@@ -66,11 +66,11 @@ const BRAND_METADATA = {
     keywords: ['TeleTest Analytika', 'Hair Tissue Mineral Analysis', 'HTMA', 'Heavy Metal Toxicology', 'HLA Autoimmunity', 'Celiac Disease Genetics', 'Omega-3 Index', 'ISO 17025 European Reference Laboratory']
   },
   peptides: {
-    title: 'Lotusland Clinical Peptides Portfolio & Lyophilized Vials | Atlas Collection',
-    description: 'Explore the official Lotusland clinical peptide collection: high-purity lyophilized 10R vials (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested). BPC-157, TB-500, GHK-Cu, Epithalon, MOTS-c, GLP-1 analogues, and secretagogues.',
+    title: 'Clinical Peptides Portfolio & Lyophilized Vials | Atlas Collection',
+    description: 'Explore the official clinical peptide collection: high-purity lyophilized 10R vials (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested). BPC-157, TB-500, GHK-Cu, Epithalon, MOTS-c, GLP-1 analogues, and secretagogues.',
     image: `${BASE_URL}/images/og-peptides.png`,
     section: 'Lyophilized Clinical Peptides & Monographs',
-    keywords: ['Lotusland', 'Research Peptides', 'BPC-157', 'TB-500', 'GHK-Cu', 'Epithalon', 'Peptides Catalog', 'Lyophilized Vials']
+    keywords: ['Clinical Peptides', 'Research Peptides', 'BPC-157', 'TB-500', 'GHK-Cu', 'Epithalon', 'Peptides Catalog', 'Lyophilized Vials']
   },
   supplements: {
     title: 'Clinical Grade Supplements & Nutraceuticals | Atlas Platform',

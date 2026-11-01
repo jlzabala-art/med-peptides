@@ -163,17 +163,17 @@ const BRAND_CONFIGS = {
     ]
   },
   peptides: {
-    name: 'Lotusland Peptides',
-    title: 'Lotusland • Clinical Peptide Portfolio',
+    name: 'Clinical Peptides',
+    title: 'Clinical Peptide Portfolio & Lyophilized Vials',
     tagline: 'High-Purity Reference Standards & Lyophilized Vials',
-    badge: 'Lotusland EU Lyophilization Hub',
+    badge: 'EU Certified Lyophilization Hub',
     badgeColor: '#003666',
     subtitle: 'Official monograph collection of verified lyophilized clinical peptides (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested < 0.05 EU/mg) in sealed 10R borosilicate vials.',
     heroImage: '/images/og-peptides.png',
     accentColor: '#003666',
     kpis: [
       { label: 'Analytical Purity', value: '≥99.0% HPLC', sub: 'Certified Lot Analysis & Mass Spec', icon: ShieldCheck, color: '#16a34a' },
-      { label: 'Sourcing Hub', value: 'Lotusland EU', sub: 'Verified Lyophilization Logistics', icon: Award, color: '#003666' },
+      { label: 'Sourcing Hub', value: 'EU Certified Lab', sub: 'Verified Lyophilization Logistics', icon: Award, color: '#003666' },
       { label: 'Form Factor', value: '10R Borosilicate', sub: 'Sealed Lyophilized Cake with Septum', icon: FlaskConical, color: '#2563eb' },
       { label: 'Monograph Specs', value: 'Full COA Included', sub: 'Sequence, MW & Net Peptide Content', icon: FileText, color: '#7c3aed' }
     ],
@@ -310,7 +310,7 @@ const BRAND_CONFIGS = {
     tagline: 'Epigenetic mRNA Neocollagenesis, Triple-Helix Tropocollagen & GHK-Cu',
     badge: 'Advanced Medical Dermocosmetics & Skin Architecture',
     badgeColor: '#0284c7',
-    subtitle: 'Cellular dermocosmetics and skin rejuvenation uniting Colway® Blue Diamond epigenetic peptides, biologically active freshwater tropocollagen, and Lotusland GHK-Cu copper remodeling peptides.',
+    subtitle: 'Cellular dermocosmetics and skin rejuvenation uniting Colway® Blue Diamond epigenetic peptides, biologically active freshwater tropocollagen, and clinical GHK-Cu copper remodeling peptides.',
     heroImage: '/images/products/colway/colway-dermatology-clinic-hero-v2.jpg',
     accentColor: '#0284c7',
     isAreaCollection: true,
@@ -346,23 +346,57 @@ BRAND_CONFIGS['neuro'] = BRAND_CONFIGS['neuro-performance'];
 BRAND_CONFIGS['cognitive'] = BRAND_CONFIGS['neuro-performance'];
 BRAND_CONFIGS['dermal'] = BRAND_CONFIGS['dermal-aesthetics'];
 
-function resolveBrandProductImage(product, brandSlug) {
-  if (product.image_url) return product.image_url;
-  if (product.imageUrl) return product.imageUrl;
-  if (product.image) return product.image;
+const PEPTIDE_VIAL_IMAGE_MAP = {
+  'bpc-157': '/assets/vials/bpc157.png',
+  'bpc157': '/assets/vials/bpc157.png',
+  'tb-500': '/assets/vials/tb500.png',
+  'tb500': '/assets/vials/tb500.png',
+  'retatrutide': '/assets/vials/retatrutide.png',
+  'tirzepatide': '/assets/vials/tirzepatide.png',
+  'semaglutide': '/assets/vials/semaglutide.png',
+  'cagrilintide': '/assets/vials/cagrilintide.png',
+  'aod-9604': '/assets/vials/aod9604.png',
+  'aod9604': '/assets/vials/aod9604.png',
+  'epithalon': '/assets/vials/epithalon.png',
+  'mots-c': '/assets/vials/motsc.png',
+  'motsc': '/assets/vials/motsc.png',
+  'ss-31': '/assets/vials/ss31.png',
+  'ss31': '/assets/vials/ss31.png',
+  'kpv': '/assets/vials/kpv.png',
+  'ara-290': '/assets/vials/ara290.png',
+  'ara290': '/assets/vials/ara290.png',
+  'slu-pp-332': '/assets/vials/slupp332.png',
+  'slupp332': '/assets/vials/slupp332.png',
+  'gw-501516': '/assets/vials/gw501516.png',
+  'gw501516': '/assets/vials/gw501516.png',
+  'nad': '/assets/vials/nadplus.png',
+  '5-amino': '/assets/vials/generic-vial.png'
+};
 
-  if (brandSlug === 'peptides') {
-    if (product.image) return product.image;
-    if (product.image_url) return product.image_url;
-    if (product.imageUrl) return product.imageUrl;
-    const pid = (product.id || product.slug || '').toLowerCase();
-    if (pid.includes('bpc')) return '/images/products/lotusland/bpc-157.png';
-    if (pid.includes('tb-500') || pid.includes('tb500')) return '/images/products/lotusland/tb-500.png';
-    if (pid.includes('ghk')) return '/images/products/lotusland/ghk-cu.png';
-    if (pid.includes('epithalon')) return '/images/products/lotusland/epithalon.png';
-    if (pid.includes('mots')) return '/images/products/lotusland/mots-c.png';
-    return '/images/products/lotusland/bpc-157.png';
+function resolvePeptideImage(product) {
+  const existing = product.image || product.imageUrl || product.image_url;
+  if (existing && !existing.includes('lotusland') && !existing.includes('undefined')) {
+    return existing;
   }
+  const pid = (product.id || product.slug || '').toLowerCase();
+  const pname = (product.name || product.title || '').toLowerCase();
+
+  for (const [key, path] of Object.entries(PEPTIDE_VIAL_IMAGE_MAP)) {
+    if (pid.includes(key) || pname.includes(key)) {
+      return path;
+    }
+  }
+  return '/assets/vials/generic-vial.png';
+}
+
+function resolveBrandProductImage(product, brandSlug) {
+  if (brandSlug === 'peptides') {
+    return resolvePeptideImage(product);
+  }
+
+  if (product.image_url && !product.image_url.includes('lotusland')) return product.image_url;
+  if (product.imageUrl && !product.imageUrl.includes('lotusland')) return product.imageUrl;
+  if (product.image && !product.image.includes('lotusland')) return product.image;
 
   const id = (product.id || '').toLowerCase();
   const name = (product.name || product.title || '').toLowerCase();
@@ -381,9 +415,9 @@ function resolveBrandProductImage(product, brandSlug) {
     if (id.includes('conditioner') || name.includes('conditioner')) return '/images/products/colway/conditioner.png';
     if (id.includes('colvita') || name.includes('colvita')) return '/images/products/colway/colvita.png';
     if (id.includes('trichology') || name.includes('trichology')) return '/images/products/colway/bundle-colway-trichology.jpg';
-    if (id.includes('ghk') || name.includes('ghk')) return '/images/products/lotusland/ghk-cu.png';
-    if (id.includes('tb-500') || id.includes('tb500')) return '/images/products/lotusland/tb-500.png';
-    if (id.includes('bpc-157') || id.includes('bpc157') || id.includes('bpc')) return '/images/products/lotusland/bpc-157.png';
+    if (id.includes('ghk') || name.includes('ghk')) return '/assets/vials/standard-vial.png';
+    if (id.includes('tb-500') || id.includes('tb500')) return '/assets/vials/tb500.png';
+    if (id.includes('bpc-157') || id.includes('bpc157') || id.includes('bpc')) return '/assets/vials/bpc157.png';
     if (id.includes('teletest') || id.includes('mineral') || id.includes('cabello') || id.includes('htma')) return '/images/products/teletest/mineralograma-cabello.svg';
     return '/images/products/colway/bundle-colway-trichology.jpg';
   }
@@ -498,7 +532,7 @@ function resolveProductRegulatoryBadges(product, brandSlug) {
     if (id.includes('ghk') || id.includes('tb-500') || id.includes('bpc') || product.category === 'peptides') {
       return [
         { label: 'HPLC ≥99.0%', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'HPLC Verified Analytical Monograph Standard' },
-        { label: 'Lotusland Hub', color: '#003666', bg: 'rgba(0, 54, 102, 0.10)', border: 'rgba(0, 54, 102, 0.25)', title: 'Official Lotusland Lyophilization Logistics Hub' }
+        { label: 'EU Certified Hub', color: '#003666', bg: 'rgba(0, 54, 102, 0.10)', border: 'rgba(0, 54, 102, 0.25)', title: 'Official European Lyophilization Logistics Hub' }
       ];
     }
     if (id.includes('teletest') || id.includes('mineral') || id.includes('htma')) {
@@ -522,7 +556,7 @@ function resolveProductRegulatoryBadges(product, brandSlug) {
     if (brandSlug === 'peptides') {
       return [
         { label: 'HPLC ≥99.0%', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'HPLC Verified Analytical Monograph Standard' },
-        { label: 'Lotusland Hub', color: '#003666', bg: 'rgba(0, 54, 102, 0.10)', border: 'rgba(0, 54, 102, 0.25)', title: 'Official Lotusland Lyophilization Logistics Hub' }
+        { label: 'EU Certified Hub', color: '#003666', bg: 'rgba(0, 54, 102, 0.10)', border: 'rgba(0, 54, 102, 0.25)', title: 'Official European Lyophilization Logistics Hub' }
       ];
     }
     const badgeLabel = brandSlug === 'eterna'
@@ -677,11 +711,11 @@ export default function BrandCollectionPage({
     let text;
     if (brandSlug === 'peptides') {
       if (product) {
-        text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Lotusland Peptides Collection. Please provide institutional wholesale pricing, COA and technical specifications.`;
+        text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Clinical Peptides Portfolio. Please provide institutional wholesale pricing, COA and technical specifications.`;
       } else if (selectedCategory && selectedCategory !== 'all') {
-        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Lotusland Peptides (${selectedCategory})* catalog. Please share the wholesale catalog and supply terms.`;
+        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Clinical Peptides (${selectedCategory})* catalog. Please share the wholesale catalog and supply terms.`;
       } else {
-        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Lotusland Peptides Collection* (HPLC ≥99.0% Lyophilized Vials). Please share the wholesale catalog and supply terms.`;
+        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Clinical Peptides Portfolio* (HPLC ≥99.0% Lyophilized Vials). Please share the wholesale catalog and supply terms.`;
       }
     } else if (brandSlug === 'teletest') {
       if (product) {
@@ -1311,7 +1345,7 @@ export default function BrandCollectionPage({
                 🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : brandSlug === 'peptides' ? 'Peptides' : 'Items'}
               </span>
               <span style={{ fontSize: '0.68rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '2px 8px', borderRadius: '4px' }}>
-                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ Lotusland EU Lyophilization Hub' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ Atlas Compounding Network' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🏛️ TrichoTest™ Compounding · Peptides · Colway®' : '🏛️ Atlas Clinical Network'}
+                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ European Lyophilization Hub' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ Atlas Compounding Network' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🏛️ TrichoTest™ Compounding · Peptides · Colway®' : '🏛️ Atlas Clinical Network'}
               </span>
               <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
                 {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : brandSlug === 'peptides' ? '🛡️ HPLC ≥99.0% & Endotoxin Tested' : brandSlug === 'teletest' ? '🛡️ ISO 17025 Accredited' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🛡️ EU GMP Certified' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🛡️ EU GMP Compounding & CPNP Certified' : '🛡️ CE-IVDR & ISO 15189'}
@@ -2475,7 +2509,7 @@ export default function BrandCollectionPage({
                             {product.therapeutic_category || (brandSlug === 'ultraperson' ? 'Precision Nutraceutical' : brandSlug === 'colway' ? 'Bioactive Collagen' : 'Clinical Protocol')}
                           </span>
                           <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <CheckCircle2 size={12} /> {brandSlug === 'eterna' ? 'Eurofins Genomics' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'Atlas Compounding Network' : brandSlug === 'colway' ? 'Colway Dermocosmetics' : brandSlug === 'peptides' ? 'Lotusland EU Hub' : brandSlug === 'teletest' ? 'TeleTest Reference Lab' : 'LifeLab1'}
+                            <CheckCircle2 size={12} /> {brandSlug === 'eterna' ? 'Eurofins Genomics' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'Atlas Compounding Network' : brandSlug === 'colway' ? 'Colway Dermocosmetics' : brandSlug === 'peptides' ? 'EU Lyophilization Hub' : brandSlug === 'teletest' ? 'TeleTest Reference Lab' : 'LifeLab1'}
                           </span>
                         </div>
 
@@ -3087,7 +3121,7 @@ export default function BrandCollectionPage({
 
       {/* ── Persistent Google Cloud Console Sticky Bottom Action Bar ── */}
       <PublicStickyActionBar
-        title={config.name || (isEs ? 'Colección Lotusland Peptides' : 'Lotusland Peptides Collection')}
+        title={config.name || (isEs ? 'Colección de Péptidos Clínicos' : 'Clinical Peptide Portfolio')}
         subtitle={
           (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
             ? `${filteredProducts.length} ${isEs ? 'Formulaciones Clínicas' : 'Targeted Formulations'} • Vegan HPMC · EU GMP`

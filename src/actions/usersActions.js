@@ -15,7 +15,7 @@ export async function fetchUsersAction({ limitCount = 50, role = null, search = 
     }
 
     const snapshot = await query.limit(limitCount).get();
-    
+
     let users = snapshot.docs.map(doc => {
       const data = doc.data();
       return { id: doc.id, ...data };
@@ -23,7 +23,7 @@ export async function fetchUsersAction({ limitCount = 50, role = null, search = 
 
     if (search && search.trim()) {
       const q = search.toLowerCase().trim();
-      users = users.filter(u => 
+      users = users.filter(u =>
         (u.name || u.displayName || '').toLowerCase().includes(q) ||
         (u.email || '').toLowerCase().includes(q) ||
         (u.company || '').toLowerCase().includes(q) ||
@@ -42,7 +42,7 @@ export async function fetchUsersAction({ limitCount = 50, role = null, search = 
 export async function fetchUsersAggregatesAction() {
   try {
     if (!adminDb) return { total: 0, patients: 0, doctors: 0, wholesalers: 0, clinics: 0, pending: 0, activeAtlasUsers: 0, verifiedSecurity: 0 };
-    
+
     const [totalSnap, patientsSnap, doctorsSnap, pendingSnap, wsSnap, clSnap, wsCollectionSnap, clCollectionSnap] = await Promise.all([
       adminDb.collection('users').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
       adminDb.collection('users').where('role', '==', 'patient').count().get().catch(() => ({ data: () => ({ count: 0 }) })),

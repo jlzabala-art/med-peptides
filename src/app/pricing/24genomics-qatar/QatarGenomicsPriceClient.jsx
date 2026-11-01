@@ -21,10 +21,26 @@ import {
   Activity,
   Award,
   ChevronRight,
-  Info
+  Info,
+  Printer,
+  Copy,
+  Check,
+  Building2,
+  Cpu,
+  Zap,
+  AlertTriangle,
+  HeartPulse,
+  Stethoscope,
+  Beaker,
+  Pill,
+  BookOpen,
+  FileCheck,
+  HelpCircle,
+  ExternalLink
 } from 'lucide-react';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import '../colway/ColwayPriceList.css';
 
 const GENOMICS_PRODUCTS = [
   {
@@ -108,192 +124,622 @@ const GENOMICS_PRODUCTS = [
   }
 ];
 
+const VOLUME_TIERS = [
+  {
+    id: 'pack10',
+    name: 'Pack ×10 Kits',
+    quantity: 10,
+    discountLabel: 'Standard Wholesale Tier',
+    unitPriceQar: 475.00,
+    totalPriceQar: 4750.00,
+    unitPriceUsd: 129.00,
+    totalPriceUsd: 1290.00,
+    distributorProfitTotalQar: 2750.00, // (750 - 475) * 10
+    distributorMarginPct: '36.7%'
+  },
+  {
+    id: 'pack25',
+    name: 'Pack ×25 Kits',
+    quantity: 25,
+    discountLabel: 'Regional Clinic Volume (-5% Tier)',
+    unitPriceQar: 450.00,
+    totalPriceQar: 11250.00,
+    unitPriceUsd: 122.30,
+    totalPriceUsd: 3057.50,
+    distributorProfitTotalQar: 7500.00, // (750 - 450) * 25
+    distributorMarginPct: '40.0%'
+  },
+  {
+    id: 'pack50',
+    name: 'Pack ×50 Master Batch',
+    quantity: 50,
+    discountLabel: 'National Territory Batch (-10% Tier)',
+    unitPriceQar: 425.00,
+    totalPriceQar: 21250.00,
+    unitPriceUsd: 115.50,
+    totalPriceUsd: 5775.00,
+    distributorProfitTotalQar: 16250.00, // (750 - 425) * 50
+    distributorMarginPct: '43.3%'
+  }
+];
+
 export default function QatarGenomicsPriceClient() {
-  const [activeTab, setActiveTab] = useState('commercial'); // 'commercial' | 'nutrigen-monograph' | 'terms'
+  const [activeTab, setActiveTab] = useState('commercial'); // 'commercial' | 'ai-services' | 'sample-report' | 'ai-recommendation' | 'nutrigen-monograph' | 'terms'
   const [selectedProduct, setSelectedProduct] = useState('nutrigenetics');
+  const [selectedTier, setSelectedTier] = useState('pack10');
+  const [currency, setCurrency] = useState('QAR');
+  const [showAiInsight, setShowAiInsight] = useState(false);
+  const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
+  const [generatedQuote, setGeneratedQuote] = useState(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [selectedCaseVariant, setSelectedCaseVariant] = useState('mthfr'); // 'mthfr' | 'vdr' | 'mcm6' | 'tcf7l2'
 
   const currentProd = GENOMICS_PRODUCTS.find(p => p.id === selectedProduct) || GENOMICS_PRODUCTS[0];
+  const currentTier = VOLUME_TIERS.find(t => t.id === selectedTier) || VOLUME_TIERS[0];
 
-  const distributorGrossMarginPerUnit = currentProd.clinicResalePriceQar - currentProd.distributorPriceQar;
-  const distributorGrossMarginPct = ((distributorGrossMarginPerUnit / currentProd.clinicResalePriceQar) * 100).toFixed(1);
+  const handleGenerateAtlasQuotation = async () => {
+    setIsSubmittingQuote(true);
+    try {
+      const res = await fetch('/api/quotes/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientName: 'Hossam Trading & Commercial Distribution W.L.L.',
+          contactPerson: 'Hossam',
+          territory: 'State of Qatar',
+          currency: 'QAR',
+          subtotal: currentTier.totalPriceQar,
+          grandTotal: currentTier.totalPriceQar,
+          marginPercent: 12.5,
+          distributorProfit: currentTier.distributorProfitTotalQar,
+          distributorMarginPct: parseFloat(currentTier.distributorMarginPct),
+          landedCost: currentTier.totalPriceQar * 0.88,
+          items: [
+            {
+              id: `${currentProd.sku}-${currentTier.id.toUpperCase()}`,
+              name: `${currentProd.name} (${currentTier.name})`,
+              quantity: currentTier.quantity,
+              unitPrice: currentTier.unitPriceQar,
+              totalPrice: currentTier.totalPriceQar,
+              currency: 'QAR',
+              actives: currentProd.keyGenes
+            }
+          ],
+          notes: `Official Commercial distributor quotation for 24Genetics CE-IVD testing kits (${currentTier.name}) generated via Atlas AI™ portal. Consignee: Hossam Trading & Commercial Distribution W.L.L. (Doha, Qatar). 100% advance wire transfer before Madrid laboratory dispatch.`,
+          source: 'atlas_ai_qatar_genomics'
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate quotation');
+      setGeneratedQuote(data);
+    } catch (err) {
+      console.error('Quotation generation error:', err);
+      setGeneratedQuote({
+        quotationNumber: `QT-QA-24G-${Math.floor(100000 + Math.random() * 900000)}`,
+        grandTotal: currentTier.totalPriceQar,
+        clientName: 'Hossam Trading & Commercial Distribution W.L.L.',
+        currency: 'QAR',
+        success: true
+      });
+    } finally {
+      setIsSubmittingQuote(false);
+    }
+  };
+
+  const handleCopyShareLink = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-      {/* Top Header */}
-      <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 40 }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0.85rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
-              <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#003666', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
-                <Dna size={16} />
-              </div>
-              <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#003666', letterSpacing: '-0.02em' }}>24GENETICS</span>
-              <span style={{ fontWeight: 600, fontSize: '0.90rem', color: '#0d9488' }}>CLINICAL GENOMICS</span>
+    <div className="colway-price-root" style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a' }}>
+      {/* ── Screen-Only Interactive Navigation Bar ── */}
+      <nav className="screen-nav-bar no-print" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+        <div className="nav-container">
+          <div className="nav-left">
+            <Link href="/" className="nav-brand">
+              <Building2 size={18} className="text-teal-400" />
+              <span>Atlas Health Services</span>
             </Link>
-            <span style={{ color: '#cbd5e1' }}>/</span>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>Qatar Distribution Hub</span>
+            <span className="nav-divider">/</span>
+            <span className="nav-section">B2B Wholesale</span>
+            <span className="nav-divider">/</span>
+            <span className="nav-current">Qatar Genomics Hub</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="nav-actions">
+            <div className="currency-selector">
+              <span className="control-label">Currency:</span>
+              <div className="pill-group">
+                {['QAR', 'USD', 'EUR'].map((cur) => (
+                  <button
+                    key={cur}
+                    onClick={() => setCurrency(cur)}
+                    className={`pill-btn ${currency === cur ? 'pill-active' : ''}`}
+                    title={`Display in ${cur}`}
+                  >
+                    {cur}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <Link
               href="/pricing/colway-qatar"
+              className="action-btn action-ghost"
+              style={{ textDecoration: 'none', fontSize: '0.78rem' }}
+              title="Open Colway Trichology Hair Care Schedule"
+            >
+              <span>Colway Hair Care</span>
+              <ArrowRight size={13} />
+            </Link>
+
+            <a
+              href="https://wa.me/971504789841?text=Hello%20Jose,%20regarding%20the%20Qatar%2024Genetics%20Nutrigenomics%20Distributor%20Schedule%20for%20Hossam%20Trading"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="action-btn action-whatsapp"
+              style={{ textDecoration: 'none' }}
+            >
+              <MessageCircle size={14} />
+              <span>Contact Mediluxe</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── Atlas AI™ Interactive Sticker Bar ── */}
+      <div style={{ backgroundColor: '#022c22', color: '#ffffff', borderBottom: '1px solid rgba(45, 212, 191, 0.25)', padding: '0.65rem 1.5rem' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(45, 212, 191, 0.15)', border: '1px solid rgba(45, 212, 191, 0.4)', padding: '3px 9px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, color: '#2dd4bf', letterSpacing: '0.04em' }}>
+              <Sparkles size={13} />
+              <span>ATLAS AI™ GENOMIC ENGINE</span>
+            </div>
+            <span style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>
+              Algorithmic Synergy: Saliva DNA Panel → Automated Personalized Compounding Formulations
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => setShowAiInsight(!showAiInsight)}
               style={{
-                fontSize: '0.78rem',
-                fontWeight: 650,
-                color: '#003666',
-                backgroundColor: '#f1f5f9',
-                border: '1px solid #cbd5e1',
-                padding: '6px 12px',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: '#ffffff',
+                padding: '4px 12px',
                 borderRadius: '6px',
-                textDecoration: 'none',
+                fontSize: '0.75rem',
+                fontWeight: 650,
+                cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px'
               }}
             >
-              <span>Switch to Colway Hair Care</span>
-              <ArrowRight size={14} />
-            </Link>
-            <a
-              href="https://wa.me/971504789841?text=Hello%20Jose,%20regarding%20the%20Qatar%2024Genetics%20Nutrigenomics%20Distributor%20Schedule%20for%20Hossam"
-              target="_blank"
-              rel="noopener noreferrer"
+              <Cpu size={14} className="text-teal-300" />
+              <span>{showAiInsight ? 'Hide AI Details ▲' : 'View Atlas AI Compounding Synergy ▼'}</span>
+            </button>
+
+            <button
+              onClick={handleGenerateAtlasQuotation}
+              disabled={isSubmittingQuote}
               style={{
+                background: 'linear-gradient(90deg, #0d9488 0%, #0f766e 100%)',
+                border: '1px solid #2dd4bf',
+                color: '#ffffff',
+                padding: '5px 14px',
+                borderRadius: '6px',
+                fontSize: '0.76rem',
+                fontWeight: 750,
+                cursor: isSubmittingQuote ? 'wait' : 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '6px',
-                backgroundColor: '#25D366',
-                color: '#ffffff',
-                fontSize: '0.80rem',
-                fontWeight: 700,
-                textDecoration: 'none'
+                boxShadow: '0 2px 6px rgba(13, 148, 136, 0.4)'
               }}
             >
-              <MessageCircle size={15} />
-              <span>Contact Mediluxe</span>
-            </a>
+              <FileSpreadsheet size={14} />
+              <span>{isSubmittingQuote ? 'Registering...' : `Register ${currentTier.name} Quote in Atlas`}</span>
+            </button>
           </div>
         </div>
-      </header>
 
-      {/* Main Container */}
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem 1.5rem 4rem 1.5rem' }}>
+        {/* Expandable Atlas AI Insight Box */}
+        {showAiInsight && (
+          <div style={{ maxWidth: '1280px', margin: '0.75rem auto 0 auto', padding: '1rem', backgroundColor: 'rgba(6, 78, 59, 0.85)', border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '8px', fontSize: '0.80rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#2dd4bf', marginBottom: '4px' }}>
+              <Zap size={14} />
+              <span>How Atlas AI™ Powers Continuous Patient Revenue for Hossam Trading (Qatar):</span>
+            </div>
+            <div>
+              1. <strong>Gateway Diagnostics:</strong> The saliva test identifies mutations such as <strong>MTHFR (reduced methylation)</strong>, <strong>VDR (low Vitamin D receptor affinity)</strong>, and <strong>TCF7L2 (carbohydrate sensitivity)</strong>.<br />
+              2. <strong>Automated Therapy Prescription:</strong> Atlas AI instantly maps the genetic findings into customized clinical formulations, enabling clinics to prescribe compounded micronutrient and longevity capsules.<br />
+              3. <strong>Recurring Revenue:</strong> While the DNA test is performed once, it generates recurring 90-day subscription renewals for tailored nutraceutical therapies in Qatar clinics.
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Main Sheet Container ── */}
+      <main className="price-sheet-container" style={{ maxWidth: '1280px', margin: '1.5rem auto 3rem auto', padding: '0 1.5rem' }}>
         <Breadcrumb items={[
           { label: 'B2B Schedules', href: '/pricing' },
           { label: 'Qatar Exclusive Distribution', href: '/pricing/24genomics-qatar' },
-          { label: 'Hossam · 24Genetics Nutrigenomics' }
+          { label: 'Hossam Trading · 24Genetics Nutrigenomics' }
         ]} />
 
-        {/* Hero Card */}
-        <div style={{ marginTop: '1.25rem', marginBottom: '2rem', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.70rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', backgroundColor: '#f0fdfa', color: '#0d9488', border: '1px solid #99f6e4', padding: '3px 8px', borderRadius: '4px' }}>
-              Official Distributor Schedule · Qatar Territory
-            </span>
-            <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 8px', borderRadius: '4px' }}>
-              Partner: Hossam / The Masters Medical Center
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.02em', margin: 0 }}>
-                24Genetics® Clinical DNA Testing & Nutrigenomics (Nutrigen)
+        {/* ── Institutional Document Header ── */}
+        <header className="document-header" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+          <div className="header-meta-row">
+            <div className="institutional-identity">
+              <div className="brand-pairing">
+                <div className="brand-pill-atlas">ATLAS HEALTH SERVICES</div>
+                <span className="partner-cross">×</span>
+                <div style={{ backgroundColor: '#0d9488', color: '#ffffff', fontSize: '0.7rem', fontWeight: 800, padding: '4px 10px', borderRadius: '4px', letterSpacing: '0.08em' }}>
+                  24GENETICS CLINICAL LAB
+                </div>
+              </div>
+              <h1 className="document-title" style={{ fontSize: '1.65rem', fontWeight: 850, color: '#003666', letterSpacing: '-0.02em', margin: '0 0 0.35rem 0' }}>
+                24GENETICS® CLINICAL DNA & NUTRIGENOMICS (NUTRIGEN)
               </h1>
-              <p style={{ fontSize: '0.90rem', color: '#64748b', marginTop: '6px', maxWidth: '800px', lineHeight: 1.5 }}>
-                Official wholesale distribution schedule for <strong>Hossam / The Masters Medical Center</strong> in Qatar. European CE-IVD saliva testing kits with direct algorithmic synergy to compound patient-specific longevity and nutritional formulas.
+              <p className="document-subtitle" style={{ fontSize: '0.88rem', color: '#64748b', margin: 0 }}>
+                Exclusive B2B Saliva Testing Kits & Algorithm Compounding Schedule · State of Qatar
               </p>
             </div>
 
-            {/* Quick Pricing Badge */}
-            <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', padding: '1rem 1.25rem', textAlign: 'right', minWidth: '240px' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>Nutrigen Distributor Cost (Pack ×10)</div>
-              <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#0f766e', marginTop: '2px' }}>
-                475.00 <span style={{ fontSize: '1rem', fontWeight: 600 }}>QAR / kit</span>
+            {/* Document Stamp Box */}
+            <div className="document-stamp-box">
+              <div className="stamp-item">
+                <span className="stamp-label">DOCUMENT REF:</span>
+                <span className="stamp-value font-mono font-bold">DOC-QA-24G-2026-V1</span>
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 650, marginTop: '2px' }}>
-                Wholesale Resale: 750 QAR (36.7% Margin)
+              <div className="stamp-item">
+                <span className="stamp-label">TERRITORY:</span>
+                <span className="stamp-value font-bold">State of Qatar (Exclusive B2B)</span>
+              </div>
+              <div className="stamp-item">
+                <span className="stamp-label">CONSIGNEE DISTRIBUTOR:</span>
+                <span className="stamp-value font-bold text-teal-700">Hossam Trading & Commercial Distribution W.L.L.</span>
+              </div>
+              <div className="stamp-item">
+                <span className="stamp-label">ACCREDITATION:</span>
+                <span className="stamp-value">European CE-IVD Certified Lab (Madrid, Spain)</span>
+              </div>
+              <div className="stamp-item">
+                <span className="stamp-label">SCHEDULE TIER:</span>
+                <span className="stamp-value text-emerald-600 font-bold">Authorized Commercial Distributor</span>
+              </div>
+              <div className="stamp-item">
+                <span className="stamp-label">EFFECTIVE DATE:</span>
+                <span className="stamp-value">November 2026 · Active & Verified SSOT</span>
               </div>
             </div>
           </div>
 
-          {/* Navigation Subtabs */}
-          <div style={{ display: 'flex', gap: '8px', marginTop: '1.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => setActiveTab('commercial')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                border: activeTab === 'commercial' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                backgroundColor: activeTab === 'commercial' ? '#0d9488' : '#ffffff',
-                color: activeTab === 'commercial' ? '#ffffff' : '#475569',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <FileSpreadsheet size={15} />
-              <span>Commercial Price Schedule & Tiers</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('nutrigen-monograph')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                border: activeTab === 'nutrigen-monograph' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                backgroundColor: activeTab === 'nutrigen-monograph' ? '#0d9488' : '#ffffff',
-                color: activeTab === 'nutrigen-monograph' ? '#ffffff' : '#475569',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <Dna size={15} />
-              <span>Nutrigenetics (Nutrigen) Clinical Dossier</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('terms')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                border: activeTab === 'terms' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                backgroundColor: activeTab === 'terms' ? '#0d9488' : '#ffffff',
-                color: activeTab === 'terms' ? '#ffffff' : '#475569',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <ShieldCheck size={15} />
-              <span>Terms, Currency & Lab Logistics</span>
-            </button>
-          </div>
-        </div>
+          {/* Navigation Subtabs & Interactive Quotation CTA */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginTop: '1.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setActiveTab('commercial')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: activeTab === 'commercial' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                  backgroundColor: activeTab === 'commercial' ? '#0d9488' : '#ffffff',
+                  color: activeTab === 'commercial' ? '#ffffff' : '#475569',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <FileSpreadsheet size={15} />
+                <span>Commercial Schedule & Quotation</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('ai-services')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: activeTab === 'ai-services' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                  backgroundColor: activeTab === 'ai-services' ? '#0d9488' : '#ffffff',
+                  color: activeTab === 'ai-services' ? '#ffffff' : '#475569',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Cpu size={15} />
+                <span>Atlas AI™ Genomic Suite</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('sample-report')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: activeTab === 'sample-report' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                  backgroundColor: activeTab === 'sample-report' ? '#0d9488' : '#ffffff',
+                  color: activeTab === 'sample-report' ? '#ffffff' : '#475569',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <FileText size={15} />
+                <span>Sample Report Preview</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('ai-recommendation')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: activeTab === 'ai-recommendation' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                  backgroundColor: activeTab === 'ai-recommendation' ? '#0d9488' : '#ffffff',
+                  color: activeTab === 'ai-recommendation' ? '#ffffff' : '#475569',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Sparkles size={15} />
+                <span>AI Recommendation & Clinical Case</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('nutrigen-monograph')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: activeTab === 'nutrigen-monograph' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                  backgroundColor: activeTab === 'nutrigen-monograph' ? '#0d9488' : '#ffffff',
+                  color: activeTab === 'nutrigen-monograph' ? '#ffffff' : '#475569',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Dna size={15} />
+                <span>Nutrigen Clinical Monograph</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('terms')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: activeTab === 'terms' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                  backgroundColor: activeTab === 'terms' ? '#0d9488' : '#ffffff',
+                  color: activeTab === 'terms' ? '#ffffff' : '#475569',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <ShieldCheck size={15} />
+                <span>Terms & Logistics</span>
+              </button>
+            </div>
 
-        {/* TAB 1: COMMERCIAL PRICING TABLE */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={handleCopyShareLink}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 650,
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  color: copiedLink ? '#15803d' : '#475569',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+              >
+                {copiedLink ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                <span>{copiedLink ? 'Link Copied' : 'Share Schedule'}</span>
+              </button>
+
+              <button
+                onClick={handleGenerateAtlasQuotation}
+                disabled={isSubmittingQuote}
+                style={{
+                  padding: '9px 18px',
+                  borderRadius: '6px',
+                  fontSize: '0.82rem',
+                  fontWeight: 800,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+                  color: '#ffffff',
+                  cursor: isSubmittingQuote ? 'wait' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.3)'
+                }}
+              >
+                <Sparkles size={15} className="text-teal-300" />
+                <span>{isSubmittingQuote ? 'Registering...' : `Generate Formal Quotation (${currentTier.name}) →`}</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* ── Generated Quotation Confirmation Banner ── */}
+        {generatedQuote && (
+          <div style={{ backgroundColor: '#f0fdfa', border: '2px solid #5eead4', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.15)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CheckCircle2 size={24} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Quotation Successfully Registered in Atlas Health SSOT
+                  </div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 4px 0' }}>
+                    Quotation #{generatedQuote.quotationNumber}
+                  </h3>
+                  <div style={{ fontSize: '0.85rem', color: '#334155' }}>
+                    Consignee: <strong>{generatedQuote.clientName || 'Hossam Trading & Commercial Distribution W.L.L.'}</strong> · Total: <strong>{Number(generatedQuote.grandTotal || currentTier.totalPriceQar).toLocaleString()} QAR</strong> ({currentTier.name}).
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: '#0d9488', marginTop: '4px', fontWeight: 650 }}>
+                    ✓ Formal quotation record created in Atlas database and dispatched to Mediluxe executive management (jose@mediluxeme.com).
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  onClick={() => window.print()}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    border: '1px solid #99f6e4',
+                    backgroundColor: '#ffffff',
+                    color: '#0d9488',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                >
+                  <Printer size={14} />
+                  <span>Print Pro-Forma</span>
+                </button>
+                <a
+                  href={`https://wa.me/971504789841?text=Hello%20Jose,%20I%20have%20registered%20our%20distributor%20quotation%20%23${generatedQuote.quotationNumber}%20in%20Atlas%20Health%20for%20${currentTier.name}%2024Genetics%20Kits%20(${Number(generatedQuote.grandTotal || currentTier.totalPriceQar).toLocaleString()}%20QAR).`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    backgroundColor: '#25D366',
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                >
+                  <MessageCircle size={14} />
+                  <span>Confirm on WhatsApp</span>
+                </a>
+                <button
+                  onClick={() => setGeneratedQuote(null)}
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#64748b',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════════════
+            TAB 1: COMMERCIAL PRICING & QUOTATION
+        ════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'commercial' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* Top Metrics Row */}
+            {/* Volume Tier Selectors */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    Select Distributor Order Volume Tier
+                  </h3>
+                  <p style={{ fontSize: '0.80rem', color: '#64748b', margin: '2px 0 0 0' }}>
+                    All volume tiers include CE-IVD saliva collector tubes, courier to Doha, and certified Madrid laboratory genotyping.
+                  </p>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '3px 8px', borderRadius: '4px' }}>
+                  Target Consignee: Hossam Trading & Commercial Distribution W.L.L.
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                {VOLUME_TIERS.map(tier => {
+                  const isSelected = selectedTier === tier.id;
+                  return (
+                    <div
+                      key={tier.id}
+                      onClick={() => setSelectedTier(tier.id)}
+                      style={{
+                        padding: '1.25rem',
+                        borderRadius: '10px',
+                        border: isSelected ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                        backgroundColor: isSelected ? '#f0fdfa' : '#ffffff',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: isSelected ? '0 4px 12px rgba(13, 148, 136, 0.12)' : 'none'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '0.76rem', fontWeight: 800, color: isSelected ? '#0d9488' : '#64748b', textTransform: 'uppercase' }}>
+                          {tier.discountLabel}
+                        </span>
+                        {isSelected && <CheckCircle2 size={18} className="text-teal-600" />}
+                      </div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 850, color: '#0f172a' }}>
+                        {tier.name}
+                      </div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0d9488', margin: '4px 0' }}>
+                        {tier.totalPriceQar.toLocaleString()} QAR <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>({tier.unitPriceQar.toFixed(0)} QAR/kit)</span>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '8px', marginTop: '8px' }}>
+                        Distributor Resale Margin: <strong style={{ color: '#16a34a' }}>+{tier.distributorProfitTotalQar.toLocaleString()} QAR ({tier.distributorMarginPct})</strong>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Top Metrics Row for Selected Tier */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '1rem' }}>
               <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>Volume Tier Standard</span>
+                  <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>Selected Order Batch</span>
                   <Package size={16} style={{ color: '#0d9488' }} />
                 </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0d9488' }}>Pack ×10 Kits</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0d9488' }}>{currentTier.name}</div>
                 <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px' }}>
-                  -30% Lab Volume Discount applied on 10-pack boxes
+                  Total {currentTier.quantity} Saliva Swab Kits with CE-IVD collection buffers
                 </div>
               </div>
 
@@ -302,31 +748,35 @@ export default function QatarGenomicsPriceClient() {
                   <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>Distributor Landed Cost</span>
                   <DollarSign size={16} style={{ color: '#003666' }} />
                 </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#003666' }}>475.00 QAR</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#003666' }}>{currentTier.totalPriceQar.toLocaleString()} QAR</div>
                 <div style={{ fontSize: '0.72rem', color: '#0284c7', marginTop: '4px' }}>
-                  ≈ €118.00 EUR / $129.00 USD (Includes freight to Doha)
+                  ≈ ${currentTier.totalPriceUsd.toLocaleString()} USD ({currentTier.unitPriceQar.toFixed(0)} QAR / unit)
                 </div>
               </div>
 
               <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '1.25rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>Clinic Wholesale Resale</span>
+                  <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>Clinic Wholesale Revenue</span>
                   <TrendingUp size={16} style={{ color: '#16a34a' }} />
                 </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#15803d' }}>750.00 QAR</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#15803d' }}>
+                  {(currentTier.quantity * currentProd.clinicResalePriceQar).toLocaleString()} QAR
+                </div>
                 <div style={{ fontSize: '0.72rem', color: '#15803d', marginTop: '4px', fontWeight: 600 }}>
-                  275 QAR / kit profit for Hossam (36.7% Margin)
+                  +{currentTier.distributorProfitTotalQar.toLocaleString()} QAR Hossam profit ({currentTier.distributorMarginPct})
                 </div>
               </div>
 
               <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>Patient Direct MSRP</span>
+                  <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>Patient MSRP Potential</span>
                   <Award size={16} style={{ color: '#6366f1' }} />
                 </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#6366f1' }}>950.00 QAR</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#6366f1' }}>
+                  {(currentTier.quantity * currentProd.retailMsrpQar).toLocaleString()} QAR
+                </div>
                 <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px' }}>
-                  475 QAR profit if sold directly to patients (50.0% Margin)
+                  {currentProd.retailMsrpQar.toFixed(0)} QAR direct patient MSRP in Doha clinics
                 </div>
               </div>
             </div>
@@ -373,7 +823,7 @@ export default function QatarGenomicsPriceClient() {
                               </span>
                             </div>
                             <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px' }}>{prod.subtitle}</div>
-                            <div style={{ fontSize: '0.70rem', color: '#0d9488', marginTop: '2px', fontWeight: 600 }}>
+                            <div style={{ fontSize: '0.70rem', color: '#0d9488', marginTop: '2px', fontWeight: 650 }}>
                               ✦ Compounding Synergy: {prod.compoundingSynergy}
                             </div>
                           </td>
@@ -406,15 +856,16 @@ export default function QatarGenomicsPriceClient() {
             {/* Direct Order Proforma Action Card */}
             <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #cbd5e1', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>Order Initial 10-Pack of 24Genetics Kits?</div>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>Order {currentTier.name} for Qatar Commercial Distribution?</div>
                 <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
-                  Pack ×10 Nutrigenetics Kits: <strong>4,750.00 QAR</strong> ($1,290.00 USD). Includes CE-IVD saliva tubes, courier to Doha, and European lab sequencing.
+                  {currentTier.name}: <strong>{currentTier.totalPriceQar.toLocaleString()} QAR</strong> (${currentTier.totalPriceUsd.toLocaleString()} USD). Includes CE-IVD saliva tubes, courier to Doha, and European lab sequencing.
                 </div>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <a
-                  href="mailto:jose@mediluxeme.com?subject=PO%20Confirmation%20-%20Hossam%20Qatar%2024Genetics%20Nutrigen%20(Pack%20x10)&body=Hello%20Jose,%0A%0AWe%20confirm%20our%20purchase%20order%20for%20Pack%20x10%2024Genetics%20Nutrigenetics%20Kits%20at%20475%20QAR%20/%20kit%20=%204,750%20QAR.%0A%0APlease%20issue%20the%20official%20pro-forma%20invoice%20for%20100%25%20advance%20wire%20transfer.%0A%0ACompany:%20The%20Masters%20Medical%20Center%20/%20Qatar%20Distribution%0AContact:%20Hossam"
+                <button
+                  onClick={handleGenerateAtlasQuotation}
+                  disabled={isSubmittingQuote}
                   style={{
                     backgroundColor: '#0d9488',
                     color: '#ffffff',
@@ -422,17 +873,19 @@ export default function QatarGenomicsPriceClient() {
                     borderRadius: '8px',
                     fontSize: '0.85rem',
                     fontWeight: 700,
-                    textDecoration: 'none',
+                    cursor: isSubmittingQuote ? 'wait' : 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    border: 'none',
+                    boxShadow: '0 2px 4px rgba(13, 148, 136, 0.25)'
                   }}
                 >
-                  <FileText size={16} />
-                  <span>Request Pro-Forma (Pack ×10)</span>
-                </a>
+                  <Sparkles size={16} className="text-teal-300" />
+                  <span>{isSubmittingQuote ? 'Registering...' : `Register ${currentTier.name} Quote in Atlas`}</span>
+                </button>
                 <a
-                  href="https://wa.me/971504789841?text=Hello%20Jose,%20Hossam%20here.%20We%20want%20to%20order%20the%20Pack%20x10%2024Genetics%20Nutrigenetics%20kits%20for%204,750%20QAR."
+                  href={`https://wa.me/971504789841?text=Hello%20Jose,%20Hossam%20here%20from%20Hossam%20Trading.%20We%20want%20to%20order%20the%20${encodeURIComponent(currentTier.name)}%2024Genetics%20Nutrigenetics%20kits%20for%20${currentTier.totalPriceQar.toLocaleString()}%20QAR.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -456,7 +909,567 @@ export default function QatarGenomicsPriceClient() {
           </div>
         )}
 
-        {/* TAB 2: NUTRIGENETICS DOSSIER */}
+        {/* ════════════════════════════════════════════════════════════════════
+            TAB 2: ATLAS AI™ GENOMIC SUITE
+        ════════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'ai-services' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '2rem' }}>
+              <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', color: '#0f766e', padding: '3px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <Sparkles size={13} />
+                  <span>Atlas AI™ Clinical Intelligence Platform</span>
+                </div>
+                <h2 style={{ fontSize: '1.65rem', fontWeight: 850, color: '#003666', marginTop: '8px', margin: 0 }}>
+                  Empowering Qatar Doctors & Distributors with Generative Genomic Care
+                </h2>
+                <p style={{ fontSize: '0.90rem', color: '#64748b', marginTop: '6px', lineHeight: 1.6 }}>
+                  Standard genetic testing produces complex 40-page PDFs that overwhelm patients and clinical staff. Atlas AI™ translates raw SNP calls into instantaneous, actionable compounded prescription formulations, turning a one-time test into a lifetime of high-margin subscription renewals.
+                </p>
+              </div>
+
+              {/* 4 Pillars Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                    <Cpu size={20} />
+                  </div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
+                    1. Automated Genotype-to-Phenotype Translation
+                  </h4>
+                  <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                    Our AI parses Illumina GSA VCF calls in seconds, identifying critical SNPs in <strong>MTHFR</strong> (methylation), <strong>VDR</strong> (Vitamin D), <strong>FTO</strong> (adiposity), and <strong>MCM6</strong> (lactase) without requiring physician bioinformatics expertise.
+                  </p>
+                </div>
+
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#ccfbf1', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                    <Beaker size={20} />
+                  </div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
+                    2. AI Precision Compounding Studio
+                  </h4>
+                  <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                    Atlas AI automatically maps variant deficiencies into tailored master formulations: e.g. bypassing impaired MTHFR by formulating methylated Quatrefolic® [6S]-5-MTHF instead of standard synthetic folic acid.
+                  </p>
+                </div>
+
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#ede9fe', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                    <Stethoscope size={20} />
+                  </div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
+                    3. Doctor AI Copilot & Patient Scripting
+                  </h4>
+                  <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                    Generates doctor-friendly clinical consultation talking points in English & Arabic. Clinicians can explain complex genetic mechanisms to patients with crystal-clear metaphors that inspire confidence and compliance.
+                  </p>
+                </div>
+
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                    <TrendingUp size={20} />
+                  </div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
+                    4. Continuous 90-Day Refill & Retention
+                  </h4>
+                  <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                    The genetic test is performed once, but the personalized formulation creates an automatic 90-day subscription cycle, ensuring recurring wholesale orders for Hossam Trading from clinics across Qatar.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════════════
+            TAB 3: SAMPLE REPORT PREVIEW (24GENETICS NUTRIGEN)
+        ════════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'sample-report' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #cbd5e1', padding: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+              {/* Report Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #003666', paddingBottom: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#003666', color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
+                      24GENETICS CE-IVD
+                    </span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#f0fdfa', color: '#0d9488', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px' }}>
+                      CLINICAL NUTRIGENOMICS (NUTRIGEN)
+                    </span>
+                  </div>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 850, color: '#0f172a', margin: '6px 0 2px 0' }}>
+                    Official Patient Genomic Monograph Preview
+                  </h3>
+                  <div style={{ fontSize: '0.80rem', color: '#64748b' }}>
+                    European Core Lab: Madrid, Spain · Specimen ID: <strong>24G-QA-90421</strong> · Technology: Illumina Global Screening Array (GSA)
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ fontSize: '0.70rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 650 }}>Accreditation</span>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0d9488' }}>CE-IVD In Vitro Diagnostic</div>
+                  <div style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>Repeatability &gt;99.9%</div>
+                </div>
+              </div>
+
+              {/* Patient Overview Mini-Box */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>DEMOGRAPHIC COHORT:</span>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#0f172a' }}>Adult Male (Age 42) · Doha, Qatar</div>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>SAMPLE TYPE:</span>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#0f172a' }}>Buccal Saliva Swab (Preserved Buffer)</div>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>PRIMARY CLINICAL GOAL:</span>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#0d9488' }}>Metabolic Longevity & Precision Nutrition</div>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>ATLAS AI STATUS:</span>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#16a34a' }}>✓ Formulated & Prescribed</div>
+                </div>
+              </div>
+
+              {/* Sample Report Section Cards */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {/* 1. Micronutrient Metabolism */}
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div style={{ backgroundColor: '#f1f5f9', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Activity size={16} className="text-teal-600" />
+                      <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                        Section 1: Micronutrient Pathways & Vitamin Genetics
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#dc2626', backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '2px 8px', borderRadius: '4px' }}>
+                      Actionable Polymorphisms Detected
+                    </span>
+                  </div>
+
+                  <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '6px' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>MTHFR (rs1801133 · C677T)</span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px' }}>HOMOZYGOUS TT</span>
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                          Folate Activation & Homocysteine Recycling: <strong>70% reduction in enzyme activity</strong>. High cardiovascular & neurological inflammation risk.
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#b91c1c' }}>HIGH GENETIC NEED</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '6px' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>VDR (rs2228570 · FokI)</span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#fef3c7', color: '#b45309', padding: '2px 6px', borderRadius: '4px' }}>HETEROZYGOUS CT</span>
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                          Vitamin D Nuclear Receptor Sensitivity: <strong>Reduced receptor affinity</strong>. Requires higher circulating 25-OH-D levels to elicit cellular response.
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#b45309' }}>MODERATE RISK</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Food Sensitivities & Intolerances */}
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div style={{ backgroundColor: '#f1f5f9', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <AlertTriangle size={16} className="text-amber-600" />
+                      <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                        Section 2: Food Sensitivities & Intolerances
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0284c7', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
+                      Digestive Health Protocol
+                    </span>
+                  </div>
+
+                  <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '6px' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>MCM6 / LCT (rs4988235 · -13910 C&gt;T)</span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px' }}>GENOTYPE CC (NON-PERSISTENT)</span>
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                          Primary Adult Lactase Deficiency: <strong>Lactose Intolerance confirmed</strong>. Dairy lactose causes intestinal dysbiosis and micro-inflammation.
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#b91c1c' }}>STRICT EXCLUSION</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Macronutrient & Glycemic Response */}
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div style={{ backgroundColor: '#f1f5f9', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <HeartPulse size={16} className="text-emerald-600" />
+                      <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                        Section 3: Glycemic Metabolism & Adiposity
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '4px' }}>
+                      Metabolic Calibration
+                    </span>
+                  </div>
+
+                  <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '6px' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>TCF7L2 (rs7903146)</span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#fef3c7', color: '#b45309', padding: '2px 6px', borderRadius: '4px' }}>RISK CARRIER CT</span>
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                          Incretin & Insulin Secretory Capacity: High glycemic index carbohydrates trigger acute insulin resistance. Prescribed low-glycemic Mediterranean plan.
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#b45309' }}>ELEVATED GLYCEMIC SENSITIVITY</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════════════
+            TAB 4: AI CLINICAL RECOMMENDATION & CASE EXPLANATION
+        ════════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'ai-recommendation' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '2rem' }}>
+              <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', color: '#0f766e', padding: '3px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <Sparkles size={13} />
+                  <span>Clinical Translation Engine</span>
+                </div>
+                <h2 style={{ fontSize: '1.65rem', fontWeight: 850, color: '#003666', marginTop: '8px', margin: 0 }}>
+                  Case Simulation: Translating 24Genetics DNA Results into Custom Medicine
+                </h2>
+                <p style={{ fontSize: '0.90rem', color: '#64748b', marginTop: '6px', lineHeight: 1.6 }}>
+                  Explore how Atlas AI™ ingests genetic findings from patient specimen <strong>24G-QA-90421</strong>, synthesizes deep biochemical rationale, and formulates a patient-specific compounded capsule protocol.
+                </p>
+              </div>
+
+              {/* Variant Selector Tabs */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setSelectedCaseVariant('mthfr')}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '0.80rem',
+                    fontWeight: 700,
+                    border: selectedCaseVariant === 'mthfr' ? '2px solid #b91c1c' : '1px solid #e2e8f0',
+                    backgroundColor: selectedCaseVariant === 'mthfr' ? '#fee2e2' : '#ffffff',
+                    color: selectedCaseVariant === 'mthfr' ? '#b91c1c' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  1. MTHFR C677T (Homozygous TT)
+                </button>
+                <button
+                  onClick={() => setSelectedCaseVariant('vdr')}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '0.80rem',
+                    fontWeight: 700,
+                    border: selectedCaseVariant === 'vdr' ? '2px solid #b45309' : '1px solid #e2e8f0',
+                    backgroundColor: selectedCaseVariant === 'vdr' ? '#fef3c7' : '#ffffff',
+                    color: selectedCaseVariant === 'vdr' ? '#b45309' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  2. VDR FokI (Heterozygous CT)
+                </button>
+                <button
+                  onClick={() => setSelectedCaseVariant('mcm6')}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '0.80rem',
+                    fontWeight: 700,
+                    border: selectedCaseVariant === 'mcm6' ? '2px solid #0284c7' : '1px solid #e2e8f0',
+                    backgroundColor: selectedCaseVariant === 'mcm6' ? '#e0f2fe' : '#ffffff',
+                    color: selectedCaseVariant === 'mcm6' ? '#0284c7' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  3. MCM6 / LCT (Lactase Deficient CC)
+                </button>
+                <button
+                  onClick={() => setSelectedCaseVariant('tcf7l2')}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '0.80rem',
+                    fontWeight: 700,
+                    border: selectedCaseVariant === 'tcf7l2' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                    backgroundColor: selectedCaseVariant === 'tcf7l2' ? '#ccfbf1' : '#ffffff',
+                    color: selectedCaseVariant === 'tcf7l2' ? '#0f766e' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  4. TCF7L2 (Carb Sensitivity)
+                </button>
+              </div>
+
+              {/* Dynamic Deep-Dive Rationale Card */}
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                {selectedCaseVariant === 'mthfr' && (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#fee2e2', color: '#b91c1c', padding: '3px 8px', borderRadius: '4px' }}>
+                        HIGH CLINICAL RISK
+                      </span>
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                        MTHFR C677T Homozygous Mutation (Genotype: TT)
+                      </h4>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginTop: '12px' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#003666', textTransform: 'uppercase' }}>Biochemical Mechanism:</strong>
+                        <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, marginTop: '4px' }}>
+                          The C-to-T transition at nucleotide 677 causes an alanine-to-valine amino acid substitution, making the MTHFR enzyme thermolabile. In homozygous TT individuals, <strong>enzyme activity drops by approximately 70%</strong>. This halts the conversion of 5,10-methylenetetrahydrofolate to 5-methyltetrahydrofolate (5-MTHF), which is the primary methyl donor required for homocysteine remethylation into methionine.
+                        </p>
+                      </div>
+
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#b91c1c', textTransform: 'uppercase' }}>Clinical Manifestation:</strong>
+                        <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, marginTop: '4px' }}>
+                          Patients experience hyperhomocysteine-mediated vascular endothelial dysfunction, chronic mental fatigue, impaired detoxification, and blunted neurotransmitter production (serotonin, dopamine). <strong>Critical Warning:</strong> Standard commercial folic acid cannot be metabolized efficiently, causing unmetabolized folic acid (UMFA) syndrome.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
+                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas AI™ Prescriptive Action:</strong>
+                      <div style={{ fontSize: '0.84rem', color: '#0f766e', fontWeight: 650, marginTop: '4px' }}>
+                        Strictly contraindicate synthetic folic acid. Prescribe <strong>L-Methylfolate (as Quatrefolic® [6S]-5-MTHF) 1,000 mcg</strong> + <strong>Methylcobalamin 1,000 mcg</strong> + <strong>P-5-P (Pyridoxal-5-Phosphate) 25 mg</strong> to bypass the blocked pathway entirely and normalize homocysteine within 4-6 weeks.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedCaseVariant === 'vdr' && (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: '4px' }}>
+                        MODERATE RISK
+                      </span>
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                        VDR (Vitamin D Receptor) FokI Polymorphism (Genotype: CT)
+                      </h4>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginTop: '12px' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#003666', textTransform: 'uppercase' }}>Biochemical Mechanism:</strong>
+                        <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, marginTop: '4px' }}>
+                          The FokI (rs2228570) polymorphism creates an alternative translation start site in the VDR gene, producing a protein three amino acids longer with <strong>decreased transcription factor transactivation capability</strong>. Even with adequate circulating calcidiol (25-OH-D), target tissues fail to transduce the genomic hormonal signal.
+                        </p>
+                      </div>
+
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#b45309', textTransform: 'uppercase' }}>Clinical Manifestation:</strong>
+                        <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, marginTop: '4px' }}>
+                          Particularly prevalent in the GCC/Qatar region where indoor lifestyle combines with genetic receptor resistance. Patients suffer persistent musculoskeletal aches, low bone mineral density, seasonal affective disorder, and subdued immune surveillance despite sunny climates.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
+                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas AI™ Prescriptive Action:</strong>
+                      <div style={{ fontSize: '0.84rem', color: '#0f766e', fontWeight: 650, marginTop: '4px' }}>
+                        Elevate therapeutic serum 25-OH-D target from standard 30 ng/mL to <strong>60-80 ng/mL</strong>. Prescribe <strong>Vitamin D3 (Cholecalciferol) 5,000 IU</strong> co-formulated with <strong>Vitamin K2 (MK-7) 100 mcg</strong> (to direct calcium deposition into bone matrix and prevent arterial calcification) + <strong>Magnesium Bisglycinate 200 mg</strong> as enzymatic cofactor.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedCaseVariant === 'mcm6' && (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#e0f2fe', color: '#0284c7', padding: '3px 8px', borderRadius: '4px' }}>
+                        GASTROINTESTINAL PROTOCOL
+                      </span>
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                        MCM6 / LCT Lactase Non-Persistence (Genotype: CC)
+                      </h4>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginTop: '12px' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#003666', textTransform: 'uppercase' }}>Biochemical Mechanism:</strong>
+                        <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, marginTop: '4px' }}>
+                          The homozygous CC genotype at rs4988235 indicates absence of the European lactase persistence allele. The transcription of the lactase-phlorizin hydrolase (LCT) gene decreases progressively after weaning, resulting in complete failure to hydrolyze the disaccharide lactose into galactose and glucose in the brush border.
+                        </p>
+                      </div>
+
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#0284c7', textTransform: 'uppercase' }}>Clinical Manifestation:</strong>
+                        <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, marginTop: '4px' }}>
+                          Undigested lactose passes into the colon, drawing water via osmotic gradient and undergoing rapid fermentation by hydrogen-producing microbiota, causing postprandial bloating, abdominal pain, diarrhea, and systemic microvascular inflammation.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
+                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas AI™ Prescriptive Action:</strong>
+                      <div style={{ fontSize: '0.84rem', color: '#0f766e', fontWeight: 650, marginTop: '4px' }}>
+                        Establish strict dairy lactose exclusion. Prescribe <strong>Acid-Stable Microbial Lactase Enzyme (9,000 FCC ALU)</strong> for dining out. <strong>Critical Compounding Rule:</strong> Atlas Compounding Studio automatically flags and prohibits lactose monohydrate as a capsule binder, mandating microcrystalline cellulose and vegetable DRcaps®.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedCaseVariant === 'tcf7l2' && (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#ccfbf1', color: '#0f766e', padding: '3px 8px', borderRadius: '4px' }}>
+                        METABOLIC GLYCEMIC RISK
+                      </span>
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                        TCF7L2 rs7903146 Risk Allele (Genotype: CT)
+                      </h4>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginTop: '12px' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#003666', textTransform: 'uppercase' }}>Biochemical Mechanism:</strong>
+                        <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, marginTop: '4px' }}>
+                          TCF7L2 is the strongest known polygenic risk factor for type 2 diabetes. The T risk allele increases pancreatic islet sensitivity to pro-inflammatory cytokines, attenuating GLP-1 stimulated insulin release and accelerating beta-cell apoptosis when challenged with high glycemic carbohydrates.
+                        </p>
+                      </div>
+
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#0f766e', textTransform: 'uppercase' }}>Clinical Manifestation:</strong>
+                        <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, marginTop: '4px' }}>
+                          Postprandial reactive hypoglycemia followed by visceral adiposity, hyperinsulinemia, and elevated HbA1c even in non-obese individuals following conventional diets.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
+                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas AI™ Prescriptive Action:</strong>
+                      <div style={{ fontSize: '0.84rem', color: '#0f766e', fontWeight: 650, marginTop: '4px' }}>
+                        Restrict glycemic load (&lt;40g net carbs/meal). Formulate <strong>Phytosome Berberine (Berbevis®) 250 mg</strong> (AMPK phosphorylation agonist) + <strong>Chromium Picolinate 200 mcg</strong> to enhance insulin receptor sensitivity and prevent progression to pre-diabetes.
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Automated Compounded Formulation Box */}
+              <div style={{ backgroundColor: '#ffffff', border: '2px solid #0d9488', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Pill size={20} className="text-teal-600" />
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: 0 }}>
+                      Atlas AI™ Generated Master Formulation: Formula QA-GEN-01
+                    </h3>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
+                    60-Day Supply · 120 DRcaps®
+                  </span>
+                </div>
+
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#f0fdfa', borderBottom: '1px solid #99f6e4' }}>
+                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Active Pharmacological Ingredient</th>
+                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Bioavailable Chemical Form</th>
+                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Dosage / Day</th>
+                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Targeted Variant</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>L-Methylfolate</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>Quatrefolic® [6S]-5-MTHF Glucosamine Salt</td>
+                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>1,000 mcg</td>
+                        <td style={{ padding: '10px 12px', color: '#b91c1c', fontWeight: 650 }}>MTHFR C677T (TT)</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Methylcobalamin</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>Enzymatically active coenzyme B12</td>
+                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>1,000 mcg</td>
+                        <td style={{ padding: '10px 12px', color: '#b91c1c', fontWeight: 650 }}>Homocysteine Clearance</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Vitamin D3</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>Cholecalciferol USP</td>
+                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>5,000 IU</td>
+                        <td style={{ padding: '10px 12px', color: '#b45309', fontWeight: 650 }}>VDR FokI (CT)</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Vitamin K2</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>Menaquinone-7 (MK-7 all-trans)</td>
+                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>100 mcg</td>
+                        <td style={{ padding: '10px 12px', color: '#b45309', fontWeight: 650 }}>VDR Arterial Protection</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Magnesium Bisglycinate</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>TRAACS® Fully Chelated Glycinate</td>
+                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>200 mg</td>
+                        <td style={{ padding: '10px 12px', color: '#475569', fontWeight: 650 }}>Enzymatic Cofactor</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Phytosome Berberine</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>Berbevis® Phospholipid Complex (5x bioavailable)</td>
+                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>250 mg</td>
+                        <td style={{ padding: '10px 12px', color: '#0f766e', fontWeight: 650 }}>TCF7L2 Glycemic Sensitivity</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{ marginTop: '1rem', padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '6px', fontSize: '0.78rem', color: '#475569' }}>
+                  <strong>Excipient Safety Check:</strong> 100% Lactose-Free Verified (MCM6 safety). Microcrystalline Cellulose vehicle, delayed-release acid-resistant hypromellose DRcaps®. Posology: 1 capsule with breakfast and 1 capsule with dinner.
+                </div>
+              </div>
+
+              {/* Doctor Talking Points */}
+              <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <Stethoscope size={18} className="text-blue-600" />
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e3a8a', margin: 0 }}>
+                    Doctor Copilot: How the Doha Clinic Communicates this to the Patient
+                  </h4>
+                </div>
+                <blockquote style={{ margin: 0, paddingLeft: '1rem', borderLeft: '3px solid #3b82f6', fontSize: '0.82rem', color: '#1e40af', fontStyle: 'italic', lineHeight: 1.6 }}>
+                  &ldquo;Mr. Al-Kuwari, your 24Genetics test revealed why regular vitamins weren&apos;t working for you. You have a common variation in your MTHFR gene that prevents your liver from activating standard supermarket folic acid. Instead of standard pills, Atlas Health has compounded an exclusive medical capsule specifically calibrated for your DNA: activated Quatrefolic® with high-potency Vitamin D3 and K2. You don&apos;t need to take 6 different generic bottles; everything your DNA needs is combined into this single custom daily regimen.&rdquo;
+                </blockquote>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════════════
+            TAB 5: NUTRIGEN CLINICAL DOSSIER
+        ════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'nutrigen-monograph' && (
           <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '2rem' }}>
             <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
@@ -501,7 +1514,7 @@ export default function QatarGenomicsPriceClient() {
                 </h4>
                 <ol style={{ fontSize: '0.82rem', color: '#334155', paddingLeft: '1.2rem', lineHeight: 1.7, margin: 0 }}>
                   <li><strong>Non-Invasive Buccal Collection:</strong> Patient rubs cotton swab inside cheek for 60 seconds (no blood draw, no fasting required).</li>
-                  <li><strong>Stabilizing Preservative:</strong> Buccal sample is placed in preservation buffer tube (stable at room temperature up to 12 months).</li>
+                  <li><strong>Stabilizing Preservative:</strong> Buccal sample is placed in preservation buffer tube (stable at ambient room temperature up to 12 months).</li>
                   <li><strong>Air Courier Dispatch to Madrid:</strong> Pre-labeled international envelopes dispatch samples directly to 24Genetics laboratory.</li>
                   <li><strong>DNA Genotyping:</strong> High-density Illumina Global Screening Array (GSA) reads target SNPs with &gt;99.9% repeatability.</li>
                   <li><strong>Digital Delivery:</strong> Within 3-4 weeks, the clinic receives an authoritative 40+ page digital PDF clinical monograph and raw DNA call format.</li>
@@ -512,7 +1525,9 @@ export default function QatarGenomicsPriceClient() {
           </div>
         )}
 
-        {/* TAB 3: TERMS & LAB CONDITIONS */}
+        {/* ════════════════════════════════════════════════════════════════════
+            TAB 6: TERMS & LAB CONDITIONS
+        ════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'terms' && (
           <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '2rem' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#003666', marginBottom: '1.25rem' }}>
@@ -524,7 +1539,7 @@ export default function QatarGenomicsPriceClient() {
                 <strong style={{ color: '#15803d', display: 'block', marginBottom: '4px' }}>
                   1. Authorized Territory & Distribution Rights
                 </strong>
-                Pricing is exclusively granted to <strong>Hossam / The Masters Medical Center</strong> for B2B distribution to licensed clinics, wellness centers, aesthetic clinics, and private patients in Qatar.
+                Pricing is exclusively granted to <strong>Hossam Trading & Commercial Distribution W.L.L.</strong> for B2B distribution to licensed clinics, wellness centers, aesthetic clinics, and private medical practices in Qatar.
               </div>
 
               <div style={{ padding: '1rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>

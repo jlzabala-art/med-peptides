@@ -107,8 +107,8 @@ const INQUIRY_TOPICS_NUTRIGEN = [
     labelEn: 'Compounding Formulation, Actives & Oral Capsules',
     labelEs: 'Fórmula Magistral, Principios Activos y Cápsulas Orales',
     icon: FlaskConical,
-    placeholderEn: 'Ask regarding active compounds (GreenSelect™, Silymarin, Quercetin, Resveratrol, Curcumin, Melatonin), Lotusland synthesis, excipients, or tolerability...',
-    placeholderEs: 'Consulte sobre los principios activos (GreenSelect™, Silimarina, Quercetina, Resveratrol, Curcumina, Melatonina), síntesis Lotusland, excipientes o tolerancia...'
+    placeholderEn: 'Ask regarding active compounds (GreenSelect™, Silymarin, Quercetin, Resveratrol, Curcumin, Melatonin), peptide synthesis, excipients, or tolerability...',
+    placeholderEs: 'Consulte sobre los principios activos (GreenSelect™, Silimarina, Quercetina, Resveratrol, Curcumina, Melatonina), síntesis de péptidos, excipientes o tolerancia...'
   },
   {
     id: 'posology_schedule',

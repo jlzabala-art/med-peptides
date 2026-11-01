@@ -1911,12 +1911,15 @@ export default function PublicDatasheetView({
           slug.includes('strengthening-shampoo') ? '/images/products/colway/shampoo.png' :
           slug.includes('strengthening-conditioner') ? '/images/products/colway/conditioner.png' :
           slug.includes('trichology') ? '/images/products/colway/colway-trichology-banner.jpg' :
-          slug.includes('bpc') ? '/images/products/lotusland/bpc-157.png' :
-          slug.includes('tb-500') || slug.includes('tb500') ? '/images/products/lotusland/tb-500.png' :
-          slug.includes('ghk') ? '/images/products/lotusland/ghk-cu.png' :
-          slug.includes('epithalon') ? '/images/products/lotusland/epithalon.png' :
-          slug.includes('mots') ? '/images/products/lotusland/mots-c.png' :
-          '/images/products/lotusland/bpc-157.png'
+          slug.includes('bpc') ? '/assets/vials/bpc157.png' :
+          slug.includes('tb-500') || slug.includes('tb500') ? '/assets/vials/tb500.png' :
+          slug.includes('ghk') ? '/assets/vials/standard-vial.png' :
+          slug.includes('epithalon') ? '/assets/vials/epithalon.png' :
+          slug.includes('mots') ? '/assets/vials/motsc.png' :
+          slug.includes('retatrutide') ? '/assets/vials/retatrutide.png' :
+          slug.includes('tirzepatide') ? '/assets/vials/tirzepatide.png' :
+          slug.includes('semaglutide') ? '/assets/vials/semaglutide.png' :
+          '/assets/vials/generic-vial.png'
         ));
 
   // Comprehensive Context Anchor for Atlas AI Drawer (Unified across sticky bar and direct triggers)

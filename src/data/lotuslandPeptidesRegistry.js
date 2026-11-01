@@ -23,7 +23,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '137525-51-0',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 48.00,
     wholesalePrice: 32.00,
     landedCostAed: 110,
@@ -34,8 +34,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'High-affinity pentadecapeptide targeting VEGFR2 upregulation, accelerated collagen synthesis, tendon-to-bone healing, and gastric cytoprotection.',
     overview_summary: 'VEGFR2-mediated angiogenesis and rapid extracellular matrix remodeling in sealed lyophilized 10R vial.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic 0.9% Benzyl Alcohol Water. Store reconstituted solution at 2°C – 8°C.'
   },
   {
@@ -54,7 +54,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '137525-51-0',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 32.00,
     wholesalePrice: 22.00,
     landedCostAed: 75,
@@ -65,8 +65,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Analytical grade pentadecapeptide for tissue repair, vascular micro-perfusion, and gut mucosal barrier integrity.',
     overview_summary: 'Targeted tissue healing and mucosal barrier restoration in 5 mg lyophilized format.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 1.0–2.0 mL Bacteriostatic Water. Store reconstituted at 2°C – 8°C.'
   },
   {
@@ -85,7 +85,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '77591-33-4',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 54.00,
     wholesalePrice: 38.00,
     landedCostAed: 130,
@@ -96,8 +96,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Potent actin-sequestering peptide accelerating cell migration, myofibrillar regeneration, and systemic anti-inflammatory resolution.',
     overview_summary: 'G-actin regulation for accelerated muscle, tendon, and ligament tissue regeneration.',
-    image: '/images/products/lotusland/tb-500.png',
-    image_url: '/images/products/lotusland/tb-500.png',
+    image: '/assets/vials/tb500.png',
+    image_url: '/assets/vials/tb500.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted at 2°C – 8°C.'
   },
   {
@@ -116,7 +116,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '49557-75-7',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 45.00,
     wholesalePrice: 28.00,
     landedCostAed: 100,
@@ -127,8 +127,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Regenerative copper complex regulating over 4,000 human genes. Stimulates collagen I/III synthesis, glycosaminoglycans, and follicular stem cells.',
     overview_summary: 'Cellular neocollagenesis, tissue remodeling, and dermal genetic gene-resetting complex.',
-    image: '/images/products/lotusland/ghk-cu.png',
-    image_url: '/images/products/lotusland/ghk-cu.png',
+    image: '/assets/vials/standard-vial.png',
+    image_url: '/assets/vials/standard-vial.png',
     reconstitution: 'Reconstitute with 2.5–5.0 mL Bacteriostatic Water. Deep azure blue aqueous solution.'
   },
   {
@@ -147,7 +147,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '49557-75-7',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 68.00,
     wholesalePrice: 46.00,
     landedCostAed: 160,
@@ -158,8 +158,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'High-concentration copper tripeptide monograph for protocol blending, skin remodelation, and clinical tissue repair.',
     overview_summary: 'Double concentration copper peptide formulation for institutional clinic use.',
-    image: '/images/products/lotusland/ghk-cu.png',
-    image_url: '/images/products/lotusland/ghk-cu.png',
+    image: '/assets/vials/standard-vial.png',
+    image_url: '/assets/vials/standard-vial.png',
     reconstitution: 'Reconstitute with 5.0 mL Bacteriostatic Water. Store protected from direct light at 2°C – 8°C.'
   },
   {
@@ -178,7 +178,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '307297-39-8',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 62.00,
     wholesalePrice: 42.00,
     landedCostAed: 145,
@@ -189,8 +189,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Synthetic pineal gland bio-regulator. Induces telomerase catalytic subunit (hTERT) expression, elongation of telomeres, and neuroendocrine rejuvenation.',
     overview_summary: 'Telomere length preservation, pineal melatonin synchronization, and biological aging deceleration.',
-    image: '/images/products/lotusland/epithalon.png',
-    image_url: '/images/products/lotusland/epithalon.png',
+    image: '/assets/vials/epithalon.png',
+    image_url: '/assets/vials/epithalon.png',
     reconstitution: 'Reconstitute with 2.5–5.0 mL Bacteriostatic Water. Refrigerate post-reconstitution.'
   },
   {
@@ -209,7 +209,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '307297-39-8',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 36.00,
     wholesalePrice: 24.00,
     landedCostAed: 80,
@@ -220,8 +220,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Standard 10 mg dosage of the telomerase activator tetrapeptide for cyclical longevity regimens.',
     overview_summary: 'Epigenetic telomere stabilization in 10 mg single-course lyophilized format.',
-    image: '/images/products/lotusland/epithalon.png',
-    image_url: '/images/products/lotusland/epithalon.png',
+    image: '/assets/vials/epithalon.png',
+    image_url: '/assets/vials/epithalon.png',
     reconstitution: 'Reconstitute with 1.0–2.0 mL Bacteriostatic Water.'
   },
   {
@@ -240,7 +240,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '1627580-64-6',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 58.00,
     wholesalePrice: 39.00,
     landedCostAed: 135,
@@ -251,8 +251,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Mitochondrial-derived peptide (MDP) promoting AMPK activation, skeletal muscle glucose uptake, AICAR-like exercise mimesis, and metabolic flexibility.',
     overview_summary: 'Mitochondrial AMPK phosphorylation and insulin-sensitizing cellular bioenergetics.',
-    image: '/images/products/lotusland/mots-c.png',
-    image_url: '/images/products/lotusland/mots-c.png',
+    image: '/assets/vials/motsc.png',
+    image_url: '/assets/vials/motsc.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Sensitive to heat; store strictly at 2°C – 8°C.'
   },
   {
@@ -271,7 +271,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '910463-68-2',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 65.00,
     wholesalePrice: 44.00,
     landedCostAed: 155,
@@ -282,8 +282,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Long-acting GLP-1 receptor agonist with albumin-binding fatty diacid chain. Delays gastric emptying, increases glucose-dependent insulin secretion, and curtails central appetite signaling.',
     overview_summary: 'Selective GLP-1R incretin mimetic for metabolic optimization and glycemic control.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Protect from light.'
   },
   {
@@ -302,7 +302,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '2023788-19-2',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 88.00,
     wholesalePrice: 62.00,
     landedCostAed: 215,
@@ -313,8 +313,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Dual GIP/GLP-1 receptor agonist engineered for synergistic white adipose lipolysis, insulin sensitivity enhancement, and deep central satiety signaling.',
     overview_summary: 'Twincretin dual-receptor agonist for metabolic homeostasis and fat mass reduction.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store at 2°C – 8°C.'
   },
   {
@@ -333,7 +333,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '2023788-19-2',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 110.00,
     wholesalePrice: 78.00,
     landedCostAed: 270,
@@ -344,8 +344,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: '15 mg concentrated dual agonist for maintenance and advanced metabolic reconstitution protocols.',
     overview_summary: 'Dual incretin receptor pathway co-agonist in 15 mg clinical format.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0–3.0 mL Bacteriostatic Water.'
   },
   {
@@ -364,7 +364,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '863288-34-0',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 38.00,
     wholesalePrice: 26.00,
     landedCostAed: 90,
@@ -375,8 +375,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Modified growth hormone releasing factor analogue (tetrasubstituted). Preserves natural physiological pulsatile pituitary GH release without constant elevated baseline.',
     overview_summary: 'Pulsatile GHRH secretagogue for natural somatotropic pituitary stimulation.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water.'
   },
   {
@@ -395,7 +395,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '170851-70-4',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 36.00,
     wholesalePrice: 24.00,
     landedCostAed: 85,
@@ -406,8 +406,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Highly selective ghrelin receptor (GHS-R1a) agonist pentapeptide. Induces clean GH pulse without elevating cortisol, prolactin, ACTH, or appetite.',
     overview_summary: 'Selective secretagogue mimicking ghrelin pulses with zero adrenal/prolactin elevation.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water.'
   },
   {
@@ -426,7 +426,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: 'Combined Specification',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 68.00,
     wholesalePrice: 48.00,
     landedCostAed: 165,
@@ -437,8 +437,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Gold-standard synergistic GH secretagogue combo: dual GHRH and GHS-R receptor activation generating synergistic GH and IGF-1 secretion.',
     overview_summary: 'Dual GHRH + Ghrelin-R activation for enhanced nocturnal recovery and protein synthesis.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store at 2°C – 8°C.'
   },
   {
@@ -457,7 +457,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '80714-61-0',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 49.00,
     wholesalePrice: 34.00,
     landedCostAed: 120,
@@ -468,8 +468,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Heptapeptide ACTH analogue devoid of hormonal activity. Strongly elevates BDNF (Brain-Derived Neurotrophic Factor) and trkB receptors in the hippocampus.',
     overview_summary: 'Hippocampal BDNF upregulation, neurovascular protection, and cognitive resilience.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0–3.0 mL Bacteriostatic Water or Saline.'
   },
   {
@@ -488,7 +488,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '129954-20-5',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 48.00,
     wholesalePrice: 33.00,
     landedCostAed: 115,
@@ -499,8 +499,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Anxiolytic regulatory peptide modulating GABAergic neurotransmission and monoaminergic brain systems without sedation, addiction, or motor impairment.',
     overview_summary: 'Allosteric GABA-A modulation and stress attenuation without sedative side effects.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0–3.0 mL Bacteriostatic Water.'
   },
   {
@@ -519,7 +519,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '218949-48-5',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 75.00,
     wholesalePrice: 52.00,
     landedCostAed: 180,
@@ -530,8 +530,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Stabilized GHRH analogue specifically reducing visceral adipose tissue (VAT), improving lipid profiles, and stimulating endogenous somatotroph function.',
     overview_summary: 'Selective visceral adipose reduction and somatotropic axis amplification.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Sterile Water / Bacteriostatic Water.'
   },
   {
@@ -550,7 +550,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '221231-10-3',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 38.00,
     wholesalePrice: 26.00,
     landedCostAed: 90,
@@ -561,8 +561,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'C-terminal fragment 177-191 of human Growth Hormone. Directly stimulates beta-3 adrenergic lipolysis and inhibits lipogenesis without glycemic disruption or IGF-1 spikes.',
     overview_summary: 'Selective adipose tissue lipolysis stimulation without IGF-1 elevation.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water.'
   },
   {
@@ -581,7 +581,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '53-84-9',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 55.00,
     wholesalePrice: 36.00,
     landedCostAed: 130,
@@ -592,8 +592,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'High-dose oxidized coenzyme essential for mitochondrial Complex I respiration, PARP DNA repair, and Sirtuin (SIRT1-7) deacetylation pathways.',
     overview_summary: 'Cellular bioenergetics, mitochondrial electron transport, and sirtuin activation.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 5.0–10.0 mL Bacteriostatic Water or Sterile Saline. Keep strictly refrigerated.'
   },
   {
@@ -612,7 +612,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '161040-51-5',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 70.00,
     wholesalePrice: 38.00,
     landedCostAed: 160,
@@ -623,8 +623,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Short peptide bioregulator specifically targeting chondrocyte gene expression, extracellular matrix synthesis, proteoglycan synthesis, and spinal disc regeneration.',
     overview_summary: 'Cartilage extracellular matrix repair and chondrocyte regeneration in 25 mg lyophilized vial.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -660,7 +660,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '923013-75-4',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 70.00,
     wholesalePrice: 38.00,
     landedCostAed: 160,
@@ -671,8 +671,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Myocardial bioregulator peptide that promotes cardiac myocyte proliferation, attenuates myocardial fibrosis, and preserves coronary micro-endothelial structure.',
     overview_summary: 'Cardiomyocyte protection and microvascular tissue repair in 25 mg lyophilized vial.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -708,7 +708,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '122931-48-0',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 50.00,
     wholesalePrice: 28.00,
     landedCostAed: 120,
@@ -719,8 +719,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Synthetic thymic dipeptide restoring cellular immunity, modulating T-cell differentiation (CD4+/CD8+ balance), and enhancing host resistance against chronic cellular stress.',
     overview_summary: 'Thymic immune restoration and T-cell modulation in 25 mg lyophilized vial.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -756,7 +756,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '1047683-72-8',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 70.00,
     wholesalePrice: 38.00,
     landedCostAed: 160,
@@ -767,8 +767,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Peptide bioregulator designed to normalize testicular endocrine metabolism, support Leydig cell functional activity, and sustain physiological testosterone synthesis.',
     overview_summary: 'Testicular endocrine regulation and Leydig cell support in 25 mg lyophilized vial.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -804,7 +804,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '63958-90-7',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 55.00,
     wholesalePrice: 30.00,
     landedCostAed: 125,
@@ -815,8 +815,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Zinc-dependent thymic hormone involved in T-lymphocyte differentiation and neuroendocrine-immune network cross-talk.',
     overview_summary: 'Zinc-coupled thymic hormone for cellular immunity and neuro-immune signaling.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -852,7 +852,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '1047683-72-8',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 70.00,
     wholesalePrice: 38.00,
     landedCostAed: 160,
@@ -863,8 +863,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Bioregulator peptide supporting cellular homeostasis in prostatic tissue, modulating local vascular tone, and aiding tissue recovery.',
     overview_summary: 'Prostate tissue functional optimization and vascular micro-tone regulation.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -900,7 +900,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '868844-74-0',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 35.00,
     wholesalePrice: 18.00,
     landedCostAed: 80,
@@ -911,8 +911,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Octapeptide analogue of SNAP-25 that attenuates muscle contraction by inhibiting SNARE complex vesicle fusion, offering neuromuscular relaxation.',
     overview_summary: 'SNARE complex vesicle modulation and neuromuscular release dampening.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -948,7 +948,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '61489-71-2',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 35.00,
     wholesalePrice: 18.00,
     landedCostAed: 80,
@@ -959,8 +959,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Lyophilized gonadotropin preparation consisting of Follicle-Stimulating Hormone (FSH) and Luteinizing Hormone (LH) in a balanced 1:1 physiological ratio.',
     overview_summary: 'Standardized FSH/LH gonadotropic preparation in 75 IU lyophilized format.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 1.0–2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -996,7 +996,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '736992-21-5',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 210.00,
     wholesalePrice: 85.00,
     landedCostAed: 350,
@@ -1007,8 +1007,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Targeted mitochondrial antioxidant tetrapeptide that penetrates cell membranes and selectively binds cardiolipin on the inner mitochondrial membrane, optimizing electron flux.',
     overview_summary: 'Cardiolipin-targeted mitochondrial inner-membrane stabilizer in 50 mg format.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0–3.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -1059,7 +1059,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '189691-06-3',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 45.00,
     wholesalePrice: 24.00,
     landedCostAed: 110,
@@ -1070,8 +1070,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Non-selective melanocortin receptor agonist (primarily MC3R and MC4R) acting centrally within the central nervous system to modulate sexual arousal and appetite pathways.',
     overview_summary: 'Central melanocortin MC3R/MC4R agonist in high-potency 20 mg lyophilized format.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {
@@ -1122,7 +1122,7 @@ export const LOTUSLAND_PEPTIDES = [
     casNumber: '374675-21-5',
     supplierId: 'supplier-lotusland',
     supplierName: 'Lotusland',
-    sourcingHub: 'Lotusland EU Lyophilization Hub',
+    sourcingHub: 'EU Certified Lyophilization Hub',
     price: 40.00,
     wholesalePrice: 20.00,
     landedCostAed: 90,
@@ -1133,8 +1133,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Potent peptide agonist of the GPR54 (KISS1R) receptor. Directly stimulates hypothalamic GnRH pulsation, triggering downstream release of LH and FSH without negative feedback blunting.',
     overview_summary: 'GPR54 receptor agonist for endogenous hypothalamic GnRH pulse stimulation.',
-    image: '/images/products/lotusland/bpc-157.png',
-    image_url: '/images/products/lotusland/bpc-157.png',
+    image: '/assets/vials/bpc157.png',
+    image_url: '/assets/vials/bpc157.png',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted solution at 2°C – 8°C.',
     variants: [
       {

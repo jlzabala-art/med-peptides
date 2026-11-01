@@ -49,7 +49,7 @@ import { approveUserRoleAction } from '../../../actions/adminActions';
 import { normalizeRole, CANONICAL_ROLES, ROLE_METADATA } from '../../../constants/roles';
 import ReassignPhysicianModal from '../../../components/admin/patients/ReassignPhysicianModal';
 
-const EMAILJS_TEMPLATE_ID = EMAILJS_CONFIG.TEMPLATES.USER_WELCOME; 
+const EMAILJS_TEMPLATE_ID = EMAILJS_CONFIG.TEMPLATES.USER_WELCOME;
 
 export default function UsersTable({ initialUsers = null, kpisData = null, isSubTab = false, role = 'admin', defaultRole = null, readOnly = false, canApprove = true }) {
   const { user } = useAuth();
@@ -70,7 +70,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   const [emailPreview, setEmailPreview] = useState(null);
   const [aiTargetUser, setAiTargetUser] = useState(null);
   const [reassignModal, setReassignModal] = useState({ isOpen: false, patients: [] });
-  
+
   const [allDoctors, setAllDoctors] = useState([]);
   const [allWholesalers, setAllWholesalers] = useState([]);
   const [shareDrawerConfig, setShareDrawerConfig] = useState(null);
@@ -136,15 +136,15 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     ['createdAt', 'desc']
   ], []);
 
-  const { 
-    data: users, 
-    isLoading: firestoreLoading, 
-    refresh: refetch, 
-    loadMore, 
-    hasMore, 
-    isFetchingMore 
-  } = useFirestorePaginatedCollection('users', { 
-    constraints: [], 
+  const {
+    data: users,
+    isLoading: firestoreLoading,
+    refresh: refetch,
+    loadMore,
+    hasMore,
+    isFetchingMore
+  } = useFirestorePaginatedCollection('users', {
+    constraints: [],
     whereConditions,
     orderByFields: dynamicOrderBy,
     pageSize: rowsPerPage
@@ -206,7 +206,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     return source.filter(u => {
       if (u.isDeleted) return false;
       if (showArchived ? !u.isArchived : u.isArchived) return false;
-      
+
       const roles = u.roles || (u.role ? [u.role] : []);
       const appliedRole = defaultRole || (roleFilter !== 'all' ? roleFilter : null);
       if (appliedRole && !roles.includes(appliedRole)) return false;
@@ -236,7 +236,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     if (deepLinkPreselect === 'true' && filteredUsers.length > 0) {
       // Select all loaded users that match the filters
       selectAll(filteredUsers.map(u => u.id));
-      
+
       // Clean up URL to prevent re-selection on subsequent navigation within the page
       const url = new URL(window.location.href);
       url.searchParams.delete('preselect');
@@ -249,9 +249,9 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     const userId = typeof targetUser === 'object' ? targetUser.id : targetUser;
     const fullUser = typeof targetUser === 'object' ? targetUser : filteredUsers.find(u => u.id === userId);
     const userName = fullUser ? getUserFullName(fullUser) : 'this user';
-    
-    const confirmMessage = currentStatus 
-      ? `Are you sure you want to REVOKE professional access for ${userName}?` 
+
+    const confirmMessage = currentStatus
+      ? `Are you sure you want to REVOKE professional access for ${userName}?`
       : `Approve ${userName} for professional access and synchronize RBAC claims?`;
 
     notifier.confirmCritical(confirmMessage, async () => {
@@ -260,15 +260,15 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           // Approving: resolve canonical role
           const rawRole = fullUser?.role || fullUser?.roles?.[0] || fullUser?.requestedRole || defaultRole || CANONICAL_ROLES.DOCTOR;
           const canonicalRole = normalizeRole(rawRole);
-          
+
           const result = await approveUserRoleAction(userId, canonicalRole);
           if (result && !result.success) {
             // Fallback direct Firestore update if server action encountered an issue
-            await updateDoc(doc(db, 'users', userId), { 
-              approved: true, 
-              role: canonicalRole, 
+            await updateDoc(doc(db, 'users', userId), {
+              approved: true,
+              role: canonicalRole,
               roles: [canonicalRole],
-              professionalStatus: 'approved' 
+              professionalStatus: 'approved'
             });
           }
 
@@ -285,7 +285,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           toast.success(`User ${userName} approved as ${ROLE_METADATA[canonicalRole]?.label || canonicalRole}. Permissions synchronized.`);
         } else {
           // Revoking access
-          await updateDoc(doc(db, 'users', userId), { 
+          await updateDoc(doc(db, 'users', userId), {
             approved: false,
             professionalStatus: 'revoked'
           });
@@ -539,15 +539,15 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', wordBreak: 'break-word' }}>{email}</span>
                 <CopyableId value={u.id} iconOnly={true} />
                 <span className="hide-on-mobile">
-                  <UserSharedCatalogsPopover 
-                    user={u} 
+                  <UserSharedCatalogsPopover
+                    user={u}
                     onOpenShareDrawer={(targetUser) => {
                       setShareDrawerConfig({
                         user: targetUser,
                         shareUrl: 'https://www.atlashealth-services.com/catalog',
                         docType: 'catalog'
                       });
-                    }} 
+                    }}
                   />
                 </span>
               </div>
@@ -605,11 +605,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           cost: 'Acquisition Cost',
         };
         return (
-          <div 
-            style={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              gap: '6px', 
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
               position: 'relative',
               padding: '4px 10px',
               borderRadius: '8px',
@@ -674,7 +674,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       width: '180px',
       render: (u) => {
         const actions = [];
-        
+
         if (!u.isArchived && canApprove && !u.approved) {
           actions.push({
             type: 'approve',
@@ -687,8 +687,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
         actions.push({
           label: 'Share Catalog',
           icon: Share2,
-          onClick: (e) => { 
-            e.stopPropagation(); 
+          onClick: (e) => {
+            e.stopPropagation();
             handleQuickShareCatalog(u, 'products');
           }
         });
@@ -697,8 +697,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
         actions.push({
           label: 'Share Protocols',
           icon: BookOpen,
-          onClick: (e) => { 
-            e.stopPropagation(); 
+          onClick: (e) => {
+            e.stopPropagation();
             handleQuickShareCatalog(u, 'protocols');
           }
         });
@@ -707,8 +707,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
         actions.push({
           label: 'AI Outreach',
           icon: Sparkles,
-          onClick: (e) => { 
-            e.stopPropagation(); 
+          onClick: (e) => {
+            e.stopPropagation();
             setAiTargetUser(u);
           }
         });
@@ -720,13 +720,13 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             onClick: (e) => { e.stopPropagation(); handleToggleApproval(u, true); }
           });
         }
-        
+
         if (!u.isArchived) {
           actions.push({
             label: 'Act As',
             icon: Eye,
-            onClick: (e) => { 
-              e.stopPropagation(); 
+            onClick: (e) => {
+              e.stopPropagation();
               impersonateUser(u);
               toast.success(`Now simulating session as ${getUserFullName(u)}`);
             }
@@ -750,7 +750,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             }
           });
         }
-        
+
         actions.push({
           type: 'edit',
           onClick: (e) => { e.stopPropagation(); setDetailsUser(u); }
@@ -1059,14 +1059,14 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
       {!isSubTab && (
         <div style={{ flexShrink: 0 }}>
-          <PageHeader 
+          <PageHeader
             title="Users Management"
             subtitle="Manage all users across portals, approve access, and assign roles."
             icon={Users}
             actions={
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <button 
-                  onClick={handleBulkExportCSV} 
+                <button
+                  onClick={handleBulkExportCSV}
                   className="gcp-btn-secondary"
                   disabled={!filteredUsers.length}
                   title="Export current view to CSV"
@@ -1074,8 +1074,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                   <Download size={16} />
                   <span>Export ({filteredUsers.length})</span>
                 </button>
-                <button 
-                  onClick={() => setIsInviteModalOpen(true)} 
+                <button
+                  onClick={() => setIsInviteModalOpen(true)}
                   className="gcp-btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#16a34a', borderColor: '#86efac' }}
                 >
@@ -1281,7 +1281,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       )}
 
       {financialWholesaler && <FinancialWholesalerModal financialWholesaler={financialWholesaler} setFinancialWholesaler={setFinancialWholesaler} />}
-      
+
       {detailsUser && (
         <User360Drawer
           isOpen={Boolean(detailsUser)}
