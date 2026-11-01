@@ -1451,6 +1451,48 @@ export default function QatarGenomicsPriceClient() {
                 </div>
               </div>
 
+              {/* Download Patient & Pharmacy Prescription PDF */}
+              <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem 1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FileText size={18} className="text-teal-700" />
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f766e' }}>
+                      Ready-to-Use Patient & Pharmacy Prescription PDF
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#ccfbf1', color: '#0f766e', padding: '2px 8px', borderRadius: '4px' }}>
+                      2-Page Document
+                    </span>
+                  </div>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#334155', maxWidth: '640px', lineHeight: 1.5 }}>
+                    Page 1 translates DNA findings into clear, simple language for the patient. Page 2 provides the exact generic active ingredients (APIs), dosages, and galenic specs formatted for any compounding pharmacy.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <a
+                    href="/api/reports/24genomics-patient-pdf?patient=Hossam%20Ahmed&sample=24G-QA-90421&clinic=Ryhanh%20Medical%20Company%20%C2%B7%20Doha"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      padding: '9px 18px',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      backgroundColor: '#0d9488',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)'
+                    }}
+                  >
+                    <Download size={15} />
+                    <span>Download Prescription PDF</span>
+                  </a>
+                </div>
+              </div>
+
               {/* Doctor Talking Points */}
               <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '1.25rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
