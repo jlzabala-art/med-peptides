@@ -38,7 +38,7 @@ export default function AtlasLoadingScreen() {
         </span>
       </div>
       <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500 }}>
-        {t('common.loading', { defaultValue: 'Iniciando Atlas App...' })}
+        {t('common.loading', { defaultValue: 'Initializing Atlas Platform...' })}
       </p>
 
       {/* Shimmer bar */}

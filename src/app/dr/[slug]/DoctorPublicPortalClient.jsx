@@ -1944,7 +1944,7 @@ export default function DoctorPublicPortalClient({
       const safeDocName = isAuthorizedViewer ? doctor.name : `Practice ${opaqueCode}`;
       const replyContent =
         json?.reply ||
-        `**Practice Intelligence for ${safeDocName}:**\n• **${doctorPatientsList.length} Unique Patients** (${soldPatientsCount} Sold Customers · ${unacceptedPatientsCount} Unaccepted Proposal Patients)\n• **${allPrescriptions.length} Prescriptions** (${quickCounts.active} Sold & Invoiced · ${quickCounts.proposals} Unaccepted Offers)`;
+        `**Practice Intelligence for ${safeDocName}:**\n• **${doctorPatientsList.length} Unique Patients** (${soldPatientsCount} Prescribed Patients · ${unacceptedPatientsCount} Pending Proposal Patients)\n• **${allPrescriptions.length} Prescriptions** (${quickCounts.active} Prescribed & Dispensed · ${quickCounts.proposals} Pending Proposals)`;
 
       const assistantMsg = {
         role: 'assistant',
@@ -4083,7 +4083,7 @@ export default function DoctorPublicPortalClient({
     },
     {
       key: 'status',
-      header: 'Commercial Status',
+      header: 'Prescription Status',
       width: '22%',
       align: 'left',
       sortable: true,
@@ -4093,9 +4093,9 @@ export default function DoctorPublicPortalClient({
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             {pat.hasSold ? (
               <>
-                <StatusBadge status="approved" customLabel="Sold Customer" />
+                <StatusBadge status="approved" customLabel="Prescribed" />
                 <div style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 650, marginTop: '3px' }}>
-                  ✓ {pat.invoices?.join(', ') || 'Invoiced Order'}
+                  ✓ {pat.invoices?.join(', ') || 'Prescription Fulfilled'}
                 </div>
               </>
             ) : (
@@ -8733,13 +8733,13 @@ export default function DoctorPublicPortalClient({
                     style={{ cursor: 'pointer', border: patientFilterMode === 'sold' ? '2px solid #16a34a' : '1px solid #e8eaed' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#15803d', textTransform: 'uppercase' }}>Sold Customers</span>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#15803d', textTransform: 'uppercase' }}>Prescribed Patients</span>
                       <CheckCircle2 size={15} style={{ color: '#16a34a' }} />
                     </div>
                     <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#15803d' }}>
                       {doctorPatientsList.filter(p => p.hasSold).length}
                     </div>
-                    <div style={{ fontSize: '0.70rem', color: '#15803d', marginTop: '4px', fontWeight: 650 }}>Confirmed invoice on file</div>
+                    <div style={{ fontSize: '0.70rem', color: '#15803d', marginTop: '4px', fontWeight: 650 }}>Active & Fulfilled Rx</div>
                   </div>
 
                   <div
@@ -8786,7 +8786,7 @@ export default function DoctorPublicPortalClient({
                       patientFilterMode !== 'all' && {
                         key: 'mode',
                         label: 'Status',
-                        value: patientFilterMode === 'sold' ? 'Sold Customers' : (patientFilterMode === 'refill' ? 'Due for Renewal' : 'Unaccepted Proposals'),
+                        value: patientFilterMode === 'sold' ? 'Prescribed Patients' : (patientFilterMode === 'refill' ? 'Due for Renewal' : 'Unaccepted Proposals'),
                         onRemove: () => setPatientFilterMode('all')
                       }
                     ].filter(Boolean)}
@@ -8829,7 +8829,7 @@ export default function DoctorPublicPortalClient({
                         cursor: 'pointer'
                       }}
                     >
-                      🟢 Sold Customers ({doctorPatientsList.filter(p => p.hasSold).length})
+                      🟢 Prescribed Patients ({doctorPatientsList.filter(p => p.hasSold).length})
                     </button>
                     <button
                       type="button"

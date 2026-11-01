@@ -42,8 +42,8 @@ export default function AdminCustomersTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--color-bg-app)' }}>
       <PageHeader
-        title="Customers"
-        subtitle="Manage all customer accounts across Clinics, Wholesalers, and Individual Patients (Zoho Books Standard)."
+        title="CRM Directory"
+        subtitle="Unified CRM Counterparty Directory across Clinics, Wholesalers, Doctors, and Patients (SSOT)."
         icon={Users2}
         showDashboardBack={false}
         actions={
@@ -63,10 +63,10 @@ export default function AdminCustomersTab() {
                 borderRadius: '6px',
                 cursor: isRegularizing ? 'wait' : 'pointer'
               }}
-              title="Reconcile and consolidate all counterparty records into the unified customers collection"
+              title="Reconcile and consolidate all counterparty records into the unified CRM customers collection"
             >
               <RefreshCw size={14} className={isRegularizing ? 'spin' : ''} />
-              <span>{isRegularizing ? 'Regularizing...' : 'Sync Customers SSOT'}</span>
+              <span>{isRegularizing ? 'Regularizing...' : 'Sync CRM SSOT'}</span>
             </button>
           </div>
         }

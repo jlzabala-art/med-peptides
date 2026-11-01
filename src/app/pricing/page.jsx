@@ -75,6 +75,28 @@ const SCHEDULES = [
     badgeBg: '#eef2ff',
     badgeBorder: '#c7d2fe',
     highlights: ['Intact Native Tropocollagen (<26°C)', 'Wholesale Net & Recommended Clinic Tiers', 'Official UAE & GCC Distribution']
+  },
+  {
+    id: 'colway-qatar',
+    title: 'Colway Hair Care • Qatar Distributor Schedule',
+    badge: 'Exclusive: Hossam (The Masters)',
+    desc: 'Exclusive landed-cost schedule for Hair Strengthening Shampoo & Conditioner in Qatar. Baicapil™ 2% + native tropocollagen + micronized diosmin.',
+    route: '/pricing/colway-qatar',
+    badgeColor: '#15803d',
+    badgeBg: '#f0fdf4',
+    badgeBorder: '#bbf7d0',
+    highlights: ['Distributor Price: 112.00 QAR / unit', 'Distributor Margin: 40.1% (75 QAR)', 'Full Technical Monographs Included']
+  },
+  {
+    id: '24genomics-qatar',
+    title: '24Genetics Clinical Genomics & Nutrigen • Qatar Schedule',
+    badge: 'Exclusive: Hossam (The Masters)',
+    desc: 'Saliva-based DNA test panels covering Nutrigenetics (Nutrigen), Pharmacogenetics & All-in-One. Direct integration with customized compounded nutrient capsules.',
+    route: '/pricing/24genomics-qatar',
+    badgeColor: '#0f766e',
+    badgeBg: '#f0fdfa',
+    badgeBorder: '#99f6e4',
+    highlights: ['Nutrigen Distributor Cost: 475.00 QAR', 'Clinic Resale: 750.00 QAR (36.7% Margin)', 'CE-IVD Certified European Laboratory']
   }
 ];
 

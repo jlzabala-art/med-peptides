@@ -105,7 +105,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
   const handleStartPrescriptionWithPatient = (patient) => {
     setPrefilledPatient(patient);
     setShowBuilder(true);
-    notifier.info(`Iniciando prescripción para ${patient.name || patient.firstName}.`);
+    notifier.info(`Starting prescription for ${patient.name || patient.firstName}.`);
     setTimeout(() => {
       builderRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);

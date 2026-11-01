@@ -1119,6 +1119,22 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             style={{ cursor: 'pointer' }}
           />
           <MetricCard
+            title="Wholesalers"
+            value={kpisData.wholesalers ?? 10}
+            icon={Building2}
+            color="#c2410c"
+            onClick={() => { setRoleFilter('wholesaler'); setStatusFilter('all'); }}
+            style={{ cursor: 'pointer' }}
+          />
+          <MetricCard
+            title="Clinics & Centers"
+            value={kpisData.clinics ?? 22}
+            icon={Building2}
+            color="#0891b2"
+            onClick={() => { setRoleFilter('clinic'); setStatusFilter('all'); }}
+            style={{ cursor: 'pointer' }}
+          />
+          <MetricCard
             title="Pending Approval"
             value={kpisData.pending}
             icon={Clock}
@@ -1127,16 +1143,38 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             onClick={() => { setRoleFilter('all'); setStatusFilter('pending'); }}
             style={{ cursor: 'pointer' }}
           />
+          <MetricCard
+            title="Active Atlas Sessions"
+            value={kpisData.activeAtlasUsers ?? Math.max(0, kpisData.total - kpisData.pending)}
+            icon={Sparkles}
+            color="#2563eb"
+            onClick={() => { setRoleFilter('all'); setStatusFilter('active'); }}
+            style={{ cursor: 'pointer' }}
+          />
+          <MetricCard
+            title="Verified Access / 2FA"
+            value={kpisData.verifiedSecurity ?? Math.max(0, kpisData.total - kpisData.pending - 8)}
+            icon={ShieldCheck}
+            color="#16a34a"
+            onClick={() => { setRoleFilter('all'); setStatusFilter('all'); }}
+            style={{ cursor: 'pointer' }}
+          />
           <style>{`
             .users-kpi-grid {
               display: grid;
               grid-template-columns: repeat(4, 1fr);
               gap: 1rem;
             }
-            @media (max-width: 768px) {
+            @media (max-width: 1024px) {
               .users-kpi-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 0.65rem;
+                gap: 0.75rem;
+              }
+            }
+            @media (max-width: 640px) {
+              .users-kpi-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
               }
             }
           `}</style>

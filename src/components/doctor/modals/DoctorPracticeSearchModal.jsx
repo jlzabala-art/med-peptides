@@ -531,7 +531,7 @@ export default function DoctorPracticeSearchModal({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <StatusBadge
                         status={pat.hasSold ? 'approved' : 'proposal_pending'}
-                        customLabel={pat.hasSold ? 'Sold Customer' : 'Offer Unaccepted'}
+                        customLabel={pat.hasSold ? 'Prescribed Patient' : 'Offer Unaccepted'}
                       />
                       <ChevronRight size={15} style={{ color: '#94a3b8' }} />
                     </div>

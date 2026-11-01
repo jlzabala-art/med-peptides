@@ -53,18 +53,29 @@ function getCustomerTypeMeta(type = '') {
  */
 export function resolveCustomerDisplayName(c) {
   if (!c) return 'Unnamed Account';
+  if (typeof c === 'string' && c.trim() !== '') return c.trim();
   const nameCandidate = (
     c.name ||
     c.displayName ||
     c.fullName ||
     c.companyName ||
+    c.company ||
     c.legalName ||
+    c.clinicName ||
     ([c.firstName, c.lastName].filter(Boolean).join(' ')) ||
     c.patientName ||
     c.doctorName ||
-    c.contactName
+    c.contactName ||
+    c.contact_name ||
+    c.billingAddress?.name ||
+    c.billingAddress?.company ||
+    c.shippingAddress?.name ||
+    c.patientProfile?.name ||
+    c.doctorProfile?.name ||
+    c.clinicProfile?.name ||
+    c.wholesalerProfile?.name
   );
-  if (nameCandidate && nameCandidate.trim() !== '') {
+  if (nameCandidate && typeof nameCandidate === 'string' && nameCandidate.trim() !== '') {
     return nameCandidate.trim();
   }
   if (c.email && typeof c.email === 'string') {
@@ -73,7 +84,13 @@ export function resolveCustomerDisplayName(c) {
   if (c.contactEmail && typeof c.contactEmail === 'string') {
     return c.contactEmail.split('@')[0];
   }
-  return 'Unnamed Account';
+  if (c.phone || c.contactPhone || c.mobile) {
+    return c.phone || c.contactPhone || c.mobile;
+  }
+  if (c.id && typeof c.id === 'string') {
+    return `Account #${c.id.slice(0, 8)}`;
+  }
+  return 'Registered Account';
 }
 
 /**
@@ -342,10 +359,12 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
       key: 'name',
       header: 'Customer / Organization',
       width: '38%',
-      render: (row) => {
+      render: (val, rowRecord) => {
+        const row = rowRecord || (typeof val === 'object' && val !== null ? val : {});
         const meta = getCustomerTypeMeta(row.customerType || row.type);
         const hasBooks = Boolean(row.zohoContactId || row.zohoContactNumber);
         const hasBigin = Boolean(row.zohoBiginContactId);
+        const displayName = resolveCustomerDisplayName(row.name ? row : (typeof val === 'string' ? val : row));
 
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -368,9 +387,9 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexWrap: 'wrap' }}>
               <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {resolveCustomerDisplayName(row)}
+                {displayName}
               </span>
-              <CopyableId value={row.id} iconOnly={true} />
+              <CopyableId value={row.id || (typeof val === 'string' && val.startsWith('CUS-') ? val : null)} iconOnly={true} />
               {hasBooks && (
                 <span
                   title={`Zoho Books Contact: ${row.zohoContactNumber || row.zohoContactId}`}
@@ -414,8 +433,9 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
       key: 'customerType',
       header: 'Channel Type',
       width: '15%',
-      render: (row) => {
-        const meta = getCustomerTypeMeta(row.customerType || row.type);
+      render: (val, rowRecord) => {
+        const row = rowRecord || (typeof val === 'object' && val !== null ? val : {});
+        const meta = getCustomerTypeMeta(row.customerType || row.type || (typeof val === 'string' ? val : null));
         return (
           <span
             style={{
@@ -441,7 +461,8 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
       key: 'commercialTerms',
       header: 'Pricing & Currency',
       width: '16%',
-      render: (row) => {
+      render: (val, rowRecord) => {
+        const row = rowRecord || (typeof val === 'object' && val !== null ? val : {});
         const currency = row.currency || (row.country?.toLowerCase().includes('emirates') ? 'AED' : (row.country?.toLowerCase().includes('spain') ? 'EUR' : 'USD'));
         const markup = row.commercialMarkup ?? row.markup ?? row.discountMargin ?? 20;
 
@@ -483,14 +504,20 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
       key: 'status',
       header: 'Status',
       width: '13%',
-      render: (row) => <StatusBadge status={row.status || 'active'} />
+      render: (val, rowRecord) => {
+        const row = rowRecord || (typeof val === 'object' && val !== null ? val : {});
+        const st = typeof val === 'string' ? val : (row.status || 'active');
+        return <StatusBadge status={st} />;
+      }
     },
     {
       key: 'actions',
       header: 'Quick Actions',
       width: '18%',
       align: 'right',
-      render: (row) => (
+      render: (val, rowRecord) => {
+        const row = rowRecord || (typeof val === 'object' && val !== null ? val : {});
+        return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px' }} onClick={e => e.stopPropagation()}>
           <button
             type="button"

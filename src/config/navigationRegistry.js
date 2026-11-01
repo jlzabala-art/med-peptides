@@ -69,7 +69,7 @@ export const NAVIGATION_REGISTRY = [
     icon: ShoppingBag,
     roles: ['admin', 'ceo', 'sales', 'operations', 'finance', 'patient'],
     items: [
-      { id: 'customers',  label: 'Customers (CRM)', icon: Users2,      roles: ['admin', 'sales'] },
+      { id: 'customers',  label: 'CRM',             icon: Users2,      roles: ['admin', 'sales'] },
       { id: 'orders',     label: 'Orders',          icon: ShoppingBag, roles: ['admin', 'sales', 'operations', 'finance', 'patient'] },
       { id: 'quotations', label: 'Quotations',       icon: FileText,    roles: ['admin', 'sales', 'finance'] },
     ]

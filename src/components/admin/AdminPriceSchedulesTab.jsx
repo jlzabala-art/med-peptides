@@ -107,7 +107,48 @@ const PRICE_SCHEDULES = [
     supplierFamily: 'Colway Native Tropocollagen',
     whiteLabelStatus: 'Official Colway Master Schedule (Landed Cost restricted to Admin)',
     emailNotifications: 'Direct B2B Proforma Request notification to jose@mediluxeme.com',
-    category: 'derma'
+    category: 'derma',
+    tierSupport: ['wholesale', 'clinic', 'patient']
+  },
+  {
+    id: 'colway-qatar',
+    title: 'Colway Hair Care • Qatar Distributor Schedule',
+    subtitle: 'Landed-cost commercial architecture for Hossam / The Masters Medical Center',
+    badge: 'Qatar Exclusive · 80 Units',
+    badgeColor: '#15803d',
+    badgeBg: '#f0fdf4',
+    badgeBorder: '#bbf7d0',
+    route: '/pricing/colway-qatar',
+    referralCode: 'QATAR-COLWAY-HOSSAM',
+    partnerName: 'Hossam · The Masters Medical Center (Doha, Qatar)',
+    pricingFormula: 'Factory (94 PLN / $24.00) + Freight ($3.14) + Duty ($1.20) → Mediluxe (112 QAR) → Retail (187 QAR)',
+    volumeTier: '80 Units Initial Commercial Batch (40 Shampoo + 40 Conditioner)',
+    currencies: 'QAR (Primary) · USD · PLN (Origin)',
+    supplierFamily: 'Colway European Compounding Lab',
+    whiteLabelStatus: 'Exclusive Distributor Schedule (100% advance payment with purchase order)',
+    emailNotifications: 'Instant notification to jose@mediluxeme.com on pro-forma requests',
+    category: 'distributor',
+    tierSupport: ['wholesale']
+  },
+  {
+    id: '24genomics-qatar',
+    title: '24Genetics Clinical DNA & Nutrigenomics (Nutrigen)',
+    subtitle: 'Exclusive Qatar wholesale testing kits schedule for Hossam / The Masters Medical Center',
+    badge: 'Qatar Exclusive · CE-IVD',
+    badgeColor: '#0f766e',
+    badgeBg: '#f0fdfa',
+    badgeBorder: '#99f6e4',
+    route: '/pricing/24genomics-qatar',
+    referralCode: 'QATAR-24G-HOSSAM',
+    partnerName: 'Hossam · The Masters Medical Center (Doha, Qatar)',
+    pricingFormula: 'Lab Pack ×10 (€104.30) → Distributor (475 QAR) → Clinic (750 QAR / 36.7% Margin) → Retail (950 QAR)',
+    volumeTier: 'Pack ×10 Kits (-30% Volume Discount)',
+    currencies: 'QAR (Primary) · USD · EUR (Lab origin)',
+    supplierFamily: '24Genetics CE-IVD European Lab (Madrid)',
+    whiteLabelStatus: 'Custom Compounded Nutrigenomic Formulation Integration',
+    emailNotifications: 'Instant notification to jose@mediluxeme.com on pro-forma requests',
+    category: 'distributor',
+    tierSupport: ['wholesale', 'clinic']
   }
 ];
 
@@ -116,13 +157,18 @@ export default function AdminPriceSchedulesTab() {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [copiedId, setCopiedId] = useState(null);
 
-  const handleCopyLink = (schedule) => {
+  const handleCopyLink = (schedule, tier = null) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
-    const refParam = schedule.referralCode ? `?ref=${schedule.referralCode}` : '';
-    const fullUrl = `${origin}${schedule.route}${refParam}`;
+    const params = new URLSearchParams();
+    if (schedule.referralCode) params.set('ref', schedule.referralCode);
+    if (tier && tier !== 'default') params.set('tier', tier);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const fullUrl = `${origin}${schedule.route}${queryString}`;
     navigator.clipboard.writeText(fullUrl);
-    setCopiedId(schedule.id);
-    toast.success(`Copied shareable link for ${schedule.title} ✓`);
+    const copyKey = `${schedule.id}-${tier || 'default'}`;
+    setCopiedId(copyKey);
+    const tierLabel = tier ? ` (${tier.toUpperCase()} TIER)` : '';
+    toast.success(`Copied shareable link${tierLabel} for ${schedule.title} ✓`);
     setTimeout(() => setCopiedId(null), 2500);
   };
 
@@ -135,7 +181,14 @@ export default function AdminPriceSchedulesTab() {
         s.partnerName.toLowerCase().includes(q) ||
         s.route.toLowerCase().includes(q);
 
-      const matchesFilter = selectedFilter === 'all' || s.category === selectedFilter;
+      let matchesFilter = true;
+      if (selectedFilter === 'all') matchesFilter = true;
+      else if (selectedFilter === 'wholesalers') matchesFilter = s.tierSupport?.includes('wholesale') || s.category === 'distributor' || s.pricingFormula.includes('Wholesale') || s.pricingFormula.includes('Wholeseller');
+      else if (selectedFilter === 'clinics') matchesFilter = s.tierSupport?.includes('clinic') || s.pricingFormula.includes('Clinic');
+      else if (selectedFilter === 'patients') matchesFilter = s.tierSupport?.includes('patient') || s.pricingFormula.includes('Retail') || s.pricingFormula.includes('Guest');
+      else if (selectedFilter === 'distributor') matchesFilter = s.category === 'distributor';
+      else matchesFilter = s.category === selectedFilter;
+
       return matchesSearch && matchesFilter;
     });
   }, [searchQuery, selectedFilter]);
@@ -205,10 +258,10 @@ export default function AdminPriceSchedulesTab() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               {[
                 { id: 'all', label: 'All Schedules' },
-                { id: 'peptides', label: 'Peptides Vials' },
-                { id: 'genomics', label: '24Genetics DNA' },
-                { id: 'hair', label: 'Colway Hair Line' },
-                { id: 'derma', label: 'Colway Cellular' }
+                { id: 'wholesalers', label: 'Wholesalers & Distributors' },
+                { id: 'clinics', label: 'Clinics & Doctors' },
+                { id: 'patients', label: 'Patients & Retail' },
+                { id: 'distributor', label: 'Qatar Exclusive (Hossam)' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -315,7 +368,7 @@ export default function AdminPriceSchedulesTab() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons & Multi-Tier Share Links */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -325,17 +378,17 @@ export default function AdminPriceSchedulesTab() {
                 borderTop: '1px solid #f1f5f9',
                 flexWrap: 'wrap'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => handleCopyLink(schedule)}
                     style={{
-                      padding: '6px 12px',
-                      fontSize: '0.75rem',
+                      padding: '5px 10px',
+                      fontSize: '0.74rem',
                       fontWeight: 650,
                       background: '#ffffff',
                       border: '1px solid #cbd5e1',
                       borderRadius: '6px',
-                      color: isCopied ? '#059669' : '#334155',
+                      color: copiedId === `${schedule.id}-default` ? '#059669' : '#334155',
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -343,19 +396,71 @@ export default function AdminPriceSchedulesTab() {
                     }}
                     title={schedule.referralCode ? `Copy partner link with ?ref=${schedule.referralCode}` : 'Copy direct link'}
                   >
-                    {isCopied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-                    <span>{isCopied ? 'Copied' : (schedule.referralCode ? 'Copy Partner Link' : 'Copy Link')}</span>
+                    {copiedId === `${schedule.id}-default` ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                    <span>{copiedId === `${schedule.id}-default` ? 'Copied' : (schedule.referralCode ? 'Partner Link' : 'Copy Link')}</span>
+                  </button>
+
+                  {/* Multi-Tier Direct Links */}
+                  <button
+                    onClick={() => handleCopyLink(schedule, 'wholesale')}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '0.70rem',
+                      fontWeight: 650,
+                      background: '#fff7ed',
+                      border: '1px solid #fed7aa',
+                      borderRadius: '4px',
+                      color: copiedId === `${schedule.id}-wholesale` ? '#15803d' : '#c2410c',
+                      cursor: 'pointer'
+                    }}
+                    title="Copy Wholesale B2B Link (?tier=wholesale)"
+                  >
+                    {copiedId === `${schedule.id}-wholesale` ? '✓ Wholesale' : '+ Wholesale Link'}
+                  </button>
+
+                  <button
+                    onClick={() => handleCopyLink(schedule, 'clinic')}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '0.70rem',
+                      fontWeight: 650,
+                      background: '#f0fdfa',
+                      border: '1px solid #99f6e4',
+                      borderRadius: '4px',
+                      color: copiedId === `${schedule.id}-clinic` ? '#15803d' : '#0d9488',
+                      cursor: 'pointer'
+                    }}
+                    title="Copy Clinic / Practitioner Link (?tier=clinic)"
+                  >
+                    {copiedId === `${schedule.id}-clinic` ? '✓ Clinic' : '+ Clinic Link'}
+                  </button>
+
+                  <button
+                    onClick={() => handleCopyLink(schedule, 'patient')}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '0.70rem',
+                      fontWeight: 650,
+                      background: '#faf5ff',
+                      border: '1px solid #e9d5ff',
+                      borderRadius: '4px',
+                      color: copiedId === `${schedule.id}-patient` ? '#15803d' : '#7c3aed',
+                      cursor: 'pointer'
+                    }}
+                    title="Copy Patient / Retail MSRP Link (?tier=patient)"
+                  >
+                    {copiedId === `${schedule.id}-patient` ? '✓ Patient' : '+ Patient Link'}
                   </button>
 
                   {schedule.referralCode && (
                     <span style={{
-                      fontSize: '0.68rem',
+                      fontSize: '0.66rem',
                       fontFamily: 'monospace',
                       fontWeight: 700,
                       color: '#0284c7',
                       background: '#f0f9ff',
                       border: '1px solid #bae6fd',
-                      padding: '2px 6px',
+                      padding: '2px 5px',
                       borderRadius: '4px'
                     }}>
                       ?ref={schedule.referralCode}

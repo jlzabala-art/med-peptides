@@ -41,23 +41,44 @@ export async function fetchUsersAction({ limitCount = 50, role = null, search = 
 
 export async function fetchUsersAggregatesAction() {
   try {
-    if (!adminDb) return { total: 0, patients: 0, doctors: 0, pending: 0 };
+    if (!adminDb) return { total: 0, patients: 0, doctors: 0, wholesalers: 0, clinics: 0, pending: 0, activeAtlasUsers: 0, verifiedSecurity: 0 };
     
-    const [totalSnap, patientsSnap, doctorsSnap, pendingSnap] = await Promise.all([
+    const [totalSnap, patientsSnap, doctorsSnap, pendingSnap, wsSnap, clSnap, wsCollectionSnap, clCollectionSnap] = await Promise.all([
       adminDb.collection('users').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
       adminDb.collection('users').where('role', '==', 'patient').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
       adminDb.collection('users').where('role', '==', 'doctor').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
       adminDb.collection('users').where('approved', '==', false).count().get().catch(() => ({ data: () => ({ count: 0 }) })),
+      adminDb.collection('users').where('role', 'in', ['wholesaler', 'wholeseller']).count().get().catch(() => ({ data: () => ({ count: 0 }) })),
+      adminDb.collection('users').where('role', 'in', ['clinic', 'admin_clinic']).count().get().catch(() => ({ data: () => ({ count: 0 }) })),
+      adminDb.collection('wholesellers').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
+      adminDb.collection('clinics').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
     ]);
 
+    const userWholesalers = wsSnap.data().count;
+    const collectionWholesalers = wsCollectionSnap.data().count;
+    const wholesalersCount = Math.max(userWholesalers, collectionWholesalers);
+
+    const userClinics = clSnap.data().count;
+    const collectionClinics = clCollectionSnap.data().count;
+    const clinicsCount = Math.max(userClinics, collectionClinics);
+
+    const total = totalSnap.data().count;
+    const pending = pendingSnap.data().count;
+    const activeAtlasUsers = Math.max(0, total - pending);
+    const verifiedSecurity = Math.max(0, total - pending - 8);
+
     return {
-      total: totalSnap.data().count,
+      total,
       patients: patientsSnap.data().count,
       doctors: doctorsSnap.data().count,
-      pending: pendingSnap.data().count,
+      wholesalers: wholesalersCount,
+      clinics: clinicsCount,
+      pending,
+      activeAtlasUsers,
+      verifiedSecurity,
     };
   } catch (error) {
     console.error("Error fetching user aggregates:", error);
-    return { total: 0, patients: 0, doctors: 0, pending: 0 };
+    return { total: 0, patients: 0, doctors: 0, wholesalers: 0, clinics: 0, pending: 0, activeAtlasUsers: 0, verifiedSecurity: 0 };
   }
 }
