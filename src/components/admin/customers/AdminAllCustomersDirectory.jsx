@@ -557,7 +557,8 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
             <Eye size={14} />
           </button>
         </div>
-      )
+        );
+      }
     }
   ];
 
