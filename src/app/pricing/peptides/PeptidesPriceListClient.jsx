@@ -25,7 +25,9 @@ import {
   Plus,
   Minus,
   Trash2,
-  X
+  X,
+  MessageCircle,
+  Zap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
@@ -48,11 +50,72 @@ const CATEGORY_MAP = {
   general_health: { label: 'Bioactive Peptide', color: '#475569', bg: '#f8fafc', border: '#e2e8f0' }
 };
 
+const DOSAGE_STRENGTHS = [
+  { id: 'all', label: 'All Strengths' },
+  { id: '5mg', label: '5 mg' },
+  { id: '10mg', label: '10 mg' },
+  { id: '20mg_plus', label: '15–20 mg+' }
+];
+
+const CLINICAL_PRESETS = [
+  {
+    id: 'tissue_repair',
+    name: 'Tissue Repair Protocol',
+    icon: '🩹',
+    description: 'BPC-157 (10mg) + TB-500 (10mg)',
+    searchTerms: ['bpc', 'tb-500'],
+    dosageFilter: '10mg',
+    accent: '#0284c7',
+    bg: '#f0f9ff'
+  },
+  {
+    id: 'metabolic_glp1',
+    name: 'Metabolic & GLP-1 Protocol',
+    icon: '⚡',
+    description: 'Tirzepatide (10mg) + Retatrutide (10mg)',
+    searchTerms: ['tirzepatide', 'retatrutide'],
+    dosageFilter: '10mg',
+    accent: '#16a34a',
+    bg: '#f0fdf4'
+  },
+  {
+    id: 'cellular_longevity',
+    name: 'Longevity & Cellular Protocol',
+    icon: '🧬',
+    description: 'Epithalon (10mg) + MOTS-c (10mg)',
+    searchTerms: ['epithalon', 'mots-c'],
+    dosageFilter: '10mg',
+    accent: '#7c3aed',
+    bg: '#faf5ff'
+  },
+  {
+    id: 'cognitive_neuro',
+    name: 'Neuro & Focus Protocol',
+    icon: '🧠',
+    description: 'Semax (10mg) + Selank (10mg)',
+    searchTerms: ['semax', 'selank'],
+    dosageFilter: '10mg',
+    accent: '#ea580c',
+    bg: '#fff7ed'
+  },
+  {
+    id: 'gh_secretagogue',
+    name: 'GH Secretagogue Axis',
+    icon: '🚀',
+    description: 'CJC-1295 (5mg) + Ipamorelin (5mg)',
+    searchTerms: ['cjc', 'ipamorelin'],
+    dosageFilter: '5mg',
+    accent: '#0d9488',
+    bg: '#f0fdfa'
+  }
+];
+
 export default function PeptidesPriceListClient({ initialProducts = [], referralCode = 'CAT-RX-7482' }) {
   const [currency, setCurrency] = useState('USD'); // USD, EUR, AED
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedStrength, setSelectedStrength] = useState('all'); // 'all' | '5mg' | '10mg' | '20mg_plus'
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22)
   const [copied, setCopied] = useState(false);
   const [hasRestoredCart, setHasRestoredCart] = useState(false);
@@ -203,9 +266,22 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
         (p.categoryMeta.label || '').toLowerCase().includes(q);
 
       const matchesCat = selectedCategory === 'all' || p.categoryKey === selectedCategory;
-      return matchesSearch && matchesCat;
+
+      let matchesStrength = true;
+      if (selectedStrength !== 'all') {
+        const d = (p.dosage || '').toLowerCase();
+        if (selectedStrength === '5mg') {
+          matchesStrength = d.includes('5 mg') || d.includes('5mg') || d.includes('5.0');
+        } else if (selectedStrength === '10mg') {
+          matchesStrength = d.includes('10 mg') || d.includes('10mg');
+        } else if (selectedStrength === '20mg_plus') {
+          matchesStrength = d.includes('15') || d.includes('20') || d.includes('30') || d.includes('50') || d.includes('60') || d.includes('100');
+        }
+      }
+
+      return matchesSearch && matchesCat && matchesStrength;
     });
-  }, [processedProducts, debouncedSearchQuery, selectedCategory]);
+  }, [processedProducts, debouncedSearchQuery, selectedCategory, selectedStrength]);
 
   // Cart quantity update & removal helpers
   const updateItemQuantity = useCallback((productId, type, delta) => {
@@ -279,6 +355,75 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const grandTotalCartValueUsd = useMemo(() => {
     return totalCartCount > 0 ? (totalCartValueUsd + shippingCostUsd) : 0;
   }, [totalCartCount, totalCartValueUsd, shippingCostUsd]);
+
+  // 1-Click Protocol Preset Addition Helper (Mejora #2)
+  const handleAddProtocolPreset = useCallback((preset) => {
+    let addedCount = 0;
+    const itemsToAdd = {};
+
+    preset.searchTerms.forEach(term => {
+      const match = processedProducts.find(p => {
+        const name = (p.productName || '').toLowerCase();
+        const dose = (p.dosage || '').toLowerCase();
+        return name.includes(term) && (preset.dosageFilter ? dose.includes(preset.dosageFilter) : true);
+      }) || processedProducts.find(p => (p.productName || '').toLowerCase().includes(term));
+
+      if (match) {
+        itemsToAdd[match.id] = match;
+        addedCount++;
+      }
+    });
+
+    if (addedCount > 0) {
+      setCartItems(prev => {
+        const updated = { ...prev };
+        Object.values(itemsToAdd).forEach(prod => {
+          const current = updated[prod.id] || { quantity1x: 0, quantity10x: 0, product: prod };
+          updated[prod.id] = {
+            ...current,
+            quantity1x: current.quantity1x + 1
+          };
+        });
+        return updated;
+      });
+      toast.success(`Added ${preset.name} (${addedCount} formulations) to request! ✓`);
+    } else {
+      toast.info(`Could not automatically locate items for ${preset.name}`);
+    }
+  }, [processedProducts]);
+
+  // Direct Order via WhatsApp Helper (Mejora #4)
+  const handleOrderViaWhatsApp = useCallback(() => {
+    if (Object.keys(cartItems).length === 0) {
+      toast.error('Please add formulations before ordering via WhatsApp');
+      return;
+    }
+
+    const itemsListText = Object.values(cartItems).map(item => {
+      const qty1x = item.quantity1x > 0 ? `${item.quantity1x}x 1x Vial` : null;
+      const qty10x = item.quantity10x > 0 ? `${item.quantity10x}x Pack ×10` : null;
+      const qtyStr = [qty1x, qty10x].filter(Boolean).join(', ');
+      const lineTotal = (item.quantity1x * item.product.unitPrice) + (item.quantity10x * (item.product.pack10Price || item.product.unitPrice * 8.5));
+      return `• ${item.product.productName} (${item.product.dosage || 'Lyophilized'}) [${qtyStr}] ── ${currencySymbol}${lineTotal.toFixed(2)}`;
+    }).join('\n');
+
+    const totalStr = `${currencySymbol}${grandTotalCartValueUsd.toFixed(2)} ${currency}`;
+    const clinicStr = orderForm.clinicName || orderForm.name ? `\nClinic: ${orderForm.clinicName || orderForm.name}` : '';
+    const emailStr = orderForm.email ? `\nEmail: ${orderForm.email}` : '';
+    const destinationStr = orderForm.country ? `\nDestination: ${orderForm.city ? `${orderForm.city}, ` : ''}${orderForm.country}` : '';
+
+    const message = `Hello, I would like to place this clinical peptide proforma request (Partner Code: ${referralCode || 'CAT-RX-7482'}):
+
+${itemsListText}
+
+Subtotal: ${currencySymbol}${totalCartValueUsd.toFixed(2)}
+Freight: Express Medical Logistics (${currencySymbol}${shippingCostCurrentCurrency.toFixed(2)})
+Grand Total: ${totalStr}${clinicStr}${emailStr}${destinationStr}
+
+Please coordinate 24-hour proforma confirmation and secure payment link. Thank you!`;
+
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+  }, [cartItems, currencySymbol, grandTotalCartValueUsd, currency, orderForm, referralCode, totalCartValueUsd, shippingCostCurrentCurrency]);
 
   const handleShareSchedule = () => {
     const url = window.location.href;
@@ -829,50 +974,183 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
             size="lg"
             resultCount={filteredProducts.length}
             filters={
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => setSelectedCategory('all')}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    fontSize: '0.72rem',
-                    fontWeight: 650,
-                    border: '1px solid',
-                    cursor: 'pointer',
-                    background: selectedCategory === 'all' ? '#0f172a' : '#ffffff',
-                    color: selectedCategory === 'all' ? '#ffffff' : '#475569',
-                    borderColor: selectedCategory === 'all' ? '#0f172a' : '#cbd5e1'
-                  }}
-                >
-                  All Categories ({processedProducts.length})
-                </button>
-                {Object.entries(CATEGORY_MAP).map(([key, meta]) => {
-                  const count = processedProducts.filter(p => p.categoryKey === key).length;
-                  if (count === 0) return null;
-                  const active = selectedCategory === key;
-                  return (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => setSelectedCategory('all')}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '20px',
+                      fontSize: '0.72rem',
+                      fontWeight: 650,
+                      border: '1px solid',
+                      cursor: 'pointer',
+                      background: selectedCategory === 'all' ? '#0f172a' : '#ffffff',
+                      color: selectedCategory === 'all' ? '#ffffff' : '#475569',
+                      borderColor: selectedCategory === 'all' ? '#0f172a' : '#cbd5e1'
+                    }}
+                  >
+                    All Categories ({processedProducts.length})
+                  </button>
+                  {Object.entries(CATEGORY_MAP).map(([key, meta]) => {
+                    const count = processedProducts.filter(p => p.categoryKey === key).length;
+                    if (count === 0) return null;
+                    const active = selectedCategory === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setSelectedCategory(key)}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          fontSize: '0.72rem',
+                          fontWeight: 650,
+                          border: '1px solid',
+                          cursor: 'pointer',
+                          background: active ? meta.color : '#ffffff',
+                          color: active ? '#ffffff' : meta.color,
+                          borderColor: meta.border
+                        }}
+                      >
+                        {meta.label} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Dosage Strength Quick Filter Pills (Mejora #5) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Strength:
+                  </span>
+                  {DOSAGE_STRENGTHS.map(st => {
+                    const isSelected = selectedStrength === st.id;
+                    return (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => setSelectedStrength(st.id)}
+                        style={{
+                          padding: '2px 9px',
+                          borderRadius: '20px',
+                          fontSize: '0.70rem',
+                          fontWeight: isSelected ? 750 : 600,
+                          border: '1px solid',
+                          cursor: 'pointer',
+                          background: isSelected ? '#0284c7' : '#ffffff',
+                          color: isSelected ? '#ffffff' : '#475569',
+                          borderColor: isSelected ? '#0284c7' : '#cbd5e1',
+                          transition: 'all 0.12s ease'
+                        }}
+                      >
+                        {st.label}
+                      </button>
+                    );
+                  })}
+
+                  {(selectedCategory !== 'all' || selectedStrength !== 'all' || searchQuery) && (
                     <button
-                      key={key}
-                      onClick={() => setSelectedCategory(key)}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCategory('all');
+                        setSelectedStrength('all');
+                        setSearchQuery('');
+                      }}
                       style={{
-                        padding: '4px 10px',
-                        borderRadius: '20px',
+                        marginLeft: 'auto',
+                        border: 'none',
+                        background: 'none',
+                        color: '#dc2626',
                         fontSize: '0.72rem',
-                        fontWeight: 650,
-                        border: '1px solid',
-                        cursor: 'pointer',
-                        background: active ? meta.color : '#ffffff',
-                        color: active ? '#ffffff' : meta.color,
-                        borderColor: meta.border
+                        fontWeight: 700,
+                        cursor: 'pointer'
                       }}
                     >
-                      {meta.label} ({count})
+                      Reset Filters ×
                     </button>
-                  );
-                })}
+                  )}
+                </div>
               </div>
             }
           />
+        </div>
+
+        {/* ── 1-Click Clinical Protocol Presets (Starter Packs - Mejora #2) ── */}
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '10px',
+          border: '1px solid #e2e8f0',
+          padding: '12px 16px',
+          marginBottom: '1.25rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Zap size={15} color="#0284c7" />
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Popular Clinical Protocols (1-Click Presets)
+              </span>
+            </div>
+            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+              Pre-configured synergistic combinations for medical practices
+            </span>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+            gap: '8px'
+          }}>
+            {CLINICAL_PRESETS.map(preset => (
+              <div
+                key={preset.id}
+                style={{
+                  border: `1px solid ${preset.accent}30`,
+                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  backgroundColor: preset.bg,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '6px'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '1rem' }}>{preset.icon}</span>
+                    <span style={{ fontWeight: 800, fontSize: '0.80rem', color: '#0f172a' }}>
+                      {preset.name}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px' }}>
+                    {preset.description}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleAddProtocolPreset(preset)}
+                  style={{
+                    alignSelf: 'flex-start',
+                    padding: '3px 8px',
+                    fontSize: '0.70rem',
+                    fontWeight: 700,
+                    backgroundColor: '#ffffff',
+                    border: `1px solid ${preset.accent}`,
+                    color: preset.accent,
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px'
+                  }}
+                >
+                  <Plus size={11} />
+                  <span>Add Protocol</span>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* ── Peptide DataTable (Golden Rule #3) ── */}
@@ -1504,6 +1782,30 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                     <ArrowRight size={16} />
                   </button>
 
+                  <button
+                    type="button"
+                    onClick={handleOrderViaWhatsApp}
+                    disabled={Object.keys(cartItems).length === 0}
+                    style={{
+                      padding: '11px',
+                      backgroundColor: '#25D366',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: 700,
+                      fontSize: '0.88rem',
+                      cursor: Object.keys(cartItems).length === 0 ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <MessageCircle size={16} />
+                    <span>Send Order via WhatsApp</span>
+                  </button>
+
                   <p style={{ fontSize: '0.70rem', color: '#94a3b8', textAlign: 'center', margin: '4px 0 0 0' }}>
                     Upon submission, our medical logistics team will issue an official B2B proforma invoice with customs documentation and analytical COA verification.
                   </p>
@@ -1511,6 +1813,71 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
               </form>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Floating Cart Dock (Mejora #3: Mobile & Desktop Quick Checkout) ── */}
+      {totalCartCount > 0 && !isOrderDrawerOpen && (
+        <div style={{
+          position: 'fixed',
+          bottom: '16px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'calc(100% - 32px)',
+          maxWidth: '560px',
+          backgroundColor: '#003666',
+          color: '#ffffff',
+          borderRadius: '12px',
+          padding: '10px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          zIndex: 80,
+          boxShadow: '0 8px 30px rgba(0, 54, 102, 0.35)',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{
+              backgroundColor: '#38bdf8',
+              color: '#003666',
+              fontWeight: 800,
+              fontSize: '0.78rem',
+              borderRadius: '9999px',
+              padding: '2px 9px'
+            }}>
+              {totalCartCount} Vials
+            </span>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.98rem', color: '#ffffff' }}>
+                {formatPrice(totalCartValueUsd)}
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#93c5fd' }}>
+                +€60 Express Logistics added at checkout
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsOrderDrawerOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#38bdf8',
+              color: '#003666',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '8px 14px',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+            }}
+          >
+            <span>Review Proforma</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
       )}
 
