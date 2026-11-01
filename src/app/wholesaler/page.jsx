@@ -2,6 +2,8 @@ import React from 'react';
 import { fetchWholesalerOverviewDataAction } from '../../actions/wholesalerActions';
 import WholesalerPageClient from './WholesalerPageClient';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Server Component (RSC) for Wholesaler Overview Page.
  * Implements Golden Rule #21 (Promote read-only / prefetch modules to RSC).

@@ -2,6 +2,8 @@ import React from 'react';
 import { fetchWholesalerCommissionsAction } from '../../../actions/wholesalerActions';
 import WholesalerCommissionsClient from './WholesalerCommissionsClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Commissions & Referral Payouts | Wholesaler Portal | Atlas Health Services',
   description: 'Track real-time 15% referral commissions, pending payouts, order ledgers, and clinical accounts attributed to your wholesaler partner code.'

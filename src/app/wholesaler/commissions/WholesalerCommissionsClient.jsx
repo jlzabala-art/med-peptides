@@ -11,10 +11,16 @@ import {
   RefreshCw,
   Box,
   Truck,
-  Layers,
   ChevronDown,
   ChevronUp,
-  Info
+  Info,
+  Share2,
+  Copy,
+  Check,
+  ExternalLink,
+  MessageCircle,
+  Printer,
+  CheckCircle2
 } from '@/lib/icons';
 import {
   DataTable,
@@ -25,8 +31,18 @@ import {
   GlobalSearchBar
 } from '../../../components/ui';
 import PageHeader from '../../../components/ui/PageHeader';
-import { fetchWholesalerCommissionsAction } from '../../../actions/wholesalerActions';
+import {
+  fetchWholesalerCommissionsAction,
+  reconcileWholesalerPayoutAction
+} from '../../../actions/wholesalerActions';
 import { toast } from 'react-hot-toast';
+
+const REFERRAL_TARGETS = [
+  { id: 'peptides', label: 'Peptides & Vials Schedule', path: '/pricing/peptides', shareMsg: 'Hello Dr., here is our direct B2B lyophilized peptide pricing schedule (≥99% HPLC purity certified, express courier dispatch):' },
+  { id: 'vials', label: 'Clinical Vials Portfolio', path: '/vials', shareMsg: 'Hello Dr., here is our complete direct clinical vials catalog for practice dispensing:' },
+  { id: 'colway', label: 'Colway® Dermocosmetics', path: '/pricing/colway', shareMsg: 'Hello, here is the official B2B schedule for Colway® bioactive native tropocollagen & dermocosmetics:' },
+  { id: 'ultraman', label: 'UltraPerson™ Longevity', path: '/vials?collection=ultraman', shareMsg: 'Hello, here is the clinical catalog for UltraPerson™ precision longevity & metabolic supplements:' }
+];
 
 export default function WholesalerCommissionsClient({ initialData = null }) {
   const { user } = useAuth();
@@ -47,11 +63,17 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [reconciling, setReconciling] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'approved' | 'reconciled'
   const [collectionFilter, setCollectionFilter] = useState('all'); // 'all' | 'vials' | 'colway' | 'bloodo' | 'ultraman'
+  const [dateRange, setDateRange] = useState('all_time'); // 'all_time' | 'this_month' | 'last_30_days' | 'last_quarter'
   const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global'
   const [expandedRowId, setExpandedRowId] = useState(null);
+
+  // Link Generator State
+  const [selectedCatalogTarget, setSelectedCatalogTarget] = useState('peptides');
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Wholesaler identifier from auth or defaults to Nikolas for QA
   const effectiveWholesalerId = useMemo(() => {
@@ -60,6 +82,24 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
     const isNikolas = email.includes('nikol') || email.includes('nplabs') || email === 'jlzabala@gmail.com';
     return isNikolas ? 'np-labs-international' : (user.uid || 'np-labs-international');
   }, [user, data.wholesalerId]);
+
+  // Construct active referral URL
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+  const activeCatalog = REFERRAL_TARGETS.find(t => t.id === selectedCatalogTarget) || REFERRAL_TARGETS[0];
+  const refCode = data.referralCode || 'CAT-RX-7482';
+  const referralUrl = `${origin}${activeCatalog.path}${activeCatalog.path.includes('?') ? '&' : '?'}ref=${encodeURIComponent(refCode)}`;
+
+  const handleCopyReferralLink = () => {
+    navigator.clipboard.writeText(referralUrl);
+    setCopiedLink(true);
+    toast.success('Referral link copied to clipboard');
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = `${activeCatalog.shareMsg} ${referralUrl}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
   // Refresh handler
   const handleRefresh = useCallback(async () => {
@@ -80,6 +120,63 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
     }
   }, [effectiveWholesalerId]);
 
+  // Payout Reconciliation Handler (Admin Settlement)
+  const handleReconcileOrder = useCallback(async (orderId, orderCode) => {
+    setReconciling(true);
+    try {
+      const res = await reconcileWholesalerPayoutAction({
+        wholesalerId: effectiveWholesalerId,
+        orderIds: [orderId],
+        payoutReference: `PAYOUT-BANK-${Date.now().toString().slice(-6)}`,
+        notes: `Bank disbursement settlement for order #${orderCode}`
+      });
+
+      if (res && res.success) {
+        toast.success(`Commission for order #${orderCode} reconciled (+€${res.reconciledAmount.toFixed(2)})`);
+        await handleRefresh();
+      } else {
+        toast.error(res?.error || 'Reconciliation failed');
+      }
+    } catch (err) {
+      console.error('Reconciliation error:', err);
+      toast.error('Failed to reconcile order');
+    } finally {
+      setReconciling(false);
+    }
+  }, [effectiveWholesalerId, handleRefresh]);
+
+  // Batch reconcile all pending orders in current filtered view
+  const handleReconcileAllPending = async () => {
+    const pendingOrders = filteredOrders.filter(o => o.payoutStatus !== 'reconciled');
+    if (pendingOrders.length === 0) {
+      toast.info('No pending commissions in current view to reconcile');
+      return;
+    }
+
+    setReconciling(true);
+    try {
+      const orderIds = pendingOrders.map(o => o.id || o.orderId);
+      const res = await reconcileWholesalerPayoutAction({
+        wholesalerId: effectiveWholesalerId,
+        orderIds,
+        payoutReference: `BATCH-DISBURSE-${new Date().toISOString().split('T')[0]}`,
+        notes: `Batch monthly payout reconciliation for ${orderIds.length} orders`
+      });
+
+      if (res && res.success) {
+        toast.success(`Successfully reconciled €${res.reconciledAmount.toFixed(2)} across ${res.ordersCount} orders!`);
+        await handleRefresh();
+      } else {
+        toast.error(res?.error || 'Batch reconciliation failed');
+      }
+    } catch (err) {
+      console.error('Batch reconciliation error:', err);
+      toast.error('Failed to settle pending batch');
+    } finally {
+      setReconciling(false);
+    }
+  };
+
   // Filtered orders computation
   const filteredOrders = useMemo(() => {
     const list = data.orders || [];
@@ -98,7 +195,22 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
         if (col !== collectionFilter) return false;
       }
 
-      // 3. Search Query
+      // 3. Date Range Filter (Golden Rule #24)
+      if (dateRange !== 'all_time' && order.createdAt) {
+        const ordDate = new Date(order.createdAt);
+        const now = new Date();
+        if (dateRange === 'this_month') {
+          if (ordDate.getMonth() !== now.getMonth() || ordDate.getFullYear() !== now.getFullYear()) return false;
+        } else if (dateRange === 'last_30_days') {
+          const d30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          if (ordDate < d30) return false;
+        } else if (dateRange === 'last_quarter') {
+          const d90 = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          if (ordDate < d90) return false;
+        }
+      }
+
+      // 4. Search Query
       if (query) {
         const matchCode = String(order.orderCode || '').toLowerCase().includes(query);
         const matchName = String(order.customerName || '').toLowerCase().includes(query);
@@ -111,7 +223,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
 
       return true;
     });
-  }, [data.orders, statusFilter, collectionFilter, searchQuery]);
+  }, [data.orders, statusFilter, collectionFilter, dateRange, searchQuery]);
 
   // Scope metrics: Switch between Active Filtered View vs Entire Database (Golden Rule #22)
   const activeMetrics = useMemo(() => {
@@ -164,11 +276,127 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `wholesaler_commissions_${data.referralCode || 'NP-LABS'}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `wholesaler_commissions_${refCode}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     toast.success('Commissions ledger CSV downloaded');
+  };
+
+  // Print / PDF Statement Generator
+  const handlePrintStatement = () => {
+    const printWindow = window.open('', '_blank', 'width=950,height=800');
+    if (!printWindow) {
+      toast.error('Please allow popups to open the PDF Commission Statement');
+      return;
+    }
+
+    const statementDate = new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'long', year: 'numeric' });
+    const sym = '€';
+
+    const orderRowsHtml = filteredOrders.map((o, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+        <td style="padding: 8px 10px; font-weight: 700; font-family: monospace;">${o.orderCode}</td>
+        <td style="padding: 8px 10px; color: #475569;">${o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
+        <td style="padding: 8px 10px; font-weight: 600;">${o.customerName || 'Direct Clinic'}</td>
+        <td style="padding: 8px 10px; text-align: center;">${o.totalUnits || 0}</td>
+        <td style="padding: 8px 10px; text-align: right;">${sym}${Number(o.subtotal || 0).toFixed(2)}</td>
+        <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: #16a34a;">+${sym}${Number(o.commissionAmount || 0).toFixed(2)}</td>
+        <td style="padding: 8px 10px; text-align: center; font-weight: 700; text-transform: uppercase; font-size: 11px; color: ${o.payoutStatus === 'reconciled' ? '#16a34a' : '#d97706'};">
+          ${o.payoutStatus || 'pending'}
+        </td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Atlas Health · Commission Statement #${refCode}</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 30px; color: #0f172a; line-height: 1.4; }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #003666; padding-bottom: 15px; margin-bottom: 20px; }
+          .title { font-size: 20px; font-weight: 800; color: #003666; margin: 0; }
+          .subtitle { font-size: 12px; color: #64748b; margin-top: 4px; }
+          .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+          .kpi-box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; background: #f8fafc; }
+          .kpi-title { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; }
+          .kpi-val { font-size: 18px; font-weight: 800; color: #003666; margin-top: 4px; }
+          table { width: 100%; border-collapse: collapse; font-size: 12px; }
+          th { background: #003666; color: #ffffff; padding: 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+          .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b; display: flex; justify-content: space-between; }
+          @media print {
+            body { margin: 15mm; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1 class="title">Atlas Health Services · Commission & Payout Statement</h1>
+            <div class="subtitle">Official B2B Partner Remittance & Referral Settlement Statement</div>
+            <div style="font-size: 12px; margin-top: 6px;">
+              <strong>Partner:</strong> ${data.wholesalerName || 'NP Labs International'} · <strong>Referral Code:</strong> ${refCode}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: 700; font-size: 13px;">Date: ${statementDate}</div>
+            <div style="font-size: 11px; color: #64748b;">Currency: EUR (€) · Rate: 15.0%</div>
+            <button class="no-print" onclick="window.print()" style="margin-top: 8px; padding: 6px 14px; background: #003666; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 12px;">Print / Save as PDF</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-title">Total Earned</div>
+            <div class="kpi-val" style="color: #16a34a;">${sym}${activeMetrics.totalCommissions.toFixed(2)}</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-title">Pending Disbursement</div>
+            <div class="kpi-val" style="color: #d97706;">${sym}${activeMetrics.pendingPayoutCommissions.toFixed(2)}</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-title">Reconciled / Settled</div>
+            <div class="kpi-val" style="color: #2563eb;">${sym}${activeMetrics.paidCommissions.toFixed(2)}</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-title">Referred Sales Vol.</div>
+            <div class="kpi-val">${sym}${activeMetrics.totalRevenue.toFixed(2)}</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Order Code</th>
+              <th>Date</th>
+              <th>Clinic / Customer</th>
+              <th style="text-align: center;">Vials</th>
+              <th style="text-align: right;">Subtotal</th>
+              <th style="text-align: right;">Commission (15%)</th>
+              <th style="text-align: center;">Payout Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orderRowsHtml}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          <div>
+            <strong>Atlas Health Services S.L.</strong> · European Registered Compounding & Distribution Hub<br>
+            All commissions calculated strictly on formulation subtotal (excluding express freight logistics).
+          </div>
+          <div style="text-align: right;">
+            Remittance coordination: accounting@atlashealth-services.com<br>
+            Statement Reference: STMT-${refCode}-${new Date().toISOString().split('T')[0]}
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   // DataTable column definitions (Golden Rule #30: Explicit column widths)
@@ -210,7 +438,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
     {
       header: 'Date',
       field: 'createdAt',
-      width: '13%',
+      width: '12%',
       render: (row) => (
         <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
           {row.createdAt
@@ -222,7 +450,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
     {
       header: 'Clinic / Practitioner',
       field: 'customerName',
-      width: '21%',
+      width: '20%',
       render: (row) => (
         <div>
           <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
@@ -239,7 +467,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
     {
       header: 'Units',
       field: 'totalUnits',
-      width: '10%',
+      width: '9%',
       render: (row) => (
         <span style={{ fontWeight: 700, fontSize: '0.84rem', color: '#003666' }}>
           {row.totalUnits || 0} pcs
@@ -267,7 +495,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
     {
       header: 'Commission (15%)',
       field: 'commissionAmount',
-      width: '12%',
+      width: '13%',
       render: (row) => {
         const sym = row.currency === 'EUR' ? '€' : '$';
         return (
@@ -290,10 +518,34 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
     {
       header: 'Payout Status',
       field: 'payoutStatus',
-      width: '12%',
-      render: (row) => <StatusBadge status={row.payoutStatus || 'pending'} />
+      width: '14%',
+      render: (row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <StatusBadge status={row.payoutStatus || 'pending'} />
+          {row.payoutStatus !== 'reconciled' && (
+            <button
+              type="button"
+              onClick={() => handleReconcileOrder(row.id || row.orderId, row.orderCode)}
+              disabled={reconciling}
+              title="Mark commission as reconciled/paid"
+              style={{
+                border: 'none',
+                background: '#e0f2fe',
+                color: '#0284c7',
+                borderRadius: '4px',
+                padding: '2px 5px',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                cursor: reconciling ? 'not-allowed' : 'pointer'
+              }}
+            >
+              Settle
+            </button>
+          )}
+        </div>
+      )
     }
-  ], [expandedRowId]);
+  ], [expandedRowId, reconciling, handleReconcileOrder]);
 
   // Master-Detail Row Renderer (Golden Rule #4 & Colway Specs Layout)
   const renderMasterDetail = (row) => {
@@ -457,13 +709,13 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
       {/* ── Standard PageHeader (Golden Rule #9 & #16) ── */}
       <PageHeader
         title="Commissions & Referral Payouts"
-        subtitle={`Live ledger for ${data.wholesalerName || 'Wholesaler Partner'} · Referral Code: ${data.referralCode || 'CAT-RX-7482'}`}
+        subtitle={`Live ledger for ${data.wholesalerName || 'Wholesaler Partner'} · Referral Code: ${refCode}`}
         breadcrumbItems={[
           { label: 'Wholesaler Portal', href: '/wholesaler' },
           { label: 'Commissions & Payouts' }
         ]}
         actions={
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             <button
               type="button"
               onClick={handleRefresh}
@@ -484,6 +736,27 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
             >
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
               <span>{loading ? 'Refreshing…' : 'Refresh'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handlePrintStatement}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #003666',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                color: '#003666',
+                cursor: 'pointer'
+              }}
+            >
+              <Printer size={14} />
+              <span>Statement PDF</span>
             </button>
 
             <button
@@ -510,6 +783,147 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
           </div>
         }
       />
+
+      {/* ── Referral Link Generator & WhatsApp Direct Share Card (Mejora #1) ── */}
+      <div style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
+        padding: '16px 20px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Share2 size={16} color="#003666" />
+              <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#003666' }}>
+                Your Attributed B2B Referral Link (Code: {refCode})
+              </h4>
+            </div>
+            <p style={{ margin: '3px 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+              Clinics and physicians ordering via this link automatically credit a 15% formulation commission to your account.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={handleShareWhatsApp}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                backgroundColor: '#25D366',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: 700,
+                fontSize: '0.78rem',
+                cursor: 'pointer'
+              }}
+            >
+              <MessageCircle size={14} />
+              <span>WhatsApp Doctor</span>
+            </button>
+
+            <a
+              href={referralUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 12px',
+                backgroundColor: '#f1f5f9',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontWeight: 700,
+                fontSize: '0.78rem',
+                textDecoration: 'none'
+              }}
+            >
+              <span>Preview</span>
+              <ExternalLink size={13} />
+            </a>
+          </div>
+        </div>
+
+        {/* Target Catalog Pills */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+          {REFERRAL_TARGETS.map(t => {
+            const isSelected = selectedCatalogTarget === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setSelectedCatalogTarget(t.id)}
+                style={{
+                  padding: '3px 10px',
+                  borderRadius: '4px',
+                  fontSize: '0.74rem',
+                  fontWeight: isSelected ? 800 : 600,
+                  cursor: 'pointer',
+                  border: isSelected ? '1px solid #003666' : '1px solid #e2e8f0',
+                  backgroundColor: isSelected ? '#003666' : '#f8fafc',
+                  color: isSelected ? '#ffffff' : '#475569'
+                }}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Copyable Box */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: '#f8fafc',
+          border: '1px solid #cbd5e1',
+          borderRadius: '6px',
+          padding: '4px 10px',
+          gap: '8px'
+        }}>
+          <input
+            type="text"
+            readOnly
+            value={referralUrl}
+            style={{
+              flex: 1,
+              background: 'none',
+              border: 'none',
+              outline: 'none',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              color: '#003666',
+              fontFamily: 'monospace'
+            }}
+          />
+          <button
+            type="button"
+            onClick={handleCopyReferralLink}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              backgroundColor: copiedLink ? '#16a34a' : '#003666',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '5px 12px',
+              fontWeight: 700,
+              fontSize: '0.76rem',
+              cursor: 'pointer'
+            }}
+          >
+            {copiedLink ? <Check size={13} /> : <Copy size={13} />}
+            <span>{copiedLink ? 'Copied ✓' : 'Copy Link'}</span>
+          </button>
+        </div>
+      </div>
 
       {/* ── Scope Indicator & Switcher (Golden Rule #22) ── */}
       <div style={{
@@ -585,7 +999,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
         <MetricCard
           title="Pending Payout"
           value={loading ? '…' : `€${activeMetrics.pendingPayoutCommissions.toFixed(2)}`}
-          subtitle="Awaiting next disbursement cycle"
+          subtitle="Ready for bank disbursement"
           icon={TrendingUp}
           color="#d97706"
         />
@@ -614,7 +1028,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
           size="lg"
         />
 
-        {/* Filter Chips Bar */}
+        {/* Filter Chips Bar (Payout Status + Date Range Golden Rule #24 + Collections) */}
         <div style={{
           display: 'flex',
           gap: '8px',
@@ -622,8 +1036,44 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
           flexWrap: 'wrap',
           padding: '4px 2px'
         }}>
+          {/* Date Filter (Golden Rule #24) */}
           <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#475569' }}>
-            Payout Status:
+            Period:
+          </span>
+          {[
+            { id: 'all_time', label: 'All Time' },
+            { id: 'this_month', label: 'This Month' },
+            { id: 'last_30_days', label: 'Last 30 Days' },
+            { id: 'last_quarter', label: 'Last 90 Days' }
+          ].map(opt => {
+            const isSelected = dateRange === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setDateRange(opt.id)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
+                  fontSize: '0.74rem',
+                  fontWeight: isSelected ? 800 : 600,
+                  cursor: 'pointer',
+                  border: isSelected ? '1px solid #003666' : '1px solid #cbd5e1',
+                  backgroundColor: isSelected ? '#003666' : '#ffffff',
+                  color: isSelected ? '#ffffff' : '#475569',
+                  transition: 'all 0.12s ease'
+                }}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+
+          <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1', margin: '0 4px' }} />
+
+          {/* Status Filter */}
+          <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#475569' }}>
+            Status:
           </span>
           {[
             { id: 'all', label: 'All Statuses' },
@@ -656,6 +1106,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
 
           <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1', margin: '0 4px' }} />
 
+          {/* Collection Filter */}
           <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#475569' }}>
             Collection:
           </span>
@@ -689,16 +1140,42 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
             );
           })}
 
-          {(statusFilter !== 'all' || collectionFilter !== 'all' || searchQuery) && (
+          {/* Action to Settle Pending in batch */}
+          {activeMetrics.pendingPayoutCommissions > 0 && (
+            <button
+              type="button"
+              onClick={handleReconcileAllPending}
+              disabled={reconciling}
+              style={{
+                marginLeft: 'auto',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                color: '#16a34a',
+                cursor: reconciling ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <CheckCircle2 size={13} />
+              <span>Settle Pending (€{activeMetrics.pendingPayoutCommissions.toFixed(2)})</span>
+            </button>
+          )}
+
+          {(statusFilter !== 'all' || collectionFilter !== 'all' || dateRange !== 'all_time' || searchQuery) && (
             <button
               type="button"
               onClick={() => {
                 setStatusFilter('all');
                 setCollectionFilter('all');
+                setDateRange('all_time');
                 setSearchQuery('');
               }}
               style={{
-                marginLeft: 'auto',
                 border: 'none',
                 background: 'none',
                 color: '#dc2626',
@@ -731,6 +1208,7 @@ export default function WholesalerCommissionsClient({ initialData = null }) {
               onClick: () => {
                 setStatusFilter('all');
                 setCollectionFilter('all');
+                setDateRange('all_time');
                 setSearchQuery('');
               }
             }}

@@ -21,7 +21,10 @@ import {
   buildCustomerOrderConfirmationHtml,
   buildWholesalerReferralNotificationHtml
 } from '../src/lib/orderNotificationMailer.js';
-import { fetchWholesalerCommissionsAction } from '../src/actions/wholesalerActions.js';
+import {
+  fetchWholesalerCommissionsAction,
+  reconcileWholesalerPayoutAction
+} from '../src/actions/wholesalerActions.js';
 
 const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 
@@ -256,6 +259,25 @@ async function runTestSuite() {
     assert(foundTestOrder.commissionAmount === 66.96, `Order in portal ledger has commissionAmount: $66.96 (Actual: $${foundTestOrder.commissionAmount})`);
     assert(foundTestOrder.items.length === 2, `Order in portal ledger contains 2 items for master-detail inspection`);
   }
+
+  // ── TEST 7: Settlement & Payout Reconciliation Server Action ──────────────────────
+  console.log('\n--- TEST 7: Settlement & Payout Reconciliation ---');
+  const settleRes = await reconcileWholesalerPayoutAction({
+    wholesalerId: 'np-labs-international',
+    orderIds: [orderRef.id],
+    payoutReference: `TEST-SETTLE-${Date.now().toString().slice(-4)}`,
+    notes: 'Automated settlement QA verification'
+  });
+
+  assert(settleRes.success === true, 'reconcileWholesalerPayoutAction returned success: true');
+  assert(settleRes.reconciledAmount === 66.96, `Reconciled amount matches commission ($66.96, Actual: $${settleRes.reconciledAmount})`);
+  assert(Boolean(settleRes.payoutId), `Payout audit record created with ID: ${settleRes.payoutId}`);
+
+  // Verify updated state in portal
+  const postSettlePortal = await fetchWholesalerCommissionsAction('np-labs-international');
+  const settledOrder = postSettlePortal.orders.find(o => o.orderCode === testOrderCode);
+  assert(settledOrder && settledOrder.payoutStatus === 'reconciled', `Order ${testOrderCode} payoutStatus transitioned to 'reconciled'`);
+  assert(postSettlePortal.kpis.paidCommissions >= 66.96, `Portal KPIs reflect paidCommissions: $${postSettlePortal.kpis.paidCommissions}`);
 
   // ── FINAL SUMMARY ──────────────────────────────────────────────────────────────────
   console.log('\n======================================================================');

@@ -495,3 +495,105 @@ export async function updateOrderPayoutStatusAction({ wholesalerId = 'np-labs-in
   }
 }
 
+/**
+ * Server Action: Batch reconciles and settles wholesaler commissions.
+ * Moves commissions from `pendingPayoutCommissions` to `paidCommissions`,
+ * sets orders to `reconciled`, and creates an immutable payout transaction record.
+ */
+export async function reconcileWholesalerPayoutAction({
+  wholesalerId = 'np-labs-international',
+  orderIds = [],
+  payoutReference = '',
+  notes = ''
+}) {
+  try {
+    if (!adminDb) throw new Error('Database connection unavailable');
+    const rawId = String(wholesalerId || 'np-labs-international').trim().toLowerCase();
+    const isNikolas = ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas', 'partner-7482'].includes(rawId);
+    const cleanId = isNikolas ? 'np-labs-international' : (wholesalerId || 'np-labs-international');
+
+    if (!Array.isArray(orderIds) || orderIds.length === 0) {
+      throw new Error('At least one orderId must be selected for payout reconciliation');
+    }
+
+    const refDocRef = adminDb.collection('wholesaler_referrals').doc(cleanId);
+    let totalSettled = 0;
+    const settledOrderCodes = [];
+    const now = new Date();
+
+    for (const ordId of orderIds) {
+      // 1. Check order in subcollection
+      const subOrderRef = refDocRef.collection('orders').doc(ordId);
+      const subSnap = await subOrderRef.get();
+      let comm = 0;
+      let code = ordId;
+
+      if (subSnap.exists) {
+        const d = subSnap.data();
+        comm = Number(d.commissionAmount || 0);
+        code = d.orderCode || ordId;
+        await subOrderRef.set({
+          payoutStatus: 'reconciled',
+          payoutReference: payoutReference || `PAYOUT-${now.toISOString().split('T')[0]}`,
+          reconciledAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        }, { merge: true });
+      }
+
+      // 2. Also update main orders collection if exists
+      const mainSnap = await adminDb.collection('orders').doc(ordId).get();
+      if (mainSnap.exists) {
+        const d = mainSnap.data();
+        if (!comm) comm = Number(d.commissionAmount || 0);
+        code = d.orderCode || ordId;
+        await mainSnap.ref.set({
+          payoutStatus: 'reconciled',
+          payoutReference: payoutReference || `PAYOUT-${now.toISOString().split('T')[0]}`,
+          reconciledAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        }, { merge: true });
+      }
+
+      totalSettled += comm;
+      settledOrderCodes.push(code);
+    }
+
+    totalSettled = Math.round(totalSettled * 100) / 100;
+
+    // 3. Atomically update parent document balance
+    const { FieldValue } = await import('firebase-admin/firestore');
+    await refDocRef.set({
+      pendingPayoutCommissions: FieldValue.increment(-totalSettled),
+      paidCommissions: FieldValue.increment(totalSettled),
+      lastPayoutAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    }, { merge: true });
+
+    // 4. Record formal payout entry in subcollection
+    const payoutDoc = await refDocRef.collection('payouts').add({
+      payoutReference: payoutReference || `PAYOUT-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}-${Date.now().toString().slice(-4)}`,
+      wholesalerId: cleanId,
+      amount: totalSettled,
+      currency: 'EUR',
+      ordersCount: orderIds.length,
+      orderCodes: settledOrderCodes,
+      notes: notes || 'Monthly bank disbursement settlement',
+      status: 'settled',
+      settledAt: now.toISOString(),
+      createdAt: now.toISOString()
+    });
+
+    return {
+      success: true,
+      payoutId: payoutDoc.id,
+      reconciledAmount: totalSettled,
+      ordersCount: orderIds.length,
+      orderCodes: settledOrderCodes
+    };
+  } catch (err) {
+    console.error('[reconcileWholesalerPayoutAction] Error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+

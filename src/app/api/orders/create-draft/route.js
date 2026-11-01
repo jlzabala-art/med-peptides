@@ -372,6 +372,26 @@ export async function POST(request) {
 
     await adminDb.collection('notifications').add(notifData);
 
+    // Dedicated In-App Notification for Wholesaler Partner
+    if (isWholesalerOrder) {
+      const sym = orderDocData.currency === 'EUR' ? '€' : '$';
+      await adminDb.collection('notifications').add({
+        title: `🎉 Referral Commission Earned: +${sym}${Number(orderDocData.commissionAmount || 0).toFixed(2)}`,
+        message: `Order #${orderCode} from ${clientDisplayName} (${orderDocData.totalUnits} units) attributed to code ${orderDocData.referralCode || orderDocData.wholesalerId}. Credited to your monthly payout ledger.`,
+        type: 'commission_earned',
+        severity: 'info',
+        orderId: orderRef.id,
+        orderCode,
+        wholesalerId: orderDocData.wholesalerId,
+        targetRoles: ['wholesaler'],
+        targetUserId: orderDocData.wholesalerId,
+        commissionAmount: orderDocData.commissionAmount,
+        read: false,
+        link: `/wholesaler/commissions`,
+        createdAt: now.toISOString()
+      });
+    }
+
     // Update catalog_generation_logs conversion status if order originated from a catalog link
     const targetCatId = orderDocData.catalogId || (isNikolasOrder ? 'CAT-RX-7482' : null);
     if (targetCatId) {
