@@ -128,36 +128,40 @@ export async function GET(request) {
 
     const cards = [
       {
-        gene: 'MTHFR Gene (Methylation & Energy)',
-        status: 'Requires Active Folate',
+        pillar: 'PILAR 1: METABOLISMO & GLUCEMIA (TCF7L2 / FTO)',
+        gene: 'Metabolismo de Azúcares y Grasa Abdominal',
+        status: 'Sensibilidad a Glucosa',
         statusColor: alertRed,
         bgColor: badgeRedBg,
-        patientWhy: 'Your liver has a natural variation that makes it 70% slower at activating regular synthetic folic acid found in cheap multivitamins.',
-        simpleFix: 'Prescription: L-Methylfolate 1,000 mcg + Methylcobalamin 1,000 mcg. Posology: 500 mcg BID with meals for 60 days.'
+        patientWhy: 'Los carbohidratos refinados causan picos bruscos de azúcar, fatiga a media tarde y acumulación de grasa visceral.',
+        simpleFix: 'Prescripción: Berberina 250 mg + Cromo 200 mcg. Posología: 125 mg BID 15 min antes de comidas durante 60 días.'
       },
       {
-        gene: 'VDR Gene (Vitamin D Receptors)',
-        status: 'Reduced Sensitivity',
-        statusColor: amberDark,
-        bgColor: rgb(254 / 255, 243 / 255, 199 / 255),
-        patientWhy: 'Your cell receptors absorb vitamin D more slowly than average, requiring higher circulating levels to protect bones and cellular immunity.',
-        simpleFix: 'Prescription: Vitamin D3 5,000 IU + Vitamin K2 100 mcg + Magnesium 200 mg. Posology: 1 dose each morning with breakfast for 60 days.'
-      },
-      {
-        gene: 'TCF7L2 Gene (Blood Sugar & Carbs)',
-        status: 'Sensitive to Simple Sugars',
-        statusColor: amberDark,
-        bgColor: rgb(254 / 255, 243 / 255, 199 / 255),
-        patientWhy: 'Rapid-digesting carbs and sweets trigger an exaggerated insulin surge, causing fatigue, sugar cravings, and abdominal fat storage.',
-        simpleFix: 'Prescription: Standardized Berberine 250 mg + Chromium 200 mcg. Posology: 125 mg BID 15 min prior to meals for 60 days.'
-      },
-      {
-        gene: 'LCT / MCM6 Gene (Dairy & Digestion)',
-        status: 'Lactose Sensitivity',
+        pillar: 'PILAR 2: METILACIÓN CELULAR & ENERGÍA (MTHFR)',
+        gene: 'Reciclaje de Homocisteína & Folato Activo',
+        status: 'Requiere Folato Activo',
         statusColor: alertRed,
         bgColor: badgeRedBg,
-        patientWhy: 'Your intestines produce negligible lactase enzyme; conventional milk or lactose capsule fillers cause gut dysbiosis and micro-inflammation.',
-        simpleFix: 'Protocol: Strict dairy lactose exclusion. Compounding Rule: 100% lactose-free vehicle in acid-resistant vegetable DRcaps®.'
+        patientWhy: 'Déficit del 70% en activar ácido fólico sintético. Afecta neurotransmisores, energía celular y salud vascular.',
+        simpleFix: 'Prescripción: L-Metilfolato 1.000 mcg + Metilcobalamina 1.000 mcg. Posología: 500 mcg BID con comidas durante 60 días.'
+      },
+      {
+        pillar: 'PILAR 3: MICROBIOTA & BARRERA INTESTINAL (MCM6 / FUT2)',
+        gene: 'Eje Intestinal, Microbioma & Tolerancia Láctea',
+        status: 'Microbiota & Sin Lactosa',
+        statusColor: tealAccent,
+        bgColor: rgb(240 / 255, 253 / 255, 250 / 255),
+        patientWhy: 'Intolerancia primaria a la lactosa y mayor permeabilidad mucosa; los lácteos fermentan produciendo disbiosis e inflamación.',
+        simpleFix: 'Prescripción: Probióticos 15B CFU + L-Glutamina 1g + Enzima Lactasa 9.000 ALU. Posología: 1 cap DRcaps® en ayunas por 60 días.'
+      },
+      {
+        pillar: 'PILAR 4: INMUNIDAD & HUESO (VDR / VITAMINA D)',
+        gene: 'Sensibilidad de Receptores Nucleares Celulares',
+        status: 'Resistencia a Receptor',
+        statusColor: amberDark,
+        bgColor: rgb(254 / 255, 243 / 255, 199 / 255),
+        patientWhy: 'Afinidad celular reducida; requiere niveles sanguíneos más altos (60-80 ng/mL) para mantener fuerza y defensas.',
+        simpleFix: 'Prescripción: Vitamina D3 5.000 UI + Vitamina K2 100 mcg + Magnesio 200 mg. Posología: 1 dosis matutina por 60 días.'
       }
     ];
 
@@ -182,86 +186,96 @@ export async function GET(request) {
         color: card.statusColor
       });
 
+      // Pillar Tag
+      page1.drawText(card.pillar, {
+        x: 48,
+        y: y - 13,
+        size: 7,
+        font: helveticaBold,
+        color: tealAccent
+      });
+
       // Card Header
       page1.drawText(card.gene, {
         x: 48,
-        y: y - 16,
-        size: 9.5,
+        y: y - 24,
+        size: 9,
         font: helveticaBold,
         color: darkSlate
       });
 
       // Status pill on the right
-      const pillWidth = helveticaBold.widthOfTextAtSize(card.status, 7.5) + 12;
+      const pillWidth = helveticaBold.widthOfTextAtSize(card.status, 7) + 12;
       page1.drawRectangle({
         x: p1Width - 48 - pillWidth,
-        y: y - 20,
+        y: y - 22,
         width: pillWidth,
-        height: 14,
+        height: 13,
         color: card.bgColor
       });
       page1.drawText(card.status, {
         x: p1Width - 48 - pillWidth + 6,
-        y: y - 16,
-        size: 7.5,
+        y: y - 18,
+        size: 7,
         font: helveticaBold,
         color: card.statusColor
       });
 
       // Patient Explanation
-      page1.drawText(`What this means: ${card.patientWhy}`, {
+      page1.drawText(`Hallazgo ADN: ${card.patientWhy}`, {
         x: 48,
-        y: y - 32,
-        size: 8,
+        y: y - 37,
+        size: 7.6,
         font: helvetica,
         color: darkSlate,
         maxWidth: p1Width - 100,
-        lineHeight: 11
+        lineHeight: 10.5
       });
 
       // Simple Action Step
-      page1.drawText(`Action step: ${card.simpleFix}`, {
+      page1.drawText(`Acción Terapéutica: ${card.simpleFix}`, {
         x: 48,
-        y: y - 58,
-        size: 8,
+        y: y - 59,
+        size: 7.6,
         font: helveticaBold,
-        color: tealAccent,
+        color: navyPrimary,
         maxWidth: p1Width - 100,
-        lineHeight: 11
+        lineHeight: 10.5
       });
 
-      y -= cardHeight + 10;
+      y -= cardHeight + 8;
     });
 
-    // Practical Daily Rules Box
-    y -= 10;
+    // Practical Daily Rules Box (Dieta Concreta)
+    y -= 4;
     page1.drawRectangle({
       x: 36,
-      y: y - 82,
+      y: y - 94,
       width: p1Width - 72,
-      height: 82,
+      height: 94,
       color: rgb(240 / 255, 253 / 255, 250 / 255), // light teal
       borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
       borderWidth: 1
     });
 
-    page1.drawText('3 SIMPLE LIFESTYLE RULES TO REMEMBER', {
-      x: 50,
-      y: y - 18,
-      size: 8.5,
+    page1.drawText('PAUTAS DIETÉTICAS CONCRETAS PARA EL PACIENTE (DIETA DE ALTA ADHERENCIA)', {
+      x: 48,
+      y: y - 16,
+      size: 8,
       font: helveticaBold,
       color: tealAccent
     });
 
     const tips = [
-      '1. Plate Balance: Eat your proteins and vegetables before carbohydrates to flatten blood sugar curves.',
-      '2. Caffeine Window: Since your caffeine metabolism is standard/gradual, enjoy coffee only before 2:00 PM.',
-      '3. Whole Nutrition: Prioritize olive oil, leafy greens, wild fish, and nuts which naturally support cell methylation.'
+      '1. Regla de Secuencia en el Plato: Come primero la verdura/fibra, luego la proteína/grasas y al final los hidratos de carbono. Aplana la glucosa hasta un 45%.',
+      '2. Límite de Carbohidratos Netos: Maximo 40g de hidratos netos por comida. Cero bebidas azucaradas o zumos comerciales.',
+      '3. Protección de Microbiota: Incluye aceite de oliva virgen extra y alimentos fermentados sin lactosa (kéfir de coco, chucrut). Cero leche convencional.',
+      '4. Ventana de Cafeína: Por metabolismo hepático gradual (CYP1A2), tomar café solo antes de las 14:00 hrs para evitar picos nocturnos de cortisol.'
     ];
 
-    let tipY = y - 34;
+    let tipY = y - 30;
     tips.forEach(t => {
-      page1.drawText(t, { x: 50, y: tipY, size: 8, font: helvetica, color: darkSlate });
+      page1.drawText(t, { x: 48, y: tipY, size: 7.2, font: helvetica, color: darkSlate });
       tipY -= 14;
     });
 
@@ -385,58 +399,64 @@ export async function GET(request) {
     // Table rows
     const formulaRows = [
       {
-        api: 'L-Methylfolate',
-        spec: '[6S]-5-Methyltetrahydrofolate Calcium Salt',
-        dose: '1,000 mcg',
-        target: 'MTHFR Methylation'
+        api: 'L-Metilfolato ([6S]-5-MTHF)',
+        spec: 'Sal de Calcio Grado Farmacopea USP',
+        dose: '1.000 mcg',
+        target: 'Pilar 2: Metilación MTHFR (500 mcg BID)'
       },
       {
-        api: 'Methylcobalamin (B12)',
-        spec: 'Active Coenzyme B12 (USP grade)',
-        dose: '1,000 mcg',
-        target: 'Homocysteine Clearance'
+        api: 'Metilcobalamina (Vitamina B12)',
+        spec: 'Coenzima Activa Pura (USP grade)',
+        dose: '1.000 mcg',
+        target: 'Pilar 2: Aclaramiento Homocisteína'
       },
       {
-        api: 'Vitamin D3',
-        spec: 'Cholecalciferol Powder (USP grade)',
-        dose: '5,000 IU',
-        target: 'VDR Receptor Sensitivity'
+        api: 'Vitamina D3 (Colecalciferol)',
+        spec: 'Polvo Cristalino Farmacéutico (USP)',
+        dose: '5.000 UI',
+        target: 'Pilar 4: Sensibilidad Receptor VDR'
       },
       {
-        api: 'Vitamin K2',
-        spec: 'Menaquinone-7 (all-trans MK-7)',
+        api: 'Vitamina K2 (Menaquinona-7)',
+        spec: 'MK-7 all-trans de alta biodisponibilidad',
         dose: '100 mcg',
-        target: 'Vascular Safety & Calcium Routing'
+        target: 'Pilar 4: Protección Vascular & Hueso'
       },
       {
-        api: 'Magnesium Bisglycinate',
-        spec: 'Chelated Magnesium Glycinate Powder',
+        api: 'Bisglicinato de Magnesio',
+        spec: 'Magnesio Totalmente Quelado USP',
         dose: '200 mg',
-        target: 'Enzymatic VDR Cofactor'
+        target: 'Pilar 4: Cofactor Enzimático VDR'
       },
       {
-        api: 'Berberine Extract',
-        spec: 'Phospholipid / Phytosome Standardized (97%)',
+        api: 'Extracto Estandarizado de Berberina',
+        spec: 'Complejo Fosfolipídico Estandarizado 97%',
         dose: '250 mg',
-        target: 'TCF7L2 Glycemic Response'
+        target: 'Pilar 1: Glucemia TCF7L2 (125mg BID)'
       },
       {
-        api: 'Chromium Picolinate',
-        spec: 'Pharmaceutical Grade Chromium (USP)',
+        api: 'Picolinato de Cromo',
+        spec: 'Grado Farmacéutico USP',
         dose: '200 mcg',
-        target: 'Insulin Receptor Affinity'
+        target: 'Pilar 1: Sensibilización Receptor Insulina'
       },
       {
-        api: '5-Hydroxytryptophan (5-HTP)',
-        spec: 'Natural Botanical Extract (Griffonia)',
-        dose: '100 mg',
-        target: 'Satiety & Evening Cravings'
+        api: 'Complejo Probiótico + L-Glutamina',
+        spec: '15B CFU (Bifido/Lacto) + L-Glutamina 1g',
+        dose: '1 dosis/día',
+        target: 'Pilar 3: Microbiota & Barrera Mucosa'
+      },
+      {
+        api: 'Enzima Lactasa Microbiana',
+        spec: 'Lactasa Ácido-Estable (9.000 FCC ALU)',
+        dose: '9.000 ALU',
+        target: 'Pilar 3: Prevención Disbiosis MCM6'
       }
     ];
 
     y2 -= 18;
     formulaRows.forEach((row, idx) => {
-      const rowHeight = 22;
+      const rowHeight = 20;
       const isAlt = idx % 2 === 1;
       if (isAlt) {
         page2.drawRectangle({
@@ -455,10 +475,10 @@ export async function GET(request) {
         color: cardBorder
       });
 
-      page2.drawText(row.api, { x: 44, y: y2 - 14, size: 8, font: helveticaBold, color: darkSlate });
-      page2.drawText(row.spec, { x: 215, y: y2 - 14, size: 7.5, font: helvetica, color: mutedSlate });
-      page2.drawText(row.dose, { x: 380, y: y2 - 14, size: 8, font: helveticaBold, color: tealAccent });
-      page2.drawText(row.target, { x: 450, y: y2 - 14, size: 7.5, font: helvetica, color: darkSlate });
+      page2.drawText(row.api, { x: 44, y: y2 - 13, size: 7.5, font: helveticaBold, color: darkSlate });
+      page2.drawText(row.spec, { x: 205, y: y2 - 13, size: 7, font: helvetica, color: mutedSlate });
+      page2.drawText(row.dose, { x: 375, y: y2 - 13, size: 7.5, font: helveticaBold, color: tealAccent });
+      page2.drawText(row.target, { x: 440, y: y2 - 13, size: 7, font: helvetica, color: darkSlate });
 
       y2 -= rowHeight;
     });

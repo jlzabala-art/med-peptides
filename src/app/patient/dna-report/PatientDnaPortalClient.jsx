@@ -250,79 +250,99 @@ export default function PatientDnaPortalClient({
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.25rem' }}>
-                {/* 1. MTHFR */}
-                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', borderLeft: '4px solid #b91c1c' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                      1. Energy & Brain Clarity (MTHFR Gene)
-                    </div>
-                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '4px' }}>
-                      PRIORITY FOCUS
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
-                    Your liver has a natural variation that makes it 70% slower at activating regular synthetic folic acid found in cheap multivitamins. When your body cannot activate folate, you may experience mid-afternoon brain fog, sluggish recovery, and higher cardiovascular inflammation.
-                  </p>
-                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
-                    <div><strong>Clinical Recommendation:</strong> Take bioavailable <em>L-Methylfolate (1,000 mcg)</em> and <em>Methylcobalamin (B12, 1,000 mcg)</em>.</div>
-                    <div style={{ marginTop: '3px' }}><strong>Posology:</strong> 500 mcg BID (1 capsule with breakfast and 1 with dinner). <strong>Duration:</strong> 60-day cycle.</div>
-                  </div>
-                </div>
-
-                {/* 2. VDR */}
-                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', borderLeft: '4px solid #b45309' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                      2. Bone Strength & Immunity (Vitamin D Receptor)
-                    </div>
-                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '4px' }}>
-                      MODERATE ACTION
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
-                    Even in a sunny environment like the Gulf/Qatar, your cell receptors take longer to recognize vitamin D. This can lead to low energy, muscle fatigue, and weaker bone density over time.
-                  </p>
-                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
-                    <div><strong>Clinical Recommendation:</strong> Daily therapeutic <em>Vitamin D3 (5,000 IU)</em> combined with <em>Vitamin K2 (100 mcg)</em> and <em>Magnesium Bisglycinate (200 mg)</em>.</div>
-                    <div style={{ marginTop: '3px' }}><strong>Posology:</strong> Take once daily in the morning with a meal containing healthy fats. <strong>Duration:</strong> 60-day cycle.</div>
-                  </div>
-                </div>
-
-                {/* 3. TCF7L2 */}
+                {/* Pilar 1: Metabolismo */}
                 <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', borderLeft: '4px solid #0d9488' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                      3. Sugar Spikes & Fat Storage (TCF7L2 Gene)
+                    <div>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        PILAR 1 · METABOLISMO GLUCÉMICO & INSULINA
+                      </span>
+                      <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                        Control de Glucemia & Grasa Abdominal (Genes TCF7L2 / FTO)
+                      </div>
                     </div>
                     <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#ccfbf1', color: '#0f766e', padding: '2px 8px', borderRadius: '4px' }}>
-                      METABOLIC ADAPTATION
+                      SENSIBILIDAD A GLUCOSA
                     </span>
                   </div>
                   <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
-                    Refined carbohydrates, white bread, pastries, and sweet beverages trigger an exaggerated insulin surge in your body. This makes you feel suddenly hungry again 90 minutes after eating and causes preferential fat storage around the abdomen.
+                    Los carbohidratos refinados, azúcares y harinas blancas generan una liberación exagerada de insulina. Esto causa bajones de energía tras comer, antojos intensos y mayor tendencia a acumular grasa visceral alrededor del abdomen.
                   </p>
                   <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
-                    <div><strong>Clinical Recommendation:</strong> High-bioavailability <em>Standardized Berberine (250 mg)</em> and <em>Chromium Picolinate (200 mcg)</em>.</div>
-                    <div style={{ marginTop: '3px' }}><strong>Posology:</strong> 125 mg Berberine BID taken 15 min before breakfast and dinner. <strong>Duration:</strong> 60-day cycle.</div>
+                    <div><strong>Prescripción Farmacéutica:</strong> <em>Extracto de Berberina Estandarizada (250 mg)</em> + <em>Picolinato de Cromo USP (200 mcg)</em>.</div>
+                    <div style={{ marginTop: '3px' }}><strong>Posología:</strong> 125 mg de Berberina BID 15 minutos antes del desayuno y la cena. <strong>Duración:</strong> Ciclo inicial de 60 días.</div>
                   </div>
                 </div>
 
-                {/* 4. Lactase Deficiency */}
-                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', borderLeft: '4px solid #0284c7' }}>
+                {/* Pilar 2: Metilación */}
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', borderLeft: '4px solid #b91c1c' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                      4. Dairy & Gut Comfort (LCT / MCM6 Gene)
+                    <div>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        PILAR 2 · METILACIÓN CELULAR & ENERGÍA
+                      </span>
+                      <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                        Activación de Folato & Homocisteína (Gen MTHFR C677T)
+                      </div>
                     </div>
-                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#e0f2fe', color: '#0284c7', padding: '2px 8px', borderRadius: '4px' }}>
-                      DIGESTIVE SAFETY
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '4px' }}>
+                      PRIORIDAD MTHFR
                     </span>
                   </div>
                   <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
-                    Your intestines produce negligible lactase enzyme. Consuming conventional cow milk, soft cheeses, or medicines containing lactose filler triggers bloating, gas, and hidden gut lining inflammation.
+                    Tu hígado presenta una variante que reduce en un 70% la conversión de ácido fólico sintético común en su forma bioactiva. Esto impacta la síntesis de neurotransmisores, la desintoxicación celular y eleva la homocisteína vascular.
                   </p>
-                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
-                    <div><strong>Clinical Recommendation:</strong> Strict dietary exclusion of unfermented dairy lactose. For unverified dining out, keep <em>Lactase Enzyme (9,000 FCC ALU)</em> available.</div>
-                    <div style={{ marginTop: '3px' }}><strong>Galenic Standard:</strong> Capsules are 100% lactose-free in acid-resistant DRcaps®. <strong>Duration:</strong> Permanent dietary protocol.</div>
+                  <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#991b1b', fontWeight: 650 }}>
+                    <div><strong>Prescripción Farmacéutica:</strong> <em>L-Metilfolato ([6S]-5-MTHF Calcio, 1.000 mcg)</em> + <em>Metilcobalamina B12 (1.000 mcg)</em> + <em>P-5-P (25 mg)</em>.</div>
+                    <div style={{ marginTop: '3px' }}><strong>Posología:</strong> 500 mcg BID con las comidas. <strong>Duración:</strong> 60 días continuos con analítica en el día 45.</div>
+                  </div>
+                </div>
+
+                {/* Pilar 3: Microbiota y Barrera Intestinal */}
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', borderLeft: '4px solid #0284c7' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        PILAR 3 · MICROBIOTA, BARRERA INTESTINAL & DIGESTIÓN
+                      </span>
+                      <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                        Tolerancia Láctea & Diversidad del Microbioma (Genes MCM6 / FUT2)
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#e0f2fe', color: '#0284c7', padding: '2px 8px', borderRadius: '4px' }}>
+                      EJE MICROBIOMA
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
+                    Genotipo con ausencia de persistencia de lactasa; la ingesta de leche o medicamentos con lactosa genera fermentación osmótica, disbiosis de bacterias beneficiosas (Bifidobacterias) y permeabilidad en la barrera intestinal.
+                  </p>
+                  <div style={{ backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0369a1', fontWeight: 650 }}>
+                    <div><strong>Prescripción Farmacéutica:</strong> <em>Complejo Probiótico Multicepa (15 Billion CFU)</em> + <em>L-Glutamina (1.000 mg)</em> + <em>Lactasa Enzimática (9.000 ALU)</em>.</div>
+                    <div style={{ marginTop: '3px' }}><strong>Posología:</strong> 1 dosis en ayunas en cápsulas vegetales DRcaps® 100% libres de lactosa. <strong>Duración:</strong> Protocolo de 60 días.</div>
+                  </div>
+                </div>
+
+                {/* Pilar 4: Inmunidad y Receptor de Vitamina D */}
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', borderLeft: '4px solid #b45309' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        PILAR 4 · INMUNIDAD CELULAR & DENSIDAD ÓSEA
+                      </span>
+                      <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                        Sensibilidad de Receptores Nucleares (Gen VDR FokI)
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '4px' }}>
+                      SENSIBILIDAD VDR
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
+                    Tus receptores nucleares celulares necesitan concentraciones séricas mayores (60-80 ng/mL) para activar las defensas y la densidad mineral ósea.
+                  </p>
+                  <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#92400e', fontWeight: 650 }}>
+                    <div><strong>Prescripción Farmacéutica:</strong> <em>Vitamina D3 Colecalciferol (5.000 UI)</em> + <em>Vitamina K2 MK-7 (100 mcg)</em> + <em>Bisglicinato de Magnesio (200 mg)</em>.</div>
+                    <div style={{ marginTop: '3px' }}><strong>Posología:</strong> 1 cápsula por la mañana con el desayuno (con alimentos grasos). <strong>Duración:</strong> 60 días continuos.</div>
                   </div>
                 </div>
               </div>
@@ -431,25 +451,37 @@ export default function PatientDnaPortalClient({
                       <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>Magnesium Bisglycinate</td>
                       <td style={{ padding: '10px 14px', color: '#475569' }}>Chelated Magnesium Glycinate Powder</td>
                       <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0d9488' }}>200 mg</td>
-                      <td style={{ padding: '10px 14px', color: '#475569', fontWeight: 650 }}>Enzymatic VDR Cofactor</td>
+                      <td style={{ padding: '10px 14px', color: '#475569', fontWeight: 650 }}>Pilar 4: Cofactor Enzimático VDR</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
-                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>Berberine Extract</td>
-                      <td style={{ padding: '10px 14px', color: '#475569' }}>Phospholipid / Phytosome Standardized (97%)</td>
+                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>Extracto Estandarizado de Berberina</td>
+                      <td style={{ padding: '10px 14px', color: '#475569' }}>Complejo Fosfolipídico 97% Estandarizado</td>
                       <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0d9488' }}>250 mg</td>
-                      <td style={{ padding: '10px 14px', color: '#0d9488', fontWeight: 650 }}>TCF7L2 Glycemic Spikes</td>
+                      <td style={{ padding: '10px 14px', color: '#0d9488', fontWeight: 650 }}>Pilar 1: Glucemia TCF7L2 (125mg BID)</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>Chromium Picolinate</td>
-                      <td style={{ padding: '10px 14px', color: '#475569' }}>Pharmaceutical Grade Chromium (USP)</td>
+                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>Picolinato de Cromo USP</td>
+                      <td style={{ padding: '10px 14px', color: '#475569' }}>Grado Farmacéutico Ph. Eur. / USP</td>
                       <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0d9488' }}>200 mcg</td>
-                      <td style={{ padding: '10px 14px', color: '#0d9488', fontWeight: 650 }}>Insulin Receptor Affinity</td>
+                      <td style={{ padding: '10px 14px', color: '#0d9488', fontWeight: 650 }}>Pilar 1: Sensibilización Receptor Insulina</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
+                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>Complejo Probiótico Multicepa</td>
+                      <td style={{ padding: '10px 14px', color: '#475569' }}>15B CFU (Bifido lactis, L. rhamnosus GG, L. plantarum)</td>
+                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0d9488' }}>1 dosis/día</td>
+                      <td style={{ padding: '10px 14px', color: '#0284c7', fontWeight: 650 }}>Pilar 3: Microbiota & Eje Intestinal</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>L-Glutamina Pura (Ph. Eur.)</td>
+                      <td style={{ padding: '10px 14px', color: '#475569' }}>Polvo cristalino micronizado para mucosa</td>
+                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0d9488' }}>1.000 mg</td>
+                      <td style={{ padding: '10px 14px', color: '#0284c7', fontWeight: 650 }}>Pilar 3: Sellado de Barrera Mucosa</td>
                     </tr>
                     <tr style={{ backgroundColor: '#f8fafc' }}>
-                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>5-Hydroxytryptophan (5-HTP)</td>
-                      <td style={{ padding: '10px 14px', color: '#475569' }}>Natural Botanical Extract (Griffonia)</td>
-                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0d9488' }}>100 mg</td>
-                      <td style={{ padding: '10px 14px', color: '#475569', fontWeight: 650 }}>Evening Craving Control</td>
+                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0f172a' }}>Enzima Lactasa Ácido-Estable</td>
+                      <td style={{ padding: '10px 14px', color: '#475569' }}>Lactasa Microbiana Purificada (9.000 FCC ALU)</td>
+                      <td style={{ padding: '10px 14px', fontWeight: 750, color: '#0d9488' }}>9.000 ALU</td>
+                      <td style={{ padding: '10px 14px', color: '#0284c7', fontWeight: 650 }}>Pilar 3: Prevención Disbiosis MCM6</td>
                     </tr>
                   </tbody>
                 </table>
@@ -465,26 +497,46 @@ export default function PatientDnaPortalClient({
           </div>
         )}
 
-        {/* ── SECTION 3: PRACTICAL LIFESTYLE HABITS ── */}
+        {/* ── SECTION 3: PRACTICAL LIFESTYLE & MICROBIOME DIET ── */}
         {activeSection === 'lifestyle' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
             <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Activity size={18} className="text-teal-600" />
                 <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  Dietary Sequencing: How to Eat for Your DNA
+                  1. Secuencia Dietética en el Plato (Control de Glucosa TCF7L2)
                 </h4>
               </div>
               <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
-                Because of your <strong>TCF7L2 carb sensitivity</strong>, the order in which you eat your food dramatically alters your post-meal energy and fat storage:
+                Por tu <strong>sensibilidad genética a carbohidratos</strong>, el orden exacto en el que ingieres tus alimentos cambia por completo la respuesta de la insulina y el almacenamiento graso:
               </p>
               <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px', fontSize: '0.82rem', color: '#334155', lineHeight: 1.6 }}>
-                <li><strong>Step 1:</strong> Always eat fiber and greens first (salads, cucumbers, broccoli).</li>
-                <li><strong>Step 2:</strong> Consume proteins and healthy fats next (grilled fish, chicken, olive oil).</li>
-                <li><strong>Step 3:</strong> Finish with complex carbohydrates (quinoa, sweet potatoes, wild rice).</li>
+                <li><strong>Paso 1:</strong> Come siempre primero la fibra y ensaladas (hojas verdes, pepino, brócoli, calabacín).</li>
+                <li><strong>Paso 2:</strong> Consume después las proteínas y grasas saludables (pescado blanco/azul, pollo, aguacate, aceite de oliva virgen extra).</li>
+                <li><strong>Paso 3:</strong> Finaliza con los carbohidratos complejos de bajo índice glucémico (quinoa, boniato, arroz salvaje).</li>
               </ul>
               <div style={{ marginTop: '12px', fontSize: '0.78rem', color: '#0d9488', fontWeight: 700 }}>
-                Result: Flattens glucose spikes by up to 45% and prevents post-lunch drowsiness.
+                ✓ Reduce los picos postprandiales de glucosa hasta un 45% y evita la somnolencia después de comer.
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <HeartPulse size={18} className="text-emerald-600" />
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  2. Alimentos Clave para tu Microbiota & Sellado Intestinal
+                </h4>
+              </div>
+              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
+                Para contrarrestar la permeabilidad mucosa y alimentar las <strong>Bifidobacterias protectoras</strong>:
+              </p>
+              <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px', fontSize: '0.82rem', color: '#334155', lineHeight: 1.6 }}>
+                <li><strong>Fermentados Seguros:</strong> Kéfir de agua o de coco, chucrut sin pasteurizar y miso (cero lácteos de vaca).</li>
+                <li><strong>Polifenoles Prebióticos:</strong> Arándanos silvestres, granada, té verde matcha matutino y cacao puro &gt;85%.</li>
+                <li><strong>Almidón Resistente:</strong> Patata o arroz cocinado y enfriado 24h en nevera (alimenta el butirato colónico).</li>
+              </ul>
+              <div style={{ marginTop: '12px', fontSize: '0.78rem', color: '#16a34a', fontWeight: 700 }}>
+                ✓ Mantiene el epitelio intestinal cerrado y reduce la endotoxemia inflamatoria.
               </div>
             </div>
 
@@ -492,16 +544,16 @@ export default function PatientDnaPortalClient({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Calendar size={18} className="text-blue-600" />
                 <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  Caffeine & Sleep Window
+                  3. Ventana de Cafeína & Descanso Circadiano (CYP1A2)
                 </h4>
               </div>
               <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
-                Your liver metabolizes caffeine at a gradual rate. Afternoon coffee or energy drinks linger in your system well into the evening:
+                Tu hígado metaboliza la cafeína a velocidad moderada/lenta. La cafeína consumida por la tarde permanece en sangre durante la noche:
               </p>
               <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px', fontSize: '0.82rem', color: '#334155', lineHeight: 1.6 }}>
-                <li><strong>Cutoff Time:</strong> Restrict coffee, espresso, and pre-workouts to before <strong>2:00 PM</strong>.</li>
-                <li><strong>Evening Alternative:</strong> Chamomile, peppermint, or ginger herbal tea.</li>
-                <li><strong>Bedtime Routine:</strong> Take your second compounded capsule with dinner to promote deep restorative sleep via 5-HTP and magnesium.</li>
+                <li><strong>Hora Límite:</strong> Ningún café, té negro o pre-entreno después de las <strong>14:00 hrs</strong>.</li>
+                <li><strong>Tardes/Noches:</strong> Infusión de jengibre, manzanilla o menta poleo.</li>
+                <li><strong>Rutina Nocturna:</strong> Tomar la cápsula nocturna con la cena para favorecer la relajación vía magnesio y metilación.</li>
               </ul>
             </div>
           </div>

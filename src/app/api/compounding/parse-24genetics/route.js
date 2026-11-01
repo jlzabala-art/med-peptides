@@ -31,9 +31,43 @@ export async function POST(request) {
       return NextResponse.json({
         success: true,
         source: '24genetics_sample',
-        patientName: 'Hossam',
-        sampleCode: 'G000943554',
-        reportType: '24Genetics Nutrition Report',
+        patientName: 'Hossam Ahmed',
+        sampleCode: '24G-QA-90421',
+        reportType: '24Genetics Nutrition & Clinical Nutrigenomics Report',
+        clinicalPillars: {
+          pillar1_metabolism: {
+            title: 'Metabolic & Glycemic Balance',
+            genes: 'TCF7L2, FTO, SLC2A2',
+            finding: 'High carbohydrate sensitivity and elevated glycemic spike predisposition',
+            recommendation: 'Standardized Berberine 250 mg + Chromium Picolinate 200 mcg',
+            posology: '125 mg BID 15 min prior to meals (breakfast and dinner)',
+            duration: '60 days'
+          },
+          pillar2_methylation: {
+            title: 'Cellular Methylation & Energy',
+            genes: 'MTHFR C677T (TT), MTR',
+            finding: 'Impaired MTHFR enzymatic conversion (~70% reduction); synthetic folic acid contraindicated',
+            recommendation: 'L-Methylfolate ([6S]-5-MTHF Calcium) 1,000 mcg + Methylcobalamin 1,000 mcg + Pyridoxal-5-Phosphate 25 mg',
+            posology: '500 mcg BID with meals',
+            duration: '60 days (homocysteine follow-up at day 45)'
+          },
+          pillar3_microbiota: {
+            title: 'Gut Microbiome & Mucosal Barrier',
+            genes: 'MCM6 / LCT (CC), FUT2 Secretor Status',
+            finding: 'Primary adult hypolactasia; mucosal sensitivity and reduced bifidobacteria diversity',
+            recommendation: 'Delayed-Release Multi-Strain Probiotics (15B CFU) + L-Glutamine 1,000 mg + Acid-Stable Lactase Enzyme (9,000 FCC ALU)',
+            posology: '1 capsule morning on empty stomach; 100% lactose-free vehicle in vegetable DRcaps®',
+            duration: '60 days continuous microbiome restoration'
+          },
+          pillar4_immunity_vitamins: {
+            title: 'Bone Density & Immune Receptors',
+            genes: 'VDR FokI (CT), CYP2R1',
+            finding: 'Subdued VDR nuclear receptor affinity requiring higher circulating 25-OH-D',
+            recommendation: 'Vitamin D3 (Cholecalciferol) 5,000 IU + Vitamin K2 (MK-7 all-trans) 100 mcg + Magnesium Bisglycinate 200 mg',
+            posology: 'Take once daily with morning meal containing healthy fats',
+            duration: '60 days (serum 25-OH-D test at day 45)'
+          }
+        },
         dietAndWeight: {
           effectiveDietType: 'low_carb',
           predispositionToOverweight: 'high',
@@ -55,12 +89,25 @@ export async function POST(request) {
           vitaminB12: 'normal',
           antioxidantCapacity: 'low'
         },
+        microbiotaAndGut: {
+          lactoseIntolerance: 'confirmed_hypolactasia',
+          microbiomeDiversityTendency: 'reduced_bifidobacteria',
+          mucosalPermeabilityRisk: 'elevated'
+        },
+        concreteDietGuidelines: [
+          'Plate Sequencing Rule: Consume leafy vegetables and soluble fiber first, lean proteins/healthy fats second, and complex low-glycemic carbs last.',
+          'Carbohydrate Boundary: Cap net carbohydrates at <40g per meal; strictly avoid high-fructose syrups and liquid calories.',
+          'Microbiome Support: Introduce organic fermented foods (coconut kefir, kimchi, sauerkraut) and polyphenol-rich olive oil daily.',
+          'Dairy Exclusion: 100% strict elimination of unfermented cow milk and soft cheeses; choose almond, coconut, or certified lactose-free alternatives.',
+          'Circadian Caffeine Cutoff: Discontinue caffeine and adrenergic beverages after 2:00 PM to protect nighttime sleep architecture and avoid cortisol surges.'
+        ],
         clinicalNutrigenomicNotes: [
-          'High genetic predisposition to overweight (FTO/MC4R risk variant).',
-          'Low-Carb diet shows highest relative efficacy compared to standard or low-fat diets.',
-          'Marked sweet tooth and carbohydrate sensitivity (SLC2A2/TCF7L2) indicating need for insulin-receptor sensitization.',
-          'Slow caffeine metabolizer (CYP1A2*1F alleles): Avoid high-dose caffeine and adrenergic stimulants to prevent cortisol spikes.',
-          'Reduced vitamin D assimilation and impaired MTHFR methylation require bioavailable cofactors.'
+          'Evaluated by Atlas Health medical geneticists and compounding pharmacists.',
+          'High genetic predisposition to overweight (FTO/MC4R risk variant) best managed via Low-Carb Mediterranean protocol.',
+          'TCF7L2 sensitivity requires insulin receptor sensitization with bioavailable Berberine and Chromium.',
+          'Homozygous MTHFR requires bypassing synthetic folic acid with biologically active [6S]-5-MTHF.',
+          'Confirmed MCM6 lactase non-persistence mandates strict lactose exclusion and 100% lactose-free compounding excipients in DRcaps®.',
+          'Slow caffeine metabolism (CYP1A2*1F) warrants a strict early-afternoon cutoff.'
         ]
       });
     }
@@ -139,6 +186,20 @@ export async function POST(request) {
           enum: ['impaired_methylation', 'normal'],
           description: 'Folate / Vitamin B9 genetic predisposition (MTHFR)'
         },
+        microbiotaAndGut: {
+          type: Type.OBJECT,
+          properties: {
+            lactoseIntolerance: { type: Type.STRING, description: 'Lactase MCM6/LCT status' },
+            gutMicrobiomeTendency: { type: Type.STRING, description: 'Microbiome diversity and mucosal barrier status' },
+            mucosalPermeabilityRisk: { type: Type.STRING, description: 'Intestinal permeability predisposition' }
+          },
+          description: 'Microbiota, mucosal integrity, and digestive genetic predispositions'
+        },
+        concreteDietGuidelines: {
+          type: Type.ARRAY,
+          items: { type: Type.STRING },
+          description: 'Concrete, actionable dietary rules for the patient (plate sequencing, carb boundaries, microbiome foods)'
+        },
         clinicalNutrigenomicNotes: {
           type: Type.ARRAY,
           items: { type: Type.STRING },
@@ -152,19 +213,21 @@ export async function POST(request) {
         'predispositionToOverweight',
         'carbSensitivity',
         'caffeineMetabolism',
+        'concreteDietGuidelines',
         'clinicalNutrigenomicNotes'
       ]
     };
 
-    const prompt = `You are a clinical geneticist and master compounding pharmacist evaluating a 24Genetics Nutrition DNA report.
-Carefully inspect the document, especially Section 2 "Summary" and the "Diet and weight", "Metabolism", and "Vitamins and minerals" sections.
+    const prompt = `You are a medical geneticist and compounding pharmacist from the Atlas Health clinical genomics team evaluating a 24Genetics Nutrition DNA report.
+Carefully inspect the document, especially Section 2 "Summary" and the "Diet and weight", "Metabolism", "Food intolerances / Gut", and "Vitamins and minerals" sections.
 Extract:
 1. Patient name and sample ID.
 2. The most effective diet type (e.g. low-carb, low-fat, mediterranean, or high-protein).
 3. Predispositions regarding overweight, ease of weight loss, emotional eating, snacking, sweet tooth, and carbohydrate/fat sensitivities.
 4. Caffeine metabolism (slow vs fast, CYP1A2).
-5. Vitamin D and Folate/B9 predispositions.
-6. A concise array of 3-5 clinical bullet points explaining how compounding supplements should be adjusted for this genetic profile.`;
+5. Vitamin D, Folate/B9 predispositions, and Gut/Microbiota & Lactase status (MCM6, FUT2).
+6. 4-5 concrete, direct dietary instructions for the patient (e.g., plate sequencing, carb grams per meal, fermented foods, caffeine cutoff).
+7. A concise array of clinical bullet points explaining how compounding supplements and exact posology should be adjusted for this genetic profile.`;
 
     const { text } = await generateWithResilientGemini({
       tier: AI_TIER.REASONING,
