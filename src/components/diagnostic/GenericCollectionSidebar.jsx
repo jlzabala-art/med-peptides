@@ -61,10 +61,8 @@ export default function GenericCollectionSidebar({
   const isPeptides = brandSlug === 'peptides';
   const isHairTreatments = ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug);
 
-  // Filter out 'all' category for hair-treatments if present
-  const displayCategories = isHairTreatments
-    ? categories.filter(c => c.id !== 'all')
-    : categories;
+  // Filter out 'all' category (GCP UX standard: categories should only be specific lines)
+  const displayCategories = categories.filter(c => c.id !== 'all' && c.id !== 'all-peptides' && c.id !== 'all-formulations' && !c.label?.toLowerCase().includes('all peptides'));
 
   return (
     <aside
@@ -258,60 +256,7 @@ export default function GenericCollectionSidebar({
         </div>
       )}
 
-      {/* ── 3. Quality & Accreditation Card (Only for Non-Hair or Clean Trichology Summary) ── */}
-      {!isHairTreatments && (
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: '14px',
-            border: '1px solid #e2e8f0',
-            padding: '1.25rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                background: isPeptides ? 'rgba(0, 54, 102, 0.1)' : 'rgba(2, 132, 199, 0.1)',
-                color: isPeptides ? '#003666' : '#0284c7',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              {isPeptides ? <FlaskConical size={16} /> : <Microscope size={16} />}
-            </div>
-            <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
-                {isPeptides ? 'Lotusland Analytical Hub' : 'TeleTest Reference Lab'}
-              </div>
-              <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                {isPeptides ? 'HPLC ≥99.0% · EU Lyophilization Hub' : 'ISO 17025 Accredited · E08750211'}
-              </div>
-            </div>
-          </div>
 
-          <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.5, margin: '0 0 1rem 0' }}>
-            {isPeptides
-              ? 'Monographs verified via High-Performance Liquid Chromatography (HPLC) and Mass Spectrometry (MS). Sourced and lyophilized under ISO 9001/cGMP conditions at the Lotusland Hub.'
-              : 'European reference laboratory accredited by Generalitat de Catalunya and ISO 17025. Specializing in high-precision immunogenetics, celiac HLA, and ICP-MS/MS toxicology.'}
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#334155', fontWeight: 650 }}>
-              <ShieldCheck size={13} color="#16a34a" />
-              <span>{isPeptides ? 'Lot-Specific Certificate of Analysis (COA)' : 'FNMT Electronically Signed Lab Reports'}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#334155', fontWeight: 650 }}>
-              <Award size={13} color="#0284c7" />
-              <span>{isPeptides ? 'Certified Reference Standard Monograph' : '36+ Elements ICP-MS/MS & HLA qPCR'}</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── 3. Institutional Inquiry & Share CTA ── */}
       <div

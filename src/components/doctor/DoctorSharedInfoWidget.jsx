@@ -25,7 +25,7 @@ const DEFAULT_SHARED_PROTOCOLS = [
     title: 'Dr. Erdmann Trichology & Scalp Regeneration Protocol',
     category: 'Trichology & Dermatology',
     shareCode: 'SH-PROT-ERD-01',
-    sharedBy: 'Atlas Medical Board & Lotusland',
+    sharedBy: 'Atlas Medical Affairs & European Core Lab',
     sharedAt: '2026-03-10',
     validUntil: '2027-03-10',
     channel: 'Direct Medical Portal',
@@ -76,11 +76,11 @@ const DEFAULT_SHARED_PROTOCOLS = [
 
 const DEFAULT_SHARED_CATALOGS = [
   {
-    id: 'cat-lotusland-dha-2026',
-    title: 'Lotusland Limited — Authorized Clinical Formulary 2026',
+    id: 'cat-peptides-dha-2026',
+    title: 'Clinical Peptide Portfolio & Compounding Formulary 2026',
     category: 'Authorized Galenic Formulary',
-    shareCode: 'SH-CAT-LOT-2026',
-    sharedBy: 'Lotusland Limited & Atlas Commercial Desk',
+    shareCode: 'SH-CAT-CLIN-2026',
+    sharedBy: 'Atlas Medical Affairs & Commercial Desk',
     sharedAt: '2026-02-01',
     validUntil: '2026-12-31',
     channel: 'Verified DHA Healthcare Channel',

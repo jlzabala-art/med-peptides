@@ -125,7 +125,7 @@ export function getPrescriptionAtlasRecommendations(rx) {
 
   if (isMitochondrialLongevity) {
     peptideRec = {
-      brand: 'Lotusland Research',
+      brand: 'Clinical Peptides',
       peptideName: 'Epithalon 10 mg / vial',
       category: 'Telomerase Catalytic Activation & Follicular Stem Cell Senescence',
       catalogCode: 'atlas-epithalon-10mg',
@@ -140,7 +140,7 @@ export function getPrescriptionAtlasRecommendations(rx) {
     };
   } else if (isTissueRepairWound) {
     peptideRec = {
-      brand: 'Lotusland Research',
+      brand: 'Clinical Peptides',
       peptideName: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
       category: 'Triple Angiogenic Bioregulator & Microvascular Tissue Repair',
       catalogCode: 'atlas-glow-blend',
@@ -155,7 +155,7 @@ export function getPrescriptionAtlasRecommendations(rx) {
     };
   } else if (isHormonalBHRT) {
     peptideRec = {
-      brand: 'Lotusland Research',
+      brand: 'Clinical Peptides',
       peptideName: 'CJC-1295 (No DAC) & Ipamorelin 5 mg / 5 mg',
       category: 'Pulsatile Pituitary GH Axis & Body Composition Bioregulator',
       catalogCode: 'atlas-cjc-ipam-blend',
@@ -170,7 +170,7 @@ export function getPrescriptionAtlasRecommendations(rx) {
     };
   } else if (isNeuroSleep) {
     peptideRec = {
-      brand: 'Lotusland Research',
+      brand: 'Clinical Peptides',
       peptideName: 'DSIP (Delta Sleep-Inducing Peptide) 5 mg / vial',
       category: 'Central GABAergic & Pineal Circadian Neuro-Reset',
       catalogCode: 'atlas-dsip-5mg',
@@ -185,7 +185,7 @@ export function getPrescriptionAtlasRecommendations(rx) {
     };
   } else if (isTrichoTest) {
     peptideRec = {
-      brand: 'Lotusland Research',
+      brand: 'Clinical Peptides',
       peptideName: 'GHK-Cu (Copper Tripeptide-1) 50 mg / vial',
       category: 'Dermal Papilla Proliferation & TGF-β1 Catagen Blockade',
       catalogCode: 'atlas-ghk-cu-50mg',
@@ -200,7 +200,7 @@ export function getPrescriptionAtlasRecommendations(rx) {
     };
   } else {
     peptideRec = {
-      brand: 'Lotusland Research',
+      brand: 'Clinical Peptides',
       peptideName: 'BPC-157 10 mg / vial',
       category: 'Endothelial Nitric Oxide Signaling & Cytoprotection',
       catalogCode: 'atlas-bpc-157-10mg',

@@ -58,7 +58,7 @@ export default function DoctorRecentActivityFeed({
                 FORMULARY SYNC
               </span>
               <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
-                Lotusland Compounding Formulary v2026.9
+                Clinical Compounding Formulary v2026.9
               </span>
               <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
                 Verified by Medical Director

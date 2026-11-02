@@ -318,8 +318,8 @@
         "new_rx_desc": "Crear prescripciones magistrales personalizadas y protocolos clínicos.",
         "create_rx": "Crear Receta",
         "close_form": "Cerrar Formulario",
-        "catalogs": "Formulario Lotusland",
-        "catalogs_desc": "Explorar preparados y dosis de péptidos aprobados de Lotusland.",
+        "catalogs": "Formulario de Péptidos Clínicos",
+        "catalogs_desc": "Explorar preparados y dosis de péptidos clínicos aprobados.",
         "open_generator": "Ver Catálogo",
         "builder_form": "Nueva Receta Clínica",
         "builder_form_desc": "Generar órdenes de compuestos peptídicos a medida"

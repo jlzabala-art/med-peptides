@@ -5,6 +5,7 @@ import CollectionClientWrapper from './CollectionClientWrapper';
 import { sanitizeForClient } from '../../../utils/sanitizeForClient';
 import { adminDb } from '../../../lib/firebaseAdmin';
 import { trackReferralVisitAction } from '@/actions/vialsCatalogActions';
+import { resolvePeptideCategory } from '../../../data/peptideCategoriesRegistry';
 
 const BASE_URL = 'https://www.atlashealth-services.com';
 
@@ -308,6 +309,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
             list.push({
               id: d.id,
               ...data,
+              category: resolvePeptideCategory({ id: d.id, ...data }),
               costPrice: primaryVar.costPrice,
               cost: primaryVar.cost,
               mediluxePrice: primaryVar.mediluxePrice,
@@ -638,8 +640,17 @@ export default async function NextCollectionPage({ params, searchParams }) {
 
   const safeCatalog = sanitizeForClient(catalog || []);
 
+  // Compute category counts on server side (Rule #22 - Server-Side Facet Calculations)
+  const { computeServerCategoryCounts } = await import('../../../data/peptideCategoriesRegistry');
+  const serverCategoryCounts = computeServerCategoryCounts(safeCatalog || [], slug);
+
   return (
-    <CollectionClientWrapper serverParams={{ ...resolvedParams, slug }} referralRef={ref} initialProducts={safeCatalog} />
+    <CollectionClientWrapper
+      serverParams={{ ...resolvedParams, slug }}
+      referralRef={ref}
+      initialProducts={safeCatalog}
+      serverCategoryCounts={serverCategoryCounts}
+    />
   );
 }
 

@@ -249,7 +249,7 @@ export default function AtlasSynergyRecommendationsSection({
                       Bioregulator Peptide
                     </span>
                     <span style={{ fontSize: '0.73rem', color: '#5f6368', fontWeight: 600 }}>
-                      Lotusland Research
+                      Clinical Research Core
                     </span>
                   </div>
                   <span

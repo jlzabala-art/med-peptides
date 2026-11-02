@@ -44,6 +44,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import { getTeletestCatalog } from '../data/teletestRegistry';
 import ClinicalWorksExplorer from '../components/collection/ClinicalWorksExplorer';
 import { getWorksByClinicalArea, getWorksByBrand } from '../data/clinicalWorksRegistry';
+import { resolvePeptideCategory } from '../data/peptideCategoriesRegistry';
 import '../styles/collection_shared.css';
 
 // Brand configurations with clinical metadata and 4 KPIs (Regla Golden #22)
@@ -165,11 +166,11 @@ const BRAND_CONFIGS = {
   },
   peptides: {
     name: 'Clinical Peptides',
-    title: 'Clinical Peptide Portfolio & Lyophilized Vials',
-    tagline: 'High-Purity Reference Standards & Lyophilized Vials',
+    title: 'Clinical Peptide Portfolio',
+    tagline: '',
     badge: 'EU Certified Lyophilization Hub',
     badgeColor: '#003666',
-    subtitle: 'Official monograph collection of verified lyophilized clinical peptides (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested < 0.05 EU/mg) in sealed 10R borosilicate vials.',
+    subtitle: 'Verified monograph collection of lyophilized clinical peptides (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested < 0.05 EU/mg) in sealed 10R borosilicate vials.',
     heroImage: '/images/og-peptides.png',
     accentColor: '#003666',
     kpis: [
@@ -179,7 +180,6 @@ const BRAND_CONFIGS = {
       { label: 'Monograph Specs', value: 'Full COA Included', sub: 'Sequence, MW & Net Peptide Content', icon: FileText, color: '#7c3aed' }
     ],
     categories: [
-      { id: 'all', label: 'All Peptides' },
       { id: 'recovery-repair', label: 'Recovery & Tissue Repair' },
       { id: 'metabolic', label: 'Metabolic & GLP-1/GIP' },
       { id: 'longevity', label: 'Longevity & Cellular' },
@@ -415,8 +415,8 @@ function resolveBrandProductImage(product, brandSlug) {
     if (id.includes('conditioner') || name.includes('conditioner')) return '/images/products/colway/conditioner.png';
     if (id.includes('colvita') || name.includes('colvita')) return '/images/products/colway/colvita.png';
     if (id.includes('trichology') || name.includes('trichology')) return '/images/products/colway/bundle-colway-trichology.jpg';
-    if (id.includes('ghk') || name.includes('ghk')) return '/assets/vials/standard-vial.png';
-    if (id.includes('tb-500') || id.includes('tb500')) return '/assets/vials/tb500.png';
+    if (id.includes('ghk') || name.includes('ghk')) return '/assets/vials/ghkcu-clinical.jpg';
+    if (id.includes('tb-500') || id.includes('tb500')) return '/assets/vials/tb500-clinical.jpg';
     if (id.includes('bpc-157') || id.includes('bpc157') || id.includes('bpc')) return '/assets/vials/bpc157.png';
     if (id.includes('teletest') || id.includes('mineral') || id.includes('cabello') || id.includes('htma')) return '/images/products/teletest/mineralograma-cabello.svg';
     return '/images/products/colway/bundle-colway-trichology.jpg';
@@ -594,6 +594,7 @@ function resolveProductRegulatoryBadges(product, brandSlug) {
 export default function BrandCollectionPage({
   brandSlug = 'bloodo',
   products: initialProducts = [],
+  serverCategoryCounts = null,
   onSelectProduct,
   updateCart,
   toggleCompare
@@ -621,6 +622,27 @@ export default function BrandCollectionPage({
     return (config.categories || []).map((cat) => {
       const isAll = cat.id === 'all';
       const catId = cat.id.toLowerCase();
+
+      // Golden Rule #22: Prefer server-side facet calculations when available
+      if (serverCategoryCounts && typeof serverCategoryCounts[cat.id] === 'number') {
+        return {
+          id: cat.id,
+          label: cat.label,
+          count: serverCategoryCounts[cat.id]
+        };
+      }
+
+      if (brandSlug === 'peptides') {
+        const count = isAll
+          ? products.length
+          : products.filter(p => resolvePeptideCategory(p) === cat.id).length;
+        return {
+          id: cat.id,
+          label: cat.label,
+          count
+        };
+      }
+
       const count = isAll
         ? products.length
         : products.filter(p => {
@@ -652,7 +674,7 @@ export default function BrandCollectionPage({
         count
       };
     });
-  }, [config.categories, products, brandSlug]);
+  }, [config.categories, products, brandSlug, serverCategoryCounts]);
 
   const colwayCategories = brandCategories;
   const isHairCollection = ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug);
@@ -903,11 +925,7 @@ export default function BrandCollectionPage({
           if (cat === 'detox') return str.includes('detox') || str.includes('saliva') || str.includes('metabolizer') || str.includes('pharmacogen') || str.includes('farmacogen');
         }
         if (brandSlug === 'peptides') {
-          if (cat === 'recovery-repair') return str.includes('recovery') || str.includes('repair') || str.includes('bpc') || str.includes('tb-500') || str.includes('tb500') || str.includes('ghk') || str.includes('healing');
-          if (cat === 'metabolic') return str.includes('metabolic') || str.includes('weight') || str.includes('glp') || str.includes('gip') || str.includes('semaglutide') || str.includes('tirzepatide') || str.includes('aod') || str.includes('tesamorelin');
-          if (cat === 'longevity') return str.includes('longevity') || str.includes('cellular') || str.includes('epithalon') || str.includes('mots') || str.includes('nad');
-          if (cat === 'cognitive') return str.includes('cognitive') || str.includes('neuro') || str.includes('semax') || str.includes('selank') || str.includes('brain');
-          if (cat === 'hormonal') return str.includes('hormon') || str.includes('cjc') || str.includes('ipamorelin') || str.includes('gh') || str.includes('growth hormone');
+          return resolvePeptideCategory(p) === cat;
         }
         if (brandSlug === 'weight-loss' || brandSlug === 'weight-management' || brandSlug === 'weight' || brandSlug === 'metabolic' || brandSlug === 'nutrigen') {
           if (cat === 'dual-incretins' || cat === 'glp1') return str.includes('tirzepatide') || str.includes('semaglutide') || str.includes('retatrutide') || str.includes('tesofensine') || str.includes('incretin');
@@ -1264,20 +1282,22 @@ export default function BrandCollectionPage({
                   <Sparkles size={11} />
                   <span>{config.badge}</span>
                 </div>
-                <span className="gcp-hero-iso" style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  color: '#64748b',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontSize: '0.66rem',
-                  fontWeight: 650
-                }}>
-                  {brandSlug === 'colway' ? 'EU CPNP Reg. · ISO 22716' : 'ISO Accredited · European Lab'}
-                </span>
+                {brandSlug !== 'peptides' && (
+                  <span className="gcp-hero-iso" style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    color: '#64748b',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.66rem',
+                    fontWeight: 650
+                  }}>
+                    {brandSlug === 'colway' ? 'EU CPNP Reg. · ISO 22716' : 'ISO Accredited · European Lab'}
+                  </span>
+                )}
               </div>
 
               {/* Action buttons on desktop header (Clinical Desk & TrichoTest PDF) */}
@@ -1395,28 +1415,25 @@ export default function BrandCollectionPage({
               </button>
             </div>
 
-            {/* Architecture Metadata Badges (GCP Standard) — scroll horizontal en móvil */}
-            <div className="gcp-hero-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '0.15rem' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#334155', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
-                🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : brandSlug === 'peptides' ? 'Peptides' : 'Items'}
-              </span>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '2px 8px', borderRadius: '4px' }}>
-                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ European Lyophilization Hub' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ Atlas Compounding Network' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🏛️ TrichoTest™ Compounding · Peptides · Colway®' : '🏛️ Atlas Clinical Network'}
-              </span>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
-                {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : brandSlug === 'peptides' ? '🛡️ HPLC ≥99.0% & Endotoxin Tested' : brandSlug === 'teletest' ? '🛡️ ISO 17025 Accredited' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🛡️ EU GMP Certified' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🛡️ EU GMP Compounding & CPNP Certified' : '🛡️ CE-IVDR & ISO 15189'}
-              </span>
-              {brandSlug === 'peptides' && (
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#003666', background: '#e0f2fe', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
-                  ✨ 10R Sealed Lyophilized Vials
+            {/* Architecture Metadata Badges (GCP Standard) — omitted on peptides to eliminate repetition */}
+            {brandSlug !== 'peptides' && (
+              <div className="gcp-hero-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '0.15rem' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#334155', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
+                  🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : 'Items'}
                 </span>
-              )}
-              {brandSlug === 'colway' && (
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '4px' }}>
-                  ✨ Native Freshwater Tropocollagen (3D Helix)
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '2px 8px', borderRadius: '4px' }}>
+                  {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ Atlas Compounding Network' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🏛️ TrichoTest™ Compounding · Peptides · Colway®' : '🏛️ Atlas Clinical Network'}
                 </span>
-              )}
-            </div>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
+                  {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : brandSlug === 'teletest' ? '🛡️ ISO 17025 Accredited' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🛡️ EU GMP Certified' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🛡️ EU GMP Compounding & CPNP Certified' : '🛡️ CE-IVDR & ISO 15189'}
+                </span>
+                {brandSlug === 'colway' && (
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '4px' }}>
+                    ✨ Native Freshwater Tropocollagen (3D Helix)
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -1458,8 +1475,8 @@ export default function BrandCollectionPage({
             }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: scopeMode === 'filtered' ? '#0284c7' : '#94a3b8' }} />
               {scopeMode === 'filtered' 
-                ? (isEs ? `Resultados Filtrados (${filteredProducts.length} ${getItemUnitLabel(brandSlug, filteredProducts.length, true)})` : `Matching Active Filters (${filteredProducts.length} items)`)
-                : (isEs ? `Colección Completa (${products.length} ${getItemUnitLabel(brandSlug, products.length, true)})` : `Entire Collection (${products.length} items)`)}
+                ? (isEs ? 'Filtros Activos' : 'Active Filters View')
+                : (isEs ? 'Base Completa' : 'Global Database View')}
             </span>
           </div>
 
@@ -1765,9 +1782,11 @@ export default function BrandCollectionPage({
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
-                    {filteredProducts.length} {getItemUnitLabel(brandSlug, filteredProducts.length, isEs)}
-                  </span>
+                  {brandSlug !== 'peptides' && (
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
+                      {filteredProducts.length} {getItemUnitLabel(brandSlug, filteredProducts.length, isEs)}
+                    </span>
+                  )}
 
                   {/* Incoterm EXW Badge */}
                   <span style={{
@@ -3215,7 +3234,7 @@ export default function BrandCollectionPage({
             ? `${filteredProducts.length} ${isEs ? 'Formulaciones de Tropocolágeno' : 'Tropocollagen Formulations'} • EU CPNP · ISO 22716`
             : (brandSlug === 'bloodo' || brandSlug === 'eterna' || brandSlug === 'teletest')
             ? `${filteredProducts.length} ${isEs ? 'Paneles Diagnósticos y Biomarcadores' : 'Diagnostic Biomarker Panels'} • ISO 15189 / CE-IVDR`
-            : `${filteredProducts.length} ${isEs ? 'Monografías y Referencias' : 'Reference Peptides & Monographs'} • HPLC ≥99.0%`
+            : `${filteredProducts.length} ${isEs ? 'Monografías y Referencias Certificadas' : 'Reference Peptides & Monographs'}`
         }
         badge={
           (brandSlug === 'ultraperson' || brandSlug === 'ultraman')

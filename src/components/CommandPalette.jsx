@@ -48,7 +48,7 @@ const PORTAL_CONFIGS = {
       { id: 'qa-new-rx',           label: '✨ New Prescription (Rx Builder)', icon: Stethoscope, type: 'Action', path: '/doctor/new-prescription' },
       { id: 'qa-workspace-toggle', label: 'Workspace: Clinical Hub (Alt+W)', icon: Briefcase, type: 'Action', action: 'toggle-workspace' },
       { id: 'qa-patient-new',      label: 'Intake New Patient',               icon: User,        type: 'Action', path: '/doctor/patients?new=true' },
-      { id: 'qa-formulary',        label: 'Lotusland Peptide Formulary',      icon: Box,         type: 'Action', path: '/doctor/catalog' },
+      { id: 'qa-formulary',        label: 'Clinical Peptide Formulary',      icon: Box,         type: 'Action', path: '/doctor/catalog' },
       { id: 'qa-protocols',        label: 'Clinical Protocols & Guidelines',  icon: Stethoscope, type: 'Action', path: '/doctor/protocols' },
       { id: 'qa-history',          label: 'Prescriptions & Lifecycle',        icon: FileText,    type: 'Action', path: '/doctor/prescriptions-history' },
       { id: 'qa-ai',               label: 'Ask Atlas AI (Clinical Scribe)',   icon: Sparkles,    type: 'Action', action: 'ask-ai' },

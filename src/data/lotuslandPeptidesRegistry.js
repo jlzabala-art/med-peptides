@@ -96,8 +96,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Potent actin-sequestering peptide accelerating cell migration, myofibrillar regeneration, and systemic anti-inflammatory resolution.',
     overview_summary: 'G-actin regulation for accelerated muscle, tendon, and ligament tissue regeneration.',
-    image: '/assets/vials/tb500.png',
-    image_url: '/assets/vials/tb500.png',
+    image: '/assets/vials/tb500-clinical.jpg',
+    image_url: '/assets/vials/tb500-clinical.jpg',
     reconstitution: 'Reconstitute with 2.0 mL Bacteriostatic Water. Store reconstituted at 2°C – 8°C.'
   },
   {
@@ -127,8 +127,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'Regenerative copper complex regulating over 4,000 human genes. Stimulates collagen I/III synthesis, glycosaminoglycans, and follicular stem cells.',
     overview_summary: 'Cellular neocollagenesis, tissue remodeling, and dermal genetic gene-resetting complex.',
-    image: '/assets/vials/standard-vial.png',
-    image_url: '/assets/vials/standard-vial.png',
+    image: '/assets/vials/ghkcu-clinical.jpg',
+    image_url: '/assets/vials/ghkcu-clinical.jpg',
     reconstitution: 'Reconstitute with 2.5–5.0 mL Bacteriostatic Water. Deep azure blue aqueous solution.'
   },
   {
@@ -158,8 +158,8 @@ export const LOTUSLAND_PEPTIDES = [
     isActive: true,
     description: 'High-concentration copper tripeptide monograph for protocol blending, skin remodelation, and clinical tissue repair.',
     overview_summary: 'Double concentration copper peptide formulation for institutional clinic use.',
-    image: '/assets/vials/standard-vial.png',
-    image_url: '/assets/vials/standard-vial.png',
+    image: '/assets/vials/ghkcu-clinical.jpg',
+    image_url: '/assets/vials/ghkcu-clinical.jpg',
     reconstitution: 'Reconstitute with 5.0 mL Bacteriostatic Water. Store protected from direct light at 2°C – 8°C.'
   },
   {

@@ -148,12 +148,12 @@ export default function GCPCommandPalette() {
     {
       id: 'doc-khalid',
       title: 'Dr. Khalid Shukri (Dubai, UAE 🇦🇪)',
-      subtitle: 'Lotusland Bio-Regenerative Center · Anti-Aging & Compounding Peptides',
+      subtitle: 'Emirates Longevity & Regenerative Center · Anti-Aging & Compounding Peptides',
       category: 'Physicians',
       url: '/dr/khalid-shukri',
       icon: Stethoscope,
       badge: 'Longevity MD',
-      doctorData: { id: 'khalid-shukri', name: 'Dr. Khalid Shukri', slug: 'khalid-shukri', specialty: 'Anti-Aging & Peptides', clinic: 'Lotusland Dubai' }
+      doctorData: { id: 'khalid-shukri', name: 'Dr. Khalid Shukri', slug: 'khalid-shukri', specialty: 'Anti-Aging & Peptides', clinic: 'Emirates Longevity Dubai' }
     },
     {
       id: 'doc-raffanie',

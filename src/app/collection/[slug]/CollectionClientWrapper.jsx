@@ -9,7 +9,7 @@ import { useUIStore } from '../../../stores/uiStore';
 import { useParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
-export default function CollectionClientWrapper({ serverParams, referralRef = null, initialProducts }) {
+export default function CollectionClientWrapper({ serverParams, referralRef = null, initialProducts, serverCategoryCounts = null }) {
   const params = useParams();
   const slug = serverParams?.slug || params?.slug;
 
@@ -60,6 +60,7 @@ export default function CollectionClientWrapper({ serverParams, referralRef = nu
       setPendingQuote={null}
       onOpenSearch={() => setActiveModal('search')}
       products={products}
+      serverCategoryCounts={serverCategoryCounts}
       EXCHANGE_RATES={{}} 
     />
   );

@@ -57,7 +57,7 @@ export async function GET(request) {
     // Header Area: Left Title & Right Role Badge
     let y = p1Height - 34;
 
-    page1.drawText('ATLAS HEALTH SERVICES · CLINICAL GENOMICS', {
+    page1.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
       x: 36,
       y,
       size: 11,
@@ -66,7 +66,7 @@ export async function GET(request) {
     });
 
     // Page 1 Role Badge (PATIENT COPY)
-    const p1Badge = 'PAGE 1 OF 2 · PATIENT COPY (HOJA DEL PACIENTE)';
+    const p1Badge = 'PAGE 1 OF 2 · PATIENT CLINICAL GUIDE';
     const p1BadgeWidth = helveticaBold.widthOfTextAtSize(p1Badge, 7) + 14;
     page1.drawRectangle({
       x: p1Width - 36 - p1BadgeWidth,
@@ -111,7 +111,7 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Patient Dossier Mini-Banner
+    // Patient Dossier Mini-Banner (Balanced 4-column layout with zero text collision)
     y -= 40;
     page1.drawRectangle({
       x: 36,
@@ -123,17 +123,23 @@ export async function GET(request) {
       borderWidth: 1
     });
 
-    page1.drawText('PATIENT NAME:', { x: 48, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(patientName, { x: 48, y: y + 10, size: 9, font: helveticaBold, color: darkSlate });
+    // Col 1: Patient
+    page1.drawText('PATIENT NAME:', { x: 46, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
+    page1.drawText(patientName, { x: 46, y: y + 10, size: 8.5, font: helveticaBold, color: darkSlate, maxWidth: 120 });
 
-    page1.drawText('SPECIMEN / LAB ID:', { x: 190, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(`${sampleId} (CE-IVD Lab)`, { x: 190, y: y + 10, size: 8.5, font: helvetica, color: darkSlate });
+    // Col 2: Specimen
+    page1.drawText('SPECIMEN / LAB ID:', { x: 175, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
+    page1.drawText(sampleId, { x: 175, y: y + 10, size: 8.0, font: helveticaBold, color: darkSlate });
+    page1.drawText('CE-IVD Core Lab', { x: 175, y: y + 2, size: 6.0, font: helvetica, color: tealAccent });
 
-    page1.drawText('PROTOCOL DURATION:', { x: 320, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText('60-Day Initial Cycle', { x: 320, y: y + 10, size: 8.5, font: helveticaBold, color: tealAccent });
+    // Col 3: Protocol Duration
+    page1.drawText('PROTOCOL DURATION:', { x: 300, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
+    page1.drawText('60-Day Initial Cycle', { x: 300, y: y + 10, size: 8.0, font: helveticaBold, color: tealAccent });
+    page1.drawText('Size 0 Regimen', { x: 300, y: y + 2, size: 6.0, font: helvetica, color: mutedSlate });
 
-    page1.drawText('SUPERVISING CLINIC:', { x: 435, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(clinicName.split('·')[0].trim(), { x: 435, y: y + 10, size: 8, font: helvetica, color: navyPrimary });
+    // Col 4: Partner Medical Practice (Atlas is never labeled a clinic)
+    page1.drawText('PARTNER CLINICAL PRACTICE:', { x: 415, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
+    page1.drawText(clinicName.split('·')[0].trim(), { x: 415, y: y + 10, size: 7.8, font: helvetica, color: navyPrimary, maxWidth: 100 });
 
     // Section 1: Notice to Patient
     y -= 22;
@@ -396,7 +402,7 @@ export async function GET(request) {
     });
 
     // Page 1 Footer
-    page1.drawText('Página 1 de 2 · Copia informativa del Paciente · Ver Hoja 2 para la Receta Oficial de Formulación Magistral de Farmacia', {
+    page1.drawText('Page 1 of 2 · Patient Clinical Reference Guide · Turn to Page 2 for Official Compounding Pharmacy Order', {
       x: 36,
       y: 18,
       size: 7,
@@ -405,7 +411,7 @@ export async function GET(request) {
     });
 
     // =========================================================================
-    // PAGE 2: OFFICIAL PHARMACY COMPOUNDING PRESCRIPTION (HOJA PARA EL FARMACÉUTICO)
+    // PAGE 2: OFFICIAL PHARMACY COMPOUNDING PRESCRIPTION
     // =========================================================================
     const page2 = pdfDoc.addPage([595.28, 841.89]);
     const { width: p2Width, height: p2Height } = page2.getSize();
@@ -430,8 +436,8 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    // Page 2 Role Badge (PHARMACY COPY)
-    const p2Badge = 'PAGE 2 OF 2 · PHARMACY COPY (COPIA PARA LA FARMACIA)';
+    // Page 2 Role Badge (PHARMACY COPY - Strict English)
+    const p2Badge = 'PAGE 2 OF 2 · PHARMACY COPY';
     const p2BadgeWidth = helveticaBold.widthOfTextAtSize(p2Badge, 7) + 14;
     page2.drawRectangle({
       x: p2Width - 36 - p2BadgeWidth,
@@ -507,38 +513,30 @@ export async function GET(request) {
       lineHeight: 8.5
     });
 
-    // Dynamic 3-Capsule Compounding Tables
-    // High-precision batch math for 60 capsules
+    // Streamlined 3-Capsule Compounding Tables (Size 0 Universal Standard, Zero Collision)
     const PHARMACY_CAPSULES = [
       {
         id: 'cap_a',
         num: '1',
         title: 'FORMULATION 1: CAPSULE A · MORNING ENTERIC PROBIOTIC & MUCOSAL SHIELD',
         qty: '60 Capsules (60-Day Supply)',
-        vehicle: 'Vehicle: Delayed-Release Enteric DRcaps® (Acid-Resistant Hypromellose) · Lactose-Free Filler',
+        vehicle: 'Vehicle: Size 0 Delayed-Release Enteric DRcaps® · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
         timing: 'Posology: 1 capsule upon waking on an empty stomach with a full glass of water (30 min before food).',
         headerColor: tealAccent,
         ingredients: [
           {
-            name: 'Multi-Strain Probiotics (B. lactis, L. rhamnosus GG, L. plantarum)',
+            name: 'Multi-Strain Probiotics (B. lactis & L. rhamnosus GG)',
             spec: 'Live Lyophilized Microbial Culture (USP/Ph. Eur.)',
             dose: '15 Billion CFU',
             batch60: '900 B. CFU',
             purpose: 'Mucosal Colonization'
           },
           {
-            name: 'L-Glutamine USP',
+            name: 'L-Glutamine USP (Micronized)',
             spec: 'Micronized Pharmaceutical Grade Ph. Eur.',
-            dose: '500 mg',
-            batch60: '30.00 g',
-            purpose: 'Enterocyte Tight-Junction Fuel'
-          },
-          {
-            name: 'Acid-Stable Lactase Enzyme',
-            spec: 'Purified Microbial Lactase (FCC ALU)',
-            dose: '9,000 ALU',
-            batch60: '540,000 ALU',
-            purpose: 'Lactose Cleavage Catalyst'
+            dose: '350 mg',
+            batch60: '21.00 g',
+            purpose: 'Enterocyte Barrier Fuel'
           }
         ]
       },
@@ -548,96 +546,75 @@ export async function GET(request) {
         title: 'FORMULATION 2: CAPSULE B · MIDDAY METABOLIC & METHYLATION ACTIVATOR',
         qty: '60 Capsules (60-Day Supply)',
         vehicle: 'Vehicle: Size 0 Vegetable HPMC Capsule · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
-        timing: 'Posology: 1 capsule with breakfast (meal containing healthy fats for optimal D3/K2 micellar absorption).',
+        timing: 'Posology: 1 capsule with breakfast or lunch (meal containing healthy fats for optimal D3/K2 micellar uptake).',
         headerColor: navyPrimary,
         ingredients: [
           {
-            name: 'Standardized Berberine',
-            spec: 'High-Bioavailability Phospholipid Complex (97%)',
-            dose: '150 mg',
-            batch60: '9.00 g',
-            purpose: 'AMPK Agonist / Glycemic Control'
+            name: 'Standardized Berberine HCl (97%)',
+            spec: 'High-Purity Purified Botanical Extract USP',
+            dose: '300 mg',
+            batch60: '18.00 g',
+            purpose: 'AMPK / Glycemic Control'
           },
           {
             name: 'Chromium Picolinate USP',
             spec: 'Pharmaceutical Grade Chromium Chelate',
-            dose: '100 mcg',
-            batch60: '6.00 mg',
-            purpose: 'Insulin Receptor Sensitizer'
+            dose: '200 mcg',
+            batch60: '12.00 mg',
+            purpose: 'Insulin Sensitivity'
           },
           {
-            name: 'L-Methylfolate ([6S]-5-MTHF)',
+            name: 'Active L-Methylfolate ([6S]-5-MTHF)',
             spec: 'Active Calcium Salt (USP Grade, Lactose-Free)',
-            dose: '500 mcg',
-            batch60: '30.00 mg',
-            purpose: 'Bypasses MTHFR C677T Block'
+            dose: '1,000 mcg',
+            batch60: '60.00 mg',
+            purpose: 'MTHFR Enzymatic Bypass'
           },
           {
             name: 'Methylcobalamin (Active B12)',
-            spec: 'Active Enzymatic Coenzyme B12 (USP grade)',
-            dose: '500 mcg',
-            batch60: '30.00 mg',
-            purpose: 'Homocysteine Remethylation'
+            spec: 'Active Enzymatic Coenzyme B12 (USP Grade)',
+            dose: '1,000 mcg',
+            batch60: '60.00 mg',
+            purpose: 'Homocysteine Clearance'
           },
           {
-            name: 'Vitamin D3 (Cholecalciferol)',
-            spec: 'Cholecalciferol Crystalline Powder USP',
-            dose: '5,000 IU',
-            batch60: '300,000 IU',
-            purpose: 'VDR Receptor Nuclear Ligand'
-          },
-          {
-            name: 'Vitamin K2 (all-trans MK-7)',
-            spec: 'Pure Microencapsulated Menaquinone-7',
-            dose: '100 mcg',
-            batch60: '6.00 mg',
-            purpose: 'Osteocalcin Carboxylation'
+            name: 'Vitamin D3 + Vitamin K2 (all-trans MK-7)',
+            spec: 'Microencapsulated Cholecalciferol / Menaquinone',
+            dose: '5,000 IU / 100 mcg',
+            batch60: '300k IU / 6 mg',
+            purpose: 'VDR Ligand & Bone Health'
           }
         ]
       },
       {
         id: 'cap_c',
         num: '3',
-        title: 'FORMULATION 3: CAPSULE C · EVENING METABOLIC RECOVERY & CELLULAR REPAIR',
+        title: 'FORMULATION 3: CAPSULE C · EVENING RECOVERY & SLEEP ARCHITECTURE',
         qty: '60 Capsules (60-Day Supply)',
         vehicle: 'Vehicle: Size 0 Vegetable HPMC Capsule · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
-        timing: 'Posology: 1 capsule with evening meal or 30 minutes before sleep with water.',
+        timing: 'Posology: 1 capsule with evening meal or 30 minutes before bed with water.',
         headerColor: rgb(30 / 255, 58 / 255, 138 / 255),
         ingredients: [
           {
-            name: 'Standardized Berberine',
-            spec: 'High-Bioavailability Phospholipid Complex (97%)',
-            dose: '100 mg',
-            batch60: '6.00 g',
-            purpose: 'Overnight Fasting Glycemia'
-          },
-          {
-            name: 'Chromium Picolinate USP',
-            spec: 'Pharmaceutical Grade Chromium Chelate',
-            dose: '100 mcg',
-            batch60: '6.00 mg',
-            purpose: 'Fasting Insulin Sensitizer'
-          },
-          {
-            name: 'L-Methylfolate + Methylcobalamin',
-            spec: '[6S]-5-MTHF (500 mcg) + B12 (500 mcg) USP',
-            dose: '500 mcg each',
-            batch60: '30 mg each',
-            purpose: 'Completes 1,000 mcg 24h Cycle'
-          },
-          {
             name: 'Magnesium Bisglycinate Chelate',
-            spec: 'TRAACS® Fully Chelated Glycinate (USP)',
-            dose: '200 mg',
-            batch60: '12.00 g',
-            purpose: 'Neuromuscular Relaxation'
+            spec: 'TRAACS® Fully Chelated Glycinate USP',
+            dose: '250 mg',
+            batch60: '15.00 g',
+            purpose: 'Neuromuscular Relax'
           },
           {
-            name: '5-Hydroxytryptophan (5-HTP)',
-            spec: 'Natural Botanical Extract (Griffonia 98%)',
-            dose: '100 mg',
-            batch60: '6.00 g',
-            purpose: 'Serotonin / Melatonin Pathway'
+            name: 'L-Theanine (Suntheanine® Grade)',
+            spec: 'Pure Enzymatic Fermentation (99% L-Isomer)',
+            dose: '150 mg',
+            batch60: '9.00 g',
+            purpose: 'Alpha-Wave Sleep'
+          },
+          {
+            name: 'Pyridoxal-5-Phosphate (Active B6)',
+            spec: 'Enzymatic Coenzyme B6 (Ph. Eur.)',
+            dose: '25 mg',
+            batch60: '1.50 g',
+            purpose: 'Neurotransmitter Cofactor'
           }
         ]
       }
@@ -647,7 +624,7 @@ export async function GET(request) {
 
     PHARMACY_CAPSULES.forEach((cap) => {
       const rowCount = cap.ingredients.length;
-      const cardHeight = 44 + (rowCount * 13) + 6;
+      const cardHeight = 44 + (rowCount * 14) + 6;
 
       y2 -= cardHeight;
 
@@ -714,27 +691,28 @@ export async function GET(request) {
         color: lightBg
       });
 
+      // Explicit wide columns with zero possibility of overlapping
       page2.drawText('ACTIVE INGREDIENT (API)', { x: 44, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('SPECIFICATION / GRADE', { x: 190, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('DOSE / CAP', { x: 345, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('BATCH QTY (60 CAPS)', { x: 415, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('PHARMACEUTICAL ROLE', { x: 495, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page2.drawText('SPECIFICATION / GRADE', { x: 195, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page2.drawText('DOSE / CAP', { x: 335, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page2.drawText('BATCH (60 CAPS)', { x: 400, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page2.drawText('PHARMACEUTICAL ROLE', { x: 465, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
 
-      // Table Rows (Strict single lines to guarantee ZERO overlapping)
+      // Table Rows
       let rowY = thY - 12;
       cap.ingredients.forEach((ing) => {
-        page2.drawText(ing.name, { x: 44, y: rowY, size: 6.2, font: helveticaBold, color: darkSlate, maxWidth: 142 });
-        page2.drawText(ing.spec, { x: 190, y: rowY, size: 5.6, font: helvetica, color: mutedSlate, maxWidth: 150 });
-        page2.drawText(ing.dose, { x: 345, y: rowY, size: 6.2, font: helveticaBold, color: tealAccent });
-        page2.drawText(ing.batch60, { x: 415, y: rowY, size: 6.2, font: helveticaBold, color: navyPrimary });
-        page2.drawText(ing.purpose, { x: 495, y: rowY, size: 5.6, font: helvetica, color: darkSlate, maxWidth: 60 });
-        rowY -= 13;
+        page2.drawText(ing.name, { x: 44, y: rowY, size: 6.2, font: helveticaBold, color: darkSlate, maxWidth: 145 });
+        page2.drawText(ing.spec, { x: 195, y: rowY, size: 5.6, font: helvetica, color: mutedSlate, maxWidth: 135 });
+        page2.drawText(ing.dose, { x: 335, y: rowY, size: 6.2, font: helveticaBold, color: tealAccent });
+        page2.drawText(ing.batch60, { x: 400, y: rowY, size: 6.2, font: helveticaBold, color: navyPrimary });
+        page2.drawText(ing.purpose, { x: 465, y: rowY, size: 5.6, font: helvetica, color: darkSlate, maxWidth: 90 });
+        rowY -= 14;
       });
 
       y2 -= 6;
     });
 
-    // Prescribing Physician Authorization & Medical Signature (No Pharmacist Log, Blank Fields)
+    // Prescribing Physician Authorization & Medical Signature (Clean English layout)
     y2 -= 66;
     page2.drawRectangle({
       x: 36,
@@ -747,7 +725,7 @@ export async function GET(request) {
     });
 
     // Top Header in Box
-    page2.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL SIGNATURE (FIRMA MÉDICA):', {
+    page2.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL SIGNATURE:', {
       x: 44,
       y: y2 + 52,
       size: 6.8,
@@ -797,7 +775,7 @@ export async function GET(request) {
     });
 
     // Right Column: Dedicated Stamp & Signature Box
-    page2.drawText('Physician\'s Signature & Professional Stamp (Firma y Sello):', {
+    page2.drawText('Physician\'s Signature & Professional Stamp:', {
       x: 355,
       y: y2 + 52,
       size: 6.2,
@@ -821,7 +799,7 @@ export async function GET(request) {
     });
 
     // Page 2 Footer
-    page2.drawText('Página 2 de 2 · Receta Oficial de Formulación Magistral · Dispensación sujeta a prescripción médica autorizada', {
+    page2.drawText('Page 2 of 2 · Official Magistral Compounding Prescription · Dispensing subject to authorized medical prescription', {
       x: 36,
       y: 18,
       size: 7,

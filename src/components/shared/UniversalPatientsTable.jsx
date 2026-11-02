@@ -710,7 +710,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                 )}
                 {isPaid && (
                   <span style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 700 }}>
-                    ✓ Order Processed with Lotusland
+                    ✓ Order Processed with European Core Lab
                   </span>
                 )}
               </div>

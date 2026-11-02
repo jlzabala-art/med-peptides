@@ -80,7 +80,7 @@ export default function DoctorUpgradePlanModal({
     },
     {
       feature: 'Patient Admin Guide & U-100 Syringe Units',
-      basic: 'Standard Lotusland format',
+      basic: 'Standard Clinical Formulary format',
       pro: '100% White-Label (Clinic logo & branding)',
       highlight: true
     },
@@ -97,7 +97,7 @@ export default function DoctorUpgradePlanModal({
       highlight: true
     },
     {
-      feature: 'Lotusland Formulary Clinical Pricing',
+      feature: 'Clinical Peptides Formulary Pricing',
       basic: 'Included',
       pro: 'Included + Bioequivalence comparator',
       highlight: false
@@ -182,7 +182,7 @@ export default function DoctorUpgradePlanModal({
           </button>
 
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 255, 255, 0.2)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-            <Award size={14} /> Lotusland & Atlas Health Medical Membership
+            <Award size={14} /> Atlas Health Medical Membership
           </div>
 
           <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff' }}>

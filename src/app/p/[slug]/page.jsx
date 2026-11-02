@@ -128,7 +128,7 @@ async function getPublicProduct(slug, supplierFilter = null) {
         ...lotusPeptide,
         ...sanitized,
         isSingleSupplierLocked: true,
-        availableSuppliers: [{ id: 'supplier-lotusland', name: 'Lotusland Limited', isPen: false, isSpray: false }],
+        availableSuppliers: [{ id: 'supplier-lotusland', name: 'European Lyophilization Hub', isPen: false, isSpray: false }],
         activeSupplierId: 'supplier-lotusland',
         processedHierarchy,
       };
@@ -247,7 +247,7 @@ async function getPublicProduct(slug, supplierFilter = null) {
       seenSupplierKeys.add(cleanId);
       const isMagenta = cleanId.includes('magenta');
       const isLotusland = cleanId.includes('lotus');
-      const sName = v.supplierName || (isMagenta ? 'Magenta' : isLotusland ? 'Lotusland' : cleanId);
+      const sName = v.supplierName || (isMagenta ? 'Magenta' : isLotusland ? 'European Lyophilization Hub' : cleanId);
       const pStr = String(v.presentation || '').toLowerCase();
       allAvailableSuppliers.push({
         id: cleanId,

@@ -1782,7 +1782,7 @@ export default function PublicDatasheetView({
             isSpray,
             isCurrentlyActive,
             purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : (isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV 6.6%)' : isSupplementProduct ? (lang === 'es' ? 'EU GMP Farmacéutico · Vegano' : 'EU GMP Certified · Vegan') : '≥ 99.0% (RP-HPLC)')),
-            supplierName: activeSupplierObj.name || (isSupplementProduct ? 'Pharmapolis' : 'Lotusland Limited'),
+            supplierName: activeSupplierObj.name || (isSupplementProduct ? 'Pharmapolis' : 'Clinical Peptide Hub'),
             supplierId: activeSupplierObj.id
           });
         });
@@ -1912,8 +1912,8 @@ export default function PublicDatasheetView({
           slug.includes('strengthening-conditioner') ? '/images/products/colway/conditioner.png' :
           slug.includes('trichology') ? '/images/products/colway/colway-trichology-banner.jpg' :
           slug.includes('bpc') ? '/assets/vials/bpc157.png' :
-          slug.includes('tb-500') || slug.includes('tb500') ? '/assets/vials/tb500.png' :
-          slug.includes('ghk') ? '/assets/vials/standard-vial.png' :
+          slug.includes('tb-500') || slug.includes('tb500') ? '/assets/vials/tb500-clinical.jpg' :
+          slug.includes('ghk') ? '/assets/vials/ghkcu-clinical.jpg' :
           slug.includes('epithalon') ? '/assets/vials/epithalon.png' :
           slug.includes('mots') ? '/assets/vials/motsc.png' :
           slug.includes('retatrutide') ? '/assets/vials/retatrutide.png' :
@@ -2020,7 +2020,7 @@ export default function PublicDatasheetView({
           overview: description || '',
           storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C, discard after 28 days',
           reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : '1.0mL - 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol)',
-          activeSupplier: displaySupplierName || 'Lotusland Limited / Atlas Services',
+          activeSupplier: displaySupplierName || 'Clinical Peptide Hub / Atlas Services',
           availableFormulations: (matrixRows || []).slice(0, 8).map(r => ({
             strength: r.strengthName,
             format: r.formatName,
@@ -2067,7 +2067,7 @@ export default function PublicDatasheetView({
         onLangChange={setLang}
         copyUrl={dynamicPublicUrl}
         shortUrl={shortMonographUrl}
-        supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || (isBloodoDiagnostic ? 'Bloodo' : isTeletestDiagnostic ? 'TeleTest' : 'Lotusland')}
+        supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || (isBloodoDiagnostic ? 'Bloodo' : isTeletestDiagnostic ? 'TeleTest' : 'Clinical Laboratory')}
         currentSlug={slug}
         inquiryContextType="product"
         inquiryEntity={{

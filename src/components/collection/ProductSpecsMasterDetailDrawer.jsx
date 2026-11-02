@@ -156,7 +156,7 @@ export default function ProductSpecsMasterDetailDrawer({
             </span>
 
             <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-              • {brandSlug === 'colway' ? 'Colway® Biotech' : brandSlug === 'peptides' ? 'Lotusland Peptides' : 'Atlas Clinical'}
+              • {brandSlug === 'colway' ? 'Colway® Biotech' : brandSlug === 'peptides' ? 'Clinical Peptides' : 'Atlas Clinical'}
             </span>
           </div>
 

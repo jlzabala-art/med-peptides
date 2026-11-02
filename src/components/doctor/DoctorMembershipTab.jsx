@@ -94,7 +94,7 @@ export default function DoctorMembershipTab() {
       >
         <div style={{ position: 'relative', zIndex: 2 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(8px)', padding: '6px 14px', borderRadius: '30px', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>
-            <Award size={15} /> Lotusland & Atlas Health Medical Membership Sheet
+            <Award size={15} /> Atlas Health Medical Membership Sheet
           </div>
 
           <h1 style={{ margin: '0 0 0.75rem 0', fontSize: '2.1rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1.2 }}>
@@ -155,7 +155,7 @@ export default function DoctorMembershipTab() {
               <Zap size={18} /> Your practice is currently on the Basic Tier
             </div>
             <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
-              You have full access to prescribe individual products from the Lotusland formulary. However, your patients do not receive automated WhatsApp refill reminders or personalized guides with your clinic branding.
+              You have full access to prescribe individual products from the clinical peptides formulary. However, your patients do not receive automated WhatsApp refill reminders or personalized guides with your clinic branding.
             </p>
           </div>
 
@@ -570,7 +570,7 @@ export default function DoctorMembershipTab() {
               Can I continue using the Basic Plan indefinitely?
             </div>
             <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5 }}>
-              Yes. The Basic Plan is 100% free and never expires. You can continue issuing standard clinical prescriptions for your patients with full access to the official Lotusland formulary.
+              Yes. The Basic Plan is 100% free and never expires. You can continue issuing standard clinical prescriptions for your patients with full access to the official clinical peptides formulary.
             </p>
           </div>
 

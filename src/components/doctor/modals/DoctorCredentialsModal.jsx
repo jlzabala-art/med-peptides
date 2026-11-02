@@ -129,7 +129,7 @@ export default function DoctorCredentialsModal({
       key: 'clinic',
       label: 'Practice / Clinic',
       value: doctor.clinic || '',
-      placeholder: 'e.g. Lotusland Bio-Regenerative Center',
+      placeholder: 'e.g. Emirates Regenerative Center',
       icon: MapPin,
       type: 'text'
     },

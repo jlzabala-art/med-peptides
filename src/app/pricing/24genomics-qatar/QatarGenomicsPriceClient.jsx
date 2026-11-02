@@ -246,7 +246,23 @@ const SCHEDULE_SECTIONS = [
 export default function QatarGenomicsPriceClient() {
   const { user } = useAuth();
   const [previewUnlocked, setPreviewUnlocked] = useState(false);
-  const isPricingUnlocked = !!user || previewUnlocked;
+  const [hossamDemoActive, setHossamDemoActive] = useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('user') === 'hossam' || params.get('partner') === 'hossam' || params.get('demo') === 'hossam') {
+        setHossamDemoActive(true);
+      }
+    }
+  }, []);
+
+  const isHossamMode = Boolean(
+    hossamDemoActive ||
+    (user && (user.email?.toLowerCase().includes('hossam') || user.displayName?.toLowerCase().includes('hossam')))
+  );
+
+  const isPricingUnlocked = Boolean(user || previewUnlocked || isHossamMode);
 
   const [activeTab, setActiveTab] = useState('commercial');
   const [selectedProduct, setSelectedProduct] = useState('nutrigenetics');
@@ -281,24 +297,24 @@ export default function QatarGenomicsPriceClient() {
 
   const AI_FAQS = [
     {
-      q: '¿Qué incluye el pago único del pack?',
-      a: 'El pack seleccionado (Tier 1, Tier 2 o Tier 3) incluye los Puntos 1 al 4: (1) Reporte de Nutrición clínica en papel encuadernado y en la plataforma Atlas, (2) Reporte de Ancestros biogeográficos en papel, (3) Recomendaciones y prescripción personalizada de 3 cápsulas diarias en Atlas, y (4) Identificación algorítmica de la dieta más idónea del catálogo de 24Genetics. Todos estos puntos se abonan una sola vez con los kits adquiridos.'
+      q: 'What is included in the one-time pack fee?',
+      a: 'The selected volume tier (Tier 1, Tier 2, or Tier 3) includes Core Pillars 1 to 4: (1) Official Nutrition Clinical Monograph delivered both in luxury hardbound paper and digitally within the Atlas Platform, (2) High-Resolution Biogeographical Ancestry Monograph on bound paper, (3) Algorithmic precision compounding recommendations for a 3-capsule daily master regimen on Atlas, and (4) Algorithmic identification of the optimal clinical diet from the 24Genetics catalog. All 4 pillars are fully covered in the one-time pack purchase.'
     },
     {
-      q: '¿Cómo funciona la suscripción de WhatsApp?',
-      a: 'El Punto 5 es un servicio flexible de acompañamiento clínico directo por WhatsApp (150 de la divisa elegida al mes por paciente activo). Permite al paciente resolver dudas sobre su plan dietético, suplementación y evolución en cualquier momento. No tiene permanencia y se puede activar o cancelar libremente cada mes.'
+      q: 'How does the monthly WhatsApp clinical support work?',
+      a: 'Pillar 5 provides continuous, direct WhatsApp clinical communication (150 in the selected currency per active patient per month). It allows patients and clinical staff to clarify dietary choices, review supplement tolerance, and receive expert answers from clinical nutrition specialists. It is completely flexible, with zero lock-in contracts, and can be cancelled or adjusted anytime.'
     },
     {
-      q: '¿Por qué la suplementación se divide en 3 cápsulas?',
-      a: 'Para respetar la biodisponibilidad y farmacocinética de cada nutriente. La toma en ayunas (Cápsula A) protege probióticos y mucosa gástrica; la del desayuno (Cápsula B) activa la metilación (MTHFR) y aprovecha las grasas de la comida para absorber vitaminas liposolubles (D3/K2); y la de la cena (Cápsula C) aporta minerales quelados y precursores neuroquímicos para la regeneración nocturna sin competir entre sí.'
+      q: 'Why is the personalized compounding regimen split into 3 daily capsules?',
+      a: 'To strictly honor nutrient pharmacokinetics, chemical stability, and bioavailability. Fasting morning intake (Capsule A) protects delicate live probiotics in DRcaps® and soothes the gastric mucosa; breakfast intake (Capsule B) activates hepatic methylation (bypassing MTHFR blocks) and uses meal fats to absorb lipophilic vitamins D3/K2; and dinner intake (Capsule C) provides chelated minerals and calming neurochemical precursors for nocturnal restoration without biochemical competition.'
     },
     {
-      q: '¿Cómo se recoge la muestra de saliva?',
-      a: 'Mediante un hisopo bucal indoloro que se frota en el interior de la mejilla durante 60 segundos. No requiere extracción de sangre ni ayuno. El tubo contiene un tampón estabilizador celular que mantiene el ADN intacto a temperatura ambiente durante más de 12 meses.'
+      q: 'How is the saliva DNA sample collected?',
+      a: 'Via an intuitive, non-invasive buccal swab rubbed inside the inner cheek for 60 seconds. No blood draw, needles, or prior fasting required. The collection tube contains an advanced preservation buffer that stabilizes cellular DNA at ambient room temperature for up to 12 months.'
     },
     {
-      q: '¿Cuánto tarda el laboratorio en emitir los reportes?',
-      a: 'Una vez recibida la muestra en el Core Lab europeo de Madrid, el proceso de genotipado en chip Illumina GSA (+50.000 SNPs) tarda entre 3 y 4 semanas. Los informes digitales se activan de inmediato en la plataforma Atlas y los dossiers impresos se envían encuadernados.'
+      q: 'What is the laboratory turnaround time?',
+      a: 'Once specimens arrive at the European CE-IVD Core Lab in Madrid, high-density Illumina Global Screening Array (GSA) genotyping (+50,000 SNPs) is completed in 3 to 4 weeks. Digital reports and compounding formulas activate immediately on the Atlas Platform, while bound paper monographs are dispatched via express courier.'
     }
   ];
 
@@ -309,139 +325,253 @@ export default function QatarGenomicsPriceClient() {
 
     let matched = AI_FAQS.find(f => qLower.includes(f.q.toLowerCase().slice(0, 15)) || f.q.toLowerCase().includes(qLower));
     if (!matched) {
-      if (qLower.includes('precio') || qLower.includes('coste') || qLower.includes('moneda') || qLower.includes('pack') || qLower.includes('tier')) {
+      if (qLower.includes('price') || qLower.includes('cost') || qLower.includes('currency') || qLower.includes('pack') || qLower.includes('tier') || qLower.includes('fee')) {
         matched = {
           q: textToProcess,
-          a: `Los packs están disponibles en 3 niveles de volumen (Tier 1: 10 kits, Tier 2: 25 kits, Tier 3: 50 kits). El precio incluye los puntos 1 a 4 como pago único, y las consultas de WhatsApp (punto 5) se facturan como suscripción mensual flexible @ ${formatPrice(150)}/mes. Puedes cambiar la moneda de visualización (QAR, AED, SAR, KWD, USD, EUR) en cualquier momento desde el selector de la cabecera.`
+          a: `Packs are available in 3 volume tiers: Tier 1 (10 kits), Tier 2 (25 kits), and Tier 3 (50 kits). Pillars 1 to 4 are covered under the initial one-time pack fee. WhatsApp clinical support (Pillar 5) operates as an optional, flexible monthly subscription at ${formatPrice(150)}/month per active patient. You can toggle your preferred currency (QAR, AED, SAR, KWD, USD, EUR) anytime using the compact selector in the top toolbar.`
         };
-      } else if (qLower.includes('dieta') || qLower.includes('catálogo') || qLower.includes('catalogo') || qLower.includes('comida') || qLower.includes('menu')) {
+      } else if (qLower.includes('diet') || qLower.includes('catalog') || qLower.includes('meal') || qLower.includes('food') || qLower.includes('nutrition')) {
         matched = {
           q: textToProcess,
-          a: 'El algoritmo genómico cruza los polimorfismos FTO, PPARG, TCF7L2 y genes lipídicos con el catálogo de dietas de 24Genetics para seleccionar la más idónea: Mediterránea, Low Carb, Low Fat o Equilibrada, indicando porcentajes de macronutrientes precisos.'
+          a: 'The clinical genomic engine analyzes key metabolic and insulin sensitivity polymorphisms (FTO, PPARG, TCF7L2, FABP2) and correlates them with the 24Genetics clinical diet catalog to assign the single most effective dietary pattern: Mediterranean, Low Carb / Keto, Low Fat, or Balanced, complete with exact macronutrient ratios.'
         };
       } else {
         matched = {
           q: textToProcess,
-          a: '24Genomics Nutrition combina el genotipado clínico de +50.000 SNPs de 24Genetics con la plataforma Atlas Health para traducir los hallazgos en una dieta idónea, una fórmula magistral en 3 cápsulas y acompañamiento por WhatsApp. Puedes consultar cualquier duda técnica o comercial con nuestro equipo clínico.'
+          a: '24Genomics Nutrition bridges European CE-IVD Illumina genotyping (+50,000 SNPs) with the Atlas multidisciplinary platform to deliver an optimal personalized diet, 3-capsule chronobiological compounding, and direct WhatsApp clinical follow-up. Feel free to ask any technical or operational question!'
         };
       }
     }
     setActiveAiAnswer(matched);
   };
 
-  const handleGenerateAtlasQuotation = async () => {
+  const handleGenerateFormalQuote = async () => {
     setIsSubmittingQuote(true);
     try {
-      const curCfg = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.QAR;
-      const subtotalConverted = currentTier.totalPriceQar * curCfg.rate;
-      const whatsappSubtotal = (whatsappSubscriptionsCount * 150) * curCfg.rate;
-      const grandTotal = subtotalConverted + whatsappSubtotal;
+    const curCfg = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.QAR;
+    const subtotalConverted = currentTier.totalPriceQar * curCfg.rate;
+    const whatsappSubtotal = (whatsappSubscriptionsCount * 150) * curCfg.rate;
+    const grandTotal = subtotalConverted + whatsappSubtotal;
 
-      const res = await fetch('/api/quotes/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clientName: 'Authorized Clinical Partner',
-          contactPerson: 'Clinical Director / Prescriber',
-          territory: 'International B2B',
-          currency: currency,
-          subtotal: grandTotal,
-          grandTotal: grandTotal,
-          marginPercent: 12.5,
-          distributorProfit: currentTier.distributorProfitTotalQar * curCfg.rate,
-          distributorMarginPct: parseFloat(currentTier.distributorMarginPct),
-          landedCost: subtotalConverted * 0.88,
-          items: [
-            {
-              id: `${currentProd.sku}-${currentTier.id.toUpperCase()}`,
-              name: `24Genomics Nutrition (${currentTier.name}) - Puntos 1 a 4 Incluidos`,
-              quantity: currentTier.quantity,
-              unitPrice: currentTier.unitPriceQar * curCfg.rate,
-              totalPrice: subtotalConverted,
-              currency: currency,
-              actives: currentProd.keyGenes
-            },
-            {
-              id: `24G-CARE-WA-${whatsappSubscriptionsCount}`,
-              name: `Consultas y Seguimiento Clínico WhatsApp (Punto 5) - ${whatsappSubscriptionsCount} Pacientes/Mes`,
-              quantity: whatsappSubscriptionsCount,
-              unitPrice: 150 * curCfg.rate,
-              totalPrice: whatsappSubtotal,
-              currency: currency,
-              actives: 'Acompañamiento clínico dietético y farmacológico'
-            }
-          ],
-          notes: `Official Commercial quotation for 24Genomics Nutrition (${currentTier.name} + ${whatsappSubscriptionsCount} WhatsApp subscriptions) generated via Atlas Clinical Platform. 100% advance wire transfer before Madrid laboratory dispatch.`,
-          source: 'atlas_24genomics_nutrition'
-        })
-      });
+    const clientLabel = isHossamMode ? 'Dr. Hossam Ahmed / Ryhanh Medical' : 'Authorized Healthcare Partner';
+    const territoryLabel = isHossamMode ? 'State of Qatar (Doha & GCC)' : 'International B2B';
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to generate quotation');
-      setGeneratedQuote(data);
-      setOrderModalOpen(true);
-    } catch (err) {
-      console.error('Quotation generation error:', err);
-      const curCfg = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.QAR;
-      const subtotalConverted = currentTier.totalPriceQar * curCfg.rate;
-      const whatsappSubtotal = (whatsappSubscriptionsCount * 150) * curCfg.rate;
-      const grandTotal = subtotalConverted + whatsappSubtotal;
-
-      setGeneratedQuote({
-        quotationNumber: `QT-24GN-${Math.floor(100000 + Math.random() * 900000)}`,
-        grandTotal: grandTotal,
-        clientName: 'Authorized Healthcare Partner',
+    const res = await fetch('/api/quotes/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientName: clientLabel,
+        contactPerson: isHossamMode ? 'Dr. Hossam Ahmed' : 'Clinical Director / Prescriber',
+        territory: territoryLabel,
         currency: currency,
-        success: true
-      });
-      setOrderModalOpen(true);
-    } finally {
-      setIsSubmittingQuote(false);
-    }
-  };
+        subtotal: grandTotal,
+        grandTotal: grandTotal,
+        marginPercent: 12.5,
+        distributorProfit: currentTier.distributorProfitTotalQar * curCfg.rate,
+        distributorMarginPct: parseFloat(currentTier.distributorMarginPct),
+        landedCost: subtotalConverted * 0.88,
+        items: [
+          {
+            id: `${currentProd.sku}-${currentTier.id.toUpperCase()}`,
+            name: `24Genomics Nutrition (${currentTier.name}) - Pillars 1 to 4 Included`,
+            quantity: currentTier.quantity,
+            unitPrice: currentTier.unitPriceQar * curCfg.rate,
+            totalPrice: subtotalConverted,
+            currency: currency,
+            actives: currentProd.keyGenes
+          },
+          {
+            id: `24G-CARE-WA-${whatsappSubscriptionsCount}`,
+            name: `WhatsApp Clinical Care & Follow-up (Pillar 5) - ${whatsappSubscriptionsCount} Patients/Month`,
+            quantity: whatsappSubscriptionsCount,
+            unitPrice: 150 * curCfg.rate,
+            totalPrice: whatsappSubtotal,
+            currency: currency,
+            actives: 'Ongoing dietary, galenic & clinical adherence monitoring'
+          }
+        ],
+        notes: `Official Commercial quotation for 24Genomics Nutrition (${currentTier.name} + ${whatsappSubscriptionsCount} WhatsApp subscriptions) generated via Atlas Clinical Platform for ${clientLabel}. 100% advance wire transfer before Madrid laboratory dispatch.`,
+        source: 'atlas_24genomics_nutrition'
+      })
+    });
 
-  const handleCopyShareLink = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2500);
-    }
-  };
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to generate quotation');
+    setGeneratedQuote(data);
+    setOrderModalOpen(true);
+  } catch (err) {
+    console.error('Quotation generation error:', err);
+    const curCfg = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.QAR;
+    const subtotalConverted = currentTier.totalPriceQar * curCfg.rate;
+    const whatsappSubtotal = (whatsappSubscriptionsCount * 150) * curCfg.rate;
+    const grandTotal = subtotalConverted + whatsappSubtotal;
 
-  return (
-    <div className="colway-price-root" style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a' }}>
-      {/* ── Public Unified Header with standard navigation & Login CTA ── */}
-      <PublicUnifiedHeader
-        track="diagnostics"
-        brandTitle="Atlas Health Services · Precision Genomics & Compounding Suite"
-        loginRedirect="/pricing/24genomics-qatar"
-        hideTier2={true}
-      />
+    setGeneratedQuote({
+      quotationNumber: `QT-24GN-${Math.floor(100000 + Math.random() * 900000)}`,
+      grandTotal: grandTotal,
+      clientName: isHossamMode ? 'Dr. Hossam Ahmed / Ryhanh Medical (Qatar)' : 'Authorized Healthcare Partner',
+      currency: currency,
+      success: true
+    });
+    setOrderModalOpen(true);
+  } finally {
+    setIsSubmittingQuote(false);
+  }
+};
 
-      {/* ── Atlas Clinical Hub Interactive Sub-Bar (Google Cloud Console Banner UX) ── */}
-      <div style={{ backgroundColor: '#022c22', color: '#ffffff', borderBottom: '1px solid rgba(45, 212, 191, 0.25)', padding: '0.65rem 1.5rem' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(45, 212, 191, 0.15)', border: '1px solid rgba(45, 212, 191, 0.4)', padding: '3px 9px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, color: '#2dd4bf', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
-              <Sparkles size={13} />
-              <span>24GENOMICS NUTRITION</span>
-            </div>
-            <span style={{ fontSize: '0.82rem', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              Saliva DNA Panel → Synchronized 3-Capsule Formulations &amp; WhatsApp Care
-            </span>
+const handleGenerateAtlasQuotation = handleGenerateFormalQuote;
+
+const handleCopyShareLink = () => {
+  if (typeof window !== 'undefined') {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  }
+};
+
+return (
+  <div className="colway-price-root" style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a' }}>
+    {/* ── Public Unified Header with standard navigation & Login CTA ── */}
+    <PublicUnifiedHeader
+      track="diagnostics"
+      brandTitle="Atlas Health Services · Precision Genomics & Compounding Suite"
+      loginRedirect="/pricing/24genomics-qatar"
+      hideTier2={true}
+    />
+
+    {/* ── Atlas Clinical Hub Interactive Sub-Bar (Google Cloud Console Banner UX) ── */}
+    <div style={{ backgroundColor: '#022c22', color: '#ffffff', borderBottom: '1px solid rgba(45, 212, 191, 0.25)', padding: '0.65rem 1.5rem' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(45, 212, 191, 0.15)', border: '1px solid rgba(45, 212, 191, 0.4)', padding: '3px 9px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, color: '#2dd4bf', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+            <Sparkles size={13} />
+            <span>24GENOMICS NUTRITION</span>
+          </div>
+          <span style={{ fontSize: '0.82rem', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            Saliva DNA Panel → Synchronized 3-Capsule Formulations &amp; WhatsApp Care
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          {/* Compact Currency Selector */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '3px 8px' }}>
+            <Globe size={13} style={{ color: '#2dd4bf' }} />
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              style={{
+                fontSize: '0.74rem',
+                fontWeight: 800,
+                color: '#ffffff',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              {Object.values(CURRENCY_CONFIG).map((c) => (
+                <option key={c.code} value={c.code} style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>
+                  {c.flag} {c.label}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            {/* Compact Currency Selector */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '3px 8px' }}>
-              <Globe size={13} style={{ color: '#2dd4bf' }} />
+          {/* Login / Auth Status Pill */}
+          {!isPricingUnlocked ? (
+            <Link
+              href="/login?redirect=/pricing/24genomics-qatar"
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                color: '#fef08a',
+                backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                border: '1px solid rgba(250, 204, 21, 0.4)',
+                padding: '4px 9px',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <Lock size={12} />
+              <span>Login to View Prices</span>
+            </Link>
+          ) : (
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#86efac', backgroundColor: 'rgba(34, 197, 94, 0.2)', border: '1px solid rgba(74, 222, 128, 0.4)', padding: '4px 9px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <CheckCircle2 size={12} />
+              <span>B2B Unlocked</span>
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowAtlasAiModal(true)}
+            style={{
+              background: 'linear-gradient(90deg, #0d9488 0%, #0f766e 100%)',
+              border: '1px solid #2dd4bf',
+              color: '#ffffff',
+              padding: '5px 12px',
+              borderRadius: '6px',
+              fontSize: '0.74rem',
+              fontWeight: 750,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+          >
+            <Sparkles size={13} className="text-teal-300" />
+            <span>Atlas AI</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* ── Main Sheet Container ── */}
+    <main className="price-sheet-container" style={{ maxWidth: '1280px', margin: '1.5rem auto 3rem auto', padding: '0 1.5rem' }}>
+      <Breadcrumb items={[
+        { label: 'B2B Schedules', href: '/pricing' },
+        { label: 'Clinical Genomics' },
+        { label: '24Genomics Nutrition Clinical Suite' }
+      ]} />
+
+      {/* ── Institutional Document Header (Google Cloud Console UX) ── */}
+      <header className="document-header" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+        {/* Top Row: Title & Action Toolbar */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1.25rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          <div style={{ flex: '1 1 500px', minWidth: '280px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ backgroundColor: '#003666', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '3px 8px', borderRadius: '4px', letterSpacing: '0.06em' }}>
+                ATLAS HEALTH SERVICES
+              </span>
+              <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '0.8rem' }}>×</span>
+              <span style={{ backgroundColor: '#0d9488', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '3px 8px', borderRadius: '4px', letterSpacing: '0.06em' }}>
+                24GENETICS CLINICAL LAB
+              </span>
+            </div>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 850, color: '#003666', letterSpacing: '-0.02em', margin: '0 0 0.4rem 0', lineHeight: 1.2 }}>
+              24GENOMICS NUTRITION
+            </h1>
+            <p style={{ fontSize: '0.88rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+              B2B Saliva DNA Testing Kits, Clinical Nutrition Profile, Personalized 3-Capsule Formulations &amp; WhatsApp Clinical Care
+            </p>
+          </div>
+
+          {/* GCP Action Toolbar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Compact Currency Dropdown */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '4px 8px' }}>
+              <Globe size={13} style={{ color: '#0d9488' }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b' }}>Currency:</span>
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
                 style={{
-                  fontSize: '0.74rem',
+                  fontSize: '0.76rem',
                   fontWeight: 800,
-                  color: '#ffffff',
+                  color: '#0f172a',
                   backgroundColor: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
@@ -449,335 +579,298 @@ export default function QatarGenomicsPriceClient() {
                 }}
               >
                 {Object.values(CURRENCY_CONFIG).map((c) => (
-                  <option key={c.code} value={c.code} style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>
+                  <option key={c.code} value={c.code}>
                     {c.flag} {c.label}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Login / Auth Status Pill */}
-            {!isPricingUnlocked ? (
-              <Link
-                href="/login?redirect=/pricing/24genomics-qatar"
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  color: '#fef08a',
-                  backgroundColor: 'rgba(234, 179, 8, 0.2)',
-                  border: '1px solid rgba(250, 204, 21, 0.4)',
-                  padding: '4px 9px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <Lock size={12} />
-                <span>Login to View Prices</span>
-              </Link>
-            ) : (
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#86efac', backgroundColor: 'rgba(34, 197, 94, 0.2)', border: '1px solid rgba(74, 222, 128, 0.4)', padding: '4px 9px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <CheckCircle2 size={12} />
-                <span>B2B Unlocked</span>
-              </span>
-            )}
-
+            {/* Simulate Hossam (Qatar Registered Partner) Toggle */}
             <button
               type="button"
-              onClick={() => setShowAtlasAiModal(true)}
+              onClick={() => {
+                const next = !hossamDemoActive;
+                setHossamDemoActive(next);
+                if (next) setCurrency('QAR');
+              }}
               style={{
-                background: 'linear-gradient(90deg, #0d9488 0%, #0f766e 100%)',
-                border: '1px solid #2dd4bf',
-                color: '#ffffff',
-                padding: '5px 12px',
+                padding: '8px 12px',
                 borderRadius: '6px',
                 fontSize: '0.74rem',
                 fontWeight: 750,
+                border: isHossamMode ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
+                backgroundColor: isHossamMode ? '#003666' : '#ffffff',
+                color: isHossamMode ? '#ffffff' : '#334155',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px'
               }}
             >
-              <Sparkles size={13} className="text-teal-300" />
+              <UserCheck size={13} className={isHossamMode ? 'text-teal-300' : 'text-slate-500'} />
+              <span>{isHossamMode ? 'Partner: Dr. Hossam (Qatar)' : 'View as: Dr. Hossam (Qatar)'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowAtlasAiModal(true)}
+              style={{
+                padding: '9px 13px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                border: '1px solid #99f6e4',
+                backgroundColor: '#f0fdfa',
+                color: '#0f766e',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+              }}
+            >
+              <Sparkles size={14} className="text-teal-600" />
               <span>Atlas AI</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCopyShareLink}
+              style={{
+                padding: '9px 13px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 650,
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: copiedLink ? '#15803d' : '#334155',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+              }}
+            >
+              {copiedLink ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+              <span>{copiedLink ? 'Copied' : 'Share'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleGenerateAtlasQuotation}
+              disabled={isSubmittingQuote}
+              style={{
+                padding: '9px 16px',
+                borderRadius: '6px',
+                fontSize: '0.80rem',
+                fontWeight: 800,
+                border: 'none',
+                background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+                color: '#ffffff',
+                cursor: isSubmittingQuote ? 'wait' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 6px rgba(13, 148, 136, 0.3)'
+              }}
+            >
+              <FileCheck size={14} className="text-teal-300" />
+              <span>{isSubmittingQuote ? 'Registering...' : `Order ${currentTier.name} →`}</span>
             </button>
           </div>
         </div>
-      </div>
 
-      {/* ── Main Sheet Container ── */}
-      <main className="price-sheet-container" style={{ maxWidth: '1280px', margin: '1.5rem auto 3rem auto', padding: '0 1.5rem' }}>
-        <Breadcrumb items={[
-          { label: 'B2B Schedules', href: '/pricing' },
-          { label: 'Clinical Genomics' },
-          { label: '24Genomics Nutrition Clinical Suite' }
-        ]} />
-
-        {/* ── Institutional Document Header (Google Cloud Console UX) ── */}
-        <header className="document-header" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
-          {/* Top Row: Title & Action Toolbar */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1.25rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-            <div style={{ flex: '1 1 500px', minWidth: '280px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <span style={{ backgroundColor: '#003666', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '3px 8px', borderRadius: '4px', letterSpacing: '0.06em' }}>
-                  ATLAS HEALTH SERVICES
-                </span>
-                <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '0.8rem' }}>×</span>
-                <span style={{ backgroundColor: '#0d9488', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '3px 8px', borderRadius: '4px', letterSpacing: '0.06em' }}>
-                  24GENETICS CLINICAL LAB
-                </span>
-              </div>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 850, color: '#003666', letterSpacing: '-0.02em', margin: '0 0 0.4rem 0', lineHeight: 1.2 }}>
-                24GENOMICS NUTRITION
-              </h1>
-              <p style={{ fontSize: '0.88rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                B2B Saliva DNA Testing Kits, Clinical Nutrition Profile, Personalized 3-Capsule Formulations &amp; WhatsApp Clinical Care
-              </p>
+        {/* GCP Resource Metadata Card */}
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+          padding: '1.25rem 1.5rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1.25rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+        }}>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+              Document Reference
             </div>
-
-            {/* GCP Action Toolbar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {/* Compact Currency Dropdown */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '4px 8px' }}>
-                <Globe size={13} style={{ color: '#0d9488' }} />
-                <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b' }}>Currency:</span>
-                <select
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  style={{
-                    fontSize: '0.76rem',
-                    fontWeight: 800,
-                    color: '#0f172a',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    outline: 'none'
-                  }}
-                >
-                  {Object.values(CURRENCY_CONFIG).map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.flag} {c.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowAtlasAiModal(true)}
-                style={{
-                  padding: '9px 13px',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  border: '1px solid #99f6e4',
-                  backgroundColor: '#f0fdfa',
-                  color: '#0f766e',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                }}
-              >
-                <Sparkles size={14} className="text-teal-600" />
-                <span>Atlas AI</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCopyShareLink}
-                style={{
-                  padding: '9px 13px',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
-                  fontWeight: 650,
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  color: copiedLink ? '#15803d' : '#334155',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                }}
-              >
-                {copiedLink ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                <span>{copiedLink ? 'Copied' : 'Share'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleGenerateAtlasQuotation}
-                disabled={isSubmittingQuote}
-                style={{
-                  padding: '9px 16px',
-                  borderRadius: '6px',
-                  fontSize: '0.80rem',
-                  fontWeight: 800,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
-                  color: '#ffffff',
-                  cursor: isSubmittingQuote ? 'wait' : 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.3)'
-                }}
-              >
-                <FileCheck size={14} className="text-teal-300" />
-                <span>{isSubmittingQuote ? 'Registering...' : `Order ${currentTier.name} →`}</span>
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <CopyableId value="DOC-24G-NUTRITION-V1" />
             </div>
           </div>
 
-          {/* GCP Resource Metadata Card */}
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+              Document Status
+            </div>
+            <div>
+              <StatusBadge status="active" label="Active & Verified SSOT" />
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+              Scope & Target Audience
+            </div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#0f172a' }}>
+              Licensed Clinics, Medical Centers & Distributors
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+              Lab Accreditation
+            </div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0d9488' }}>
+              European CE-IVD (Madrid, Spain)
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+              Genomic Technology
+            </div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+              Illumina GSA Array (+50,000 SNPs)
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+              Pricing Access
+            </div>
+            <div>
+              {isPricingUnlocked ? (
+                <StatusBadge status="approved" label="B2B Unlocked" />
+              ) : (
+                <StatusBadge status="pending" label="Login Required" />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Hossam / Qatar Verified Partner Banner ── */}
+        {isHossamMode && (
           <div style={{
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
+            marginTop: '1.25rem',
+            backgroundColor: '#00284d',
+            border: '1.5px solid #0d9488',
             borderRadius: '10px',
-            padding: '1.25rem 1.5rem',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '1.25rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+            padding: '1rem 1.25rem',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            boxShadow: '0 4px 14px rgba(0, 40, 77, 0.25)'
           }}>
-            <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-                Document Reference
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <CopyableId value="DOC-24G-NUTRITION-V1" />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-                Document Status
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 850, fontSize: '1rem' }}>
+                HA
               </div>
               <div>
-                <StatusBadge status="active" label="Active & Verified SSOT" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.98rem', fontWeight: 850 }}>
+                    Welcome back, Dr. Hossam Ahmed
+                  </span>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '2px 8px', borderRadius: '4px' }}>
+                    QATAR VERIFIED PARTNER
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#99f6e4', marginTop: '2px' }}>
+                  Ryhanh Medical Company · Doha, State of Qatar · Authorized Regional B2B Distribution Account
+                </div>
               </div>
             </div>
-
-            <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-                Scope & Target Audience
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#0f172a' }}>
-                Licensed Clinics, Medical Centers & Distributors
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-                Lab Accreditation
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0d9488' }}>
-                European CE-IVD (Madrid, Spain)
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-                Genomic Technology
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-                Illumina GSA Array (+50,000 SNPs)
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-                Pricing Access
-              </div>
-              <div>
-                {isPricingUnlocked ? (
-                  <StatusBadge status="approved" label="B2B Unlocked" />
-                ) : (
-                  <StatusBadge status="pending" label="Login Required" />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* ── Visual 3-Step Patient Journey Pipeline ── */}
-          <div style={{ marginTop: '1.25rem', backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <TrendingUp size={14} style={{ color: '#0d9488' }} />
-              <span>Flujo Clínico en 3 Pasos · Del ADN al Tratamiento y Cuidado Continuo</span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
-              <div style={{ backgroundColor: '#f8fafc', borderLeft: '4px solid #0284c7', padding: '0.85rem 1rem', borderRadius: '6px' }}>
-                <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>Paso 1 · Toma de Muestra (2 min)</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: '3px 0' }}>Saliva CE-IVD No Invasiva</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Hisopo bucal indoloro con buffer estabilizador a temperatura ambiente (en clínica o domicilio).</div>
-              </div>
-
-              <div style={{ backgroundColor: '#f8fafc', borderLeft: '4px solid #0d9488', padding: '0.85rem 1rem', borderRadius: '6px' }}>
-                <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase' }}>Paso 2 · Secuenciación (3–4 semanas)</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: '3px 0' }}>Core Lab Europeo (Madrid)</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Chip Illumina GSA (+50.000 SNPs informativos) con reproducibilidad clínica &gt;99.9%.</div>
-              </div>
-
-              <div style={{ backgroundColor: '#f8fafc', borderLeft: '4px solid #7c3aed', padding: '0.85rem 1rem', borderRadius: '6px' }}>
-                <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase' }}>Paso 3 · Entregables &amp; Cuidado</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: '3px 0' }}>Reportes, 3 Cápsulas, Dieta y WhatsApp</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Doble formato papel + Atlas, fórmula magistral en 3 tomas, dieta del catálogo y soporte mensual.</div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── 4 GCP Default Metric KPIs Strip (Rule #22) ── */}
-          <div style={{ marginTop: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0d9488' }}></span>
-                Clinical Genomics Protocol Metrics
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '0.74rem', color: '#cbd5e1' }}>
+                Partner ID: <strong style={{ color: '#ffffff' }}>QA-RYH-88219</strong>
               </span>
-              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0f766e', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px' }}>
-                Scope: Worldwide B2B Clinical Distribution
+              <span style={{ backgroundColor: 'rgba(13, 148, 136, 0.25)', border: '1px solid #0d9488', color: '#5eead4', fontSize: '0.72rem', fontWeight: 750, padding: '4px 10px', borderRadius: '6px' }}>
+                ✓ Tier 1 Wholesale Unlocked (QAR)
               </span>
             </div>
+          </div>
+        )}
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '1rem'
-            }}>
-              <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #003666', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Target Audience</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#003666', margin: '3px 0' }}>Licensed Clinics</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Medical centers &amp; private practices</div>
-              </div>
+        {/* ── Visual 3-Step Patient Journey Pipeline ── */}
+        <div style={{ marginTop: '1.25rem', backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <TrendingUp size={14} style={{ color: '#0d9488' }} />
+            <span>3-Step Clinical Protocol · From DNA Sequencing to Active Patient Care</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+            <div style={{ backgroundColor: '#f8fafc', borderLeft: '4px solid #0284c7', padding: '0.85rem 1rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>Step 1 · Sample Collection (2 min)</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: '3px 0' }}>Non-Invasive CE-IVD Saliva Swab</div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Painless buccal swab with ambient room temperature cellular preservation buffer (in-clinic or at-home).</div>
+            </div>
 
-              <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #0d9488', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Lab Turnaround Time</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#0d9488', margin: '3px 0' }}>3–4 Weeks</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>European CE-IVD Core Lab Madrid</div>
-              </div>
+            <div style={{ backgroundColor: '#f8fafc', borderLeft: '4px solid #0d9488', padding: '0.85rem 1rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase' }}>Step 2 · Sequencing (3–4 weeks)</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: '3px 0' }}>European Core Lab (Madrid)</div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Illumina GSA Array (+50,000 informative SNPs) with clinical analytical repeatability &gt;99.9%.</div>
+            </div>
 
-              <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #7c3aed', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Galenic Protocol</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#7c3aed', margin: '3px 0' }}>3-Capsule Daily</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Fasting · Breakfast · Dinner Regimen</div>
-              </div>
-
-              <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #16a34a', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Clinical Deliverables</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#16a34a', margin: '3px 0' }}>5 Core Pillars</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>4 in Pack (One-Time) + 1 WhatsApp Care</div>
-              </div>
+            <div style={{ backgroundColor: '#f8fafc', borderLeft: '4px solid #7c3aed', padding: '0.85rem 1rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase' }}>Step 3 · Deliverables &amp; Continuous Care</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: '3px 0' }}>Reports, 3-Capsule Regimen, Diet &amp; WhatsApp</div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Dual format paper + Atlas digital platform, 3 chronobiological capsules, assigned clinical diet, and monthly specialist care.</div>
             </div>
           </div>
+        </div>
 
-        </header>
+        {/* ── 4 GCP Default Metric KPIs Strip (Rule #22) ── */}
+        <div style={{ marginTop: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0d9488' }}></span>
+              Clinical Genomics Protocol Metrics
+            </span>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0f766e', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px' }}>
+              Scope: Worldwide B2B Clinical Distribution
+            </span>
+          </div>
 
-        {/* ── Responsive Styling for Qatar Schedule Workspace ── */}
-        <style dangerouslySetInnerHTML={{ __html: `
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '1rem'
+          }}>
+            <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #003666', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Target Audience</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#003666', margin: '3px 0' }}>Licensed Clinics</div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Medical centers &amp; private practices</div>
+            </div>
+
+            <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #0d9488', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Lab Turnaround Time</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#0d9488', margin: '3px 0' }}>3–4 Weeks</div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>European CE-IVD Core Lab Madrid</div>
+            </div>
+
+            <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #7c3aed', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Galenic Protocol</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#7c3aed', margin: '3px 0' }}>3-Capsule Daily</div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Fasting · Breakfast · Dinner Regimen</div>
+            </div>
+
+            <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #16a34a', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Clinical Deliverables</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#16a34a', margin: '3px 0' }}>5 Core Pillars</div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>4 in Pack (One-Time) + 1 WhatsApp Care</div>
+            </div>
+          </div>
+        </div>
+
+      </header>
+
+      {/* ── Responsive Styling for Qatar Schedule Workspace ── */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
           .qatar-genomics-workspace {
             display: grid;
             grid-template-columns: 290px minmax(0, 1fr);
@@ -823,834 +916,835 @@ export default function QatarGenomicsPriceClient() {
           }
         ` }} />
 
-        <div className="qatar-genomics-workspace">
-          {/* ── MOBILE NAV STRIP (Visible only on screens <= 960px) ── */}
-          <div className="qatar-mobile-nav-strip">
-            {SCHEDULE_SECTIONS.map((section) => {
-              const Icon = section.icon;
-              const isActive = activeTab === section.id;
-              return (
-                <button
-                  key={section.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(section.id);
-                    const el = document.getElementById('qatar-active-section-anchor');
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    fontSize: '0.78rem',
-                    fontWeight: isActive ? 800 : 600,
-                    whiteSpace: 'nowrap',
-                    border: isActive ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
-                    backgroundColor: isActive ? '#f0fdfa' : '#ffffff',
-                    color: isActive ? '#0d9488' : '#475569',
-                    cursor: 'pointer',
-                    boxShadow: isActive ? '0 2px 4px rgba(13, 148, 136, 0.15)' : 'none',
-                    flexShrink: 0
-                  }}
-                >
-                  <Icon size={14} />
-                  <span>{section.shortLabel || section.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* ── DESKTOP STICKY SIDEBAR (290px) ── */}
-          <aside className="qatar-desktop-sidebar">
-            {/* Sections Menu Card */}
-            <div style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              overflow: 'hidden',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
-            }}>
-              <div style={{
-                padding: '12px 14px',
-                borderBottom: '1px solid #f1f5f9',
-                backgroundColor: '#f8fafc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  SCHEDULE SECTIONS
-                </span>
-                <span style={{ fontSize: '0.66rem', fontWeight: 750, backgroundColor: '#f0fdfa', color: '#0d9488', padding: '2px 7px', borderRadius: '4px' }}>
-                  6 Sections
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {SCHEDULE_SECTIONS.map((section) => {
-                  const Icon = section.icon;
-                  const isActive = activeTab === section.id;
-                  return (
-                    <button
-                      key={section.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveTab(section.id);
-                        const el = document.getElementById('qatar-active-section-anchor');
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }}
-                      style={{
-                        padding: '12px 14px',
-                        border: 'none',
-                        borderLeft: isActive ? '3.5px solid #0d9488' : '3.5px solid transparent',
-                        backgroundColor: isActive ? '#f0fdfa' : 'transparent',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '10px',
-                        transition: 'all 0.15s ease',
-                        borderBottom: '1px solid #f8fafc'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isActive) e.currentTarget.style.backgroundColor = '#f8fafc';
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
-                    >
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '6px',
-                        backgroundColor: isActive ? '#0d9488' : '#f1f5f9',
-                        color: isActive ? '#ffffff' : '#64748b',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        marginTop: '1px'
-                      }}>
-                        <Icon size={16} />
-                      </div>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{
-                          fontSize: '0.80rem',
-                          fontWeight: isActive ? 800 : 650,
-                          color: isActive ? '#0d9488' : '#0f172a',
-                          lineHeight: 1.3
-                        }}>
-                          {section.label}
-                        </div>
-                        <div style={{
-                          fontSize: '0.68rem',
-                          color: '#64748b',
-                          marginTop: '2px',
-                          lineHeight: 1.3
-                        }}>
-                          {section.desc}
-                        </div>
-                      </div>
-                      {isActive && (
-                        <div style={{ color: '#0d9488', marginTop: '6px', flexShrink: 0 }}>
-                          <ChevronRight size={14} />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Procurement Actions Card */}
-            <div style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              padding: '14px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
-            }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                DISTRIBUTOR PROCUREMENT
-              </span>
+      <div className="qatar-genomics-workspace">
+        {/* ── MOBILE NAV STRIP (Visible only on screens <= 960px) ── */}
+        <div className="qatar-mobile-nav-strip">
+          {SCHEDULE_SECTIONS.map((section) => {
+            const Icon = section.icon;
+            const isActive = activeTab === section.id;
+            return (
               <button
+                key={section.id}
                 type="button"
-                onClick={handleGenerateAtlasQuotation}
-                disabled={isSubmittingQuote}
+                onClick={() => {
+                  setActiveTab(section.id);
+                  const el = document.getElementById('qatar-active-section-anchor');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
                 style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
-                  fontWeight: 800,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
-                  color: '#ffffff',
-                  cursor: isSubmittingQuote ? 'wait' : 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
                   gap: '6px',
-                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)'
-                }}
-              >
-                <Sparkles size={14} className="text-teal-300" />
-                <span>{isSubmittingQuote ? 'Registering...' : `Generate Quote (${currentTier.name}) →`}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCopyShareLink}
-                style={{
-                  width: '100%',
                   padding: '8px 12px',
-                  borderRadius: '6px',
-                  fontSize: '0.76rem',
-                  fontWeight: 650,
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  color: copiedLink ? '#15803d' : '#334155',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  fontWeight: isActive ? 800 : 600,
+                  whiteSpace: 'nowrap',
+                  border: isActive ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
+                  backgroundColor: isActive ? '#f0fdfa' : '#ffffff',
+                  color: isActive ? '#0d9488' : '#475569',
                   cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
+                  boxShadow: isActive ? '0 2px 4px rgba(13, 148, 136, 0.15)' : 'none',
+                  flexShrink: 0
                 }}
               >
-                {copiedLink ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                <span>{copiedLink ? 'Link Copied' : 'Share Schedule'}</span>
+                <Icon size={14} />
+                <span>{section.shortLabel || section.label}</span>
               </button>
-            </div>
+            );
+          })}
+        </div>
 
-            {/* Institutional Metadata Card */}
+        {/* ── DESKTOP STICKY SIDEBAR (290px) ── */}
+        <aside className="qatar-desktop-sidebar">
+          {/* Sections Menu Card */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            overflow: 'hidden',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+          }}>
             <div style={{
-              backgroundColor: '#f8fafc',
-              borderRadius: '10px',
-              border: '1px solid #e2e8f0',
               padding: '12px 14px',
-              fontSize: '0.72rem',
-              color: '#64748b',
-              lineHeight: 1.5
+              borderBottom: '1px solid #f1f5f9',
+              backgroundColor: '#f8fafc',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
             }}>
-              <div><strong>Scope:</strong> Licensed Medical Practices &amp; Clinics</div>
-              <div style={{ marginTop: '2px' }}><strong>Territory:</strong> International B2B</div>
-              <div style={{ marginTop: '2px' }}><strong>Ref:</strong> <code style={{ color: '#003666', fontWeight: 700 }}>DOC-24G-NUTRITION-V1</code></div>
-              <div style={{ marginTop: '2px' }}><strong>Status:</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>Active &amp; Verified SSOT</span></div>
+              <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                SCHEDULE SECTIONS
+              </span>
+              <span style={{ fontSize: '0.66rem', fontWeight: 750, backgroundColor: '#f0fdfa', color: '#0d9488', padding: '2px 7px', borderRadius: '4px' }}>
+                6 Sections
+              </span>
             </div>
-          </aside>
 
-          {/* ── RIGHT COLUMN: ACTIVE SECTION CONTENT (ONLY THE SELECTED ONE) ── */}
-          <div className="genomics-main-content-column" id="genomics-active-section-anchor">
-
-        {/* ── Generated Quotation Confirmation Banner ── */}
-        {generatedQuote && (
-          <div style={{ backgroundColor: '#f0fdfa', border: '2px solid #5eead4', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.15)' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CheckCircle2 size={24} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                    Quotation Successfully Registered in Atlas Health SSOT
-                  </div>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 4px 0' }}>
-                    Quotation #{generatedQuote.quotationNumber}
-                  </h3>
-                  <div style={{ fontSize: '0.85rem', color: '#334155' }}>
-                    Consignee: <strong>{generatedQuote.clientName || 'Authorized Healthcare Partner'}</strong> · Total: <strong>{formatPrice(currentTier.totalPriceQar)}</strong> ({currentTier.name}).
-                  </div>
-                  <div style={{ fontSize: '0.76rem', color: '#0d9488', marginTop: '4px', fontWeight: 650 }}>
-                    ✓ Formal quotation record created in Atlas database and dispatched to Mediluxe executive management (jose@mediluxeme.com).
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
-                  onClick={() => window.print()}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: '6px',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    border: '1px solid #99f6e4',
-                    backgroundColor: '#ffffff',
-                    color: '#0d9488',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px'
-                  }}
-                >
-                  <Printer size={14} />
-                  <span>Print Pro-Forma</span>
-                </button>
-                <a
-                  href={`https://wa.me/971504789841?text=Hello%20Jose,%20I%20have%20registered%20our%20quotation%20%23${generatedQuote.quotationNumber}%20in%20Atlas%20Health%20for%20${currentTier.name}%2024Genomics%20Nutrition%20Kits.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: '6px',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    backgroundColor: '#25D366',
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px'
-                  }}
-                >
-                  <MessageCircle size={14} />
-                  <span>Confirm on WhatsApp</span>
-                </a>
-                <button
-                  onClick={() => setGeneratedQuote(null)}
-                  style={{
-                    padding: '8px 10px',
-                    borderRadius: '6px',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    border: 'none',
-                    backgroundColor: 'transparent',
-                    color: '#64748b',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ════════════════════════════════════════════════════════════════════
-            TAB 1: COMMERCIAL PRICING & QUOTATION (24GENOMICS NUTRITION)
-        ════════════════════════════════════════════════════════════════════ */}
-        {activeTab === 'commercial' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-
-            {/* B2B Authentication Required Banner if !isPricingUnlocked */}
-            {!isPricingUnlocked && (
-              <div style={{ backgroundColor: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '12px', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', boxShadow: '0 2px 8px rgba(217, 119, 6, 0.08)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Lock size={22} />
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '1rem', fontWeight: 850, color: '#92400e', margin: 0 }}>
-                      Tarifario Comercial B2B Protegido (24Genomics Nutrition)
-                    </h4>
-                    <p style={{ fontSize: '0.80rem', color: '#b45309', margin: '3px 0 0 0' }}>
-                      Las tarifas por volumen, descuentos de kits y pautas de prescripción están reservadas a facultativos, clínicas y distribuidores autorizados.
-                    </p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {SCHEDULE_SECTIONS.map((section) => {
+                const Icon = section.icon;
+                const isActive = activeTab === section.id;
+                return (
                   <button
+                    key={section.id}
                     type="button"
-                    onClick={() => setPreviewUnlocked(true)}
+                    onClick={() => {
+                      setActiveTab(section.id);
+                      const el = document.getElementById('qatar-active-section-anchor');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
                     style={{
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      color: '#0d9488',
-                      backgroundColor: '#f0fdfa',
-                      border: '1px solid #99f6e4',
-                      padding: '8px 14px',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
+                      padding: '12px 14px',
+                      border: 'none',
+                      borderLeft: isActive ? '3.5px solid #0d9488' : '3.5px solid transparent',
+                      backgroundColor: isActive ? '#f0fdfa' : 'transparent',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '10px',
+                      transition: 'all 0.15s ease',
+                      borderBottom: '1px solid #f8fafc'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                   >
-                    Desbloquear Vista Demo
-                  </button>
-                  <Link
-                    href="/login?redirect=/pricing/24genomics-qatar"
-                    style={{
-                      fontSize: '0.78rem',
-                      fontWeight: 800,
-                      color: '#ffffff',
-                      backgroundColor: '#0d9488',
-                      padding: '8px 16px',
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
                       borderRadius: '6px',
+                      backgroundColor: isActive ? '#0d9488' : '#f1f5f9',
+                      color: isActive ? '#ffffff' : '#64748b',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: '1px'
+                    }}>
+                      <Icon size={16} />
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{
+                        fontSize: '0.80rem',
+                        fontWeight: isActive ? 800 : 650,
+                        color: isActive ? '#0d9488' : '#0f172a',
+                        lineHeight: 1.3
+                      }}>
+                        {section.label}
+                      </div>
+                      <div style={{
+                        fontSize: '0.68rem',
+                        color: '#64748b',
+                        marginTop: '2px',
+                        lineHeight: 1.3
+                      }}>
+                        {section.desc}
+                      </div>
+                    </div>
+                    {isActive && (
+                      <div style={{ color: '#0d9488', marginTop: '6px', flexShrink: 0 }}>
+                        <ChevronRight size={14} />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Procurement Actions Card */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            padding: '14px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+          }}>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              DISTRIBUTOR PROCUREMENT
+            </span>
+            <button
+              type="button"
+              onClick={handleGenerateAtlasQuotation}
+              disabled={isSubmittingQuote}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 800,
+                border: 'none',
+                background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+                color: '#ffffff',
+                cursor: isSubmittingQuote ? 'wait' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)'
+              }}
+            >
+              <Sparkles size={14} className="text-teal-300" />
+              <span>{isSubmittingQuote ? 'Registering...' : `Generate Quote (${currentTier.name}) →`}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCopyShareLink}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                fontSize: '0.76rem',
+                fontWeight: 650,
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: copiedLink ? '#15803d' : '#334155',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              {copiedLink ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+              <span>{copiedLink ? 'Link Copied' : 'Share Schedule'}</span>
+            </button>
+          </div>
+
+          {/* Institutional Metadata Card */}
+          <div style={{
+            backgroundColor: '#f8fafc',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            padding: '12px 14px',
+            fontSize: '0.72rem',
+            color: '#64748b',
+            lineHeight: 1.5
+          }}>
+            <div><strong>Scope:</strong> Licensed Medical Practices &amp; Clinics</div>
+            <div style={{ marginTop: '2px' }}><strong>Territory:</strong> International B2B</div>
+            <div style={{ marginTop: '2px' }}><strong>Ref:</strong> <code style={{ color: '#003666', fontWeight: 700 }}>DOC-24G-NUTRITION-V1</code></div>
+            <div style={{ marginTop: '2px' }}><strong>Status:</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>Active &amp; Verified SSOT</span></div>
+          </div>
+        </aside>
+
+        {/* ── RIGHT COLUMN: ACTIVE SECTION CONTENT (ONLY THE SELECTED ONE) ── */}
+        <div className="genomics-main-content-column" id="genomics-active-section-anchor">
+
+          {/* ── Generated Quotation Confirmation Banner ── */}
+          {generatedQuote && (
+            <div style={{ backgroundColor: '#f0fdfa', border: '2px solid #5eead4', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.15)' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Quotation Successfully Registered in Atlas Health SSOT
+                    </div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 4px 0' }}>
+                      Quotation #{generatedQuote.quotationNumber}
+                    </h3>
+                    <div style={{ fontSize: '0.85rem', color: '#334155' }}>
+                      Consignee: <strong>{generatedQuote.clientName || 'Authorized Healthcare Partner'}</strong> · Total: <strong>{formatPrice(currentTier.totalPriceQar)}</strong> ({currentTier.name}).
+                    </div>
+                    <div style={{ fontSize: '0.76rem', color: '#0d9488', marginTop: '4px', fontWeight: 650 }}>
+                      ✓ Formal quotation record created in Atlas database and dispatched to Mediluxe executive management (jose@mediluxeme.com).
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    onClick={() => window.print()}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      border: '1px solid #99f6e4',
+                      backgroundColor: '#ffffff',
+                      color: '#0d9488',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <Printer size={14} />
+                    <span>Print Pro-Forma</span>
+                  </button>
+                  <a
+                    href={`https://wa.me/971504789841?text=Hello%20Jose,%20I%20have%20registered%20our%20quotation%20%23${generatedQuote.quotationNumber}%20in%20Atlas%20Health%20for%20${currentTier.name}%2024Genomics%20Nutrition%20Kits.`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      backgroundColor: '#25D366',
+                      color: '#ffffff',
                       textDecoration: 'none',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '5px'
                     }}
                   >
-                    <LogIn size={14} />
-                    <span>Iniciar Sesión B2B</span>
-                  </Link>
-                </div>
-              </div>
-            )}
-
-            {/* Volume Tier Selectors (Clean: Tier 1, Tier 2, Tier 3) */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                    Selección de Pack por Volumen (Kits 24Genomics Nutrition)
-                  </h3>
-                  <p style={{ fontSize: '0.80rem', color: '#64748b', margin: '2px 0 0 0' }}>
-                    Todos los tiers incluyen tubos salivales CE-IVD, transporte refrigerado, extracción de ADN, genotipado en Madrid y entregables 1 al 4.
-                  </p>
-                </div>
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '3px 8px', borderRadius: '4px' }}>
-                  Acreditación: Core Lab Europeo CE-IVD (Madrid)
-                </span>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-                {VOLUME_TIERS.map(tier => {
-                  const isSelected = selectedTier === tier.id;
-                  return (
-                    <div
-                      key={tier.id}
-                      onClick={() => setSelectedTier(tier.id)}
-                      style={{
-                        padding: '1.25rem',
-                        borderRadius: '10px',
-                        border: isSelected ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                        backgroundColor: isSelected ? '#f0fdfa' : '#ffffff',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        boxShadow: isSelected ? '0 4px 12px rgba(13, 148, 136, 0.12)' : 'none'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.76rem', fontWeight: 800, color: isSelected ? '#0d9488' : '#64748b', textTransform: 'uppercase' }}>
-                          {tier.discountLabel}
-                        </span>
-                        {isSelected && <CheckCircle2 size={18} className="text-teal-600" />}
-                      </div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 850, color: '#0f172a' }}>
-                        {tier.name}
-                      </div>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0d9488', margin: '4px 0' }}>
-                        {formatPrice(tier.totalPriceQar)}{' '}
-                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
-                          ({formatPrice(tier.unitPriceQar)} / kit)
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '4px', borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
-                        Pago único integral · Puntos 1, 2, 3 y 4 incluidos.
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Visual Comparison: Traditional PDF vs. 24Genomics Nutrition Ecosystem (Approved Improvement #2) */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <Zap size={16} style={{ color: '#0d9488' }} />
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#003666', margin: 0 }}>
-                  Por qué 24Genomics Nutrition transforma la experiencia del paciente frente a un test tradicional
-                </h4>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
-                <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '1rem' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#dc2626', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>✕</span> Test Genético Convencional de Mercado
-                  </div>
-                  <ul style={{ fontSize: '0.78rem', color: '#7f1d1d', margin: 0, paddingLeft: '1.1rem', lineHeight: 1.6 }}>
-                    <li>Informe PDF denso de 40 páginas con términos de laboratorio incomprensibles.</li>
-                    <li>Sin indicación clara de qué dieta seguir en la vida diaria.</li>
-                    <li>El paciente no sabe qué suplementos comprar ni en qué dosis o combinación.</li>
-                    <li>Sin seguimiento facultativo: el informe acaba archivado en un cajón.</li>
-                  </ul>
-                </div>
-
-                <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '1rem' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>✓</span> Ecosistema 24Genomics Nutrition + Atlas
-                  </div>
-                  <ul style={{ fontSize: '0.78rem', color: '#14532d', margin: 0, paddingLeft: '1.1rem', lineHeight: 1.6 }}>
-                    <li>Doble reporte de lujo en papel encuadernado para el paciente + app digital interactiva.</li>
-                    <li>Asignación de la dieta óptima con semáforo nutricional de alimentos.</li>
-                    <li>Fórmula magistral precisa de 3 cápsulas cronobiológicas (Morning, Midday, Evening).</li>
-                    <li>Acompañamiento y resolución continua de dudas por WhatsApp con especialista.</li>
-                  </ul>
+                    <MessageCircle size={14} />
+                    <span>Confirm on WhatsApp</span>
+                  </a>
+                  <button
+                    onClick={() => setGeneratedQuote(null)}
+                    style={{
+                      padding: '8px 10px',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      color: '#64748b',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Dismiss
+                  </button>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Complete Deliverables & Services Schedule Table (5 Points) */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-              <div style={{ padding: '1.25rem 1.5rem', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                      Servicios y Entregables Incluidos en el Programa 24Genomics Nutrition
-                    </h3>
-                    <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#0d9488', color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
-                      Puntos 1–4 en Pack · Punto 5 Suscripción
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '0.80rem', color: '#64748b', marginTop: '4px', marginBottom: 0 }}>
-                    Los entregables del 1 al 4 forman parte de un <strong>único pago integral</strong> al adquirir el pack seleccionado ({currentTier.name}). El servicio 5 es un acompañamiento clínico continuo de <strong>pago mensual flexible</strong>, cancelable en cualquier momento.
-                  </p>
-                </div>
-              </div>
+          {/* ════════════════════════════════════════════════════════════════════
+            TAB 1: COMMERCIAL PRICING & QUOTATION (24GENOMICS NUTRITION)
+        ════════════════════════════════════════════════════════════════════ */}
+          {activeTab === 'commercial' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                      <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569', width: '38%' }}>Nº y Servicio Incluido</th>
-                      <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569', width: '24%' }}>Formato de Entrega</th>
-                      <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569', width: '22%' }}>Alcance Clínico</th>
-                      <th style={{ padding: '12px 16px', fontWeight: 700, color: '#0d9488', textAlign: 'right', width: '16%' }}>Modalidad y Precio</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* Item 1 */}
-                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
-                            1
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
-                              Reporte Clínico de Nutrición (Nutrigenética)
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
-                              Evaluación exhaustiva de predisposición metabólica a macro y micronutrientes, absorción de vitaminas críticas y sensibilidades digestivas.
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                            <FileText size={14} style={{ color: '#0d9488' }} /> En papel encuadernado
-                          </span>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                            <Cpu size={14} style={{ color: '#0284c7' }} /> Dentro de la Plataforma Atlas
-                          </span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
-                        Metabolismo de carbohidratos, grasas, proteínas, MTHFR (folato), VDR (vitamina D), intolerancia a la lactosa y celiaquía.
-                      </td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <span style={{ backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block' }}>
-                          ✓ Incluido en Pack
-                        </span>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '4px' }}>Pago único</div>
-                      </td>
-                    </tr>
-
-                    {/* Item 2 */}
-                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
-                            2
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
-                              Reporte de Ancestros Biogeográficos
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
-                              Mapeo biogeográfico de origen étnico e historia poblacional a partir de marcadores genéticos informativos de ancestría (AIMs).
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <BookOpen size={14} style={{ color: '#0d9488' }} /> Reporte impreso en papel
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
-                        Desglose geográfico detallado entre más de 400 regiones y poblaciones de referencia globales.
-                      </td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <span style={{ backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block' }}>
-                          ✓ Incluido en Pack
-                        </span>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '4px' }}>Pago único</div>
-                      </td>
-                    </tr>
-
-                    {/* Item 3 */}
-                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
-                            3
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
-                              Recomendaciones de Suplementos Nutricionales Personalizados
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
-                              Algoritmo clínico Atlas que traduce variantes genéticas en formulaciones magistrales exactas sincronizadas cronobiológicamente (3 cápsulas al día).
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <Cpu size={14} style={{ color: '#0284c7' }} /> Dentro de la Plataforma Atlas
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
-                        Esquema galénico de 3 cápsulas (Morning, Midday, Evening) con compatibilidad química y dosificaciones farmacológicas verificadas.
-                      </td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <span style={{ backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block' }}>
-                          ✓ Incluido en Pack
-                        </span>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '4px' }}>Pago único</div>
-                      </td>
-                    </tr>
-
-                    {/* Item 4 */}
-                    <tr style={{ borderBottom: '2px solid #cbd5e1' }}>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
-                            4
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
-                              Identificación de la Dieta Más Idónea del Catálogo
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
-                              Cálculo de compatibilidad y asignación de la estrategia nutricional óptima entre los modelos clínicos disponibles según la biología individual.
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <Layers size={14} style={{ color: '#0284c7' }} /> Plataforma Atlas + Dossier
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
-                        Selección entre Dieta Mediterránea, Baja en Carbohidratos/Keto, Baja en Grasas o Equilibrada con índice glucémico individualizado.
-                      </td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <span style={{ backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block' }}>
-                          ✓ Incluido en Pack
-                        </span>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '4px' }}>Pago único</div>
-                      </td>
-                    </tr>
-
-                    {/* Pack Summary Banner Row */}
-                    <tr style={{ backgroundColor: '#f0fdfa', borderBottom: '2px solid #0d9488' }}>
-                      <td colSpan={3} style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <CheckCircle2 size={18} style={{ color: '#0d9488' }} />
-                          <div>
-                            <strong style={{ color: '#0f172a', fontSize: '0.90rem' }}>
-                              Subtotal Puntos 1 al 4 (Pago Único incluido en {currentTier.name}):
-                            </strong>
-                            <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
-                              Incluye {currentTier.quantity} kits de saliva CE-IVD, transporte refrigerado, extracción de ADN, secuenciación Illumina GSA y acceso completo a los servicios 1, 2, 3 y 4.
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#0d9488' }}>
-                          {formatPrice(currentTier.totalPriceQar)}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
-                          ({formatPrice(currentTier.unitPriceQar)} / kit) · Pago único
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Item 5 - Monthly Subscription */}
-                    <tr style={{ backgroundColor: '#ffffff' }}>
-                      <td style={{ padding: '16px 16px', verticalAlign: 'top' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
-                            5
-                          </div>
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
-                                Consultas y Seguimiento Clínico por WhatsApp
-                              </span>
-                              <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px' }}>
-                                Suscripción Mensual
-                              </span>
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
-                              Canal directo y continuo con el especialista clínico para resolver dudas sobre la dieta, evolución de la suplementación y ajustes del tratamiento.
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px 16px', verticalAlign: 'top' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <MessageCircle size={14} style={{ color: '#16a34a' }} /> WhatsApp Business Especializado
-                        </span>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-                          Respuesta en menos de 24h laborables
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
-                        Acompañamiento en la adherencia dietética, revisión de síntomas o tolerancia, resolución de dudas galénicas y ajustes periódicos.
-                      </td>
-                      <td style={{ padding: '16px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <div style={{ fontSize: '1.15rem', fontWeight: 850, color: '#2563eb' }}>
-                          {formatPrice(150)} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>/ mes</span>
-                        </div>
-                        <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, fontSize: '0.70rem', display: 'inline-block', marginTop: '4px' }}>
-                          Cancelable en cualquier momento
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Interactive Order Configurator & Acceptance Card */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #cbd5e1', padding: '1.75rem', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1.25rem', marginBottom: '1.25rem' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: 0 }}>
-                      Configurador de Pedido y Suscripciones (24Genomics Nutrition)
-                    </h3>
-                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '2px 8px', borderRadius: '4px' }}>
-                      {currentTier.name} Seleccionado
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '0.80rem', color: '#64748b', margin: '4px 0 0 0' }}>
-                    Personaliza tu pedido: selecciona el pack de kits que mejor se adapta al volumen de tu consulta y el número de suscripciones mensuales de consultas WhatsApp.
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', alignItems: 'center' }}>
-                {/* WhatsApp Subscription Stepper */}
-                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>
-                      Nº Suscripciones Mensuales WhatsApp (Punto 5)
-                    </span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#2563eb' }}>
-                      {formatPrice(150)} / paciente / mes
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setWhatsappSubscriptionsCount(Math.max(0, whatsappSubscriptionsCount - 1))}
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        backgroundColor: '#ffffff',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.1rem',
-                        fontWeight: 800,
-                        color: '#334155'
-                      }}
-                    >
-                      -
-                    </button>
-                    <div style={{ fontSize: '1.3rem', fontWeight: 850, color: '#0f172a', minWidth: '40px', textAlign: 'center' }}>
-                      {whatsappSubscriptionsCount}
+              {/* B2B Authentication Required Banner if !isPricingUnlocked */}
+              {!isPricingUnlocked && (
+                <div style={{ backgroundColor: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '12px', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', boxShadow: '0 2px 8px rgba(217, 119, 6, 0.08)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Lock size={22} />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setWhatsappSubscriptionsCount(whatsappSubscriptionsCount + 1)}
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        backgroundColor: '#ffffff',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.1rem',
-                        fontWeight: 800,
-                        color: '#334155'
-                      }}
-                    >
-                      +
-                    </button>
-                    <div style={{ fontSize: '0.74rem', color: '#64748b', marginLeft: '6px' }}>
-                      Total mensual: <strong>{formatPrice(whatsappSubscriptionsCount * 150)} / mes</strong> (cancelable en cualquier momento)
-                    </div>
-                  </div>
-                </div>
-
-                {/* Live Financial Breakdown & CTA Button */}
-                <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', marginBottom: '6px' }}>
-                    Resumen de Inversión Seleccionada
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#334155', marginBottom: '4px' }}>
-                    <span>Pack {currentTier.name} (Puntos 1 al 4, Pago Único):</span>
-                    <strong style={{ color: '#0f172a' }}>{formatPrice(currentTier.totalPriceQar)}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#334155', marginBottom: '8px' }}>
-                    <span>Consultas WhatsApp ({whatsappSubscriptionsCount} subs, Punto 5):</span>
-                    <strong style={{ color: '#2563eb' }}>{formatPrice(whatsappSubscriptionsCount * 150)} / mes</strong>
-                  </div>
-
-                  <div style={{ borderTop: '1px solid #ccfbf1', paddingTop: '10px', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                     <div>
-                      <div style={{ fontSize: '0.70rem', color: '#0f766e', fontWeight: 600 }}>Inversión Inicial del Pack</div>
-                      <div style={{ fontSize: '1.35rem', fontWeight: 850, color: '#0d9488' }}>
-                        {formatPrice(currentTier.totalPriceQar)}
-                      </div>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 850, color: '#92400e', margin: 0 }}>
+                        Protected B2B Commercial Schedule (24Genomics Nutrition)
+                      </h4>
+                      <p style={{ fontSize: '0.80rem', color: '#b45309', margin: '3px 0 0 0' }}>
+                        Volume pricing tiers, batch kit discounts, and clinical compounding protocols are reserved for licensed medical clinics, physicians, and verified distributors.
+                      </p>
                     </div>
-
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <button
                       type="button"
-                      onClick={handleGenerateAtlasQuotation}
-                      disabled={isSubmittingQuote}
+                      onClick={() => setPreviewUnlocked(true)}
                       style={{
-                        padding: '11px 22px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
-                        color: '#ffffff',
-                        fontSize: '0.86rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        color: '#0d9488',
+                        backgroundColor: '#f0fdfa',
+                        border: '1px solid #99f6e4',
+                        padding: '8px 14px',
+                        borderRadius: '6px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Unlock Demo Preview
+                    </button>
+                    <Link
+                      href="/login?redirect=/pricing/24genomics-qatar"
+                      style={{
+                        fontSize: '0.78rem',
                         fontWeight: 800,
-                        cursor: isSubmittingQuote ? 'wait' : 'pointer',
+                        color: '#ffffff',
+                        backgroundColor: '#0d9488',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        textDecoration: 'none',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 4px 12px rgba(13, 148, 136, 0.3)'
+                        gap: '6px'
                       }}
                     >
-                      <CheckCircle2 size={16} />
-                      <span>{isSubmittingQuote ? 'Generando Proforma...' : 'Aceptar Oferta y Formalizar Pedido →'}</span>
-                    </button>
+                      <LogIn size={14} />
+                      <span>B2B Healthcare Sign In</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* Volume Tier Selectors (Clean: Tier 1, Tier 2, Tier 3) */}
+              <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                      Volume Tier Selection (24Genomics Nutrition Kits)
+                    </h3>
+                    <p style={{ fontSize: '0.80rem', color: '#64748b', margin: '2px 0 0 0' }}>
+                      All tiers include CE-IVD saliva collector tubes, ambient preservation buffers, courier logistics, core lab Madrid genotyping, and Pillars 1 to 4.
+                    </p>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '3px 8px', borderRadius: '4px' }}>
+                    Accreditation: European CE-IVD Core Lab (Madrid, Spain)
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                  {VOLUME_TIERS.map(tier => {
+                    const isSelected = selectedTier === tier.id;
+                    return (
+                      <div
+                        key={tier.id}
+                        onClick={() => setSelectedTier(tier.id)}
+                        style={{
+                          padding: '1.25rem',
+                          borderRadius: '10px',
+                          border: isSelected ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                          backgroundColor: isSelected ? '#f0fdfa' : '#ffffff',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: isSelected ? '0 4px 12px rgba(13, 148, 136, 0.12)' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.76rem', fontWeight: 800, color: isSelected ? '#0d9488' : '#64748b', textTransform: 'uppercase' }}>
+                            {tier.discountLabel}
+                          </span>
+                          {isSelected && <CheckCircle2 size={18} className="text-teal-600" />}
+                        </div>
+                        <div style={{ fontSize: '1.4rem', fontWeight: 850, color: '#0f172a' }}>
+                          {tier.name}
+                        </div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0d9488', margin: '4px 0' }}>
+                          {formatPrice(tier.totalPriceQar)}{' '}
+                          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
+                            ({formatPrice(tier.unitPriceQar)} / kit)
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '4px', borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
+                          Comprehensive one-time payment · Pillars 1, 2, 3 &amp; 4 included.
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Visual Comparison: Traditional PDF vs. 24Genomics Nutrition Ecosystem (Approved Improvement #2) */}
+              <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <Zap size={16} style={{ color: '#0d9488' }} />
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#003666', margin: 0 }}>
+                    Why 24Genomics Nutrition Transforms the Patient Experience Compared to Conventional DNA Tests
+                  </h4>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+                  <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '1rem' }}>
+                    <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#dc2626', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>✕</span> Conventional Commercial DNA Testing
+                    </div>
+                    <ul style={{ fontSize: '0.78rem', color: '#7f1d1d', margin: 0, paddingLeft: '1.1rem', lineHeight: 1.6 }}>
+                      <li>Dense 40-page PDF report loaded with technical laboratory jargon that confuses patients.</li>
+                      <li>No clear daily meal guidelines or actionable nutritional direction.</li>
+                      <li>Patient left guessing which generic retail supplements or dosages to take.</li>
+                      <li>Zero clinical follow-up: the report ends up forgotten inside a drawer.</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '1rem' }}>
+                    <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>✓</span> 24Genomics Nutrition + Atlas Clinical Ecosystem
+                    </div>
+                    <ul style={{ fontSize: '0.78rem', color: '#14532d', margin: 0, paddingLeft: '1.1rem', lineHeight: 1.6 }}>
+                      <li>Luxury hardbound patient presentation book + interactive digital web platform.</li>
+                      <li>Algorithmic assignment of the optimal clinical diet with categorized food lists.</li>
+                      <li>Precision 3-capsule chronobiological compounding formulation (Morning, Midday, Evening).</li>
+                      <li>Continuous direct WhatsApp consultation and adherence support with clinical specialists.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Complete Deliverables & Services Schedule Table (5 Points) */}
+              <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                <div style={{ padding: '1.25rem 1.5rem', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                        Deliverables &amp; Services Included in 24Genomics Nutrition
+                      </h3>
+                      <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#0d9488', color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
+                        Pillars 1–4 in Pack · Pillar 5 Subscription
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.80rem', color: '#64748b', marginTop: '4px', marginBottom: 0 }}>
+                      Deliverables 1 through 4 are part of a <strong>comprehensive one-time payment</strong> included when acquiring the selected volume pack ({currentTier.name}). Service 5 is an ongoing clinical follow-up provided as a <strong>flexible monthly subscription</strong>, cancelable at any time.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ overflowX: 'auto' }}>
+                  {/* eslint-disable-next-line no-restricted-syntax */}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
+                        <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569', width: '38%' }}>No. &amp; Included Deliverable</th>
+                        <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569', width: '24%' }}>Delivery Format</th>
+                        <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569', width: '22%' }}>Clinical Scope</th>
+                        <th style={{ padding: '12px 16px', fontWeight: 700, color: '#0d9488', textAlign: 'right', width: '16%' }}>Billing Model &amp; Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* Item 1 */}
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
+                              1
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                                Clinical Nutrigenetics Monograph (Nutrigen)
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
+                                Comprehensive evaluation of metabolic predispositions to macro- and micronutrients, critical vitamin absorption pathways, and digestive sensitivities.
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <FileText size={14} style={{ color: '#0d9488' }} /> Hardbound Printed Book
+                            </span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <Cpu size={14} style={{ color: '#0284c7' }} /> Within Atlas Digital Platform
+                            </span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
+                          Carbohydrate, fat, and protein metabolic efficiency, MTHFR methylation (folate), VDR (Vitamin D receptor), lactose intolerance, and celiac risk.
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
+                          <span style={{ backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block' }}>
+                            ✓ Included in Pack
+                          </span>
+                          <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '4px' }}>One-time payment</div>
+                        </td>
+                      </tr>
+
+                      {/* Item 2 */}
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
+                              2
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                                High-Resolution Biogeographical Ancestry Monograph
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
+                                Biogeographical ethnic origin and ancestral population history reconstructed from ancestry-informative markers (AIMs).
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <BookOpen size={14} style={{ color: '#0d9488' }} /> Hardbound Printed Book
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
+                          Granular geographical breakdown across more than 1,500 reference populations worldwide.
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
+                          <span style={{ backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block' }}>
+                            ✓ Included in Pack
+                          </span>
+                          <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '4px' }}>One-time payment</div>
+                        </td>
+                      </tr>
+
+                      {/* Item 3 */}
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
+                              3
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                                Personalized Compounding Supplementation Regimen
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
+                                Atlas clinical algorithm translating detected polymorphisms into synchronized, chronobiological master formulations (3 capsules per day).
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <Cpu size={14} style={{ color: '#0284c7' }} /> Within Atlas Digital Platform
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
+                          3-capsule partitioned regimen (Morning, Midday, Evening) with verified chemical compatibility and pharmaceutical-grade dosages.
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
+                          <span style={{ backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block' }}>
+                            ✓ Included in Pack
+                          </span>
+                          <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '4px' }}>One-time payment</div>
+                        </td>
+                      </tr>
+
+                      {/* Item 4 */}
+                      <tr style={{ borderBottom: '2px solid #cbd5e1' }}>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
+                              4
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                                Optimal Diet Identification from Clinical Catalog
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
+                                Compatibility scoring and algorithmic assignment of the single most effective nutritional model from 24Genetics clinical options.
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <Layers size={14} style={{ color: '#0284c7' }} /> Atlas Platform + Clinical Dossier
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
+                          Selection between Mediterranean, Low Carb / Keto, Low Fat, or Balanced Diet with individualized glycemic indexing.
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
+                          <span style={{ backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem', display: 'inline-block' }}>
+                            ✓ Included in Pack
+                          </span>
+                          <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '4px' }}>One-time payment</div>
+                        </td>
+                      </tr>
+
+                      {/* Pack Summary Banner Row */}
+                      <tr style={{ backgroundColor: '#f0fdfa', borderBottom: '2px solid #0d9488' }}>
+                        <td colSpan={3} style={{ padding: '14px 16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <CheckCircle2 size={18} style={{ color: '#0d9488' }} />
+                            <div>
+                              <strong style={{ color: '#0f172a', fontSize: '0.90rem' }}>
+                                Subtotal Pillars 1 to 4 (One-Time Payment Included in {currentTier.name}):
+                              </strong>
+                              <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
+                                Includes {currentTier.quantity} CE-IVD saliva collector kits, ambient temperature buffers, DNA extraction, Illumina GSA genotyping, and complete access to services 1, 2, 3, and 4.
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                          <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#0d9488' }}>
+                            {formatPrice(currentTier.totalPriceQar)}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
+                            ({formatPrice(currentTier.unitPriceQar)} / kit) · One-time payment
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Item 5 - Monthly Subscription */}
+                      <tr style={{ backgroundColor: '#ffffff' }}>
+                        <td style={{ padding: '16px 16px', verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', flexShrink: 0 }}>
+                              5
+                            </div>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                                  Clinical Consultations &amp; Specialist Care via WhatsApp
+                                </span>
+                                <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px' }}>
+                                  Monthly Subscription
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
+                                Direct, continuous messaging channel with clinical nutritionists to resolve patient dietary queries, monitor supplementation tolerance, and optimize treatment protocols.
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px 16px', verticalAlign: 'top' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <MessageCircle size={14} style={{ color: '#16a34a' }} /> Dedicated Business WhatsApp
+                          </span>
+                          <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                            Replies within 24 business hours
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px 16px', verticalAlign: 'top', fontSize: '0.76rem', color: '#475569' }}>
+                          Nutritional adherence coaching, symptom review, galenic troubleshooting, and periodic protocol calibrations.
+                        </td>
+                        <td style={{ padding: '16px 16px', textAlign: 'right', verticalAlign: 'top' }}>
+                          <div style={{ fontSize: '1.15rem', fontWeight: 850, color: '#2563eb' }}>
+                            {formatPrice(150)} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>/ month</span>
+                          </div>
+                          <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, fontSize: '0.70rem', display: 'inline-block', marginTop: '4px' }}>
+                            Cancelable anytime with zero lock-in
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Interactive Order Configurator & Acceptance Card */}
+              <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #cbd5e1', padding: '1.75rem', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1.25rem', marginBottom: '1.25rem' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: 0 }}>
+                        Order &amp; Subscription Configurator (24Genomics Nutrition)
+                      </h3>
+                      <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '2px 8px', borderRadius: '4px' }}>
+                        {currentTier.name} Selected
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.80rem', color: '#64748b', margin: '4px 0 0 0' }}>
+                      Customize your order: select the volume tier that fits your clinical practice and set the number of monthly WhatsApp patient support subscriptions.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', alignItems: 'center' }}>
+                  {/* WhatsApp Subscription Stepper */}
+                  <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>
+                        Active WhatsApp Monthly Subscriptions (Pillar 5)
+                      </span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#2563eb' }}>
+                        {formatPrice(150)} / patient / month
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setWhatsappSubscriptionsCount(Math.max(0, whatsappSubscriptionsCount - 1))}
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#ffffff',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.1rem',
+                          fontWeight: 800,
+                          color: '#334155'
+                        }}
+                      >
+                        -
+                      </button>
+                      <div style={{ fontSize: '1.3rem', fontWeight: 850, color: '#0f172a', minWidth: '40px', textAlign: 'center' }}>
+                        {whatsappSubscriptionsCount}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setWhatsappSubscriptionsCount(whatsappSubscriptionsCount + 1)}
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#ffffff',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.1rem',
+                          fontWeight: 800,
+                          color: '#334155'
+                        }}
+                      >
+                        +
+                      </button>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b', marginLeft: '6px' }}>
+                        Monthly total: <strong>{formatPrice(whatsappSubscriptionsCount * 150)} / month</strong> (cancelable anytime)
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Live Financial Breakdown & CTA Button */}
+                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', padding: '1.25rem' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', marginBottom: '6px' }}>
+                      Selected Investment Summary
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#334155', marginBottom: '4px' }}>
+                      <span>Pack {currentTier.name} (Pillars 1 to 4, One-Time):</span>
+                      <strong style={{ color: '#0f172a' }}>{formatPrice(currentTier.totalPriceQar)}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#334155', marginBottom: '8px' }}>
+                      <span>WhatsApp Consultations ({whatsappSubscriptionsCount} subs, Pillar 5):</span>
+                      <strong style={{ color: '#2563eb' }}>{formatPrice(whatsappSubscriptionsCount * 150)} / month</strong>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid #ccfbf1', paddingTop: '10px', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <div style={{ fontSize: '0.70rem', color: '#0f766e', fontWeight: 600 }}>Initial Pack Investment</div>
+                        <div style={{ fontSize: '1.35rem', fontWeight: 850, color: '#0d9488' }}>
+                          {formatPrice(currentTier.totalPriceQar)}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleGenerateAtlasQuotation}
+                        disabled={isSubmittingQuote}
+                        style={{
+                          padding: '11px 22px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+                          color: '#ffffff',
+                          fontSize: '0.86rem',
+                          fontWeight: 800,
+                          cursor: isSubmittingQuote ? 'wait' : 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          boxShadow: '0 4px 12px rgba(13, 148, 136, 0.3)'
+                        }}
+                      >
+                        <CheckCircle2 size={16} />
+                        <span>{isSubmittingQuote ? 'Generating Proforma...' : 'Accept Offer & Generate Quotation Proforma →'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
         )}
 
         {/* ════════════════════════════════════════════════════════════════════
@@ -1662,17 +1756,17 @@ export default function QatarGenomicsPriceClient() {
               <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', color: '#0f766e', padding: '3px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   <Sparkles size={13} />
-                  <span>24Genomics Nutrition · Protocolo Clínico Integral</span>
+                  <span>24Genomics Nutrition · Comprehensive Clinical Protocol</span>
                 </div>
                 <h2 style={{ fontSize: '1.65rem', fontWeight: 850, color: '#003666', marginTop: '8px', margin: 0 }}>
-                  Metodología Clínica Integral: De la Secuenciación Genómica al Cuidado Continuo
+                  Comprehensive Clinical Methodology: From Genomic Sequencing to Continuous Care
                 </h2>
                 <p style={{ fontSize: '0.90rem', color: '#64748b', marginTop: '6px', lineHeight: 1.6 }}>
-                  Un test genético tradicional genera extensos informes de 40 páginas que quedan archivados sin acción terapéutica real. El ecosistema <strong>24Genomics Nutrition</strong> traduce los biomarcadores en un circuito clínico cerrado compuesto por 5 pilares operativos que aseguran cumplimiento, adherencia del paciente y resultados medibles.
+                  Standard genetic tests produce 40-page PDFs that get archived without actionable clinical therapy. The <strong>24Genomics Nutrition</strong> ecosystem translates raw genetic biomarkers into a closed-loop clinical pathway across 5 core operational pillars, ensuring patient adherence, compounding feasibility, and measurable outcomes.
                 </p>
               </div>
 
-              {/* Numbered Vertical List (Replacing Old Cards) */}
+              {/* Numbered Vertical List */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {/* Item 1 */}
                 <div style={{
@@ -1703,17 +1797,17 @@ export default function QatarGenomicsPriceClient() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '4px' }}>
                       <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                        Toma de Muestra Salival No Invasiva y Genotipado CE-IVD (Core Lab Madrid)
+                        Non-Invasive Saliva Sample Collection &amp; CE-IVD Genotyping (Madrid Core Lab)
                       </h4>
                       <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#e0f2fe', color: '#0284c7', padding: '2px 8px', borderRadius: '4px' }}>
-                        Pilar 1 · Pago Único en Pack
+                        Pillar 1 · Single Pack Investment
                       </span>
                     </div>
                     <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, margin: '0 0 8px 0' }}>
-                      Hisopo bucal no invasivo (2 minutos de recolección, sin extracciones de sangre ni ayuno requerido) con tampón estabilizador que preserva la integridad del ADN a temperatura ambiente durante más de 12 meses. Secuenciación en laboratorio central acreditado de Madrid (España) mediante microarrays <strong>Illumina Global Screening Array (GSA)</strong> con análisis de más de <strong>50.000 SNPs clave</strong> y reproducibilidad analítica superior al 99.9%.
+                      Non-invasive buccal swab (2-minute collection, zero blood draw, no fasting required) with stabilizing buffer preserving DNA integrity at room temperature for over 12 months. Sequenced in accredited European central laboratory (Madrid, Spain) via <strong>Illumina Global Screening Array (GSA)</strong> analyzing over <strong>50,000 key SNPs</strong> with &gt;99.9% analytical repeatability.
                     </p>
                     <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 650 }}>
-                      ✓ Incluye: Reporte Clínico de Nutrición completo entregado en papel encuadernado de alta gama y disponible de inmediato en la plataforma digital Atlas.
+                      ✓ Includes: Full Clinical Nutrition Report delivered in premium bound hardcover book and immediately accessible on the Atlas digital platform.
                     </div>
                   </div>
                 </div>
@@ -1747,17 +1841,17 @@ export default function QatarGenomicsPriceClient() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '4px' }}>
                       <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                        Reporte de Ancestros Biogeográficos de Alta Resolución en Papel
+                        High-Resolution Biogeographical Ancestry Monograph in Print
                       </h4>
                       <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#ccfbf1', color: '#0f766e', padding: '2px 8px', borderRadius: '4px' }}>
-                        Pilar 2 · Pago Único en Pack
+                        Pillar 2 · Single Pack Investment
                       </span>
                     </div>
                     <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, margin: '0 0 8px 0' }}>
-                      Mapeo genético exhaustivo que rastrea el origen biogeográfico del paciente a través de más de <strong>1.500 regiones geográficas</strong> en todo el mundo. Este análisis contextualiza la historia evolutiva y las adaptaciones nutricionales ancestrales del paciente, entregado en un elegante libro físico encuadernado de gran valor tangible.
+                      Exhaustive genetic mapping tracing patient ancestral origin across <strong>1,500+ global geographic regions</strong>. Contextualizes evolutionary history and ancestral dietary adaptations, delivered in an elegant physical book of tangible clinical prestige.
                     </p>
                     <div style={{ fontSize: '0.78rem', color: '#0f766e', fontWeight: 650 }}>
-                      ✓ Formato físico impreso que eleva la percepción de calidad del paciente y consolida el valor percibido del servicio clínico.
+                      ✓ Physical printed monograph that enhances patient perceived quality and elevates clinical consultation value.
                     </div>
                   </div>
                 </div>
@@ -1791,17 +1885,17 @@ export default function QatarGenomicsPriceClient() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '4px' }}>
                       <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                        Recomendaciones y Formulación Magistral en 3 Cápsulas Sincronizadas (Atlas)
+                        Precision Compounding Formulation &amp; Synchronized 3-Capsule Schedule (Atlas Engine)
                       </h4>
                       <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#ede9fe', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px' }}>
-                        Pilar 3 · Pago Único en Pack
+                        Pillar 3 · Single Pack Investment
                       </span>
                     </div>
                     <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, margin: '0 0 8px 0' }}>
-                      El motor algorítmico de Atlas traduce las mutaciones de baja actividad enzimática (como <em>MTHFR C677T</em> o <em>VDR FokI</em>) en principios activos biodisponibles exactos (L-metilfolato, D3/K2, etc.). Para evitar incompatibilidades físico-químicas, la suplementación se distribuye en <strong>3 cápsulas diarias sincronizadas</strong> (Mañana en ayunas, Mediodía con comida y Noche en cena) en cápsulas gastrorresistentes DRcaps® 100% libres de lactosa.
+                      The Atlas clinical intelligence platform translates enzymatic mutations (such as <em>MTHFR C677T</em> or <em>VDR FokI</em>) into exact bioavailable active ingredients (L-methylfolate, D3/K2, etc.). To eliminate physicochemical conflicts, daily supplementation is partitioned into <strong>3 synchronized Size 0 capsules</strong> (Fasting Morning DRcaps®, Midday with meal, Evening bedtime) that are 100% lactose-free.
                     </p>
                     <div style={{ fontSize: '0.78rem', color: '#7c3aed', fontWeight: 650 }}>
-                      ✓ Sustituye 8–9 frascos comerciales por una fórmula personalizada calibrada con exactitud farmacopea para el paciente.
+                      ✓ Replaces 8–9 commercial supplement bottles with a single personalized, pharmacopeia-grade compounded formula.
                     </div>
                   </div>
                 </div>
@@ -1835,17 +1929,17 @@ export default function QatarGenomicsPriceClient() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '4px' }}>
                       <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                        Identificación Algorítmica de la Dieta Óptima del Catálogo 24Genetics
+                        Algorithmic Optimal Diet Identification from 24Genetics Catalog
                       </h4>
                       <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#f0fdf4', color: '#16a34a', padding: '2px 8px', borderRadius: '4px' }}>
-                        Pilar 4 · Pago Único en Pack
+                        Pillar 4 · Single Pack Investment
                       </span>
                     </div>
                     <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, margin: '0 0 8px 0' }}>
-                      Mediante el cruce computacional de polimorfismos que controlan el metabolismo de grasas, adiposidad y respuesta insulínica (<em>FTO, PPARG, TCF7L2, FABP2, APOA5</em>), el sistema determina con precisión científica cuál de las dietas del catálogo clínico es idónea para el perfil metabólico del paciente: <strong>Dieta Mediterránea, Baja en Carbohidratos (Low Carb), Baja en Grasas (Low Fat) o Dieta Equilibrada</strong>.
+                      By cross-analyzing polymorphisms governing lipid metabolism, adiposity, and insulin response (<em>FTO, PPARG, TCF7L2, FABP2, APOA5</em>), the system accurately determines which clinical diet best fits the patient&apos;s metabolic profile: <strong>Mediterranean Diet, Low Carb, Low Fat, or Balanced Diet</strong>.
                     </p>
                     <div style={{ fontSize: '0.78rem', color: '#16a34a', fontWeight: 650 }}>
-                      ✓ Guía de distribución de macronutrientes y listas de alimentos recomendados integradas en la plataforma y el informe impreso.
+                      ✓ Macronutrient distribution matrix and recommended food lists integrated into the digital platform and print report.
                     </div>
                   </div>
                 </div>
@@ -1879,17 +1973,17 @@ export default function QatarGenomicsPriceClient() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '4px' }}>
                       <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                        Consultas y Acompañamiento Continuo por WhatsApp (Suscripción Mensual Flexible)
+                        Continuous WhatsApp Clinical Inquiries &amp; Guidance (Flexible Monthly Subscription)
                       </h4>
                       <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px' }}>
-                        Pilar 5 · Suscripción Mensual (Cancelable en Cualquier Momento)
+                        Pillar 5 · Monthly Subscription (Cancel Anytime)
                       </span>
                     </div>
                     <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '0 0 8px 0' }}>
-                      Canal directo y continuo de mensajería instantánea por WhatsApp atendido por el equipo especialista en nutrición clínica y genómica. Permite al paciente resolver dudas sobre la incorporación de alimentos, posología de las cápsulas, síntomas digestivos o ajustes de estilo de vida en tiempo real, garantizando la retención y el éxito clínico a largo plazo.
+                      Direct, continuous WhatsApp messaging channel staffed by specialists in clinical nutrition and genomics. Enables patients to clarify food introductions, capsule dosing schedules, digestive tolerance, or lifestyle adjustments in real time, driving high patient retention and treatment compliance.
                     </p>
                     <div style={{ fontSize: '0.78rem', color: '#2563eb', fontWeight: 700 }}>
-                      ⚡ Tarifa mensual transparente: 150 {currency}/mes por paciente activo, sin contratos de permanencia y con cancelación instantánea cuando el paciente lo desee.
+                      ⚡ Transparent monthly fee: 150 {currency}/month per active patient, with zero lock-in contracts and 1-click cancellation anytime.
                     </div>
                   </div>
                 </div>
@@ -2388,6 +2482,7 @@ export default function QatarGenomicsPriceClient() {
 
                     {/* Active Ingredients Table */}
                     <div style={{ overflowX: 'auto' }}>
+                      {/* eslint-disable-next-line no-restricted-syntax */}
                       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
@@ -2586,23 +2681,23 @@ export default function QatarGenomicsPriceClient() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.86rem', color: '#334155', lineHeight: 1.6 }}>
               <div style={{ padding: '1rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
                 <strong style={{ color: '#15803d', display: 'block', marginBottom: '4px' }}>
-                  1. Ámbito de Distribución Clínica B2B Autorizada
+                  1. Authorized B2B Clinical Distribution Scope
                 </strong>
-                Las condiciones y tarifas de este catálogo están destinadas exclusivamente a clínicas médicas, centros de longevidad, consultas de medicina de precisión y distribuidores acreditados a nivel internacional. Cada kit incluye tubos colectores bucales con tampón CE-IVD y acceso a la plataforma digital Atlas.
+                The pricing and commercial terms in this catalog are exclusively intended for verified medical clinics, longevity centers, functional practices, and accredited international distribution partners. Every kit includes CE-IVD saliva collector tubes with stabilization buffer and full enterprise access to the Atlas Clinical Intelligence Platform.
               </div>
 
               <div style={{ padding: '1rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>
                 <strong style={{ color: '#b45309', display: 'block', marginBottom: '4px' }}>
-                  2. Formalización de Pedidos y Logística Express
+                  2. Order Confirmation &amp; Priority Air Courier Fulfillment
                 </strong>
-                Los pedidos se formalizan mediante emisión de proforma o pedido en firme. Los kits de recolección de saliva se despachan de forma inmediata mediante transporte aéreo internacional desde la central de fulfillment del Core Lab en Madrid (España), con soporte logístico y aduanero integral.
+                Orders are processed upon formal proforma confirmation. CE-IVD saliva collection kits are dispatched immediately via international express air courier from the Madrid Core Lab fulfillment hub (Spain), with comprehensive customs clearance support.
               </div>
 
               <div style={{ padding: '1rem', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px' }}>
                 <strong style={{ color: '#1d4ed8', display: 'block', marginBottom: '4px' }}>
-                  3. Multi-Divisa y Flexibilidad de Suscripciones WhatsApp
+                  3. Multi-Currency Settlement &amp; Flexible WhatsApp Subscriptions
                 </strong>
-                Las liquidaciones pueden realizarse en cualquiera de las divisas disponibles (QAR, AED, SAR, KWD, USD, EUR). El servicio de acompañamiento y consultas por WhatsApp (Punto 5) funciona bajo una suscripción mensual independiente que puede activarse, incrementarse o cancelarse en cualquier momento sin permanencia contractual.
+                Settlement is accepted in all regional currencies (QAR, AED, SAR, KWD, USD, EUR). The ongoing clinical guidance via WhatsApp (Pillar 5) operates as an independent monthly subscription that can be activated, scaled, or paused anytime with zero contractual lock-in.
               </div>
             </div>
           </div>
@@ -2616,304 +2711,304 @@ export default function QatarGenomicsPriceClient() {
         <div style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(4px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 100,
+      padding: '1rem'
+    }}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '16px',
+        maxWidth: '560px',
+        width: '100%',
+        padding: '2rem',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+        border: '1px solid #e2e8f0',
+        position: 'relative'
+      }}>
+        <button
+          type="button"
+          onClick={() => setOrderModalOpen(false)}
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            backgroundColor: '#f1f5f9',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#64748b'
+          }}
+        >
+          <X size={16} />
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#f0fdfa', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #99f6e4' }}>
+            <CheckCircle2 size={26} />
+          </div>
+          <div>
+            <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              B2B Proforma Generated Successfully
+            </span>
+            <h3 style={{ fontSize: '1.35rem', fontWeight: 850, color: '#003666', margin: '2px 0 0 0' }}>
+              Order {currentTier.name} Registered
+            </h3>
+          </div>
+        </div>
+
+        {/* Reference Box */}
+        <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Quotation Reference</div>
+            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.90rem' }}>
+              <CopyableId value={generatedQuote?.quotationNumber || `QT-24GN-${currentTier.id.toUpperCase()}`} />
+            </div>
+          </div>
+          <StatusBadge status="approved" label="Active Proforma" />
+        </div>
+
+        {/* Breakdown */}
+        <div style={{ borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '1rem 0', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#334155' }}>
+            <span>{currentTier.name} ({currentTier.quantity} kits, Pillars 1 to 4 Included):</span>
+            <strong style={{ color: '#0f172a' }}>{formatPrice(currentTier.totalPriceQar)}</strong>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#334155' }}>
+            <span>WhatsApp Clinical Guidance ({whatsappSubscriptionsCount} active, Pillar 5):</span>
+            <strong style={{ color: '#2563eb' }}>{formatPrice(whatsappSubscriptionsCount * 150)} / month</strong>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0f766e', fontWeight: 800, paddingTop: '8px', borderTop: '1px dashed #cbd5e1', fontSize: '0.92rem' }}>
+            <span>Initial Pack Investment:</span>
+            <span>{formatPrice(currentTier.totalPriceQar)}</span>
+          </div>
+        </div>
+
+        <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '8px', padding: '10px 14px', marginBottom: '1.5rem', fontSize: '0.78rem', color: '#0f766e', lineHeight: 1.5 }}>
+          ✓ CE-IVD saliva collector kits are dispatched directly from the Madrid laboratory hub.<br />
+          ✓ Atlas Platform user accounts for Nutrition, Ancestry, and Diet reports activate automatically upon receipt.<br />
+          ✓ Direct WhatsApp clinical support is ready to be linked with your clinic&apos;s patients.
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            onClick={() => setOrderModalOpen(false)}
+            style={{
+              padding: '9px 16px',
+              borderRadius: '6px',
+              border: '1px solid #cbd5e1',
+              backgroundColor: '#ffffff',
+              color: '#334155',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Close
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              alert(`Formalized order summary for ${generatedQuote?.quotationNumber || '24Genomics Nutrition'} saved successfully.`);
+              setOrderModalOpen(false);
+            }}
+            style={{
+              padding: '9px 20px',
+              borderRadius: '6px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+              color: '#ffffff',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 6px rgba(13, 148, 136, 0.3)'
+            }}
+          >
+            <CheckCircle2 size={15} />
+            <span>Confirm &amp; Download Proforma</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* ── Atlas AI Assistant Drawer ── */}
+  {showAtlasAiModal && (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+      backdropFilter: 'blur(3px)',
+      zIndex: 110,
+      display: 'flex',
+      justifyContent: 'flex-end'
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '460px',
+        backgroundColor: '#ffffff',
+        height: '100%',
+        boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
+        display: 'flex',
+        flexDirection: 'column',
+        animation: 'slideInRight 0.25s ease-out'
+      }}>
+        {/* Drawer Header */}
+        <div style={{
+          padding: '1.25rem 1.5rem',
+          borderBottom: '1px solid #e2e8f0',
+          backgroundColor: '#003666',
+          color: '#ffffff',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '1rem'
+          justifyContent: 'space-between'
         }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            maxWidth: '560px',
-            width: '100%',
-            padding: '2rem',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-            border: '1px solid #e2e8f0',
-            position: 'relative'
-          }}>
-            <button
-              type="button"
-              onClick={() => setOrderModalOpen(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                backgroundColor: '#f1f5f9',
-                border: 'none',
-                borderRadius: '50%',
-                width: '32px',
-                height: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#64748b'
-              }}
-            >
-              <X size={16} />
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#f0fdfa', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #99f6e4' }}>
-                <CheckCircle2 size={26} />
-              </div>
-              <div>
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Proforma B2B Generada con Éxito
-                </span>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: 850, color: '#003666', margin: '2px 0 0 0' }}>
-                  Pedido {currentTier.name} Registrado
-                </h3>
-              </div>
-            </div>
-
-            {/* Reference Box */}
-            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Referencia de Cotización</div>
-                <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.90rem' }}>
-                  <CopyableId value={generatedQuote?.quotationNumber || `QT-24GN-${currentTier.id.toUpperCase()}`} />
-                </div>
-              </div>
-              <StatusBadge status="approved" label="Proforma Activa" />
-            </div>
-
-            {/* Breakdown */}
-            <div style={{ borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '1rem 0', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#334155' }}>
-                <span>{currentTier.name} ({currentTier.quantity} kits, Puntos 1 al 4 Incluidos):</span>
-                <strong style={{ color: '#0f172a' }}>{formatPrice(currentTier.totalPriceQar)}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#334155' }}>
-                <span>Suscripciones WhatsApp ({whatsappSubscriptionsCount} activas, Punto 5):</span>
-                <strong style={{ color: '#2563eb' }}>{formatPrice(whatsappSubscriptionsCount * 150)} / mes</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0f766e', fontWeight: 800, paddingTop: '8px', borderTop: '1px dashed #cbd5e1', fontSize: '0.92rem' }}>
-                <span>Inversión Inicial del Pack:</span>
-                <span>{formatPrice(currentTier.totalPriceQar)}</span>
-              </div>
-            </div>
-
-            <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '8px', padding: '10px 14px', marginBottom: '1.5rem', fontSize: '0.78rem', color: '#0f766e', lineHeight: 1.5 }}>
-              ✓ Los kits de recogida salival CE-IVD serán despachados desde Madrid.<br />
-              ✓ Las cuentas de la plataforma Atlas para los reportes de Nutrición, Ancestros y Dieta se activarán automáticamente.<br />
-              ✓ El servicio de WhatsApp queda disponible para sincronizarse con sus pacientes.
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={() => setOrderModalOpen(false)}
-                style={{
-                  padding: '9px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  color: '#334155',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                Cerrar
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  alert(`Resumen de la orden formalizada ${generatedQuote?.quotationNumber || '24Genomics Nutrition'} guardado correctamente.`);
-                  setOrderModalOpen(false);
-                }}
-                style={{
-                  padding: '9px 20px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
-                  color: '#ffffff',
-                  fontSize: '0.82rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.3)'
-                }}
-              >
-                <CheckCircle2 size={15} />
-                <span>Confirmar y Descargar Proforma</span>
-              </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Sparkles size={18} className="text-teal-300" />
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 850 }}>Atlas AI Clinical Assistant</h3>
+              <div style={{ fontSize: '0.72rem', color: '#99f6e4' }}>24Genomics Nutrition Clinical Intelligence</div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* ── Atlas AI Assistant Drawer ── */}
-      {showAtlasAiModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.5)',
-          backdropFilter: 'blur(3px)',
-          zIndex: 110,
-          display: 'flex',
-          justifyContent: 'flex-end'
-        }}>
-          <div style={{
-            width: '100%',
-            maxWidth: '460px',
-            backgroundColor: '#ffffff',
-            height: '100%',
-            boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
-            display: 'flex',
-            flexDirection: 'column',
-            animation: 'slideInRight 0.25s ease-out'
-          }}>
-            {/* Drawer Header */}
-            <div style={{
-              padding: '1.25rem 1.5rem',
-              borderBottom: '1px solid #e2e8f0',
-              backgroundColor: '#003666',
-              color: '#ffffff',
+          <button
+            type="button"
+            onClick={() => setShowAtlasAiModal(false)}
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '30px',
+              height: '30px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={18} className="text-teal-300" />
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 850 }}>Atlas AI Clinical Assistant</h3>
-                  <div style={{ fontSize: '0.72rem', color: '#99f6e4' }}>24Genomics Nutrition Clinical Intelligence</div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAtlasAiModal(false)}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '30px',
-                  height: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff',
-                  cursor: 'pointer'
-                }}
-              >
-                <X size={16} />
-              </button>
+              justifyContent: 'center',
+              color: '#ffffff',
+              cursor: 'pointer'
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Drawer Body */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', padding: '12px 14px', fontSize: '0.80rem', color: '#0f766e', lineHeight: 1.5 }}>
+            Hello, I am the Atlas Health clinical intelligence assistant. Ask me about saliva collection protocols, Illumina GSA genotyping in Madrid, the 3 synchronized compounding capsules, or our wholesale volume tiers.
+          </div>
+
+          {/* Quick Question Chips */}
+          <div>
+            <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+              Quick Clinical Inquiries
             </div>
-
-            {/* Drawer Body */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', padding: '12px 14px', fontSize: '0.80rem', color: '#0f766e', lineHeight: 1.5 }}>
-                Hola, soy el asistente clínico inteligente de Atlas Health. Pregúntame sobre el circuito de toma de saliva, el genotipado en Madrid, las 3 cápsulas personalizadas o el esquema de precios.
-              </div>
-
-              {/* Quick Question Chips */}
-              <div>
-                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Preguntas Frecuentes Rápidas
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {AI_FAQS.map((faq, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleAskAtlasAi(faq.q)}
-                      style={{
-                        textAlign: 'left',
-                        padding: '8px 12px',
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
-                        fontSize: '0.78rem',
-                        fontWeight: 650,
-                        color: '#334155',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      💬 {faq.q}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Active Answer Card */}
-              {activeAiAnswer && (
-                <div style={{
-                  backgroundColor: '#ffffff',
-                  border: '1.5px solid #0d9488',
-                  borderRadius: '10px',
-                  padding: '1rem',
-                  boxShadow: '0 4px 12px rgba(13, 148, 136, 0.08)'
-                }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0d9488', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Sparkles size={13} />
-                    <span>Respuesta Atlas AI:</span>
-                  </div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginBottom: '6px' }}>
-                    {activeAiAnswer.q}
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.6 }}>
-                    {activeAiAnswer.a}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Drawer Input Footer */}
-            <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  type="text"
-                  placeholder="Escribe tu consulta clínica o comercial..."
-                  value={aiCustomQuestion}
-                  onChange={(e) => setAiCustomQuestion(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleAskAtlasAi();
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: '9px 12px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.80rem',
-                    outline: 'none'
-                  }}
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {AI_FAQS.map((faq, idx) => (
                 <button
+                  key={idx}
                   type="button"
-                  onClick={() => handleAskAtlasAi()}
+                  onClick={() => handleAskAtlasAi(faq.q)}
                   style={{
-                    padding: '9px 14px',
-                    backgroundColor: '#0d9488',
-                    border: 'none',
+                    textAlign: 'left',
+                    padding: '8px 12px',
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
                     borderRadius: '6px',
-                    color: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 650,
+                    color: '#334155',
                     cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  <Send size={15} />
+                  💬 {faq.q}
                 </button>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
-      )}
 
-      {/* ── Floating Atlas AI Button ── */}
-      <button
-        type="button"
-        onClick={() => setShowAtlasAiModal(true)}
+          {/* Active Answer Card */}
+          {activeAiAnswer && (
+            <div style={{
+              backgroundColor: '#ffffff',
+              border: '1.5px solid #0d9488',
+              borderRadius: '10px',
+              padding: '1rem',
+              boxShadow: '0 4px 12px rgba(13, 148, 136, 0.08)'
+            }}>
+              <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0d9488', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Sparkles size={13} />
+                <span>Atlas AI Response:</span>
+              </div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginBottom: '6px' }}>
+                {activeAiAnswer.q}
+              </div>
+              <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.6 }}>
+                {activeAiAnswer.a}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Drawer Input Footer */}
+        <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="text"
+              placeholder="Ask a clinical, compounding, or pricing question..."
+              value={aiCustomQuestion}
+              onChange={(e) => setAiCustomQuestion(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAskAtlasAi();
+              }}
+              style={{
+                flex: 1,
+                padding: '9px 12px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.80rem',
+                outline: 'none'
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => handleAskAtlasAi()}
+              style={{
+                padding: '9px 14px',
+                backgroundColor: '#0d9488',
+                border: 'none',
+                borderRadius: '6px',
+                color: '#ffffff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Send size={15} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* ── Floating Atlas AI Button ── */}
+  <button
+    type="button"
+    onClick={() => setShowAtlasAiModal(true)}
         aria-label="Open Atlas AI"
         style={{
           position: 'fixed',
@@ -2940,6 +3035,6 @@ export default function QatarGenomicsPriceClient() {
       </button>
 
       <PublicUnifiedFooter />
-    </div>
+    </div >
   );
 }

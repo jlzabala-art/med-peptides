@@ -48,7 +48,7 @@ export default function PeptideMonographSidebar({
   const cleanSlug = slug || product.slug || 'product';
   const pageUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/p/${cleanSlug}`);
   const batchCode = effectiveBatch || product.batchNumber || 'RP-MED-RT10-2609';
-  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || 'Lotusland';
+  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || 'Clinical Laboratory';
   const supplier = formatCommercialSupplierName(rawSupplier);
   const { isDiagnostic } = classifyProductDomain(product, { slug: cleanSlug, activeFormat });
   const isTeletestHtma = cleanSlug.includes('htma') || cleanSlug.includes('mineralograma');

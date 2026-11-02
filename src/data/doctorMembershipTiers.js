@@ -16,7 +16,7 @@ export const DOCTOR_TIERS = {
     badgeBg: '#e6f4ea',
     summary: 'Standard clinical access for all verified healthcare practitioners.',
     keyHighlights: [
-      'Full Lotusland & Compounding Formulary Access',
+      'Full Clinical Peptides & Compounding Formulary Access',
       'Individual Product Prescription Issuance',
       'Up to 30 Active Patients Directory',
       'Standard Med-Peptides Posology & Syringe Guide',
@@ -94,7 +94,7 @@ export const DOCTOR_CAPABILITIES_MATRIX = [
   {
     id: 'formulary_access',
     category: 'PHARMACOPEIA ACCESS',
-    feature: 'Lotusland Formulary & Compounding Pricing',
+    feature: 'Clinical Peptides Formulary & Compounding Pricing',
     basic: 'Standard verified catalog access',
     pro: 'VIP Access + Bioequivalence & Thermal Stability Matrix',
     description: 'In-depth pharmacokinetics, bioequivalence benchmarks, and compounding stability data.',

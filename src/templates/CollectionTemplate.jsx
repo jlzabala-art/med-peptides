@@ -64,6 +64,7 @@ export default function CollectionTemplate({
   setPendingQuote,
   onOpenSearch,
   products,
+  serverCategoryCounts = null,
   EXCHANGE_RATES,
   slug: propSlug,
 }) {
@@ -81,13 +82,14 @@ export default function CollectionTemplate({
 
   const s = (slug || '').toLowerCase();
 
-  // /collection/peptides → Google Cloud UX BrandCollectionPage (Lotusland Peptides Collection)
+  // /collection/peptides → Google Cloud UX BrandCollectionPage (Clinical Peptides Collection)
   if (s === 'peptides') {
     return (
       <RestrictedCatalogRoute catalogName="products">
         <BrandCollectionPage
           brandSlug="peptides"
           products={products || []}
+          serverCategoryCounts={serverCategoryCounts}
           onSelectProduct={handleProductSelect}
           updateCart={updateCart}
           toggleCompare={toggleCompare}
@@ -197,6 +199,7 @@ export default function CollectionTemplate({
         <BrandCollectionPage
           brandSlug={normalizedBrand}
           products={products || []}
+          serverCategoryCounts={serverCategoryCounts}
           onSelectProduct={handleProductSelect}
           updateCart={updateCart}
           toggleCompare={toggleCompare}

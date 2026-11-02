@@ -70,9 +70,9 @@ export function normalizeSupplierId(raw) {
  * E.g., 'lotus land', 'supplier-lotusland' -> 'Lotusland'
  */
 export function getCanonicalSupplierName(raw) {
-  if (!raw) return 'Lotusland';
+  if (!raw) return 'Clinical Peptides Hub';
   const clean = String(raw).toLowerCase().trim();
-  if (clean.includes('lotus')) return 'Lotusland';
+  if (clean.includes('lotus')) return 'Clinical Peptides Hub';
   return SUPPLIERS[raw] || SUPPLIERS[normalizeSupplierId(raw)] || raw;
 }
 

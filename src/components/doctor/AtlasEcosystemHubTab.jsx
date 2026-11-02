@@ -92,7 +92,7 @@ const COLLECTIVES = [
     features: [
       {
         title: 'Direct Clinical Demand Channel',
-        desc: 'Your active ingredients (Lotusland peptide APIs, cosmetic raw materials) are embedded directly into clinical protocols prescribed by verified physicians.',
+        desc: 'Your active ingredients (high-purity peptide APIs, cosmetic raw materials) are embedded directly into clinical protocols prescribed by verified physicians.',
         icon: Zap
       },
       {
@@ -156,7 +156,7 @@ const COLLECTIVES = [
       },
       {
         title: 'Direct API Procurement Integration',
-        desc: 'Quickly match prescribed active substances with in-stock suppliers (Lotusland, Fagron) with instant access to analytical certificates.',
+        desc: 'Quickly match prescribed active substances with in-stock suppliers (European Core Lab, Fagron) with instant access to analytical certificates.',
         icon: CheckCircle2
       }
     ],

@@ -141,7 +141,7 @@ export default function PeptideMonographHeader({
   const verifiedPurity = isDiagnostic
     ? (isTeletestHtma ? 'ISO 17025 Accredited · ICP-MS/MS' : 'ISO 15189 · CE-IVD (CV ≤ 6.6%)')
     : (product.purity || '≥99% (99.4% HPLC verified)');
-  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || (isDiagnostic ? (isTeletestHtma ? 'TeleTest Analytika' : 'Bloodo') : 'Lotusland');
+  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || (isDiagnostic ? (isTeletestHtma ? 'TeleTest Analytika' : 'Bloodo') : 'Clinical Laboratory');
   const supplier = formatCommercialSupplierName(rawSupplier);
   const batchCode = effectiveBatch || (product.testCode ? `TEST-TL01-${product.testCode}` : (product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-MED-PT05-2609')));
 

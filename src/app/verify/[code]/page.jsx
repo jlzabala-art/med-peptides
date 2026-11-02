@@ -95,7 +95,7 @@ async function getBatchVerificationData(code) {
         productName: mappedEntry.name,
         dosage: mappedEntry.dose,
         purity: '≥99.1% (HPLC Verified)',
-        supplierName: 'Lotusland Limited',
+        supplierName: 'European Lyophilization Hub',
         status: 'verified',
         testedAt: '2026-10-25'
       };
@@ -110,7 +110,7 @@ async function getBatchVerificationData(code) {
           productName: directLotus.name,
           dosage: directLotus.dosage,
           purity: directLotus.purity || '≥99.0%',
-          supplierName: 'Lotusland Limited',
+          supplierName: 'European Lyophilization Hub',
           status: 'verified'
         };
       }

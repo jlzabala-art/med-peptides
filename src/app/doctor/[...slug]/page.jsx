@@ -174,14 +174,14 @@ function DoctorCatalogWrapper() {
           <div>
             <div style={{ fontWeight: 800, color: '#1e40af', fontSize: '0.90rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>🌿</span>
-              <span>Lotusland Limited — Authorized Clinical Formulary</span>
+              <span>European Analytical Hub — Authorized Clinical Formulary</span>
             </div>
             <div style={{ fontSize: '0.78rem', color: '#3b82f6', marginTop: '2px' }}>
-              Exclusive authorized clinical catalog for Dr. Hanieh Erdmann. Access restricted to Lotusland peptide preparations and sterile compounding devices.
+              Exclusive authorized clinical catalog for Dr. Hanieh Erdmann. Access restricted to verified clinical peptide preparations and sterile compounding devices.
             </div>
           </div>
           <span style={{ fontSize: '0.72rem', background: '#dbeafe', color: '#1d4ed8', padding: '3px 10px', borderRadius: '12px', fontWeight: 700, border: '1px solid #93c5fd' }}>
-            Exclusive Supplier: Lotusland
+            Authorized Formulary
           </span>
         </div>
       )}

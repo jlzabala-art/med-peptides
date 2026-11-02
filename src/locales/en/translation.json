@@ -318,8 +318,8 @@
         "new_rx_desc": "Create custom magistral compound prescriptions and clinical protocols.",
         "create_rx": "Create Prescription",
         "close_form": "Close Form",
-        "catalogs": "Lotusland Formulary",
-        "catalogs_desc": "Browse approved Lotusland peptide preparations, dosages and compounds.",
+        "catalogs": "Clinical Peptides Formulary",
+        "catalogs_desc": "Browse approved clinical peptide preparations, dosages and compounds.",
         "open_generator": "View Catalog",
         "builder_form": "New Clinical Prescription",
         "builder_form_desc": "Generate patient-tailored peptide compound orders"
