@@ -26,6 +26,7 @@ export default function RegulatoryTab({ form, setForm }) {
                 onChange={e => setForm({ ...form, fdaStatus: e.target.value })}
                 style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', backgroundColor: '#ffffff', color: '#0f172a' }}
               >
+                <option value="hhs_503a_enforcement_discretion">🏛️ HHS 503A Enforcement Discretion (Oct 28, 2026)</option>
                 <option value="fda_pcac_503a_recommended">🛡️ FDA PCAC 503A Recommended (July 2026)</option>
                 <option value="fda_approved">✅ FDA Approved Drug (NDA / ANDA)</option>
                 <option value="fda_category_2_restricted">⚠️ FDA Category 2 / Restricted Compounding</option>

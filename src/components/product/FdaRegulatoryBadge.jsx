@@ -54,6 +54,8 @@ export default function FdaRegulatoryBadge({
   const localizedShortBadge = useMemo(() => {
     if (!isEs || !info.shortBadge) return info.shortBadge;
     if (info.shortBadge === 'Phase 3 IND') return 'Fase 3 IND';
+    if (info.shortBadge === '503A Discretion ✓') return '503A Discreción ✓';
+    if (info.shortBadge === '503A Separate Vials ✓') return '503A Viales Sep. ✓';
     if (info.shortBadge === '503A PCAC ✓') return '503A PCAC ✓';
     if (info.shortBadge === 'cGMP Standard') return 'Estándar cGMP';
     if (info.shortBadge === 'FDA Approved') return 'Aprobado FDA';
@@ -63,6 +65,8 @@ export default function FdaRegulatoryBadge({
 
   const localizedBadgeLabel = useMemo(() => {
     if (!isEs || !info.badgeLabel) return info.badgeLabel;
+    if (info.badgeLabel.includes('HHS 503A Enforcement Discretion')) return 'Discreción 503A HHS (28 Oct 2026)';
+    if (info.badgeLabel.includes('HHS 503A Discretion')) return 'Discreción 503A HHS (Monoterapia)';
     if (info.badgeLabel.includes('Phase 3 Investigational')) return 'Fase 3 en Investigación (IND)';
     if (info.badgeLabel.includes('503A Recommended')) return 'Recomendado 503A PCAC';
     if (info.badgeLabel.includes('cGMP Analytical')) return 'Estándar Analítico cGMP';
@@ -73,6 +77,12 @@ export default function FdaRegulatoryBadge({
 
   const localizedVoteResult = useMemo(() => {
     if (!isEs || !info.voteResult) return info.voteResult;
+    if (info.voteResult.includes('HHS Interim Enforcement Discretion')) {
+      return 'Amparado bajo la Política Provisional de Discreción del HHS (Compuestos 503A)';
+    }
+    if (info.voteResult.includes('Both Components Eligible under HHS 503A Discretion')) {
+      return 'Ambos Componentes Elegibles bajo Discreción 503A del HHS como Monoterapias Separadas';
+    }
     if (info.voteResult.includes('Phase 3 Clinical Trials')) {
       return 'Ensayos Clínicos Activos Fase 3 para Obesidad y Condiciones Metabólicas';
     }
@@ -90,6 +100,9 @@ export default function FdaRegulatoryBadge({
 
   const localizedAdvisoryBody = useMemo(() => {
     if (!isEs || !info.advisoryBody) return info.advisoryBody;
+    if (info.advisoryBody.includes('HHS') || info.advisoryBody.includes('Department of Health and Human Services')) {
+      return 'Departamento de Salud y Servicios Humanos de EE. UU. (HHS) & FDA';
+    }
     if (info.advisoryBody.includes('PCAC')) {
       return 'Comité Asesor de Fórmulas Magistrales de la FDA (PCAC)';
     }
@@ -107,6 +120,12 @@ export default function FdaRegulatoryBadge({
 
   const localizedSummary = useMemo(() => {
     if (!isEs || !info.summary) return info.summary;
+    if (info.summary.includes('October 28, 2026') || info.summary.includes('Department of Health and Human Services (HHS)')) {
+      if (info.slug === 'bpc-157-tb-500' || info.canonicalName?.includes('Wolverine')) {
+        return 'Ambos componentes del protocolo (BPC-157 y TB-500) están amparados por la Política de Discreción en la Aplicación del HHS del 28 de octubre de 2026. REQUISITO REGULATORIO: El decreto exige que las fórmulas magistrales contengan ÚNICAMENTE 1 principio activo por preparado. Por tanto, BPC-157 y TB-500 deben dispensarse en viales o plumas separadas para cumplir con la normativa federal.';
+      }
+      return 'El 28 de octubre de 2026, el Departamento de Salud y Servicios Humanos de EE. UU. (HHS) anunció una política provisional de discreción en la aplicación. Bajo esta directriz federal, las autoridades no emprenderán acciones sancionadoras contra farmacias 503A autorizadas ni médicos que formulen y prescriban este péptido como monoterapia individual para pacientes, bajo estrictos estándares cGMP, pureza HPLC y esterilidad.';
+    }
     if (info.canonicalName?.toLowerCase().includes('retatrutide') || info.summary?.toLowerCase().includes('retatrutide')) {
       return 'Retatrutida se encuentra actualmente en desarrollo clínico activo bajo Solicitud de Medicamento en Investigación (IND), específicamente en ensayos clínicos de Fase 3 para el tratamiento de obesidad y condiciones metabólicas asociadas. Aún no cuenta con aprobación comercial de prescripción por la FDA. Su desarrollo está bajo la supervisión del Centro de Evaluación e Investigación de Medicamentos de la FDA (CDER).';
     }
@@ -114,10 +133,16 @@ export default function FdaRegulatoryBadge({
       return 'El Comité Asesor de Fórmulas Magistrales de la FDA (PCAC) dictaminó recomendación favorable para la inclusión de este compuesto en la Lista 503A Bulks para formulación de precisión.';
     }
     return info.summary;
-  }, [info.summary, info.canonicalName, isEs]);
+  }, [info.summary, info.canonicalName, info.slug, isEs]);
 
   const localizedLegalNotice = useMemo(() => {
     if (!isEs || !info.legalNotice) return info.legalNotice;
+    if (info.legalNotice.includes('October 28, 2026') || info.legalNotice.includes('HHS Interim Policy') || info.legalNotice.includes('SINGLE-API')) {
+      if (info.slug === 'bpc-157-tb-500' || info.legalNotice.includes('SINGLE-API')) {
+        return 'MANDATO DE INGREDIENTE ACTIVO ÚNICO: La política provisional del HHS exige estrictamente que cada preparado magistral contenga solo un ingrediente activo. BPC-157 y TB-500 no pueden premezclarse en un mismo vial; deben prescribirse y suministrarse como dos monoterapias separadas.';
+      }
+      return 'Amparado bajo la Política Provisional del HHS de EE. UU. (28 de octubre de 2026). Aplica discreción en la aplicación federal para farmacias de formulación magistral 503A; NO constituye aprobación comercial general (NDA) ni inclusión formal final en la lista 503A Bulks. Obligatorio formular como monoterapia de un solo ingrediente activo (sin premezclas).';
+    }
     if (info.legalNotice.includes('investigational new drug') || info.legalNotice.includes('Investigational new drug')) {
       return 'Como medicamento en fase de investigación (IND), Retatrutida no está autorizada para comercialización comercial ni formulación magistral general según las Secciones 503A o 503B de la Ley FD&C. Su uso está restringido a ensayos clínicos autorizados bajo una solicitud activa de Nuevo Fármaco en Investigación (IND).';
     }
@@ -125,7 +150,7 @@ export default function FdaRegulatoryBadge({
       return 'Recomendación favorable por el comité PCAC para prescripción médica magistral bajo directrices 503A.';
     }
     return info.legalNotice;
-  }, [info.legalNotice, isEs]);
+  }, [info.legalNotice, info.slug, isEs]);
 
   const handleRefreshFdaStatus = async () => {
     setIsRefreshing(true);
@@ -494,6 +519,39 @@ export default function FdaRegulatoryBadge({
                   <span>{isEs ? 'Monografía FDA' : 'FDA Monograph'}</span>
                 </div>
               </div>
+
+              {/* HHS Interim Policy Highlight Callout */}
+              {Boolean(info.status === 'hhs_503a_enforcement_discretion' || info.badgeLabel?.includes('HHS 503A') || info.rulingDate?.includes('October 28, 2026')) && (
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    backgroundColor: '#ecfdf5',
+                    border: '1.5px solid #6ee7b7',
+                    color: '#065f46'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '1.1rem' }}>🏛️</span>
+                    <strong style={{ fontSize: '0.82rem', color: '#065f46' }}>
+                      {isEs ? 'Decreto HHS de EE. UU. (28 de Octubre de 2026)' : 'U.S. HHS Interim Policy (October 28, 2026)'}
+                    </strong>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 800, backgroundColor: '#d1fae5', color: '#047857', padding: '1px 6px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
+                      {isEs ? 'Discreción 503A Activa' : '503A Discretion Active'}
+                    </span>
+                  </div>
+                  <p style={{ margin: '0 0 6px 0', fontSize: '0.78rem', lineHeight: 1.5, color: '#064e3b' }}>
+                    {isEs
+                      ? 'El Departamento de Salud y Servicios Humanos (HHS) no tomará medidas sancionadoras contra farmacias 503A con licencia ni médicos que preparen fórmulas magistrales de este compuesto para pacientes individuales.'
+                      : 'The U.S. Department of Health and Human Services (HHS) does not intend to take enforcement action against licensed 503A pharmacies or physicians compounding this peptide for individual patients.'}
+                  </p>
+                  <div style={{ fontSize: '0.72rem', backgroundColor: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #a7f3d0', color: '#047857', lineHeight: 1.45 }}>
+                    <strong>{isEs ? 'Mandato Single-API:' : 'Single-API Mandate:'}</strong> {isEs
+                      ? 'La fórmula debe contener un único ingrediente activo (monoterapia). No se admiten premezclas en un mismo vial (deben dispensarse en viales separados).'
+                      : 'Preparations must contain only one active ingredient (monotherapy). Pre-mixed multi-peptide combinations are excluded and must be dispensed in separate vials.'}
+                  </div>
+                </div>
+              )}
 
               {/* Legal & Medical Notice */}
               <div

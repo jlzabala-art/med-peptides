@@ -48,10 +48,11 @@ Your task is to determine the authoritative, up-to-date US FDA regulatory classi
 
 Analyze the compound against official US regulatory frameworks:
 1. 'fda_approved': Fully approved by the FDA under an approved New Drug Application (NDA) or Biologics License Application (BLA) for commercial prescription marketing (e.g., Semaglutide, Tirzepatide, Tesamorelin, Sermorelin).
-2. 'fda_pcac_503a_recommended': Formally evaluated and voted favorably by the FDA Pharmacy Compounding Advisory Committee (PCAC) for inclusion on the Section 503A Bulks Compounding List (e.g., BPC-157, TB-500, KPV, MOTS-c, Semax, Epitalon, Emideltide).
-3. 'clinical_investigational': Currently undergoing active Investigational New Drug (IND) clinical development and clinical trials (Phase 1, 2, or 3), not yet commercially approved by FDA (e.g., Retatrutide, Cagrilintide, Mazdutide, Survodutide).
-4. 'fda_category_2_restricted': Classified on FDA Category 2 with specific safety alerts or restrictions against compounding.
-5. 'research_analytical_standard': Research-grade analytical standard without human therapeutic approval.
+2. 'hhs_503a_enforcement_discretion': Covered under the US Department of Health and Human Services (HHS) Interim Policy of Enforcement Discretion announced on October 28, 2026 for patient-specific pharmacy compounding of 6 peptides (BPC-157, TB-500, KPV, MOTS-c, Semax, Epitalon). Requires single active ingredient monotherapy.
+3. 'fda_pcac_503a_recommended': Formally evaluated and voted favorably by the FDA Pharmacy Compounding Advisory Committee (PCAC) for inclusion on the Section 503A Bulks Compounding List.
+4. 'clinical_investigational': Currently undergoing active Investigational New Drug (IND) clinical development and clinical trials (Phase 1, 2, or 3), not yet commercially approved by FDA (e.g., Retatrutide, Cagrilintide, Mazdutide, Survodutide).
+5. 'fda_category_2_restricted': Classified on FDA Category 2 with specific safety alerts or restrictions against compounding (e.g., Emideltide/DSIP).
+6. 'research_analytical_standard': Research-grade analytical standard without human therapeutic approval.
 
 Be factually accurate, clinical, and precise. Format review date in English (e.g., "September 2026").`;
 
@@ -71,6 +72,7 @@ Be factually accurate, clinical, and precise. Format review date in English (e.g
               type: Type.STRING,
               enum: [
                 'fda_approved',
+                'hhs_503a_enforcement_discretion',
                 'fda_pcac_503a_recommended',
                 'clinical_investigational',
                 'fda_category_2_restricted',

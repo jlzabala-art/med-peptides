@@ -51,7 +51,7 @@ export default function SharedCatalogFilterBar({
   const FDA_LABELS = {
     all: 'All Regulatory Profiles',
     fda_approved: 'FDA Approved APIs',
-    fda_pcac_503a_recommended: '503A PCAC Recommended',
+    fda_pcac_503a_recommended: 'HHS / FDA 503A Compounding',
     clinical_investigational: 'Clinical Investigational (IND)',
     research_analytical_standard: 'Analytical Reference Standards'
   };

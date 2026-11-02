@@ -61,6 +61,7 @@ export const PeptideApiSpecsSchema = z.object({
 export const FdaRegulatorySchema = z.object({
   status: z.enum([
     'fda_approved',
+    'hhs_503a_enforcement_discretion',
     'fda_pcac_503a_recommended',
     'fda_category_2_restricted',
     'clinical_investigational',

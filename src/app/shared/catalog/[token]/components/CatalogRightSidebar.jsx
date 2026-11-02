@@ -27,12 +27,12 @@ const FDA_STATUS_CONFIG = [
   },
   {
     id: 'fda_pcac_503a_recommended',
-    label: '503A PCAC Recommended',
-    badge: '503A PCAC ✓',
+    label: 'HHS / FDA 503A Compounding',
+    badge: '503A Discretion ✓',
     color: '#0d9488',
     bg: '#f0fdfa',
     borderColor: '#99f6e4',
-    description: 'Evaluated by FDA Pharmacy Compounding Advisory Committee'
+    description: 'HHS Interim Policy of Enforcement Discretion & FDA PCAC reviewed'
   },
   {
     id: 'clinical_investigational',

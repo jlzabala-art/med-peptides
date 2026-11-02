@@ -176,6 +176,9 @@ const Catalog = React.memo(function Catalog({
     if (fdaStatusFilter) {
       return list.filter(p => {
         const fda = getFdaPeptideStatus(p);
+        if (fdaStatusFilter === 'fda_pcac_503a_recommended' || fdaStatusFilter === 'hhs_503a_enforcement_discretion') {
+          return fda?.status === 'fda_pcac_503a_recommended' || fda?.status === 'hhs_503a_enforcement_discretion';
+        }
         return fda?.status === fdaStatusFilter;
       });
     }

@@ -333,9 +333,9 @@ export const PEPTIDE_REFERENCE_DOSSIERS = {
       brand: 'BPC-157 / PL 14736 (Body Protection Compound)',
       brandUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/108182224',
       appNumber: 'Investigational Reference Standard (CAS 137525-51-0)',
-      approvalDate: 'FDA PCAC 503A Recommended (July 23, 2026: 8-6-1)',
-      holder: 'Diagen d.o.o. / Academic Research Registries',
-      guidance: 'BPC-157 is a 15-amino-acid synthetic peptide derived from human gastric juice protein BPC. On July 23, 2026, the FDA Pharmacy Compounding Advisory Committee (PCAC) voted 8 in favor, 6 against, and 1 abstention to recommend BPC-157 (evaluated in free-base and acetate forms for ulcerative colitis) for inclusion on the Section 503A Bulks List for patient-specific compounding by eligible physicians and pharmacists.',
+      approvalDate: 'US HHS 503A Interim Policy (Oct 28, 2026)',
+      holder: 'US HHS Enforcement Discretion / Academic Registries',
+      guidance: 'BPC-157 is a 15-amino-acid synthetic peptide derived from human gastric juice protein BPC. On October 28, 2026, the US Department of Health and Human Services (HHS) announced a new interim policy of enforcement discretion for pharmacy compounding of BPC-157 following the FDA PCAC review. Licensed 503A pharmacies and physicians may prepare patient-specific single-ingredient formulations without federal enforcement action under defined cGMP and testing standards.',
       officialLinks: [
         { label: 'PubChem Compound (CID: 108182224)', url: 'https://pubchem.ncbi.nlm.nih.gov/compound/108182224', type: 'pubchem' },
         { label: 'PubMed Literature Search (BPC-157)', url: 'https://pubmed.ncbi.nlm.nih.gov/?term=BPC-157+gastric+pentadecapeptide', type: 'pubmed' }
@@ -391,9 +391,9 @@ export const PEPTIDE_REFERENCE_DOSSIERS = {
       brand: 'TB-500 / Thymosin Beta-4 (Active G-Actin Binding Fragment)',
       brandUrl: 'https://pubchem.ncbi.nlm.nih.gov/#query=thymosin+beta-4',
       appNumber: 'Investigational Compounding Standard (CAS 77591-33-4)',
-      approvalDate: 'FDA PCAC 503A Recommended (July 23, 2026: 8-6-1)',
-      holder: 'Regitene / Academic Research Registries',
-      guidance: 'TB-500 is the synthetic 17-43 active fragment of Thymosin Beta-4. Studied for actin sequestration, cell migration, tissue regeneration, and wound repair. On July 23, 2026, the FDA Pharmacy Compounding Advisory Committee (PCAC) voted 8 in favor, 6 against, and 1 abstention to recommend TB-500 (evaluated in free-base and acetate forms specifically for wound healing) for inclusion on the Section 503A Bulks List.',
+      approvalDate: 'US HHS 503A Interim Policy (Oct 28, 2026)',
+      holder: 'US HHS Enforcement Discretion / Academic Registries',
+      guidance: 'TB-500 is the synthetic 17-43 active fragment of Thymosin Beta-4. Studied for actin sequestration, cell migration, tissue regeneration, and wound repair. On October 28, 2026, the US Department of Health and Human Services (HHS) published an interim policy of enforcement discretion covering TB-500. Licensed 503A pharmacies and clinicians may compound patient-specific single-ingredient preparations without federal enforcement action provided strict cGMP and sterility standards are satisfied.',
       officialLinks: [
         { label: 'PubChem Reference (Thymosin β4)', url: 'https://pubchem.ncbi.nlm.nih.gov/#query=thymosin+beta-4', type: 'pubchem' },
         { label: 'PubMed Literature Search (TB-500 / Tβ4)', url: 'https://pubmed.ncbi.nlm.nih.gov/?term=thymosin+beta-4+wound+healing+actin', type: 'pubmed' }

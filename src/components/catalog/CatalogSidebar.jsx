@@ -24,7 +24,7 @@ export default function CatalogSidebar({
   onSelectFdaStatus
 }) {
   const fdaFilterOptions = [
-    { id: 'fda_pcac_503a_recommended', label: 'FDA 503A Recommended (6)', icon: '🛡️' },
+    { id: 'fda_pcac_503a_recommended', label: 'HHS / FDA 503A (6)', icon: '🛡️' },
     { id: 'fda_approved', label: 'FDA Approved Active', icon: '✅' },
     { id: 'clinical_investigational', label: 'Phase 3 IND Trials', icon: '🔬' }
   ];

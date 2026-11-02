@@ -69,7 +69,7 @@ export default function PatientDnaPortalClient({
 
       {/* ── Main Container ── */}
       <main style={{ maxWidth: '1080px', margin: '0 auto', width: '100%', padding: '1.5rem 1rem 4rem 1rem', flex: 1 }}>
-        
+
         {/* Navigation Breadcrumb & Actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.80rem', color: '#64748b' }}>
@@ -311,7 +311,7 @@ export default function PatientDnaPortalClient({
         {/* ── SECTION 2: 3-CAPSULE COMPACT PHARMACY PRESCRIPTION & COMPATIBILITY ── */}
         {activeSection === 'prescription' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            
+
             {/* Pharmacokinetic Compatibility Analysis Banner */}
             <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem 1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
