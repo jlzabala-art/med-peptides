@@ -291,21 +291,22 @@ export default function TieredPriceShield({
   }
 
   // Determine user authorization & role hierarchy
-  const isAuthenticated = Boolean(user) || Boolean(localPreview) || Boolean(adminSimulationTier);
+  // STRICT RULE: "NO LOGIN, NO PRECIO". Unauthenticated visitors must NEVER see wholesale numeric prices.
   const isAdmin = is('admin') || is('medical_director') || (localPreview?.role === 'admin');
+  const isAuthenticated = Boolean(user) || (Boolean(localPreview) && Boolean(localPreview?.timestamp)) || (isAdmin && Boolean(adminSimulationTier));
   const isWholesaler = is('wholesaler') || is('supplier') || is('distributor') || (localPreview?.role === 'wholesaler');
   const isDoctor = is('doctor') || is('clinic') || is('medical_director') || is('fagron_clinic') || is('compounding_pharmacy') || (localPreview?.role === 'clinic');
   const isPatient = is('patient') || (localPreview?.role === 'patient');
 
   // Determine which tier to display based on canonical role
   let activeTierKey = 'clinic';
-  if (isWholesaler && !adminSimulationTier) {
+  if (isWholesaler && !isAdmin) {
     activeTierKey = 'wholesaler';
-  } else if (isDoctor && !adminSimulationTier) {
+  } else if (isDoctor && !isAdmin) {
     activeTierKey = 'clinic';
-  } else if (isPatient && !adminSimulationTier) {
+  } else if (isPatient && !isAdmin) {
     activeTierKey = 'retail';
-  } else if (adminSimulationTier) {
+  } else if (isAdmin && adminSimulationTier) {
     activeTierKey = adminSimulationTier;
   }
 
@@ -376,7 +377,7 @@ export default function TieredPriceShield({
             alignItems: 'center',
             gap: '4px'
           }}>
-            <Lock size={10} /> {isEs ? 'Ver precio (registro)' : 'Sign In for Price'}
+            <Lock size={10} /> {isEs ? 'Tarifa B2B (Bloqueada)' : 'B2B Locked · Sign In'}
           </span>
         </div>
       );

@@ -33,11 +33,12 @@ import { safeReplaceState } from '../hooks/useSafeUrlState';
 import InlineOrderButton from '../components/orders/InlineOrderButton';
 import UnifiedOrderDrawer from '../components/orders/UnifiedOrderDrawer';
 import { useAuth } from '../context/AuthContext';
+import { resolveProductClinicalPosology } from '@/data/peptidePosologyDirectory';
 import {
   Search, SlidersHorizontal, LayoutGrid, List, Sparkles, Shield, Activity,
   Zap, HeartPulse, Check, ArrowRight, ExternalLink, Dna,
   Droplets, Microscope, FileText, FlaskConical, Award, ShieldCheck, CheckCircle2, ChevronRight,
-  ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare, BookOpen, Package, Mail, Download
+  ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare, BookOpen, Package, Mail, Download, Pill
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTeletestCatalog } from '../data/teletestRegistry';
@@ -203,7 +204,6 @@ const BRAND_CONFIGS = {
       { label: 'B2B Cost-Plus Tier', value: '+20% / +30%', sub: 'Wholeseller (+20%) & Clinic (+30%) on Cost', icon: ShieldCheck, color: '#16a34a' }
     ],
     categories: [
-      { id: 'all', label: 'All Hair Treatments' },
       { id: 'trichotest-compounding', label: '1. TrichoTest™ Compounding (6)' },
       { id: 'peptides', label: '2. Hair Peptides (GHK-Cu / TB-500)' },
       { id: 'colway-hair', label: '3. Colway® Hair Care (2)' }
@@ -626,9 +626,17 @@ export default function BrandCollectionPage({
         : products.filter(p => {
             const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
             if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
-              if (catId === 'trichotest-compounding') return Boolean(p.isCompounded) || str.includes('tricho') || str.includes('trichosol') || str.includes('trichofoam') || str.includes('trichooil');
-              if (catId === 'peptides') return str.includes('ghk') || str.includes('tb-500') || str.includes('tb500') || p.category === 'peptides';
-              if (catId === 'colway-hair' || catId === 'colway-trichology') return (str.includes('shampoo') || str.includes('conditioner') || str.includes('colway')) && !str.includes('colvita');
+              const isColwayCosmetic = p.brand === 'Colway' || p.category === 'colway-hair' || str.includes('shampoo') || str.includes('conditioner') || str.includes('colway');
+              if (catId === 'trichotest-compounding') {
+                if (isColwayCosmetic) return false;
+                return Boolean(p.isCompounded) || str.includes('trichosol') || str.includes('trichofoam') || str.includes('trichooil') || str.includes('trichotest');
+              }
+              if (catId === 'peptides') {
+                return (str.includes('ghk') || str.includes('tb-500') || str.includes('tb500') || p.category === 'peptides') && !str.includes('trichosol') && !str.includes('trichofoam');
+              }
+              if (catId === 'colway-hair' || catId === 'colway-trichology') {
+                return (isColwayCosmetic || p.category === 'colway-hair') && !str.includes('colvita');
+              }
             }
             if (brandSlug === 'teletest') {
               if (catId === 'genomics') return str.includes('genom') || str.includes('hla') || str.includes('celiac') || str.includes('celiaca') || str.includes('gnt') || str.includes('autoimmun');
@@ -647,8 +655,11 @@ export default function BrandCollectionPage({
   }, [config.categories, products, brandSlug]);
 
   const colwayCategories = brandCategories;
+  const isHairCollection = ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    return isHairCollection ? 'trichotest-compounding' : 'all';
+  });
   const [activeMainTab, setActiveMainTab] = useState('products'); // 'products' | 'works' | 'protocols'
 
   const collectionWorks = useMemo(() => {
@@ -693,7 +704,21 @@ export default function BrandCollectionPage({
 
   // Dynamic Tiered Pricing & Unlock Modal (Golden Rule #14 & #22)
   const [activeCurrency, setActiveCurrency] = useState('EUR'); // 'EUR' | 'USD' | 'AED'
-  const [adminSimulationTier, setAdminSimulationTier] = useState('clinic'); // 'cost' | 'wholesaler' | 'clinic' | 'retail'
+  const [adminSimulationTier, setAdminSimulationTier] = useState(() => {
+    if (activeRole === 'wholesaler') return 'wholesaler';
+    if (activeRole === 'patient') return 'retail';
+    return 'clinic'; // default B2B clinic / doctor tier
+  });
+
+  useEffect(() => {
+    if (activeRole === 'wholesaler') {
+      setAdminSimulationTier('wholesaler');
+    } else if (activeRole === 'patient') {
+      setAdminSimulationTier('retail');
+    } else if (activeRole === 'doctor' || activeRole === 'clinic') {
+      setAdminSimulationTier('clinic');
+    }
+  }, [activeRole]);
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const [selectedCapsulesMap, setSelectedCapsulesMap] = useState({});
 
@@ -851,9 +876,17 @@ export default function BrandCollectionPage({
       list = list.filter(p => {
         const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
         if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
-          if (cat === 'trichotest-compounding') return Boolean(p.isCompounded) || str.includes('tricho') || str.includes('trichosol') || str.includes('trichofoam') || str.includes('trichooil');
-          if (cat === 'colway-hair' || cat === 'colway-trichology') return (str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('colway')) && !str.includes('colvita');
-          if (cat === 'peptides') return str.includes('ghk') || str.includes('tb-500') || str.includes('tb500') || str.includes('bpc') || str.includes('peptide') || p.category === 'peptides';
+          const isColwayCosmetic = p.brand === 'Colway' || p.category === 'colway-hair' || str.includes('shampoo') || str.includes('conditioner') || str.includes('colway');
+          if (cat === 'trichotest-compounding') {
+            if (isColwayCosmetic) return false;
+            return Boolean(p.isCompounded) || str.includes('trichosol') || str.includes('trichofoam') || str.includes('trichooil') || str.includes('trichotest');
+          }
+          if (cat === 'colway-hair' || cat === 'colway-trichology') {
+            return (isColwayCosmetic || p.category === 'colway-hair') && !str.includes('colvita');
+          }
+          if (cat === 'peptides') {
+            return (str.includes('ghk') || str.includes('tb-500') || str.includes('tb500') || str.includes('bpc') || p.category === 'peptides') && !str.includes('trichosol') && !str.includes('trichofoam');
+          }
           if (cat === 'diagnostic') return str.includes('htma') || str.includes('teletest') || str.includes('mineral') || str.includes('cabello');
           if (cat === 'nutricosmetics') return str.includes('colvita') || str.includes('capsule');
         }
@@ -983,8 +1016,31 @@ export default function BrandCollectionPage({
       };
     }
 
+    if (brandSlug === 'peptides') {
+      return {
+        brandSlug: 'peptides',
+        sectionId: selectedCategory,
+        sectionTitle: 'Clinical Peptide Portfolio & Lyophilized Vials (HPLC ≥99.0%)',
+        products: filteredProducts.map(p => p.name || p.title),
+        keyActives: 'Lyophilized Reference Standards: BPC-157, TB-500, Epithalon, MOTS-c, Semax, Selank, AOD-9604, Tirzepatide. Oct 28, 2026 HHS 503A Interim Enforcement Discretion compliant.',
+        mechanisms: 'RP-HPLC purity ≥99.0%, endotoxin <0.05 EU/mg, certified mass spectrometry, cold-chain European lyophilization.',
+      };
+    }
+
+    if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
+      return {
+        brandSlug: 'hair-treatments',
+        sectionId: selectedCategory,
+        sectionTitle: 'Integrated Clinical Trichology & Follicular Compounding',
+        products: filteredProducts.map(p => p.name || p.title),
+        keyActives: '6 TrichoTest™ magistral formulations (TrichoSol™, TrichoFoam™, TrichoOil™) + GHK-Cu/TB-500 hair peptides + Colway® Baicapil™ 2% topicals.',
+        mechanisms: 'Pharmacogenomics-guided epicutaneous delivery, scalp microvascular perfusion, Wnt/β-catenin hair follicle stem cell activation.',
+      };
+    }
+
     if (brandSlug !== 'colway') {
       return {
+        brandSlug,
         sectionId: selectedCategory,
         sectionTitle: `${config.name} Clinical Portfolio`,
         products: filteredProducts.map(p => p.name || p.title),
@@ -1480,6 +1536,9 @@ export default function BrandCollectionPage({
               onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
               activePriceTier={adminSimulationTier}
               onSelectPriceTier={setAdminSimulationTier}
+              userRole={activeRole || 'clinic'}
+              isAuthenticated={Boolean(user)}
+              onUnlockRequest={() => setIsUnlockModalOpen(true)}
             />
           )}
 
@@ -2026,7 +2085,7 @@ export default function BrandCollectionPage({
                       <span>{brandSlug === 'peptides' ? 'Compound / Specification' : 'Resource & Specification'}</span>
                     </div>
                     <div>
-                      <span>{isEs ? 'Acreditación & Formato' : 'Accreditation & Format'}</span>
+                      <span>{isEs ? 'Posología & Dosificación' : 'Dosage & Posology'}</span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <span>{isEs ? 'Tarifa B2B (EXW)' : 'Wholesale Tier'}</span>
@@ -2041,8 +2100,10 @@ export default function BrandCollectionPage({
                   const isHairCollection = ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug);
                   const getHairSection = (p) => {
                     const pid = `${p.id || ''} ${p.name || ''} ${p.category || ''}`.toLowerCase();
-                    if (p.isCompounded || pid.includes('tricho')) return 'trichotest';
+                    const isColwayCosmetic = p.brand === 'Colway' || p.category === 'colway-hair' || pid.includes('shampoo') || pid.includes('conditioner') || pid.includes('colway');
+                    if (isColwayCosmetic) return 'colway';
                     if (pid.includes('ghk') || pid.includes('tb-500') || pid.includes('tb500') || p.category === 'peptides') return 'peptides';
+                    if (p.isCompounded || pid.includes('trichosol') || pid.includes('trichofoam') || pid.includes('trichooil') || pid.includes('trichotest')) return 'trichotest';
                     return 'colway';
                   };
                   const currentHairSec = isHairCollection ? getHairSection(product) : null;
@@ -2224,112 +2285,134 @@ export default function BrandCollectionPage({
                             </div>
                           </div>
 
-                          {/* Col 2: Regulatory Badges & Posology / Presentation */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                              {resolveProductRegulatoryBadges(product, brandSlug).map((rb, idx) => (
-                                <span
-                                  key={idx}
-                                  title={rb.title}
-                                  style={{
-                                    fontSize: '0.64rem',
+                          {/* Col 2: Clinical Dosage & Posology (Replacing redundant Accreditation badges) */}
+                          {(() => {
+                            const posologyInfo = resolveProductClinicalPosology(product, brandSlug, isEs);
+                            return (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start', minWidth: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                  <span style={{
+                                    fontSize: '0.74rem',
                                     fontWeight: 800,
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                    background: rb.bg,
-                                    color: rb.color,
-                                    border: `1px solid ${rb.border}`,
+                                    padding: '2px 8px',
+                                    borderRadius: '5px',
+                                    background: '#f0fdfa',
+                                    color: '#0f766e',
+                                    border: '1px solid #99f6e4',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
                                     whiteSpace: 'nowrap'
-                                  }}
-                                >
-                                  {rb.label}
-                                </span>
-                              ))}
-                              {brandSlug === 'colway' && (product.routine_badge || product.step_number != null) && (
-                                <span style={{
-                                  fontSize: '0.64rem',
-                                  fontWeight: 700,
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  background: '#f0fdfa',
-                                  color: '#0d9488',
-                                  border: '1px solid #99f6e4'
-                                }}>
-                                  {product.routine_badge || `Step ${product.step_number}`}
-                                </span>
-                              )}
-                            </div>
-                            <span style={{ fontSize: '0.72rem', color: '#0d9488', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <Sparkles size={11} color="#0d9488" />
-                              <span>{sampleType}</span>
-                            </span>
+                                  }}>
+                                    <Pill size={11} />
+                                    <span>{posologyInfo.dosageBadge}</span>
+                                  </span>
+                                  {posologyInfo.routeText && (
+                                    <span style={{
+                                      fontSize: '0.65rem',
+                                      fontWeight: 650,
+                                      padding: '1px 6px',
+                                      borderRadius: '4px',
+                                      background: '#f1f5f9',
+                                      color: '#475569',
+                                      whiteSpace: 'nowrap'
+                                    }}>
+                                      {posologyInfo.routeText}
+                                    </span>
+                                  )}
+                                </div>
 
-                            {/* Colvita 60 / 120 Capsule Selector (Patrón Ultraman) */}
-                            {isColvita && (
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '2px', background: '#f1f5f9', borderRadius: '6px', marginTop: '2px' }}>
-                                <button
-                                  type="button"
-                                  onClick={(e) => handleCapsuleSelect(product.id, 60, e)}
-                                  style={{
-                                    padding: '2px 7px',
-                                    fontSize: '0.66rem',
-                                    fontWeight: currentCaps === 60 ? 800 : 600,
-                                    borderRadius: '4px',
-                                    border: 'none',
-                                    background: currentCaps === 60 ? '#ffffff' : 'transparent',
-                                    color: currentCaps === 60 ? '#0d9488' : '#64748b',
-                                    boxShadow: currentCaps === 60 ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  60 Caps (30d)
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => handleCapsuleSelect(product.id, 120, e)}
-                                  style={{
-                                    padding: '2px 7px',
-                                    fontSize: '0.66rem',
-                                    fontWeight: currentCaps === 120 ? 800 : 600,
-                                    borderRadius: '4px',
-                                    border: 'none',
-                                    background: currentCaps === 120 ? '#ffffff' : 'transparent',
-                                    color: currentCaps === 120 ? '#0d9488' : '#64748b',
-                                    boxShadow: currentCaps === 120 ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  120 Caps (60d)
-                                </button>
-                              </div>
-                            )}
-
-                            {/* Trichology Duo Guide */}
-                            {isTrichologyItem && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedCategory('bundles');
-                                  setSearchQuery('Duo');
-                                }}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  padding: 0,
-                                  fontSize: '0.66rem',
-                                  color: '#0284c7',
+                                <div style={{
+                                  fontSize: '0.74rem',
+                                  color: '#1e293b',
                                   fontWeight: 650,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px'
-                                }}
-                                title="Ver Pack Dúo Folicular con Ahorro"
-                              >
-                                <span>✨ {isEs ? 'Ver en Dúo Folicular' : 'Available in Duo Pack'} →</span>
-                              </button>
-                            )}
-                          </div>
+                                  lineHeight: 1.35,
+                                  marginTop: '2px'
+                                }}>
+                                  {posologyInfo.posologyText}
+                                </div>
+
+                                {posologyInfo.durationText && (
+                                  <div style={{
+                                    fontSize: '0.68rem',
+                                    color: '#64748b',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    marginTop: '1px'
+                                  }}>
+                                    <span>⏱ {posologyInfo.durationText}</span>
+                                  </div>
+                                )}
+
+                                {/* Colvita 60 / 120 Capsule Selector (Patrón Ultraman) */}
+                                {isColvita && (
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '2px', background: '#f1f5f9', borderRadius: '6px', marginTop: '3px' }}>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => handleCapsuleSelect(product.id, 60, e)}
+                                      style={{
+                                        padding: '2px 7px',
+                                        fontSize: '0.66rem',
+                                        fontWeight: currentCaps === 60 ? 800 : 600,
+                                        borderRadius: '4px',
+                                        border: 'none',
+                                        background: currentCaps === 60 ? '#ffffff' : 'transparent',
+                                        color: currentCaps === 60 ? '#0d9488' : '#64748b',
+                                        boxShadow: currentCaps === 60 ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      60 Caps (30d)
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => handleCapsuleSelect(product.id, 120, e)}
+                                      style={{
+                                        padding: '2px 7px',
+                                        fontSize: '0.66rem',
+                                        fontWeight: currentCaps === 120 ? 800 : 600,
+                                        borderRadius: '4px',
+                                        border: 'none',
+                                        background: currentCaps === 120 ? '#ffffff' : 'transparent',
+                                        color: currentCaps === 120 ? '#0d9488' : '#64748b',
+                                        boxShadow: currentCaps === 120 ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      120 Caps (60d)
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* Trichology Duo Guide */}
+                                {isTrichologyItem && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedCategory('bundles');
+                                      setSearchQuery('Duo');
+                                    }}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      padding: 0,
+                                      fontSize: '0.66rem',
+                                      color: '#0284c7',
+                                      fontWeight: 650,
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px'
+                                    }}
+                                    title="Ver Pack Dúo Folicular con Ahorro"
+                                  >
+                                    <span>✨ {isEs ? 'Ver en Dúo Folicular' : 'Available in Duo Pack'} →</span>
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })()}
 
                           {/* Col 3: Wholesale Tier Price */}
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
@@ -2915,6 +2998,9 @@ export default function BrandCollectionPage({
                   onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }}
                   activePriceTier={adminSimulationTier}
                   onSelectPriceTier={setAdminSimulationTier}
+                  userRole={activeRole || 'clinic'}
+                  isAuthenticated={Boolean(user)}
+                  onUnlockRequest={() => { setIsMobileSidebarOpen(false); setIsUnlockModalOpen(true); }}
                 />
               )}
             </div>

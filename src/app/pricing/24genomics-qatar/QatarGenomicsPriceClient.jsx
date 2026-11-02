@@ -40,6 +40,8 @@ import {
 } from 'lucide-react';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import CopyableId from '@/components/ui/CopyableId';
+import StatusBadge from '@/components/ui/StatusBadge';
 import {
   GALENIC_COMPATIBILITY_ANALYSIS,
   CLINICAL_PILLARS,
@@ -299,27 +301,28 @@ export default function QatarGenomicsPriceClient() {
         </div>
       </nav>
 
-      {/* ── Atlas Clinical Hub Interactive Bar ── */}
+      {/* ── Atlas Clinical Hub Interactive Bar (Google Cloud Console Banner UX) ── */}
       <div style={{ backgroundColor: '#022c22', color: '#ffffff', borderBottom: '1px solid rgba(45, 212, 191, 0.25)', padding: '0.65rem 1.5rem' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(45, 212, 191, 0.15)', border: '1px solid rgba(45, 212, 191, 0.4)', padding: '3px 9px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, color: '#2dd4bf', letterSpacing: '0.04em' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(45, 212, 191, 0.15)', border: '1px solid rgba(45, 212, 191, 0.4)', padding: '3px 9px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, color: '#2dd4bf', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
               <Sparkles size={13} />
-              <span>ATLAS CLINICAL GENOMICS PLATFORM</span>
+              <span>ATLAS CLINICAL GENOMICS</span>
             </div>
-            <span style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>
-              Clinical Synergy: Saliva DNA Panel → Personalized 3-Capsule Compounding Prescriptions
+            <span style={{ fontSize: '0.82rem', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              Saliva DNA Panel → Synchronized 3-Capsule Compounding Prescriptions
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <button
+              type="button"
               onClick={() => setShowAiInsight(!showAiInsight)}
               style={{
-                background: 'rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.08)',
                 border: '1px solid rgba(255,255,255,0.2)',
                 color: '#ffffff',
-                padding: '4px 12px',
+                padding: '5px 12px',
                 borderRadius: '6px',
                 fontSize: '0.75rem',
                 fontWeight: 650,
@@ -330,10 +333,11 @@ export default function QatarGenomicsPriceClient() {
               }}
             >
               <Cpu size={14} className="text-teal-300" />
-              <span>{showAiInsight ? 'Hide Details ▲' : 'View Clinical Compounding Synergy ▼'}</span>
+              <span>{showAiInsight ? 'Hide Details ▲' : 'Clinical Synergy Details ▼'}</span>
             </button>
 
             <button
+              type="button"
               onClick={handleGenerateAtlasQuotation}
               disabled={isSubmittingQuote}
               style={{
@@ -381,195 +385,54 @@ export default function QatarGenomicsPriceClient() {
           { label: 'Ryhanh Medical Company · 24Genetics Nutrigenomics' }
         ]} />
 
-        {/* ── Institutional Document Header ── */}
+        {/* ── Institutional Document Header (Google Cloud Console UX) ── */}
         <header className="document-header" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
-          <div className="header-meta-row">
-            <div className="institutional-identity">
-              <div className="brand-pairing">
-                <div className="brand-pill-atlas">ATLAS HEALTH SERVICES</div>
-                <span className="partner-cross">×</span>
-                <div style={{ backgroundColor: '#0d9488', color: '#ffffff', fontSize: '0.7rem', fontWeight: 800, padding: '4px 10px', borderRadius: '4px', letterSpacing: '0.08em' }}>
+          {/* Top Row: Title & Action Toolbar */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1.25rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+            <div style={{ flex: '1 1 500px', minWidth: '280px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span style={{ backgroundColor: '#003666', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '3px 8px', borderRadius: '4px', letterSpacing: '0.06em' }}>
+                  ATLAS HEALTH SERVICES
+                </span>
+                <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '0.8rem' }}>×</span>
+                <span style={{ backgroundColor: '#0d9488', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '3px 8px', borderRadius: '4px', letterSpacing: '0.06em' }}>
                   24GENETICS CLINICAL LAB
-                </div>
+                </span>
               </div>
-              <h1 className="document-title" style={{ fontSize: '1.65rem', fontWeight: 850, color: '#003666', letterSpacing: '-0.02em', margin: '0 0 0.35rem 0' }}>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: 850, color: '#003666', letterSpacing: '-0.02em', margin: '0 0 0.4rem 0', lineHeight: 1.2 }}>
                 24GENETICS® CLINICAL DNA & NUTRIGENOMICS (NUTRIGEN)
               </h1>
-              <p className="document-subtitle" style={{ fontSize: '0.88rem', color: '#64748b', margin: 0 }}>
+              <p style={{ fontSize: '0.88rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
                 Exclusive B2B Saliva Testing Kits & Algorithm Compounding Schedule · State of Qatar
               </p>
             </div>
 
-            {/* Document Stamp Box */}
-            <div className="document-stamp-box">
-              <div className="stamp-item">
-                <span className="stamp-label">DOCUMENT REF:</span>
-                <span className="stamp-value font-mono font-bold">DOC-QA-24G-2026-V1</span>
-              </div>
-              <div className="stamp-item">
-                <span className="stamp-label">TERRITORY:</span>
-                <span className="stamp-value font-bold">State of Qatar (Exclusive B2B)</span>
-              </div>
-              <div className="stamp-item">
-                <span className="stamp-label">CONSIGNEE DISTRIBUTOR:</span>
-                <span className="stamp-value font-bold text-teal-700">Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)</span>
-              </div>
-              <div className="stamp-item">
-                <span className="stamp-label">ACCREDITATION:</span>
-                <span className="stamp-value">European CE-IVD Certified Lab (Madrid, Spain)</span>
-              </div>
-              <div className="stamp-item">
-                <span className="stamp-label">SCHEDULE TIER:</span>
-                <span className="stamp-value text-emerald-600 font-bold">Authorized Commercial Distributor</span>
-              </div>
-              <div className="stamp-item">
-                <span className="stamp-label">EFFECTIVE DATE:</span>
-                <span className="stamp-value">November 2026 · Active & Verified SSOT</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation Subtabs & Interactive Quotation CTA */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginTop: '1.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {/* GCP Action Toolbar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button
-                onClick={() => setActiveTab('commercial')}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  border: activeTab === 'commercial' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                  backgroundColor: activeTab === 'commercial' ? '#0d9488' : '#ffffff',
-                  color: activeTab === 'commercial' ? '#ffffff' : '#475569',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <FileSpreadsheet size={15} />
-                <span>Commercial Schedule & Quotation</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('ai-services')}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  border: activeTab === 'ai-services' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                  backgroundColor: activeTab === 'ai-services' ? '#0d9488' : '#ffffff',
-                  color: activeTab === 'ai-services' ? '#ffffff' : '#475569',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Cpu size={15} />
-                <span>Clinical Genomic Suite</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('sample-report')}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  border: activeTab === 'sample-report' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                  backgroundColor: activeTab === 'sample-report' ? '#0d9488' : '#ffffff',
-                  color: activeTab === 'sample-report' ? '#ffffff' : '#475569',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <FileText size={15} />
-                <span>Sample Report Preview</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('ai-recommendation')}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  border: activeTab === 'ai-recommendation' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                  backgroundColor: activeTab === 'ai-recommendation' ? '#0d9488' : '#ffffff',
-                  color: activeTab === 'ai-recommendation' ? '#ffffff' : '#475569',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Sparkles size={15} />
-                <span>AI Recommendation & Clinical Case</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('nutrigen-monograph')}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  border: activeTab === 'nutrigen-monograph' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                  backgroundColor: activeTab === 'nutrigen-monograph' ? '#0d9488' : '#ffffff',
-                  color: activeTab === 'nutrigen-monograph' ? '#ffffff' : '#475569',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Dna size={15} />
-                <span>Nutrigen Clinical Monograph</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('terms')}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  border: activeTab === 'terms' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                  backgroundColor: activeTab === 'terms' ? '#0d9488' : '#ffffff',
-                  color: activeTab === 'terms' ? '#ffffff' : '#475569',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <ShieldCheck size={15} />
-                <span>Terms & Logistics</span>
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
+                type="button"
                 onClick={handleCopyShareLink}
                 style={{
-                  padding: '8px 14px',
+                  padding: '9px 14px',
                   borderRadius: '6px',
-                  fontSize: '0.78rem',
+                  fontSize: '0.80rem',
                   fontWeight: 650,
                   border: '1px solid #cbd5e1',
                   backgroundColor: '#ffffff',
-                  color: copiedLink ? '#15803d' : '#475569',
+                  color: copiedLink ? '#15803d' : '#334155',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px'
+                  gap: '6px',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
                 }}
               >
-                {copiedLink ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                {copiedLink ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
                 <span>{copiedLink ? 'Link Copied' : 'Share Schedule'}</span>
               </button>
 
               <button
+                type="button"
                 onClick={handleGenerateAtlasQuotation}
                 disabled={isSubmittingQuote}
                 style={{
@@ -592,6 +455,169 @@ export default function QatarGenomicsPriceClient() {
               </button>
             </div>
           </div>
+
+          {/* GCP Resource Metadata Card (Replaces the old stamp box) */}
+          <div style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '10px',
+            padding: '1.25rem 1.5rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1.25rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+          }}>
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                Document Reference
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <CopyableId value="DOC-QA-24G-2026-V1" />
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                Document Status
+              </div>
+              <div>
+                <StatusBadge status="active" label="Active & Verified SSOT" />
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                Territory
+              </div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#0f172a' }}>
+                State of Qatar (Exclusive B2B)
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                Consignee Distributor
+              </div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#0d9488' }}>
+                Ryhanh Medical Co. (Doha, Qatar)
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                Lab Accreditation
+              </div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+                European CE-IVD (Madrid, Spain)
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                Schedule Tier
+              </div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#16a34a' }}>
+                Authorized Commercial Distributor
+              </div>
+            </div>
+          </div>
+
+          {/* ── 4 GCP Default Metric KPIs Strip (Rule #22) ── */}
+          <div style={{ marginTop: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0d9488' }}></span>
+                Qatar Clinical Genomics Schedule Metrics
+              </span>
+              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0f766e', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px' }}>
+                Scope: Qatar National Distribution
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '1rem'
+            }}>
+              <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #003666', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Exclusive Territory</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#003666', margin: '3px 0' }}>State of Qatar</div>
+                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Ryhanh Medical Co. Distribution</div>
+              </div>
+
+              <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #0d9488', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Lab Turnaround Time</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#0d9488', margin: '3px 0' }}>3–4 Weeks</div>
+                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>European CE-IVD Core Lab Madrid</div>
+              </div>
+
+              <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #7c3aed', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Galenic Protocol</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#7c3aed', margin: '3px 0' }}>3-Capsule Daily</div>
+                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Fasting · Breakfast · Dinner Regimen</div>
+              </div>
+
+              <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1rem', borderLeft: '4px solid #16a34a', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>Distributor Margin</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 850, color: '#16a34a', margin: '3px 0' }}>36.7% – 50.0%</div>
+                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Direct Resale & Compounding Refills</div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Google Cloud Console Underline Tabs ── */}
+          <nav
+            role="tablist"
+            style={{
+              display: 'flex',
+              gap: '1.5rem',
+              overflowX: 'auto',
+              whiteSpace: 'nowrap',
+              borderBottom: '2px solid #e2e8f0',
+              marginTop: '1.75rem',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
+            {[
+              { id: 'commercial', label: 'Commercial Schedule & Quotation', icon: FileSpreadsheet },
+              { id: 'ai-services', label: 'Clinical Genomic Suite', icon: Cpu },
+              { id: 'sample-report', label: 'Sample Report Preview', icon: FileText },
+              { id: 'ai-recommendation', label: 'Clinical Case & 3-Capsule Regimen', icon: Sparkles },
+              { id: 'nutrigen-monograph', label: 'Nutrigen Clinical Monograph', icon: Dna },
+              { id: 'terms', label: 'Terms & Logistics', icon: ShieldCheck }
+            ].map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '12px 2px',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: isActive ? '3px solid #0d9488' : '3px solid transparent',
+                    color: isActive ? '#0d9488' : '#475569',
+                    fontSize: '0.84rem',
+                    fontWeight: isActive ? 800 : 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    marginBottom: '-2px'
+                  }}
+                >
+                  <Icon size={16} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </header>
 
         {/* ── Generated Quotation Confirmation Banner ── */}
@@ -966,7 +992,7 @@ export default function QatarGenomicsPriceClient() {
                     <Stethoscope size={20} />
                   </div>
                   <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
-                    3. Doctor AI Copilot & Patient Scripting
+                    3. Doctor Copilot & Patient Scripting
                   </h4>
                   <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
                     Generates doctor-friendly clinical consultation talking points in English & Arabic. Clinicians can explain complex genetic mechanisms to patients with crystal-clear metaphors that inspire confidence and compliance.
@@ -1036,7 +1062,7 @@ export default function QatarGenomicsPriceClient() {
                   <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#0d9488' }}>Metabolic Longevity & Precision Nutrition</div>
                 </div>
                 <div>
-                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>ATLAS AI STATUS:</span>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>CLINICAL FORMULATION STATUS:</span>
                   <div style={{ fontSize: '0.85rem', fontWeight: 750, color: '#16a34a' }}>✓ Formulated & Prescribed</div>
                 </div>
               </div>

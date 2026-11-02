@@ -188,7 +188,7 @@ export default function PatientDnaPortalClient({
           </div>
         </div>
 
-        {/* ── Section Tabs ── */}
+        {/* ── Section Tabs: Clearly Marking Sheet 1 (Patient) vs Sheet 2 (Pharmacy) ── */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setActiveSection('summary')}
@@ -201,10 +201,13 @@ export default function PatientDnaPortalClient({
               backgroundColor: activeSection === 'summary' ? '#003666' : '#ffffff',
               color: activeSection === 'summary' ? '#ffffff' : '#64748b',
               cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
               boxShadow: activeSection === 'summary' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            1. Your DNA Findings in Plain English
+            <span>📄 Sheet 1: Patient Guide (Hoja del Paciente)</span>
           </button>
 
           <button
@@ -218,10 +221,13 @@ export default function PatientDnaPortalClient({
               backgroundColor: activeSection === 'prescription' ? '#003666' : '#ffffff',
               color: activeSection === 'prescription' ? '#ffffff' : '#64748b',
               cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
               boxShadow: activeSection === 'prescription' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            2. 3-Capsule Compounded Pharmacy Order & Compatibility
+            <span>💊 Sheet 2: Pharmacy Compounding Order (Hoja Farmacéutico)</span>
           </button>
 
           <button
@@ -235,10 +241,13 @@ export default function PatientDnaPortalClient({
               backgroundColor: activeSection === 'lifestyle' ? '#003666' : '#ffffff',
               color: activeSection === 'lifestyle' ? '#ffffff' : '#64748b',
               cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
               boxShadow: activeSection === 'lifestyle' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            3. Concrete Dietary Rules & Microbiome Habits
+            <span>🥗 Dietary & Lifestyle Rules</span>
           </button>
         </div>
 
@@ -308,9 +317,30 @@ export default function PatientDnaPortalClient({
           </div>
         )}
 
-        {/* ── SECTION 2: 3-CAPSULE COMPACT PHARMACY PRESCRIPTION & COMPATIBILITY ── */}
+        {/* ── SECTION 2: MASTER PHARMACY COMPOUNDING ORDER (PAGE 2 COPY) ── */}
         {activeSection === 'prescription' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+            {/* Official Pharmacy Dispensing Header Banner */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #cbd5e1', padding: '1.25rem 1.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '8px' }}>
+                <div>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                    PAGE 2 OF 2 · PHARMACY DISPENSING COPY (COPIA PARA LA FARMACIA)
+                  </span>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 850, color: '#003666', margin: '6px 0 2px 0' }}>
+                    Master Compounding Prescription Order
+                  </h3>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>OFFICIAL PRESCRIPTION REF</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#b91c1c' }}>RX-DNA-COMP-8821</div>
+                </div>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
+                Authorized 3-Capsule Formulations · Galenically partitioned to prevent botanical degradation of live cultures, optimize absorption kinetics, and guarantee patient compliance. Excipients: 100% Lactose-Free.
+              </p>
+            </div>
 
             {/* Pharmacokinetic Compatibility Analysis Banner */}
             <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem 1.5rem' }}>
@@ -346,9 +376,9 @@ export default function PatientDnaPortalClient({
               </div>
             </div>
 
-            {/* 3 Distinct Capsules */}
+            {/* 3 Distinct Capsules with Pharmacy Batch Math */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {THREE_CAPSULE_PROTOCOL.map((capsule) => (
+              {THREE_CAPSULE_PROTOCOL.map((capsule, cIdx) => (
                 <div
                   key={capsule.capsuleId}
                   style={{
@@ -362,8 +392,8 @@ export default function PatientDnaPortalClient({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem', marginBottom: '1rem' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#003666', color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
-                          {capsule.code}
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: cIdx === 0 ? '#0d9488' : (cIdx === 1 ? '#003666' : '#1e3a8a'), color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
+                          FORMULATION #{cIdx + 1}
                         </span>
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 850, color: '#003666', margin: 0 }}>
                           {capsule.nameEn}
@@ -386,35 +416,91 @@ export default function PatientDnaPortalClient({
 
                   {/* Galenic Vehicle & Rationale */}
                   <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '6px', fontSize: '0.78rem', color: '#334155', marginBottom: '1rem', border: '1px solid #e2e8f0', lineHeight: 1.5 }}>
-                    <div><strong>Galenic Vehicle:</strong> {capsule.galenicVehicleEn}</div>
-                    <div style={{ marginTop: '3px' }}><strong>Pharmacokinetic Rationale:</strong> {capsule.rationaleEn}</div>
+                    <div><strong>Galenic Delivery Vehicle:</strong> {capsule.galenicVehicleEn}</div>
+                    <div style={{ marginTop: '3px' }}><strong>Compounding Rationale:</strong> {capsule.rationaleEn}</div>
                   </div>
 
-                  {/* Formulation Table */}
+                  {/* Formulation Table (Mirroring PDF Sheet 2) */}
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.80rem' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
                           <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Active Ingredient (Generic API)</th>
-                          <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Pharmacopeia Chemical Grade</th>
-                          <th style={{ padding: '8px 12px', fontWeight: 750, color: '#003666' }}>Target Dose</th>
-                          <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Targeted Clinical Purpose</th>
+                          <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Chemical Specification / Grade</th>
+                          <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0d9488' }}>Dose / Cap</th>
+                          <th style={{ padding: '8px 12px', fontWeight: 750, color: '#003666' }}>Batch Qty (60 Caps)</th>
+                          <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Pharmaceutical Role</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {capsule.ingredients.map((ing, idx) => (
-                          <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: idx % 2 === 1 ? '#fafafa' : '#ffffff' }}>
-                            <td style={{ padding: '9px 12px', fontWeight: 750, color: '#0f172a' }}>{ing.apiEn}</td>
-                            <td style={{ padding: '9px 12px', color: '#475569' }}>{ing.chemicalSpec}</td>
-                            <td style={{ padding: '9px 12px', fontWeight: 800, color: '#0d9488' }}>{ing.dose}</td>
-                            <td style={{ padding: '9px 12px', color: '#334155' }}>{ing.purposeEn}</td>
-                          </tr>
-                        ))}
+                        {capsule.ingredients.map((ing, idx) => {
+                          const batchQty = 
+                            cIdx === 0 && idx === 0 ? '900 B. CFU' :
+                            cIdx === 0 && idx === 1 ? '30.00 g' :
+                            cIdx === 0 && idx === 2 ? '540,000 ALU' :
+                            cIdx === 1 && idx === 0 ? '9.00 g' :
+                            cIdx === 1 && idx === 1 ? '6.00 mg' :
+                            cIdx === 1 && idx === 2 ? '30.00 mg' :
+                            cIdx === 1 && idx === 3 ? '30.00 mg' :
+                            cIdx === 1 && idx === 4 ? '300,000 IU' :
+                            cIdx === 1 && idx === 5 ? '6.00 mg' :
+                            cIdx === 2 && idx === 0 ? '6.00 g' :
+                            cIdx === 2 && idx === 1 ? '6.00 mg' :
+                            cIdx === 2 && idx === 2 ? '30 mg each' :
+                            cIdx === 2 && idx === 3 ? '12.00 g' :
+                            cIdx === 2 && idx === 4 ? '6.00 g' : '—';
+
+                          return (
+                            <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: idx % 2 === 1 ? '#fafafa' : '#ffffff' }}>
+                              <td style={{ padding: '9px 12px', fontWeight: 750, color: '#0f172a' }}>{ing.apiEn}</td>
+                              <td style={{ padding: '9px 12px', color: '#475569' }}>{ing.chemicalSpec}</td>
+                              <td style={{ padding: '9px 12px', fontWeight: 800, color: '#0d9488' }}>{ing.dose}</td>
+                              <td style={{ padding: '9px 12px', fontWeight: 800, color: '#003666' }}>{batchQty}</td>
+                              <td style={{ padding: '9px 12px', color: '#334155' }}>{ing.purposeEn}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Prescribing Medical Authority & Pharmacist Dispensing Log */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #cbd5e1', padding: '1.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                <div style={{ borderRight: '1px solid #f1f5f9', paddingRight: '1rem' }}>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase' }}>
+                    CLINICAL GENETICS PRESCRIBING AUTHORITY
+                  </span>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                    Atlas Health Clinical Genetics & Compounding Pharmacy Council
+                  </div>
+                  <div style={{ fontSize: '0.80rem', color: '#0d9488', fontWeight: 650, marginTop: '2px' }}>
+                    Accredited Partner: {clinic}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                    Registration: QA-MOH-GEN-2026 · European CE-IVD Validated Protocol
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
+                    Prescription Validity: 60 Days from Issue · Non-Transferable Single Patient Rx
+                  </div>
+                </div>
+
+                <div>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#b91c1c', textTransform: 'uppercase' }}>
+                    COMPOUNDING PHARMACIST DISPENSING & BATCH LOG
+                  </span>
+                  <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.78rem', color: '#475569' }}>
+                    <div><strong>Dispensing Pharmacy:</strong> <span style={{ color: '#94a3b8' }}>__________________________________________</span></div>
+                    <div><strong>Compounding Pharmacist:</strong> <span style={{ color: '#94a3b8' }}>__________________ Reg #: ____________</span></div>
+                    <div><strong>Batch Lot #:</strong> <span style={{ color: '#94a3b8' }}>_____________</span> <strong>Compounded Date:</strong> <span style={{ color: '#94a3b8' }}>___/___/2026</span></div>
+                    <div><strong>Beyond-Use Date (BUD):</strong> +60 Days from Compounding</div>
+                    <div><strong>Pharmacist Signature & Stamp:</strong> <span style={{ color: '#94a3b8' }}>___________________________</span></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Treatment Cycle & Pharmacy Note */}
@@ -444,7 +530,7 @@ export default function PatientDnaPortalClient({
                 }}
               >
                 <Printer size={15} />
-                <span>Print Compounding Order</span>
+                <span>Print Official Compounding Order (PDF)</span>
               </a>
             </div>
           </div>

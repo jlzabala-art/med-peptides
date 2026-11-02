@@ -8,7 +8,9 @@ import {
   Copy,
   Check,
   Mail,
-  FlaskConical
+  FlaskConical,
+  Lock,
+  Sparkles
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
@@ -22,10 +24,16 @@ export default function GenericCollectionSidebar({
   totalCount = 0,
   onOpenInquiry = null,
   activePriceTier = 'clinic',
-  onSelectPriceTier = null
+  onSelectPriceTier = null,
+  userRole = 'clinic',
+  isAuthenticated = false,
+  onUnlockRequest = null
 }) {
   const [copied, setCopied] = useState(false);
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
+
+  const isAdmin = userRole === 'admin' || userRole === 'medical_director';
+  const isWholesaler = userRole === 'wholesaler';
 
   const handleCopyLink = async () => {
     triggerHaptic('selection');
@@ -53,6 +61,11 @@ export default function GenericCollectionSidebar({
   const isPeptides = brandSlug === 'peptides';
   const isHairTreatments = ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug);
 
+  // Filter out 'all' category for hair-treatments if present
+  const displayCategories = isHairTreatments
+    ? categories.filter(c => c.id !== 'all')
+    : categories;
+
   return (
     <aside
       style={{
@@ -64,7 +77,7 @@ export default function GenericCollectionSidebar({
       }}
     >
       {/* ── 1. Category Navigation Card (Primary Sidebar Filter) ── */}
-      {categories.length > 0 && (
+      {displayCategories.length > 0 && (
         <div
           style={{
             background: '#ffffff',
@@ -76,7 +89,7 @@ export default function GenericCollectionSidebar({
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isHairTreatments ? 'Secciones Capilares' : 'Categories'}
+              {isHairTreatments ? 'Trichology Sections' : 'Categories'}
             </span>
             <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
               {totalCount} Total
@@ -84,7 +97,7 @@ export default function GenericCollectionSidebar({
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {categories.map((cat) => {
+            {displayCategories.map((cat) => {
               const isSelected = selectedCategory === cat.id;
               const accent = config?.accentColor || '#003666';
               return (
@@ -136,8 +149,65 @@ export default function GenericCollectionSidebar({
         </div>
       )}
 
-      {/* ── 2. B2B Pricing Profile Selector (Wholeseller +20% vs Clinic/Doctor +30% over Cost) ── */}
-      {onSelectPriceTier && (
+      {/* ── 2. B2B Pricing Profile or Locked State (Golden Rule: NO LOGIN, NO PRECIO) ── */}
+      {!isAuthenticated ? (
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: '14px',
+            border: '1px solid #cbd5e1',
+            padding: '1.25rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '6px',
+              backgroundColor: 'rgba(13, 148, 136, 0.12)',
+              color: '#0d9488',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Lock size={14} />
+            </div>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              B2B Pricing Locked
+            </span>
+          </div>
+          <p style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+            Wholesale tiers, distributor rates, and magistral compounding costs are reserved for verified medical clinics and authorized prescribers.
+          </p>
+          <button
+            type="button"
+            onClick={onUnlockRequest}
+            style={{
+              width: '100%',
+              padding: '9px 12px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+              color: '#ffffff',
+              border: 'none',
+              fontSize: '0.76rem',
+              fontWeight: 750,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)'
+            }}
+          >
+            <Sparkles size={13} />
+            <span>Quick 1-Click Sign In →</span>
+          </button>
+        </div>
+      ) : onSelectPriceTier && (
         <div
           style={{
             background: '#ffffff',
@@ -148,14 +218,14 @@ export default function GenericCollectionSidebar({
           }}
         >
           <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.6rem' }}>
-            Perfil de Tarifa B2B (Sobre Coste)
+            B2B Pricing Profile (Cost-Plus)
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {[
-              { id: 'wholesaler', label: 'Wholeseller (+20% s/ coste)', sub: 'Distribuidores & Mayoristas', color: '#c2410c', bg: '#fff7ed', border: '#fed7aa' },
-              { id: 'clinic', label: 'Clínica / Médico (+30% s/ coste)', sub: 'Prescriptores & Clínicas Capilares', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4' },
-              { id: 'cost', label: 'Precio de Coste (Base)', sub: 'Coste neto registrado', color: '#dc2626', bg: '#fef2f2', border: '#fecaca' }
-            ].map((tier) => {
+              { id: 'wholesaler', label: 'Wholesaler (+20% on cost)', sub: 'Distributors & Bulk Buyers', color: '#c2410c', bg: '#fff7ed', border: '#fed7aa', visible: true },
+              { id: 'clinic', label: 'Clinic / Doctor (+30% on cost)', sub: 'Prescribers & Trichology Clinics', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', visible: true },
+              { id: 'cost', label: 'Base Cost Price', sub: 'Net Registered Cost (Internal)', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', visible: isAdmin }
+            ].filter(t => t.visible).map((tier) => {
               const isActive = activePriceTier === tier.id;
               return (
                 <button

@@ -73,23 +73,35 @@ export function useB2BOrder() {
       setIsDrawerOpen(true);
     };
 
+    const handleCloseDrawer = () => {
+      setIsDrawerOpen(false);
+    };
+
     window.addEventListener('storage', handleStorage);
     window.addEventListener(UPDATE_EVENT, handleUpdate);
     window.addEventListener(DRAWER_EVENT, handleOpenDrawer);
+    window.addEventListener('close-b2b-order-drawer', handleCloseDrawer);
 
     return () => {
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener(UPDATE_EVENT, handleUpdate);
       window.removeEventListener(DRAWER_EVENT, handleOpenDrawer);
+      window.removeEventListener('close-b2b-order-drawer', handleCloseDrawer);
     };
   }, []);
 
   const openDrawer = useCallback(() => {
     setIsDrawerOpen(true);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(DRAWER_EVENT));
+    }
   }, []);
 
   const closeDrawer = useCallback(() => {
     setIsDrawerOpen(false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('close-b2b-order-drawer'));
+    }
   }, []);
 
   const addItem = useCallback((product, options = {}) => {

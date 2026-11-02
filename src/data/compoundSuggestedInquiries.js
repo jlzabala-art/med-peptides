@@ -845,6 +845,69 @@ export function getSuggestedInquiriesForProduct(contextAnchor, contextType = 'mo
     ];
   }
 
+  // 0c. Brand Collection / Pricing Portfolio Context (Peptides, Hair Treatments, Diagnostics, Longevity)
+  if (contextType === 'brand_collection') {
+    const brandSlug = String(contextAnchor?.brandSlug || contextAnchor?.slug || '').toLowerCase();
+    const isHair = brandSlug.includes('hair') || brandSlug.includes('tricho');
+    const isDiagnostics = brandSlug.includes('bloodo') || brandSlug.includes('teletest') || brandSlug.includes('eterna');
+
+    if (isHair) {
+      if (isEs) {
+        return [
+          '¿Cómo se prescriben las 6 fórmulas magistrales en TrichoSol™, TrichoFoam™ y TrichoOil™?',
+          '¿Qué evidencia clínica y posología respaldan los péptidos capilares GHK-Cu y TB-500?',
+          '¿Cómo actúa el complejo Baicapil™ 2% de Colway en la fase anágena folicular?',
+          '¿Cómo se estructura la tarifa de distribución mayorista (+20%) y prescripción clínica (+30%)?',
+          '¿Qué pruebas farmacogenómicas capilares (TrichoTest™) guían la formulación personalizada?'
+        ];
+      }
+      return [
+        'How are the 6 magistral formulations in TrichoSol™, TrichoFoam™ & TrichoOil™ prescribed?',
+        'What clinical evidence and posology support follicular peptides GHK-Cu and TB-500?',
+        'How does Colway Baicapil™ 2% stimulate anagen phase elongation in hair follicles?',
+        'How do the Wholesaler (+20%) and Clinic (+30%) tiers operate for hair clinics?',
+        'Which pharmacogenomic testing (TrichoTest™) guides individual magistral compounding?'
+      ];
+    }
+
+    if (isDiagnostics) {
+      if (isEs) {
+        return [
+          '¿Cuáles son los plazos de entrega y acreditaciones CE-IVD / ISO 15189 de los laboratorios centrales?',
+          '¿Cómo se realiza la recogida de muestra capilar (HTMA) o sangre seca (DBS Bloodo)?',
+          '¿Qué metabolitos y metales pesados cuantifica el análisis por ICP-MS/MS?',
+          '¿Cómo se vinculan los resultados diagnósticos con protocolos de medicina de precisión?',
+          '¿Qué tarifas y márgenes B2B aplican para clínicas y distribuidores autorizados?'
+        ];
+      }
+      return [
+        'What are the turnaround times and CE-IVD / ISO 15189 accreditations for the core labs?',
+        'How are capillary blood (Bloodo DBS) and hair mineral (HTMA) samples collected and shipped?',
+        'Which toxic heavy metals and essential minerals does the ICP-MS/MS screen quantify?',
+        'How do diagnostic findings directly translate into custom compounding protocols?',
+        'What are the B2B wholesale pricing tiers and margins for authorized medical centers?'
+      ];
+    }
+
+    // Default: Clinical Peptides Portfolio & Pricing Hub
+    if (isEs) {
+      return [
+        '¿Qué péptidos del catálogo están cubiertos por la política HHS 503A de discreción regulatoria (BPC-157, TB-500, Epitalon, KPV, Semax, MOTS-c)?',
+        '¿Cuáles son las combinaciones clínicas más prescritas (BPC-157 + TB-500, MOTS-c), con su posología y duración del tratamiento?',
+        '¿Cuál es el protocolo estándar de reconstitución con agua bacteriostática, cálculo de volumen por vial y conservación en frío (2°C–8°C)?',
+        '¿Cómo funcionan las tarifas B2B de Mayorista (+20% s/ coste) y Clínica (+30% s/ coste), y los plazos de entrega en Europa y GCC?',
+        '¿Cómo certifica el European Lyophilization Hub la pureza por HPLC (≥99.0%), espectrometría de masas y endotoxinas (<0.05 EU/mg)?'
+      ];
+    }
+    return [
+      'Which peptides are covered under the Oct 28, 2026 HHS 503A enforcement discretion policy (BPC-157, TB-500, Epitalon, KPV, Semax, MOTS-c)?',
+      'What are the most prescribed clinical combinations (e.g. BPC-157 + TB-500 for tissue repair, MOTS-c for metabolic support), with posology and duration?',
+      'What is the standard reconstitution protocol with bacteriostatic water, vial calculations, and cold-chain storage (2°C–8°C)?',
+      'How do the Wholesale (+20% on cost) and Clinic (+30% on cost) tiers operate, and what are delivery times across Europe and GCC?',
+      'How does the European Lyophilization Hub verify HPLC purity (≥99.0%), mass spectrometry, and endotoxin levels (<0.05 EU/mg)?'
+    ];
+  }
+
   // 0. Prescription Context
   if (
     contextType === 'prescription' ||
