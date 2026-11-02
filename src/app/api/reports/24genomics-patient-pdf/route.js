@@ -137,9 +137,10 @@ export async function GET(request) {
     page1.drawText('60-Day Initial Cycle', { x: 300, y: y + 10, size: 8.0, font: helveticaBold, color: tealAccent });
     page1.drawText('Size 0 Regimen', { x: 300, y: y + 2, size: 6.0, font: helvetica, color: mutedSlate });
 
-    // Col 4: Partner Medical Practice (Atlas is never labeled a clinic)
-    page1.drawText('PARTNER CLINICAL PRACTICE:', { x: 415, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(clinicName.split('·')[0].trim(), { x: 415, y: y + 10, size: 7.8, font: helvetica, color: navyPrimary, maxWidth: 100 });
+    // Col 4: Dispensing Standard (Zero mention of any clinic)
+    page1.drawText('DISPENSING STANDARD:', { x: 415, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
+    page1.drawText('Size 0 Magistral Caps', { x: 415, y: y + 10, size: 8.0, font: helveticaBold, color: navyPrimary });
+    page1.drawText('100% Lactose-Free HPMC', { x: 415, y: y + 2, size: 6.0, font: helvetica, color: tealAccent });
 
     // Section 1: Notice to Patient
     y -= 22;
@@ -425,25 +426,26 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    let y2 = p2Height - 34;
+    let y2 = p2Height - 26;
 
-    // Page 2 Header: Clean separation between Title and Pharmacy Badge
-    page2.drawText('ATLAS HEALTH SERVICES · MASTER COMPOUNDING PRESCRIPTION', {
+    // Page 2 Header (Hierarchical Google Cloud UX layout: Zero horizontal collisions)
+    // Row 1: Platform Category Context (Left) + Distinct Role Badge (Right)
+    page2.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
       x: 36,
       y: y2,
-      size: 11,
+      size: 8.5,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    // Page 2 Role Badge (PHARMACY COPY - Strict English)
+    // Page 2 Role Badge (PHARMACY COPY - Clean English in distinct pill box)
     const p2Badge = 'PAGE 2 OF 2 · PHARMACY COPY';
-    const p2BadgeWidth = helveticaBold.widthOfTextAtSize(p2Badge, 7) + 14;
+    const p2BadgeWidth = helveticaBold.widthOfTextAtSize(p2Badge, 6.8) + 14;
     page2.drawRectangle({
       x: p2Width - 36 - p2BadgeWidth,
       y: y2 - 3,
       width: p2BadgeWidth,
-      height: 16,
+      height: 15,
       color: badgeRedBg,
       borderColor: alertRed,
       borderWidth: 1
@@ -451,23 +453,43 @@ export async function GET(request) {
     page2.drawText(p2Badge, {
       x: p2Width - 36 - p2BadgeWidth + 7,
       y: y2 + 2,
-      size: 7,
+      size: 6.8,
       font: helveticaBold,
       color: alertRed
     });
 
-    y2 -= 14;
-    page2.drawText('OFFICIAL MAGISTRAL PRESCRIPTION ORDER · VALID FOR 60-DAY DISPENSING', {
+    // Row 2: Main Document Title (Full Page Width - Unconstrained)
+    y2 -= 16;
+    page2.drawText('MASTER COMPOUNDING PRESCRIPTION ORDER', {
       x: 36,
       y: y2,
-      size: 9.5,
+      size: 12,
       font: helveticaBold,
       color: darkSlate
     });
 
-    // Rx Bar with metadata
+    // Row 3: Subtitle / Authority Scope
+    y2 -= 11;
+    page2.drawText('Official Magistral Compounding Directive · Valid for 60-Day Dispensing Protocol', {
+      x: 36,
+      y: y2,
+      size: 7.2,
+      font: helvetica,
+      color: mutedSlate
+    });
+
+    // Row 4: Separator Line
+    y2 -= 8;
+    page2.drawLine({
+      start: { x: 36, y: y2 },
+      end: { x: p2Width - 36, y: y2 },
+      thickness: 1,
+      color: cardBorder
+    });
+
+    // Row 5: Metadata Ribbon
     y2 -= 12;
-    page2.drawText('PRESCRIPTION REF: RX-DNA-COMP-8821   |   PATIENT: Hossam Ahmed (Specimen: 24G-QA-90421)   |   TERRITORY: State of Qatar', {
+    page2.drawText(`PRESCRIPTION REF: RX-DNA-COMP-8821   |   PATIENT: ${patientName} (Specimen: ${sampleId})   |   TERRITORY: State of Qatar`, {
       x: 36,
       y: y2,
       size: 7.2,
@@ -479,17 +501,17 @@ export async function GET(request) {
     page2.drawLine({
       start: { x: 36, y: y2 },
       end: { x: p2Width - 36, y: y2 },
-      thickness: 1,
+      thickness: 0.8,
       color: cardBorder
     });
 
     // Technical Compounding Directive to Pharmacist
-    y2 -= 36;
+    y2 -= 38;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 32,
+      height: 34,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
@@ -497,7 +519,7 @@ export async function GET(request) {
 
     page2.drawText('TECHNICAL GALENIC PARTITIONING DIRECTIVE FOR THE LICENSED PHARMACIST:', {
       x: 44,
-      y: y2 + 20,
+      y: y2 + 22,
       size: 6.8,
       font: helveticaBold,
       color: navyPrimary
@@ -505,7 +527,7 @@ export async function GET(request) {
     const directiveText = 'Active substances are strictly partitioned into 3 separate formulations: (1) Enteric DRcaps® isolate probiotics from stomach acid and botanical berberine; (2) Lipophilic vitamins D3/K2 require co-administration with lipid meal in Capsule B; (3) Magnesium and sleep cofactors are reserved for evening Capsule C. Excipient Standard: 100% Lactose-Free HPMC / microcrystalline cellulose.';
     page2.drawText(directiveText, {
       x: 44,
-      y: y2 + 8,
+      y: y2 + 10,
       size: 6.2,
       font: helvetica,
       color: darkSlate,
@@ -513,7 +535,7 @@ export async function GET(request) {
       lineHeight: 8.5
     });
 
-    // Streamlined 3-Capsule Compounding Tables (Size 0 Universal Standard, Zero Collision)
+    // Streamlined 3-Capsule Compounding Tables (2-Line Google Cloud Console Resource UX: Zero Collisions)
     const PHARMACY_CAPSULES = [
       {
         id: 'cap_a',
@@ -526,17 +548,17 @@ export async function GET(request) {
         ingredients: [
           {
             name: 'Multi-Strain Probiotics (B. lactis & L. rhamnosus GG)',
-            spec: 'Live Lyophilized Microbial Culture (USP/Ph. Eur.)',
+            spec: 'Live Lyophilized Microbial Culture (USP/Ph. Eur. grade) · Acid-resistant enteric shell delivery',
             dose: '15 Billion CFU',
             batch60: '900 B. CFU',
-            purpose: 'Mucosal Colonization'
+            purpose: 'Mucosal Barrier'
           },
           {
             name: 'L-Glutamine USP (Micronized)',
-            spec: 'Micronized Pharmaceutical Grade Ph. Eur.',
+            spec: 'Micronized Pharmaceutical Grade Ph. Eur. · Pure crystalline amino acid for enterocyte tight junctions',
             dose: '350 mg',
             batch60: '21.00 g',
-            purpose: 'Enterocyte Barrier Fuel'
+            purpose: 'Enterocyte Fuel'
           }
         ]
       },
@@ -551,38 +573,38 @@ export async function GET(request) {
         ingredients: [
           {
             name: 'Standardized Berberine HCl (97%)',
-            spec: 'High-Purity Purified Botanical Extract USP',
+            spec: 'High-Purity Purified Botanical Extract USP · Standardized to 97% active alkaloid',
             dose: '300 mg',
             batch60: '18.00 g',
-            purpose: 'AMPK / Glycemic Control'
+            purpose: 'AMPK / Glycemic'
           },
           {
             name: 'Chromium Picolinate USP',
-            spec: 'Pharmaceutical Grade Chromium Chelate',
+            spec: 'Pharmaceutical Grade Chromium Chelate · Highly bioavailable micro-mineral complex',
             dose: '200 mcg',
             batch60: '12.00 mg',
             purpose: 'Insulin Sensitivity'
           },
           {
             name: 'Active L-Methylfolate ([6S]-5-MTHF)',
-            spec: 'Active Calcium Salt (USP Grade, Lactose-Free)',
+            spec: 'Active Calcium Salt (USP Grade, Lactose-Free) · Bypasses impaired MTHFR C677T enzyme',
             dose: '1,000 mcg',
             batch60: '60.00 mg',
-            purpose: 'MTHFR Enzymatic Bypass'
+            purpose: 'MTHFR Bypass'
           },
           {
-            name: 'Methylcobalamin (Active B12)',
-            spec: 'Active Enzymatic Coenzyme B12 (USP Grade)',
+            name: 'Methylcobalamin (Active Coenzyme B12)',
+            spec: 'Active Enzymatic Coenzyme B12 (USP Grade) · Essential cofactor for methionine synthase',
             dose: '1,000 mcg',
             batch60: '60.00 mg',
-            purpose: 'Homocysteine Clearance'
+            purpose: 'Homocysteine Clear'
           },
           {
             name: 'Vitamin D3 + Vitamin K2 (all-trans MK-7)',
-            spec: 'Microencapsulated Cholecalciferol / Menaquinone',
+            spec: 'Microencapsulated Cholecalciferol / Menaquinone-7 · Lipophilic micellar synergy',
             dose: '5,000 IU / 100 mcg',
             batch60: '300k IU / 6 mg',
-            purpose: 'VDR Ligand & Bone Health'
+            purpose: 'VDR Receptor / Bone'
           }
         ]
       },
@@ -597,34 +619,35 @@ export async function GET(request) {
         ingredients: [
           {
             name: 'Magnesium Bisglycinate Chelate',
-            spec: 'TRAACS® Fully Chelated Glycinate USP',
+            spec: 'TRAACS® Fully Chelated Glycinate USP · High bioavailability, zero laxative threshold',
             dose: '250 mg',
             batch60: '15.00 g',
-            purpose: 'Neuromuscular Relax'
+            purpose: 'GABA / Muscle Relax'
           },
           {
             name: 'L-Theanine (Suntheanine® Grade)',
-            spec: 'Pure Enzymatic Fermentation (99% L-Isomer)',
+            spec: 'Pure Enzymatic Fermentation (99% L-Isomer) · Promotes alpha brainwave relaxation',
             dose: '150 mg',
             batch60: '9.00 g',
-            purpose: 'Alpha-Wave Sleep'
+            purpose: 'Alpha Sleep Wave'
           },
           {
             name: 'Pyridoxal-5-Phosphate (Active B6)',
-            spec: 'Enzymatic Coenzyme B6 (Ph. Eur.)',
+            spec: 'Active Enzymatic Coenzyme B6 (Ph. Eur.) · Essential cofactor for GABA synthesis',
             dose: '25 mg',
             batch60: '1.50 g',
-            purpose: 'Neurotransmitter Cofactor'
+            purpose: 'Neurotransmitter'
           }
         ]
       }
     ];
 
-    y2 -= 10;
+    y2 -= 12;
 
     PHARMACY_CAPSULES.forEach((cap) => {
       const rowCount = cap.ingredients.length;
-      const cardHeight = 44 + (rowCount * 14) + 6;
+      // 2-line layout per ingredient: 22pt per item + 46pt header/vehicle space
+      const cardHeight = 46 + (rowCount * 22) + 6;
 
       y2 -= cardHeight;
 
@@ -681,7 +704,7 @@ export async function GET(request) {
         color: mutedSlate
       });
 
-      // Table Header Strip
+      // Table Header Strip (Clear 4-Column Layout)
       const thY = y2 + cardHeight - 48;
       page2.drawRectangle({
         x: 40,
@@ -691,106 +714,115 @@ export async function GET(request) {
         color: lightBg
       });
 
-      // Explicit wide columns with zero possibility of overlapping
-      page2.drawText('ACTIVE INGREDIENT (API)', { x: 44, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('SPECIFICATION / GRADE', { x: 195, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('DOSE / CAP', { x: 335, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('BATCH (60 CAPS)', { x: 400, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('PHARMACEUTICAL ROLE', { x: 465, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page2.drawText('ACTIVE INGREDIENT (API) & PHARMACOPEIA SPECIFICATION', { x: 44, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page2.drawText('TARGET DOSE', { x: 300, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page2.drawText('BATCH (60 CAPS)', { x: 380, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page2.drawText('THERAPEUTIC ROLE', { x: 460, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
 
-      // Table Rows
-      let rowY = thY - 12;
+      // 2-Line Table Rows (Google Cloud Console pattern: Zero Collisions)
+      let itemY = thY - 14;
       cap.ingredients.forEach((ing) => {
-        page2.drawText(ing.name, { x: 44, y: rowY, size: 6.2, font: helveticaBold, color: darkSlate, maxWidth: 145 });
-        page2.drawText(ing.spec, { x: 195, y: rowY, size: 5.6, font: helvetica, color: mutedSlate, maxWidth: 135 });
-        page2.drawText(ing.dose, { x: 335, y: rowY, size: 6.2, font: helveticaBold, color: tealAccent });
-        page2.drawText(ing.batch60, { x: 400, y: rowY, size: 6.2, font: helveticaBold, color: navyPrimary });
-        page2.drawText(ing.purpose, { x: 465, y: rowY, size: 5.6, font: helvetica, color: darkSlate, maxWidth: 90 });
-        rowY -= 14;
+        // Line 1: Ingredient Name (Bold) + Dose (Teal) + Batch (Navy) + Role (Slate)
+        page2.drawText(`• ${ing.name}`, { x: 44, y: itemY + 2, size: 6.8, font: helveticaBold, color: darkSlate, maxWidth: 245 });
+        page2.drawText(ing.dose, { x: 300, y: itemY + 2, size: 6.5, font: helveticaBold, color: tealAccent });
+        page2.drawText(ing.batch60, { x: 380, y: itemY + 2, size: 6.5, font: helveticaBold, color: navyPrimary });
+        page2.drawText(ing.purpose, { x: 460, y: itemY + 2, size: 6.0, font: helveticaBold, color: darkSlate, maxWidth: 90 });
+
+        // Line 2: Specification / Grade (Italic, secondary, indented)
+        page2.drawText(`Spec: ${ing.spec}`, { x: 50, y: itemY - 7, size: 5.4, font: helveticaOblique, color: mutedSlate, maxWidth: p2Width - 110 });
+
+        // Row Separator Line
+        page2.drawLine({
+          start: { x: 44, y: itemY - 9 },
+          end: { x: p2Width - 44, y: itemY - 9 },
+          thickness: 0.5,
+          color: rgb(241 / 255, 245 / 255, 249 / 255)
+        });
+
+        itemY -= 22;
       });
 
-      y2 -= 6;
+      y2 -= 8;
     });
 
-    // Prescribing Physician Authorization & Medical Signature (Clean English layout)
-    y2 -= 66;
+    // Prescribing Physician Authorization & Medical Signature (Clean GCP Unified Header layout)
+    y2 -= 70;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 66,
+      height: 70,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
     });
 
-    // Top Header in Box
-    page2.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL SIGNATURE:', {
+    // Full-Width Top Header (Zero collision across panels)
+    page2.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL VALIDATION', {
       x: 44,
-      y: y2 + 52,
-      size: 6.8,
+      y: y2 + 56,
+      size: 7.2,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    // Left Column: Blank Fields for Prescribing Doctor
+    page2.drawLine({
+      start: { x: 44, y: y2 + 50 },
+      end: { x: p2Width - 44, y: y2 + 50 },
+      thickness: 0.6,
+      color: cardBorder
+    });
+
+    // Left Panel (Width ~290pt): Physician Information (Zero mention of any clinic)
     page2.drawText('Prescribing Physician (Full Name): _______________________________________________', {
       x: 44,
-      y: y2 + 38,
-      size: 5.9,
+      y: y2 + 36,
+      size: 6.0,
       font: helvetica,
       color: darkSlate
     });
 
-    page2.drawText('Medical License / Collegiate Reg. No.: ____________________________________________', {
+    page2.drawText('Medical License / Registry Reg. No.: ____________________________________________', {
       x: 44,
-      y: y2 + 26,
-      size: 5.9,
+      y: y2 + 23,
+      size: 6.0,
       font: helvetica,
       color: darkSlate
     });
 
-    page2.drawText('Clinic / Institution: ___________________________  Date: ____ / ____ / 2026', {
+    page2.drawText('Territory Jurisdiction: State of Qatar   ·   Issue Date: ____ / ____ / 2026', {
       x: 44,
-      y: y2 + 14,
-      size: 5.9,
+      y: y2 + 10,
+      size: 6.0,
       font: helvetica,
       color: darkSlate
     });
 
-    page2.drawText('Prescription Validity: 60 Days from Issue · Non-Transferable Single-Patient Magistral Rx', {
-      x: 44,
-      y: y2 + 4,
-      size: 5.4,
-      font: helveticaOblique,
-      color: mutedSlate
-    });
-
-    // Vertical Divider
+    // Vertical Panel Divider
     page2.drawLine({
       start: { x: 345, y: y2 + 4 },
-      end: { x: 345, y: y2 + 58 },
+      end: { x: 345, y: y2 + 48 },
       thickness: 0.8,
       color: cardBorder
     });
 
-    // Right Column: Dedicated Stamp & Signature Box
-    page2.drawText('Physician\'s Signature & Professional Stamp:', {
+    // Right Panel (Width ~180pt): Signature & Stamp Box
+    page2.drawText('Physician\'s Professional Stamp & Signature:', {
       x: 355,
-      y: y2 + 52,
+      y: y2 + 36,
       size: 6.2,
       font: helveticaBold,
       color: darkSlate
     });
 
     page2.drawLine({
-      start: { x: 355, y: y2 + 15 },
-      end: { x: p2Width - 46, y: y2 + 15 },
+      start: { x: 355, y: y2 + 14 },
+      end: { x: p2Width - 46, y: y2 + 14 },
       thickness: 0.8,
       color: rgb(160 / 255, 160 / 255, 160 / 255)
     });
 
-    page2.drawText('Authorized Prescribing Physician Signature & Clinical Seal', {
+    page2.drawText('Authorized Prescribing Signature & Clinical Seal', {
       x: 355,
       y: y2 + 5,
       size: 5.5,

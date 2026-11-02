@@ -2542,7 +2542,7 @@ return (
 
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <a
-                    href={`/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(isHossamMode ? 'Hossam Ahmed' : 'Clinical Patient')}&sample=${encodeURIComponent(isHossamMode ? '24G-QA-90421' : '24G-CLINICAL-90421')}&clinic=${encodeURIComponent(isHossamMode ? 'Ryhanh Medical Wellness · Doha, Qatar' : 'Partner Clinical Practice · Doha')}`}
+                    href={`/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(isHossamMode ? 'Hossam Ahmed' : 'Clinical Patient')}&sample=${encodeURIComponent(isHossamMode ? '24G-QA-90421' : '24G-CLINICAL-90421')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
