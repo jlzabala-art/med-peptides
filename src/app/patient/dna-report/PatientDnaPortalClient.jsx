@@ -467,37 +467,67 @@ export default function PatientDnaPortalClient({
               ))}
             </div>
 
-            {/* Prescribing Medical Authority & Pharmacist Dispensing Log */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #cbd5e1', padding: '1.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                <div style={{ borderRight: '1px solid #f1f5f9', paddingRight: '1rem' }}>
-                  <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase' }}>
-                    CLINICAL GENETICS PRESCRIBING AUTHORITY
+            {/* Prescribing Physician Authorization & Official Medical Signature (No Pharmacist Log, Blank Fields) */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1.5px solid #cbd5e1', padding: '1.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    MEDICAL PRESCRIPTION AUTHORIZATION · EXCLUSIVE FOR PRESCRIBING PHYSICIAN
                   </span>
-                  <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
-                    Atlas Health Clinical Genetics & Compounding Pharmacy Council
+                  <h4 style={{ fontSize: '1.05rem', fontWeight: 850, color: '#0f172a', margin: '2px 0 0 0' }}>
+                    Prescribing Physician Sign-Off & Official Validation (Firma Médica)
+                  </h4>
+                </div>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: '4px' }}>
+                  Single-Patient Non-Transferable Rx · Valid for 60 Days
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.5rem', alignItems: 'flex-start' }}>
+                {/* Doctor's Identification Fields (Left blank for the prescribing physician to fill) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.80rem', color: '#334155' }}>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                      Prescribing Physician (Full Name / Nombre y Apellidos del Médico):
+                    </span>
+                    <div style={{ borderBottom: '1.5px solid #94a3b8', height: '22px', width: '100%' }}></div>
                   </div>
-                  <div style={{ fontSize: '0.80rem', color: '#0d9488', fontWeight: 650, marginTop: '2px' }}>
-                    Accredited Partner: {clinic}
+
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                      Medical License / Collegiate Reg. No. (Nº Colegiado / Licencia Médica):
+                    </span>
+                    <div style={{ borderBottom: '1.5px solid #94a3b8', height: '22px', width: '100%' }}></div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
-                    Registration: QA-MOH-GEN-2026 · European CE-IVD Validated Protocol
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
-                    Prescription Validity: 60 Days from Issue · Non-Transferable Single Patient Rx
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+                    <div>
+                      <span style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        Clinic / Healthcare Institution:
+                      </span>
+                      <div style={{ borderBottom: '1.5px solid #94a3b8', height: '22px', width: '100%' }}></div>
+                    </div>
+                    <div>
+                      <span style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        Date (Fecha):
+                      </span>
+                      <div style={{ borderBottom: '1.5px solid #94a3b8', height: '22px', width: '100%' }}></div>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#b91c1c', textTransform: 'uppercase' }}>
-                    COMPOUNDING PHARMACIST DISPENSING & BATCH LOG
-                  </span>
-                  <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.78rem', color: '#475569' }}>
-                    <div><strong>Dispensing Pharmacy:</strong> <span style={{ color: '#94a3b8' }}>__________________________________________</span></div>
-                    <div><strong>Compounding Pharmacist:</strong> <span style={{ color: '#94a3b8' }}>__________________ Reg #: ____________</span></div>
-                    <div><strong>Batch Lot #:</strong> <span style={{ color: '#94a3b8' }}>_____________</span> <strong>Compounded Date:</strong> <span style={{ color: '#94a3b8' }}>___/___/2026</span></div>
-                    <div><strong>Beyond-Use Date (BUD):</strong> +60 Days from Compounding</div>
-                    <div><strong>Pharmacist Signature & Stamp:</strong> <span style={{ color: '#94a3b8' }}>___________________________</span></div>
+                {/* Signature & Professional Stamp Box */}
+                <div style={{ backgroundColor: '#f8fafc', border: '1.5px dashed #94a3b8', borderRadius: '8px', padding: '1rem', minHeight: '120px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase' }}>
+                      Physician&apos;s Signature & Professional Stamp (Firma y Sello Oficial):
+                    </span>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.70rem', color: '#94a3b8' }}>
+                      Place official clinical seal or physical/digital medical signature here.
+                    </p>
+                  </div>
+                  <div style={{ borderTop: '1px solid #94a3b8', paddingTop: '6px', textAlign: 'center', fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+                    Authorized Prescribing Physician Signature & Stamp
                   </div>
                 </div>
               </div>

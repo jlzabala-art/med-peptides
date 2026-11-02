@@ -734,7 +734,7 @@ export async function GET(request) {
       y2 -= 6;
     });
 
-    // Prescribing Authority & Pharmacist Dispensing Log
+    // Prescribing Physician Authorization & Medical Signature (No Pharmacist Log, Blank Fields)
     y2 -= 66;
     page2.drawRectangle({
       x: 36,
@@ -746,31 +746,82 @@ export async function GET(request) {
       borderWidth: 1
     });
 
-    // Left Column: Prescribing Medical Authority
-    page2.drawText('CLINICAL GENETICS & PRESCRIBING AUTHORITY:', { x: 44, y: y2 + 52, size: 6.8, font: helveticaBold, color: navyPrimary });
-    page2.drawText('Prescribing Team: Atlas Health Clinical Genetics Council', { x: 44, y: y2 + 39, size: 6.2, font: helveticaBold, color: darkSlate });
-    page2.drawText('Accredited Partner: Ryhanh Medical Wellness (Doha, Qatar)', { x: 44, y: y2 + 28, size: 6.2, font: helvetica, color: tealAccent });
-    page2.drawText('Registration / License: QA-MOH-GEN-2026 · European CE-IVD Validated', { x: 44, y: y2 + 17, size: 5.8, font: helveticaOblique, color: mutedSlate });
-    page2.drawText('Prescription Validity: 60 Days from Issue · Non-Transferable Single Patient Rx', { x: 44, y: y2 + 6, size: 5.8, font: helvetica, color: mutedSlate });
+    // Top Header in Box
+    page2.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL SIGNATURE (FIRMA MÉDICA):', {
+      x: 44,
+      y: y2 + 52,
+      size: 6.8,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    // Left Column: Blank Fields for Prescribing Doctor
+    page2.drawText('Prescribing Physician (Full Name): _______________________________________________', {
+      x: 44,
+      y: y2 + 38,
+      size: 5.9,
+      font: helvetica,
+      color: darkSlate
+    });
+
+    page2.drawText('Medical License / Collegiate Reg. No.: ____________________________________________', {
+      x: 44,
+      y: y2 + 26,
+      size: 5.9,
+      font: helvetica,
+      color: darkSlate
+    });
+
+    page2.drawText('Clinic / Institution: ___________________________  Date: ____ / ____ / 2026', {
+      x: 44,
+      y: y2 + 14,
+      size: 5.9,
+      font: helvetica,
+      color: darkSlate
+    });
+
+    page2.drawText('Prescription Validity: 60 Days from Issue · Non-Transferable Single-Patient Magistral Rx', {
+      x: 44,
+      y: y2 + 4,
+      size: 5.4,
+      font: helveticaOblique,
+      color: mutedSlate
+    });
 
     // Vertical Divider
     page2.drawLine({
-      start: { x: 310, y: y2 + 6 },
-      end: { x: 310, y: y2 + 60 },
+      start: { x: 345, y: y2 + 4 },
+      end: { x: 345, y: y2 + 58 },
       thickness: 0.8,
       color: cardBorder
     });
 
-    // Right Column: Licensed Compounding Pharmacist Dispensing Log
-    page2.drawText('COMPOUNDING PHARMACIST DISPENSING & BATCH LOG:', { x: 320, y: y2 + 52, size: 6.8, font: helveticaBold, color: alertRed });
+    // Right Column: Dedicated Stamp & Signature Box
+    page2.drawText('Physician\'s Signature & Professional Stamp (Firma y Sello):', {
+      x: 355,
+      y: y2 + 52,
+      size: 6.2,
+      font: helveticaBold,
+      color: darkSlate
+    });
 
-    page2.drawText('Dispensing Pharmacy: ________________________________________', { x: 320, y: y2 + 39, size: 5.8, font: helvetica, color: darkSlate });
-    page2.drawText('Pharmacist (Name & Reg #): __________________________________', { x: 320, y: y2 + 28, size: 5.8, font: helvetica, color: darkSlate });
-    page2.drawText('Batch Lot #: _________________  Compounded Date: ___/___/2026', { x: 320, y: y2 + 17, size: 5.8, font: helvetica, color: darkSlate });
-    page2.drawText('BUD (Beyond-Use Date): +60 Days   |   Pharmacist Signature & Stamp', { x: 320, y: y2 + 6, size: 5.8, font: helveticaBold, color: mutedSlate });
+    page2.drawLine({
+      start: { x: 355, y: y2 + 15 },
+      end: { x: p2Width - 46, y: y2 + 15 },
+      thickness: 0.8,
+      color: rgb(160 / 255, 160 / 255, 160 / 255)
+    });
+
+    page2.drawText('Authorized Prescribing Physician Signature & Clinical Seal', {
+      x: 355,
+      y: y2 + 5,
+      size: 5.5,
+      font: helveticaOblique,
+      color: mutedSlate
+    });
 
     // Page 2 Footer
-    page2.drawText('Página 2 de 2 · Receta Oficial de Formulación Magistral · Dispensación exclusiva por Farmacia Comunitaria o Hospitalaria Autorizada', {
+    page2.drawText('Página 2 de 2 · Receta Oficial de Formulación Magistral · Dispensación sujeta a prescripción médica autorizada', {
       x: 36,
       y: 18,
       size: 7,
