@@ -58,7 +58,8 @@ import {
   CLINICAL_PILLARS,
   THREE_CAPSULE_PROTOCOL,
   CONCRETE_DIET_GUIDELINES,
-  TREATMENT_CYCLE
+  TREATMENT_CYCLE,
+  TWENTY_FOUR_GENETICS_AI_ECOSYSTEM
 } from '@/data/genomics/clinicalNutrigenomicEngine';
 import '../colway/ColwayPriceList.css';
 
@@ -1764,6 +1765,78 @@ return (
                 <p style={{ fontSize: '0.90rem', color: '#64748b', marginTop: '6px', lineHeight: 1.6 }}>
                   Standard genetic tests produce 40-page PDFs that get archived without actionable clinical therapy. The <strong>24Genomics Nutrition</strong> ecosystem translates raw genetic biomarkers into a closed-loop clinical pathway across 5 core operational pillars, ensuring patient adherence, compounding feasibility, and measurable outcomes.
                 </p>
+              </div>
+
+              {/* ── 24Genetics Multimedia AI Showcase ── */}
+              <div style={{ backgroundColor: '#f0fdfa', borderRadius: '10px', border: '1.5px solid #99f6e4', padding: '1.5rem', marginBottom: '1.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                  <div>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#0f766e', color: '#ffffff', padding: '3px 9px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                      24Genetics AI Virtual Assistant Video
+                    </span>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 850, color: '#003666', margin: '6px 0 2px 0' }}>
+                      Watch Julia: AI Genetic Nutrition Assistant (1080p Full HD)
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.84rem', color: '#334155', lineHeight: 1.5 }}>
+                      24Genetics delivers an AI-generated video and continuous 24/7 WhatsApp consultation across 22 languages. <strong>Atlas Health Services complements this informational foundation</strong> by prescribing the actionable clinical diet and the official 3-capsule magistral compounding order.
+                    </p>
+                  </div>
+                  <a
+                    href="/assets/videos/24G-AI-Nutritional-Assistant.mp4"
+                    download="24G-AI-Nutritional-Assistant.mp4"
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.80rem',
+                      fontWeight: 700,
+                      backgroundColor: '#ffffff',
+                      color: '#0f766e',
+                      border: '1px solid #99f6e4',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Download size={14} />
+                    <span>Download 1080p Video (32MB)</span>
+                  </a>
+                </div>
+
+                <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#0f172a', border: '1px solid #0f172a' }}>
+                  <video
+                    controls
+                    preload="metadata"
+                    style={{ width: '100%', maxHeight: '440px', display: 'block', margin: '0 auto' }}
+                    src="/assets/videos/24G-AI-Nutritional-Assistant.mp4"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+
+                {/* 4-Step End-to-End Value Funnel */}
+                <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.75rem' }}>
+                  <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #ccfbf1' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase' }}>Step 1 · 24Genetics</div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a' }}>Saliva DNA Sequencing</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>CE-IVD Lab testing in 22 languages</div>
+                  </div>
+                  <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #ccfbf1' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>Step 2 · 24Genetics</div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a' }}>Julia AI Video & WhatsApp</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Personalized explainer video & 24/7 AI chat</div>
+                  </div>
+                  <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>Step 3 · Atlas Health</div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a' }}>Clinical Diet Selection</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Plate sequencing & under 40g net carb limit</div>
+                  </div>
+                  <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>Step 4 · Atlas Health</div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a' }}>3-Capsule Compounding Order</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Official Size 0 magistral pharmacy prescription</div>
+                  </div>
+                </div>
               </div>
 
               {/* Numbered Vertical List */}

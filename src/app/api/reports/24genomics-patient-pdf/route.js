@@ -95,12 +95,12 @@ export async function GET(request) {
     });
 
     y -= 11;
-    page1.drawText('Individualized Nutrigenomic Translation & 3-Capsule Daily Schedule · Prepared for Patient Reference', {
+    page1.drawText('Individualized Translation Based on Your 24Genetics Nutrition Report · 3-Capsule Patient Schedule', {
       x: 36,
       y,
       size: 7.5,
-      font: helvetica,
-      color: mutedSlate
+      font: helveticaBold,
+      color: tealAccent
     });
 
     y -= 8;
@@ -130,7 +130,7 @@ export async function GET(request) {
     // Col 2: Specimen
     page1.drawText('SPECIMEN / LAB ID:', { x: 175, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
     page1.drawText(sampleId, { x: 175, y: y + 10, size: 8.0, font: helveticaBold, color: darkSlate });
-    page1.drawText('CE-IVD Core Lab', { x: 175, y: y + 2, size: 6.0, font: helvetica, color: tealAccent });
+    page1.drawText('24Genetics CE-IVD Lab', { x: 175, y: y + 2, size: 6.0, font: helvetica, color: tealAccent });
 
     // Col 3: Protocol Duration
     page1.drawText('PROTOCOL DURATION:', { x: 300, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
@@ -153,10 +153,10 @@ export async function GET(request) {
       borderColor: rgb(186 / 255, 230 / 255, 253 / 255),
       borderWidth: 0.8
     });
-    page1.drawText('PATIENT NOTICE: This guide translates your genetic DNA results into clear daily actions. Turn to PAGE 2 for the Official Compounding Pharmacy Order.', {
+    page1.drawText('PATIENT NOTICE: This guide translates findings from your 24Genetics Nutrition DNA test into clear daily actions. Turn to PAGE 2 for the Official Compounding Pharmacy Order.', {
       x: 44,
       y: y - 11,
-      size: 6.8,
+      size: 6.7,
       font: helveticaBold,
       color: blueDark
     });
@@ -179,7 +179,8 @@ export async function GET(request) {
         statusColor: alertRed,
         statusBg: badgeRedBg,
         why: 'Refined carbs trigger rapid insulin surges, promoting mid-afternoon energy crashes and abdominal fat storage.',
-        action: 'Prescribed: Standardized Berberine (250 mg) + Chromium (200 mcg). Split in Capsule B (breakfast) & Capsule C (dinner).'
+        assignedFormulation: 'Formulation 2 (Capsule B · Midday Activator) — See Page 2',
+        clinicalGoal: 'Stabilizes postprandial glucose surges, improves insulin sensitivity, and prevents energy dips.'
       },
       {
         pillarTag: 'PILLAR 2: CELLULAR METHYLATION & ENERGY (MTHFR C677T)',
@@ -188,7 +189,8 @@ export async function GET(request) {
         statusColor: alertRed,
         statusBg: badgeRedBg,
         why: 'Your liver is 70% slower at activating synthetic folic acid, which impairs cellular detox and neurotransmitters.',
-        action: 'Prescribed: Active L-Methylfolate 1,000 mcg ([6S]-5-MTHF) + Methylcobalamin B12 1,000 mcg. Split in Capsule B & C.'
+        assignedFormulation: 'Formulation 2 (Capsule B · Midday Activator) — See Page 2',
+        clinicalGoal: 'Bypasses the enzymatic MTHFR block with active L-methylfolate & B12 to clear homocysteine.'
       },
       {
         pillarTag: 'PILLAR 3: GUT MICROBIOME & BARRIER (MCM6 / LCT)',
@@ -197,22 +199,24 @@ export async function GET(request) {
         statusColor: blueDark,
         statusBg: blueBg,
         why: 'Adult lactase deficiency causes dairy fermentation, abdominal bloating, and reduced beneficial Bifidobacteria.',
-        action: 'Prescribed: Multi-Strain Probiotics 15B CFU + L-Glutamine 500 mg. Posology: Capsule A in morning fasting with water (DRcaps®).'
+        assignedFormulation: 'Formulation 1 (Capsule A · Morning Enteric Shield) — See Page 2',
+        clinicalGoal: 'Restores beneficial probiotic flora and seals tight junctions via acid-resistant DRcaps®.'
       },
       {
-        pillarTag: 'PILLAR 4: IMMUNITY & BONE HEALTH (VDR FokI)',
-        title: 'Vitamin D Receptor Genetic Resistance',
+        pillarTag: 'PILLAR 4: IMMUNITY & BONE HEALTH (VDR FokI / CYP1A2)',
+        title: 'Vitamin D Receptor Genetic Resistance & Sleep Reset',
         status: 'VDR RESISTANCE',
         statusColor: amberDark,
         statusBg: amberBg,
         why: 'Nuclear receptor variation requires higher circulating levels (60-80 ng/mL) to activate cellular defenses and protect bones.',
-        action: 'Prescribed: Vitamin D3 5,000 IU + Vitamin K2 (MK-7) 100 mcg in Capsule B (with breakfast fat) + Magnesium in Capsule C.'
+        assignedFormulation: 'Formulation 2 (Midday D3/K2) & Formulation 3 (Evening Sleep) — See Page 2',
+        clinicalGoal: 'Overcomes VDR resistance with micellar D3/K2, while evening chelated magnesium optimizes sleep.'
       }
     ];
 
     y -= 14;
     pillarCardDefs.forEach((p) => {
-      const cardHeight = 52;
+      const cardHeight = 54;
       page1.drawRectangle({
         x: 36,
         y: y - cardHeight,
@@ -267,23 +271,33 @@ export async function GET(request) {
         color: p.statusColor
       });
 
-      // Why Text
+      // Why Text (DNA Finding in plain language)
       page1.drawText(`DNA Finding: ${p.why}`, {
         x: 46,
         y: y - 29,
-        size: 6.8,
+        size: 6.7,
         font: helvetica,
         color: darkSlate,
         maxWidth: p1Width - 96
       });
 
-      // Action Step
-      page1.drawText(`Clinical Action: ${p.action}`, {
+      // Galenic Resolution Cross-Reference (Pointing directly to Pharmacy Order on Page 2)
+      page1.drawText(`🎯 Addressed by: ${p.assignedFormulation}`, {
         x: 46,
-        y: y - 43,
-        size: 6.8,
+        y: y - 41,
+        size: 6.7,
         font: helveticaBold,
         color: navyPrimary,
+        maxWidth: p1Width - 96
+      });
+
+      // Clinical Objective
+      page1.drawText(`Clinical Goal: ${p.clinicalGoal}`, {
+        x: 46,
+        y: y - 50,
+        size: 6.1,
+        font: helveticaOblique,
+        color: tealAccent,
         maxWidth: p1Width - 96
       });
 
@@ -306,16 +320,19 @@ export async function GET(request) {
     const patientIntakeSchedule = [
       {
         capName: 'CAPSULE A (Morning)',
+        targetPillars: 'Resolves: Pillar 3 (Gut Microbiome)',
         time: 'Upon Waking (Empty Stomach)',
-        rule: 'Take 1 capsule 30 min before breakfast with room-temperature water. DRcaps® protect delicate probiotics from stomach acid.'
+        rule: 'Take 1 capsule 30 min before breakfast with room-temperature water. DRcaps® protect delicate live probiotics from stomach acid.'
       },
       {
         capName: 'CAPSULE B (Midday)',
+        targetPillars: 'Resolves: Pillars 1 & 2 (Glycemic & Methylation)',
         time: 'With Breakfast (Healthy Fats)',
         rule: 'Take 1 capsule with eggs, avocado, or olive oil. Healthy fats maximize absorption of Vitamin D3/K2 and stabilize blood sugar.'
       },
       {
         capName: 'CAPSULE C (Evening)',
+        targetPillars: 'Resolves: Pillar 4 (Immunity & Sleep)',
         time: 'With Dinner / Bedtime',
         rule: 'Take 1 capsule with evening meal or 30 min before bed with water. Supports overnight glucose, deep sleep, and muscle relaxation.'
       }
@@ -323,7 +340,7 @@ export async function GET(request) {
 
     patientIntakeSchedule.forEach((sch, sIdx) => {
       const boxX = 36 + sIdx * (scheduleBoxWidth + 8);
-      const boxHeight = 52;
+      const boxHeight = 56;
 
       page1.drawRectangle({
         x: boxX,
@@ -343,27 +360,35 @@ export async function GET(request) {
         color: sIdx === 0 ? tealAccent : navyPrimary
       });
 
+      page1.drawText(sch.targetPillars, {
+        x: boxX + 6,
+        y: y - 19,
+        size: 5.8,
+        font: helveticaBold,
+        color: tealAccent
+      });
+
       page1.drawText(sch.time, {
         x: boxX + 6,
-        y: y - 20,
-        size: 6.2,
+        y: y - 27,
+        size: 6.0,
         font: helveticaBold,
         color: darkSlate
       });
 
       page1.drawText(sch.rule, {
         x: boxX + 6,
-        y: y - 29,
-        size: 5.8,
+        y: y - 36,
+        size: 5.6,
         font: helvetica,
         color: mutedSlate,
         maxWidth: scheduleBoxWidth - 12,
-        lineHeight: 7.5
+        lineHeight: 7.2
       });
     });
 
     // Section 3: High-Adherence Patient Dietary Guidelines
-    y -= 64;
+    y -= 68;
     page1.drawRectangle({
       x: 36,
       y: y - 66,
@@ -542,6 +567,7 @@ export async function GET(request) {
         num: '1',
         title: 'FORMULATION 1: CAPSULE A · MORNING ENTERIC PROBIOTIC & MUCOSAL SHIELD',
         qty: '60 Capsules (60-Day Supply)',
+        dnaTarget: 'DNA Target: Pillar 3 (Gut Microbiome & Mucosal Integrity)',
         vehicle: 'Vehicle: Size 0 Delayed-Release Enteric DRcaps® · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
         timing: 'Posology: 1 capsule upon waking on an empty stomach with a full glass of water (30 min before food).',
         headerColor: tealAccent,
@@ -567,6 +593,7 @@ export async function GET(request) {
         num: '2',
         title: 'FORMULATION 2: CAPSULE B · MIDDAY METABOLIC & METHYLATION ACTIVATOR',
         qty: '60 Capsules (60-Day Supply)',
+        dnaTarget: 'DNA Targets: Pillars 1 & 2 (Glycemic Control & Cellular Methylation)',
         vehicle: 'Vehicle: Size 0 Vegetable HPMC Capsule · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
         timing: 'Posology: 1 capsule with breakfast or lunch (meal containing healthy fats for optimal D3/K2 micellar uptake).',
         headerColor: navyPrimary,
@@ -613,6 +640,7 @@ export async function GET(request) {
         num: '3',
         title: 'FORMULATION 3: CAPSULE C · EVENING RECOVERY & SLEEP ARCHITECTURE',
         qty: '60 Capsules (60-Day Supply)',
+        dnaTarget: 'DNA Target: Pillar 4 (Cellular Immunity & Sleep Architecture)',
         vehicle: 'Vehicle: Size 0 Vegetable HPMC Capsule · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
         timing: 'Posology: 1 capsule with evening meal or 30 minutes before bed with water.',
         headerColor: rgb(30 / 255, 58 / 255, 138 / 255),
@@ -690,19 +718,31 @@ export async function GET(request) {
       // Vehicle & Posology subheader lines
       page2.drawText(cap.timing, {
         x: 44,
-        y: y2 + cardHeight - 27,
-        size: 6.2,
+        y: y2 + cardHeight - 26,
+        size: 6.1,
         font: helveticaBold,
         color: darkSlate
       });
 
       page2.drawText(cap.vehicle, {
         x: 44,
-        y: y2 + cardHeight - 36,
-        size: 5.8,
+        y: y2 + cardHeight - 35,
+        size: 5.7,
         font: helveticaOblique,
         color: mutedSlate
       });
+
+      // DNA Target Reference Tag (Right-aligned in vehicle line)
+      if (cap.dnaTarget) {
+        const targetWidth = helveticaBold.widthOfTextAtSize(cap.dnaTarget, 5.9);
+        page2.drawText(cap.dnaTarget, {
+          x: p2Width - 44 - targetWidth,
+          y: y2 + cardHeight - 35,
+          size: 5.9,
+          font: helveticaBold,
+          color: tealAccent
+        });
+      }
 
       // Table Header Strip (Clear 4-Column Layout)
       const thY = y2 + cardHeight - 48;

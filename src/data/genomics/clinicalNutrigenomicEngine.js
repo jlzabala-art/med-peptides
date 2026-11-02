@@ -50,60 +50,120 @@ export const CLINICAL_PILLARS = [
     number: 1,
     titleEn: 'Pillar 1: Glycemic Metabolism & Insulin Sensitivity',
     titleEs: 'Pilar 1: Metabolismo Glucémico & Sensibilidad a la Insulina',
+    shortTitleEn: 'Carbohydrate Sensitivity & Midday Energy Dips',
+    shortTitleEs: 'Sensibilidad a Carbohidratos & Bajones de Energía',
     keyGenes: 'TCF7L2 (rs7903146), FTO (rs9939609), SLC2A2',
-    dnaFindingEn: 'Elevated sensitivity to refined carbohydrates and risk allele for postprandial glucose spikes and abdominal visceral adiposity.',
-    dnaFindingEs: 'Sensibilidad acusada a carbohidratos refinados con tendencia a picos glucémicos postprandiales y acúmulo de grasa visceral.',
+    dnaFindingEn: 'Refined carbs trigger rapid insulin surges, promoting mid-afternoon energy crashes and abdominal fat storage.',
+    dnaFindingEs: 'Los carbohidratos refinados generan picos de insulina acusados, provocando bajones vespertinos y acumulación de grasa visceral.',
     clinicalRationaleEn: 'TCF7L2 reduces beta-cell GLP-1 responsiveness. Activating AMPK phosphorylation and enhancing insulin receptor tyrosine kinase activity flattens glycemic curves.',
     clinicalRationaleEs: 'TCF7L2 atenúa la respuesta a GLP-1. La activación de AMPK y la sensibilización del receptor de insulina previenen la lipogénesis.',
-    statusEn: 'GLUCOSE SENSITIVITY',
+    statusEn: 'GLUCOSE SENSITIVE',
     statusEs: 'SENSIBILIDAD A GLUCOSA',
     statusColor: '#0d9488',
-    assignedCapsules: ['Capsule B (Daytime)', 'Capsule C (Evening)']
+    statusBg: '#f0fdfa',
+    assignedCapsules: ['Capsule B (Midday)'],
+    assignedFormulation: {
+      code: 'FORMULATION 2',
+      formulationNumber: 2,
+      capsuleId: 'capsule_b',
+      capsuleNameEn: 'Capsule B (Midday)',
+      capsuleNameEs: 'Cápsula B (Mediodía)',
+      timingEn: 'With Breakfast / Lunch (Healthy Fats)',
+      timingEs: 'Con el Desayuno / Almuerzo (Grasas Saludables)',
+      referenceLabelEn: 'Formulation 2 (Capsule B · Midday Activator) — See Page 2',
+      referenceLabelEs: 'Formulación 2 (Cápsula B · Activador de Mediodía) — Ver Hoja 2',
+      clinicalGoalEn: 'Blunts postprandial glycemic excursions and enhances insulin receptor sensitivity.'
+    }
   },
   {
     id: 'pillar2_methylation',
     number: 2,
     titleEn: 'Pillar 2: Cellular Methylation & Homocysteine Clearance',
     titleEs: 'Pilar 2: Metilación Celular & Reciclaje de Homocisteína',
+    shortTitleEn: 'Active Folate & Homocysteine Recycling Deficit',
+    shortTitleEs: 'Déficit de Folato Activo & Reciclaje de Homocisteína',
     keyGenes: 'MTHFR (C677T rs1801133 TT), MTR, MTRR',
-    dnaFindingEn: 'Homozygous C677T mutation causing approximately 70% reduction in MTHFR enzymatic activity. Synthetic folic acid is contraindicated.',
-    dnaFindingEs: 'Mutación homocigota C677T que reduce un 70% la actividad MTHFR. El ácido fólico sintético común queda contraindicado.',
+    dnaFindingEn: 'Your liver is 70% slower at activating synthetic folic acid, which impairs cellular detox and neurotransmitters.',
+    dnaFindingEs: 'Tu hígado activa el ácido fólico sintético un 70% más lento, afectando la detoxificación celular y los neurotransmisores.',
     clinicalRationaleEn: 'Cannot efficiently reduce 5,10-methylene-THF to active 5-MTHF. Requires already-methylated folates to clear homocysteine and fuel neurotransmitter synthesis.',
     clinicalRationaleEs: 'Incapacidad de activar ácido fólico. Requiere folato biológicamente activo para desintoxicación y neurotransmisión.',
     statusEn: 'MTHFR PRIORITY',
     statusEs: 'PRIORIDAD MTHFR',
     statusColor: '#b91c1c',
-    assignedCapsules: ['Capsule B (Daytime)', 'Capsule C (Evening)']
+    statusBg: '#fef2f2',
+    assignedCapsules: ['Capsule B (Midday)'],
+    assignedFormulation: {
+      code: 'FORMULATION 2',
+      formulationNumber: 2,
+      capsuleId: 'capsule_b',
+      capsuleNameEn: 'Capsule B (Midday)',
+      capsuleNameEs: 'Cápsula B (Mediodía)',
+      timingEn: 'With Breakfast / Lunch (Healthy Fats)',
+      timingEs: 'Con el Desayuno / Almuerzo (Grasas Saludables)',
+      referenceLabelEn: 'Formulation 2 (Capsule B · Midday Activator) — See Page 2',
+      referenceLabelEs: 'Formulación 2 (Cápsula B · Activador de Mediodía) — Ver Hoja 2',
+      clinicalGoalEn: 'Bypasses the enzymatic MTHFR block with active L-methylfolate to clear homocysteine.'
+    }
   },
   {
     id: 'pillar3_microbiota',
     number: 3,
     titleEn: 'Pillar 3: Gut Microbiome & Mucosal Barrier',
     titleEs: 'Pilar 3: Microbiota & Barrera Intestinal',
+    shortTitleEn: 'Lactose Intolerance & Mucosal Barrier Support',
+    shortTitleEs: 'Intolerancia a la Lactosa & Sellado de Barrera Mucosa',
     keyGenes: 'MCM6 / LCT (rs4988235 CC), FUT2 Non-Secretor Risk',
-    dnaFindingEn: 'Primary adult hypolactasia (lactose intolerance) with increased risk of mucosal hyperpermeability and reduced protective Bifidobacteria.',
-    dnaFindingEs: 'Déficit primario de lactasa (intolerancia) con riesgo de hiperpermeabilidad mucosa y reducción de Bifidobacterias benéficas.',
+    dnaFindingEn: 'Adult lactase deficiency causes dairy fermentation, abdominal bloating, and reduced beneficial Bifidobacteria.',
+    dnaFindingEs: 'El déficit de lactasa causa fermentación colónica, hinchazón abdominal y menor recuento de Bifidobacterias beneficiosas.',
     clinicalRationaleEn: 'Unabsorbed dairy lactose causes colonic osmotic fermentation and endotoxemia. Requires live mucosal colonization and enterocyte tight-junction sealing.',
     clinicalRationaleEs: 'La lactosa no absorbida produce fermentación y disbiosis. Requiere probióticos puros y sellado de uniones estrechas con L-Glutamina.',
-    statusEn: 'MICROBIOME & LACTOSE-FREE',
-    statusEs: 'MICROBIOMA & SIN LACTOSA',
+    statusEn: 'LACTOSE-FREE SHIELD',
+    statusEs: 'ESCUDO SIN LACTOSA',
     statusColor: '#0284c7',
-    assignedCapsules: ['Capsule A (Fasting)']
+    statusBg: '#e0f2fe',
+    assignedCapsules: ['Capsule A (Morning Fasting)'],
+    assignedFormulation: {
+      code: 'FORMULATION 1',
+      formulationNumber: 1,
+      capsuleId: 'capsule_a',
+      capsuleNameEn: 'Capsule A (Morning Fasting)',
+      capsuleNameEs: 'Cápsula A (Ayunas Mañana)',
+      timingEn: 'Upon Waking on Empty Stomach (DRcaps® with water)',
+      timingEs: 'En Ayunas al Despertar (DRcaps® con agua)',
+      referenceLabelEn: 'Formulation 1 (Capsule A · Morning Enteric Shield) — See Page 2',
+      referenceLabelEs: 'Formulación 1 (Cápsula A · Escudo Entérico) — Ver Hoja 2',
+      clinicalGoalEn: 'Restores beneficial probiotic flora and seals tight junctions in acid-resistant DRcaps®.'
+    }
   },
   {
     id: 'pillar4_immunity_vitamins',
     number: 4,
-    titleEn: 'Pillar 4: Cellular Immunity & Bone Density (VDR)',
-    titleEs: 'Pilar 4: Inmunidad Celular & Densidad Ósea (VDR)',
-    keyGenes: 'VDR FokI (rs2228570 CT), CYP2R1',
-    dnaFindingEn: 'Altered translation start site producing lower-affinity vitamin D nuclear receptor, requiring higher serum targets (60-80 ng/mL).',
-    dnaFindingEs: 'Receptor nuclear con menor afinidad que requiere niveles séricos de 25-OH-D más altos (60-80 ng/mL) para activación celular.',
+    titleEn: 'Pillar 4: Cellular Immunity, Bone Density & Sleep Architecture',
+    titleEs: 'Pilar 4: Inmunidad Celular, Densidad Ósea & Arquitectura del Sueño',
+    shortTitleEn: 'Vitamin D Receptor Genetic Resistance & Sleep Reset',
+    shortTitleEs: 'Resistencia Genética al Receptor VDR & Reparación del Sueño',
+    keyGenes: 'VDR FokI (rs2228570 CT), CYP2R1, CYP1A2',
+    dnaFindingEn: 'Nuclear receptor variation requires higher circulating levels (60-80 ng/mL) to activate cellular defenses and protect bones.',
+    dnaFindingEs: 'La menor afinidad del receptor nuclear exige niveles séricos más altos (60-80 ng/mL) para inmunidad celular y fijación ósea.',
     clinicalRationaleEn: 'Co-administering therapeutic D3 with all-trans MK-7 K2 routes calcium exclusively to the hydroxyapatite bone matrix while preventing vascular calcification.',
     clinicalRationaleEs: 'La combinación de D3 con K2 MK-7 enruta el calcio al hueso y evita calcificaciones arteriales indeseadas.',
-    statusEn: 'VDR RECEPTOR RESISTANCE',
+    statusEn: 'VDR RESISTANCE',
     statusEs: 'RESISTENCIA RECEPTOR VDR',
     statusColor: '#b45309',
-    assignedCapsules: ['Capsule B (Daytime)', 'Capsule C (Evening)']
+    statusBg: '#fef3c7',
+    assignedCapsules: ['Capsule B (Midday)', 'Capsule C (Evening)'],
+    assignedFormulation: {
+      code: 'FORMULATION 2 & 3',
+      formulationNumber: '2 & 3',
+      capsuleId: 'capsule_b_and_c',
+      capsuleNameEn: 'Capsule B (D3/K2) + Capsule C (Magnesium)',
+      capsuleNameEs: 'Cápsula B (D3/K2) + Cápsula C (Magnesio)',
+      timingEn: 'Cap B with breakfast fats · Cap C at bedtime',
+      timingEs: 'Cáp B con grasas · Cáp C al acostarse',
+      referenceLabelEn: 'Formulation 2 (Midday) & Formulation 3 (Evening) — See Page 2',
+      referenceLabelEs: 'Formulación 2 (Mediodía) y Formulación 3 (Noche) — Ver Hoja 2',
+      clinicalGoalEn: 'Overcomes VDR resistance with micellar D3/K2 while evening chelated magnesium optimizes sleep.'
+    }
   }
 ];
 
@@ -111,11 +171,16 @@ export const THREE_CAPSULE_PROTOCOL = [
   {
     capsuleId: 'capsule_a',
     code: 'CAP-A',
+    formulationNumber: 1,
     nameEn: 'CAPSULE A · Morning Microbiota & Gut Barrier Shield',
     nameEs: 'CÁPSULA A · Escudo Matutino de Microbiota & Barrera Mucosa',
     timingEn: 'Upon waking on an empty stomach (30 min before breakfast) with room-temperature water',
     timingEs: 'En ayunas al despertar (30 min antes del desayuno) con un vaso de agua templada',
     targetPillar: 'Pillar 3 (Gut Microbiome & Mucosal Barrier)',
+    coveredPillars: [3],
+    coveredPillarsTagEn: 'Resolves: Pillar 3 · Gut Microbiome & Mucosal Barrier',
+    coveredPillarsTagEs: 'Resuelve: Pilar 3 · Microbioma & Barrera Intestinal',
+    pharmacyDnaHeaderEn: 'DNA Target: Pillar 3 (Gut Microbiome & Mucosal Integrity)',
     galenicVehicleEn: 'Delayed-release acid-resistant hypromellose vegetable capsule (DRcaps®). 100% Lactose-Free verified.',
     galenicVehicleEs: 'Cápsula vegetal gastrorresistente de liberación retardada (DRcaps®). Certificada 100% libre de lactosa.',
     rationaleEn: 'Taken fasting in DRcaps® to ensure fragile live probiotic bacteria bypass destructive stomach acid and release intact into the small intestine, without interference from food or antimicrobial berberine.',
@@ -133,139 +198,144 @@ export const THREE_CAPSULE_PROTOCOL = [
         apiEn: 'L-Glutamine USP',
         apiEs: 'L-Glutamina Pura USP',
         chemicalSpec: 'Micronized Pharmaceutical Grade (Ph. Eur.)',
-        dose: '500 mg',
+        dose: '350 mg',
         purposeEn: 'Fuels enterocytes and seals tight-junction mucosal permeability',
         purposeEs: 'Combustible preferente del enterocito para sellar la barrera intestinal'
-      },
-      {
-        apiEn: 'Acid-Stable Lactase Enzyme',
-        apiEs: 'Enzima Lactasa Ácido-Estable',
-        chemicalSpec: 'Purified Microbial Lactase (FCC ALU)',
-        dose: '9,000 ALU',
-        purposeEn: 'Neutralizes hidden lactose traces from daily dining',
-        purposeEs: 'Degrada trazas de lactosa y previene la fermentación cólica'
       }
     ]
   },
   {
     capsuleId: 'capsule_b',
     code: 'CAP-B',
+    formulationNumber: 2,
     nameEn: 'CAPSULE B · Midday Metabolic & Methylation Activator',
     nameEs: 'CÁPSULA B · Activador Metabólico & Metilación Matutina',
     timingEn: 'With breakfast (meal containing healthy fats: olive oil, avocado, or eggs)',
     timingEs: 'Con el desayuno (comida con grasas saludables: aceite de oliva, aguacate o huevos)',
     targetPillar: 'Pillar 1 (Metabolism), Pillar 2 (Methylation), Pillar 4 (Immunity/VDR)',
+    coveredPillars: [1, 2, 4],
+    coveredPillarsTagEn: 'Resolves: Pillars 1 & 2 · Glycemic & Methylation (+ D3/K2)',
+    coveredPillarsTagEs: 'Resuelve: Pilares 1 y 2 · Glucemia & Metilación (+ D3/K2)',
+    pharmacyDnaHeaderEn: 'DNA Targets: Pillars 1 & 2 (Glycemic Control & Cellular Methylation)',
     galenicVehicleEn: 'Vegetable hypromellose capsule (HPMC) with microcrystalline cellulose NF filler. 100% Lactose-Free.',
     galenicVehicleEs: 'Cápsula vegetal de celulosa (HPMC) con celulosa microcristalina NF. 100% libre de lactosa.',
     rationaleEn: 'Co-formulated with fat-containing breakfast to maximize micellar absorption of fat-soluble vitamins (D3/K2) while berberine blunts postprandial glucose excursions.',
     rationaleEs: 'Tomada con el desayuno graso para absorción óptima de vitaminas liposolubles (D3/K2) y estabilización glucémica inmediata.',
     ingredients: [
       {
-        apiEn: 'Standardized Berberine',
+        apiEn: 'Standardized Berberine HCl (97%)',
         apiEs: 'Extracto Estandarizado de Berberina',
-        chemicalSpec: 'High-Bioavailability Phospholipid Complex (97% standardized)',
-        dose: '150 mg',
+        chemicalSpec: 'High-Purity Purified Botanical Extract USP · Standardized to 97% active alkaloid',
+        dose: '300 mg',
         purposeEn: 'AMPK phosphorylation agonist; moderates post-breakfast glycemic curve',
         purposeEs: 'Activa AMPK y amortigua el pico de glucosa tras el desayuno'
       },
       {
         apiEn: 'Chromium Picolinate USP',
         apiEs: 'Picolinato de Cromo USP',
-        chemicalSpec: 'Pharmaceutical Grade Chromium Chelate',
-        dose: '100 mcg',
+        chemicalSpec: 'Pharmaceutical Grade Chromium Chelate · Highly bioavailable micro-mineral',
+        dose: '200 mcg',
         purposeEn: 'Enhances insulin receptor tyrosine kinase sensitivity',
         purposeEs: 'Sensibiliza los receptores celulares de insulina'
       },
       {
-        apiEn: 'L-Methylfolate',
+        apiEn: 'Active L-Methylfolate ([6S]-5-MTHF)',
         apiEs: 'L-Metilfolato Activo',
-        chemicalSpec: '[6S]-5-Methyltetrahydrofolate Calcium Salt USP',
-        dose: '500 mcg',
+        chemicalSpec: 'Active Calcium Salt (USP Grade, Lactose-Free) · Bypasses impaired MTHFR enzyme',
+        dose: '1,000 mcg',
         purposeEn: 'Direct daytime cellular methylation bypassing MTHFR mutation',
         purposeEs: 'Metilación directa sin requerir conversión hepática'
       },
       {
-        apiEn: 'Methylcobalamin (B12)',
+        apiEn: 'Methylcobalamin (Active Coenzyme B12)',
         apiEs: 'Metilcobalamina Pura',
-        chemicalSpec: 'Active Enzymatic Coenzyme B12 (USP grade)',
-        dose: '500 mcg',
+        chemicalSpec: 'Active Enzymatic Coenzyme B12 (USP grade) · Essential methionine synthase cofactor',
+        dose: '1,000 mcg',
         purposeEn: 'Homocysteine remethylation into methionine cofactor',
         purposeEs: 'Cofactor esencial en el reciclaje de homocisteína'
       },
       {
-        apiEn: 'Vitamin D3',
-        apiEs: 'Vitamina D3 (Colecalciferol)',
-        chemicalSpec: 'Cholecalciferol Crystalline Powder USP',
-        dose: '5,000 IU',
+        apiEn: 'Vitamin D3 + Vitamin K2 (all-trans MK-7)',
+        apiEs: 'Vitamina D3 + K2 MK-7',
+        chemicalSpec: 'Cholecalciferol Crystalline USP + Microencapsulated Menaquinone-7',
+        dose: '5,000 IU / 100 mcg',
         purposeEn: 'Therapeutic ligand for low-affinity VDR nuclear receptors',
         purposeEs: 'Supera la menor afinidad genética del receptor VDR'
-      },
-      {
-        apiEn: 'Vitamin K2',
-        apiEs: 'Vitamina K2 (Menaquinona-7)',
-        chemicalSpec: 'all-trans MK-7 Microencapsulated',
-        dose: '100 mcg',
-        purposeEn: 'Carboxylates osteocalcin; guides calcium to bones, spares arteries',
-        purposeEs: 'Enruta el calcio al hueso y evita calcificaciones vasculares'
       }
     ]
   },
   {
     capsuleId: 'capsule_c',
     code: 'CAP-C',
-    nameEn: 'CAPSULE C · Evening Metabolic Recovery & Cellular Repair',
-    nameEs: 'CÁPSULA C · Reparación Metabólica Nocturna & Relax',
+    formulationNumber: 3,
+    nameEn: 'CAPSULE C · Evening Recovery & Sleep Architecture',
+    nameEs: 'CÁPSULA C · Reparación Nocturna & Arquitectura del Sueño',
     timingEn: 'With dinner or 30 minutes before bed with a glass of water',
     timingEs: 'Con la cena o 30 minutos antes de acostarse con un vaso de agua',
-    targetPillar: 'Pillar 1 (Metabolism), Pillar 2 (Methylation), Pillar 4 (Magnesium Cofactor)',
+    targetPillar: 'Pillar 4 (Cellular Immunity, Bone Density & Sleep Architecture)',
+    coveredPillars: [4],
+    coveredPillarsTagEn: 'Resolves: Pillar 4 · Immunity, Bone Density & Deep Sleep',
+    coveredPillarsTagEs: 'Resuelve: Pilar 4 · Inmunidad, Fijación Ósea & Sueño Profundo',
+    pharmacyDnaHeaderEn: 'DNA Target: Pillar 4 (Immunity & Neuro-Recovery Architecture)',
     galenicVehicleEn: 'Vegetable hypromellose capsule (HPMC). 100% Lactose-Free verified.',
     galenicVehicleEs: 'Cápsula vegetal de celulosa (HPMC). 100% libre de lactosa.',
-    rationaleEn: 'Balances overnight fasting insulin, completes the 1,000 mcg folate/B12 cycle, and induces neuromuscular relaxation via chelated magnesium without daytime drowsiness.',
-    rationaleEs: 'Mantiene la glucemia nocturna, completa los 1.000 mcg de metilación y aporta magnesio para inducir sueño reparador.',
+    rationaleEn: 'Delivers fully chelated TRAACS® magnesium with active P5P and pure L-theanine to stimulate alpha brainwaves and nocturnal neuromuscular relaxation.',
+    rationaleEs: 'Aporta magnesio quelado con P5P activa y L-teanina para inducir relajación neurovascular y sueño profundo reparador.',
     ingredients: [
       {
-        apiEn: 'Standardized Berberine',
-        apiEs: 'Extracto Estandarizado de Berberina',
-        chemicalSpec: 'High-Bioavailability Phospholipid Complex (97% standardized)',
-        dose: '100 mg',
-        purposeEn: 'Maintains nocturnal glycemic stability and suppresses late cravings',
-        purposeEs: 'Estabilidad de glucosa nocturna y freno a antojos tardíos'
-      },
-      {
-        apiEn: 'Chromium Picolinate USP',
-        apiEs: 'Picolinato de Cromo USP',
-        chemicalSpec: 'Pharmaceutical Grade Chromium Chelate',
-        dose: '100 mcg',
-        purposeEn: 'Maintains nocturnal insulin receptor sensitivity during fasting',
-        purposeEs: 'Control de sensibilidad insulínica durante el ayuno nocturno'
-      },
-      {
-        apiEn: 'L-Methylfolate + Methylcobalamin',
-        apiEs: 'L-Metilfolato + Metilcobalamina',
-        chemicalSpec: '[6S]-5-MTHF Calcium (500 mcg) + B12 (500 mcg)',
-        dose: '500 mcg + 500 mcg',
-        purposeEn: 'Completes 1,000 mcg daily methylation dose during nocturnal repair',
-        purposeEs: 'Completa la dosis de metilación para detoxificación nocturna'
-      },
-      {
-        apiEn: 'Magnesium Bisglycinate',
+        apiEn: 'Magnesium Bisglycinate Chelate',
         apiEs: 'Bisglicinato de Magnesio Quelado',
-        chemicalSpec: 'TRAACS® Fully Chelated Glycinate (USP)',
-        dose: '200 mg',
+        chemicalSpec: 'TRAACS® Fully Chelated Glycinate USP · High bioavailability, zero laxative threshold',
+        dose: '250 mg',
         purposeEn: 'Neurovascular relaxation, deep restorative sleep, VDR cofactor',
         purposeEs: 'Relajación neurovascular, sueño profundo y cofactor VDR'
       },
       {
-        apiEn: '5-Hydroxytryptophan (5-HTP)',
-        apiEs: '5-Hidroxitriptófano (5-HTP)',
-        chemicalSpec: 'Natural Botanical Extract (Griffonia simplicifolia)',
-        dose: '100 mg',
-        purposeEn: 'Serotonin/melatonin pathway support; blunts stress-induced snacking',
-        purposeEs: 'Precursor de serotonina; inhibe el hambre por estrés vespertino'
+        apiEn: 'L-Theanine (Suntheanine® Grade)',
+        apiEs: 'L-Teanina Pura',
+        chemicalSpec: 'Pure Enzymatic Fermentation (99% L-Isomer) · Promotes alpha brainwave relaxation',
+        dose: '150 mg',
+        purposeEn: 'Reduces evening cortisol and facilitates deep sleep onset',
+        purposeEs: 'Reduce el cortisol nocturno e induce ondas alfa cerebrales'
+      },
+      {
+        apiEn: 'Pyridoxal-5-Phosphate (Active B6)',
+        apiEs: 'Piridoxal-5-Fosfato (B6 Activa)',
+        chemicalSpec: 'Active Enzymatic Coenzyme B6 (Ph. Eur.) · Essential cofactor for GABA synthesis',
+        dose: '25 mg',
+        purposeEn: 'Synergistic cofactor for magnesium absorption and GABA production',
+        purposeEs: 'Cofactor sinérgico para la síntesis de GABA y absorción de magnesio'
       }
     ]
   }
 ];
+
+export const TWENTY_FOUR_GENETICS_AI_ECOSYSTEM = {
+  assistantName: 'Julia',
+  assistantRoleEn: '24Genetics Nutrition AI Assistant',
+  assistantRoleEs: 'Asistente IA de Nutrición 24Genetics',
+  allAssistants: [
+    { name: 'Julia', specialty: 'Nutrition & Metabolic Health', icon: '🥗' },
+    { name: 'Gaia', specialty: 'Ancestry & Geographical Heritage', icon: '🌍' },
+    { name: 'Jun', specialty: 'Skin, Hair & Dermogenetics', icon: '✨' },
+    { name: 'Kai', specialty: 'Sport, Recovery & Performance', icon: '⚡' },
+    { name: 'Nuria', specialty: 'Personality, Circadian & Wellbeing', icon: '🧠' }
+  ],
+  supportedLanguagesCount: 22,
+  subscriptionTiers: {
+    monthly: '€19 / month',
+    annual: '€199 / year'
+  },
+  videoAsset: {
+    title: '24Genetics AI Nutritional Assistant Explainer Video (Julia)',
+    fileName: '24G-AI-Nutritional-Assistant.mp4',
+    publicUrl: '/assets/videos/24G-AI-Nutritional-Assistant.mp4',
+    format: 'MP4 1080p Full HD',
+    fileSizeBytes: 33499700
+  },
+  disclaimerEn: '24Genetics virtual assistants provide informational guidance and educational interpretation of genetic predispositions; they do not diagnose, formulate magistral compounds, or replace medical prescriptions. Atlas Health Services provides the clinical diet protocol and official compounding pharmacy order.',
+  disclaimerEs: 'Los asistentes virtuales de 24Genetics proporcionan orientación educativa sobre predisposiciones genéticas; no diagnostican, no formulan compuestos magistrales ni sustituyen recetas médicas. Atlas Health Services aporta la pauta dietética clínica y la receta oficial de formulación magistral.'
+};
 
 export const CONCRETE_DIET_GUIDELINES = [
   {

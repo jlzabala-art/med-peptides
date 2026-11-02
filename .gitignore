@@ -33,6 +33,7 @@ cypress/videos/
 cypress/screenshots/
 public/videos/
 *.mp4
+!public/assets/videos/24G-AI-Nutritional-Assistant.mp4
 node_modules_bad/
 
 # Ignore bad node_modules backup

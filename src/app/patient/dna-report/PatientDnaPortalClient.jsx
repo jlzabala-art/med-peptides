@@ -27,7 +27,8 @@ import {
   CLINICAL_PILLARS,
   THREE_CAPSULE_PROTOCOL,
   CONCRETE_DIET_GUIDELINES,
-  TREATMENT_CYCLE
+  TREATMENT_CYCLE,
+  TWENTY_FOUR_GENETICS_AI_ECOSYSTEM
 } from '@/data/genomics/clinicalNutrigenomicEngine';
 
 export default function PatientDnaPortalClient({
@@ -253,7 +254,90 @@ export default function PatientDnaPortalClient({
 
         {/* ── SECTION 1: PLAIN LANGUAGE DNA FINDINGS (4 PILLARS) ── */}
         {activeSection === 'summary' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+            {/* ── 24GENETICS AI EXPLAINER VIDEO & VALUE CHAIN SHOWCASE ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1.5px solid #ccfbf1', padding: '1.5rem', boxShadow: '0 4px 12px rgba(13,148,136,0.06)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                      24Genetics Multimedia Experience
+                    </span>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px' }}>
+                      22 Languages · 1080p HD
+                    </span>
+                  </div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 850, color: '#003666', margin: '4px 0 2px 0' }}>
+                    Watch Julia: Your AI Genetic Nutrition Assistant Explains Your DNA
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.84rem', color: '#64748b' }}>
+                    24Genetics provides a personalized AI-generated video and continuous 24/7 WhatsApp consultation. Atlas Health Services translates these findings into your actionable <strong>Clinical Diet</strong> and <strong>Official 3-Capsule Compounding Prescription</strong>.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <a
+                    href="/assets/videos/24G-AI-Nutritional-Assistant.mp4"
+                    download="24G-AI-Nutritional-Assistant.mp4"
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.80rem',
+                      fontWeight: 700,
+                      backgroundColor: '#f8fafc',
+                      color: '#003666',
+                      border: '1px solid #cbd5e1',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Download size={14} />
+                    <span>Download 1080p Video</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Video Player */}
+              <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#0f172a', border: '1px solid #0f172a' }}>
+                <video
+                  controls
+                  preload="metadata"
+                  style={{ width: '100%', maxHeight: '420px', display: 'block', margin: '0 auto' }}
+                  src="/assets/videos/24G-AI-Nutritional-Assistant.mp4"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+
+              {/* Value Chain Integration Callout */}
+              <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                <div style={{ backgroundColor: '#f8fafc', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase' }}>1. Diagnostic Layer</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>24Genetics DNA Report</div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>CE-IVD Lab saliva sequencing across 22 languages</div>
+                </div>
+                <div style={{ backgroundColor: '#f8fafc', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>2. AI Explanation</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>Julia Virtual Assistant</div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Personalized video & 24/7 WhatsApp consultation</div>
+                </div>
+                <div style={{ backgroundColor: '#f0fdf4', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>3. Clinical Diet (Atlas)</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>Plate Sequencing & Limits</div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Net carb limit & microbiome food protocol</div>
+                </div>
+                <div style={{ backgroundColor: '#eff6ff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>4. Medical Compounding (Atlas)</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>3-Capsule Size 0 Regimen</div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Official compounding pharmacy prescription</div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── 4 CLINICAL PILLARS ── */}
             <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Sparkles size={18} className="text-teal-600" />
@@ -262,7 +346,7 @@ export default function PatientDnaPortalClient({
                 </h3>
               </div>
               <p style={{ fontSize: '0.86rem', color: '#475569', lineHeight: 1.6, margin: '0 0 1.25rem 0' }}>
-                This clinical evaluation was prepared by the <strong>Atlas Health multidisciplinary team of medical geneticists and compounding pharmacists</strong>. Every finding is explained in clear, accessible language, paired with an exact 60-day targeted protocol:
+                This clinical evaluation was prepared by the <strong>Atlas Health multidisciplinary team of medical geneticists and compounding pharmacists</strong> based on your 24Genetics Nutrition DNA report. Every finding is explained in clear language, paired with an exact 60-day targeted protocol:
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -301,13 +385,37 @@ export default function PatientDnaPortalClient({
                       <div style={{ color: '#475569', lineHeight: 1.5 }}>
                         <strong>Clinical Mechanism:</strong> {pillar.clinicalRationaleEn}
                       </div>
-                      <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontWeight: 700, color: '#0f172a' }}>Addressed In:</span>
-                        {pillar.assignedCapsules.map((cap) => (
-                          <span key={cap} style={{ backgroundColor: '#003666', color: '#ffffff', padding: '2px 7px', borderRadius: '3px', fontSize: '0.72rem', fontWeight: 700 }}>
-                            {cap}
-                          </span>
-                        ))}
+
+                      {/* Direct Galenic Cross-Reference */}
+                      <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                        <div>
+                          <div style={{ fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
+                            🎯 {pillar.assignedFormulation?.referenceLabelEn || 'Addressed in Compounding Protocol'}
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: '#0d9488', fontStyle: 'italic', marginTop: '2px' }}>
+                            Clinical Goal: {pillar.assignedFormulation?.clinicalGoalEn}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setActiveSection('prescription')}
+                          style={{
+                            padding: '5px 12px',
+                            backgroundColor: '#003666',
+                            color: '#ffffff',
+                            borderRadius: '4px',
+                            border: 'none',
+                            fontSize: '0.74rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>View Pharmacy Order</span>
+                          <ChevronRight size={13} />
+                        </button>
                       </div>
                     </div>
                   </div>
