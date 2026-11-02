@@ -57,26 +57,26 @@ function cleanStr(s) {
 
 function resolvePatientDoctorAndClinic(row, doctors = []) {
   const doctorObj = (doctors || []).find(d => d.id === (row.physicianId || row.doctorId));
-  
-  const docName = row.physician 
-    || row.doctorName 
-    || doctorObj?.name 
-    || doctorObj?.displayName 
-    || row.doctor?.name 
+
+  const docName = row.physician
+    || row.doctorName
+    || doctorObj?.name
+    || doctorObj?.displayName
+    || row.doctor?.name
     || (row.prescribingDoctorNames && row.prescribingDoctorNames[0])
     || null;
 
-  const clinicName = row.clinic 
-    || row.clinicName 
-    || row.doctorClinic 
-    || doctorObj?.clinic 
-    || doctorObj?.clinicName 
-    || row.doctor?.clinicName 
+  const clinicName = row.clinic
+    || row.clinicName
+    || row.doctorClinic
+    || doctorObj?.clinic
+    || doctorObj?.clinicName
+    || row.doctor?.clinicName
     || null;
 
-  return { 
-    docName: docName || 'Unassigned Doctor', 
-    clinicName: clinicName || 'Atlas Network' 
+  return {
+    docName: docName || 'Unassigned Doctor',
+    clinicName: clinicName || 'Atlas Network'
   };
 }
 
@@ -181,7 +181,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     } else if (effectiveDoctorId) {
       facetFilters.push(`doctorIds:${effectiveDoctorId}`);
     }
-    
+
     // Numeric filters for timeRange
     const numericFilters = [];
     if (filters.timeRange && filters.timeRange !== 'all') {
@@ -192,12 +192,12 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       numericFilters.push(`createdAt_ts >= ${threshold}`);
     }
 
-    return { 
+    return {
       alwaysFetch: true,
-      facetFilters: facetFilters.length > 0 ? facetFilters : undefined, 
+      facetFilters: facetFilters.length > 0 ? facetFilters : undefined,
       numericFilters: numericFilters.length > 0 ? numericFilters : undefined,
       page,
-      hitsPerPage: 50 
+      hitsPerPage: 50
     };
   }, [filters, page, effectiveDoctorId]);
 
@@ -469,7 +469,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       ) : null}
       mobileOverflowActions={[
         { label: 'Export CSV', icon: Download, onClick: () => handleBulkExportCSV(finalFiltered) },
-        { label: 'Refresh', icon: RefreshCw, onClick: () => {} }
+        { label: 'Refresh', icon: RefreshCw, onClick: () => { } }
       ]}
       searchPlaceholder="Search patients by name, email, clinic, physician (Algolia)..."
       searchTerm={searchTerm}
@@ -478,9 +478,9 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       searchLoading={algoliaLoading}
       namespace="admin-patients"
       kpis={
-        <PatientsKPIs 
-          filteredCount={finalFiltered.length} 
-          isFiltered={Boolean(searchTerm || filters.status || filters.clinic || filters.physicianId || filters.commercialStage !== 'all' || (filters.timeRange && filters.timeRange !== 'all'))} 
+        <PatientsKPIs
+          filteredCount={finalFiltered.length}
+          isFiltered={Boolean(searchTerm || filters.status || filters.clinic || filters.physicianId || filters.commercialStage !== 'all' || (filters.timeRange && filters.timeRange !== 'all'))}
           scopedPatients={effectiveDoctorId ? finalFiltered : null}
           isDoctorMode={Boolean(effectiveDoctorId || viewMode === 'doctor')}
         />
@@ -538,9 +538,9 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           key: 'commercialStage',
           label: 'Commercial',
           value: filters.commercialStage === 'paid' ? 'Paid & Confirmed'
-               : filters.commercialStage === 'quote_pending' ? 'Quote Pending'
-               : filters.commercialStage === 'quote_unconfirmed' ? 'Unconfirmed Quote'
-               : 'Registered Lead',
+            : filters.commercialStage === 'quote_pending' ? 'Quote Pending'
+              : filters.commercialStage === 'quote_unconfirmed' ? 'Unconfirmed Quote'
+                : 'Registered Lead',
           onRemove: () => setFilters(prev => ({ ...prev, commercialStage: 'all' }))
         },
         filters.timeRange && filters.timeRange !== 'all' && {
@@ -549,17 +549,17 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           value: filters.timeRange === '30d' ? 'Last 30 Days' : 'Last 90 Days',
           onRemove: () => setFilters(prev => ({ ...prev, timeRange: 'all' }))
         },
-        filters.status && { 
-          key: 'status', 
-          label: 'Status', 
-          value: filters.status, 
-          onRemove: () => setFilters(prev => ({ ...prev, status: undefined })) 
+        filters.status && {
+          key: 'status',
+          label: 'Status',
+          value: filters.status,
+          onRemove: () => setFilters(prev => ({ ...prev, status: undefined }))
         },
-        filters.physicianId && { 
-          key: 'physician', 
-          label: 'Assigned Physician', 
-          value: (doctors || []).find(d => d.id === filters.physicianId)?.name || (doctors || []).find(d => d.id === filters.physicianId)?.displayName || 'Physician', 
-          onRemove: () => setFilters(prev => ({ ...prev, physicianId: undefined })) 
+        filters.physicianId && {
+          key: 'physician',
+          label: 'Assigned Physician',
+          value: (doctors || []).find(d => d.id === filters.physicianId)?.name || (doctors || []).find(d => d.id === filters.physicianId)?.displayName || 'Physician',
+          onRemove: () => setFilters(prev => ({ ...prev, physicianId: undefined }))
         }
       ].filter(Boolean)}
       data={finalFiltered}
@@ -567,8 +567,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       isSearchActive={isAlgoliaActive}
       selectedIds={Array.from(selectedIds)}
       onSelectionChange={(newArr) => {
-         clearSelection();
-         newArr.forEach(id => toggleRowSelection(id));
+        clearSelection();
+        newArr.forEach(id => toggleRowSelection(id));
       }}
       onRowClick={(row) => {
         openDrawer('patient', row.id, { initialTab: 'overview', patient: row });
@@ -650,7 +650,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             </div>
 
             {/* 2. Tarjeta de Estado Comercial & Cotización (GCP Lifecycle Card) */}
-            <div style={{ 
+            <div style={{
               backgroundColor: isPaid ? '#f0fdf4' : isUnconfirmed ? '#fef2f2' : isPending ? '#fffbeb' : '#ffffff',
               border: `1px solid ${isPaid ? '#bbf7d0' : isUnconfirmed ? '#fecaca' : isPending ? '#fde68a' : '#e2e8f0'}`,
               borderRadius: '6px',
@@ -662,21 +662,21 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
               gap: '0.75rem'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <StatusBadge 
-                  status={stage} 
+                <StatusBadge
+                  status={stage}
                   customLabel={
                     isPaid ? 'Confirmed & Paid' :
-                    isPending ? 'Quote Pending Payment' :
-                    isUnconfirmed ? 'Quotation Unconfirmed (Needs Follow-up)' :
-                    'Lead / Registered Only'
+                      isPending ? 'Quote Pending Payment' :
+                        isUnconfirmed ? 'Quotation Unconfirmed (Needs Follow-up)' :
+                          'Lead / Registered Only'
                   }
                 />
                 <span style={{ fontSize: '0.80rem', color: isPaid ? '#166534' : isUnconfirmed ? '#991b1b' : '#1e293b', fontWeight: 600 }}>
-                  {isPaid 
+                  {isPaid
                     ? `Payment Confirmed (${totalDisplay || 'Verified'}) • ${invoiceDisplay ? `Invoice: ${invoiceDisplay}` : 'Direct Zoho Payment'}`
-                    : isUnconfirmed 
+                    : isUnconfirmed
                       ? 'Consultation/Prescription issued without order confirmation. Opportunity to reactivate patient.'
-                      : isPending 
+                      : isPending
                         ? 'Awaiting patient quotation acceptance & checkout.'
                         : 'No formal quotation has been generated yet for this patient.'
                   }
@@ -710,6 +710,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                 )}
                 {isPaid && (
                   <span style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 700 }}>
+                    ✓ Order Processed with Lotusland
                     ✓ Order Processed with European Core Lab
                   </span>
                 )}
@@ -757,27 +758,27 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       emptyState={
         (searchTerm || filters.status || filters.physicianId || filters.productCategory || filters.algoliaDoctor || filters.commercialStage !== 'all' || (filters.timeRange && filters.timeRange !== 'all'))
           ? {
-              title: "No patients match active filters",
-              description: `No patient records found matching ${searchTerm ? `"${searchTerm}"` : 'the current filter criteria'}. Try clearing your search or resetting active filters.`,
-              actionLabel: "Clear All Filters",
-              onAction: () => {
-                setSearchTerm('');
-                setFilters({ timeRange: 'all', status: undefined, commercialStage: 'all', physicianId: undefined, productCategory: undefined, algoliaDoctor: undefined });
-                if (typeof window !== 'undefined') {
-                  const url = new URL(window.location.href);
-                  url.searchParams.delete('search');
-                  url.searchParams.delete('status');
-                  url.searchParams.delete('ids');
-                  window.history.replaceState({}, '', url.toString());
-                }
+            title: "No patients match active filters",
+            description: `No patient records found matching ${searchTerm ? `"${searchTerm}"` : 'the current filter criteria'}. Try clearing your search or resetting active filters.`,
+            actionLabel: "Clear All Filters",
+            onAction: () => {
+              setSearchTerm('');
+              setFilters({ timeRange: 'all', status: undefined, commercialStage: 'all', physicianId: undefined, productCategory: undefined, algoliaDoctor: undefined });
+              if (typeof window !== 'undefined') {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('search');
+                url.searchParams.delete('status');
+                url.searchParams.delete('ids');
+                window.history.replaceState({}, '', url.toString());
               }
             }
+          }
           : {
-              title: "Welcome to Patient Management",
-              description: "Manage patients, programs, clinics, physicians, prescriptions, and follow-ups from one centralized workspace.",
-              actionLabel: "Create First Patient",
-              onAction: () => setIsWizardOpen(true)
-            }
+            title: "Welcome to Patient Management",
+            description: "Manage patients, programs, clinics, physicians, prescriptions, and follow-ups from one centralized workspace.",
+            actionLabel: "Create First Patient",
+            onAction: () => setIsWizardOpen(true)
+          }
       }
       bulkActions={[
         ...(canReassignDoctor ? [{
@@ -807,8 +808,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
         { label: 'Delete', icon: Trash2, onClick: () => handleBulkDelete(Array.from(selectedIds), clearSelection), variant: 'danger' },
       ]}
       columns={[
-        { 
-          key: 'name', 
+        {
+          key: 'name',
           header: 'Patient',
           width: '26%',
           render: (row) => (
@@ -847,10 +848,10 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             );
           }
         },
-        { 
-          key: 'prescriptionCount', 
-          header: 'Active Program', 
-          width: '16%', 
+        {
+          key: 'prescriptionCount',
+          header: 'Active Program',
+          width: '16%',
           render: (row) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#eff6ff', color: '#1d4ed8', fontWeight: 600, border: '1px solid #bfdbfe' }}>
@@ -859,10 +860,10 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             </div>
           )
         },
-        { 
-          key: 'commercialStage', 
-          header: 'Quotation & Payment', 
-          width: '24%', 
+        {
+          key: 'commercialStage',
+          header: 'Quotation & Payment',
+          width: '24%',
           render: (row) => {
             const stage = row.commercialStage || (
               row.hasPaidOrders || (Array.isArray(row.invoices) && row.invoices.length > 0) ? 'paid' : 'registered_only'
@@ -876,13 +877,13 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                  <StatusBadge 
-                    status={stage} 
+                  <StatusBadge
+                    status={stage}
                     customLabel={
                       isPaid ? 'Paid & Confirmed' :
-                      isPending ? 'Quote Pending' :
-                      isUnconfirmed ? 'Unconfirmed Quote' :
-                      'Registered Lead'
+                        isPending ? 'Quote Pending' :
+                          isUnconfirmed ? 'Unconfirmed Quote' :
+                            'Registered Lead'
                     }
                   />
                   {totalDisplay && isPaid && (
@@ -961,12 +962,12 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
         }
       ]}
     >
-      <PatientFormDrawer 
+      <PatientFormDrawer
         isOpen={isWizardOpen}
         onClose={() => setIsWizardOpen(false)}
         onComplete={(newPat) => {
           setIsWizardOpen(false);
-          window.location.reload(); 
+          window.location.reload();
         }}
       />
       <MobileActionSheet

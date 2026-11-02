@@ -5,20 +5,20 @@ import './InteractiveReconstitutionGuide.css';
 import './PeptideAnalyticalSpecsCard.css';
 import React, { useState, useEffect, useTransition, useRef, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { 
-  FileText, 
-  Download, 
-  Share2, 
-  Copy, 
-  Check, 
-  ShieldCheck, 
-  Sparkles, 
-  FlaskConical, 
-  Thermometer, 
-  Layers, 
-  Activity, 
-  CheckCircle2, 
-  AlertTriangle, 
+import {
+  FileText,
+  Download,
+  Share2,
+  Copy,
+  Check,
+  ShieldCheck,
+  Sparkles,
+  FlaskConical,
+  Thermometer,
+  Layers,
+  Activity,
+  CheckCircle2,
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
@@ -43,9 +43,9 @@ import {
   Calendar
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
-import { 
-  SUPPORTED_LANGUAGES, 
-  getTranslations, 
+import {
+  SUPPORTED_LANGUAGES,
+  getTranslations,
   getLocalizedField,
   getLocalizedCategory,
   getLocalizedTargetSystem
@@ -115,9 +115,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
 
-export default function PublicDatasheetView({ 
-  product, 
-  slug, 
+export default function PublicDatasheetView({
+  product,
+  slug,
   baseUrl,
   initialSupplierFilter = null,
   initialFormat = null,
@@ -329,8 +329,8 @@ export default function PublicDatasheetView({
       return product.commercialProducts.map(cp => cp.brandName || cp.name).filter(Boolean);
     }
     const targetSlug = (slug || product?.slug || product?.id || '').toLowerCase().trim();
-    const netItem = FDA_APPROVED_PEPTIDES_NETWORK.find(p => 
-      p.slug === targetSlug || 
+    const netItem = FDA_APPROVED_PEPTIDES_NETWORK.find(p =>
+      p.slug === targetSlug ||
       (p.aliases && p.aliases.includes(targetSlug)) ||
       (product?.name && p.name.toLowerCase().includes(product.name.toLowerCase()))
     );
@@ -435,12 +435,12 @@ export default function PublicDatasheetView({
     const pt = (product?.productType || '').toLowerCase();
     const pName = (product?.name || product?.title || '').toLowerCase();
     return Boolean(
-      product?.isSolvent || 
-      cat === 'solvent' || 
-      pt === 'solvent' || 
-      slug === 'bac-water' || 
-      slug === 'purified-water' || 
-      slug.includes('bacteriostatic') || 
+      product?.isSolvent ||
+      cat === 'solvent' ||
+      pt === 'solvent' ||
+      slug === 'bac-water' ||
+      slug === 'purified-water' ||
+      slug.includes('bacteriostatic') ||
       pName.includes('bacteriostatic water')
     );
   }, [product]);
@@ -458,17 +458,17 @@ export default function PublicDatasheetView({
       cat === 'diagnostic' ||
       cat === 'diagnostic_test' ||
       cat === 'diagnostic_tests' ||
-      cat === 'genomics_biomarkers' || 
+      cat === 'genomics_biomarkers' ||
       cat === 'tests' ||
       cat.includes('diagnostic') ||
       pt === 'diagnostic' ||
       pt.includes('diagnostic') ||
       pres === 'diagnostic_kit' ||
-      pres === 'blood_test' || 
+      pres === 'blood_test' ||
       pres === 'home_test_kit' ||
       pres === 'saliva_kit' ||
       fmt === 'diagnostic_kit' ||
-      fmt === 'blood_test' || 
+      fmt === 'blood_test' ||
       fmt === 'saliva_kit' ||
       supp === 'supplier-bloodo' ||
       supp.includes('teletest') ||
@@ -523,13 +523,13 @@ export default function PublicDatasheetView({
     const pName = (product?.name || product?.title || '').toLowerCase();
     const pres = (product?.presentation || '').toLowerCase();
     return Boolean(
-      cat === 'iv_drips' || 
+      cat === 'iv_drips' ||
       cat === 'iv_therapy' ||
-      pt === 'iv_drip' || 
-      pres === 'iv_drip' || 
+      pt === 'iv_drip' ||
+      pres === 'iv_drip' ||
       pres === 'infusion_bag' ||
-      pSlug.includes('iv-drip') || 
-      pSlug.includes('drip-plus') || 
+      pSlug.includes('iv-drip') ||
+      pSlug.includes('drip-plus') ||
       pName.includes('iv drip') ||
       (Array.isArray(product?.ingredients) && product.ingredients.length > 0 && pSlug.includes('drip'))
     );
@@ -592,15 +592,15 @@ export default function PublicDatasheetView({
   }, [product, slug]);
 
   const isPeptideCompound = useMemo(() => {
-    return !isCorporateService && 
-           !isCosmeticProduct && 
-           !isSolventProduct && 
-           !isSupplementProduct && 
-           !isIvDrip &&
-           !isDiagnosticKit && 
-           !isBloodoDiagnostic && 
-           !isTeletestDiagnostic && 
-           !isEternaDiagnostic;
+    return !isCorporateService &&
+      !isCosmeticProduct &&
+      !isSolventProduct &&
+      !isSupplementProduct &&
+      !isIvDrip &&
+      !isDiagnosticKit &&
+      !isBloodoDiagnostic &&
+      !isTeletestDiagnostic &&
+      !isEternaDiagnostic;
   }, [isCorporateService, isCosmeticProduct, isSolventProduct, isSupplementProduct, isIvDrip, isDiagnosticKit, isBloodoDiagnostic, isTeletestDiagnostic, isEternaDiagnostic]);
 
   const isLipProduct = useMemo(() => {
@@ -658,140 +658,140 @@ export default function PublicDatasheetView({
   const category = isLipProduct
     ? (lang === 'es' ? 'Cuidado Labial Bioactivo & Barrera' : 'Bioactive Lip Barrier Care')
     : isHairProduct
-    ? (lang === 'es' ? 'Cosmecéutica y Tricología Capilar' : 'Hair & Scalp Cosmeceuticals')
-    : isFacialProduct
-    ? (lang === 'es' ? 'Dermocosmética Celular Avanzada' : 'Advanced Cellular Cosmeceuticals')
-    : isCosmeticProduct
-    ? (lang === 'es' ? 'Cosmecéutica y Cuidado Dérmico' : 'Cosmeceuticals & Dermal Care')
-    : isSolventProduct 
-    ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
-    : isEternaDiagnostic
-    ? (lang === 'es' ? 'Plataforma Multiómica y Portal Clínico' : 'Multiomic Platform & Clinical Portal')
-    : isTeletestDiagnostic
-    ? (lang === 'es' ? 'Diagnóstico Clínico y Toxicología' : 'Clinical Diagnostics & Toxicology')
-    : isDiagnosticKit
-    ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
-    : isIvDrip
-    ? (lang === 'es' ? 'Terapia Intravenosa y Nutrición Parenteral' : 'Sterile IV Infusion & Micronutrient Formulation')
-    : isSupplementProduct
-    ? (lang === 'es' ? 'Suplementación Clínica Avanzada' : 'Advanced Clinical Supplementation')
-    : getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
+      ? (lang === 'es' ? 'Cosmecéutica y Tricología Capilar' : 'Hair & Scalp Cosmeceuticals')
+      : isFacialProduct
+        ? (lang === 'es' ? 'Dermocosmética Celular Avanzada' : 'Advanced Cellular Cosmeceuticals')
+        : isCosmeticProduct
+          ? (lang === 'es' ? 'Cosmecéutica y Cuidado Dérmico' : 'Cosmeceuticals & Dermal Care')
+          : isSolventProduct
+            ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
+            : isEternaDiagnostic
+              ? (lang === 'es' ? 'Plataforma Multiómica y Portal Clínico' : 'Multiomic Platform & Clinical Portal')
+              : isTeletestDiagnostic
+                ? (lang === 'es' ? 'Diagnóstico Clínico y Toxicología' : 'Clinical Diagnostics & Toxicology')
+                : isDiagnosticKit
+                  ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
+                  : isIvDrip
+                    ? (lang === 'es' ? 'Terapia Intravenosa y Nutrición Parenteral' : 'Sterile IV Infusion & Micronutrient Formulation')
+                    : isSupplementProduct
+                      ? (lang === 'es' ? 'Suplementación Clínica Avanzada' : 'Advanced Clinical Supplementation')
+                      : getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
 
   const casNumber = isCosmeticProduct
     ? (lang === 'es' ? 'Reglamento Cosmético UE 1223/2009' : 'EU Cosmetics Reg. 1223/2009 (CPNP)')
-    : isSolventProduct 
-    ? '100-51-6 (Benzyl Alcohol USP)' 
-    : isTeletestDiagnostic
-    ? (lang === 'es' ? 'Acreditación ENAC ISO 17025 / ISO 15189' : 'ISO 17025 / ISO 15189 Central Lab')
-    : isDiagnosticKit
-    ? (lang === 'es' ? 'Directiva CE-IVDR (UE 2017/746)' : 'CE-IVDR Directive (EU 2017/746)')
-    : isIvDrip
-    ? 'USP <797> Compounded Parenteral'
-    : isSupplementProduct
-    ? (lang === 'es' ? 'Directiva UE 2002/46/CE · Sin Fármacos' : 'EU Directive 2002/46/EC · Drug-Free')
-    : (product?.casNumber || product?.cas || 'Documented on Monograph');
+    : isSolventProduct
+      ? '100-51-6 (Benzyl Alcohol USP)'
+      : isTeletestDiagnostic
+        ? (lang === 'es' ? 'Acreditación ENAC ISO 17025 / ISO 15189' : 'ISO 17025 / ISO 15189 Central Lab')
+        : isDiagnosticKit
+          ? (lang === 'es' ? 'Directiva CE-IVDR (UE 2017/746)' : 'CE-IVDR Directive (EU 2017/746)')
+          : isIvDrip
+            ? 'USP <797> Compounded Parenteral'
+            : isSupplementProduct
+              ? (lang === 'es' ? 'Directiva UE 2002/46/CE · Sin Fármacos' : 'EU Directive 2002/46/EC · Drug-Free')
+              : (product?.casNumber || product?.cas || 'Documented on Monograph');
 
   const formula = isCosmeticProduct
     ? (lang === 'es' ? `Complejo Bioactivo (${product?.ingredients?.length || '15+'} Activos INCI)` : `Bioactive Multi-Complex (${product?.ingredients?.length || '15+'} INCI Actives)`)
-    : isSolventProduct 
-    ? 'H₂O + C₇H₈O (0.9%)' 
-    : isTeletestDiagnostic
-    ? (slug.includes('htma') || slug.includes('mineralograma')
-        ? (lang === 'es' ? 'Matriz: Cabello Proximal (3 cm)' : 'Matrix: Proximal Scalp Hair (3 cm)')
-        : (slug.includes('metabolizer') || slug.includes('hla') || slug.includes('celiac')
+    : isSolventProduct
+      ? 'H₂O + C₇H₈O (0.9%)'
+      : isTeletestDiagnostic
+        ? (slug.includes('htma') || slug.includes('mineralograma')
+          ? (lang === 'es' ? 'Matriz: Cabello Proximal (3 cm)' : 'Matrix: Proximal Scalp Hair (3 cm)')
+          : (slug.includes('metabolizer') || slug.includes('hla') || slug.includes('celiac')
             ? (lang === 'es' ? 'Matriz: Saliva / Frotis Bucal' : 'Matrix: Saliva / Buccal Swab')
             : (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')))
-    : isDiagnosticKit
-    ? (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')
-    : isIvDrip
-    ? `${product?.ingredients?.length || 12} Active Compounds (${product?.volume_ml || 50} mL)`
-    : isSupplementProduct
-    ? (lang === 'es' ? `Fórmula Multi-Activa (${product?.ingredients?.length || '6+'} Activos Clave)` : `Multi-Active Matrix (${product?.ingredients?.length || '6+'} Key Actives)`)
-    : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
+        : isDiagnosticKit
+          ? (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')
+          : isIvDrip
+            ? `${product?.ingredients?.length || 12} Active Compounds (${product?.volume_ml || 50} mL)`
+            : isSupplementProduct
+              ? (lang === 'es' ? `Fórmula Multi-Activa (${product?.ingredients?.length || '6+'} Activos Clave)` : `Multi-Active Matrix (${product?.ingredients?.length || '6+'} Key Actives)`)
+              : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
 
   const mw = isLipProduct
     ? (lang === 'es' ? 'Barra Anhidra Lipídica (0% Agua)' : 'Anhydrous Lipid Stick (0% Water)')
     : isHairProduct
-    ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
-    : isFacialProduct
-    ? (lang === 'es' ? 'Formulación Fisiológica: pH 5.5' : 'Physiologic Cosmeceutical: pH 5.5')
-    : isCosmeticProduct
-    ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
-    : isSolventProduct 
-    ? '18.02 g/mol (H₂O)' 
-    : isTeletestDiagnostic
-    ? (lang === 'es' ? 'Laboratorio Central: TeleTest Analytika (ISO 17025)' : 'Central Laboratory: TeleTest Analytika (ISO 17025)')
-    : isDiagnosticKit
-    ? (lang === 'es' ? 'Laboratorio Central: LifeLab1' : 'Central Laboratory: LifeLab1')
-    : isIvDrip
-    ? `Total Actives: ${(product?.totalActiveMg || 10000).toLocaleString()} mg`
-    : isSupplementProduct
-    ? (lang === 'es' ? 'Cápsulas HPMC Gastrorresistentes' : 'Acid-Resistant HPMC Delayed-Release')
-    : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
+      ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
+      : isFacialProduct
+        ? (lang === 'es' ? 'Formulación Fisiológica: pH 5.5' : 'Physiologic Cosmeceutical: pH 5.5')
+        : isCosmeticProduct
+          ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
+          : isSolventProduct
+            ? '18.02 g/mol (H₂O)'
+            : isTeletestDiagnostic
+              ? (lang === 'es' ? 'Laboratorio Central: TeleTest Analytika (ISO 17025)' : 'Central Laboratory: TeleTest Analytika (ISO 17025)')
+              : isDiagnosticKit
+                ? (lang === 'es' ? 'Laboratorio Central: LifeLab1' : 'Central Laboratory: LifeLab1')
+                : isIvDrip
+                  ? `Total Actives: ${(product?.totalActiveMg || 10000).toLocaleString()} mg`
+                  : isSupplementProduct
+                    ? (lang === 'es' ? 'Cápsulas HPMC Gastrorresistentes' : 'Acid-Resistant HPMC Delayed-Release')
+                    : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
 
   const purity = isLipProduct
     ? (lang === 'es' ? 'Testado Dermatológicamente · Ceras Naturales' : 'Dermatologically Tested · Natural Waxes')
     : isHairProduct
-    ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
-    : isFacialProduct
-    ? (lang === 'es' ? 'Dermatológicamente Testado · Hipoalergénico' : 'Dermatologically Tested · Hypoallergenic')
-    : isCosmeticProduct
-    ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
-    : isSolventProduct 
-    ? 'USP Pharmacopeial Grade (Sterile)' 
-    : isTeletestDiagnostic
-    ? (lang === 'es' ? 'Acreditado ISO 17025 / ISO 15189 · Analytika' : 'ISO 17025 / ISO 15189 Accredited · Analytika')
-    : isDiagnosticKit
-    ? (lang === 'es' ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)' : 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)')
-    : isIvDrip
-    ? 'USP <797> Sterile / ISO Class 5 Certified'
-    : isSupplementProduct
-    ? (lang === 'es' ? 'Grado Farmacéutico EU GMP · 100% Vegano' : 'EU GMP Certified · 100% Vegan')
-    : (product?.purity || '≥ 99.4% (RP-HPLC)');
+      ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
+      : isFacialProduct
+        ? (lang === 'es' ? 'Dermatológicamente Testado · Hipoalergénico' : 'Dermatologically Tested · Hypoallergenic')
+        : isCosmeticProduct
+          ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
+          : isSolventProduct
+            ? 'USP Pharmacopeial Grade (Sterile)'
+            : isTeletestDiagnostic
+              ? (lang === 'es' ? 'Acreditado ISO 17025 / ISO 15189 · Analytika' : 'ISO 17025 / ISO 15189 Accredited · Analytika')
+              : isDiagnosticKit
+                ? (lang === 'es' ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)' : 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)')
+                : isIvDrip
+                  ? 'USP <797> Sterile / ISO Class 5 Certified'
+                  : isSupplementProduct
+                    ? (lang === 'es' ? 'Grado Farmacéutico EU GMP · 100% Vegano' : 'EU GMP Certified · 100% Vegan')
+                    : (product?.purity || '≥ 99.4% (RP-HPLC)');
 
   const sequence = (isSolventProduct || isDiagnosticKit || isIvDrip || isCosmeticProduct || isSupplementProduct) ? null : (product?.sequence || product?.molecular?.sequence || null);
 
   const targetSystem = isLipProduct
     ? (lang === 'es' ? 'Borde Bermellón, Mucosa Labial y Barrera Cutánea' : 'Vermilion Border, Labial Mucosa & Cutaneous Barrier')
     : isHairProduct
-    ? (lang === 'es' ? 'Folículo Piloso, Matriz Dérmica y Fase Anágena' : 'Hair Follicle, Scalp Dermal Matrix & Anagen Phase')
-    : isFacialProduct
-    ? (lang === 'es' ? 'Matriz Extracelular Dérmica, Fibroblastos y Renovación Celular' : 'Dermal Extracellular Matrix, Fibroblasts & Cellular Renewal')
-    : isCosmeticProduct
-    ? (lang === 'es' ? 'Matriz Cutánea y Barrera Dérmica' : 'Cutaneous Matrix & Dermal Barrier')
-    : isSolventProduct
-    ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
-    : isEternaDiagnostic
-    ? (lang === 'es' ? 'Ecosistema de Salud de Precisión, Telemetría 24/7 y Portal Clínico' : 'Precision Multiomics Ecosystem, 24/7 Telemetry & Clinical OS')
-    : isTeletestDiagnostic
-    ? (slug.includes('htma') || slug.includes('mineralograma')
-        ? (lang === 'es' ? 'Homeostasis Mineral, Toxicología de Metales Pesados y Tasa de Oxidación' : 'Trace Mineral Homeostasis, Chronic Heavy Metal Toxicology & Metabolic Oxidation Rate')
-        : slug.includes('omega')
-        ? (lang === 'es' ? 'Membrana Celular Cardiovascular, Neuroinflamación y Balance Eicosanoide' : 'Cardiovascular Cellular Membrane, Neuroinflammation & Eicosanoid Balance')
-        : slug.includes('metabolizer')
-        ? (lang === 'es' ? 'Biotransformación Hepática Fase I/II, Aclaramiento de Fármacos y Neutralización Oxidativa' : 'Hepatic Biotransformation Phase I/II, Drug Clearance & Oxidative Neutralization')
-        : slug.includes('hla')
-        ? (lang === 'es' ? 'Complejo Mayor de Histocompatibilidad (MHC), Regulación Inmune y Riesgo Autoinmune' : 'Major Histocompatibility Complex (MHC) Immune Regulation & Autoimmune Risk')
-        : slug.includes('celiac')
-        ? (lang === 'es' ? 'Inmunidad Mucosa Intestinal, Enteropatía al Gluten y Restricción HLA Clase II' : 'Intestinal Mucosal Immunity, Gluten Enteropathy & HLA Class II Restriction')
-        : (lang === 'es' ? 'Diagnóstico Clínico Avanzado y Marcadores Metabólicos' : 'Advanced Clinical Diagnostics & Metabolic Markers'))
-    : isBloodoDiagnostic || isDiagnosticKit
-    ? (slug.includes('nad')
-        ? (lang === 'es' ? 'Bioenergética Celular, Longevidad Mitocondrial y Activación de Sirtuinas (SIRT1/SIRT3)' : 'Cellular Bioenergetics, Mitochondrial Longevity & Sirtuin (SIRT1/SIRT3) Activation')
-        : slug.includes('cortisol')
-        ? (lang === 'es' ? 'Eje Hipotálamo-Hipofisario-Adrenal (HPA), Carga Alostática y Ritmo Circadiano' : 'Hypothalamic-Pituitary-Adrenal (HPA) Axis, Allostatic Load & Circadian Rhythm')
-        : slug.includes('testosterone')
-        ? (lang === 'es' ? 'Homeostasis Androgénica, Anabolismo Muscular y Eje Gonadal' : 'Androgenic Homeostasis, Lean Anabolism & Pituitary-Gonadal Axis')
-        : slug.includes('hba1c')
-        ? (lang === 'es' ? 'Glucorregulación a Largo Plazo, Sensibilidad a la Insulina y Glicación Tisular' : 'Long-Term Glycoregulation, Insulin Sensitivity & Tissue Glycation Index')
-        : slug.includes('omega')
-        ? (lang === 'es' ? 'Fluidez de Membrana Celular, Balance Eicosanoide y Protección Cardiovascular' : 'Cell Membrane Fluidity, Eicosanoid Balance & Cardiovascular Resilience')
-        : (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring'))
-    : isIvDrip
-    ? (lang === 'es' ? 'Optimización Celular, Inmunidad y Longevidad Intravenosa' : 'Parenteral Cellular Optimization, Immunity & Longevity')
-    : isSupplementProduct
-    ? (lang === 'es' ? (product?.targetSystem || 'Optimización Metabólica, Mitocondrial y Celular') : (product?.targetSystem || 'Mitochondrial, Metabolic & Cellular Optimization'))
-    : getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
+      ? (lang === 'es' ? 'Folículo Piloso, Matriz Dérmica y Fase Anágena' : 'Hair Follicle, Scalp Dermal Matrix & Anagen Phase')
+      : isFacialProduct
+        ? (lang === 'es' ? 'Matriz Extracelular Dérmica, Fibroblastos y Renovación Celular' : 'Dermal Extracellular Matrix, Fibroblasts & Cellular Renewal')
+        : isCosmeticProduct
+          ? (lang === 'es' ? 'Matriz Cutánea y Barrera Dérmica' : 'Cutaneous Matrix & Dermal Barrier')
+          : isSolventProduct
+            ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
+            : isEternaDiagnostic
+              ? (lang === 'es' ? 'Ecosistema de Salud de Precisión, Telemetría 24/7 y Portal Clínico' : 'Precision Multiomics Ecosystem, 24/7 Telemetry & Clinical OS')
+              : isTeletestDiagnostic
+                ? (slug.includes('htma') || slug.includes('mineralograma')
+                  ? (lang === 'es' ? 'Homeostasis Mineral, Toxicología de Metales Pesados y Tasa de Oxidación' : 'Trace Mineral Homeostasis, Chronic Heavy Metal Toxicology & Metabolic Oxidation Rate')
+                  : slug.includes('omega')
+                    ? (lang === 'es' ? 'Membrana Celular Cardiovascular, Neuroinflamación y Balance Eicosanoide' : 'Cardiovascular Cellular Membrane, Neuroinflammation & Eicosanoid Balance')
+                    : slug.includes('metabolizer')
+                      ? (lang === 'es' ? 'Biotransformación Hepática Fase I/II, Aclaramiento de Fármacos y Neutralización Oxidativa' : 'Hepatic Biotransformation Phase I/II, Drug Clearance & Oxidative Neutralization')
+                      : slug.includes('hla')
+                        ? (lang === 'es' ? 'Complejo Mayor de Histocompatibilidad (MHC), Regulación Inmune y Riesgo Autoinmune' : 'Major Histocompatibility Complex (MHC) Immune Regulation & Autoimmune Risk')
+                        : slug.includes('celiac')
+                          ? (lang === 'es' ? 'Inmunidad Mucosa Intestinal, Enteropatía al Gluten y Restricción HLA Clase II' : 'Intestinal Mucosal Immunity, Gluten Enteropathy & HLA Class II Restriction')
+                          : (lang === 'es' ? 'Diagnóstico Clínico Avanzado y Marcadores Metabólicos' : 'Advanced Clinical Diagnostics & Metabolic Markers'))
+                : isBloodoDiagnostic || isDiagnosticKit
+                  ? (slug.includes('nad')
+                    ? (lang === 'es' ? 'Bioenergética Celular, Longevidad Mitocondrial y Activación de Sirtuinas (SIRT1/SIRT3)' : 'Cellular Bioenergetics, Mitochondrial Longevity & Sirtuin (SIRT1/SIRT3) Activation')
+                    : slug.includes('cortisol')
+                      ? (lang === 'es' ? 'Eje Hipotálamo-Hipofisario-Adrenal (HPA), Carga Alostática y Ritmo Circadiano' : 'Hypothalamic-Pituitary-Adrenal (HPA) Axis, Allostatic Load & Circadian Rhythm')
+                      : slug.includes('testosterone')
+                        ? (lang === 'es' ? 'Homeostasis Androgénica, Anabolismo Muscular y Eje Gonadal' : 'Androgenic Homeostasis, Lean Anabolism & Pituitary-Gonadal Axis')
+                        : slug.includes('hba1c')
+                          ? (lang === 'es' ? 'Glucorregulación a Largo Plazo, Sensibilidad a la Insulina y Glicación Tisular' : 'Long-Term Glycoregulation, Insulin Sensitivity & Tissue Glycation Index')
+                          : slug.includes('omega')
+                            ? (lang === 'es' ? 'Fluidez de Membrana Celular, Balance Eicosanoide y Protección Cardiovascular' : 'Cell Membrane Fluidity, Eicosanoid Balance & Cardiovascular Resilience')
+                            : (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring'))
+                  : isIvDrip
+                    ? (lang === 'es' ? 'Optimización Celular, Inmunidad y Longevidad Intravenosa' : 'Parenteral Cellular Optimization, Immunity & Longevity')
+                    : isSupplementProduct
+                      ? (lang === 'es' ? (product?.targetSystem || 'Optimización Metabólica, Mitocondrial y Celular') : (product?.targetSystem || 'Mitochondrial, Metabolic & Cellular Optimization'))
+                      : getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
 
   const description = useMemo(() => {
     const pSlug = (slug || product?.slug || product?.id || '').toLowerCase();
@@ -968,8 +968,8 @@ export default function PublicDatasheetView({
 
     let volumeNum;
     const strLower = String(strengthName || '').toLowerCase();
-    const isBlendStrength = strLower.includes('+') 
-      || strLower.includes('|') 
+    const isBlendStrength = strLower.includes('+')
+      || strLower.includes('|')
       || strLower.includes('/')
       || String(name || '').toLowerCase().includes('klow')
       || String(name || '').toLowerCase().includes('glow');
@@ -1054,10 +1054,10 @@ export default function PublicDatasheetView({
       const nonVialFormats = sanitizedFormats.filter(f => !f.id.toLowerCase().includes('vial'));
       if (nonVialFormats.length > 0) return nonVialFormats;
       return [
-        { 
-          id: 'diagnostic_kit', 
-          name: product.sampleType ? `Specimen Collection Kit (${product.sampleType})` : 'Diagnostic Specimen Collection Kit', 
-          strengths: sortedStrengths.map(s => s.id) 
+        {
+          id: 'diagnostic_kit',
+          name: product.sampleType ? `Specimen Collection Kit (${product.sampleType})` : 'Diagnostic Specimen Collection Kit',
+          strengths: sortedStrengths.map(s => s.id)
         }
       ];
     }
@@ -1124,7 +1124,7 @@ export default function PublicDatasheetView({
         return sortedStrengths.filter(s => allowedStrengthIds.includes(s.id));
       }
     }
-    return sortedStrengths.filter(s => 
+    return sortedStrengths.filter(s =>
       activeFormatStrengthIds.length === 0 || activeFormatStrengthIds.includes(s.id)
     );
   }, [sortedStrengths, activeSupplierId, activeSupplierObj, activeFormatId, activeFormatStrengthIds]);
@@ -1151,10 +1151,10 @@ export default function PublicDatasheetView({
 
 
   const selectedStrength = useMemo(() => {
-    return filteredStrengths.find(s => s.id === selectedStrengthId) 
-      || sortedStrengths.find(s => s.id === selectedStrengthId) 
-      || filteredStrengths[0] 
-      || sortedStrengths[0] 
+    return filteredStrengths.find(s => s.id === selectedStrengthId)
+      || sortedStrengths.find(s => s.id === selectedStrengthId)
+      || filteredStrengths[0]
+      || sortedStrengths[0]
       || null;
   }, [filteredStrengths, sortedStrengths, selectedStrengthId]);
 
@@ -1491,7 +1491,7 @@ export default function PublicDatasheetView({
   // Reactive Dynamic Share URL respecting active state — Guaranteed https://www.atlashealth-services.com
   const dynamicPublicUrl = useMemo(() => {
     const params = new URLSearchParams();
-    
+
     // 1. Dose: Prefer canonical readable name e.g. "10 mg"
     const currentDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');
     params.set('dose', currentDose);
@@ -1561,7 +1561,7 @@ export default function PublicDatasheetView({
           setShortMonographUrl(data.shortUrl);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => { isMounted = false; };
   }, [dynamicPublicUrl, slug]);
 
@@ -1672,7 +1672,7 @@ export default function PublicDatasheetView({
           headers: { 'Content-Type': 'application/json' },
           body: payload,
           keepalive: true,
-        }).catch(() => {});
+        }).catch(() => { });
       }
     } catch {
       // Non-blocking telemetry failure is ignored
@@ -1684,7 +1684,7 @@ export default function PublicDatasheetView({
   const handleCopyUrl = async () => {
     triggerHaptic('copy');
     const targetUrl = shortMonographUrl || dynamicPublicUrl;
-    await navigator.clipboard.writeText(targetUrl).catch(() => {});
+    await navigator.clipboard.writeText(targetUrl).catch(() => { });
     setCopied(true);
     toast.success(lang === 'es' ? 'Enlace corto copiado al portapapeles ✓' : 'Short link copied to clipboard ✓');
     setTimeout(() => setCopied(false), 2000);
@@ -1731,9 +1731,9 @@ export default function PublicDatasheetView({
               ? (lang === 'es' ? 'Kit Todo Incluido (Lancetas + Tarjeta DBS)' : 'Self-Contained Kit (Lancets + DBS Card)')
               : isSupplementProduct
                 ? (lang === 'es' ? 'Cápsula HPMC Oral (Sin reconstitución)' : 'Oral HPMC Capsule (No reconstitution)')
-                : isPenOrCart 
+                : isPenOrCart
                   ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
-                  : isOral 
+                  : isOral
                     ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
                     : isSpray
                       ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
@@ -1745,9 +1745,9 @@ export default function PublicDatasheetView({
               ? (lang === 'es' ? 'Rango: 5.0–60.0 µmol/L (LoD 0.23)' : 'Range: 5.0–60.0 µmol/L (LoD 0.23)')
               : isSupplementProduct
                 ? (st.name || (lang === 'es' ? 'Fórmula Multi-Activa' : 'Multi-Active Formula'))
-                : isPenOrCart 
+                : isPenOrCart
                   ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
-                  : isOral 
+                  : isOral
                     ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
                     : isSpray
                       ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
@@ -1759,9 +1759,9 @@ export default function PublicDatasheetView({
               ? (lang === 'es' ? 'Punción Capilar (DBS Yema de Dedo)' : 'Capillary Fingerstick (DBS Card)')
               : isSupplementProduct
                 ? (lang === 'es' ? 'Vía Oral (Con agua / Comida)' : 'Oral Route (With water / Food)')
-                : isPenOrCart 
+                : isPenOrCart
                   ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
-                  : isOral 
+                  : isOral
                     ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
                     : isSpray
                       ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
@@ -1817,7 +1817,7 @@ export default function PublicDatasheetView({
                     ? (lang === 'es' ? 'Solución Precargada (Sin BAC · Cero mezcla)' : 'Pre-filled Solution (Zero BAC mixing)')
                     : isCart
                       ? (lang === 'es' ? 'Cartucho 3 mL Recambio (Sin BAC)' : '3 mL Refill Cartridge (Zero BAC)')
-                      : isOral 
+                      : isOral
                         ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
                         : isSpray
                           ? (lang === 'es' ? 'Solución Intranasal Tamponada (Sin BAC)' : 'Pre-metered Buffered Solution (Zero BAC)')
@@ -1833,7 +1833,7 @@ export default function PublicDatasheetView({
                     ? (lang === 'es' ? '3.0 mL (Multidosis Calibrada)' : '3.0 mL (Calibrated Multi-dose)')
                     : isCart
                       ? (lang === 'es' ? '3.0 mL (Cartucho Borosilicato Tipo I)' : '3.0 mL (Borosilicate Refill)')
-                      : isOral 
+                      : isOral
                         ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
                         : isSpray
                           ? (lang === 'es' ? '10 mL (~100 sprays · 0.1 mL/puff)' : '10 mL (~100 sprays · 0.1 mL/puff)')
@@ -1849,7 +1849,7 @@ export default function PublicDatasheetView({
                     ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
                     : isCart
                       ? (lang === 'es' ? 'Recambio 3 mL para Pluma' : '3 mL Reusable Pen Refill')
-                      : isOral 
+                      : isOral
                         ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
                         : isSpray
                           ? (lang === 'es' ? 'Mucosa Intranasal (Sin Agujas)' : 'Intranasal Mucosal (Needle-Free)')
@@ -1892,35 +1892,35 @@ export default function PublicDatasheetView({
     ? (product?.imageUrl || product?.image || '/images/products/eterna/eterna-kit-box.png')
     : (isDiagnosticKit || isBloodoDiagnostic)
       ? (product?.imageUrl || product?.image || (
-          slug.includes('nad') ? '/images/products/bloodo/nad.jpg' :
+        slug.includes('nad') ? '/images/products/bloodo/nad.jpg' :
           slug.includes('cortisol') ? '/images/products/bloodo/cortisol.jpg' :
-          slug.includes('hba1c') || slug.includes('hemoglobin') ? '/images/products/bloodo/hba1c.jpg' :
-          slug.includes('omega-index') ? '/images/products/bloodo/omega-index.jpg' :
-          slug.includes('omega') ? '/images/products/bloodo/omega.jpg' :
-          slug.includes('testosterone') ? '/images/products/bloodo/testosterone.jpg' :
-          slug.includes('vitamin-d') || slug.includes('vit-d') ? '/images/products/bloodo/vitamin-d.jpg' :
-          '/images/products/bloodo/nad.jpg'
-        ))
+            slug.includes('hba1c') || slug.includes('hemoglobin') ? '/images/products/bloodo/hba1c.jpg' :
+              slug.includes('omega-index') ? '/images/products/bloodo/omega-index.jpg' :
+                slug.includes('omega') ? '/images/products/bloodo/omega.jpg' :
+                  slug.includes('testosterone') ? '/images/products/bloodo/testosterone.jpg' :
+                    slug.includes('vitamin-d') || slug.includes('vit-d') ? '/images/products/bloodo/vitamin-d.jpg' :
+                      '/images/products/bloodo/nad.jpg'
+      ))
       : (product?.image || product?.imageUrl || product?.images?.[0] || (
-          slug.includes('colvita') ? '/images/products/colway/colvita.png' :
+        slug.includes('colvita') ? '/images/products/colway/colvita.png' :
           slug.includes('blue-diamond-cream') ? '/images/products/colway/blue-diamond-cream.png' :
-          slug.includes('blue-diamond-peeling') ? '/images/products/colway/blue-diamond-peeling.png' :
-          slug.includes('collagen-vege') ? '/images/products/colway/vege-collagen.png' :
-          slug.includes('collagen-wash-gel') ? '/images/products/colway/washing-gel.png' :
-          slug.includes('collagen-lip-care') ? '/images/products/colway/lip-care.png' :
-          slug.includes('strengthening-shampoo') ? '/images/products/colway/shampoo.png' :
-          slug.includes('strengthening-conditioner') ? '/images/products/colway/conditioner.png' :
-          slug.includes('trichology') ? '/images/products/colway/colway-trichology-banner.jpg' :
-          slug.includes('bpc') ? '/assets/vials/bpc157.png' :
-          slug.includes('tb-500') || slug.includes('tb500') ? '/assets/vials/tb500-clinical.jpg' :
-          slug.includes('ghk') ? '/assets/vials/ghkcu-clinical.jpg' :
-          slug.includes('epithalon') ? '/assets/vials/epithalon.png' :
-          slug.includes('mots') ? '/assets/vials/motsc.png' :
-          slug.includes('retatrutide') ? '/assets/vials/retatrutide.png' :
-          slug.includes('tirzepatide') ? '/assets/vials/tirzepatide.png' :
-          slug.includes('semaglutide') ? '/assets/vials/semaglutide.png' :
-          '/assets/vials/generic-vial.png'
-        ));
+            slug.includes('blue-diamond-peeling') ? '/images/products/colway/blue-diamond-peeling.png' :
+              slug.includes('collagen-vege') ? '/images/products/colway/vege-collagen.png' :
+                slug.includes('collagen-wash-gel') ? '/images/products/colway/washing-gel.png' :
+                  slug.includes('collagen-lip-care') ? '/images/products/colway/lip-care.png' :
+                    slug.includes('strengthening-shampoo') ? '/images/products/colway/shampoo.png' :
+                      slug.includes('strengthening-conditioner') ? '/images/products/colway/conditioner.png' :
+                        slug.includes('trichology') ? '/images/products/colway/colway-trichology-banner.jpg' :
+                          slug.includes('bpc') ? '/assets/vials/bpc157.png' :
+                            slug.includes('tb-500') || slug.includes('tb500') ? '/assets/vials/tb500-clinical.jpg' :
+                              slug.includes('ghk') ? '/assets/vials/ghkcu-clinical.jpg' :
+                                slug.includes('epithalon') ? '/assets/vials/epithalon.png' :
+                                  slug.includes('mots') ? '/assets/vials/motsc.png' :
+                                    slug.includes('retatrutide') ? '/assets/vials/retatrutide.png' :
+                                      slug.includes('tirzepatide') ? '/assets/vials/tirzepatide.png' :
+                                        slug.includes('semaglutide') ? '/assets/vials/semaglutide.png' :
+                                          '/assets/vials/generic-vial.png'
+      ));
 
   // Comprehensive Context Anchor for Atlas AI Drawer (Unified across sticky bar and direct triggers)
   const atlasAiDrawerProps = useMemo(() => {
@@ -1930,44 +1930,44 @@ export default function PublicDatasheetView({
       contextType: isSpainResidency
         ? 'corporate_residency'
         : isCompoundingService
-        ? 'compounding_service'
-        : isPeptideSupplyService
-        ? 'peptide_supply_service'
-        : isAnyDiagnostic
-        ? 'diagnostic_test'
-        : isCosmeticProduct
-        ? 'cosmetic_product'
-        : 'monograph',
+          ? 'compounding_service'
+          : isPeptideSupplyService
+            ? 'peptide_supply_service'
+            : isAnyDiagnostic
+              ? 'diagnostic_test'
+              : isCosmeticProduct
+                ? 'cosmetic_product'
+                : 'monograph',
       contextAnchor: {
         name: isSpainResidency
           ? 'Spanish Corporate Acquisition & Law 14/2013 Residence Program'
           : isCompoundingService
-          ? 'European Pharmaceutical Compounding & Custom Formulation Service'
-          : isPeptideSupplyService
-          ? 'B2B Peptide Supply Chain & Dedicated Inventory Management Service'
-          : isAnyDiagnostic
-          ? (product?.canonicalName || product?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit')
-          : (product?.canonicalName || product?.name || 'Peptide Monograph'),
+            ? 'European Pharmaceutical Compounding & Custom Formulation Service'
+            : isPeptideSupplyService
+              ? 'B2B Peptide Supply Chain & Dedicated Inventory Management Service'
+              : isAnyDiagnostic
+                ? (product?.canonicalName || product?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit')
+                : (product?.canonicalName || product?.name || 'Peptide Monograph'),
         slug: slug,
         cas: product?.cas || (isCompoundingService ? 'EU GMP / Ph. Eur.' : isPeptideSupplyService ? 'B2B Certified Stock' : isAnyDiagnostic ? 'CE-IVDR / Whatman 903' : 'N/A'),
         purity: isSpainResidency
           ? '100% S.L. Legal Ownership & Clean Due Diligence'
           : isCompoundingService
-          ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy'
-          : isPeptideSupplyService
-          ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)'
-          : isAnyDiagnostic
-          ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)'
-          : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
+            ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy'
+            : isPeptideSupplyService
+              ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)'
+              : isAnyDiagnostic
+                ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)'
+                : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
         category: isSpainResidency
           ? 'Corporate Services'
           : isCompoundingService
-          ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding')
-          : isPeptideSupplyService
-          ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management')
-          : isAnyDiagnostic
-          ? 'Diagnostic Kits'
-          : (product?.category || 'Peptides'),
+            ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding')
+            : isPeptideSupplyService
+              ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management')
+              : isAnyDiagnostic
+                ? 'Diagnostic Kits'
+                : (product?.category || 'Peptides'),
         brand: isBloodoDiagnostic ? 'Bloodo Diagnostics' : (product?.brand || 'Atlas Health'),
         sampleType: product?.sampleType || (isAnyDiagnostic ? 'Capillary Dried Blood Spot (DBS)' : null),
         laboratory: isBloodoDiagnostic ? 'LifeLab1 (Vilnius, EU) · ISO 15189' : undefined,
@@ -2067,6 +2067,7 @@ export default function PublicDatasheetView({
         onLangChange={setLang}
         copyUrl={dynamicPublicUrl}
         shortUrl={shortMonographUrl}
+        supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || (isBloodoDiagnostic ? 'Bloodo' : isTeletestDiagnostic ? 'TeleTest' : 'Lotusland')}
         supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || (isBloodoDiagnostic ? 'Bloodo' : isTeletestDiagnostic ? 'TeleTest' : 'Clinical Laboratory')}
         currentSlug={slug}
         inquiryContextType="product"
@@ -2112,1176 +2113,1176 @@ export default function PublicDatasheetView({
         />
       ) : (
         <PublicPageShell>
-        {/* ── Google Cloud Console Dynamic Dual Navigation Layout ── */}
-        <div className="pds-content-with-sidebar">
-          <div className="pds-main-column">
-            {effectiveActiveSection === 'overview' ? (
-              <div id="overview">
-                <PublicPageHero
-            badges={
-            <>
-              <CollectionBadgePill product={product} />
-              <span className="pds-cat-tag">
-                {(isDiagnosticKit || isBloodoDiagnostic)
-                  ? (lang === 'es' ? 'DIAGNÓSTICO CLÍNICO & BIOMARCADORES' : 'CLINICAL DIAGNOSTICS & BIOMARKERS')
-                  : isTeletestDiagnostic
-                  ? (lang === 'es' ? 'PANEL ANALÍTICO CLÍNICO' : 'CLINICAL ANALYTIC PANEL')
-                  : lang === 'es' && (category === 'PEPTIDE' || category === 'Peptide' || !category) ? 'PÉPTIDO' : category}
-              </span>
-              <span className="pds-cgmp-tag">
-                {isCorporateService
-                  ? (displaySupplierName && !displaySupplierName.includes('Certified Clinical Laboratories') && !displaySupplierName.includes('Multi-Source')
-                      ? `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`
-                      : (lang === 'es' ? 'Asesoramiento Institucional' : 'Institutional Advisory'))
-                  : isTeletestDiagnostic
-                  ? (lang === 'es' ? 'Acreditación ENAC ISO 17025 / ISO 15189' : 'ISO 17025 / ISO 15189 Accredited')
-                  : isBloodoDiagnostic || isDiagnosticKit
-                  ? (lang === 'es' ? 'Conforme CE-IVDR · LifeLab1 Central Lab' : 'CE-IVDR Certified · LifeLab1 Central Lab')
-                  : isStrictlyLotusland 
-                    ? (t.lotuslandVerified || (lang === 'es' ? 'Certificado Atlas Services' : 'Atlas Services Certified')) 
-                    : `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`}
-              </span>
-              {!isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isTeletestDiagnostic && !isBloodoDiagnostic && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
-              {!isCorporateService && !isSolventProduct && !isDiagnosticKit && !isCosmeticProduct && !isTeletestDiagnostic && !isBloodoDiagnostic && (
-                <>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    backgroundColor: '#ecfdf5',
-                    color: '#065f46',
-                    border: '1px solid #6ee7b7',
-                    borderRadius: '6px',
-                    padding: '2px 8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700
-                  }}>
-                    <ShieldCheck size={13} color="#059669" />
-                    <span>{lang === 'es' ? '≥ 99.0% Pureza (Dual RP-HPLC)' : '≥ 99.0% Purity (Dual RP-HPLC)'}</span>
-                  </span>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    backgroundColor: '#eff6ff',
-                    color: '#1e40af',
-                    border: '1px solid #bfdbfe',
-                    borderRadius: '6px',
-                    padding: '2px 8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700
-                  }}>
-                    <span>{lang === 'es' ? 'Grado Protocolo Clínico' : 'Clinical Protocol Grade'}</span>
-                  </span>
-                </>
-              )}
-              {isCosmeticProduct && (
-                <>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    backgroundColor: '#f0fdfa',
-                    color: '#0d9488',
-                    border: '1px solid #99f6e4',
-                    borderRadius: '6px',
-                    padding: '2px 8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700
-                  }}>
-                    <ShieldCheck size={13} color="#0d9488" />
-                    <span>{lang === 'es' ? 'Reglamento UE 1223/2009 (CPNP)' : 'EU Reg. 1223/2009 (CPNP)'}</span>
-                  </span>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    backgroundColor: '#eff6ff',
-                    color: '#1d4ed8',
-                    border: '1px solid #bfdbfe',
-                    borderRadius: '6px',
-                    padding: '2px 8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700
-                  }}>
-                    <Sparkles size={13} color="#2563eb" />
-                    <span>{lang === 'es' ? 'Testado Dermatológicamente' : 'Dermatologically Tested'}</span>
-                  </span>
-                </>
-              )}
-              {!(isDiagnosticKit || isBloodoDiagnostic) && (
-                <>
-                  <span className="pds-version-tag" title={`Clinical Monograph Revision ${versionInfo.version}`}>
-                    <span className="pds-version-dot" />
-                    <span>Rev {versionInfo.version}</span>
-                  </span>
-                  <span className="pds-updated-tag" title="Verified specification release date">
-                    <span>{lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate}</span>
-                  </span>
-                  {initialBatch && !isCorporateService && (
-                    <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      backgroundColor: '#ecfdf5',
-                      color: '#065f46',
-                      border: '1px solid #6ee7b7',
-                      borderRadius: '6px',
-                      padding: '2px 8px',
-                      fontSize: '0.72rem',
-                      fontWeight: 700
-                    }}>
-                      <ShieldCheck size={13} color="#059669" />
-                      <span>{lang === 'es' ? 'Lote Verificado:' : 'Batch Verified:'}</span>
-                      <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#047857' }}>{initialBatch}</code>
-                    </span>
+          {/* ── Google Cloud Console Dynamic Dual Navigation Layout ── */}
+          <div className="pds-content-with-sidebar">
+            <div className="pds-main-column">
+              {effectiveActiveSection === 'overview' ? (
+                <div id="overview">
+                  <PublicPageHero
+                    badges={
+                      <>
+                        <CollectionBadgePill product={product} />
+                        <span className="pds-cat-tag">
+                          {(isDiagnosticKit || isBloodoDiagnostic)
+                            ? (lang === 'es' ? 'DIAGNÓSTICO CLÍNICO & BIOMARCADORES' : 'CLINICAL DIAGNOSTICS & BIOMARKERS')
+                            : isTeletestDiagnostic
+                              ? (lang === 'es' ? 'PANEL ANALÍTICO CLÍNICO' : 'CLINICAL ANALYTIC PANEL')
+                              : lang === 'es' && (category === 'PEPTIDE' || category === 'Peptide' || !category) ? 'PÉPTIDO' : category}
+                        </span>
+                        <span className="pds-cgmp-tag">
+                          {isCorporateService
+                            ? (displaySupplierName && !displaySupplierName.includes('Certified Clinical Laboratories') && !displaySupplierName.includes('Multi-Source')
+                              ? `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`
+                              : (lang === 'es' ? 'Asesoramiento Institucional' : 'Institutional Advisory'))
+                            : isTeletestDiagnostic
+                              ? (lang === 'es' ? 'Acreditación ENAC ISO 17025 / ISO 15189' : 'ISO 17025 / ISO 15189 Accredited')
+                              : isBloodoDiagnostic || isDiagnosticKit
+                                ? (lang === 'es' ? 'Conforme CE-IVDR · LifeLab1 Central Lab' : 'CE-IVDR Certified · LifeLab1 Central Lab')
+                                : isStrictlyLotusland
+                                  ? (t.lotuslandVerified || (lang === 'es' ? 'Certificado Atlas Services' : 'Atlas Services Certified'))
+                                  : `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`}
+                        </span>
+                        {!isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isTeletestDiagnostic && !isBloodoDiagnostic && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
+                        {!isCorporateService && !isSolventProduct && !isDiagnosticKit && !isCosmeticProduct && !isTeletestDiagnostic && !isBloodoDiagnostic && (
+                          <>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              backgroundColor: '#ecfdf5',
+                              color: '#065f46',
+                              border: '1px solid #6ee7b7',
+                              borderRadius: '6px',
+                              padding: '2px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700
+                            }}>
+                              <ShieldCheck size={13} color="#059669" />
+                              <span>{lang === 'es' ? '≥ 99.0% Pureza (Dual RP-HPLC)' : '≥ 99.0% Purity (Dual RP-HPLC)'}</span>
+                            </span>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              backgroundColor: '#eff6ff',
+                              color: '#1e40af',
+                              border: '1px solid #bfdbfe',
+                              borderRadius: '6px',
+                              padding: '2px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700
+                            }}>
+                              <span>{lang === 'es' ? 'Grado Protocolo Clínico' : 'Clinical Protocol Grade'}</span>
+                            </span>
+                          </>
+                        )}
+                        {isCosmeticProduct && (
+                          <>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              backgroundColor: '#f0fdfa',
+                              color: '#0d9488',
+                              border: '1px solid #99f6e4',
+                              borderRadius: '6px',
+                              padding: '2px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700
+                            }}>
+                              <ShieldCheck size={13} color="#0d9488" />
+                              <span>{lang === 'es' ? 'Reglamento UE 1223/2009 (CPNP)' : 'EU Reg. 1223/2009 (CPNP)'}</span>
+                            </span>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              backgroundColor: '#eff6ff',
+                              color: '#1d4ed8',
+                              border: '1px solid #bfdbfe',
+                              borderRadius: '6px',
+                              padding: '2px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700
+                            }}>
+                              <Sparkles size={13} color="#2563eb" />
+                              <span>{lang === 'es' ? 'Testado Dermatológicamente' : 'Dermatologically Tested'}</span>
+                            </span>
+                          </>
+                        )}
+                        {!(isDiagnosticKit || isBloodoDiagnostic) && (
+                          <>
+                            <span className="pds-version-tag" title={`Clinical Monograph Revision ${versionInfo.version}`}>
+                              <span className="pds-version-dot" />
+                              <span>Rev {versionInfo.version}</span>
+                            </span>
+                            <span className="pds-updated-tag" title="Verified specification release date">
+                              <span>{lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate}</span>
+                            </span>
+                            {initialBatch && !isCorporateService && (
+                              <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                backgroundColor: '#ecfdf5',
+                                color: '#065f46',
+                                border: '1px solid #6ee7b7',
+                                borderRadius: '6px',
+                                padding: '2px 8px',
+                                fontSize: '0.72rem',
+                                fontWeight: 700
+                              }}>
+                                <ShieldCheck size={13} color="#059669" />
+                                <span>{lang === 'es' ? 'Lote Verificado:' : 'Batch Verified:'}</span>
+                                <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#047857' }}>{initialBatch}</code>
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </>
+                    }
+                    title={name}
+                    description={
+                      <>
+                        {/* 🏛️ FDA Commercial Reference Brands Strip (Laptop & Mobile Responsive) */}
+                        {resolvedCommercialNames.length > 0 && (
+                          <div className="pds-commercial-brands-strip">
+                            <div className="pds-cbs-label">
+                              <span className="pds-cbs-icon">🏛️</span>
+                              <span>{lang === 'es' ? 'Medicamentos Comerciales de Referencia (FDA):' : 'FDA Commercial Reference Brands:'}</span>
+                            </div>
+                            <div className="pds-cbs-chips">
+                              {resolvedCommercialNames.map((brand, idx) => (
+                                <span key={idx} className="pds-cbs-chip">
+                                  <span className="pds-cbs-chip-dot" />
+                                  <strong className="pds-cbs-chip-name">{brand}</strong>
+                                  <span className="pds-cbs-chip-tag">FDA Approved</span>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <span style={{ display: 'block', fontSize: '0.96rem', color: '#475569', marginBottom: '0.45rem' }}>
+                          <strong style={{ color: '#0f172a' }}>
+                            {isCorporateService
+                              ? (lang === 'es' ? 'Marco Normativo y Alcance:' : 'Statutory Framework & Scope:')
+                              : isSolventProduct
+                                ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:')
+                                : isDiagnosticKit
+                                  ? (lang === 'es' ? 'Utilidad Diagnóstica y Aplicación:' : 'Diagnostic Utility & Target Axis:')
+                                  : (t.targetReceptorAxis || 'Target Receptor Axis:')}
+                          </strong>{' '}
+                          {targetSystem}
+                        </span>
+
+                        {/* 🧪 Option A: Clinical Micro-Summary Cards (Structured Specs Grid) */}
+                        {(isDiagnosticKit || isBloodoDiagnostic) && (
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+                            gap: '8px',
+                            marginTop: '0.75rem',
+                            marginBottom: '0.75rem',
+                            padding: '10px 12px',
+                            background: '#f8fafc',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0'
+                          }}>
+                            <div>
+                              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                {lang === 'es' ? 'Analito Objetivo' : 'Target Analyte'}
+                              </div>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>
+                                Total NAD+ / NADP+
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
+                                {lang === 'es' ? 'Intracelular (Eritrocitos)' : 'Intracellular (RBC)'}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                {lang === 'es' ? 'Tecnología & Muestra' : 'Technology & Specimen'}
+                              </div>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>
+                                Capillary DBS · LC-MS/MS
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
+                                Tarjeta Whatman® 903
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                {lang === 'es' ? 'Laboratorio Central' : 'Central Laboratory'}
+                              </div>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>
+                                LifeLab1 Central Lab
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
+                                Vilnius (EU) · ISO 15189
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* ── Metadata Strip: Revision, Verified Date & Batch ── */}
+                        {(isDiagnosticKit || isBloodoDiagnostic) && (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '0.72rem',
+                            color: '#64748b',
+                            flexWrap: 'wrap',
+                            marginBottom: '0.5rem'
+                          }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0d9488' }} />
+                              Rev {versionInfo.version}
+                            </span>
+                            <span>•</span>
+                            <span>{lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate}</span>
+                            {initialBatch && (
+                              <>
+                                <span>•</span>
+                                <span>{lang === 'es' ? 'Lote Verificado:' : 'Batch:'} <code style={{ fontFamily: 'monospace', fontWeight: 700, color: '#047857' }}>{initialBatch}</code></span>
+                              </>
+                            )}
+                          </div>
+                        )}
+
+                        {/* ── Google Cloud UX Action Buttons Strip (Hidden for Diagnostic Kits & Corporate) ── */}
+                        {!isAnyDiagnostic && !isCorporateService && (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            marginTop: '0.45rem',
+                            marginBottom: '0.65rem',
+                            flexWrap: 'wrap'
+                          }}>
+                            <button
+                              type="button"
+                              onClick={handleCopyMonographSpecs}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '5px 12px',
+                                borderRadius: '6px',
+                                background: '#ffffff',
+                                border: '1px solid #cbd5e1',
+                                color: '#1e293b',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                                transition: 'all 0.15s ease'
+                              }}
+                              title={lang === 'es' ? 'Copiar ficha técnica monográfica al portapapeles' : 'Copy technical monograph to clipboard'}
+                            >
+                              {copiedMonograph ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                              <span>{copiedMonograph ? (lang === 'es' ? 'Copiado ✓' : 'Copied ✓') : (lang === 'es' ? 'Copiar Ficha Técnica' : 'Copy Spec Sheet')}</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setIsPreviewModalOpen(true)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '5px 12px',
+                                borderRadius: '6px',
+                                background: '#ffffff',
+                                border: '1px solid #cbd5e1',
+                                color: '#1e293b',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                                transition: 'all 0.15s ease'
+                              }}
+                              title={lang === 'es' ? 'Imprimir o guardar ficha técnica en PDF' : 'Print or save technical monograph to PDF'}
+                            >
+                              <Printer size={13} />
+                              <span>{lang === 'es' ? 'Ficha Imprimible (PDF)' : 'Print / PDF Monograph'}</span>
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    }
+                    meta={
+                      <>
+                        {/* 🏛️ FDA Approved Commercial Formulations Detail Card (Laptop & Mobile) */}
+                        {resolvedCommercialProducts.length > 0 && (
+                          <div className="pds-commercial-products-card">
+                            <div className="pds-cpc-header">
+                              <div className="pds-cpc-title-wrap">
+                                <ShieldCheck size={16} color="#16a34a" />
+                                <h3 className="pds-cpc-title">
+                                  {lang === 'es' ? 'Fármacos Comerciales Aprobados por FDA (Especialidades de Referencia)' : 'FDA-Approved Commercial Products (Reference Formulations)'}
+                                </h3>
+                              </div>
+                              <span className="pds-cpc-badge">
+                                {resolvedCommercialProducts.length} {lang === 'es' ? 'Especialidades Registradas' : 'Registered Brands'}
+                              </span>
+                            </div>
+
+                            <div className="pds-cpc-grid">
+                              {resolvedCommercialProducts.map((cp, idx) => (
+                                <div key={idx} className="pds-cpc-item">
+                                  <div className="pds-cpc-item-top">
+                                    <span className="pds-cpc-item-brand">{cp.brandName}</span>
+                                    {cp.fdaApprovalYear && (
+                                      <span className="pds-cpc-item-year">FDA {cp.fdaApprovalYear}</span>
+                                    )}
+                                  </div>
+
+                                  {cp.sponsor && (
+                                    <div className="pds-cpc-item-sponsor">
+                                      🏢 {cp.sponsor}
+                                    </div>
+                                  )}
+
+                                  {cp.primaryIndication && (
+                                    <div className="pds-cpc-item-indication">
+                                      <strong>{lang === 'es' ? 'Indicación FDA:' : 'FDA Indication:'}</strong> {cp.primaryIndication}
+                                    </div>
+                                  )}
+
+                                  <div className="pds-cpc-item-meta">
+                                    {cp.route && <span>💉 {cp.route}</span>}
+                                    {cp.dosageForms && (
+                                      <>
+                                        <span style={{ opacity: 0.4 }}>•</span>
+                                        <span>📦 {cp.dosageForms}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                      </>
+                    }
+                    desktopSecondary={
+                      diagnosticHeroImage ? (
+                        <div className="pds-hero-square-showcase">
+                          {/* 1. Frosted Glass Top Badges */}
+                          <div className="pds-square-badge-strip">
+                            <div className="pds-square-frosted-pill">
+                              <ShieldCheck size={13} color="#0d9488" />
+                              <span>
+                                {isEternaDiagnostic
+                                  ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
+                                  : (isDiagnosticKit || isBloodoDiagnostic)
+                                    ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
+                                    : isSupplementProduct
+                                      ? (lang === 'es' ? 'Nutracéutico Clínico Oficial' : 'Official Clinical Nutraceutical')
+                                      : (lang === 'es' ? 'Cosmecéutico Oficial Colway' : 'Official Colway Cosmeceutical')}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              className="pds-square-zoom-btn"
+                              onClick={() => setIsImageModalOpen(true)}
+                              title={lang === 'es' ? 'Ampliar imagen' : 'Enlarge image'}
+                              style={{ border: 'none', cursor: 'pointer' }}
+                            >
+                              <ZoomIn size={14} />
+                            </button>
+                          </div>
+
+                          {/* 2. Studio Lighting Square Viewport */}
+                          <div
+                            className="pds-square-img-viewport"
+                            onClick={() => setIsImageModalOpen(true)}
+                            style={{ cursor: 'pointer' }}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsImageModalOpen(true); }}
+                            title={lang === 'es' ? 'Haz clic para ampliar la imagen del kit oficial' : 'Click to inspect official kit packaging'}
+                          >
+                            <img
+                              src={diagnosticHeroImage}
+                              alt={name}
+                              className="pds-square-product-img"
+                              loading="eager"
+                            />
+                          </div>
+
+                          {/* 3. High-End Technical Spec Strip */}
+                          <div className="pds-square-footer-spec">
+                            <div className="pds-square-lab-row">
+                              <span className="pds-square-lab-name">
+                                {isEternaDiagnostic
+                                  ? 'Fagron Genomics / European Lab'
+                                  : (isDiagnosticKit || isBloodoDiagnostic)
+                                    ? 'LifeLab1 Central Lab (Vilnius)'
+                                    : `${displaySupplierName || 'Colway'} · Bioactive Laboratory`}
+                              </span>
+                              <span className="pds-square-ce-tag">
+                                {isEternaDiagnostic ? 'CE-IVD' : (isDiagnosticKit || isBloodoDiagnostic) ? 'CE-IVDR' : 'EU GMP'}
+                              </span>
+                            </div>
+                            <div className="pds-square-sub-meta">
+                              <span>
+                                {isEternaDiagnostic
+                                  ? 'Saliva DNA Buffer'
+                                  : (isDiagnosticKit || isBloodoDiagnostic)
+                                    ? 'Whatman® 903 Card'
+                                    : isSupplementProduct
+                                      ? (lang === 'es' ? 'Colágeno Liofilizado Nativo' : 'Native Freeze-Dried Tropocollagen')
+                                      : 'Biologically Active Tropocollagen'}
+                              </span>
+                              <span>•</span>
+                              <span>
+                                {isEternaDiagnostic
+                                  ? '+700K Microarray'
+                                  : (isDiagnosticKit || isBloodoDiagnostic)
+                                    ? 'Capillary DBS LC-MS'
+                                    : `Batch: ${selectedStrength?.batchCode || 'AS-COL-CL60-2610'}`}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* 4. Base Dock: Tiered Price Shield & Unified Order Control */}
+                          <div className="pds-square-price-dock">
+                            <TieredPriceShield
+                              product={product}
+                              currency="EUR"
+                              compact={false}
+                              embedded={true}
+                              isEs={lang === 'es'}
+                              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                              adminSimulationTier={adminSimulationTier}
+                              onSelectAdminSimulationTier={setAdminSimulationTier}
+                            />
+
+                            {/* 1-Click Order Button for Registered Clinicians */}
+                            <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
+                              <InlineOrderButton
+                                product={product}
+                                variant={selectedStrength || product.variants?.[0] || null}
+                                isEs={lang === 'es'}
+                                compact={false}
+                                role={activeRole || 'clinic'}
+                                brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
+                                onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ) : null
+                    }
+                    mobileSecondary={
+                      diagnosticHeroImage ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                          <div
+                            className="pds-hero-mobile-square-card"
+                            onClick={() => setIsImageModalOpen(true)}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            <div className="pds-mobile-square-thumb-wrap">
+                              <img
+                                src={diagnosticHeroImage}
+                                alt={name}
+                                className="pds-mobile-square-thumb"
+                                loading="eager"
+                              />
+                            </div>
+                            <div className="pds-mobile-square-content">
+                              <div className="pds-mobile-square-badge">
+                                <ShieldCheck size={11} color="#0d9488" />
+                                <span>
+                                  {isEternaDiagnostic
+                                    ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
+                                    : (isDiagnosticKit || isBloodoDiagnostic)
+                                      ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
+                                      : isSupplementProduct
+                                        ? (lang === 'es' ? 'Nutracéutico Clínico' : 'Clinical Nutraceutical')
+                                        : (lang === 'es' ? 'Cosmecéutico Oficial' : 'Official Cosmeceutical')}
+                                </span>
+                              </div>
+                              <strong className="pds-mobile-square-title">
+                                {isEternaDiagnostic
+                                  ? 'Fagron Genomics / European Lab'
+                                  : (isDiagnosticKit || isBloodoDiagnostic)
+                                    ? 'LifeLab1 Clinical Laboratory'
+                                    : `${displaySupplierName || 'Colway'} Bioactive`}
+                              </strong>
+                              <span className="pds-mobile-square-sub">
+                                {isEternaDiagnostic
+                                  ? 'CE-IVD Certified · Saliva DNA Kit'
+                                  : (isDiagnosticKit || isBloodoDiagnostic)
+                                    ? 'CE-IVDR Certified · Whatman® 903 Card'
+                                    : 'EU GMP Standard · 100% Bioactive Formulations'}
+                              </span>
+                            </div>
+                            <div className="pds-mobile-square-action">
+                              <ZoomIn size={16} color="#0284c7" />
+                            </div>
+                          </div>
+
+                          {/* ── Mobile Tiered Price Shield & Order Action (Google Cloud UX) ── */}
+                          <div style={{
+                            background: '#ffffff',
+                            borderRadius: '10px',
+                            border: '1px solid #e2e8f0',
+                            padding: '10px',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+                          }}>
+                            <TieredPriceShield
+                              product={product}
+                              currency="EUR"
+                              compact={false}
+                              embedded={true}
+                              isEs={lang === 'es'}
+                              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                              adminSimulationTier={adminSimulationTier}
+                              onSelectAdminSimulationTier={setAdminSimulationTier}
+                            />
+
+                            <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
+                              <InlineOrderButton
+                                product={product}
+                                variant={selectedStrength || product.variants?.[0] || null}
+                                isEs={lang === 'es'}
+                                compact={false}
+                                role={activeRole || 'clinic'}
+                                brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
+                                onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ) : null
+                    }
+                  />
+                  {/* ── Block 4.1: Google Cloud UX Clinical Specimen Dossier Banner (Non-Bloodo Diagnostic Kits) ── */}
+                  {(!isBloodoDiagnostic && isDiagnosticKit) && (
+                    <div style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
+                      <DiagnosticReportVisualPreview
+                        activeTest={
+                          slug?.includes('cortisol') ? 'cortisol' :
+                            slug?.includes('testosterone') || slug?.includes('testosterona') ? 'testosterone' :
+                              slug?.includes('hba1c') || slug?.includes('hemoglobin') || slug?.includes('glucose') || slug?.includes('glucosa') ? 'hba1c' :
+                                slug?.includes('omega') || slug?.includes('lipid') ? 'omega' :
+                                  slug?.includes('vitamin') || slug?.includes('vitd') || slug?.includes('vit-d') ? 'vitd' : 'nad'
+                        }
+                        lang={lang}
+                        hideSelector={true}
+                        hideWorkflow={true}
+                        variant="gcp"
+                      />
+                    </div>
                   )}
-                </>
-              )}
-            </>
-          }
-          title={name}
-          description={
-            <>
-              {/* 🏛️ FDA Commercial Reference Brands Strip (Laptop & Mobile Responsive) */}
-              {resolvedCommercialNames.length > 0 && (
-                <div className="pds-commercial-brands-strip">
-                  <div className="pds-cbs-label">
-                    <span className="pds-cbs-icon">🏛️</span>
-                    <span>{lang === 'es' ? 'Medicamentos Comerciales de Referencia (FDA):' : 'FDA Commercial Reference Brands:'}</span>
-                  </div>
-                  <div className="pds-cbs-chips">
-                    {resolvedCommercialNames.map((brand, idx) => (
-                      <span key={idx} className="pds-cbs-chip">
-                        <span className="pds-cbs-chip-dot" />
-                        <strong className="pds-cbs-chip-name">{brand}</strong>
-                        <span className="pds-cbs-chip-tag">FDA Approved</span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <span style={{ display: 'block', fontSize: '0.96rem', color: '#475569', marginBottom: '0.45rem' }}>
-                <strong style={{ color: '#0f172a' }}>
-                  {isCorporateService
-                    ? (lang === 'es' ? 'Marco Normativo y Alcance:' : 'Statutory Framework & Scope:')
-                    : isSolventProduct 
-                      ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:') 
-                      : isDiagnosticKit 
-                        ? (lang === 'es' ? 'Utilidad Diagnóstica y Aplicación:' : 'Diagnostic Utility & Target Axis:') 
-                        : (t.targetReceptorAxis || 'Target Receptor Axis:')}
-                </strong>{' '}
-                {targetSystem}
-              </span>
-
-              {/* 🧪 Option A: Clinical Micro-Summary Cards (Structured Specs Grid) */}
-              {(isDiagnosticKit || isBloodoDiagnostic) && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-                  gap: '8px',
-                  marginTop: '0.75rem',
-                  marginBottom: '0.75rem',
-                  padding: '10px 12px',
-                  background: '#f8fafc',
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0'
-                }}>
-                  <div>
-                    <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {lang === 'es' ? 'Analito Objetivo' : 'Target Analyte'}
+                  {isBloodoDiagnostic ? (
+                    <BloodoDiagnosticOverviewCard
+                      product={product}
+                      lang={lang}
+                      onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                      onSelectSection={handleSelectSection}
+                    />
+                  ) : description && (
+                    <div className="pds-description-card" style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <h2 className="pds-section-heading" style={{ margin: 0 }}>
+                          {isCorporateService
+                            ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
+                            : isEternaDiagnostic
+                              ? (lang === 'es' ? 'Ecosistema de Salud de Precisión y Portal Clínico ETERNA®' : 'ETERNA® Precision Health Ecosystem & Clinical Platform')
+                              : isDiagnosticKit
+                                ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility')
+                                : isSupplementProduct
+                                  ? (lang === 'es' ? 'Descripción y Perfil Nutracéutico' : 'Nutraceutical Profile & Bioactive Matrix')
+                                  : (t.pharmacologicalOverview || 'Pharmacological Overview')}
+                        </h2>
+                        {isTranslating ? (
+                          <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                            <Sparkles size={13} className="spin" /> {lang === 'es' ? 'Traduciendo...' : (t.translating || 'Translating…')}
+                          </span>
+                        ) : lang !== 'en' && (
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <Sparkles size={11} color="#0284c7" /> {lang === 'es' ? 'Traducción Asistida' : 'Verified Translation'}
+                          </span>
+                        )}
+                      </div>
+                      <p className="pds-description-body">{description}</p>
                     </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>
-                      Total NAD+ / NADP+
+                  )}
+                  {isEternaDiagnostic && (
+                    <EternaPublicOverviewShowcase
+                      product={product}
+                      lang={lang}
+                      onSelectSection={handleSelectSection}
+                    />
+                  )}
+                  {isSupplementProduct && (
+                    <SupplementPublicOverviewShowcase
+                      product={product}
+                      lang={lang}
+                      onSelectSection={handleSelectSection}
+                    />
+                  )}
+                  {(isDiagnosticKit && !isBloodoDiagnostic) && (
+                    <div style={{ marginTop: '24px' }}>
+                      <PresentationsMatrixSection
+                        product={product}
+                        slug={slug}
+                        lang={lang}
+                        t={t}
+                        isCorporateService={isCorporateService}
+                        isDiagnosticKit={isDiagnosticKit}
+                        isSolventProduct={isSolventProduct}
+                        isSupplementProduct={isSupplementProduct}
+                        isCosmeticProduct={isCosmeticProduct}
+                        isPenOrCart={isPenOrCart}
+                        isSprayFormat={isSprayFormat}
+                        isCartridgeFormat={isCartridgeFormat}
+                        isPenFormat={isPenFormat}
+                        isPenAndCartridgeEcosystem={isPenAndCartridgeEcosystem}
+                        distinctCartridgeFmt={distinctCartridgeFmt}
+                        distinctPenFmt={distinctPenFmt}
+                        isMultiSupplierMode={isMultiSupplierMode}
+                        suppliersList={suppliersList}
+                        activeSupplierId={activeSupplierId}
+                        setActiveSupplierId={setActiveSupplierId}
+                        availableFormats={availableFormats}
+                        activeFormatId={activeFormatId}
+                        setActiveFormatId={setActiveFormatId}
+                        rawFormats={rawFormats}
+                        filteredStrengths={filteredStrengths}
+                        sortedStrengths={sortedStrengths}
+                        selectedStrengthId={selectedStrengthId}
+                        setSelectedStrengthId={setSelectedStrengthId}
+                        selectedStrength={selectedStrength}
+                        packUnits={packUnits}
+                        setPackUnits={setPackUnits}
+                        realKitSavings={realKitSavings}
+                        displaySupplierName={displaySupplierName}
+                        matrixRows={matrixRows}
+                        getReconstitutionVolume={getReconstitutionVolume}
+                      />
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
-                      {lang === 'es' ? 'Intracelular (Eritrocitos)' : 'Intracellular (RBC)'}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {lang === 'es' ? 'Tecnología & Muestra' : 'Technology & Specimen'}
-                    </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>
-                      Capillary DBS · LC-MS/MS
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
-                      Tarjeta Whatman® 903
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {lang === 'es' ? 'Laboratorio Central' : 'Central Laboratory'}
-                    </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>
-                      LifeLab1 Central Lab
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
-                      Vilnius (EU) · ISO 15189
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ── Metadata Strip: Revision, Verified Date & Batch ── */}
-              {(isDiagnosticKit || isBloodoDiagnostic) && (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '0.72rem',
-                  color: '#64748b',
-                  flexWrap: 'wrap',
-                  marginBottom: '0.5rem'
-                }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0d9488' }} />
-                    Rev {versionInfo.version}
-                  </span>
-                  <span>•</span>
-                  <span>{lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate}</span>
-                  {initialBatch && (
-                    <>
-                      <span>•</span>
-                      <span>{lang === 'es' ? 'Lote Verificado:' : 'Batch:'} <code style={{ fontFamily: 'monospace', fontWeight: 700, color: '#047857' }}>{initialBatch}</code></span>
-                    </>
                   )}
                 </div>
-              )}
+              ) : (
+                <div className="pds-single-section-view">
 
-              {/* ── Google Cloud UX Action Buttons Strip (Hidden for Diagnostic Kits & Corporate) ── */}
-              {!isAnyDiagnostic && !isCorporateService && (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginTop: '0.45rem',
-                  marginBottom: '0.65rem',
-                  flexWrap: 'wrap'
-                }}>
-                  <button
-                    type="button"
-                    onClick={handleCopyMonographSpecs}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '5px 12px',
-                      borderRadius: '6px',
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      color: '#1e293b',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                      transition: 'all 0.15s ease'
-                    }}
-                    title={lang === 'es' ? 'Copiar ficha técnica monográfica al portapapeles' : 'Copy technical monograph to clipboard'}
-                  >
-                    {copiedMonograph ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
-                    <span>{copiedMonograph ? (lang === 'es' ? 'Copiado ✓' : 'Copied ✓') : (lang === 'es' ? 'Copiar Ficha Técnica' : 'Copy Spec Sheet')}</span>
-                  </button>
+                  {effectiveActiveSection === 'when-to-test' && (
+                    <BloodoWhenToTestSection
+                      product={product}
+                      lang={lang}
+                      onSelectSection={handleSelectSection}
+                      onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                    />
+                  )}
 
-                  <button
-                    type="button"
-                    onClick={() => setIsPreviewModalOpen(true)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '5px 12px',
-                      borderRadius: '6px',
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      color: '#1e293b',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                      transition: 'all 0.15s ease'
-                    }}
-                    title={lang === 'es' ? 'Imprimir o guardar ficha técnica en PDF' : 'Print or save technical monograph to PDF'}
-                  >
-                    <Printer size={13} />
-                    <span>{lang === 'es' ? 'Ficha Imprimible (PDF)' : 'Print / PDF Monograph'}</span>
-                  </button>
-                </div>
-              )}
-            </>
-          }
-          meta={
-            <>
-              {/* 🏛️ FDA Approved Commercial Formulations Detail Card (Laptop & Mobile) */}
-              {resolvedCommercialProducts.length > 0 && (
-                <div className="pds-commercial-products-card">
-                  <div className="pds-cpc-header">
-                    <div className="pds-cpc-title-wrap">
-                      <ShieldCheck size={16} color="#16a34a" />
-                      <h3 className="pds-cpc-title">
-                        {lang === 'es' ? 'Fármacos Comerciales Aprobados por FDA (Especialidades de Referencia)' : 'FDA-Approved Commercial Products (Reference Formulations)'}
-                      </h3>
-                    </div>
-                    <span className="pds-cpc-badge">
-                      {resolvedCommercialProducts.length} {lang === 'es' ? 'Especialidades Registradas' : 'Registered Brands'}
-                    </span>
-                  </div>
+                  {effectiveActiveSection === 'presentations-matrix' && (
+                    <PresentationsMatrixSection
+                      product={product}
+                      slug={slug}
+                      lang={lang}
+                      t={t}
+                      isCorporateService={isCorporateService}
+                      isDiagnosticKit={isDiagnosticKit}
+                      isSolventProduct={isSolventProduct}
+                      isSupplementProduct={isSupplementProduct}
+                      isCosmeticProduct={isCosmeticProduct}
+                      isPenOrCart={isPenOrCart}
+                      isSprayFormat={isSprayFormat}
+                      isCartridgeFormat={isCartridgeFormat}
+                      isPenFormat={isPenFormat}
+                      isPenAndCartridgeEcosystem={isPenAndCartridgeEcosystem}
+                      distinctCartridgeFmt={distinctCartridgeFmt}
+                      distinctPenFmt={distinctPenFmt}
+                      isMultiSupplierMode={isMultiSupplierMode}
+                      suppliersList={suppliersList}
+                      activeSupplierId={activeSupplierId}
+                      setActiveSupplierId={setActiveSupplierId}
+                      availableFormats={availableFormats}
+                      activeFormatId={activeFormatId}
+                      setActiveFormatId={setActiveFormatId}
+                      rawFormats={rawFormats}
+                      filteredStrengths={filteredStrengths}
+                      sortedStrengths={sortedStrengths}
+                      selectedStrengthId={selectedStrengthId}
+                      setSelectedStrengthId={setSelectedStrengthId}
+                      selectedStrength={selectedStrength}
+                      packUnits={packUnits}
+                      setPackUnits={setPackUnits}
+                      realKitSavings={realKitSavings}
+                      displaySupplierName={displaySupplierName}
+                      matrixRows={matrixRows}
+                      getReconstitutionVolume={getReconstitutionVolume}
+                    />
+                  )}
 
-                  <div className="pds-cpc-grid">
-                    {resolvedCommercialProducts.map((cp, idx) => (
-                      <div key={idx} className="pds-cpc-item">
-                        <div className="pds-cpc-item-top">
-                          <span className="pds-cpc-item-brand">{cp.brandName}</span>
-                          {cp.fdaApprovalYear && (
-                            <span className="pds-cpc-item-year">FDA {cp.fdaApprovalYear}</span>
+                  {/* ── Block 2: Corporate & Clinical Services or Reconstitution/Specs ── */}
+                  {effectiveActiveSection === 'reconstitution-section' && (
+                    <ReconstitutionRouterSection
+                      product={product}
+                      lang={lang}
+                      t={t}
+                      isSpainResidency={isSpainResidency}
+                      isCompoundingService={isCompoundingService}
+                      isPeptideSupplyService={isPeptideSupplyService}
+                      isUaeCorporateService={isUaeCorporateService}
+                      isSolventProduct={isSolventProduct}
+                      isEternaDiagnostic={isEternaDiagnostic}
+                      isDiagnosticKit={isDiagnosticKit}
+                      isIvDrip={isIvDrip}
+                      isCosmeticProduct={isCosmeticProduct}
+                      isSupplementProduct={isSupplementProduct}
+                      isPenOrCart={isPenOrCart}
+                      isSprayFormat={isSprayFormat}
+                      selectedStrength={selectedStrength}
+                      sortedStrengths={sortedStrengths}
+                      activeFormatId={activeFormatId}
+                      activeFormat={activeFormat}
+                      availableFormats={availableFormats}
+                      setActiveFormatId={setActiveFormatId}
+                      displaySupplierName={displaySupplierName}
+                      primaryProtocol={primaryProtocol}
+                      associatedProtocols={associatedProtocols}
+                      initialPhase={initialPhase}
+                      onOpenInquiry={handleOpenInquiry}
+                    />
+                  )}
+
+                  {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
+                  {effectiveActiveSection === 'specs-section' && !isCorporateService && !isCosmeticProduct && (
+                    <section id="specs-section" className="pds-traceability-wrapper">
+                      {isBloodoDiagnostic ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          <BloodoLabStandardsDownloadsSection
+                            product={product}
+                            lang={lang}
+                            onSelectSection={handleSelectSection}
+                            onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                          />
+                          <ProductRegulatoryWarningsSection
+                            product={product}
+                            lang={lang}
+                            isCosmeticProduct={isCosmeticProduct}
+                            isDiagnosticKit={true}
+                            isSolventProduct={isSolventProduct}
+                            isCorporateService={isCorporateService}
+                            isSupplementProduct={isSupplementProduct}
+                            supplierName={supplierName}
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <ProductTraceabilityCard
+                            product={product}
+                            baseUrl={baseUrl}
+                            lang={lang}
+                            monographUrl={dynamicPublicUrl}
+                            batchCode={effectiveBatchCode}
+                          />
+                          {(isDiagnosticKit || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) && (
+                            <div style={{ marginTop: '20px' }}>
+                              <BloodoNadFaqCard product={product} lang={lang} />
+                            </div>
                           )}
+                        </>
+                      )}
+                    </section>
+                  )}
+
+                  {/* ── Peer-Reviewed Scientific Literature & Clinical Trials ── */}
+                  {effectiveActiveSection === 'publications-section' && !isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
+                    <PeptidePublicationsSection product={product} lang={lang} />
+                  )}
+
+                  {/* ── Clinical Safety Profile: Contraindications & Precautions ── */}
+                  {effectiveActiveSection === 'contraindications-section' && !isCorporateService && !isAnyDiagnostic && !isSolventProduct && !isCosmeticProduct && (
+                    <PeptideContraindicationsSection product={product} lang={lang} />
+                  )}
+
+                  {effectiveActiveSection === 'labels-section' && !isAnyDiagnostic && !isCorporateService && !isCosmeticProduct && (
+                    <section id="labels-section" className="pds-section-card">
+                      <div className="pds-section-header">
+                        <div className="pds-section-header-left">
+                          <div className="pds-section-header-shield">
+                            <QrCode size={22} />
+                          </div>
+                          <div className="pds-section-header-titles">
+                            <div className="pds-section-header-meta-row">
+                              <span className="pds-section-header-category">
+                                {t.physicalLabelsSection || 'PHYSICAL VIAL LABELS & DISPENSING'}
+                              </span>
+                              <span className="pds-section-badge">
+                                <CheckCircle2 size={11} /> 38×90mm THERMAL
+                              </span>
+                            </div>
+                            <h3 className="pds-section-header-title">
+                              {t.physicalLabelsSection || 'Physical Vial Labels & Batch Printing'}
+                            </h3>
+                          </div>
                         </div>
 
-                        {cp.sponsor && (
-                          <div className="pds-cpc-item-sponsor">
-                            🏢 {cp.sponsor}
+                        <div className="pds-section-header-right">
+                          <div className="pds-section-cert-badge">
+                            <Printer size={14} color="#38bdf8" />
+                            <span>Thermal 38×90mm Ready</span>
                           </div>
-                        )}
-
-                        {cp.primaryIndication && (
-                          <div className="pds-cpc-item-indication">
-                            <strong>{lang === 'es' ? 'Indicación FDA:' : 'FDA Indication:'}</strong> {cp.primaryIndication}
-                          </div>
-                        )}
-
-                        <div className="pds-cpc-item-meta">
-                          {cp.route && <span>💉 {cp.route}</span>}
-                          {cp.dosageForms && (
-                            <>
-                              <span style={{ opacity: 0.4 }}>•</span>
-                              <span>📦 {cp.dosageForms}</span>
-                            </>
-                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
-            </>
-          }
-          desktopSecondary={
-            diagnosticHeroImage ? (
-              <div className="pds-hero-square-showcase">
-                {/* 1. Frosted Glass Top Badges */}
-                <div className="pds-square-badge-strip">
-                  <div className="pds-square-frosted-pill">
-                    <ShieldCheck size={13} color="#0d9488" />
-                    <span>
-                      {isEternaDiagnostic
-                        ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
-                        : isSupplementProduct
-                        ? (lang === 'es' ? 'Nutracéutico Clínico Oficial' : 'Official Clinical Nutraceutical')
-                        : (lang === 'es' ? 'Cosmecéutico Oficial Colway' : 'Official Colway Cosmeceutical')}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="pds-square-zoom-btn"
-                    onClick={() => setIsImageModalOpen(true)}
-                    title={lang === 'es' ? 'Ampliar imagen' : 'Enlarge image'}
-                    style={{ border: 'none', cursor: 'pointer' }}
-                  >
-                    <ZoomIn size={14} />
-                  </button>
-                </div>
+                      <div className="pds-section-card-body" style={{ padding: '1.5rem' }}>
+                        <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+                          {t.physicalLabelsSubtitle || 'Standard 38×90mm adhesive labels and batch sheets formatted for clinical and dispatch use.'}
+                        </p>
 
-                {/* 2. Studio Lighting Square Viewport */}
-                <div 
-                  className="pds-square-img-viewport"
-                  onClick={() => setIsImageModalOpen(true)}
-                  style={{ cursor: 'pointer' }}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsImageModalOpen(true); }}
-                  title={lang === 'es' ? 'Haz clic para ampliar la imagen del kit oficial' : 'Click to inspect official kit packaging'}
-                >
-                  <img
-                    src={diagnosticHeroImage}
-                    alt={name}
-                    className="pds-square-product-img"
-                    loading="eager"
-                  />
-                </div>
+                        {/* Dual Label Options Grid: Shipping vs Client Vial */}
+                        <div className="pds-dual-labels-grid">
+                          {/* Option 1: Shipping / Batch Traceability Label */}
+                          <div className="pds-label-type-card">
+                            <div className="pds-label-type-head">
+                              <span className="pds-label-badge-icon">📦</span>
+                              <div>
+                                <h4 className="pds-label-type-title">{t.shippingTraceabilityLabel || 'Shipping & Traceability Label'}</h4>
+                                <span className="pds-label-use-tag">{t.outboundLogisticsTag || 'For Outbound Box & Logistics'}</span>
+                              </div>
+                            </div>
+                            <p className="pds-label-type-desc">
+                              {t.shippingLabelDesc || 'Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.'}
+                            </p>
+                            <div className="pds-label-type-buttons">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  triggerHaptic('light');
+                                  setPreviewModalTab('shipping');
+                                  setIsPreviewModalOpen(true);
+                                }}
+                                className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode"
+                                title="Preview 38x90mm Shipping Label before printing"
+                              >
+                                <Eye size={15} className="pds-btn-icon" /> <span>{t.previewPrintLabel || 'Preview & Print 38×90mm'}</span>
+                              </button>
+                              <a
+                                href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download={isMobileDevice ? undefined : `shipping_labels_sheet_${variantFileSuffix}_a4.pdf`}
+                                onClick={() => handleDownloadClick('shipping_sheet')}
+                                className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'shipping_sheet' ? 'loading' : ''}`}
+                                style={downloadingType === 'shipping_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
+                                title="Download A4 Sheet with 8 Shipping Labels (PDF File)"
+                              >
+                                {downloadingType === 'shipping_sheet' ? (
+                                  <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
+                                ) : (
+                                  <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
+                                )}
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyLabelUrl('shipping')}
+                                className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'shipping' ? 'copied' : ''}`}
+                                title="Copy direct shareable link to this shipping label"
+                              >
+                                {copiedLabelType === 'shipping' ? (
+                                  <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
+                                ) : (
+                                  <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
+                                )}
+                              </button>
+                            </div>
+                          </div>
 
-                {/* 3. High-End Technical Spec Strip */}
-                <div className="pds-square-footer-spec">
-                  <div className="pds-square-lab-row">
-                    <span className="pds-square-lab-name">
-                      {isEternaDiagnostic
-                        ? 'Fagron Genomics / European Lab'
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? 'LifeLab1 Central Lab (Vilnius)'
-                        : `${displaySupplierName || 'Colway'} · Bioactive Laboratory`}
-                    </span>
-                    <span className="pds-square-ce-tag">
-                      {isEternaDiagnostic ? 'CE-IVD' : (isDiagnosticKit || isBloodoDiagnostic) ? 'CE-IVDR' : 'EU GMP'}
-                    </span>
-                  </div>
-                  <div className="pds-square-sub-meta">
-                    <span>
-                      {isEternaDiagnostic
-                        ? 'Saliva DNA Buffer'
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? 'Whatman® 903 Card'
-                        : isSupplementProduct
-                        ? (lang === 'es' ? 'Colágeno Liofilizado Nativo' : 'Native Freeze-Dried Tropocollagen')
-                        : 'Biologically Active Tropocollagen'}
-                    </span>
-                    <span>•</span>
-                    <span>
-                      {isEternaDiagnostic
-                        ? '+700K Microarray'
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? 'Capillary DBS LC-MS'
-                        : `Batch: ${selectedStrength?.batchCode || 'AS-COL-CL60-2610'}`}
-                    </span>
-                  </div>
-                </div>
+                          {/* Option 2: Client Vial Application Label */}
+                          <div className="pds-label-type-card highlight">
+                            <div className="pds-label-type-head">
+                              <span className="pds-label-badge-icon">🏷️</span>
+                              <div>
+                                <h4 className="pds-label-type-title">
+                                  {isPenOrCart
+                                    ? (lang === 'es' ? 'Etiqueta de Bolígrafo / Cartucho' : 'Patient Pen / Cartridge Label')
+                                    : (t.clientVialLabelTitle || 'Patient Vial Label')}
+                                </h4>
+                                <span className="pds-label-use-tag active">
+                                  {isPenOrCart
+                                    ? (lang === 'es' ? 'Dispensación para Paciente (SubQ Pen)' : 'For Patient Dispensing (SubQ Pen)')
+                                    : (t.patientSubqTag || 'For Patient Dispensing (SubQ)')}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="pds-label-type-desc">
+                              {isPenOrCart
+                                ? (lang === 'es'
+                                  ? 'Etiqueta clínica de alta adherencia para bolígrafos y cartuchos de recambio. Muestra potencia de la formulación, lote estéril, instrucciones de dosificación por dial y QR de verificación directa.'
+                                  : 'High-adhesion clinical label for patient dial pens and refill cartridges. Displays formulation potency, sterile batch number, dial dosage instructions, and direct-lookup verification QR.')
+                                : (t.clientVialLabelDesc || 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.')}
+                            </p>
+                            <div className="pds-label-type-buttons">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  triggerHaptic('light');
+                                  setPreviewModalTab('client');
+                                  setIsPreviewModalOpen(true);
+                                }}
+                                className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf"
+                                title="Preview 38x90mm Client Vial Label before printing"
+                              >
+                                <Eye size={15} className="pds-btn-icon" /> <span>{t.previewPrintLabel || 'Preview & Print 38×90mm'}</span>
+                              </button>
+                              <a
+                                href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download={isMobileDevice ? undefined : `client_vial_labels_sheet_${variantFileSuffix}_a4.pdf`}
+                                onClick={() => handleDownloadClick('client_sheet')}
+                                className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'client_sheet' ? 'loading' : ''}`}
+                                style={downloadingType === 'client_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
+                                title="Download A4 Sheet with 8 Client Vial Labels (PDF File)"
+                              >
+                                {downloadingType === 'client_sheet' ? (
+                                  <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
+                                ) : (
+                                  <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
+                                )}
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyLabelUrl('client')}
+                                className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'client' ? 'copied' : ''}`}
+                                title="Copy direct shareable link to this client vial label"
+                              >
+                                {copiedLabelType === 'client' ? (
+                                  <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
+                                ) : (
+                                  <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
 
-                {/* 4. Base Dock: Tiered Price Shield & Unified Order Control */}
-                <div className="pds-square-price-dock">
-                  <TieredPriceShield
-                    product={product}
-                    currency="EUR"
-                    compact={false}
-                    embedded={true}
-                    isEs={lang === 'es'}
-                    onUnlockRequest={() => setIsUnlockModalOpen(true)}
-                    adminSimulationTier={adminSimulationTier}
-                    onSelectAdminSimulationTier={setAdminSimulationTier}
-                  />
+                        {/* Live Scannable Label Preview */}
+                        <div className="pds-vial-label-preview-wrap">
+                          <img
+                            src={`/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(getConcreteSupplierId(activeSupplierId, supplierName))}&batch=${encodeURIComponent(effectiveBatchCode)}`}
+                            alt={`Vial Dispensing Label for ${product?.canonicalName || product?.name || slug}`}
+                            className="pds-vial-label-img"
+                            loading="lazy"
+                            style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                          />
+                        </div>
+                      </div>
+                    </section>
+                  )}
 
-                  {/* 1-Click Order Button for Registered Clinicians */}
-                  <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
-                    <InlineOrderButton
+                  {/* ── Block 4.5: Analytical Quality Verification & Clinical Dosing Parameters (EQNO Inspired) ── */}
+                  {effectiveActiveSection === 'analytical-specs' && !isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && !isSupplementProduct && (
+                    <PeptideAnalyticalSpecsCard
                       product={product}
-                      variant={selectedStrength || product.variants?.[0] || null}
-                      isEs={lang === 'es'}
-                      compact={false}
-                      role={activeRole || 'clinic'}
-                      brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
-                      onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                      selectedStrength={selectedStrength}
+                      lang={lang}
+                      onOpenCoa={() => setIsCoaModalOpen(true)}
                     />
-                  </div>
-                </div>
-              </div>
-            ) : null
-          }
-          mobileSecondary={
-            diagnosticHeroImage ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                <div 
-                  className="pds-hero-mobile-square-card"
-                  onClick={() => setIsImageModalOpen(true)}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className="pds-mobile-square-thumb-wrap">
-                    <img
-                      src={diagnosticHeroImage}
-                      alt={name}
-                      className="pds-mobile-square-thumb"
-                      loading="eager"
-                    />
-                  </div>
-                  <div className="pds-mobile-square-content">
-                    <div className="pds-mobile-square-badge">
-                      <ShieldCheck size={11} color="#0d9488" />
-                      <span>
-                        {isEternaDiagnostic
-                          ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
-                          : (isDiagnosticKit || isBloodoDiagnostic)
-                          ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
-                          : isSupplementProduct
-                          ? (lang === 'es' ? 'Nutracéutico Clínico' : 'Clinical Nutraceutical')
-                          : (lang === 'es' ? 'Cosmecéutico Oficial' : 'Official Cosmeceutical')}
-                      </span>
+                  )}
+
+                  {/* ── Block 4.8: Bloodo™ Clinical Diagnostic FAQ & WhatsApp Share (Legacy fallback) ── */}
+                  {effectiveActiveSection === 'nad-clinical-faq' && !isCosmeticProduct && (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
+                    <BloodoNadFaqCard product={product} lang={lang} />
+                  )}
+
+                  {/* ── Block 5: Targeted Therapeutic Peptides (Legacy fallback) ── */}
+                  {effectiveActiveSection === 'related-peptides-section' && (
+                    <BloodoRelatedPeptidesSection product={product} lang={lang} />
+                  )}
+
+                  {/* ── Block 5.5: Universal Clinical Synergy & Adjuvant Recommendations (Cross-Sell Engine) ── */}
+                  {effectiveActiveSection === 'clinical-synergy' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <ClinicalSynergySection product={product} slug={slug || product?.slug} lang={lang} />
+                      {(isBloodoDiagnostic || isDiagnosticKit) && (
+                        <>
+                          <BloodoRelatedPeptidesSection product={product} lang={lang} />
+                          <BloodoClinicalAdvantageCard lang={lang} />
+                        </>
+                      )}
                     </div>
-                    <strong className="pds-mobile-square-title">
-                      {isEternaDiagnostic
-                        ? 'Fagron Genomics / European Lab'
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? 'LifeLab1 Clinical Laboratory'
-                        : `${displaySupplierName || 'Colway'} Bioactive`}
-                    </strong>
-                    <span className="pds-mobile-square-sub">
-                      {isEternaDiagnostic
-                        ? 'CE-IVD Certified · Saliva DNA Kit'
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? 'CE-IVDR Certified · Whatman® 903 Card'
-                        : 'EU GMP Standard · 100% Bioactive Formulations'}
-                    </span>
-                  </div>
-                  <div className="pds-mobile-square-action">
-                    <ZoomIn size={16} color="#0284c7" />
-                  </div>
-                </div>
+                  )}
 
-                {/* ── Mobile Tiered Price Shield & Order Action (Google Cloud UX) ── */}
-                <div style={{
-                  background: '#ffffff',
-                  borderRadius: '10px',
-                  border: '1px solid #e2e8f0',
-                  padding: '10px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
-                }}>
-                  <TieredPriceShield
+                  {/* ── Block 6: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
+                  {effectiveActiveSection === 'bloodo-suite' && isBloodoDiagnostic && (
+                    <section id="bloodo-suite" className="pds-section-card">
+                      <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
+                    </section>
+                  )}
+
+                  {/* ── Block 7: In-Office Clinical Advantage (Legacy fallback) ── */}
+                  {effectiveActiveSection === 'clinical-dbs-advantages' && (isBloodoDiagnostic || isDiagnosticKit) && (
+                    <BloodoClinicalAdvantageCard lang={lang} />
+                  )}
+
+                  {/* Diagnostic kit specific sub-sections */}
+                  {(effectiveActiveSection === 'diagnostic-specs' || effectiveActiveSection === 'collection-protocol' || ['biomarker-simulator', 'pre-analytical-prep', 'kit-contents'].includes(effectiveActiveSection)) && (
+                    <section id={effectiveActiveSection} className="pds-section-card">
+                      {/* Show Specimen Dossier Report Preview exclusively in Section 3 (diagnostic-specs) */}
+                      {isBloodoDiagnostic && effectiveActiveSection === 'diagnostic-specs' && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <DiagnosticReportVisualPreview
+                            activeTest={
+                              slug?.includes('cortisol') ? 'cortisol' :
+                                slug?.includes('testosterone') || slug?.includes('testosterona') ? 'testosterone' :
+                                  slug?.includes('hba1c') || slug?.includes('hemoglobin') || slug?.includes('glucose') || slug?.includes('glucosa') ? 'hba1c' :
+                                    slug?.includes('omega') || slug?.includes('lipid') ? 'omega' :
+                                      slug?.includes('vitamin') || slug?.includes('vitd') || slug?.includes('vit-d') ? 'vitd' : 'nad'
+                            }
+                            lang={lang}
+                            hideSelector={true}
+                            hideWorkflow={true}
+                            variant="gcp"
+                          />
+                        </div>
+                      )}
+                      <DiagnosticTestTechnicalSpecs
+                        product={product}
+                        selectedDose={selectedStrength?.name || 'Standard'}
+                        supplierName={displaySupplierName}
+                        lang={lang}
+                        activeSection={effectiveActiveSection}
+                      />
+                    </section>
+                  )}
+
+                  {/* Cosmetic specific sub-sections */}
+                  {['clinical-evidence', 'inci-dossier', 'application-protocol', 'colway-system'].includes(effectiveActiveSection) && (
+                    <section id={effectiveActiveSection} className="pds-section-card">
+                      <CosmeticTechnicalSpecs
+                        product={product}
+                        lang={lang}
+                        onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+                      />
+                    </section>
+                  )}
+
+                  <ProductSectionFooterNav
+                    activeSection={effectiveActiveSection}
+                    sections={tocSections}
+                    onSelectSection={handleSelectSection}
+                    lang={lang}
+                  />
+                </div>
+              )}
+
+              {/* ── Block 8: Product Regulatory Warnings & Safety Governance (Overview or Safety Section) ── */}
+              {(!isBloodoDiagnostic && (effectiveActiveSection === 'overview' || effectiveActiveSection === 'regulatory-warnings' || effectiveActiveSection === 'safety-governance')) && (
+                <>
+                  <ProductRegulatoryWarningsSection
                     product={product}
-                    currency="EUR"
-                    compact={false}
-                    embedded={true}
-                    isEs={lang === 'es'}
-                    onUnlockRequest={() => setIsUnlockModalOpen(true)}
-                    adminSimulationTier={adminSimulationTier}
-                    onSelectAdminSimulationTier={setAdminSimulationTier}
+                    lang={lang}
+                    isCosmeticProduct={isCosmeticProduct}
+                    isDiagnosticKit={isDiagnosticKit || isBloodoDiagnostic}
+                    isSolventProduct={isSolventProduct}
+                    isCorporateService={isCorporateService}
+                    isSupplementProduct={isSupplementProduct}
+                    supplierName={supplierName}
                   />
 
-                  <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
-                    <InlineOrderButton
-                      product={product}
-                      variant={selectedStrength || product.variants?.[0] || null}
-                      isEs={lang === 'es'}
-                      compact={false}
-                      role={activeRole || 'clinic'}
-                      brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
-                      onUnlockRequest={() => setIsUnlockModalOpen(true)}
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : null
-          }
-        />
-        {/* ── Block 4.1: Google Cloud UX Clinical Specimen Dossier Banner (Non-Bloodo Diagnostic Kits) ── */}
-        {(!isBloodoDiagnostic && isDiagnosticKit) && (
-          <div style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
-            <DiagnosticReportVisualPreview
-              activeTest={
-                slug?.includes('cortisol') ? 'cortisol' :
-                slug?.includes('testosterone') || slug?.includes('testosterona') ? 'testosterone' :
-                slug?.includes('hba1c') || slug?.includes('hemoglobin') || slug?.includes('glucose') || slug?.includes('glucosa') ? 'hba1c' :
-                slug?.includes('omega') || slug?.includes('lipid') ? 'omega' :
-                slug?.includes('vitamin') || slug?.includes('vitd') || slug?.includes('vit-d') ? 'vitd' : 'nad'
-              }
-              lang={lang}
-              hideSelector={true}
-              hideWorkflow={true}
-              variant="gcp"
-            />
-          </div>
-        )}
-        {isBloodoDiagnostic ? (
-          <BloodoDiagnosticOverviewCard
-            product={product}
-            lang={lang}
-            onUnlockRequest={() => setIsUnlockModalOpen(true)}
-            onSelectSection={handleSelectSection}
-          />
-        ) : description && (
-          <div className="pds-description-card" style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <h2 className="pds-section-heading" style={{ margin: 0 }}>
-                {isCorporateService
-                  ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
-                  : isEternaDiagnostic
-                    ? (lang === 'es' ? 'Ecosistema de Salud de Precisión y Portal Clínico ETERNA®' : 'ETERNA® Precision Health Ecosystem & Clinical Platform')
-                    : isDiagnosticKit 
-                      ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
-                      : isSupplementProduct
-                        ? (lang === 'es' ? 'Descripción y Perfil Nutracéutico' : 'Nutraceutical Profile & Bioactive Matrix')
-                        : (t.pharmacologicalOverview || 'Pharmacological Overview')}
-              </h2>
-              {isTranslating ? (
-                <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                  <Sparkles size={13} className="spin" /> {lang === 'es' ? 'Traduciendo...' : (t.translating || 'Translating…')}
-                </span>
-              ) : lang !== 'en' && (
-                <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <Sparkles size={11} color="#0284c7" /> {lang === 'es' ? 'Traducción Asistida' : 'Verified Translation'}
-                </span>
+                </>
               )}
+
+              {/* Institutional Regulatory Footnote */}
+              <footer className="pds-page-footer">
+                <div className="pds-footer-box">
+                  <p className="pds-footer-text">
+                    {isCosmeticProduct ? (
+                      <>
+                        <strong>{lang === 'es' ? 'Gobernanza y Regulación Cosmética Europea:' : 'Quality & European Cosmetic Regulatory Governance:'}</strong>{' '}
+                        {lang === 'es'
+                          ? `Distribuido a través del socio oficial autorizado (${supplierName}). Formulado de plena conformidad con el Reglamento Europeo (CE) Nº 1223/2009 sobre productos cosméticos y estándares de Buenas Prácticas de Fabricación ISO 22716. Expediente activo en el Portal Europeo CPNP. Testado dermatológicamente. Ficha técnica elaborada para orientación tricológica, cosmética y de cuidado personal.`
+                          : `Sourced through authorized brand partner (${supplierName}). Formulated and packaged in full compliance with EU Cosmetic Regulation (EC) No 1223/2009 and ISO 22716 Cosmetic GMP standards. Notification active on the European CPNP. Dermatologically tested. This technical document is intended for trichological, cosmetic, and personal wellness advisory.`}
+                      </>
+                    ) : (isDiagnosticKit || isBloodoDiagnostic) ? (
+                      <>
+                        <strong>{lang === 'es' ? 'Gobernanza y Regulación de Diagnóstico In Vitro:' : 'Quality & In Vitro Diagnostic Regulatory Governance:'}</strong>{' '}
+                        {lang === 'es'
+                          ? `Dispositivo de diagnóstico in vitro con marcado CE-IVD conforme a la Directiva 98/79/CE y el Reglamento Europeo (UE) 2017/746 (CE-IVDR). Procesamiento analítico cuantitativo ejecutado por laboratorio clínico acreditado (LifeLab1, certificación ISO 15189). Trazabilidad de muestra en sangre seca (Whatman 903). Destinado a profesionales sanitarios y seguimiento clínico.`
+                          : `CE-IVD Marked in accordance with EU Directive 98/79/EC & Regulation (EU) 2017/746 (CE-IVDR). Analytical processing performed by accredited central clinical laboratory (LifeLab1, ISO 15189 certified). Quantitative blood spot analytical reports delivered via secure encrypted clinical portal.`}
+                      </>
+                    ) : isSolventProduct ? (
+                      <>
+                        <strong>{lang === 'es' ? 'Estándares de Calidad & Solvente Estéril:' : 'Sterile Solvent & Quality Governance:'}</strong>{' '}
+                        {lang === 'es'
+                          ? `Diluyente estéril preparado bajo estándares de Farmacopea Europea (Ph. Eur.) y cGMP para reconstitución de péptidos liofilizados. Control de endotoxinas (<0.25 EU/mL) con 0.9% de alcohol bencílico como conservante bacteriostático. Uso en reconstitución clínica y farmacia de compounding.`
+                          : `Pharmaceutical-grade sterile bacteriostatic diluent manufactured under EU GMP / cGMP standards. Multi-dose vial preserved with 0.9% benzyl alcohol. Endotoxin tested (<0.25 EU/mL). Intended for aseptic peptide and lyophilized compound reconstitution.`}
+                      </>
+                    ) : isSupplementProduct ? (
+                      <>
+                        <strong>{lang === 'es' ? 'Gobernanza y Regulación de Suplementos Clínicos:' : 'Clinical Supplement Quality & Regulatory Governance:'}</strong>{' '}
+                        {lang === 'es'
+                          ? `Fabricado y envasado bajo normativa europea de complementos alimenticios (Directiva 2002/46/CE) y directrices cGMP / ISO 22000. Cápsulas vegetales gastrorresistentes HPMC sin gluten, sin lactosa y libres de alérgenos. Lotes analizados por terceros para pureza, metales pesados y ausencia de contaminantes microbiológicos. Formulado para profesionales sanitarios y optimización metabólica.`
+                          : `Manufactured and packaged in strict compliance with EU Dietary Supplements Directive 2002/46/EC and cGMP / ISO 22000 standards. Acid-resistant HPMC vegetable capsules, gluten-free, lactose-free, and allergen-free. Third-party tested for purity, heavy metals, and microbiological safety. Intended for healthcare practitioners and clinical nutritional optimization.`}
+                      </>
+                    ) : isCorporateService ? (
+                      <>
+                        <strong>{lang === 'es' ? 'Cumplimiento Legal & Marco Corporativo:' : 'Corporate & Regulatory Governance:'}</strong>{' '}
+                        {lang === 'es'
+                          ? `Servicios corporativos gestionados conforme a la Ley 14/2013 y marco normativo europeo y emiratí. Diligencia debida, custodia fiduciaria y cumplimiento societario coordinado a través de despachos colegiados y socios institucionales.`
+                          : `Corporate acquisition and residency programs are processed under Spanish Law 14/2013 / UAE Corporate Framework. Comprehensive due diligence and institutional escrow compliance handled through verified institutional partners.`}
+                      </>
+                    ) : (
+                      <>
+                        <strong>Quality & Regulatory Governance:</strong> Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing meeting pharmacopeial grade standards. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
+                      </>
+                    )}
+                  </p>
+                  <p className="pds-footer-meta">
+                    Document Ref: PDS-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
+                  </p>
+                  {isStrictlyLotusland && (
+                    <p style={{ marginTop: '6px', fontSize: '0.6rem', color: '#94a3b8', opacity: 0.55, lineHeight: 1.4 }}>
+                      {lang === 'es' ? 'Fabricación externalizada: ' : 'Contract manufacturer: '}
+                      <a
+                        href="https://drive.google.com/file/d/1GbqhKnRbBgNcvH5E87iYFmmaurnVQnAv/view"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: '2px' }}
+                      >
+                        Hotide Biotech — Quality Methodology &amp; U.S. Regulatory Compliance
+                      </a>
+                    </p>
+                  )}
+                </div>
+              </footer>
             </div>
-            <p className="pds-description-body">{description}</p>
-          </div>
-        )}
-        {isEternaDiagnostic && (
-          <EternaPublicOverviewShowcase
-            product={product}
-            lang={lang}
-            onSelectSection={handleSelectSection}
-          />
-        )}
-        {isSupplementProduct && (
-          <SupplementPublicOverviewShowcase
-            product={product}
-            lang={lang}
-            onSelectSection={handleSelectSection}
-          />
-        )}
-        {(isDiagnosticKit && !isBloodoDiagnostic) && (
-          <div style={{ marginTop: '24px' }}>
-            <PresentationsMatrixSection
-              product={product}
-              slug={slug}
-              lang={lang}
-              t={t}
-              isCorporateService={isCorporateService}
-              isDiagnosticKit={isDiagnosticKit}
-              isSolventProduct={isSolventProduct}
-              isSupplementProduct={isSupplementProduct}
-              isCosmeticProduct={isCosmeticProduct}
-              isPenOrCart={isPenOrCart}
-              isSprayFormat={isSprayFormat}
-              isCartridgeFormat={isCartridgeFormat}
-              isPenFormat={isPenFormat}
-              isPenAndCartridgeEcosystem={isPenAndCartridgeEcosystem}
-              distinctCartridgeFmt={distinctCartridgeFmt}
-              distinctPenFmt={distinctPenFmt}
-              isMultiSupplierMode={isMultiSupplierMode}
-              suppliersList={suppliersList}
-              activeSupplierId={activeSupplierId}
-              setActiveSupplierId={setActiveSupplierId}
-              availableFormats={availableFormats}
-              activeFormatId={activeFormatId}
-              setActiveFormatId={setActiveFormatId}
-              rawFormats={rawFormats}
-              filteredStrengths={filteredStrengths}
-              sortedStrengths={sortedStrengths}
-              selectedStrengthId={selectedStrengthId}
-              setSelectedStrengthId={setSelectedStrengthId}
-              selectedStrength={selectedStrength}
-              packUnits={packUnits}
-              setPackUnits={setPackUnits}
-              realKitSavings={realKitSavings}
-              displaySupplierName={displaySupplierName}
-              matrixRows={matrixRows}
-              getReconstitutionVolume={getReconstitutionVolume}
-            />
-          </div>
-        )}
-        </div>
-      ) : (
-        <div className="pds-single-section-view">
 
-          {effectiveActiveSection === 'when-to-test' && (
-            <BloodoWhenToTestSection
-              product={product}
+            {/* Specialized Google Cloud Console Product Sidebar (Desktop Sticky + Mobile Drawer) */}
+            <ProductDetailSidebar
+              sections={tocSections}
               lang={lang}
-              onSelectSection={handleSelectSection}
-              onUnlockRequest={() => setIsUnlockModalOpen(true)}
-            />
-          )}
-
-          {effectiveActiveSection === 'presentations-matrix' && (
-            <PresentationsMatrixSection
               product={product}
-              slug={slug}
-              lang={lang}
-              t={t}
-              isCorporateService={isCorporateService}
-              isDiagnosticKit={isDiagnosticKit}
-              isSolventProduct={isSolventProduct}
-              isSupplementProduct={isSupplementProduct}
-              isCosmeticProduct={isCosmeticProduct}
-              isPenOrCart={isPenOrCart}
-              isSprayFormat={isSprayFormat}
-              isCartridgeFormat={isCartridgeFormat}
-              isPenFormat={isPenFormat}
-              isPenAndCartridgeEcosystem={isPenAndCartridgeEcosystem}
-              distinctCartridgeFmt={distinctCartridgeFmt}
-              distinctPenFmt={distinctPenFmt}
-              isMultiSupplierMode={isMultiSupplierMode}
-              suppliersList={suppliersList}
-              activeSupplierId={activeSupplierId}
-              setActiveSupplierId={setActiveSupplierId}
-              availableFormats={availableFormats}
-              activeFormatId={activeFormatId}
-              setActiveFormatId={setActiveFormatId}
-              rawFormats={rawFormats}
-              filteredStrengths={filteredStrengths}
-              sortedStrengths={sortedStrengths}
-              selectedStrengthId={selectedStrengthId}
-              setSelectedStrengthId={setSelectedStrengthId}
-              selectedStrength={selectedStrength}
-              packUnits={packUnits}
-              setPackUnits={setPackUnits}
-              realKitSavings={realKitSavings}
-              displaySupplierName={displaySupplierName}
-              matrixRows={matrixRows}
-              getReconstitutionVolume={getReconstitutionVolume}
-            />
-          )}
-
-    {/* ── Block 2: Corporate & Clinical Services or Reconstitution/Specs ── */}
-          {effectiveActiveSection === 'reconstitution-section' && (
-            <ReconstitutionRouterSection
-              product={product}
-              lang={lang}
-              t={t}
-              isSpainResidency={isSpainResidency}
-              isCompoundingService={isCompoundingService}
-              isPeptideSupplyService={isPeptideSupplyService}
-              isUaeCorporateService={isUaeCorporateService}
-              isSolventProduct={isSolventProduct}
-              isEternaDiagnostic={isEternaDiagnostic}
-              isDiagnosticKit={isDiagnosticKit}
-              isIvDrip={isIvDrip}
-              isCosmeticProduct={isCosmeticProduct}
-              isSupplementProduct={isSupplementProduct}
-              isPenOrCart={isPenOrCart}
-              isSprayFormat={isSprayFormat}
-              selectedStrength={selectedStrength}
-              sortedStrengths={sortedStrengths}
-              activeFormatId={activeFormatId}
-              activeFormat={activeFormat}
-              availableFormats={availableFormats}
-              setActiveFormatId={setActiveFormatId}
-              displaySupplierName={displaySupplierName}
-              primaryProtocol={primaryProtocol}
+              slug={slug || product?.slug}
+              effectiveBatchCode={effectiveBatchCode}
               associatedProtocols={associatedProtocols}
-              initialPhase={initialPhase}
-              onOpenInquiry={handleOpenInquiry}
-            />
-          )}
-
-      {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
-      {effectiveActiveSection === 'specs-section' && !isCorporateService && !isCosmeticProduct && (
-        <section id="specs-section" className="pds-traceability-wrapper">
-          {isBloodoDiagnostic ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <BloodoLabStandardsDownloadsSection
-                product={product}
-                lang={lang}
-                onSelectSection={handleSelectSection}
-                onUnlockRequest={() => setIsUnlockModalOpen(true)}
-              />
-              <ProductRegulatoryWarningsSection
-                product={product}
-                lang={lang}
-                isCosmeticProduct={isCosmeticProduct}
-                isDiagnosticKit={true}
-                isSolventProduct={isSolventProduct}
-                isCorporateService={isCorporateService}
-                isSupplementProduct={isSupplementProduct}
-                supplierName={supplierName}
-              />
-            </div>
-          ) : (
-            <>
-              <ProductTraceabilityCard
-                product={product}
-                baseUrl={baseUrl}
-                lang={lang}
-                monographUrl={dynamicPublicUrl}
-                batchCode={effectiveBatchCode}
-              />
-              {(isDiagnosticKit || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) && (
-                <div style={{ marginTop: '20px' }}>
-                  <BloodoNadFaqCard product={product} lang={lang} />
-                </div>
-              )}
-            </>
-          )}
-        </section>
-      )}
-
-      {/* ── Peer-Reviewed Scientific Literature & Clinical Trials ── */}
-      {effectiveActiveSection === 'publications-section' && !isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
-        <PeptidePublicationsSection product={product} lang={lang} />
-      )}
-
-      {/* ── Clinical Safety Profile: Contraindications & Precautions ── */}
-      {effectiveActiveSection === 'contraindications-section' && !isCorporateService && !isAnyDiagnostic && !isSolventProduct && !isCosmeticProduct && (
-        <PeptideContraindicationsSection product={product} lang={lang} />
-      )}
-
-      {effectiveActiveSection === 'labels-section' && !isAnyDiagnostic && !isCorporateService && !isCosmeticProduct && (
-        <section id="labels-section" className="pds-section-card">
-            <div className="pds-section-header">
-              <div className="pds-section-header-left">
-                <div className="pds-section-header-shield">
-                  <QrCode size={22} />
-                </div>
-                <div className="pds-section-header-titles">
-                  <div className="pds-section-header-meta-row">
-                    <span className="pds-section-header-category">
-                      {t.physicalLabelsSection || 'PHYSICAL VIAL LABELS & DISPENSING'}
-                    </span>
-                    <span className="pds-section-badge">
-                      <CheckCircle2 size={11} /> 38×90mm THERMAL
-                    </span>
-                  </div>
-                  <h3 className="pds-section-header-title">
-                    {t.physicalLabelsSection || 'Physical Vial Labels & Batch Printing'}
-                  </h3>
-                </div>
-              </div>
-
-              <div className="pds-section-header-right">
-                <div className="pds-section-cert-badge">
-                  <Printer size={14} color="#38bdf8" />
-                  <span>Thermal 38×90mm Ready</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pds-section-card-body" style={{ padding: '1.5rem' }}>
-              <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
-                {t.physicalLabelsSubtitle || 'Standard 38×90mm adhesive labels and batch sheets formatted for clinical and dispatch use.'}
-              </p>
-
-              {/* Dual Label Options Grid: Shipping vs Client Vial */}
-              <div className="pds-dual-labels-grid">
-                {/* Option 1: Shipping / Batch Traceability Label */}
-                <div className="pds-label-type-card">
-                  <div className="pds-label-type-head">
-                    <span className="pds-label-badge-icon">📦</span>
-                    <div>
-                      <h4 className="pds-label-type-title">{t.shippingTraceabilityLabel || 'Shipping & Traceability Label'}</h4>
-                      <span className="pds-label-use-tag">{t.outboundLogisticsTag || 'For Outbound Box & Logistics'}</span>
-                    </div>
-                  </div>
-                  <p className="pds-label-type-desc">
-                    {t.shippingLabelDesc || 'Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.'}
-                  </p>
-                  <div className="pds-label-type-buttons">
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('light');
-                        setPreviewModalTab('shipping');
-                        setIsPreviewModalOpen(true);
-                      }}
-                      className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode"
-                      title="Preview 38x90mm Shipping Label before printing"
-                    >
-                      <Eye size={15} className="pds-btn-icon" /> <span>{t.previewPrintLabel || 'Preview & Print 38×90mm'}</span>
-                    </button>
-                    <a 
-                      href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`}
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      download={isMobileDevice ? undefined : `shipping_labels_sheet_${variantFileSuffix}_a4.pdf`}
-                      onClick={() => handleDownloadClick('shipping_sheet')}
-                      className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'shipping_sheet' ? 'loading' : ''}`}
-                      style={downloadingType === 'shipping_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
-                      title="Download A4 Sheet with 8 Shipping Labels (PDF File)"
-                    >
-                      {downloadingType === 'shipping_sheet' ? (
-                        <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
-                      ) : (
-                        <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
-                      )}
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyLabelUrl('shipping')}
-                      className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'shipping' ? 'copied' : ''}`}
-                      title="Copy direct shareable link to this shipping label"
-                    >
-                      {copiedLabelType === 'shipping' ? (
-                        <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
-                      ) : (
-                        <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Option 2: Client Vial Application Label */}
-                <div className="pds-label-type-card highlight">
-                  <div className="pds-label-type-head">
-                    <span className="pds-label-badge-icon">🏷️</span>
-                    <div>
-                      <h4 className="pds-label-type-title">
-                        {isPenOrCart
-                          ? (lang === 'es' ? 'Etiqueta de Bolígrafo / Cartucho' : 'Patient Pen / Cartridge Label')
-                          : (t.clientVialLabelTitle || 'Patient Vial Label')}
-                      </h4>
-                      <span className="pds-label-use-tag active">
-                        {isPenOrCart
-                          ? (lang === 'es' ? 'Dispensación para Paciente (SubQ Pen)' : 'For Patient Dispensing (SubQ Pen)')
-                          : (t.patientSubqTag || 'For Patient Dispensing (SubQ)')}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="pds-label-type-desc">
-                    {isPenOrCart
-                      ? (lang === 'es'
-                          ? 'Etiqueta clínica de alta adherencia para bolígrafos y cartuchos de recambio. Muestra potencia de la formulación, lote estéril, instrucciones de dosificación por dial y QR de verificación directa.'
-                          : 'High-adhesion clinical label for patient dial pens and refill cartridges. Displays formulation potency, sterile batch number, dial dosage instructions, and direct-lookup verification QR.')
-                      : (t.clientVialLabelDesc || 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.')}
-                  </p>
-                  <div className="pds-label-type-buttons">
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('light');
-                        setPreviewModalTab('client');
-                        setIsPreviewModalOpen(true);
-                      }}
-                      className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf"
-                      title="Preview 38x90mm Client Vial Label before printing"
-                    >
-                      <Eye size={15} className="pds-btn-icon" /> <span>{t.previewPrintLabel || 'Preview & Print 38×90mm'}</span>
-                    </button>
-                    <a 
-                      href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`}
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      download={isMobileDevice ? undefined : `client_vial_labels_sheet_${variantFileSuffix}_a4.pdf`}
-                      onClick={() => handleDownloadClick('client_sheet')}
-                      className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'client_sheet' ? 'loading' : ''}`}
-                      style={downloadingType === 'client_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
-                      title="Download A4 Sheet with 8 Client Vial Labels (PDF File)"
-                    >
-                      {downloadingType === 'client_sheet' ? (
-                        <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
-                      ) : (
-                        <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
-                      )}
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyLabelUrl('client')}
-                      className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'client' ? 'copied' : ''}`}
-                      title="Copy direct shareable link to this client vial label"
-                    >
-                      {copiedLabelType === 'client' ? (
-                        <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
-                      ) : (
-                        <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Live Scannable Label Preview */}
-              <div className="pds-vial-label-preview-wrap">
-                <img
-                  src={`/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(getConcreteSupplierId(activeSupplierId, supplierName))}&batch=${encodeURIComponent(effectiveBatchCode)}`}
-                  alt={`Vial Dispensing Label for ${product?.canonicalName || product?.name || slug}`}
-                  className="pds-vial-label-img"
-                  loading="lazy"
-                  style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                />
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── Block 4.5: Analytical Quality Verification & Clinical Dosing Parameters (EQNO Inspired) ── */}
-        {effectiveActiveSection === 'analytical-specs' && !isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && !isSupplementProduct && (
-          <PeptideAnalyticalSpecsCard
-            product={product}
-            selectedStrength={selectedStrength}
-            lang={lang}
-            onOpenCoa={() => setIsCoaModalOpen(true)}
-          />
-        )}
-
-        {/* ── Block 4.8: Bloodo™ Clinical Diagnostic FAQ & WhatsApp Share (Legacy fallback) ── */}
-        {effectiveActiveSection === 'nad-clinical-faq' && !isCosmeticProduct && (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
-          <BloodoNadFaqCard product={product} lang={lang} />
-        )}
-
-        {/* ── Block 5: Targeted Therapeutic Peptides (Legacy fallback) ── */}
-        {effectiveActiveSection === 'related-peptides-section' && (
-          <BloodoRelatedPeptidesSection product={product} lang={lang} />
-        )}
-
-        {/* ── Block 5.5: Universal Clinical Synergy & Adjuvant Recommendations (Cross-Sell Engine) ── */}
-        {effectiveActiveSection === 'clinical-synergy' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <ClinicalSynergySection product={product} slug={slug || product?.slug} lang={lang} />
-            {(isBloodoDiagnostic || isDiagnosticKit) && (
-              <>
-                <BloodoRelatedPeptidesSection product={product} lang={lang} />
-                <BloodoClinicalAdvantageCard lang={lang} />
-              </>
-            )}
-          </div>
-        )}
-
-        {/* ── Block 6: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
-        {effectiveActiveSection === 'bloodo-suite' && isBloodoDiagnostic && (
-          <section id="bloodo-suite" className="pds-section-card">
-            <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
-          </section>
-        )}
-
-        {/* ── Block 7: In-Office Clinical Advantage (Legacy fallback) ── */}
-        {effectiveActiveSection === 'clinical-dbs-advantages' && (isBloodoDiagnostic || isDiagnosticKit) && (
-          <BloodoClinicalAdvantageCard lang={lang} />
-        )}
-
-        {/* Diagnostic kit specific sub-sections */}
-        {(effectiveActiveSection === 'diagnostic-specs' || effectiveActiveSection === 'collection-protocol' || ['biomarker-simulator', 'pre-analytical-prep', 'kit-contents'].includes(effectiveActiveSection)) && (
-          <section id={effectiveActiveSection} className="pds-section-card">
-            {/* Show Specimen Dossier Report Preview exclusively in Section 3 (diagnostic-specs) */}
-            {isBloodoDiagnostic && effectiveActiveSection === 'diagnostic-specs' && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <DiagnosticReportVisualPreview
-                  activeTest={
-                    slug?.includes('cortisol') ? 'cortisol' :
-                    slug?.includes('testosterone') || slug?.includes('testosterona') ? 'testosterone' :
-                    slug?.includes('hba1c') || slug?.includes('hemoglobin') || slug?.includes('glucose') || slug?.includes('glucosa') ? 'hba1c' :
-                    slug?.includes('omega') || slug?.includes('lipid') ? 'omega' :
-                    slug?.includes('vitamin') || slug?.includes('vitd') || slug?.includes('vit-d') ? 'vitd' : 'nad'
-                  }
-                  lang={lang}
-                  hideSelector={true}
-                  hideWorkflow={true}
-                  variant="gcp"
-                />
-              </div>
-            )}
-            <DiagnosticTestTechnicalSpecs
-              product={product}
-              selectedDose={selectedStrength?.name || 'Standard'}
-              supplierName={displaySupplierName}
-              lang={lang}
-              activeSection={effectiveActiveSection}
-            />
-          </section>
-        )}
-
-        {/* Cosmetic specific sub-sections */}
-        {['clinical-evidence', 'inci-dossier', 'application-protocol', 'colway-system'].includes(effectiveActiveSection) && (
-          <section id={effectiveActiveSection} className="pds-section-card">
-            <CosmeticTechnicalSpecs
-              product={product}
-              lang={lang}
+              onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
+              onOpenCoaModal={() => setIsCoaModalOpen(true)}
               onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              isDiagnosticKit={isDiagnosticKit}
+              isBloodoDiagnostic={isBloodoDiagnostic}
+              isCosmeticProduct={isCosmeticProduct}
+              isSolventProduct={isSolventProduct}
+              isCorporateService={isCorporateService}
+              isSupplementProduct={isSupplementProduct}
+              hideFloatingTrigger={true}
+              activeSection={effectiveActiveSection}
+              onSelectSection={handleSelectSection}
             />
-          </section>
-        )}
-
-        <ProductSectionFooterNav
-          activeSection={effectiveActiveSection}
-          sections={tocSections}
-          onSelectSection={handleSelectSection}
-          lang={lang}
-        />
-      </div>
-    )}
-
-    {/* ── Block 8: Product Regulatory Warnings & Safety Governance (Overview or Safety Section) ── */}
-    {(!isBloodoDiagnostic && (effectiveActiveSection === 'overview' || effectiveActiveSection === 'regulatory-warnings' || effectiveActiveSection === 'safety-governance')) && (
-      <>
-        <ProductRegulatoryWarningsSection
-          product={product}
-          lang={lang}
-          isCosmeticProduct={isCosmeticProduct}
-          isDiagnosticKit={isDiagnosticKit || isBloodoDiagnostic}
-          isSolventProduct={isSolventProduct}
-          isCorporateService={isCorporateService}
-          isSupplementProduct={isSupplementProduct}
-          supplierName={supplierName}
-        />
-
-      </>
-    )}
-
-        {/* Institutional Regulatory Footnote */}
-        <footer className="pds-page-footer">
-          <div className="pds-footer-box">
-            <p className="pds-footer-text">
-              {isCosmeticProduct ? (
-                <>
-                  <strong>{lang === 'es' ? 'Gobernanza y Regulación Cosmética Europea:' : 'Quality & European Cosmetic Regulatory Governance:'}</strong>{' '}
-                  {lang === 'es' 
-                    ? `Distribuido a través del socio oficial autorizado (${supplierName}). Formulado de plena conformidad con el Reglamento Europeo (CE) Nº 1223/2009 sobre productos cosméticos y estándares de Buenas Prácticas de Fabricación ISO 22716. Expediente activo en el Portal Europeo CPNP. Testado dermatológicamente. Ficha técnica elaborada para orientación tricológica, cosmética y de cuidado personal.`
-                    : `Sourced through authorized brand partner (${supplierName}). Formulated and packaged in full compliance with EU Cosmetic Regulation (EC) No 1223/2009 and ISO 22716 Cosmetic GMP standards. Notification active on the European CPNP. Dermatologically tested. This technical document is intended for trichological, cosmetic, and personal wellness advisory.`}
-                </>
-              ) : (isDiagnosticKit || isBloodoDiagnostic) ? (
-                <>
-                  <strong>{lang === 'es' ? 'Gobernanza y Regulación de Diagnóstico In Vitro:' : 'Quality & In Vitro Diagnostic Regulatory Governance:'}</strong>{' '}
-                  {lang === 'es'
-                    ? `Dispositivo de diagnóstico in vitro con marcado CE-IVD conforme a la Directiva 98/79/CE y el Reglamento Europeo (UE) 2017/746 (CE-IVDR). Procesamiento analítico cuantitativo ejecutado por laboratorio clínico acreditado (LifeLab1, certificación ISO 15189). Trazabilidad de muestra en sangre seca (Whatman 903). Destinado a profesionales sanitarios y seguimiento clínico.`
-                    : `CE-IVD Marked in accordance with EU Directive 98/79/EC & Regulation (EU) 2017/746 (CE-IVDR). Analytical processing performed by accredited central clinical laboratory (LifeLab1, ISO 15189 certified). Quantitative blood spot analytical reports delivered via secure encrypted clinical portal.`}
-                </>
-              ) : isSolventProduct ? (
-                <>
-                  <strong>{lang === 'es' ? 'Estándares de Calidad & Solvente Estéril:' : 'Sterile Solvent & Quality Governance:'}</strong>{' '}
-                  {lang === 'es'
-                    ? `Diluyente estéril preparado bajo estándares de Farmacopea Europea (Ph. Eur.) y cGMP para reconstitución de péptidos liofilizados. Control de endotoxinas (<0.25 EU/mL) con 0.9% de alcohol bencílico como conservante bacteriostático. Uso en reconstitución clínica y farmacia de compounding.`
-                    : `Pharmaceutical-grade sterile bacteriostatic diluent manufactured under EU GMP / cGMP standards. Multi-dose vial preserved with 0.9% benzyl alcohol. Endotoxin tested (<0.25 EU/mL). Intended for aseptic peptide and lyophilized compound reconstitution.`}
-                </>
-              ) : isSupplementProduct ? (
-                <>
-                  <strong>{lang === 'es' ? 'Gobernanza y Regulación de Suplementos Clínicos:' : 'Clinical Supplement Quality & Regulatory Governance:'}</strong>{' '}
-                  {lang === 'es'
-                    ? `Fabricado y envasado bajo normativa europea de complementos alimenticios (Directiva 2002/46/CE) y directrices cGMP / ISO 22000. Cápsulas vegetales gastrorresistentes HPMC sin gluten, sin lactosa y libres de alérgenos. Lotes analizados por terceros para pureza, metales pesados y ausencia de contaminantes microbiológicos. Formulado para profesionales sanitarios y optimización metabólica.`
-                    : `Manufactured and packaged in strict compliance with EU Dietary Supplements Directive 2002/46/EC and cGMP / ISO 22000 standards. Acid-resistant HPMC vegetable capsules, gluten-free, lactose-free, and allergen-free. Third-party tested for purity, heavy metals, and microbiological safety. Intended for healthcare practitioners and clinical nutritional optimization.`}
-                </>
-              ) : isCorporateService ? (
-                <>
-                  <strong>{lang === 'es' ? 'Cumplimiento Legal & Marco Corporativo:' : 'Corporate & Regulatory Governance:'}</strong>{' '}
-                  {lang === 'es'
-                    ? `Servicios corporativos gestionados conforme a la Ley 14/2013 y marco normativo europeo y emiratí. Diligencia debida, custodia fiduciaria y cumplimiento societario coordinado a través de despachos colegiados y socios institucionales.`
-                    : `Corporate acquisition and residency programs are processed under Spanish Law 14/2013 / UAE Corporate Framework. Comprehensive due diligence and institutional escrow compliance handled through verified institutional partners.`}
-                </>
-              ) : (
-                <>
-                  <strong>Quality & Regulatory Governance:</strong> Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing meeting pharmacopeial grade standards. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
-                </>
-              )}
-            </p>
-            <p className="pds-footer-meta">
-              Document Ref: PDS-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
-            </p>
-            {isStrictlyLotusland && (
-              <p style={{ marginTop: '6px', fontSize: '0.6rem', color: '#94a3b8', opacity: 0.55, lineHeight: 1.4 }}>
-                {lang === 'es' ? 'Fabricación externalizada: ' : 'Contract manufacturer: '}
-                <a
-                  href="https://drive.google.com/file/d/1GbqhKnRbBgNcvH5E87iYFmmaurnVQnAv/view"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: '2px' }}
-                >
-                  Hotide Biotech — Quality Methodology &amp; U.S. Regulatory Compliance
-                </a>
-              </p>
-            )}
           </div>
-        </footer>
-          </div>
-
-          {/* Specialized Google Cloud Console Product Sidebar (Desktop Sticky + Mobile Drawer) */}
-          <ProductDetailSidebar 
-            sections={tocSections} 
-            lang={lang} 
-            product={product}
-            slug={slug || product?.slug}
-            effectiveBatchCode={effectiveBatchCode}
-            associatedProtocols={associatedProtocols}
-            onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
-            onOpenCoaModal={() => setIsCoaModalOpen(true)}
-            onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
-            isDiagnosticKit={isDiagnosticKit}
-            isBloodoDiagnostic={isBloodoDiagnostic}
-            isCosmeticProduct={isCosmeticProduct}
-            isSolventProduct={isSolventProduct}
-            isCorporateService={isCorporateService}
-            isSupplementProduct={isSupplementProduct}
-            hideFloatingTrigger={true}
-            activeSection={effectiveActiveSection}
-            onSelectSection={handleSelectSection}
-          />
-        </div>
-      </PublicPageShell>
+        </PublicPageShell>
       )}
 
       {/* Dynamic Flexible Share Monograph Drawer */}
@@ -3347,10 +3348,10 @@ export default function PublicDatasheetView({
             category: isDiagnosticKit
               ? (lang === 'es' ? 'Test Diagnóstico Capilar (DBS LC-MS)' : 'Capillary Diagnostic Test (DBS LC-MS)')
               : isCompoundingService
-              ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding')
-              : isPeptideSupplyService
-              ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management')
-              : (product?.category || 'Peptides'),
+                ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding')
+                : isPeptideSupplyService
+                  ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management')
+                  : (product?.category || 'Peptides'),
             inquiryGoal: isDiagnosticKit ? 'home_dbs_kit' : undefined
           }}
           lang={lang}
@@ -3372,44 +3373,44 @@ export default function PublicDatasheetView({
           isSpainResidency
             ? (lang === 'es' ? 'Programa de Residencia y Adquisición Corporativa (Ley 14/2013)' : 'Spanish Corporate Acquisition & Law 14/2013 Residence Program')
             : isCompoundingService
-            ? (lang === 'es' ? 'Servicio de Compounding Farmacéutico Europeo' : 'European Pharmaceutical Compounding Service')
-            : isPeptideSupplyService
-            ? (lang === 'es' ? 'Suministro de Péptidos B2B y Gestión de Inventario' : 'B2B Dedicated Peptide Supply Chain')
-            : (product?.canonicalName || product?.name || slug)
+              ? (lang === 'es' ? 'Servicio de Compounding Farmacéutico Europeo' : 'European Pharmaceutical Compounding Service')
+              : isPeptideSupplyService
+                ? (lang === 'es' ? 'Suministro de Péptidos B2B y Gestión de Inventario' : 'B2B Dedicated Peptide Supply Chain')
+                : (product?.canonicalName || product?.name || slug)
         }
         subtitle={
           isDiagnosticKit
             ? (lang === 'es' ? 'Sangre Capilar (DBS) • Certificado CE-IVDR • LifeLab1' : 'Capillary Blood (DBS) • CE-IVDR Certified • LifeLab1')
             : isSpainResidency
-            ? (lang === 'es' ? 'Programa Legal Ley 14/2013 • Resolución en 20 Días' : 'Law 14/2013 Statutory Program • 20-Day Fast Track')
-            : isCompoundingService
-            ? (lang === 'es' ? 'Formulaciones Personalizadas EU GMP & Ph. Eur.' : 'EU GMP & Ph. Eur. Certified Compounding Formulation')
-            : isPeptideSupplyService
-            ? (lang === 'es' ? 'Stock HPLC ≥99% Certificado • Envío 24-48h' : 'HPLC ≥99% Certified Inventory • 24-48h Dispatch')
-            : `${selectedStrength?.name || ''}${product?.format ? ` · ${getHumanFormatName(product.format, lang)}` : ''} • ${lang === 'es' ? 'Pureza' : 'Purity'} ${product?.purity || '≥99%'}`.trim()
+              ? (lang === 'es' ? 'Programa Legal Ley 14/2013 • Resolución en 20 Días' : 'Law 14/2013 Statutory Program • 20-Day Fast Track')
+              : isCompoundingService
+                ? (lang === 'es' ? 'Formulaciones Personalizadas EU GMP & Ph. Eur.' : 'EU GMP & Ph. Eur. Certified Compounding Formulation')
+                : isPeptideSupplyService
+                  ? (lang === 'es' ? 'Stock HPLC ≥99% Certificado • Envío 24-48h' : 'HPLC ≥99% Certified Inventory • 24-48h Dispatch')
+                  : `${selectedStrength?.name || ''}${product?.format ? ` · ${getHumanFormatName(product.format, lang)}` : ''} • ${lang === 'es' ? 'Pureza' : 'Purity'} ${product?.purity || '≥99%'}`.trim()
         }
         badge={
           isDiagnosticKit
             ? (lang === 'es' ? 'Test Diagnóstico' : 'Diagnostic Kit')
             : isSpainResidency
-            ? (lang === 'es' ? 'Programa Legal' : 'Residency Program')
-            : isCompoundingService
-            ? 'Compounding'
-            : isPeptideSupplyService
-            ? (lang === 'es' ? 'Suministro B2B' : 'B2B Supply')
-            : (lang === 'es' ? 'Monografía' : 'Peptide Monograph')
+              ? (lang === 'es' ? 'Programa Legal' : 'Residency Program')
+              : isCompoundingService
+                ? 'Compounding'
+                : isPeptideSupplyService
+                  ? (lang === 'es' ? 'Suministro B2B' : 'B2B Supply')
+                  : (lang === 'es' ? 'Monografía' : 'Peptide Monograph')
         }
         badgeType={isDiagnosticKit ? 'diagnostic' : 'default'}
         inquireLabel={
           isDiagnosticKit
             ? (lang === 'es' ? 'Consultar Test' : 'Inquire Test')
             : isSpainResidency
-            ? (lang === 'es' ? 'Consultar Programa' : 'Inquire Program')
-            : isCompoundingService
-            ? (lang === 'es' ? 'Consultar Formulación' : 'Inquire Formulation')
-            : isPeptideSupplyService
-            ? (lang === 'es' ? 'Consultar Suministro' : 'Inquire Supply')
-            : (lang === 'es' ? 'Consultar Producto' : 'Inquire Product')
+              ? (lang === 'es' ? 'Consultar Programa' : 'Inquire Program')
+              : isCompoundingService
+                ? (lang === 'es' ? 'Consultar Formulación' : 'Inquire Formulation')
+                : isPeptideSupplyService
+                  ? (lang === 'es' ? 'Consultar Suministro' : 'Inquire Supply')
+                  : (lang === 'es' ? 'Consultar Producto' : 'Inquire Product')
         }
         onInquire={handleOpenInquiry}
         showClinicalAI={true}
@@ -3417,11 +3418,11 @@ export default function PublicDatasheetView({
         aiContextQuery={
           isDiagnosticKit
             ? (lang === 'es'
-                ? `¿Qué biomarcadores mide el test ${product?.name || slug}, cómo se realiza la toma capilar y qué relevancia clínica tiene?`
-                : `What biomarkers does ${product?.name || slug} measure, how is capillary sampling done, and what is its clinical utility?`)
+              ? `¿Qué biomarcadores mide el test ${product?.name || slug}, cómo se realiza la toma capilar y qué relevancia clínica tiene?`
+              : `What biomarkers does ${product?.name || slug} measure, how is capillary sampling done, and what is its clinical utility?`)
             : (lang === 'es'
-                ? `¿Cuáles son las aplicaciones clínicas, dianas biológicas, pureza HPLC y posología documentada de ${product?.canonicalName || product?.name || slug}?`
-                : `What are the clinical applications, biological targets, HPLC purity, and documented posology for ${product?.canonicalName || product?.name || slug}?`)
+              ? `¿Cuáles son las aplicaciones clínicas, dianas biológicas, pureza HPLC y posología documentada de ${product?.canonicalName || product?.name || slug}?`
+              : `What are the clinical applications, biological targets, HPLC purity, and documented posology for ${product?.canonicalName || product?.name || slug}?`)
         }
         showSections={true}
         sectionsCount={isPeptideCompound ? 5 : tocSections.length}

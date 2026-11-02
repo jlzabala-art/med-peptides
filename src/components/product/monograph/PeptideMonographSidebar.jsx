@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState } from 'react';
-import { 
-  LayoutTemplate, 
-  FlaskConical, 
-  Droplet, 
-  ShieldCheck, 
-  BookOpen, 
-  Copy, 
-  Check, 
-  Printer, 
-  FileText, 
+import {
+  LayoutTemplate,
+  FlaskConical,
+  Droplet,
+  ShieldCheck,
+  BookOpen,
+  Copy,
+  Check,
+  Printer,
+  FileText,
   QrCode,
   ExternalLink,
   Sparkles
@@ -58,15 +58,15 @@ export default function PeptideMonographSidebar({
   const rawStrength = selectedStrength?.name || selectedStrength?.id || (typeof selectedStrength === 'string' ? selectedStrength : '');
   const cleanStrength = isTeletestHtma
     ? '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment'
-    : rawStrength && !rawStrength.toLowerCase().includes('perfil') 
-      ? rawStrength 
+    : rawStrength && !rawStrength.toLowerCase().includes('perfil')
+      ? rawStrength
       : (cleanSlug.includes('omega') ? '1 Complete 24 Fatty Acid Analytical Profile + Evaluation' : '1 Complete Clinical Analytical Profile');
   const strengthLabel = isDiagnostic ? cleanStrength : (rawStrength || 'Standard Formulation');
-  const formatLabel = isDiagnostic 
-    ? (isTeletestHtma ? 'Matrix: Proximal Scalp Hair (0.25 g)' : (product.sampleType ? `Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit')) 
+  const formatLabel = isDiagnostic
+    ? (isTeletestHtma ? 'Matrix: Proximal Scalp Hair (0.25 g)' : (product.sampleType ? `Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit'))
     : (activeFormat?.name || activeFormat?.id || product.presentation || 'Lyophilized SubQ Vial');
-  const purityText = isDiagnostic 
-    ? (isTeletestHtma ? 'ISO 17025 Accredited (ICP-MS/MS)' : 'ISO 15189 · CE-IVD (CV ≤ 6.6%)') 
+  const purityText = isDiagnostic
+    ? (isTeletestHtma ? 'ISO 17025 Accredited (ICP-MS/MS)' : 'ISO 15189 · CE-IVD (CV ≤ 6.6%)')
     : (product.purity || '≥99.2% (HPLC Verified)');
 
   const tabs = [
@@ -128,7 +128,7 @@ export default function PeptideMonographSidebar({
   };
 
   return (
-    <aside 
+    <aside
       className="pds-monograph-sidebar-root"
       aria-label="Monograph Navigation & Context Panel"
       style={{

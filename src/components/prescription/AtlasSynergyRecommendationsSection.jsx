@@ -163,7 +163,8 @@ export default function AtlasSynergyRecommendationsSection({
         )}
 
         {/* Responsive Google Cloud UX Recommendations Rows (Full-Width Horizontal Stack) */}
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style dangerouslySetInnerHTML={{
+          __html: `
           .atlas-gcp-recs-grid {
             display: flex;
             flex-direction: column;

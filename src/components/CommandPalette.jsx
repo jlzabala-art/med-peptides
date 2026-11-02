@@ -31,27 +31,27 @@ const PORTAL_CONFIGS = {
     routePrefix: '/admin',
     quickActions: [
       { id: 'qa-workspace-toggle', label: 'Workspace: Open Hub (Alt+W)', icon: Briefcase, type: 'Action', action: 'toggle-workspace' },
-      { id: 'qa-workspace-clear',  label: 'Workspace: Clear Staged Items', icon: Sparkles, type: 'Action', action: 'clear-workspace' },
-      { id: 'qa-ai',       label: 'Ask Atlas AI',           icon: Sparkles, type: 'Action', action: 'ask-ai' },
-      { id: 'qa-user',     label: 'Create New User',        icon: Sparkles, type: 'Action', path: '/admin/users?new=true' },
-      { id: 'qa-product',  label: 'Add New Item',           icon: Box,      type: 'Action', path: '/admin/products?new=true' },
-      { id: 'qa-rfq',      label: 'New Purchase RFQ',       icon: Sparkles, type: 'Action', path: '/admin/purchase-rfqs' },
-      { id: 'qa-po',       label: 'New Purchase Order',     icon: Sparkles, type: 'Action', path: '/admin/purchase-orders' },
-      { id: 'qa-bill',     label: 'New Supplier Bill',      icon: Sparkles, type: 'Action', path: '/admin/purchase-bills' },
-      { id: 'qa-quotation',label: 'New Sales Quotation',    icon: Sparkles, type: 'Action', path: '/admin/quotations' },
+      { id: 'qa-workspace-clear', label: 'Workspace: Clear Staged Items', icon: Sparkles, type: 'Action', action: 'clear-workspace' },
+      { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
+      { id: 'qa-user', label: 'Create New User', icon: Sparkles, type: 'Action', path: '/admin/users?new=true' },
+      { id: 'qa-product', label: 'Add New Item', icon: Box, type: 'Action', path: '/admin/products?new=true' },
+      { id: 'qa-rfq', label: 'New Purchase RFQ', icon: Sparkles, type: 'Action', path: '/admin/purchase-rfqs' },
+      { id: 'qa-po', label: 'New Purchase Order', icon: Sparkles, type: 'Action', path: '/admin/purchase-orders' },
+      { id: 'qa-bill', label: 'New Supplier Bill', icon: Sparkles, type: 'Action', path: '/admin/purchase-bills' },
+      { id: 'qa-quotation', label: 'New Sales Quotation', icon: Sparkles, type: 'Action', path: '/admin/quotations' },
     ],
   },
   doctor: {
     placeholder: 'Search patients, formulary peptides, protocols, or commands...',
     routePrefix: '/doctor',
     quickActions: [
-      { id: 'qa-new-rx',           label: '✨ New Prescription (Rx Builder)', icon: Stethoscope, type: 'Action', path: '/doctor/new-prescription' },
+      { id: 'qa-new-rx', label: '✨ New Prescription (Rx Builder)', icon: Stethoscope, type: 'Action', path: '/doctor/new-prescription' },
       { id: 'qa-workspace-toggle', label: 'Workspace: Clinical Hub (Alt+W)', icon: Briefcase, type: 'Action', action: 'toggle-workspace' },
-      { id: 'qa-patient-new',      label: 'Intake New Patient',               icon: User,        type: 'Action', path: '/doctor/patients?new=true' },
-      { id: 'qa-formulary',        label: 'Clinical Peptide Formulary',      icon: Box,         type: 'Action', path: '/doctor/catalog' },
-      { id: 'qa-protocols',        label: 'Clinical Protocols & Guidelines',  icon: Stethoscope, type: 'Action', path: '/doctor/protocols' },
-      { id: 'qa-history',          label: 'Prescriptions & Lifecycle',        icon: FileText,    type: 'Action', path: '/doctor/prescriptions-history' },
-      { id: 'qa-ai',               label: 'Ask Atlas AI (Clinical Scribe)',   icon: Sparkles,    type: 'Action', action: 'ask-ai' },
+      { id: 'qa-patient-new', label: 'Intake New Patient', icon: User, type: 'Action', path: '/doctor/patients?new=true' },
+      { id: 'qa-formulary', label: 'Clinical Peptide Formulary', icon: Box, type: 'Action', path: '/doctor/catalog' },
+      { id: 'qa-protocols', label: 'Clinical Protocols & Guidelines', icon: Stethoscope, type: 'Action', path: '/doctor/protocols' },
+      { id: 'qa-history', label: 'Prescriptions & Lifecycle', icon: FileText, type: 'Action', path: '/doctor/prescriptions-history' },
+      { id: 'qa-ai', label: 'Ask Atlas AI (Clinical Scribe)', icon: Sparkles, type: 'Action', action: 'ask-ai' },
     ],
   },
   patient: {
@@ -325,7 +325,7 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
                       onMouseEnter={() => {
                         setSelectedIndex(curIdx);
                         if (item.path) {
-                          try { router.prefetch(item.path); } catch (e) {}
+                          try { router.prefetch(item.path); } catch (e) { }
                         }
                       }}
                       style={{
@@ -354,7 +354,7 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
         </div>
         {/* Footer hints */}
         <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.75rem', color: '#cbd5e1', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-        <span><ArrowUp size={12} /> ↑ / <ArrowDown size={12} /> ↓: Navigate</span>
+          <span><ArrowUp size={12} /> ↑ / <ArrowDown size={12} /> ↓: Navigate</span>
           <span><ArrowRight size={12} /> ↵: Select</span>
           <span>Esc: Close</span>
         </div>

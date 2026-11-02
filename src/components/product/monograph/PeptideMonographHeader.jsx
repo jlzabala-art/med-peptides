@@ -77,18 +77,18 @@ export default function PeptideMonographHeader({
   const uniqueVariantDoses = [...new Set(variantDoses)];
 
   const strengthsList = (sortedStrengths || []).map(s => s.name || s.id).filter(Boolean);
-  const baseStrengths = strengthsList.length > 0 
-    ? strengthsList 
-    : uniqueVariantDoses.length > 0 
-      ? uniqueVariantDoses 
+  const baseStrengths = strengthsList.length > 0
+    ? strengthsList
+    : uniqueVariantDoses.length > 0
+      ? uniqueVariantDoses
       : (product.availableStrengths ? String(product.availableStrengths).split('|').map(s => s.trim()).filter(Boolean) : ['Standard Formulation']);
-  
+
   // Strictly filter out Bulk Raw API powders from finished clinical monographs
   const rawStrengthsArray = baseStrengths.filter(str => {
     const s = String(str).toLowerCase();
     return !s.includes('bulk') && !s.includes('api') && !/^\d+\s*g$/i.test(s.trim());
   });
-  
+
   // Clean strengths array to English
   const isTeletestHtma = slug?.toLowerCase().includes('htma') || slug?.toLowerCase().includes('mineralograma');
   const strengthsArray = (rawStrengthsArray.length > 0 ? rawStrengthsArray : ['Standard Formulation']).map(str => {
@@ -110,12 +110,12 @@ export default function PeptideMonographHeader({
 
   // Dynamic Presentation Format Resolution
   const rawFormat = String(
-    activeFormat?.name || 
-    activeFormat?.id || 
-    product.format || 
-    product.presentation || 
-    (product.variants?.[0]?.format) || 
-    (product.variants?.[0]?.presentation) || 
+    activeFormat?.name ||
+    activeFormat?.id ||
+    product.format ||
+    product.presentation ||
+    (product.variants?.[0]?.format) ||
+    (product.variants?.[0]?.presentation) ||
     ''
   ).toLowerCase();
 
@@ -126,16 +126,16 @@ export default function PeptideMonographHeader({
 
   const presentation = isDiagnostic
     ? (isTeletestHtma
-        ? 'Diagnostic Specimen Collection Kit (Proximal Scalp Hair)'
-        : (product.sampleType ? `Specimen Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit'))
-    : isNasalSpray 
-      ? 'Nasal Spray (Intranasal)' 
-      : isSublingual 
-        ? 'Sublingual Dropper' 
-        : isPen 
-          ? 'Multi-Dose Pen (SubQ)' 
-          : isOral 
-            ? 'Oral Capsules' 
+      ? 'Diagnostic Specimen Collection Kit (Proximal Scalp Hair)'
+      : (product.sampleType ? `Specimen Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit'))
+    : isNasalSpray
+      ? 'Nasal Spray (Intranasal)'
+      : isSublingual
+        ? 'Sublingual Dropper'
+        : isPen
+          ? 'Multi-Dose Pen (SubQ)'
+          : isOral
+            ? 'Oral Capsules'
             : (product.presentationFormat || product.presentation || 'Lyophilized sterile vial');
 
   const verifiedPurity = isDiagnostic
@@ -466,16 +466,16 @@ export default function PeptideMonographHeader({
                   gap: '6px'
                 }}
               >
-                <code 
+                <code
                   onClick={(e) => {
                     e.stopPropagation();
                     navigator.clipboard?.writeText(batchCode);
                     toast.success(`Batch code ${batchCode} copied ✓`);
                   }}
-                  style={{ 
-                    fontFamily: 'monospace', 
-                    fontWeight: 800, 
-                    color: '#003666', 
+                  style={{
+                    fontFamily: 'monospace',
+                    fontWeight: 800,
+                    color: '#003666',
                     fontSize: '0.80rem',
                     cursor: 'pointer',
                     background: '#f1f5f9',
@@ -525,7 +525,7 @@ export default function PeptideMonographHeader({
 
       {/* Institutional QR Verification Modal */}
       {isQrModalOpen && (
-        <div 
+        <div
           style={{
             position: 'fixed',
             inset: 0,
@@ -539,7 +539,7 @@ export default function PeptideMonographHeader({
           }}
           onClick={() => setIsQrModalOpen(false)}
         >
-          <div 
+          <div
             style={{
               background: '#ffffff',
               borderRadius: '12px',
@@ -593,10 +593,10 @@ export default function PeptideMonographHeader({
               boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
               marginBottom: '14px'
             }}>
-              <QRCodeSVG 
-                value={typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://www.atlashealth-services.com/p/${slug}`} 
-                size={160} 
-                level="M" 
+              <QRCodeSVG
+                value={typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://www.atlashealth-services.com/p/${slug}`}
+                size={160}
+                level="M"
                 includeMargin={false}
               />
             </div>

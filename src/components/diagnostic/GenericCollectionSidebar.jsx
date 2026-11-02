@@ -20,7 +20,7 @@ export default function GenericCollectionSidebar({
   config,
   categories = [],
   selectedCategory = 'all',
-  onSelectCategory = () => {},
+  onSelectCategory = () => { },
   totalCount = 0,
   onOpenInquiry = null,
   activePriceTier = 'clinic',

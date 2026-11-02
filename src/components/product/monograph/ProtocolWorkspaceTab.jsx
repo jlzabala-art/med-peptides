@@ -751,7 +751,7 @@ export default function ProtocolWorkspaceTab({
       `Total API Required: ${procCalc.totalApiRequiredMg} mg`,
       `Recommended Procurement: ${procCalc.procurementSummary}`,
       `Total Supply: ${procCalc.totalProvidedApiMg} mg API (${procCalc.expectedUnusedMg} mg buffer)`,
-      `Dispensed by: ${product.supplierName || 'Bioblend / Atlas Health Services'}`
+      `Dispensed by: ${product.supplierName || 'Lotusland / Bioblend / Atlas Health Services'}`
     ].join('\n');
 
     navigator.clipboard?.writeText(text);

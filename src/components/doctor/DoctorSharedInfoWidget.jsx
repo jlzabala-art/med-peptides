@@ -107,11 +107,11 @@ const DEFAULT_SHARED_CATALOGS = [
   }
 ];
 
-export default function DoctorSharedInfoWidget({ 
-  doctorId = 'dr-hanieh-erdmann', 
+export default function DoctorSharedInfoWidget({
+  doctorId = 'dr-hanieh-erdmann',
   doctorName = 'Dr. Hanieh Erdmann',
   compact = false,
-  onNavigate 
+  onNavigate
 }) {
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'catalogs' | 'protocols'
   const [sharedCatalogs, setSharedCatalogs] = useState([]);
