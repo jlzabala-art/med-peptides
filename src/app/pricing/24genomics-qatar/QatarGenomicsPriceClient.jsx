@@ -1829,7 +1829,7 @@ return (
                   <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
                     <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>Step 3 · Atlas Health</div>
                     <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a' }}>Clinical Diet Selection</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Plate sequencing & under 40g net carb limit</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Plate sequencing &amp; &lt;40g net carb limit</div>
                   </div>
                   <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
                     <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>Step 4 · Atlas Health</div>

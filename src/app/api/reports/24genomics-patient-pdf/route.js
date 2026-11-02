@@ -282,7 +282,7 @@ export async function GET(request) {
       });
 
       // Galenic Resolution Cross-Reference (Pointing directly to Pharmacy Order on Page 2)
-      page1.drawText(`🎯 Addressed by: ${p.assignedFormulation}`, {
+      page1.drawText(`Targeted Resolution: ${p.assignedFormulation}`, {
         x: 46,
         y: y - 41,
         size: 6.7,
