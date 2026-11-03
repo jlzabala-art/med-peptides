@@ -20,7 +20,9 @@ export function useCommercialSchedule(slug = 'colway-qatar') {
   const [agreement, setAgreement] = useState(() => FALLBACK_AGREEMENTS[slug] || null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currency, setCurrency] = useState('QAR');
+  const [currency, setCurrency] = useState(() => {
+    return FALLBACK_AGREEMENTS[slug]?.baseCurrency || 'AED';
+  });
   const [activeTab, setActiveTab] = useState('commercial');
   const [hossamDemoActive, setHossamDemoActive] = useState(false);
   const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
@@ -42,7 +44,7 @@ export function useCommercialSchedule(slug = 'colway-qatar') {
       }
       if (params.get('currency')) {
         const c = params.get('currency').toUpperCase();
-        if (['QAR', 'USD', 'PLN', 'EUR'].includes(c)) setCurrency(c);
+        if (['AED', 'QAR', 'USD', 'PLN', 'EUR', 'SAR', 'KWD'].includes(c)) setCurrency(c);
       }
     }
   }, []);
@@ -54,6 +56,12 @@ export function useCommercialSchedule(slug = 'colway-qatar') {
       const data = await getCommercialAgreement(slug, { forceRefresh: force });
       if (data) {
         setAgreement(data);
+        if (data.baseCurrency && typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          if (!params.get('currency')) {
+            setCurrency(data.baseCurrency);
+          }
+        }
       }
       setError(null);
     } catch (err) {

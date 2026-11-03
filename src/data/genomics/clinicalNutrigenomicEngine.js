@@ -379,3 +379,129 @@ export const TREATMENT_CYCLE = {
   followUpNoteEs: 'En el día 45, realizar analítica de seguimiento (glucemia, HbA1c, 25-OH-D y homocisteína) para calibrar el mantenimiento a 12 meses.'
 };
 
+/**
+ * Pathway 1: Personalized Local Over-The-Counter Commercial Supplements Catalog
+ * Guides patients to exact active chemical forms and local Qatar pharmacy brands.
+ */
+export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
+  {
+    id: 'active_folate',
+    nutrientEn: 'Active Folate (Vitamin B9)',
+    nutrientEs: 'Folato Activo (Vitamina B9)',
+    chemicalFormEn: 'L-5-Methyltetrahydrofolate (L-5-MTHF / Metafolin®)',
+    chemicalFormEs: 'L-5-Metiltetrahidrofolato (L-5-MTHF / Metafolina®)',
+    avoidEn: 'Synthetic Folic Acid (Pteroylmonoglutamic Acid) — Satures receptors and accumulates un-metabolized in MTHFR carriers',
+    avoidEs: 'Ácido Fólico Sintético — No se metaboliza en portadores MTHFR y compite con folatos naturales',
+    doseDaily: '800 mcg (0.8 mg)',
+    timingEn: 'Morning with water or light breakfast',
+    timingEs: 'Por la mañana con agua o desayuno ligero',
+    targetedGenes: 'MTHFR C677T (rs1801133 TT), MTR, MTRR',
+    localBrandsEn: 'Thorne 5-MTHF 1mg, Solgar Folate (as Metafolin 800mcg), Pure Encapsulations Folate 1,000',
+    localBrandsEs: 'Thorne 5-MTHF 1mg, Solgar Folate (Metafolin 800mcg), Pure Encapsulations Folate 1,000',
+    availabilityQatar: 'Widely available in Doha (Boots, Wellcare, Kulud Pharmacies) and GCC distributors'
+  },
+  {
+    id: 'vitamin_d3_k2',
+    nutrientEn: 'Vitamin D3 + Vitamin K2 (Synergistic Duo)',
+    nutrientEs: 'Vitamina D3 + Vitamina K2 (Dúo Sinérgico)',
+    chemicalFormEn: 'Cholecalciferol (D3) + Menaquinone-7 (all-trans MK-7 K2)',
+    chemicalFormEs: 'Colecalciferol (D3) + Menaquinona-7 (MK-7 todo-trans)',
+    avoidEn: 'Isolated high-dose D3 without K2 (risk of arterial calcification) or Ergocalciferol (D2)',
+    avoidEs: 'D3 aislada sin K2 (riesgo de depósito arterial de calcio) o D2 (Ergocalciferol vegetal)',
+    doseDaily: '4,000 IU D3 + 100 mcg K2 MK-7',
+    timingEn: 'With breakfast or lunch containing healthy dietary fats (olive oil, avocado, eggs)',
+    timingEs: 'Con el desayuno o almuerzo con grasas saludables (aceite de oliva, aguacate, huevos)',
+    targetedGenes: 'VDR FokI (rs2228570), CYP2R1, GC (DBP)',
+    localBrandsEn: 'Now Foods D3 & K2 Liposomal, Carlson Labs Solar D Gems, Thorne D/K2 Liquid Drops',
+    localBrandsEs: 'Now Foods D3 & K2 Liposomal, Carlson Labs Solar D Gems, Thorne D/K2 Gotas',
+    availabilityQatar: 'Available in major Doha wellness centers, hospital pharmacies & health stores'
+  },
+  {
+    id: 'chelated_magnesium',
+    nutrientEn: 'Bioavailable Chelated Magnesium',
+    nutrientEs: 'Magnesio Quelado de Alta Biodisponibilidad',
+    chemicalFormEn: 'Magnesium Bisglycinate Chelate or Magnesium L-Threonate',
+    chemicalFormEs: 'Bisglicinato de Magnesio Quelado o L-Treonato de Magnesio',
+    avoidEn: 'Magnesium Oxide or Magnesium Sulfate (Poor <4% absorption, laxative side effects)',
+    avoidEs: 'Óxido o Sulfato de Magnesio (Absorción <4%, efecto laxante indeseado sin absorción)',
+    doseDaily: '300–400 mg elemental magnesium',
+    timingEn: 'Evening 45–60 minutes before bedtime',
+    timingEs: 'Por la noche, 45–60 minutos antes de acostarse',
+    targetedGenes: 'COMT (rs4680), TRPM6, SLC41A1',
+    localBrandsEn: 'Pure Encapsulations Magnesium Glycinate, Doctor’s Best High Absorption Magnesium, Thorne Magnesium Bisglycinate',
+    localBrandsEs: 'Pure Encapsulations Magnesium Glycinate, Doctor’s Best High Absorption Magnesium, Thorne Magnesium',
+    availabilityQatar: 'Standard inventory across leading pharmacies in Qatar & UAE'
+  },
+  {
+    id: 'methyl_b12_b6',
+    nutrientEn: 'Methylated Neuro-Support B-Complex',
+    nutrientEs: 'Complejo B Metilado de Soporte Neurológico',
+    chemicalFormEn: 'Methylcobalamin (B12) + Pyridoxal-5-Phosphate (P-5-P active B6)',
+    chemicalFormEs: 'Metilcobalamina (B12 activa) + Piridoxal-5-Fosfato (P-5-P activa B6)',
+    avoidEn: 'Cyanocobalamin (releases synthetic cyanide moiety upon hepatic clearance) and Pyridoxine HCl',
+    avoidEs: 'Cianocobalamina (libera cianuro sintético que requiere desintoxicación hepática)',
+    doseDaily: 'B12: 1,000 mcg · B6 (P-5-P): 25 mg',
+    timingEn: 'Morning with food (enhances daytime alertness and dopamine synthesis)',
+    timingEs: 'Por la mañana con alimento (optimiza síntesis de dopamina y vigilia)',
+    targetedGenes: 'MTRR (rs1801394), TCN2, CBS',
+    localBrandsEn: 'Jarrow Formulas Methyl B-Right, Life Extension BioActive Complete B-Complex, Thorne Basic B Complex',
+    localBrandsEs: 'Jarrow Formulas Methyl B-Right, Life Extension BioActive B-Complex, Thorne Basic B',
+    availabilityQatar: 'Available OTC in Qatar pharmacy chains (Wellcare, Boots)'
+  },
+  {
+    id: 'gut_barrier_probiotics',
+    nutrientEn: 'Targeted Enteric Probiotics & Gut Barrier Support',
+    nutrientEs: 'Probióticos Entéricos Dirigidos & Soporte de Barrera',
+    chemicalFormEn: 'Multi-strain freeze-dried CFUs (B. lactis, L. rhamnosus GG, L. plantarum) in acid-resistant enteric capsules',
+    chemicalFormEs: 'Cepas probióticas vivas liofilizadas en cápsulas gastrorresistentes entéricas (DRcaps®)',
+    avoidEn: 'Non-enteric cheap gummies or yogurts containing added sugars, lactose excipients, or artificial dyes',
+    avoidEs: 'Gummies comerciales o yogures azucarados con lactosa residual y colorantes artificiales',
+    doseDaily: '10–15 Billion CFU + 350 mg L-Glutamine',
+    timingEn: 'Fasting in the morning upon waking with room-temperature water',
+    timingEs: 'En ayunas al despertar con agua a temperatura ambiente',
+    targetedGenes: 'MCM6 / LCT (rs4988235 Lactase deficiency), FUT2 Non-Secretor',
+    localBrandsEn: 'Culturelle Digestive Daily Probiotic, Seed DS-01 Daily Synbiotic, Renew Life Extra Care',
+    localBrandsEs: 'Culturelle Digestive Probiotic, Seed DS-01 Synbiotic, Renew Life Probiotics',
+    availabilityQatar: 'Available across premium wellness pharmacies in Doha & online delivery'
+  }
+];
+
+/**
+ * Dual-Track Prescription Comparison Strategy
+ */
+export const PRESCRIPTION_COMPARISON = {
+  pathwayA: {
+    id: 'pathway_a_commercial',
+    title: 'Pathway 1: Local Commercial Over-The-Counter Supplements',
+    titleEs: 'Vía 1: Suplementos Comerciales Locales (Farmacia Doha / GCC)',
+    subtitle: 'Immediate OTC purchase in Qatar pharmacies using genetically validated active forms',
+    pros: [
+      'Immediate availability in local Qatar pharmacies (Boots, Wellcare, Kulud)',
+      'Zero waiting time for compounding formulation',
+      'Pay-as-you-go modular purchasing for individual vitamins'
+    ],
+    cons: [
+      'Pill fatigue: Patient must take 6 to 9 pills from 5 separate commercial bottles at different times',
+      'Non-customized doses: Fixed mass manufacturer dosages may under- or over-shoot genetic target',
+      'Excipient risk: Commercial capsules often contain lactose, silica, titanium dioxide, or synthetic fillers'
+    ]
+  },
+  pathwayB: {
+    id: 'pathway_b_compounded',
+    title: 'Pathway 2: Personalized Compounded Formulation (Compounding Pharmacy)',
+    titleEs: 'Vía 2: Formulación Magistral Personalizada (Farmacia Galénica)',
+    subtitle: 'Tailor-made chronobiological 3-capsule master regimen prepared by licensed compounding laboratory',
+    pros: [
+      'Maximum adherence: Combines all therapeutic actives into 3 synchronized daily capsules (Morning, Midday, Evening)',
+      'Exact personalized dosages calibrated to genetic polymorphism severity and patient weight',
+      '100% hypoallergenic: Vegetable DRcaps®, strictly lactose-free, zero artificial excipients or chemical binders',
+      'Bypasses galenic incompatibilities (protects live probiotics from berberine antagonism)'
+    ],
+    cons: [
+      'Requires 48–72h compounding preparation and specialized cold-chain delivery',
+      'Available exclusively through authorized clinical partner prescription'
+    ]
+  }
+};
+
+

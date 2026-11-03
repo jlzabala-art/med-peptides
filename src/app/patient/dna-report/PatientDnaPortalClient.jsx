@@ -28,7 +28,9 @@ import {
   THREE_CAPSULE_PROTOCOL,
   CONCRETE_DIET_GUIDELINES,
   TREATMENT_CYCLE,
-  TWENTY_FOUR_GENETICS_AI_ECOSYSTEM
+  TWENTY_FOUR_GENETICS_AI_ECOSYSTEM,
+  COMMERCIAL_LOCAL_SUPPLEMENTS,
+  PRESCRIPTION_COMPARISON
 } from '@/data/genomics/clinicalNutrigenomicEngine';
 
 export default function PatientDnaPortalClient({
@@ -121,7 +123,7 @@ export default function PatientDnaPortalClient({
               }}
             >
               <Download size={14} />
-              <span>Download Official PDF (2 Pages)</span>
+              <span>Download Official PDF (3 Pages)</span>
             </a>
           </div>
         </div>
@@ -189,14 +191,14 @@ export default function PatientDnaPortalClient({
           </div>
         </div>
 
-        {/* ── Section Tabs: Clearly Marking Sheet 1 (Patient) vs Sheet 2 (Pharmacy) ── */}
+        {/* ── Section Tabs: Clearly Marking Patient Guide, Pathway 1 (OTC), Pathway 2 (Compounded), and Lifestyle ── */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setActiveSection('summary')}
             style={{
-              padding: '9px 18px',
+              padding: '9px 16px',
               borderRadius: '6px',
-              fontSize: '0.85rem',
+              fontSize: '0.84rem',
               fontWeight: 750,
               border: 'none',
               backgroundColor: activeSection === 'summary' ? '#003666' : '#ffffff',
@@ -208,15 +210,35 @@ export default function PatientDnaPortalClient({
               boxShadow: activeSection === 'summary' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            <span>📄 Sheet 1: Patient Guide (Hoja del Paciente)</span>
+            <span>📄 Sheet 1: Clinical Guide &amp; DNA Findings</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSection('commercial')}
+            style={{
+              padding: '9px 16px',
+              borderRadius: '6px',
+              fontSize: '0.84rem',
+              fontWeight: 750,
+              border: 'none',
+              backgroundColor: activeSection === 'commercial' ? '#0d9488' : '#ffffff',
+              color: activeSection === 'commercial' ? '#ffffff' : '#64748b',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: activeSection === 'commercial' ? '0 2px 4px rgba(13, 148, 136, 0.2)' : 'none'
+            }}
+          >
+            <span>🏪 Pathway 1: Local Commercial Supplements (OTC)</span>
           </button>
 
           <button
             onClick={() => setActiveSection('prescription')}
             style={{
-              padding: '9px 18px',
+              padding: '9px 16px',
               borderRadius: '6px',
-              fontSize: '0.85rem',
+              fontSize: '0.84rem',
               fontWeight: 750,
               border: 'none',
               backgroundColor: activeSection === 'prescription' ? '#003666' : '#ffffff',
@@ -228,15 +250,15 @@ export default function PatientDnaPortalClient({
               boxShadow: activeSection === 'prescription' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            <span>💊 Sheet 2: Pharmacy Compounding Order (Hoja Farmacéutico)</span>
+            <span>💊 Pathway 2: Master Compounding Order</span>
           </button>
 
           <button
             onClick={() => setActiveSection('lifestyle')}
             style={{
-              padding: '9px 18px',
+              padding: '9px 16px',
               borderRadius: '6px',
-              fontSize: '0.85rem',
+              fontSize: '0.84rem',
               fontWeight: 750,
               border: 'none',
               backgroundColor: activeSection === 'lifestyle' ? '#003666' : '#ffffff',
@@ -248,7 +270,7 @@ export default function PatientDnaPortalClient({
               boxShadow: activeSection === 'lifestyle' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            <span>🥗 Dietary & Lifestyle Rules</span>
+            <span>🥗 Dietary &amp; Lifestyle Rules</span>
           </button>
         </div>
 
@@ -425,7 +447,221 @@ export default function PatientDnaPortalClient({
           </div>
         )}
 
-        {/* ── SECTION 2: MASTER PHARMACY COMPOUNDING ORDER (PAGE 2 COPY) ── */}
+        {/* ── SECTION: PATHWAY 1 · LOCAL COMMERCIAL OTC SUPPLEMENTS (PAGE 2 COPY) ── */}
+        {activeSection === 'commercial' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+            {/* Pathway 1 Header Banner */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #cbd5e1', padding: '1.25rem 1.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '8px' }}>
+                <div>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                    PAGE 2 OF 3 · PATHWAY 1: LOCAL COMMERCIAL OTC SUPPLEMENTS
+                  </span>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 850, color: '#003666', margin: '6px 0 2px 0' }}>
+                    Personalized Multivitamin &amp; Commercial Supplement Recommendation
+                  </h3>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>DISPENSING STANDARD</div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#0d9488' }}>Doha / Qatar Pharmacies OTC</div>
+                </div>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.84rem', color: '#475569', lineHeight: 1.5 }}>
+                Based on your genetic profile, these commercially available supplements can be purchased directly in retail pharmacies in Doha (Boots, Wellcare, Kulud, Aster). Make sure to purchase the exact active chemical forms specified below to bypass your metabolic bottlenecks.
+              </p>
+            </div>
+
+            {/* Warning Callout Box for OTC purchases */}
+            <div style={{ backgroundColor: '#fefce8', border: '1.5px solid #fef08a', borderRadius: '10px', padding: '1rem 1.25rem' }}>
+              <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#b45309', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <AlertCircle size={15} />
+                <span>GENETIC DISPENSING ADVICE: ACTIVE CHEMICAL FORMS ARE MANDATORY</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.80rem', color: '#451a03', lineHeight: 1.5 }}>
+                Standard commercial multivitamins commonly use synthetic folic acid, magnesium oxide, and cyanocobalamin. Due to your MTHFR C677T and VDR polymorphisms, synthetic folic acid and poorly absorbed mineral oxides cannot be utilized efficiently. Look for the exact chemical names on the back label.
+              </p>
+            </div>
+
+            {/* Dual-Track Strategy Comparison Card */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+              <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1.5px solid #0d9488', padding: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '2px 6px', borderRadius: '4px' }}>
+                    CURRENT VIEW
+                  </span>
+                  <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                    {PRESCRIPTION_COMPARISON.pathwayA.title}
+                  </h4>
+                </div>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0 0 10px 0' }}>
+                  {PRESCRIPTION_COMPARISON.pathwayA.subtitle}
+                </p>
+                <div style={{ fontSize: '0.76rem', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>Advantages:</div>
+                <ul style={{ margin: '0 0 10px 0', paddingLeft: '18px', fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
+                  {PRESCRIPTION_COMPARISON.pathwayA.pros.map((pro, i) => (
+                    <li key={i}>{pro}</li>
+                  ))}
+                </ul>
+                <div style={{ fontSize: '0.76rem', color: '#dc2626', fontWeight: 700, marginBottom: '6px' }}>Considerations:</div>
+                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.76rem', color: '#64748b', lineHeight: 1.5 }}>
+                  {PRESCRIPTION_COMPARISON.pathwayA.cons.map((con, i) => (
+                    <li key={i}>{con}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div style={{ backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #cbd5e1', padding: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 6px', borderRadius: '4px' }}>
+                    PATHWAY 2 ALTERNATIVE
+                  </span>
+                  <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#003666' }}>
+                    {PRESCRIPTION_COMPARISON.pathwayB.title}
+                  </h4>
+                </div>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0 0 10px 0' }}>
+                  {PRESCRIPTION_COMPARISON.pathwayB.subtitle}
+                </p>
+                <div style={{ fontSize: '0.76rem', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>Clinical Benefits:</div>
+                <ul style={{ margin: '0 0 10px 0', paddingLeft: '18px', fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
+                  {PRESCRIPTION_COMPARISON.pathwayB.pros.map((pro, i) => (
+                    <li key={i}>{pro}</li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => setActiveSection('prescription')}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    backgroundColor: '#003666',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 750,
+                    cursor: 'pointer',
+                    marginTop: '6px'
+                  }}
+                >
+                  View Tailor-Made Compounding Order →
+                </button>
+              </div>
+            </div>
+
+            {/* List of 5 Commercial Supplements */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {COMMERCIAL_LOCAL_SUPPLEMENTS.map((supp, sIdx) => (
+                <div
+                  key={supp.id}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '10px',
+                    border: '1px solid #e2e8f0',
+                    padding: '1.25rem',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
+                        #{sIdx + 1}
+                      </span>
+                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#003666' }}>
+                        {supp.nutrientEn}
+                      </h4>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px' }}>
+                        Dose: {supp.doseDaily}
+                      </span>
+                      <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                        Target: {supp.targetedGenes}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.75rem', fontSize: '0.80rem' }}>
+                    <div>
+                      <span style={{ fontWeight: 700, color: '#0f172a', display: 'block', marginBottom: '2px' }}>
+                        ✓ Active Chemical Form:
+                      </span>
+                      <div style={{ color: '#0d9488', fontWeight: 750 }}>
+                        {supp.chemicalFormEn}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span style={{ fontWeight: 700, color: '#b91c1c', display: 'block', marginBottom: '2px' }}>
+                        ✗ Avoid on Label:
+                      </span>
+                      <div style={{ color: '#64748b', fontSize: '0.76rem' }}>
+                        {supp.avoidEn}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span style={{ fontWeight: 700, color: '#0f172a', display: 'block', marginBottom: '2px' }}>
+                        ⏰ Posology:
+                      </span>
+                      <div style={{ color: '#334155' }}>
+                        {supp.timingEn}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span style={{ fontWeight: 700, color: '#003666', display: 'block', marginBottom: '2px' }}>
+                        🏬 Qatar Reference Brands:
+                      </span>
+                      <div style={{ color: '#0f172a', fontWeight: 650 }}>
+                        {supp.localBrandsEn}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px dashed #e2e8f0', fontSize: '0.72rem', color: '#64748b' }}>
+                    📍 Availability: {supp.availabilityQatar}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom PDF CTA */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1.25rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <strong style={{ fontSize: '0.88rem', color: '#003666' }}>Download Complete 3-Page Clinical Dossier:</strong>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
+                  Includes Page 1 (Findings), Page 2 (Pathway 1 Local OTC Guide), and Page 3 (Pathway 2 Compounding Order).
+                </p>
+              </div>
+
+              <a
+                href={pdfDownloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 18px',
+                  fontSize: '0.82rem',
+                  fontWeight: 750,
+                  backgroundColor: '#0d9488',
+                  color: '#ffffff',
+                  borderRadius: '6px',
+                  textDecoration: 'none'
+                }}
+              >
+                <Download size={15} />
+                <span>Download Official PDF (3 Pages)</span>
+              </a>
+            </div>
+
+          </div>
+        )}
+
+        {/* ── SECTION 3: MASTER PHARMACY COMPOUNDING ORDER (PAGE 3 COPY) ── */}
         {activeSection === 'prescription' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -434,7 +670,7 @@ export default function PatientDnaPortalClient({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '8px' }}>
                 <div>
                   <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                    PAGE 2 OF 2 · PHARMACY DISPENSING COPY (COPIA PARA LA FARMACIA)
+                    PAGE 3 OF 3 · PATHWAY 2: MASTER COMPOUNDING PRESCRIPTION ORDER
                   </span>
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 850, color: '#003666', margin: '6px 0 2px 0' }}>
                     Master Compounding Prescription Order

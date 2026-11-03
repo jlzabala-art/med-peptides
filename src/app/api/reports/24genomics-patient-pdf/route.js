@@ -5,7 +5,9 @@ import {
   CLINICAL_PILLARS,
   THREE_CAPSULE_PROTOCOL,
   CONCRETE_DIET_GUIDELINES,
-  TREATMENT_CYCLE
+  TREATMENT_CYCLE,
+  COMMERCIAL_LOCAL_SUPPLEMENTS,
+  PRESCRIPTION_COMPARISON
 } from '@/data/genomics/clinicalNutrigenomicEngine';
 
 export const dynamic = 'force-dynamic';
@@ -66,7 +68,7 @@ export async function GET(request) {
     });
 
     // Page 1 Role Badge (PATIENT COPY)
-    const p1Badge = 'PAGE 1 OF 2 · PATIENT CLINICAL GUIDE';
+    const p1Badge = 'PAGE 1 OF 3 · PATIENT CLINICAL GUIDE';
     const p1BadgeWidth = helveticaBold.widthOfTextAtSize(p1Badge, 7) + 14;
     page1.drawRectangle({
       x: p1Width - 36 - p1BadgeWidth,
@@ -428,7 +430,7 @@ export async function GET(request) {
     });
 
     // Page 1 Footer
-    page1.drawText('Page 1 of 2 · Patient Clinical Reference Guide · Turn to Page 2 for Official Compounding Pharmacy Order', {
+    page1.drawText('Page 1 of 3 · Patient Clinical Reference Guide · Turn to Page 2 for Pathway 1 (Local OTC) & Page 3 for Pathway 2 (Compounding Order)', {
       x: 36,
       y: 18,
       size: 7,
@@ -437,24 +439,23 @@ export async function GET(request) {
     });
 
     // =========================================================================
-    // PAGE 2: OFFICIAL PHARMACY COMPOUNDING PRESCRIPTION
+    // PAGE 2: PATHWAY 1 · PERSONALIZED COMMERCIAL SUPPLEMENT RECOMMENDATION (OTC)
     // =========================================================================
     const page2 = pdfDoc.addPage([595.28, 841.89]);
     const { width: p2Width, height: p2Height } = page2.getSize();
 
-    // Top Brand Accent Strip (Navy for medical compounding authority)
+    // Top Brand Accent Strip (Teal for nutrition & commercial wellness guidance)
     page2.drawRectangle({
       x: 0,
       y: p2Height - 8,
       width: p2Width,
       height: 8,
-      color: navyPrimary
+      color: tealAccent
     });
 
     let y2 = p2Height - 26;
 
-    // Page 2 Header (Hierarchical Google Cloud UX layout: Zero horizontal collisions)
-    // Row 1: Platform Category Context (Left) + Distinct Role Badge (Right)
+    // Page 2 Header
     page2.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
       x: 36,
       y: y2,
@@ -463,16 +464,15 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    // Page 2 Role Badge (PHARMACY COPY - Clean English in distinct pill box)
-    const p2Badge = 'PAGE 2 OF 2 · PHARMACY COPY';
+    const p2Badge = 'PAGE 2 OF 3 · PATHWAY 1: COMMERCIAL OTC SUPPLEMENTS';
     const p2BadgeWidth = helveticaBold.widthOfTextAtSize(p2Badge, 6.8) + 14;
     page2.drawRectangle({
       x: p2Width - 36 - p2BadgeWidth,
       y: y2 - 3,
       width: p2BadgeWidth,
       height: 15,
-      color: badgeRedBg,
-      borderColor: alertRed,
+      color: rgb(240 / 255, 253 / 255, 250 / 255),
+      borderColor: tealAccent,
       borderWidth: 1
     });
     page2.drawText(p2Badge, {
@@ -480,22 +480,20 @@ export async function GET(request) {
       y: y2 + 2,
       size: 6.8,
       font: helveticaBold,
-      color: alertRed
+      color: tealAccent
     });
 
-    // Row 2: Main Document Title (Full Page Width - Unconstrained)
     y2 -= 16;
-    page2.drawText('MASTER COMPOUNDING PRESCRIPTION ORDER', {
+    page2.drawText('PERSONALIZED MULTIVITAMIN & SUPPLEMENT RECOMMENDATION', {
       x: 36,
       y: y2,
-      size: 12,
+      size: 11.5,
       font: helveticaBold,
       color: darkSlate
     });
 
-    // Row 3: Subtitle / Authority Scope
     y2 -= 11;
-    page2.drawText('Official Magistral Compounding Directive · Valid for 60-Day Dispensing Protocol', {
+    page2.drawText('Genetically Matched Over-the-Counter Supplements Available for Local Purchase in Qatar & GCC Pharmacies', {
       x: 36,
       y: y2,
       size: 7.2,
@@ -503,7 +501,6 @@ export async function GET(request) {
       color: mutedSlate
     });
 
-    // Row 4: Separator Line
     y2 -= 8;
     page2.drawLine({
       start: { x: 36, y: y2 },
@@ -512,9 +509,9 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Row 5: Metadata Ribbon
+    // Metadata Ribbon
     y2 -= 12;
-    page2.drawText(`PRESCRIPTION REF: RX-DNA-COMP-8821   |   PATIENT: ${patientName} (Specimen: ${sampleId})   |   TERRITORY: State of Qatar`, {
+    page2.drawText(`PATIENT: ${patientName} (Specimen: ${sampleId})   |   TERRITORY: State of Qatar (Doha OTC)   |   PROTOCOL: 60-Day Commercial OTC Regimen`, {
       x: 36,
       y: y2,
       size: 7.2,
@@ -530,37 +527,320 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Technical Compounding Directive to Pharmacist
-    y2 -= 38;
+    // Clinical Directive to Patient box
+    y2 -= 44;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 34,
-      color: lightBg,
-      borderColor: cardBorder,
+      height: 40,
+      color: rgb(254 / 255, 252 / 255, 232 / 255),
+      borderColor: rgb(254 / 255, 240 / 255, 138 / 255),
       borderWidth: 1
     });
 
-    page2.drawText('TECHNICAL GALENIC PARTITIONING DIRECTIVE FOR THE LICENSED PHARMACIST:', {
+    page2.drawText('IMPORTANT GENETIC DISPENSING ADVICE FOR LOCAL PHARMACY PURCHASES:', {
       x: 44,
-      y: y2 + 22,
+      y: y2 + 28,
       size: 6.8,
       font: helveticaBold,
-      color: navyPrimary
+      color: amberDark
     });
-    const directiveText = 'Active substances are strictly partitioned into 3 separate formulations: (1) Enteric DRcaps® isolate probiotics from stomach acid and botanical berberine; (2) Lipophilic vitamins D3/K2 require co-administration with lipid meal in Capsule B; (3) Magnesium and sleep cofactors are reserved for evening Capsule C. Excipient Standard: 100% Lactose-Free HPMC / microcrystalline cellulose.';
-    page2.drawText(directiveText, {
+    const otcDirectiveText = 'Standard retail multivitamins contain synthetic folic acid, magnesium oxide, and cyanocobalamin, which your DNA cannot efficiently metabolize or actively rejects. When purchasing commercial supplements in Doha (Boots, Wellcare, Kulud, Aster), verify the exact chemical form on the label. Never accept generic synthetic substitutes.';
+    page2.drawText(otcDirectiveText, {
       x: 44,
-      y: y2 + 10,
-      size: 6.2,
+      y: y2 + 16,
+      size: 6.0,
       font: helvetica,
       color: darkSlate,
       maxWidth: p2Width - 88,
       lineHeight: 8.5
     });
 
-    // Streamlined 3-Capsule Compounding Tables (2-Line Google Cloud Console Resource UX: Zero Collisions)
+    // Render the 5 Supplements from COMMERCIAL_LOCAL_SUPPLEMENTS
+    y2 -= 10;
+    COMMERCIAL_LOCAL_SUPPLEMENTS.forEach((supp, idx) => {
+      const cardH = 74;
+      y2 -= cardH;
+
+      // Card Container
+      page2.drawRectangle({
+        x: 36,
+        y: y2,
+        width: p2Width - 72,
+        height: cardH,
+        color: white,
+        borderColor: cardBorder,
+        borderWidth: 1
+      });
+
+      // Card Header Strip
+      page2.drawRectangle({
+        x: 36,
+        y: y2 + cardH - 16,
+        width: p2Width - 72,
+        height: 16,
+        color: lightBg
+      });
+
+      page2.drawText(`${idx + 1}. ${supp.nutrientEn.toUpperCase()}`, {
+        x: 44,
+        y: y2 + cardH - 11,
+        size: 7.0,
+        font: helveticaBold,
+        color: navyPrimary
+      });
+
+      page2.drawText(`Dose: ${supp.doseDaily}`, {
+        x: 230,
+        y: y2 + cardH - 11,
+        size: 6.5,
+        font: helveticaBold,
+        color: tealAccent
+      });
+
+      const geneText = `DNA Target: ${supp.targetedGenes}`;
+      const geneW = helveticaBold.widthOfTextAtSize(geneText, 6.0);
+      page2.drawText(geneText, {
+        x: p2Width - 44 - geneW,
+        y: y2 + cardH - 11,
+        size: 6.0,
+        font: helveticaBold,
+        color: mutedSlate
+      });
+
+      // Line 1: Active Form
+      page2.drawText('• Recommended Chemical Form: ', {
+        x: 44,
+        y: y2 + 45,
+        size: 6.2,
+        font: helveticaBold,
+        color: darkSlate
+      });
+      page2.drawText(supp.chemicalFormEn, {
+        x: 165,
+        y: y2 + 45,
+        size: 6.2,
+        font: helveticaBold,
+        color: tealAccent
+      });
+
+      // Line 2: Avoid
+      page2.drawText('• Strictly Avoid: ', {
+        x: 44,
+        y: y2 + 33,
+        size: 6.0,
+        font: helveticaBold,
+        color: alertRed
+      });
+      page2.drawText(supp.avoidEn, {
+        x: 110,
+        y: y2 + 33,
+        size: 5.7,
+        font: helvetica,
+        color: darkSlate,
+        maxWidth: p2Width - 160
+      });
+
+      // Line 3: Posology
+      page2.drawText('• Timing & Posology: ', {
+        x: 44,
+        y: y2 + 21,
+        size: 6.0,
+        font: helveticaBold,
+        color: mutedSlate
+      });
+      page2.drawText(supp.timingEn, {
+        x: 130,
+        y: y2 + 21,
+        size: 5.8,
+        font: helvetica,
+        color: darkSlate
+      });
+
+      // Line 4: Retail Doha Brands
+      page2.drawText('• Qatar Pharmacy Reference Brands: ', {
+        x: 44,
+        y: y2 + 9,
+        size: 6.0,
+        font: helveticaBold,
+        color: navyPrimary
+      });
+      page2.drawText(supp.localBrandsEn, {
+        x: 185,
+        y: y2 + 9,
+        size: 5.8,
+        font: helveticaBold,
+        color: darkSlate
+      });
+
+      // Spacing between cards
+      y2 -= 8;
+    });
+
+    // Bottom Adherence & Compounding Notice Banner
+    y2 -= 46;
+    page2.drawRectangle({
+      x: 36,
+      y: y2,
+      width: p2Width - 72,
+      height: 42,
+      color: rgb(240 / 255, 253 / 255, 250 / 255),
+      borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
+      borderWidth: 1
+    });
+
+    page2.drawText('DUAL-TRACK COMPARISON: COMMERCIAL OTC (PATHWAY 1) VS. COMPOUNDED (PATHWAY 2):', {
+      x: 44,
+      y: y2 + 29,
+      size: 6.8,
+      font: helveticaBold,
+      color: tealAccent
+    });
+    const comparisonNotice = '• Pathway 1 requires taking 6 to 9 pills from 5 separate commercial bottles at varied times, with fixed non-customized dosages.\n• Pathway 2 combines all pure pharmaceutical actives into 3 synchronized chronobiological capsules (Morning, Midday, Evening) prepared 100% lactose-free in DRcaps® by our compounding pharmacy. See Page 3 for the official compounding pharmacy order.';
+    page2.drawText(comparisonNotice, {
+      x: 44,
+      y: y2 + 18,
+      size: 5.8,
+      font: helvetica,
+      color: darkSlate,
+      maxWidth: p2Width - 88,
+      lineHeight: 8.2
+    });
+
+    // Page 2 Footer
+    page2.drawText('Page 2 of 3 · Pathway 1: Commercial OTC Supplements Guide · Turn to Page 3 for Official Compounding Pharmacy Order', {
+      x: 36,
+      y: 18,
+      size: 7,
+      font: helvetica,
+      color: mutedSlate
+    });
+
+    // =========================================================================
+    // PAGE 3: PATHWAY 2 · OFFICIAL PHARMACY COMPOUNDING PRESCRIPTION ORDER
+    // =========================================================================
+    const page3 = pdfDoc.addPage([595.28, 841.89]);
+    const { width: p3Width, height: p3Height } = page3.getSize();
+
+    // Top Brand Accent Strip (Navy for medical compounding authority)
+    page3.drawRectangle({
+      x: 0,
+      y: p3Height - 8,
+      width: p3Width,
+      height: 8,
+      color: navyPrimary
+    });
+
+    let y3 = p3Height - 26;
+
+    // Page 3 Header (Hierarchical Google Cloud UX layout: Zero horizontal collisions)
+    page3.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
+      x: 36,
+      y: y3,
+      size: 8.5,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    // Page 3 Role Badge (PHARMACY COPY)
+    const p3Badge = 'PAGE 3 OF 3 · PATHWAY 2: COMPOUNDING ORDER';
+    const p3BadgeWidth = helveticaBold.widthOfTextAtSize(p3Badge, 6.8) + 14;
+    page3.drawRectangle({
+      x: p3Width - 36 - p3BadgeWidth,
+      y: y3 - 3,
+      width: p3BadgeWidth,
+      height: 15,
+      color: badgeRedBg,
+      borderColor: alertRed,
+      borderWidth: 1
+    });
+    page3.drawText(p3Badge, {
+      x: p3Width - 36 - p3BadgeWidth + 7,
+      y: y3 + 2,
+      size: 6.8,
+      font: helveticaBold,
+      color: alertRed
+    });
+
+    // Row 2: Main Document Title (Full Page Width - Unconstrained)
+    y3 -= 16;
+    page3.drawText('MASTER COMPOUNDING PRESCRIPTION ORDER', {
+      x: 36,
+      y: y3,
+      size: 12,
+      font: helveticaBold,
+      color: darkSlate
+    });
+
+    // Row 3: Subtitle / Authority Scope
+    y3 -= 11;
+    page3.drawText('Personalized Tailor-Made Compounded Formulation · 3-Capsule Synchronized Regimen (60 Days)', {
+      x: 36,
+      y: y3,
+      size: 7.2,
+      font: helvetica,
+      color: mutedSlate
+    });
+
+    // Row 4: Separator Line
+    y3 -= 8;
+    page3.drawLine({
+      start: { x: 36, y: y3 },
+      end: { x: p3Width - 36, y: y3 },
+      thickness: 1,
+      color: cardBorder
+    });
+
+    // Row 5: Metadata Ribbon
+    y3 -= 12;
+    page3.drawText(`PRESCRIPTION REF: RX-DNA-COMP-8821   |   PATIENT: ${patientName} (Specimen: ${sampleId})   |   TERRITORY: State of Qatar`, {
+      x: 36,
+      y: y3,
+      size: 7.2,
+      font: helveticaBold,
+      color: tealAccent
+    });
+
+    y3 -= 8;
+    page3.drawLine({
+      start: { x: 36, y: y3 },
+      end: { x: p3Width - 36, y: y3 },
+      thickness: 0.8,
+      color: cardBorder
+    });
+
+    // Technical Compounding Directive to Pharmacist
+    y3 -= 38;
+    page3.drawRectangle({
+      x: 36,
+      y: y3,
+      width: p3Width - 72,
+      height: 34,
+      color: lightBg,
+      borderColor: cardBorder,
+      borderWidth: 1
+    });
+
+    page3.drawText('TECHNICAL GALENIC PARTITIONING DIRECTIVE FOR THE LICENSED PHARMACIST:', {
+      x: 44,
+      y: y3 + 22,
+      size: 6.8,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+    const directiveText = 'Active substances are strictly partitioned into 3 separate formulations: (1) Enteric DRcaps® isolate probiotics from stomach acid and botanical berberine; (2) Lipophilic vitamins D3/K2 require co-administration with lipid meal in Capsule B; (3) Magnesium and sleep cofactors are reserved for evening Capsule C. Excipient Standard: 100% Lactose-Free HPMC / microcrystalline cellulose.';
+    page3.drawText(directiveText, {
+      x: 44,
+      y: y3 + 10,
+      size: 6.2,
+      font: helvetica,
+      color: darkSlate,
+      maxWidth: p3Width - 88,
+      lineHeight: 8.5
+    });
+
+    // Streamlined 3-Capsule Compounding Tables
     const PHARMACY_CAPSULES = [
       {
         id: 'cap_a',
@@ -670,20 +950,19 @@ export async function GET(request) {
       }
     ];
 
-    y2 -= 12;
+    y3 -= 12;
 
     PHARMACY_CAPSULES.forEach((cap) => {
       const rowCount = cap.ingredients.length;
-      // 2-line layout per ingredient: 22pt per item + 46pt header/vehicle space
       const cardHeight = 46 + (rowCount * 22) + 6;
 
-      y2 -= cardHeight;
+      y3 -= cardHeight;
 
       // Card Outline
-      page2.drawRectangle({
+      page3.drawRectangle({
         x: 36,
-        y: y2,
-        width: p2Width - 72,
+        y: y3,
+        width: p3Width - 72,
         height: cardHeight,
         color: white,
         borderColor: cardBorder,
@@ -691,90 +970,87 @@ export async function GET(request) {
       });
 
       // Capsule Header Strip
-      page2.drawRectangle({
+      page3.drawRectangle({
         x: 36,
-        y: y2 + cardHeight - 17,
-        width: p2Width - 72,
+        y: y3 + cardHeight - 17,
+        width: p3Width - 72,
         height: 17,
         color: cap.headerColor
       });
 
-      page2.drawText(cap.title, {
+      page3.drawText(cap.title, {
         x: 44,
-        y: y2 + cardHeight - 12,
+        y: y3 + cardHeight - 12,
         size: 7.2,
         font: helveticaBold,
         color: white
       });
 
-      page2.drawText(cap.qty, {
-        x: p2Width - 44 - helveticaBold.widthOfTextAtSize(cap.qty, 6.8),
-        y: y2 + cardHeight - 12,
+      page3.drawText(cap.qty, {
+        x: p3Width - 44 - helveticaBold.widthOfTextAtSize(cap.qty, 6.8),
+        y: y3 + cardHeight - 12,
         size: 6.8,
         font: helveticaBold,
         color: white
       });
 
       // Vehicle & Posology subheader lines
-      page2.drawText(cap.timing, {
+      page3.drawText(cap.timing, {
         x: 44,
-        y: y2 + cardHeight - 26,
+        y: y3 + cardHeight - 26,
         size: 6.1,
         font: helveticaBold,
         color: darkSlate
       });
 
-      page2.drawText(cap.vehicle, {
+      page3.drawText(cap.vehicle, {
         x: 44,
-        y: y2 + cardHeight - 35,
+        y: y3 + cardHeight - 35,
         size: 5.7,
         font: helveticaOblique,
         color: mutedSlate
       });
 
-      // DNA Target Reference Tag (Right-aligned in vehicle line)
+      // DNA Target Reference Tag
       if (cap.dnaTarget) {
         const targetWidth = helveticaBold.widthOfTextAtSize(cap.dnaTarget, 5.9);
-        page2.drawText(cap.dnaTarget, {
-          x: p2Width - 44 - targetWidth,
-          y: y2 + cardHeight - 35,
+        page3.drawText(cap.dnaTarget, {
+          x: p3Width - 44 - targetWidth,
+          y: y3 + cardHeight - 35,
           size: 5.9,
           font: helveticaBold,
           color: tealAccent
         });
       }
 
-      // Table Header Strip (Clear 4-Column Layout)
-      const thY = y2 + cardHeight - 48;
-      page2.drawRectangle({
+      // Table Header Strip
+      const thY = y3 + cardHeight - 48;
+      page3.drawRectangle({
         x: 40,
         y: thY - 2,
-        width: p2Width - 80,
+        width: p3Width - 80,
         height: 11,
         color: lightBg
       });
 
-      page2.drawText('ACTIVE INGREDIENT (API) & PHARMACOPEIA SPECIFICATION', { x: 44, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('TARGET DOSE', { x: 300, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('BATCH (60 CAPS)', { x: 380, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page2.drawText('THERAPEUTIC ROLE', { x: 460, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page3.drawText('ACTIVE INGREDIENT (API) & PHARMACOPEIA SPECIFICATION', { x: 44, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page3.drawText('TARGET DOSE', { x: 300, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page3.drawText('BATCH (60 CAPS)', { x: 380, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page3.drawText('THERAPEUTIC ROLE', { x: 460, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
 
-      // 2-Line Table Rows (Google Cloud Console pattern: Zero Collisions)
+      // 2-Line Table Rows
       let itemY = thY - 14;
       cap.ingredients.forEach((ing) => {
-        // Line 1: Ingredient Name (Bold) + Dose (Teal) + Batch (Navy) + Role (Slate)
-        page2.drawText(`• ${ing.name}`, { x: 44, y: itemY + 2, size: 6.8, font: helveticaBold, color: darkSlate, maxWidth: 245 });
-        page2.drawText(ing.dose, { x: 300, y: itemY + 2, size: 6.5, font: helveticaBold, color: tealAccent });
-        page2.drawText(ing.batch60, { x: 380, y: itemY + 2, size: 6.5, font: helveticaBold, color: navyPrimary });
-        page2.drawText(ing.purpose, { x: 460, y: itemY + 2, size: 6.0, font: helveticaBold, color: darkSlate, maxWidth: 90 });
+        page3.drawText(`• ${ing.name}`, { x: 44, y: itemY + 2, size: 6.8, font: helveticaBold, color: darkSlate, maxWidth: 245 });
+        page3.drawText(ing.dose, { x: 300, y: itemY + 2, size: 6.5, font: helveticaBold, color: tealAccent });
+        page3.drawText(ing.batch60, { x: 380, y: itemY + 2, size: 6.5, font: helveticaBold, color: navyPrimary });
+        page3.drawText(ing.purpose, { x: 460, y: itemY + 2, size: 6.0, font: helveticaBold, color: darkSlate, maxWidth: 90 });
 
-        // Line 2: Specification / Grade (Italic, secondary, indented)
-        page2.drawText(`Spec: ${ing.spec}`, { x: 50, y: itemY - 7, size: 5.4, font: helveticaOblique, color: mutedSlate, maxWidth: p2Width - 110 });
+        page3.drawText(`Spec: ${ing.spec}`, { x: 50, y: itemY - 7, size: 5.4, font: helveticaOblique, color: mutedSlate, maxWidth: p3Width - 110 });
 
-        // Row Separator Line
-        page2.drawLine({
+        page3.drawLine({
           start: { x: 44, y: itemY - 9 },
-          end: { x: p2Width - 44, y: itemY - 9 },
+          end: { x: p3Width - 44, y: itemY - 9 },
           thickness: 0.5,
           color: rgb(241 / 255, 245 / 255, 249 / 255)
         });
@@ -782,96 +1058,95 @@ export async function GET(request) {
         itemY -= 22;
       });
 
-      y2 -= 8;
+      y3 -= 8;
     });
 
-    // Prescribing Physician Authorization & Medical Signature (Clean GCP Unified Header layout)
-    y2 -= 70;
-    page2.drawRectangle({
+    // Prescribing Physician Authorization & Medical Signature
+    y3 -= 70;
+    page3.drawRectangle({
       x: 36,
-      y: y2,
-      width: p2Width - 72,
+      y: y3,
+      width: p3Width - 72,
       height: 70,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
     });
 
-    // Full-Width Top Header (Zero collision across panels)
-    page2.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL VALIDATION', {
+    page3.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL VALIDATION', {
       x: 44,
-      y: y2 + 56,
+      y: y3 + 56,
       size: 7.2,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    page2.drawLine({
-      start: { x: 44, y: y2 + 50 },
-      end: { x: p2Width - 44, y: y2 + 50 },
+    page3.drawLine({
+      start: { x: 44, y: y3 + 50 },
+      end: { x: p3Width - 44, y: y3 + 50 },
       thickness: 0.6,
       color: cardBorder
     });
 
-    // Left Panel (Width ~290pt): Physician Information (Zero mention of any clinic)
-    page2.drawText('Prescribing Physician (Full Name): _______________________________________________', {
+    // Left Panel: Physician Information
+    page3.drawText('Prescribing Physician (Full Name): _______________________________________________', {
       x: 44,
-      y: y2 + 36,
+      y: y3 + 36,
       size: 6.0,
       font: helvetica,
       color: darkSlate
     });
 
-    page2.drawText('Medical License / Registry Reg. No.: ____________________________________________', {
+    page3.drawText('Medical License / Registry Reg. No.: ____________________________________________', {
       x: 44,
-      y: y2 + 23,
+      y: y3 + 23,
       size: 6.0,
       font: helvetica,
       color: darkSlate
     });
 
-    page2.drawText('Territory Jurisdiction: State of Qatar   ·   Issue Date: ____ / ____ / 2026', {
+    page3.drawText('Territory Jurisdiction: State of Qatar   ·   Issue Date: ____ / ____ / 2026', {
       x: 44,
-      y: y2 + 10,
+      y: y3 + 10,
       size: 6.0,
       font: helvetica,
       color: darkSlate
     });
 
     // Vertical Panel Divider
-    page2.drawLine({
-      start: { x: 345, y: y2 + 4 },
-      end: { x: 345, y: y2 + 48 },
+    page3.drawLine({
+      start: { x: 345, y: y3 + 4 },
+      end: { x: 345, y: y3 + 48 },
       thickness: 0.8,
       color: cardBorder
     });
 
-    // Right Panel (Width ~180pt): Signature & Stamp Box
-    page2.drawText('Physician\'s Professional Stamp & Signature:', {
+    // Right Panel: Signature & Stamp Box
+    page3.drawText('Physician\'s Professional Stamp & Signature:', {
       x: 355,
-      y: y2 + 36,
+      y: y3 + 36,
       size: 6.2,
       font: helveticaBold,
       color: darkSlate
     });
 
-    page2.drawLine({
-      start: { x: 355, y: y2 + 14 },
-      end: { x: p2Width - 46, y: y2 + 14 },
+    page3.drawLine({
+      start: { x: 355, y: y3 + 14 },
+      end: { x: p3Width - 46, y: y3 + 14 },
       thickness: 0.8,
       color: rgb(160 / 255, 160 / 255, 160 / 255)
     });
 
-    page2.drawText('Authorized Prescribing Signature & Clinical Seal', {
+    page3.drawText('Authorized Prescribing Signature & Clinical Seal', {
       x: 355,
-      y: y2 + 5,
+      y: y3 + 5,
       size: 5.5,
       font: helveticaOblique,
       color: mutedSlate
     });
 
-    // Page 2 Footer
-    page2.drawText('Page 2 of 2 · Official Magistral Compounding Prescription · Dispensing subject to authorized medical prescription', {
+    // Page 3 Footer
+    page3.drawText('Page 3 of 3 · Official Magistral Compounding Prescription · Dispensing subject to authorized medical prescription', {
       x: 36,
       y: 18,
       size: 7,
