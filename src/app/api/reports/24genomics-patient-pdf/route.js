@@ -245,7 +245,7 @@ export async function GET(request) {
       page1.drawText(p.pillarTag, {
         x: 48,
         y: y - 13,
-        size: 7.0,
+        size: 7.6,
         font: helveticaBold,
         color: tealAccent
       });
@@ -254,24 +254,24 @@ export async function GET(request) {
       page1.drawText(p.title, {
         x: 48,
         y: y - 24,
-        size: 8.4,
+        size: 9.2,
         font: helveticaBold,
         color: darkSlate
       });
 
       // Status Pill
-      const pillWidth = helveticaBold.widthOfTextAtSize(p.status, 6.2) + 12;
+      const pillWidth = helveticaBold.widthOfTextAtSize(p.status, 6.5) + 12;
       page1.drawRectangle({
         x: p1Width - 46 - pillWidth,
         y: y - 22,
         width: pillWidth,
-        height: 13,
+        height: 14,
         color: p.statusBg
       });
       page1.drawText(p.status, {
         x: p1Width - 46 - pillWidth + 6,
         y: y - 18,
-        size: 6.2,
+        size: 6.5,
         font: helveticaBold,
         color: p.statusColor
       });
@@ -280,7 +280,7 @@ export async function GET(request) {
       page1.drawText(`DNA Finding: ${p.why}`, {
         x: 48,
         y: y - 37,
-        size: 7.0,
+        size: 8.0,
         font: helvetica,
         color: darkSlate,
         maxWidth: p1Width - 96
@@ -290,7 +290,7 @@ export async function GET(request) {
       page1.drawText(`Targeted Support: ${p.assignedFormulation}`, {
         x: 48,
         y: y - 49,
-        size: 7.0,
+        size: 7.8,
         font: helveticaBold,
         color: navyPrimary,
         maxWidth: p1Width - 96
@@ -300,9 +300,9 @@ export async function GET(request) {
       page1.drawText(`Clinical Goal: ${p.clinicalGoal}`, {
         x: 48,
         y: y - 61,
-        size: 6.5,
+        size: 7.4,
         font: helveticaOblique,
-        color: tealAccent,
+        color: mutedSlate,
         maxWidth: p1Width - 96
       });
 
@@ -418,7 +418,7 @@ export async function GET(request) {
     page1.drawText('3. CONCRETE PATIENT DIETARY RULES (HIGH-ADHERENCE GUIDELINES)', {
       x: 48,
       y: y - 16,
-      size: 7.8,
+      size: 8.5,
       font: helveticaBold,
       color: tealAccent
     });
@@ -427,7 +427,7 @@ export async function GET(request) {
       '1. Plate Sequencing: Eat vegetables and soluble fiber first, lean proteins/healthy fats second, and complex carbs last (reduces glucose spikes up to 45%).',
       '2. Carbohydrate Cap: Keep net carbohydrates under 40g per meal. Avoid sugary soft drinks, commercial juices, and refined white flour pastries.',
       '3. Microbiota Foods: Consume dairy-free fermented foods (coconut kefir, sauerkraut) and cooked/cooled potatoes to nourish beneficial Bifidobacteria.',
-      '4. Circadian Caffeine Window: Due to your genetic CYP1A2 profile, stop caffeine and stimulants before 2:00 PM to protect nighttime sleep architecture.'
+      '4. Circadian Caffeine Window: Due to your genetic CYP1A2 profile, stop caffeine and stimulants before 12:00 PM to protect nighttime sleep architecture.'
     ];
 
     let rY = y - 32;
@@ -435,12 +435,12 @@ export async function GET(request) {
       page1.drawText(r, {
         x: 48,
         y: rY,
-        size: 6.8,
+        size: 7.8,
         font: helvetica,
         color: darkSlate,
         maxWidth: p1Width - 96
       });
-      rY -= 14;
+      rY -= 14.5;
     });
 
     y -= (dietH + 12);
@@ -722,28 +722,28 @@ export async function GET(request) {
       // Left: Standardized Short Title
       page2.drawText(`${idx + 1}. ${meta.title}`, {
         x: 46,
-        y: y2 + cardH - 13,
-        size: 7.2,
+        y: y2 + cardH - 14,
+        size: 8.2,
         font: helveticaBold,
         color: navyPrimary,
         maxWidth: 175
       });
 
       // Priority Badge Pill (Distinct visual category)
-      const pBadgeW = helveticaBold.widthOfTextAtSize(meta.priorityBadge, 5.6) + 10;
+      const pBadgeW = helveticaBold.widthOfTextAtSize(meta.priorityBadge, 6.2) + 10;
       page2.drawRectangle({
         x: 224,
-        y: y2 + cardH - 15,
+        y: y2 + cardH - 16,
         width: pBadgeW,
-        height: 12,
+        height: 13,
         color: meta.priorityBg,
         borderColor: meta.priorityColor,
-        borderWidth: 0.6
+        borderWidth: 0.8
       });
       page2.drawText(meta.priorityBadge, {
         x: 229,
-        y: y2 + cardH - 12,
-        size: 5.6,
+        y: y2 + cardH - 13,
+        size: 6.2,
         font: helveticaBold,
         color: meta.priorityColor
       });
@@ -751,8 +751,8 @@ export async function GET(request) {
       // Center: Short Gene Tag
       page2.drawText(`Gene: ${meta.shortGene}`, {
         x: 348,
-        y: y2 + cardH - 13,
-        size: 6.2,
+        y: y2 + cardH - 14,
+        size: 7.2,
         font: helveticaBold,
         color: mutedSlate,
         maxWidth: 110
@@ -760,11 +760,11 @@ export async function GET(request) {
 
       // Right: Target Daily Dose (Right-aligned with zero overlap)
       const doseLabel = `Target Dose: ${meta.dose}`;
-      const doseW = helveticaBold.widthOfTextAtSize(doseLabel, 6.8);
+      const doseW = helveticaBold.widthOfTextAtSize(doseLabel, 7.5);
       page2.drawText(doseLabel, {
         x: p2Width - 46 - doseW,
-        y: y2 + cardH - 13,
-        size: 6.8,
+        y: y2 + cardH - 14,
+        size: 7.5,
         font: helveticaBold,
         color: tealAccent
       });
@@ -773,68 +773,68 @@ export async function GET(request) {
       page2.drawText('• Recommended Chemical Form: ', {
         x: 46,
         y: y2 + 55,
-        size: 6.5,
+        size: 7.4,
         font: helveticaBold,
         color: darkSlate
       });
       page2.drawText(supp.chemicalFormEn, {
-        x: 170,
+        x: 184,
         y: y2 + 55,
-        size: 6.5,
+        size: 7.4,
         font: helveticaBold,
         color: tealAccent,
-        maxWidth: p2Width - 220
+        maxWidth: p2Width - 235
       });
 
       // Line 2: Avoid
       page2.drawText('• Strictly Avoid: ', {
         x: 46,
-        y: y2 + 41,
-        size: 6.4,
+        y: y2 + 40,
+        size: 7.2,
         font: helveticaBold,
         color: alertRed
       });
       page2.drawText(supp.avoidEn, {
-        x: 114,
-        y: y2 + 41,
-        size: 6.1,
+        x: 122,
+        y: y2 + 40,
+        size: 7.0,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p2Width - 162
+        maxWidth: p2Width - 170
       });
 
       // Line 3: Posology
       page2.drawText('• Timing & Posology: ', {
         x: 46,
-        y: y2 + 27,
-        size: 6.4,
+        y: y2 + 25,
+        size: 7.2,
         font: helveticaBold,
         color: mutedSlate
       });
       page2.drawText(supp.timingEn, {
-        x: 136,
-        y: y2 + 27,
-        size: 6.1,
+        x: 146,
+        y: y2 + 25,
+        size: 7.0,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p2Width - 184
+        maxWidth: p2Width - 195
       });
 
       // Line 4: Retail Doha Brands
       page2.drawText('• Qatar Pharmacy Reference Brands: ', {
         x: 46,
-        y: y2 + 13,
-        size: 6.4,
+        y: y2 + 10,
+        size: 7.2,
         font: helveticaBold,
         color: navyPrimary
       });
       page2.drawText(supp.localBrandsEn, {
-        x: 194,
-        y: y2 + 13,
-        size: 6.1,
+        x: 212,
+        y: y2 + 10,
+        size: 7.0,
         font: helveticaBold,
         color: darkSlate,
-        maxWidth: p2Width - 240
+        maxWidth: p2Width - 260
       });
 
       // Spacing between cards

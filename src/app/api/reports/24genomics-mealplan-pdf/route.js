@@ -64,67 +64,67 @@ export async function GET(request) {
     page1.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
       x: 36,
       y: y1,
-      size: 8.5,
+      size: 9.0,
       font: helveticaBold,
       color: navyPrimary
     });
 
     const badge1 = 'PAGE 1 OF 2 · MEAL PLAN & KITCHEN ROUTINE';
-    const badge1W = helveticaBold.widthOfTextAtSize(badge1, 6.8) + 14;
+    const badge1W = helveticaBold.widthOfTextAtSize(badge1, 7.5) + 16;
     page1.drawRectangle({
       x: p1Width - 36 - badge1W,
-      y: y1 - 3,
+      y: y1 - 4,
       width: badge1W,
-      height: 15,
+      height: 18,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: tealAccent,
-      borderWidth: 1
+      borderWidth: 1.2
     });
     page1.drawText(badge1, {
-      x: p1Width - 36 - badge1W + 7,
-      y: y1 + 2,
-      size: 6.8,
+      x: p1Width - 36 - badge1W + 8,
+      y: y1 + 1,
+      size: 7.5,
       font: helveticaBold,
       color: tealAccent
     });
 
-    y1 -= 16;
+    y1 -= 18;
     page1.drawText('PERSONALIZED MEAL PLAN & DIET GUIDE', {
       x: 36,
       y: y1,
-      size: 13,
+      size: 14.5,
       font: helveticaBold,
       color: darkSlate
     });
 
-    y1 -= 11;
+    y1 -= 13;
     page1.drawText('How to choose your daily catering meals and synchronize your nutrition based on your DNA', {
       x: 36,
       y: y1,
-      size: 7.4,
+      size: 8.5,
       font: helvetica,
       color: mutedSlate
     });
 
-    y1 -= 8;
+    y1 -= 10;
     page1.drawLine({
       start: { x: 36, y: y1 },
       end: { x: p1Width - 36, y: y1 },
-      thickness: 1,
+      thickness: 1.2,
       color: cardBorder
     });
 
     // Metadata Ribbon
-    y1 -= 12;
+    y1 -= 14;
     page1.drawText(`PATIENT: ${patientName}   |   SPECIMEN ID: ${sampleId}   |   MEAL SERVICE: ${mealPlanPartner}`, {
       x: 36,
       y: y1,
-      size: 7.0,
+      size: 7.8,
       font: helveticaBold,
       color: tealAccent
     });
 
-    y1 -= 8;
+    y1 -= 10;
     page1.drawLine({
       start: { x: 36, y: y1 },
       end: { x: p1Width - 36, y: y1 },
@@ -133,13 +133,13 @@ export async function GET(request) {
     });
 
     // -------------------------------------------------------------------------
-    // SECTION 1: YOUR DNA IN 4 PLAIN-ENGLISH FINDINGS
+    // SECTION 1: YOUR DNA IN 4 PLAIN-ENGLISH FINDINGS (2x2 Grid, Legible 8.5pt)
     // -------------------------------------------------------------------------
-    y1 -= 16;
+    y1 -= 18;
     page1.drawText('1. YOUR GENETIC PROFILE IN PLAIN ENGLISH (WHAT YOUR DNA SAYS)', {
       x: 36,
       y: y1,
-      size: 9.5,
+      size: 11.0,
       font: helveticaBold,
       color: navyPrimary
     });
@@ -147,30 +147,34 @@ export async function GET(request) {
     y1 -= 8;
     const plainFindings = [
       {
-        title: 'High Active Folate Need',
-        desc: 'Your cells need pre-activated folate (5-MTHF) for sustained energy and brain clarity. Avoid cheap synthetic folic acid found in fortified industrial breads.'
+        badge: 'HIGH NEED · MTHFR',
+        title: 'Folate Metabolism (Active B9)',
+        action: 'Your cells require pre-activated folate (5-MTHF) for sustained energy and brain focus. Avoid synthetic folic acid in fortified white bread.'
       },
       {
-        title: 'Lactose Sensitivity',
-        desc: 'Your genetics show low lactase enzyme production. Choosing dairy-free dishes in your meal plan will prevent bloating, gas, and digestive sluggishness.'
+        badge: 'LACTASE DEFICIENT',
+        title: 'Lactose & Dairy Digestion',
+        action: 'Genetics show minimal lactase production. Choosing 100% dairy-free dishes (almond, coconut) prevents digestive bloating, gas, and fatigue.'
       },
       {
+        badge: 'VDR BOTTLENECK',
         title: 'Fat-Assisted Vitamin D Uptake',
-        desc: 'Your Vitamin D receptors require extra support. Always take your Vitamin D supplement alongside healthy fats (olive oil, eggs, avocado) for real absorption.'
+        action: 'Your Vitamin D receptors have reduced efficiency. Always take Vitamin D supplements alongside healthy fats (eggs, olive oil, avocado).'
       },
       {
-        title: 'Slow Afternoon Caffeine Clearance',
-        desc: 'Your liver takes longer to clear caffeine. Cut off coffee and energy stimulants before 2:00 PM to protect nighttime restorative sleep architecture.'
+        badge: 'SLOW CLEARANCE',
+        title: 'Afternoon Caffeine Metabolism',
+        action: 'Your liver clears caffeine slowly. Cut off coffee, colas, and stimulants strictly before 12:00 PM to protect deep, restorative slow-wave sleep.'
       }
     ];
 
-    const boxW = (p1Width - 72 - 16) / 2;
-    const boxH = 68;
+    const boxW = (p1Width - 72 - 14) / 2;
+    const boxH = 58;
     plainFindings.forEach((f, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
-      const bX = 36 + col * (boxW + 16);
-      const bY = y1 - (row * (boxH + 12)) - boxH;
+      const bX = 36 + col * (boxW + 14);
+      const bY = y1 - (row * (boxH + 10)) - boxH;
 
       page1.drawRectangle({
         x: bX,
@@ -179,66 +183,88 @@ export async function GET(request) {
         height: boxH,
         color: lightBg,
         borderColor: cardBorder,
-        borderWidth: 0.8
+        borderWidth: 1.0
       });
 
-      page1.drawText(`• ${f.title}:`, {
-        x: bX + 10,
+      // Accent pill
+      const bW = helveticaBold.widthOfTextAtSize(f.badge, 6.2) + 10;
+      page1.drawRectangle({
+        x: bX + 8,
         y: bY + boxH - 16,
-        size: 7.8,
+        width: bW,
+        height: 12,
+        color: rgb(240 / 255, 253 / 255, 250 / 255),
+        borderColor: tealAccent,
+        borderWidth: 0.8
+      });
+      page1.drawText(f.badge, {
+        x: bX + 13,
+        y: bY + boxH - 13,
+        size: 6.2,
+        font: helveticaBold,
+        color: tealAccent
+      });
+
+      page1.drawText(f.title, {
+        x: bX + 12 + bW,
+        y: bY + boxH - 14,
+        size: 8.8,
         font: helveticaBold,
         color: navyPrimary
       });
 
-      page1.drawText(f.desc, {
+      page1.drawText(f.action, {
         x: bX + 10,
         y: bY + boxH - 30,
-        size: 6.8,
+        size: 8.0,
         font: helvetica,
         color: darkSlate,
         maxWidth: boxW - 20,
-        lineHeight: 9.5
+        lineHeight: 11.0
       });
     });
 
-    y1 -= (2 * boxH + 12 + 14);
+    y1 -= (2 * boxH + 10 + 16);
 
     // -------------------------------------------------------------------------
-    // SECTION 2: MEAL PLAN TRAFFIC LIGHT (WHAT TO ORDER)
+    // SECTION 2: MEAL PLAN TRAFFIC LIGHT (TRAFFIC LIGHT FOR CATERING)
     // -------------------------------------------------------------------------
-    y1 -= 14;
     page1.drawText('2. MEAL PLAN SELECTION GUIDE (TRAFFIC LIGHT FOR YOUR CATERING MENU)', {
       x: 36,
       y: y1,
-      size: 9.8,
+      size: 11.0,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y1 -= 10;
+    y1 -= 8;
     const trafficCols = [
       {
-        header: '[GREEN] ALWAYS ORDER (DNA Favorites)',
+        header: '[GREEN] ALWAYS ORDER (FAVORITES)',
         color: greenText,
         bgColor: greenBg,
         borderColor: greenBorder,
         items: [
-          '• Wild salmon, sea bass, lean poultry, grass-fed beef',
-          '• Dark leafy greens (spinach, arugula, kale), broccoli',
-          '• Healthy fats: Extra virgin olive oil, avocado, seeds',
-          '• Smart carbs: Quinoa, basmati rice, cooled boiled potatoes'
+          '• Wild salmon, sea bass, local hamour',
+          '• Grass-fed beef, grilled chicken breast',
+          '• Avocados, extra virgin olive oil, walnuts',
+          '• Dark leafy greens (spinach, arugula, kale)',
+          '• Quinoa, jasmine rice, sweet potatoes',
+          '• Almond milk, coconut yogurt (zero dairy)'
         ]
       },
       {
-        header: '[AMBER] ENJOY IN MODERATION (Control)',
+        header: '[AMBER] ENJOY IN MODERATION (CONTROL)',
         color: amberText,
         bgColor: amberBg,
         borderColor: amberBorder,
         items: [
-          '• Net Carbs: Keep under 40g per meal to prevent spikes',
-          '• Soaked legumes: Lentils, chickpeas, edamame',
-          '• Natural fruits: Berries, green apples, citrus fruits',
-          '• Red meat: Limit to 2–3 times per week maximum'
+          '• Net Carbs: Keep under 40g per meal tray',
+          '• Soaked legumes (lentils, chickpeas)',
+          '• Low-glycemic fruits (berries, green apples)',
+          '• Red meat dishes (cap at 2x per week)',
+          '• Caffeinated coffee (strictly before noon)',
+          '• Roasted nuts with salt (watch sodium)'
         ]
       },
       {
@@ -247,16 +273,18 @@ export async function GET(request) {
         bgColor: redBg,
         borderColor: redBorder,
         items: [
-          '• Dairy creams, cow milk cheeses, bechamel sauces',
-          '• Industrial seed oils (soybean, corn, refined palm)',
-          '• White flour baguettes, sugary pastries & desserts',
-          '• Commercial bottled fruit juices & sweetened sodas'
+          '• Whole cow milk, labneh, heavy creams',
+          '• Samosas & deep-fried catering sides',
+          '• Industrial seed oils (canola, sunflower)',
+          '• White flour baguettes & sweet pastries',
+          '• Commercial sodas & bottled fruit juices',
+          '• Late catering meals eaten past 8:30 PM'
         ]
       }
     ];
 
     const colW = (p1Width - 72 - 16) / 3;
-    const cH = 165;
+    const cH = 145;
     trafficCols.forEach((tc, cIdx) => {
       const cX = 36 + cIdx * (colW + 8);
 
@@ -267,7 +295,7 @@ export async function GET(request) {
         height: cH,
         color: tc.bgColor,
         borderColor: tc.borderColor,
-        borderWidth: 1
+        borderWidth: 1.2
       });
 
       page1.drawRectangle({
@@ -281,7 +309,7 @@ export async function GET(request) {
       page1.drawText(tc.header, {
         x: cX + 8,
         y: y1 - 15,
-        size: 7.0,
+        size: 7.5,
         font: helveticaBold,
         color: tc.color
       });
@@ -291,23 +319,22 @@ export async function GET(request) {
         page1.drawText(it, {
           x: cX + 8,
           y: iY,
-          size: 6.6,
+          size: 7.8,
           font: helvetica,
           color: darkSlate,
           maxWidth: colW - 16,
-          lineHeight: 8.8
+          lineHeight: 10.5
         });
-        iY -= 31;
+        iY -= 17.5;
       });
     });
 
-    y1 -= (cH + 16);
+    y1 -= (cH + 14);
 
     // -------------------------------------------------------------------------
     // SECTION 3: THE GOLDEN PLATE SEQUENCING RULE
     // -------------------------------------------------------------------------
-    y1 -= 4;
-    const seqH = 68;
+    const seqH = 50;
     page1.drawRectangle({
       x: 36,
       y: y1 - seqH,
@@ -320,67 +347,70 @@ export async function GET(request) {
 
     page1.drawText('THE GOLDEN PLATE SEQUENCING RULE (ELIMINATES AFTERNOON BRAIN FOG):', {
       x: 48,
-      y: y1 - 18,
-      size: 7.8,
+      y: y1 - 16,
+      size: 8.5,
       font: helveticaBold,
       color: tealAccent
     });
 
-    const seqText = 'Inside each meal tray, eat your food in this exact sequence: (1) Vegetables & salad first  ->  (2) Protein & healthy fats second  ->  (3) Rice or potatoes LAST.\nClinical impact: This creates a protective fiber mesh in your stomach, reducing blood sugar spikes by up to 45% and eliminating post-meal energy slumps.';
+    const seqText = 'Inside each meal tray, eat your food in this sequence: (1) Salad & vegetables first  ->  (2) Protein & healthy fats second  ->  (3) Rice or potatoes LAST.\nClinical impact: This creates a protective fiber mesh in your stomach, reducing glucose spikes by 45% and eliminating post-lunch sluggishness.';
     page1.drawText(seqText, {
       x: 48,
-      y: y1 - 36,
-      size: 7.0,
+      y: y1 - 32,
+      size: 7.8,
       font: helvetica,
       color: darkSlate,
       maxWidth: p1Width - 96,
-      lineHeight: 10.5
+      lineHeight: 11.0
     });
 
-    y1 -= (seqH + 16);
+    y1 -= (seqH + 14);
 
     // -------------------------------------------------------------------------
-    // SECTION 4: 24-HOUR DAILY ROUTINE WITH YOUR MEALS
+    // SECTION 4: 24-HOUR DAILY ROUTINE WITH YOUR MEALS (Chronobiology)
     // -------------------------------------------------------------------------
-    y1 -= 4;
-    page1.drawText('4. 24-HOUR DAILY ROUTINE: SYNCHRONIZED WITH YOUR MEALS & SUPPLEMENTS', {
+    page1.drawText('3. 24-HOUR DAILY ROUTINE: SYNCHRONIZED WITH YOUR MEALS & SUPPLEMENTS', {
       x: 36,
       y: y1,
-      size: 9.8,
+      size: 11.0,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y1 -= 10;
+    y1 -= 8;
     const dailySteps = [
       {
-        time: 'Upon Waking (Empty Stomach)',
-        step: 'Probiotics & Gut Shield',
-        action: 'Drink a full glass of water. Take Capsule A (Probiotic DRcaps®).',
-        why: 'Protects delicate live cultures as they enter an empty stomach without food interference.'
+        time: 'UPON WAKING',
+        meal: 'Empty Stomach (07:30)',
+        step: 'Gut Shield Probiotic',
+        action: 'Glass of water (300ml) + Capsule A (DRcaps®).',
+        why: 'Probiotics reach gut safely without food acid interference.'
       },
       {
-        time: 'With Meal Plan Breakfast',
-        step: 'Energy & Vitamin D3/K2',
-        action: 'Take Capsule B (Active Folate + B-Complex + D3/K2).',
-        why: 'Must be taken with breakfast containing healthy fats (eggs, olive oil, avocado) to absorb fat-soluble Vitamin D.'
+        time: 'BREAKFAST',
+        meal: 'With Morning Meal (08:30)',
+        step: 'Active Folate + D3/K2',
+        action: 'Capsule B + 2 eggs, olive oil or avocado.',
+        why: 'Vitamins D & K2 require healthy fats for 100% absorption.'
       },
       {
-        time: 'With Lunch or Main Dinner',
-        step: 'Plate Sequencing & Soluble Fiber',
-        action: 'Follow the 1-2-3 plate order. Optional: 1 glass of water with fiber sachet.',
-        why: 'Slows carbohydrate absorption, maintains steady mental focus and prevents energy crashes.'
+        time: 'LUNCH / DINNER',
+        meal: 'Catering Dish (13:00)',
+        step: 'Plate Sequence & Focus',
+        action: 'Eat Veggies -> Protein -> Carbs. Take Omega-3.',
+        why: 'Slows sugar absorption and stops 3 PM afternoon slump.'
       },
       {
-        time: '30-60 Min Before Sleep',
-        step: 'Restorative Sleep & Muscle Relax',
-        action: 'Take Capsule C (2 capsules of Magnesium Bisglycinate + Theanine).',
-        why: 'Clears daily stress, calms the nervous system, prevents muscle tension, and promotes deep REM sleep.'
+        time: 'BEDTIME',
+        meal: '45 Min Before Sleep (22:00)',
+        step: 'Magnesium Bisglycinate',
+        action: 'Capsule C + herbal chamomile tea.',
+        why: 'Relaxes muscle fibers and triggers deep REM restorative sleep.'
       }
     ];
 
     const stepW = (p1Width - 72 - 18) / 4;
-    const sH = 155;
+    const sH = 145;
     dailySteps.forEach((st, sIdx) => {
       const sX = 36 + sIdx * (stepW + 6);
 
@@ -391,31 +421,39 @@ export async function GET(request) {
         height: sH,
         color: lightBg,
         borderColor: cardBorder,
-        borderWidth: 0.8
+        borderWidth: 1.0
       });
 
-      // Header Banner
       page1.drawRectangle({
         x: sX,
-        y: y1 - 24,
+        y: y1 - 22,
         width: stepW,
-        height: 24,
+        height: 22,
         color: rgb(241 / 255, 245 / 255, 249 / 255)
       });
 
       page1.drawText(st.time, {
         x: sX + 6,
         y: y1 - 15,
-        size: 6.2,
+        size: 7.2,
         font: helveticaBold,
         color: tealAccent,
         maxWidth: stepW - 12
       });
 
+      page1.drawText(st.meal, {
+        x: sX + 6,
+        y: y1 - 34,
+        size: 7.0,
+        font: helveticaOblique,
+        color: mutedSlate,
+        maxWidth: stepW - 12
+      });
+
       page1.drawText(st.step, {
         x: sX + 6,
-        y: y1 - 38,
-        size: 7.2,
+        y: y1 - 50,
+        size: 8.5,
         font: helveticaBold,
         color: navyPrimary,
         maxWidth: stepW - 12
@@ -423,38 +461,38 @@ export async function GET(request) {
 
       page1.drawText(st.action, {
         x: sX + 6,
-        y: y1 - 60,
-        size: 6.4,
-        font: helveticaBold,
+        y: y1 - 70,
+        size: 7.8,
+        font: helvetica,
         color: darkSlate,
         maxWidth: stepW - 12,
-        lineHeight: 8.5
+        lineHeight: 10.2
       });
 
       page1.drawLine({
-        start: { x: sX + 6, y: y1 - 100 },
-        end: { x: sX + stepW - 6, y: y1 - 100 },
-        thickness: 0.5,
+        start: { x: sX + 6, y: y1 - 104 },
+        end: { x: sX + stepW - 6, y: y1 - 104 },
+        thickness: 0.6,
         color: cardBorder
       });
 
       page1.drawText(st.why, {
         x: sX + 6,
-        y: y1 - 114,
-        size: 6.0,
-        font: helvetica,
+        y: y1 - 118,
+        size: 7.2,
+        font: helveticaOblique,
         color: mutedSlate,
         maxWidth: stepW - 12,
-        lineHeight: 7.8
+        lineHeight: 9.5
       });
     });
 
-    y1 -= (sH + 16);
+    y1 -= (sH + 12);
 
     // -------------------------------------------------------------------------
-    // SECTION 5: KITCHEN FRIDGE REMINDER
+    // SECTION 5: KITCHEN FRIDGE REMINDER (High Legibility 8.0pt)
     // -------------------------------------------------------------------------
-    const kH = 54;
+    const kH = 46;
     page1.drawRectangle({
       x: 36,
       y: y1 - kH,
@@ -462,26 +500,26 @@ export async function GET(request) {
       height: kH,
       color: lightBg,
       borderColor: cardBorder,
-      borderWidth: 1
+      borderWidth: 1.0
     });
 
-    page1.drawText('3 GOLDEN KITCHEN REMINDERS:', {
+    page1.drawText('3 GOLDEN KITCHEN RULES FOR DAILY MEAL SUCCESS:', {
       x: 48,
-      y: y1 - 16,
-      size: 7.2,
+      y: y1 - 15,
+      size: 8.2,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    const kitchenReminders = '1. Hydration: Drink 2.5L of water daily between meals (not during)  ·  2. Caffeine Cutoff: Zero caffeine after 2:00 PM  ·  3. Overnight Rest: Maintain a 12-hour overnight fast between dinner and breakfast.';
+    const kitchenReminders = '1. Hydration: Drink 2.5L water daily between meals  ·  2. Caffeine Cutoff: Strict zero caffeine past 12:00 PM  ·  3. Overnight Rest: Maintain a 12-hour metabolic rest between dinner and breakfast.';
     page1.drawText(kitchenReminders, {
       x: 48,
-      y: y1 - 34,
-      size: 6.5,
+      y: y1 - 32,
+      size: 7.8,
       font: helvetica,
       color: darkSlate,
       maxWidth: p1Width - 96,
-      lineHeight: 9.5
+      lineHeight: 11.0
     });
 
     // QR Code for Digital Interactive Portal
@@ -610,7 +648,7 @@ export async function GET(request) {
     page2.drawText('1. YOUR 5 TARGETED NUTRIENTS (WHAT THEY DO FOR YOUR BODY)', {
       x: 36,
       y: y2,
-      size: 9.5,
+      size: 11.0,
       font: helveticaBold,
       color: navyPrimary
     });
@@ -619,8 +657,8 @@ export async function GET(request) {
       {
         benefit: 'IMMUNITY & BONE STRENGTH',
         nutrient: 'Vitamin D3 + K2 (MK-7)',
-        why: 'Your DNA shows slow Vitamin D activation. This pair directs calcium directly into your bones and strengthens defense cells.',
-        timing: 'With breakfast containing fats (eggs, olive oil, avocado).',
+        why: 'Your DNA shows slow Vitamin D activation. This synergistic pair directs calcium straight into bones and strengthens daily immune defense.',
+        timing: 'With morning breakfast containing healthy fats (eggs, olive oil, avocado).',
         priority: 'PRIORITY 1 · ESSENTIAL',
         pColor: redText,
         pBg: redBg
@@ -628,7 +666,7 @@ export async function GET(request) {
       {
         benefit: 'CELLULAR ENERGY & CLARITY',
         nutrient: 'Active Folate (L-5-MTHF)',
-        why: 'Bypasses your MTHFR genetic block to keep you clear-headed. Provides clean cellular energy without synthetic buildup.',
+        why: 'Bypasses your MTHFR genetic block to keep you clear-headed. Provides clean cellular energy without synthetic unmethylated buildup.',
         timing: 'Morning with your breakfast.',
         priority: 'PRIORITY 1 · ESSENTIAL',
         pColor: redText,
@@ -637,8 +675,8 @@ export async function GET(request) {
       {
         benefit: 'DEEP REST & STRESS RESET',
         nutrient: 'Magnesium Bisglycinate + Theanine',
-        why: 'Calms nerve sensitivity, relaxes muscle tension after workouts, and quiets racing thoughts for restorative sleep.',
-        timing: 'Evening: Take 2 capsules 30–60 min before bed with water.',
+        why: 'Calms nerve excitability, relaxes muscle tension after exercise, and quiets racing thoughts for deep slow-wave restorative sleep.',
+        timing: 'Evening: Take 2 capsules 30–60 min before bed with room-temp water.',
         priority: 'PRIORITY 2 · RECOMMENDED',
         pColor: blueBorder,
         pBg: blueBg
@@ -646,7 +684,7 @@ export async function GET(request) {
       {
         benefit: 'METABOLISM & LIVER BALANCE',
         nutrient: 'Methylated B-Complex (B12 + B6)',
-        why: 'Essential cofactors that support homocysteine clearance, healthy nerve myelin, and daytime alertness.',
+        why: 'Essential cofactors that support homocysteine clearance, healthy nerve myelin, and daytime alertness without jitters.',
         timing: 'Morning with food.',
         priority: 'PRIORITY 2 · RECOMMENDED',
         pColor: blueBorder,
@@ -675,77 +713,79 @@ export async function GET(request) {
         height: cardH,
         color: white,
         borderColor: cardBorder,
-        borderWidth: 0.8
+        borderWidth: 1.0
       });
 
       // Left Accent Strip
       page2.drawRectangle({
         x: 36,
         y: y2,
-        width: 4,
+        width: 4.5,
         height: cardH,
         color: s.pColor
       });
 
       // Header strip inside card
       page2.drawRectangle({
-        x: 40,
-        y: y2 + cardH - 20,
-        width: p2Width - 76,
-        height: 20,
+        x: 40.5,
+        y: y2 + cardH - 22,
+        width: p2Width - 76.5,
+        height: 22,
         color: rgb(248 / 255, 250 / 255, 252 / 255)
       });
 
       // Benefit Header & Nutrient Name
       page2.drawText(s.benefit, {
         x: 48,
-        y: y2 + cardH - 14,
-        size: 8.2,
+        y: y2 + cardH - 15,
+        size: 8.8,
         font: helveticaBold,
         color: navyPrimary
       });
 
       page2.drawText(`· ${s.nutrient}`, {
-        x: 48 + helveticaBold.widthOfTextAtSize(s.benefit, 8.2) + 8,
-        y: y2 + cardH - 14,
-        size: 7.8,
+        x: 48 + helveticaBold.widthOfTextAtSize(s.benefit, 8.8) + 8,
+        y: y2 + cardH - 15,
+        size: 8.4,
         font: helveticaBold,
         color: tealAccent
       });
 
       // Priority Pill
-      const pillW = helveticaBold.widthOfTextAtSize(s.priority, 6.0) + 12;
+      const pillW = helveticaBold.widthOfTextAtSize(s.priority, 6.4) + 12;
       page2.drawRectangle({
         x: p2Width - 44 - pillW,
-        y: y2 + cardH - 16,
+        y: y2 + cardH - 17,
         width: pillW,
-        height: 13,
-        color: s.pBg
+        height: 14,
+        color: s.pBg,
+        borderColor: s.pColor,
+        borderWidth: 0.8
       });
       page2.drawText(s.priority, {
         x: p2Width - 44 - pillW + 6,
         y: y2 + cardH - 13,
-        size: 6.0,
+        size: 6.4,
         font: helveticaBold,
         color: s.pColor
       });
 
-      // Why Text
+      // Why Text (High legibility 8.0pt)
       page2.drawText(`Why your DNA needs this: ${s.why}`, {
         x: 48,
         y: y2 + 34,
-        size: 7.0,
+        size: 8.0,
         font: helvetica,
         color: darkSlate,
         maxWidth: p2Width - 100,
-        lineHeight: 9.8
+        lineHeight: 11.0
       });
 
       // Timing Text
       page2.drawText(`How to take: ${s.timing}`, {
         x: 48,
-        y: y2 + 14,
-        size: 6.8,
+        y: y2 + 13,
+        size: 7.6,
         font: helveticaBold,
         color: mutedSlate
       });
@@ -760,7 +800,7 @@ export async function GET(request) {
     page2.drawText('2. CHOOSE YOUR LEVEL: 3 SIMPLE DECISION PACKS (BUY ONLY WHAT YOU NEED)', {
       x: 36,
       y: y2,
-      size: 9.8,
+      size: 11.0,
       font: helveticaBold,
       color: navyPrimary
     });
@@ -779,7 +819,7 @@ export async function GET(request) {
         name: 'PACK 2 · PERFORMANCE & SLEEP',
         items: '4 Supplements · Most Popular',
         highlight: 'Daytime Energy + Restful Sleep',
-        desc: '• Adds Magnesium Bisglycinate + B-Complex.\n• Highly recommended if you experience stressful workdays, fatigue or restless nights.',
+        desc: '• Adds Magnesium Bisglycinate + B-Complex.\n• Recommended if you experience demanding workdays, fatigue or restless nights.',
         color: navyPrimary,
         bg: rgb(239 / 255, 246 / 255, 255 / 255)
       },
@@ -787,7 +827,7 @@ export async function GET(request) {
         name: 'PACK 3 · TOTAL DIGESTION',
         items: '5 Supplements · Full Program',
         highlight: 'Complete Microbiome Defense',
-        desc: '• Adds Targeted Enteric Probiotics.\n• Perfect if you suffer from bloating, gas, lactose sensitivity, or frequent gut discomfort.',
+        desc: '• Adds Targeted Enteric Probiotics.\n• Perfect if you suffer from bloating, gas, lactose sensitivity, or gut discomfort.',
         color: greenText,
         bg: greenBg
       }
@@ -805,42 +845,42 @@ export async function GET(request) {
         height: pkH,
         color: pk.bg,
         borderColor: pk.color,
-        borderWidth: pIdx === 1 ? 1.4 : 0.8
+        borderWidth: pIdx === 1 ? 1.4 : 1.0
       });
 
       // Header inside pack card
       page2.drawRectangle({
         x: pkX,
-        y: y2 - 20,
+        y: y2 - 22,
         width: pkW,
-        height: 20,
+        height: 22,
         color: pk.bg
       });
 
       page2.drawText(pk.name, {
         x: pkX + 8,
-        y: y2 - 13,
-        size: 7.0,
+        y: y2 - 15,
+        size: 7.6,
         font: helveticaBold,
         color: pk.color
       });
 
       page2.drawText(pk.items, {
         x: pkX + 8,
-        y: y2 - 30,
-        size: 6.4,
+        y: y2 - 32,
+        size: 7.0,
         font: helveticaBold,
         color: darkSlate
       });
 
       page2.drawText(pk.desc, {
         x: pkX + 8,
-        y: y2 - 46,
-        size: 6.0,
+        y: y2 - 48,
+        size: 7.0,
         font: helvetica,
         color: mutedSlate,
         maxWidth: pkW - 16,
-        lineHeight: 8.5
+        lineHeight: 9.8
       });
     });
 
@@ -853,7 +893,7 @@ export async function GET(request) {
     page2.drawText('3. HOW DO YOU PREFER TO TAKE IT? (TWO SIMPLE SHOPPING PATHWAYS)', {
       x: 36,
       y: y2,
-      size: 9.8,
+      size: 11.0,
       font: helveticaBold,
       color: navyPrimary
     });
@@ -870,25 +910,25 @@ export async function GET(request) {
       height: pathwayH,
       color: lightBg,
       borderColor: cardBorder,
-      borderWidth: 0.8
+      borderWidth: 1.0
     });
 
     page2.drawText('OPTION A: LOCAL DOHA PHARMACIES (COMMERCIAL BOTTLES)', {
       x: 48,
       y: y2 - 16,
-      size: 7.0,
+      size: 7.8,
       font: helveticaBold,
       color: darkSlate
     });
     const p1Desc = '• Buy 2 to 5 separate bottles at retail pharmacies in Qatar (Brands: Solgar, Thorne, Now Foods).\n• Pros: Immediate local purchase.\n• Cons: Taking 4–6 pills from multiple bottles with non-customized generic doses.';
     page2.drawText(p1Desc, {
       x: 48,
-      y: y2 - 32,
-      size: 6.2,
+      y: y2 - 34,
+      size: 7.2,
       font: helvetica,
       color: mutedSlate,
       maxWidth: pathwayW - 24,
-      lineHeight: 9.0
+      lineHeight: 10.5
     });
 
     // Pathway 2: Custom Compounding All-in-One
@@ -902,22 +942,22 @@ export async function GET(request) {
       borderWidth: 1.2
     });
 
-    page2.drawText('OPTION B: CUSTOM ALL-IN-ONE COMPOUNDING (RECOMMENDED)', {
+    page2.drawText('OPTION B: OFFICIAL 3-CAPSULE COMPOUNDED ORDER', {
       x: 48 + pathwayW + 12,
       y: y2 - 16,
-      size: 7.0,
+      size: 7.8,
       font: helveticaBold,
       color: tealAccent
     });
-    const p2Desc = '• Prepared specifically for you in synchronized daily capsules (1 with breakfast, 2 at bedtime).\n• Pros: All your pure nutrients combined into just 3 capsules/day. 100% lactose-free.\n• Cons: Requires authorized prescription compounding by licensed partner pharmacy.';
+    const p2Desc = '• Have all your genetic cofactors custom-prepared into exactly 3 daily capsules by a compounding pharmacy.\n• Pros: Only 3 capsules/day, zero synthetic binders, zero lactose excipients, exact micro-dosages.\n• To order: Hand the prescription order on Page 3 to your clinic.';
     page2.drawText(p2Desc, {
       x: 48 + pathwayW + 12,
-      y: y2 - 32,
-      size: 6.2,
+      y: y2 - 34,
+      size: 7.2,
       font: helvetica,
       color: darkSlate,
       maxWidth: pathwayW - 24,
-      lineHeight: 9.0
+      lineHeight: 10.5
     });
 
     y2 -= (pathwayH + 12);
