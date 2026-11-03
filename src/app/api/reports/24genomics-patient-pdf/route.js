@@ -176,43 +176,43 @@ export async function GET(request) {
     const pillarCardDefs = [
       {
         pillarTag: 'PILLAR 1: GLYCEMIC METABOLISM (TCF7L2 / FTO)',
-        title: 'Carbohydrate Sensitivity & Midday Energy Dips',
+        title: 'Carbohydrate Sensitivity & Postprandial Glucose',
         status: 'GLUCOSE SENSITIVE',
         statusColor: alertRed,
         statusBg: badgeRedBg,
         why: 'Refined carbs trigger rapid insulin surges, promoting mid-afternoon energy crashes and abdominal fat storage.',
-        assignedFormulation: 'Formulation 2 (Capsule B · Midday Activator) — See Page 2',
-        clinicalGoal: 'Stabilizes postprandial glucose surges, improves insulin sensitivity, and prevents energy dips.'
+        assignedFormulation: 'Dietary Plate Sequencing + Optional Module D (Psyllium 5g sachet if HbA1c is elevated)',
+        clinicalGoal: 'Blunts postprandial glucose excursions up to 45% via food order; avoids systemic pharmacologic berberine.'
       },
       {
         pillarTag: 'PILLAR 2: CELLULAR METHYLATION & ENERGY (MTHFR C677T)',
-        title: 'Active Folate & Homocysteine Recycling Deficit',
+        title: 'Active Folate & Homocysteine Recycling Pathway',
         status: 'MTHFR PRIORITY',
         statusColor: alertRed,
         statusBg: badgeRedBg,
-        why: 'Your liver is 70% slower at activating synthetic folic acid, which impairs cellular detox and neurotransmitters.',
-        assignedFormulation: 'Formulation 2 (Capsule B · Midday Activator) — See Page 2',
-        clinicalGoal: 'Bypasses the enzymatic MTHFR block with active L-methylfolate & B12 to clear homocysteine.'
+        why: 'Your liver is slower at activating synthetic folic acid, requiring active methylfolate and its FAD enzyme cofactor.',
+        assignedFormulation: 'Formulation 2 (Capsule B · Breakfast with fat) — Active 5-MTHF + Riboflavin + B12 + P5P',
+        clinicalGoal: 'Supports cellular methylation with active 5-MTHF, Riboflavin (MTHFR FAD cofactor), Methyl-B12, and P5P.'
       },
       {
         pillarTag: 'PILLAR 3: GUT MICROBIOME & BARRIER (MCM6 / LCT)',
-        title: 'Lactose Intolerance & Mucosal Barrier Support',
+        title: 'Lactose Intolerance & Microbiota Diversity',
         status: 'LACTOSE-FREE SHIELD',
         statusColor: blueDark,
         statusBg: blueBg,
-        why: 'Adult lactase deficiency causes dairy fermentation, abdominal bloating, and reduced beneficial Bifidobacteria.',
-        assignedFormulation: 'Formulation 1 (Capsule A · Morning Enteric Shield) — See Page 2',
-        clinicalGoal: 'Restores beneficial probiotic flora and seals tight junctions via acid-resistant DRcaps®.'
+        why: 'Adult lactase non-persistence requires dietary lactose avoidance or exogenous lactase; supports beneficial flora.',
+        assignedFormulation: 'Formulation 1 (Capsule A · Morning Acid-Resistant DRcaps® with LGG 10B + BB-12 5B CFU)',
+        clinicalGoal: 'Delivers verified probiotic strains in acid-resistant DRcaps®; dietary lactose-free advice recommended.'
       },
       {
         pillarTag: 'PILLAR 4: IMMUNITY & BONE HEALTH (VDR FokI / CYP1A2)',
-        title: 'Vitamin D Receptor Genetic Resistance & Sleep Reset',
+        title: 'Vitamin D Receptor Signaling & Restorative Sleep',
         status: 'VDR RESISTANCE',
         statusColor: amberDark,
         statusBg: amberBg,
-        why: 'Nuclear receptor variation requires higher circulating levels (60-80 ng/mL) to activate cellular defenses and protect bones.',
-        assignedFormulation: 'Formulation 2 (Midday D3/K2) & Formulation 3 (Evening Sleep) — See Page 2',
-        clinicalGoal: 'Overcomes VDR resistance with micellar D3/K2, while evening chelated magnesium optimizes sleep.'
+        why: 'Nuclear receptor variation benefits from consistent physiological D3/K2, while evening chelated magnesium supports deep rest.',
+        assignedFormulation: 'Capsule B (Breakfast D3 2,000 IU + K2 100µg) & Capsule C (Evening 150mg elemental Mg + Theanine 200mg)',
+        clinicalGoal: 'Maintains optimal 25(OH)D safely within EU adult UL, paired with evening chelated magnesium and L-theanine.'
       }
     ];
 
@@ -283,8 +283,8 @@ export async function GET(request) {
         maxWidth: p1Width - 96
       });
 
-      // Galenic Resolution Cross-Reference (Pointing directly to Pharmacy Order on Page 2)
-      page1.drawText(`Targeted Resolution: ${p.assignedFormulation}`, {
+      // Galenic Support Cross-Reference
+      page1.drawText(`Targeted Support: ${p.assignedFormulation}`, {
         x: 46,
         y: y - 41,
         size: 6.7,
@@ -306,9 +306,9 @@ export async function GET(request) {
       y -= cardHeight + 5;
     });
 
-    // Section 2: Patient Daily 3-Capsule Schedule (Simple visual summary)
+    // Section 2: Patient Daily Compounded Schedule (Revised Per Pharmacist Review)
     y -= 4;
-    page1.drawText('2. How to Take Your 3 Personalized Daily Capsules', {
+    page1.drawText('2. How to Take Your Personalized Formulations (Revised Daily Schedule)', {
       x: 36,
       y,
       size: 9.5,
@@ -322,21 +322,21 @@ export async function GET(request) {
     const patientIntakeSchedule = [
       {
         capName: 'CAPSULE A (Morning)',
-        targetPillars: 'Resolves: Pillar 3 (Gut Microbiome)',
-        time: 'Upon Waking (Empty Stomach)',
-        rule: 'Take 1 capsule 30 min before breakfast with room-temperature water. DRcaps® protect delicate live probiotics from stomach acid.'
+        targetPillars: 'Pillar 3 · Verified Probiotics (LGG + BB-12)',
+        time: '15–30 min Before Breakfast (Empty Stomach)',
+        rule: 'Take 1 capsule with room-temperature water. Acid-resistant DRcaps® protect delicate live cultures from gastric acidity.'
       },
       {
-        capName: 'CAPSULE B (Midday)',
-        targetPillars: 'Resolves: Pillars 1 & 2 (Glycemic & Methylation)',
-        time: 'With Breakfast (Healthy Fats)',
-        rule: 'Take 1 capsule with eggs, avocado, or olive oil. Healthy fats maximize absorption of Vitamin D3/K2 and stabilize blood sugar.'
+        capName: 'CAPSULE B (Breakfast)',
+        targetPillars: 'Pillars 2 & 4 · 5-MTHF + Riboflavin + D3/K2',
+        time: 'With Breakfast (Containing Dietary Fats)',
+        rule: 'Take 1 capsule with eggs, avocado, or olive oil. Dietary fats maximize micellar absorption of Vitamin D3 and K2.'
       },
       {
-        capName: 'CAPSULE C (Evening)',
-        targetPillars: 'Resolves: Pillar 4 (Immunity & Sleep)',
-        time: 'With Dinner / Bedtime',
-        rule: 'Take 1 capsule with evening meal or 30 min before bed with water. Supports overnight glucose, deep sleep, and muscle relaxation.'
+        capName: 'CAPSULE C (Evening · 2 Caps)',
+        targetPillars: 'Pillar 4 · 150mg Elemental Mg + Theanine 200mg',
+        time: '30–60 min Before Bedtime (2 Capsules)',
+        rule: 'Take 2 capsules with water before sleep. Calms COMT hyper-reactivity, supports restorative sleep & neuromuscular relaxation.'
       }
     ];
 
@@ -527,13 +527,13 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Clinical Directive to Patient: Mutual Exclusivity Safety Alert
-    y2 -= 56;
+    // Clinical Directive to Patient: Mutual Exclusivity Safety Alert (Generous padding, zero collision)
+    y2 -= 60;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 50,
+      height: 54,
       color: rgb(254 / 255, 242 / 255, 242 / 255), // light alert red
       borderColor: alertRed,
       borderWidth: 1.2
@@ -541,7 +541,7 @@ export async function GET(request) {
 
     page2.drawText('CRITICAL CLINICAL SAFETY DIRECTIVE · MUTUALLY EXCLUSIVE THERAPEUTIC PATHWAYS:', {
       x: 44,
-      y: y2 + 37,
+      y: y2 + 40,
       size: 6.8,
       font: helveticaBold,
       color: alertRed
@@ -549,12 +549,12 @@ export async function GET(request) {
     const otcDirectiveText = 'Pathway 1 (Commercial OTC) and Pathway 2 (Master Compounding) are ALTERNATIVE clinical approaches to resolve your DNA profile.\nNEVER TAKE BOTH TRACKS CONCURRENTLY: If purchasing retail OTC supplements below, DO NOT take the compounded prescription.\nIf your physician prescribes Pathway 2 (Page 3), it fully replaces all standalone OTC vitamins to prevent micronutrient toxicity (hypervitaminosis).';
     page2.drawText(otcDirectiveText, {
       x: 44,
-      y: y2 + 25,
+      y: y2 + 28,
       size: 5.7,
       font: helvetica,
       color: darkSlate,
       maxWidth: p2Width - 88,
-      lineHeight: 8.5
+      lineHeight: 9.0
     });
 
     // Standardized Titles, Priorities & Gene Targets
@@ -919,121 +919,129 @@ export async function GET(request) {
     page3.drawText('OPTION B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C · 3 CAPS/DAY)', { x: 56, y: y3 + 5, size: 6.1, font: helveticaBold, color: tealAccent });
     page3.drawText('Includes Capsule A (Enteric Probiotics DRcaps®) for mucosal barrier repair, dairy intolerance & tight junction seal.', { x: 308, y: y3 + 5, size: 5.5, font: helvetica, color: mutedSlate, maxWidth: 210 });
 
-    // Streamlined 3-Capsule Compounding Tables
+    // Streamlined 3-Capsule Compounding Tables (Revised Per Nikolay / Pharmapolis Pharmacist Review)
     const PHARMACY_CAPSULES = [
       {
         id: 'cap_a',
         num: '1',
-        title: 'FORMULATION 1: CAPSULE A · MORNING ENTERIC PROBIOTIC SHIELD  [PRIORITY 3 · GUT OPTIMIZATION]',
+        title: 'FORMULATION 1: CAPSULE A · MORNING ACID-RESISTANT PROBIOTIC SHIELD  [PRIORITY 3 · GUT MICROBIOME]',
         qty: '60 Capsules (60-Day Supply)',
-        dnaTarget: 'DNA Target: Pillar 3 (Gut Microbiome & Mucosal Integrity)',
-        vehicle: 'Vehicle: Size 0 Delayed-Release Enteric DRcaps® · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
-        timing: 'Posology: 1 capsule upon waking on an empty stomach with a full glass of water (30 min before food).',
+        dnaTarget: 'DNA Target: Pillar 3 (Mucosal Barrier & Gut Microbiome Integrity)',
+        vehicle: 'Vehicle: Size 1–2 Acid-Resistant DRcaps® · Excipient: MCC PH-112 (low-moisture) + Desiccant Canister · Lactose-Free',
+        timing: 'Posology: 1 capsule 15–30 min before breakfast on an empty stomach with room-temperature water.',
         headerColor: tealAccent,
         ingredients: [
           {
-            name: 'Multi-Strain Probiotics (B. lactis & L. rhamnosus GG)',
-            spec: 'Live Lyophilized Microbial Culture (USP/Ph. Eur. grade) · Acid-resistant enteric shell delivery',
-            dose: '15 Billion CFU',
-            batch60: '900 B. CFU',
-            purpose: 'Mucosal Barrier'
+            name: 'Lactobacillus rhamnosus GG (ATCC 53103)',
+            spec: 'Lyophilized viable culture guaranteed at expiry (Ph. Eur. grade) · Low-moisture vehicle',
+            dose: '10 Billion CFU',
+            batch60: '600 B. CFU',
+            purpose: 'Microbiome Barrier'
           },
           {
-            name: 'L-Glutamine USP (Micronized)',
-            spec: 'Micronized Pharmaceutical Grade Ph. Eur. · Pure crystalline amino acid for enterocyte tight junctions',
-            dose: '350 mg',
-            batch60: '21.00 g',
-            purpose: 'Enterocyte Fuel'
+            name: 'Bifidobacterium animalis subsp. lactis BB-12',
+            spec: 'Lyophilized viable culture guaranteed at expiry · Documented acid/bile resistant strain',
+            dose: '5 Billion CFU',
+            batch60: '300 B. CFU',
+            purpose: 'Colonic Integrity'
           }
         ]
       },
       {
         id: 'cap_b',
         num: '2',
-        title: 'FORMULATION 2: CAPSULE B · MIDDAY METABOLIC & METHYL ACTIVATOR  [PRIORITY 1 · ESSENTIAL CORE]',
+        title: 'FORMULATION 2: CAPSULE B · BREAKFAST METHYLATION & VITAMIN D3/K2  [PRIORITY 1 · ESSENTIAL CORE]',
         qty: '60 Capsules (60-Day Supply)',
-        dnaTarget: 'DNA Targets: Pillars 1 & 2 (Glycemic Control & Cellular Methylation)',
-        vehicle: 'Vehicle: Size 0 Vegetable HPMC Capsule · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
-        timing: 'Posology: 1 capsule with breakfast or lunch (meal containing healthy fats for optimal D3/K2 micellar uptake).',
+        dnaTarget: 'DNA Targets: Pillars 2 & 4 (Cellular Methylation & Vitamin D Receptor Activation)',
+        vehicle: 'Vehicle: Size 1–3 Vegetable HPMC Capsule · Excipient: MCC PH-102 · Certified Triturations per Ph. Eur. 2.9.40',
+        timing: 'Posology: 1 capsule with breakfast (meal containing dietary fats: avocado, olive oil, eggs for D3/K2 micellar uptake).',
         headerColor: navyPrimary,
         ingredients: [
           {
-            name: 'Standardized Berberine HCl (97%)',
-            spec: 'High-Purity Purified Botanical Extract USP · Standardized to 97% active alkaloid',
-            dose: '300 mg',
-            batch60: '18.00 g',
-            purpose: 'AMPK / Glycemic'
-          },
-          {
-            name: 'Chromium Picolinate USP',
-            spec: 'Pharmaceutical Grade Chromium Chelate · Highly bioavailable micro-mineral complex',
-            dose: '200 mcg',
-            batch60: '12.00 mg',
-            purpose: 'Insulin Sensitivity'
-          },
-          {
             name: 'Active L-Methylfolate ([6S]-5-MTHF)',
-            spec: 'Active Calcium Salt (USP Grade, Lactose-Free) · Bypasses impaired MTHFR C677T enzyme',
-            dose: '1,000 mcg',
-            batch60: '60.00 mg',
-            purpose: 'MTHFR Bypass'
+            spec: 'Active Calcium or Glucosamine Salt (Ph. Eur.) · 400 mcg base (800 mcg if Homocysteine >15)',
+            dose: '400–800 mcg',
+            batch60: '24–48 mg',
+            purpose: 'MTHFR C677T Support'
+          },
+          {
+            name: 'Riboflavin (Vitamin B2)',
+            spec: 'Pharmaceutical Grade Ph. Eur. · Essential FAD enzymatic cofactor for MTHFR activation',
+            dose: '2.5 mg',
+            batch60: '150.00 mg',
+            purpose: 'MTHFR FAD Cofactor'
           },
           {
             name: 'Methylcobalamin (Active Coenzyme B12)',
-            spec: 'Active Enzymatic Coenzyme B12 (USP Grade) · Essential cofactor for methionine synthase',
+            spec: 'Active Enzymatic Coenzyme B12 (USP/Ph. Eur.) · Essential methionine synthase cofactor',
             dose: '1,000 mcg',
             batch60: '60.00 mg',
             purpose: 'Homocysteine Clear'
           },
           {
-            name: 'Vitamin D3 + Vitamin K2 (all-trans MK-7)',
-            spec: 'Microencapsulated Cholecalciferol / Menaquinone-7 · Lipophilic micellar synergy',
-            dose: '5,000 IU / 100 mcg',
-            batch60: '300k IU / 6 mg',
-            purpose: 'VDR Receptor / Bone'
+            name: 'Pyridoxal-5-Phosphate (Active B6 / P-5-P)',
+            spec: 'Active Enzymatic B6 (Ph. Eur.) · Daytime transsulfuration & CBS cofactor (Safe below EFSA 12mg UL)',
+            dose: '5.0 mg',
+            batch60: '300.00 mg',
+            purpose: 'Transsulfuration'
+          },
+          {
+            name: 'Vitamin D3 (Cholecalciferol)',
+            spec: 'Dry Beadlet USP/Ph. Eur. · 2,000 IU default (4,000 IU if 25(OH)D <20 ng/mL; re-test at 8-12 wks)',
+            dose: '2,000 IU',
+            batch60: '120,000 IU',
+            purpose: 'VDR Receptor Support'
+          },
+          {
+            name: 'Vitamin K2 (all-trans Menaquinone-7)',
+            spec: 'Microencapsulated all-trans MK-7 (Ph. Eur.) · Synergistic calcium matrix directing (Screen Warfarin)',
+            dose: '100 mcg',
+            batch60: '6.00 mg',
+            purpose: 'Calcium Directing'
+          },
+          {
+            name: '(Conditional) Chromium Picolinate',
+            spec: 'Pharmaceutical Chelate (200 mcg elemental Cr) · Include ONLY if HbA1c 5.7–6.4% or HOMA-IR elevated',
+            dose: '1.6 mg (200mcg Cr)',
+            batch60: '96.00 mg',
+            purpose: 'Glycemic Support'
           }
         ]
       },
       {
         id: 'cap_c',
         num: '3',
-        title: 'FORMULATION 3: CAPSULE C · EVENING RECOVERY & SLEEP ARCHITECTURE  [PRIORITY 2 · ESSENTIAL REST]',
-        qty: '60 Capsules (60-Day Supply)',
-        dnaTarget: 'DNA Target: Pillar 4 (Cellular Immunity & Sleep Architecture)',
-        vehicle: 'Vehicle: Size 0 Vegetable HPMC Capsule · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
-        timing: 'Posology: 1 capsule with evening meal or 30 minutes before bed with water.',
+        title: 'FORMULATION 3: CAPSULE C · EVENING REST & NEUROMUSCULAR ARCHITECTURE  [PRIORITY 2 · REST & COMT]',
+        qty: '120 Capsules (60-Day Supply · 2 Caps/Day)',
+        dnaTarget: 'DNA Target: Pillar 4 (Cellular Immunity, COMT Moderation & Sleep Architecture)',
+        vehicle: 'Vehicle: 2 × Size 00 Vegetable HPMC Capsules · Excipient: MCC PH-102 · Non-buffered pure chelate',
+        timing: 'Posology: Take 2 capsules with water 30–60 minutes before bedtime (delivers true 150 mg elemental magnesium).',
         headerColor: rgb(30 / 255, 58 / 255, 138 / 255),
         ingredients: [
           {
             name: 'Magnesium Bisglycinate Chelate',
-            spec: 'TRAACS® Fully Chelated Glycinate USP · High bioavailability, zero laxative threshold',
-            dose: '250 mg',
-            batch60: '15.00 g',
-            purpose: 'GABA / Muscle Relax'
+            spec: 'Pure Non-Buffered TRAACS® Glycinate · 150 mg elemental Mg across 2 caps (reduce to 100mg if eGFR <60)',
+            dose: '150 mg elemental Mg',
+            batch60: '18.00 g (9.0g elem)',
+            purpose: 'COMT / GABA Support'
           },
           {
             name: 'L-Theanine (Suntheanine® Grade)',
-            spec: 'Pure Enzymatic Fermentation (99% L-Isomer) · Promotes alpha brainwave relaxation',
-            dose: '150 mg',
-            batch60: '9.00 g',
+            spec: 'Pure Enzymatic Fermentation (99% L-Isomer) · Promotes alpha brainwave relaxation & sleep architecture',
+            dose: '200 mg',
+            batch60: '12.00 g',
             purpose: 'Alpha Sleep Wave'
-          },
-          {
-            name: 'Pyridoxal-5-Phosphate (Active B6)',
-            spec: 'Active Enzymatic Coenzyme B6 (Ph. Eur.) · Essential cofactor for GABA synthesis',
-            dose: '25 mg',
-            batch60: '1.50 g',
-            purpose: 'Neurotransmitter'
           }
         ]
       }
     ];
 
-    y3 -= 12;
+    y3 -= 10;
 
     PHARMACY_CAPSULES.forEach((cap) => {
       const rowCount = cap.ingredients.length;
-      const cardHeight = 46 + (rowCount * 22) + 6;
+      const rowH = rowCount > 3 ? 18 : 20;
+      const cardHeight = 44 + (rowCount * rowH) + 4;
 
       y3 -= cardHeight;
 
@@ -1051,24 +1059,24 @@ export async function GET(request) {
       // Capsule Header Strip
       page3.drawRectangle({
         x: 36,
-        y: y3 + cardHeight - 17,
+        y: y3 + cardHeight - 16,
         width: p3Width - 72,
-        height: 17,
+        height: 16,
         color: cap.headerColor
       });
 
       page3.drawText(cap.title, {
         x: 44,
-        y: y3 + cardHeight - 12,
-        size: 7.2,
+        y: y3 + cardHeight - 11,
+        size: 6.8,
         font: helveticaBold,
         color: white
       });
 
       page3.drawText(cap.qty, {
-        x: p3Width - 44 - helveticaBold.widthOfTextAtSize(cap.qty, 6.8),
-        y: y3 + cardHeight - 12,
-        size: 6.8,
+        x: p3Width - 44 - helveticaBold.widthOfTextAtSize(cap.qty, 6.5),
+        y: y3 + cardHeight - 11,
+        size: 6.5,
         font: helveticaBold,
         color: white
       });
@@ -1076,77 +1084,127 @@ export async function GET(request) {
       // Vehicle & Posology subheader lines
       page3.drawText(cap.timing, {
         x: 44,
-        y: y3 + cardHeight - 26,
-        size: 6.1,
+        y: y3 + cardHeight - 25,
+        size: 5.9,
         font: helveticaBold,
         color: darkSlate
       });
 
       page3.drawText(cap.vehicle, {
         x: 44,
-        y: y3 + cardHeight - 35,
-        size: 5.7,
+        y: y3 + cardHeight - 34,
+        size: 5.5,
         font: helveticaOblique,
         color: mutedSlate
       });
 
       // DNA Target Reference Tag
       if (cap.dnaTarget) {
-        const targetWidth = helveticaBold.widthOfTextAtSize(cap.dnaTarget, 5.9);
+        const targetWidth = helveticaBold.widthOfTextAtSize(cap.dnaTarget, 5.7);
         page3.drawText(cap.dnaTarget, {
           x: p3Width - 44 - targetWidth,
-          y: y3 + cardHeight - 35,
-          size: 5.9,
+          y: y3 + cardHeight - 34,
+          size: 5.7,
           font: helveticaBold,
           color: tealAccent
         });
       }
 
       // Table Header Strip
-      const thY = y3 + cardHeight - 48;
+      const thY = y3 + cardHeight - 46;
       page3.drawRectangle({
         x: 40,
         y: thY - 2,
         width: p3Width - 80,
-        height: 11,
+        height: 10,
         color: lightBg
       });
 
-      page3.drawText('ACTIVE INGREDIENT (API) & PHARMACOPEIA SPECIFICATION', { x: 44, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page3.drawText('TARGET DOSE', { x: 300, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page3.drawText('BATCH (60 CAPS)', { x: 380, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
-      page3.drawText('THERAPEUTIC ROLE', { x: 460, y: thY + 1, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page3.drawText('ACTIVE INGREDIENT (API) & PHARMACOPEIA SPECIFICATION', { x: 44, y: thY + 1, size: 5.6, font: helveticaBold, color: mutedSlate });
+      page3.drawText('TARGET DOSE', { x: 300, y: thY + 1, size: 5.6, font: helveticaBold, color: mutedSlate });
+      page3.drawText('BATCH (60 CAPS)', { x: 380, y: thY + 1, size: 5.6, font: helveticaBold, color: mutedSlate });
+      page3.drawText('THERAPEUTIC ROLE', { x: 460, y: thY + 1, size: 5.6, font: helveticaBold, color: mutedSlate });
 
       // 2-Line Table Rows
-      let itemY = thY - 14;
+      let itemY = thY - 12;
       cap.ingredients.forEach((ing) => {
-        page3.drawText(`• ${ing.name}`, { x: 44, y: itemY + 2, size: 6.8, font: helveticaBold, color: darkSlate, maxWidth: 245 });
-        page3.drawText(ing.dose, { x: 300, y: itemY + 2, size: 6.5, font: helveticaBold, color: tealAccent });
-        page3.drawText(ing.batch60, { x: 380, y: itemY + 2, size: 6.5, font: helveticaBold, color: navyPrimary });
-        page3.drawText(ing.purpose, { x: 460, y: itemY + 2, size: 6.0, font: helveticaBold, color: darkSlate, maxWidth: 90 });
+        page3.drawText(`• ${ing.name}`, { x: 44, y: itemY + 2, size: 6.4, font: helveticaBold, color: darkSlate, maxWidth: 245 });
+        page3.drawText(ing.dose, { x: 300, y: itemY + 2, size: 6.2, font: helveticaBold, color: tealAccent });
+        page3.drawText(ing.batch60, { x: 380, y: itemY + 2, size: 6.2, font: helveticaBold, color: navyPrimary });
+        page3.drawText(ing.purpose, { x: 460, y: itemY + 2, size: 5.8, font: helveticaBold, color: darkSlate, maxWidth: 90 });
 
-        page3.drawText(`Spec: ${ing.spec}`, { x: 50, y: itemY - 7, size: 5.4, font: helveticaOblique, color: mutedSlate, maxWidth: p3Width - 110 });
+        page3.drawText(`Spec: ${ing.spec}`, { x: 50, y: itemY - 6, size: 5.1, font: helveticaOblique, color: mutedSlate, maxWidth: p3Width - 110 });
 
         page3.drawLine({
-          start: { x: 44, y: itemY - 9 },
-          end: { x: p3Width - 44, y: itemY - 9 },
+          start: { x: 44, y: itemY - 8 },
+          end: { x: p3Width - 44, y: itemY - 8 },
           thickness: 0.5,
           color: rgb(241 / 255, 245 / 255, 249 / 255)
         });
 
-        itemY -= 22;
+        itemY -= rowH;
       });
 
-      y3 -= 8;
+      y3 -= 6;
     });
 
-    // Co-Administration Restriction & Anti-Duplication Directive
-    y3 -= 28;
+    // Optional Module D: Soluble Fiber Sachet Directive
+    y3 -= 24;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 24,
+      height: 22,
+      color: rgb(240 / 255, 253 / 255, 250 / 255),
+      borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
+      borderWidth: 0.8
+    });
+    page3.drawText('OPTIONAL MODULE D · SOLUBLE FIBER SACHET (FOR GLYCEMIC REGULATION):', {
+      x: 44,
+      y: y3 + 13,
+      size: 5.9,
+      font: helveticaBold,
+      color: tealAccent
+    });
+    page3.drawText('Psyllium Husk Powder USP (5 g per sachet in water, before largest meal). Take 2 hours apart from capsules. Add only if HbA1c 5.7–6.4% or fasting glucose elevated.', {
+      x: 44,
+      y: y3 + 4,
+      size: 5.3,
+      font: helvetica,
+      color: darkSlate,
+      maxWidth: p3Width - 88
+    });
+
+    // Baseline Lab Decision Rules Matrix (Adjusting Formulations to Labs)
+    y3 -= 32;
+    page3.drawRectangle({
+      x: 36,
+      y: y3,
+      width: p3Width - 72,
+      height: 30,
+      color: lightBg,
+      borderColor: cardBorder,
+      borderWidth: 0.8
+    });
+    page3.drawText('BASELINE LABS DECISION MATRIX (CLINICAL SAFETY ADJUSTMENT RULES):', {
+      x: 44,
+      y: y3 + 21,
+      size: 5.8,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+    const labRulesLine1 = '• 25(OH)D <20 ng/mL: Increase D3 to 4,000 IU; re-test at 8–12 wks   • Homocysteine >15 µmol/L: Increase 5-MTHF to 800 mcg   • Warfarin: Contraindicated with Vit K2';
+    const labRulesLine2 = '• HbA1c 5.7–6.4%: Add Chromium Picolinate (200 mcg Cr) + Module D   • eGFR <60 mL/min: Reduce elemental Mg to 100 mg & monitor serum magnesium';
+    page3.drawText(labRulesLine1, { x: 44, y: y3 + 12, size: 5.2, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
+    page3.drawText(labRulesLine2, { x: 44, y: y3 + 4, size: 5.2, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
+
+    // Co-Administration Restriction & Anti-Duplication Directive
+    y3 -= 24;
+    page3.drawRectangle({
+      x: 36,
+      y: y3,
+      width: p3Width - 72,
+      height: 22,
       color: rgb(254 / 255, 242 / 255, 242 / 255), // alert light red
       borderColor: alertRed,
       borderWidth: 1
@@ -1154,27 +1212,27 @@ export async function GET(request) {
 
     page3.drawText('DISPENSING DIRECTIVE & CO-ADMINISTRATION RESTRICTION (NO DUPLICATE SUPPLEMENTATION):', {
       x: 44,
-      y: y3 + 14,
-      size: 6.2,
+      y: y3 + 13,
+      size: 6.0,
       font: helveticaBold,
       color: alertRed
     });
     page3.drawText('This master compounded protocol provides 100% of required therapeutic micronutrients. Discontinue all separate OTC multivitamins/minerals to prevent duplicate dosing.', {
       x: 44,
-      y: y3 + 5,
-      size: 5.6,
+      y: y3 + 4,
+      size: 5.4,
       font: helveticaBold,
       color: darkSlate,
       maxWidth: p3Width - 88
     });
 
     // Prescribing Physician Authorization & Medical Signature
-    y3 -= 76;
+    y3 -= 66;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 70,
+      height: 62,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
@@ -1182,15 +1240,15 @@ export async function GET(request) {
 
     page3.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL VALIDATION', {
       x: 44,
-      y: y3 + 56,
-      size: 7.2,
+      y: y3 + 49,
+      size: 7.0,
       font: helveticaBold,
       color: navyPrimary
     });
 
     page3.drawLine({
-      start: { x: 44, y: y3 + 50 },
-      end: { x: p3Width - 44, y: y3 + 50 },
+      start: { x: 44, y: y3 + 44 },
+      end: { x: p3Width - 44, y: y3 + 44 },
       thickness: 0.6,
       color: cardBorder
     });
@@ -1198,24 +1256,24 @@ export async function GET(request) {
     // Left Panel: Physician Information
     page3.drawText('Prescribing Physician (Full Name): _______________________________________________', {
       x: 44,
-      y: y3 + 36,
-      size: 6.0,
+      y: y3 + 31,
+      size: 5.8,
       font: helvetica,
       color: darkSlate
     });
 
     page3.drawText('Medical License / Registry Reg. No.: ____________________________________________', {
       x: 44,
-      y: y3 + 23,
-      size: 6.0,
+      y: y3 + 19,
+      size: 5.8,
       font: helvetica,
       color: darkSlate
     });
 
     page3.drawText('Territory Jurisdiction: State of Qatar   ·   Issue Date: ____ / ____ / 2026', {
       x: 44,
-      y: y3 + 10,
-      size: 6.0,
+      y: y3 + 7,
+      size: 5.8,
       font: helvetica,
       color: darkSlate
     });
@@ -1223,7 +1281,7 @@ export async function GET(request) {
     // Vertical Panel Divider
     page3.drawLine({
       start: { x: 345, y: y3 + 4 },
-      end: { x: 345, y: y3 + 48 },
+      end: { x: 345, y: y3 + 42 },
       thickness: 0.8,
       color: cardBorder
     });
@@ -1231,23 +1289,23 @@ export async function GET(request) {
     // Right Panel: Signature & Stamp Box
     page3.drawText('Physician\'s Professional Stamp & Signature:', {
       x: 355,
-      y: y3 + 36,
-      size: 6.2,
+      y: y3 + 31,
+      size: 6.0,
       font: helveticaBold,
       color: darkSlate
     });
 
     page3.drawLine({
-      start: { x: 355, y: y3 + 14 },
-      end: { x: p3Width - 46, y: y3 + 14 },
+      start: { x: 355, y: y3 + 12 },
+      end: { x: p3Width - 46, y: y3 + 12 },
       thickness: 0.8,
       color: rgb(160 / 255, 160 / 255, 160 / 255)
     });
 
     page3.drawText('Authorized Prescribing Signature & Clinical Seal', {
       x: 355,
-      y: y3 + 5,
-      size: 5.5,
+      y: y3 + 4,
+      size: 5.3,
       font: helveticaOblique,
       color: mutedSlate
     });

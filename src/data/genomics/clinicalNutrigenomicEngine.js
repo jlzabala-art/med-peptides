@@ -172,143 +172,207 @@ export const THREE_CAPSULE_PROTOCOL = [
     capsuleId: 'capsule_a',
     code: 'CAP-A',
     formulationNumber: 1,
-    nameEn: 'CAPSULE A · Morning Microbiota & Gut Barrier Shield',
-    nameEs: 'CÁPSULA A · Escudo Matutino de Microbiota & Barrera Mucosa',
-    timingEn: 'Upon waking on an empty stomach (30 min before breakfast) with room-temperature water',
-    timingEs: 'En ayunas al despertar (30 min antes del desayuno) con un vaso de agua templada',
-    targetPillar: 'Pillar 3 (Gut Microbiome & Mucosal Barrier)',
+    nameEn: 'CAPSULE A · Morning Microbiota & Mucosal Shield',
+    nameEs: 'CÁPSULA A · Escudo Matutino de Microbiota & Mucosa',
+    timingEn: '15–30 minutes before breakfast on an empty stomach with a glass of water',
+    timingEs: '15–30 minutos antes del desayuno en ayunas con un vaso de agua',
+    targetPillar: 'Pillar 3 (Gut Microbiome & Mucosal Support)',
     coveredPillars: [3],
-    coveredPillarsTagEn: 'Resolves: Pillar 3 · Gut Microbiome & Mucosal Barrier',
-    coveredPillarsTagEs: 'Resuelve: Pilar 3 · Microbioma & Barrera Intestinal',
-    pharmacyDnaHeaderEn: 'DNA Target: Pillar 3 (Gut Microbiome & Mucosal Integrity)',
-    galenicVehicleEn: 'Delayed-release acid-resistant hypromellose vegetable capsule (DRcaps®). 100% Lactose-Free verified.',
-    galenicVehicleEs: 'Cápsula vegetal gastrorresistente de liberación retardada (DRcaps®). Certificada 100% libre de lactosa.',
-    rationaleEn: 'Taken fasting in DRcaps® to ensure fragile live probiotic bacteria bypass destructive stomach acid and release intact into the small intestine, without interference from food or antimicrobial berberine.',
-    rationaleEs: 'Tomada en ayunas para asegurar que las bacterias probióticas vivas superen el ácido gástrico sin interferencia de alimentos ni de la berberina.',
+    coveredPillarsTagEn: 'Supports: Pillar 3 · Gut Microbiome Diversity',
+    coveredPillarsTagEs: 'Soporte: Pilar 3 · Diversidad de la Microbiota',
+    pharmacyDnaHeaderEn: 'DNA Target: Pillar 3 (Gut Microbiome & Mucosal Support)',
+    galenicVehicleEn: 'Size 1–2 Acid-Resistant DRcaps® (delayed-release HPMC). Low-moisture excipient (MCC PH-112) with desiccant packaging. 100% Lactose-Free.',
+    galenicVehicleEs: 'Cápsula vegetal gastrorresistente DRcaps® tamaño 1–2. Excipiente de baja humedad (MCC PH-112) con desecante. 100% libre de lactosa.',
+    rationaleEn: 'Taken fasting in acid-resistant DRcaps® 15–30 min before breakfast to protect live probiotic strains from gastric acidity and release them intact into the small intestine.',
+    rationaleEs: 'Tomada en ayunas en DRcaps® gastrorresistentes 15–30 min antes del desayuno para proteger cepas probióticas vivas del ácido gástrico.',
     ingredients: [
       {
-        apiEn: 'Multi-Strain Probiotics',
-        apiEs: 'Complejo Probiótico Multicepa',
-        chemicalSpec: 'Bifidobacterium lactis, Lactobacillus rhamnosus GG, Lactobacillus plantarum',
-        dose: '15 Billion CFU',
-        purposeEn: 'Colonizes mucosal lining and restores bacterial diversity',
-        purposeEs: 'Restaura la flora intestinal benéfica y diversidad del microbioma'
-      },
-      {
-        apiEn: 'L-Glutamine USP',
-        apiEs: 'L-Glutamina Pura USP',
-        chemicalSpec: 'Micronized Pharmaceutical Grade (Ph. Eur.)',
-        dose: '350 mg',
-        purposeEn: 'Fuels enterocytes and seals tight-junction mucosal permeability',
-        purposeEs: 'Combustible preferente del enterocito para sellar la barrera intestinal'
+        apiEn: 'Verified Probiotic Strains (LGG + BB-12)',
+        apiEs: 'Cepas Probióticas Verificadas (LGG + BB-12)',
+        chemicalSpec: 'L. rhamnosus GG (ATCC 53103) 10B CFU + B. lactis BB-12 (or HN019) 5B CFU · Guaranteed at expiry',
+        dose: '15 Billion CFU total (10B LGG + 5B BB-12)',
+        purposeEn: 'Colonizes mucosal lining and supports beneficial microbiota diversity',
+        purposeEs: 'Coloniza la mucosa y apoya la diversidad de la microbiota intestinal'
       }
-    ]
+    ],
+    clinicalNotesEn: 'L-Glutamine removed from capsule (sub-therapeutic at 350 mg; clinical gut doses are 5–15 g powder sachet if indicated). Adult hypolactasia (MCM6) addressed via dietary lactose avoidance or exogenous lactase enzyme.',
+    clinicalNotesEs: 'L-Glutamina retirada de cápsula (subterapéutica a 350 mg; dosis clínicas son 5–15 g en sobre si hay indicación). La hipolactasia (MCM6) se maneja con dieta sin lactosa o enzima lactasa exógena.'
   },
   {
     capsuleId: 'capsule_b',
     code: 'CAP-B',
     formulationNumber: 2,
-    nameEn: 'CAPSULE B · Midday Metabolic & Methylation Activator',
-    nameEs: 'CÁPSULA B · Activador Metabólico & Metilación Matutina',
+    nameEn: 'CAPSULE B · Breakfast Methylation, Cofactors & Vitamin D',
+    nameEs: 'CÁPSULA B · Metilación en el Desayuno, Cofactores & Vitamina D',
     timingEn: 'With breakfast (meal containing healthy fats: olive oil, avocado, or eggs)',
     timingEs: 'Con el desayuno (comida con grasas saludables: aceite de oliva, aguacate o huevos)',
-    targetPillar: 'Pillar 1 (Metabolism), Pillar 2 (Methylation), Pillar 4 (Immunity/VDR)',
-    coveredPillars: [1, 2, 4],
-    coveredPillarsTagEn: 'Resolves: Pillars 1 & 2 · Glycemic & Methylation (+ D3/K2)',
-    coveredPillarsTagEs: 'Resuelve: Pilares 1 y 2 · Glucemia & Metilación (+ D3/K2)',
-    pharmacyDnaHeaderEn: 'DNA Targets: Pillars 1 & 2 (Glycemic Control & Cellular Methylation)',
-    galenicVehicleEn: 'Vegetable hypromellose capsule (HPMC) with microcrystalline cellulose NF filler. 100% Lactose-Free.',
-    galenicVehicleEs: 'Cápsula vegetal de celulosa (HPMC) con celulosa microcristalina NF. 100% libre de lactosa.',
-    rationaleEn: 'Co-formulated with fat-containing breakfast to maximize micellar absorption of fat-soluble vitamins (D3/K2) while berberine blunts postprandial glucose excursions.',
-    rationaleEs: 'Tomada con el desayuno graso para absorción óptima de vitaminas liposolubles (D3/K2) y estabilización glucémica inmediata.',
+    targetPillar: 'Pillar 2 (Methylation & Cofactors), Pillar 4 (Immunity/VDR)',
+    coveredPillars: [2, 4],
+    coveredPillarsTagEn: 'Supports: Pillars 2 & 4 · Methylation Cofactors & Vitamin D3/K2',
+    coveredPillarsTagEs: 'Soporte: Pilares 2 y 4 · Cofactores de Metilación & Vitamina D3/K2',
+    pharmacyDnaHeaderEn: 'DNA Targets: Pillars 2 & 4 (Cellular Methylation & Vitamin D Metabolism)',
+    galenicVehicleEn: 'Size 1–3 Vegetable HPMC Capsule. Certified triturations for micro-dose actives per Ph. Eur. 2.9.40. Opaque / light-protected packaging. 100% Lactose-Free.',
+    galenicVehicleEs: 'Cápsula vegetal HPMC tamaño 1–3. Trituraciones certificadas para microdosis según Ph. Eur. 2.9.40. Envasado opaco fotoprotector. 100% libre de lactosa.',
+    rationaleEn: 'Co-administered with dietary fats at breakfast to maximize micellar uptake of fat-soluble D3 and K2. Combines active methylfolate with its essential enzymatic cofactors: Riboflavin (FAD for MTHFR), Methyl-B12, and P5P.',
+    rationaleEs: 'Tomada con grasas en el desayuno para absorción micelar de D3/K2. Combina metilfolato activo con sus cofactores enzimáticos: Riboflavina (FAD de MTHFR), Metil-B12 y P5P.',
     ingredients: [
       {
-        apiEn: 'Standardized Berberine HCl (97%)',
-        apiEs: 'Extracto Estandarizado de Berberina',
-        chemicalSpec: 'High-Purity Purified Botanical Extract USP · Standardized to 97% active alkaloid',
-        dose: '300 mg',
-        purposeEn: 'AMPK phosphorylation agonist; moderates post-breakfast glycemic curve',
-        purposeEs: 'Activa AMPK y amortigua el pico de glucosa tras el desayuno'
-      },
-      {
-        apiEn: 'Chromium Picolinate USP',
-        apiEs: 'Picolinato de Cromo USP',
-        chemicalSpec: 'Pharmaceutical Grade Chromium Chelate · Highly bioavailable micro-mineral',
-        dose: '200 mcg',
-        purposeEn: 'Enhances insulin receptor tyrosine kinase sensitivity',
-        purposeEs: 'Sensibiliza los receptores celulares de insulina'
-      },
-      {
         apiEn: 'Active L-Methylfolate ([6S]-5-MTHF)',
-        apiEs: 'L-Metilfolato Activo',
-        chemicalSpec: 'Active Calcium Salt (USP Grade, Lactose-Free) · Bypasses impaired MTHFR enzyme',
-        dose: '1,000 mcg',
-        purposeEn: 'Direct daytime cellular methylation bypassing MTHFR mutation',
-        purposeEs: 'Metilación directa sin requerir conversión hepática'
+        apiEs: 'L-Metilfolato Activo ([6S]-5-MTHF)',
+        chemicalSpec: 'Stabilized Calcium/Glucosamine Salt (USP Grade, corrected for salt weight)',
+        dose: '400 µg default (800 µg if homocysteine >12–15 µmol/L or MTHFR TT confirmed)',
+        purposeEn: 'Direct bioavailable folate supporting the methylation cycle',
+        purposeEs: 'Folato bioactivo directo para el ciclo de metilación'
+      },
+      {
+        apiEn: 'Riboflavin (Vitamin B2 / P-5-P Cofactor)',
+        apiEs: 'Riboflavina (Vitamina B2 / Cofactor FAD)',
+        chemicalSpec: 'Riboflavin / Riboflavin-5-Phosphate USP (MTHFR FAD enzymatic cofactor)',
+        dose: '2.5 mg (1.6–5 mg adjusted to homocysteine)',
+        purposeEn: 'Essential FAD prosthetic group for the MTHFR enzyme (crucial for C677T TT)',
+        purposeEs: 'Grupo prostético FAD esencial para la enzima MTHFR (crucial en C677T TT)'
       },
       {
         apiEn: 'Methylcobalamin (Active Coenzyme B12)',
-        apiEs: 'Metilcobalamina Pura',
-        chemicalSpec: 'Active Enzymatic Coenzyme B12 (USP grade) · Essential methionine synthase cofactor',
-        dose: '1,000 mcg',
+        apiEs: 'Metilcobalamina Pura (B12 Activa)',
+        chemicalSpec: 'Active Enzymatic Coenzyme B12 (USP grade) · Light-protected packaging',
+        dose: '1,000 µg',
         purposeEn: 'Homocysteine remethylation into methionine cofactor',
-        purposeEs: 'Cofactor esencial en el reciclaje de homocisteína'
+        purposeEs: 'Cofactor esencial en la remetilación de homocisteína a metionina'
       },
       {
-        apiEn: 'Vitamin D3 + Vitamin K2 (all-trans MK-7)',
-        apiEs: 'Vitamina D3 + K2 MK-7',
-        chemicalSpec: 'Cholecalciferol Crystalline USP + Microencapsulated Menaquinone-7',
-        dose: '5,000 IU / 100 mcg',
-        purposeEn: 'Therapeutic ligand for low-affinity VDR nuclear receptors',
-        purposeEs: 'Supera la menor afinidad genética del receptor VDR'
+        apiEn: 'Pyridoxal-5-Phosphate (Active B6 / P5P)',
+        apiEs: 'Piridoxal-5-Fosfato (B6 Activa / P5P)',
+        chemicalSpec: 'Active Enzymatic Coenzyme B6 (Ph. Eur.) · Safe intake below EFSA UL of 12 mg',
+        dose: '5 mg',
+        purposeEn: 'Transsulfuration pathway cofactor (clears homocysteine to cystathionine)',
+        purposeEs: 'Cofactor de la vía de transulfuración (aclara homocisteína a cistationina)'
+      },
+      {
+        apiEn: 'Vitamin D3 (Cholecalciferol)',
+        apiEs: 'Vitamina D3 (Colecalciferol)',
+        chemicalSpec: 'Microencapsulated Crystalline Cholecalciferol USP (safe EU physiological baseline)',
+        dose: '2,000 IU default (4,000 IU if baseline 25(OH)D <20 ng/mL; re-test at 8–12 weeks)',
+        purposeEn: 'Supports healthy serum 25(OH)D levels and nuclear VDR signaling',
+        purposeEs: 'Apoya niveles óptimos de 25(OH)D y señalización del receptor VDR'
+      },
+      {
+        apiEn: 'Vitamin K2 (all-trans MK-7)',
+        apiEs: 'Vitamina K2 (todo-trans MK-7)',
+        chemicalSpec: 'Menaquinone-7 all-trans pure extract (Screen out patients on Warfarin/VKA)',
+        dose: '100 µg',
+        purposeEn: 'Carboxylates osteocalcin and matrix Gla-protein (directs calcium to bones)',
+        purposeEs: 'Carboxila osteocalcina y MGP (dirige el calcio a la matriz ósea)'
       }
-    ]
+    ],
+    conditionalActivesEn: 'Chromium Picolinate: Conditional 200 µg elemental Cr only if HbA1c 5.7–6.4% or elevated HOMA-IR confirmed. Berberine removed due to EFSA 2026 safety review and CYP interactions; replaced by dietary advice and Module D (Psyllium).',
+    conditionalActivesEs: 'Picolinato de Cromo: Condicional a 200 µg de Cr elemental solo si HbA1c 5.7–6.4% o HOMA-IR elevado. Berberina retirada por revisión EFSA 2026 e interacciones CYP; sustituida por pauta dietética y Módulo D (Psyllium).'
   },
   {
     capsuleId: 'capsule_c',
     code: 'CAP-C',
     formulationNumber: 3,
-    nameEn: 'CAPSULE C · Evening Recovery & Sleep Architecture',
-    nameEs: 'CÁPSULA C · Reparación Nocturna & Arquitectura del Sueño',
-    timingEn: 'With dinner or 30 minutes before bed with a glass of water',
-    timingEs: 'Con la cena o 30 minutos antes de acostarse con un vaso de agua',
-    targetPillar: 'Pillar 4 (Cellular Immunity, Bone Density & Sleep Architecture)',
+    nameEn: 'CAPSULE C · Evening Neuromuscular & Sleep Support',
+    nameEs: 'CÁPSULA C · Soporte Neuromuscular Nocturno & Sueño',
+    timingEn: '2 capsules taken 30–60 minutes before bedtime with water',
+    timingEs: '2 cápsulas tomadas 30–60 minutos antes de acostarse con agua',
+    targetPillar: 'Pillar 4 (Neuromuscular Relaxation & Sleep Architecture)',
     coveredPillars: [4],
-    coveredPillarsTagEn: 'Resolves: Pillar 4 · Immunity, Bone Density & Deep Sleep',
-    coveredPillarsTagEs: 'Resuelve: Pilar 4 · Inmunidad, Fijación Ósea & Sueño Profundo',
-    pharmacyDnaHeaderEn: 'DNA Target: Pillar 4 (Immunity & Neuro-Recovery Architecture)',
-    galenicVehicleEn: 'Vegetable hypromellose capsule (HPMC). 100% Lactose-Free verified.',
-    galenicVehicleEs: 'Cápsula vegetal de celulosa (HPMC). 100% libre de lactosa.',
-    rationaleEn: 'Delivers fully chelated TRAACS® magnesium with active P5P and pure L-theanine to stimulate alpha brainwaves and nocturnal neuromuscular relaxation.',
-    rationaleEs: 'Aporta magnesio quelado con P5P activa y L-teanina para inducir relajación neurovascular y sueño profundo reparador.',
+    coveredPillarsTagEn: 'Supports: Pillar 4 · Neuromuscular Relaxation & Sleep Architecture',
+    coveredPillarsTagEs: 'Soporte: Pilar 4 · Relajación Neuromuscular & Arquitectura del Sueño',
+    pharmacyDnaHeaderEn: 'DNA Target: Pillar 4 (Neuromuscular Relaxation & Sleep Architecture)',
+    galenicVehicleEn: '2 × Size 00 Vegetable HPMC Capsules. 100% Lactose-Free verified.',
+    galenicVehicleEs: '2 × Cápsulas vegetales HPMC tamaño 00. 100% libre de lactosa.',
+    rationaleEn: 'Provides verified therapeutic elemental magnesium (150 mg elemental Mg across 2 capsules) combined with clinically studied pure L-theanine (200 mg) to calm COMT hyper-reactivity, lower evening cortisol, and support restorative sleep.',
+    rationaleEs: 'Aporta magnesio elemental terapéutico (150 mg Mg elemental en 2 cápsulas) con L-teanina pura (200 mg) para modular COMT, reducir cortisol y favorecer sueño profundo.',
     ingredients: [
       {
-        apiEn: 'Magnesium Bisglycinate Chelate',
-        apiEs: 'Bisglicinato de Magnesio Quelado',
-        chemicalSpec: 'TRAACS® Fully Chelated Glycinate USP · High bioavailability, zero laxative threshold',
-        dose: '250 mg',
-        purposeEn: 'Neurovascular relaxation, deep restorative sleep, VDR cofactor',
-        purposeEs: 'Relajación neurovascular, sueño profundo y cofactor VDR'
+        apiEn: 'Magnesium Bisglycinate Chelate (Elemental Mg)',
+        apiEs: 'Bisglicinato de Magnesio Quelado (Mg Elemental)',
+        chemicalSpec: 'TRAACS® / Pure Bisglycinate (≈750 mg buffered or ≈1,070 mg non-buffered per CoA assay)',
+        dose: '150 mg elemental Mg (across 2 capsules)',
+        purposeEn: 'Neuromuscular relaxation, GABA pathway support, and sleep quality (reduce to 100mg if eGFR <60)',
+        purposeEs: 'Relajación neuromuscular, modulación GABA y calidad de sueño (reducir a 100mg si eGFR <60)'
       },
       {
         apiEn: 'L-Theanine (Suntheanine® Grade)',
-        apiEs: 'L-Teanina Pura',
-        chemicalSpec: 'Pure Enzymatic Fermentation (99% L-Isomer) · Promotes alpha brainwave relaxation',
-        dose: '150 mg',
-        purposeEn: 'Reduces evening cortisol and facilitates deep sleep onset',
-        purposeEs: 'Reduce el cortisol nocturno e induce ondas alfa cerebrales'
-      },
-      {
-        apiEn: 'Pyridoxal-5-Phosphate (Active B6)',
-        apiEs: 'Piridoxal-5-Fosfato (B6 Activa)',
-        chemicalSpec: 'Active Enzymatic Coenzyme B6 (Ph. Eur.) · Essential cofactor for GABA synthesis',
-        dose: '25 mg',
-        purposeEn: 'Synergistic cofactor for magnesium absorption and GABA production',
-        purposeEs: 'Cofactor sinérgico para la síntesis de GABA y absorción de magnesio'
+        apiEs: 'L-Teanina Pura (Grado Suntheanine®)',
+        chemicalSpec: 'Pure Enzymatic Fermentation (>99% L-Enantiomer) · Clinically validated dose',
+        dose: '200 mg',
+        purposeEn: 'Promotes alpha brainwave relaxation and eases sleep onset without sedation',
+        purposeEs: 'Induce ondas alfa cerebrales y facilita la conciliación del sueño sin sedación'
       }
-    ]
+    ],
+    clinicalNotesEn: 'P5P removed from Capsule C (moved to morning Capsule B at safe 5 mg dose). "Overnight glucose" claim removed. Note: Requires 2 x size 00 capsules to achieve 150 mg elemental magnesium.',
+    clinicalNotesEs: 'P5P retirada de Cápsula C (trasladada a Cápsula B a dosis segura de 5 mg). Retirada afirmación de glucosa nocturna. Requiere 2 cápsulas tamaño 00 para 150 mg de Mg elemental.'
   }
 ];
+
+export const OPTIONAL_MODULE_D = {
+  moduleId: 'module_d',
+  code: 'MOD-D',
+  nameEn: 'MODULE D (Optional) · Glycaemic & Viscous Fiber Sachet',
+  nameEs: 'MÓDULO D (Opcional) · Sobre de Fibra Viscosa y Control Glucémico',
+  timingEn: '1 sachet (5 g) in a large glass of water taken immediately before the largest meal of the day',
+  timingEs: '1 sobre (5 g) en un vaso grande de agua inmediatamente antes de la comida principal',
+  activeEn: 'Organic Psyllium Husk Powder (Plantago ovata) 5 g sachet',
+  activeEs: 'Polvo de Cáscara de Psyllium Orgánico (Plantago ovata) 5 g en sobre',
+  ruleEn: 'Take 2 hours apart from any prescription capsules or medications. Indicated only with physician approval if baseline HbA1c is 5.7–6.4% or HOMA-IR is elevated. If HbA1c ≥6.5%, refer to physician for medical co-management.',
+  ruleEs: 'Tomar con 2 horas de separación de cualquier cápsula o fármaco. Indicado con aprobación médica si HbA1c está entre 5.7–6.4% o HOMA-IR elevado. Si HbA1c ≥6.5%, derivar a médico.'
+};
+
+export const BASELINE_LAB_DECISION_RULES = [
+  {
+    parameter: '25-OH-Vitamin D',
+    labResult: '<20 ng/mL (Deficiency)',
+    adjustmentEn: 'Increase Vitamin D3 to 4,000 IU/day in Capsule B; re-test at 8–12 weeks.',
+    adjustmentEs: 'Aumentar Vitamina D3 a 4,000 UI/día en Cápsula B; repetir analítica a las 8–12 semanas.'
+  },
+  {
+    parameter: '25-OH-Vitamin D',
+    labResult: '20–30 ng/mL (Sub-optimal) / >30 ng/mL (Adequate)',
+    adjustmentEn: '2,000 IU/day default maintenance (reduce to 1,000 IU if >30 ng/mL in sunny season).',
+    adjustmentEs: '2,000 UI/día de mantenimiento estándar (reducir a 1,000 UI si >30 ng/mL en meses de sol).'
+  },
+  {
+    parameter: 'Plasma Homocysteine / MTHFR',
+    labResult: 'Homocysteine >12–15 µmol/L or MTHFR C677T TT confirmed',
+    adjustmentEn: 'Increase L-5-MTHF to 800 µg and Riboflavin to 5 mg in Capsule B.',
+    adjustmentEs: 'Aumentar L-5-MTHF a 800 µg y Riboflavina a 5 mg en Cápsula B.'
+  },
+  {
+    parameter: 'Glycated Hemoglobin (HbA1c)',
+    labResult: 'HbA1c 5.7–6.4% or elevated HOMA-IR',
+    adjustmentEn: 'Add Chromium Picolinate (200 µg elemental Cr) to Capsule B + add Module D (Psyllium 5g).',
+    adjustmentEs: 'Añadir Picolinato de Cromo (200 µg Cr elemental) en Cápsula B + añadir Módulo D (Psyllium 5g).'
+  },
+  {
+    parameter: 'Glycated Hemoglobin (HbA1c)',
+    labResult: 'HbA1c ≥6.5% or on glucose-lowering drugs',
+    adjustmentEn: 'Refer to physician; no glycaemic compounding module without medical co-management.',
+    adjustmentEs: 'Derivar a médico prescriptor; no iniciar módulo glucémico sin co-manejo clínico.'
+  },
+  {
+    parameter: 'Renal Function (eGFR)',
+    labResult: 'eGFR <60 mL/min/1.73 m²',
+    adjustmentEn: 'Reduce elemental magnesium in Capsule C to 100 mg, or omit.',
+    adjustmentEs: 'Reducir el magnesio elemental en Cápsula C a 100 mg, o suprimir.'
+  },
+  {
+    parameter: 'Anticoagulation Therapy',
+    labResult: 'Warfarin or Vitamin K Antagonist (VKA) therapy',
+    adjustmentEn: 'Strictly remove Vitamin K2 from Capsule B to prevent INR interference.',
+    adjustmentEs: 'Eliminar estrictamente la Vitamina K2 de la Cápsula B para evitar interferencia con el INR.'
+  }
+];
+
+export const RAMADAN_CHRONOBIOLOGY_SCHEDULE = {
+  titleEn: 'Ramadan Circadian Schedule Adjustment',
+  titleEs: 'Ajuste Circadiano para el Periodo de Ramadán',
+  suhoor: 'Capsule A (15–30 min before Suhoor meal) + Capsule B with Suhoor meal (containing healthy fats).',
+  beforeIftar: 'Module D (Optional Psyllium sachet) in water before Iftar.',
+  afterIftar: 'Capsule C (2 capsules) after Iftar / 30–60 min before sleep.'
+};
 
 export const TWENTY_FOUR_GENETICS_AI_ECOSYSTEM = {
   assistantName: 'Julia',

@@ -221,7 +221,7 @@ export async function GET(request) {
     page1.drawText('80.00 QAR / kit · Express door-to-lab courier transport from Doha to Madrid with biological integrity guarantee.', { x: 44, y: y + 7, size: 6.0, font: helvetica, color: mutedSlate });
 
     page1.drawText('Continuous Clinical AI Care Subscription (WhatsApp & Julia AI):', { x: 340, y: y + 40, size: 6.8, font: helveticaBold, color: tealAccent });
-    page1.drawText('51.09 QAR / month per active patient · Flexible monthly care with daily photo meal logging and nutritionist chat.', { x: 340, y: y + 25, size: 6.0, font: helvetica, color: darkSlate, maxWidth: 210, lineHeight: 8.0 });
+    page1.drawText('50.00 QAR / month per active customer · Optional monthly add-on for continuous WhatsApp guidance & meal photo logging.', { x: 340, y: y + 25, size: 6.0, font: helvetica, color: darkSlate, maxWidth: 210, lineHeight: 8.0 });
 
     // Section 3: Dual-Track Clinical Model Summary
     y -= 24;
@@ -367,7 +367,7 @@ export async function GET(request) {
     });
 
     y2 -= 16;
-    page2.drawText('EXACT DELIVERABLES INCLUDED IN EACH TEST & PACK', {
+    page2.drawText('EXACT DELIVERABLES INCLUDED IN EACH TEST KIT & PACK', {
       x: 36,
       y: y2,
       size: 13,
@@ -376,7 +376,7 @@ export async function GET(request) {
     });
 
     y2 -= 11;
-    page2.drawText('Detailed Specification of Collection Hardware, Laboratory Sequencing, Monographs & Clinical Protocols', {
+    page2.drawText('Comprehensive 7-Service Clinical Nutrition Suite · State of Qatar Wholesale Specification', {
       x: 36,
       y: y2,
       size: 7.5,
@@ -392,83 +392,89 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // 6 Structured Deliverable Cards in a 2-Column Grid
-    const DELIVERABLES = [
+    // 6 Core Test Services in a 2-Column Grid
+    const CORE_SERVICES = [
       {
         num: '1',
-        title: 'PHYSICAL CE-IVD SALIVA COLLECTION KIT',
+        title: 'NUTRIGENETIC CLINICAL TEST',
+        subtitle: 'Personalized genetic analysis focused on nutrition and metabolism.',
         accent: tealAccent,
         points: [
-          'Non-invasive buccal saliva swab (in-clinic or at-home, 2 minutes).',
-          'Patented cellular DNA lysis & stabilization buffer: room temperature stability (15°C–30°C) for up to 12 months with zero degradation.',
-          'No dry ice, centrifugation, or immediate refrigeration required.',
-          'Individually barcoded specimen tube, tamper-evident security seal, and prepaid international courier return mailer.'
+          'Personalized genetic analysis focused on nutrition and metabolism.',
+          'High-density Illumina Global Screening Array (GSA) with +50,000 informative SNPs.',
+          'Evaluates carbohydrate, lipid, and protein metabolic efficiency, vitamin absorption, and intolerances.',
+          'CE-IVD European accredited molecular genetics laboratory in Madrid (accuracy >99.9%).'
         ]
       },
       {
         num: '2',
-        title: 'EUROPEAN CORE LAB GENOMIC SEQUENCING',
+        title: 'GENETIC ANCESTRY TEST',
+        subtitle: 'Complete biogeographical genetic ancestry analysis included in pack.',
         accent: navyPrimary,
         points: [
-          'High-density Illumina Global Screening Array (GSA) with +50,000 informative single nucleotide polymorphisms (SNPs).',
-          'European CE-IVD accredited molecular genetics laboratory in Madrid, Spain.',
-          'Analytical repeatability and genotyping accuracy >99.9%.',
-          'Turnaround time: 3 to 4 weeks from Madrid laboratory arrival, with full bioinformatic quality control and raw data curation.'
+          'High-resolution biogeographical ancestry analysis included in every pack.',
+          'Regional origin breakdown reconstructed across 1,500+ global population clusters.',
+          'Maternal and paternal deep haplogroup lineage and historical migration tracing.',
+          'Provided in both luxury printed presentation monograph and 24/7 digital portal.'
         ]
       },
       {
         num: '3',
-        title: 'DUAL HARDBOUND LUXURY & DIGITAL MONOGRAPHS',
+        title: 'SHIPPING TO QATAR',
+        subtitle: 'Direct delivery of test kit hardware from Spain to Qatar.',
         accent: tealAccent,
         points: [
-          'Deluxe hardbound printed monograph delivered physically to clinic or patient, bound in luxury archival-quality paper.',
-          'Full High-Resolution Biogeographical Ancestry Monograph included in the pack fee (maternal/paternal haplogroups & migrations).',
-          'Atlas Health Platform 24/7 digital portal access with 1-click verified login and exportable 3-page clinical PDF dossier.',
-          'Complete coverage of metabolic pathways, food sensitivities, vitamin receptors, and cardiovascular predispositions.'
+          'Delivery of physical CE-IVD saliva collection kits from laboratory in Spain to Qatar.',
+          'Patented room-temperature cellular DNA stabilization buffer (15°C–30°C, 12 months stability).',
+          'Non-invasive 2-minute buccal swab collection (in-clinic or at-home).',
+          'Pre-barcoded collection tubes with tamper-evident seal and protective biological packaging.'
         ]
       },
       {
         num: '4',
-        title: 'ALGORITHMIC CLINICAL DIET ASSIGNMENT',
+        title: 'SAMPLE RETURN SHIPPING',
+        subtitle: 'Collection & shipping from Qatar to Spain (batches of >=5 kits).',
         accent: navyPrimary,
         points: [
-          'Personalized selection of the optimal dietary pattern from 24Genetics catalog: Low-Carb, Mediterranean, Low-Fat, or Balanced.',
-          'Correlates TCF7L2, PPARG, FTO, and FABP2 genotypes to assign exact daily macronutrient targets (<40g net carbs/meal).',
-          'High-Adherence Plate Sequencing protocol: fiber and vegetables first, proteins/fats second, complex carbs last.',
-          'Clinically validated to blunt postprandial glucose excursions by up to 45%.'
+          'Collection and express return shipment of biological samples from Qatar to Madrid.',
+          'Included for consolidated batches of at least 5 kits per pickup.',
+          'Full international customs biological clearance and chain-of-custody tracking.',
+          'Ensures integrity of patient genetic material from clinic doorstep to Core Lab arrival.'
         ]
       },
       {
         num: '5',
-        title: 'DUAL-TRACK MICRONUTRIENT PRESCRIPTION',
+        title: 'PERSONALIZED SUPPLEMENTATION',
+        subtitle: 'AI-assisted multivitamin recommendations subject to doctor validation.',
         accent: tealAccent,
         points: [
-          'Pathway 1 (Local Commercial OTC Guide): Recommends exact active forms (L-5-MTHF, D3+K2 MK-7, TRAACS® Magnesium, P-5-P B6) and local Doha pharmacy brands (Boots, Wellcare, Kulud).',
-          'Pathway 2 (Master Compounded Formulation): 3-capsule chronobiological regimen in 100% lactose-free DRcaps®.',
-          'Galenically partitioned: isolates live probiotics from berberine; lipophilic D3/K2 with breakfast fats; evening magnesium.',
-          'Strict mutual exclusivity directive preventing accidental micronutrient duplication.'
+          'AI-assisted multivitamin and nutritional supplement recommendations based on DNA profile.',
+          'Organized by clinical priorities: Priority 1 (Core MTHFR/VDR), Priority 2 (Metabolic), Priority 3 (Gut).',
+          'Pathway 1 (Local OTC Guide): Specific brand names and active forms available in Doha pharmacies.',
+          'Pathway 2 (Compounding Rx): Doctor-validated custom formulation in lactose-free DRcaps®.'
         ]
       },
       {
         num: '6',
-        title: 'CONTINUOUS CLINICAL CARE & JULIA AI (OPTIONAL)',
+        title: 'PERSONALIZED MEAL PLAN SELECTION',
+        subtitle: 'Optimal diet assignment from your available menu catalogue.',
         accent: navyPrimary,
         points: [
-          'Integrated with 24Genetics AI Ecosystem (Julia AI for Clinical Nutrition) supporting 22 languages.',
-          'WhatsApp-based daily meal photo logging, nutrient tolerance checks, and dietary adjustments.',
-          'Direct asynchronous communication with clinical nutritionists and compounding pharmacists.',
-          'Flexible monthly subscription at 51.09 QAR / month per active patient with zero long-term lock-in.'
+          'Recommendation of the most suitable meal plan from your available menu catalogue.',
+          'Algorithmic assignment based on individual genetics (Low-Carb, Mediterranean, Low-Fat, Balanced).',
+          'Daily macronutrient targeting (<40g net carbs/meal) and blood glucose stabilization.',
+          'Plate Sequencing protocol to blunt postprandial glucose excursions by up to 45%.'
         ]
       }
     ];
 
-    y2 -= 18;
+    y2 -= 16;
     const colWidth = (p2Width - 84) / 2;
-    const cardHeight = 104;
+    const cardHeight = 84;
 
-    for (let i = 0; i < DELIVERABLES.length; i += 2) {
-      const leftItem = DELIVERABLES[i];
-      const rightItem = DELIVERABLES[i + 1];
+    for (let i = 0; i < CORE_SERVICES.length; i += 2) {
+      const leftItem = CORE_SERVICES[i];
+      const rightItem = CORE_SERVICES[i + 1];
 
       y2 -= cardHeight;
 
@@ -485,9 +491,9 @@ export async function GET(request) {
 
       page2.drawRectangle({
         x: 36,
-        y: y2 + cardHeight - 16,
+        y: y2 + cardHeight - 15,
         width: colWidth,
-        height: 16,
+        height: 15,
         color: lightBg
       });
 
@@ -500,18 +506,18 @@ export async function GET(request) {
         maxWidth: colWidth - 16
       });
 
-      let pY = y2 + cardHeight - 27;
+      let pY = y2 + cardHeight - 25;
       leftItem.points.forEach((pt) => {
         page2.drawText(`• ${pt}`, {
           x: 44,
           y: pY,
-          size: 5.7,
+          size: 5.6,
           font: helvetica,
           color: darkSlate,
           maxWidth: colWidth - 18,
-          lineHeight: 7.8
+          lineHeight: 7.5
         });
-        pY -= 18;
+        pY -= 14;
       });
 
       // Right Box
@@ -530,9 +536,9 @@ export async function GET(request) {
 
         page2.drawRectangle({
           x: rightX,
-          y: y2 + cardHeight - 16,
+          y: y2 + cardHeight - 15,
           width: colWidth,
-          height: 16,
+          height: 15,
           color: lightBg
         });
 
@@ -545,56 +551,88 @@ export async function GET(request) {
           maxWidth: colWidth - 16
         });
 
-        let rpY = y2 + cardHeight - 27;
+        let rpY = y2 + cardHeight - 25;
         rightItem.points.forEach((pt) => {
           page2.drawText(`• ${pt}`, {
             x: rightX + 8,
             y: rpY,
-            size: 5.7,
+            size: 5.6,
             font: helvetica,
             color: darkSlate,
             maxWidth: colWidth - 18,
-            lineHeight: 7.8
+            lineHeight: 7.5
           });
-          rpY -= 18;
+          rpY -= 14;
         });
       }
 
-      y2 -= 10;
+      y2 -= 8;
     }
 
-    // Summary Box at Bottom of Page 2
-    y2 -= 48;
+    // Service 7: Optional WhatsApp Platform Access (Dedicated Full-Width Highlight Box)
+    y2 -= 46;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 48,
+      height: 44,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
-      borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
-      borderWidth: 1
+      borderColor: tealAccent,
+      borderWidth: 1.2
     });
 
-    page2.drawText('TURNKEY VALUE PROPOSITION FOR CLINICS & MEDICAL CENTERS IN QATAR:', {
+    page2.drawText('7. OPTIONAL WHATSAPP PLATFORM ACCESS · QAR 50.00 / MONTH PER CUSTOMER', {
       x: 44,
-      y: y2 + 34,
-      size: 6.8,
+      y: y2 + 30,
+      size: 7.2,
       font: helveticaBold,
       color: tealAccent
     });
-    const turnkeyText = 'Each 24Genomics Nutrition Test Kit represents a complete clinical service: from non-invasive saliva sampling in Doha to high-density European CE-IVD molecular sequencing in Madrid, luxury hardbound reporting, customized nutritional translation, and doctor-signed compounding prescriptions. Available under tiered B2B wholesale pricing exclusively for Ryhanh Medical Company authorized accounts.';
-    page2.drawText(turnkeyText, {
+
+    const s7Detail = 'For an additional QAR 50 per month per customer, patients receive access to our Atlas platform via WhatsApp for ongoing personalized nutritional guidance. Includes daily photo meal logging, supplement tolerance monitoring, and clinical query resolution.\n• Pricing Clarification: 100% optional monthly add-on, cancelable at any time with zero lock-in. It is not required for kit processing or report delivery.';
+    page2.drawText(s7Detail, {
       x: 44,
-      y: y2 + 22,
-      size: 5.8,
+      y: y2 + 18,
+      size: 5.7,
       font: helvetica,
       color: darkSlate,
       maxWidth: p2Width - 88,
-      lineHeight: 8.2
+      lineHeight: 8.0
+    });
+
+    // Clear Next Steps for Dr. Hossam / Ryhanh Medical Company
+    y2 -= 60;
+    page2.drawRectangle({
+      x: 36,
+      y: y2,
+      width: p2Width - 72,
+      height: 56,
+      color: lightBg,
+      borderColor: cardBorder,
+      borderWidth: 1
+    });
+
+    page2.drawText('CLEAR NEXT STEPS FOR DR. HOSSAM (RYHANH MEDICAL COMPANY · QATAR):', {
+      x: 44,
+      y: y2 + 42,
+      size: 7.0,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    const nextSteps = '1. Confirm Volume Tier: Select either 1 Pilot Kit (QAR 1,048.44) or 50 Kits Wholesale Tier 1 (QAR 799.56 / kit · Total QAR 39,977.78).\n2. Authorize Commercial Agreement QA-RYH-88219 and establish clinic sample intake points across Doha.\n3. Express Dispatch of Test Kits from Madrid Core Lab to Doha with biological customs clearance.\nObjective: Offer a complete personalized nutrition solution combining genetic testing, supplementation, and your meal plans within a single service.';
+    page2.drawText(nextSteps, {
+      x: 44,
+      y: y2 + 30,
+      size: 5.7,
+      font: helvetica,
+      color: darkSlate,
+      maxWidth: p2Width - 88,
+      lineHeight: 8.0
     });
 
     // Page 2 Footer
-    page2.drawText('Page 2 of 2 · Comprehensive Deliverables Specification · Authorized for Ryhanh Medical Company (State of Qatar)', {
+    page2.drawText('Page 2 of 2 · Official 7-Service Scope of Inclusions & Commercial Next Steps · 24Genetics & Atlas Health Services (Qatar)', {
       x: 36,
       y: 18,
       size: 7,

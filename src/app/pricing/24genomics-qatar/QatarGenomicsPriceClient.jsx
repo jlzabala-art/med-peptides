@@ -1488,6 +1488,146 @@ export default function QatarGenomicsPriceClient() {
                   </div>
                 </div>
 
+                {/* Executive B2B Proposal & 7-Service Deliverables Schedule for Dr. Hossam */}
+                <div style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1.5px solid #003666',
+                  padding: '1.5rem',
+                  boxShadow: '0 4px 14px rgba(0, 54, 102, 0.06)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#003666', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.90rem' }}>
+                        24G
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: 0 }}>
+                          24Genetics Wholesale Pricing &amp; Integrated Services for Qatar
+                        </h3>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          Official Partner Schedule for Dr. Hossam Ahmed / Ryhanh Medical Company (Ref: QA-RYH-88219)
+                        </div>
+                      </div>
+                    </div>
+
+                    <a
+                      href="/api/reports/24genomics-qatar-pricelist-pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        fontSize: '0.80rem',
+                        fontWeight: 800,
+                        backgroundColor: '#0d9488',
+                        color: '#ffffff',
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)'
+                      }}
+                    >
+                      <Download size={15} />
+                      <span>Download QAR Price List PDF</span>
+                    </a>
+                  </div>
+
+                  <p style={{ fontSize: '0.86rem', color: '#334155', lineHeight: 1.6, margin: '0 0 1rem 0' }}>
+                    Please find below our <strong>24Genetics wholesale pricing for Qatar</strong>, including volume discounts and the additional clinical services provided through our Atlas platform.
+                  </p>
+
+                  {/* Volume Pricing Summary Pills */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                    <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px' }}>
+                      <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>1 kit (Pilot)</div>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666' }}>QAR 1,048.44</div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Baseline single evaluation</div>
+                    </div>
+                    <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '8px', padding: '10px 14px' }}>
+                      <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase' }}>50 kits (Wholesale)</div>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 850, color: '#0f766e' }}>QAR 799.56 <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>/ kit</span></div>
+                      <div style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>23.7% wholesale discount unlocked</div>
+                    </div>
+                    <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '10px 14px' }}>
+                      <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>100 kits (Clinical Batch)</div>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 850, color: '#1e3a8a' }}>QAR 750.67 <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>/ kit</span></div>
+                      <div style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 700 }}>28.4% maximum wholesale margin</div>
+                    </div>
+                  </div>
+
+                  {/* 7 Services Breakdown */}
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#003666', margin: '0 0 0.75rem 0' }}>
+                      Each kit includes the following 7 services:
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '0.75rem' }}>
+                      <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                        <strong style={{ color: '#003666', fontSize: '0.82rem' }}>1. Nutrigenetic Test:</strong>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>Personalized genetic analysis focused on nutrition and metabolism (+50,000 SNPs, Illumina GSA, CE-IVD Core Lab Madrid).</div>
+                      </div>
+                      <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                        <strong style={{ color: '#003666', fontSize: '0.82rem' }}>2. Ancestry Test:</strong>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>Complete genetic ancestry analysis and biogeographical population history across 1,500+ reference clusters included in pack.</div>
+                      </div>
+                      <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                        <strong style={{ color: '#003666', fontSize: '0.82rem' }}>3. Shipping to Qatar:</strong>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>Delivery of the physical test kit hardware and 12-month ambient preservation buffers from Spain to Qatar.</div>
+                      </div>
+                      <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                        <strong style={{ color: '#003666', fontSize: '0.82rem' }}>4. Sample Return Shipping:</strong>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>Collection and shipment of samples from Qatar to Spain, provided they are consolidated in batches of at least 5 kits.</div>
+                      </div>
+                      <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                        <strong style={{ color: '#003666', fontSize: '0.82rem' }}>5. Personalized Supplementation:</strong>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>AI-assisted multivitamin and nutritional supplement recommendations based on genetic results, subject to professional validation (Priority 1 Core, Priority 2 Metabolic, Priority 3 Digestive; and Compounding Modalities A &amp; B).</div>
+                      </div>
+                      <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                        <strong style={{ color: '#003666', fontSize: '0.82rem' }}>6. Personalized Meal Plan Selection:</strong>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>Recommendation of the most suitable meal plan from your available menu catalogue, based on the individual's genetic profile.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Service 7: WhatsApp Subscription Pricing Clarification */}
+                  <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '8px', padding: '12px 16px', marginBottom: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '4px' }}>
+                      <strong style={{ color: '#0f766e', fontSize: '0.88rem' }}>
+                        7. Optional WhatsApp Platform Access (Clarification on Pricing &amp; Terms)
+                      </strong>
+                      <span style={{ backgroundColor: '#0d9488', color: '#ffffff', fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '4px' }}>
+                        + QAR 50.00 / month per customer
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.80rem', color: '#134e4a', lineHeight: 1.5 }}>
+                      For an additional <strong>QAR 50 per month per customer</strong>, patients receive access to our Atlas platform via WhatsApp for ongoing personalized nutritional guidance, photo meal logging, and nutritionist chat.
+                      <br />
+                      <em>Clarification: This is a 100% optional monthly add-on that can be activated or paused per patient at any time with zero long-term commitment. It does not add mandatory recurrent overhead if the clinic chooses to manage the patient internally.</em>
+                    </p>
+                  </div>
+
+                  {/* Objective & Clinical Value */}
+                  <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '12px 16px', marginBottom: '1.25rem' }}>
+                    <strong style={{ color: '#1e3a8a', fontSize: '0.84rem' }}>Our Objective:</strong>
+                    <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: '#1e40af', lineHeight: 1.5 }}>
+                      Our objective is to offer a complete personalized nutrition solution, combining genetic testing, supplementation recommendations, and your meal plans within a single integrated service. The platform can be adapted to your specific commercial and clinical requirements.
+                    </p>
+                  </div>
+
+                  {/* Clear Next Steps for Dr. Hossam */}
+                  <div style={{ backgroundColor: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '8px', padding: '12px 16px' }}>
+                    <strong style={{ color: '#003666', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <CheckCircle2 size={16} className="text-teal-600" /> Clear Next Steps for Dr. Hossam:
+                    </strong>
+                    <ol style={{ margin: '6px 0 0 0', paddingLeft: '1.25rem', fontSize: '0.80rem', color: '#334155', lineHeight: 1.6 }}>
+                      <li><strong>Select your initial batch order:</strong> Confirm either 1 Pilot Kit (QAR 1,048.44) for initial clinical trial or 50 Kits Wholesale Tier 1 (QAR 799.56/kit · Total QAR 39,977.78) for clinic launch.</li>
+                      <li><strong>Authorize Proforma QA-RYH-88219:</strong> Ratify partner distribution account and establish sample intake points across Doha clinics.</li>
+                      <li><strong>Kit Dispatch from Madrid:</strong> Immediate international courier dispatch of CE-IVD saliva kits with 12-month ambient buffers to Ryhanh Medical in Doha with customs clearance.</li>
+                    </ol>
+                  </div>
+                </div>
+
                 {/* Visual Comparison: Traditional PDF vs. 24Genomics Nutrition Ecosystem (Approved Improvement #2) */}
                 <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
