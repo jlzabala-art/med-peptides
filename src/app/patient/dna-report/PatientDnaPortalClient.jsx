@@ -472,14 +472,14 @@ export default function PatientDnaPortalClient({
               </p>
             </div>
 
-            {/* Warning Callout Box for OTC purchases */}
-            <div style={{ backgroundColor: '#fefce8', border: '1.5px solid #fef08a', borderRadius: '10px', padding: '1rem 1.25rem' }}>
-              <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#b45309', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {/* Warning Callout Box for OTC purchases: Mutual Exclusivity Safety */}
+            <div style={{ backgroundColor: '#fef2f2', border: '1.5px solid #fecaca', borderRadius: '10px', padding: '1rem 1.25rem' }}>
+              <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#b91c1c', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <AlertCircle size={15} />
-                <span>GENETIC DISPENSING ADVICE: ACTIVE CHEMICAL FORMS ARE MANDATORY</span>
+                <span>CRITICAL CLINICAL DIRECTIVE: MUTUALLY EXCLUSIVE PATHWAYS (CHOOSE ONE ONLY)</span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.80rem', color: '#451a03', lineHeight: 1.5 }}>
-                Standard commercial multivitamins commonly use synthetic folic acid, magnesium oxide, and cyanocobalamin. Due to your MTHFR C677T and VDR polymorphisms, synthetic folic acid and poorly absorbed mineral oxides cannot be utilized efficiently. Look for the exact chemical names on the back label.
+              <p style={{ margin: 0, fontSize: '0.80rem', color: '#7f1d1d', lineHeight: 1.5 }}>
+                <strong>Do NOT combine Pathway 1 and Pathway 2 concurrently.</strong> They are alternative clinical tracks designed to resolve the same genetic targets. If taking the local commercial OTC supplements below, do not take compounded formulations. If your physician prescribes the tailor-made compounded regimen (Pathway 2), it replaces all OTC supplements to prevent dangerous micronutrient hypervitaminosis (excess Vitamin D, folate, or mineral toxicity).
               </p>
             </div>
 

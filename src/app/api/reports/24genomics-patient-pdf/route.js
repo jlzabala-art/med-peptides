@@ -527,41 +527,51 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Clinical Directive to Patient box
+    // Clinical Directive to Patient: Mutual Exclusivity Safety Alert
     y2 -= 44;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 40,
-      color: rgb(254 / 255, 252 / 255, 232 / 255),
-      borderColor: rgb(254 / 255, 240 / 255, 138 / 255),
-      borderWidth: 1
+      height: 42,
+      color: rgb(254 / 255, 242 / 255, 242 / 255), // light alert red
+      borderColor: alertRed,
+      borderWidth: 1.2
     });
 
-    page2.drawText('IMPORTANT GENETIC DISPENSING ADVICE FOR LOCAL PHARMACY PURCHASES:', {
+    page2.drawText('CRITICAL CLINICAL SAFETY DIRECTIVE · MUTUALLY EXCLUSIVE THERAPEUTIC PATHWAYS:', {
       x: 44,
-      y: y2 + 28,
+      y: y2 + 29,
       size: 6.8,
       font: helveticaBold,
-      color: amberDark
+      color: alertRed
     });
-    const otcDirectiveText = 'Standard retail multivitamins contain synthetic folic acid, magnesium oxide, and cyanocobalamin, which your DNA cannot efficiently metabolize or actively rejects. When purchasing commercial supplements in Doha (Boots, Wellcare, Kulud, Aster), verify the exact chemical form on the label. Never accept generic synthetic substitutes.';
+    const otcDirectiveText = 'Pathway 1 (Commercial OTC) and Pathway 2 (Master Compounding) are ALTERNATIVE clinical approaches to resolve the same genetic targets. NEVER TAKE BOTH TRACKS CONCURRENTLY. If purchasing the commercial supplements below, DO NOT take the compounded prescription. If your physician prescribes Pathway 2 (Page 3), it fully supersedes and replaces all standalone OTC vitamins to prevent dangerous micronutrient hypervitaminosis (excess Vitamin D, folate, or mineral toxicity).';
     page2.drawText(otcDirectiveText, {
       x: 44,
-      y: y2 + 16,
-      size: 6.0,
+      y: y2 + 17,
+      size: 5.8,
       font: helvetica,
       color: darkSlate,
       maxWidth: p2Width - 88,
-      lineHeight: 8.5
+      lineHeight: 8.2
     });
+
+    // Standardized Short Titles & Gene Targets for Zero Collision
+    const STANDARDIZED_CARD_TITLES = [
+      { title: 'ACTIVE FOLATE (VITAMIN B9)', shortGene: 'MTHFR C677T (TT)', dose: '800 mcg' },
+      { title: 'VITAMIN D3 + K2 (MK-7)', shortGene: 'VDR FokI / CYP2R1', dose: '4,000 IU + 100 mcg' },
+      { title: 'BIOAVAILABLE CHELATED MAGNESIUM', shortGene: 'COMT / TRPM6', dose: '300–400 mg' },
+      { title: 'METHYLATED B-COMPLEX (B12 + B6)', shortGene: 'MTRR / TCN2', dose: 'B12 1,000mcg · B6 25mg' },
+      { title: 'ENTERIC PROBIOTICS & GLUTAMINE', shortGene: 'MCM6 / LCT (CC)', dose: '15B CFU + 350mg' }
+    ];
 
     // Render the 5 Supplements from COMMERCIAL_LOCAL_SUPPLEMENTS
     y2 -= 10;
     COMMERCIAL_LOCAL_SUPPLEMENTS.forEach((supp, idx) => {
       const cardH = 74;
       y2 -= cardH;
+      const meta = STANDARDIZED_CARD_TITLES[idx] || { title: supp.nutrientEn, shortGene: supp.targetedGenes, dose: supp.doseDaily };
 
       // Card Container
       page2.drawRectangle({
@@ -583,95 +593,103 @@ export async function GET(request) {
         color: lightBg
       });
 
-      page2.drawText(`${idx + 1}. ${supp.nutrientEn.toUpperCase()}`, {
+      // Left: Standardized Short Title (Guaranteed <= 180pt)
+      page2.drawText(`${idx + 1}. ${meta.title}`, {
         x: 44,
         y: y2 + cardH - 11,
-        size: 7.0,
+        size: 6.8,
         font: helveticaBold,
-        color: navyPrimary
+        color: navyPrimary,
+        maxWidth: 200
       });
 
-      page2.drawText(`Dose: ${supp.doseDaily}`, {
-        x: 230,
-        y: y2 + cardH - 11,
-        size: 6.5,
-        font: helveticaBold,
-        color: tealAccent
-      });
-
-      const geneText = `DNA Target: ${supp.targetedGenes}`;
-      const geneW = helveticaBold.widthOfTextAtSize(geneText, 6.0);
-      page2.drawText(geneText, {
-        x: p2Width - 44 - geneW,
+      // Center: Short Gene Tag (Guaranteed at x: 235)
+      page2.drawText(`Gene: ${meta.shortGene}`, {
+        x: 235,
         y: y2 + cardH - 11,
         size: 6.0,
         font: helveticaBold,
-        color: mutedSlate
+        color: mutedSlate,
+        maxWidth: 120
+      });
+
+      // Right: Target Daily Dose (Right-aligned with zero overlap)
+      const doseLabel = `Target Dose: ${meta.dose}`;
+      const doseW = helveticaBold.widthOfTextAtSize(doseLabel, 6.3);
+      page2.drawText(doseLabel, {
+        x: p2Width - 44 - doseW,
+        y: y2 + cardH - 11,
+        size: 6.3,
+        font: helveticaBold,
+        color: tealAccent
       });
 
       // Line 1: Active Form
       page2.drawText('• Recommended Chemical Form: ', {
         x: 44,
         y: y2 + 45,
-        size: 6.2,
+        size: 6.0,
         font: helveticaBold,
         color: darkSlate
       });
       page2.drawText(supp.chemicalFormEn, {
-        x: 165,
+        x: 162,
         y: y2 + 45,
-        size: 6.2,
+        size: 6.0,
         font: helveticaBold,
-        color: tealAccent
+        color: tealAccent,
+        maxWidth: p2Width - 210
       });
 
       // Line 2: Avoid
       page2.drawText('• Strictly Avoid: ', {
         x: 44,
         y: y2 + 33,
-        size: 6.0,
+        size: 5.9,
         font: helveticaBold,
         color: alertRed
       });
       page2.drawText(supp.avoidEn, {
-        x: 110,
+        x: 108,
         y: y2 + 33,
-        size: 5.7,
+        size: 5.6,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p2Width - 160
+        maxWidth: p2Width - 156
       });
 
       // Line 3: Posology
       page2.drawText('• Timing & Posology: ', {
         x: 44,
         y: y2 + 21,
-        size: 6.0,
+        size: 5.9,
         font: helveticaBold,
         color: mutedSlate
       });
       page2.drawText(supp.timingEn, {
-        x: 130,
+        x: 128,
         y: y2 + 21,
-        size: 5.8,
+        size: 5.6,
         font: helvetica,
-        color: darkSlate
+        color: darkSlate,
+        maxWidth: p2Width - 176
       });
 
       // Line 4: Retail Doha Brands
       page2.drawText('• Qatar Pharmacy Reference Brands: ', {
         x: 44,
         y: y2 + 9,
-        size: 6.0,
+        size: 5.9,
         font: helveticaBold,
         color: navyPrimary
       });
       page2.drawText(supp.localBrandsEn, {
-        x: 185,
+        x: 182,
         y: y2 + 9,
-        size: 5.8,
+        size: 5.6,
         font: helveticaBold,
-        color: darkSlate
+        color: darkSlate,
+        maxWidth: p2Width - 230
       });
 
       // Spacing between cards
@@ -1061,8 +1079,36 @@ export async function GET(request) {
       y3 -= 8;
     });
 
+    // Co-Administration Restriction & Anti-Duplication Directive
+    y3 -= 28;
+    page3.drawRectangle({
+      x: 36,
+      y: y3,
+      width: p3Width - 72,
+      height: 24,
+      color: rgb(254 / 255, 242 / 255, 242 / 255), // alert light red
+      borderColor: alertRed,
+      borderWidth: 1
+    });
+
+    page3.drawText('DISPENSING DIRECTIVE & CO-ADMINISTRATION RESTRICTION (NO DUPLICATE SUPPLEMENTATION):', {
+      x: 44,
+      y: y3 + 14,
+      size: 6.2,
+      font: helveticaBold,
+      color: alertRed
+    });
+    page3.drawText('This master compounded protocol provides 100% of required therapeutic micronutrients. Discontinue all separate OTC multivitamins/minerals to prevent duplicate dosing.', {
+      x: 44,
+      y: y3 + 5,
+      size: 5.6,
+      font: helveticaBold,
+      color: darkSlate,
+      maxWidth: p3Width - 88
+    });
+
     // Prescribing Physician Authorization & Medical Signature
-    y3 -= 70;
+    y3 -= 76;
     page3.drawRectangle({
       x: 36,
       y: y3,

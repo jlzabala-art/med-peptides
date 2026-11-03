@@ -734,6 +734,29 @@ export default function QatarGenomicsPriceClient() {
                 <span>Clinical Copilot</span>
               </button>
 
+              <a
+                href="/api/reports/24genomics-qatar-pricelist-pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  padding: '9px 13px',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 750,
+                  border: '1px solid #003666',
+                  backgroundColor: '#003666',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 1px 3px rgba(0, 54, 102, 0.2)'
+                }}
+              >
+                <FileText size={14} className="text-teal-300" />
+                <span>QAR Price List (PDF)</span>
+              </a>
+
               <button
                 type="button"
                 onClick={handleCopyShareLink}
@@ -1196,6 +1219,29 @@ export default function QatarGenomicsPriceClient() {
                 <span>{isSubmittingQuote ? 'Registering...' : `Generate Quote (${currentTier.name}) →`}</span>
               </button>
 
+              <a
+                href="/api/reports/24genomics-qatar-pricelist-pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  padding: '9px 13px',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 750,
+                  border: '1px solid #003666',
+                  backgroundColor: '#003666',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 1px 3px rgba(0, 54, 102, 0.2)'
+                }}
+              >
+                <FileText size={14} className="text-teal-300" />
+                <span>QAR Price List (PDF)</span>
+              </a>
+
               <button
                 type="button"
                 onClick={handleCopyShareLink}
@@ -1481,10 +1527,10 @@ export default function QatarGenomicsPriceClient() {
                 {/* Complete Deliverables & Services Schedule Table (5 Points) */}
                 <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
                   <div style={{ padding: '1.25rem 1.5rem', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ flex: '1 1 500px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                          Deliverables &amp; Services Included in 24Genomics Nutrition
+                          Deliverables &amp; Services Included in 24Genomics Nutrition ("Lo que incluye")
                         </h3>
                         <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#0d9488', color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
                           Pillars 1–4 in Pack · Pillar 5 Subscription
@@ -1493,6 +1539,30 @@ export default function QatarGenomicsPriceClient() {
                       <p style={{ fontSize: '0.80rem', color: '#64748b', marginTop: '4px', marginBottom: 0 }}>
                         Deliverables 1 through 4 are part of a <strong>comprehensive one-time payment</strong> included when acquiring the selected volume pack ({currentTier.name}). Service 5 is an ongoing clinical follow-up provided as a <strong>flexible monthly subscription</strong>, cancelable at any time.
                       </p>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <a
+                        href="/api/reports/24genomics-qatar-pricelist-pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          padding: '8px 14px',
+                          borderRadius: '6px',
+                          fontSize: '0.78rem',
+                          fontWeight: 750,
+                          backgroundColor: '#0d9488',
+                          color: '#ffffff',
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 2px 4px rgba(13, 148, 136, 0.2)'
+                        }}
+                      >
+                        <Download size={14} />
+                        <span>Download Price List &amp; Deliverables PDF (QAR)</span>
+                      </a>
                     </div>
                   </div>
 
