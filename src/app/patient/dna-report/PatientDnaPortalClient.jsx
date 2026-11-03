@@ -550,6 +550,45 @@ export default function PatientDnaPortalClient({
               </div>
             </div>
 
+            {/* Patient Flexibility & Budget Decision Guide Banner */}
+            <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem 1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <Sparkles size={16} className="text-teal-700" />
+                <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#0f766e' }}>
+                  Patient Flexibility &amp; Budget Guide: Choose What Fits Your Goals
+                </h4>
+              </div>
+              <p style={{ margin: '0 0 10px 0', fontSize: '0.80rem', color: '#134e4a', lineHeight: 1.5 }}>
+                You do not have to purchase all 5 commercial bottles at once if you prefer a phased or budget-conscious approach:
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem', fontSize: '0.78rem' }}>
+                <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ccfbf1' }}>
+                  <div style={{ fontWeight: 800, color: '#b91c1c', marginBottom: '2px' }}>
+                    🔴 Tier 1 · Minimum Core (Priority 1 only · 2 bottles)
+                  </div>
+                  <div style={{ color: '#475569' }}>
+                    Active Folate + Vitamin D3/K2. Directly resolves MTHFR &amp; VDR enzymatic bottlenecks (covers 80% of clinical genetic risk).
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ccfbf1' }}>
+                  <div style={{ fontWeight: 800, color: '#0284c7', marginBottom: '2px' }}>
+                    🔵 Tier 2 · Metabolic &amp; Sleep (Priorities 1 &amp; 2 · 4 bottles)
+                  </div>
+                  <div style={{ color: '#475569' }}>
+                    Adds Chelated Magnesium + Methyl-B12 for COMT stress modulation, daytime alertness &amp; restorative sleep architecture.
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ccfbf1' }}>
+                  <div style={{ fontWeight: 800, color: '#d97706', marginBottom: '2px' }}>
+                    🟡 Tier 3 · Full Optimization (Priorities 1, 2 &amp; 3 · 5 bottles)
+                  </div>
+                  <div style={{ color: '#475569' }}>
+                    Adds Enteric Probiotics for gut barrier repair. <em>Can be safely omitted if you already maintain a 100% strict dairy-free diet.</em>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* List of 5 Commercial Supplements */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {COMMERCIAL_LOCAL_SUPPLEMENTS.map((supp, sIdx) => (
@@ -564,13 +603,26 @@ export default function PatientDnaPortalClient({
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
                         #{sIdx + 1}
                       </span>
                       <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#003666' }}>
                         {supp.nutrientEn}
                       </h4>
+                      {supp.priorityBadge && (
+                        <span style={{
+                          fontSize: '0.66rem',
+                          fontWeight: 800,
+                          backgroundColor: supp.priorityBg,
+                          color: supp.priorityColor,
+                          border: `1px solid ${supp.priorityBorder}`,
+                          padding: '2px 8px',
+                          borderRadius: '12px'
+                        }}>
+                          {supp.priorityBadge}
+                        </span>
+                      )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px' }}>
@@ -717,6 +769,43 @@ export default function PatientDnaPortalClient({
               <div style={{ marginTop: '12px', padding: '8px 12px', backgroundColor: '#0f766e', color: '#ffffff', borderRadius: '6px', fontSize: '0.80rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <CheckCircle2 size={16} />
                 <span>Clinical Solution: {GALENIC_COMPATIBILITY_ANALYSIS.resolvedArchitecture}</span>
+              </div>
+            </div>
+
+            {/* Prescription Modality Selection: Option A (Core 2-Capsule) vs Option B (Comprehensive 3-Capsule) */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1.5px solid #003666', padding: '1.25rem 1.5rem', boxShadow: '0 2px 6px rgba(0, 54, 102, 0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <ShieldCheck size={18} className="text-blue-900" />
+                <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 850, color: '#003666' }}>
+                  Compounding Modalities: Flexible Regimens for Every Patient &amp; Budget
+                </h4>
+              </div>
+              <p style={{ margin: '0 0 12px 0', fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
+                Your prescribing physician can authorize either the foundational 2-capsule daily regimen or the complete 3-capsule chronobiological protocol:
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '8px', padding: '12px' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    MODALITY A · CORE 2-CAPSULE REGIMEN (CAPSULES B + C ONLY)
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#003666', marginBottom: '4px' }}>
+                    Essential Methylation &amp; Sleep Foundation (2 Caps / Day)
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
+                    Focuses on the primary genetic bottlenecks (MTHFR, VDR, COMT). Reduces preparation cost by ~30% and pill burden. Best if you do not suffer from severe gut dysbiosis.
+                  </p>
+                </div>
+                <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '12px' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    MODALITY B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C)
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#003666', marginBottom: '4px' }}>
+                    Comprehensive 360° Chronobiology (3 Caps / Day)
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
+                    Adds Morning Capsule A (Enteric DRcaps® Probiotics &amp; Glutamine) for tight-junction repair, lactose intolerance mucosal shield, and full cellular longevity.
+                  </p>
+                </div>
               </div>
             </div>
 

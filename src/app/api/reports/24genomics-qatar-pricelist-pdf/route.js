@@ -246,7 +246,7 @@ export async function GET(request) {
     });
 
     page1.drawText('PATHWAY 1 · LOCAL COMMERCIAL OTC SUPPLEMENTS', { x: 44, y: y + 48, size: 6.5, font: helveticaBold, color: tealAccent });
-    const p1Desc = '• Patients purchase active forms in local Doha pharmacies (Boots, Wellcare, Kulud, Aster).\n• Includes brands like Thorne 5-MTHF, Solgar Metafolin, Now Foods D3/K2, Pure Encapsulations.\n• Advantage: Immediate purchase with zero compounding delay.\n• Limitation: Requires taking 6 to 9 pills daily from 5 separate commercial bottles.';
+    const p1Desc = '• Patients purchase active forms in local Doha pharmacies (Boots, Wellcare, Kulud, Aster).\n• Clinical Priorities: Priority 1 (Core MTHFR/VDR), Priority 2 (Metabolic), Priority 3 (Gut).\n• Flexibility: Allows starting with Priority 1 only (2 bottles) to reduce pill burden and cost.\n• Limitation: Taking all 5 bottles requires 6 to 9 pills daily from separate commercial bottles.';
     page1.drawText(p1Desc, { x: 44, y: y + 36, size: 5.6, font: helvetica, color: darkSlate, maxWidth: (p1Width - 110) / 2, lineHeight: 7.8 });
 
     // Right Box: Pathway 2 Compounding
@@ -262,7 +262,7 @@ export async function GET(request) {
     });
 
     page1.drawText('PATHWAY 2 · MASTER COMPOUNDED FORMULATION', { x: rightBoxX + 8, y: y + 48, size: 6.5, font: helveticaBold, color: navyPrimary });
-    const p2Desc = '• Advanced tailor-made 3-capsule chronobiological regimen prepared by compounding pharmacy.\n• Formulated 100% lactose-free in acid-resistant DRcaps® and vegetable HPMC.\n• Isolates live probiotics from botanical berberine; pairs D3/K2 with breakfast fats; evening magnesium.\n• Resolves pill fatigue: Combines all therapeutic actives into 3 synchronized daily capsules.';
+    const p2Desc = '• Modular prescription: Option A (Core 2-Capsule) or Option B (Comprehensive 3-Capsule).\n• Formulated 100% lactose-free in acid-resistant DRcaps® and vegetable HPMC.\n• Isolates live probiotics from botanical berberine; pairs D3/K2 with breakfast fats; evening magnesium.\n• Resolves pill fatigue: Combines all therapeutic actives into 2 or 3 synchronized daily capsules.';
     page1.drawText(p2Desc, { x: rightBoxX + 8, y: y + 36, size: 5.6, font: helvetica, color: darkSlate, maxWidth: (p1Width - 110) / 2, lineHeight: 7.8 });
 
     // Section 4: Mutual Exclusivity Safety Banner

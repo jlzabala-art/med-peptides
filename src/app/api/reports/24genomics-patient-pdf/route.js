@@ -528,12 +528,12 @@ export async function GET(request) {
     });
 
     // Clinical Directive to Patient: Mutual Exclusivity Safety Alert
-    y2 -= 44;
+    y2 -= 56;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 42,
+      height: 50,
       color: rgb(254 / 255, 242 / 255, 242 / 255), // light alert red
       borderColor: alertRed,
       borderWidth: 1.2
@@ -541,29 +541,64 @@ export async function GET(request) {
 
     page2.drawText('CRITICAL CLINICAL SAFETY DIRECTIVE · MUTUALLY EXCLUSIVE THERAPEUTIC PATHWAYS:', {
       x: 44,
-      y: y2 + 29,
+      y: y2 + 37,
       size: 6.8,
       font: helveticaBold,
       color: alertRed
     });
-    const otcDirectiveText = 'Pathway 1 (Commercial OTC) and Pathway 2 (Master Compounding) are ALTERNATIVE clinical approaches to resolve the same genetic targets. NEVER TAKE BOTH TRACKS CONCURRENTLY. If purchasing the commercial supplements below, DO NOT take the compounded prescription. If your physician prescribes Pathway 2 (Page 3), it fully supersedes and replaces all standalone OTC vitamins to prevent dangerous micronutrient hypervitaminosis (excess Vitamin D, folate, or mineral toxicity).';
+    const otcDirectiveText = 'Pathway 1 (Commercial OTC) and Pathway 2 (Master Compounding) are ALTERNATIVE clinical approaches to resolve your DNA profile.\nNEVER TAKE BOTH TRACKS CONCURRENTLY: If purchasing retail OTC supplements below, DO NOT take the compounded prescription.\nIf your physician prescribes Pathway 2 (Page 3), it fully replaces all standalone OTC vitamins to prevent micronutrient toxicity (hypervitaminosis).';
     page2.drawText(otcDirectiveText, {
       x: 44,
-      y: y2 + 17,
-      size: 5.8,
+      y: y2 + 25,
+      size: 5.7,
       font: helvetica,
       color: darkSlate,
       maxWidth: p2Width - 88,
-      lineHeight: 8.2
+      lineHeight: 8.5
     });
 
-    // Standardized Short Titles & Gene Targets for Zero Collision
+    // Standardized Titles, Priorities & Gene Targets
     const STANDARDIZED_CARD_TITLES = [
-      { title: 'ACTIVE FOLATE (VITAMIN B9)', shortGene: 'MTHFR C677T (TT)', dose: '800 mcg' },
-      { title: 'VITAMIN D3 + K2 (MK-7)', shortGene: 'VDR FokI / CYP2R1', dose: '4,000 IU + 100 mcg' },
-      { title: 'BIOAVAILABLE CHELATED MAGNESIUM', shortGene: 'COMT / TRPM6', dose: '300–400 mg' },
-      { title: 'METHYLATED B-COMPLEX (B12 + B6)', shortGene: 'MTRR / TCN2', dose: 'B12 1,000mcg · B6 25mg' },
-      { title: 'ENTERIC PROBIOTICS & GLUTAMINE', shortGene: 'MCM6 / LCT (CC)', dose: '15B CFU + 350mg' }
+      {
+        title: 'ACTIVE FOLATE (VITAMIN B9)',
+        priorityBadge: 'PRIORITY 1 · ESSENTIAL',
+        priorityColor: alertRed,
+        priorityBg: badgeRedBg,
+        shortGene: 'MTHFR C677T (TT)',
+        dose: '800 mcg'
+      },
+      {
+        title: 'VITAMIN D3 + K2 (MK-7)',
+        priorityBadge: 'PRIORITY 1 · ESSENTIAL',
+        priorityColor: alertRed,
+        priorityBg: badgeRedBg,
+        shortGene: 'VDR FokI / CYP2R1',
+        dose: '4,000 IU + 100 mcg'
+      },
+      {
+        title: 'BIOAVAILABLE CHELATED MAGNESIUM',
+        priorityBadge: 'PRIORITY 2 · RECOMMENDED',
+        priorityColor: blueDark,
+        priorityBg: blueBg,
+        shortGene: 'COMT / TRPM6',
+        dose: '300–400 mg'
+      },
+      {
+        title: 'METHYLATED B-COMPLEX (B12 + B6)',
+        priorityBadge: 'PRIORITY 2 · RECOMMENDED',
+        priorityColor: blueDark,
+        priorityBg: blueBg,
+        shortGene: 'MTRR / TCN2',
+        dose: 'B12 1,000mcg · B6 25mg'
+      },
+      {
+        title: 'ENTERIC PROBIOTICS & GLUTAMINE',
+        priorityBadge: 'PRIORITY 3 · OPTIONAL',
+        priorityColor: amberDark,
+        priorityBg: amberBg,
+        shortGene: 'MCM6 / LCT (CC)',
+        dose: '15B CFU + 350mg'
+      }
     ];
 
     // Render the 5 Supplements from COMMERCIAL_LOCAL_SUPPLEMENTS
@@ -571,7 +606,14 @@ export async function GET(request) {
     COMMERCIAL_LOCAL_SUPPLEMENTS.forEach((supp, idx) => {
       const cardH = 74;
       y2 -= cardH;
-      const meta = STANDARDIZED_CARD_TITLES[idx] || { title: supp.nutrientEn, shortGene: supp.targetedGenes, dose: supp.doseDaily };
+      const meta = STANDARDIZED_CARD_TITLES[idx] || {
+        title: supp.nutrientEn,
+        priorityBadge: 'RECOMMENDED',
+        priorityColor: tealAccent,
+        priorityBg: rgb(240 / 255, 253 / 255, 250 / 255),
+        shortGene: supp.targetedGenes,
+        dose: supp.doseDaily
+      };
 
       // Card Container
       page2.drawRectangle({
@@ -593,33 +635,52 @@ export async function GET(request) {
         color: lightBg
       });
 
-      // Left: Standardized Short Title (Guaranteed <= 180pt)
+      // Left: Standardized Short Title
       page2.drawText(`${idx + 1}. ${meta.title}`, {
         x: 44,
         y: y2 + cardH - 11,
-        size: 6.8,
+        size: 6.7,
         font: helveticaBold,
         color: navyPrimary,
-        maxWidth: 200
+        maxWidth: 165
       });
 
-      // Center: Short Gene Tag (Guaranteed at x: 235)
-      page2.drawText(`Gene: ${meta.shortGene}`, {
-        x: 235,
+      // Priority Badge Pill (Distinct visual category)
+      const pBadgeW = helveticaBold.widthOfTextAtSize(meta.priorityBadge, 5.2) + 8;
+      page2.drawRectangle({
+        x: 214,
+        y: y2 + cardH - 14,
+        width: pBadgeW,
+        height: 11,
+        color: meta.priorityBg,
+        borderColor: meta.priorityColor,
+        borderWidth: 0.6
+      });
+      page2.drawText(meta.priorityBadge, {
+        x: 218,
         y: y2 + cardH - 11,
-        size: 6.0,
+        size: 5.2,
+        font: helveticaBold,
+        color: meta.priorityColor
+      });
+
+      // Center: Short Gene Tag
+      page2.drawText(`Gene: ${meta.shortGene}`, {
+        x: 338,
+        y: y2 + cardH - 11,
+        size: 5.8,
         font: helveticaBold,
         color: mutedSlate,
-        maxWidth: 120
+        maxWidth: 110
       });
 
       // Right: Target Daily Dose (Right-aligned with zero overlap)
       const doseLabel = `Target Dose: ${meta.dose}`;
-      const doseW = helveticaBold.widthOfTextAtSize(doseLabel, 6.3);
+      const doseW = helveticaBold.widthOfTextAtSize(doseLabel, 6.2);
       page2.drawText(doseLabel, {
         x: p2Width - 44 - doseW,
         y: y2 + cardH - 11,
-        size: 6.3,
+        size: 6.2,
         font: helveticaBold,
         color: tealAccent
       });
@@ -696,34 +757,34 @@ export async function GET(request) {
       y2 -= 8;
     });
 
-    // Bottom Adherence & Compounding Notice Banner
-    y2 -= 46;
+    // Bottom Patient Flexibility & Budget Decision Guide Banner
+    y2 -= 48;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 42,
+      height: 44,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
       borderWidth: 1
     });
 
-    page2.drawText('DUAL-TRACK COMPARISON: COMMERCIAL OTC (PATHWAY 1) VS. COMPOUNDED (PATHWAY 2):', {
+    page2.drawText('PATIENT FLEXIBILITY & BUDGET GUIDE · CHOOSE THE REGIMEN THAT FITS YOUR GOALS:', {
       x: 44,
-      y: y2 + 29,
+      y: y2 + 31,
       size: 6.8,
       font: helveticaBold,
       color: tealAccent
     });
-    const comparisonNotice = '• Pathway 1 requires taking 6 to 9 pills from 5 separate commercial bottles at varied times, with fixed non-customized dosages.\n• Pathway 2 combines all pure pharmaceutical actives into 3 synchronized chronobiological capsules (Morning, Midday, Evening) prepared 100% lactose-free in DRcaps® by our compounding pharmacy. See Page 3 for the official compounding pharmacy order.';
+    const comparisonNotice = '• Minimum Essential Core (Priority 1 only · 2 bottles): Focuses on MTHFR & VDR genetic blocks. Covers 80% of critical health risk.\n• Metabolic & Sleep Reset (Priorities 1 & 2 · 4 bottles): Adds Chelated Magnesium & Methyl-B12 for stress, daytime energy & restorative sleep.\n• Complete Optimization (Priorities 1, 2 & 3 · 5 bottles): Adds Enteric Probiotics. Can be omitted if you maintain a strict 100% dairy-free diet.';
     page2.drawText(comparisonNotice, {
       x: 44,
-      y: y2 + 18,
-      size: 5.8,
+      y: y2 + 20,
+      size: 5.6,
       font: helvetica,
       color: darkSlate,
       maxWidth: p2Width - 88,
-      lineHeight: 8.2
+      lineHeight: 7.8
     });
 
     // Page 2 Footer
@@ -828,42 +889,42 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Technical Compounding Directive to Pharmacist
-    y3 -= 38;
+    // Technical Compounding Directive to Pharmacist & Modality Selection Checkboxes
+    y3 -= 46;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 34,
+      height: 42,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
     });
 
-    page3.drawText('TECHNICAL GALENIC PARTITIONING DIRECTIVE FOR THE LICENSED PHARMACIST:', {
+    page3.drawText('PRESCRIPTION MODALITY SELECTION · LICENSED PHYSICIAN DIRECTIVE (CHECK ONE):', {
       x: 44,
-      y: y3 + 22,
+      y: y3 + 29,
       size: 6.8,
       font: helveticaBold,
       color: navyPrimary
     });
-    const directiveText = 'Active substances are strictly partitioned into 3 separate formulations: (1) Enteric DRcaps® isolate probiotics from stomach acid and botanical berberine; (2) Lipophilic vitamins D3/K2 require co-administration with lipid meal in Capsule B; (3) Magnesium and sleep cofactors are reserved for evening Capsule C. Excipient Standard: 100% Lactose-Free HPMC / microcrystalline cellulose.';
-    page3.drawText(directiveText, {
-      x: 44,
-      y: y3 + 10,
-      size: 6.2,
-      font: helvetica,
-      color: darkSlate,
-      maxWidth: p3Width - 88,
-      lineHeight: 8.5
-    });
+
+    // Checkbox 1: Option A (Core 2-Capsule)
+    page3.drawRectangle({ x: 44, y: y3 + 16, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
+    page3.drawText('OPTION A · CORE 2-CAPSULE REGIMEN (CAPSULES B + C · 2 CAPS/DAY)', { x: 56, y: y3 + 17, size: 6.1, font: helveticaBold, color: navyPrimary });
+    page3.drawText('Resolves MTHFR, VDR & Neuro-Sleep. Lowers compounding cost by ~30% for patients without active gut dysbiosis.', { x: 298, y: y3 + 17, size: 5.5, font: helvetica, color: mutedSlate, maxWidth: 220 });
+
+    // Checkbox 2: Option B (Full 3-Capsule)
+    page3.drawRectangle({ x: 44, y: y3 + 4, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
+    page3.drawText('OPTION B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C · 3 CAPS/DAY)', { x: 56, y: y3 + 5, size: 6.1, font: helveticaBold, color: tealAccent });
+    page3.drawText('Includes Capsule A (Enteric Probiotics DRcaps®) for mucosal barrier repair, dairy intolerance & tight junction seal.', { x: 308, y: y3 + 5, size: 5.5, font: helvetica, color: mutedSlate, maxWidth: 210 });
 
     // Streamlined 3-Capsule Compounding Tables
     const PHARMACY_CAPSULES = [
       {
         id: 'cap_a',
         num: '1',
-        title: 'FORMULATION 1: CAPSULE A · MORNING ENTERIC PROBIOTIC & MUCOSAL SHIELD',
+        title: 'FORMULATION 1: CAPSULE A · MORNING ENTERIC PROBIOTIC SHIELD  [PRIORITY 3 · GUT OPTIMIZATION]',
         qty: '60 Capsules (60-Day Supply)',
         dnaTarget: 'DNA Target: Pillar 3 (Gut Microbiome & Mucosal Integrity)',
         vehicle: 'Vehicle: Size 0 Delayed-Release Enteric DRcaps® · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
@@ -889,7 +950,7 @@ export async function GET(request) {
       {
         id: 'cap_b',
         num: '2',
-        title: 'FORMULATION 2: CAPSULE B · MIDDAY METABOLIC & METHYLATION ACTIVATOR',
+        title: 'FORMULATION 2: CAPSULE B · MIDDAY METABOLIC & METHYL ACTIVATOR  [PRIORITY 1 · ESSENTIAL CORE]',
         qty: '60 Capsules (60-Day Supply)',
         dnaTarget: 'DNA Targets: Pillars 1 & 2 (Glycemic Control & Cellular Methylation)',
         vehicle: 'Vehicle: Size 0 Vegetable HPMC Capsule · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',
@@ -936,7 +997,7 @@ export async function GET(request) {
       {
         id: 'cap_c',
         num: '3',
-        title: 'FORMULATION 3: CAPSULE C · EVENING RECOVERY & SLEEP ARCHITECTURE',
+        title: 'FORMULATION 3: CAPSULE C · EVENING RECOVERY & SLEEP ARCHITECTURE  [PRIORITY 2 · ESSENTIAL REST]',
         qty: '60 Capsules (60-Day Supply)',
         dnaTarget: 'DNA Target: Pillar 4 (Cellular Immunity & Sleep Architecture)',
         vehicle: 'Vehicle: Size 0 Vegetable HPMC Capsule · Excipient: Microcrystalline Cellulose NF · 100% Lactose-Free',

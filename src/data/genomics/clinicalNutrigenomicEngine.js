@@ -386,6 +386,13 @@ export const TREATMENT_CYCLE = {
 export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
   {
     id: 'active_folate',
+    priorityLevel: 1,
+    priorityBadge: 'PRIORITY 1 · ESSENTIAL',
+    priorityLabelEn: 'Priority 1 · Essential Foundation (Must-Have)',
+    priorityLabelEs: 'Prioridad 1 · Fundamento Esencial (Imprescindible)',
+    priorityColor: '#b91c1c',
+    priorityBg: '#fef2f2',
+    priorityBorder: '#fecaca',
     nutrientEn: 'Active Folate (Vitamin B9)',
     nutrientEs: 'Folato Activo (Vitamina B9)',
     chemicalFormEn: 'L-5-Methyltetrahydrofolate (L-5-MTHF / Metafolin®)',
@@ -402,6 +409,13 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
   },
   {
     id: 'vitamin_d3_k2',
+    priorityLevel: 1,
+    priorityBadge: 'PRIORITY 1 · ESSENTIAL',
+    priorityLabelEn: 'Priority 1 · Essential Foundation (Must-Have)',
+    priorityLabelEs: 'Prioridad 1 · Fundamento Esencial (Imprescindible)',
+    priorityColor: '#b91c1c',
+    priorityBg: '#fef2f2',
+    priorityBorder: '#fecaca',
     nutrientEn: 'Vitamin D3 + Vitamin K2 (Synergistic Duo)',
     nutrientEs: 'Vitamina D3 + Vitamina K2 (Dúo Sinérgico)',
     chemicalFormEn: 'Cholecalciferol (D3) + Menaquinone-7 (all-trans MK-7 K2)',
@@ -418,6 +432,13 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
   },
   {
     id: 'chelated_magnesium',
+    priorityLevel: 2,
+    priorityBadge: 'PRIORITY 2 · RECOMMENDED',
+    priorityLabelEn: 'Priority 2 · Metabolic & Sleep Support (Recommended)',
+    priorityLabelEs: 'Prioridad 2 · Soporte Metabólico y Sueño (Recomendado)',
+    priorityColor: '#0284c7',
+    priorityBg: '#f0f9ff',
+    priorityBorder: '#bae6fd',
     nutrientEn: 'Bioavailable Chelated Magnesium',
     nutrientEs: 'Magnesio Quelado de Alta Biodisponibilidad',
     chemicalFormEn: 'Magnesium Bisglycinate Chelate or Magnesium L-Threonate',
@@ -434,6 +455,13 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
   },
   {
     id: 'methyl_b12_b6',
+    priorityLevel: 2,
+    priorityBadge: 'PRIORITY 2 · RECOMMENDED',
+    priorityLabelEn: 'Priority 2 · Neuro-Metabolic Cofactors (Recommended)',
+    priorityLabelEs: 'Prioridad 2 · Cofactores Neuro-Metabólicos (Recomendado)',
+    priorityColor: '#0284c7',
+    priorityBg: '#f0f9ff',
+    priorityBorder: '#bae6fd',
     nutrientEn: 'Methylated Neuro-Support B-Complex',
     nutrientEs: 'Complejo B Metilado de Soporte Neurológico',
     chemicalFormEn: 'Methylcobalamin (B12) + Pyridoxal-5-Phosphate (P-5-P active B6)',
@@ -450,6 +478,13 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
   },
   {
     id: 'gut_barrier_probiotics',
+    priorityLevel: 3,
+    priorityBadge: 'PRIORITY 3 · OPTIONAL',
+    priorityLabelEn: 'Priority 3 · Digestive & Mucosal Barrier (Optional / Conditional)',
+    priorityLabelEs: 'Prioridad 3 · Barrera Digestiva y Mucosa (Opcional / Condicional)',
+    priorityColor: '#d97706',
+    priorityBg: '#fffbeb',
+    priorityBorder: '#fde68a',
     nutrientEn: 'Targeted Enteric Probiotics & Gut Barrier Support',
     nutrientEs: 'Probióticos Entéricos Dirigidos & Soporte de Barrera',
     chemicalFormEn: 'Multi-strain freeze-dried CFUs (B. lactis, L. rhamnosus GG, L. plantarum) in acid-resistant enteric capsules',
@@ -462,7 +497,7 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
     targetedGenes: 'MCM6 / LCT (rs4988235 Lactase deficiency), FUT2 Non-Secretor',
     localBrandsEn: 'Culturelle Digestive Daily Probiotic, Seed DS-01 Daily Synbiotic, Renew Life Extra Care',
     localBrandsEs: 'Culturelle Digestive Probiotic, Seed DS-01 Synbiotic, Renew Life Probiotics',
-    availabilityQatar: 'Available across premium wellness pharmacies in Doha & online delivery'
+    availabilityQatar: 'Available across premium wellness pharmacies in Doha & online delivery (can be omitted if following a 100% strict dairy-free diet)'
   }
 ];
 

@@ -2771,14 +2771,14 @@ export default function QatarGenomicsPriceClient() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <FileText size={18} className="text-teal-700" />
                         <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f766e' }}>
-                          Ready-to-Use Patient & Pharmacy Prescription PDF (English)
+                          Ready-to-Use Patient &amp; Pharmacy Prescription PDF (English)
                         </span>
                         <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#ccfbf1', color: '#0f766e', padding: '2px 8px', borderRadius: '4px' }}>
-                          2-Page Document
+                          3-Page Clinical Dossier
                         </span>
                       </div>
                       <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#334155', maxWidth: '640px', lineHeight: 1.5 }}>
-                        Page 1 translates DNA findings into clear, simple language for the patient. Page 2 provides the exact generic active ingredients (APIs), dosages, and 3-capsule partitioned galenic specs formatted for any compounding pharmacy.
+                        Page 1 translates DNA findings into clear patient language. Page 2 organizes local OTC supplements by clinical priorities (Priority 1: Core, Priority 2: Metabolic, Priority 3: Digestive) with patient flexibility guidance. Page 3 provides the official pharmacy compounding order with Modality A (2-Capsule Core) and Modality B (3-Capsule Full).
                       </p>
                     </div>
 
