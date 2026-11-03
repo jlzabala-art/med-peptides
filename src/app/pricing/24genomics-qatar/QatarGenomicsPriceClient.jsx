@@ -344,30 +344,83 @@ export default function QatarGenomicsPriceClient() {
     return `${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cfg.symbol}`;
   };
 
+  const [copilotCategory, setCopilotCategory] = useState('mealplan');
+  const [copiedAiAnswer, setCopiedAiAnswer] = useState(false);
+
+  const COPILOT_CATEGORIES = [
+    { id: 'mealplan', label: '🥗 Meal Plan & Diet', icon: '🥗' },
+    { id: 'supplements', label: '💊 Supplements (Easy)', icon: '💊' },
+    { id: 'pricing', label: '💰 Qatar Pricing (QAR)', icon: '💰' },
+    { id: 'genetics', label: '🧬 DNA in Plain English', icon: '🧬' }
+  ];
+
   const AI_FAQS = [
+    // Category: mealplan
     {
-      q: 'What are the distributor wholesale volume tiers in AED for Qatar?',
-      a: 'For the State of Qatar, wholesale volume tiers are anchored in AED (fixed GCC clearing at 1 EUR = 4.40 AED; AED and QAR trade at 1:1 par):\n• Tier 1 (1 Kit): 1,048.44 AED / unit (Total: 1,048.44 AED)\n• Tier 2 (50 Kits): 799.56 AED / unit (Total: 39,977.78 AED) — Tier 1 Wholesale Unlocked\n• Tier 3 (100 Kits): 750.67 AED / unit (Total: 75,066.67 AED) — National Distribution Tier\nEuropean Core Lab cost is €150.00 / kit and international return courier shipping to Madrid is 80 AED.'
+      category: 'mealplan',
+      q: 'How do I choose the best meals from my catering menu based on my DNA?',
+      a: 'Follow our 3-Zone Traffic Light for your catering order:\n\n• 🟢 ALWAYS ORDER: Wild salmon, lean poultry, pasture eggs, dark leafy greens (spinach, arugula, kale), extra virgin olive oil, avocado, quinoa, and cooked/cooled potatoes (resistant starch prebiotic).\n• 🟡 MODERATE (<40g net carbs): Soaked legumes (lentils, chickpeas), fresh berries, portion-controlled carbs.\n• 🔴 EXCLUDE: Heavy creams, cow milk cheese, and bechamel sauces (lactose bloat), industrial seed oils, white bread, and sugary sodas.'
     },
     {
-      q: 'What is the difference between Pathway 1 (Local OTC) and Pathway 2 (Compounded)?',
-      a: 'We provide a Dual-Track clinical prescription model:\n• Pathway 1 (Personalized Multivitamin Recommendation): Identifies commercially available OTC supplements in local Doha pharmacies (Boots, Wellcare, Kulud, Aster) with the exact active chemical forms needed (e.g. Thorne 5-MTHF, Solgar Metafolin, Now Foods D3+K2, Pure Encapsulations Magnesium Glycinate). Ideal for immediate purchase, though it involves taking 6–9 pills daily from 5 separate bottles.\n• Pathway 2 (Personalized Compounded Formulation): A tailor-made 3-capsule chronobiological regimen prepared by our licensed compounding pharmacy (DRcaps®, 100% lactose-free). It eliminates 8 bottles into 3 synchronized daily capsules with zero galenic antagonisms.'
+      category: 'mealplan',
+      q: 'What is the "Golden Plate Sequencing Rule" and why does it matter?',
+      a: 'Inside each meal tray, eat your food in this exact sequence:\n\n1º Vegetables & fiber salad FIRST\n2º Protein & healthy fats SECOND\n3º Rice, quinoa, or potatoes LAST\n\nClinical impact: This forms a protective viscous fiber mesh in your stomach that slows carbohydrate absorption, lowering post-meal blood sugar spikes by up to 45% and completely eliminating the 3:00 PM energy slump.'
     },
     {
+      category: 'mealplan',
+      q: 'What foods should I ask my catering company to exclude?',
+      a: 'Based on your genetic markers (MCM6 lactase non-persistence and CYP1A2 slow caffeine clearance):\n\n1. Dairy & Cow Milk: Exclude heavy cream sauces, cow cheeses, and whey. Request olive oil, coconut milk, or ghee.\n2. Refined White Flour: Exclude commercial baguettes and pastries (often fortified with synthetic folic acid, which blocks MTHFR pathways).\n3. Afternoon Caffeine: Ask for caffeine-free herbal infusions after 2:00 PM.'
+    },
+
+    // Category: supplements
+    {
+      category: 'supplements',
+      q: 'What are the 3 flexible supplement budget packs (Essential vs Sleep vs Digestion)?',
+      a: 'You do NOT need to buy all 5 bottles. Choose the pack that fits your budget:\n\n• Pack 1 · Essential Core (2 bottles): Vitamin D3/K2 + Active Folate (L-5-MTHF). Covers 80% of critical DNA blocks for cellular vitality and bone strength.\n• Pack 2 · Performance & Deep Sleep (4 bottles · Most Popular): Adds Magnesium Bisglycinate + Methylated B-Complex. Perfect for busy professionals with daily stress or restless sleep.\n• Pack 3 · Total Digestion (5 bottles): Adds Targeted Enteric Probiotics. Recommended for bloating, gas, or dairy sensitivities.'
+    },
+    {
+      category: 'supplements',
+      q: 'What is the difference between buying OTC bottles in Doha vs Compounded Capsules?',
+      a: 'We offer two flexible purchase options:\n\n• Option A · Local Doha Pharmacies (OTC Bottles): Buy retail brands at Boots, Wellcare, Kulud, or Aster (e.g. Solgar, Thorne, Now Foods). Immediate access, but you take 4–6 pills daily from multiple separate bottles.\n• Option B · Custom "All-in-One" Compounding (Recommended): Our partner pharmacy combines all pure active ingredients into just 3 synchronized daily capsules labeled with your name (1 with breakfast, 2 at bedtime). Zero filler bottles, 100% lactose-free.'
+    },
+    {
+      category: 'supplements',
+      q: 'When should I take each capsule with my daily meals?',
+      a: 'Your synchronized daily routine:\n\n🌅 Upon Waking (Empty Stomach): Drink 1 full glass of water + Capsule A (Probiotic DRcaps®) to repair gut flora before breakfast.\n🍳 With Breakfast: Capsule B (Active Folate + B-Complex + D3/K2). Must be taken with breakfast fats (eggs, olive oil, avocado) to absorb Vitamin D.\n🥗 With Lunch / Dinner: Follow the 1-2-3 plate sequence (veggies first, carbs last).\n🌙 30–60 Min Before Bed: Capsule C (2 capsules of Magnesium Bisglycinate + Theanine) with water to relax muscles and promote deep sleep.'
+    },
+
+    // Category: pricing
+    {
+      category: 'pricing',
+      q: 'What are the wholesale volume tiers in QAR for Qatar (Dr. Hossam Proposal)?',
+      a: 'Official wholesale pricing in Qatari Riyals (QAR) for Dr. Hossam / Ryhanh Medical:\n\n• 1 Kit (Pilot): QAR 1,048.44 per kit\n• 50 Kits: QAR 799.56 per kit (23.7% volume discount · Total: QAR 39,978.00)\n• 100 Kits: QAR 750.67 per kit (28.4% volume discount · Total: QAR 75,067.00)\n\nAll kits include European CE-IVD core lab analysis in Madrid, insured shipment to Doha, and return logistics in batches of ≥5 kits.'
+    },
+    {
+      category: 'pricing',
+      q: 'What 7 comprehensive services are included in each test kit?',
+      a: 'Every 24Genomics test kit includes 7 full deliverables:\n\n1. Nutrigenetic Test (Metabolic, glycemic, and food tolerance genetic analysis)\n2. Ancestry Test (Biogeographical ancestry and maternal/paternal lineage)\n3. Shipping to Qatar (Direct insured delivery from Madrid to Doha)\n4. Sample Return Shipping (Consolidated batch pickup in Doha for batches ≥5)\n5. Personalized Supplementation (AI recommendations in 3 priority tiers)\n6. Personalized Meal Plan Selection (Matching genetic profile to your catering menu)\n7. Optional WhatsApp Platform Access (Continuous AI guidance for QAR 50/month per patient)'
+    },
+    {
+      category: 'pricing',
+      q: 'How does the optional QAR 50/month WhatsApp platform access work?',
+      a: 'The WhatsApp AI platform access (QAR 50.00 / month per customer) is a 100% optional, cancelable-anytime add-on. Patients can photograph meals, ask nutrition questions 24/7, and receive ongoing adjustments from our clinical AI assistants (Julia AI) in 22 languages, with zero lock-in contracts.'
+    },
+
+    // Category: genetics
+    {
+      category: 'genetics',
       q: 'Why is synthetic folic acid contraindicated for MTHFR carriers?',
-      a: 'The MTHFR C677T mutation (rs1801133 TT) reduces MTHFR enzyme efficiency by ~70%. When patients ingest synthetic folic acid (pteroylmonoglutamic acid), the liver cannot reduce it efficiently. It builds up as unmetabolized folic acid (UMFA) in the bloodstream, competes with natural folates, and blocks DHFR receptors. We strictly prescribe direct, biologically active L-5-Methyltetrahydrofolate ([6S]-5-MTHF) 1,000 mcg, Methyl-B12 (1,000 mcg), and active P-5-P B6 (25 mg).'
+      a: 'The MTHFR C677T mutation (TT homozygous) reduces enzyme efficiency by ~70%. When taking synthetic folic acid (found in fortified industrial breads and cheap multivitamins), the liver cannot process it efficiently.\n\nIt accumulates in the bloodstream as un-metabolized folic acid (UMFA) and blocks cellular folate receptors. We prescribe exclusively direct, bioactive L-5-Methyltetrahydrofolate (L-5-MTHF 400–800 mcg) which is immediately usable by your cells.'
     },
     {
-      q: 'How are the 3 daily compounding capsules formulated to prevent galenic conflicts?',
-      a: 'Active ingredients are chronobiologically partitioned:\n• Capsule A (Morning on waking, empty stomach): Live multi-strain probiotics (15B CFU) and L-Glutamine (350 mg) in acid-resistant DRcaps® to colonize the gut without degradation by stomach acid.\n• Capsule B (Midday with breakfast healthy fats): Berberine HCl (300 mg), Chromium (200 mcg), active L-5-MTHF (1,000 mcg), Methyl-B12 (1,000 mcg), and lipophilic Vitamin D3 (5,000 IU) + K2 MK-7 (100 mcg), which require meal lipids for optimal micellar absorption.\n• Capsule C (Evening before bed): Magnesium Bisglycinate (250 mg), L-Theanine (150 mg), and P-5-P B6 (25 mg) to stimulate GABAergic alpha waves and induce deep sleep without competing with daytime minerals.'
+      category: 'genetics',
+      q: 'Why does slow caffeine clearance (CYP1A2) affect nighttime sleep?',
+      a: 'Your CYP1A2 gene variant makes you a slow caffeine metabolizer. While fast metabolizers clear a cup of coffee in 3–4 hours, your liver retains active caffeine for 8 to 12 hours.\n\nEven if you fall asleep, caffeine blocks adenosine receptors in the brain, drastically reducing restorative slow-wave (deep) and REM sleep. Strictly cut off coffee, matcha, and energy drinks before 2:00 PM.'
     },
     {
-      q: 'What is the saliva sample collection protocol and laboratory turnaround time?',
-      a: 'Sample collection is 100% non-invasive via a buccal saliva swab rubbed against the inner cheek for 60 seconds (in-clinic or at-home). The tube contains a CE-IVD cellular preservation buffer stable at room temperature (15°C–30°C) for up to 12 months (no dry ice required). Once received at the European Core Lab in Madrid, Illumina GSA genotyping (+50,000 SNPs) is completed in 3 to 4 weeks.'
-    },
-    {
-      q: 'How does the monthly WhatsApp Clinical Support and Julia AI work?',
-      a: 'The monthly AI WhatsApp subscription (51.09 AED / month per active patient) connects patients directly to 24Genetics AI assistants (led by Julia for clinical nutrition) in 22 languages and our clinical nutrition team. Patients can photograph meals, ask about dietary tolerances, adjust micronutrient schedules, and receive continuous follow-up with zero lock-in contracts.'
+      category: 'genetics',
+      q: 'How does saliva sample collection work and what is the turnaround time?',
+      a: 'Sample collection is 100% non-invasive via a buccal saliva swab rubbed inside the cheeks for 60 seconds (can be done at home or in clinic). The tube contains a CE-IVD cellular stabilization buffer stable at room temperature (15°C–30°C) for up to 12 months.\n\nOnce received at our European Core Lab in Madrid, Illumina GSA genotyping (+50,000 SNPs) is completed in 3 to 4 weeks.'
     }
   ];
 
@@ -379,7 +432,7 @@ export default function QatarGenomicsPriceClient() {
     setIsAiLoading(true);
     setActiveAiAnswer({
       q: textToProcess,
-      a: 'Analyzing 24Genomics Clinical & Commercial Intelligence...'
+      a: 'Analyzing 24Genomics Clinical, Meal Plan & Commercial Intelligence...'
     });
 
     try {
@@ -420,32 +473,40 @@ export default function QatarGenomicsPriceClient() {
       qLower.includes(f.q.toLowerCase().slice(0, 15)) || 
       f.q.toLowerCase().includes(qLower) ||
       (qLower.includes('tier') && f.q.toLowerCase().includes('tier')) ||
-      (qLower.includes('pathway') && f.q.toLowerCase().includes('pathway')) ||
+      (qLower.includes('service') && f.q.toLowerCase().includes('service')) ||
+      (qLower.includes('meal') && f.q.toLowerCase().includes('meal')) ||
+      (qLower.includes('sequencing') && f.q.toLowerCase().includes('sequencing')) ||
       (qLower.includes('mthfr') && f.q.toLowerCase().includes('mthfr')) ||
       (qLower.includes('capsule') && f.q.toLowerCase().includes('capsule')) ||
+      (qLower.includes('whatsapp') && f.q.toLowerCase().includes('whatsapp')) ||
       (qLower.includes('turnaround') && f.q.toLowerCase().includes('turnaround'))
     );
 
     if (!matched) {
-      if (qLower.includes('price') || qLower.includes('cost') || qLower.includes('aed') || qLower.includes('qar') || qLower.includes('tier')) {
+      if (qLower.includes('price') || qLower.includes('cost') || qLower.includes('qar') || qLower.includes('tier')) {
         matched = {
           q: textToProcess,
-          a: `Wholesale tiers for Qatar in AED (reference currency):\n• 1 Kit: 1,048.44 AED\n• 50 Kits: 799.56 AED / kit (Total: 39,977.78 AED)\n• 100 Kits: 750.67 AED / kit (Total: 75,066.67 AED)\nMonthly AI WhatsApp Care is 51.09 AED/month. Fixed GCC clearing rate is 1 EUR = 4.40 AED.`
+          a: `Wholesale tiers for Qatar in QAR:\n• 1 Kit (Pilot): QAR 1,048.44\n• 50 Kits: QAR 799.56 / kit (23.7% discount · Total: QAR 39,978.00)\n• 100 Kits: QAR 750.67 / kit (28.4% discount · Total: QAR 75,067.00)\nOptional monthly WhatsApp platform care is QAR 50.00 / month.`
         };
-      } else if (qLower.includes('otc') || qLower.includes('supplement') || qLower.includes('pharmacy') || qLower.includes('brand') || qLower.includes('doha')) {
+      } else if (qLower.includes('meal') || qLower.includes('food') || qLower.includes('diet') || qLower.includes('eat')) {
         matched = {
           q: textToProcess,
-          a: `Pathway 1 provides genetically matched OTC supplement guidance for Doha pharmacies (Boots, Wellcare, Kulud, Aster):\n• Active Folate: Thorne 5-MTHF, Solgar Metafolin 800mcg (avoid synthetic folic acid)\n• Vitamin D3+K2: Now Foods Liposomal D3/K2, Carlson Solar D Gems\n• Magnesium: Pure Encapsulations Magnesium Glycinate, Doctor’s Best TRAACS®\n• B-Complex: Jarrow Formulas Methyl B-Right, Life Extension BioActive\n• Probiotics: Culturelle Digestive Daily, Seed DS-01.`
+          a: `Your meal plan strategy based on DNA:\n• Choose: Wild fish, lean meats, leafy greens, avocado, olive oil, and cooled potatoes.\n• Sequencing: Always eat vegetables first, protein second, and carbs last (cuts glucose spikes by 45%).\n• Avoid: Cow milk dairy (lactose bloat) and afternoon caffeine after 2:00 PM.`
+        };
+      } else if (qLower.includes('otc') || qLower.includes('supplement') || qLower.includes('pharmacy') || qLower.includes('brand')) {
+        matched = {
+          q: textToProcess,
+          a: `Pathway 1 provides genetically matched OTC supplement guidance for Doha pharmacies (Boots, Wellcare, Kulud, Aster):\n• Active Folate: Thorne 5-MTHF or Solgar Metafolin 800mcg (avoid synthetic folic acid)\n• Vitamin D3+K2: Now Foods Liposomal D3/K2 (take with breakfast fats)\n• Magnesium: Pure Encapsulations Magnesium Glycinate (take 2 caps at bedtime)\n• B-Complex: Jarrow Formulas Methyl B-Right\n• Probiotics: Culturelle Digestive Daily (take upon waking).`
         };
       } else if (qLower.includes('compounding') || qLower.includes('capsule') || qLower.includes('recipe')) {
         matched = {
           q: textToProcess,
-          a: `Pathway 2 provides our master compounding prescription (100% Lactose-Free HPMC / DRcaps®):\n• Capsule A (Morning empty stomach): 15B CFU live probiotics + 350 mg L-Glutamine\n• Capsule B (Midday with breakfast fats): Berberine 300mg, Chromium 200mcg, L-5-MTHF 1,000mcg, Methyl-B12 1,000mcg, D3+K2 MK-7 5,000IU/100mcg\n• Capsule C (Evening): TRAACS® Magnesium Bisglycinate 250mg, Suntheanine® L-Theanine 150mg, P-5-P B6 25mg.`
+          a: `Pathway 2 provides custom compounding (100% Lactose-Free HPMC / DRcaps®):\n• Capsule A (Morning on waking): Probiotics LGG 10B + BB-12 5B CFU in acid-resistant DRcaps®.\n• Capsule B (Breakfast): Active 5-MTHF (400-800mcg) + Riboflavin B2 (2.5mg) + Methyl-B12 (1,000mcg) + P5P (5mg) + Vitamin D3 (2,000IU) + K2 MK-7 (100mcg).\n• Capsule C (Bedtime · 2 caps): Magnesium Bisglycinate (150mg elemental Mg) + L-Theanine (200mg).`
         };
       } else {
         matched = {
           q: textToProcess,
-          a: `24Genomics Nutrition bridges European CE-IVD Illumina genotyping (+50,000 SNPs in Madrid) with our dual-track clinical model: Pathway 1 (local OTC Doha pharmacy guidance) and Pathway 2 (tailor-made 3-capsule compounding in DRcaps®). Turnaround is 3–4 weeks, with base pricing in AED and continuous WhatsApp clinical care.`
+          a: `24Genomics Nutrition bridges European CE-IVD Illumina genotyping (+50,000 SNPs in Madrid) with personalized meal plan selection and our dual-track clinical model: Pathway 1 (local OTC Doha pharmacy guidance) and Pathway 2 (tailor-made 3-capsule compounding). Turnaround is 3–4 weeks, with wholesale pricing in QAR and continuous WhatsApp clinical care.`
         };
       }
     }
@@ -3240,64 +3301,138 @@ export default function QatarGenomicsPriceClient() {
         }}>
           <div style={{
             width: '100%',
-            maxWidth: '460px',
+            maxWidth: '490px',
             backgroundColor: '#ffffff',
             height: '100%',
-            boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
+            boxShadow: '-6px 0 28px rgba(0,0,0,0.16)',
             display: 'flex',
             flexDirection: 'column',
-            animation: 'slideInRight 0.25s ease-out'
+            animation: 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
-            {/* Drawer Header */}
+            {/* Google Cloud Style Header Bar */}
             <div style={{
-              padding: '1.25rem 1.5rem',
-              borderBottom: '1px solid #e2e8f0',
-              backgroundColor: '#003666',
+              padding: '1.1rem 1.25rem',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: '#00284d',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
+              justifyContent: 'space-between',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.12)'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={18} className="text-teal-300" />
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 850 }}>24Genomics Clinical Copilot</h3>
-                  <div style={{ fontSize: '0.72rem', color: '#99f6e4' }}>CE-IVD Illumina Genotyping &amp; Dual-Track Precision Intelligence</div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAtlasAiModal(false)}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '30px',
-                  height: '30px',
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  backgroundColor: '#0d9488',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#ffffff',
-                  cursor: 'pointer'
+                  boxShadow: '0 2px 4px rgba(13,148,136,0.3)'
+                }}>
+                  <Sparkles size={17} color="#ffffff" />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
+                      Atlas Clinical &amp; Nutrition AI
+                    </h3>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 700, backgroundColor: '#0f766e', color: '#ccfbf1', padding: '1px 6px', borderRadius: '4px' }}>
+                      v2.5 Pro
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }}></span>
+                    <span>Ready · Context: 24Genomics Qatar (QAR &amp; Meal Plan)</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowAtlasAiModal(false)}
+                title="Close Assistant"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '6px',
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#e2e8f0',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s ease'
                 }}
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
 
-            {/* Drawer Body */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', padding: '12px 14px', fontSize: '0.80rem', color: '#0f766e', lineHeight: 1.5 }}>
-                Hello! I am your <strong>24Genomics Clinical Intelligence Copilot</strong>. Ask me about Illumina GSA genotyping in Madrid, the 4 biological pillars (MTHFR, VDR, MCM6), our Dual-Track prescription models (Local OTC supplements vs. 3-capsule compounding in DRcaps®), or wholesale distributor tiers in AED for Qatar.
+            {/* Google Cloud Style Categorized Filter Tabs (Horizontal Pills) */}
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              padding: '10px 14px',
+              backgroundColor: '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              overflowX: 'auto',
+              flexShrink: 0
+            }}>
+              {COPILOT_CATEGORIES.map((cat) => {
+                const isActive = copilotCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setCopilotCategory(cat.id)}
+                    style={{
+                      padding: '5px 11px',
+                      borderRadius: '16px',
+                      fontSize: '0.74rem',
+                      fontWeight: isActive ? 800 : 600,
+                      backgroundColor: isActive ? '#003666' : '#ffffff',
+                      color: isActive ? '#ffffff' : '#475569',
+                      border: isActive ? '1px solid #003666' : '1px solid #cbd5e1',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Drawer Body (Conversation Stream & Active Answer) */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+              
+              {/* Human-Friendly Welcome Banner */}
+              <div style={{
+                backgroundColor: '#f0fdfa',
+                border: '1px solid #99f6e4',
+                borderRadius: '8px',
+                padding: '10px 13px',
+                fontSize: '0.78rem',
+                color: '#0f766e',
+                lineHeight: 1.55
+              }}>
+                👋 <strong>Hello! I am your Nutrition &amp; Clinical Concierge.</strong> Ask me anything about how to choose your meals from the menu, when to take each supplement, how your DNA works in plain English, or our wholesale kit pricing in QAR.
               </div>
 
-              {/* Quick Question Chips */}
+              {/* Categorized Quick Question Chips */}
               <div>
-                <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Quick Clinical &amp; Commercial Inquiries
+                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+                  Suggested Questions · {COPILOT_CATEGORIES.find(c => c.id === copilotCategory)?.label}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {AI_FAQS.map((faq, idx) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  {AI_FAQS.filter(f => f.category === copilotCategory).map((faq, idx) => (
                     <button
                       key={idx}
                       type="button"
@@ -3305,59 +3440,129 @@ export default function QatarGenomicsPriceClient() {
                       disabled={isAiLoading}
                       style={{
                         textAlign: 'left',
-                        padding: '8px 12px',
-                        backgroundColor: '#f8fafc',
+                        padding: '8px 11px',
+                        backgroundColor: '#ffffff',
                         border: '1px solid #e2e8f0',
                         borderRadius: '6px',
-                        fontSize: '0.78rem',
+                        fontSize: '0.76rem',
                         fontWeight: 650,
-                        color: '#334155',
+                        color: '#1e293b',
                         cursor: isAiLoading ? 'wait' : 'pointer',
-                        transition: 'all 0.15s ease'
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                        transition: 'all 0.15s ease',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
                       }}
                     >
-                      💬 {faq.q}
+                      <span style={{ flex: 1 }}>{faq.q}</span>
+                      <ArrowRight size={13} color="#0d9488" style={{ flexShrink: 0 }} />
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Active Answer Card */}
+              {/* Active Answer Card (GCP Styled Response Card) */}
               {activeAiAnswer && (
                 <div style={{
                   backgroundColor: '#ffffff',
                   border: '1.5px solid #0d9488',
                   borderRadius: '10px',
-                  padding: '1rem',
-                  boxShadow: '0 4px 12px rgba(13, 148, 136, 0.08)'
+                  padding: '1.1rem',
+                  boxShadow: '0 4px 14px rgba(13, 148, 136, 0.10)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
                 }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0d9488', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Sparkles size={13} />
-                    <span>Clinical Copilot Intelligence:</span>
+                  {/* User Question Header */}
+                  <div style={{
+                    backgroundColor: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '6px',
+                    padding: '7px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 750,
+                    color: '#1e40af'
+                  }}>
+                    💬 {activeAiAnswer.q}
                   </div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginBottom: '6px' }}>
-                    {activeAiAnswer.q}
-                  </div>
-                  <div style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+
+                  {/* AI Output Content */}
+                  <div style={{
+                    fontSize: '0.79rem',
+                    color: '#334155',
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-line',
+                    padding: '4px 2px'
+                  }}>
                     {isAiLoading ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0d9488', fontWeight: 650 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0d9488', fontWeight: 650, padding: '12px 0' }}>
                         <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚙️</span>
-                        <span>Querying 24Genomics Clinical &amp; Pharmacokinetic Engine...</span>
+                        <span>Consulting Clinical &amp; Meal Plan Intelligence Engine...</span>
                       </div>
                     ) : (
                       activeAiAnswer.a
                     )}
                   </div>
+
+                  {/* GCP Card Action Toolbar (Copy Answer, Share, Timestamp) */}
+                  {!isAiLoading && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      borderTop: '1px solid #f1f5f9',
+                      paddingTop: '8px',
+                      marginTop: '4px'
+                    }}>
+                      <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                        Atlas AI · Clinically Validated
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof window !== 'undefined' && activeAiAnswer.a) {
+                            navigator.clipboard.writeText(activeAiAnswer.a);
+                            setCopiedAiAnswer(true);
+                            setTimeout(() => setCopiedAiAnswer(false), 2000);
+                          }
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '4px 9px',
+                          fontSize: '0.70rem',
+                          fontWeight: 700,
+                          backgroundColor: copiedAiAnswer ? '#f0fdf4' : '#f8fafc',
+                          color: copiedAiAnswer ? '#16a34a' : '#475569',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {copiedAiAnswer ? <Check size={12} /> : <Copy size={12} />}
+                        <span>{copiedAiAnswer ? 'Copied ✓' : 'Copy Answer'}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
+
             </div>
 
-            {/* Drawer Input Footer */}
-            <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ display: 'flex', gap: '8px' }}>
+            {/* Google Cloud Style Input Footer */}
+            <div style={{
+              padding: '1rem 1.25rem',
+              borderTop: '1px solid #e2e8f0',
+              backgroundColor: '#f8fafc'
+            }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <input
                   type="text"
-                  placeholder="Ask a clinical, compounding, or pricing question..."
+                  placeholder="Ask a question about food, supplements, or QAR pricing..."
                   value={aiCustomQuestion}
                   onChange={(e) => setAiCustomQuestion(e.target.value)}
                   onKeyDown={(e) => {
@@ -3370,27 +3575,33 @@ export default function QatarGenomicsPriceClient() {
                     borderRadius: '6px',
                     border: '1px solid #cbd5e1',
                     fontSize: '0.80rem',
-                    outline: 'none'
+                    outline: 'none',
+                    backgroundColor: '#ffffff'
                   }}
                 />
                 <button
                   type="button"
                   onClick={() => handleAskAtlasAi()}
-                  disabled={isAiLoading}
+                  disabled={isAiLoading || !aiCustomQuestion.trim()}
                   style={{
                     padding: '9px 14px',
-                    backgroundColor: isAiLoading ? '#94a3b8' : '#0d9488',
+                    backgroundColor: isAiLoading || !aiCustomQuestion.trim() ? '#94a3b8' : '#003666',
                     border: 'none',
                     borderRadius: '6px',
                     color: '#ffffff',
-                    cursor: isAiLoading ? 'wait' : 'pointer',
+                    cursor: isAiLoading || !aiCustomQuestion.trim() ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 4px rgba(0, 54, 102, 0.2)'
                   }}
                 >
                   <Send size={15} />
                 </button>
+              </div>
+
+              <div style={{ fontSize: '0.66rem', color: '#94a3b8', marginTop: '6px', textAlign: 'center' }}>
+                Powered by Atlas Clinical Intelligence · Press <strong>Enter</strong> to send
               </div>
             </div>
           </div>

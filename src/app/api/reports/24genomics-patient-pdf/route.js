@@ -557,10 +557,10 @@ export async function GET(request) {
       lineHeight: 9.0
     });
 
-    // Standardized Titles, Priorities & Gene Targets
+    // Standardized Titles, Priorities & Gene Targets (Human-Friendly Benefit First)
     const STANDARDIZED_CARD_TITLES = [
       {
-        title: 'ACTIVE FOLATE (VITAMIN B9)',
+        title: 'ENERGY · ACTIVE FOLATE (B9)',
         priorityBadge: 'PRIORITY 1 · ESSENTIAL',
         priorityColor: alertRed,
         priorityBg: badgeRedBg,
@@ -568,7 +568,7 @@ export async function GET(request) {
         dose: '800 mcg'
       },
       {
-        title: 'VITAMIN D3 + K2 (MK-7)',
+        title: 'IMMUNITY · VITAMIN D3 + K2',
         priorityBadge: 'PRIORITY 1 · ESSENTIAL',
         priorityColor: alertRed,
         priorityBg: badgeRedBg,
@@ -576,7 +576,7 @@ export async function GET(request) {
         dose: '4,000 IU + 100 mcg'
       },
       {
-        title: 'BIOAVAILABLE CHELATED MAGNESIUM',
+        title: 'SLEEP · CHELATED MAGNESIUM',
         priorityBadge: 'PRIORITY 2 · RECOMMENDED',
         priorityColor: blueDark,
         priorityBg: blueBg,
@@ -584,7 +584,7 @@ export async function GET(request) {
         dose: '300–400 mg'
       },
       {
-        title: 'METHYLATED B-COMPLEX (B12 + B6)',
+        title: 'VITALITY · B-COMPLEX (B12+B6)',
         priorityBadge: 'PRIORITY 2 · RECOMMENDED',
         priorityColor: blueDark,
         priorityBg: blueBg,
@@ -592,12 +592,12 @@ export async function GET(request) {
         dose: 'B12 1,000mcg · B6 25mg'
       },
       {
-        title: 'ENTERIC PROBIOTICS & GLUTAMINE',
+        title: 'GUT SHIELD · PROBIOTICS',
         priorityBadge: 'PRIORITY 3 · OPTIONAL',
         priorityColor: amberDark,
         priorityBg: amberBg,
         shortGene: 'MCM6 / LCT (CC)',
-        dose: '15B CFU + 350mg'
+        dose: '15 Billion CFU'
       }
     ];
 
