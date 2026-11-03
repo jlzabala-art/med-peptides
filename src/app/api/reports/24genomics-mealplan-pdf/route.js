@@ -129,9 +129,9 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // SECTION 1: YOUR DNA IN 4 PLAIN-ENGLISH FINDINGS
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     y1 -= 16;
     page1.drawText('1. YOUR GENETIC PROFILE IN PLAIN ENGLISH (WHAT YOUR DNA SAYS)', {
       x: 36,
@@ -199,9 +199,9 @@ export async function GET(request) {
 
     y1 -= 76;
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // SECTION 2: MEAL PLAN TRAFFIC LIGHT (WHAT TO ORDER)
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     y1 -= 8;
     page1.drawText('2. MEAL PLAN SELECTION GUIDE (TRAFFIC LIGHT FOR YOUR CATERING MENU)', {
       x: 36,
@@ -214,7 +214,7 @@ export async function GET(request) {
     y1 -= 8;
     const trafficCols = [
       {
-        header: '🟢 ALWAYS ORDER (DNA Favorites)',
+        header: '[GREEN] ALWAYS ORDER (DNA Favorites)',
         color: greenText,
         bgColor: greenBg,
         borderColor: greenBorder,
@@ -226,7 +226,7 @@ export async function GET(request) {
         ]
       },
       {
-        header: '🟡 ENJOY IN MODERATION (Control)',
+        header: '[AMBER] ENJOY IN MODERATION (Control)',
         color: amberText,
         bgColor: amberBg,
         borderColor: amberBorder,
@@ -238,7 +238,7 @@ export async function GET(request) {
         ]
       },
       {
-        header: '🔴 EXCLUDE FROM YOUR CATERING',
+        header: '[RED] EXCLUDE FROM YOUR CATERING',
         color: redText,
         bgColor: redBg,
         borderColor: redBorder,
@@ -291,21 +291,21 @@ export async function GET(request) {
 
     y1 -= 72;
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // SECTION 3: THE GOLDEN PLATE SEQUENCING RULE
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     y1 -= 6;
     page1.drawRectangle({
       x: 36,
       y: y1 - 38,
       width: p1Width - 72,
       height: 38,
-      color: rgb(240 / 255, 253 / 250 / 255),
-      borderColor: rgb(153 / 255, 246 / 228 / 255),
+      color: rgb(240 / 255, 253 / 255, 250 / 255),
+      borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
       borderWidth: 1
     });
 
-    page1.drawText('💡 THE GOLDEN PLATE SEQUENCING RULE (ELIMINATES AFTERNOON BRAIN FOG):', {
+    page1.drawText('THE GOLDEN PLATE SEQUENCING RULE (ELIMINATES AFTERNOON BRAIN FOG):', {
       x: 44,
       y: y1 - 12,
       size: 6.5,
@@ -313,7 +313,7 @@ export async function GET(request) {
       color: tealAccent
     });
 
-    const seqText = 'Inside each meal tray, eat your food in this exact sequence: (1) Vegetables & salad first  →  (2) Protein & healthy fats second  →  (3) Rice or potatoes LAST.\nClinical impact: This creates a protective fiber mesh in your stomach, reducing blood sugar spikes by up to 45% and eliminating post-meal energy slumps.';
+    const seqText = 'Inside each meal tray, eat your food in this exact sequence: (1) Vegetables & salad first  ->  (2) Protein & healthy fats second  ->  (3) Rice or potatoes LAST.\nClinical impact: This creates a protective fiber mesh in your stomach, reducing blood sugar spikes by up to 45% and eliminating post-meal energy slumps.';
     page1.drawText(seqText, {
       x: 44,
       y: y1 - 23,
@@ -326,9 +326,7 @@ export async function GET(request) {
 
     y1 -= 46;
 
-    // ─────────────────────────────────────────────────────────────────────────
     // SECTION 4: 24-HOUR DAILY ROUTINE WITH YOUR MEALS
-    // ─────────────────────────────────────────────────────────────────────────
     y1 -= 6;
     page1.drawText('4. 24-HOUR DAILY ROUTINE: SYNCHRONIZED WITH YOUR MEALS & SUPPLEMENTS', {
       x: 36,
@@ -341,25 +339,25 @@ export async function GET(request) {
     y1 -= 8;
     const dailySteps = [
       {
-        time: '🌅 Upon Waking (Empty Stomach)',
+        time: 'Upon Waking (Empty Stomach)',
         step: 'Probiotics & Gut Shield',
         action: 'Drink a full glass of water. Take Capsule A (Probiotic DRcaps®).',
         why: 'Protects delicate live cultures as they enter an empty stomach without food interference.'
       },
       {
-        time: '🍳 With Meal Plan Breakfast',
+        time: 'With Meal Plan Breakfast',
         step: 'Energy & Vitamin D3/K2',
         action: 'Take Capsule B (Active Folate + B-Complex + D3/K2).',
         why: 'Must be taken with breakfast containing healthy fats (eggs, olive oil, avocado) to absorb fat-soluble Vitamin D.'
       },
       {
-        time: '🥗 With Lunch or Main Dinner',
+        time: 'With Lunch or Main Dinner',
         step: 'Plate Sequencing & Soluble Fiber',
         action: 'Follow the 1-2-3 plate order. Optional: 1 glass of water with fiber sachet.',
         why: 'Slows carbohydrate absorption, maintains steady mental focus and prevents energy crashes.'
       },
       {
-        time: '🌙 30–60 Min Before Sleep',
+        time: '30-60 Min Before Sleep',
         step: 'Restorative Sleep & Muscle Relax',
         action: 'Take Capsule C (2 capsules of Magnesium Bisglycinate + Theanine).',
         why: 'Clears daily stress, calms the nervous system, prevents muscle tension, and promotes deep REM sleep.'
@@ -420,9 +418,9 @@ export async function GET(request) {
 
     y1 -= 84;
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // SECTION 5: KITCHEN FRIDGE REMINDER
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     page1.drawRectangle({
       x: 36,
       y: y1 - 30,
@@ -433,7 +431,7 @@ export async function GET(request) {
       borderWidth: 0.8
     });
 
-    page1.drawText('📌 3 GOLDEN KITCHEN REMINDERS:', {
+    page1.drawText('3 GOLDEN KITCHEN REMINDERS:', {
       x: 44,
       y: y1 - 11,
       size: 5.9,
@@ -531,9 +529,9 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // SECTION 1: THE 5 SUPPLEMENTS EXPLAINED BY BENEFIT (PLAIN LANGUAGE)
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     y2 -= 14;
     page2.drawText('1. YOUR 5 TARGETED NUTRIENTS (WHAT THEY DO FOR YOUR BODY)', {
       x: 36,
@@ -545,7 +543,7 @@ export async function GET(request) {
 
     const humanSupplements = [
       {
-        benefit: '☀️ IMMUNITY & BONE STRENGTH',
+        benefit: 'IMMUNITY & BONE STRENGTH',
         nutrient: 'Vitamin D3 + K2 (MK-7)',
         why: 'Your DNA shows slow Vitamin D activation. This pair directs calcium directly into your bones and strengthens defense cells.',
         timing: 'With breakfast containing fats (eggs, olive oil, avocado).',
@@ -554,7 +552,7 @@ export async function GET(request) {
         pBg: redBg
       },
       {
-        benefit: '⚡ CELLULAR ENERGY & CLARITY',
+        benefit: 'CELLULAR ENERGY & CLARITY',
         nutrient: 'Active Folate (L-5-MTHF)',
         why: 'Bypasses your MTHFR genetic block to keep you clear-headed. Provides clean cellular energy without synthetic buildup.',
         timing: 'Morning with your breakfast.',
@@ -563,7 +561,7 @@ export async function GET(request) {
         pBg: redBg
       },
       {
-        benefit: '🌙 DEEP REST & STRESS RESET',
+        benefit: 'DEEP REST & STRESS RESET',
         nutrient: 'Magnesium Bisglycinate + Theanine',
         why: 'Calms nerve sensitivity, relaxes muscle tension after workouts, and quiets racing thoughts for restorative sleep.',
         timing: 'Evening: Take 2 capsules 30–60 min before bed with water.',
@@ -572,7 +570,7 @@ export async function GET(request) {
         pBg: blueBg
       },
       {
-        benefit: '🔋 METABOLISM & LIVER BALANCE',
+        benefit: 'METABOLISM & LIVER BALANCE',
         nutrient: 'Methylated B-Complex (B12 + B6)',
         why: 'Essential cofactors that support homocysteine clearance, healthy nerve myelin, and daytime alertness.',
         timing: 'Morning with food.',
@@ -581,7 +579,7 @@ export async function GET(request) {
         pBg: blueBg
       },
       {
-        benefit: '🛡️ GUT BARRIER & FLAT DIGESTION',
+        benefit: 'GUT BARRIER & FLAT DIGESTION',
         nutrient: 'Targeted Enteric Probiotics',
         why: 'Protective cultures (LGG + BB-12) that re-seed healthy gut flora and defend against bloat, gas, and dairy sensitivities.',
         timing: 'First thing upon waking with room-temperature water.',
@@ -660,7 +658,7 @@ export async function GET(request) {
       });
 
       // Timing Text
-      page2.drawText(`👉 How to take: ${s.timing}`, {
+      page2.drawText(`How to take: ${s.timing}`, {
         x: 46,
         y: y2 + 9,
         size: 5.5,
@@ -671,9 +669,9 @@ export async function GET(request) {
       y2 -= 4;
     });
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // SECTION 2: CHOOSE YOUR LEVEL (3 SIMPLE BUDGET PACKS)
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     y2 -= 8;
     page2.drawText('2. CHOOSE YOUR LEVEL: 3 SIMPLE DECISION PACKS (BUY ONLY WHAT YOU NEED)', {
       x: 36,
@@ -755,9 +753,9 @@ export async function GET(request) {
 
     y2 -= 64;
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // SECTION 3: HOW DO YOU PREFER TO TAKE IT? (PHARMACY VS COMPOUNDING)
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     y2 -= 6;
     page2.drawText('3. HOW DO YOU PREFER TO TAKE IT? (TWO SIMPLE SHOPPING PATHWAYS)', {
       x: 36,
@@ -781,7 +779,7 @@ export async function GET(request) {
       borderWidth: 0.8
     });
 
-    page2.drawText('🏪 OPTION A: LOCAL DOHA PHARMACIES (COMMERCIAL BOTTLES)', {
+    page2.drawText('OPTION A: LOCAL DOHA PHARMACIES (COMMERCIAL BOTTLES)', {
       x: 44,
       y: y2 - 12,
       size: 5.9,
@@ -810,7 +808,7 @@ export async function GET(request) {
       borderWidth: 1.2
     });
 
-    page2.drawText('💊 OPTION B: CUSTOM "ALL-IN-ONE" COMPOUNDING (RECOMMENDED)', {
+    page2.drawText('OPTION B: CUSTOM ALL-IN-ONE COMPOUNDING (RECOMMENDED)', {
       x: 44 + pathwayW + 12,
       y: y2 - 12,
       size: 5.9,
@@ -841,7 +839,7 @@ export async function GET(request) {
       borderWidth: 0.8
     });
 
-    page2.drawText('⚠️ CRITICAL SAFETY RULE: MUTUALLY EXCLUSIVE PATHWAYS', {
+    page2.drawText('CRITICAL SAFETY RULE: MUTUALLY EXCLUSIVE PATHWAYS', {
       x: 44,
       y: y2 - 9,
       size: 5.8,
