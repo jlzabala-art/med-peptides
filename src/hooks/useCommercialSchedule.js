@@ -33,7 +33,7 @@ export function useCommercialSchedule(slug = 'colway-qatar') {
       const params = new URLSearchParams(window.location.search);
       const isParamHossam = ['hossam', 'ryhanh'].some(k =>
         params.get('user') === k || params.get('partner') === k || params.get('client') === k
-      );
+      ) || params.get('key') === 'RYHANH-QA-2026';
       if (isParamHossam) {
         setHossamDemoActive(true);
       }
@@ -74,8 +74,30 @@ export function useCommercialSchedule(slug = 'colway-qatar') {
     if (!user) return false;
     const email = user.email?.toLowerCase() || '';
     const name = user.displayName?.toLowerCase() || '';
-    return email.includes('hossam') || name.includes('hossam') || email.includes('ryhanh');
-  }, [hossamDemoActive, user]);
+    const wholesalerId = user.wholesalerId || '';
+    const assignedAgreement = user.assignedAgreementId || '';
+
+    return (
+      email.includes('hossam') ||
+      name.includes('hossam') ||
+      email.includes('ryhanh') ||
+      wholesalerId === 'ryhanh-medical-qatar' ||
+      assignedAgreement === slug ||
+      assignedAgreement === agreement?.id
+    );
+  }, [hossamDemoActive, user, slug, agreement?.id]);
+
+  const partnerProfile = useMemo(() => {
+    if (isHossamMode) {
+      return {
+        name: agreement?.partnerName || 'Hossam Ahmed',
+        organization: agreement?.organization || 'Ryhanh Medical Company',
+        territory: agreement?.territory || 'State of Qatar',
+        tier: agreement?.tier || 'Exclusive Commercial Partner'
+      };
+    }
+    return null;
+  }, [isHossamMode, agreement]);
 
   // Copy share link
   const handleCopyShareLink = useCallback(() => {
@@ -142,6 +164,7 @@ export function useCommercialSchedule(slug = 'colway-qatar') {
     activeTab,
     setActiveTab,
     isHossamMode,
+    partnerProfile,
     isSubmittingQuote,
     generatedQuote,
     setGeneratedQuote,

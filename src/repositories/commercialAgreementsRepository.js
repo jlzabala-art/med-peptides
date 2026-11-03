@@ -20,7 +20,8 @@ import {
   limit,
   serverTimestamp
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase.js';
+import { validateAndNormalizeAgreement } from './agreementWriteGuard.js';
 
 // ── Cache Configuration ───────────────────────────────────────────────────────
 const RAM_CACHE = new Map();
@@ -255,25 +256,24 @@ export async function getCommercialAgreement(slugOrId, options = {}) {
 
 /**
  * Save or update a commercial agreement in Firestore and invalidate cache.
+ * Validates data integrity through agreementWriteGuard before writing.
  */
 export async function saveCommercialAgreement(agreement) {
-  if (!agreement || !agreement.slug) {
-    throw new Error('Agreement must have a valid slug.');
-  }
+  // 1. Validate and normalize payload via write guard
+  const validatedPayload = validateAndNormalizeAgreement(agreement);
 
-  const id = agreement.id || agreement.slug;
+  const id = validatedPayload.id;
   const docRef = doc(db, 'commercial_agreements', id);
 
   const payload = {
-    ...agreement,
-    id,
+    ...validatedPayload,
     updatedAt: serverTimestamp()
   };
 
   await setDoc(docRef, payload, { merge: true });
-  invalidateAgreementCache(agreement.slug);
+  invalidateAgreementCache(validatedPayload.slug);
   invalidateAgreementCache(id);
 
-  return { id, success: true };
+  return { id, success: true, data: validatedPayload };
 }
 

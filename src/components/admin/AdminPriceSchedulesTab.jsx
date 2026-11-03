@@ -30,6 +30,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import MetricCard from '@/components/ui/MetricCard';
 import KpiScopeBar from '@/components/ui/KpiScopeBar';
+import AdminAgreementModal from './AdminAgreementModal';
 
 const PRICE_SCHEDULES = [
   {
@@ -121,14 +122,16 @@ const PRICE_SCHEDULES = [
     route: '/pricing/colway-qatar',
     referralCode: 'QATAR-COLWAY-RYHANH',
     partnerName: 'Hossam Ahmed · Ryhanh Medical Company (Doha, Qatar)',
-    pricingFormula: 'Factory (94 PLN / $24.00) + Freight ($3.14) + Duty ($1.20) → Mediluxe (112 QAR) → Retail (187 QAR)',
+    pricingFormula: 'Approved Factory (102 PLN / $26.00) + Air Freight (19.73 PLN / $5.00) = 121.73 PLN ($31.00 USD / 112 QAR) → Retail (187 QAR, +75 QAR / 40.1% Margin)',
     volumeTier: '80 Units Initial Commercial Batch (40 Shampoo + 40 Conditioner)',
     currencies: 'QAR (Primary) · USD · PLN (Origin)',
     supplierFamily: 'Colway European Compounding Lab',
     whiteLabelStatus: 'Exclusive Distributor Schedule (100% advance payment with purchase order)',
     emailNotifications: 'Instant notification to jose@mediluxeme.com on pro-forma requests',
     category: 'distributor',
-    tierSupport: ['wholesale']
+    tierSupport: ['wholesale'],
+    isFirestoreSsot: true,
+    agreementSlug: 'colway-qatar'
   },
   {
     id: '24genomics-qatar',
@@ -148,7 +151,9 @@ const PRICE_SCHEDULES = [
     whiteLabelStatus: 'Custom Compounded Nutrigenomic Formulation Integration',
     emailNotifications: 'Instant notification to jose@mediluxeme.com on pro-forma requests',
     category: 'distributor',
-    tierSupport: ['wholesale', 'clinic']
+    tierSupport: ['wholesale', 'clinic'],
+    isFirestoreSsot: true,
+    agreementSlug: '24genomics-qatar'
   }
 ];
 
@@ -156,6 +161,7 @@ export default function AdminPriceSchedulesTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [copiedId, setCopiedId] = useState(null);
+  const [editingAgreementSlug, setEditingAgreementSlug] = useState(null);
 
   const handleCopyLink = (schedule, tier = null) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
@@ -468,30 +474,65 @@ export default function AdminPriceSchedulesTab() {
                   )}
                 </div>
 
-                <Link
-                  href={schedule.referralCode ? `${schedule.route}?ref=${schedule.referralCode}` : schedule.route}
-                  target="_blank"
-                  style={{
-                    padding: '6px 14px',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    background: '#0284c7',
-                    color: '#ffffff',
-                    borderRadius: '6px',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <span>Open Price List</span>
-                  <ArrowRight size={13} />
-                </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {schedule.isFirestoreSsot && (
+                    <button
+                      type="button"
+                      onClick={() => setEditingAgreementSlug(schedule.agreementSlug)}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        background: '#f0fdf4',
+                        color: '#15803d',
+                        border: '1px solid #86efac',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                      title="Edit commercial agreement terms & pricing directly in Firestore SSOT"
+                    >
+                      <Sparkles size={13} className="text-emerald-600" />
+                      <span>Edit SSOT</span>
+                    </button>
+                  )}
+
+                  <Link
+                    href={schedule.referralCode ? `${schedule.route}?ref=${schedule.referralCode}` : schedule.route}
+                    target="_blank"
+                    style={{
+                      padding: '6px 14px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      background: '#0284c7',
+                      color: '#ffffff',
+                      borderRadius: '6px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span>Open Price List</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Firestore SSOT Agreement Modal */}
+      {editingAgreementSlug && (
+        <AdminAgreementModal
+          slug={editingAgreementSlug}
+          isOpen={Boolean(editingAgreementSlug)}
+          onClose={() => setEditingAgreementSlug(null)}
+        />
+      )}
     </div>
   );
 }

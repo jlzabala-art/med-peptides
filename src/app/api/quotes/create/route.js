@@ -20,9 +20,9 @@ export async function POST(request) {
       items = [],
       subtotal = 8960.00,
       grandTotal = 8960.00,
-      marginPercent = 6.9,
-      landedCost = 8342.16,
-      notes = '100% advance wire transfer payment with purchase order. Invoiced based on 94 PLN European compounding laboratory cost.',
+      marginPercent = 40.1,
+      landedCost = 8960.00,
+      notes = '100% advance wire transfer payment with purchase order. Approved Colway commercial terms: 102 PLN product + 19.73 PLN shipping (Total 121.73 PLN / $31.00 USD / 112.00 QAR). Price set in PLN.',
       source = 'atlas_ai_qatar_schedule',
       distributorProfit = 6000.00,
       distributorMarginPct = 40.1

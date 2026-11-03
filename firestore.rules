@@ -581,6 +581,13 @@ service cloud.firestore {
     match /b2b_invoices/{id} { allow read, write: if isAdmin() || isWholesaler() || isDoctor(); }
     match /b2b_payments/{id} { allow read, write: if isAdmin() || isWholesaler() || isDoctor(); }
 
+    // ── Commercial Agreements (B2B Pricing & Distribution Schedules) ────────
+    // Public read when active (e.g. /pricing/:slug); Admin & Wholesaler full read; writes restricted to Admin.
+    match /commercial_agreements/{agreementId} {
+      allow read: if resource.data.status == 'active' || isAdmin() || isWholesaler();
+      allow write: if isAdmin();
+    }
+
     match /inbound_emails/{id} { allow read, write: if isAdmin(); }
     match /command_center/{id} { allow read, write: if isAdmin(); }
     match /operations_queue/{id} { allow read, write: if isAdmin(); }
