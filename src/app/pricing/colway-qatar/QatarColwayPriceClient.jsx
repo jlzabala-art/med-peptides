@@ -34,131 +34,35 @@ import {
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
-import { useAuth } from '@/context/AuthContext';
+import { useCommercialSchedule } from '@/hooks/useCommercialSchedule';
+import { FALLBACK_AGREEMENTS } from '@/repositories/commercialAgreementsRepository';
 import '../colway/ColwayPriceList.css';
 
 export default function QatarColwayPriceClient() {
-  const { user } = useAuth();
-  const [hossamDemoActive, setHossamDemoActive] = useState(false);
+  const {
+    agreement,
+    currency,
+    setCurrency,
+    activeTab,
+    setActiveTab,
+    isHossamMode,
+    isSubmittingQuote,
+    generatedQuote,
+    setGeneratedQuote,
+    copiedLink,
+    handleCopyShareLink,
+    handleGenerateAtlasQuotation
+  } = useCommercialSchedule('colway-qatar');
 
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('user') === 'hossam' || params.get('partner') === 'hossam' || params.get('client') === 'hossam') {
-        setHossamDemoActive(true);
-      }
-    }
-  }, []);
-
-  const isHossamMode = Boolean(
-    hossamDemoActive ||
-    (user && (user.email?.toLowerCase().includes('hossam') || user.displayName?.toLowerCase().includes('hossam') || user.email?.toLowerCase().includes('ryhanh')))
-  );
-
-  const [activeTab, setActiveTab] = useState('commercial'); // 'commercial' | 'monographs' | 'terms'
   const [selectedProduct, setSelectedProduct] = useState('shampoo');
-  const [currency, setCurrency] = useState('QAR'); // 'QAR' | 'USD' | 'PLN'
   const [showAiInsight, setShowAiInsight] = useState(false);
-  const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
-  const [generatedQuote, setGeneratedQuote] = useState(null);
-  const [copiedLink, setCopiedLink] = useState(false);
 
-  const orderQuantity = 80; // 40× Shampoo + 40× Conditioner
-
-  // Approved Colway Terms
-  const unitProductPricePln = 102.00; // ~18% discount secured
-  const unitShippingPln = 19.73;
-  const unitTotalPln = 121.73;
-
-  const unitProductPriceUsd = 26.00;
-  const unitShippingUsd = 5.00;
-  const unitTotalUsd = 31.00;
-
-  const unitProductPriceQar = 93.94;
-  const unitShippingQar = 18.06;
-  const unitDistributorPriceQar = 112.00; // Landed price to Hossam
-
-  const unitRecommendedRetailQar = 187.00; // Target price in Qatar clinics/salons
-
-  const totalDistributorInvoiceQar = orderQuantity * unitDistributorPriceQar; // 8,960.00 QAR
-  const totalDistributorInvoiceUsd = (orderQuantity * unitTotalUsd).toFixed(2); // $2,480.00 USD
-  const totalDistributorInvoicePln = (orderQuantity * unitTotalPln).toFixed(2); // 9,738.40 PLN
-
-  const distributorGrossMarginPerUnit = unitRecommendedRetailQar - unitDistributorPriceQar; // 75.00 QAR
-  const distributorTotalGrossProfit = orderQuantity * distributorGrossMarginPerUnit; // 6,000.00 QAR
-  const distributorGrossMarginPct = ((distributorGrossMarginPerUnit / unitRecommendedRetailQar) * 100).toFixed(1); // 40.1%
-
-  const distributorOpexPerUnit = 28.05; // 15% operating & bad debt buffer
-  const distributorNetProfitPerUnit = 44.74; // 23.93%
-  const distributorTotalNetProfit = orderQuantity * distributorNetProfitPerUnit; // 3,579.25 QAR
-
-  const handleGenerateAtlasQuotation = async () => {
-    setIsSubmittingQuote(true);
-    try {
-      const res = await fetch('/api/quotes/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clientName: 'Ryhanh Medical Company',
-          contactPerson: 'Hossam Ahmed',
-          territory: 'State of Qatar',
-          currency: 'QAR',
-          subtotal: totalDistributorInvoiceQar,
-          grandTotal: totalDistributorInvoiceQar,
-          marginPercent: 40.1,
-          distributorProfit: distributorTotalGrossProfit,
-          distributorMarginPct: Number(distributorGrossMarginPct),
-          landedCost: totalDistributorInvoiceQar,
-          items: [
-            {
-              id: 'colway-shampoo-250',
-              name: 'Colway Strengthening Anti-Hair Loss Shampoo (250 mL)',
-              quantity: 40,
-              unitPrice: 112.00,
-              totalPrice: 4480.00,
-              currency: 'QAR',
-              actives: 'Baicapil™ 2.0%, Native Fish Tropocollagen, Micronized Diosmin, Caffeine'
-            },
-            {
-              id: 'colway-conditioner-200',
-              name: 'Colway Strengthening Hair Conditioner (200 mL)',
-              quantity: 40,
-              unitPrice: 112.00,
-              totalPrice: 4480.00,
-              currency: 'QAR',
-              actives: 'Baicapil™, Native Tropocollagen, Hydrolyzed Keratin, Argan Oil, D-Panthenol'
-            }
-          ],
-          notes: 'Approved Colway agreement terms: 102 PLN product price (~18% discount), 19.73 PLN shipping (Total 121.73 PLN / $31.00 USD / 112.00 QAR). 100% advance wire prepayment required prior to order dispatch. Price anchored in PLN; regional shipping adjustment applies.',
-          source: 'atlas_ai_qatar_schedule'
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to generate quotation');
-      setGeneratedQuote(data);
-    } catch (err) {
-      console.error('Quotation generation error:', err);
-      // Fallback local quote object if offline
-      setGeneratedQuote({
-        quotationNumber: `QT-QA-COL-${Math.floor(100000 + Math.random() * 900000)}`,
-        grandTotal: totalDistributorInvoiceQar,
-        clientName: 'Ryhanh Medical Company',
-        currency: 'QAR',
-        success: true
-      });
-    } finally {
-      setIsSubmittingQuote(false);
-    }
-  };
-
-  const handleCopyShareLink = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2500);
-    }
-  };
+  // Dynamic values backed by Firestore SSOT
+  const pricing = agreement?.pricing || FALLBACK_AGREEMENTS['colway-qatar'].pricing;
+  const totals = agreement?.totals || FALLBACK_AGREEMENTS['colway-qatar'].totals;
+  const orderQuantity = agreement?.orderQuantity || 80;
+  const keyConditions = agreement?.keyConditions || FALLBACK_AGREEMENTS['colway-qatar'].keyConditions;
+  const discountPct = agreement?.securedDiscountPct || 18;
 
   return (
     <div className="colway-price-root" style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a' }}>
@@ -328,10 +232,10 @@ export default function QatarColwayPriceClient() {
                 <div className="brand-pill-colway">COLWAY CLINICAL TRICHOLOGY</div>
               </div>
               <h1 className="document-title" style={{ fontSize: '1.65rem', fontWeight: 850, color: '#003666', letterSpacing: '-0.02em', margin: '0 0 0.35rem 0' }}>
-                COLWAY® CLINICAL HAIR CARE & TRICHOLOGY SCHEDULE
+                {agreement?.title || 'COLWAY® CLINICAL HAIR CARE & TRICHOLOGY SCHEDULE'}
               </h1>
               <p className="document-subtitle" style={{ fontSize: '0.88rem', color: '#64748b', margin: 0 }}>
-                Exclusive B2B Commercial Distribution Architecture · State of Qatar Territory
+                {agreement?.subtitle || 'Exclusive B2B Commercial Distribution Architecture · State of Qatar Territory'}
               </p>
             </div>
 
@@ -339,23 +243,23 @@ export default function QatarColwayPriceClient() {
             <div className="document-stamp-box">
               <div className="stamp-item">
                 <span className="stamp-label">DOCUMENT REF:</span>
-                <span className="stamp-value font-mono font-bold">DOC-QA-COL-2026-V1</span>
+                <span className="stamp-value font-mono font-bold">{agreement?.documentRef || 'DOC-QA-COL-2026-V1'}</span>
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">TERRITORY:</span>
-                <span className="stamp-value font-bold">State of Qatar (Exclusive B2B)</span>
+                <span className="stamp-value font-bold">{agreement?.territory || 'State of Qatar (Exclusive B2B)'}</span>
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">CONSIGNEE DISTRIBUTOR:</span>
-                <span className="stamp-value font-bold text-sky-700">Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)</span>
+                <span className="stamp-value font-bold text-sky-700">{agreement?.organization || 'Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)'}</span>
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">PRICING BASIS:</span>
-                <span className="stamp-value">CIF Doha Port of Entry (excl. 5% local VAT)</span>
+                <span className="stamp-value">{agreement?.pricingBasis || 'CIF Doha Port of Entry (excl. 5% local VAT)'}</span>
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">SCHEDULE TIER:</span>
-                <span className="stamp-value text-emerald-600 font-bold">Authorized Commercial Distributor</span>
+                <span className="stamp-value text-emerald-600 font-bold">{agreement?.tier || 'Authorized Commercial Distributor'}</span>
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">EFFECTIVE DATE:</span>
@@ -491,30 +395,30 @@ export default function QatarColwayPriceClient() {
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#ecfdf5', border: '1px solid #86efac', padding: '6px 14px', borderRadius: '20px', color: '#15803d', fontSize: '0.80rem', fontWeight: 800 }}>
               <CheckCircle2 size={16} />
-              <span>18% Factory Discount Approved</span>
+              <span>{discountPct}% Factory Discount Approved</span>
             </div>
           </div>
 
           <p style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.6, margin: '0 0 1rem 0' }}>
-            {isHossamMode ? 'Hi Hossam,' : 'Dear Distributor Partner,'} following our recent discussions with Colway, I’m pleased to share that we have secured an approved product price of <strong>102 PLN (approx. 94 QAR / $26.00 USD)</strong> per unit, which reflects a discount of approximately <strong>18%</strong>:
+            {isHossamMode ? `Hi ${agreement?.partnerName || 'Hossam'},` : 'Dear Distributor Partner,'} following our recent discussions with Colway, I’m pleased to share that we have secured an approved product price of <strong>{pricing.unitProductPricePln.toFixed(2)} PLN (approx. {pricing.unitProductPriceQar.toFixed(2)} QAR / ${pricing.unitProductPriceUsd.toFixed(2)} USD)</strong> per unit, which reflects a discount of approximately <strong>{discountPct}%</strong>:
           </p>
 
           {/* 3 Metrics Cards (Product, Shipping, Total) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
             <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.85rem 1rem' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>• Product Price (-18%)</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 850, color: '#003666', margin: '2px 0' }}>102.00 PLN</div>
-              <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 700 }}>$26.00 USD = 93.94 QAR</div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>• Product Price (-{discountPct}%)</div>
+              <div style={{ fontSize: '1.3rem', fontWeight: 850, color: '#003666', margin: '2px 0' }}>{pricing.unitProductPricePln.toFixed(2)} PLN</div>
+              <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 700 }}>${pricing.unitProductPriceUsd.toFixed(2)} USD = {pricing.unitProductPriceQar.toFixed(2)} QAR</div>
             </div>
             <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.85rem 1rem' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>• Shipping & Customs</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 850, color: '#003666', margin: '2px 0' }}>19.73 PLN</div>
-              <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 700 }}>$5.00 USD = 18.06 QAR</div>
+              <div style={{ fontSize: '1.3rem', fontWeight: 850, color: '#003666', margin: '2px 0' }}>{pricing.unitShippingPln.toFixed(2)} PLN</div>
+              <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 700 }}>${pricing.unitShippingUsd.toFixed(2)} USD = {pricing.unitShippingQar.toFixed(2)} QAR</div>
             </div>
             <div style={{ backgroundColor: '#f0fdf4', border: '2px solid #86efac', borderRadius: '8px', padding: '0.85rem 1rem' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase' }}>TOTAL LANDED PRICE</div>
-              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#15803d', margin: '2px 0' }}>121.73 PLN</div>
-              <div style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 800 }}>$31.00 USD = 112.00 QAR</div>
+              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#15803d', margin: '2px 0' }}>{pricing.unitTotalPln.toFixed(2)} PLN</div>
+              <div style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 800 }}>${pricing.unitTotalUsd.toFixed(2)} USD = {pricing.unitDistributorPriceQar.toFixed(2)} QAR</div>
             </div>
           </div>
 
@@ -525,15 +429,11 @@ export default function QatarColwayPriceClient() {
               <span>Key Conditions of this Agreement:</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem', color: '#78350f', lineHeight: 1.5 }}>
-              <div>
-                <strong>1. Prepayment:</strong> Full payment to Colway is required prior to the dispatch of any order.
-              </div>
-              <div>
-                <strong>2. Dynamic Shipping & Regional Impact:</strong> The shipping cost can change depending on the dimensions and weight of the shipment. The situation in the region can have an additional price impact.
-              </div>
-              <div>
-                <strong>3. Currency Exchange:</strong> The price is set in PLN, so any currency fluctuation risk between PLN and US$ / QAR will be assumed on your end.
-              </div>
+              {keyConditions.map((cond, idx) => (
+                <div key={cond.title || idx}>
+                  <strong>{idx + 1}. {cond.title}:</strong> {cond.text}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -996,42 +896,32 @@ export default function QatarColwayPriceClient() {
               <div style={{ padding: '1.2rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#15803d', fontWeight: 800, fontSize: '0.92rem', marginBottom: '6px' }}>
                   <CheckCircle2 size={18} />
-                  <span>Approved Colway Pricing & 18% Discount Structure</span>
+                  <span>Approved Colway Pricing & {discountPct}% Discount Structure</span>
                 </div>
                 <div>
-                  Following direct negotiations with Colway Poland headquarters, Ryhanh Medical Company has secured an approved unit product price of <strong>102 PLN (approx. 94 QAR / $26.00 USD)</strong>, reflecting an approved discount of approximately <strong>18%</strong>. With shipping and customs at <strong>19.73 PLN (approx. 18.06 QAR / $5.00 USD)</strong>, the total landed price to distributor is <strong>121.73 PLN (approx. 112.00 QAR / $31.00 USD)</strong>.
+                  Following direct negotiations with Colway Poland headquarters, Ryhanh Medical Company has secured an approved unit product price of <strong>{pricing.unitProductPricePln.toFixed(2)} PLN (approx. {pricing.unitProductPriceQar.toFixed(2)} QAR / ${pricing.unitProductPriceUsd.toFixed(2)} USD)</strong>, reflecting an approved discount of approximately <strong>{discountPct}%</strong>. With shipping and customs at <strong>{pricing.unitShippingPln.toFixed(2)} PLN (approx. {pricing.unitShippingQar.toFixed(2)} QAR / ${pricing.unitShippingUsd.toFixed(2)} USD)</strong>, the total landed price to distributor is <strong>{pricing.unitTotalPln.toFixed(2)} PLN (approx. {pricing.unitDistributorPriceQar.toFixed(2)} QAR / ${pricing.unitTotalUsd.toFixed(2)} USD)</strong>.
                 </div>
               </div>
 
-              <div style={{ padding: '1.2rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b45309', fontWeight: 800, fontSize: '0.92rem', marginBottom: '6px' }}>
-                  <ShieldCheck size={18} />
-                  <span>Condition 1: Prepayment (Full Advance Payment)</span>
-                </div>
-                <div>
-                  <strong>Full payment to Colway is required prior to the dispatch of any order.</strong> Commercial release and dispatch from the European logistics center in Poland is triggered immediately upon receipt and confirmation of wire transfer funds.
-                </div>
-              </div>
-
-              <div style={{ padding: '1.2rem', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1d4ed8', fontWeight: 800, fontSize: '0.92rem', marginBottom: '6px' }}>
-                  <Truck size={18} />
-                  <span>Condition 2: Dynamic Shipping & Regional Transit Impact</span>
-                </div>
-                <div>
-                  <strong>The shipping cost can change depending on the dimensions and weight of the shipment.</strong> Furthermore, the logistics and geopolitical situation in the Middle East region can have an additional price impact on final air freight rates at the time of order fulfillment.
-                </div>
-              </div>
-
-              <div style={{ padding: '1.2rem', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#7e22ce', fontWeight: 800, fontSize: '0.92rem', marginBottom: '6px' }}>
-                  <Globe2 size={18} />
-                  <span>Condition 3: Currency Exchange & PLN Settlement Risk</span>
-                </div>
-                <div>
-                  <strong>The price is set in PLN (Polish Złoty).</strong> Any currency fluctuation risk between PLN and US$ / QAR will be assumed on your end (Ryhanh Medical Company). All QAR and USD figures displayed on this portal represent live exchange calibrations pegged to the official PLN contract.
-                </div>
-              </div>
+              {keyConditions.map((cond, idx) => {
+                const styles = [
+                  { bg: '#fffbeb', border: '#fde68a', color: '#b45309', Icon: ShieldCheck },
+                  { bg: '#eff6ff', border: '#bfdbfe', color: '#1d4ed8', Icon: Truck },
+                  { bg: '#faf5ff', border: '#e9d5ff', color: '#7e22ce', Icon: Globe2 }
+                ][idx % 3];
+                const IconComponent = styles.Icon;
+                return (
+                  <div key={cond.title || idx} style={{ padding: '1.2rem', backgroundColor: styles.bg, border: `1px solid ${styles.border}`, borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: styles.color, fontWeight: 800, fontSize: '0.92rem', marginBottom: '6px' }}>
+                      <IconComponent size={18} />
+                      <span>Condition {idx + 1}: {cond.title}</span>
+                    </div>
+                    <div>
+                      {cond.text}
+                    </div>
+                  </div>
+                );
+              })}
 
               <div style={{ padding: '1.2rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 800, fontSize: '0.92rem', marginBottom: '6px' }}>
@@ -1039,7 +929,7 @@ export default function QatarColwayPriceClient() {
                   <span>Territory & Batch Specifications</span>
                 </div>
                 <div>
-                  Consignee: <strong>Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)</strong> · Initial Commercial Batch: <strong>80 Units</strong> (40× Anti-Hair Loss Shampoo 250mL + 40× Hair Strengthening Conditioner 200mL). Total initial batch commitment: <strong>9,738.40 PLN / $2,480.00 USD (8,960.00 QAR)</strong>.
+                  Consignee: <strong>{agreement?.organization || 'Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)'}</strong> · Initial Commercial Batch: <strong>{orderQuantity} Units</strong> (40× Anti-Hair Loss Shampoo 250mL + 40× Hair Strengthening Conditioner 200mL). Total initial batch commitment: <strong>{totals.totalDistributorInvoicePln.toLocaleString()} PLN / ${totals.totalDistributorInvoiceUsd.toLocaleString()} USD ({totals.totalDistributorInvoiceQar.toLocaleString()} QAR)</strong>.
                 </div>
               </div>
             </div>
