@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
+import QRCode from 'qrcode';
 
 export const dynamic = 'force-dynamic';
 
@@ -483,6 +484,22 @@ export async function GET(request) {
       lineHeight: 9.5
     });
 
+    // QR Code for Digital Interactive Portal
+    const portalBaseUrl = 'https://med-peptides-app-27a3a.web.app/patient/dna-report';
+    const portalUrl = `${portalBaseUrl}?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleId)}`;
+    let qrImage = null;
+    try {
+      const qrBuffer = await QRCode.toBuffer(portalUrl, {
+        type: 'png',
+        margin: 1,
+        width: 130,
+        color: { dark: '#003666', light: '#ffffff' }
+      });
+      qrImage = await pdfDoc.embedPng(qrBuffer);
+    } catch (e) {
+      console.warn('QR Code generation skipped:', e.message);
+    }
+
     // Page 1 Footer
     page1.drawText('Page 1 of 2 · Meal Plan & Daily Routine · Turn to Page 2 for Simplified Supplement Packs & Shopping Guide', {
       x: 36,
@@ -491,6 +508,29 @@ export async function GET(request) {
       font: helvetica,
       color: mutedSlate
     });
+
+    if (qrImage) {
+      page1.drawImage(qrImage, {
+        x: p1Width - 36 - 32,
+        y: 8,
+        width: 30,
+        height: 30
+      });
+      page1.drawText('Digital Portal', {
+        x: p1Width - 36 - 88,
+        y: 21,
+        size: 5.8,
+        font: helveticaBold,
+        color: navyPrimary
+      });
+      page1.drawText('Scan to view online ->', {
+        x: p1Width - 36 - 88,
+        y: 13,
+        size: 5.4,
+        font: helvetica,
+        color: mutedSlate
+      });
+    }
 
     // =========================================================================
     // PAGE 2: PERSONALIZED SUPPLEMENTS MADE SIMPLE (PATIENT EDITION)
@@ -958,30 +998,31 @@ export async function GET(request) {
           borderWidth: 1.2
         });
 
-        // Center Content Box
+        // Center Content Box (Section Overview)
+        const boxTop = dHeight - 340;
         dividerPage.drawRectangle({
           x: 56,
-          y: dHeight / 2 - 130,
+          y: boxTop,
           width: dWidth - 112,
-          height: 290,
+          height: 270,
           color: white,
           borderColor: tealAccent,
-          borderWidth: 1.5
+          borderWidth: 1.4
         });
 
         // Badge
         dividerPage.drawRectangle({
           x: 76,
-          y: dHeight / 2 + 114,
-          width: 330,
+          y: boxTop + 232,
+          width: 320,
           height: 22,
           color: blueBg,
           borderColor: blueBorder,
           borderWidth: 0.8
         });
-        dividerPage.drawText('SECTION II · PRIMARY LABORATORY GENOMIC SOURCE', {
+        dividerPage.drawText('SECTION II · 24GENETICS LABORATORY REPORT', {
           x: 88,
-          y: dHeight / 2 + 120,
+          y: boxTop + 238,
           size: 8.5,
           font: helveticaBold,
           color: navyPrimary
@@ -989,15 +1030,15 @@ export async function GET(request) {
 
         dividerPage.drawText('24Genetics DNA Nutrition Analysis', {
           x: 76,
-          y: dHeight / 2 + 82,
+          y: boxTop + 200,
           size: 19,
           font: helveticaBold,
           color: navyPrimary
         });
 
-        dividerPage.drawText('Full Unedited 55-Page Certified Laboratory Dossier', {
+        dividerPage.drawText('Complete 55-Page Laboratory Report', {
           x: 76,
-          y: dHeight / 2 + 62,
+          y: boxTop + 180,
           size: 11,
           font: helveticaOblique,
           color: tealAccent
@@ -1005,57 +1046,165 @@ export async function GET(request) {
 
         // Thin Separator
         dividerPage.drawLine({
-          start: { x: 76, y: dHeight / 2 + 50 },
-          end: { x: dWidth - 76, y: dHeight / 2 + 50 },
+          start: { x: 76, y: boxTop + 168 },
+          end: { x: dWidth - 76, y: boxTop + 168 },
           thickness: 1,
           color: cardBorder
         });
 
         // Metadata grid
-        dividerPage.drawText(`Patient: ${patientName}`, { x: 76, y: dHeight / 2 + 30, size: 9.5, font: helveticaBold, color: darkSlate });
-        dividerPage.drawText(`Specimen ID: G000943554 / ${sampleId}`, { x: 76, y: dHeight / 2 + 14, size: 9, font: helvetica, color: mutedSlate });
-        dividerPage.drawText('Sequencing Platform: Illumina NGS Microarray · European CE-IVD Standard', { x: 76, y: dHeight / 2 - 2, size: 8.5, font: helvetica, color: mutedSlate });
-        dividerPage.drawText('Laboratory Facility: 24Genetics SL · Madrid, Spain · ISO 9001 Certified', { x: 76, y: dHeight / 2 - 18, size: 8.5, font: helvetica, color: mutedSlate });
+        dividerPage.drawText(`Patient: ${patientName}`, { x: 76, y: boxTop + 148, size: 9.5, font: helveticaBold, color: darkSlate });
+        dividerPage.drawText(`Specimen ID: G000943554 / ${sampleId}`, { x: 76, y: boxTop + 132, size: 9, font: helvetica, color: mutedSlate });
+        dividerPage.drawText('Sequencing Technology: Illumina NGS Microarray Platform', { x: 76, y: boxTop + 116, size: 8.5, font: helvetica, color: mutedSlate });
+        dividerPage.drawText('Laboratory Source: 24Genetics SL · Madrid, Spain', { x: 76, y: boxTop + 100, size: 8.5, font: helvetica, color: mutedSlate });
 
-        // Explanation Paragraph
+        // Generic Document Overview Box (without validation claims)
         dividerPage.drawRectangle({
           x: 76,
-          y: dHeight / 2 - 110,
+          y: boxTop + 16,
           width: dWidth - 152,
-          height: 78,
+          height: 72,
           color: lightBg,
           borderColor: cardBorder,
           borderWidth: 0.8
         });
 
-        dividerPage.drawText('CLINICAL DATA ORIGIN & VERIFICATION AUDIT TRAIL:', {
-          x: 86,
-          y: dHeight / 2 - 46,
-          size: 7.8,
+        dividerPage.drawText('DOCUMENT STRUCTURE & GENERAL OVERVIEW:', {
+          x: 88,
+          y: boxTop + 68,
+          size: 8.0,
           font: helveticaBold,
           color: navyPrimary
         });
-        dividerPage.drawText('Section I of this document represents the clinical translation, personalized meal plan guidelines, and targeted compounding protocols formulated by Atlas Health Services & Ryhanh Medical Wellness.', {
-          x: 86,
-          y: dHeight / 2 - 60,
+        dividerPage.drawText('Section I contains the personalized meal plan recommendations, daily routine schedule, and dietary choices designed for daily convenience.', {
+          x: 88,
+          y: boxTop + 52,
           size: 7.2,
           font: helvetica,
           color: darkSlate,
-          maxWidth: dWidth - 172
+          maxWidth: dWidth - 176
         });
-        dividerPage.drawText('The subsequent 55 pages constitute the primary raw genomic findings emitted directly by 24Genetics, containing the complete spectrum of nutritional predispositions, metabolic profiles, and genetic polymorphisms.', {
-          x: 86,
-          y: dHeight / 2 - 86,
+        dividerPage.drawText('Section II includes the full 55-page DNA Nutrition report issued by 24Genetics, containing the complete spectrum of nutritional predispositions, metabolic profiles, and genetic polymorphisms.', {
+          x: 88,
+          y: boxTop + 30,
           size: 7.2,
           font: helvetica,
           color: darkSlate,
-          maxWidth: dWidth - 172
+          maxWidth: dWidth - 176
         });
 
-        // Bottom footer on divider page
-        dividerPage.drawText('Atlas Health Services · Unified Clinical Genomics Dossier · Section II begins on next page', {
-          x: 36,
-          y: 26,
+        // ---------------------------------------------------------------------
+        // Quick Navigation Index Directory (Section II Key Pages)
+        // ---------------------------------------------------------------------
+        const dirTop = boxTop - 180;
+        dividerPage.drawRectangle({
+          x: 56,
+          y: dirTop,
+          width: dWidth - 112,
+          height: 165,
+          color: white,
+          borderColor: cardBorder,
+          borderWidth: 1.2
+        });
+
+        dividerPage.drawRectangle({
+          x: 56,
+          y: dirTop + 140,
+          width: dWidth - 112,
+          height: 25,
+          color: rgb(241 / 255, 245 / 255, 249 / 255)
+        });
+        dividerPage.drawText('LABORATORY REPORT DIRECTORY · KEY FINDING SECTIONS', {
+          x: 72,
+          y: dirTop + 148,
+          size: 8.0,
+          font: helveticaBold,
+          color: navyPrimary
+        });
+
+        const tocItems = [
+          {
+            title: '1. Nutrigenomic Sensitivities & Food Intolerances',
+            sub: 'Lactose intolerance, salt sensitivity, caffeine metabolism, and gluten predisposition',
+            page: 'Page 4'
+          },
+          {
+            title: '2. Vitamin & Mineral Metabolic Needs',
+            sub: 'Vitamins D, B9 (Folate), B12, C, Iron, Calcium, and antioxidant defenses',
+            page: 'Page 12'
+          },
+          {
+            title: '3. Macronutrients & Metabolic Profile',
+            sub: 'Lipid metabolism, saturated fat response, carbohydrate absorption, and satiety index',
+            page: 'Page 24'
+          },
+          {
+            title: '4. Dietary Effectiveness & Energy Balance',
+            sub: 'Low-carb vs Mediterranean diet effectiveness, caloric restriction, and exercise impact',
+            page: 'Page 42'
+          }
+        ];
+
+        let tocY = dirTop + 115;
+        tocItems.forEach((item) => {
+          dividerPage.drawText(item.title, {
+            x: 72,
+            y: tocY,
+            size: 7.6,
+            font: helveticaBold,
+            color: darkSlate
+          });
+
+          // Page Badge on Right
+          const pBadgeW = 50;
+          dividerPage.drawRectangle({
+            x: dWidth - 56 - pBadgeW - 16,
+            y: tocY - 3,
+            width: pBadgeW,
+            height: 14,
+            color: rgb(240 / 255, 253 / 255, 250 / 255),
+            borderColor: tealAccent,
+            borderWidth: 0.8
+          });
+          dividerPage.drawText(item.page, {
+            x: dWidth - 56 - pBadgeW - 10,
+            y: tocY + 1,
+            size: 6.8,
+            font: helveticaBold,
+            color: tealAccent
+          });
+
+          dividerPage.drawText(item.sub, {
+            x: 72,
+            y: tocY - 11,
+            size: 6.6,
+            font: helvetica,
+            color: mutedSlate
+          });
+
+          tocY -= 28;
+        });
+
+        // Bottom QR & Footer on Divider Page
+        if (qrImage) {
+          dividerPage.drawImage(qrImage, {
+            x: dWidth - 56 - 42,
+            y: 58,
+            width: 38,
+            height: 38
+          });
+          dividerPage.drawText('Scan to open online portal', {
+            x: dWidth - 56 - 150,
+            y: 72,
+            size: 6.2,
+            font: helveticaOblique,
+            color: mutedSlate
+          });
+        }
+
+        dividerPage.drawText('Personalized Genomic Dossier · 24Genetics Laboratory Report begins on next page', {
+          x: 56,
+          y: 65,
           size: 7.5,
           font: helveticaOblique,
           color: mutedSlate

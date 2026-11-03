@@ -22,7 +22,8 @@ import {
   Utensils,
   Clock,
   Sun,
-  Moon
+  Moon,
+  MessageSquare
 } from 'lucide-react';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
@@ -62,6 +63,17 @@ export default function PatientDnaPortalClient({
       navigator.clipboard.writeText(url);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  const handleWhatsAppShare = (lang = 'en') => {
+    if (typeof window !== 'undefined') {
+      const url = window.location.href;
+      const text = lang === 'es'
+        ? `Hola ${patientName}, aquí tienes tu Dossier Genómico Personalizado: ${url}\n\nIncluye tu guía de alimentación, pauta de suplementación y el informe de 24Genetics.`
+        : `Hello ${patientName}, here is your Personalized Genomic Dossier: ${url}\n\nIt includes your meal plan guide, supplement routine, and the 24Genetics report.`;
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -109,7 +121,28 @@ export default function PatientDnaPortalClient({
               }}
             >
               {copiedLink ? <Check size={14} /> : <Share2 size={14} />}
-              <span>{copiedLink ? 'Link Copied!' : 'Share Access Link'}</span>
+              <span>{copiedLink ? 'Link Copied!' : 'Copy Link'}</span>
+            </button>
+
+            <button
+              onClick={() => handleWhatsAppShare('en')}
+              title="Share personalized generic message via WhatsApp (without validation claims)"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #86efac',
+                borderRadius: '6px',
+                color: '#15803d',
+                cursor: 'pointer'
+              }}
+            >
+              <MessageSquare size={14} />
+              <span>WhatsApp</span>
             </button>
 
             <a
