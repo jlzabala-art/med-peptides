@@ -325,6 +325,8 @@ export default function QatarGenomicsPriceClient() {
   const [activeAiAnswer, setActiveAiAnswer] = useState(null);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
 
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
   const currentProd = GENOMICS_PRODUCTS.find(p => p.id === selectedProduct) || GENOMICS_PRODUCTS[0];
   const currentTier = VOLUME_TIERS.find(t => t.id === selectedTier) || VOLUME_TIERS[1] || VOLUME_TIERS[0];
   const monthlyAiPriceQar = agreement?.aiSubscription?.priceQar || 51.09;
@@ -344,52 +346,112 @@ export default function QatarGenomicsPriceClient() {
 
   const AI_FAQS = [
     {
-      q: 'What is included in the one-time pack fee?',
-      a: 'The selected volume tier (Tier 1, Tier 2, or Tier 3) includes Core Pillars 1 to 4: (1) Official Nutrition Clinical Monograph delivered both in luxury hardbound paper and digitally within the Atlas Platform, (2) High-Resolution Biogeographical Ancestry Monograph on bound paper, (3) Algorithmic precision compounding recommendations for a 3-capsule daily master regimen on Atlas, and (4) Algorithmic identification of the optimal clinical diet from the 24Genetics catalog. All 4 pillars are fully covered in the one-time pack purchase.'
+      q: 'What are the distributor wholesale volume tiers in AED for Qatar?',
+      a: 'For the State of Qatar, wholesale volume tiers are anchored in AED (fixed GCC clearing at 1 EUR = 4.40 AED; AED and QAR trade at 1:1 par):\n• Tier 1 (1 Kit): 1,048.44 AED / unit (Total: 1,048.44 AED)\n• Tier 2 (50 Kits): 799.56 AED / unit (Total: 39,977.78 AED) — Tier 1 Wholesale Unlocked\n• Tier 3 (100 Kits): 750.67 AED / unit (Total: 75,066.67 AED) — National Distribution Tier\nEuropean Core Lab cost is €150.00 / kit and international return courier shipping to Madrid is 80 AED.'
     },
     {
-      q: 'How does the monthly WhatsApp clinical support work?',
-      a: 'Pillar 5 provides continuous, direct WhatsApp clinical communication (150 in the selected currency per active patient per month). It allows patients and clinical staff to clarify dietary choices, review supplement tolerance, and receive expert answers from clinical nutrition specialists. It is completely flexible, with zero lock-in contracts, and can be cancelled or adjusted anytime.'
+      q: 'What is the difference between Pathway 1 (Local OTC) and Pathway 2 (Compounded)?',
+      a: 'We provide a Dual-Track clinical prescription model:\n• Pathway 1 (Personalized Multivitamin Recommendation): Identifies commercially available OTC supplements in local Doha pharmacies (Boots, Wellcare, Kulud, Aster) with the exact active chemical forms needed (e.g. Thorne 5-MTHF, Solgar Metafolin, Now Foods D3+K2, Pure Encapsulations Magnesium Glycinate). Ideal for immediate purchase, though it involves taking 6–9 pills daily from 5 separate bottles.\n• Pathway 2 (Personalized Compounded Formulation): A tailor-made 3-capsule chronobiological regimen prepared by our licensed compounding pharmacy (DRcaps®, 100% lactose-free). It eliminates 8 bottles into 3 synchronized daily capsules with zero galenic antagonisms.'
     },
     {
-      q: 'Why is the personalized compounding regimen split into 3 daily capsules?',
-      a: 'To strictly honor nutrient pharmacokinetics, chemical stability, and bioavailability. Fasting morning intake (Capsule A) protects delicate live probiotics in DRcaps® and soothes the gastric mucosa; breakfast intake (Capsule B) activates hepatic methylation (bypassing MTHFR blocks) and uses meal fats to absorb lipophilic vitamins D3/K2; and dinner intake (Capsule C) provides chelated minerals and calming neurochemical precursors for nocturnal restoration without biochemical competition.'
+      q: 'Why is synthetic folic acid contraindicated for MTHFR carriers?',
+      a: 'The MTHFR C677T mutation (rs1801133 TT) reduces MTHFR enzyme efficiency by ~70%. When patients ingest synthetic folic acid (pteroylmonoglutamic acid), the liver cannot reduce it efficiently. It builds up as unmetabolized folic acid (UMFA) in the bloodstream, competes with natural folates, and blocks DHFR receptors. We strictly prescribe direct, biologically active L-5-Methyltetrahydrofolate ([6S]-5-MTHF) 1,000 mcg, Methyl-B12 (1,000 mcg), and active P-5-P B6 (25 mg).'
     },
     {
-      q: 'How is the saliva DNA sample collected?',
-      a: 'Via an intuitive, non-invasive buccal swab rubbed inside the inner cheek for 60 seconds. No blood draw, needles, or prior fasting required. The collection tube contains an advanced preservation buffer that stabilizes cellular DNA at ambient room temperature for up to 12 months.'
+      q: 'How are the 3 daily compounding capsules formulated to prevent galenic conflicts?',
+      a: 'Active ingredients are chronobiologically partitioned:\n• Capsule A (Morning on waking, empty stomach): Live multi-strain probiotics (15B CFU) and L-Glutamine (350 mg) in acid-resistant DRcaps® to colonize the gut without degradation by stomach acid.\n• Capsule B (Midday with breakfast healthy fats): Berberine HCl (300 mg), Chromium (200 mcg), active L-5-MTHF (1,000 mcg), Methyl-B12 (1,000 mcg), and lipophilic Vitamin D3 (5,000 IU) + K2 MK-7 (100 mcg), which require meal lipids for optimal micellar absorption.\n• Capsule C (Evening before bed): Magnesium Bisglycinate (250 mg), L-Theanine (150 mg), and P-5-P B6 (25 mg) to stimulate GABAergic alpha waves and induce deep sleep without competing with daytime minerals.'
     },
     {
-      q: 'What is the laboratory turnaround time?',
-      a: 'Once specimens arrive at the European CE-IVD Core Lab in Madrid, high-density Illumina Global Screening Array (GSA) genotyping (+50,000 SNPs) is completed in 3 to 4 weeks. Digital reports and compounding formulas activate immediately on the Atlas Platform, while bound paper monographs are dispatched via express courier.'
+      q: 'What is the saliva sample collection protocol and laboratory turnaround time?',
+      a: 'Sample collection is 100% non-invasive via a buccal saliva swab rubbed against the inner cheek for 60 seconds (in-clinic or at-home). The tube contains a CE-IVD cellular preservation buffer stable at room temperature (15°C–30°C) for up to 12 months (no dry ice required). Once received at the European Core Lab in Madrid, Illumina GSA genotyping (+50,000 SNPs) is completed in 3 to 4 weeks.'
+    },
+    {
+      q: 'How does the monthly WhatsApp Clinical Support and Julia AI work?',
+      a: 'The monthly AI WhatsApp subscription (51.09 AED / month per active patient) connects patients directly to 24Genetics AI assistants (led by Julia for clinical nutrition) in 22 languages and our clinical nutrition team. Patients can photograph meals, ask about dietary tolerances, adjust micronutrient schedules, and receive continuous follow-up with zero lock-in contracts.'
     }
   ];
 
-  const handleAskAtlasAi = (questionText) => {
+  const handleAskAtlasAi = async (questionText) => {
     const textToProcess = questionText || aiCustomQuestion;
-    const qLower = textToProcess.toLowerCase().trim();
+    const qLower = (textToProcess || '').toLowerCase().trim();
     if (!qLower) return;
 
-    let matched = AI_FAQS.find(f => qLower.includes(f.q.toLowerCase().slice(0, 15)) || f.q.toLowerCase().includes(qLower));
+    setIsAiLoading(true);
+    setActiveAiAnswer({
+      q: textToProcess,
+      a: 'Analyzing 24Genomics Clinical & Commercial Intelligence...'
+    });
+
+    try {
+      const res = await fetch('/api/ai-chat?scope=public_sandbox', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: textToProcess,
+          context: {
+            screenScope: '24genomics',
+            pathname: '/pricing/24genomics-qatar',
+            contextAnchor: {
+              name: '24Genomics Nutrition Clinical Suite',
+              category: 'genomics',
+              currency,
+              isHossamPartner: isHossamMode,
+              selectedTier: currentTier
+            }
+          }
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const reply = data.reply || data.response || data.message;
+        if (reply && typeof reply === 'string' && reply.length > 20) {
+          setActiveAiAnswer({ q: textToProcess, a: reply });
+          setIsAiLoading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('[Clinical Copilot] Backend AI query notice:', err);
+    }
+
+    // High-fidelity instant local fallback
+    let matched = AI_FAQS.find(f => 
+      qLower.includes(f.q.toLowerCase().slice(0, 15)) || 
+      f.q.toLowerCase().includes(qLower) ||
+      (qLower.includes('tier') && f.q.toLowerCase().includes('tier')) ||
+      (qLower.includes('pathway') && f.q.toLowerCase().includes('pathway')) ||
+      (qLower.includes('mthfr') && f.q.toLowerCase().includes('mthfr')) ||
+      (qLower.includes('capsule') && f.q.toLowerCase().includes('capsule')) ||
+      (qLower.includes('turnaround') && f.q.toLowerCase().includes('turnaround'))
+    );
+
     if (!matched) {
-      if (qLower.includes('price') || qLower.includes('cost') || qLower.includes('currency') || qLower.includes('pack') || qLower.includes('tier') || qLower.includes('fee')) {
+      if (qLower.includes('price') || qLower.includes('cost') || qLower.includes('aed') || qLower.includes('qar') || qLower.includes('tier')) {
         matched = {
           q: textToProcess,
-          a: `Packs are available in 3 volume tiers: Tier 1 (10 kits), Tier 2 (25 kits), and Tier 3 (50 kits). Pillars 1 to 4 are covered under the initial one-time pack fee. WhatsApp clinical support (Pillar 5) operates as an optional, flexible monthly subscription at ${formatPrice(150)}/month per active patient. You can toggle your preferred currency (QAR, AED, SAR, KWD, USD, EUR) anytime using the compact selector in the top toolbar.`
+          a: `Wholesale tiers for Qatar in AED (reference currency):\n• 1 Kit: 1,048.44 AED\n• 50 Kits: 799.56 AED / kit (Total: 39,977.78 AED)\n• 100 Kits: 750.67 AED / kit (Total: 75,066.67 AED)\nMonthly AI WhatsApp Care is 51.09 AED/month. Fixed GCC clearing rate is 1 EUR = 4.40 AED.`
         };
-      } else if (qLower.includes('diet') || qLower.includes('catalog') || qLower.includes('meal') || qLower.includes('food') || qLower.includes('nutrition')) {
+      } else if (qLower.includes('otc') || qLower.includes('supplement') || qLower.includes('pharmacy') || qLower.includes('brand') || qLower.includes('doha')) {
         matched = {
           q: textToProcess,
-          a: 'The clinical genomic engine analyzes key metabolic and insulin sensitivity polymorphisms (FTO, PPARG, TCF7L2, FABP2) and correlates them with the 24Genetics clinical diet catalog to assign the single most effective dietary pattern: Mediterranean, Low Carb / Keto, Low Fat, or Balanced, complete with exact macronutrient ratios.'
+          a: `Pathway 1 provides genetically matched OTC supplement guidance for Doha pharmacies (Boots, Wellcare, Kulud, Aster):\n• Active Folate: Thorne 5-MTHF, Solgar Metafolin 800mcg (avoid synthetic folic acid)\n• Vitamin D3+K2: Now Foods Liposomal D3/K2, Carlson Solar D Gems\n• Magnesium: Pure Encapsulations Magnesium Glycinate, Doctor’s Best TRAACS®\n• B-Complex: Jarrow Formulas Methyl B-Right, Life Extension BioActive\n• Probiotics: Culturelle Digestive Daily, Seed DS-01.`
+        };
+      } else if (qLower.includes('compounding') || qLower.includes('capsule') || qLower.includes('recipe')) {
+        matched = {
+          q: textToProcess,
+          a: `Pathway 2 provides our master compounding prescription (100% Lactose-Free HPMC / DRcaps®):\n• Capsule A (Morning empty stomach): 15B CFU live probiotics + 350 mg L-Glutamine\n• Capsule B (Midday with breakfast fats): Berberine 300mg, Chromium 200mcg, L-5-MTHF 1,000mcg, Methyl-B12 1,000mcg, D3+K2 MK-7 5,000IU/100mcg\n• Capsule C (Evening): TRAACS® Magnesium Bisglycinate 250mg, Suntheanine® L-Theanine 150mg, P-5-P B6 25mg.`
         };
       } else {
         matched = {
           q: textToProcess,
-          a: '24Genomics Nutrition bridges European CE-IVD Illumina genotyping (+50,000 SNPs) with the Atlas multidisciplinary platform to deliver an optimal personalized diet, 3-capsule chronobiological compounding, and direct WhatsApp clinical follow-up. Feel free to ask any technical or operational question!'
+          a: `24Genomics Nutrition bridges European CE-IVD Illumina genotyping (+50,000 SNPs in Madrid) with our dual-track clinical model: Pathway 1 (local OTC Doha pharmacy guidance) and Pathway 2 (tailor-made 3-capsule compounding in DRcaps®). Turnaround is 3–4 weeks, with base pricing in AED and continuous WhatsApp clinical care.`
         };
       }
     }
+
     setActiveAiAnswer(matched);
+    setIsAiLoading(false);
   };
 
   const handleGenerateFormalQuote = async () => {
@@ -2989,8 +3051,8 @@ export default function QatarGenomicsPriceClient() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={18} className="text-teal-300" />
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 850 }}>Atlas AI Clinical Assistant</h3>
-                  <div style={{ fontSize: '0.72rem', color: '#99f6e4' }}>24Genomics Nutrition Clinical Intelligence</div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 850 }}>24Genomics Clinical Copilot</h3>
+                  <div style={{ fontSize: '0.72rem', color: '#99f6e4' }}>CE-IVD Illumina Genotyping &amp; Dual-Track Precision Intelligence</div>
                 </div>
               </div>
               <button
@@ -3016,13 +3078,13 @@ export default function QatarGenomicsPriceClient() {
             {/* Drawer Body */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', padding: '12px 14px', fontSize: '0.80rem', color: '#0f766e', lineHeight: 1.5 }}>
-                Hello, I am the Atlas Health clinical intelligence assistant. Ask me about saliva collection protocols, Illumina GSA genotyping in Madrid, the 3 synchronized compounding capsules, or our wholesale volume tiers.
+                Hello! I am your <strong>24Genomics Clinical Intelligence Copilot</strong>. Ask me about Illumina GSA genotyping in Madrid, the 4 biological pillars (MTHFR, VDR, MCM6), our Dual-Track prescription models (Local OTC supplements vs. 3-capsule compounding in DRcaps®), or wholesale distributor tiers in AED for Qatar.
               </div>
 
               {/* Quick Question Chips */}
               <div>
                 <div style={{ fontSize: '0.70rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Quick Clinical Inquiries
+                  Quick Clinical &amp; Commercial Inquiries
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {AI_FAQS.map((faq, idx) => (
@@ -3030,6 +3092,7 @@ export default function QatarGenomicsPriceClient() {
                       key={idx}
                       type="button"
                       onClick={() => handleAskAtlasAi(faq.q)}
+                      disabled={isAiLoading}
                       style={{
                         textAlign: 'left',
                         padding: '8px 12px',
@@ -3039,7 +3102,7 @@ export default function QatarGenomicsPriceClient() {
                         fontSize: '0.78rem',
                         fontWeight: 650,
                         color: '#334155',
-                        cursor: 'pointer',
+                        cursor: isAiLoading ? 'wait' : 'pointer',
                         transition: 'all 0.15s ease'
                       }}
                     >
@@ -3060,14 +3123,21 @@ export default function QatarGenomicsPriceClient() {
                 }}>
                   <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0d9488', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <Sparkles size={13} />
-                    <span>Atlas AI Response:</span>
+                    <span>Clinical Copilot Intelligence:</span>
                   </div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginBottom: '6px' }}>
                     {activeAiAnswer.q}
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.6 }}>
-                    {activeAiAnswer.a}
-                  </p>
+                  <div style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+                    {isAiLoading ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0d9488', fontWeight: 650 }}>
+                        <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚙️</span>
+                        <span>Querying 24Genomics Clinical &amp; Pharmacokinetic Engine...</span>
+                      </div>
+                    ) : (
+                      activeAiAnswer.a
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -3083,6 +3153,7 @@ export default function QatarGenomicsPriceClient() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleAskAtlasAi();
                   }}
+                  disabled={isAiLoading}
                   style={{
                     flex: 1,
                     padding: '9px 12px',
@@ -3095,13 +3166,14 @@ export default function QatarGenomicsPriceClient() {
                 <button
                   type="button"
                   onClick={() => handleAskAtlasAi()}
+                  disabled={isAiLoading}
                   style={{
                     padding: '9px 14px',
-                    backgroundColor: '#0d9488',
+                    backgroundColor: isAiLoading ? '#94a3b8' : '#0d9488',
                     border: 'none',
                     borderRadius: '6px',
                     color: '#ffffff',
-                    cursor: 'pointer',
+                    cursor: isAiLoading ? 'wait' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'

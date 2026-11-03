@@ -200,6 +200,16 @@ export async function POST(req) {
       const publicPlatformKnowledge = await getPublicPlatformKnowledgeContext();
 
       let activeEntityContext = '';
+      const isGenomics = screenScope === '24genomics' ||
+        screenScope === 'genomics_pricing' ||
+        screenScope === 'genomics' ||
+        pathname?.includes('24genomics') ||
+        pathname?.includes('genomics') ||
+        pathname?.includes('dna-report') ||
+        String(contextAnchor?.category || '').toLowerCase().includes('genomic') ||
+        String(contextAnchor?.name || '').toLowerCase().includes('24genomics') ||
+        String(contextAnchor?.name || '').toLowerCase().includes('24genetics');
+
       const isCorporate = screenScope === 'corporate_residency' || 
         String(contextAnchor?.category || '').toLowerCase().includes('corporate') || 
         String(contextAnchor?.details?.program || '').toLowerCase().includes('residence') ||
@@ -231,7 +241,84 @@ export async function POST(req) {
       const isSingleProtocol = screenScope === 'protocol' || screenScope === 'protocol_guide' ||
         contextAnchor?.type === 'protocol' || Boolean(contextAnchor?.phasesCount) || Boolean(contextAnchor?.phases);
 
-      if (isSingleProtocol) {
+      if (isGenomics) {
+        activeEntityContext = `CURRENT ACTIVE 24GENOMICS CLINICAL SUITE & NUTRIGENOMICS CONTEXT:
+- Suite Identity: 24Genomics Nutrition Clinical Suite · State of Qatar & GCC B2B Schedule
+- Laboratory Diagnostics: 24Genetics® Core Clinical Laboratory (Madrid, Spain). CE-IVD accredited molecular genetics facility.
+- Genomic Assay Technology: Illumina Global Screening Array (GSA) with +50,000 informative SNPs; clinical analytical repeatability >99.9%.
+- Specimen & Collection: Non-invasive buccal saliva swab with cellular stabilization buffer. Stable at ambient room temperature (15°C–30°C) for up to 12 months. Turnaround: 3–4 weeks from Madrid arrival.
+- European Core Lab Cost: €150.00 / kit. Return international express courier/cold-chain shipping to Madrid: 80 AED.
+- Authorized Qatar Regional Partner: Ryhanh Medical Company (Doha, Qatar), Partner ID: QA-RYH-88219 (Dr. Hossam Ahmed).
+- Reference Currency Standard: AED (Cleared into GCC at 1 EUR = 4.40 AED; AED and QAR trade at 1:1 par in Qatar).
+- Authoritative Wholesale Volume Tiers (from Firestore SSOT commercial_agreements/24genomics-qatar-ryhanh):
+  * Tier 1 (1 Kit): 1,048.44 AED unit / 1,048.44 AED total (Single Evaluation / Pilot).
+  * Tier 2 (50 Kits): 799.56 AED unit / 39,977.78 AED total (Clinical Partner Tier 1 Wholesale Unlock).
+  * Tier 3 (100 Kits): 750.67 AED unit / 75,066.67 AED total (National Distribution Wholesale Tier).
+  * AI Continuous WhatsApp Care Subscription: 51.09 AED / month per active patient (includes Julia AI Nutritionist, daily meal guidance, and clinical nutritionist chat in 22 languages).
+
+- 4 Core Biological Pillars & Genetic Targets:
+  1. Pillar 1 (Metabolic & Glycemic Control): TCF7L2 (rs7903146), PPARG (rs1801282), FTO (rs9939609), FABP2 (rs1799883). Clinical action: Low-Carb Meal Sequencing (vegetables and soluble fiber first, protein and healthy fats second, complex low-glycemic carbs <40g last). Reduces postprandial glucose excursions by up to 45%.
+  2. Pillar 2 (Cellular Methylation & Homocysteine): MTHFR C677T (rs1801133 TT homozygous mutant), MTRR (rs1801394). MTHFR enzyme activity is reduced by ~70%.
+     CRITICAL CONTRAINDICATION: Synthetic Folic Acid (pteroylmonoglutamic acid) is strictly contraindicated. Unreduced folic acid accumulates as unmetabolized folic acid (UMFA) in serum, competes with natural folates, and blocks dihydrofolate reductase (DHFR).
+     Prescribe direct active L-5-Methyltetrahydrofolate (L-5-MTHF 1,000 mcg) + Methylcobalamin (1,000 mcg) + Pyridoxal-5-Phosphate (P-5-P active B6 25 mg).
+  3. Pillar 3 (Gut Barrier & Lactose Intolerance): MCM6 / LCT (rs4988235 CC primary adult hypolactasia). Zero unfermented dairy. Fasting enteric probiotics (15B CFU B. lactis, L. rhamnosus GG, L. plantarum in acid-resistant DRcaps®) + 350 mg L-Glutamine USP.
+  4. Pillar 4 (Immunity, VDR & Sleep Architecture): VDR FokI (rs2228570), COMT (rs4680 Val158Met), CYP1A2 (rs762551). Vitamin D3 (5,000 IU) + Vitamin K2 all-trans MK-7 (100 mcg) co-administered with breakfast dietary fats. Evening TRAACS® Magnesium Bisglycinate (250 mg) + Suntheanine® L-Theanine (150 mg) for GABAergic sleep architecture. Caffeine cutoff strictly before 14:00.
+
+- Dual-Track Prescription Model:
+  * Pathway 1: Personalized Multivitamin Recommendation (Local Over-The-Counter Commercial Supplements):
+    - Available immediately in retail pharmacies in Doha (Boots, Wellcare, Kulud, Aster).
+    - Validated local brands: Thorne 5-MTHF 1mg, Solgar Folate (as Metafolin 800mcg), Pure Encapsulations Folate 1,000, Now Foods D3+K2 Liposomal, Carlson Labs Solar D Gems, Pure Encapsulations Magnesium Glycinate, Doctor’s Best High Absorption Magnesium, Jarrow Formulas Methyl B-Right, Culturelle Digestive Daily, Seed DS-01.
+    - Trade-offs: Immediate access with zero compounding delay, but causes pill fatigue (taking 6–9 pills daily from 5 separate commercial bottles) and fixed non-customized manufacturer dosages.
+  * Pathway 2: Personalized Compounded Formulation (Master Compounding Pharmacy Order):
+    - Advanced tailor-made 3-capsule chronobiological regimen prepared by licensed compounding pharmacy:
+      · Capsule A (Morning on waking, empty stomach): Enteric DRcaps®, 15B CFU live probiotics + 350 mg L-Glutamine.
+      · Capsule B (Midday with breakfast healthy fats): Vegetable HPMC capsule, Berberine HCl 97% (300 mg), Chromium Picolinate (200 mcg), L-5-MTHF (1,000 mcg), Methylcobalamin (1,000 mcg), D3+K2 MK-7 (5,000 IU / 100 mcg).
+      · Capsule C (Evening before bed): Vegetable HPMC capsule, Magnesium Bisglycinate (250 mg), L-Theanine (150 mg), P-5-P active B6 (25 mg).
+    - 100% Lactose-Free HPMC, zero artificial excipients, binders, or titanium dioxide.
+    - Resolves galenic incompatibilities (isolates live probiotics from botanical berberine in acid-resistant DRcaps®; pairs lipophilic vitamins with dietary fats; separates evening magnesium).
+    - Requires authorized prescribing physician signature and 48–72h pharmacy preparation.
+
+- 24Genetics AI Ecosystem (5 Virtual Assistants in 22 Languages):
+  * Julia: Clinical nutrition, glycemic curves, metabolic pathways, and personalized diet assignment.
+  * Gaia: Biogeographical ancestry, haplogroups, and geographical migration roots.
+  * Jun: Dermogenetics, skin aging, collagen remodeling, and photoprotection.
+  * Kai: Sports genetics, VO2 max, muscle fiber typing (ACTN3), and injury susceptibility.
+  * Nuria: Personality traits, chronobiology, circadian genetics, and emotional wellbeing.
+
+- Platform Architecture & Institutional Scope:
+  * 24Genetics (Madrid, Spain): CE-IVD Core Diagnostics Laboratory.
+  * Atlas Health Services: Technology platform, algorithmic nutrigenomic engine, and compounding coordination.
+  * Ryhanh Medical Company: Exclusive authorized distributor in the State of Qatar.
+  * Compounding Pharmacy Network: Magistral formulation under European & USP pharmacopeia standards.
+${pubmedContextText}`;
+
+        systemPrompt = `You are Atlas Clinical Genomics & Nutrigenomics Intelligence Advisor, the authoritative AI specialist for 24Genetics® Clinical Laboratory diagnostics, CE-IVD saliva DNA genotyping (Madrid, Spain), clinical nutrigenomic interpretation (TCF7L2, MTHFR, MCM6, VDR, COMT), Dual-Track prescription protocols, and State of Qatar wholesale distribution (Ryhanh Medical Company).
+
+CRITICAL OPERATING PRINCIPLES:
+1. STRICT GENOMICS & NUTRIGENOMICS DOMAIN MASTERY:
+   - Provide precise, scientifically accurate answers on human genetics (TCF7L2, MTHFR, MCM6, VDR FokI, COMT, CYP1A2, FTO, PPARG).
+   - When asked about MTHFR, emphasize that synthetic folic acid (pteroylmonoglutamic acid) is strictly contraindicated and explain the biological mechanism of un-metabolized folic acid (UMFA) accumulation blocking DHFR, recommending direct active L-5-MTHF.
+   - When asked about lactose intolerance, explain MCM6/LCT genetic downregulation and the requirement for 100% lactose-free excipients in all capsules.
+   - When asked about compounding, explain the galenic partitioning rationale of the 3 synchronized capsules (protecting probiotics from botanical berberine in DRcaps®, pairing D3/K2 with breakfast fats, timing magnesium for nocturnal sleep).
+2. DUAL-TRACK PRESCRIPTION GUIDANCE:
+   - Clearly explain the two distinct clinical pathways:
+     * Pathway 1: Local commercial OTC supplements available in Doha pharmacies (Boots, Wellcare, Kulud) with exact active chemical forms and local brand names (Thorne, Solgar, Now Foods, Pure Encapsulations).
+     * Pathway 2: Tailor-made 3-capsule chronobiological compounding formulated 100% lactose-free by our compounding pharmacy under official doctor prescription.
+3. COMMERCIAL & LOGISTICAL ACCURACY:
+   - State of Qatar Base Currency: AED (at 1 EUR = 4.40 AED; AED and QAR trade at 1:1 par).
+   - Volume Tiers: 1 kit (1,048.44 AED), 50 kits (799.56 AED/unit = 39,977.78 AED total), 100 kits (750.67 AED/unit = 75,066.67 AED total).
+   - Monthly AI WhatsApp Subscription: 51.09 AED / month.
+   - Turnaround: 3 to 4 weeks from Madrid CE-IVD laboratory check-in via non-invasive buccal saliva swabs.
+4. INSTITUTIONAL CLARITY:
+   - Clearly distinguish the roles: 24Genetics (Madrid CE-IVD core lab), Atlas Health Services (clinical AI platform and compounding coordination), Ryhanh Medical (exclusive Qatar distributor managed by Dr. Hossam Ahmed).
+5. PROFESSIONAL, MULTILINGUAL & CONCISE:
+   - Respond in the language used by the visitor (English or Spanish) using clear, elegant GitHub-style markdown. Never fabricate unverified medical claims.
+
+${activeEntityContext}
+
+${publicPlatformKnowledge}
+`;
+      } else if (isSingleProtocol) {
         activeEntityContext = `CURRENT ACTIVE CLINICAL PROTOCOL (BEING VIEWED BY VISITOR):
 - Protocol Name: ${contextAnchor?.name || 'Clinical Protocol Blueprint'}
 - Protocol Code: ${contextAnchor?.code || 'PR-CLINICAL'}
