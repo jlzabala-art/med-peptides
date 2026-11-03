@@ -72,6 +72,40 @@ export default function AdminAgreementModal({ slug = 'colway-qatar', isOpen, onC
     });
   };
 
+  const handleTierChange = (index, field, value) => {
+    const num = parseFloat(value) || 0;
+    setFormData(prev => {
+      const nextTiers = [...(prev.volumeTiers || [])];
+      const tier = { ...nextTiers[index], [field]: num };
+
+      if (field === 'mediluxeCostEur') {
+        tier.costAed = parseFloat((num * 4.4).toFixed(2));
+        tier.totalKitAed = parseFloat((tier.costAed * tier.quantity).toFixed(2));
+      }
+      if (field === 'mediluxeCostEur' || field === 'returnShippingAed' || field === 'marginSalesPct') {
+        const totalKitAed = tier.totalKitAed || (tier.costAed * tier.quantity);
+        tier.totalCostAed = parseFloat((totalKitAed + (tier.returnShippingAed || 0)).toFixed(2));
+        tier.perKitCostAed = parseFloat((tier.totalCostAed / tier.quantity).toFixed(2));
+        const marginPct = (tier.marginSalesPct || 10) / 100;
+        const distPrice = parseFloat((tier.perKitCostAed / (1 - marginPct)).toFixed(2));
+        tier.distributionPriceAed = distPrice;
+        tier.distributionPriceQar = distPrice;
+        tier.unitPriceQar = distPrice;
+        tier.totalPriceQar = parseFloat((distPrice * tier.quantity).toFixed(2));
+        tier.marginSalesAed = parseFloat((distPrice - tier.perKitCostAed).toFixed(2));
+      }
+      if (field === 'distributionPriceAed' || field === 'distributionPriceQar') {
+        tier.distributionPriceAed = num;
+        tier.distributionPriceQar = num;
+        tier.unitPriceQar = num;
+        tier.totalPriceQar = parseFloat((num * tier.quantity).toFixed(2));
+      }
+
+      nextTiers[index] = tier;
+      return { ...prev, volumeTiers: nextTiers };
+    });
+  };
+
   const handleConditionChange = (index, field, value) => {
     setFormData(prev => {
       const nextConditions = [...prev.keyConditions];
@@ -219,85 +253,176 @@ export default function AdminAgreementModal({ slug = 'colway-qatar', isOpen, onC
               </div>
             </div>
 
-            {/* Pricing Parameters Section */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem', backgroundColor: '#f8fafc' }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#003666', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <TrendingUp size={16} />
-                <span>Unit Economics & Currency Calibration</span>
+            {/* Pricing Parameters Section (Volume Tiers for 24Genetics, or Single-Product for Colway) */}
+            {formData?.volumeTiers && formData.volumeTiers.length > 0 ? (
+              <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem', backgroundColor: '#f8fafc' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#003666', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <TrendingUp size={16} />
+                    <span>24Genomics Volume Tier Schedule (@ 1 EUR = 4.40 AED)</span>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', color: '#0d9488', fontWeight: 700 }}>
+                    Fixed Clearing Peg: 1 EUR = 4.40 AED
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {formData.volumeTiers.map((tier, idx) => (
+                    <div key={tier.id || idx} style={{ backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <strong style={{ fontSize: '0.84rem', color: '#0f172a' }}>{tier.name}</strong>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0d9488', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px' }}>
+                          Distributor: {tier.distributionPriceAed} AED ({tier.distributionPriceQar} QAR) / test
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+                        <div>
+                          <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Lab Cost (EUR)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={tier.mediluxeCostEur}
+                            onChange={(e) => handleTierChange(idx, 'mediluxeCostEur', e.target.value)}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.80rem', fontWeight: 700 }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Return Ship (AED)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={tier.returnShippingAed}
+                            onChange={(e) => handleTierChange(idx, 'returnShippingAed', e.target.value)}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.80rem', fontWeight: 700 }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Margin on Sales (%)</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={tier.marginSalesPct}
+                            onChange={(e) => handleTierChange(idx, 'marginSalesPct', e.target.value)}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.80rem', fontWeight: 700, color: '#16a34a' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Dist. Price (AED/QAR)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={tier.distributionPriceAed}
+                            onChange={(e) => handleTierChange(idx, 'distributionPriceAed', e.target.value)}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.80rem', fontWeight: 800, color: '#0284c7' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Batch Total (AED)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            readOnly
+                            value={tier.totalPriceQar}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.80rem', fontWeight: 800, backgroundColor: '#f8fafc', color: '#0f172a' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* AI Subscription Info */}
+                {formData.aiSubscription && (
+                  <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.80rem' }}>
+                    <div style={{ color: '#1e40af' }}>
+                      <strong>{formData.aiSubscription.name}:</strong> EUR {formData.aiSubscription.costEur} cost (@ 4.40 AED = {formData.aiSubscription.costAed} AED) + 10% margin
+                    </div>
+                    <strong style={{ color: '#1d4ed8' }}>
+                      {formData.aiSubscription.priceAed} AED / {formData.aiSubscription.priceQar} QAR / month
+                    </strong>
+                  </div>
+                )}
               </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Product Price (PLN)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData?.pricing?.unitProductPricePln ?? 102.00}
-                    onChange={(e) => handlePricingChange('unitProductPricePln', e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 700 }}
-                  />
-                  <span style={{ fontSize: '0.70rem', color: '#0284c7' }}>Approved factory discount</span>
+            ) : (
+              <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem', backgroundColor: '#f8fafc' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#003666', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <TrendingUp size={16} />
+                  <span>Unit Economics &amp; Currency Calibration</span>
                 </div>
 
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Air Freight & Customs (PLN)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData?.pricing?.unitShippingPln ?? 19.73}
-                    onChange={(e) => handlePricingChange('unitShippingPln', e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 700 }}
-                  />
-                  <span style={{ fontSize: '0.70rem', color: '#0284c7' }}>Freight tariff allocation</span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Product Price (PLN)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData?.pricing?.unitProductPricePln ?? 102.00}
+                      onChange={(e) => handlePricingChange('unitProductPricePln', e.target.value)}
+                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 700 }}
+                    />
+                    <span style={{ fontSize: '0.70rem', color: '#0284c7' }}>Approved factory discount</span>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Air Freight &amp; Customs (PLN)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData?.pricing?.unitShippingPln ?? 19.73}
+                      onChange={(e) => handlePricingChange('unitShippingPln', e.target.value)}
+                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 700 }}
+                    />
+                    <span style={{ fontSize: '0.70rem', color: '#0284c7' }}>Freight tariff allocation</span>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Total Landed (PLN)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      readOnly
+                      value={formData?.pricing?.unitTotalPln ?? 121.73}
+                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 800, backgroundColor: '#f1f5f9', color: '#0f172a' }}
+                    />
+                    <span style={{ fontSize: '0.70rem', color: '#16a34a' }}>Calculated total landed</span>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Distributor Landed (QAR)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData?.pricing?.unitDistributorPriceQar ?? 112.00}
+                      onChange={(e) => handlePricingChange('unitDistributorPriceQar', e.target.value)}
+                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 700, color: '#0284c7' }}
+                    />
+                    <span style={{ fontSize: '0.70rem', color: '#0284c7' }}>Price invoiced to Ryhanh</span>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Target Retail (QAR)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData?.pricing?.unitRecommendedRetailQar ?? 187.00}
+                      onChange={(e) => handlePricingChange('unitRecommendedRetailQar', e.target.value)}
+                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 700, color: '#15803d' }}
+                    />
+                    <span style={{ fontSize: '0.70rem', color: '#15803d' }}>Qatar clinic MSRP</span>
+                  </div>
                 </div>
 
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Total Landed (PLN)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    readOnly
-                    value={formData?.pricing?.unitTotalPln ?? 121.73}
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 800, backgroundColor: '#f1f5f9', color: '#0f172a' }}
-                  />
-                  <span style={{ fontSize: '0.70rem', color: '#16a34a' }}>Calculated total landed</span>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Distributor Landed (QAR)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData?.pricing?.unitDistributorPriceQar ?? 112.00}
-                    onChange={(e) => handlePricingChange('unitDistributorPriceQar', e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 700, color: '#0284c7' }}
-                  />
-                  <span style={{ fontSize: '0.70rem', color: '#0284c7' }}>Price invoiced to Ryhanh</span>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>Target Retail (QAR)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData?.pricing?.unitRecommendedRetailQar ?? 187.00}
-                    onChange={(e) => handlePricingChange('unitRecommendedRetailQar', e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 700, color: '#15803d' }}
-                  />
-                  <span style={{ fontSize: '0.70rem', color: '#15803d' }}>Qatar clinic MSRP</span>
+                {/* Margin Live Calculation Summary */}
+                <div style={{ marginTop: '1rem', padding: '0.85rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 600 }}>
+                    Live Distributor Margin: <strong>+{formData?.pricing?.distributorGrossMarginPerUnit || 75.00} QAR</strong> ({formData?.pricing?.distributorGrossMarginPct || 40.1}%)
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: '#15803d', fontWeight: 800 }}>
+                    Batch Profit (80 Units): +{((formData?.pricing?.distributorGrossMarginPerUnit || 75.00) * (formData?.orderQuantity || 80)).toLocaleString()} QAR
+                  </div>
                 </div>
               </div>
-
-              {/* Margin Live Calculation Summary */}
-              <div style={{ marginTop: '1rem', padding: '0.85rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 600 }}>
-                  Live Distributor Margin: <strong>+{formData?.pricing?.distributorGrossMarginPerUnit || 75.00} QAR</strong> ({formData?.pricing?.distributorGrossMarginPct || 40.1}%)
-                </div>
-                <div style={{ fontSize: '0.82rem', color: '#15803d', fontWeight: 800 }}>
-                  Batch Profit (80 Units): +{((formData?.pricing?.distributorGrossMarginPerUnit || 75.00) * (formData?.orderQuantity || 80)).toLocaleString()} QAR
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* Key Contractual Conditions */}
             <div>

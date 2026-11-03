@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Sparkles,
@@ -53,6 +53,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { useAuth } from '@/context/AuthContext';
+import { useCommercialSchedule } from '@/hooks/useCommercialSchedule';
 import {
   GALENIC_COMPATIBILITY_ANALYSIS,
   CLINICAL_PILLARS,
@@ -145,42 +146,66 @@ const GENOMICS_PRODUCTS = [
   }
 ];
 
-const VOLUME_TIERS = [
+const DEFAULT_VOLUME_TIERS = [
   {
-    id: 'tier1',
-    name: 'Tier 1',
-    quantity: 10,
-    discountLabel: '10 Kits',
-    unitPriceQar: 475.00,
-    totalPriceQar: 4750.00,
-    unitPriceUsd: 129.00,
-    totalPriceUsd: 1290.00,
-    distributorProfitTotalQar: 2750.00,
-    distributorMarginPct: '36.7%'
+    id: 'tier-1',
+    name: '1 Kit (Single Test Sample)',
+    quantity: 1,
+    discountLabel: '1 Kit',
+    unitPriceQar: 1048.44,
+    totalPriceQar: 1048.44,
+    unitPriceUsd: 285.50,
+    totalPriceUsd: 285.50,
+    unitPriceEur: 238.28,
+    totalPriceEur: 238.28,
+    unitPriceAed: 1048.44,
+    totalPriceAed: 1048.44,
+    mediluxeCostEur: 169.00,
+    costAed: 743.60,
+    returnShippingAed: 200.00,
+    totalCostAed: 943.60,
+    distributorProfitTotalQar: 104.84,
+    distributorMarginPct: '10.0%'
   },
   {
-    id: 'tier2',
-    name: 'Tier 2',
-    quantity: 25,
-    discountLabel: '25 Kits',
-    unitPriceQar: 450.00,
-    totalPriceQar: 11250.00,
-    unitPriceUsd: 122.30,
-    totalPriceUsd: 3057.50,
-    distributorProfitTotalQar: 7500.00,
-    distributorMarginPct: '40.0%'
-  },
-  {
-    id: 'tier3',
-    name: 'Tier 3',
+    id: 'tier-50',
+    name: '50 Kits (Commercial Batch)',
     quantity: 50,
     discountLabel: '50 Kits',
-    unitPriceQar: 425.00,
-    totalPriceQar: 21250.00,
-    unitPriceUsd: 115.50,
-    totalPriceUsd: 5775.00,
-    distributorProfitTotalQar: 16250.00,
-    distributorMarginPct: '43.3%'
+    unitPriceQar: 799.56,
+    totalPriceQar: 39977.78,
+    unitPriceUsd: 217.75,
+    totalPriceUsd: 10887.50,
+    unitPriceEur: 181.72,
+    totalPriceEur: 9086.00,
+    unitPriceAed: 799.56,
+    totalPriceAed: 39977.78,
+    mediluxeCostEur: 159.00,
+    costAed: 699.60,
+    returnShippingAed: 1000.00,
+    totalCostAed: 35980.00,
+    distributorProfitTotalQar: 3997.78,
+    distributorMarginPct: '10.0%'
+  },
+  {
+    id: 'tier-100',
+    name: '100 Kits (Clinic Batch)',
+    quantity: 100,
+    discountLabel: '100 Kits',
+    unitPriceQar: 750.67,
+    totalPriceQar: 75066.67,
+    unitPriceUsd: 204.43,
+    totalPriceUsd: 20443.00,
+    unitPriceEur: 170.61,
+    totalPriceEur: 17061.00,
+    unitPriceAed: 750.67,
+    totalPriceAed: 75066.67,
+    mediluxeCostEur: 149.00,
+    costAed: 655.60,
+    returnShippingAed: 2000.00,
+    totalCostAed: 67560.00,
+    distributorProfitTotalQar: 7506.67,
+    distributorMarginPct: '10.0%'
   }
 ];
 
@@ -247,33 +272,53 @@ const SCHEDULE_SECTIONS = [
 export default function QatarGenomicsPriceClient() {
   const { user } = useAuth();
   const [previewUnlocked, setPreviewUnlocked] = useState(false);
-  const [hossamDemoActive, setHossamDemoActive] = useState(false);
 
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('user') === 'hossam' || params.get('partner') === 'hossam' || params.get('demo') === 'hossam') {
-        setHossamDemoActive(true);
-      }
+  // Firestore SSOT Commercial Schedule hook
+  const {
+    agreement,
+    currency,
+    setCurrency,
+    isHossamMode,
+    isSubmittingQuote,
+    generatedQuote,
+    setGeneratedQuote,
+    copiedLink,
+    handleCopyShareLink
+  } = useCommercialSchedule('24genomics-qatar');
+
+  const VOLUME_TIERS = useMemo(() => {
+    if (Array.isArray(agreement?.volumeTiers) && agreement.volumeTiers.length > 0) {
+      return agreement.volumeTiers.map(t => ({
+        id: t.id,
+        name: t.name,
+        quantity: t.quantity,
+        discountLabel: t.shortLabel || `${t.quantity} Kits`,
+        unitPriceQar: Number(t.distributionPriceQar || t.unitPriceQar || 799.56),
+        totalPriceQar: Number(t.totalPriceQar || ((t.distributionPriceQar || 799.56) * t.quantity)),
+        unitPriceUsd: Number(t.unitPriceUsd || 217.75),
+        totalPriceUsd: Number(t.totalPriceUsd || 10887.50),
+        unitPriceEur: Number(t.unitPriceEur || 181.72),
+        totalPriceEur: Number(t.totalPriceEur || 9086.00),
+        unitPriceAed: Number(t.distributionPriceAed || 799.56),
+        totalPriceAed: Number(t.totalPriceQar || 39977.78),
+        mediluxeCostEur: Number(t.mediluxeCostEur || 159),
+        costAed: Number(t.costAed || 699.60),
+        returnShippingAed: Number(t.returnShippingAed || 1000),
+        totalCostAed: Number(t.totalCostAed || 35980),
+        distributorProfitTotalQar: Number(t.marginSalesAed ? t.marginSalesAed * t.quantity : (t.totalPriceQar || 0) * 0.1),
+        distributorMarginPct: `${t.marginSalesPct || 10}%`
+      }));
     }
-  }, []);
-
-  const isHossamMode = Boolean(
-    hossamDemoActive ||
-    (user && (user.email?.toLowerCase().includes('hossam') || user.displayName?.toLowerCase().includes('hossam')))
-  );
+    return DEFAULT_VOLUME_TIERS;
+  }, [agreement]);
 
   const isPricingUnlocked = Boolean(user || previewUnlocked || isHossamMode);
 
   const [activeTab, setActiveTab] = useState('commercial');
   const [selectedProduct, setSelectedProduct] = useState('nutrigenetics');
-  const [selectedTier, setSelectedTier] = useState('tier1');
-  const [currency, setCurrency] = useState('QAR');
+  const [selectedTier, setSelectedTier] = useState('tier-50');
   const [whatsappSubscriptionsCount, setWhatsappSubscriptionsCount] = useState(10);
   const [showAiInsight, setShowAiInsight] = useState(false);
-  const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
-  const [generatedQuote, setGeneratedQuote] = useState(null);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [selectedCaseVariant, setSelectedCaseVariant] = useState('mthfr');
   const [showAtlasAiModal, setShowAtlasAiModal] = useState(false);
   const [aiCustomQuestion, setAiCustomQuestion] = useState('');
@@ -281,7 +326,8 @@ export default function QatarGenomicsPriceClient() {
   const [orderModalOpen, setOrderModalOpen] = useState(false);
 
   const currentProd = GENOMICS_PRODUCTS.find(p => p.id === selectedProduct) || GENOMICS_PRODUCTS[0];
-  const currentTier = VOLUME_TIERS.find(t => t.id === selectedTier) || VOLUME_TIERS[0];
+  const currentTier = VOLUME_TIERS.find(t => t.id === selectedTier) || VOLUME_TIERS[1] || VOLUME_TIERS[0];
+  const monthlyAiPriceQar = agreement?.aiSubscription?.priceQar || 51.09;
 
   const formatPrice = (baseQar, targetCur = currency) => {
     if (!isPricingUnlocked) return '••••';
@@ -351,7 +397,7 @@ export default function QatarGenomicsPriceClient() {
     try {
     const curCfg = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.QAR;
     const subtotalConverted = currentTier.totalPriceQar * curCfg.rate;
-    const whatsappSubtotal = (whatsappSubscriptionsCount * 150) * curCfg.rate;
+    const whatsappSubtotal = (whatsappSubscriptionsCount * monthlyAiPriceQar) * curCfg.rate;
     const grandTotal = subtotalConverted + whatsappSubtotal;
 
     const clientLabel = isHossamMode ? 'Dr. Hossam Ahmed / Ryhanh Medical' : 'Authorized Healthcare Partner';
@@ -367,10 +413,10 @@ export default function QatarGenomicsPriceClient() {
         currency: currency,
         subtotal: grandTotal,
         grandTotal: grandTotal,
-        marginPercent: 12.5,
+        marginPercent: 10.0,
         distributorProfit: currentTier.distributorProfitTotalQar * curCfg.rate,
-        distributorMarginPct: parseFloat(currentTier.distributorMarginPct),
-        landedCost: subtotalConverted * 0.88,
+        distributorMarginPct: parseFloat(currentTier.distributorMarginPct) || 10.0,
+        landedCost: subtotalConverted * 0.90,
         items: [
           {
             id: `${currentProd.sku}-${currentTier.id.toUpperCase()}`,
@@ -383,15 +429,15 @@ export default function QatarGenomicsPriceClient() {
           },
           {
             id: `24G-CARE-WA-${whatsappSubscriptionsCount}`,
-            name: `WhatsApp Clinical Care & Follow-up (Pillar 5) - ${whatsappSubscriptionsCount} Patients/Month`,
+            name: `Monthly AI & Clinical Companion Subscription (EUR 10.45 cost) - ${whatsappSubscriptionsCount} Patients/Month`,
             quantity: whatsappSubscriptionsCount,
-            unitPrice: 150 * curCfg.rate,
+            unitPrice: monthlyAiPriceQar * curCfg.rate,
             totalPrice: whatsappSubtotal,
             currency: currency,
-            actives: 'Ongoing dietary, galenic & clinical adherence monitoring'
+            actives: 'Ongoing dietary, galenic & clinical adherence monitoring via Julia AI Companion'
           }
         ],
-        notes: `Official Commercial quotation for 24Genomics Nutrition (${currentTier.name} + ${whatsappSubscriptionsCount} WhatsApp subscriptions) generated via Atlas Clinical Platform for ${clientLabel}. 100% advance wire transfer before Madrid laboratory dispatch.`,
+        notes: `Official Commercial quotation for 24Genomics Nutrition (${currentTier.name} + ${whatsappSubscriptionsCount} AI/WhatsApp subscriptions) generated via Atlas Clinical Platform for ${clientLabel}. 100% advance wire transfer before Madrid laboratory dispatch.`,
         source: 'atlas_24genomics_nutrition'
       })
     });
@@ -404,7 +450,7 @@ export default function QatarGenomicsPriceClient() {
     console.error('Quotation generation error:', err);
     const curCfg = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.QAR;
     const subtotalConverted = currentTier.totalPriceQar * curCfg.rate;
-    const whatsappSubtotal = (whatsappSubscriptionsCount * 150) * curCfg.rate;
+    const whatsappSubtotal = (whatsappSubscriptionsCount * monthlyAiPriceQar) * curCfg.rate;
     const grandTotal = subtotalConverted + whatsappSubtotal;
 
     setGeneratedQuote({
@@ -421,14 +467,6 @@ export default function QatarGenomicsPriceClient() {
 };
 
 const handleGenerateAtlasQuotation = handleGenerateFormalQuote;
-
-const handleCopyShareLink = () => {
-  if (typeof window !== 'undefined') {
-    navigator.clipboard.writeText(window.location.href);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
-  }
-};
 
 return (
   <div className="colway-price-root" style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a' }}>
@@ -1606,7 +1644,7 @@ return (
                         </td>
                         <td style={{ padding: '16px 16px', textAlign: 'right', verticalAlign: 'top' }}>
                           <div style={{ fontSize: '1.15rem', fontWeight: 850, color: '#2563eb' }}>
-                            {formatPrice(150)} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>/ month</span>
+                            {formatPrice(monthlyAiPriceQar)} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>/ month</span>
                           </div>
                           <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, fontSize: '0.70rem', display: 'inline-block', marginTop: '4px' }}>
                             Cancelable anytime with zero lock-in
@@ -1644,7 +1682,7 @@ return (
                         Active WhatsApp Monthly Subscriptions (Pillar 5)
                       </span>
                       <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#2563eb' }}>
-                        {formatPrice(150)} / patient / month
+                        {formatPrice(monthlyAiPriceQar)} / patient / month
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px' }}>
@@ -1692,7 +1730,7 @@ return (
                         +
                       </button>
                       <div style={{ fontSize: '0.74rem', color: '#64748b', marginLeft: '6px' }}>
-                        Monthly total: <strong>{formatPrice(whatsappSubscriptionsCount * 150)} / month</strong> (cancelable anytime)
+                        Monthly total: <strong>{formatPrice(whatsappSubscriptionsCount * monthlyAiPriceQar)} / month</strong> (cancelable anytime)
                       </div>
                     </div>
                   </div>
@@ -1708,7 +1746,7 @@ return (
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#334155', marginBottom: '8px' }}>
                       <span>WhatsApp Consultations ({whatsappSubscriptionsCount} subs, Pillar 5):</span>
-                      <strong style={{ color: '#2563eb' }}>{formatPrice(whatsappSubscriptionsCount * 150)} / month</strong>
+                      <strong style={{ color: '#2563eb' }}>{formatPrice(whatsappSubscriptionsCount * monthlyAiPriceQar)} / month</strong>
                     </div>
 
                     <div style={{ borderTop: '1px solid #ccfbf1', paddingTop: '10px', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
@@ -2857,7 +2895,7 @@ return (
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#334155' }}>
             <span>WhatsApp Clinical Guidance ({whatsappSubscriptionsCount} active, Pillar 5):</span>
-            <strong style={{ color: '#2563eb' }}>{formatPrice(whatsappSubscriptionsCount * 150)} / month</strong>
+            <strong style={{ color: '#2563eb' }}>{formatPrice(whatsappSubscriptionsCount * monthlyAiPriceQar)} / month</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0f766e', fontWeight: 800, paddingTop: '8px', borderTop: '1px dashed #cbd5e1', fontSize: '0.92rem' }}>
             <span>Initial Pack Investment:</span>

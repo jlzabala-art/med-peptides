@@ -61,35 +61,79 @@ export function validateAndNormalizeAgreement(data, options = {}) {
     errors.push(`Invalid "baseCurrency": "${baseCurrency}". Must be one of PLN, USD, QAR, EUR, AED.`);
   }
 
-  // 2. Numerical Pricing Validation
+  // 2. Numerical Pricing & Tiers Validation
+  const hasVolumeTiers = Array.isArray(data.volumeTiers) && data.volumeTiers.length > 0;
   const pricing = data.pricing || {};
-  const unitProductPricePln = Number(pricing.unitProductPricePln || 0);
-  const unitShippingPln = Number(pricing.unitShippingPln || 0);
-  const unitTotalPln = Number(pricing.unitTotalPln || 0);
-  const unitDistributorPriceQar = Number(pricing.unitDistributorPriceQar || 0);
-  const unitRecommendedRetailQar = Number(pricing.unitRecommendedRetailQar || 0);
 
-  if (unitProductPricePln <= 0) {
-    errors.push('pricing.unitProductPricePln must be greater than 0.');
-  }
-  if (unitShippingPln < 0) {
-    errors.push('pricing.unitShippingPln cannot be negative.');
-  }
+  let normalizedTiers = [];
+  let unitDistributorPriceQar = Number(pricing.unitDistributorPriceQar || 0);
+  let unitRecommendedRetailQar = Number(pricing.unitRecommendedRetailQar || 0);
+  let unitProductPricePln = Number(pricing.unitProductPricePln || 0);
+  let unitShippingPln = Number(pricing.unitShippingPln || 0);
+  let unitTotalPln = Number(pricing.unitTotalPln || 0);
+  let expectedTotalPln = unitProductPricePln + unitShippingPln;
 
-  // Mathematical consistency: product + shipping ≈ total landed
-  const expectedTotalPln = unitProductPricePln + unitShippingPln;
-  if (unitTotalPln > 0 && Math.abs(expectedTotalPln - unitTotalPln) > 0.05) {
-    errors.push(
-      `Mathematical discrepancy in PLN pricing: unitProductPricePln (${unitProductPricePln}) + unitShippingPln (${unitShippingPln}) = ${expectedTotalPln.toFixed(2)}, but unitTotalPln is set to ${unitTotalPln}.`
-    );
-  }
+  if (hasVolumeTiers) {
+    // Validate each volume tier
+    data.volumeTiers.forEach((tier, idx) => {
+      const qty = Number(tier.quantity || 0);
+      const distPriceAed = Number(tier.distributionPriceAed || tier.distributionPriceQar || tier.unitPriceQar || 0);
+      if (qty <= 0) {
+        errors.push(`Tier ${idx + 1} (${tier.name || 'unnamed'}): quantity must be greater than 0.`);
+      }
+      if (distPriceAed <= 0) {
+        errors.push(`Tier ${idx + 1} (${tier.name || 'unnamed'}): distribution price must be greater than 0.`);
+      }
+      normalizedTiers.push({
+        id: tier.id || `tier-${qty}`,
+        name: String(tier.name || `${qty} Units Batch`).trim(),
+        shortLabel: String(tier.shortLabel || `${qty} Kits`).trim(),
+        quantity: qty,
+        mediluxeCostEur: Number(tier.mediluxeCostEur || 0),
+        costAed: Number(tier.costAed || 0),
+        totalKitAed: Number(tier.totalKitAed || (tier.costAed * qty) || 0),
+        returnShippingAed: Number(tier.returnShippingAed || 0),
+        totalCostAed: Number(tier.totalCostAed || 0),
+        perKitCostAed: Number(tier.perKitCostAed || (tier.totalCostAed / qty) || 0),
+        marginSalesPct: Number(tier.marginSalesPct || 10),
+        marginSalesAed: Number(tier.marginSalesAed || 0),
+        distributionPriceAed: distPriceAed,
+        distributionPriceQar: Number(tier.distributionPriceQar || distPriceAed),
+        unitPriceQar: Number(tier.unitPriceQar || distPriceAed),
+        totalPriceQar: Number(tier.totalPriceQar || (distPriceAed * qty).toFixed(2)),
+        unitPriceUsd: Number(tier.unitPriceUsd || (distPriceAed * 0.2747).toFixed(2)),
+        totalPriceUsd: Number(tier.totalPriceUsd || (distPriceAed * qty * 0.2747).toFixed(2)),
+        unitPriceEur: Number(tier.unitPriceEur || (distPriceAed / 4.4).toFixed(2)),
+        totalPriceEur: Number(tier.totalPriceEur || (distPriceAed * qty / 4.4).toFixed(2))
+      });
+    });
 
-  if (unitRecommendedRetailQar > 0 && unitDistributorPriceQar > 0 && unitRecommendedRetailQar <= unitDistributorPriceQar) {
-    errors.push('unitRecommendedRetailQar must be strictly greater than unitDistributorPriceQar to provide distributor gross margin.');
+    if (unitDistributorPriceQar <= 0 && normalizedTiers.length > 0) {
+      unitDistributorPriceQar = normalizedTiers[0].distributionPriceQar;
+    }
+  } else {
+    // Single-schedule validation (e.g. Colway)
+    if (unitProductPricePln <= 0 && Number(pricing.unitProductPriceEur || 0) <= 0) {
+      errors.push('pricing.unitProductPricePln or unitProductPriceEur must be greater than 0.');
+    }
+    if (unitShippingPln < 0) {
+      errors.push('pricing.unitShippingPln cannot be negative.');
+    }
+
+    // Mathematical consistency: product + shipping ≈ total landed
+    if (unitProductPricePln > 0 && unitTotalPln > 0 && Math.abs(expectedTotalPln - unitTotalPln) > 0.05) {
+      errors.push(
+        `Mathematical discrepancy in PLN pricing: unitProductPricePln (${unitProductPricePln}) + unitShippingPln (${unitShippingPln}) = ${expectedTotalPln.toFixed(2)}, but unitTotalPln is set to ${unitTotalPln}.`
+      );
+    }
+
+    if (unitRecommendedRetailQar > 0 && unitDistributorPriceQar > 0 && unitRecommendedRetailQar <= unitDistributorPriceQar) {
+      errors.push('unitRecommendedRetailQar must be strictly greater than unitDistributorPriceQar to provide distributor gross margin.');
+    }
   }
 
   // 3. Order Quantity & Items
-  const orderQuantity = Number(data.orderQuantity || 80);
+  const orderQuantity = Number(data.orderQuantity || (normalizedTiers[0]?.quantity || 1));
   if (orderQuantity <= 0) {
     errors.push('orderQuantity must be a positive integer.');
   }
@@ -150,8 +194,23 @@ export function validateAndNormalizeAgreement(data, options = {}) {
     pegRates: {
       QAR_USD: Number(data.pegRates?.QAR_USD || 3.6795),
       PLN_USD: Number(data.pegRates?.PLN_USD || 3.9268),
-      QAR_PLN: Number(data.pegRates?.QAR_PLN || 0.92098)
+      QAR_PLN: Number(data.pegRates?.QAR_PLN || 0.92098),
+      EUR_AED: Number(data.pegRates?.EUR_AED || 4.40),
+      EUR_QAR: Number(data.pegRates?.EUR_QAR || 4.36),
+      AED_QAR: Number(data.pegRates?.AED_QAR || 1.00)
     },
+    volumeTiers: normalizedTiers,
+    aiSubscription: data.aiSubscription ? {
+      name: String(data.aiSubscription.name || 'Monthly AI Subscription').trim(),
+      costEur: Number(data.aiSubscription.costEur || 10.45),
+      costAed: Number(data.aiSubscription.costAed || (Number(data.aiSubscription.costEur || 10.45) * 4.4).toFixed(2)),
+      marginSalesPct: Number(data.aiSubscription.marginSalesPct || 10),
+      marginSalesAed: Number(data.aiSubscription.marginSalesAed || 5.11),
+      priceAed: Number(data.aiSubscription.priceAed || 51.09),
+      priceQar: Number(data.aiSubscription.priceQar || 51.09),
+      priceEur: Number(data.aiSubscription.priceEur || 11.61),
+      billingPeriod: 'monthly'
+    } : null,
     pricing: {
       unitProductPricePln,
       unitShippingPln,
