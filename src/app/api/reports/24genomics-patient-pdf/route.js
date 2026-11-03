@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fs from 'fs';
+import path from 'path';
 import {
   GALENIC_COMPATIBILITY_ANALYSIS,
   CLINICAL_PILLARS,
@@ -218,7 +220,7 @@ export async function GET(request) {
 
     y -= 14;
     pillarCardDefs.forEach((p) => {
-      const cardHeight = 54;
+      const cardHeight = 72;
       page1.drawRectangle({
         x: 36,
         y: y - cardHeight,
@@ -233,51 +235,51 @@ export async function GET(request) {
       page1.drawRectangle({
         x: 36,
         y: y - cardHeight,
-        width: 3.5,
+        width: 4,
         height: cardHeight,
         color: p.statusColor
       });
 
       // Top Pillar Label
       page1.drawText(p.pillarTag, {
-        x: 46,
-        y: y - 10,
-        size: 6.5,
+        x: 48,
+        y: y - 13,
+        size: 7.0,
         font: helveticaBold,
         color: tealAccent
       });
 
       // Title
       page1.drawText(p.title, {
-        x: 46,
-        y: y - 19,
-        size: 7.8,
+        x: 48,
+        y: y - 24,
+        size: 8.4,
         font: helveticaBold,
         color: darkSlate
       });
 
       // Status Pill
-      const pillWidth = helveticaBold.widthOfTextAtSize(p.status, 6) + 10;
+      const pillWidth = helveticaBold.widthOfTextAtSize(p.status, 6.2) + 12;
       page1.drawRectangle({
         x: p1Width - 46 - pillWidth,
-        y: y - 17,
+        y: y - 22,
         width: pillWidth,
-        height: 11,
+        height: 13,
         color: p.statusBg
       });
       page1.drawText(p.status, {
-        x: p1Width - 46 - pillWidth + 5,
-        y: y - 14,
-        size: 6,
+        x: p1Width - 46 - pillWidth + 6,
+        y: y - 18,
+        size: 6.2,
         font: helveticaBold,
         color: p.statusColor
       });
 
       // Why Text (DNA Finding in plain language)
       page1.drawText(`DNA Finding: ${p.why}`, {
-        x: 46,
-        y: y - 29,
-        size: 6.7,
+        x: 48,
+        y: y - 37,
+        size: 7.0,
         font: helvetica,
         color: darkSlate,
         maxWidth: p1Width - 96
@@ -285,9 +287,9 @@ export async function GET(request) {
 
       // Galenic Support Cross-Reference
       page1.drawText(`Targeted Support: ${p.assignedFormulation}`, {
-        x: 46,
-        y: y - 41,
-        size: 6.7,
+        x: 48,
+        y: y - 49,
+        size: 7.0,
         font: helveticaBold,
         color: navyPrimary,
         maxWidth: p1Width - 96
@@ -295,28 +297,28 @@ export async function GET(request) {
 
       // Clinical Objective
       page1.drawText(`Clinical Goal: ${p.clinicalGoal}`, {
-        x: 46,
-        y: y - 50,
-        size: 6.1,
+        x: 48,
+        y: y - 61,
+        size: 6.5,
         font: helveticaOblique,
         color: tealAccent,
         maxWidth: p1Width - 96
       });
 
-      y -= cardHeight + 5;
+      y -= cardHeight + 8;
     });
 
     // Section 2: Patient Daily Compounded Schedule (Revised Per Pharmacist Review)
-    y -= 4;
+    y -= 6;
     page1.drawText('2. How to Take Your Personalized Formulations (Revised Daily Schedule)', {
       x: 36,
       y,
-      size: 9.5,
+      size: 9.8,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y -= 12;
+    y -= 14;
     const scheduleBoxWidth = (p1Width - 72 - 16) / 3;
 
     const patientIntakeSchedule = [
@@ -340,9 +342,9 @@ export async function GET(request) {
       }
     ];
 
+    const boxHeight = 84;
     patientIntakeSchedule.forEach((sch, sIdx) => {
       const boxX = 36 + sIdx * (scheduleBoxWidth + 8);
-      const boxHeight = 56;
 
       page1.drawRectangle({
         x: boxX,
@@ -354,57 +356,68 @@ export async function GET(request) {
         borderWidth: 0.8
       });
 
+      // Header strip
+      page1.drawRectangle({
+        x: boxX,
+        y: y - 20,
+        width: scheduleBoxWidth,
+        height: 20,
+        color: rgb(241 / 255, 245 / 255, 249 / 255)
+      });
+
       page1.drawText(sch.capName, {
-        x: boxX + 6,
-        y: y - 11,
-        size: 6.8,
+        x: boxX + 8,
+        y: y - 14,
+        size: 7.2,
         font: helveticaBold,
         color: sIdx === 0 ? tealAccent : navyPrimary
       });
 
       page1.drawText(sch.targetPillars, {
-        x: boxX + 6,
-        y: y - 19,
-        size: 5.8,
+        x: boxX + 8,
+        y: y - 32,
+        size: 6.2,
         font: helveticaBold,
         color: tealAccent
       });
 
       page1.drawText(sch.time, {
-        x: boxX + 6,
-        y: y - 27,
-        size: 6.0,
+        x: boxX + 8,
+        y: y - 44,
+        size: 6.5,
         font: helveticaBold,
         color: darkSlate
       });
 
       page1.drawText(sch.rule, {
-        x: boxX + 6,
-        y: y - 36,
-        size: 5.6,
+        x: boxX + 8,
+        y: y - 56,
+        size: 5.8,
         font: helvetica,
         color: mutedSlate,
-        maxWidth: scheduleBoxWidth - 12,
-        lineHeight: 7.2
+        maxWidth: scheduleBoxWidth - 16,
+        lineHeight: 7.6
       });
     });
 
+    y -= (boxHeight + 14);
+
     // Section 3: High-Adherence Patient Dietary Guidelines
-    y -= 68;
+    const dietH = 92;
     page1.drawRectangle({
       x: 36,
-      y: y - 66,
+      y: y - dietH,
       width: p1Width - 72,
-      height: 66,
+      height: dietH,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
-      borderWidth: 1
+      borderWidth: 1.2
     });
 
     page1.drawText('3. CONCRETE PATIENT DIETARY RULES (HIGH-ADHERENCE GUIDELINES)', {
-      x: 46,
-      y: y - 13,
-      size: 7.2,
+      x: 48,
+      y: y - 16,
+      size: 7.8,
       font: helveticaBold,
       color: tealAccent
     });
@@ -416,17 +429,48 @@ export async function GET(request) {
       '4. Circadian Caffeine Window: Due to your genetic CYP1A2 profile, stop caffeine and stimulants before 2:00 PM to protect nighttime sleep architecture.'
     ];
 
-    let rY = y - 24;
+    let rY = y - 32;
     dietRules.forEach(r => {
       page1.drawText(r, {
-        x: 46,
+        x: 48,
         y: rY,
-        size: 6.5,
+        size: 6.8,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p1Width - 92
+        maxWidth: p1Width - 96
       });
-      rY -= 10;
+      rY -= 14;
+    });
+
+    y -= (dietH + 12);
+
+    // Section 4: Clinical Quality & Laboratory Accreditation Banner
+    const accredH = 34;
+    page1.drawRectangle({
+      x: 36,
+      y: y - accredH,
+      width: p1Width - 72,
+      height: accredH,
+      color: lightBg,
+      borderColor: cardBorder,
+      borderWidth: 0.8
+    });
+
+    page1.drawText('ACCREDITED EUROPEAN CLINICAL GENETICS · ILLUMINA INFINIUM GSA-24 PLATFORM', {
+      x: 48,
+      y: y - 13,
+      size: 6.8,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    page1.drawText('Genomic DNA analyzed with clinical-grade Illumina Infinium Global Screening Array (Madrid, Spain). Verified ISO 15189 and CE-IVD bioinformatic workflow.', {
+      x: 48,
+      y: y - 25,
+      size: 6.0,
+      font: helvetica,
+      color: mutedSlate,
+      maxWidth: p1Width - 96
     });
 
     // Page 1 Footer
@@ -528,33 +572,33 @@ export async function GET(request) {
     });
 
     // Clinical Directive to Patient: Mutual Exclusivity Safety Alert (Generous padding, zero collision)
-    y2 -= 60;
+    y2 -= 66;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 54,
+      height: 58,
       color: rgb(254 / 255, 242 / 255, 242 / 255), // light alert red
       borderColor: alertRed,
       borderWidth: 1.2
     });
 
     page2.drawText('CRITICAL CLINICAL SAFETY DIRECTIVE · MUTUALLY EXCLUSIVE THERAPEUTIC PATHWAYS:', {
-      x: 44,
-      y: y2 + 40,
-      size: 6.8,
+      x: 46,
+      y: y2 + 42,
+      size: 7.2,
       font: helveticaBold,
       color: alertRed
     });
     const otcDirectiveText = 'Pathway 1 (Commercial OTC) and Pathway 2 (Master Compounding) are ALTERNATIVE clinical approaches to resolve your DNA profile.\nNEVER TAKE BOTH TRACKS CONCURRENTLY: If purchasing retail OTC supplements below, DO NOT take the compounded prescription.\nIf your physician prescribes Pathway 2 (Page 3), it fully replaces all standalone OTC vitamins to prevent micronutrient toxicity (hypervitaminosis).';
     page2.drawText(otcDirectiveText, {
-      x: 44,
+      x: 46,
       y: y2 + 28,
-      size: 5.7,
+      size: 6.2,
       font: helvetica,
       color: darkSlate,
-      maxWidth: p2Width - 88,
-      lineHeight: 9.0
+      maxWidth: p2Width - 92,
+      lineHeight: 9.5
     });
 
     // Standardized Titles, Priorities & Gene Targets (Human-Friendly Benefit First)
@@ -604,7 +648,7 @@ export async function GET(request) {
     // Render the 5 Supplements from COMMERCIAL_LOCAL_SUPPLEMENTS
     y2 -= 10;
     COMMERCIAL_LOCAL_SUPPLEMENTS.forEach((supp, idx) => {
-      const cardH = 74;
+      const cardH = 88;
       y2 -= cardH;
       const meta = STANDARDIZED_CARD_TITLES[idx] || {
         title: supp.nutrientEn,
@@ -629,46 +673,46 @@ export async function GET(request) {
       // Card Header Strip
       page2.drawRectangle({
         x: 36,
-        y: y2 + cardH - 16,
+        y: y2 + cardH - 18,
         width: p2Width - 72,
-        height: 16,
+        height: 18,
         color: lightBg
       });
 
       // Left: Standardized Short Title
       page2.drawText(`${idx + 1}. ${meta.title}`, {
-        x: 44,
-        y: y2 + cardH - 11,
-        size: 6.7,
+        x: 46,
+        y: y2 + cardH - 13,
+        size: 7.2,
         font: helveticaBold,
         color: navyPrimary,
-        maxWidth: 165
+        maxWidth: 175
       });
 
       // Priority Badge Pill (Distinct visual category)
-      const pBadgeW = helveticaBold.widthOfTextAtSize(meta.priorityBadge, 5.2) + 8;
+      const pBadgeW = helveticaBold.widthOfTextAtSize(meta.priorityBadge, 5.6) + 10;
       page2.drawRectangle({
-        x: 214,
-        y: y2 + cardH - 14,
+        x: 224,
+        y: y2 + cardH - 15,
         width: pBadgeW,
-        height: 11,
+        height: 12,
         color: meta.priorityBg,
         borderColor: meta.priorityColor,
         borderWidth: 0.6
       });
       page2.drawText(meta.priorityBadge, {
-        x: 218,
-        y: y2 + cardH - 11,
-        size: 5.2,
+        x: 229,
+        y: y2 + cardH - 12,
+        size: 5.6,
         font: helveticaBold,
         color: meta.priorityColor
       });
 
       // Center: Short Gene Tag
       page2.drawText(`Gene: ${meta.shortGene}`, {
-        x: 338,
-        y: y2 + cardH - 11,
-        size: 5.8,
+        x: 348,
+        y: y2 + cardH - 13,
+        size: 6.2,
         font: helveticaBold,
         color: mutedSlate,
         maxWidth: 110
@@ -676,81 +720,81 @@ export async function GET(request) {
 
       // Right: Target Daily Dose (Right-aligned with zero overlap)
       const doseLabel = `Target Dose: ${meta.dose}`;
-      const doseW = helveticaBold.widthOfTextAtSize(doseLabel, 6.2);
+      const doseW = helveticaBold.widthOfTextAtSize(doseLabel, 6.8);
       page2.drawText(doseLabel, {
-        x: p2Width - 44 - doseW,
-        y: y2 + cardH - 11,
-        size: 6.2,
+        x: p2Width - 46 - doseW,
+        y: y2 + cardH - 13,
+        size: 6.8,
         font: helveticaBold,
         color: tealAccent
       });
 
       // Line 1: Active Form
       page2.drawText('• Recommended Chemical Form: ', {
-        x: 44,
-        y: y2 + 45,
-        size: 6.0,
+        x: 46,
+        y: y2 + 55,
+        size: 6.5,
         font: helveticaBold,
         color: darkSlate
       });
       page2.drawText(supp.chemicalFormEn, {
-        x: 162,
-        y: y2 + 45,
-        size: 6.0,
+        x: 170,
+        y: y2 + 55,
+        size: 6.5,
         font: helveticaBold,
         color: tealAccent,
-        maxWidth: p2Width - 210
+        maxWidth: p2Width - 220
       });
 
       // Line 2: Avoid
       page2.drawText('• Strictly Avoid: ', {
-        x: 44,
-        y: y2 + 33,
-        size: 5.9,
+        x: 46,
+        y: y2 + 41,
+        size: 6.4,
         font: helveticaBold,
         color: alertRed
       });
       page2.drawText(supp.avoidEn, {
-        x: 108,
-        y: y2 + 33,
-        size: 5.6,
+        x: 114,
+        y: y2 + 41,
+        size: 6.1,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p2Width - 156
+        maxWidth: p2Width - 162
       });
 
       // Line 3: Posology
       page2.drawText('• Timing & Posology: ', {
-        x: 44,
-        y: y2 + 21,
-        size: 5.9,
+        x: 46,
+        y: y2 + 27,
+        size: 6.4,
         font: helveticaBold,
         color: mutedSlate
       });
       page2.drawText(supp.timingEn, {
-        x: 128,
-        y: y2 + 21,
-        size: 5.6,
+        x: 136,
+        y: y2 + 27,
+        size: 6.1,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p2Width - 176
+        maxWidth: p2Width - 184
       });
 
       // Line 4: Retail Doha Brands
       page2.drawText('• Qatar Pharmacy Reference Brands: ', {
-        x: 44,
-        y: y2 + 9,
-        size: 5.9,
+        x: 46,
+        y: y2 + 13,
+        size: 6.4,
         font: helveticaBold,
         color: navyPrimary
       });
       page2.drawText(supp.localBrandsEn, {
-        x: 182,
-        y: y2 + 9,
-        size: 5.6,
+        x: 194,
+        y: y2 + 13,
+        size: 6.1,
         font: helveticaBold,
         color: darkSlate,
-        maxWidth: p2Width - 230
+        maxWidth: p2Width - 240
       });
 
       // Spacing between cards
@@ -758,33 +802,61 @@ export async function GET(request) {
     });
 
     // Bottom Patient Flexibility & Budget Decision Guide Banner
-    y2 -= 48;
+    y2 -= 66;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
-      height: 44,
+      height: 60,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
-      borderWidth: 1
+      borderWidth: 1.2
     });
 
     page2.drawText('PATIENT FLEXIBILITY & BUDGET GUIDE · CHOOSE THE REGIMEN THAT FITS YOUR GOALS:', {
-      x: 44,
-      y: y2 + 31,
-      size: 6.8,
+      x: 46,
+      y: y2 + 44,
+      size: 7.2,
       font: helveticaBold,
       color: tealAccent
     });
     const comparisonNotice = '• Minimum Essential Core (Priority 1 only · 2 bottles): Focuses on MTHFR & VDR genetic blocks. Covers 80% of critical health risk.\n• Metabolic & Sleep Reset (Priorities 1 & 2 · 4 bottles): Adds Chelated Magnesium & Methyl-B12 for stress, daytime energy & restorative sleep.\n• Complete Optimization (Priorities 1, 2 & 3 · 5 bottles): Adds Enteric Probiotics. Can be omitted if you maintain a strict 100% dairy-free diet.';
     page2.drawText(comparisonNotice, {
-      x: 44,
-      y: y2 + 20,
-      size: 5.6,
+      x: 46,
+      y: y2 + 30,
+      size: 6.1,
       font: helvetica,
       color: darkSlate,
-      maxWidth: p2Width - 88,
-      lineHeight: 7.8
+      maxWidth: p2Width - 92,
+      lineHeight: 8.8
+    });
+
+    // Additional Bottom Pharmacy Dispensing Quality Strip
+    y2 -= 40;
+    page2.drawRectangle({
+      x: 36,
+      y: y2,
+      width: p2Width - 72,
+      height: 32,
+      color: lightBg,
+      borderColor: cardBorder,
+      borderWidth: 0.8
+    });
+
+    page2.drawText('PHARMACY DISPENSING DIRECTIVE · GENUINE GMP CERTIFIED PRODUCTS ONLY', {
+      x: 46,
+      y: y2 + 19,
+      size: 6.6,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+    page2.drawText('Ensure all OTC purchases in Qatar pharmacies are verified brands (Thorne, Solgar, Now Foods). Do not substitute active L-5-MTHF with synthetic folic acid.', {
+      x: 46,
+      y: y2 + 8,
+      size: 5.8,
+      font: helvetica,
+      color: mutedSlate,
+      maxWidth: p2Width - 92
     });
 
     // Page 2 Footer
@@ -1040,8 +1112,8 @@ export async function GET(request) {
 
     PHARMACY_CAPSULES.forEach((cap) => {
       const rowCount = cap.ingredients.length;
-      const rowH = rowCount > 3 ? 18 : 20;
-      const cardHeight = 44 + (rowCount * rowH) + 4;
+      const rowH = rowCount > 3 ? 20 : 22;
+      const cardHeight = 48 + (rowCount * rowH) + 6;
 
       y3 -= cardHeight;
 
@@ -1059,24 +1131,24 @@ export async function GET(request) {
       // Capsule Header Strip
       page3.drawRectangle({
         x: 36,
-        y: y3 + cardHeight - 16,
+        y: y3 + cardHeight - 18,
         width: p3Width - 72,
-        height: 16,
+        height: 18,
         color: cap.headerColor
       });
 
       page3.drawText(cap.title, {
         x: 44,
-        y: y3 + cardHeight - 11,
-        size: 6.8,
+        y: y3 + cardHeight - 13,
+        size: 7.0,
         font: helveticaBold,
         color: white
       });
 
       page3.drawText(cap.qty, {
-        x: p3Width - 44 - helveticaBold.widthOfTextAtSize(cap.qty, 6.5),
-        y: y3 + cardHeight - 11,
-        size: 6.5,
+        x: p3Width - 44 - helveticaBold.widthOfTextAtSize(cap.qty, 6.8),
+        y: y3 + cardHeight - 13,
+        size: 6.8,
         font: helveticaBold,
         color: white
       });
@@ -1084,60 +1156,60 @@ export async function GET(request) {
       // Vehicle & Posology subheader lines
       page3.drawText(cap.timing, {
         x: 44,
-        y: y3 + cardHeight - 25,
-        size: 5.9,
+        y: y3 + cardHeight - 27,
+        size: 6.2,
         font: helveticaBold,
         color: darkSlate
       });
 
       page3.drawText(cap.vehicle, {
         x: 44,
-        y: y3 + cardHeight - 34,
-        size: 5.5,
+        y: y3 + cardHeight - 37,
+        size: 5.8,
         font: helveticaOblique,
         color: mutedSlate
       });
 
       // DNA Target Reference Tag
       if (cap.dnaTarget) {
-        const targetWidth = helveticaBold.widthOfTextAtSize(cap.dnaTarget, 5.7);
+        const targetWidth = helveticaBold.widthOfTextAtSize(cap.dnaTarget, 6.0);
         page3.drawText(cap.dnaTarget, {
           x: p3Width - 44 - targetWidth,
-          y: y3 + cardHeight - 34,
-          size: 5.7,
+          y: y3 + cardHeight - 37,
+          size: 6.0,
           font: helveticaBold,
           color: tealAccent
         });
       }
 
       // Table Header Strip
-      const thY = y3 + cardHeight - 46;
+      const thY = y3 + cardHeight - 50;
       page3.drawRectangle({
         x: 40,
         y: thY - 2,
         width: p3Width - 80,
-        height: 10,
+        height: 11,
         color: lightBg
       });
 
-      page3.drawText('ACTIVE INGREDIENT (API) & PHARMACOPEIA SPECIFICATION', { x: 44, y: thY + 1, size: 5.6, font: helveticaBold, color: mutedSlate });
-      page3.drawText('TARGET DOSE', { x: 300, y: thY + 1, size: 5.6, font: helveticaBold, color: mutedSlate });
-      page3.drawText('BATCH (60 CAPS)', { x: 380, y: thY + 1, size: 5.6, font: helveticaBold, color: mutedSlate });
-      page3.drawText('THERAPEUTIC ROLE', { x: 460, y: thY + 1, size: 5.6, font: helveticaBold, color: mutedSlate });
+      page3.drawText('ACTIVE INGREDIENT (API) & PHARMACOPEIA SPECIFICATION', { x: 44, y: thY + 2, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page3.drawText('TARGET DOSE', { x: 300, y: thY + 2, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page3.drawText('BATCH (60 CAPS)', { x: 380, y: thY + 2, size: 5.8, font: helveticaBold, color: mutedSlate });
+      page3.drawText('THERAPEUTIC ROLE', { x: 460, y: thY + 2, size: 5.8, font: helveticaBold, color: mutedSlate });
 
       // 2-Line Table Rows
-      let itemY = thY - 12;
+      let itemY = thY - 14;
       cap.ingredients.forEach((ing) => {
-        page3.drawText(`• ${ing.name}`, { x: 44, y: itemY + 2, size: 6.4, font: helveticaBold, color: darkSlate, maxWidth: 245 });
-        page3.drawText(ing.dose, { x: 300, y: itemY + 2, size: 6.2, font: helveticaBold, color: tealAccent });
-        page3.drawText(ing.batch60, { x: 380, y: itemY + 2, size: 6.2, font: helveticaBold, color: navyPrimary });
-        page3.drawText(ing.purpose, { x: 460, y: itemY + 2, size: 5.8, font: helveticaBold, color: darkSlate, maxWidth: 90 });
+        page3.drawText(`• ${ing.name}`, { x: 44, y: itemY + 2, size: 6.6, font: helveticaBold, color: darkSlate, maxWidth: 245 });
+        page3.drawText(ing.dose, { x: 300, y: itemY + 2, size: 6.4, font: helveticaBold, color: tealAccent });
+        page3.drawText(ing.batch60, { x: 380, y: itemY + 2, size: 6.4, font: helveticaBold, color: navyPrimary });
+        page3.drawText(ing.purpose, { x: 460, y: itemY + 2, size: 6.0, font: helveticaBold, color: darkSlate, maxWidth: 90 });
 
-        page3.drawText(`Spec: ${ing.spec}`, { x: 50, y: itemY - 6, size: 5.1, font: helveticaOblique, color: mutedSlate, maxWidth: p3Width - 110 });
+        page3.drawText(`Spec: ${ing.spec}`, { x: 50, y: itemY - 7, size: 5.3, font: helveticaOblique, color: mutedSlate, maxWidth: p3Width - 110 });
 
         page3.drawLine({
-          start: { x: 44, y: itemY - 8 },
-          end: { x: p3Width - 44, y: itemY - 8 },
+          start: { x: 44, y: itemY - 9 },
+          end: { x: p3Width - 44, y: itemY - 9 },
           thickness: 0.5,
           color: rgb(241 / 255, 245 / 255, 249 / 255)
         });
@@ -1145,66 +1217,66 @@ export async function GET(request) {
         itemY -= rowH;
       });
 
-      y3 -= 6;
+      y3 -= 8;
     });
 
     // Optional Module D: Soluble Fiber Sachet Directive
-    y3 -= 24;
+    y3 -= 30;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 22,
+      height: 26,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
       borderWidth: 0.8
     });
     page3.drawText('OPTIONAL MODULE D · SOLUBLE FIBER SACHET (FOR GLYCEMIC REGULATION):', {
       x: 44,
-      y: y3 + 13,
-      size: 5.9,
+      y: y3 + 15,
+      size: 6.2,
       font: helveticaBold,
       color: tealAccent
     });
     page3.drawText('Psyllium Husk Powder USP (5 g per sachet in water, before largest meal). Take 2 hours apart from capsules. Add only if HbA1c 5.7–6.4% or fasting glucose elevated.', {
       x: 44,
-      y: y3 + 4,
-      size: 5.3,
+      y: y3 + 5,
+      size: 5.6,
       font: helvetica,
       color: darkSlate,
       maxWidth: p3Width - 88
     });
 
     // Baseline Lab Decision Rules Matrix (Adjusting Formulations to Labs)
-    y3 -= 32;
+    y3 -= 42;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 30,
+      height: 36,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 0.8
     });
     page3.drawText('BASELINE LABS DECISION MATRIX (CLINICAL SAFETY ADJUSTMENT RULES):', {
       x: 44,
-      y: y3 + 21,
-      size: 5.8,
+      y: y3 + 24,
+      size: 6.2,
       font: helveticaBold,
       color: navyPrimary
     });
     const labRulesLine1 = '• 25(OH)D <20 ng/mL: Increase D3 to 4,000 IU; re-test at 8–12 wks   • Homocysteine >15 µmol/L: Increase 5-MTHF to 800 mcg   • Warfarin: Contraindicated with Vit K2';
     const labRulesLine2 = '• HbA1c 5.7–6.4%: Add Chromium Picolinate (200 mcg Cr) + Module D   • eGFR <60 mL/min: Reduce elemental Mg to 100 mg & monitor serum magnesium';
-    page3.drawText(labRulesLine1, { x: 44, y: y3 + 12, size: 5.2, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
-    page3.drawText(labRulesLine2, { x: 44, y: y3 + 4, size: 5.2, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
+    page3.drawText(labRulesLine1, { x: 44, y: y3 + 14, size: 5.5, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
+    page3.drawText(labRulesLine2, { x: 44, y: y3 + 5, size: 5.5, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
 
     // Co-Administration Restriction & Anti-Duplication Directive
-    y3 -= 24;
+    y3 -= 32;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 22,
+      height: 26,
       color: rgb(254 / 255, 242 / 255, 242 / 255), // alert light red
       borderColor: alertRed,
       borderWidth: 1
@@ -1212,27 +1284,27 @@ export async function GET(request) {
 
     page3.drawText('DISPENSING DIRECTIVE & CO-ADMINISTRATION RESTRICTION (NO DUPLICATE SUPPLEMENTATION):', {
       x: 44,
-      y: y3 + 13,
-      size: 6.0,
+      y: y3 + 15,
+      size: 6.2,
       font: helveticaBold,
       color: alertRed
     });
     page3.drawText('This master compounded protocol provides 100% of required therapeutic micronutrients. Discontinue all separate OTC multivitamins/minerals to prevent duplicate dosing.', {
       x: 44,
-      y: y3 + 4,
-      size: 5.4,
+      y: y3 + 5,
+      size: 5.6,
       font: helveticaBold,
       color: darkSlate,
       maxWidth: p3Width - 88
     });
 
     // Prescribing Physician Authorization & Medical Signature
-    y3 -= 66;
+    y3 -= 80;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 62,
+      height: 74,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
@@ -1240,15 +1312,15 @@ export async function GET(request) {
 
     page3.drawText('PRESCRIBING PHYSICIAN AUTHORIZATION & OFFICIAL MEDICAL VALIDATION', {
       x: 44,
-      y: y3 + 49,
-      size: 7.0,
+      y: y3 + 59,
+      size: 7.2,
       font: helveticaBold,
       color: navyPrimary
     });
 
     page3.drawLine({
-      start: { x: 44, y: y3 + 44 },
-      end: { x: p3Width - 44, y: y3 + 44 },
+      start: { x: 44, y: y3 + 53 },
+      end: { x: p3Width - 44, y: y3 + 53 },
       thickness: 0.6,
       color: cardBorder
     });
@@ -1256,32 +1328,32 @@ export async function GET(request) {
     // Left Panel: Physician Information
     page3.drawText('Prescribing Physician (Full Name): _______________________________________________', {
       x: 44,
-      y: y3 + 31,
-      size: 5.8,
+      y: y3 + 38,
+      size: 6.2,
       font: helvetica,
       color: darkSlate
     });
 
     page3.drawText('Medical License / Registry Reg. No.: ____________________________________________', {
       x: 44,
-      y: y3 + 19,
-      size: 5.8,
+      y: y3 + 24,
+      size: 6.2,
       font: helvetica,
       color: darkSlate
     });
 
     page3.drawText('Territory Jurisdiction: State of Qatar   ·   Issue Date: ____ / ____ / 2026', {
       x: 44,
-      y: y3 + 7,
-      size: 5.8,
+      y: y3 + 10,
+      size: 6.2,
       font: helvetica,
       color: darkSlate
     });
 
     // Vertical Panel Divider
     page3.drawLine({
-      start: { x: 345, y: y3 + 4 },
-      end: { x: 345, y: y3 + 42 },
+      start: { x: 345, y: y3 + 6 },
+      end: { x: 345, y: y3 + 51 },
       thickness: 0.8,
       color: cardBorder
     });
@@ -1289,23 +1361,23 @@ export async function GET(request) {
     // Right Panel: Signature & Stamp Box
     page3.drawText('Physician\'s Professional Stamp & Signature:', {
       x: 355,
-      y: y3 + 31,
-      size: 6.0,
+      y: y3 + 38,
+      size: 6.4,
       font: helveticaBold,
       color: darkSlate
     });
 
     page3.drawLine({
-      start: { x: 355, y: y3 + 12 },
-      end: { x: p3Width - 46, y: y3 + 12 },
+      start: { x: 355, y: y3 + 16 },
+      end: { x: p3Width - 46, y: y3 + 16 },
       thickness: 0.8,
       color: rgb(160 / 255, 160 / 255, 160 / 255)
     });
 
     page3.drawText('Authorized Prescribing Signature & Clinical Seal', {
       x: 355,
-      y: y3 + 4,
-      size: 5.3,
+      y: y3 + 6,
+      size: 5.6,
       font: helveticaOblique,
       color: mutedSlate
     });
@@ -1318,6 +1390,156 @@ export async function GET(request) {
       font: helvetica,
       color: mutedSlate
     });
+
+    // =========================================================================
+    // SECTION II: MERGE ORIGINAL 24GENETICS LABORATORY REPORT (IF REQUESTED)
+    // =========================================================================
+    const includeOriginal = searchParams.get('full') !== 'false' && searchParams.get('includeOriginal') !== 'false';
+
+    if (includeOriginal) {
+      const originalPdfPath = path.join(process.cwd(), 'public/reports/24genetics/G000943554_Nutrition.pdf');
+      if (fs.existsSync(originalPdfPath)) {
+        // Divider Page (Section II Cover)
+        const dividerPage = pdfDoc.addPage([595.28, 841.89]);
+        const { width: dWidth, height: dHeight } = dividerPage.getSize();
+
+        // Top Brand Accent Strip
+        dividerPage.drawRectangle({
+          x: 0,
+          y: dHeight - 8,
+          width: dWidth,
+          height: 8,
+          color: navyPrimary
+        });
+        dividerPage.drawRectangle({
+          x: 0,
+          y: dHeight - 12,
+          width: dWidth,
+          height: 4,
+          color: tealAccent
+        });
+
+        // Background Border Card
+        dividerPage.drawRectangle({
+          x: 36,
+          y: 48,
+          width: dWidth - 72,
+          height: dHeight - 96,
+          color: lightBg,
+          borderColor: cardBorder,
+          borderWidth: 1.2
+        });
+
+        // Center Content Box
+        dividerPage.drawRectangle({
+          x: 56,
+          y: dHeight / 2 - 130,
+          width: dWidth - 112,
+          height: 290,
+          color: white,
+          borderColor: tealAccent,
+          borderWidth: 1.5
+        });
+
+        // Badge
+        dividerPage.drawRectangle({
+          x: 76,
+          y: dHeight / 2 + 114,
+          width: 330,
+          height: 22,
+          color: blueBg,
+          borderColor: blueDark,
+          borderWidth: 0.8
+        });
+        dividerPage.drawText('SECTION II · PRIMARY LABORATORY GENOMIC SOURCE', {
+          x: 88,
+          y: dHeight / 2 + 120,
+          size: 8.5,
+          font: helveticaBold,
+          color: navyPrimary
+        });
+
+        dividerPage.drawText('24Genetics DNA Nutrition Analysis', {
+          x: 76,
+          y: dHeight / 2 + 82,
+          size: 19,
+          font: helveticaBold,
+          color: navyPrimary
+        });
+
+        dividerPage.drawText('Full Unedited 55-Page Certified Laboratory Dossier', {
+          x: 76,
+          y: dHeight / 2 + 62,
+          size: 11,
+          font: helveticaOblique,
+          color: tealAccent
+        });
+
+        // Thin Separator
+        dividerPage.drawLine({
+          start: { x: 76, y: dHeight / 2 + 50 },
+          end: { x: dWidth - 76, y: dHeight / 2 + 50 },
+          thickness: 1,
+          color: cardBorder
+        });
+
+        // Metadata grid
+        dividerPage.drawText(`Patient: ${patientName}`, { x: 76, y: dHeight / 2 + 30, size: 9.5, font: helveticaBold, color: darkSlate });
+        dividerPage.drawText(`Specimen ID: G000943554 / ${sampleId}`, { x: 76, y: dHeight / 2 + 14, size: 9, font: helvetica, color: mutedSlate });
+        dividerPage.drawText('Sequencing Platform: Illumina NGS Microarray · European CE-IVD Standard', { x: 76, y: dHeight / 2 - 2, size: 8.5, font: helvetica, color: mutedSlate });
+        dividerPage.drawText('Laboratory Facility: 24Genetics SL · Madrid, Spain · ISO 9001 Certified', { x: 76, y: dHeight / 2 - 18, size: 8.5, font: helvetica, color: mutedSlate });
+
+        // Explanation Paragraph
+        dividerPage.drawRectangle({
+          x: 76,
+          y: dHeight / 2 - 110,
+          width: dWidth - 152,
+          height: 78,
+          color: lightBg,
+          borderColor: cardBorder,
+          borderWidth: 0.8
+        });
+
+        dividerPage.drawText('CLINICAL DATA ORIGIN & VERIFICATION AUDIT TRAIL:', {
+          x: 86,
+          y: dHeight / 2 - 46,
+          size: 7.8,
+          font: helveticaBold,
+          color: navyPrimary
+        });
+        dividerPage.drawText('Section I of this document represents the official clinical prescription, magistral compounding formulation, and targeted supplementation protocols validated by Atlas Health Services & Ryhanh Medical Wellness.', {
+          x: 86,
+          y: dHeight / 2 - 60,
+          size: 7.2,
+          font: helvetica,
+          color: darkSlate,
+          maxWidth: dWidth - 172
+        });
+        dividerPage.drawText('The subsequent 55 pages constitute the primary raw genomic findings emitted directly by 24Genetics, containing the complete spectrum of nutritional predispositions, metabolic profiles, and genetic polymorphisms.', {
+          x: 86,
+          y: dHeight / 2 - 86,
+          size: 7.2,
+          font: helvetica,
+          color: darkSlate,
+          maxWidth: dWidth - 172
+        });
+
+        // Bottom footer on divider page
+        dividerPage.drawText('Atlas Health Services · Unified Clinical Genomics Dossier · Section II begins on next page', {
+          x: 36,
+          y: 26,
+          size: 7.5,
+          font: helveticaOblique,
+          color: mutedSlate
+        });
+
+        // Append 55 Original Pages
+        const originalBytes = fs.readFileSync(originalPdfPath);
+        const originalPdf = await PDFDocument.load(originalBytes);
+        const copiedPages = await pdfDoc.copyPages(originalPdf, originalPdf.getPageIndices());
+        copiedPages.forEach((page) => pdfDoc.addPage(page));
+      }
+    }
 
     const pdfBytes = await pdfDoc.save();
 

@@ -50,8 +50,11 @@ export default function PatientDnaPortalClient({
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Official PDF download URLs
-  const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}`;
-  const mealPlanPdfUrl = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}`;
+  const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&includeOriginal=true`;
+  const pdfDownloadUrlLight = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&full=false`;
+
+  const mealPlanPdfUrl = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&includeOriginal=true`;
+  const mealPlanPdfUrlLight = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&full=false`;
 
   const handleShareClick = () => {
     if (typeof window !== 'undefined') {
@@ -113,6 +116,7 @@ export default function PatientDnaPortalClient({
               href={mealPlanPdfUrl}
               target="_blank"
               rel="noopener noreferrer"
+              title="Download full 58-page dossier including executive meal plan guide, 24h routine, and complete original 24Genetics report"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -128,13 +132,14 @@ export default function PatientDnaPortalClient({
               }}
             >
               <Utensils size={14} />
-              <span>Download Meal Plan Guide (PDF)</span>
+              <span>Meal Plan Dossier (58 Pgs)</span>
             </a>
 
             <a
               href={pdfDownloadUrl}
               target="_blank"
               rel="noopener noreferrer"
+              title="Download full 59-page clinical dossier including 3-page prescription protocol and complete original 24Genetics report"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -150,8 +155,31 @@ export default function PatientDnaPortalClient({
               }}
             >
               <Download size={14} />
-              <span>Download Clinical Rx PDF (3 Pages)</span>
+              <span>Clinical Rx Dossier (59 Pgs)</span>
             </a>
+
+            {/* Light WhatsApp PDF Links */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 6px', backgroundColor: '#f1f5f9', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', paddingRight: '2px' }}>WhatsApp (Light):</span>
+              <a
+                href={mealPlanPdfUrlLight}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Download 2-page executive summary only (lightweight, ideal for WhatsApp/mobile)"
+                style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0284c7', textDecoration: 'none', padding: '3px 6px', borderRadius: '4px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
+              >
+                Diet (2p)
+              </a>
+              <a
+                href={pdfDownloadUrlLight}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Download 3-page clinical Rx only (lightweight, ideal for WhatsApp/mobile)"
+                style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', textDecoration: 'none', padding: '3px 6px', borderRadius: '4px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
+              >
+                Rx (3p)
+              </a>
+            </div>
           </div>
         </div>
 
@@ -349,27 +377,44 @@ export default function PatientDnaPortalClient({
                   </p>
                 </div>
 
-                <a
-                  href={mealPlanPdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '9px 18px',
-                    fontSize: '0.84rem',
-                    fontWeight: 750,
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    boxShadow: '0 3px 8px rgba(2, 132, 199, 0.3)'
-                  }}
-                >
-                  <Printer size={16} />
-                  <span>Download 2-Page Guide for My Kitchen</span>
-                </a>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+                  <a
+                    href={mealPlanPdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '9px 18px',
+                      fontSize: '0.84rem',
+                      fontWeight: 750,
+                      backgroundColor: '#0284c7',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      textDecoration: 'none',
+                      boxShadow: '0 3px 8px rgba(2, 132, 199, 0.3)'
+                    }}
+                  >
+                    <Utensils size={16} />
+                    <span>Download Full Dossier (58 Pgs: Guide + 24Genetics)</span>
+                  </a>
+
+                  <a
+                    href={mealPlanPdfUrlLight}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      color: '#0284c7',
+                      textDecoration: 'underline',
+                      paddingLeft: '4px'
+                    }}
+                  >
+                    ⚡ Download 2-Page Executive Guide Only (Light · Kitchen Print)
+                  </a>
+                </div>
               </div>
 
               {/* 4 Plain-English DNA Findings */}
@@ -1144,32 +1189,49 @@ export default function PatientDnaPortalClient({
             {/* Bottom PDF CTA */}
             <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '1.25rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <strong style={{ fontSize: '0.88rem', color: '#003666' }}>Download Complete 3-Page Clinical Dossier:</strong>
+                <strong style={{ fontSize: '0.88rem', color: '#003666' }}>Clinical Genomic Prescription Dossier:</strong>
                 <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
-                  Includes Page 1 (Findings), Page 2 (Pathway 1 Local OTC Guide), and Page 3 (Pathway 2 Compounding Order).
+                  Includes 3-Page Clinical Rx Guide plus the complete unedited 55-page certified 24Genetics laboratory report.
                 </p>
               </div>
 
-              <a
-                href={pdfDownloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '9px 18px',
-                  fontSize: '0.82rem',
-                  fontWeight: 750,
-                  backgroundColor: '#0d9488',
-                  color: '#ffffff',
-                  borderRadius: '6px',
-                  textDecoration: 'none'
-                }}
-              >
-                <Download size={15} />
-                <span>Download Official PDF (3 Pages)</span>
-              </a>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+                <a
+                  href={pdfDownloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '9px 18px',
+                    fontSize: '0.82rem',
+                    fontWeight: 750,
+                    backgroundColor: '#0d9488',
+                    color: '#ffffff',
+                    borderRadius: '6px',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <Download size={15} />
+                  <span>Download Full Clinical Dossier (59 Pgs)</span>
+                </a>
+
+                <a
+                  href={pdfDownloadUrlLight}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    color: '#0d9488',
+                    textDecoration: 'underline',
+                    paddingLeft: '4px'
+                  }}
+                >
+                  ⚡ Download Executive 3-Page Rx Only (Light)
+                </a>
+              </div>
             </div>
 
           </div>
@@ -1437,26 +1499,43 @@ export default function PatientDnaPortalClient({
                 </p>
               </div>
 
-              <a
-                href={pdfDownloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '9px 18px',
-                  fontSize: '0.82rem',
-                  fontWeight: 750,
-                  backgroundColor: '#003666',
-                  color: '#ffffff',
-                  borderRadius: '6px',
-                  textDecoration: 'none'
-                }}
-              >
-                <Printer size={15} />
-                <span>Print Official Compounding Order (PDF)</span>
-              </a>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+                <a
+                  href={pdfDownloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '9px 18px',
+                    fontSize: '0.82rem',
+                    fontWeight: 750,
+                    backgroundColor: '#003666',
+                    color: '#ffffff',
+                    borderRadius: '6px',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <Printer size={15} />
+                  <span>Print Full Compounding Dossier (59 Pgs)</span>
+                </a>
+
+                <a
+                  href={pdfDownloadUrlLight}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    color: '#003666',
+                    textDecoration: 'underline',
+                    paddingLeft: '4px'
+                  }}
+                >
+                  ⚡ Print Executive Order Only (3 Pages · Fast)
+                </a>
+              </div>
             </div>
           </div>
         )}

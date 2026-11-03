@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,7 +138,7 @@ export async function GET(request) {
     page1.drawText('1. YOUR GENETIC PROFILE IN PLAIN ENGLISH (WHAT YOUR DNA SAYS)', {
       x: 36,
       y: y1,
-      size: 8.8,
+      size: 9.5,
       font: helveticaBold,
       color: navyPrimary
     });
@@ -161,57 +163,58 @@ export async function GET(request) {
       }
     ];
 
-    const boxW = (p1Width - 72 - 18) / 2;
+    const boxW = (p1Width - 72 - 16) / 2;
+    const boxH = 68;
     plainFindings.forEach((f, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
-      const bX = 36 + col * (boxW + 18);
-      const bY = y1 - (row * 36) - 32;
+      const bX = 36 + col * (boxW + 16);
+      const bY = y1 - (row * (boxH + 12)) - boxH;
 
       page1.drawRectangle({
         x: bX,
         y: bY,
         width: boxW,
-        height: 32,
+        height: boxH,
         color: lightBg,
         borderColor: cardBorder,
         borderWidth: 0.8
       });
 
       page1.drawText(`• ${f.title}:`, {
-        x: bX + 6,
-        y: bY + 22,
-        size: 6.5,
+        x: bX + 10,
+        y: bY + boxH - 16,
+        size: 7.8,
         font: helveticaBold,
         color: navyPrimary
       });
 
       page1.drawText(f.desc, {
-        x: bX + 6,
-        y: bY + 12,
-        size: 5.6,
+        x: bX + 10,
+        y: bY + boxH - 30,
+        size: 6.8,
         font: helvetica,
         color: darkSlate,
-        maxWidth: boxW - 12,
-        lineHeight: 7.2
+        maxWidth: boxW - 20,
+        lineHeight: 9.5
       });
     });
 
-    y1 -= 76;
+    y1 -= (2 * boxH + 12 + 14);
 
     // -------------------------------------------------------------------------
     // SECTION 2: MEAL PLAN TRAFFIC LIGHT (WHAT TO ORDER)
     // -------------------------------------------------------------------------
-    y1 -= 8;
+    y1 -= 14;
     page1.drawText('2. MEAL PLAN SELECTION GUIDE (TRAFFIC LIGHT FOR YOUR CATERING MENU)', {
       x: 36,
       y: y1,
-      size: 8.8,
+      size: 9.8,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y1 -= 8;
+    y1 -= 10;
     const trafficCols = [
       {
         header: '[GREEN] ALWAYS ORDER (DNA Favorites)',
@@ -252,9 +255,9 @@ export async function GET(request) {
     ];
 
     const colW = (p1Width - 72 - 16) / 3;
+    const cH = 165;
     trafficCols.forEach((tc, cIdx) => {
       const cX = 36 + cIdx * (colW + 8);
-      const cH = 66;
 
       page1.drawRectangle({
         x: cX,
@@ -266,77 +269,88 @@ export async function GET(request) {
         borderWidth: 1
       });
 
+      page1.drawRectangle({
+        x: cX,
+        y: y1 - 22,
+        width: colW,
+        height: 22,
+        color: tc.bgColor
+      });
+
       page1.drawText(tc.header, {
-        x: cX + 6,
-        y: y1 - 12,
-        size: 6.2,
+        x: cX + 8,
+        y: y1 - 15,
+        size: 7.0,
         font: helveticaBold,
         color: tc.color
       });
 
-      let iY = y1 - 24;
+      let iY = y1 - 36;
       tc.items.forEach((it) => {
         page1.drawText(it, {
-          x: cX + 6,
+          x: cX + 8,
           y: iY,
-          size: 5.4,
+          size: 6.6,
           font: helvetica,
           color: darkSlate,
-          maxWidth: colW - 12,
-          lineHeight: 7.2
+          maxWidth: colW - 16,
+          lineHeight: 8.8
         });
-        iY -= 10;
+        iY -= 31;
       });
     });
 
-    y1 -= 72;
+    y1 -= (cH + 16);
 
     // -------------------------------------------------------------------------
     // SECTION 3: THE GOLDEN PLATE SEQUENCING RULE
     // -------------------------------------------------------------------------
-    y1 -= 6;
+    y1 -= 4;
+    const seqH = 68;
     page1.drawRectangle({
       x: 36,
-      y: y1 - 38,
+      y: y1 - seqH,
       width: p1Width - 72,
-      height: 38,
+      height: seqH,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
-      borderWidth: 1
+      borderWidth: 1.2
     });
 
     page1.drawText('THE GOLDEN PLATE SEQUENCING RULE (ELIMINATES AFTERNOON BRAIN FOG):', {
-      x: 44,
-      y: y1 - 12,
-      size: 6.5,
+      x: 48,
+      y: y1 - 18,
+      size: 7.8,
       font: helveticaBold,
       color: tealAccent
     });
 
     const seqText = 'Inside each meal tray, eat your food in this exact sequence: (1) Vegetables & salad first  ->  (2) Protein & healthy fats second  ->  (3) Rice or potatoes LAST.\nClinical impact: This creates a protective fiber mesh in your stomach, reducing blood sugar spikes by up to 45% and eliminating post-meal energy slumps.';
     page1.drawText(seqText, {
-      x: 44,
-      y: y1 - 23,
-      size: 5.6,
+      x: 48,
+      y: y1 - 36,
+      size: 7.0,
       font: helvetica,
       color: darkSlate,
-      maxWidth: p1Width - 88,
-      lineHeight: 8.0
+      maxWidth: p1Width - 96,
+      lineHeight: 10.5
     });
 
-    y1 -= 46;
+    y1 -= (seqH + 16);
 
+    // -------------------------------------------------------------------------
     // SECTION 4: 24-HOUR DAILY ROUTINE WITH YOUR MEALS
-    y1 -= 6;
+    // -------------------------------------------------------------------------
+    y1 -= 4;
     page1.drawText('4. 24-HOUR DAILY ROUTINE: SYNCHRONIZED WITH YOUR MEALS & SUPPLEMENTS', {
       x: 36,
       y: y1,
-      size: 8.8,
+      size: 9.8,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y1 -= 8;
+    y1 -= 10;
     const dailySteps = [
       {
         time: 'Upon Waking (Empty Stomach)',
@@ -365,9 +379,9 @@ export async function GET(request) {
     ];
 
     const stepW = (p1Width - 72 - 18) / 4;
+    const sH = 155;
     dailySteps.forEach((st, sIdx) => {
       const sX = 36 + sIdx * (stepW + 6);
-      const sH = 76;
 
       page1.drawRectangle({
         x: sX,
@@ -379,74 +393,94 @@ export async function GET(request) {
         borderWidth: 0.8
       });
 
+      // Header Banner
+      page1.drawRectangle({
+        x: sX,
+        y: y1 - 24,
+        width: stepW,
+        height: 24,
+        color: rgb(241 / 255, 245 / 255, 249 / 255)
+      });
+
       page1.drawText(st.time, {
-        x: sX + 5,
-        y: y1 - 11,
-        size: 5.6,
+        x: sX + 6,
+        y: y1 - 15,
+        size: 6.2,
         font: helveticaBold,
-        color: tealAccent
+        color: tealAccent,
+        maxWidth: stepW - 12
       });
 
       page1.drawText(st.step, {
-        x: sX + 5,
-        y: y1 - 20,
-        size: 6.0,
+        x: sX + 6,
+        y: y1 - 38,
+        size: 7.2,
         font: helveticaBold,
-        color: navyPrimary
+        color: navyPrimary,
+        maxWidth: stepW - 12
       });
 
       page1.drawText(st.action, {
-        x: sX + 5,
-        y: y1 - 30,
-        size: 5.3,
+        x: sX + 6,
+        y: y1 - 60,
+        size: 6.4,
         font: helveticaBold,
         color: darkSlate,
-        maxWidth: stepW - 10,
-        lineHeight: 6.8
+        maxWidth: stepW - 12,
+        lineHeight: 8.5
+      });
+
+      page1.drawLine({
+        start: { x: sX + 6, y: y1 - 100 },
+        end: { x: sX + stepW - 6, y: y1 - 100 },
+        thickness: 0.5,
+        color: cardBorder
       });
 
       page1.drawText(st.why, {
-        x: sX + 5,
-        y: y1 - 50,
-        size: 5.0,
+        x: sX + 6,
+        y: y1 - 114,
+        size: 6.0,
         font: helvetica,
         color: mutedSlate,
-        maxWidth: stepW - 10,
-        lineHeight: 6.4
+        maxWidth: stepW - 12,
+        lineHeight: 7.8
       });
     });
 
-    y1 -= 84;
+    y1 -= (sH + 16);
 
     // -------------------------------------------------------------------------
     // SECTION 5: KITCHEN FRIDGE REMINDER
     // -------------------------------------------------------------------------
+    const kH = 54;
     page1.drawRectangle({
       x: 36,
-      y: y1 - 30,
+      y: y1 - kH,
       width: p1Width - 72,
-      height: 30,
+      height: kH,
       color: lightBg,
       borderColor: cardBorder,
-      borderWidth: 0.8
+      borderWidth: 1
     });
 
     page1.drawText('3 GOLDEN KITCHEN REMINDERS:', {
-      x: 44,
-      y: y1 - 11,
-      size: 5.9,
+      x: 48,
+      y: y1 - 16,
+      size: 7.2,
       font: helveticaBold,
       color: navyPrimary
     });
 
     const kitchenReminders = '1. Hydration: Drink 2.5L of water daily between meals (not during)  ·  2. Caffeine Cutoff: Zero caffeine after 2:00 PM  ·  3. Overnight Rest: Maintain a 12-hour overnight fast between dinner and breakfast.';
     page1.drawText(kitchenReminders, {
-      x: 44,
-      y: y1 - 22,
-      size: 5.4,
+      x: 48,
+      y: y1 - 34,
+      size: 6.5,
       font: helvetica,
       color: darkSlate,
-      maxWidth: p1Width - 88
+      maxWidth: p1Width - 96,
+      lineHeight: 9.5
     });
 
     // Page 1 Footer
@@ -532,11 +566,11 @@ export async function GET(request) {
     // -------------------------------------------------------------------------
     // SECTION 1: THE 5 SUPPLEMENTS EXPLAINED BY BENEFIT (PLAIN LANGUAGE)
     // -------------------------------------------------------------------------
-    y2 -= 14;
+    y2 -= 16;
     page2.drawText('1. YOUR 5 TARGETED NUTRIENTS (WHAT THEY DO FOR YOUR BODY)', {
       x: 36,
       y: y2,
-      size: 8.8,
+      size: 9.5,
       font: helveticaBold,
       color: navyPrimary
     });
@@ -589,9 +623,9 @@ export async function GET(request) {
       }
     ];
 
-    y2 -= 4;
+    y2 -= 6;
     humanSupplements.forEach((s) => {
-      const cardH = 46;
+      const cardH = 76;
       y2 -= cardH;
 
       page2.drawRectangle({
@@ -608,65 +642,75 @@ export async function GET(request) {
       page2.drawRectangle({
         x: 36,
         y: y2,
-        width: 3.5,
+        width: 4,
         height: cardH,
         color: s.pColor
       });
 
+      // Header strip inside card
+      page2.drawRectangle({
+        x: 40,
+        y: y2 + cardH - 20,
+        width: p2Width - 76,
+        height: 20,
+        color: rgb(248 / 255, 250 / 255, 252 / 255)
+      });
+
       // Benefit Header & Nutrient Name
       page2.drawText(s.benefit, {
-        x: 46,
-        y: y2 + cardH - 12,
-        size: 6.8,
+        x: 48,
+        y: y2 + cardH - 14,
+        size: 8.2,
         font: helveticaBold,
         color: navyPrimary
       });
 
       page2.drawText(`· ${s.nutrient}`, {
-        x: 46 + helveticaBold.widthOfTextAtSize(s.benefit, 6.8) + 6,
-        y: y2 + cardH - 12,
-        size: 6.5,
+        x: 48 + helveticaBold.widthOfTextAtSize(s.benefit, 8.2) + 8,
+        y: y2 + cardH - 14,
+        size: 7.8,
         font: helveticaBold,
         color: tealAccent
       });
 
       // Priority Pill
-      const pillW = helveticaBold.widthOfTextAtSize(s.priority, 5.2) + 8;
+      const pillW = helveticaBold.widthOfTextAtSize(s.priority, 6.0) + 12;
       page2.drawRectangle({
         x: p2Width - 44 - pillW,
-        y: y2 + cardH - 14,
+        y: y2 + cardH - 16,
         width: pillW,
-        height: 10,
+        height: 13,
         color: s.pBg
       });
       page2.drawText(s.priority, {
-        x: p2Width - 44 - pillW + 4,
-        y: y2 + cardH - 11,
-        size: 5.2,
+        x: p2Width - 44 - pillW + 6,
+        y: y2 + cardH - 13,
+        size: 6.0,
         font: helveticaBold,
         color: s.pColor
       });
 
       // Why Text
       page2.drawText(`Why your DNA needs this: ${s.why}`, {
-        x: 46,
-        y: y2 + 20,
-        size: 5.6,
+        x: 48,
+        y: y2 + 34,
+        size: 7.0,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p2Width - 100
+        maxWidth: p2Width - 100,
+        lineHeight: 9.8
       });
 
       // Timing Text
       page2.drawText(`How to take: ${s.timing}`, {
-        x: 46,
-        y: y2 + 9,
-        size: 5.5,
+        x: 48,
+        y: y2 + 14,
+        size: 6.8,
         font: helveticaBold,
         color: mutedSlate
       });
 
-      y2 -= 4;
+      y2 -= 7;
     });
 
     // -------------------------------------------------------------------------
@@ -676,12 +720,12 @@ export async function GET(request) {
     page2.drawText('2. CHOOSE YOUR LEVEL: 3 SIMPLE DECISION PACKS (BUY ONLY WHAT YOU NEED)', {
       x: 36,
       y: y2,
-      size: 8.8,
+      size: 9.8,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y2 -= 8;
+    y2 -= 10;
     const packs = [
       {
         name: 'PACK 1 · ESSENTIAL CORE',
@@ -710,9 +754,9 @@ export async function GET(request) {
     ];
 
     const pkW = (p2Width - 72 - 16) / 3;
+    const pkH = 96;
     packs.forEach((pk, pIdx) => {
       const pkX = 36 + pIdx * (pkW + 8);
-      const pkH = 56;
 
       page2.drawRectangle({
         x: pkX,
@@ -724,135 +768,146 @@ export async function GET(request) {
         borderWidth: pIdx === 1 ? 1.4 : 0.8
       });
 
+      // Header inside pack card
+      page2.drawRectangle({
+        x: pkX,
+        y: y2 - 20,
+        width: pkW,
+        height: 20,
+        color: pk.bg
+      });
+
       page2.drawText(pk.name, {
-        x: pkX + 6,
-        y: y2 - 11,
-        size: 5.8,
+        x: pkX + 8,
+        y: y2 - 13,
+        size: 7.0,
         font: helveticaBold,
         color: pk.color
       });
 
       page2.drawText(pk.items, {
-        x: pkX + 6,
-        y: y2 - 19,
-        size: 5.2,
+        x: pkX + 8,
+        y: y2 - 30,
+        size: 6.4,
         font: helveticaBold,
         color: darkSlate
       });
 
       page2.drawText(pk.desc, {
-        x: pkX + 6,
-        y: y2 - 28,
-        size: 4.9,
+        x: pkX + 8,
+        y: y2 - 46,
+        size: 6.0,
         font: helvetica,
         color: mutedSlate,
-        maxWidth: pkW - 12,
-        lineHeight: 6.6
+        maxWidth: pkW - 16,
+        lineHeight: 8.5
       });
     });
 
-    y2 -= 64;
+    y2 -= (pkH + 16);
 
     // -------------------------------------------------------------------------
     // SECTION 3: HOW DO YOU PREFER TO TAKE IT? (PHARMACY VS COMPOUNDING)
     // -------------------------------------------------------------------------
-    y2 -= 6;
+    y2 -= 4;
     page2.drawText('3. HOW DO YOU PREFER TO TAKE IT? (TWO SIMPLE SHOPPING PATHWAYS)', {
       x: 36,
       y: y2,
-      size: 8.8,
+      size: 9.8,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y2 -= 8;
+    y2 -= 10;
     const pathwayW = (p2Width - 72 - 12) / 2;
+    const pathwayH = 86;
 
     // Pathway 1: Local Doha Pharmacy
     page2.drawRectangle({
       x: 36,
-      y: y2 - 48,
+      y: y2 - pathwayH,
       width: pathwayW,
-      height: 48,
+      height: pathwayH,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 0.8
     });
 
     page2.drawText('OPTION A: LOCAL DOHA PHARMACIES (COMMERCIAL BOTTLES)', {
-      x: 44,
-      y: y2 - 12,
-      size: 5.9,
+      x: 48,
+      y: y2 - 16,
+      size: 7.0,
       font: helveticaBold,
       color: darkSlate
     });
     const p1Desc = '• Buy 2 to 5 separate bottles at retail pharmacies in Qatar (Brands: Solgar, Thorne, Now Foods).\n• Pros: Immediate local purchase.\n• Cons: Taking 4–6 pills from multiple bottles with non-customized generic doses.';
     page2.drawText(p1Desc, {
-      x: 44,
-      y: y2 - 22,
-      size: 5.1,
+      x: 48,
+      y: y2 - 32,
+      size: 6.2,
       font: helvetica,
       color: mutedSlate,
-      maxWidth: pathwayW - 16,
-      lineHeight: 6.8
+      maxWidth: pathwayW - 24,
+      lineHeight: 9.0
     });
 
     // Pathway 2: Custom Compounding All-in-One
     page2.drawRectangle({
       x: 36 + pathwayW + 12,
-      y: y2 - 48,
+      y: y2 - pathwayH,
       width: pathwayW,
-      height: 48,
+      height: pathwayH,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: tealAccent,
       borderWidth: 1.2
     });
 
     page2.drawText('OPTION B: CUSTOM ALL-IN-ONE COMPOUNDING (RECOMMENDED)', {
-      x: 44 + pathwayW + 12,
-      y: y2 - 12,
-      size: 5.9,
+      x: 48 + pathwayW + 12,
+      y: y2 - 16,
+      size: 7.0,
       font: helveticaBold,
       color: tealAccent
     });
     const p2Desc = '• Prepared specifically for you in synchronized daily capsules (1 with breakfast, 2 at bedtime).\n• Pros: All your pure nutrients combined into just 3 capsules/day. 100% lactose-free.\n• Cons: Requires authorized prescription compounding by licensed partner pharmacy.';
     page2.drawText(p2Desc, {
-      x: 44 + pathwayW + 12,
-      y: y2 - 22,
-      size: 5.1,
+      x: 48 + pathwayW + 12,
+      y: y2 - 32,
+      size: 6.2,
       font: helvetica,
       color: darkSlate,
-      maxWidth: pathwayW - 16,
-      lineHeight: 6.8
+      maxWidth: pathwayW - 24,
+      lineHeight: 9.0
     });
 
-    y2 -= 56;
+    y2 -= (pathwayH + 12);
 
     // Safety Alert
+    const safeH = 40;
     page2.drawRectangle({
       x: 36,
-      y: y2 - 24,
+      y: y2 - safeH,
       width: p2Width - 72,
-      height: 24,
+      height: safeH,
       color: redBg,
       borderColor: redBorder,
       borderWidth: 0.8
     });
 
     page2.drawText('CRITICAL SAFETY RULE: MUTUALLY EXCLUSIVE PATHWAYS', {
-      x: 44,
-      y: y2 - 9,
-      size: 5.8,
+      x: 48,
+      y: y2 - 14,
+      size: 7.0,
       font: helveticaBold,
       color: redText
     });
     page2.drawText('Choose either Option A OR Option B. Never take both together to prevent accidental double-dosing of Vitamin D or minerals.', {
-      x: 44,
-      y: y2 - 18,
-      size: 5.2,
+      x: 48,
+      y: y2 - 28,
+      size: 6.4,
       font: helvetica,
       color: darkSlate,
-      maxWidth: p2Width - 88
+      maxWidth: p2Width - 96
     });
 
     // Page 2 Footer
@@ -863,6 +918,156 @@ export async function GET(request) {
       font: helvetica,
       color: mutedSlate
     });
+
+    // =========================================================================
+    // SECTION II: MERGE ORIGINAL 24GENETICS LABORATORY REPORT (IF REQUESTED)
+    // =========================================================================
+    const includeOriginal = searchParams.get('full') !== 'false' && searchParams.get('includeOriginal') !== 'false';
+
+    if (includeOriginal) {
+      const originalPdfPath = path.join(process.cwd(), 'public/reports/24genetics/G000943554_Nutrition.pdf');
+      if (fs.existsSync(originalPdfPath)) {
+        // Divider Page (Section II Cover)
+        const dividerPage = pdfDoc.addPage([595.28, 841.89]);
+        const { width: dWidth, height: dHeight } = dividerPage.getSize();
+
+        // Top Brand Accent Strip
+        dividerPage.drawRectangle({
+          x: 0,
+          y: dHeight - 8,
+          width: dWidth,
+          height: 8,
+          color: navyPrimary
+        });
+        dividerPage.drawRectangle({
+          x: 0,
+          y: dHeight - 12,
+          width: dWidth,
+          height: 4,
+          color: tealAccent
+        });
+
+        // Background Border Card
+        dividerPage.drawRectangle({
+          x: 36,
+          y: 48,
+          width: dWidth - 72,
+          height: dHeight - 96,
+          color: lightBg,
+          borderColor: cardBorder,
+          borderWidth: 1.2
+        });
+
+        // Center Content Box
+        dividerPage.drawRectangle({
+          x: 56,
+          y: dHeight / 2 - 130,
+          width: dWidth - 112,
+          height: 290,
+          color: white,
+          borderColor: tealAccent,
+          borderWidth: 1.5
+        });
+
+        // Badge
+        dividerPage.drawRectangle({
+          x: 76,
+          y: dHeight / 2 + 114,
+          width: 330,
+          height: 22,
+          color: blueBg,
+          borderColor: blueBorder,
+          borderWidth: 0.8
+        });
+        dividerPage.drawText('SECTION II · PRIMARY LABORATORY GENOMIC SOURCE', {
+          x: 88,
+          y: dHeight / 2 + 120,
+          size: 8.5,
+          font: helveticaBold,
+          color: navyPrimary
+        });
+
+        dividerPage.drawText('24Genetics DNA Nutrition Analysis', {
+          x: 76,
+          y: dHeight / 2 + 82,
+          size: 19,
+          font: helveticaBold,
+          color: navyPrimary
+        });
+
+        dividerPage.drawText('Full Unedited 55-Page Certified Laboratory Dossier', {
+          x: 76,
+          y: dHeight / 2 + 62,
+          size: 11,
+          font: helveticaOblique,
+          color: tealAccent
+        });
+
+        // Thin Separator
+        dividerPage.drawLine({
+          start: { x: 76, y: dHeight / 2 + 50 },
+          end: { x: dWidth - 76, y: dHeight / 2 + 50 },
+          thickness: 1,
+          color: cardBorder
+        });
+
+        // Metadata grid
+        dividerPage.drawText(`Patient: ${patientName}`, { x: 76, y: dHeight / 2 + 30, size: 9.5, font: helveticaBold, color: darkSlate });
+        dividerPage.drawText(`Specimen ID: G000943554 / ${sampleId}`, { x: 76, y: dHeight / 2 + 14, size: 9, font: helvetica, color: mutedSlate });
+        dividerPage.drawText('Sequencing Platform: Illumina NGS Microarray · European CE-IVD Standard', { x: 76, y: dHeight / 2 - 2, size: 8.5, font: helvetica, color: mutedSlate });
+        dividerPage.drawText('Laboratory Facility: 24Genetics SL · Madrid, Spain · ISO 9001 Certified', { x: 76, y: dHeight / 2 - 18, size: 8.5, font: helvetica, color: mutedSlate });
+
+        // Explanation Paragraph
+        dividerPage.drawRectangle({
+          x: 76,
+          y: dHeight / 2 - 110,
+          width: dWidth - 152,
+          height: 78,
+          color: lightBg,
+          borderColor: cardBorder,
+          borderWidth: 0.8
+        });
+
+        dividerPage.drawText('CLINICAL DATA ORIGIN & VERIFICATION AUDIT TRAIL:', {
+          x: 86,
+          y: dHeight / 2 - 46,
+          size: 7.8,
+          font: helveticaBold,
+          color: navyPrimary
+        });
+        dividerPage.drawText('Section I of this document represents the clinical translation, personalized meal plan guidelines, and targeted compounding protocols formulated by Atlas Health Services & Ryhanh Medical Wellness.', {
+          x: 86,
+          y: dHeight / 2 - 60,
+          size: 7.2,
+          font: helvetica,
+          color: darkSlate,
+          maxWidth: dWidth - 172
+        });
+        dividerPage.drawText('The subsequent 55 pages constitute the primary raw genomic findings emitted directly by 24Genetics, containing the complete spectrum of nutritional predispositions, metabolic profiles, and genetic polymorphisms.', {
+          x: 86,
+          y: dHeight / 2 - 86,
+          size: 7.2,
+          font: helvetica,
+          color: darkSlate,
+          maxWidth: dWidth - 172
+        });
+
+        // Bottom footer on divider page
+        dividerPage.drawText('Atlas Health Services · Unified Clinical Genomics Dossier · Section II begins on next page', {
+          x: 36,
+          y: 26,
+          size: 7.5,
+          font: helveticaOblique,
+          color: mutedSlate
+        });
+
+        // Append 55 Original Pages
+        const originalBytes = fs.readFileSync(originalPdfPath);
+        const originalPdf = await PDFDocument.load(originalBytes);
+        const copiedPages = await pdfDoc.copyPages(originalPdf, originalPdf.getPageIndices());
+        copiedPages.forEach((page) => pdfDoc.addPage(page));
+      }
+    }
 
     const pdfBytes = await pdfDoc.save();
 

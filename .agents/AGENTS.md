@@ -585,3 +585,13 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
      - **Botón Primario (Inquire)**: CTA principal en gradiente de acento (ej. `Inquire Product →` o `Inquire Collection →`), que abre el drawer institucional `PublicInstitutionalInquiryDrawer` con el producto/colección inyectado automáticamente.
 
 
+
+
+## 48. Máximo Aprovechamiento y Distribución Vertical en PDFs (Golden Rule)
+- **Nunca comprimas la información en la mitad superior de una página dejando grandes espacios en blanco abajo.**
+- Todo documento PDF generado en la plataforma (prescripciones clínicas, guías de nutrición y meal plan, monografías, consentimientos, albaranes, catálogos) DEBE distribuir proporcionalmente sus bloques y tarjetas a lo largo de toda la altura imprimible de la hoja A4 (842 pt).
+- **Proporción y Legibilidad Ejecutiva**:
+  - Las tarjetas, tablas, cajas y filas deben contar con alturas y espaciados generosos (`lineHeight` cómodo, paddings amplios, fuentes entre 6.5 pt y 8.5 pt para lectura óptima).
+  - El contenido debe extenderse de forma homogénea desde la cabecera (Y ≈ 815 pt) hasta la banda inferior antes del pie de página (Y ≈ 50–90 pt), evitando el aspecto de borrador o texto apretado.
+- **Codificación y Compatibilidad WinAnsi**:
+  - En `pdf-lib`, usar siempre caracteres compatibles con el estándar WinAnsi (evitando emojis o caracteres de 4 bytes que disparan errores 500 al renderizar; usar en su lugar identificadores claros como `[GREEN]`, `[STEP 1]` o flechas ASCII `->`).
