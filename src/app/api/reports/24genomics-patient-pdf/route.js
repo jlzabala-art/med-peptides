@@ -403,44 +403,100 @@ export async function GET(request) {
 
     y -= (boxHeight + 14);
 
-    // Section 3: High-Adherence Patient Dietary Guidelines
-    const dietH = 92;
+    // Section 3: High-Adherence Patient Dietary Guidelines (Clean GCP Card, Zero Overlap)
+    const dietH = 106;
     page1.drawRectangle({
       x: 36,
       y: y - dietH,
       width: p1Width - 72,
       height: dietH,
-      color: rgb(240 / 255, 253 / 255, 250 / 255),
-      borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
-      borderWidth: 1.2
+      color: white,
+      borderColor: gcpBorder,
+      borderWidth: 1
     });
 
-    page1.drawText('3. CONCRETE PATIENT DIETARY RULES (HIGH-ADHERENCE GUIDELINES)', {
+    // Top Header Strip
+    page1.drawRectangle({
+      x: 36,
+      y: y - 20,
+      width: p1Width - 72,
+      height: 20,
+      color: rgb(248 / 255, 250 / 255, 252 / 255)
+    });
+
+    page1.drawText('3. FOUR CORE PATIENT DIETARY RULES (PLAIN-ENGLISH ACTION GUIDE)', {
       x: 48,
-      y: y - 16,
+      y: y - 14,
       size: 8.5,
       font: helveticaBold,
-      color: tealAccent
+      color: navyPrimary
     });
 
     const dietRules = [
-      '1. Plate Sequencing: Eat vegetables and soluble fiber first, lean proteins/healthy fats second, and complex carbs last (reduces glucose spikes up to 45%).',
-      '2. Carbohydrate Cap: Keep net carbohydrates under 40g per meal. Avoid sugary soft drinks, commercial juices, and refined white flour pastries.',
-      '3. Microbiota Foods: Consume dairy-free fermented foods (coconut kefir, sauerkraut) and cooked/cooled potatoes to nourish beneficial Bifidobacteria.',
-      '4. Circadian Caffeine Window: Due to your genetic CYP1A2 profile, stop caffeine and stimulants before 12:00 PM to protect nighttime sleep architecture.'
+      {
+        num: '1',
+        title: 'Plate Order (Vegetables First):',
+        text: 'Eat greens/fiber first -> protein second -> carbs last. Smooths insulin and prevents energy crashes.'
+      },
+      {
+        num: '2',
+        title: 'Carb Limit (Under 40g Net):',
+        text: 'Keep carbs under 40g per meal. Avoid sugary soft drinks, bottled juices, and white flour pastries.'
+      },
+      {
+        num: '3',
+        title: 'Gut Microbiota (Dairy-Free):',
+        text: 'Choose coconut kefir, fermented vegetables, and cooled potatoes to nourish your Bifidobacteria.'
+      },
+      {
+        num: '4',
+        title: 'Caffeine Cut-Off (Before 12 PM):',
+        text: 'Slow CYP1A2 gene: Stop coffee, tea, and stimulants by 12:00 noon to safeguard deep sleep.'
+      }
     ];
 
-    let rY = y - 32;
+    let rY = y - 36;
     dietRules.forEach(r => {
-      page1.drawText(r, {
+      // Number badge pill
+      page1.drawRectangle({
         x: 48,
-        y: rY,
-        size: 7.8,
-        font: helvetica,
-        color: darkSlate,
-        maxWidth: p1Width - 96
+        y: rY - 2,
+        width: 14,
+        height: 12,
+        color: rgb(240 / 255, 253 / 255, 250 / 255),
+        borderColor: tealAccent,
+        borderWidth: 0.8
       });
-      rY -= 14.5;
+      page1.drawText(r.num, {
+        x: 53,
+        y: rY + 1,
+        size: 7.2,
+        font: helveticaBold,
+        color: tealAccent
+      });
+
+      // Title
+      page1.drawText(r.title, {
+        x: 68,
+        y: rY + 1,
+        size: 7.4,
+        font: helveticaBold,
+        color: darkSlate
+      });
+
+      const tWidth = helveticaBold.widthOfTextAtSize(r.title, 7.4);
+
+      // Body text starting cleanly after title with strict maxWidth
+      page1.drawText(r.text, {
+        x: 68 + tWidth + 6,
+        y: rY + 1,
+        size: 7.0,
+        font: helvetica,
+        color: mutedSlate,
+        maxWidth: p1Width - (68 + tWidth + 6) - 46
+      });
+
+      rY -= 19;
     });
 
     y -= (dietH + 12);
@@ -726,13 +782,13 @@ export async function GET(request) {
         size: 8.2,
         font: helveticaBold,
         color: navyPrimary,
-        maxWidth: 175
+        maxWidth: 160
       });
 
       // Priority Badge Pill (Distinct visual category)
       const pBadgeW = helveticaBold.widthOfTextAtSize(meta.priorityBadge, 6.2) + 10;
       page2.drawRectangle({
-        x: 224,
+        x: 212,
         y: y2 + cardH - 16,
         width: pBadgeW,
         height: 13,
@@ -741,100 +797,116 @@ export async function GET(request) {
         borderWidth: 0.8
       });
       page2.drawText(meta.priorityBadge, {
-        x: 229,
+        x: 217,
         y: y2 + cardH - 13,
         size: 6.2,
         font: helveticaBold,
         color: meta.priorityColor
       });
 
-      // Center: Short Gene Tag
-      page2.drawText(`Gene: ${meta.shortGene}`, {
-        x: 348,
-        y: y2 + cardH - 14,
-        size: 7.2,
-        font: helveticaBold,
-        color: mutedSlate,
-        maxWidth: 110
-      });
-
-      // Right: Target Daily Dose (Right-aligned with zero overlap)
+      // Right: Target Daily Dose Pill (Clean boxed pill, zero overlap with gene)
       const doseLabel = `Target Dose: ${meta.dose}`;
-      const doseW = helveticaBold.widthOfTextAtSize(doseLabel, 7.5);
+      const doseBoxW = helveticaBold.widthOfTextAtSize(doseLabel, 7.2) + 14;
+      const doseX = p2Width - 46 - doseBoxW;
+      page2.drawRectangle({
+        x: doseX,
+        y: y2 + cardH - 16,
+        width: doseBoxW,
+        height: 13,
+        color: rgb(240 / 255, 253 / 255, 250 / 255),
+        borderColor: tealAccent,
+        borderWidth: 0.8
+      });
       page2.drawText(doseLabel, {
-        x: p2Width - 46 - doseW,
-        y: y2 + cardH - 14,
-        size: 7.5,
+        x: doseX + 7,
+        y: y2 + cardH - 13,
+        size: 7.2,
         font: helveticaBold,
         color: tealAccent
       });
 
-      // Line 1: Active Form
-      page2.drawText('• Recommended Chemical Form: ', {
-        x: 46,
+      // Center: Short Gene Tag (Constrained between Priority Badge and Dose Box with zero collision)
+      const geneMaxW = doseX - (212 + pBadgeW + 16);
+      page2.drawText(`DNA: ${meta.shortGene}`, {
+        x: 212 + pBadgeW + 8,
+        y: y2 + cardH - 13,
+        size: 6.8,
+        font: helvetica,
+        color: mutedSlate,
+        maxWidth: Math.max(geneMaxW, 40)
+      });
+
+      // Unified 2-Column Key-Value Rows (Values strictly aligned at x: 168)
+      const labelColX = 46;
+      const valueColX = 168;
+      const valMaxW = p2Width - valueColX - 46;
+
+      // Line 1: Best Form
+      page2.drawText('• Best Active Form:', {
+        x: labelColX,
         y: y2 + 55,
-        size: 7.4,
+        size: 7.2,
         font: helveticaBold,
         color: darkSlate
       });
       page2.drawText(supp.chemicalFormEn, {
-        x: 184,
+        x: valueColX,
         y: y2 + 55,
-        size: 7.4,
+        size: 7.2,
         font: helveticaBold,
         color: tealAccent,
-        maxWidth: p2Width - 235
+        maxWidth: valMaxW
       });
 
-      // Line 2: Avoid
-      page2.drawText('• Strictly Avoid: ', {
-        x: 46,
+      // Line 2: What to Avoid
+      page2.drawText('• Strictly Avoid:', {
+        x: labelColX,
         y: y2 + 40,
         size: 7.2,
         font: helveticaBold,
         color: alertRed
       });
       page2.drawText(supp.avoidEn, {
-        x: 122,
+        x: valueColX,
         y: y2 + 40,
         size: 7.0,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p2Width - 170
+        maxWidth: valMaxW
       });
 
-      // Line 3: Posology
-      page2.drawText('• Timing & Posology: ', {
-        x: 46,
+      // Line 3: Posology / Timing
+      page2.drawText('• When & How to Take:', {
+        x: labelColX,
         y: y2 + 25,
         size: 7.2,
         font: helveticaBold,
         color: mutedSlate
       });
       page2.drawText(supp.timingEn, {
-        x: 146,
+        x: valueColX,
         y: y2 + 25,
         size: 7.0,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p2Width - 195
+        maxWidth: valMaxW
       });
 
-      // Line 4: Retail Doha Brands
-      page2.drawText('• Qatar Pharmacy Reference Brands: ', {
-        x: 46,
+      // Line 4: Suggested Retail Brands
+      page2.drawText('• Suggested Brands:', {
+        x: labelColX,
         y: y2 + 10,
         size: 7.2,
         font: helveticaBold,
         color: navyPrimary
       });
       page2.drawText(supp.localBrandsEn, {
-        x: 212,
+        x: valueColX,
         y: y2 + 10,
         size: 7.0,
         font: helveticaBold,
         color: darkSlate,
-        maxWidth: p2Width - 260
+        maxWidth: valMaxW
       });
 
       // Spacing between cards
