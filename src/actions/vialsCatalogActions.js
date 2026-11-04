@@ -46,12 +46,34 @@ function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 1
       variant.unit_price ??
       defaultPrice
     );
-    // Distributor tier: strictly +15% over Lotusland cost. Standard wholesale: dual +15% margin
+
+    const rawCost10 = Number(
+      variant.cost_tiers?.cost_10 ??
+      variant.cost_10 ??
+      variant.price_per_kit_10 ??
+      variant.pricing?.master?.kit ??
+      0
+    );
+
+    // Distributor tier: strictly +15% over Lotusland cost. Standard wholesale: dual +15% margin (1.15 * 1.15 = 1.3225)
     const unitPrice = isDistributor
       ? round2(baseCost * 1.15)
       : round2(round2(baseCost * 1.15) * (1 + Number(markupPercent || 15) / 100));
-    const tier10UnitPrice = round2(unitPrice * 0.90);
-    const pack10Price = round2(tier10UnitPrice * 10);
+
+    // Pack 10 / Box Volume Pricing:
+    // Sourced directly from Lotusland's official cost_10 when available (typically 30% - 50% discount)
+    let pack10Price;
+    let tier10UnitPrice;
+
+    if (rawCost10 > 0 && rawCost10 < baseCost * 10) {
+      pack10Price = isDistributor
+        ? round2(rawCost10 * 1.15)
+        : round2(round2(rawCost10 * 1.15) * (1 + Number(markupPercent || 15) / 100));
+      tier10UnitPrice = round2(pack10Price / 10);
+    } else {
+      tier10UnitPrice = round2(unitPrice * 0.85);
+      pack10Price = round2(tier10UnitPrice * 10);
+    }
 
     return {
       unitPrice,

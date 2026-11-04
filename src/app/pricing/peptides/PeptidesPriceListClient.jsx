@@ -151,6 +151,16 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   // ── Cart & Contact Draft Persistence (Anti-abandonment) ──
   const storageKey = `atlas_peptides_b2b_cart_${referralCode || 'CAT-RX-7482'}`;
 
+  // Persist current tier & referral to localStorage so registration inherits correct pricing
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_peptides_tier', isDistributor ? 'distributor' : 'wholesaler');
+        localStorage.setItem('atlas_peptides_referral', referralCode || (isDistributor ? 'DISTRIBUTOR-15' : 'WHOLESALER-B2B'));
+      } catch (e) {}
+    }
+  }, [isDistributor, referralCode]);
+
   // Hydrate cart & contact on initial mount (asynchronously to avoid cascading renders)
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -623,6 +633,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       render: (_, row) => {
         const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
         const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
+        const discountPct = Math.max(10, Math.round((1 - (p10 / (row.unitPrice * 10))) * 100));
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -638,7 +649,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 padding: '1px 5px',
                 borderRadius: '4px'
               }}>
-                -15% Vol.
+                -{discountPct}% Box
               </span>
             </div>
             <span style={{ fontSize: '0.68rem', color: '#047857', fontFamily: 'monospace' }}>
@@ -812,7 +823,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   padding: '2px 8px',
                   borderRadius: '4px'
                 }}>
-                  {isDistributor ? 'Official Distributor Schedule • +15% Cost Margin' : 'Official B2B & Clinical Price Schedule'}
+                  {isDistributor ? 'Official Distributor Schedule • +15% Cost Margin' : 'Official Wholesaler Schedule • 15% + 15% Margin Tier'}
                 </span>
                 <span style={{
                   fontSize: '0.68rem',
@@ -827,10 +838,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 </span>
               </div>
               <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', margin: 0 }}>
-                Certified Clinical Peptide Vials
+                {isDistributor ? 'Certified Clinical Peptide Vials • Distributor B2B' : 'Certified Clinical Peptide Vials • Wholesaler & Clinic'}
               </h1>
               <p style={{ fontSize: '0.88rem', color: '#64748b', marginTop: '4px', maxWidth: '750px' }}>
-                Comprehensive institutional price schedule for sterile lyophilized bioactive peptides. Direct lab pricing with volume tiers for registered medical practices, clinics, and research compounding facilities.
+                {isDistributor
+                  ? 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate). Strictly applied +15% margin over Lotusland cost with manufacturer box volume pricing.'
+                  : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides. Standard wholesale tier with manufacturer 10-pack volume savings.'
+                }
               </p>
             </div>
 
