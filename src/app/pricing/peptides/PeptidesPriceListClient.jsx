@@ -13,6 +13,7 @@ import {
   Layers,
   Sparkles,
   ChevronRight,
+  ChevronDown,
   Filter,
   Lock,
   ArrowRight,
@@ -488,6 +489,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [selectedSpecsProduct, setSelectedSpecsProduct] = useState(null);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
 
   // Debounce search query to keep main thread at 60fps on mobile (150ms)
   useEffect(() => {
@@ -1296,7 +1298,29 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
             </div>
 
-            {/* Share button (Request Proforma deduplicated to bottom docker per Golden Rule) */}
+            {/* PDF Preview button in Header */}
+            <button
+              onClick={() => setIsPdfPreviewOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                color: '#cbd5e1',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title="Preview official PDF price schedule"
+            >
+              <Eye size={13} />
+              <span>PDF</span>
+            </button>
+
+            {/* Share button */}
             <button
               onClick={handleShareSchedule}
               style={{
@@ -1332,50 +1356,51 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.75rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+              {/* Consolidated GCP Status Strip (Single Row) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
                 <span style={{
-                  fontSize: '0.68rem',
+                  fontSize: '0.70rem',
                   fontWeight: 750,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  background: isDistributor ? '#e6f4ea' : '#e8f0fe',
                   color: isDistributor ? '#137333' : '#1a73e8',
+                  background: isDistributor ? '#e6f4ea' : '#e8f0fe',
                   border: isDistributor ? '1px solid #ceead6' : '1px solid #c2e7ff',
-                  padding: '3px 9px',
-                  borderRadius: '12px'
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px'
                 }}>
-                  {isDistributor ? 'Official Distributor Price Schedule' : 'Official Wholesaler & Institutional Schedule'}
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isDistributor ? '#137333' : '#1a73e8', display: 'inline-block' }} />
+                  <span>{isDistributor ? 'Official Distributor Schedule' : 'Wholesale Schedule'}</span>
                 </span>
                 <span style={{
-                  fontSize: '0.68rem',
+                  fontSize: '0.70rem',
                   fontWeight: 650,
                   color: '#137333',
                   background: '#e6f4ea',
                   border: '1px solid #ceead6',
-                  padding: '3px 9px',
-                  borderRadius: '12px',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}>
-                  <CheckCircle2 size={12} />
-                  <span>Batch Verified ≥99.0% HPLC</span>
+                  <CheckCircle2 size={11} />
+                  <span>≥99.0% HPLC</span>
                 </span>
                 <span style={{
-                  fontSize: '0.74rem',
-                  fontWeight: 800,
+                  fontSize: '0.70rem',
+                  fontWeight: 750,
                   color: '#0d47a1',
                   background: '#e3f2fd',
-                  border: '1.5px solid #90caf9',
-                  padding: '3px 12px',
-                  borderRadius: '14px',
+                  border: '1px solid #90caf9',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 1px 3px rgba(13, 71, 161, 0.12)'
+                  gap: '4px'
                 }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1976d2', display: 'inline-block' }} />
-                  <span>Pricing Currency: <strong>{currency} ({currencySymbol.trim()})</strong></span>
+                  <span>Currency: <strong>{currency} ({currencySymbol.trim()})</strong></span>
                 </span>
               </div>
               <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#202124', letterSpacing: '-0.02em', margin: 0 }}>
@@ -1389,7 +1414,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="mobile-hide" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 onClick={() => setIsPdfPreviewOpen(true)}
                 style={{
@@ -1447,31 +1472,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             display: flex;
             flex-direction: column;
           }
+          .mobile-only-category-selector {
+            display: none;
+          }
           @media (max-width: 1024px) {
             .gcp-pricing-portal-layout {
               flex-direction: column;
               gap: 1rem;
             }
             .gcp-pricing-sidebar {
-              width: 100%;
-              position: static;
+              display: none !important;
             }
-            .gcp-categories-horizontal {
-              display: flex !important;
-              flex-direction: row !important;
-              overflow-x: auto !important;
-              -webkit-overflow-scrolling: touch;
-              padding-bottom: 6px;
-              gap: 6px !important;
-            }
-            .gcp-categories-horizontal button {
-              flex-shrink: 0;
-              white-space: nowrap;
-            }
-            .gcp-protocols-grid {
-              display: grid !important;
-              grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
-              gap: 8px !important;
+            .mobile-only-category-selector {
+              display: block !important;
             }
           }
         ` }} />
@@ -1708,6 +1721,54 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* ── Option 1: Mobile Google Cloud Category Selector Button ── */}
+            <div className="mobile-only-category-selector" style={{ marginBottom: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setIsCategorySheetOpen(true)}
+                style={{
+                  width: '100%',
+                  minHeight: '44px',
+                  background: '#ffffff',
+                  border: '1.5px solid #1a73e8',
+                  borderRadius: '8px',
+                  padding: '8px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 3px rgba(26,115,232,0.12)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                  <span style={{ color: '#1a73e8', display: 'flex', alignItems: 'center' }}>
+                    {selectedCategory === 'all' ? <Layers size={16} /> : getCategoryIcon(selectedCategory, 16)}
+                  </span>
+                  <div style={{ textAlign: 'left', minWidth: 0 }}>
+                    <div style={{ fontSize: '0.66rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>
+                      Peptide Category Filter
+                    </div>
+                    <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1a73e8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {selectedCategory === 'all' ? 'All Formulations' : (CATEGORY_MAP[selectedCategory]?.label || selectedCategory)}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                  <span style={{
+                    fontSize: '0.70rem',
+                    fontWeight: 800,
+                    background: '#e8f0fe',
+                    color: '#1a73e8',
+                    padding: '2px 8px',
+                    borderRadius: '10px'
+                  }}>
+                    {selectedCategory === 'all' ? processedProducts.length : processedProducts.filter(p => p.categoryKey === selectedCategory).length}
+                  </span>
+                  <ChevronDown size={16} color="#1a73e8" />
+                </div>
+              </button>
             </div>
 
             {/* ── Global Search & Filters (Golden Rule #7) ── */}
@@ -2811,6 +2872,186 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           <strong>Logistics & Regulatory Terms:</strong> All peptide vials are manufactured under cGMP standards with certified analytical purity (≥99.0% HPLC). Lyophilized sterile formulations are vacuum-sealed for maximum room-temperature stability and dispatched via express medical courier. Official proforma invoice and analytical COA documentation will be issued upon formal order confirmation.
         </div>
       </div>
+
+      {/* ── Option 1: Mobile Category Selection Bottom Sheet (Google Cloud Console Standard) ── */}
+      {isCategorySheetOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1100,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            animation: 'fadeIn 0.18s ease'
+          }}
+          onClick={() => setIsCategorySheetOpen(false)}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderTopLeftRadius: '16px',
+              borderTopRightRadius: '16px',
+              maxHeight: '82vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Sheet Handle & Header */}
+            <div style={{
+              padding: '12px 16px 10px',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '6px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '36px',
+                height: '4px',
+                background: '#cbd5e1',
+                borderRadius: '2px'
+              }} />
+              <div style={{ marginTop: '4px' }}>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1e293b' }}>
+                  Select Peptide Category
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  Filter 109 formulations by clinical therapeutic classification
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCategorySheetOpen(false)}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#64748b',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Category Options List */}
+            <div style={{ padding: '8px 12px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {/* Option: All Formulations */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setIsCategorySheetOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 14px',
+                  borderRadius: '8px',
+                  border: selectedCategory === 'all' ? '1.5px solid #1a73e8' : '1px solid #f1f5f9',
+                  background: selectedCategory === 'all' ? '#e8f0fe' : '#ffffff',
+                  color: selectedCategory === 'all' ? '#1a73e8' : '#1e293b',
+                  fontWeight: selectedCategory === 'all' ? 800 : 600,
+                  fontSize: '0.86rem',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Layers size={18} color={selectedCategory === 'all' ? '#1a73e8' : '#64748b'} />
+                  <span>All Formulations</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    background: selectedCategory === 'all' ? '#1a73e8' : '#f1f5f9',
+                    color: selectedCategory === 'all' ? '#ffffff' : '#64748b',
+                    padding: '2px 8px',
+                    borderRadius: '12px'
+                  }}>
+                    {processedProducts.length}
+                  </span>
+                  {selectedCategory === 'all' && <Check size={16} color="#1a73e8" />}
+                </div>
+              </button>
+
+              {/* Each category from CATEGORY_ORDER */}
+              {CATEGORY_ORDER.map(key => {
+                const meta = CATEGORY_MAP[key];
+                if (!meta) return null;
+                const count = processedProducts.filter(p => p.categoryKey === key).length;
+                if (count === 0) return null;
+                const isSelected = selectedCategory === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(key);
+                      setIsCategorySheetOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      border: isSelected ? `1.5px solid ${meta.color}` : '1px solid #f1f5f9',
+                      background: isSelected ? meta.bg : '#ffffff',
+                      color: isSelected ? meta.color : '#1e293b',
+                      fontWeight: isSelected ? 800 : 600,
+                      fontSize: '0.86rem',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px' }}>
+                        {getCategoryIcon(key, 16)}
+                      </span>
+                      <span>{meta.label}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        background: isSelected ? meta.color : '#f1f5f9',
+                        color: isSelected ? '#ffffff' : '#64748b',
+                        padding: '2px 8px',
+                        borderRadius: '12px'
+                      }}>
+                        {count}
+                      </span>
+                      {isSelected && <Check size={16} color={meta.color} />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Official Institutional Price Schedule PDF Preview Modal ── */}
       <PeptidePricePdfPreviewModal
