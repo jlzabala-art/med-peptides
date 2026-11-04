@@ -110,7 +110,7 @@ const CLINICAL_PRESETS = [
   }
 ];
 
-export default function PeptidesPriceListClient({ initialProducts = [], referralCode = 'CAT-RX-7482' }) {
+export default function PeptidesPriceListClient({ initialProducts = [], referralCode = 'CAT-RX-7482', isDistributor = false }) {
   const [currency, setCurrency] = useState('USD'); // USD, EUR, AED
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -807,12 +807,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   fontWeight: 750,
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
-                  background: '#0284c7',
+                  background: isDistributor ? '#0f766e' : '#0284c7',
                   color: '#ffffff',
                   padding: '2px 8px',
                   borderRadius: '4px'
                 }}>
-                  Official B2B & Clinical Price Schedule
+                  {isDistributor ? 'Official Distributor Schedule • +15% Cost Margin' : 'Official B2B & Clinical Price Schedule'}
                 </span>
                 <span style={{
                   fontSize: '0.68rem',

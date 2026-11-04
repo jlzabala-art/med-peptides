@@ -39,26 +39,28 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function PeptidesPricingPage({ searchParams }) {
   const resolvedSearch = await searchParams;
-  const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || null;
+  const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || resolvedSearch?.tier || null;
+  const isDistributor = String(rawRef || '').toLowerCase().includes('distrib') || resolvedSearch?.margin === '15';
   const isPartnerAlias = !rawRef || ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas', 'partner-7482'].includes(String(rawRef).toLowerCase());
-  const referralCode = resolvedSearch?.code || (isPartnerAlias ? 'CAT-RX-7482' : rawRef);
+  const referralCode = isDistributor ? 'distributor' : (resolvedSearch?.code || (isPartnerAlias ? 'CAT-RX-7482' : rawRef));
 
   // Track referral visit server-side without exposing wholesaler identities to client
   if (referralCode) {
     trackReferralVisitAction({
-      wholesalerId: isPartnerAlias ? 'np-labs-international' : referralCode,
+      wholesalerId: isDistributor ? 'distributor' : (isPartnerAlias ? 'np-labs-international' : referralCode),
       referralCode,
       collection: 'vials'
     }).catch(() => {});
   }
 
-  // Pre-fetch 127 vials with double margin (Mediluxe + Wholeseller)
+  // Pre-fetch vials with distributor schedule (+15% margin) or standard wholesale
   const initialProducts = await fetchCollectionProductsAction('vials', referralCode);
 
   return (
     <PeptidesPriceListClient
       initialProducts={initialProducts || []}
       referralCode={referralCode}
+      isDistributor={isDistributor}
     />
   );
 }

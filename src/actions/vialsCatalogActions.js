@@ -32,7 +32,7 @@ function sanitizeBrandName(text) {
  *   Effective compound factor = 1.15 * 1.15 = 1.3225 (+32.25% over Lotusland base cost).
  *   Zero internal cost or margin fields are exposed to the public client.
  */
-function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 15) {
+function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 15, isDistributor = false) {
   const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
   const vSupp = String(variant?.supplierId || variant?.supplier_id || variant?.supplier || variant?.supplierName || '').toLowerCase();
   const isLotusland = vSupp.includes('lotusland') || variant?.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
@@ -46,11 +46,11 @@ function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 1
       variant.unit_price ??
       defaultPrice
     );
-    const mediluxeMarkup = 15;
-    const wholesalerMarkup = Number(markupPercent || 15);
-    const mediluxePrice = round2(baseCost * (1 + mediluxeMarkup / 100));
-    const unitPrice = round2(mediluxePrice * (1 + wholesalerMarkup / 100));
-    const tier10UnitPrice = round2(unitPrice * 0.85);
+    // Distributor tier: strictly +15% over Lotusland cost. Standard wholesale: dual +15% margin
+    const unitPrice = isDistributor
+      ? round2(baseCost * 1.15)
+      : round2(round2(baseCost * 1.15) * (1 + Number(markupPercent || 15) / 100));
+    const tier10UnitPrice = round2(unitPrice * 0.90);
     const pack10Price = round2(tier10UnitPrice * 10);
 
     return {
@@ -76,9 +76,9 @@ function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 1
   );
 
   const mediluxePrice = round2(baseCost * 1.15);
-  const factor = 1 + (Number(markupPercent || 15) / 100);
+  const factor = isDistributor ? 1 : (1 + (Number(markupPercent || 15) / 100));
   const unitPrice = round2(mediluxePrice * factor);
-  const tier10UnitPrice = round2(unitPrice * 0.85);
+  const tier10UnitPrice = round2(unitPrice * 0.90);
   const pack10Price = round2(tier10UnitPrice * 10);
 
   return {
@@ -132,8 +132,9 @@ export async function fetchLotuslandVialsAction(referralRef = null) {
 }
 
 /** 1. Peptides & Vials Fetcher (Lotusland Finished Peptide Vials at +15% Mediluxe + 15% Wholeseller) */
-async function fetchLotuslandVials() {
+async function fetchLotuslandVials(referralRef = null) {
   if (!adminDb) return [];
+  const isDistributor = String(referralRef || '').toLowerCase().includes('distrib');
   const snapshot = await adminDb.collection('products')
     .where('supplierIds', 'array-contains', 'supplier-lotusland')
     .limit(150)
@@ -147,7 +148,7 @@ async function fetchLotuslandVials() {
     if (data.status === 'archived' || data.status === 'hidden') continue;
     if (data.productType === 'raw_material' || data.category === 'raw_material') continue;
     const pNameLower = String(data.canonicalName || data.name || '').toLowerCase();
-    if (pNameLower.includes('bulk api') || pNameLower.includes('benzocaine')) continue;
+    if (pNameLower.includes('bulk api') || pNameLower.includes('benzocaine') || pNameLower.includes('syringe')) continue;
 
     const docVariants = Array.isArray(data.variants) ? data.variants : [];
     if (docVariants.length === 0) continue;
@@ -160,9 +161,9 @@ async function fetchLotuslandVials() {
     for (const v of cleanVariants) {
       if (isApiOrRawMaterialVariant(v, data)) continue;
       const vDoseStr = String(v.dosage || v.dose || v.presentation || v.format || '').toLowerCase();
-      if (vDoseStr.includes('bulk') || vDoseStr.includes('powder') || vDoseStr.includes('000g')) continue;
+      if (vDoseStr.includes('bulk') || vDoseStr.includes('powder') || vDoseStr.includes('000g') || vDoseStr.includes('starter') || vDoseStr.includes('bottle')) continue;
 
-      const pricing = resolveWholesalePricing(v, 30.0, 15);
+      const pricing = resolveWholesalePricing(v, 30.0, 15, isDistributor);
       if (!pricing.unitPrice || pricing.unitPrice <= 0) continue;
 
       const cleanName = sanitizeBrandName(v.name || data.canonicalName || data.name || 'Clinical Peptide');
