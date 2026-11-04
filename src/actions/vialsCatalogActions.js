@@ -355,62 +355,56 @@ async function fetchColwayProducts() {
   }));
 }
 
-/** 4. UltraPerson / Ultraman Longevity Supplements Fetcher */
+/** 4. UltraPerson / Ultraman Longevity Supplements Fetcher (Firestore Primary Source of Truth) */
 async function fetchUltraPersonProducts() {
+  if (adminDb) {
+    try {
+      const snap = await adminDb.collection('products')
+        .where('collection', '==', 'ultraman')
+        .limit(50)
+        .get();
+
+      if (!snap.empty) {
+        return snap.docs
+          .filter(doc => {
+            const d = doc.data();
+            return d.status !== 'archived' && d.status !== 'hidden';
+          })
+          .map(doc => {
+            const d = doc.data();
+            const clinicPrice = Number(d.price_clinic || d.unitPrice || 95.0);
+            const tier10Price = Number(d.tier10UnitPrice || (d.price_wholesale ? d.price_wholesale : clinicPrice * 0.85));
+            const pack10 = Number(d.pack10Price || (tier10Price * 10));
+
+            return {
+              id: doc.id,
+              productId: doc.id,
+              variantId: d.variants?.[0]?.id || null,
+              collection: 'ultraman',
+              category: 'supplement',
+              productName: d.canonicalName || d.name || d.product_name,
+              dosage: d.variants?.[0]?.dosage || d.dosage || d.format || '60 Capsules',
+              presentation: d.format || 'Acid-Resistant Vegan Capsules',
+              purity: d.purity || 'Compounded Pharmaceutical Grade',
+              primaryGoal: d.goalIds?.[0] || d.primaryGoal || 'anti_aging',
+              goals: d.goalIds || d.goals || ['anti_aging', 'general_health'],
+              description: d.shortDescription || d.description || '',
+              unitPrice: clinicPrice,
+              tier10UnitPrice: tier10Price,
+              pack10Price: pack10,
+              currency: d.currency || 'EUR',
+              currencySymbol: d.currencySymbol || '€',
+              inStock: d.inStock !== false,
+              unitNoun: 'Pack'
+            };
+          });
+      }
+    } catch (err) {
+      console.warn('[fetchUltraPersonProducts] Error fetching from Firestore, falling back to static list:', err);
+    }
+  }
+
   const ultraItems = [
-    {
-      id: 'ultraperson-energy-metabolic',
-      productName: 'UltraPerson™ Energy & Metabolic Biogenesis Co-factors',
-      dosage: '60 Vegan HPMC Capsules',
-      presentation: 'Acid-Resistant Vegetable Delayed-Release Capsules',
-      purity: 'CoQ10 Ubiquinol (125mg) + PQQ (20mg) + ALA',
-      primaryGoal: 'anti_aging',
-      goals: ['anti_aging', 'fat_loss'],
-      description: 'Compounded rate-limiting mitochondrial co-factor matrix engineered to stimulate de novo mitochondrial biogenesis and multiply cellular ATP yield.',
-      unitPrice: 48.0,
-      tier10UnitPrice: 40.8,
-      pack10Price: 408.0
-    },
-    {
-      id: 'ultraperson-cognitive-neuro',
-      productName: 'UltraPerson™ Synaptic & Cognitive Neuro Resilience',
-      dosage: '60 Vegan HPMC Capsules',
-      presentation: 'Acid-Resistant Vegetable Delayed-Release Capsules',
-      purity: 'Bacopa Monnieri (55% Bacosides) + Lion\'s Mane (Hericenones)',
-      primaryGoal: 'cognitive',
-      goals: ['cognitive', 'anti_aging'],
-      description: 'Nootropic neurogenesis formula enhancing cholinergic transmission, dendritic arborization, and synaptic plasticity under high-demand workflows.',
-      unitPrice: 45.0,
-      tier10UnitPrice: 38.25,
-      pack10Price: 382.5
-    },
-    {
-      id: 'ultraperson-stress-adaptogen',
-      productName: 'UltraPerson™ Sensoril® Ashwagandha Stress Adaptogen',
-      dosage: '60 Vegan HPMC Capsules',
-      presentation: 'Acid-Resistant Vegetable Delayed-Release Capsules',
-      purity: 'Sensoril® Ashwagandha (10% Withanolides) + L-Theanine',
-      primaryGoal: 'cognitive',
-      goals: ['cognitive', 'general_health'],
-      description: 'Multi-system adaptogenic stabilization blunting excess cortisol spikes while preserving wakeful alertness and evening parasympathetic tone.',
-      unitPrice: 42.0,
-      tier10UnitPrice: 35.7,
-      pack10Price: 357.0
-    },
-    {
-      id: 'ultraperson-longevity-sirtuin',
-      productName: 'UltraPerson™ Sirtuin & Cellular Autophagy Precursor',
-      dosage: '60 Vegan HPMC Capsules',
-      presentation: 'Acid-Resistant Vegetable Delayed-Release Capsules',
-      purity: 'Trans-Resveratrol (99%) + Apigenin + Fisetin',
-      primaryGoal: 'anti_aging',
-      goals: ['anti_aging', 'general_health'],
-      description: 'Direct SIRT-1 sirtuin activator and CD38 inhibitor preventing intracellular NAD+ degradation while triggering chaperone-mediated autophagy.',
-      unitPrice: 52.0,
-      tier10UnitPrice: 44.2,
-      pack10Price: 442.0
-    },
-    // ── 9 Official UltraMan Chronotherapeutic AM/PM Formulations ──
     {
       id: 'ultraperson-am-pm-vitality-sleep',
       productName: 'UltraMan™ Circadian Vitality & Neuro-Restorative Sleep Duo',
@@ -420,9 +414,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'anti_aging',
       goals: ['anti_aging', 'general_health'],
       description: 'Circadian AM/PM chronotherapy delivering morning bioenergetic co-factors and nocturnal GABAergic neuro-restorative sleep support.',
-      unitPrice: 126.0,
-      tier10UnitPrice: 103.0,
-      pack10Price: 1030.0
+      unitPrice: 95.0,
+      tier10UnitPrice: 55.0,
+      pack10Price: 550.0
     },
     {
       id: 'ultraperson-am-pm-detox-cardio',
@@ -433,9 +427,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'anti_aging',
       goals: ['anti_aging', 'general_health'],
       description: 'Advanced hepatic Phase I/II biotransformation matrix combined with marine algal omega-3 and endothelial vascular protection.',
-      unitPrice: 131.0,
-      tier10UnitPrice: 107.0,
-      pack10Price: 1070.0
+      unitPrice: 98.0,
+      tier10UnitPrice: 85.0,
+      pack10Price: 850.0
     },
     {
       id: 'ultraperson-am-pm-mitoshield-antiox',
@@ -446,9 +440,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'anti_aging',
       goals: ['anti_aging', 'tissue_repair'],
       description: 'Targeted electron transport chain Complex I/II bioenergetics paired with master intracellular glutathione and curcumin redox defense.',
-      unitPrice: 146.0,
-      tier10UnitPrice: 120.0,
-      pack10Price: 1200.0
+      unitPrice: 125.0,
+      tier10UnitPrice: 109.0,
+      pack10Price: 1090.0
     },
     {
       id: 'ultraperson-am-pm-longevity-sirtuin',
@@ -459,9 +453,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'anti_aging',
       goals: ['anti_aging', 'general_health'],
       description: 'Cutting-edge longevity chronotherapy activating SIRT-1 deacetylases, cellular autophagy, and telomere integrity.',
-      unitPrice: 183.0,
-      tier10UnitPrice: 150.0,
-      pack10Price: 1500.0
+      unitPrice: 155.0,
+      tier10UnitPrice: 119.0,
+      pack10Price: 1190.0
     },
     {
       id: 'ultraperson-am-pm-dermal-matrix',
@@ -472,9 +466,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'tissue_repair',
       goals: ['tissue_repair', 'anti_aging'],
       description: 'Nutraceutical follicle and dermal collagen renewal formula with high-dose Biotin, SiliciuMax orthosilicic acid, Horsetail, and Panax Ginseng.',
-      unitPrice: 131.0,
-      tier10UnitPrice: 107.0,
-      pack10Price: 1070.0
+      unitPrice: 110.0,
+      tier10UnitPrice: 95.0,
+      pack10Price: 950.0
     },
     {
       id: 'ultraperson-am-pm-hepato-neuro',
@@ -485,9 +479,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'anti_aging',
       goals: ['anti_aging', 'cognitive'],
       description: 'Cynarin-driven biliary clearance, copper-zinc enzymatic balance, and nocturnal neuro-glial glymphatic cleansing.',
-      unitPrice: 130.0,
-      tier10UnitPrice: 107.0,
-      pack10Price: 1070.0
+      unitPrice: 105.0,
+      tier10UnitPrice: 89.0,
+      pack10Price: 890.0
     },
     {
       id: 'ultraperson-am-pm-cardio-stress',
@@ -498,9 +492,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'cognitive',
       goals: ['cognitive', 'general_health'],
       description: 'Core cardiovascular homocysteine balance, algal EPA/DHA, and targeted evening HPA axis adaptogenic calm.',
-      unitPrice: 119.0,
-      tier10UnitPrice: 98.0,
-      pack10Price: 980.0
+      unitPrice: 89.0,
+      tier10UnitPrice: 49.0,
+      pack10Price: 490.0
     },
     {
       id: 'ultraperson-am-pm-gut-inflammation',
@@ -511,9 +505,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'tissue_repair',
       goals: ['tissue_repair', 'anti_aging'],
       description: 'Dual-target formulation addressing mucosal tight junction integrity via Biointestil and systemic NF-kB suppression via Cureit Curcumin, Resveratrol, and ALA.',
-      unitPrice: 124.0,
-      tier10UnitPrice: 101.0,
-      pack10Price: 1010.0
+      unitPrice: 98.0,
+      tier10UnitPrice: 85.0,
+      pack10Price: 850.0
     },
     {
       id: 'ultraperson-am-pm-neuro-metabolic',
@@ -524,9 +518,9 @@ async function fetchUltraPersonProducts() {
       primaryGoal: 'cognitive',
       goals: ['cognitive', 'anti_aging'],
       description: 'High-potency Methylcobalamin one-carbon methylation donor paired with Myo-Inositol for insulin receptor second messenger cascade and synaptic density.',
-      unitPrice: 111.0,
-      tier10UnitPrice: 91.0,
-      pack10Price: 910.0
+      unitPrice: 88.0,
+      tier10UnitPrice: 75.0,
+      pack10Price: 750.0
     }
   ];
 
@@ -536,10 +530,10 @@ async function fetchUltraPersonProducts() {
     variantId: null,
     collection: 'ultraman',
     category: 'supplement',
-    currency: 'USD',
-    currencySymbol: '$',
+    currency: 'EUR',
+    currencySymbol: '€',
     inStock: true,
-    unitNoun: 'Bottle'
+    unitNoun: 'Pack'
   }));
 }
 

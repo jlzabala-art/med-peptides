@@ -4,8 +4,8 @@
  * Registers the 9 Official Chronotherapeutic AM/PM Formulations for UltraMan / UltraPerson
  * in Cloud Firestore under the canonical schema (_schemaVersion: 2).
  * 
- * Language: 100% English across all clinical descriptions, specs, and labels.
- * Supplier: Pharmapolis Compounding Pharmacy (Plovdiv, Bulgaria)
+ * Based on the Pharmapolis Compounding Pharmacy review & costing workbook (Plovdiv, Bulgaria).
+ * Currency: EUR (excl. VAT).
  * Collection: "ultraman" / "ultraperson"
  * Category: "supplement" · Subcategory: "compounding_formula"
  */
@@ -13,7 +13,7 @@
 import { readFileSync } from 'fs';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { calculatePharmapolisCost, resolvePhysicalCapsuleSize } from '../services/pharmapolisCostEngine.js';
+import { resolvePhysicalCapsuleSize } from '../services/pharmapolisCostEngine.js';
 
 const serviceAccount = JSON.parse(readFileSync('src/scripts/serviceAccountKey.json', 'utf8'));
 initializeApp({ credential: cert(serviceAccount) });
@@ -24,6 +24,8 @@ export const ULTRAMAN_9_FORMULATIONS = [
     id: 'ultraperson-am-pm-vitality-sleep',
     slug: 'ultraperson-am-pm-vitality-sleep',
     canonicalKey: 'ultraperson-am-pm-vitality-sleep',
+    formulationNumber: 1,
+    profile: 'Wellness / immune',
     name: 'UltraMan™ Circadian Vitality & Neuro-Restorative Sleep Duo',
     product_name: 'UltraMan™ Circadian Vitality & Neuro-Restorative Sleep Duo',
     canonicalName: 'UltraMan™ Circadian Vitality & Neuro-Restorative Sleep Duo',
@@ -37,6 +39,25 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Antioxidant Defense'
     ],
     goalIds: ['energy_vitality', 'sleep_recovery', 'anti_aging'],
+    costStructure: {
+      ingredientsCostEur: 4.25,
+      preparationQcEur: 57.75,
+      capsulesPackagingEur: 5.80,
+      baseCompoundingPriceEur: 67.80,
+      optimizedPriceEur: 67.62,
+      savingEur: 0.18,
+      pooledBatch10xCostEur: 25.68,
+      capsulesPerDayBase: '1 AM + 2 PM',
+      capsulesPerDayOptimized: '1 AM + 2 PM',
+      safetyNotes: 'EFSA Reference: P-5-P 25 mg exceeds 12 mg/day UL; Nicotinic acid 50 mg exceeds 10 mg UL (flushing). Optimized formula adapts P-5-P to 10 mg and Nicotinic acid to 10 mg.'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 95.0,
+      wholesaleUnitPriceEur: 78.0,
+      retailUnitPriceEur: 145.0,
+      tier10UnitPriceEur: 55.0,
+      pack10PriceEur: 550.0
+    },
     amActives: [
       { name: 'Vitamin D3 (Cholecalciferol)', apiId: 'pharmapolis-vitamin-d3-cholecalciferol', doseMg: 0.05, unit: 'mg (2000 IU)', role: 'Immune modulation and circadian diurnal gene expression' },
       { name: 'Vitamin C (Ascorbic Acid)', apiId: 'pharmapolis-vitamin-c-ascorbic-acid', doseMg: 200, unit: 'mg', role: 'Adrenal antioxidant support and catecholamine synthesis' },
@@ -56,6 +77,8 @@ export const ULTRAMAN_9_FORMULATIONS = [
     id: 'ultraperson-am-pm-detox-cardio',
     slug: 'ultraperson-am-pm-detox-cardio',
     canonicalKey: 'ultraperson-am-pm-detox-cardio',
+    formulationNumber: 2,
+    profile: 'Antioxidant / hepatic',
     name: 'UltraMan™ Hepato-Cellular Detox & Cardiovascular Shield Duo',
     product_name: 'UltraMan™ Hepato-Cellular Detox & Cardiovascular Shield Duo',
     canonicalName: 'UltraMan™ Hepato-Cellular Detox & Cardiovascular Shield Duo',
@@ -69,6 +92,24 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Systemic Antioxidant Protection'
     ],
     goalIds: ['cardiovascular', 'liver_detox', 'anti_aging'],
+    costStructure: {
+      ingredientsCostEur: 6.39,
+      preparationQcEur: 57.75,
+      capsulesPackagingEur: 5.80,
+      baseCompoundingPriceEur: 69.94,
+      optimizedPriceEur: 68.29,
+      savingEur: 1.65,
+      capsulesPerDayBase: '1 AM + 2 PM + omega-3 softgel',
+      capsulesPerDayOptimized: '1 AM + 2 PM',
+      safetyNotes: 'Omega-3 included as oil cost and supplied separately as finished enteric softgels, eliminating liquid capsule compounding.'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 98.0,
+      wholesaleUnitPriceEur: 80.0,
+      retailUnitPriceEur: 149.0,
+      tier10UnitPriceEur: 85.0,
+      pack10PriceEur: 850.0
+    },
     amActives: [
       { name: 'Vitamin D3 (Cholecalciferol)', apiId: 'pharmapolis-vitamin-d3-cholecalciferol', doseMg: 0.05, unit: 'mg (2000 IU)', role: 'Vascular endothelial VDR receptor signaling' },
       { name: 'Vitamin C (Ascorbic Acid)', apiId: 'pharmapolis-vitamin-c-ascorbic-acid', doseMg: 200, unit: 'mg', role: 'Protects tetrahydrobiopterin (BH4) to sustain eNOS uncoupling' },
@@ -88,6 +129,8 @@ export const ULTRAMAN_9_FORMULATIONS = [
     id: 'ultraperson-am-pm-mitoshield-antiox',
     slug: 'ultraperson-am-pm-mitoshield-antiox',
     canonicalKey: 'ultraperson-am-pm-mitoshield-antiox',
+    formulationNumber: 3,
+    profile: 'Mitochondrial / hepatic',
     name: 'UltraMan™ Mitochondrial Shield & Master Glutathione Booster Duo',
     product_name: 'UltraMan™ Mitochondrial Shield & Master Glutathione Booster Duo',
     canonicalName: 'UltraMan™ Mitochondrial Shield & Master Glutathione Booster Duo',
@@ -101,6 +144,24 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Cardiometabolic Vitality'
     ],
     goalIds: ['mitochondrial', 'anti_aging', 'longevity'],
+    costStructure: {
+      ingredientsCostEur: 24.97,
+      preparationQcEur: 59.25,
+      capsulesPackagingEur: 6.40,
+      baseCompoundingPriceEur: 90.62,
+      optimizedPriceEur: 82.42,
+      savingEur: 8.20,
+      capsulesPerDayBase: '1 AM + 3 PM + omega-3 softgel',
+      capsulesPerDayOptimized: '1 AM + 2 PM',
+      safetyNotes: 'Ubiquinol oxidizes in powder capsules; needs stabilized grade and cold storage. Ubiquinone is the stable alternative saving €3.42. Reducing Astaxanthin from 8 mg to 4 mg saves €4.89.'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 125.0,
+      wholesaleUnitPriceEur: 105.0,
+      retailUnitPriceEur: 189.0,
+      tier10UnitPriceEur: 109.0,
+      pack10PriceEur: 1090.0
+    },
     amActives: [
       { name: 'Coenzyme Q10 (Ubiquinol)', apiId: 'pharmapolis-coenzyme-q10-ubiquinol', doseMg: 100, unit: 'mg', role: 'Reduced active electron carrier for mitochondrial respiratory chain' },
       { name: 'Vitamin K2 (MK-7)', apiId: 'pharmapolis-vitamin-k2-mk-7', doseMg: 0.1, unit: 'mg (100 mcg)', role: 'Activates osteocalcin and matrix Gla-protein (MGP) preventing arterial calcification' },
@@ -120,6 +181,8 @@ export const ULTRAMAN_9_FORMULATIONS = [
     id: 'ultraperson-am-pm-longevity-sirtuin',
     slug: 'ultraperson-am-pm-longevity-sirtuin',
     canonicalKey: 'ultraperson-am-pm-longevity-sirtuin',
+    formulationNumber: 4,
+    profile: 'Mitochondrial / detox',
     name: 'UltraMan™ Advanced Longevity Sirtuin & Telomere Defense Duo',
     product_name: 'UltraMan™ Advanced Longevity Sirtuin & Telomere Defense Duo',
     canonicalName: 'UltraMan™ Advanced Longevity Sirtuin & Telomere Defense Duo',
@@ -133,9 +196,28 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Telomere & Epigenetic Longevity'
     ],
     goalIds: ['anti_aging', 'longevity', 'cellular_repair'],
+    costStructure: {
+      ingredientsCostEur: 44.16,
+      preparationQcEur: 60.75,
+      capsulesPackagingEur: 7.00,
+      baseCompoundingPriceEur: 111.91,
+      optimizedPriceEur: 107.08,
+      savingEur: 4.83,
+      pooledBatch10xCostEur: 71.14,
+      capsulesPerDayBase: '2 AM + 3 PM',
+      capsulesPerDayOptimized: '2 AM + 2 PM',
+      safetyNotes: 'Mitocondrin®, CitrusiM®, Brocophanus®, Miodesin® are Fagron Brazil specialties with extended lead times. Removing Mitocondrin saves €7.33; removing Miodesin saves €6.11.'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 155.0,
+      wholesaleUnitPriceEur: 130.0,
+      retailUnitPriceEur: 235.0,
+      tier10UnitPriceEur: 119.0,
+      pack10PriceEur: 1190.0
+    },
     amActives: [
       { name: 'Coenzyme Q10 (Ubiquinol)', apiId: 'pharmapolis-coenzyme-q10-ubiquinol', doseMg: 100, unit: 'mg', role: 'Mitochondrial electron transport and anti-aging energy donor' },
-      { name: 'Mitocondrin', apiId: 'pharmapolis-mitocondrin', doseMg: 250, unit: 'mg', role: 'Specialized mitochondrial protective complex stimulating mitochondrial biogenesis' },
+      { name: 'Mitocondrin', apiId: 'pharmapolis-mitocondrin', doseMg: 200, unit: 'mg', role: 'Specialized mitochondrial protective complex stimulating mitochondrial biogenesis' },
       { name: 'CitrusiM', apiId: 'pharmapolis-citrusim', doseMg: 250, unit: 'mg', role: 'Red orange anthocyanin and flavanone complex for metabolic AMPK stimulation' },
       { name: 'Brocophanus', apiId: 'pharmapolis-brocophanus', doseMg: 250, unit: 'mg', role: 'Glucoraphanin & myrosinase sulforaphane generator; master Nrf2 activator' },
       { name: 'Astaxanthin', apiId: 'pharmapolis-astaxanthin', doseMg: 8, unit: 'mg', role: 'Protects nuclear and mitochondrial DNA from oxidative double-strand breaks' }
@@ -145,13 +227,15 @@ export const ULTRAMAN_9_FORMULATIONS = [
       { name: 'Trans-Resveratrol', apiId: 'pharmapolis-resveratrol', doseMg: 150, unit: 'mg', role: 'Direct allosteric activator of SIRT1 longevity gene' },
       { name: 'Reduced Glutathione', apiId: 'pharmapolis-reduced-glutathione', doseMg: 250, unit: 'mg', role: 'Nocturnal cellular nucleophilic scavenger of reactive electrophiles' },
       { name: 'Miodesin', apiId: 'pharmapolis-miodesin', doseMg: 250, unit: 'mg', role: 'Potent botanical anti-inflammatory matrix targeting somatic cellular aging' },
-      { name: 'SiliciuMax', apiId: 'pharmapolis-siliciumax', doseMg: 10, unit: 'mg', role: 'Monomeric bioavailable orthosilicic acid for extracellular matrix crosslinking' }
+      { name: 'SiliciuMax', apiId: 'pharmapolis-siliciumax', doseMg: 300, unit: 'mg', role: 'Bioavailable orthosilicic acid powder for extracellular matrix crosslinking' }
     ]
   },
   {
     id: 'ultraperson-am-pm-dermal-matrix',
     slug: 'ultraperson-am-pm-dermal-matrix',
     canonicalKey: 'ultraperson-am-pm-dermal-matrix',
+    formulationNumber: 5,
+    profile: 'Hair / skin / nail',
     name: 'UltraMan™ Dermal Matrix & Hair Follicle Regeneration Duo',
     product_name: 'UltraMan™ Dermal Matrix & Hair Follicle Regeneration Duo',
     canonicalName: 'UltraMan™ Dermal Matrix & Hair Follicle Regeneration Duo',
@@ -165,25 +249,45 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Connective Tissue Elasticity'
     ],
     goalIds: ['hair_skin_nails', 'tissue_repair', 'wellness'],
+    costStructure: {
+      ingredientsCostEur: 11.97,
+      preparationQcEur: 61.50,
+      capsulesPackagingEur: 7.00,
+      baseCompoundingPriceEur: 80.47,
+      optimizedPriceEur: 72.08,
+      savingEur: 8.39,
+      capsulesPerDayBase: '3 AM + 2 PM + algal oil softgel',
+      capsulesPerDayOptimized: '2 AM + 1 PM',
+      safetyNotes: 'EFSA Reference: Zinc 30 mg exceeds 25 mg UL; recommend reducing to 15 mg or balancing with 1-2 mg Copper. D3 4,000 IU is at UL (100 mcg). Biotin 5 mg note: stop 3 days before lab tests (thyroid/troponin).'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 110.0,
+      wholesaleUnitPriceEur: 90.0,
+      retailUnitPriceEur: 169.0,
+      tier10UnitPriceEur: 95.0,
+      pack10PriceEur: 950.0
+    },
     amActives: [
       { name: 'Biotin', apiId: 'pharmapolis-biotin', doseMg: 5, unit: 'mg (5000 mcg)', role: 'Essential carboxylase cofactor for keratin matrix structural protein synthesis' },
-      { name: 'SiliciuMax', apiId: 'pharmapolis-siliciumax', doseMg: 10, unit: 'mg', role: 'Orthosilicic acid activates prolyl hydroxylase for collagen fibril crosslinking' },
+      { name: 'SiliciuMax', apiId: 'pharmapolis-siliciumax', doseMg: 300, unit: 'mg', role: 'Orthosilicic acid powder activates prolyl hydroxylase for collagen fibril crosslinking' },
       { name: 'Horsetail Extract', apiId: 'pharmapolis-horsetail-extract-equisetum-arvense', doseMg: 300, unit: 'mg', role: 'High organic silica plant extract strengthening hair shaft tensile durability' },
       { name: 'Zinc Gluconate', apiId: 'pharmapolis-zinc-gluconate', doseMg: 30, unit: 'mg', role: 'Inhibits 5-alpha reductase and accelerates follicle matrix cell division' },
-      { name: 'Vitamin D3 (Cholecalciferol)', apiId: 'pharmapolis-vitamin-d3-cholecalciferol', doseMg: 0.1, unit: 'mg (4000 IU)', role: 'Stimulates hair follicle cycling and activates dormant stem cell niches' }
+      { name: 'Vitamin D3 (Cholecalciferol)', apiId: 'pharmapolis-vitamin-d3-cholecalciferol', doseMg: 0.1, unit: 'mg (4000 IU)', role: 'Stimulates hair follicle cycling and activates dormant stem cell niches' },
+      { name: 'Panax Ginseng Extract', apiId: 'pharmapolis-panax-ginseng-extract', doseMg: 200, unit: 'mg', role: 'Moved to AM: Ginsenosides Rg3/Rb1 promote scalp vascular endothelial growth factor (VEGF)' }
     ],
     pmActives: [
       { name: 'Algal Omega-3 (EPA/DHA)', apiId: 'pharmapolis-algal-omega-3-epa-dha', doseMg: 300, unit: 'mg', role: 'Normalizes scalp sebum fatty acid profiles and dampens perifollicular erythema' },
       { name: 'N-Acetylcysteine (NAC)', apiId: 'pharmapolis-n-acetylcysteine-nac', doseMg: 250, unit: 'mg', role: 'Supplies cysteine for disulfide bond formation in hard hair keratin' },
       { name: 'Vitamin C (Ascorbic Acid)', apiId: 'pharmapolis-vitamin-c-ascorbic-acid', doseMg: 200, unit: 'mg', role: 'Rate-limiting cofactor for lysine and proline collagen hydroxylation' },
-      { name: 'Silibin (Milk Thistle)', apiId: 'pharmapolis-silibin-milk-thistle', doseMg: 140, unit: 'mg', role: 'Protects microvascular capillaries from oxidative lipid breakdown' },
-      { name: 'Panax Ginseng Extract', apiId: 'pharmapolis-panax-ginseng-extract', doseMg: 200, unit: 'mg', role: 'Ginsenoside Rg3/Rb1 promotes dermal papilla cell proliferation and VEGF expression' }
+      { name: 'Silibin (Milk Thistle)', apiId: 'pharmapolis-silibin-milk-thistle', doseMg: 140, unit: 'mg', role: 'Protects microvascular capillaries from oxidative lipid breakdown' }
     ]
   },
   {
     id: 'ultraperson-am-pm-hepato-neuro',
     slug: 'ultraperson-am-pm-hepato-neuro',
     canonicalKey: 'ultraperson-am-pm-hepato-neuro',
+    formulationNumber: 6,
+    profile: 'Hepatic / calming',
     name: 'UltraMan™ Hepato-Biliary Detox & Neuro-Restoration Duo',
     product_name: 'UltraMan™ Hepato-Biliary Detox & Neuro-Restoration Duo',
     canonicalName: 'UltraMan™ Hepato-Biliary Detox & Neuro-Restoration Duo',
@@ -197,6 +301,24 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Parasympathetic Nervous System Tone'
     ],
     goalIds: ['liver_detox', 'sleep_recovery', 'cognitive_mood'],
+    costStructure: {
+      ingredientsCostEur: 9.05,
+      preparationQcEur: 61.50,
+      capsulesPackagingEur: 7.00,
+      baseCompoundingPriceEur: 77.55,
+      optimizedPriceEur: 70.42,
+      savingEur: 7.13,
+      capsulesPerDayBase: '2 AM + 3 PM',
+      capsulesPerDayOptimized: '1 AM + 2 PM',
+      safetyNotes: 'Valerian and NAC absorb moisture; packaged in HDPE containers with silica desiccant and induction seal.'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 105.0,
+      wholesaleUnitPriceEur: 88.0,
+      retailUnitPriceEur: 159.0,
+      tier10UnitPriceEur: 89.0,
+      pack10PriceEur: 890.0
+    },
     amActives: [
       { name: 'Artichoke Extract (Cynara scolymus)', apiId: 'pharmapolis-artichoke-extract-cynara-scolymus', doseMg: 300, unit: 'mg', role: 'Standardized 5% cynarin stimulating choleresis and gallbladder emptying' },
       { name: 'Copper (Bisglycinate)', apiId: 'pharmapolis-copper-bisglycinate', doseMg: 2, unit: 'mg', role: 'Ceruloplasmin and cytochrome c oxidase essential trace element' },
@@ -216,6 +338,8 @@ export const ULTRAMAN_9_FORMULATIONS = [
     id: 'ultraperson-am-pm-cardio-stress',
     slug: 'ultraperson-am-pm-cardio-stress',
     canonicalKey: 'ultraperson-am-pm-cardio-stress',
+    formulationNumber: 7,
+    profile: 'Maintenance',
     name: 'UltraMan™ Essential Cardiometabolic & Adaptogenic Calm Duo',
     product_name: 'UltraMan™ Essential Cardiometabolic & Adaptogenic Calm Duo',
     canonicalName: 'UltraMan™ Essential Cardiometabolic & Adaptogenic Calm Duo',
@@ -229,6 +353,25 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Endothelial Nitric Oxide Tone'
     ],
     goalIds: ['cardiovascular', 'stress_mood', 'general_wellness'],
+    costStructure: {
+      ingredientsCostEur: 3.84,
+      preparationQcEur: 54.45,
+      capsulesPackagingEur: 5.80,
+      baseCompoundingPriceEur: 64.09,
+      optimizedPriceEur: 62.44,
+      savingEur: 1.65,
+      pooledBatch10xCostEur: 24.94,
+      capsulesPerDayBase: '1 AM + 2 PM + omega-3 softgel',
+      capsulesPerDayOptimized: '1 AM + 2 PM',
+      safetyNotes: 'Morning capsule is 100% identical to Formulation 2. High pooling efficiency for shared clinical production.'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 89.0,
+      wholesaleUnitPriceEur: 75.0,
+      retailUnitPriceEur: 135.0,
+      tier10UnitPriceEur: 49.0,
+      pack10PriceEur: 490.0
+    },
     amActives: [
       { name: 'Vitamin D3 (Cholecalciferol)', apiId: 'pharmapolis-vitamin-d3-cholecalciferol', doseMg: 0.05, unit: 'mg (2000 IU)', role: 'Renin-angiotensin-aldosterone system (RAAS) downregulatory hormone' },
       { name: 'Vitamin C (Ascorbic Acid)', apiId: 'pharmapolis-vitamin-c-ascorbic-acid', doseMg: 200, unit: 'mg', role: 'Scavenges peroxynitrite radicals in coronary endothelium' },
@@ -246,6 +389,8 @@ export const ULTRAMAN_9_FORMULATIONS = [
     id: 'ultraperson-am-pm-gut-inflammation',
     slug: 'ultraperson-am-pm-gut-inflammation',
     canonicalKey: 'ultraperson-am-pm-gut-inflammation',
+    formulationNumber: 8,
+    profile: 'NEW – anti-inflammatory / sleep / gut',
     name: 'UltraMan™ Systemic Anti-Inflammatory & Microbiome Barrier Duo',
     product_name: 'UltraMan™ Systemic Anti-Inflammatory & Microbiome Barrier Duo',
     canonicalName: 'UltraMan™ Systemic Anti-Inflammatory & Microbiome Barrier Duo',
@@ -259,6 +404,24 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Visceral Nerve Soothing'
     ],
     goalIds: ['gut_health', 'anti_aging', 'tissue_repair'],
+    costStructure: {
+      ingredientsCostEur: 11.08,
+      preparationQcEur: 52.65,
+      capsulesPackagingEur: 6.40,
+      baseCompoundingPriceEur: 70.13,
+      optimizedPriceEur: 67.86,
+      savingEur: 2.27,
+      capsulesPerDayBase: '2 AM + 2 PM',
+      capsulesPerDayOptimized: '2 AM + 1 PM',
+      safetyNotes: 'Alpha-lipoic acid has a low melting point and must be kept away from heat. Biointestil® is a Fagron specialty; alternative ginger extract saves €3.72.'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 98.0,
+      wholesaleUnitPriceEur: 82.0,
+      retailUnitPriceEur: 149.0,
+      tier10UnitPriceEur: 85.0,
+      pack10PriceEur: 850.0
+    },
     amActives: [
       { name: 'Vitamin D3 (Cholecalciferol)', apiId: 'pharmapolis-vitamin-d3-cholecalciferol', doseMg: 0.075, unit: 'mg (3000 IU)', role: 'Upregulates occludin and claudin tight junction protein expression' },
       { name: 'Curcumin (Cureit)', apiId: 'pharmapolis-curcumin-cureit', doseMg: 250, unit: 'mg', role: 'Bioavailable turmeric matrix blocking I-kappa-B kinase (IKK) activation' },
@@ -274,6 +437,8 @@ export const ULTRAMAN_9_FORMULATIONS = [
     id: 'ultraperson-am-pm-neuro-metabolic',
     slug: 'ultraperson-am-pm-neuro-metabolic',
     canonicalKey: 'ultraperson-am-pm-neuro-metabolic',
+    formulationNumber: 9,
+    profile: 'NEW – basic / metabolic',
     name: 'UltraMan™ Neuro-Metabolic Synaptic & Insulin Sensitivity Duo',
     product_name: 'UltraMan™ Neuro-Metabolic Synaptic & Insulin Sensitivity Duo',
     canonicalName: 'UltraMan™ Neuro-Metabolic Synaptic & Insulin Sensitivity Duo',
@@ -287,6 +452,29 @@ export const ULTRAMAN_9_FORMULATIONS = [
       'Cognitive Synaptic Speed'
     ],
     goalIds: ['cognitive_mood', 'metabolic', 'general_wellness'],
+    costStructure: {
+      ingredientsCostEur: 5.87,
+      preparationQcEur: 51.15,
+      capsulesPackagingEur: 5.80,
+      baseCompoundingPriceEur: 62.82,
+      optimizedPriceEur: 37.81,
+      savingEur: 25.01,
+      capsulesPerDayBase: '1 AM + 2 PM + algal oil softgel',
+      capsulesPerDayOptimized: '2 capsules, once daily (single batch)',
+      safetyNotes: 'Game changer optimization: Since timing is non-critical, preparing as a single daily batch eliminates €25.01 in duplicate compounding labor.'
+    },
+    commercialPricing: {
+      clinicUnitPriceEur: 88.0,
+      clinicOptimizedPriceEur: 55.0,
+      wholesaleUnitPriceEur: 72.0,
+      wholesaleOptimizedPriceEur: 45.0,
+      retailUnitPriceEur: 135.0,
+      retailOptimizedPriceEur: 85.0,
+      tier10UnitPriceEur: 75.0,
+      tier10OptimizedUnitPriceEur: 49.0,
+      pack10PriceEur: 750.0,
+      pack10OptimizedPriceEur: 490.0
+    },
     amActives: [
       { name: 'Vitamin B12 (Methylcobalamin)', apiId: 'pharmapolis-vitamin-b12-methylcobalamin', doseMg: 1, unit: 'mg (1000 mcg)', role: 'Bioactive cobalamin cofactor for methionine synthase and homocysteine clearance' },
       { name: 'Vitamin D3 (Cholecalciferol)', apiId: 'pharmapolis-vitamin-d3-cholecalciferol', doseMg: 0.05, unit: 'mg (2000 IU)', role: 'Enhances neurotrophic factor synthesis (NGF, BDNF) in hippocampal neurons' },
@@ -301,27 +489,22 @@ export const ULTRAMAN_9_FORMULATIONS = [
 ];
 
 async function seed() {
-  console.log('🚀 Seeding 9 Official UltraMan AM/PM Formulations to Firestore...');
+  console.log('🚀 Seeding 9 Official UltraMan AM/PM Formulations to Firestore with verified Pharmapolis costing...');
 
   for (const form of ULTRAMAN_9_FORMULATIONS) {
     const docRef = db.collection('products').doc(form.id);
 
-    // Compute exact physical capsule specs
     const amSize = resolvePhysicalCapsuleSize(form.amActives);
     const pmSize = resolvePhysicalCapsuleSize(form.pmActives);
 
-    // Compute exact Pharmapolis manufacturing costs (CAT-CAP v1.1)
-    const costAm = calculatePharmapolisCost({ activeIngredients: form.amActives, capsPerBottle: 30 });
-    const costPm = calculatePharmapolisCost({ activeIngredients: form.pmActives, capsPerBottle: 30 });
-    const netManufacturingPriceEur = Number((costAm.finalPricing.netSellingPriceEur + costPm.finalPricing.netSellingPriceEur).toFixed(2));
-    const totalProductionCostEur = Number((costAm.totalProductionCostEur + costPm.totalProductionCostEur).toFixed(2));
+    const baseCostEur = form.costStructure.baseCompoundingPriceEur;
+    const optimizedCostEur = form.costStructure.optimizedPriceEur;
+    const clinicPriceEur = form.commercialPricing.clinicUnitPriceEur;
+    const wholesalePriceEur = form.commercialPricing.wholesaleUnitPriceEur;
+    const retailPriceEur = form.commercialPricing.retailUnitPriceEur;
+    const tier10UnitPriceEur = form.commercialPricing.tier10UnitPriceEur;
+    const pack10PriceEur = form.commercialPricing.pack10PriceEur;
 
-    // Pricing tiers
-    const wholesalePriceEur = Math.round(netManufacturingPriceEur * 1.35);
-    const clinicPriceEur = Math.round(netManufacturingPriceEur * 1.65);
-    const retailPriceEur = Math.round(netManufacturingPriceEur * 2.20);
-
-    // Construct unified active ingredients list for display & compounding engine
     const activeIngredients = [
       ...form.amActives.map(a => ({ ...a, schedule: 'AM', administration: 'Morning with food' })),
       ...form.pmActives.map(a => ({ ...a, schedule: 'PM', administration: 'Evening 30-60m before sleep' }))
@@ -333,22 +516,21 @@ async function seed() {
         variantId: `${form.id}-30d-duo`,
         docId: `${form.id}-30d-duo`,
         productId: form.id,
-        name: `${form.name} - 30-Day Duo Pack (60 Caps)`,
+        name: `${form.name} - 30-Day Duo Pack (${form.costStructure.capsulesPerDayBase})`,
         productName: form.name,
-        label: '30-Day Duo Protocol (30 AM Caps + 30 PM Caps)',
-        dosage: '60 Capsules Total (30 AM + 30 PM)',
-        dose: '60 Capsules',
-        format: `Duo Pack (${amSize.size} AM Bottle + ${pmSize.size} PM Bottle)`,
-        capsulesCount: 60,
+        label: `30-Day Protocol (${form.costStructure.capsulesPerDayBase})`,
+        dosage: `30-Day Supply (${form.costStructure.capsulesPerDayBase})`,
+        dose: '30-Day Supply',
+        format: `Compounded Duo Pack (AM: Size ${amSize.size} · PM: Size ${pmSize.size})`,
         durationDays: 30,
-        dailyServing: '1 AM Capsule (Morning) + 1 PM Capsule (Evening)',
+        dailyServing: form.costStructure.capsulesPerDayBase,
         pricing: {
-          master: { perUnit: totalProductionCostEur, currency: 'EUR' },
+          master: { perUnit: baseCostEur, currency: 'EUR' },
           wholesale: { perUnit: wholesalePriceEur, currency: 'EUR' },
           clinic: { perUnit: clinicPriceEur, currency: 'EUR' },
           retail: { perUnit: retailPriceEur, currency: 'EUR' }
         },
-        costPrice: totalProductionCostEur,
+        costPrice: baseCostEur,
         wholesalePrice: wholesalePriceEur,
         clinicPrice: clinicPriceEur,
         retailPrice: retailPriceEur,
@@ -364,39 +546,37 @@ async function seed() {
         status: 'published'
       },
       {
-        id: `${form.id}-90d-protocol`,
-        variantId: `${form.id}-90d-protocol`,
-        docId: `${form.id}-90d-protocol`,
+        id: `${form.id}-10pack-clinic-tier`,
+        variantId: `${form.id}-10pack-clinic-tier`,
+        docId: `${form.id}-10pack-clinic-tier`,
         productId: form.id,
-        name: `${form.name} - 90-Day Full Protocol (180 Caps)`,
+        name: `${form.name} - 10-Pack Clinic / Wholesaler Batch`,
         productName: form.name,
-        label: '90-Day Clinical Protocol (90 AM Caps + 90 PM Caps)',
-        dosage: '180 Capsules Total (90 AM + 90 PM)',
-        dose: '180 Capsules',
-        format: `Triple Master Pack (3x AM Bottles + 3x PM Bottles)`,
-        capsulesCount: 180,
-        durationDays: 90,
-        dailyServing: '1 AM Capsule (Morning) + 1 PM Capsule (Evening)',
-        treatmentType: '90-Day Precision Clinical Regimen',
+        label: '10-Pack Clinical Batch (Bulk Compounding Commitment)',
+        dosage: '10 x 30-Day Packs',
+        dose: '10 Units',
+        format: 'Bulk Batch Sealed Carton (10 Duo Packs)',
+        durationDays: 300,
+        treatmentType: 'Clinic Inventory & Wholesaler Bulk Batch',
         pricing: {
-          master: { perUnit: Math.round(totalProductionCostEur * 2.7), currency: 'EUR' },
-          wholesale: { perUnit: Math.round(wholesalePriceEur * 2.7), currency: 'EUR' },
-          clinic: { perUnit: Math.round(clinicPriceEur * 2.7), currency: 'EUR' },
-          retail: { perUnit: Math.round(retailPriceEur * 2.7), currency: 'EUR' }
+          master: { perUnit: pack10PriceEur, currency: 'EUR' },
+          wholesale: { perUnit: pack10PriceEur, currency: 'EUR' },
+          clinic: { perUnit: pack10PriceEur, currency: 'EUR' },
+          retail: { perUnit: Math.round(retailPriceEur * 10 * 0.9), currency: 'EUR' }
         },
-        costPrice: Math.round(totalProductionCostEur * 2.7),
-        wholesalePrice: Math.round(wholesalePriceEur * 2.7),
-        clinicPrice: Math.round(clinicPriceEur * 2.7),
-        retailPrice: Math.round(retailPriceEur * 2.7),
-        price: Math.round(retailPriceEur * 2.7),
-        unit_price: Math.round(clinicPriceEur * 2.7),
+        costPrice: Number((baseCostEur * 10).toFixed(2)),
+        wholesalePrice: pack10PriceEur,
+        clinicPrice: pack10PriceEur,
+        retailPrice: Math.round(retailPriceEur * 10 * 0.9),
+        price: pack10PriceEur,
+        unit_price: tier10UnitPriceEur,
         currency: 'EUR',
         inStock: true,
-        stockType: 'compounded_on_demand',
+        stockType: 'compounded_batch_run',
         supplierId: 'supplier-pharmapolis',
         supplierName: 'Pharmapolis Compounding Pharmacy',
         supplier: 'PharmaPolis',
-        leadTime: '3-5 business days',
+        leadTime: '5-7 business days',
         status: 'published'
       }
     ];
@@ -408,6 +588,8 @@ async function seed() {
       canonicalName: form.name,
       slug: form.slug,
       canonicalKey: form.canonicalKey,
+      formulationNumber: form.formulationNumber,
+      profile: form.profile,
       brand: 'UltraPerson',
       brandScope: 'ultraperson',
       collection: 'ultraman',
@@ -426,10 +608,10 @@ async function seed() {
       status: 'published',
       isActive: true,
       type: 'finished_product',
-      format: `Acid-Resistant Vegan HPMC Capsules (AM: ${amSize.size} · PM: ${pmSize.size})`,
+      format: `Acid-Resistant Vegan HPMC Capsules (AM: Size ${amSize.size} · PM: Size ${pmSize.size})`,
       deliveryFormat: 'capsules',
-      dailyServing: '1 AM Capsule (Morning) + 1 PM Capsule (Evening)',
-      dosageInstructions: 'Take 1 AM capsule in the morning with food; take 1 PM capsule in the evening 30-60 minutes before sleep.',
+      dailyServing: form.costStructure.capsulesPerDayBase,
+      dosageInstructions: `Take AM capsule(s) in the morning with food; take PM capsule(s) in the evening 30-60 minutes before sleep.`,
       therapeuticArea: form.therapeuticArea,
       description: form.description,
       shortDescription: form.shortDescription,
@@ -438,23 +620,30 @@ async function seed() {
       amActives: form.amActives,
       pmActives: form.pmActives,
       activeIngredients,
-      compoundingCostBenchmarks: {
-        '60_caps_duo': {
-          caps: 60,
-          totalProductionCostEur,
-          netManufacturingPriceEur,
-          costAmEur: costAm.finalPricing.netSellingPriceEur,
-          costPmEur: costPm.finalPricing.netSellingPriceEur
-        }
+      costStructure: form.costStructure,
+      pharmapolisCostBenchmarks: {
+        baseCompoundingPriceEur: baseCostEur,
+        optimizedPriceEur: optimizedCostEur,
+        ingredientsCostEur: form.costStructure.ingredientsCostEur,
+        preparationQcEur: form.costStructure.preparationQcEur,
+        capsulesPackagingEur: form.costStructure.capsulesPackagingEur,
+        savingEur: form.costStructure.savingEur,
+        pooledBatch10xCostEur: form.costStructure.pooledBatch10xCostEur || null,
+        safetyNotes: form.costStructure.safetyNotes
       },
+      commercialPricing: form.commercialPricing,
       min_unit_price: clinicPriceEur,
       price_wholesale: wholesalePriceEur,
       price_clinic: clinicPriceEur,
       price_retail: retailPriceEur,
+      tier10UnitPrice: tier10UnitPriceEur,
+      pack10Price: pack10PriceEur,
       variants,
       variantsCount: variants.length,
       goals: form.goals,
       goalIds: form.goalIds,
+      currency: 'EUR',
+      currencySymbol: '€',
       dietaryFlags: [
         '100% Vegan HPMC',
         'Acid-Resistant Delayed Release',
@@ -469,7 +658,7 @@ async function seed() {
         'Third-Party Heavy Metals Tested (< 0.01 ppm)',
         'Standardized Botanical Extracts'
       ],
-      storageConditions: 'Store in a cool, dry place away from direct sunlight (15°C–25°C). Keep bottles tightly sealed.',
+      storageConditions: 'Store in a cool, dry place away from direct sunlight (15°C–25°C). Keep bottles tightly sealed with desiccant.',
       shelfLife: '24 Months',
       _schemaVersion: 2,
       createdAt: new Date().toISOString(),
@@ -477,14 +666,13 @@ async function seed() {
     };
 
     await docRef.set(payload, { merge: true });
-    console.log(`✅ Registered in Firestore: [${form.id}] - ${form.name} (Wholesale: €${wholesalePriceEur} | Clinic: €${clinicPriceEur} | MSRP: €${retailPriceEur})`);
+    console.log(`✅ Seeded [Rx${form.formulationNumber}] ${form.id}: Cost €${baseCostEur} | Clinic €${clinicPriceEur} | MSRP €${retailPriceEur} | 10-Pack €${pack10PriceEur} (€${tier10UnitPriceEur}/ea)`);
   }
 
-  console.log('🎉 Successfully seeded all 9 UltraMan AM/PM Formulations into Firestore!');
+  console.log('🎉 Successfully synchronized all 9 UltraMan AM/PM Formulations in Firestore!');
 }
 
 seed().catch(err => {
   console.error('❌ Seeding failed:', err);
   process.exit(1);
 });
-
