@@ -371,6 +371,9 @@ export function getLotuslandProcurementReport() {
 
     const invoiceRefs = Array.from(new Set(api.invoices.map(i => i.invoiceNumber)));
 
+    // Sort receipts by date descending (most recent first)
+    api.invoices.sort((a, b) => new Date(b.date) - new Date(a.date));
+
     return {
       name: api.name,
       therapeuticClass: api.therapeuticClass,
@@ -389,12 +392,16 @@ export function getLotuslandProcurementReport() {
       invoiceRefs,
       firstDate,
       latestDate,
+      dateRange: firstDate === latestDate ? firstDate : `${firstDate} → ${latestDate}`,
       receipts: api.invoices
     };
   });
 
   // Sort by total spend descending
   apisList.sort((a, b) => b.totalSpendUSD - a.totalSpendUSD);
+
+  // Sort all line items by date descending
+  allLines.sort((a, b) => new Date(b.invoiceDate) - new Date(a.invoiceDate));
 
   return {
     metadata: LOTUSLAND_METADATA,
@@ -412,3 +419,4 @@ export function getLotuslandProcurementReport() {
     allLineItems: allLines
   };
 }
+

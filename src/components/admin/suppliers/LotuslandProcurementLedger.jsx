@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Download, Search, FileText, CheckCircle2, DollarSign, Package, Layers, Sparkles } from 'lucide-react';
+import { Download, Search, FileText, CheckCircle2, DollarSign, Package, Layers, Sparkles, Calendar } from 'lucide-react';
 import { DataTable, StatusBadge, CopyableId } from '../../ui';
 import MetricCard from '../../ui/MetricCard';
 import GlobalSearchBar from '../../ui/GlobalSearchBar';
@@ -71,7 +71,7 @@ export default function LotuslandProcurementLedger() {
     {
       header: 'Therapeutic Category',
       accessor: 'therapeuticClass',
-      width: '20%',
+      width: '16%',
       render: (row) => (
         <span style={{
           fontSize: '0.72rem',
@@ -89,7 +89,7 @@ export default function LotuslandProcurementLedger() {
     {
       header: 'Total Procured',
       accessor: 'totalGrams',
-      width: '12%',
+      width: '11%',
       render: (row) => (
         <div>
           <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>
@@ -102,9 +102,27 @@ export default function LotuslandProcurementLedger() {
       )
     },
     {
+      header: 'Latest Invoice Date',
+      accessor: 'latestDate',
+      width: '14%',
+      render: (row) => (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Calendar size={12} color="#003666" />
+            <span style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.80rem' }}>
+              {row.latestDate}
+            </span>
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px' }}>
+            {row.invoiceCount > 1 ? `${row.firstDate} → ${row.latestDate}` : 'Single release'}
+          </div>
+        </div>
+      )
+    },
+    {
       header: 'Weighted Cost / g',
       accessor: 'weightedAvgCost',
-      width: '12%',
+      width: '11%',
       render: (row) => (
         <div>
           <span style={{ fontWeight: 700, color: '#0284c7', fontSize: '0.85rem' }}>
@@ -119,7 +137,7 @@ export default function LotuslandProcurementLedger() {
     {
       header: 'Catalog Price / g',
       accessor: 'catalogPrice',
-      width: '12%',
+      width: '11%',
       render: (row) => (
         <div>
           <span style={{ fontWeight: 750, color: '#16a34a', fontSize: '0.85rem' }}>
@@ -144,7 +162,7 @@ export default function LotuslandProcurementLedger() {
     {
       header: 'Invoices',
       accessor: 'invoiceRefs',
-      width: '8%',
+      width: '6%',
       render: (row) => (
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
           <span style={{
@@ -198,7 +216,19 @@ export default function LotuslandProcurementLedger() {
               <span style={{ fontWeight: 800, color: '#1e293b', fontSize: '0.78rem' }}>
                 {rec.invoiceNumber}
               </span>
-              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+              <span style={{
+                fontSize: '0.70rem',
+                color: '#003666',
+                background: '#eff6ff',
+                border: '1px solid #dbeafe',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontWeight: 650,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <Calendar size={11} color="#1d4ed8" />
                 {rec.date}
               </span>
             </div>

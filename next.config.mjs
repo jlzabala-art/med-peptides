@@ -52,6 +52,15 @@ const nextConfig = {
     return config;
   },
 
+  async rewrites() {
+    return [
+      {
+        source: '/supplier/lotusland',
+        destination: '/b2b/lotusland',
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

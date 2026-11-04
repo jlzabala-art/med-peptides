@@ -14,6 +14,7 @@ import {
   Sparkles,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
   Filter,
   Lock,
   ArrowRight,
@@ -51,7 +52,137 @@ import AtlasAiCopilotDrawer from '@/components/pricing/AtlasAiCopilotDrawer';
 import PeptideSpecsDrawer from '@/components/pricing/PeptideSpecsDrawer';
 import PeptidePricePdfPreviewModal from '@/components/pricing/PeptidePricePdfPreviewModal';
 import { COUNTRIES } from '@/data/countries';
+import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
+import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
 import '../colway/ColwayPriceList.css';
+
+/**
+ * Standardized Clinical Pharmacology & Indication resolver (¿Para qué sirve?)
+ * Combines KNOWN_PEPTIDE_DATA, PEPTIDE_REFERENCE_DOSSIERS, and curated therapeutic targets.
+ */
+function getPeptideClinicalSummary(productName = '', category = '') {
+  const cleanName = (productName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  const knownMatch = Object.entries(KNOWN_PEPTIDE_DATA).find(([k]) => {
+    const kClean = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return cleanName.includes(kClean) || kClean.includes(cleanName);
+  });
+  const known = knownMatch ? knownMatch[1] : null;
+
+  const dossier = getPeptideReferenceDossier(productName);
+
+  const indicationsMap = {
+    'bpc157': {
+      indication: 'Accelerated soft-tissue repair, tendon and ligament regeneration, gastric mucosal cytoprotection, and systemic anti-inflammatory resolution.',
+      target: 'FAK-Paxillin & VEGF Angiogenesis Axis'
+    },
+    'tb500': {
+      indication: 'Cell migration stimulation, actin regulation, myocardial tissue cytoprotection, and accelerated dermal and muscular recovery.',
+      target: 'Actin-Sequestering G-Actin Cytoskeletal Axis'
+    },
+    'tirzepatide': {
+      indication: 'Dual incretin co-agonism for glycemic homeostasis, chronic weight management, and visceral adiposity reduction.',
+      target: 'GIP & GLP-1 Dual Receptors'
+    },
+    'semaglutide': {
+      indication: 'Selective GLP-1 agonist for glycemic control, hypothalamic appetite regulation, and cardiovascular risk modulation.',
+      target: 'GLP-1 Central & Pancreatic Receptors'
+    },
+    'retatrutide': {
+      indication: 'Next-generation triple receptor agonism for intensive lipid mobilization, metabolic rate enhancement, and glycemic control.',
+      target: 'GLP-1 / GIP / Glucagon Tri-Agonist'
+    },
+    'cjc1295': {
+      indication: 'Pulsatile growth hormone secretion, lean muscle mass preservation, deep sleep architecture enhancement, and collagen synthesis.',
+      target: 'GHRH Pituitary Receptors'
+    },
+    'ipamorelin': {
+      indication: 'Selective GH secretagogue stimulating natural pituitary release without elevating prolactin, cortisol, or aldosterone.',
+      target: 'GHSR-1a Ghrelin Pituitary Receptors'
+    },
+    'ghkcu': {
+      indication: 'Copper peptide complex promoting extracellular matrix remodeling, collagen I/III synthesis, and skin fibroblast rejuvenation.',
+      target: 'Fibroblast Gene Expression & TGF-β Modulation'
+    },
+    'epithalon': {
+      indication: 'Telomerase catalytic subunit activation, pineal melatonin regulation, and neuroendocrine circadian synchronization.',
+      target: 'Telomerase Reverse Transcriptase (TERT) & Epithalamus'
+    },
+    'nad': {
+      indication: 'Essential mitochondrial cellular coenzyme for ATP bioenergetics, PARP DNA repair enzyme activation, and sirtuin longevity pathways.',
+      target: 'Mitochondrial Respiratory Chain & Sirtuins (SIRT1-7)'
+    },
+    'thymosin': {
+      indication: 'Immune modulation, dendritic cell stimulation, and enhanced T-lymphocyte maturation for chronic defense and wellness.',
+      target: 'Toll-Like Receptors (TLR2/TLR9) & T-Cell Maturation'
+    },
+    'aod9604': {
+      indication: 'Targeted lipolytic fragment stimulating beta-3 adrenergic adipose breakdown without affecting insulin or IGF-1 levels.',
+      target: 'Adipocyte Beta-3 Adrenergic Lipolysis'
+    },
+    'motsc': {
+      indication: 'Mitochondrial-derived peptide regulating cellular metabolic homeostasis, insulin sensitivity, and skeletal muscle exercise capacity.',
+      target: 'AMPK Activation & Skeletal Muscle Glucose Uptake'
+    },
+    'selank': {
+      indication: 'Neuroprotective and nootropic heptapeptide modulating GABAergic neurotransmission, reducing anxiety and stabilizing mood.',
+      target: 'GABA-A Receptors & Enkephalin Degradation Inhibition'
+    },
+    'semax': {
+      indication: 'Nootropic ACTH fragment analog enhancing BDNF neurotrophin expression, cognitive focus, memory consolidation, and neuroprotection.',
+      target: 'BDNF/TrkB Receptors & Dopaminergic/Serotonergic Axis'
+    },
+    'pt141': {
+      indication: 'Centrally-acting melanocortin receptor agonist stimulating physiological libido and sexual response in both men and women.',
+      target: 'Central MC3R & MC4R Melanocortin Receptors'
+    },
+    'melanotan': {
+      indication: 'Non-selective melanocortin agonist stimulating melanin photoprotective synthesis (eumelanin) and UV defense.',
+      target: 'MC1R Melanocortin Cutaneous Receptors'
+    },
+    'ss31': {
+      indication: 'Cardiolipin-targeted mitochondrial antioxidant restoring inner mitochondrial membrane integrity and reducing oxidative stress.',
+      target: 'Mitochondrial Inner Membrane Cardiolipin'
+    },
+    'dsip': {
+      indication: 'Neuromodulatory peptide promoting restorative slow-wave delta sleep and physiological neuroendocrine stress reduction.',
+      target: 'Central Serotonergic & GABAergic Sleep Centers'
+    },
+    'sermorelin': {
+      indication: 'Synthetic GHRH 1-29 fragment stimulating endogenous pituitary GH production for vitality, body composition, and recovery.',
+      target: 'Pituitary GHRH-R Receptors'
+    },
+    'tesamorelin': {
+      indication: 'Stabilized GHRH analog specifically clinically demonstrated for visceral adipose tissue reduction and lipid profile improvement.',
+      target: 'Hepatic & Pituitary GHRH Axis'
+    },
+    'kisspeptin': {
+      indication: 'Hypothalamic neuropeptide triggering GnRH release, optimizing LH/FSH gonadotropin pulses and physiological fertility/testosterone.',
+      target: 'GPR54 / KISS1R Hypothalamic Receptors'
+    },
+    'oxytocin': {
+      indication: 'Neuropeptide hormone mediating social bonding, emotional relaxation, stress resilience, and positive neuroendocrine modulation.',
+      target: 'OXTR Neuroendocrine Receptors'
+    },
+    'glutathione': {
+      indication: 'Master cellular antioxidant facilitating hepatic phase II detoxification, free radical scavenging, and skin radiance.',
+      target: 'Intracellular Redox Glutathione Peroxidase Axis'
+    }
+  };
+
+  const matchedKey = Object.keys(indicationsMap).find(k => cleanName.includes(k));
+  const fallbackIndication = matchedKey ? indicationsMap[matchedKey].indication : null;
+  const fallbackTarget = matchedKey ? indicationsMap[matchedKey].target : null;
+
+  return {
+    targetSystem: known?.targetSystem || fallbackTarget || dossier?.pharmacology?.title || `${category || 'Clinical Bioactive'} Axis`,
+    indication: fallbackIndication || dossier?.regulatory?.guidance?.slice(0, 220) || 'Targeted cellular modulation, tissue repair, and clinical physiological optimization.',
+    moa: known?.mechanismOfAction || dossier?.pharmacology?.moa || 'Binds to targeted cell-surface receptors activating intracellular secondary messenger cascades for therapeutic response.',
+    halfLife: known?.halfLife || 'Physiological peptide kinetics (protease-regulated clearance)',
+    sequence: known?.sequence || null,
+    casNumber: known?.casNumber || dossier?.casNumber || null
+  };
+}
 
 /**
  * Standardized Google Cloud UX Vector Icons for Clinical Peptide Categories
@@ -249,6 +380,7 @@ const CLINICAL_PRESETS = [
  * live proforma cart status, and public specs link.
  */
 function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }) {
+  const [isClinicalExpanded, setIsClinicalExpanded] = useState(false);
   const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
   const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
   const discountPct = Math.max(10, Math.round((1 - (p10 / (row.unitPrice * 10))) * 100));
@@ -260,6 +392,8 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
   const inCart1x = cartItems[row.id]?.quantity1x || 0;
   const inCart10x = cartItems[row.id]?.quantity10x || 0;
   const hasCart = inCart1x > 0 || inCart10x > 0;
+
+  const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category);
 
   return (
     <div style={{
@@ -470,6 +604,87 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
             <span>+Pack ×10</span>
           </button>
         </div>
+      </div>
+
+      {/* Expandable Clinical Summary Accordion (¿Para qué sirve?) */}
+      <div style={{ marginTop: '2px' }}>
+        <button
+          type="button"
+          onClick={() => setIsClinicalExpanded(!isClinicalExpanded)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            padding: '7px 10px',
+            background: isClinicalExpanded ? '#eff6ff' : '#f8fafc',
+            border: isClinicalExpanded ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '0.73rem',
+            fontWeight: 700,
+            color: isClinicalExpanded ? '#1d4ed8' : '#475569',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Sparkles size={13} color={isClinicalExpanded ? '#1d4ed8' : '#64748b'} />
+            <span>¿Para qué sirve? · Clinical Quick-Ref</span>
+          </span>
+          {isClinicalExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
+
+        {isClinicalExpanded && (
+          <div style={{
+            background: '#ffffff',
+            border: '1px solid #dbeafe',
+            borderTop: 'none',
+            borderRadius: '0 0 6px 6px',
+            padding: '10px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            fontSize: '0.75rem',
+            lineHeight: 1.45,
+            animation: 'fadeIn 0.15s ease'
+          }}>
+            <div>
+              <strong style={{ color: '#0f172a' }}>🎯 Indication:</strong>{' '}
+              <span style={{ color: '#334155' }}>{clinical.indication}</span>
+            </div>
+            <div>
+              <strong style={{ color: '#0f172a' }}>⚙️ Mechanism:</strong>{' '}
+              <span style={{ color: '#475569' }}>{clinical.moa}</span>
+            </div>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderTop: '1px solid #f1f5f9',
+              paddingTop: '6px',
+              marginTop: '2px',
+              flexWrap: 'wrap',
+              gap: '6px'
+            }}>
+              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                ⏱️ Half-life: {clinical.halfLife}
+              </span>
+              <Link
+                href={specsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: '0.70rem',
+                  fontWeight: 700,
+                  color: '#1a73e8',
+                  textDecoration: 'none'
+                }}
+              >
+                Full Dossier & HPLC ↗
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1241,6 +1456,126 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     }
   ], [formatPrice, handleAddToCart, currency, cartItems]);
 
+  // Master-Detail Expandable Clinical Summary Row for Desktop DataTable (Golden Rule #4 & User Request)
+  const renderPeptideClinicalDetail = useCallback((row) => {
+    const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category);
+    const cleanDose = (row.dosage || '').replace(/[\s+]/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+    const slug = row.slug || row.productId || row.id;
+    const specsUrl = `/p/${slug}?dose=${cleanDose}`;
+
+    return (
+      <div style={{
+        backgroundColor: '#f8fafc',
+        padding: '1.15rem 1.4rem',
+        borderLeft: '4px solid #1a73e8',
+        borderRadius: '0 0 8px 8px',
+        margin: '0.25rem 0 0.5rem 0',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.85rem'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: '0.70rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              backgroundColor: '#e8f0fe',
+              color: '#1a73e8',
+              border: '1px solid #c2e7ff',
+              padding: '2px 8px',
+              borderRadius: '4px'
+            }}>
+              Clinical Indication Quick-Ref
+            </span>
+            <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#1e293b' }}>
+              {row.productName} ({row.dosage}) · {clinical.targetSystem}
+            </h4>
+          </div>
+          <Link
+            href={specsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              color: '#1a73e8',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              padding: '4px 10px',
+              borderRadius: '5px'
+            }}
+          >
+            <span>Open Full Dossier & HPLC CoAs</span>
+            <span>↗</span>
+          </Link>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
+          {/* Indication (¿Para qué sirve?) */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0',
+            padding: '0.85rem 1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <Sparkles size={14} color="#1a73e8" />
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase' }}>
+                Primary Clinical Indication (¿Para qué sirve?)
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+              {clinical.indication}
+            </p>
+          </div>
+
+          {/* Mechanism of Action */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0',
+            padding: '0.85rem 1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <Activity size={14} color="#059669" />
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase' }}>
+                Mechanism of Action & Target
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
+              {clinical.moa}
+            </p>
+          </div>
+
+          {/* Kinetics & Administration */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0',
+            padding: '0.85rem 1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <Clock size={14} color="#d97706" />
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase' }}>
+                Pharmacokinetics & Format
+              </span>
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div><strong>Half-life:</strong> {clinical.halfLife}</div>
+              {clinical.casNumber && <div><strong>CAS Registry:</strong> {clinical.casNumber}</div>}
+              <div><strong>Packaging:</strong> Sterile Lyophilized Vial (10R Borosilicate)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }, []);
+
   return (
     <div className="colway-price-root">
       {/* ── Screen Navigation Bar ── */}
@@ -1302,22 +1637,23 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             <button
               onClick={() => setIsPdfPreviewOpen(true)}
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                color: '#cbd5e1',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '5px 10px',
+                background: 'rgba(255, 255, 255, 0.12)',
+                color: '#ffffff',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                padding: '5px 12px',
                 borderRadius: '6px',
                 fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
               }}
-              title="Preview official PDF price schedule"
+              title="Preview and export official PDF price schedule"
             >
               <Eye size={13} />
-              <span>PDF</span>
+              <span>PDF Schedule</span>
             </button>
 
             {/* Share button */}
@@ -1403,7 +1739,16 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   <span>Currency: <strong>{currency} ({currencySymbol.trim()})</strong></span>
                 </span>
               </div>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#202124', letterSpacing: '-0.02em', margin: 0 }}>
+              <h1 style={{
+                fontSize: 'clamp(1.20rem, 3.2vw, 1.65rem)',
+                fontWeight: 800,
+                color: '#202124',
+                letterSpacing: '-0.02em',
+                margin: 0,
+                lineHeight: 1.25,
+                textWrap: 'balance',
+                maxWidth: '820px'
+              }}>
                 {isDistributor ? 'Certified Clinical Peptide Vials • Distributor B2B' : 'Certified Clinical Peptide Vials • Wholesaler & Clinic'}
               </h1>
               <p style={{ fontSize: '0.88rem', color: '#5f6368', marginTop: '4px', maxWidth: '850px' }}>
@@ -1412,39 +1757,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides. Standard wholesale tier with manufacturer 10-pack volume savings.'
                 }
               </p>
-            </div>
-
-            <div className="mobile-hide" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                onClick={() => setIsPdfPreviewOpen(true)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  color: '#1a73e8',
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  fontSize: '0.80rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.08)',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = '#e8f0fe';
-                  e.currentTarget.style.borderColor = '#1a73e8';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = '#ffffff';
-                  e.currentTarget.style.borderColor = '#dadce0';
-                }}
-                title="Preview official printable price schedule (only client prices, no margins)"
-              >
-                <Eye size={14} />
-                <span>Preview & Export PDF</span>
-              </button>
             </div>
           </div>
         </div>
@@ -1870,6 +2182,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   pageSize={50}
                   showPagination={true}
                   sortable={true}
+                  expandableRender={renderPeptideClinicalDetail}
                   mobileCardComponent={PeptideMobileCard}
                   mobileCardProps={{
                     handleAddToCart,
