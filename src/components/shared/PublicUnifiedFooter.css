@@ -13,6 +13,14 @@
   width: 100%;
   box-sizing: border-box;
   padding-bottom: calc(5.5rem + var(--atlas-sticky-bar-height, 0px) + env(safe-area-inset-bottom, 0px));
+  pointer-events: none !important;
+  user-select: none !important;
+  cursor: default !important;
+}
+
+.public-unified-footer * {
+  cursor: default !important;
+  pointer-events: none !important;
 }
 
 .public-footer-container {

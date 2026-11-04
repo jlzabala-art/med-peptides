@@ -7,6 +7,7 @@ import MetricCard from '../../ui/MetricCard';
 import GlobalSearchBar from '../../ui/GlobalSearchBar';
 import { getLotuslandProcurementReport } from '../../../services/lotuslandProcurementService';
 import { exportLotuslandProcurementXlsx } from '../../../utils/exportLotuslandProcurementXlsx';
+import { LotuslandApiMobileCard } from '../../../app/b2b/lotusland/LotuslandPublicPortalClient';
 import toast from 'react-hot-toast';
 
 export default function LotuslandProcurementLedger() {
@@ -50,10 +51,14 @@ export default function LotuslandProcurementLedger() {
 
   const columns = [
     {
-      header: 'API Active Principle',
+      key: 'name',
       accessor: 'name',
+      header: 'API Active Principle',
+      label: 'API Active Principle',
       width: '24%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.name,
+      render: (_val, row) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontWeight: 700, color: '#003666', fontSize: '0.85rem' }}>
@@ -61,7 +66,7 @@ export default function LotuslandProcurementLedger() {
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', color: '#64748b' }}>
-            <span>CAS: {row.casNumber}</span>
+            <span>CAS: {row.casNumber || 'N/A'}</span>
             <span>·</span>
             <span>{row.grade}</span>
           </div>
@@ -69,10 +74,14 @@ export default function LotuslandProcurementLedger() {
       )
     },
     {
-      header: 'Therapeutic Category',
+      key: 'therapeuticClass',
       accessor: 'therapeuticClass',
+      header: 'Therapeutic Category',
+      label: 'Therapeutic Category',
       width: '16%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.therapeuticClass,
+      render: (_val, row) => (
         <span style={{
           fontSize: '0.72rem',
           fontWeight: 600,
@@ -87,10 +96,14 @@ export default function LotuslandProcurementLedger() {
       )
     },
     {
-      header: 'Total Procured',
+      key: 'totalGrams',
       accessor: 'totalGrams',
+      header: 'Total Procured',
+      label: 'Total Procured',
       width: '11%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.totalGrams,
+      render: (_val, row) => (
         <div>
           <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>
             {row.totalGrams.toLocaleString()} g
@@ -102,10 +115,14 @@ export default function LotuslandProcurementLedger() {
       )
     },
     {
-      header: 'Latest Invoice Date',
+      key: 'latestDate',
       accessor: 'latestDate',
+      header: 'Latest Invoice Date',
+      label: 'Latest Invoice Date',
       width: '14%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.latestDate,
+      render: (_val, row) => (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Calendar size={12} color="#003666" />
@@ -120,10 +137,14 @@ export default function LotuslandProcurementLedger() {
       )
     },
     {
-      header: 'Weighted Cost / g',
+      key: 'weightedAvgCost',
       accessor: 'weightedAvgCost',
+      header: 'Weighted Cost / g',
+      label: 'Weighted Cost / g',
       width: '11%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.weightedAvgCost,
+      render: (_val, row) => (
         <div>
           <span style={{ fontWeight: 700, color: '#0284c7', fontSize: '0.85rem' }}>
             ${row.weightedAvgCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -135,47 +156,36 @@ export default function LotuslandProcurementLedger() {
       )
     },
     {
-      header: 'Catalog Price / g',
+      key: 'catalogPrice',
       accessor: 'catalogPrice',
-      width: '11%',
-      render: (row) => (
+      header: 'Transfer Cap (Cost + 6%)',
+      label: 'Transfer Cap (Cost + 6%)',
+      width: '12%',
+      sortable: true,
+      sortValue: (r) => r.catalogPrice,
+      render: (_val, row) => (
         <div>
           <span style={{ fontWeight: 750, color: '#16a34a', fontSize: '0.85rem' }}>
             ${row.catalogPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
           <div style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 600 }}>
-            +{row.marginPercent}% margin
+            +6.0% max cap
           </div>
         </div>
       )
     },
     {
-      header: 'Lifetime Spend',
+      key: 'totalSpendUSD',
       accessor: 'totalSpendUSD',
+      header: 'Lifetime Spend',
+      label: 'Lifetime Spend',
       width: '12%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.totalSpendUSD,
+      render: (_val, row) => (
         <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.88rem' }}>
           ${row.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}
         </span>
-      )
-    },
-    {
-      header: 'Invoices',
-      accessor: 'invoiceRefs',
-      width: '6%',
-      render: (row) => (
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          <span style={{
-            fontSize: '0.70rem',
-            fontWeight: 700,
-            backgroundColor: '#eff6ff',
-            color: '#1d4ed8',
-            padding: '2px 6px',
-            borderRadius: '4px'
-          }}>
-            {row.invoiceCount} {row.invoiceCount === 1 ? 'Inv' : 'Invs'}
-          </span>
-        </div>
       )
     }
   ];
@@ -382,6 +392,8 @@ export default function LotuslandProcurementLedger() {
         data={filteredApis}
         columns={columns}
         keyField="name"
+        sortable={true}
+        mobileCardComponent={LotuslandApiMobileCard}
         expandableRender={renderDetailRow}
         emptyTitle="No APIs match your search criteria"
         emptySubtitle="Try searching for another peptide name or resetting filters."

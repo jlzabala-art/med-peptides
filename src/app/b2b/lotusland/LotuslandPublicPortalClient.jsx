@@ -28,6 +28,219 @@ import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
 import toast from 'react-hot-toast';
 
+/**
+ * Mobile-First Card for Lotusland API Raw Materials
+ * (Strict Golden Rule #23 & Google Cloud Mobile UX)
+ */
+export function LotuslandApiMobileCard({ row, renderDetailRow }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div style={{
+      background: '#ffffff',
+      border: '1px solid #dadce0',
+      borderRadius: '8px',
+      padding: '12px 14px',
+      marginBottom: '10px',
+      boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '8px'
+    }}>
+      {/* Top Header: Compound Name & Category */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+          <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#003666' }}>
+            {row.name}
+          </h4>
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 750,
+            color: '#16a34a',
+            background: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            padding: '1px 6px',
+            borderRadius: '4px'
+          }}>
+            {row.grade}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', color: '#64748b', marginTop: '3px' }}>
+          <span>CAS: {row.casNumber || 'N/A'}</span>
+          <span>·</span>
+          <span style={{ color: '#003666', fontWeight: 650 }}>{row.therapeuticClass || 'Specialized Bioactive API'}</span>
+        </div>
+      </div>
+
+      {/* 2x2 Clean Metric Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '8px',
+        backgroundColor: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '6px',
+        padding: '8px 10px'
+      }}>
+        <div>
+          <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+            Total Procured
+          </div>
+          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+            {row.totalGrams.toLocaleString()} g
+          </div>
+          <div style={{ fontSize: '0.64rem', color: '#64748b' }}>
+            Across {row.invoiceCount} {row.invoiceCount === 1 ? 'order' : 'orders'}
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+            Latest Order Date
+          </div>
+          <div style={{ fontSize: '0.80rem', fontWeight: 750, color: '#003666', display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <Calendar size={11} color="#003666" />
+            <span>{row.latestDate}</span>
+          </div>
+          <div style={{ fontSize: '0.64rem', color: '#64748b' }}>
+            {row.invoiceCount > 1 ? `${row.firstDate} → ${row.latestDate}` : 'Single release'}
+          </div>
+        </div>
+
+        <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
+          <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+            Weighted Cost
+          </div>
+          <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0284c7' }}>
+            ${row.weightedAvgCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}/g
+          </div>
+          <div style={{ fontSize: '0.64rem', color: '#64748b' }}>
+            Latest: ${row.latestCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}/g
+          </div>
+        </div>
+
+        <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
+          <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+            Transfer Cap (Cost + 6%)
+          </div>
+          <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#16a34a' }}>
+            ${row.catalogPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}/g
+          </div>
+          <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 600 }}>
+            +6.0% max cap
+          </div>
+        </div>
+
+        <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
+          <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+            Lifetime Spend
+          </div>
+          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#003666' }}>
+            ${row.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </div>
+          <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 600 }}>
+            Reconciled USD
+          </div>
+        </div>
+      </div>
+
+      {/* Expand Toggle Button */}
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          padding: '6px 10px',
+          background: isExpanded ? '#eff6ff' : '#f8fafc',
+          border: isExpanded ? '1px solid #bfdbfe' : '1px solid #dadce0',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '0.72rem',
+          fontWeight: 700,
+          color: isExpanded ? '#1d4ed8' : '#334155'
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <FileText size={12} color={isExpanded ? '#1d4ed8' : '#64748b'} />
+          <span>View Receipts & Indications ({row.invoiceCount})</span>
+        </span>
+        {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      </button>
+
+      {/* Expanded Master-Detail Content */}
+      {isExpanded && renderDetailRow && (
+        <div style={{ marginTop: '2px' }}>
+          {renderDetailRow(row)}
+        </div>
+      )}
+    </div>
+  );
+}
+LotuslandApiMobileCard.displayName = 'LotuslandApiMobileCard';
+
+function LotuslandInvoiceMobileCard({ row }) {
+  return (
+    <div style={{
+      background: '#ffffff',
+      border: '1px solid #dadce0',
+      borderRadius: '8px',
+      padding: '12px 14px',
+      marginBottom: '10px',
+      boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '6px'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.88rem' }}>
+          {row.invoiceNumber}
+        </span>
+        <span style={{
+          fontSize: '0.68rem',
+          fontWeight: 700,
+          color: '#16a34a',
+          background: '#f0fdf4',
+          border: '1px solid #bbf7d0',
+          padding: '1px 6px',
+          borderRadius: '4px'
+        }}>
+          RECONCILED
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: '#64748b' }}>
+        <Calendar size={11} color="#64748b" />
+        <span>Release Date: <strong style={{ color: '#1e293b' }}>{row.date}</strong></span>
+      </div>
+
+      <div style={{ fontSize: '0.74rem', color: '#334155', marginTop: '2px' }}>
+        <strong>Licensed Entity:</strong> {row.buyer}
+      </div>
+
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: '4px',
+        borderTop: '1px solid #f1f5f9',
+        paddingTop: '6px'
+      }}>
+        <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+          Original: {row.currency === 'EUR' ? '€' : '$'}{row.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })} {row.currency}
+        </span>
+        <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.88rem' }}>
+          ${row.grandTotalUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+        </span>
+      </div>
+    </div>
+  );
+}
+LotuslandInvoiceMobileCard.displayName = 'LotuslandInvoiceMobileCard';
+
 export default function LotuslandPublicPortalClient() {
   const [activeTab, setActiveTab] = useState('apis'); // 'apis' | 'invoices' | 'corporate'
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,10 +308,14 @@ export default function LotuslandPublicPortalClient() {
 
   const apiColumns = [
     {
-      header: 'API Active Principle',
+      key: 'name',
       accessor: 'name',
+      header: 'API Active Principle',
+      label: 'API Active Principle',
       width: '24%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.name,
+      render: (_val, row) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontWeight: 750, color: '#003666', fontSize: '0.88rem' }}>
@@ -106,7 +323,7 @@ export default function LotuslandPublicPortalClient() {
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', color: '#64748b' }}>
-            <span>CAS: {row.casNumber}</span>
+            <span>CAS: {row.casNumber || 'N/A'}</span>
             <span>·</span>
             <span>{row.grade}</span>
           </div>
@@ -114,10 +331,14 @@ export default function LotuslandPublicPortalClient() {
       )
     },
     {
-      header: 'Therapeutic Class',
+      key: 'therapeuticClass',
       accessor: 'therapeuticClass',
+      header: 'Therapeutic Class',
+      label: 'Therapeutic Class',
       width: '16%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.therapeuticClass,
+      render: (_val, row) => (
         <span style={{
           fontSize: '0.72rem',
           fontWeight: 600,
@@ -132,10 +353,14 @@ export default function LotuslandPublicPortalClient() {
       )
     },
     {
-      header: 'Total Procured',
+      key: 'totalGrams',
       accessor: 'totalGrams',
+      header: 'Total Procured',
+      label: 'Total Procured',
       width: '11%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.totalGrams,
+      render: (_val, row) => (
         <div>
           <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>
             {row.totalGrams.toLocaleString()} g
@@ -147,10 +372,14 @@ export default function LotuslandPublicPortalClient() {
       )
     },
     {
-      header: 'Latest Invoice Date',
+      key: 'latestDate',
       accessor: 'latestDate',
+      header: 'Latest Invoice Date',
+      label: 'Latest Invoice Date',
       width: '14%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.latestDate,
+      render: (_val, row) => (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Calendar size={12} color="#003666" />
@@ -165,10 +394,14 @@ export default function LotuslandPublicPortalClient() {
       )
     },
     {
-      header: 'Weighted Cost / g',
+      key: 'weightedAvgCost',
       accessor: 'weightedAvgCost',
+      header: 'Weighted Cost / g',
+      label: 'Weighted Cost / g',
       width: '11%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.weightedAvgCost,
+      render: (_val, row) => (
         <div>
           <span style={{ fontWeight: 700, color: '#0284c7', fontSize: '0.85rem' }}>
             ${row.weightedAvgCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -180,25 +413,33 @@ export default function LotuslandPublicPortalClient() {
       )
     },
     {
-      header: 'Catalog Price / g',
+      key: 'catalogPrice',
       accessor: 'catalogPrice',
-      width: '11%',
-      render: (row) => (
+      header: 'Transfer Cap (Cost + 6%)',
+      label: 'Transfer Cap (Cost + 6%)',
+      width: '12%',
+      sortable: true,
+      sortValue: (r) => r.catalogPrice,
+      render: (_val, row) => (
         <div>
           <span style={{ fontWeight: 750, color: '#16a34a', fontSize: '0.85rem' }}>
             ${row.catalogPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
           <div style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 600 }}>
-            +{row.marginPercent}% margin
+            +6.0% max cap
           </div>
         </div>
       )
     },
     {
-      header: 'Lifetime Spend',
+      key: 'totalSpendUSD',
       accessor: 'totalSpendUSD',
-      width: '13%',
-      render: (row) => (
+      header: 'Lifetime Spend',
+      label: 'Lifetime Spend',
+      width: '12%',
+      sortable: true,
+      sortValue: (r) => r.totalSpendUSD,
+      render: (_val, row) => (
         <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.90rem' }}>
           ${row.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}
         </span>
@@ -208,10 +449,14 @@ export default function LotuslandPublicPortalClient() {
 
   const invoiceColumns = [
     {
-      header: 'Invoice #',
+      key: 'invoiceNumber',
       accessor: 'invoiceNumber',
+      header: 'Invoice #',
+      label: 'Invoice #',
       width: '16%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.invoiceNumber,
+      render: (_val, row) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontWeight: 750, color: '#003666', fontSize: '0.82rem' }}>
             {row.invoiceNumber}
@@ -220,30 +465,42 @@ export default function LotuslandPublicPortalClient() {
       )
     },
     {
-      header: 'Release Date',
+      key: 'date',
       accessor: 'date',
+      header: 'Release Date',
+      label: 'Release Date',
       width: '14%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.date,
+      render: (_val, row) => (
         <span style={{ fontSize: '0.78rem', color: '#475569' }}>
           {row.date}
         </span>
       )
     },
     {
-      header: 'Licensed Buyer Entity',
+      key: 'buyer',
       accessor: 'buyer',
+      header: 'Licensed Buyer Entity',
+      label: 'Licensed Buyer Entity',
       width: '32%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.buyer,
+      render: (_val, row) => (
         <div style={{ fontSize: '0.76rem', color: '#1e293b', fontWeight: 600 }}>
           {row.buyer}
         </div>
       )
     },
     {
-      header: 'Original Total',
+      key: 'grandTotal',
       accessor: 'grandTotal',
+      header: 'Original Total',
+      label: 'Original Total',
       width: '18%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.grandTotal,
+      render: (_val, row) => (
         <div>
           <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.84rem' }}>
             {row.currency === 'EUR' ? '€' : '$'}{row.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })} {row.currency}
@@ -257,10 +514,14 @@ export default function LotuslandPublicPortalClient() {
       )
     },
     {
-      header: 'USD Equivalent',
+      key: 'grandTotalUSD',
       accessor: 'grandTotalUSD',
+      header: 'USD Equivalent',
+      label: 'USD Equivalent',
       width: '20%',
-      render: (row) => (
+      sortable: true,
+      sortValue: (r) => r.grandTotalUSD,
+      render: (_val, row) => (
         <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.88rem' }}>
           ${row.grandTotalUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
         </span>
@@ -626,6 +887,8 @@ export default function LotuslandPublicPortalClient() {
               data={filteredApis}
               columns={apiColumns}
               keyField="name"
+              sortable={true}
+              mobileCardComponent={LotuslandApiMobileCard}
               expandableRender={renderDetailRow}
               emptyTitle="No APIs match your filter"
               emptySubtitle="Try adjusting your search or category."
@@ -652,6 +915,8 @@ export default function LotuslandPublicPortalClient() {
               data={invoices}
               columns={invoiceColumns}
               keyField="invoiceNumber"
+              sortable={true}
+              mobileCardComponent={LotuslandInvoiceMobileCard}
               emptyTitle="No invoices found"
               emptySubtitle="All 10 commercial releases are reconciled."
             />

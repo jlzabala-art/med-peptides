@@ -48,7 +48,7 @@ export const KNOWN_PEPTIDE_DATA = {
     molecularWeight: '1419.53',
     pubchemCid: 9941957,
     targetSystem: 'Angiogenesis & Tissue Cytoprotection (VEGF/eNOS)',
-    mechanismOfAction: 'Accelerates tendon, ligament, gut and muscular tissue repair'
+    mechanismOfAction: 'Upregulates VEGFR2, modulates eNOS phosphorylation to release nitric oxide, and activates the FAK-paxillin pathway and egr-1 gene expression'
   },
   'bpc 157': {
     casNumber: '137525-51-0',
@@ -56,7 +56,7 @@ export const KNOWN_PEPTIDE_DATA = {
     molecularWeight: '1419.53',
     pubchemCid: 9941957,
     targetSystem: 'Angiogenesis & Tissue Cytoprotection (VEGF/eNOS)',
-    mechanismOfAction: 'Accelerates tendon, ligament, gut and muscular tissue repair'
+    mechanismOfAction: 'Upregulates VEGFR2, modulates eNOS phosphorylation to release nitric oxide, and activates the FAK-paxillin pathway and egr-1 gene expression'
   },
   'tb-500': {
     casNumber: '77591-33-4',
@@ -64,7 +64,7 @@ export const KNOWN_PEPTIDE_DATA = {
     molecularWeight: '4963.49',
     pubchemCid: 16132341,
     targetSystem: 'Actin Regulation & Cell Migration (Thymosin Beta-4)',
-    mechanismOfAction: 'Promotes cellular mobility, tissue regeneration, and wound healing'
+    mechanismOfAction: 'Binds and sequesters G-actin, upregulates laminin-5, stimulates endothelial cell migration, and downregulates pro-fibrotic TGF-beta signaling'
   },
   'tb 500': {
     casNumber: '77591-33-4',
@@ -72,7 +72,7 @@ export const KNOWN_PEPTIDE_DATA = {
     molecularWeight: '4963.49',
     pubchemCid: 16132341,
     targetSystem: 'Actin Regulation & Cell Migration (Thymosin Beta-4)',
-    mechanismOfAction: 'Promotes cellular mobility, tissue regeneration, and wound healing'
+    mechanismOfAction: 'Binds and sequesters G-actin, upregulates laminin-5, stimulates endothelial cell migration, and downregulates pro-fibrotic TGF-beta signaling'
   },
   'cjc-1295': {
     casNumber: '863288-34-0',

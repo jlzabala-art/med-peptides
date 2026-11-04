@@ -353,26 +353,25 @@ export function getLotuslandProcurementReport() {
   });
 
   const apisList = Array.from(apisMap.values()).map(api => {
-    // Sort dates
-    api.dates.sort();
-    const firstDate = api.dates[0];
-    const latestDate = api.dates[api.dates.length - 1];
+    // Sort receipts by date descending (most recent first)
+    api.invoices.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const latestDate = api.invoices[0]?.date || '2026-05-19';
+    const firstDate = api.invoices[api.invoices.length - 1]?.date || latestDate;
 
     // Costs
     const weightedAvgCost = api.totalGrams > 0 ? (api.totalSpendUSD / api.totalGrams) : 0;
-    const latestCost = api.rates[api.rates.length - 1] || weightedAvgCost;
-    const lowestCost = Math.min(...api.rates);
-    const highestCost = Math.max(...api.rates);
+    const latestCost = api.invoices[0]?.unitCostUSD || weightedAvgCost;
+    const allCosts = api.invoices.map(i => i.unitCostUSD);
+    const lowestCost = Math.min(...allCosts);
+    const highestCost = Math.max(...allCosts);
 
-    // Wholesale Compounding Catalog Price (+15% standard margin)
-    const catalogPrice = Number((latestCost * 1.15).toFixed(2));
+    // Wholesale Compounding Transfer Cap: Cost + 6% max contractual margin for Magenta corridor
+    const catalogPrice = Number((weightedAvgCost * 1.06).toFixed(2));
     const marginUSD = Number((catalogPrice - weightedAvgCost).toFixed(2));
-    const marginPercent = catalogPrice > 0 ? Number(((marginUSD / catalogPrice) * 100).toFixed(1)) : 15.0;
+    const marginPercent = 6.0;
 
     const invoiceRefs = Array.from(new Set(api.invoices.map(i => i.invoiceNumber)));
-
-    // Sort receipts by date descending (most recent first)
-    api.invoices.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     return {
       name: api.name,

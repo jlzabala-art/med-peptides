@@ -53,6 +53,7 @@ const PORTAL_PREFIXES = [
   '/account-manager',
   '/tools',
   '/b2b',
+  '/lotusland',
   '/rfq',
   '/medical',
   '/pricing',

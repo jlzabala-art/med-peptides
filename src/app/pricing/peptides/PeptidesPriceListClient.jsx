@@ -174,13 +174,38 @@ function getPeptideClinicalSummary(productName = '', category = '') {
   const fallbackIndication = matchedKey ? indicationsMap[matchedKey].indication : null;
   const fallbackTarget = matchedKey ? indicationsMap[matchedKey].target : null;
 
+  const synergyMap = {
+    'bpc157': 'Co-administered with TB-500 for enhanced soft tissue, tendon, and vascular matrix remodeling.',
+    'tb500': 'Synergizes with BPC-157 for comprehensive systemic repair and cytoprotection.',
+    'tirzepatide': 'Can be stacked with AOD-9604 or CJC-1295/Ipamorelin to preserve lean mass during metabolic deficit.',
+    'semaglutide': 'Pairs well with BPC-157 to mitigate gastrointestinal transit discomfort and preserve mucosal integrity.',
+    'retatrutide': 'Pairs with MOTS-c or L-Carnitine for maximal mitochondrial beta-oxidation and energy output.',
+    'cjc1295': 'Pairs synergistically with Ipamorelin for amplified physiological GH pulsatile release.',
+    'ipamorelin': 'Pairs with CJC-1295 for amplified GH secretion without elevating cortisol, prolactin, or aldosterone.',
+    'ghkcu': 'Pairs with BPC-157 or Epithalon for cutaneous extracellular matrix renewal and anti-aging.',
+    'epithalon': 'Pairs with Thymosin Alpha-1 or NAD+ for multi-pathway cellular longevity and immune rejuvenation.',
+    'nad': 'Pairs with SS-31 or Epithalon for inner mitochondrial membrane restoration and cellular ATP output.',
+    'thymosin': 'Pairs with BPC-157 or Epithalon for immune modulation and infection recovery.',
+    'aod9604': 'Pairs with GLP-1/GIP agonists for targeted adipocyte lipolysis without glycemic interference.',
+    'motsc': 'Pairs with NAD+ for metabolic endurance and exercise mimetic signaling.',
+    'selank': 'Pairs with Semax for balanced executive focus, stress resilience, and mood stabilization.',
+    'semax': 'Pairs with Selank for enhanced BDNF neuroplasticity and cognitive clarity.',
+    'pt141': 'Standalone on-demand administration or stacked with Kisspeptin for neuroendocrine sexual axis support.',
+    'ss31': 'Pairs with MOTS-c and NAD+ for inner mitochondrial membrane cardiolipin recovery.',
+    'dsip': 'Pairs with Epithalon for restorative slow-wave delta sleep and circadian optimization.'
+  };
+
+  const matchedSynergy = Object.keys(synergyMap).find(k => cleanName.includes(k));
+  const synergy = matchedSynergy ? synergyMap[matchedSynergy] : 'Targeted standalone compound or physician-guided multi-peptide protocol.';
+
   return {
     targetSystem: known?.targetSystem || fallbackTarget || dossier?.pharmacology?.title || `${category || 'Clinical Bioactive'} Axis`,
     indication: fallbackIndication || dossier?.regulatory?.guidance?.slice(0, 220) || 'Targeted cellular modulation, tissue repair, and clinical physiological optimization.',
     moa: known?.mechanismOfAction || dossier?.pharmacology?.moa || 'Binds to targeted cell-surface receptors activating intracellular secondary messenger cascades for therapeutic response.',
     halfLife: known?.halfLife || 'Physiological peptide kinetics (protease-regulated clearance)',
     sequence: known?.sequence || null,
-    casNumber: known?.casNumber || dossier?.casNumber || null
+    casNumber: known?.casNumber || dossier?.casNumber || null,
+    synergy
   };
 }
 
@@ -640,11 +665,11 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
             border: '1px solid #dbeafe',
             borderTop: 'none',
             borderRadius: '0 0 6px 6px',
-            padding: '10px 12px',
+            padding: '9px 11px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
-            fontSize: '0.75rem',
+            gap: '6px',
+            fontSize: '0.74rem',
             lineHeight: 1.45,
             animation: 'fadeIn 0.15s ease'
           }}>
@@ -653,35 +678,40 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
               <span style={{ color: '#334155' }}>{clinical.indication}</span>
             </div>
             <div>
-              <strong style={{ color: '#0f172a' }}>⚙️ Mechanism:</strong>{' '}
+              <strong style={{ color: '#0f172a' }}>🧬 Target & MoA:</strong>{' '}
               <span style={{ color: '#475569' }}>{clinical.moa}</span>
             </div>
             <div style={{
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              borderTop: '1px solid #f1f5f9',
-              paddingTop: '6px',
-              marginTop: '2px',
+              gap: '6px',
               flexWrap: 'wrap',
-              gap: '6px'
+              borderTop: '1px solid #f1f5f9',
+              paddingTop: '5px',
+              marginTop: '1px'
             }}>
-              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+              <span style={{
+                fontSize: '0.66rem',
+                fontWeight: 650,
+                color: '#475569',
+                background: '#f1f5f9',
+                padding: '2px 6px',
+                borderRadius: '4px'
+              }}>
                 ⏱️ Half-life: {clinical.halfLife}
               </span>
-              <Link
-                href={specsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontSize: '0.70rem',
-                  fontWeight: 700,
-                  color: '#1a73e8',
-                  textDecoration: 'none'
-                }}
-              >
-                Full Dossier & HPLC ↗
-              </Link>
+              {clinical.casNumber && (
+                <span style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 650,
+                  color: '#475569',
+                  background: '#f1f5f9',
+                  padding: '2px 6px',
+                  borderRadius: '4px'
+                }}>
+                  CAS: {clinical.casNumber}
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -1214,7 +1244,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'productName',
       label: 'Peptide Formulation & Concentration',
-      width: '43%',
+      width: '38%',
       align: 'left', // STRICT: Left-aligned for clean price list readability
       sortable: true,
       render: (_, row) => {
@@ -1399,15 +1429,16 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'actions',
       label: 'Order Request',
-      width: '16%',
+      width: '175px',
+      minWidth: '170px',
       align: 'right',
       render: (_, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', flexWrap: 'nowrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px', flexWrap: 'nowrap', paddingRight: '8px' }}>
           <button
             onClick={() => handleAddToCart(row, '1x')}
             style={{
-              padding: '4px 7px',
-              fontSize: '0.70rem',
+              padding: '4px 6px',
+              fontSize: '0.69rem',
               fontWeight: 600,
               background: '#ffffff',
               border: '1px solid #dadce0',
@@ -1418,6 +1449,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               alignItems: 'center',
               gap: '3px',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
               transition: 'background 0.15s'
             }}
             onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
@@ -1430,8 +1462,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           <button
             onClick={() => handleAddToCart(row, '10x')}
             style={{
-              padding: '4px 8px',
-              fontSize: '0.70rem',
+              padding: '4px 7px',
+              fontSize: '0.69rem',
               fontWeight: 600,
               background: '#1a73e8',
               border: '1px solid #1a73e8',
@@ -1442,6 +1474,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               alignItems: 'center',
               gap: '3px',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
               transition: 'background 0.15s'
             }}
             onMouseEnter={e => e.currentTarget.style.background = '#1557b0'}
@@ -1459,116 +1492,111 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
   // Master-Detail Expandable Clinical Summary Row for Desktop DataTable (Golden Rule #4 & User Request)
   const renderPeptideClinicalDetail = useCallback((row) => {
     const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category);
-    const cleanDose = (row.dosage || '').replace(/[\s+]/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-    const slug = row.slug || row.productId || row.id;
-    const specsUrl = `/p/${slug}?dose=${cleanDose}`;
 
     return (
       <div style={{
         backgroundColor: '#f8fafc',
-        padding: '1.15rem 1.4rem',
-        borderLeft: '4px solid #1a73e8',
-        borderRadius: '0 0 8px 8px',
-        margin: '0.25rem 0 0.5rem 0',
+        borderLeft: '3px solid #1a73e8',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0.9rem 1.4rem',
+        margin: '0',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.85rem'
+        gap: '0.65rem'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        {/* Subtle GCP Category & Pathway Tag (No redundant compound name or duplicate buttons) */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{
-              fontSize: '0.70rem',
-              fontWeight: 800,
+              fontSize: '0.68rem',
+              fontWeight: 750,
+              letterSpacing: '0.04em',
               textTransform: 'uppercase',
-              backgroundColor: '#e8f0fe',
               color: '#1a73e8',
+              background: '#e8f0fe',
               border: '1px solid #c2e7ff',
               padding: '2px 8px',
               borderRadius: '4px'
             }}>
-              Clinical Indication Quick-Ref
+              Clinical Pharmacology Quick-Ref
             </span>
-            <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#1e293b' }}>
-              {row.productName} ({row.dosage}) · {clinical.targetSystem}
-            </h4>
+            <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+              Target Pathway: <strong style={{ color: '#0f172a' }}>{clinical.targetSystem}</strong>
+            </span>
           </div>
-          <Link
-            href={specsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              color: '#1a73e8',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              padding: '4px 10px',
-              borderRadius: '5px'
-            }}
-          >
-            <span>Open Full Dossier & HPLC CoAs</span>
-            <span>↗</span>
-          </Link>
+
+          <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+            {clinical.casNumber && <span>CAS Registry: <strong style={{ color: '#334155' }}>{clinical.casNumber}</strong></span>}
+          </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
-          {/* Indication (¿Para qué sirve?) */}
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '6px',
-            border: '1px solid #e2e8f0',
-            padding: '0.85rem 1rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-              <Sparkles size={14} color="#1a73e8" />
-              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase' }}>
-                Primary Clinical Indication (¿Para qué sirve?)
-              </span>
+        {/* 2-Column Clean Semantic Grid without bulky duplicate cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1.25fr 0.75fr',
+          gap: '1.25rem',
+          backgroundColor: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '8px',
+          padding: '0.85rem 1.15rem'
+        }}>
+          {/* Column 1: Indication & MoA */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
+                <Sparkles size={13} color="#1a73e8" />
+                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Primary Clinical Indication (¿Para qué sirve?)
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.79rem', color: '#334155', lineHeight: 1.5 }}>
+                {clinical.indication}
+              </p>
             </div>
-            <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
-              {clinical.indication}
-            </p>
+
+            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
+                <Activity size={13} color="#059669" />
+                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Biological Pathway & Receptor MoA
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.77rem', color: '#475569', lineHeight: 1.48 }}>
+                {clinical.moa}
+              </p>
+            </div>
           </div>
 
-          {/* Mechanism of Action */}
+          {/* Column 2: Pharmacological Specs & Synergy */}
           <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '6px',
-            border: '1px solid #e2e8f0',
-            padding: '0.85rem 1rem'
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            borderLeft: '1px solid #f1f5f9',
+            paddingLeft: '1.25rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-              <Activity size={14} color="#059669" />
-              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase' }}>
-                Mechanism of Action & Target
-              </span>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
+                <Clock size={13} color="#d97706" />
+                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Pharmacokinetics
+                </span>
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#475569' }}>
+                Elimination Half-Life: <strong style={{ color: '#1e293b' }}>{clinical.halfLife}</strong>
+              </div>
             </div>
-            <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
-              {clinical.moa}
-            </p>
-          </div>
 
-          {/* Kinetics & Administration */}
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '6px',
-            border: '1px solid #e2e8f0',
-            padding: '0.85rem 1rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-              <Clock size={14} color="#d97706" />
-              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase' }}>
-                Pharmacokinetics & Format
-              </span>
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div><strong>Half-life:</strong> {clinical.halfLife}</div>
-              {clinical.casNumber && <div><strong>CAS Registry:</strong> {clinical.casNumber}</div>}
-              <div><strong>Packaging:</strong> Sterile Lyophilized Vial (10R Borosilicate)</div>
+            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
+                <Layers size={13} color="#7c3aed" />
+                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Clinical Synergies & Protocol Stacks
+                </span>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.45 }}>
+                {clinical.synergy}
+              </div>
             </div>
           </div>
         </div>
