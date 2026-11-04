@@ -44,12 +44,21 @@ export async function GET(request) {
     const white = rgb(1, 1, 1);
 
     // Google Cloud Console UX Semantic Tokens (Neutral, Anti-Bias)
-    const gcpBorder = rgb(218 / 255, 220 / 255, 224 / 255);     // #dadce0 (GCP Card Border)
-    const gcpPillBg = rgb(241 / 255, 243 / 255, 244 / 255);     // #f1f3f4 (GCP Chip Surface)
-    const gcpPillText = rgb(60 / 255, 64 / 255, 67 / 255);      // #3c4043 (GCP Chip Label)
-    const googleBlue = rgb(26 / 255, 115 / 255, 232 / 255);      // #1a73e8 (GCP Blue)
-    const gcpGreen = rgb(19 / 255, 115 / 255, 51 / 255);        // #137333 (GCP Active Green)
-    const gcpGreenBg = rgb(230 / 255, 244 / 255, 234 / 255);    // #e6f4ea (GCP Active Green Bg)
+    const gcpBorder = rgb(218 / 255, 220 / 255, 224 / 255);      // #dadce0 (GCP Card Border)
+    const gcpPillBg = rgb(241 / 255, 243 / 255, 244 / 255);      // #f1f3f4 (GCP Chip Surface)
+    const gcpPillText = rgb(60 / 255, 64 / 255, 67 / 255);       // #3c4043 (GCP Chip Label)
+    const googleBlue = rgb(26 / 255, 115 / 255, 232 / 255);       // #1a73e8 (GCP Blue)
+    const googleBlueBg = rgb(232 / 255, 240 / 255, 254 / 255);   // #e8f0fe (GCP Blue Light Surface)
+    const googleBlueBorder = rgb(210 / 255, 227 / 255, 252 / 255);// #d2e3fc
+    const gcpGreen = rgb(19 / 255, 115 / 255, 51 / 255);         // #137333 (GCP Active Green)
+    const gcpGreenBg = rgb(230 / 255, 244 / 255, 234 / 255);     // #e6f4ea (GCP Active Green Bg)
+    const gcpGreenBorder = rgb(206 / 255, 234 / 255, 214 / 255);  // #ceead6
+    const gcpAmber = rgb(176 / 255, 96 / 255, 0 / 255);          // #b06000 (GCP Amber)
+    const gcpAmberBg = rgb(254 / 255, 247 / 255, 224 / 255);     // #fef7e0 (GCP Amber Bg)
+    const gcpAmberBorder = rgb(254 / 255, 239 / 255, 195 / 255); // #feefc3
+    const gcpRed = rgb(197 / 255, 34 / 255, 31 / 255);           // #c5221f (GCP Red)
+    const gcpRedBg = rgb(252 / 255, 232 / 255, 230 / 255);       // #fce8e6 (GCP Red Bg)
+    const gcpRedBorder = rgb(250 / 255, 210 / 255, 207 / 255);   // #fad2cf
 
     // =========================================================================
     // COVER PAGE: EXECUTIVE LUXURY ATLAS BRAND COVER & CREDENTIALS (GOOGLE CLOUD UX)
@@ -597,92 +606,139 @@ export async function GET(request) {
     y1 -= 8;
     const trafficCols = [
       {
-        header: '[GREEN] ALWAYS ORDER (100% HALAL & DNA FAVS)',
-        color: greenText,
-        bgColor: greenBg,
-        borderColor: greenBorder,
+        badge: 'GREEN · ALWAYS ORDER',
+        subtitle: '100% Halal Verified & DNA Favs',
+        badgeColor: gcpGreen,
+        badgeBg: gcpGreenBg,
+        badgeBorder: gcpGreenBorder,
+        accentColor: gcpGreen,
         items: [
           '• 100% Halal grass-fed beef & grilled chicken',
           '• Fresh wild salmon, sea bass, local hamour',
           '• Avocados, extra virgin olive oil, walnuts',
           '• Dark leafy greens (spinach, arugula, kale)',
           '• Steamed quinoa, jasmine rice, sweet potatoes',
-          '• Almond milk & coconut yogurt (100% dairy-free)'
+          '• Almond milk & coconut yogurt (dairy-free)'
         ]
       },
       {
-        header: '[AMBER] ENJOY IN MODERATION (CONTROL)',
-        color: amberText,
-        bgColor: amberBg,
-        borderColor: amberBorder,
+        badge: 'AMBER · IN MODERATION',
+        subtitle: 'Portion Control & Daily Limits',
+        badgeColor: gcpAmber,
+        badgeBg: gcpAmberBg,
+        badgeBorder: gcpAmberBorder,
+        accentColor: gcpAmber,
         items: [
           '• Net Carbs: Keep under 40g per meal tray',
           '• Soaked legumes & hummus (lentils, chickpeas)',
           '• Low-glycemic fruits (berries, green apples)',
           '• Halal red meat dishes (cap at 2x per week)',
-          '• Caffeinated Arabic/espresso coffee (before noon)',
-          '• Raw or dry-roasted nuts (watch added sodium)'
+          '• Caffeinated Arabic/espresso coffee (<12 PM)',
+          '• Raw or dry-roasted nuts (watch sodium)'
         ]
       },
       {
-        header: '[RED] EXCLUDE (HARAM & DNA TRIGGERS)',
-        color: redText,
-        bgColor: redBg,
-        borderColor: redBorder,
+        badge: 'RED · EXCLUDE FROM MENU',
+        subtitle: 'Haram Precepts & DNA Triggers',
+        badgeColor: gcpRed,
+        badgeBg: gcpRedBg,
+        badgeBorder: gcpRedBorder,
+        accentColor: gcpRed,
         items: [
           '• Alcohol, cooking wines & ethyl-based sauces',
           '• Pork, bacon, lard & porcine gelatin (Haram)',
           '• Non-Halal certified meats or unverified poultry',
           '• Whole cow milk, labneh & heavy creams (lactose)',
           '• Deep-fried samosas & industrial seed oils',
-          '• Sweet pastries, sodas & late meals past 8:30 PM'
+          '• Sweet pastries, sodas & meals past 8:30 PM'
         ]
       }
     ];
 
     const colW = (p1Width - 72 - 16) / 3;
-    const cH = 145;
+    const cH = 148;
     trafficCols.forEach((tc, cIdx) => {
       const cX = 36 + cIdx * (colW + 8);
 
+      // Card surface: Clean White with GCP standard subtle border
       page1.drawRectangle({
         x: cX,
         y: y1 - cH,
         width: colW,
         height: cH,
-        color: tc.bgColor,
-        borderColor: tc.borderColor,
-        borderWidth: 1.2
+        color: white,
+        borderColor: gcpBorder,
+        borderWidth: 1.0
       });
 
+      // Top 3px GCP semantic status bar
       page1.drawRectangle({
         x: cX,
-        y: y1 - 22,
+        y: y1 - 3,
         width: colW,
-        height: 22,
-        color: tc.bgColor
+        height: 3,
+        color: tc.accentColor
       });
 
-      page1.drawText(tc.header, {
+      // Header surface
+      page1.drawRectangle({
+        x: cX + 1,
+        y: y1 - 33,
+        width: colW - 2,
+        height: 30,
+        color: rgb(250 / 255, 251 / 255, 252 / 255)
+      });
+
+      // Line 1: Status Chip Badge
+      const bW = helveticaBold.widthOfTextAtSize(tc.badge, 6.2) + 12;
+      page1.drawRectangle({
         x: cX + 8,
+        y: y1 - 18,
+        width: bW,
+        height: 12,
+        color: tc.badgeBg,
+        borderColor: tc.badgeBorder,
+        borderWidth: 0.8
+      });
+      page1.drawText(tc.badge, {
+        x: cX + 14,
         y: y1 - 15,
-        size: 7.5,
+        size: 6.2,
         font: helveticaBold,
-        color: tc.color
+        color: tc.badgeColor
       });
 
-      let iY = y1 - 36;
+      // Line 2: Subtitle
+      page1.drawText(tc.subtitle, {
+        x: cX + 8,
+        y: y1 - 29,
+        size: 6.8,
+        font: helveticaBold,
+        color: darkSlate,
+        maxWidth: colW - 16
+      });
+
+      // Divider line under header
+      page1.drawLine({
+        start: { x: cX, y: y1 - 33 },
+        end: { x: cX + colW, y: y1 - 33 },
+        thickness: 0.8,
+        color: gcpBorder
+      });
+
+      // Items list
+      let iY = y1 - 48;
       tc.items.forEach((it) => {
         page1.drawText(it, {
           x: cX + 8,
           y: iY,
-          size: 7.8,
+          size: 7.4,
           font: helvetica,
           color: darkSlate,
           maxWidth: colW - 16,
-          lineHeight: 10.5
+          lineHeight: 10.2
         });
-        iY -= 17.5;
+        iY -= 16.5;
       });
     });
 
@@ -1151,7 +1207,7 @@ export async function GET(request) {
     });
 
     // -------------------------------------------------------------------------
-    // SECTION 2: CHOOSE YOUR LEVEL (3 SIMPLE BUDGET PACKS)
+    // SECTION 2: CHOOSE YOUR LEVEL (3 SIMPLE DECISION PACKS - GOOGLE CLOUD UX)
     // -------------------------------------------------------------------------
     y2 -= 8;
     page2.drawText('2. CHOOSE YOUR LEVEL: 3 SIMPLE DECISION PACKS (BUY ONLY WHAT YOU NEED)', {
@@ -1165,79 +1221,121 @@ export async function GET(request) {
     y2 -= 10;
     const packs = [
       {
+        badge: 'ESSENTIAL · BASELINE',
+        badgeColor: mutedSlate,
+        badgeBg: gcpPillBg,
+        badgeBorder: gcpBorder,
         name: 'PACK 1 · ESSENTIAL CORE',
         items: '2 Supplements · Minimum Base',
         highlight: 'Covers 80% of Core DNA Needs',
         desc: '• Vitamin D3/K2 + Active Folate.\n• Resolves your primary cellular & bone health genetic blocks without excess spending.',
-        color: tealAccent,
-        bg: rgb(240 / 255, 253 / 255, 250 / 255)
+        isFeatured: false
       },
       {
+        badge: 'RECOMMENDED · POPULAR',
+        badgeColor: googleBlue,
+        badgeBg: googleBlueBg,
+        badgeBorder: googleBlueBorder,
         name: 'PACK 2 · PERFORMANCE & SLEEP',
         items: '4 Supplements · Most Popular',
         highlight: 'Daytime Energy + Restful Sleep',
         desc: '• Adds Magnesium Bisglycinate + B-Complex.\n• Recommended if you experience demanding workdays, fatigue or restless nights.',
-        color: navyPrimary,
-        bg: rgb(239 / 255, 246 / 255, 255 / 255)
+        isFeatured: true
       },
       {
+        badge: 'ADVANCED · FULL PROGRAM',
+        badgeColor: gcpGreen,
+        badgeBg: gcpGreenBg,
+        badgeBorder: gcpGreenBorder,
         name: 'PACK 3 · TOTAL DIGESTION',
         items: '5 Supplements · Full Program',
         highlight: 'Complete Microbiome Defense',
         desc: '• Adds Targeted Enteric Probiotics.\n• Perfect if you suffer from bloating, gas, lactose sensitivity, or gut discomfort.',
-        color: greenText,
-        bg: greenBg
+        isFeatured: false
       }
     ];
 
     const pkW = (p2Width - 72 - 16) / 3;
-    const pkH = 96;
+    const pkH = 100;
     packs.forEach((pk, pIdx) => {
       const pkX = 36 + pIdx * (pkW + 8);
 
+      // Card surface: Clean White surface with GCP subtle border
+      // Featured card gets Google Blue 1.5px border
       page2.drawRectangle({
         x: pkX,
         y: y2 - pkH,
         width: pkW,
         height: pkH,
-        color: pk.bg,
-        borderColor: pk.color,
-        borderWidth: pIdx === 1 ? 1.4 : 1.0
+        color: white,
+        borderColor: pk.isFeatured ? googleBlue : gcpBorder,
+        borderWidth: pk.isFeatured ? 1.5 : 1.0
       });
 
-      // Header inside pack card
+      // Top subtle header strip
       page2.drawRectangle({
-        x: pkX,
-        y: y2 - 22,
-        width: pkW,
-        height: 22,
-        color: pk.bg
+        x: pkX + (pk.isFeatured ? 1.5 : 1),
+        y: y2 - 25,
+        width: pkW - (pk.isFeatured ? 3 : 2),
+        height: 24,
+        color: pk.isFeatured ? rgb(248 / 255, 251 / 255, 255 / 255) : rgb(250 / 255, 251 / 255, 252 / 255)
       });
 
+      // GCP Semantic Badge
+      const bW = helveticaBold.widthOfTextAtSize(pk.badge, 6.0) + 10;
+      page2.drawRectangle({
+        x: pkX + 8,
+        y: y2 - 16,
+        width: bW,
+        height: 12,
+        color: pk.badgeBg,
+        borderColor: pk.badgeBorder,
+        borderWidth: 0.8
+      });
+      page2.drawText(pk.badge, {
+        x: pkX + 13,
+        y: y2 - 13,
+        size: 6.0,
+        font: helveticaBold,
+        color: pk.badgeColor
+      });
+
+      // Title
       page2.drawText(pk.name, {
         x: pkX + 8,
-        y: y2 - 15,
-        size: 7.6,
+        y: y2 - 36,
+        size: 7.4,
         font: helveticaBold,
-        color: pk.color
+        color: pk.isFeatured ? googleBlue : darkSlate,
+        maxWidth: pkW - 16
       });
 
+      // Items subtitle
       page2.drawText(pk.items, {
         x: pkX + 8,
-        y: y2 - 32,
-        size: 7.0,
+        y: y2 - 47,
+        size: 6.8,
         font: helveticaBold,
-        color: darkSlate
+        color: mutedSlate
       });
 
+      // Divider line
+      page2.drawLine({
+        start: { x: pkX + 8, y: y2 - 52 },
+        end: { x: pkX + pkW - 8, y: y2 - 52 },
+        thickness: 0.6,
+        color: gcpBorder
+      });
+
+      // Description
       page2.drawText(pk.desc, {
         x: pkX + 8,
-        y: y2 - 48,
-        size: 7.0,
+        y: y2 - 64,
+        size: 6.8,
         font: helvetica,
-        color: mutedSlate,
+        color: darkSlate,
         maxWidth: pkW - 16,
-        lineHeight: 9.8
+        lineHeight: 9.6
       });
     });
 
