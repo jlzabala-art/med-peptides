@@ -28,7 +28,14 @@ import {
   X,
   MessageCircle,
   Zap,
-  BookOpen
+  BookOpen,
+  Brain,
+  Activity,
+  FlaskConical,
+  Droplets,
+  Moon,
+  Dna,
+  Shield
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
@@ -40,8 +47,42 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 import ClinicalProtocolDrawer from '@/components/pricing/ClinicalProtocolDrawer';
 import AtlasAiCopilotDrawer from '@/components/pricing/AtlasAiCopilotDrawer';
+import PeptideSpecsDrawer from '@/components/pricing/PeptideSpecsDrawer';
+import PeptidePricePdfPreviewModal from '@/components/pricing/PeptidePricePdfPreviewModal';
 import { COUNTRIES } from '@/data/countries';
 import '../colway/ColwayPriceList.css';
+
+/**
+ * Standardized Google Cloud UX Vector Icons for Clinical Peptide Categories
+ */
+function getCategoryIcon(key, size = 14) {
+  switch (key) {
+    case 'repair': return <ShieldCheck size={size} color="#1a73e8" />;
+    case 'metabolic': return <Zap size={size} color="#188038" />;
+    case 'longevity': return <Sparkles size={size} color="#7c3aed" />;
+    case 'neuro': return <Brain size={size} color="#ea580c" />;
+    case 'growth_hormone': return <Activity size={size} color="#0d9488" />;
+    case 'cosmetic': return <Sparkles size={size} color="#db2777" />;
+    case 'supplies': return <Droplets size={size} color="#0284c7" />;
+    case 'general_health':
+    default:
+      return <FlaskConical size={size} color="#5f6368" />;
+  }
+}
+
+/**
+ * Standardized Google Cloud UX Vector Icons for Clinical Protocol Presets
+ */
+function getPresetIcon(id, size = 15) {
+  switch (id) {
+    case 'tissue_repair': return <ShieldCheck size={size} color="#1a73e8" />;
+    case 'metabolic_glp1': return <Zap size={size} color="#188038" />;
+    case 'cellular_longevity': return <Sparkles size={size} color="#7c3aed" />;
+    case 'neuro_focus': return <Brain size={size} color="#ea580c" />;
+    case 'deep_sleep': return <Moon size={size} color="#4f46e5" />;
+    default: return <Activity size={size} color="#5f6368" />;
+  }
+}
 
 const CATEGORY_MAP = {
   repair: { label: 'Tissue Repair & Healing', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', icon: '🩹' },
@@ -210,6 +251,8 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [copied, setCopied] = useState(false);
   const [hasRestoredCart, setHasRestoredCart] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(null);
+  const [selectedSpecsProduct, setSelectedSpecsProduct] = useState(null);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
 
   // Debounce search query to keep main thread at 60fps on mobile (150ms)
@@ -696,11 +739,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'itemNumber',
       label: '#',
-      width: '4%',
+      width: '54px',
+      minWidth: '50px',
+      nowrap: true,
       align: 'center',
       sortable: true,
       render: (val, row) => (
-        <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#5f6368', fontWeight: 600 }}>
+        <span style={{
+          fontFamily: 'monospace',
+          fontSize: '0.80rem',
+          color: '#5f6368',
+          fontWeight: 600,
+          whiteSpace: 'nowrap',
+          display: 'inline-block',
+          letterSpacing: '-0.02em'
+        }}>
           {val ?? row?.itemNumber}
         </span>
       )
@@ -711,54 +764,117 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       width: '43%',
       align: 'left', // STRICT: Left-aligned for clean price list readability
       sortable: true,
-      render: (_, row) => (
-        <div style={{ textAlign: 'left', minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#202124', letterSpacing: '-0.01em' }}>
-              {row.productName}
-            </span>
-            {row.dosage && (
+      render: (_, row) => {
+        const itemInCart = cartItems[row.id];
+        const v1x = itemInCart?.quantity1x || 0;
+        const v10x = itemInCart?.quantity10x || 0;
+        const hasSelection = v1x > 0 || v10x > 0;
+
+        return (
+          <div style={{ textAlign: 'left', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#202124', letterSpacing: '-0.01em' }}>
+                {row.productName}
+              </span>
+              {row.dosage && (
+                <span style={{
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  fontFamily: 'monospace',
+                  color: '#1a73e8',
+                  background: '#e8f0fe',
+                  border: '1px solid #c2e7ff',
+                  padding: '2px 7px',
+                  borderRadius: '4px',
+                  letterSpacing: '-0.01em',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {row.dosage}
+                </span>
+              )}
+              {/* Specs Button directly adjacent to dosage with preloaded specs */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedSpecsProduct(row);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#1a73e8',
+                  background: '#ffffff',
+                  border: '1px solid #c2e7ff',
+                  padding: '1px 7px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = '#e8f0fe';
+                  e.currentTarget.style.borderColor = '#1a73e8';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#c2e7ff';
+                }}
+                title={`View clinical monograph, CAS, reconstitution & COA for ${row.productName} ${row.dosage || ''}`}
+              >
+                <FileText size={11} />
+                <span>Specs</span>
+              </button>
+
               <span style={{
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                fontFamily: 'monospace',
-                color: '#1a73e8',
-                background: '#e8f0fe',
-                border: '1px solid #c2e7ff',
-                padding: '2px 7px',
+                fontSize: '0.64rem',
+                fontWeight: 600,
+                color: row?.categoryMeta?.color,
+                background: row?.categoryMeta?.bg,
+                border: `1px solid ${row?.categoryMeta?.border}`,
+                padding: '1px 6px',
                 borderRadius: '4px',
-                letterSpacing: '-0.01em',
+                textTransform: 'uppercase',
+                letterSpacing: '0.03em',
                 whiteSpace: 'nowrap'
               }}>
-                {row.dosage}
+                {row?.categoryMeta?.label}
               </span>
-            )}
-            <span style={{
-              fontSize: '0.64rem',
-              fontWeight: 600,
-              color: row?.categoryMeta?.color,
-              background: row?.categoryMeta?.bg,
-              border: `1px solid ${row?.categoryMeta?.border}`,
-              padding: '1px 6px',
-              borderRadius: '4px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.03em',
-              whiteSpace: 'nowrap'
-            }}>
-              {row?.categoryMeta?.label}
-            </span>
+
+              {/* Live Preselected Order Indicator */}
+              {hasSelection && (
+                <span style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  color: '#137333',
+                  background: '#e6f4ea',
+                  border: '1px solid #ceead6',
+                  padding: '1px 7px',
+                  borderRadius: '10px',
+                  whiteSpace: 'nowrap',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px'
+                }}>
+                  <Check size={10} />
+                  <span>In Proforma: {v1x > 0 ? `${v1x} vial${v1x > 1 ? 's' : ''}` : ''}{v1x > 0 && v10x > 0 ? ' + ' : ''}{v10x > 0 ? `${v10x} box${v10x > 1 ? 'es' : ''} (×10)` : ''}</span>
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>Sterile Lyophilized Vial (10R Borosilicate)</span>
+              <span>•</span>
+              <span style={{ color: '#137333', fontWeight: 600 }}>≥99.0% HPLC Analytical Purity</span>
+            </div>
           </div>
-          <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>Sterile Lyophilized Vial (10R Borosilicate)</span>
-            <span>•</span>
-            <span style={{ color: '#137333', fontWeight: 600 }}>≥99.0% HPLC Analytical Purity</span>
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'unitPrice',
-      label: 'Single Vial (1x)',
+      label: `Single Vial (1x) · ${currency}`,
       width: '17%',
       align: 'left',
       sortable: true,
@@ -773,7 +889,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     },
     {
       key: 'pack10Price',
-      label: 'Box of 10 (Pack ×10)',
+      label: `Box of 10 (Pack ×10) · ${currency}`,
       width: '20%',
       align: 'left',
       sortable: true,
@@ -865,7 +981,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       )
     }
-  ], [formatPrice, handleAddToCart]);
+  ], [formatPrice, handleAddToCart, currency, cartItems]);
 
   return (
     <div className="colway-price-root">
@@ -884,57 +1000,31 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           </div>
 
           <div className="nav-actions">
-            {/* Currency selector */}
-            <div className="currency-selector">
-              <span>Display FX:</span>
+            {/* Currency selector with prominent display */}
+            <div className="currency-selector" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 650 }}>Currency:</span>
               <div className="pill-group">
-                {['USD', 'EUR', 'AED'].map((curr) => (
+                {[
+                  { code: 'USD', symbol: '$' },
+                  { code: 'EUR', symbol: '€' },
+                  { code: 'AED', symbol: 'د.إ' }
+                ].map((item) => (
                   <button
-                    key={curr}
-                    onClick={() => setCurrency(curr)}
-                    className={`pill-btn ${currency === curr ? 'active' : ''}`}
+                    key={item.code}
+                    onClick={() => setCurrency(item.code)}
+                    className={`pill-btn ${currency === item.code ? 'active' : ''}`}
+                    style={{
+                      fontWeight: currency === item.code ? 750 : 500,
+                      letterSpacing: '-0.01em'
+                    }}
                   >
-                    {curr}
+                    {item.code} ({item.symbol})
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Cart Trigger */}
-            <button
-              onClick={() => setIsOrderDrawerOpen(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: totalCartCount > 0 ? '#0284c7' : 'rgba(255,255,255,0.1)',
-                color: '#ffffff',
-                border: '1px solid rgba(255,255,255,0.2)',
-                padding: '5px 12px',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <ShoppingCart size={14} />
-              <span>Request Proforma</span>
-              {totalCartCount > 0 && (
-                <span style={{
-                  background: '#ffffff',
-                  color: '#0284c7',
-                  borderRadius: '10px',
-                  padding: '1px 6px',
-                  fontSize: '0.70rem',
-                  fontWeight: 800
-                }}>
-                  {totalCartCount}
-                </span>
-              )}
-            </button>
-
-            {/* Share button */}
+            {/* Share button (Request Proforma deduplicated to bottom docker per Golden Rule) */}
             <button
               onClick={handleShareSchedule}
               style={{
@@ -959,7 +1049,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       </header>
 
-      <main style={{ maxWidth: '1440px', margin: '0 auto', padding: '1.25rem 1.25rem 4rem 1.25rem' }}>
+      <main style={{ maxWidth: '1440px', margin: '0 auto', padding: '1.25rem 1.25rem 6.5rem 1.25rem' }}>
         {/* Page Header */}
         <div style={{ marginBottom: '1.25rem' }}>
           <Breadcrumb items={[
@@ -970,37 +1060,53 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.75rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
                 <span style={{
                   fontSize: '0.68rem',
                   fontWeight: 750,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  background: isDistributor ? '#0f766e' : '#0284c7',
-                  color: '#ffffff',
-                  padding: '2px 8px',
-                  borderRadius: '4px'
+                  letterSpacing: '0.06em',
+                  background: isDistributor ? '#e6f4ea' : '#e8f0fe',
+                  color: isDistributor ? '#137333' : '#1a73e8',
+                  border: isDistributor ? '1px solid #ceead6' : '1px solid #c2e7ff',
+                  padding: '3px 9px',
+                  borderRadius: '12px'
                 }}>
-                  {isDistributor ? 'Official Distributor Schedule • +15% Cost Margin' : 'Official Wholesaler Schedule • 15% + 15% Margin Tier'}
+                  {isDistributor ? 'Official Distributor Price Schedule' : 'Official Wholesaler & Institutional Schedule'}
                 </span>
                 <span style={{
                   fontSize: '0.68rem',
                   fontWeight: 650,
-                  color: '#0d9488',
-                  background: '#f0fdfa',
-                  border: '1px solid #99f6e4',
-                  padding: '2px 8px',
-                  borderRadius: '4px'
+                  color: '#137333',
+                  background: '#e6f4ea',
+                  border: '1px solid #ceead6',
+                  padding: '3px 9px',
+                  borderRadius: '12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
                 }}>
-                  Batch Verified ≥99.0% HPLC
+                  <CheckCircle2 size={12} />
+                  <span>Batch Verified ≥99.0% HPLC</span>
+                </span>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#1a73e8',
+                  background: '#e8f0fe',
+                  border: '1px solid #c2e7ff',
+                  padding: '3px 9px',
+                  borderRadius: '12px'
+                }}>
+                  Quoted in {currency} ({currencySymbol})
                 </span>
               </div>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', margin: 0 }}>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#202124', letterSpacing: '-0.02em', margin: 0 }}>
                 {isDistributor ? 'Certified Clinical Peptide Vials • Distributor B2B' : 'Certified Clinical Peptide Vials • Wholesaler & Clinic'}
               </h1>
-              <p style={{ fontSize: '0.88rem', color: '#64748b', marginTop: '4px', maxWidth: '850px' }}>
+              <p style={{ fontSize: '0.88rem', color: '#5f6368', marginTop: '4px', maxWidth: '850px' }}>
                 {isDistributor
-                  ? 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate). Strictly applied +15% margin over Lotusland cost with manufacturer box volume pricing.'
+                  ? 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate) with verified analytical purity and manufacturer volume tiers.'
                   : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides. Standard wholesale tier with manufacturer 10-pack volume savings.'
                 }
               </p>
@@ -1008,23 +1114,34 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
-                onClick={() => window.print()}
+                onClick={() => setIsPdfPreviewOpen(true)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   background: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  color: '#334155',
+                  border: '1px solid #dadce0',
+                  color: '#1a73e8',
                   padding: '8px 14px',
                   borderRadius: '6px',
                   fontSize: '0.80rem',
-                  fontWeight: 650,
-                  cursor: 'pointer'
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.08)',
+                  transition: 'all 0.15s ease'
                 }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = '#e8f0fe';
+                  e.currentTarget.style.borderColor = '#1a73e8';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
+                }}
+                title="Preview official printable price schedule (only client prices, no margins)"
               >
-                <Download size={14} />
-                <span>Export PDF / Print</span>
+                <Eye size={14} />
+                <span>Preview & Export PDF</span>
               </button>
             </div>
           </div>
@@ -1161,8 +1278,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f1f3f4'; }}
                       onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span>{meta.icon}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '16px' }}>
+                          {getCategoryIcon(key, 13)}
+                        </span>
                         <span>{meta.label}</span>
                       </div>
                       <span style={{
@@ -1178,105 +1297,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     </button>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* 2. Clinical Protocols Directory (5 Synergies) */}
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '8px',
-              border: '1px solid #dadce0',
-              padding: '12px 14px',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Clinical Protocols
-                </div>
-                <span style={{ fontSize: '0.65rem', color: '#1a73e8', fontWeight: 700 }}>5 Presets</span>
-              </div>
-
-              <div className="gcp-protocols-grid" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {CLINICAL_PRESETS.map(preset => (
-                  <div
-                    key={preset.id}
-                    style={{
-                      padding: '9px 10px',
-                      borderRadius: '6px',
-                      border: `1px solid ${preset.accent}30`,
-                      background: preset.bg,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '6px'
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ fontSize: '0.90rem' }}>{preset.icon}</span>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#202124' }}>
-                          {preset.name}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.68rem', color: '#5f6368', marginTop: '2px' }}>
-                        {preset.description}
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedProtocol(preset)}
-                        style={{
-                          flex: 1,
-                          padding: '4px 6px',
-                          borderRadius: '4px',
-                          border: '1px solid #dadce0',
-                          background: '#ffffff',
-                          color: '#3c4043',
-                          fontSize: '0.68rem',
-                          fontWeight: 650,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '3px',
-                          transition: 'background 0.15s ease'
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
-                        onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
-                        title="View full clinical dossier, mechanism, posology & reconstitution"
-                      >
-                        <BookOpen size={11} />
-                        <span>Consult</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleAddProtocolPreset(preset, false)}
-                        style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          border: `1px solid ${preset.accent}`,
-                          background: preset.accent,
-                          color: '#ffffff',
-                          fontSize: '0.68rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px',
-                          transition: 'opacity 0.15s ease'
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                        title="Add 1 cycle to proforma request"
-                      >
-                        <Plus size={11} />
-                        <span>+ Add</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </aside>
@@ -1315,6 +1335,23 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   }}>
                     {scopeMode === 'filtered' ? `Matching Active Filters (${filteredProducts.length} Formulations)` : `Entire Database (${processedProducts.length} Formulations)`}
                   </span>
+                  {totalCartCount > 0 && (
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 750,
+                      color: '#137333',
+                      background: '#e6f4ea',
+                      border: '1px solid #ceead6',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <CheckCircle2 size={12} />
+                      <span>{totalCartCount} Vials in Proforma ({formatPrice(totalCartValueUsd)})</span>
+                    </span>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
@@ -1338,7 +1375,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 </div>
               </div>
 
-              {/* 4 Standard Metrics */}
+              {/* 4 Standard Metrics (Dynamically updated with live selections) */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                 <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
                   <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
@@ -1352,39 +1389,45 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   </div>
                 </div>
 
-                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                    Volume Pack Tier
+                <div style={{
+                  padding: '0.75rem',
+                  background: totalCartCount > 0 ? '#f0fdf4' : '#f8fafc',
+                  borderRadius: '8px',
+                  border: totalCartCount > 0 ? '1px solid #bbf7d0' : '1px solid #f1f5f9',
+                  transition: 'all 0.2s ease'
+                }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: totalCartCount > 0 ? '#15803d' : '#64748b', textTransform: 'uppercase' }}>
+                    {totalCartCount > 0 ? 'Active Proforma Request' : 'Volume Pack Tier'}
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#059669', marginTop: '2px' }}>
-                    -15% to -52%
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: totalCartCount > 0 ? '#15803d' : '#059669', marginTop: '2px' }}>
+                    {totalCartCount > 0 ? `${totalCartCount} Vials` : '-15% to -52%'}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: '#059669', marginTop: '2px' }}>
-                    On 10+ Vial Box Orders
+                  <div style={{ fontSize: '0.72rem', color: totalCartCount > 0 ? '#15803d' : '#059669', marginTop: '2px', fontWeight: totalCartCount > 0 ? 700 : 400 }}>
+                    {totalCartCount > 0 ? `${formatPrice(totalCartValueUsd)} Subtotal` : 'On 10+ Vial Box Orders'}
                   </div>
                 </div>
 
                 <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
                   <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                    Purity Verification
+                    Volume Savings Range
                   </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                    ≥99.0%
+                    -15% to -52%
                   </div>
                   <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
-                    HPLC & MS Analytical Testing
+                    Manufacturer 10-Pack Tier
                   </div>
                 </div>
 
                 <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
                   <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                    Analytical Quality
+                    Analytical Quality & Purity
                   </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
                     100% COA
                   </div>
                   <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
-                    Batch HPLC & Mass Spec Tested
+                    ≥99.0% HPLC & Mass Spec Tested
                   </div>
                 </div>
               </div>
@@ -2124,138 +2167,208 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       )}
 
       {/* ── Floating Cart Dock (Mejora #3: Mobile & Desktop Quick Checkout) ── */}
-      {totalCartCount > 0 && !isOrderDrawerOpen && (
-        <div style={{
+      {/* ── Google Cloud UX Fixed Bottom Action Dock (Sticky Bar at bottom: 0) ── */}
+      <aside
+        className="gcp-fixed-bottom-dock"
+        style={{
           position: 'fixed',
-          bottom: '16px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'calc(100% - 32px)',
-          maxWidth: '560px',
-          backgroundColor: '#003666',
-          color: '#ffffff',
-          borderRadius: '12px',
-          padding: '10px 16px',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 900,
+          background: '#ffffff',
+          borderTop: '1px solid #dadce0',
+          boxShadow: '0 -4px 20px rgba(60, 64, 67, 0.12)',
+          padding: '10px 0',
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.98)'
+        }}
+        aria-label="Bottom Quick Actions and Cart Dock"
+      >
+        <div style={{
+          maxWidth: '1440px',
+          margin: '0 auto',
+          padding: '0 20px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          zIndex: 80,
-          boxShadow: '0 8px 30px rgba(0, 54, 102, 0.35)',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          flexWrap: 'wrap',
+          gap: '12px'
         }}>
+          {/* Left: Atlas AI Clinical Copilot Direct Launcher */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{
-              backgroundColor: '#38bdf8',
-              color: '#003666',
-              fontWeight: 800,
-              fontSize: '0.78rem',
-              borderRadius: '9999px',
-              padding: '2px 9px'
-            }}>
-              {totalCartCount} Vials
-            </span>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: '0.98rem', color: '#ffffff' }}>
-                {formatPrice(totalCartValueUsd)}
+            <button
+              type="button"
+              onClick={() => setIsAtlasAiOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '9px',
+                padding: '6px 14px',
+                background: '#e8f0fe',
+                border: '1px solid #c2e7ff',
+                borderRadius: '24px',
+                color: '#1a73e8',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                boxShadow: '0 1px 3px rgba(26, 115, 232, 0.15)'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#d2e3fc';
+                e.currentTarget.style.borderColor = '#1a73e8';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = '#e8f0fe';
+                e.currentTarget.style.borderColor = '#c2e7ff';
+              }}
+              title="Open Atlas Clinical AI Assistant (Dosing Math, Synergies & Reconstitution)"
+            >
+              <div style={{
+                width: '26px',
+                height: '26px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #1a73e8 0%, #0d9488 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 1px 4px rgba(26, 115, 232, 0.3)'
+              }}>
+                <Sparkles size={14} />
               </div>
-              <div style={{ fontSize: '0.68rem', color: '#93c5fd' }}>
-                +€60 Express Logistics added at checkout
+              <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: 1.2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1a73e8' }}>
+                    Atlas AI Copilot
+                  </span>
+                  <span style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 700,
+                    background: '#ffffff',
+                    color: '#0d9488',
+                    border: '1px solid #99f6e4',
+                    padding: '1px 6px',
+                    borderRadius: '10px'
+                  }}>
+                    {selectedCategory !== 'all' ? (CATEGORY_MAP[selectedCategory]?.label || 'Category') : 'Peptide Pharmacopeia'}
+                  </span>
+                </div>
+                <span className="mobile-hide" style={{ fontSize: '0.68rem', color: '#5f6368', fontWeight: 500 }}>
+                  Reconstitution math, syringe calibration & synergies
+                </span>
               </div>
-            </div>
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsOrderDrawerOpen(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#38bdf8',
-              color: '#003666',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '8px 14px',
-              fontWeight: 800,
-              fontSize: '0.82rem',
-              cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
-            }}
-          >
-            <span>Review Proforma</span>
-            <ArrowRight size={14} />
-          </button>
-        </div>
-      )}
+          {/* Right: Live Cart Proforma Status & Primary Action */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            {totalCartCount > 0 ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{
+                    background: '#e6f4ea',
+                    color: '#137333',
+                    border: '1px solid #ceead6',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    padding: '4px 10px',
+                    borderRadius: '16px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}>
+                    <ShoppingCart size={13} />
+                    <span>{totalCartCount} Vials</span>
+                  </span>
+                  <div>
+                    <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#202124', fontFamily: 'monospace', lineHeight: 1.1 }}>
+                      {formatPrice(totalCartValueUsd)}
+                    </div>
+                    <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>
+                      +€60 Express Logistics added at checkout
+                    </div>
+                  </div>
+                </div>
 
-      {/* ── Atlas AI Floating Clinical Copilot Sticker (Modern Public SaaS / Google Assistant style) ── */}
-      <div
-        onClick={() => setIsAtlasAiOpen(true)}
-        style={{
-          position: 'fixed',
-          bottom: totalCartCount > 0 ? '78px' : '22px',
-          right: '24px',
-          zIndex: 950,
-          cursor: 'pointer',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '8px 14px 8px 10px',
-          background: '#1f2937',
-          borderRadius: '28px',
-          border: '1px solid #38bdf8',
-          boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25), 0 0 10px rgba(56, 189, 248, 0.25)',
-          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          backdropFilter: 'blur(8px)'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 10px 24px rgba(0, 0, 0, 0.3), 0 0 16px rgba(56, 189, 248, 0.4)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'none';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.25), 0 0 10px rgba(56, 189, 248, 0.25)';
-        }}
-        title="Open Atlas AI Clinical Copilot (Interactive Pharmacopeia, Reconstitution & Synergies)"
-      >
-        <div style={{
-          width: '30px',
-          height: '30px',
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#ffffff',
-          boxShadow: '0 0 10px rgba(56, 189, 248, 0.6)'
-        }}>
-          <Sparkles size={16} />
-        </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Reset all items in your proforma cart?')) {
+                      setCartItems({});
+                    }
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#5f6368',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    textDecoration: 'underline',
+                    cursor: 'pointer'
+                  }}
+                  title="Clear all cart items"
+                >
+                  Reset
+                </button>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'left' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.01em' }}>
-              Atlas AI Copilot
-            </span>
-            <span style={{
-              fontSize: '0.62rem',
-              fontWeight: 700,
-              background: 'rgba(56, 189, 248, 0.15)',
-              color: '#38bdf8',
-              border: '1px solid rgba(56, 189, 248, 0.35)',
-              padding: '1px 5px',
-              borderRadius: '4px'
-            }}>
-              {selectedCategory !== 'all' ? (CATEGORY_MAP[selectedCategory]?.label || 'Filtered') : 'Peptide Pharmacopeia'}
-            </span>
+                <button
+                  type="button"
+                  onClick={() => setIsOrderDrawerOpen(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                    backgroundColor: '#1a73e8', // GCP Primary Blue
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    fontWeight: 750,
+                    fontSize: '0.84rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 3px rgba(60,64,67,0.3)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1557b0'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1a73e8'}
+                >
+                  <span>Review Proforma ({totalCartCount})</span>
+                  <ArrowRight size={14} />
+                </button>
+              </>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.78rem', color: '#5f6368', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <ShoppingCart size={14} color="#9aa0a6" />
+                  <span>Proforma Cart is empty</span>
+                  <span className="mobile-hide" style={{ color: '#80868b' }}>• Click <strong>+ 1 Vial</strong> or <strong>+Pack ×10</strong> to build order</span>
+                </span>
+                <button
+                  type="button"
+                  disabled={true}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    background: '#f1f3f4',
+                    color: '#9aa0a6',
+                    border: '1px solid #dadce0',
+                    borderRadius: '6px',
+                    padding: '7px 14px',
+                    fontSize: '0.78rem',
+                    fontWeight: 650,
+                    cursor: 'not-allowed',
+                    opacity: 0.75
+                  }}
+                  title="Add at least 1 vial or box from table to activate proforma review"
+                >
+                  <span>Review Proforma (0)</span>
+                </button>
+              </div>
+            )}
           </div>
-          <span style={{ fontSize: '0.67rem', color: '#94a3b8' }}>
-            {selectedCategory !== 'all'
-              ? `Reconstitution math & synergies (${filteredProducts.length} items)`
-              : 'Reconstitution math, syringe calibration & synergies'}
-          </span>
         </div>
-      </div>
+      </aside>
 
       {/* ── Official Printable Proforma Document (@media print) ── */}
       <div className="peptides-printable-proforma" style={{ display: 'none' }}>
@@ -2404,6 +2517,27 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           <strong>Logistics & Regulatory Terms:</strong> All peptide vials are manufactured under cGMP standards with certified analytical purity (≥99.0% HPLC). Lyophilized sterile formulations are vacuum-sealed for maximum room-temperature stability and dispatched via express medical courier. Official proforma invoice and analytical COA documentation will be issued upon formal order confirmation.
         </div>
       </div>
+
+      {/* ── Official Institutional Price Schedule PDF Preview Modal ── */}
+      <PeptidePricePdfPreviewModal
+        isOpen={isPdfPreviewOpen}
+        onClose={() => setIsPdfPreviewOpen(false)}
+        products={filteredProducts}
+        currency={currency}
+        currencySymbol={currencySymbol}
+        formatPrice={formatPrice}
+        isDistributor={isDistributor}
+      />
+
+      {/* ── Technical Specs & Clinical Monograph Drawer ── */}
+      <PeptideSpecsDrawer
+        isOpen={!!selectedSpecsProduct}
+        onClose={() => setSelectedSpecsProduct(null)}
+        product={selectedSpecsProduct}
+        onAddToCart={handleAddToCart}
+        currency={currency}
+        currencySymbol={currencySymbol}
+      />
 
       {/* ── Clinical Protocol Dossier Drawer ── */}
       <ClinicalProtocolDrawer

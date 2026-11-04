@@ -271,10 +271,19 @@ export default function ColwayPriceListClient({ initialProducts = [], initialCat
       {
         key: 'itemNumber',
         label: '#',
-        width: '3%',
+        width: '54px',
+        minWidth: '50px',
+        nowrap: true,
         sortable: true,
         render: (val, row) => (
-          <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+          <span style={{
+            fontFamily: 'monospace',
+            fontSize: '0.80rem',
+            color: '#64748b',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            display: 'inline-block'
+          }}>
             {val ?? row?.itemNumber}
           </span>
         )

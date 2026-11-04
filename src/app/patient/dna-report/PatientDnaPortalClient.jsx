@@ -48,11 +48,12 @@ export default function PatientDnaPortalClient({
   const [sampleCode] = useState(initialSampleCode);
   const [clinic] = useState(initialClinic);
   const [activeSection, setActiveSection] = useState('mealplan');
+  const [selectedModality, setSelectedModality] = useState('modalityB');
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Official PDF download URLs
-  const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&includeOriginal=true`;
-  const pdfDownloadUrlLight = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&full=false`;
+  // Official PDF download URLs (Synchronized with interactive modality selection)
+  const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&modality=${selectedModality}&includeOriginal=true`;
+  const pdfDownloadUrlLight = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&modality=${selectedModality}&full=false`;
 
   const mealPlanPdfUrl = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&includeOriginal=true`;
   const mealPlanPdfUrlLight = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&full=false`;
@@ -1341,23 +1342,86 @@ export default function PatientDnaPortalClient({
                 Your prescribing physician can authorize either the foundational 2-capsule daily regimen or the complete 3-capsule chronobiological protocol:
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '8px', padding: '12px' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    MODALITY A · CORE 2-CAPSULE REGIMEN (CAPSULES B + C ONLY)
+                {/* Modality A Radio Card */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedModality('modalityA')}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedModality('modalityA'); } }}
+                  style={{
+                    backgroundColor: selectedModality === 'modalityA' ? '#f0fdfa' : '#ffffff',
+                    border: selectedModality === 'modalityA' ? '2px solid #0d9488' : '1.5px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: selectedModality === 'modalityA' ? '0 4px 12px rgba(13, 148, 136, 0.15)' : 'none',
+                    position: 'relative'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase' }}>
+                      MODALITY A · CORE 2-CAPSULE REGIMEN
+                    </div>
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.66rem',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      backgroundColor: selectedModality === 'modalityA' ? '#0d9488' : '#f1f5f9',
+                      color: selectedModality === 'modalityA' ? '#ffffff' : '#64748b'
+                    }}>
+                      {selectedModality === 'modalityA' ? '✓ SELECTED DIRECTIVE' : 'CLICK TO SELECT'}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#003666', marginBottom: '4px' }}>
-                    Essential Methylation &amp; Sleep Foundation (2 Caps / Day)
+                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#003666', marginBottom: '4px' }}>
+                    Essential Methylation &amp; Sleep Foundation (2 Caps / Day: B + C)
                   </div>
                   <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
                     Focuses on the primary genetic bottlenecks (MTHFR, VDR, COMT). Reduces preparation cost by ~30% and pill burden. Best if you do not suffer from severe gut dysbiosis.
                   </p>
                 </div>
-                <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '12px' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    MODALITY B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C)
+
+                {/* Modality B Radio Card */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedModality('modalityB')}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedModality('modalityB'); } }}
+                  style={{
+                    backgroundColor: selectedModality === 'modalityB' ? '#eff6ff' : '#ffffff',
+                    border: selectedModality === 'modalityB' ? '2px solid #1d4ed8' : '1.5px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: selectedModality === 'modalityB' ? '0 4px 12px rgba(29, 78, 216, 0.15)' : 'none',
+                    position: 'relative'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>
+                      MODALITY B · FULL 3-CAPSULE REGIMEN
+                    </div>
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.66rem',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      backgroundColor: selectedModality === 'modalityB' ? '#1d4ed8' : '#f1f5f9',
+                      color: selectedModality === 'modalityB' ? '#ffffff' : '#64748b'
+                    }}>
+                      {selectedModality === 'modalityB' ? '✓ SELECTED DIRECTIVE' : 'CLICK TO SELECT'}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#003666', marginBottom: '4px' }}>
-                    Comprehensive 360° Chronobiology (3 Caps / Day)
+                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#003666', marginBottom: '4px' }}>
+                    Comprehensive 360° Chronobiology (3 Caps / Day: A + B + C)
                   </div>
                   <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
                     Adds Morning Capsule A (Enteric DRcaps® Probiotics &amp; Glutamine) for tight-junction repair, lactose intolerance mucosal shield, and full cellular longevity.
@@ -1368,35 +1432,69 @@ export default function PatientDnaPortalClient({
 
             {/* 3 Distinct Capsules with Pharmacy Batch Math */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {THREE_CAPSULE_PROTOCOL.map((capsule, cIdx) => (
+              {THREE_CAPSULE_PROTOCOL.map((capsule, cIdx) => {
+                const isCapsuleMuted = selectedModality === 'modalityA' && cIdx === 0;
+                const isCapsuleActiveA = selectedModality === 'modalityA' && (cIdx === 1 || cIdx === 2);
+                const isCapsuleActiveB = selectedModality === 'modalityB';
+
+                return (
                 <div
                   key={capsule.capsuleId}
                   style={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: isCapsuleMuted ? '#f8fafc' : '#ffffff',
                     borderRadius: '10px',
-                    border: '1.5px solid #cbd5e1',
+                    border: isCapsuleMuted
+                      ? '1.5px dashed #cbd5e1'
+                      : isCapsuleActiveA
+                        ? '2px solid #0d9488'
+                        : '2px solid #1d4ed8',
                     padding: '1.5rem',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                    opacity: isCapsuleMuted ? 0.55 : 1,
+                    filter: isCapsuleMuted ? 'grayscale(0.5)' : 'none',
+                    transition: 'all 0.25s ease',
+                    boxShadow: isCapsuleMuted
+                      ? 'none'
+                      : '0 4px 12px rgba(0, 54, 102, 0.06)'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem', marginBottom: '1rem' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: cIdx === 0 ? '#0d9488' : (cIdx === 1 ? '#003666' : '#1e3a8a'), color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          backgroundColor: isCapsuleMuted ? '#94a3b8' : (cIdx === 0 ? '#0d9488' : (cIdx === 1 ? '#003666' : '#1e3a8a')),
+                          color: '#ffffff',
+                          padding: '3px 8px',
+                          borderRadius: '4px'
+                        }}>
                           FORMULATION #{cIdx + 1}
                         </span>
-                        <h4 style={{ fontSize: '1.1rem', fontWeight: 850, color: '#003666', margin: 0 }}>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 850, color: isCapsuleMuted ? '#64748b' : '#003666', margin: 0 }}>
                           {capsule.nameEn}
                         </h4>
                       </div>
-                      <div style={{ fontSize: '0.82rem', color: '#0d9488', fontWeight: 750 }}>
+                      <div style={{ fontSize: '0.82rem', color: isCapsuleMuted ? '#94a3b8' : '#0d9488', fontWeight: 750 }}>
                         ⏰ Posology: {capsule.timingEn}
                       </div>
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: '4px' }}>
-                        60 Capsules · 60-Day Supply
+                      <span style={{
+                        fontSize: '0.70rem',
+                        fontWeight: 800,
+                        backgroundColor: isCapsuleMuted ? '#f1f5f9' : (selectedModality === 'modalityA' ? '#f0fdfa' : '#eff6ff'),
+                        color: isCapsuleMuted ? '#64748b' : (selectedModality === 'modalityA' ? '#0f766e' : '#1d4ed8'),
+                        border: isCapsuleMuted ? '1px solid #cbd5e1' : (selectedModality === 'modalityA' ? '1px solid #99f6e4' : '1px solid #bfdbfe'),
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        display: 'inline-block'
+                      }}>
+                        {isCapsuleMuted
+                          ? '⚪ Muted in Modality A (Core 2-Capsule)'
+                          : selectedModality === 'modalityA'
+                            ? '✓ Included in Modality A (2-Capsule Core)'
+                            : '✓ Included in Modality B (3-Capsule Full)'}
                       </span>
                       <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
                         {capsule.targetPillar}
@@ -1454,7 +1552,8 @@ export default function PatientDnaPortalClient({
                     </table>
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
 
             {/* Prescribing Physician Authorization & Official Medical Signature (No Pharmacist Log, Blank Fields) */}

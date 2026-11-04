@@ -151,8 +151,10 @@ export default function AdminUltramanApisTab() {
     {
       key: 'rawIndex',
       label: '#',
-      width: '5%',
-      render: (val) => <span className="text-xs text-muted-foreground font-mono">#{val}</span>
+      width: '54px',
+      minWidth: '48px',
+      nowrap: true,
+      render: (val) => <span className="text-xs text-muted-foreground font-mono whitespace-nowrap">#{val}</span>
     },
     {
       key: 'name',

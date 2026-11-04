@@ -8,9 +8,9 @@ export const revalidate = 0;
 export async function generateMetadata({ searchParams }) {
   const resolvedSearch = await searchParams;
   const rawRef = resolvedSearch?.ref || resolvedSearch?.code || '';
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
-  const title = 'Clinical Lyophilized Peptides • Official B2B & Clinic Price Schedule';
-  const description = 'Official wholesale and institutional price list for certified clinical peptide vials. ≥99.0% HPLC analytical purity, sterile lyophilization, and volume tier packaging.';
+  const appUrl = 'https://www.atlashealth-services.com';
+  const title = 'Clinical Lyophilized Peptides • Official B2B Price Schedule';
+  const description = 'Official institutional price schedule for sterile lyophilized bioactive peptide vials. ≥99.0% HPLC purity, cGMP certified, volume box savings.';
 
   return {
     title,

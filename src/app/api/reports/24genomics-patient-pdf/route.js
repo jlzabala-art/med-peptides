@@ -21,6 +21,8 @@ export async function GET(request) {
     const patientName = searchParams.get('patient') || 'Hossam Ahmed';
     const sampleId = searchParams.get('sample') || '24G-QA-90421';
     const clinicName = searchParams.get('clinic') || 'Ryhanh Medical Wellness · Doha, Qatar';
+    const modalityParam = searchParams.get('modality') || 'modalityB';
+    const isOptionA = modalityParam === 'optionA' || modalityParam === 'modalityA';
 
     const pdfDoc = await PDFDocument.create();
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -117,36 +119,56 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Patient Dossier Mini-Banner (Balanced 4-column layout with zero text collision)
-    y -= 40;
+    // Patient Dossier Mini-Banner (Google Cloud Console Metadata Summary Pattern)
+    y -= 42;
     page1.drawRectangle({
       x: 36,
       y,
       width: p1Width - 72,
       height: 38,
       color: lightBg,
-      borderColor: cardBorder,
-      borderWidth: 1
+      borderColor: gcpBorder,
+      borderWidth: 0.8
+    });
+
+    // Top subtle strip for labels
+    page1.drawRectangle({
+      x: 36,
+      y: y + 25,
+      width: p1Width - 72,
+      height: 13,
+      color: rgb(241 / 255, 245 / 255, 249 / 255)
+    });
+
+    // Vertical column dividers
+    [165, 290, 410].forEach(divX => {
+      page1.drawLine({
+        start: { x: divX, y },
+        end: { x: divX, y: y + 38 },
+        thickness: 0.6,
+        color: gcpBorder
+      });
     });
 
     // Col 1: Patient
-    page1.drawText('PATIENT NAME:', { x: 46, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(patientName, { x: 46, y: y + 10, size: 8.5, font: helveticaBold, color: darkSlate, maxWidth: 120 });
+    page1.drawText('PATIENT NAME', { x: 44, y: y + 28, size: 5.8, font: helveticaBold, color: mutedSlate });
+    page1.drawText(patientName, { x: 44, y: y + 11, size: 8.5, font: helveticaBold, color: darkSlate, maxWidth: 115 });
+    page1.drawText('Verified DNA Specimen', { x: 44, y: y + 3, size: 5.6, font: helvetica, color: tealAccent });
 
     // Col 2: Specimen
-    page1.drawText('SPECIMEN / LAB ID:', { x: 175, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(sampleId, { x: 175, y: y + 10, size: 8.0, font: helveticaBold, color: darkSlate });
-    page1.drawText('24Genetics CE-IVD Lab', { x: 175, y: y + 2, size: 6.0, font: helvetica, color: tealAccent });
+    page1.drawText('SPECIMEN / LAB ID', { x: 173, y: y + 28, size: 5.8, font: helveticaBold, color: mutedSlate });
+    page1.drawText(sampleId, { x: 173, y: y + 11, size: 8.0, font: helveticaBold, color: darkSlate });
+    page1.drawText('24Genetics CE-IVD Lab', { x: 173, y: y + 3, size: 5.6, font: helvetica, color: mutedSlate });
 
     // Col 3: Protocol Duration
-    page1.drawText('PROTOCOL DURATION:', { x: 300, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText('60-Day Initial Cycle', { x: 300, y: y + 10, size: 8.0, font: helveticaBold, color: tealAccent });
-    page1.drawText('Size 0 Regimen', { x: 300, y: y + 2, size: 6.0, font: helvetica, color: mutedSlate });
+    page1.drawText('PROTOCOL DURATION', { x: 298, y: y + 28, size: 5.8, font: helveticaBold, color: mutedSlate });
+    page1.drawText('60-Day Initial Cycle', { x: 298, y: y + 11, size: 8.0, font: helveticaBold, color: tealAccent });
+    page1.drawText('Size 0 Regimen (Re-test 60d)', { x: 298, y: y + 3, size: 5.6, font: helvetica, color: mutedSlate });
 
-    // Col 4: Dispensing Standard (Zero mention of any clinic)
-    page1.drawText('DISPENSING STANDARD:', { x: 415, y: y + 23, size: 6.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText('Size 0 Magistral Caps', { x: 415, y: y + 10, size: 8.0, font: helveticaBold, color: navyPrimary });
-    page1.drawText('100% Lactose-Free HPMC', { x: 415, y: y + 2, size: 6.0, font: helvetica, color: tealAccent });
+    // Col 4: Dispensing Standard
+    page1.drawText('DISPENSING STANDARD', { x: 418, y: y + 28, size: 5.8, font: helveticaBold, color: mutedSlate });
+    page1.drawText('Size 0 Magistral Caps', { x: 418, y: y + 11, size: 8.0, font: helveticaBold, color: navyPrimary });
+    page1.drawText('100% Lactose-Free HPMC', { x: 418, y: y + 3, size: 5.6, font: helvetica, color: tealAccent });
 
     // Section 1: Notice to Patient (Google Cloud Console Callout Pattern)
     y -= 30;
@@ -231,7 +253,7 @@ export async function GET(request) {
         status: 'VDR RESISTANCE',
         statusColor: amberDark,
         statusBg: amberBg,
-        why: 'Nuclear receptor variation benefits from consistent physiological D3/K2, while evening chelated magnesium supports deep rest.',
+        why: 'Nuclear receptor variation benefits from physiological D3/K2; evening chelated magnesium supports restorative sleep.',
         assignedFormulation: 'Capsule B (Breakfast D3 2,000 IU + K2 100µg) & Capsule C (Evening 150mg elemental Mg + Theanine 200mg)',
         clinicalGoal: 'Maintains optimal 25(OH)D safely within EU adult UL, paired with evening chelated magnesium and L-theanine.'
       }
@@ -294,34 +316,51 @@ export async function GET(request) {
         color: p.statusColor
       });
 
+      // Safe font-fitting helper to guarantee zero wrap & zero collision on any screen/platform
+      const fitTextSize = (txt, font, baseSize, maxW) => {
+        let s = baseSize;
+        while (s > 6.4 && font.widthOfTextAtSize(txt, s) > maxW) {
+          s -= 0.1;
+        }
+        return s;
+      };
+
+      const maxCardTextWidth = p1Width - 96;
+
       // Why Text (DNA Finding in plain language)
-      page1.drawText(`DNA Finding: ${p.why}`, {
+      const whyStr = `DNA Finding: ${p.why}`;
+      const whySize = fitTextSize(whyStr, helvetica, 7.8, maxCardTextWidth);
+      page1.drawText(whyStr, {
         x: 48,
-        y: y - 37,
-        size: 8.0,
+        y: y - 36,
+        size: whySize,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p1Width - 96
+        maxWidth: maxCardTextWidth
       });
 
       // Galenic Support Cross-Reference
-      page1.drawText(`Targeted Support: ${p.assignedFormulation}`, {
+      const supportStr = `Targeted Support: ${p.assignedFormulation}`;
+      const supportSize = fitTextSize(supportStr, helveticaBold, 7.6, maxCardTextWidth);
+      page1.drawText(supportStr, {
         x: 48,
-        y: y - 49,
-        size: 7.8,
+        y: y - 48,
+        size: supportSize,
         font: helveticaBold,
         color: navyPrimary,
-        maxWidth: p1Width - 96
+        maxWidth: maxCardTextWidth
       });
 
       // Clinical Objective
-      page1.drawText(`Clinical Goal: ${p.clinicalGoal}`, {
+      const goalStr = `Clinical Goal: ${p.clinicalGoal}`;
+      const goalSize = fitTextSize(goalStr, helveticaOblique, 7.2, maxCardTextWidth);
+      page1.drawText(goalStr, {
         x: 48,
-        y: y - 61,
-        size: 7.4,
+        y: y - 60,
+        size: goalSize,
         font: helveticaOblique,
         color: mutedSlate,
-        maxWidth: p1Width - 96
+        maxWidth: maxCardTextWidth
       });
 
       y -= cardHeight + 8;
@@ -685,20 +724,29 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Clinical Directive to Patient: Mutual Exclusivity Safety Alert (Generous padding, zero collision)
+    // Clinical Directive to Patient: Mutual Exclusivity Safety Alert (GCP Callout Pattern)
     y2 -= 66;
     page2.drawRectangle({
       x: 36,
       y: y2,
       width: p2Width - 72,
       height: 58,
-      color: rgb(254 / 255, 242 / 255, 242 / 255), // light alert red
-      borderColor: alertRed,
-      borderWidth: 1.2
+      color: rgb(253 / 255, 248 / 255, 248 / 255), // GCP Soft Neutral Rose
+      borderColor: rgb(254 / 255, 202 / 255, 202 / 255), // Hairline Border
+      borderWidth: 0.8
     });
 
-    page2.drawText('CRITICAL CLINICAL SAFETY DIRECTIVE · MUTUALLY EXCLUSIVE THERAPEUTIC PATHWAYS:', {
-      x: 46,
+    // Left Accent Strip (GCP Alert Callout)
+    page2.drawRectangle({
+      x: 36,
+      y: y2,
+      width: 3.5,
+      height: 58,
+      color: alertRed
+    });
+
+    page2.drawText('CRITICAL CLINICAL SAFETY DIRECTIVE · MUTUALLY EXCLUSIVE THERAPEUTIC PATHWAYS', {
+      x: 48,
       y: y2 + 42,
       size: 7.2,
       font: helveticaBold,
@@ -706,12 +754,12 @@ export async function GET(request) {
     });
     const otcDirectiveText = 'Pathway 1 (Commercial OTC) and Pathway 2 (Master Compounding) are ALTERNATIVE clinical approaches to resolve your DNA profile.\nNEVER TAKE BOTH TRACKS CONCURRENTLY: If purchasing retail OTC supplements below, DO NOT take the compounded prescription.\nIf your physician prescribes Pathway 2 (Page 3), it fully replaces all standalone OTC vitamins to prevent micronutrient toxicity (hypervitaminosis).';
     page2.drawText(otcDirectiveText, {
-      x: 46,
+      x: 48,
       y: y2 + 28,
       size: 6.2,
       font: helvetica,
       color: darkSlate,
-      maxWidth: p2Width - 92,
+      maxWidth: p2Width - 96,
       lineHeight: 9.5
     });
 
@@ -1113,26 +1161,51 @@ export async function GET(request) {
     });
 
     // Checkbox 1: Option A (Core 2-Capsule)
-    page3.drawRectangle({ x: 44, y: y3 + 15, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
+    page3.drawRectangle({
+      x: 44,
+      y: y3 + 15,
+      width: 8,
+      height: 8,
+      color: isOptionA ? navyPrimary : white,
+      borderColor: isOptionA ? navyPrimary : darkSlate,
+      borderWidth: 1
+    });
+    if (isOptionA) {
+      page3.drawText('X', { x: 45.8, y: y3 + 16.2, size: 6.0, font: helveticaBold, color: white });
+    }
     page3.drawText('OPTION A · CORE 2-CAPSULE REGIMEN (CAPSULES B + C · 2 CAPS/DAY)', { x: 56, y: y3 + 16, size: 6.0, font: helveticaBold, color: navyPrimary });
-    page3.drawText('Resolves MTHFR, VDR & Neuro-Sleep. Lowers cost ~30% for patients without active gut dysbiosis.', { x: 278, y: y3 + 16, size: 5.4, font: helvetica, color: mutedSlate, maxWidth: 240 });
+    page3.drawText('Resolves MTHFR, VDR & Neuro-Sleep. Lowers cost ~30% for patients without active gut dysbiosis.', { x: 305, y: y3 + 16, size: 5.4, font: helvetica, color: mutedSlate, maxWidth: 215 });
 
     // Checkbox 2: Option B (Full 3-Capsule)
-    page3.drawRectangle({ x: 44, y: y3 + 3, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
+    const isOptionB = !isOptionA;
+    page3.drawRectangle({
+      x: 44,
+      y: y3 + 3,
+      width: 8,
+      height: 8,
+      color: isOptionB ? navyPrimary : white,
+      borderColor: isOptionB ? navyPrimary : darkSlate,
+      borderWidth: 1
+    });
+    if (isOptionB) {
+      page3.drawText('X', { x: 45.8, y: y3 + 4.2, size: 6.0, font: helveticaBold, color: white });
+    }
     page3.drawText('OPTION B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C · 3 CAPS/DAY)', { x: 56, y: y3 + 4, size: 6.0, font: helveticaBold, color: navyPrimary });
-    page3.drawText('Includes Capsule A (Enteric DRcaps®) for mucosal barrier repair, dairy intolerance & tight junction seal.', { x: 278, y: y3 + 4, size: 5.4, font: helvetica, color: mutedSlate, maxWidth: 240 });
+    page3.drawText('Includes Capsule A (Enteric DRcaps®) for mucosal barrier repair, dairy intolerance & tight junction seal.', { x: 305, y: y3 + 4, size: 5.4, font: helvetica, color: mutedSlate, maxWidth: 215 });
 
     // Streamlined 3-Capsule Compounding Tables (Revised Per Nikolay / Pharmapolis Pharmacist Review)
     const PHARMACY_CAPSULES = [
       {
         id: 'cap_a',
         num: '1',
-        title: 'FORMULATION 1: CAPSULE A · MORNING ACID-RESISTANT PROBIOTIC SHIELD  [PRIORITY 3 · GUT MICROBIOME]',
-        qty: '60 Capsules (60-Day Supply)',
+        title: isOptionA
+          ? 'FORMULATION 1: CAPSULE A · MORNING PROBIOTIC SHIELD  [OPTION B ONLY · MUTED IN OPTION A]'
+          : 'FORMULATION 1: CAPSULE A · MORNING ACID-RESISTANT PROBIOTIC SHIELD  [PRIORITY 3 · GUT MICROBIOME]',
+        qty: isOptionA ? '60 Capsules (Optional Modality)' : '60 Capsules (60-Day Supply)',
         dnaTarget: 'DNA Target: Pillar 3 (Mucosal Barrier & Gut Microbiome Integrity)',
         vehicle: 'Vehicle: Size 1–2 Acid-Resistant DRcaps® · Excipient: MCC PH-112 (low-moisture) + Desiccant Canister · Lactose-Free',
         timing: 'Posology: 1 capsule 15–30 min before breakfast on an empty stomach with room-temperature water.',
-        headerColor: tealAccent,
+        headerColor: isOptionA ? mutedSlate : tealAccent,
         ingredients: [
           {
             name: 'Lactobacillus rhamnosus GG (ATCC 53103)',
@@ -1533,8 +1606,37 @@ export async function GET(request) {
     const includeOriginal = searchParams.get('full') !== 'false' && searchParams.get('includeOriginal') !== 'false';
 
     if (includeOriginal) {
+      let originalBytes = null;
       const originalPdfPath = path.join(process.cwd(), 'public/reports/24genetics/G000943554_Nutrition.pdf');
       if (fs.existsSync(originalPdfPath)) {
+        try {
+          originalBytes = fs.readFileSync(originalPdfPath);
+        } catch (e) {
+          console.warn('[24Genomics PDF] Local read failed, falling back to CDN fetch:', e.message);
+        }
+      }
+
+      // In production Cloud Functions / Serverless, public/ files live on the CDN
+      if (!originalBytes) {
+        const candidateCdnUrls = [
+          'https://www.atlashealth-services.com/reports/24genetics/G000943554_Nutrition.pdf',
+          'https://med-peptides-app-27a3a.web.app/reports/24genetics/G000943554_Nutrition.pdf'
+        ];
+        for (const cdnUrl of candidateCdnUrls) {
+          try {
+            const cdnRes = await fetch(cdnUrl, { cache: 'force-cache' });
+            if (cdnRes.ok) {
+              const arrayBuffer = await cdnRes.arrayBuffer();
+              originalBytes = Buffer.from(arrayBuffer);
+              break;
+            }
+          } catch (fetchErr) {
+            console.warn(`[24Genomics PDF] CDN fetch failed for ${cdnUrl}:`, fetchErr.message);
+          }
+        }
+      }
+
+      if (originalBytes) {
         // Divider Page (Section II Cover)
         const dividerPage = pdfDoc.addPage([595.28, 841.89]);
         const { width: dWidth, height: dHeight } = dividerPage.getSize();
@@ -1784,7 +1886,6 @@ export async function GET(request) {
         });
 
         // Append 55 Original Pages
-        const originalBytes = fs.readFileSync(originalPdfPath);
         const originalPdf = await PDFDocument.load(originalBytes);
         const copiedPages = await pdfDoc.copyPages(originalPdf, originalPdf.getPageIndices());
         copiedPages.forEach((page) => pdfDoc.addPage(page));

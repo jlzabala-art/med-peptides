@@ -3,6 +3,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { getPeptideScientificData } from '../../../../utils/knownPeptideData';
 import { processProductVariants } from '../../../../utils/productVariantProcessing';
+import { getLotuslandPeptideBySlug } from '../../../../data/lotuslandPeptidesRegistry';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 const BRAND_NAME = 'Atlas Solutions';
@@ -116,25 +117,95 @@ function wrapText(text, maxChars) {
 }
 
 async function getProduct(id) {
-  if (!adminDb || !id) return null;
+  if (!id) return null;
+  const rawId = decodeURIComponent(id).trim();
+  const cleanBase = rawId.includes('_') ? rawId.split('_')[0].toLowerCase() : rawId.toLowerCase();
 
-  const byId = await adminDb.collection('products').doc(id).get().catch(() => null);
-  let doc = byId?.exists ? byId : null;
+  let doc = null;
+  if (adminDb) {
+    // 1. Try exact doc ID
+    const byId = await adminDb.collection('products').doc(rawId).get().catch(() => null);
+    if (byId?.exists) doc = byId;
 
-  if (!doc) {
-    const bySlug = await adminDb.collection('products').where('slug', '==', id.toLowerCase()).limit(1).get().catch(() => null);
-    if (bySlug && !bySlug.empty) doc = bySlug.docs[0];
+    // 2. Try clean base ID
+    if (!doc && cleanBase !== rawId) {
+      const byBase = await adminDb.collection('products').doc(cleanBase).get().catch(() => null);
+      if (byBase?.exists) doc = byBase;
+    }
+
+    // 3. Try slug exact
+    if (!doc) {
+      const bySlug = await adminDb.collection('products').where('slug', '==', rawId.toLowerCase()).limit(1).get().catch(() => null);
+      if (bySlug && !bySlug.empty) doc = bySlug.docs[0];
+    }
+
+    // 4. Try cleanBase slug
+    if (!doc && cleanBase !== rawId) {
+      const byBaseSlug = await adminDb.collection('products').where('slug', '==', cleanBase).limit(1).get().catch(() => null);
+      if (byBaseSlug && !byBaseSlug.empty) doc = byBaseSlug.docs[0];
+    }
   }
 
-  if (!doc) return null;
+  if (doc) {
+    const raw = { id: doc.id, ...doc.data() };
+    if (raw.status !== 'hidden' && raw.status !== 'archived') {
+      const varSnap = await doc.ref.collection('variants').get().catch(() => null);
+      const variants = (varSnap?.docs || []).map(v => pickFields({ id: v.id, ...v.data() }, VARIANT_PUBLIC_FIELDS));
+      return { ...pickFields(raw, PUBLIC_FIELDS), variants: variants.length > 0 ? variants : (raw.variants || []) };
+    }
+  }
 
-  const raw = { id: doc.id, ...doc.data() };
-  if (raw.status === 'hidden' || raw.status === 'archived') return null;
+  // 5. Fallback to authoritative static peptide registries (Lotusland)
+  const lotusMatch = getLotuslandPeptideBySlug(cleanBase) || getLotuslandPeptideBySlug(rawId);
+  if (lotusMatch) {
+    return {
+      ...pickFields(lotusMatch, PUBLIC_FIELDS),
+      id: lotusMatch.id || cleanBase,
+      name: lotusMatch.name || cleanBase.toUpperCase(),
+      canonicalName: lotusMatch.name || cleanBase.toUpperCase(),
+      slug: cleanBase,
+      status: 'active',
+      variants: lotusMatch.variants || [
+        {
+          id: `${cleanBase}-default`,
+          name: lotusMatch.name || cleanBase,
+          dose: lotusMatch.dosage || '5 mg',
+          presentation: 'Sterile Lyophilized Vial (10R Borosilicate)',
+          purity: '≥99.0% HPLC'
+        }
+      ]
+    };
+  }
 
-  const varSnap = await doc.ref.collection('variants').get().catch(() => null);
-  const variants = (varSnap?.docs || []).map(v => pickFields({ id: v.id, ...v.data() }, VARIANT_PUBLIC_FIELDS));
+  // 6. Fallback to KNOWN_PEPTIDE_DATA
+  const sci = getPeptideScientificData(cleanBase);
+  if (sci) {
+    const displayName = cleanBase.toUpperCase().replace(/-/g, ' ');
+    return {
+      id: cleanBase,
+      name: displayName,
+      canonicalName: displayName,
+      slug: cleanBase,
+      category: 'Clinical Peptides',
+      therapeutic_category: 'Biomedical & Regenerative Science',
+      description: sci.targetSystem || 'Sterile Lyophilized Bioactive Formulation (USP Type I Borosilicate Glass).',
+      casNumber: sci.casNumber,
+      molecularFormula: sci.molecularFormula,
+      molecularWeight: sci.molecularWeight,
+      status: 'active',
+      variants: [
+        {
+          id: `${cleanBase}-default`,
+          name: `${displayName} 5mg`,
+          dose: '5 mg',
+          presentation: 'Sterile Lyophilized Vial (10R Borosilicate)',
+          purity: '≥99.0% HPLC'
+        }
+      ]
+    };
+  }
 
-  return { ...pickFields(raw, PUBLIC_FIELDS), variants: variants.length > 0 ? variants : (raw.variants || []) };
+  return null;
 }
 
 export async function GET(request, context) {

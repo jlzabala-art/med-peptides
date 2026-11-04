@@ -4,29 +4,41 @@ import PatientDnaPortalClient from './PatientDnaPortalClient';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
+const BASE_URL = 'https://www.atlashealth-services.com';
 
 export async function generateMetadata({ searchParams }) {
   const sp = await searchParams;
-  const patient = sp?.patient || 'Patient';
+  const patient = sp?.patient || 'Hossam Ahmed';
   const sample = sp?.sample || '24G-QA-90421';
 
+  const title = `Genomic Nutrition & Formulation Report · ${patient}`;
+  const description = `Confidential CE-IVD DNA Analysis & Magistral Compounded Prescription (Sample #${sample}). Issued by Atlas Health Services.`;
+  const shareUrl = `${BASE_URL}/patient/dna-report?patient=${encodeURIComponent(patient)}&sample=${encodeURIComponent(sample)}`;
+  const imageUrl = `${BASE_URL}/og-preview.png`;
+
   return {
-    title: `Personal Genomic Wellness & Nutrition Guide • Atlas Health Services`,
-    description: `Private genomic nutrition & clinical recommendations for ${patient} (Sample #${sample}). Verified digital health dossier.`,
+    title,
+    description,
     openGraph: {
-      title: `Personal Genomic Wellness Guide · ${patient}`,
-      description: `Secure 1-Click Access to Clinical DNA Recommendations & Compounding Prescription.`,
-      url: `${BASE_URL}/patient/dna-report`,
-      siteName: 'Atlas Health Services · Patient Care',
+      title,
+      description,
+      url: shareUrl,
+      siteName: 'Atlas Health Services · Precision Genomics',
+      type: 'article',
       images: [
         {
-          url: `${BASE_URL}/og-card.png`,
+          url: imageUrl,
           width: 1200,
           height: 630,
-          alt: 'Atlas Health Genomic Report'
+          alt: `Personal Genomic Report for ${patient}`
         }
       ]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl]
     }
   };
 }
