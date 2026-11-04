@@ -241,6 +241,240 @@ const CLINICAL_PRESETS = [
   }
 ];
 
+/**
+ * Google Cloud UX Dedicated Mobile Card for Peptide Price Schedule
+ * (Rule #23: Mobile-First UX Compatibility)
+ * Displays each peptide with 44px touch targets, 2-column pricing tiles (Single Vial vs Box ×10),
+ * live proforma cart status, and public specs link.
+ */
+function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }) {
+  const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
+  const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
+  const discountPct = Math.max(10, Math.round((1 - (p10 / (row.unitPrice * 10))) * 100));
+
+  const cleanDose = (row.dosage || '').replace(/[\s+]/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+  const slug = row.slug || row.productId || row.id;
+  const specsUrl = `/p/${slug}?dose=${cleanDose}`;
+
+  const inCart1x = cartItems[row.id]?.quantity1x || 0;
+  const inCart10x = cartItems[row.id]?.quantity10x || 0;
+  const hasCart = inCart1x > 0 || inCart10x > 0;
+
+  return (
+    <div style={{
+      background: '#ffffff',
+      border: hasCart ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+      borderRadius: '8px',
+      padding: '12px 14px',
+      marginBottom: '10px',
+      boxShadow: hasCart ? '0 2px 8px rgba(26,115,232,0.18)' : '0 1px 3px rgba(60,64,67,0.08)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '10px'
+    }}>
+      {/* Top Header: Compound Name, Dosage & Specs Button */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <Link
+              href={specsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: '0.98rem',
+                fontWeight: 800,
+                color: '#1a73e8',
+                textDecoration: 'none',
+                wordBreak: 'break-word'
+              }}
+            >
+              {row.productName}
+            </Link>
+            <span style={{
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              background: '#e8f0fe',
+              color: '#1a73e8',
+              border: '1px solid #c2e7ff',
+              padding: '2px 7px',
+              borderRadius: '4px',
+              whiteSpace: 'nowrap'
+            }}>
+              {row.dosage}
+            </span>
+          </div>
+          <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700, marginTop: '3px' }}>
+            {row.therapeuticClass || 'Certified Clinical Peptide'}
+          </div>
+        </div>
+
+        {/* Specs link button (Golden Rule: Opens public specs page in new tab) */}
+        <Link
+          href={specsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: '#1a73e8',
+            background: '#ffffff',
+            border: '1px solid #c2e7ff',
+            padding: '6px 9px',
+            borderRadius: '4px',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            minHeight: '34px'
+          }}
+          title={`Open public clinical specs for ${row.productName} (${row.dosage})`}
+        >
+          <span>📄 Specs</span>
+          <span>↗</span>
+        </Link>
+      </div>
+
+      {/* In-Cart Active Badge */}
+      {hasCart && (
+        <div style={{
+          background: '#e8f0fe',
+          border: '1px solid #c2e7ff',
+          borderRadius: '4px',
+          padding: '5px 9px',
+          fontSize: '0.72rem',
+          fontWeight: 700,
+          color: '#1a73e8',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px'
+        }}>
+          <Check size={12} />
+          <span>In Proforma: {inCart1x > 0 ? `${inCart1x} single vial${inCart1x > 1 ? 's' : ''}` : ''}{inCart1x > 0 && inCart10x > 0 ? ' + ' : ''}{inCart10x > 0 ? `${inCart10x} box${inCart10x > 1 ? 'es' : ''} (×10)` : ''}</span>
+        </div>
+      )}
+
+      {/* 2-Column Action Tiles: Single Vial vs Box of 10 */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '8px'
+      }}>
+        {/* Tile 1: Single Vial */}
+        <div style={{
+          background: '#f8f9fa',
+          border: '1px solid #dadce0',
+          borderRadius: '6px',
+          padding: '10px 10px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          gap: '8px'
+        }}>
+          <div>
+            <div style={{ fontSize: '0.66rem', color: '#5f6368', fontWeight: 600, textTransform: 'uppercase' }}>
+              Single Vial (1x)
+            </div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#202124', fontFamily: 'monospace', marginTop: '2px' }}>
+              {formatPrice ? formatPrice(row.unitPrice) : `$${row.unitPrice}`}
+            </div>
+            <div style={{ fontSize: '0.64rem', color: '#5f6368' }}>
+              per sterile vial
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleAddToCart && handleAddToCart(row, '1x')}
+            style={{
+              width: '100%',
+              minHeight: '44px',
+              fontSize: '0.80rem',
+              fontWeight: 700,
+              background: '#ffffff',
+              border: '1.5px solid #dadce0',
+              borderRadius: '6px',
+              color: '#3c4043',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+            }}
+          >
+            <Plus size={14} />
+            <span>1 Vial</span>
+          </button>
+        </div>
+
+        {/* Tile 2: Box of 10 */}
+        <div style={{
+          background: '#f0fdf4',
+          border: '1px solid #bbf7d0',
+          borderRadius: '6px',
+          padding: '10px 10px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          gap: '8px'
+        }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2px' }}>
+              <span style={{ fontSize: '0.66rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
+                Box of 10
+              </span>
+              <span style={{
+                fontSize: '0.60rem',
+                fontWeight: 800,
+                color: '#15803d',
+                background: '#dcfce7',
+                border: '1px solid #86efac',
+                padding: '1px 4px',
+                borderRadius: '3px'
+              }}>
+                -{discountPct}% Box
+              </span>
+            </div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#15803d', fontFamily: 'monospace', marginTop: '2px' }}>
+              {formatPrice ? formatPrice(p10) : `$${p10.toFixed(2)}`}
+            </div>
+            <div style={{ fontSize: '0.64rem', color: '#166534', fontFamily: 'monospace' }}>
+              ({formatPrice ? formatPrice(perUnit) : `$${perUnit.toFixed(2)}`}/vial)
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleAddToCart && handleAddToCart(row, '10x')}
+            style={{
+              width: '100%',
+              minHeight: '44px',
+              fontSize: '0.80rem',
+              fontWeight: 700,
+              background: '#1a73e8',
+              border: '1.5px solid #1a73e8',
+              borderRadius: '6px',
+              color: '#ffffff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              boxShadow: '0 1px 3px rgba(26,115,232,0.25)'
+            }}
+          >
+            <Box size={14} />
+            <span>+Pack ×10</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+PeptideMobileCard.displayName = 'PeptideMobileCard';
+
 export default function PeptidesPriceListClient({ initialProducts = [], referralCode = 'CAT-RX-7482', isDistributor = false }) {
   const [currency, setCurrency] = useState('USD'); // USD, EUR, AED
   const [searchQuery, setSearchQuery] = useState('');
@@ -292,7 +526,9 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       try {
         localStorage.setItem('atlas_peptides_tier', isDistributor ? 'distributor' : 'wholesaler');
         localStorage.setItem('atlas_peptides_referral', referralCode || (isDistributor ? 'DISTRIBUTOR-15' : 'WHOLESALER-B2B'));
-      } catch (e) {}
+      } catch (_err) {
+        // Ignore localStorage quota or private browsing exceptions
+      }
     }
   }, [isDistributor, referralCode]);
 
@@ -487,7 +723,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   }, [cartItems]);
 
   // Cart operations
-  const handleAddToCart = (product, packType) => {
+  const handleAddToCart = useCallback((product, packType) => {
     setCartItems(prev => {
       const current = prev[product.id] || { quantity1x: 0, quantity10x: 0, product };
       const updated = {
@@ -497,7 +733,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       return { ...prev, [product.id]: updated };
     });
     toast.success(`Added ${product.productName} (${packType === '10x' ? 'Pack ×10' : '1x Vial'}) to request ✓`);
-  };
+  }, []);
 
   const totalCartCount = useMemo(() => {
     return Object.values(cartItems).reduce((sum, item) => sum + item.quantity1x + (item.quantity10x * 10), 0);
@@ -1020,27 +1256,43 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           </div>
 
           <div className="nav-actions">
-            {/* Currency selector with prominent display */}
-            <div className="currency-selector" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 650 }}>Currency:</span>
-              <div className="pill-group">
+            {/* Currency selector with prominent display (Google Cloud Console Standard) */}
+            <div className="currency-selector" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Currency:</span>
+              <div className="pill-group" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
                 {[
                   { code: 'USD', symbol: '$' },
                   { code: 'EUR', symbol: '€' },
                   { code: 'AED', symbol: 'د.إ' }
-                ].map((item) => (
-                  <button
-                    key={item.code}
-                    onClick={() => setCurrency(item.code)}
-                    className={`pill-btn ${currency === item.code ? 'active' : ''}`}
-                    style={{
-                      fontWeight: currency === item.code ? 750 : 500,
-                      letterSpacing: '-0.01em'
-                    }}
-                  >
-                    {item.code} ({item.symbol})
-                  </button>
-                ))}
+                ].map((item) => {
+                  const isCurrent = currency === item.code;
+                  return (
+                    <button
+                      key={item.code}
+                      onClick={() => setCurrency(item.code)}
+                      className={`pill-btn ${isCurrent ? 'pill-active active' : ''}`}
+                      style={{
+                        border: 'none',
+                        background: isCurrent ? '#1a73e8' : 'transparent',
+                        color: isCurrent ? '#ffffff' : '#cbd5e1',
+                        fontWeight: isCurrent ? 800 : 500,
+                        fontSize: '0.74rem',
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        boxShadow: isCurrent ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
+                        transition: 'all 0.15s ease',
+                        letterSpacing: '-0.01em',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      {isCurrent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8', display: 'inline-block' }} />}
+                      <span>{item.code} ({item.symbol})</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -1069,7 +1321,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       </header>
 
-      <main style={{ maxWidth: '1440px', margin: '0 auto', padding: '1.25rem 1.25rem 6.5rem 1.25rem' }}>
+      <main style={{ maxWidth: '1440px', margin: '0 auto', padding: '1.25rem 1.25rem 9.5rem 1.25rem' }}>
         {/* Page Header */}
         <div style={{ marginBottom: '1.25rem' }}>
           <Breadcrumb items={[
@@ -1110,15 +1362,20 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   <span>Batch Verified ≥99.0% HPLC</span>
                 </span>
                 <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  color: '#1a73e8',
-                  background: '#e8f0fe',
-                  border: '1px solid #c2e7ff',
-                  padding: '3px 9px',
-                  borderRadius: '12px'
+                  fontSize: '0.74rem',
+                  fontWeight: 800,
+                  color: '#0d47a1',
+                  background: '#e3f2fd',
+                  border: '1.5px solid #90caf9',
+                  padding: '3px 12px',
+                  borderRadius: '14px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 1px 3px rgba(13, 71, 161, 0.12)'
                 }}>
-                  Quoted in {currency} ({currencySymbol})
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1976d2', display: 'inline-block' }} />
+                  <span>Pricing Currency: <strong>{currency} ({currencySymbol.trim()})</strong></span>
                 </span>
               </div>
               <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#202124', letterSpacing: '-0.02em', margin: 0 }}>
@@ -1552,6 +1809,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   pageSize={50}
                   showPagination={true}
                   sortable={true}
+                  mobileCardComponent={PeptideMobileCard}
+                  mobileCardProps={{
+                    handleAddToCart,
+                    cartItems,
+                    formatPrice,
+                    currency,
+                    currencySymbol
+                  }}
                 />
               )}
             </div>
@@ -2208,30 +2473,31 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         <div style={{
           maxWidth: '1440px',
           margin: '0 auto',
-          padding: '0 20px',
+          padding: '0 16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px'
+          flexWrap: 'nowrap',
+          gap: '10px'
         }}>
           {/* Left: Atlas AI Clinical Copilot Direct Launcher */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <button
               type="button"
               onClick={() => setIsAtlasAiOpen(true)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '9px',
-                padding: '6px 14px',
+                gap: '8px',
+                padding: '5px 12px',
                 background: '#e8f0fe',
                 border: '1px solid #c2e7ff',
                 borderRadius: '24px',
                 color: '#1a73e8',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
-                boxShadow: '0 1px 3px rgba(26, 115, 232, 0.15)'
+                boxShadow: '0 1px 3px rgba(26, 115, 232, 0.15)',
+                minHeight: '38px'
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.background = '#d2e3fc';
@@ -2244,67 +2510,70 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               title="Open Atlas Clinical AI Assistant (Dosing Math, Synergies & Reconstitution)"
             >
               <div style={{
-                width: '26px',
-                height: '26px',
+                width: '24px',
+                height: '24px',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #1a73e8 0%, #0d9488 100%)',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 1px 4px rgba(26, 115, 232, 0.3)'
+                boxShadow: '0 1px 4px rgba(26, 115, 232, 0.3)',
+                flexShrink: 0
               }}>
-                <Sparkles size={14} />
+                <Sparkles size={13} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: 1.2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1a73e8' }}>
-                    Atlas AI Copilot
+                  <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#1a73e8', whiteSpace: 'nowrap' }}>
+                    Atlas AI
                   </span>
-                  <span style={{
+                  <span className="mobile-hide" style={{
                     fontSize: '0.62rem',
                     fontWeight: 700,
                     background: '#ffffff',
                     color: '#0d9488',
                     border: '1px solid #99f6e4',
                     padding: '1px 6px',
-                    borderRadius: '10px'
+                    borderRadius: '10px',
+                    whiteSpace: 'nowrap'
                   }}>
-                    {selectedCategory !== 'all' ? (CATEGORY_MAP[selectedCategory]?.label || 'Category') : 'Peptide Pharmacopeia'}
+                    {selectedCategory !== 'all' ? (CATEGORY_MAP[selectedCategory]?.label || 'Category') : 'Pharmacopeia'}
                   </span>
                 </div>
                 <span className="mobile-hide" style={{ fontSize: '0.68rem', color: '#5f6368', fontWeight: 500 }}>
-                  Reconstitution math, syringe calibration & synergies
+                  Reconstitution math & synergies
                 </span>
               </div>
             </button>
           </div>
 
           {/* Right: Live Cart Proforma Status & Primary Action */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'nowrap', justifyContent: 'flex-end', flex: 1 }}>
             {totalCartCount > 0 ? (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{
                     background: '#e6f4ea',
                     color: '#137333',
                     border: '1px solid #ceead6',
-                    fontSize: '0.78rem',
+                    fontSize: '0.74rem',
                     fontWeight: 800,
-                    padding: '4px 10px',
+                    padding: '3px 8px',
                     borderRadius: '16px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px'
+                    gap: '4px',
+                    whiteSpace: 'nowrap'
                   }}>
-                    <ShoppingCart size={13} />
+                    <ShoppingCart size={12} />
                     <span>{totalCartCount} Vials</span>
                   </span>
                   <div>
-                    <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#202124', fontFamily: 'monospace', lineHeight: 1.1 }}>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#202124', fontFamily: 'monospace', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
                       {formatPrice(totalCartValueUsd)}
                     </div>
-                    <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>
+                    <div className="mobile-hide" style={{ fontSize: '0.64rem', color: '#5f6368', whiteSpace: 'nowrap' }}>
                       +€60 Express Logistics added at checkout
                     </div>
                   </div>
@@ -2317,6 +2586,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       setCartItems({});
                     }
                   }}
+                  className="mobile-hide"
                   style={{
                     background: 'transparent',
                     border: 'none',
@@ -2337,17 +2607,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '7px',
+                    gap: '6px',
                     backgroundColor: '#1a73e8', // GCP Primary Blue
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '6px',
-                    padding: '8px 16px',
+                    padding: '8px 14px',
                     fontWeight: 750,
-                    fontSize: '0.84rem',
+                    fontSize: '0.80rem',
                     cursor: 'pointer',
-                    boxShadow: '0 1px 3px rgba(60,64,67,0.3)',
-                    transition: 'all 0.15s ease'
+                    boxShadow: '0 2px 6px rgba(26, 115, 232, 0.35)',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease',
+                    minHeight: '38px'
                   }}
                   onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1557b0'}
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1a73e8'}
@@ -2357,11 +2629,11 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 </button>
               </>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '0.78rem', color: '#5f6368', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <ShoppingCart size={14} color="#9aa0a6" />
-                  <span>Proforma Cart is empty</span>
-                  <span className="mobile-hide" style={{ color: '#80868b' }}>• Click <strong>+ 1 Vial</strong> or <strong>+Pack ×10</strong> to build order</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
+                <span style={{ fontSize: '0.76rem', color: '#5f6368', display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
+                  <ShoppingCart size={13} color="#9aa0a6" />
+                  <span>Proforma empty</span>
+                  <span className="mobile-hide" style={{ color: '#80868b' }}>• Click <strong>+ 1 Vial</strong> or <strong>+Pack ×10</strong></span>
                 </span>
                 <button
                   type="button"
@@ -2369,20 +2641,22 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px',
+                    gap: '4px',
                     background: '#f1f3f4',
                     color: '#9aa0a6',
                     border: '1px solid #dadce0',
                     borderRadius: '6px',
-                    padding: '7px 14px',
-                    fontSize: '0.78rem',
+                    padding: '7px 12px',
+                    fontSize: '0.76rem',
                     fontWeight: 650,
                     cursor: 'not-allowed',
-                    opacity: 0.75
+                    opacity: 0.75,
+                    whiteSpace: 'nowrap',
+                    minHeight: '36px'
                   }}
                   title="Add at least 1 vial or box from table to activate proforma review"
                 >
-                  <span>Review Proforma (0)</span>
+                  <span>Review (0)</span>
                 </button>
               </div>
             )}
