@@ -446,3 +446,4 @@ seedAllInvoices().catch(err => {
   console.error('Fatal seeding error:', err);
   process.exit(1);
 });
+
