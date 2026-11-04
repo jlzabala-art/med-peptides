@@ -146,7 +146,7 @@ export async function GET(request) {
     });
 
     yCover -= 15;
-    coverPage.drawText('DNA-Guided Nutrition, Islamic Halal Dietary Principles & Precision Compounding', {
+    coverPage.drawText('DNA-Guided Nutrition, Metabolic Optimization & Chronobiology Guidance', {
       x: 44,
       y: yCover,
       size: 9.5,
@@ -157,7 +157,7 @@ export async function GET(request) {
     // Metadata Chips Row (GCP Chips)
     yCover -= 18;
     const chips = [
-      { label: '100% Halal Verified', bg: gcpGreenBg, border: gcpGreen, text: gcpGreen },
+      { label: 'Precision Nutrition', bg: gcpGreenBg, border: gcpGreen, text: gcpGreen },
       { label: 'Illumina NGS Sequencing', bg: rgb(241 / 255, 243 / 255, 244 / 255), border: cardBorder, text: darkSlate },
       { label: 'Complete 59-Page Dossier', bg: rgb(232 / 255, 240 / 255, 254 / 255), border: rgb(210 / 255, 227 / 255, 252 / 255), text: googleBlue }
     ];
@@ -225,10 +225,10 @@ export async function GET(request) {
     coverPage.drawText('Specimen ID:', { x: c2Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
     coverPage.drawText(`G000943554 / ${sampleId}`, { x: c2Val, y: rowY, size: 8.5, font: helveticaBold, color: darkSlate });
 
-    // Row 2: Dietary Standard (Clean, Prominent Full-Width Green Banner)
+    // Row 2: Clinical Scope (GCP Key-Value Pair)
     rowY -= 18;
-    coverPage.drawText('Dietary Standard:', { x: c1Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
-    coverPage.drawText('100% Halal Verified Compliance · Zero Porcine · Zero Alcohol', {
+    coverPage.drawText('Clinical Scope:', { x: c1Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText('Precision DNA Nutrition · Chronobiology Optimization', {
       x: c1Val,
       y: rowY,
       size: 7.8,
@@ -269,15 +269,15 @@ export async function GET(request) {
         badge: 'PART I · PAGE 2',
         badgeColor: googleBlue,
         badgeBg: rgb(232 / 255, 240 / 255, 254 / 255),
-        title: 'Actionable Halal Meal Plan & 24-Hour Chronobiology Routine',
-        desc: 'Translates DNA findings into actionable dietary choices compliant with Islamic dietary laws (100% Halal meats, zero alcohol marinades, zero porcine additives). Includes meal tray sequencing and synchronized nutrient timing.'
+        title: 'Actionable Daily Meal Plan & 24-Hour Chronobiology Routine',
+        desc: 'Translates your genetic markers into practical daily catering choices: Green (Always Order), Amber (In Moderation), and Red (Exclude). Includes the Golden Plate Sequencing rule and your synchronized 24-hour nutrition & supplement timeline.'
       },
       {
         badge: 'PART II · PAGE 3',
         badgeColor: gcpGreen,
         badgeBg: gcpGreenBg,
         title: 'Targeted Supplement Protocols & Shopping Pathways',
-        desc: 'Cellular cofactors (Active Folate 5-MTHF, D3/K2, Probiotics, Magnesium Bisglycinate). Formulated exclusively with 100% vegetable DRcaps® (Halal certified, zero porcine gelatin). Neutral comparison between retail pharmacies and compounding.'
+        desc: 'Cellular cofactors (Active Folate 5-MTHF, D3/K2, Probiotics, Magnesium Bisglycinate). Formulated exclusively with 100% vegetable DRcaps® (lactose-free, zero synthetic binders). Neutral comparison between retail pharmacies and compounding.'
       },
       {
         badge: 'PART III · PAGES 4–59',
@@ -390,7 +390,7 @@ export async function GET(request) {
       font: helveticaBold,
       color: googleBlue
     });
-    coverPage.drawText('Scan the QR code with your smartphone camera to access your interactive digital dashboard,\nexplore dynamic Halal meal filters, review dosage schedules, and share with your healthcare team.', {
+    coverPage.drawText('Scan the QR code with your smartphone camera to access your interactive digital dashboard,\nexplore dynamic food filters, review dosage schedules, and share with your healthcare team.', {
       x: 116,
       y: yCover - 31,
       size: 7.0,
@@ -593,9 +593,9 @@ export async function GET(request) {
     y1 -= (2 * boxH + 10 + 16);
 
     // -------------------------------------------------------------------------
-    // SECTION 2: MEAL PLAN TRAFFIC LIGHT (100% HALAL & DNA OPTIMIZED CATERING)
+    // SECTION 2: MEAL PLAN TRAFFIC LIGHT (DNA OPTIMIZED CATERING)
     // -------------------------------------------------------------------------
-    page1.drawText('2. MEAL PLAN SELECTION GUIDE (100% HALAL CATERING · TRAFFIC LIGHT FOR YOUR DAILY MENU)', {
+    page1.drawText('2. MEAL PLAN SELECTION GUIDE (TRAFFIC LIGHT FOR YOUR DAILY CATERING MENU)', {
       x: 36,
       y: y1,
       size: 11.0,
@@ -607,18 +607,18 @@ export async function GET(request) {
     const trafficCols = [
       {
         badge: 'GREEN · ALWAYS ORDER',
-        subtitle: '100% Halal Verified & DNA Favs',
+        subtitle: 'Metabolic Boosters & DNA Favs',
         badgeColor: gcpGreen,
         badgeBg: gcpGreenBg,
         badgeBorder: gcpGreenBorder,
         accentColor: gcpGreen,
         items: [
-          '• 100% Halal grass-fed beef & grilled chicken',
-          '• Fresh wild salmon, sea bass, local hamour',
-          '• Avocados, extra virgin olive oil, walnuts',
-          '• Dark leafy greens (spinach, arugula, kale)',
-          '• Steamed quinoa, jasmine rice, sweet potatoes',
-          '• Almond milk & coconut yogurt (dairy-free)'
+          'Grass-fed lean beef & grilled chicken',
+          'Fresh wild salmon, sea bass, local hamour',
+          'Avocados, extra virgin olive oil, walnuts',
+          'Dark leafy greens (spinach, arugula, kale)',
+          'Steamed quinoa, jasmine rice, sweet potatoes',
+          'Almond milk & coconut yogurt (dairy-free)'
         ]
       },
       {
@@ -629,28 +629,28 @@ export async function GET(request) {
         badgeBorder: gcpAmberBorder,
         accentColor: gcpAmber,
         items: [
-          '• Net Carbs: Keep under 40g per meal tray',
-          '• Soaked legumes & hummus (lentils, chickpeas)',
-          '• Low-glycemic fruits (berries, green apples)',
-          '• Halal red meat dishes (cap at 2x per week)',
-          '• Caffeinated Arabic/espresso coffee (<12 PM)',
-          '• Raw or dry-roasted nuts (watch sodium)'
+          'Net Carbs: Keep under 40g per meal tray',
+          'Soaked legumes & hummus (in moderation)',
+          'Low-glycemic fruits (berries, green apples)',
+          'Red meat dishes (cap at 2x per week)',
+          'Arabic or espresso coffee (before 12 PM)',
+          'Raw or dry-roasted nuts (watch sodium)'
         ]
       },
       {
         badge: 'RED · EXCLUDE FROM MENU',
-        subtitle: 'Haram Precepts & DNA Triggers',
+        subtitle: 'Metabolic Disruptors & DNA Triggers',
         badgeColor: gcpRed,
         badgeBg: gcpRedBg,
         badgeBorder: gcpRedBorder,
         accentColor: gcpRed,
         items: [
-          '• Alcohol, cooking wines & ethyl-based sauces',
-          '• Pork, bacon, lard & porcine gelatin (Haram)',
-          '• Non-Halal certified meats or unverified poultry',
-          '• Whole cow milk, labneh & heavy creams (lactose)',
-          '• Deep-fried samosas & industrial seed oils',
-          '• Sweet pastries, sodas & meals past 8:30 PM'
+          'Whole cow milk, labneh & heavy creams',
+          'Fortified white bread & commercial pastries',
+          'Samosas & deep-fried catering sides',
+          'Industrial seed oils (canola, sunflower)',
+          'Commercial sodas & sweetened juices',
+          'Heavy catering meals eaten past 8:30 PM'
         ]
       }
     ];
@@ -726,19 +726,29 @@ export async function GET(request) {
         color: gcpBorder
       });
 
-      // Items list
-      let iY = y1 - 48;
+      // Items list with colored bullet dot, hanging indent and dynamic line height
+      let iY = y1 - 47;
       tc.items.forEach((it) => {
-        page1.drawText(it, {
+        page1.drawText('•', {
           x: cX + 8,
           y: iY,
-          size: 7.4,
+          size: 7.5,
+          font: helveticaBold,
+          color: tc.accentColor
+        });
+        page1.drawText(it, {
+          x: cX + 16,
+          y: iY,
+          size: 7.2,
           font: helvetica,
           color: darkSlate,
-          maxWidth: colW - 16,
-          lineHeight: 10.2
+          maxWidth: colW - 22,
+          lineHeight: 9.8
         });
-        iY -= 16.5;
+        const textWidth = helvetica.widthOfTextAtSize(it, 7.2);
+        const numLines = Math.max(1, Math.ceil(textWidth / (colW - 22)));
+        const step = numLines > 1 ? 14.5 + (numLines - 1) * 9.8 : 15.5;
+        iY -= step;
       });
     });
 
@@ -1068,7 +1078,7 @@ export async function GET(request) {
 
     const humanSupplements = [
       {
-        benefit: 'IMMUNITY & BONE STRENGTH',
+        benefit: '[1] IMMUNITY & BONE STRENGTH',
         nutrient: 'Vitamin D3 + K2 (MK-7)',
         why: 'Your DNA shows slow Vitamin D activation. This synergistic pair directs calcium straight into bones and strengthens daily immune defense.',
         timing: 'With morning breakfast containing healthy fats (eggs, olive oil, avocado).',
@@ -1077,7 +1087,7 @@ export async function GET(request) {
         pBg: redBg
       },
       {
-        benefit: 'CELLULAR ENERGY & CLARITY',
+        benefit: '[2] CELLULAR ENERGY & CLARITY',
         nutrient: 'Active Folate (L-5-MTHF)',
         why: 'Bypasses your MTHFR genetic block to keep you clear-headed. Provides clean cellular energy without synthetic unmethylated buildup.',
         timing: 'Morning with your breakfast.',
@@ -1086,7 +1096,7 @@ export async function GET(request) {
         pBg: redBg
       },
       {
-        benefit: 'DEEP REST & STRESS RESET',
+        benefit: '[3] DEEP REST & STRESS RESET',
         nutrient: 'Magnesium Bisglycinate + Theanine',
         why: 'Calms nerve excitability, relaxes muscle tension after exercise, and quiets racing thoughts for deep slow-wave restorative sleep.',
         timing: 'Evening: Take 2 capsules 30–60 min before bed with room-temp water.',
@@ -1095,7 +1105,7 @@ export async function GET(request) {
         pBg: blueBg
       },
       {
-        benefit: 'METABOLISM & LIVER BALANCE',
+        benefit: '[4] METABOLISM & LIVER BALANCE',
         nutrient: 'Methylated B-Complex (B12 + B6)',
         why: 'Essential cofactors that support homocysteine clearance, healthy nerve myelin, and daytime alertness without jitters.',
         timing: 'Morning with food.',
@@ -1104,7 +1114,7 @@ export async function GET(request) {
         pBg: blueBg
       },
       {
-        benefit: 'GUT BARRIER & FLAT DIGESTION',
+        benefit: '[5] GUT BARRIER & DIGESTION',
         nutrient: 'Targeted Enteric Probiotics',
         why: 'Protective cultures (LGG + BB-12) that re-seed healthy gut flora and defend against bloat, gas, and dairy sensitivities.',
         timing: 'First thing upon waking with room-temperature water.',
@@ -1219,6 +1229,8 @@ export async function GET(request) {
     });
 
     y2 -= 10;
+    const pkW = (p2Width - 72 - 16) / 3;
+    const pkH = 114;
     const packs = [
       {
         badge: 'ESSENTIAL · BASELINE',
@@ -1226,9 +1238,12 @@ export async function GET(request) {
         badgeBg: gcpPillBg,
         badgeBorder: gcpBorder,
         name: 'PACK 1 · ESSENTIAL CORE',
-        items: '2 Supplements · Minimum Base',
-        highlight: 'Covers 80% of Core DNA Needs',
-        desc: '• Vitamin D3/K2 + Active Folate.\n• Resolves your primary cellular & bone health genetic blocks without excess spending.',
+        subtitle: '2 Supplements · Baseline DNA Coverage',
+        items: [
+          '• [1] Vitamin D3 + K2 (MK-7)',
+          '• [2] Active Folate (L-5-MTHF)'
+        ],
+        note: 'Covers 80% of core DNA needs with minimal routine.',
         isFeatured: false
       },
       {
@@ -1237,9 +1252,13 @@ export async function GET(request) {
         badgeBg: googleBlueBg,
         badgeBorder: googleBlueBorder,
         name: 'PACK 2 · PERFORMANCE & SLEEP',
-        items: '4 Supplements · Most Popular',
-        highlight: 'Daytime Energy + Restful Sleep',
-        desc: '• Adds Magnesium Bisglycinate + B-Complex.\n• Recommended if you experience demanding workdays, fatigue or restless nights.',
+        subtitle: '4 Supplements · Daytime + Night Rest',
+        items: [
+          '+ Includes All Pack 1 ([1] + [2])',
+          '• [3] Magnesium Bisglycinate',
+          '• [4] Methylated B-Complex'
+        ],
+        note: 'Stops afternoon fatigue & restores deep REM sleep.',
         isFeatured: true
       },
       {
@@ -1248,15 +1267,16 @@ export async function GET(request) {
         badgeBg: gcpGreenBg,
         badgeBorder: gcpGreenBorder,
         name: 'PACK 3 · TOTAL DIGESTION',
-        items: '5 Supplements · Full Program',
-        highlight: 'Complete Microbiome Defense',
-        desc: '• Adds Targeted Enteric Probiotics.\n• Perfect if you suffer from bloating, gas, lactose sensitivity, or gut discomfort.',
+        subtitle: '5 Supplements · Full Program',
+        items: [
+          '+ Includes All Pack 2 ([1]..[4])',
+          '• [5] Targeted Enteric Probiotics'
+        ],
+        note: 'Complete coverage for gut defense & lactose.',
         isFeatured: false
       }
     ];
 
-    const pkW = (p2Width - 72 - 16) / 3;
-    const pkH = 100;
     packs.forEach((pk, pIdx) => {
       const pkX = 36 + pIdx * (pkW + 8);
 
@@ -1275,14 +1295,14 @@ export async function GET(request) {
       // Top subtle header strip
       page2.drawRectangle({
         x: pkX + (pk.isFeatured ? 1.5 : 1),
-        y: y2 - 25,
+        y: y2 - 24,
         width: pkW - (pk.isFeatured ? 3 : 2),
-        height: 24,
+        height: 23,
         color: pk.isFeatured ? rgb(248 / 255, 251 / 255, 255 / 255) : rgb(250 / 255, 251 / 255, 252 / 255)
       });
 
       // GCP Semantic Badge
-      const bW = helveticaBold.widthOfTextAtSize(pk.badge, 6.0) + 10;
+      const bW = helveticaBold.widthOfTextAtSize(pk.badge, 5.8) + 10;
       page2.drawRectangle({
         x: pkX + 8,
         y: y2 - 16,
@@ -1295,7 +1315,7 @@ export async function GET(request) {
       page2.drawText(pk.badge, {
         x: pkX + 13,
         y: y2 - 13,
-        size: 6.0,
+        size: 5.8,
         font: helveticaBold,
         color: pk.badgeColor
       });
@@ -1303,39 +1323,55 @@ export async function GET(request) {
       // Title
       page2.drawText(pk.name, {
         x: pkX + 8,
-        y: y2 - 36,
-        size: 7.4,
+        y: y2 - 34,
+        size: 7.2,
         font: helveticaBold,
         color: pk.isFeatured ? googleBlue : darkSlate,
         maxWidth: pkW - 16
       });
 
       // Items subtitle
-      page2.drawText(pk.items, {
+      page2.drawText(pk.subtitle, {
         x: pkX + 8,
-        y: y2 - 47,
-        size: 6.8,
+        y: y2 - 44,
+        size: 6.4,
         font: helveticaBold,
-        color: mutedSlate
+        color: mutedSlate,
+        maxWidth: pkW - 16
       });
 
       // Divider line
       page2.drawLine({
-        start: { x: pkX + 8, y: y2 - 52 },
-        end: { x: pkX + pkW - 8, y: y2 - 52 },
+        start: { x: pkX + 8, y: y2 - 48 },
+        end: { x: pkX + pkW - 8, y: y2 - 48 },
         thickness: 0.6,
         color: gcpBorder
       });
 
-      // Description
-      page2.drawText(pk.desc, {
+      // Items list
+      let itemY = y2 - 59;
+      pk.items.forEach((it) => {
+        const isIncludes = it.startsWith('+ Includes');
+        page2.drawText(it, {
+          x: pkX + 8,
+          y: itemY,
+          size: 6.7,
+          font: isIncludes ? helveticaBold : helvetica,
+          color: isIncludes ? (pk.isFeatured ? googleBlue : darkSlate) : darkSlate,
+          maxWidth: pkW - 16
+        });
+        itemY -= 12.0;
+      });
+
+      // Note at bottom
+      page2.drawText(`Why: ${pk.note}`, {
         x: pkX + 8,
-        y: y2 - 64,
-        size: 6.8,
-        font: helvetica,
-        color: darkSlate,
+        y: y2 - pkH + 9,
+        size: 6.0,
+        font: helveticaOblique,
+        color: mutedSlate,
         maxWidth: pkW - 16,
-        lineHeight: 9.6
+        lineHeight: 8.0
       });
     });
 
@@ -1445,7 +1481,7 @@ export async function GET(request) {
       font: helveticaBold,
       color: navyPrimary
     });
-    const p2Desc = '• Have all your genetic cofactors custom-prepared into exactly 3 daily capsules by a compounding pharmacy.\n• Pros: Only 3 daily capsules, 100% Halal certified vegetable cellulose (DRcaps®), zero porcine gelatin, zero lactose excipients.\n• To order: Hand the prescription order on Page 3 to your clinic.';
+    const p2Desc = '• Have your selected pack ([1]-[2], [1]-[4], or [1]-[5]) custom-compounded into exactly 3 daily size 0 capsules (Capsule A, B, C).\n• Pros: Only 3 daily capsules, 100% vegetable cellulose (DRcaps®), lactose-free, exact micro-dosages.\n• To order: Hand the prescription order on Page 3 to your clinic.';
     page2.drawText(p2Desc, {
       x: 48 + pathwayW + 12,
       y: y2 - 47,
