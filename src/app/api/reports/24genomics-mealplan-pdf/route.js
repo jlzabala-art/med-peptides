@@ -47,58 +47,31 @@ export async function GET(request) {
     const gcpBorder = rgb(218 / 255, 220 / 255, 224 / 255);     // #dadce0 (GCP Card Border)
     const gcpPillBg = rgb(241 / 255, 243 / 255, 244 / 255);     // #f1f3f4 (GCP Chip Surface)
     const gcpPillText = rgb(60 / 255, 64 / 255, 67 / 255);      // #3c4043 (GCP Chip Label)
+    const googleBlue = rgb(26 / 255, 115 / 255, 232 / 255);      // #1a73e8 (GCP Blue)
+    const gcpGreen = rgb(19 / 255, 115 / 255, 51 / 255);        // #137333 (GCP Active Green)
+    const gcpGreenBg = rgb(230 / 255, 244 / 255, 234 / 255);    // #e6f4ea (GCP Active Green Bg)
 
     // =========================================================================
-    // COVER PAGE: EXECUTIVE LUXURY ATLAS BRAND COVER & CREDENTIALS
+    // COVER PAGE: EXECUTIVE LUXURY ATLAS BRAND COVER & CREDENTIALS (GOOGLE CLOUD UX)
     // =========================================================================
     const coverPage = pdfDoc.addPage([595.28, 841.89]); // A4 Standard
     const { width: cWidth, height: cHeight } = coverPage.getSize();
 
-    // Top Accent Strip
-    coverPage.drawRectangle({ x: 0, y: cHeight - 8, width: cWidth, height: 8, color: navyPrimary });
-    coverPage.drawRectangle({ x: 0, y: cHeight - 12, width: cWidth, height: 4, color: tealAccent });
+    // Top Accent Bar (GCP 4px Clean Status Line)
+    coverPage.drawRectangle({ x: 0, y: cHeight - 4, width: cWidth, height: 4, color: googleBlue });
 
-    let yCover = cHeight - 42;
+    let yCover = cHeight - 36;
 
-    // Header Institution
-    coverPage.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
-      x: 44,
-      y: yCover,
-      size: 8.5,
-      font: helveticaBold,
-      color: navyPrimary
-    });
-
-    const coverBadgeText = 'OFFICIAL PATIENT DOSSIER';
-    const cbW = helveticaBold.widthOfTextAtSize(coverBadgeText, 7.0) + 16;
-    coverPage.drawRectangle({
-      x: cWidth - 44 - cbW,
-      y: yCover - 4,
-      width: cbW,
-      height: 16,
-      color: rgb(240 / 255, 253 / 255, 250 / 255),
-      borderColor: tealAccent,
-      borderWidth: 1.0
-    });
-    coverPage.drawText(coverBadgeText, {
-      x: cWidth - 44 - cbW + 8,
-      y: yCover,
-      size: 7.0,
-      font: helveticaBold,
-      color: tealAccent
-    });
-
-    // Logo Embedding
+    // 1. TOP BAR: Brand Logo + Clinical Intelligence Header (GCP Style)
     const logoPath = path.join(process.cwd(), 'public/atlas-health-logo.png');
-    const logoSize = 75;
-    yCover -= (logoSize + 20);
+    const logoSize = 44;
     if (fs.existsSync(logoPath)) {
       try {
         const logoBytes = fs.readFileSync(logoPath);
         const logoImg = await pdfDoc.embedJpg(logoBytes);
         coverPage.drawImage(logoImg, {
           x: 44,
-          y: yCover,
+          y: yCover - logoSize + 8,
           width: logoSize,
           height: logoSize
         });
@@ -107,146 +80,207 @@ export async function GET(request) {
       }
     }
 
-    // Title beside logo
-    const textX = 44 + logoSize + 18;
+    // Brand Name & Service Line beside logo (NO geographic text)
+    const headerTextX = 44 + logoSize + 12;
     coverPage.drawText('ATLAS HEALTH SERVICES', {
-      x: textX,
-      y: yCover + 54,
+      x: headerTextX,
+      y: yCover - 2,
       size: 11,
       font: helveticaBold,
       color: navyPrimary
     });
-    coverPage.drawText('Precision Medicine, Metabolic Intelligence & Preventive Genomics', {
-      x: textX,
-      y: yCover + 38,
+    coverPage.drawText('Clinical Intelligence Platform · Precision Genomic Endocrinology', {
+      x: headerTextX,
+      y: yCover - 16,
       size: 7.8,
       font: helvetica,
       color: mutedSlate
     });
-    coverPage.drawText('United Arab Emirates · State of Qatar · GCC Clinical Network', {
-      x: textX,
-      y: yCover + 24,
-      size: 7.2,
-      font: helveticaOblique,
-      color: tealAccent
+
+    // Top-Right: GCP Semantic Status Badge
+    const statusBadge = 'ACTIVE · CLINICAL REPORT';
+    const sW = helveticaBold.widthOfTextAtSize(statusBadge, 6.8) + 16;
+    coverPage.drawRectangle({
+      x: cWidth - 44 - sW,
+      y: yCover - 14,
+      width: sW,
+      height: 18,
+      color: gcpGreenBg,
+      borderColor: gcpGreen,
+      borderWidth: 0.8
+    });
+    coverPage.drawText(statusBadge, {
+      x: cWidth - 44 - sW + 8,
+      y: yCover - 9,
+      size: 6.8,
+      font: helveticaBold,
+      color: gcpGreen
     });
 
-    // Divider Line
-    yCover -= 18;
+    // Clean Separator
+    yCover -= (logoSize + 6);
     coverPage.drawLine({
       start: { x: 44, y: yCover },
       end: { x: cWidth - 44, y: yCover },
-      thickness: 1.0,
+      thickness: 0.8,
       color: cardBorder
     });
 
-    // Hero Title
-    yCover -= 32;
+    // 2. HERO TITLE SECTION
+    yCover -= 26;
     coverPage.drawText('PERSONALIZED GENOMIC DOSSIER', {
       x: 44,
       y: yCover,
       size: 20,
       font: helveticaBold,
-      color: navyPrimary
+      color: darkSlate
     });
 
-    yCover -= 16;
-    coverPage.drawText('Precision Nutrition, Metabolic Optimization & Chronobiology Guidance', {
+    yCover -= 15;
+    coverPage.drawText('DNA-Guided Nutrition, Islamic Halal Dietary Principles & Precision Compounding', {
       x: 44,
       y: yCover,
-      size: 10.5,
-      font: helveticaOblique,
-      color: tealAccent
+      size: 9.5,
+      font: helvetica,
+      color: googleBlue
     });
 
-    // Patient Credentialing Box (GCP Card Style)
-    yCover -= 20;
-    const credH = 104;
+    // Metadata Chips Row (GCP Chips)
+    yCover -= 18;
+    const chips = [
+      { label: '100% Halal Verified', bg: gcpGreenBg, border: gcpGreen, text: gcpGreen },
+      { label: 'Illumina NGS Sequencing', bg: rgb(241 / 255, 243 / 255, 244 / 255), border: cardBorder, text: darkSlate },
+      { label: 'Complete 59-Page Dossier', bg: rgb(232 / 255, 240 / 255, 254 / 255), border: rgb(210 / 255, 227 / 255, 252 / 255), text: googleBlue }
+    ];
+    let chipX = 44;
+    chips.forEach(ch => {
+      const chW = helveticaBold.widthOfTextAtSize(ch.label, 6.8) + 14;
+      coverPage.drawRectangle({
+        x: chipX,
+        y: yCover - 2,
+        width: chW,
+        height: 15,
+        color: ch.bg,
+        borderColor: ch.border,
+        borderWidth: 0.8
+      });
+      coverPage.drawText(ch.label, {
+        x: chipX + 7,
+        y: yCover + 2,
+        size: 6.8,
+        font: helveticaBold,
+        color: ch.text
+      });
+      chipX += chW + 8;
+    });
+
+    // 3. RESOURCE DETAILS CARD (GCP Standard Property Grid - 4 Spacious Rows, Zero Collision)
+    yCover -= 22;
+    const cardH = 114;
     coverPage.drawRectangle({
       x: 44,
-      y: yCover - credH,
+      y: yCover - cardH,
       width: cWidth - 88,
-      height: credH,
-      color: lightBg,
+      height: cardH,
+      color: white,
       borderColor: cardBorder,
       borderWidth: 1.0
     });
 
-    // Credentialing Box Header Strip
+    // Card Header Strip
     coverPage.drawRectangle({
       x: 44,
       y: yCover - 22,
       width: cWidth - 88,
       height: 22,
-      color: rgb(241 / 255, 245 / 255, 249 / 255)
+      color: lightBg
     });
-    coverPage.drawText('PATIENT & CLINICAL SPECIMEN CREDENTIALS', {
+    coverPage.drawText('SPECIMEN & CLINICAL METADATA ATTRIBUTES', {
       x: 56,
       y: yCover - 15,
       size: 7.8,
       font: helveticaBold,
-      color: navyPrimary
+      color: darkSlate
     });
 
-    const col1X = 56;
-    const col2X = 44 + (cWidth - 88) / 2 + 10;
-    let cY = yCover - 40;
+    const c1Label = 56;
+    const c1Val = 138;
+    const c2Label = 300;
+    const c2Val = 380;
+    let rowY = yCover - 38;
 
-    // Row 1
-    coverPage.drawText('Patient Name:', { x: col1X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
-    coverPage.drawText(patientName, { x: col1X + 80, y: cY, size: 8.5, font: helveticaBold, color: darkSlate });
+    // Row 1: Patient Name & Specimen ID
+    coverPage.drawText('Patient Name:', { x: c1Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText(patientName, { x: c1Val, y: rowY, size: 8.5, font: helveticaBold, color: darkSlate });
 
-    coverPage.drawText('Specimen ID:', { x: col2X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
-    coverPage.drawText(`G000943554 / ${sampleId}`, { x: col2X + 75, y: cY, size: 8.5, font: helveticaBold, color: darkSlate });
+    coverPage.drawText('Specimen ID:', { x: c2Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText(`G000943554 / ${sampleId}`, { x: c2Val, y: rowY, size: 8.5, font: helveticaBold, color: darkSlate });
 
-    // Row 2
-    cY -= 18;
-    coverPage.drawText('Sequencing Hub:', { x: col1X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
-    coverPage.drawText('24Genetics SL · Madrid, Spain', { x: col1X + 80, y: cY, size: 8.0, font: helvetica, color: darkSlate });
+    // Row 2: Dietary Standard (Clean, Prominent Full-Width Green Banner)
+    rowY -= 18;
+    coverPage.drawText('Dietary Standard:', { x: c1Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText('100% Halal Verified Compliance · Zero Porcine · Zero Alcohol', {
+      x: c1Val,
+      y: rowY,
+      size: 7.8,
+      font: helveticaBold,
+      color: gcpGreen
+    });
 
-    coverPage.drawText('Technology:', { x: col2X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
-    coverPage.drawText('Illumina NGS Microarray Platform', { x: col2X + 75, y: cY, size: 8.0, font: helvetica, color: darkSlate });
+    // Row 3: Sequencing Lab & Technology
+    rowY -= 18;
+    coverPage.drawText('Sequencing Lab:', { x: c1Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText('24Genetics SL · Madrid, Spain', { x: c1Val, y: rowY, size: 7.8, font: helvetica, color: darkSlate });
 
-    // Row 3
-    cY -= 18;
-    coverPage.drawText('Catering Service:', { x: col1X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
-    coverPage.drawText(mealPlanPartner, { x: col1X + 80, y: cY, size: 8.0, font: helvetica, color: darkSlate });
+    coverPage.drawText('Technology:', { x: c2Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText('Illumina NGS Microarray Platform', { x: c2Val, y: rowY, size: 7.8, font: helvetica, color: darkSlate });
 
-    coverPage.drawText('Issue Date:', { x: col2X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
-    coverPage.drawText('November 2026 · Clinical Release', { x: col2X + 75, y: cY, size: 8.0, font: helvetica, color: darkSlate });
+    // Row 4: Catering Service & Issue Date
+    rowY -= 18;
+    coverPage.drawText('Catering Service:', { x: c1Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText(mealPlanPartner, { x: c1Val, y: rowY, size: 7.8, font: helvetica, color: darkSlate });
 
-    yCover -= (credH + 20);
+    coverPage.drawText('Issue Date:', { x: c2Label, y: rowY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText('November 2026 · Clinical Release', { x: c2Val, y: rowY, size: 7.8, font: helvetica, color: darkSlate });
 
-    // Executive Roadmap Header
-    coverPage.drawText('DOSSIER STRUCTURE & EXECUTIVE ROADMAP', {
+    yCover -= (cardH + 18);
+
+    // 4. DOSSIER ARCHITECTURE & SECTION DIRECTORY (GCP Services Grid)
+    coverPage.drawText('DOSSIER ARCHITECTURE & SECTION DIRECTORY', {
       x: 44,
       y: yCover,
-      size: 10,
+      size: 9.5,
       font: helveticaBold,
-      color: navyPrimary
+      color: darkSlate
     });
 
     yCover -= 12;
     const coverRoadmap = [
       {
-        part: 'PART I · PAGE 2',
-        title: 'Actionable Meal Plan Selection Guide & Chronobiology Schedule',
-        desc: 'Plain-English translation of your genetic markers into practical daily catering choices: Green (Always Order), Amber (In Moderation), and Red (Exclude). Includes the Golden Plate Sequencing rule and your synchronized 24-hour nutrition & supplement timeline.'
+        badge: 'PART I · PAGE 2',
+        badgeColor: googleBlue,
+        badgeBg: rgb(232 / 255, 240 / 255, 254 / 255),
+        title: 'Actionable Halal Meal Plan & 24-Hour Chronobiology Routine',
+        desc: 'Translates DNA findings into actionable dietary choices compliant with Islamic dietary laws (100% Halal meats, zero alcohol marinades, zero porcine additives). Includes meal tray sequencing and synchronized nutrient timing.'
       },
       {
-        part: 'PART II · PAGE 3',
-        title: 'Personalized Supplement Guide & Shopping Pathways',
-        desc: 'Targeted molecular cofactors matched to your cellular needs (Active Folate 5-MTHF, Vitamin D3/K2, Probiotics, Magnesium Bisglycinate). Presents two neutral purchasing options: Local Doha retail pharmacies (Option A) or Official 3-Capsule compounded formulation (Option B).'
+        badge: 'PART II · PAGE 3',
+        badgeColor: gcpGreen,
+        badgeBg: gcpGreenBg,
+        title: 'Targeted Supplement Protocols & Shopping Pathways',
+        desc: 'Cellular cofactors (Active Folate 5-MTHF, D3/K2, Probiotics, Magnesium Bisglycinate). Formulated exclusively with 100% vegetable DRcaps® (Halal certified, zero porcine gelatin). Neutral comparison between retail pharmacies and compounding.'
       },
       {
-        part: 'PART III · PAGES 4–59',
-        title: 'Original 24Genetics Laboratory Sequencing Report (Complete 55 Pages)',
-        desc: 'The complete, unedited genomic analysis issued by 24Genetics laboratory. Includes full technical polymorphic breakdowns across Nutrition, Vitamins, Minerals, Metabolic Profile, and Food Sensitivities with quick-navigation directory index.'
+        badge: 'PART III · PAGES 4–59',
+        badgeColor: mutedSlate,
+        badgeBg: rgb(241 / 255, 243 / 255, 244 / 255),
+        title: 'Complete 24Genetics Laboratory Sequencing Report (55 Pages)',
+        desc: 'The official biometric laboratory analysis across Nutrition, Vitamins, Minerals, Metabolic Profile, and Food Sensitivities (Lactase Non-Persistence), complete with structured quick-jump directory index.'
       }
     ];
 
     coverRoadmap.forEach((sec) => {
-      const sH = 54;
+      const sH = 52;
       coverPage.drawRectangle({
         x: 44,
         y: yCover - sH,
@@ -257,58 +291,67 @@ export async function GET(request) {
         borderWidth: 1.0
       });
 
-      // Part Badge
-      const pW = helveticaBold.widthOfTextAtSize(sec.part, 6.5) + 12;
+      // Badge
+      const bW = helveticaBold.widthOfTextAtSize(sec.badge, 6.5) + 12;
       coverPage.drawRectangle({
         x: 54,
         y: yCover - 16,
-        width: pW,
+        width: bW,
         height: 12,
-        color: rgb(241 / 255, 243 / 255, 244 / 255),
+        color: sec.badgeBg,
         borderColor: cardBorder,
         borderWidth: 0.8
       });
-      coverPage.drawText(sec.part, {
+      coverPage.drawText(sec.badge, {
         x: 60,
         y: yCover - 13,
         size: 6.5,
         font: helveticaBold,
-        color: rgb(60 / 255, 64 / 255, 67 / 255)
+        color: sec.badgeColor
       });
 
       coverPage.drawText(sec.title, {
-        x: 60 + pW + 6,
+        x: 60 + bW + 6,
         y: yCover - 14,
         size: 7.8,
         font: helveticaBold,
-        color: navyPrimary,
-        maxWidth: cWidth - 88 - pW - 32
+        color: darkSlate,
+        maxWidth: cWidth - 88 - bW - 32
       });
 
       coverPage.drawText(sec.desc, {
         x: 54,
-        y: yCover - 30,
+        y: yCover - 29,
         size: 7.0,
         font: helvetica,
-        color: darkSlate,
+        color: mutedSlate,
         maxWidth: cWidth - 108,
         lineHeight: 9.8
       });
 
-      yCover -= (sH + 8);
+      yCover -= (sH + 7);
     });
 
-    // Digital Interactive Portal Card with QR Code
-    yCover -= 6;
-    const portalH = 58;
+    // 5. INTERACTIVE DIGITAL PORTAL ACTION BANNER (GCP Action Banner)
+    yCover -= 4;
+    const portalH = 56;
     coverPage.drawRectangle({
       x: 44,
       y: yCover - portalH,
       width: cWidth - 88,
       height: portalH,
-      color: rgb(240 / 255, 253 / 255, 250 / 255),
-      borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
-      borderWidth: 1.2
+      color: rgb(232 / 255, 240 / 255, 254 / 255), // #e8f0fe
+      borderColor: rgb(210 / 255, 227 / 255, 252 / 255), // #d2e3fc
+      borderWidth: 1.0
+    });
+
+    // Left accent vertical bar
+    coverPage.drawRectangle({
+      x: 44,
+      y: yCover - portalH,
+      width: 4,
+      height: portalH,
+      color: googleBlue
     });
 
     // Generate QR Code for Cover
@@ -318,12 +361,12 @@ export async function GET(request) {
         type: 'png',
         margin: 1,
         width: 150,
-        color: { dark: '#003666', light: '#ffffff' }
+        color: { dark: '#1a73e8', light: '#ffffff' }
       });
       const coverQrImg = await pdfDoc.embedPng(coverQrBuffer);
       coverPage.drawImage(coverQrImg, {
-        x: 54,
-        y: yCover - portalH + 5,
+        x: 56,
+        y: yCover - portalH + 4,
         width: 48,
         height: 48
       });
@@ -331,24 +374,24 @@ export async function GET(request) {
       console.warn('Cover QR code skipped:', e.message);
     }
 
-    coverPage.drawText('ACCESS YOUR DYNAMIC INTERACTIVE DIGITAL PORTAL', {
-      x: 114,
-      y: yCover - 18,
+    coverPage.drawText('INTERACTIVE DIGITAL GENOMIC PORTAL', {
+      x: 116,
+      y: yCover - 17,
       size: 8.5,
       font: helveticaBold,
-      color: navyPrimary
+      color: googleBlue
     });
-    coverPage.drawText('Scan the QR code with your smartphone camera to access your interactive genomic dashboard,\nexplore food filters, view dynamic dosage calculators, and share directly with your nutritionist.', {
-      x: 114,
-      y: yCover - 32,
+    coverPage.drawText('Scan the QR code with your smartphone camera to access your interactive digital dashboard,\nexplore dynamic Halal meal filters, review dosage schedules, and share with your healthcare team.', {
+      x: 116,
+      y: yCover - 31,
       size: 7.0,
       font: helvetica,
       color: darkSlate,
-      maxWidth: cWidth - 88 - 80,
+      maxWidth: cWidth - 88 - 82,
       lineHeight: 9.8
     });
 
-    // Confidentiality Footer
+    // 6. SYSTEM FOOTER
     coverPage.drawText(`CONFIDENTIAL MEDICAL & GENOMIC REPORT · PREPARED EXCLUSIVELY FOR ${patientName.toUpperCase()} · ATLAS HEALTH SERVICES`, {
       x: 44,
       y: 18,
@@ -541,9 +584,9 @@ export async function GET(request) {
     y1 -= (2 * boxH + 10 + 16);
 
     // -------------------------------------------------------------------------
-    // SECTION 2: MEAL PLAN TRAFFIC LIGHT (TRAFFIC LIGHT FOR CATERING)
+    // SECTION 2: MEAL PLAN TRAFFIC LIGHT (100% HALAL & DNA OPTIMIZED CATERING)
     // -------------------------------------------------------------------------
-    page1.drawText('2. MEAL PLAN SELECTION GUIDE (TRAFFIC LIGHT FOR YOUR CATERING MENU)', {
+    page1.drawText('2. MEAL PLAN SELECTION GUIDE (100% HALAL CATERING · TRAFFIC LIGHT FOR YOUR DAILY MENU)', {
       x: 36,
       y: y1,
       size: 11.0,
@@ -554,17 +597,17 @@ export async function GET(request) {
     y1 -= 8;
     const trafficCols = [
       {
-        header: '[GREEN] ALWAYS ORDER (FAVORITES)',
+        header: '[GREEN] ALWAYS ORDER (100% HALAL & DNA FAVS)',
         color: greenText,
         bgColor: greenBg,
         borderColor: greenBorder,
         items: [
-          '• Wild salmon, sea bass, local hamour',
-          '• Grass-fed beef, grilled chicken breast',
+          '• 100% Halal grass-fed beef & grilled chicken',
+          '• Fresh wild salmon, sea bass, local hamour',
           '• Avocados, extra virgin olive oil, walnuts',
           '• Dark leafy greens (spinach, arugula, kale)',
-          '• Quinoa, jasmine rice, sweet potatoes',
-          '• Almond milk, coconut yogurt (zero dairy)'
+          '• Steamed quinoa, jasmine rice, sweet potatoes',
+          '• Almond milk & coconut yogurt (100% dairy-free)'
         ]
       },
       {
@@ -574,25 +617,25 @@ export async function GET(request) {
         borderColor: amberBorder,
         items: [
           '• Net Carbs: Keep under 40g per meal tray',
-          '• Soaked legumes (lentils, chickpeas)',
+          '• Soaked legumes & hummus (lentils, chickpeas)',
           '• Low-glycemic fruits (berries, green apples)',
-          '• Red meat dishes (cap at 2x per week)',
-          '• Caffeinated coffee (strictly before noon)',
-          '• Roasted nuts with salt (watch sodium)'
+          '• Halal red meat dishes (cap at 2x per week)',
+          '• Caffeinated Arabic/espresso coffee (before noon)',
+          '• Raw or dry-roasted nuts (watch added sodium)'
         ]
       },
       {
-        header: '[RED] EXCLUDE FROM YOUR CATERING',
+        header: '[RED] EXCLUDE (HARAM & DNA TRIGGERS)',
         color: redText,
         bgColor: redBg,
         borderColor: redBorder,
         items: [
-          '• Whole cow milk, labneh, heavy creams',
-          '• Samosas & deep-fried catering sides',
-          '• Industrial seed oils (canola, sunflower)',
-          '• White flour baguettes & sweet pastries',
-          '• Commercial sodas & bottled fruit juices',
-          '• Late catering meals eaten past 8:30 PM'
+          '• Alcohol, cooking wines & ethyl-based sauces',
+          '• Pork, bacon, lard & porcine gelatin (Haram)',
+          '• Non-Halal certified meats or unverified poultry',
+          '• Whole cow milk, labneh & heavy creams (lactose)',
+          '• Deep-fried samosas & industrial seed oils',
+          '• Sweet pastries, sodas & late meals past 8:30 PM'
         ]
       }
     ];
@@ -1304,7 +1347,7 @@ export async function GET(request) {
       font: helveticaBold,
       color: navyPrimary
     });
-    const p2Desc = '• Have all your genetic cofactors custom-prepared into exactly 3 daily capsules by a compounding pharmacy.\n• Pros: Only 3 capsules/day, zero synthetic binders, zero lactose excipients, exact micro-dosages.\n• To order: Hand the prescription order on Page 3 to your clinic.';
+    const p2Desc = '• Have all your genetic cofactors custom-prepared into exactly 3 daily capsules by a compounding pharmacy.\n• Pros: Only 3 daily capsules, 100% Halal certified vegetable cellulose (DRcaps®), zero porcine gelatin, zero lactose excipients.\n• To order: Hand the prescription order on Page 3 to your clinic.';
     page2.drawText(p2Desc, {
       x: 48 + pathwayW + 12,
       y: y2 - 47,
