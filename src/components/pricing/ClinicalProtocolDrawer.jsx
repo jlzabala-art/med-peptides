@@ -198,7 +198,7 @@ export default function ClinicalProtocolDrawer({
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
               <Droplets size={16} color="#0284c7" />
               <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, color: '#0369a1' }}>
-                Reconstitution & Cold Chain Handling
+                Reconstitution &amp; Storage Handling
               </h4>
             </div>
             <div style={{ fontSize: '0.78rem', color: '#0c4a6e', lineHeight: 1.5 }}>

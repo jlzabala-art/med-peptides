@@ -250,7 +250,7 @@ export default function PeptidePricePdfPreviewModal({
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '7.5pt', color: '#64748b' }}>
               <span>LOGISTICS:</span>
-              <span style={{ fontWeight: 600, color: '#475569' }}>UAE &amp; EU Cold-Chain</span>
+              <span style={{ fontWeight: 600, color: '#475569' }}>UAE &amp; EU Express Dispatch</span>
             </div>
           </div>
         </div>

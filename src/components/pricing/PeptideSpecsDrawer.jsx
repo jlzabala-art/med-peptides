@@ -422,7 +422,7 @@ export default function PeptideSpecsDrawer({
               gap: '6px'
             }}>
               <Droplets size={14} color="#0284c7" />
-              <span>Clinical Reconstitution & Cold-Chain Directive</span>
+              <span>Clinical Reconstitution &amp; Storage Directive</span>
             </div>
 
             <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.80rem', color: '#3c4043', lineHeight: 1.6 }}>

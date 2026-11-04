@@ -765,7 +765,7 @@ export default function PatientDnaPortalClient({
                     <strong style={{ fontSize: '1.0rem', color: '#0f172a' }}>Option A: Local Doha Pharmacies (OTC Bottles)</strong>
                   </div>
                   <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, margin: '0 0 12px 0' }}>
-                    Buy commercial bottles at retail pharmacies in Qatar (we provide vetted brands like Solgar, Thorne, and Now Foods). You take 4 to 6 pills daily from multiple separate containers.
+                    Buy commercial pharmaceutical-grade bottles at local pharmacies. You take 4 to 6 pills daily from multiple separate containers.
                   </p>
                   <button
                     onClick={() => setActiveSection('commercial')}
@@ -780,7 +780,7 @@ export default function PatientDnaPortalClient({
                       cursor: 'pointer'
                     }}
                   >
-                    View Local Pharmacy Brand List →
+                    View Active Chemical Forms Guide →
                   </button>
                 </div>
 
@@ -1205,10 +1205,10 @@ export default function PatientDnaPortalClient({
 
                     <div>
                       <span style={{ fontWeight: 700, color: '#003666', display: 'block', marginBottom: '2px' }}>
-                        🏬 Qatar Reference Brands:
+                        ✓ Quality Standard:
                       </span>
                       <div style={{ color: '#0f172a', fontWeight: 650 }}>
-                        {supp.localBrandsEn}
+                        Certified Pharmaceutical Grade (cGMP)
                       </div>
                     </div>
                   </div>

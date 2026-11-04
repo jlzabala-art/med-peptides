@@ -810,7 +810,7 @@ export async function GET(request) {
     // Render the 5 Supplements from COMMERCIAL_LOCAL_SUPPLEMENTS
     y2 -= 10;
     COMMERCIAL_LOCAL_SUPPLEMENTS.forEach((supp, idx) => {
-      const cardH = 88;
+      const cardH = 72;
       y2 -= cardH;
       const meta = STANDARDIZED_CARD_TITLES[idx] || {
         title: supp.nutrientEn,
@@ -910,14 +910,14 @@ export async function GET(request) {
       // Line 1: Best Form
       page2.drawText('• Best Active Form:', {
         x: labelColX,
-        y: y2 + 55,
+        y: y2 + 40,
         size: 7.2,
         font: helveticaBold,
         color: darkSlate
       });
       page2.drawText(supp.chemicalFormEn, {
         x: valueColX,
-        y: y2 + 55,
+        y: y2 + 40,
         size: 7.2,
         font: helveticaBold,
         color: tealAccent,
@@ -927,14 +927,14 @@ export async function GET(request) {
       // Line 2: What to Avoid
       page2.drawText('• Strictly Avoid:', {
         x: labelColX,
-        y: y2 + 40,
+        y: y2 + 26,
         size: 7.2,
         font: helveticaBold,
         color: alertRed
       });
       page2.drawText(supp.avoidEn, {
         x: valueColX,
-        y: y2 + 40,
+        y: y2 + 26,
         size: 7.0,
         font: helvetica,
         color: darkSlate,
@@ -944,33 +944,16 @@ export async function GET(request) {
       // Line 3: Posology / Timing
       page2.drawText('• When & How to Take:', {
         x: labelColX,
-        y: y2 + 25,
+        y: y2 + 12,
         size: 7.2,
         font: helveticaBold,
         color: mutedSlate
       });
       page2.drawText(supp.timingEn, {
         x: valueColX,
-        y: y2 + 25,
+        y: y2 + 12,
         size: 7.0,
         font: helvetica,
-        color: darkSlate,
-        maxWidth: valMaxW
-      });
-
-      // Line 4: Suggested Retail Brands
-      page2.drawText('• Suggested Brands:', {
-        x: labelColX,
-        y: y2 + 10,
-        size: 7.2,
-        font: helveticaBold,
-        color: navyPrimary
-      });
-      page2.drawText(supp.localBrandsEn, {
-        x: valueColX,
-        y: y2 + 10,
-        size: 7.0,
-        font: helveticaBold,
         color: darkSlate,
         maxWidth: valMaxW
       });
@@ -1028,7 +1011,7 @@ export async function GET(request) {
       font: helveticaBold,
       color: navyPrimary
     });
-    page2.drawText('Ensure all OTC purchases in Qatar pharmacies are verified brands (Thorne, Solgar, Now Foods). Do not substitute active L-5-MTHF with synthetic folic acid.', {
+    page2.drawText('Ensure all OTC purchases are verified cGMP pharmaceutical-grade formulations. Strictly avoid substituting active L-5-MTHF with synthetic folic acid.', {
       x: 46,
       y: y2 + 8,
       size: 5.8,

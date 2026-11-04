@@ -73,7 +73,7 @@ const SUGGESTED_INQUIRIES = [
     icon: ThermometerSnowflake,
     iconColor: '#0284c7',
     iconBg: '#f0f9ff',
-    badge: 'Cold-Chain Rules',
+    badge: 'Storage & Stability',
     title: 'Storage & Refrigeration Stability',
     subtitle: 'Lyophilized powder vs reconstituted liquid stability and half-life',
     prompt: 'What are the exact clinical storage, temperature limits, and half-life parameters for reconstituted lyophilized peptide vials?'
@@ -123,9 +123,9 @@ const PREBUILT_KNOWLEDGE = {
   - Non-incretin neuro-endocrine satiety signaling via area postrema calcitonin receptors. Delays gastric emptying without triggering incretin exhaustion.
 • **Stacking Protocol (CagriSema Standard):** Administered once weekly SQ at opposite injection sites to eliminate nausea spikes while achieving synergistic adipocyte reduction.`,
 
-  stability: `**Lyophilized Peptide Stability & Cold-Chain Protocol:**
+  stability: `**Lyophilized Peptide Stability & Storage Protocol:**
 • **Lyophilized (Unopened Powder):** Stable at 2°C – 8°C for up to 24 months. Stable at room temperature (20°C – 25°C) for up to 90 days during shipping without bioactivity loss.
-• **Reconstituted Solution:** Must be compounded strictly with Bacteriostatic 0.9% Benzyl Alcohol Water. Must remain at 2°C – 8°C at all times. Do not freeze once reconstituted (ice crystals shear delicate secondary peptide bonds).
+• **Reconstituted Solution:** Must be compounded strictly with Bacteriostatic 0.9% Benzyl Alcohol Water. Must remain refrigerated at 2°C – 8°C at all times. Do not freeze once reconstituted (ice crystals shear delicate secondary peptide bonds).
 • **Light & Agitation Sensitive:** Protect from direct sunlight/UV exposure. Never vigorously shake reconstituted vials; gently roll between palms to solubilize.`
 };
 
@@ -174,7 +174,7 @@ export default function AtlasAiCopilotDrawer({
       } else if (qLower.includes('stability') || qLower.includes('cold') || qLower.includes('chain') || qLower.includes('storage') || qLower.includes('refrigerat')) {
         replyText = PREBUILT_KNOWLEDGE.stability;
       } else {
-        replyText = `### Atlas Clinical Pharmacopeia Guidance\n\nFor **${query}**, the current European and US compounding standard specifies **HPLC-verified ≥99.0%** pure lyophilized peptides packed in sterile borosilicate glass.\n\n• **Solubilization:** Reconstitute strictly with 0.9% Benzyl Alcohol USP Bacteriostatic Water under laminar flow or aseptic conditions.\n• **Cold-Chain:** Maintain refrigerated at 2°C – 8°C. Protect from direct ultraviolet sunlight.\n• **Titration:** All clinical protocols require conservative upward micro-dosing titration with dedicated physician oversight.`;
+        replyText = `### Atlas Clinical Pharmacopeia Guidance\n\nFor **${query}**, the current European and US compounding standard specifies **HPLC-verified ≥99.0%** pure lyophilized peptides packed in sterile borosilicate glass.\n\n• **Solubilization:** Reconstitute strictly with 0.9% Benzyl Alcohol USP Bacteriostatic Water under laminar flow or aseptic conditions.\n• **Reconstituted Storage:** Maintain refrigerated at 2°C – 8°C. Protect from direct ultraviolet sunlight.\n• **Titration:** All clinical protocols require conservative upward micro-dosing titration with dedicated physician oversight.`;
       }
 
       setMessages(prev => [...prev, { role: 'assistant', text: replyText }]);
