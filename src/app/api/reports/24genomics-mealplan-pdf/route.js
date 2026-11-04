@@ -1432,7 +1432,7 @@ export async function GET(request) {
       font: helveticaBold,
       color: navyPrimary
     });
-    const p1Desc = '• Buy 2 to 5 separate bottles at retail pharmacies in Qatar (Brands: Solgar, Thorne, Now Foods).\n• Pros: Immediate local purchase at neighborhood pharmacy.\n• Cons: Taking 4–6 pills from multiple bottles with non-customized generic doses.';
+    const p1Desc = '• Buy 2 to 5 separate bottles at retail pharmacies in Qatar (Commercial OTC Bottles).\n• Pros: Immediate local purchase at neighborhood pharmacy.\n• Cons: Taking 4–6 pills from multiple bottles with non-customized generic doses.';
     page2.drawText(p1Desc, {
       x: 48,
       y: y2 - 47,

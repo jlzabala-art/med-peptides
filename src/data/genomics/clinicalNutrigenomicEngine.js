@@ -468,8 +468,8 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
     timingEn: 'Dose 2 (Breakfast): With breakfast containing healthy dietary fats (eggs, avocado, olive oil)',
     timingEs: 'Dosis 2 (Desayuno): Con desayuno rico en grasas saludables (aceite de oliva, aguacate, huevos)',
     targetedGenes: 'VDR FokI (rs2228570), CYP2R1, GC (DBP)',
-    localBrandsEn: 'Now Foods D3 & K2 Liposomal, Carlson Labs Solar D Gems, Thorne D/K2 Liquid Drops',
-    localBrandsEs: 'Now Foods D3 & K2 Liposomal, Carlson Labs Solar D Gems, Thorne D/K2 Gotas',
+    localBrandsEn: 'Clinical-Grade Bioavailable Formulations (HPLC ≥99% Tested)',
+    localBrandsEs: 'Formulaciones Clínicas de Alta Biodisponibilidad (Pureza HPLC ≥99%)',
     availabilityQatar: 'Available in major Doha wellness centers, hospital pharmacies & health stores'
   },
   {
@@ -492,8 +492,8 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
     timingEn: 'Dose 2 (Breakfast): Morning with your breakfast',
     timingEs: 'Dosis 2 (Desayuno): Por la mañana con tu desayuno',
     targetedGenes: 'MTHFR C677T (rs1801133 TT), MTR, MTRR',
-    localBrandsEn: 'Thorne 5-MTHF 1mg, Solgar Folate (as Metafolin 800mcg), Pure Encapsulations Folate 1,000',
-    localBrandsEs: 'Thorne 5-MTHF 1mg, Solgar Folate (Metafolin 800mcg), Pure Encapsulations Folate 1,000',
+    localBrandsEn: 'Pure L-5-MTHF Active Folate (Third-Party Tested)',
+    localBrandsEs: 'L-5-MTHF Puro Activo (Certificado por Terceros)',
     availabilityQatar: 'Widely available in Doha (Boots, Wellcare, Kulud Pharmacies) and GCC distributors'
   },
   {
@@ -516,8 +516,8 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
     timingEn: 'Dose 3 (Bedtime): Take 2 capsules 30–60 minutes before bed with room-temp water',
     timingEs: 'Dosis 3 (Antes de Dormir): Tomar 2 cápsulas 30–60 minutos antes de acostarse con agua',
     targetedGenes: 'COMT (rs4680), TRPM6, SLC41A1',
-    localBrandsEn: 'Pure Encapsulations Magnesium Glycinate, Doctor’s Best High Absorption Magnesium, Thorne Magnesium Bisglycinate',
-    localBrandsEs: 'Pure Encapsulations Magnesium Glycinate, Doctor’s Best High Absorption Magnesium, Thorne Magnesium',
+    localBrandsEn: 'Pure Chelated Bisglycinate (Clinical Grade, Non-Buffered)',
+    localBrandsEs: 'Bisglicinato Quelado Puro (Grado Clínico, No Tamponado)',
     availabilityQatar: 'Standard inventory across leading pharmacies in Qatar & UAE'
   },
   {
@@ -540,8 +540,8 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
     timingEn: 'Dose 2 (Breakfast): Morning with breakfast (enhances daytime alertness)',
     timingEs: 'Dosis 2 (Desayuno): Por la mañana con alimento (optimiza vigilia)',
     targetedGenes: 'MTRR (rs1801394), TCN2, CBS',
-    localBrandsEn: 'Jarrow Formulas Methyl B-Right, Life Extension BioActive Complete B-Complex, Thorne Basic B Complex',
-    localBrandsEs: 'Jarrow Formulas Methyl B-Right, Life Extension BioActive B-Complex, Thorne Basic B',
+    localBrandsEn: 'Active Coenzymated B-Complex (Methylcobalamin + P-5-P)',
+    localBrandsEs: 'Complejo B Coenzimado Activo (Metilcobalamina + P-5-P)',
     availabilityQatar: 'Available OTC in Qatar pharmacy chains (Wellcare, Boots)'
   },
   {
@@ -564,8 +564,8 @@ export const COMMERCIAL_LOCAL_SUPPLEMENTS = [
     timingEn: 'Dose 1 (Upon Waking): Fasting in morning upon waking with room-temperature water',
     timingEs: 'Dosis 1 (Al Despertar): En ayunas al despertar con agua a temperatura ambiente',
     targetedGenes: 'MCM6 / LCT (rs4988235 Lactase deficiency), FUT2 Non-Secretor',
-    localBrandsEn: 'Culturelle Digestive Daily Probiotic, Seed DS-01 Daily Synbiotic, Renew Life Extra Care',
-    localBrandsEs: 'Culturelle Digestive Probiotic, Seed DS-01 Synbiotic, Renew Life Probiotics',
+    localBrandsEn: 'Clinical Synbiotic DRcaps (LGG + BB-12 Acid-Resistant)',
+    localBrandsEs: 'Sinbiótico Clínico DRcaps (LGG + BB-12 Gastrorresistente)',
     availabilityQatar: 'Available across premium wellness pharmacies in Doha & online delivery (can be omitted if following a 100% strict dairy-free diet)'
   }
 ];

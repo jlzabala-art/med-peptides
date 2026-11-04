@@ -281,7 +281,7 @@ export async function POST(req) {
   4. Pillar 4 (Immunity, VDR & Sleep Architecture): VDR FokI, COMT Val158Met, CYP1A2. Vitamin D3 (2,000 IU default) + K2 MK-7 (100 mcg) co-administered with breakfast dietary fats. Evening: TRAACS® Magnesium Bisglycinate (150 mg elemental Mg across 2 size 00 capsules) + Suntheanine® L-Theanine (200 mg) for GABAergic sleep architecture. Caffeine cutoff strictly before 14:00.
 
 - Dual-Track Prescription Model:
-  * Pathway 1 (Local OTC Supplements in Doha): Brands available at Boots, Wellcare, Kulud, Aster (Thorne 5-MTHF, Solgar Metafolin, Now Foods D3/K2, Pure Encapsulations Magnesium Glycinate, Culturelle).
+  * Pathway 1 (Local OTC Supplements in Doha): Third-party tested clinical-grade bottles available at Boots, Wellcare, Kulud, Aster.
   * Pathway 2 (Master Compounding Pharmacy Order): Tailor-made 3-capsule chronobiological regimen (Cap A waking, Cap B breakfast, Cap C bedtime 2 caps). 100% lactose-free in acid-resistant DRcaps® and vegetable HPMC.
 ${pubmedContextText}`;
 

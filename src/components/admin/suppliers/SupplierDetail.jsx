@@ -7,10 +7,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { UniversalForm } from '../../shared/UniversalFormDrawer';
 import MetricCard from '../../ui/MetricCard';
 import { collection, collectionGroup, query, where, getDocs, limit } from 'firebase/firestore';
+// eslint-disable-next-line no-restricted-imports
 import { db } from '../../../firebase';
 import { resolveVariantPrice } from '../../../utils/resolvePrice';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import WarehouseComparisonTable from './WarehouseComparisonTable';
+import LotuslandProcurementLedger from './LotuslandProcurementLedger';
+import { exportLotuslandProcurementXlsx } from '../../../utils/exportLotuslandProcurementXlsx';
 
 function SupplierDocumentsTab({ supplierName, supplierId }) {
   const [docsList, setDocsList] = useState([]);
@@ -468,6 +471,8 @@ export default function SupplierDetail({ w, onClose, onUpdate, initialVariantId 
 
   if (!w) return null;
 
+  const isLotusland = w.id === 'supplier-lotusland' || w.id === 'OLlBbQjgrj6tY7GmM2Jo' || (w.name || w.companyName || '').toLowerCase().includes('lotus');
+
   // Derive clean display values — never fake defaults
   const type           = w.type || (w.isZohoMaster ? 'Manufacturer' : 'Distributor');
   const rating         = w.rating ?? null;             // null = not configured
@@ -591,6 +596,37 @@ export default function SupplierDetail({ w, onClose, onUpdate, initialVariantId 
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          {isLotusland && (
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  const file = exportLotuslandProcurementXlsx();
+                  toast.success(`Exported: ${file}`, { icon: '📊' });
+                } catch (e) {
+                  console.error(e);
+                  toast.error('Failed to export API audit');
+                }
+              }}
+              className="gcp-btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                backgroundColor: '#f0fdf4',
+                color: '#16a34a',
+                borderColor: '#bbf7d0',
+                padding: '5px 10px',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+              title="Export Lotusland API Historical Audit (.xlsx)"
+            >
+              <Download size={14} /> Export API Audit (.xlsx)
+            </button>
+          )}
           <button
             type="button"
             onClick={() => {
@@ -809,6 +845,11 @@ export default function SupplierDetail({ w, onClose, onUpdate, initialVariantId 
                 </div>
               )
             },
+            ...(isLotusland ? [{
+              id: 'api-procurement',
+              label: 'API Procurement Ledger (10 Invoices)',
+              content: <LotuslandProcurementLedger />
+            }] : []),
             ...(w.hasMultiWarehouse || w.id === 'supplier-lotusland' || (Array.isArray(w.warehouses) && w.warehouses.length > 0) ? [{
               id: 'warehouses',
               label: 'Warehouses (Compare Hubs)',

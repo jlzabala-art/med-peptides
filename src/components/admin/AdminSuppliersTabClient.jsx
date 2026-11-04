@@ -24,6 +24,7 @@ import { DataTableSkeleton } from '../ui';
 import { useCategories } from '../../hooks/admin/useCategories';
 import MobileSupplierCard from '../shared/mobile/MobileSupplierCard';
 import MobileActionSheet from '../ui/MobileActionSheet';
+import { exportLotuslandProcurementXlsx } from '../../utils/exportLotuslandProcurementXlsx';
 
 export default function AdminSuppliersTabClient({ initialData }) {
   const { openDrawer } = useDrawer();
@@ -149,6 +150,36 @@ export default function AdminSuppliersTabClient({ initialData }) {
         kpis={<SupplierKPIs kpiStats={serverKpis} isLoading={kpisLoading} activeKpiFilter={activeKpiFilter} setActiveKpiFilter={setActiveKpiFilter} />}
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  const file = exportLotuslandProcurementXlsx();
+                  toast.success(`Exported: ${file}`, { icon: '📊' });
+                } catch (e) {
+                  console.error(e);
+                  toast.error('Failed to export API audit');
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                height: '36px',
+                padding: '0 14px',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.8125rem',
+                backgroundColor: '#f0fdf4',
+                color: '#16a34a',
+                border: '1px solid #bbf7d0',
+                cursor: 'pointer'
+              }}
+              title="Export Lotusland Historical API Procurement Report (.xlsx)"
+            >
+              <Download size={15} />
+              <span>Lotusland API Report (.xlsx)</span>
+            </button>
             <AIQuickActionButton
               label="AI Scan Price List"
               onClick={() => openDrawer('import-price-list')}

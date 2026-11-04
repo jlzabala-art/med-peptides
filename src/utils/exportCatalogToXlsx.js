@@ -39,7 +39,7 @@ export function exportCatalogToXlsx({
     ['Total Variants / Presentations', items.length],
     ['', ''],
     ['COMMERCIAL & LOGISTICS NOTICE', ''],
-    ['1. Cold-Chain Compliance', 'All lyophilized peptides and sterile bio-stimulators are shipped with validated temperature indicators.'],
+    ['1. Quality & Lyophilization Compliance', 'All lyophilized bioactive peptides are stable at ambient room temperature in sterile cakes with certified HPLC CoAs.'],
     ['2. Lead Times', 'EU Hub stock: 2-4 business days. Transatlantic / UK Hub: 3-5 business days.'],
     ['3. Payment & Settlement', 'Net terms or upfront payment depending on partner agreement.'],
     ['4. Order Desk Contact', 'orders@atlas-solutions.com | +34 687 168 464'],

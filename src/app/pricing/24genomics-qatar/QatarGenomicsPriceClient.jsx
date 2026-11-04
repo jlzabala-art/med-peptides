@@ -381,7 +381,7 @@ export default function QatarGenomicsPriceClient() {
     {
       category: 'supplements',
       q: 'What is the difference between buying OTC bottles in Doha vs Compounded Capsules?',
-      a: 'We offer two flexible purchase options:\n\n• Option A · Local Doha Pharmacies (OTC Bottles): Buy retail brands at Boots, Wellcare, Kulud, or Aster (e.g. Solgar, Thorne, Now Foods). Immediate access, but you take 4–6 pills daily from multiple separate bottles.\n• Option B · Custom "All-in-One" Compounding (Recommended): Our partner pharmacy combines all pure active ingredients into just 3 synchronized daily capsules labeled with your name (1 with breakfast, 2 at bedtime). Zero filler bottles, 100% lactose-free.'
+      a: 'We offer two flexible purchase options:\n\n• Option A · Local Doha Pharmacies (OTC Bottles): Buy generic high-purity bottles at Boots, Wellcare, Kulud, or Aster. Immediate access, but you take 4–6 pills daily from multiple separate bottles.\n• Option B · Custom "All-in-One" Compounding (Recommended): Our partner pharmacy combines all pure active ingredients into just 3 synchronized daily capsules labeled with your name (1 with breakfast, 2 at bedtime). Zero filler bottles, 100% lactose-free.'
     },
     {
       category: 'supplements',
@@ -496,7 +496,7 @@ export default function QatarGenomicsPriceClient() {
       } else if (qLower.includes('otc') || qLower.includes('supplement') || qLower.includes('pharmacy') || qLower.includes('brand')) {
         matched = {
           q: textToProcess,
-          a: `Pathway 1 provides genetically matched OTC supplement guidance for Doha pharmacies (Boots, Wellcare, Kulud, Aster):\n• Active Folate: Thorne 5-MTHF or Solgar Metafolin 800mcg (avoid synthetic folic acid)\n• Vitamin D3+K2: Now Foods Liposomal D3/K2 (take with breakfast fats)\n• Magnesium: Pure Encapsulations Magnesium Glycinate (take 2 caps at bedtime)\n• B-Complex: Jarrow Formulas Methyl B-Right\n• Probiotics: Culturelle Digestive Daily (take upon waking).`
+          a: `Pathway 1 provides genetically matched OTC supplement guidance for Doha pharmacies (Boots, Wellcare, Kulud, Aster):\n• Active Folate: L-5-MTHF Active Folate 800mcg (avoid synthetic folic acid)\n• Vitamin D3+K2: Liposomal D3/K2 (take with breakfast fats)\n• Magnesium: Pure Magnesium Bisglycinate (take 2 caps at bedtime)\n• B-Complex: Active Methylated B-Complex (P-5-P + Methyl-B12)\n• Probiotics: Acid-Resistant Probiotics (LGG + BB-12, take upon waking).`
         };
       } else if (qLower.includes('compounding') || qLower.includes('capsule') || qLower.includes('recipe')) {
         matched = {
