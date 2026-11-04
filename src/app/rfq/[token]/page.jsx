@@ -422,15 +422,27 @@ export default function PublicSupplierRFQPage() {
                     backgroundColor: '#fafbfc',
                     border: '1px solid #e8eaed',
                     borderRadius: '6px',
-                    padding: '10px 14px',
+                    padding: '12px 14px',
                     fontSize: '0.86rem'
                   }}>
                     <div>
                       <div style={{ fontWeight: 600, color: '#202124' }}>{item.name}</div>
-                      <div style={{ fontSize: '0.78rem', color: '#5f6368' }}>{item.concentration} • Vehicle: {item.vehicle}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#5f6368', marginTop: '3px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                        <span>{item.packSize || item.concentration || (item.purity ? `Purity: ${item.purity}` : 'Bulk API Powder')}</span>
+                        {item.referenceCost && (
+                          <span style={{ color: '#137333', fontWeight: 600, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px', fontSize: '0.74rem' }}>
+                            Historical Benchmark: ${item.referenceCost}/{item.unit || 'g'}
+                          </span>
+                        )}
+                        {item.targetUnitCost && (
+                          <span style={{ color: '#1a73e8', fontWeight: 600, backgroundColor: '#e8f0fe', padding: '1px 6px', borderRadius: '4px', fontSize: '0.74rem' }}>
+                            Target: {item.targetUnitCost}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div style={{ fontWeight: 700, color: '#1a73e8' }}>
-                      Qty: {item.amount} {item.unit}
+                      Qty: {item.amount || item.quantity} {item.unit || ''}
                     </div>
                   </div>
                 ))}
@@ -631,7 +643,7 @@ export default function PublicSupplierRFQPage() {
                     {rawItems.map((item, idx) => {
                       const itemId = item.itemId || idx;
                       const price = itemsPrices[itemId] !== undefined ? itemsPrices[itemId] : '';
-                      const qty = parseFloat(item.amount) || 1;
+                      const qty = parseFloat(item.amount || item.quantity) || 1;
                       const lineTotal = (parseFloat(price) || 0) * qty;
 
                       return (
@@ -641,9 +653,21 @@ export default function PublicSupplierRFQPage() {
                             {item.blockTitle && (
                               <div style={{ fontSize: '0.74rem', color: '#1a73e8' }}>{item.blockTitle}</div>
                             )}
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '3px' }}>
+                              {item.referenceCost && (
+                                <span style={{ fontSize: '0.72rem', color: '#137333', fontWeight: 600, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px' }}>
+                                  Historical Ref: ${item.referenceCost}/{item.unit || 'g'}
+                                </span>
+                              )}
+                              {item.targetUnitCost && (
+                                <span style={{ fontSize: '0.72rem', color: '#1a73e8', fontWeight: 600, backgroundColor: '#e8f0fe', padding: '1px 6px', borderRadius: '4px' }}>
+                                  Target: {item.targetUnitCost}
+                                </span>
+                              )}
+                            </div>
                           </td>
-                          <td style={{ padding: '12px 14px', color: '#5f6368', fontFamily: 'monospace' }}>
-                            {item.concentration || 'Compounding Base'}
+                          <td style={{ padding: '12px 14px', color: '#5f6368', fontFamily: 'monospace', fontSize: '0.78rem' }}>
+                            {item.packSize || item.concentration || (item.purity ? `Purity: ${item.purity}` : 'Bulk API')}
                           </td>
                           <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>
                             {qty} {item.unit || ''}

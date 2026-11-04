@@ -249,32 +249,45 @@ async function seedMagentaLotuslandPeptideRfq() {
   console.log(`🌐 Phase 3: Creating Interactive Supplier Portal RFQ in 'purchase_rfqs'...`);
   const purchaseRfqDoc = {
     id: supplierPurchaseRfqId,
+    prfqId: srfqId,
     rfqNumber: srfqId,
+    publicToken: supplierToken,
     rfqToken: supplierToken,
     supplierId: SUPPLIER.id,
     supplierName: SUPPLIER.name,
     clientName: CLIENT.name,
+    clinicName: 'Magenta Health LLC (Dubai Healthcare City)',
     clientId: CLIENT.id,
-    status: 'pending_quote',
+    status: 'pending_supplier',
     currency: 'USD',
     shippingTerms: 'Cold-Chain 2-8°C Express Logistics (DAP Dubai)',
     estimatedOrderValueUSD: 52790.60,
+    notes: 'Urgent Request for Quotation: Direct order opportunity for bulk peptide APIs. Please review historical benchmark costs and provide your best Tier-1 volume rates.',
     items: RFQ_ITEMS.map(it => ({
+      itemId: it.lineIndex,
       lineIndex: it.lineIndex,
       productId: it.productId,
       name: it.name,
+      amount: it.requestedQuantity,
       quantity: it.requestedQuantity,
       unit: it.unit,
       packSize: it.packSize,
       purity: it.purity,
+      concentration: `${it.purity} · ${it.packSize}`,
+      vehicle: 'Solid Lyophilized / Crystalline Powder',
       referenceCost: it.previousUnitCost,
+      historicalBenchmarkCost: it.previousUnitCost,
+      targetUnitCost: it.targetUnitCost,
       benchmarkTotal: it.benchmarkTotalCost
     })),
     createdAt: nowIso,
     updatedAt: nowIso
   };
+
+  // Write under canonical ID and direct publicToken lookup ID
   await db.collection('purchase_rfqs').doc(supplierPurchaseRfqId).set(purchaseRfqDoc, { merge: true });
-  console.log(`   ✓ Purchase RFQ created: ${supplierPurchaseRfqId} (Token: ${supplierToken})`);
+  await db.collection('purchase_rfqs').doc(supplierToken).set({ ...purchaseRfqDoc, id: supplierToken }, { merge: true });
+  console.log(`   ✓ Purchase RFQ created: ${supplierPurchaseRfqId} and indexed under token: ${supplierToken}`);
 
   // 4. CLIENT QUOTATION DRAFT (quotations collection)
   console.log(`📄 Phase 4: Initializing Internal Client Quotation Draft in 'quotations'...`);
@@ -344,3 +357,4 @@ seedMagentaLotuslandPeptideRfq().catch(err => {
   console.error('Fatal error registering RFQ:', err);
   process.exit(1);
 });
+

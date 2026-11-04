@@ -49,7 +49,316 @@ export async function GET(request) {
     const gcpPillText = rgb(60 / 255, 64 / 255, 67 / 255);      // #3c4043 (GCP Chip Label)
 
     // =========================================================================
-    // PAGE 1: MEAL PLAN SELECTION GUIDE & 24-HOUR ROUTINE
+    // COVER PAGE: EXECUTIVE LUXURY ATLAS BRAND COVER & CREDENTIALS
+    // =========================================================================
+    const coverPage = pdfDoc.addPage([595.28, 841.89]); // A4 Standard
+    const { width: cWidth, height: cHeight } = coverPage.getSize();
+
+    // Top Accent Strip
+    coverPage.drawRectangle({ x: 0, y: cHeight - 8, width: cWidth, height: 8, color: navyPrimary });
+    coverPage.drawRectangle({ x: 0, y: cHeight - 12, width: cWidth, height: 4, color: tealAccent });
+
+    let yCover = cHeight - 42;
+
+    // Header Institution
+    coverPage.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
+      x: 44,
+      y: yCover,
+      size: 8.5,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    const coverBadgeText = 'OFFICIAL PATIENT DOSSIER';
+    const cbW = helveticaBold.widthOfTextAtSize(coverBadgeText, 7.0) + 16;
+    coverPage.drawRectangle({
+      x: cWidth - 44 - cbW,
+      y: yCover - 4,
+      width: cbW,
+      height: 16,
+      color: rgb(240 / 255, 253 / 255, 250 / 255),
+      borderColor: tealAccent,
+      borderWidth: 1.0
+    });
+    coverPage.drawText(coverBadgeText, {
+      x: cWidth - 44 - cbW + 8,
+      y: yCover,
+      size: 7.0,
+      font: helveticaBold,
+      color: tealAccent
+    });
+
+    // Logo Embedding
+    const logoPath = path.join(process.cwd(), 'public/atlas-health-logo.png');
+    const logoSize = 75;
+    yCover -= (logoSize + 20);
+    if (fs.existsSync(logoPath)) {
+      try {
+        const logoBytes = fs.readFileSync(logoPath);
+        const logoImg = await pdfDoc.embedJpg(logoBytes);
+        coverPage.drawImage(logoImg, {
+          x: 44,
+          y: yCover,
+          width: logoSize,
+          height: logoSize
+        });
+      } catch (err) {
+        console.warn('Cover logo embedding skipped:', err.message);
+      }
+    }
+
+    // Title beside logo
+    const textX = 44 + logoSize + 18;
+    coverPage.drawText('ATLAS HEALTH SERVICES', {
+      x: textX,
+      y: yCover + 54,
+      size: 11,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+    coverPage.drawText('Precision Medicine, Metabolic Intelligence & Preventive Genomics', {
+      x: textX,
+      y: yCover + 38,
+      size: 7.8,
+      font: helvetica,
+      color: mutedSlate
+    });
+    coverPage.drawText('United Arab Emirates · State of Qatar · GCC Clinical Network', {
+      x: textX,
+      y: yCover + 24,
+      size: 7.2,
+      font: helveticaOblique,
+      color: tealAccent
+    });
+
+    // Divider Line
+    yCover -= 18;
+    coverPage.drawLine({
+      start: { x: 44, y: yCover },
+      end: { x: cWidth - 44, y: yCover },
+      thickness: 1.0,
+      color: cardBorder
+    });
+
+    // Hero Title
+    yCover -= 32;
+    coverPage.drawText('PERSONALIZED GENOMIC DOSSIER', {
+      x: 44,
+      y: yCover,
+      size: 20,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    yCover -= 16;
+    coverPage.drawText('Precision Nutrition, Metabolic Optimization & Chronobiology Guidance', {
+      x: 44,
+      y: yCover,
+      size: 10.5,
+      font: helveticaOblique,
+      color: tealAccent
+    });
+
+    // Patient Credentialing Box (GCP Card Style)
+    yCover -= 20;
+    const credH = 104;
+    coverPage.drawRectangle({
+      x: 44,
+      y: yCover - credH,
+      width: cWidth - 88,
+      height: credH,
+      color: lightBg,
+      borderColor: cardBorder,
+      borderWidth: 1.0
+    });
+
+    // Credentialing Box Header Strip
+    coverPage.drawRectangle({
+      x: 44,
+      y: yCover - 22,
+      width: cWidth - 88,
+      height: 22,
+      color: rgb(241 / 255, 245 / 255, 249 / 255)
+    });
+    coverPage.drawText('PATIENT & CLINICAL SPECIMEN CREDENTIALS', {
+      x: 56,
+      y: yCover - 15,
+      size: 7.8,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    const col1X = 56;
+    const col2X = 44 + (cWidth - 88) / 2 + 10;
+    let cY = yCover - 40;
+
+    // Row 1
+    coverPage.drawText('Patient Name:', { x: col1X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText(patientName, { x: col1X + 80, y: cY, size: 8.5, font: helveticaBold, color: darkSlate });
+
+    coverPage.drawText('Specimen ID:', { x: col2X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText(`G000943554 / ${sampleId}`, { x: col2X + 75, y: cY, size: 8.5, font: helveticaBold, color: darkSlate });
+
+    // Row 2
+    cY -= 18;
+    coverPage.drawText('Sequencing Hub:', { x: col1X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText('24Genetics SL · Madrid, Spain', { x: col1X + 80, y: cY, size: 8.0, font: helvetica, color: darkSlate });
+
+    coverPage.drawText('Technology:', { x: col2X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText('Illumina NGS Microarray Platform', { x: col2X + 75, y: cY, size: 8.0, font: helvetica, color: darkSlate });
+
+    // Row 3
+    cY -= 18;
+    coverPage.drawText('Catering Service:', { x: col1X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText(mealPlanPartner, { x: col1X + 80, y: cY, size: 8.0, font: helvetica, color: darkSlate });
+
+    coverPage.drawText('Issue Date:', { x: col2X, y: cY, size: 7.5, font: helveticaBold, color: mutedSlate });
+    coverPage.drawText('November 2026 · Clinical Release', { x: col2X + 75, y: cY, size: 8.0, font: helvetica, color: darkSlate });
+
+    yCover -= (credH + 20);
+
+    // Executive Roadmap Header
+    coverPage.drawText('DOSSIER STRUCTURE & EXECUTIVE ROADMAP', {
+      x: 44,
+      y: yCover,
+      size: 10,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    yCover -= 12;
+    const coverRoadmap = [
+      {
+        part: 'PART I · PAGE 2',
+        title: 'Actionable Meal Plan Selection Guide & Chronobiology Schedule',
+        desc: 'Plain-English translation of your genetic markers into practical daily catering choices: Green (Always Order), Amber (In Moderation), and Red (Exclude). Includes the Golden Plate Sequencing rule and your synchronized 24-hour nutrition & supplement timeline.'
+      },
+      {
+        part: 'PART II · PAGE 3',
+        title: 'Personalized Supplement Guide & Shopping Pathways',
+        desc: 'Targeted molecular cofactors matched to your cellular needs (Active Folate 5-MTHF, Vitamin D3/K2, Probiotics, Magnesium Bisglycinate). Presents two neutral purchasing options: Local Doha retail pharmacies (Option A) or Official 3-Capsule compounded formulation (Option B).'
+      },
+      {
+        part: 'PART III · PAGES 4–59',
+        title: 'Original 24Genetics Laboratory Sequencing Report (Complete 55 Pages)',
+        desc: 'The complete, unedited genomic analysis issued by 24Genetics laboratory. Includes full technical polymorphic breakdowns across Nutrition, Vitamins, Minerals, Metabolic Profile, and Food Sensitivities with quick-navigation directory index.'
+      }
+    ];
+
+    coverRoadmap.forEach((sec) => {
+      const sH = 54;
+      coverPage.drawRectangle({
+        x: 44,
+        y: yCover - sH,
+        width: cWidth - 88,
+        height: sH,
+        color: white,
+        borderColor: cardBorder,
+        borderWidth: 1.0
+      });
+
+      // Part Badge
+      const pW = helveticaBold.widthOfTextAtSize(sec.part, 6.5) + 12;
+      coverPage.drawRectangle({
+        x: 54,
+        y: yCover - 16,
+        width: pW,
+        height: 12,
+        color: rgb(241 / 255, 243 / 255, 244 / 255),
+        borderColor: cardBorder,
+        borderWidth: 0.8
+      });
+      coverPage.drawText(sec.part, {
+        x: 60,
+        y: yCover - 13,
+        size: 6.5,
+        font: helveticaBold,
+        color: rgb(60 / 255, 64 / 255, 67 / 255)
+      });
+
+      coverPage.drawText(sec.title, {
+        x: 60 + pW + 6,
+        y: yCover - 14,
+        size: 7.8,
+        font: helveticaBold,
+        color: navyPrimary,
+        maxWidth: cWidth - 88 - pW - 32
+      });
+
+      coverPage.drawText(sec.desc, {
+        x: 54,
+        y: yCover - 30,
+        size: 7.0,
+        font: helvetica,
+        color: darkSlate,
+        maxWidth: cWidth - 108,
+        lineHeight: 9.8
+      });
+
+      yCover -= (sH + 8);
+    });
+
+    // Digital Interactive Portal Card with QR Code
+    yCover -= 6;
+    const portalH = 58;
+    coverPage.drawRectangle({
+      x: 44,
+      y: yCover - portalH,
+      width: cWidth - 88,
+      height: portalH,
+      color: rgb(240 / 255, 253 / 255, 250 / 255),
+      borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
+      borderWidth: 1.2
+    });
+
+    // Generate QR Code for Cover
+    const coverPortalUrl = `https://atlashealth-services.com/patient/dna-report?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleId)}`;
+    try {
+      const coverQrBuffer = await QRCode.toBuffer(coverPortalUrl, {
+        type: 'png',
+        margin: 1,
+        width: 150,
+        color: { dark: '#003666', light: '#ffffff' }
+      });
+      const coverQrImg = await pdfDoc.embedPng(coverQrBuffer);
+      coverPage.drawImage(coverQrImg, {
+        x: 54,
+        y: yCover - portalH + 5,
+        width: 48,
+        height: 48
+      });
+    } catch (e) {
+      console.warn('Cover QR code skipped:', e.message);
+    }
+
+    coverPage.drawText('ACCESS YOUR DYNAMIC INTERACTIVE DIGITAL PORTAL', {
+      x: 114,
+      y: yCover - 18,
+      size: 8.5,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+    coverPage.drawText('Scan the QR code with your smartphone camera to access your interactive genomic dashboard,\nexplore food filters, view dynamic dosage calculators, and share directly with your nutritionist.', {
+      x: 114,
+      y: yCover - 32,
+      size: 7.0,
+      font: helvetica,
+      color: darkSlate,
+      maxWidth: cWidth - 88 - 80,
+      lineHeight: 9.8
+    });
+
+    // Confidentiality Footer
+    coverPage.drawText(`CONFIDENTIAL MEDICAL & GENOMIC REPORT · PREPARED EXCLUSIVELY FOR ${patientName.toUpperCase()} · ATLAS HEALTH SERVICES`, {
+      x: 44,
+      y: 18,
+      size: 6.2,
+      font: helveticaBold,
+      color: mutedSlate
+    });
+
+    // =========================================================================
+    // PAGE 2: MEAL PLAN SELECTION GUIDE & 24-HOUR ROUTINE
     // =========================================================================
     const page1 = pdfDoc.addPage([595.28, 841.89]); // A4 Standard
     const { width: p1Width, height: p1Height } = page1.getSize();
@@ -74,7 +383,7 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    const badge1 = 'PAGE 1 OF 2 · MEAL PLAN & KITCHEN ROUTINE';
+    const badge1 = 'PAGE 2 OF 3 · MEAL PLAN & KITCHEN ROUTINE';
     const badge1W = helveticaBold.widthOfTextAtSize(badge1, 7.5) + 16;
     page1.drawRectangle({
       x: p1Width - 36 - badge1W,
@@ -543,8 +852,8 @@ export async function GET(request) {
       console.warn('QR Code generation skipped:', e.message);
     }
 
-    // Page 1 Footer
-    page1.drawText('Page 1 of 2 · Meal Plan & Daily Routine · Turn to Page 2 for Simplified Supplement Packs & Shopping Guide', {
+    // Page 2 Footer
+    page1.drawText('Page 2 of 3 · Meal Plan & Daily Routine · Turn to Page 3 for Simplified Supplement Packs & Shopping Guide', {
       x: 36,
       y: 18,
       size: 6.8,
@@ -601,7 +910,7 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    const badge2 = 'PAGE 2 OF 2 · SIMPLIFIED SUPPLEMENT GUIDE';
+    const badge2 = 'PAGE 3 OF 3 · SIMPLIFIED SUPPLEMENT GUIDE';
     const badge2W = helveticaBold.widthOfTextAtSize(badge2, 6.8) + 14;
     page2.drawRectangle({
       x: p2Width - 36 - badge2W,
@@ -1036,8 +1345,8 @@ export async function GET(request) {
       maxWidth: p2Width - 96
     });
 
-    // Page 2 Footer
-    page2.drawText('Atlas Health Services · Personalized Supplement Guide · Designed for patient clarity & adherence · www.atlashealthservices.com', {
+    // Page 3 Footer
+    page2.drawText('Page 3 of 3 · Atlas Health Services · Personalized Supplement Guide · Designed for patient clarity & adherence · www.atlashealthservices.com', {
       x: 36,
       y: 18,
       size: 6.8,
