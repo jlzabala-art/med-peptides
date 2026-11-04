@@ -34,6 +34,7 @@ export async function GET(request) {
     const mutedSlate = rgb(100 / 255, 116 / 255, 139 / 255);    // #64748b
     const lightBg = rgb(248 / 255, 250 / 255, 252 / 255);        // #f8fafc
     const cardBorder = rgb(226 / 255, 232 / 255, 240 / 255);    // #e2e8f0
+    const gcpBorder = rgb(218 / 255, 220 / 255, 224 / 255);     // #dadce0 (GCP Card Border)
     const alertRed = rgb(185 / 255, 28 / 255, 28 / 255);         // #b91c1c
     const badgeRedBg = rgb(254 / 255, 242 / 255, 242 / 255);     // #fef2f2
     const amberDark = rgb(180 / 255, 83 / 255, 9 / 255);         // #b45309

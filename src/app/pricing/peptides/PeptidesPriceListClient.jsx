@@ -700,7 +700,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       align: 'center',
       sortable: true,
       render: (val, row) => (
-        <span style={{ fontFamily: 'monospace', fontSize: '0.80rem', color: '#64748b', fontWeight: 600 }}>
+        <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#5f6368', fontWeight: 600 }}>
           {val ?? row?.itemNumber}
         </span>
       )
@@ -708,25 +708,25 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'productName',
       label: 'Peptide Formulation & Concentration',
-      width: '42%',
+      width: '43%',
       align: 'left', // STRICT: Left-aligned for clean price list readability
       sortable: true,
       render: (_, row) => (
         <div style={{ textAlign: 'left', minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.96rem', color: '#0f172a', letterSpacing: '-0.01em' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#202124', letterSpacing: '-0.01em' }}>
               {row.productName}
             </span>
             {row.dosage && (
               <span style={{
-                fontSize: '0.78rem',
-                fontWeight: 800,
+                fontSize: '0.74rem',
+                fontWeight: 700,
                 fontFamily: 'monospace',
-                color: '#0369a1',
-                background: '#f0f9ff',
-                border: '1px solid #bae6fd',
-                padding: '2px 8px',
-                borderRadius: '5px',
+                color: '#1a73e8',
+                background: '#e8f0fe',
+                border: '1px solid #c2e7ff',
+                padding: '2px 7px',
+                borderRadius: '4px',
                 letterSpacing: '-0.01em',
                 whiteSpace: 'nowrap'
               }}>
@@ -734,8 +734,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </span>
             )}
             <span style={{
-              fontSize: '0.66rem',
-              fontWeight: 700,
+              fontSize: '0.64rem',
+              fontWeight: 600,
               color: row?.categoryMeta?.color,
               background: row?.categoryMeta?.bg,
               border: `1px solid ${row?.categoryMeta?.border}`,
@@ -748,10 +748,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               {row?.categoryMeta?.label}
             </span>
           </div>
-          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>Sterile Lyophilized Vial (10R Borosilicate)</span>
             <span>•</span>
-            <span style={{ color: '#0d9488', fontWeight: 650 }}>≥99.0% HPLC Analytical Purity</span>
+            <span style={{ color: '#137333', fontWeight: 600 }}>≥99.0% HPLC Analytical Purity</span>
           </div>
         </div>
       )
@@ -759,15 +759,15 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'unitPrice',
       label: 'Single Vial (1x)',
-      width: '18%',
+      width: '17%',
       align: 'left',
       sortable: true,
       render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
-          <span style={{ fontFamily: 'monospace', fontWeight: 750, color: '#0f172a', fontSize: '0.95rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'left' }}>
+          <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#202124', fontSize: '0.92rem' }}>
             {formatPrice(val ?? row.unitPrice)}
           </span>
-          <span style={{ fontSize: '0.68rem', color: '#64748b' }}>per sterile vial</span>
+          <span style={{ fontSize: '0.66rem', color: '#5f6368' }}>per sterile vial</span>
         </div>
       )
     },
@@ -782,24 +782,25 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
         const discountPct = Math.max(10, Math.round((1 - (p10 / (row.unitPrice * 10))) * 100));
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#047857', fontSize: '0.95rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'left' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#137333', fontSize: '0.92rem' }}>
                 {formatPrice(p10)}
               </span>
               <span style={{
-                fontSize: '0.65rem',
-                fontWeight: 750,
-                color: '#065f46',
-                background: '#ecfdf5',
-                border: '1px solid #a7f3d0',
+                fontSize: '0.62rem',
+                fontWeight: 700,
+                color: '#137333',
+                background: '#e6f4ea',
+                border: '1px solid #ceead6',
                 padding: '1px 5px',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                whiteSpace: 'nowrap'
               }}>
                 -{discountPct}% Box
               </span>
             </div>
-            <span style={{ fontSize: '0.68rem', color: '#047857', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.66rem', color: '#137333', fontFamily: 'monospace' }}>
               ({formatPrice(perUnit)} / vial)
             </span>
           </div>
@@ -812,23 +813,26 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       width: '16%',
       align: 'right',
       render: (_, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', flexWrap: 'nowrap' }}>
           <button
             onClick={() => handleAddToCart(row, '1x')}
             style={{
-              padding: '5px 10px',
-              fontSize: '0.72rem',
+              padding: '4px 7px',
+              fontSize: '0.70rem',
               fontWeight: 600,
-              background: '#f1f5f9',
-              border: '1px solid #cbd5e1',
-              borderRadius: '5px',
-              color: '#1e293b',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '4px',
+              color: '#3c4043',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
-              whiteSpace: 'nowrap'
+              gap: '3px',
+              whiteSpace: 'nowrap',
+              transition: 'background 0.15s'
             }}
+            onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
+            onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
             title="Add 1 single vial to proforma"
           >
             <Plus size={11} />
@@ -837,20 +841,22 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           <button
             onClick={() => handleAddToCart(row, '10x')}
             style={{
-              padding: '5px 10px',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              background: '#0284c7',
-              border: '1px solid #0284c7',
-              borderRadius: '5px',
+              padding: '4px 8px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              background: '#1a73e8',
+              border: '1px solid #1a73e8',
+              borderRadius: '4px',
               color: '#ffffff',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '3px',
               whiteSpace: 'nowrap',
-              boxShadow: '0 1px 2px rgba(2, 132, 199, 0.25)'
+              transition: 'background 0.15s'
             }}
+            onMouseEnter={e => e.currentTarget.style.background = '#1557b0'}
+            onMouseLeave={e => e.currentTarget.style.background = '#1a73e8'}
             title="Add manufacturer box of 10 vials (-volume discount)"
           >
             <Box size={11} />
@@ -1024,91 +1030,74 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           </div>
         </div>
 
-        {/* ── Google Cloud Console 2-Column Portal Layout ── */}
-        <div style={{
-          display: 'flex',
-          gap: '1.25rem',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap'
-        }}>
-          {/* ── Left Navigation Rail / Sidebar ── */}
-          <aside style={{
-            width: '290px',
-            flexShrink: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem',
-            position: 'sticky',
-            top: '72px'
-          }}>
-            {/* 1. Atlas AI Clinical Copilot (Key Differentiator) */}
-            <div style={{
-              background: 'linear-gradient(135deg, #0b192c 0%, #1e293b 100%)',
-              borderRadius: '10px',
-              padding: '14px',
-              color: '#ffffff',
-              border: '1px solid rgba(56, 189, 248, 0.3)',
-              boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Sparkles size={16} color="#38bdf8" />
-                  <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#f8fafc', letterSpacing: '-0.01em' }}>
-                    ✦ Atlas AI Clinical Copilot
-                  </span>
-                </div>
-                <span style={{
-                  fontSize: '0.62rem',
-                  fontWeight: 800,
-                  background: 'rgba(56, 189, 248, 0.2)',
-                  color: '#38bdf8',
-                  border: '1px solid rgba(56, 189, 248, 0.4)',
-                  padding: '1px 5px',
-                  borderRadius: '4px'
-                }}>
-                  ACTIVE
-                </span>
-              </div>
-              <p style={{ fontSize: '0.74rem', color: '#94a3b8', margin: '0 0 10px 0', lineHeight: 1.45 }}>
-                Authoritative pharmacopeia engine for clinical reconstitution math, syringe calibration, and molecular synergy analysis.
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsAtlasAiOpen(true)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #38bdf8',
-                  background: 'rgba(56, 189, 248, 0.15)',
-                  color: '#38bdf8',
-                  fontSize: '0.76rem',
-                  fontWeight: 750,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Sparkles size={13} />
-                <span>Consult Atlas AI Copilot</span>
-              </button>
-            </div>
+        {/* Responsive Layout Styles (GCP-Inspired Desktop, Laptop & Mobile UX) */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          .gcp-pricing-portal-layout {
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+            width: 100%;
+          }
+          .gcp-pricing-sidebar {
+            width: 240px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            position: sticky;
+            top: 72px;
+          }
+          .gcp-pricing-workspace {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+          }
+          @media (max-width: 1024px) {
+            .gcp-pricing-portal-layout {
+              flex-direction: column;
+              gap: 1rem;
+            }
+            .gcp-pricing-sidebar {
+              width: 100%;
+              position: static;
+            }
+            .gcp-categories-horizontal {
+              display: flex !important;
+              flex-direction: row !important;
+              overflow-x: auto !important;
+              -webkit-overflow-scrolling: touch;
+              padding-bottom: 6px;
+              gap: 6px !important;
+            }
+            .gcp-categories-horizontal button {
+              flex-shrink: 0;
+              white-space: nowrap;
+            }
+            .gcp-protocols-grid {
+              display: grid !important;
+              grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+              gap: 8px !important;
+            }
+          }
+        ` }} />
 
-            {/* 2. Peptide Categories Navigation Tree */}
+        {/* ── Google Cloud Console 2-Column Portal Layout ── */}
+        <div className="gcp-pricing-portal-layout">
+          {/* ── Left Navigation Rail / Sidebar ── */}
+          <aside className="gcp-pricing-sidebar">
+            {/* 1. Peptide Categories Navigation Tree (GCP Left Rail Pattern) */}
             <div style={{
               background: '#ffffff',
-              borderRadius: '10px',
-              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
               padding: '12px 14px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
             }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
                 Peptide Categories
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div className="gcp-categories-horizontal" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 <button
                   type="button"
                   onClick={() => setSelectedCategory('all')}
@@ -1117,22 +1106,25 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '6px 10px',
-                    borderRadius: '6px',
+                    borderRadius: '4px',
                     border: 'none',
-                    background: selectedCategory === 'all' ? '#0f172a' : 'transparent',
-                    color: selectedCategory === 'all' ? '#ffffff' : '#334155',
-                    fontSize: '0.78rem',
-                    fontWeight: selectedCategory === 'all' ? 750 : 600,
+                    background: selectedCategory === 'all' ? '#e8f0fe' : 'transparent',
+                    color: selectedCategory === 'all' ? '#1a73e8' : '#3c4043',
+                    fontSize: '0.76rem',
+                    fontWeight: selectedCategory === 'all' ? 700 : 500,
                     cursor: 'pointer',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    transition: 'background 0.15s ease'
                   }}
+                  onMouseEnter={e => { if (selectedCategory !== 'all') e.currentTarget.style.background = '#f1f3f4'; }}
+                  onMouseLeave={e => { if (selectedCategory !== 'all') e.currentTarget.style.background = 'transparent'; }}
                 >
                   <span>All Formulations</span>
                   <span style={{
-                    fontSize: '0.68rem',
+                    fontSize: '0.66rem',
                     fontWeight: 700,
-                    background: selectedCategory === 'all' ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
-                    color: selectedCategory === 'all' ? '#ffffff' : '#64748b',
+                    background: selectedCategory === 'all' ? '#1a73e8' : '#f1f3f4',
+                    color: selectedCategory === 'all' ? '#ffffff' : '#5f6368',
                     padding: '1px 6px',
                     borderRadius: '10px'
                   }}>
@@ -1156,25 +1148,28 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         padding: '6px 10px',
-                        borderRadius: '6px',
+                        borderRadius: '4px',
                         border: 'none',
                         background: isSelected ? meta.bg : 'transparent',
-                        color: isSelected ? meta.color : '#475569',
-                        fontSize: '0.76rem',
-                        fontWeight: isSelected ? 750 : 550,
+                        color: isSelected ? meta.color : '#3c4043',
+                        fontSize: '0.75rem',
+                        fontWeight: isSelected ? 700 : 500,
                         cursor: 'pointer',
-                        textAlign: 'left'
+                        textAlign: 'left',
+                        transition: 'background 0.15s ease'
                       }}
+                      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f1f3f4'; }}
+                      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span>{meta.icon}</span>
                         <span>{meta.label}</span>
                       </div>
                       <span style={{
-                        fontSize: '0.66rem',
+                        fontSize: '0.65rem',
                         fontWeight: 700,
-                        background: isSelected ? meta.color : '#f1f5f9',
-                        color: isSelected ? '#ffffff' : '#64748b',
+                        background: isSelected ? meta.color : '#f1f3f4',
+                        color: isSelected ? '#ffffff' : '#5f6368',
                         padding: '1px 6px',
                         borderRadius: '10px'
                       }}>
@@ -1186,28 +1181,28 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
             </div>
 
-            {/* 3. Clinical Protocols Directory (5 Synergies) */}
+            {/* 2. Clinical Protocols Directory (5 Synergies) */}
             <div style={{
               background: '#ffffff',
-              borderRadius: '10px',
-              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
               padding: '12px 14px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Clinical Protocols
                 </div>
-                <span style={{ fontSize: '0.65rem', color: '#0284c7', fontWeight: 700 }}>5 Presets</span>
+                <span style={{ fontSize: '0.65rem', color: '#1a73e8', fontWeight: 700 }}>5 Presets</span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="gcp-protocols-grid" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {CLINICAL_PRESETS.map(preset => (
                   <div
                     key={preset.id}
                     style={{
                       padding: '9px 10px',
-                      borderRadius: '7px',
+                      borderRadius: '6px',
                       border: `1px solid ${preset.accent}30`,
                       background: preset.bg,
                       display: 'flex',
@@ -1218,11 +1213,11 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                         <span style={{ fontSize: '0.90rem' }}>{preset.icon}</span>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#202124' }}>
                           {preset.name}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.70rem', color: '#475569', marginTop: '2px' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#5f6368', marginTop: '2px' }}>
                         {preset.description}
                       </div>
                     </div>
@@ -1235,21 +1230,24 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                           flex: 1,
                           padding: '4px 6px',
                           borderRadius: '4px',
-                          border: '1px solid #cbd5e1',
+                          border: '1px solid #dadce0',
                           background: '#ffffff',
-                          color: '#334155',
+                          color: '#3c4043',
                           fontSize: '0.68rem',
                           fontWeight: 650,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          gap: '3px'
+                          gap: '3px',
+                          transition: 'background 0.15s ease'
                         }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
+                        onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
                         title="View full clinical dossier, mechanism, posology & reconstitution"
                       >
                         <BookOpen size={11} />
-                        <span>Consultar</span>
+                        <span>Consult</span>
                       </button>
 
                       <button
@@ -1266,12 +1264,15 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '3px'
+                          gap: '3px',
+                          transition: 'opacity 0.15s ease'
                         }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                         title="Add 1 cycle to proforma request"
                       >
                         <Plus size={11} />
-                        <span>+ Añadir</span>
+                        <span>+ Add</span>
                       </button>
                     </div>
                   </div>
@@ -1281,7 +1282,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           </aside>
 
           {/* ── Main Data Workspace Area ── */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          <div className="gcp-pricing-workspace">
             {/* ── 4 KPIs with Scope Switcher (Golden Rule #22) ── */}
             <div style={{
               background: '#ffffff',
@@ -2187,6 +2188,75 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       )}
 
+      {/* ── Atlas AI Floating Clinical Copilot Sticker (Modern Public SaaS / Google Assistant style) ── */}
+      <div
+        onClick={() => setIsAtlasAiOpen(true)}
+        style={{
+          position: 'fixed',
+          bottom: totalCartCount > 0 ? '78px' : '22px',
+          right: '24px',
+          zIndex: 950,
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '10px',
+          padding: '8px 14px 8px 10px',
+          background: '#1f2937',
+          borderRadius: '28px',
+          border: '1px solid #38bdf8',
+          boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25), 0 0 10px rgba(56, 189, 248, 0.25)',
+          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          backdropFilter: 'blur(8px)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+          e.currentTarget.style.boxShadow = '0 10px 24px rgba(0, 0, 0, 0.3), 0 0 16px rgba(56, 189, 248, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'none';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.25), 0 0 10px rgba(56, 189, 248, 0.25)';
+        }}
+        title="Open Atlas AI Clinical Copilot (Interactive Pharmacopeia, Reconstitution & Synergies)"
+      >
+        <div style={{
+          width: '30px',
+          height: '30px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#ffffff',
+          boxShadow: '0 0 10px rgba(56, 189, 248, 0.6)'
+        }}>
+          <Sparkles size={16} />
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'left' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.01em' }}>
+              Atlas AI Copilot
+            </span>
+            <span style={{
+              fontSize: '0.62rem',
+              fontWeight: 700,
+              background: 'rgba(56, 189, 248, 0.15)',
+              color: '#38bdf8',
+              border: '1px solid rgba(56, 189, 248, 0.35)',
+              padding: '1px 5px',
+              borderRadius: '4px'
+            }}>
+              {selectedCategory !== 'all' ? (CATEGORY_MAP[selectedCategory]?.label || 'Filtered') : 'Peptide Pharmacopeia'}
+            </span>
+          </div>
+          <span style={{ fontSize: '0.67rem', color: '#94a3b8' }}>
+            {selectedCategory !== 'all'
+              ? `Reconstitution math & synergies (${filteredProducts.length} items)`
+              : 'Reconstitution math, syringe calibration & synergies'}
+          </span>
+        </div>
+      </div>
+
       {/* ── Official Printable Proforma Document (@media print) ── */}
       <div className="peptides-printable-proforma" style={{ display: 'none' }}>
         <style dangerouslySetInnerHTML={{ __html: `
@@ -2352,6 +2422,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         isOpen={isAtlasAiOpen}
         onClose={() => setIsAtlasAiOpen(false)}
         currencySymbol={currencySymbol}
+        activeCategory={selectedCategory}
+        activeCategoryLabel={selectedCategory !== 'all' ? CATEGORY_MAP[selectedCategory]?.label : null}
       />
 
       {/* Unified Public Footer (Pointer events disabled in B2B Price Portal to prevent distraction) */}

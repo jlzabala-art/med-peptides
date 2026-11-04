@@ -58,11 +58,18 @@ const PREBUILT_KNOWLEDGE = {
   - Indication: Anxiolysis, down-regulation of generalized stress, cognitive stabilization, and restoration of restorative slow-wave sleep architecture.`
 };
 
-export default function AtlasAiCopilotDrawer({ isOpen, onClose }) {
+export default function AtlasAiCopilotDrawer({
+  isOpen,
+  onClose,
+  activeCategory = 'all',
+  activeCategoryLabel = null
+}) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: 'Hello. I am Atlas Clinical AI Copilot. I can assist you with peptide reconstitution math, receptor synergies, protocol durations, and clinical pharmacopeia data. How can I help your practice today?'
+      text: activeCategoryLabel
+        ? `Hello! I am Atlas Clinical AI Copilot. I see you are exploring ${activeCategoryLabel}. I can assist you with precise reconstitution calculations, clinical posology, receptor affinities, and synergistic protocol stacking. What would you like to formulate?`
+        : 'Hello. I am Atlas Clinical AI Copilot. I can assist you with peptide reconstitution math, receptor synergies, protocol durations, and clinical pharmacopeia data. How can I help your practice today?'
     }
   ]);
   const [inputPrompt, setInputPrompt] = useState('');
@@ -184,16 +191,32 @@ export default function AtlasAiCopilotDrawer({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Quick Prompts Bar */}
+        {/* Quick Prompts Bar with Clinical Context */}
         <div style={{
-          padding: '10px 14px',
+          padding: '8px 14px',
           background: '#f8fafc',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex',
+          alignItems: 'center',
           gap: '6px',
           overflowX: 'auto',
           whiteSpace: 'nowrap'
         }}>
+          {activeCategoryLabel && (
+            <span style={{
+              fontSize: '0.64rem',
+              fontWeight: 800,
+              color: '#0284c7',
+              background: '#e0f2fe',
+              border: '1px solid #bae6fd',
+              padding: '3px 8px',
+              borderRadius: '12px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em'
+            }}>
+              Context: {activeCategoryLabel}
+            </span>
+          )}
           {QUICK_PROMPTS.map((qp, idx) => (
             <button
               key={idx}
@@ -322,3 +345,4 @@ export default function AtlasAiCopilotDrawer({ isOpen, onClose }) {
     </div>
   );
 }
+
