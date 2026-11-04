@@ -63,7 +63,7 @@ const CLINICAL_PRESETS = [
     name: 'Tissue Repair Protocol',
     icon: '🩹',
     description: 'BPC-157 (10mg) + TB-500 (10mg)',
-    searchTerms: ['bpc', 'tb-500'],
+    searchTerms: ['bpc-157', 'tb-500'],
     dosageFilter: '10mg',
     accent: '#0284c7',
     bg: '#f0f9ff'
@@ -103,7 +103,7 @@ const CLINICAL_PRESETS = [
     name: 'GH Secretagogue Axis',
     icon: '🚀',
     description: 'CJC-1295 (5mg) + Ipamorelin (5mg)',
-    searchTerms: ['cjc', 'ipamorelin'],
+    searchTerms: ['cjc-1295', 'ipamorelin'],
     dosageFilter: '5mg',
     accent: '#0d9488',
     bg: '#f0fdfa'
@@ -372,11 +372,18 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     const itemsToAdd = {};
 
     preset.searchTerms.forEach(term => {
+      const cleanTerm = term.toLowerCase().trim();
+      // Prioritize pure individual peptide without picking up combo blends (e.g. 'tb-500' shouldn't grab 'bpc-157 + tb-500')
       const match = processedProducts.find(p => {
-        const name = (p.productName || '').toLowerCase();
+        const name = (p.productName || '').toLowerCase().trim();
         const dose = (p.dosage || '').toLowerCase();
-        return name.includes(term) && (preset.dosageFilter ? dose.includes(preset.dosageFilter) : true);
-      }) || processedProducts.find(p => (p.productName || '').toLowerCase().includes(term));
+        const isCleanMatch = (name === cleanTerm || name.startsWith(`${cleanTerm} `) || name.startsWith(`${cleanTerm}(`)) && !name.includes('+');
+        return isCleanMatch && (preset.dosageFilter ? dose.includes(preset.dosageFilter) : true);
+      }) || processedProducts.find(p => {
+        const name = (p.productName || '').toLowerCase().trim();
+        const dose = (p.dosage || '').toLowerCase();
+        return name.includes(cleanTerm) && (preset.dosageFilter ? dose.includes(preset.dosageFilter) : true);
+      }) || processedProducts.find(p => (p.productName || '').toLowerCase().includes(cleanTerm));
 
       if (match) {
         itemsToAdd[match.id] = match;
