@@ -27,7 +27,8 @@ import {
   Trash2,
   X,
   MessageCircle,
-  Zap
+  Zap,
+  BookOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
@@ -37,18 +38,32 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import EmptyState from '@/components/ui/EmptyState';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
+import ClinicalProtocolDrawer from '@/components/pricing/ClinicalProtocolDrawer';
+import AtlasAiCopilotDrawer from '@/components/pricing/AtlasAiCopilotDrawer';
 import { COUNTRIES } from '@/data/countries';
 import '../colway/ColwayPriceList.css';
 
 const CATEGORY_MAP = {
-  metabolic: { label: 'Metabolic & GLP-1', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
-  repair: { label: 'Tissue Repair & Healing', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd' },
-  longevity: { label: 'Longevity & Cellular', color: '#7c3aed', bg: '#faf5ff', border: '#e9d5ff' },
-  neuro: { label: 'Neuro & Cognitive', color: '#ea580c', bg: '#fff7ed', border: '#ffedd5' },
-  growth_hormone: { label: 'GH Secretagogues', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4' },
-  cosmetic: { label: 'Dermal & Follicular', color: '#db2777', bg: '#fdf2f8', border: '#fbcfe8' },
-  general_health: { label: 'Bioactive Peptide', color: '#475569', bg: '#f8fafc', border: '#e2e8f0' }
+  repair: { label: 'Tissue Repair & Healing', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', icon: '🩹' },
+  metabolic: { label: 'Metabolic & GLP-1', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: '⚡' },
+  longevity: { label: 'Longevity & Cellular', color: '#7c3aed', bg: '#faf5ff', border: '#e9d5ff', icon: '🧬' },
+  neuro: { label: 'Neuro & Cognitive', color: '#ea580c', bg: '#fff7ed', border: '#ffedd5', icon: '🧠' },
+  growth_hormone: { label: 'GH Secretagogues', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: '🚀' },
+  cosmetic: { label: 'Dermal & Follicular', color: '#db2777', bg: '#fdf2f8', border: '#fbcfe8', icon: '✨' },
+  general_health: { label: 'Bioactive Peptide', color: '#475569', bg: '#f8fafc', border: '#e2e8f0', icon: '🧪' },
+  supplies: { label: 'Solvents & Supplies', color: '#0891b2', bg: '#ecfeff', border: '#a5f3fc', icon: '💧' }
 };
+
+const CATEGORY_ORDER = [
+  'repair',
+  'metabolic',
+  'longevity',
+  'neuro',
+  'growth_hormone',
+  'cosmetic',
+  'general_health',
+  'supplies'
+];
 
 const DOSAGE_STRENGTHS = [
   { id: 'all', label: 'All Strengths' },
@@ -63,50 +78,125 @@ const CLINICAL_PRESETS = [
     name: 'Tissue Repair Protocol',
     icon: '🩹',
     description: 'BPC-157 (10mg) + TB-500 (10mg)',
+    categoryName: 'Musculoskeletal & Tendon Repair',
+    accent: '#0284c7',
+    accentBg: '#f0f9ff',
     searchTerms: ['bpc-157', 'tb-500'],
     dosageFilter: '10mg',
-    accent: '#0284c7',
-    bg: '#f0f9ff'
+    cycleDuration: '6 to 8 Consecutive Weeks',
+    administration: 'Subcutaneous (SQ) injection near injury site or abdomen',
+    posology: 'BPC-157: 250–500 mcg twice daily. TB-500: 2.0–2.5 mg twice weekly.',
+    bacWater: '2.0 mL Bacteriostatic Water per vial',
+    mechanism: 'BPC-157 accelerates focal neo-angiogenesis via VEGF upregulation and stabilizes granulation tissue. TB-500 acts as a cellular G-actin sequestrant, inducing rapid migration of myoblasts and endothelial progenitor cells into damaged connective tissue matrices.',
+    outcomes: [
+      'Accelerated collagen Type I & III synthesis in tendon-to-bone junctions',
+      'Rapid resolution of micro-vascular inflammation and muscular soreness',
+      'Systemic gastro-protective endothelial stabilization'
+    ],
+    peptides: [
+      { name: 'BPC-157', dosage: '10 mg', role: 'Angiogenic Repair & Collagen Synthesis' },
+      { name: 'TB-500 (Thymosin Beta-4)', dosage: '10 mg', role: 'Actin Regulation & Fibroblast Migration' }
+    ]
   },
   {
     id: 'metabolic_glp1',
     name: 'Metabolic & GLP-1 Protocol',
     icon: '⚡',
     description: 'Tirzepatide (10mg) + Retatrutide (10mg)',
+    categoryName: 'Dual/Triple Incretin Synergy',
+    accent: '#16a34a',
+    accentBg: '#f0fdf4',
     searchTerms: ['tirzepatide', 'retatrutide'],
     dosageFilter: '10mg',
-    accent: '#16a34a',
-    bg: '#f0fdf4'
+    cycleDuration: '8 to 12 Weeks Titration',
+    administration: 'Subcutaneous (SQ) injection once weekly (abdominal rotation)',
+    posology: 'Starting titration: 2.5 mg once weekly for 4 weeks, escalating to 5.0 mg – 7.5 mg weekly based on glycemic/adipose response.',
+    bacWater: '2.0 mL Bacteriostatic Water per vial',
+    mechanism: 'Simultaneous GLP-1 (satiety & gastric delay), GIP (adipose lipid buffering & insulinotropic balance), and Glucagon receptor agonism (mitochondrial thermogenesis and resting energy expenditure enhancement).',
+    outcomes: [
+      'Significant reduction in visceral adipose tissue and waist circumference',
+      'Suppression of food noise and restoration of glycemic sensitivity',
+      'Hepatic steatosis resolution through glucagon-mediated lipid clearance'
+    ],
+    peptides: [
+      { name: 'Tirzepatide', dosage: '10 mg', role: 'Dual GIP / GLP-1 Receptor Agonist' },
+      { name: 'Retatrutide', dosage: '10 mg', role: 'Triple GIP / GLP-1 / Glucagon Agonist' }
+    ]
   },
   {
     id: 'cellular_longevity',
     name: 'Longevity & Cellular Protocol',
     icon: '🧬',
     description: 'Epithalon (10mg) + MOTS-c (10mg)',
+    categoryName: 'Telomeric & Mitochondrial Health',
+    accent: '#7c3aed',
+    accentBg: '#faf5ff',
     searchTerms: ['epithalon', 'mots-c'],
     dosageFilter: '10mg',
-    accent: '#7c3aed',
-    bg: '#faf5ff'
+    cycleDuration: '20 to 60 Days Cyclic Routine',
+    administration: 'Subcutaneous (SQ) injection (morning upon waking)',
+    posology: 'Epithalon: 5–10 mg daily for 10–20 days (repeat 2x per year). MOTS-c: 5–10 mg 3x weekly for 4–8 weeks.',
+    bacWater: '2.0 mL Bacteriostatic Water per vial',
+    mechanism: 'Epithalon induces telomerase elongation and regulates pineal melatonin/circadian expression. MOTS-c translocates to the cell nucleus upon metabolic stress to trigger AMPK activation and mitochondrial biogenesis.',
+    outcomes: [
+      'Cellular senescence defense and genomic integrity stabilization',
+      'Enhanced insulin sensitivity and systemic metabolic flexibility',
+      'Deep circadian rhythm realignment and slow-wave sleep depth'
+    ],
+    peptides: [
+      { name: 'Epithalon', dosage: '10 mg', role: 'Telomerase Induction & Pineal Regulation' },
+      { name: 'MOTS-c', dosage: '10 mg', role: 'Mitochondrial-Derived Peptide & AMPK Activator' }
+    ]
   },
   {
     id: 'cognitive_neuro',
     name: 'Neuro & Focus Protocol',
     icon: '🧠',
     description: 'Semax (10mg) + Selank (10mg)',
+    categoryName: 'Neuropeptide Cognitive Optimization',
+    accent: '#ea580c',
+    accentBg: '#fff7ed',
     searchTerms: ['semax', 'selank'],
     dosageFilter: '10mg',
-    accent: '#ea580c',
-    bg: '#fff7ed'
+    cycleDuration: '4 to 6 Weeks Consecutive Cycle',
+    administration: 'Subcutaneous (SQ) or Intranasal reconstitutions',
+    posology: 'Semax: 250–500 mcg morning. Selank: 250–500 mcg late afternoon or evening.',
+    bacWater: '2.0 mL Bacteriostatic Water per vial',
+    mechanism: 'Semax triggers potent BDNF (Brain-Derived Neurotrophic Factor) and TrkB receptor expression in the hippocampus. Selank modulates GABAergic neurotransmission and suppresses enkephalin degradation without sedation.',
+    outcomes: [
+      'Marked enhancement of executive focus, working memory, and mental stamina',
+      'Robust stress resilience and reduction of Generalized Anxiety symptoms',
+      'Cerebrovascular neuroprotection and synaptic plasticity enhancement'
+    ],
+    peptides: [
+      { name: 'Semax', dosage: '10 mg', role: 'BDNF/TrkB Upregulation & Executive Function' },
+      { name: 'Selank', dosage: '10 mg', role: 'GABA-A Modulation & Stress Reduction' }
+    ]
   },
   {
     id: 'gh_secretagogue',
     name: 'GH Secretagogue Axis',
     icon: '🚀',
     description: 'CJC-1295 (5mg) + Ipamorelin (5mg)',
+    categoryName: 'Somatotropic Pituitary Pulsatility',
+    accent: '#0d9488',
+    accentBg: '#f0fdfa',
     searchTerms: ['cjc-1295', 'ipamorelin'],
     dosageFilter: '5mg',
-    accent: '#0d9488',
-    bg: '#f0fdfa'
+    cycleDuration: '8 to 12 Consecutive Weeks (5 days on / 2 days off)',
+    administration: 'Subcutaneous (SQ) pre-bedtime on an empty stomach (2h post-meal)',
+    posology: '100–200 mcg CJC-1295 + 100–300 mcg Ipamorelin once daily before sleep.',
+    bacWater: '2.0 mL Bacteriostatic Water per vial',
+    mechanism: 'CJC-1295 (GHRH analog) amplifies natural growth hormone pulse amplitude, while Ipamorelin (selective GHSR-1a agonist) triggers pituitary release without elevating cortisol, prolactin, or appetite-stimulating ghrelin.',
+    outcomes: [
+      'Pulsatile nocturnal growth hormone & circulating IGF-1 elevation',
+      'Enhanced lean body mass preservation and lipolysis',
+      'Accelerated micro-connective tissue repair and deeper stage-4 restorative sleep'
+    ],
+    peptides: [
+      { name: 'CJC-1295 (No DAC)', dosage: '5 mg', role: 'GHRH Secretagogue Pulse Amplifier' },
+      { name: 'Ipamorelin', dosage: '5 mg', role: 'Selective Ghrelin/GHSR-1a Receptor Agonist' }
+    ]
   }
 ];
 
@@ -119,6 +209,8 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22)
   const [copied, setCopied] = useState(false);
   const [hasRestoredCart, setHasRestoredCart] = useState(false);
+  const [selectedProtocol, setSelectedProtocol] = useState(null);
+  const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
 
   // Debounce search query to keep main thread at 60fps on mobile (150ms)
   useEffect(() => {
@@ -236,13 +328,21 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     })}`;
   }, [currencySymbol, fxRate]);
 
-  // Map and categorize products
+  // Helper to extract numeric dosage for ascending sort (2mg < 5mg < 10mg < 20mg)
+  const parseDoseNum = (str = '') => {
+    const match = String(str).match(/(\d+(?:\.\d+)?)/);
+    return match ? parseFloat(match[1]) : 0;
+  };
+
+  // Map, categorize and sort products by Category Priority and Ascending Dose
   const processedProducts = useMemo(() => {
-    return initialProducts.map((p, index) => {
+    const mapped = initialProducts.map((p) => {
       const nameLower = (p.productName || '').toLowerCase();
       let categoryKey = p.primaryGoal || 'general_health';
 
-      if (nameLower.includes('semaglutide') || nameLower.includes('tirzepatide') || nameLower.includes('retatrutide') || nameLower.includes('aod') || nameLower.includes('cagrilintide') || nameLower.includes('survodutide')) {
+      if (nameLower.includes('bac water') || nameLower.includes('bacteriostatic') || nameLower.includes('water') || nameLower.includes('diluent') || nameLower.includes('solvent') || nameLower.includes('saline')) {
+        categoryKey = 'supplies';
+      } else if (nameLower.includes('semaglutide') || nameLower.includes('tirzepatide') || nameLower.includes('retatrutide') || nameLower.includes('aod') || nameLower.includes('cagrilintide') || nameLower.includes('survodutide')) {
         categoryKey = 'metabolic';
       } else if (nameLower.includes('bpc') || nameLower.includes('tb-500') || nameLower.includes('kpv') || nameLower.includes('thymosin beta')) {
         categoryKey = 'repair';
@@ -258,11 +358,30 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
 
       return {
         ...p,
-        itemNumber: index + 1,
         categoryKey,
         categoryMeta: CATEGORY_MAP[categoryKey] || CATEGORY_MAP.general_health
       };
     });
+
+    // Sort by Category Priority Order, then by Product Name, then by Numerical Dose ascending
+    const sorted = [...mapped].sort((a, b) => {
+      const catA = CATEGORY_ORDER.indexOf(a.categoryKey) !== -1 ? CATEGORY_ORDER.indexOf(a.categoryKey) : 99;
+      const catB = CATEGORY_ORDER.indexOf(b.categoryKey) !== -1 ? CATEGORY_ORDER.indexOf(b.categoryKey) : 99;
+      if (catA !== catB) return catA - catB;
+
+      const nameA = (a.productName || '').trim();
+      const nameB = (b.productName || '').trim();
+      const comp = nameA.localeCompare(nameB);
+      if (comp !== 0) return comp;
+
+      return parseDoseNum(a.dosage) - parseDoseNum(b.dosage);
+    });
+
+    // Assign sequential item numbers
+    return sorted.map((p, idx) => ({
+      ...p,
+      itemNumber: idx + 1
+    }));
   }, [initialProducts]);
 
   // Filtering with debounced query (Keeps 60fps responsiveness on mobile devices)
@@ -367,7 +486,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   }, [totalCartCount, totalCartValueUsd, shippingCostUsd]);
 
   // 1-Click Protocol Preset Addition Helper (Mejora #2)
-  const handleAddProtocolPreset = useCallback((preset) => {
+  const handleAddProtocolPreset = useCallback((preset, isPack10 = false) => {
     let addedCount = 0;
     const itemsToAdd = {};
 
@@ -396,14 +515,21 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
         const updated = { ...prev };
         Object.values(itemsToAdd).forEach(prod => {
           const current = updated[prod.id] || { quantity1x: 0, quantity10x: 0, product: prod };
-          updated[prod.id] = {
-            ...current,
-            quantity1x: current.quantity1x + 1
-          };
+          if (isPack10) {
+            updated[prod.id] = {
+              ...current,
+              quantity10x: current.quantity10x + 1
+            };
+          } else {
+            updated[prod.id] = {
+              ...current,
+              quantity1x: current.quantity1x + 1
+            };
+          }
         });
         return updated;
       });
-      toast.success(`Added ${preset.name} (${addedCount} formulations) to request! ✓`);
+      toast.success(`Added ${preset.name} (${addedCount} formulations${isPack10 ? ' · Pack ×10 Boxes' : ''}) to request! ✓`);
     } else {
       toast.info(`Could not automatically locate items for ${preset.name}`);
     }
@@ -571,6 +697,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       key: 'itemNumber',
       label: '#',
       width: '4%',
+      align: 'center',
       sortable: true,
       render: (val, row) => (
         <span style={{ fontFamily: 'monospace', fontSize: '0.80rem', color: '#64748b', fontWeight: 600 }}>
@@ -582,38 +709,49 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       key: 'productName',
       label: 'Peptide Formulation & Concentration',
       width: '42%',
+      align: 'left', // STRICT: Left-aligned for clean price list readability
       sortable: true,
       render: (_, row) => (
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: '0.94rem', color: '#0f172a', letterSpacing: '-0.01em' }}>
-            {row.productName}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: '0.78rem',
-              fontWeight: 750,
-              color: '#0369a1',
-              background: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              padding: '2px 8px',
-              borderRadius: '5px',
-              letterSpacing: '-0.01em'
-            }}>
-              {row.dosage}
+        <div style={{ textAlign: 'left', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 800, fontSize: '0.96rem', color: '#0f172a', letterSpacing: '-0.01em' }}>
+              {row.productName}
             </span>
+            {row.dosage && (
+              <span style={{
+                fontSize: '0.78rem',
+                fontWeight: 800,
+                fontFamily: 'monospace',
+                color: '#0369a1',
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                padding: '2px 8px',
+                borderRadius: '5px',
+                letterSpacing: '-0.01em',
+                whiteSpace: 'nowrap'
+              }}>
+                {row.dosage}
+              </span>
+            )}
             <span style={{
-              fontSize: '0.68rem',
+              fontSize: '0.66rem',
               fontWeight: 700,
               color: row?.categoryMeta?.color,
               background: row?.categoryMeta?.bg,
               border: `1px solid ${row?.categoryMeta?.border}`,
-              padding: '2px 8px',
-              borderRadius: '5px',
+              padding: '1px 6px',
+              borderRadius: '4px',
               textTransform: 'uppercase',
-              letterSpacing: '0.03em'
+              letterSpacing: '0.03em',
+              whiteSpace: 'nowrap'
             }}>
               {row?.categoryMeta?.label}
             </span>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>Sterile Lyophilized Vial (10R Borosilicate)</span>
+            <span>•</span>
+            <span style={{ color: '#0d9488', fontWeight: 650 }}>≥99.0% HPLC Analytical Purity</span>
           </div>
         </div>
       )
@@ -622,9 +760,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       key: 'unitPrice',
       label: 'Single Vial (1x)',
       width: '18%',
+      align: 'left',
       sortable: true,
       render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
           <span style={{ fontFamily: 'monospace', fontWeight: 750, color: '#0f172a', fontSize: '0.95rem' }}>
             {formatPrice(val ?? row.unitPrice)}
           </span>
@@ -636,13 +775,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       key: 'pack10Price',
       label: 'Box of 10 (Pack ×10)',
       width: '20%',
+      align: 'left',
       sortable: true,
       render: (_, row) => {
         const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
         const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
         const discountPct = Math.max(10, Math.round((1 - (p10 / (row.unitPrice * 10))) * 100));
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#047857', fontSize: '0.95rem' }}>
                 {formatPrice(p10)}
@@ -670,8 +810,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       key: 'actions',
       label: 'Order Request',
       width: '16%',
+      align: 'right',
       render: (_, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
           <button
             onClick={() => handleAddToCart(row, '1x')}
             style={{
@@ -683,13 +824,15 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               borderRadius: '5px',
               color: '#1e293b',
               cursor: 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '4px',
+              whiteSpace: 'nowrap'
             }}
-            title="Add 1 Single Vial"
+            title="Add 1 single vial to proforma"
           >
-            +1 Vial
+            <Plus size={11} />
+            <span>1 Vial</span>
           </button>
           <button
             onClick={() => handleAddToCart(row, '10x')}
@@ -702,19 +845,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               borderRadius: '5px',
               color: '#ffffff',
               cursor: 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '4px',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 1px 2px rgba(2, 132, 199, 0.25)'
             }}
-            title="Add Box of 10 Vials (-15% volume discount)"
+            title="Add manufacturer box of 10 vials (-volume discount)"
           >
-            <Box size={12} />
-            +Pack ×10
+            <Box size={11} />
+            <span>+Pack ×10</span>
           </button>
         </div>
       )
     }
-  ], [formatPrice]);
+  ], [formatPrice, handleAddToCart]);
 
   return (
     <div className="colway-price-root">
@@ -808,9 +953,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       </header>
 
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem 1.5rem 4rem 1.5rem' }}>
+      <main style={{ maxWidth: '1440px', margin: '0 auto', padding: '1.25rem 1.25rem 4rem 1.25rem' }}>
         {/* Page Header */}
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '1.25rem' }}>
           <Breadcrumb items={[
             { label: 'B2B Portal', href: '/' },
             { label: 'Official Price Schedules', href: '/pricing/peptides' },
@@ -847,7 +992,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', margin: 0 }}>
                 {isDistributor ? 'Certified Clinical Peptide Vials • Distributor B2B' : 'Certified Clinical Peptide Vials • Wholesaler & Clinic'}
               </h1>
-              <p style={{ fontSize: '0.88rem', color: '#64748b', marginTop: '4px', maxWidth: '750px' }}>
+              <p style={{ fontSize: '0.88rem', color: '#64748b', marginTop: '4px', maxWidth: '850px' }}>
                 {isDistributor
                   ? 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate). Strictly applied +15% margin over Lotusland cost with manufacturer box volume pricing.'
                   : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides. Standard wholesale tier with manufacturer 10-pack volume savings.'
@@ -879,334 +1024,474 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           </div>
         </div>
 
-        {/* ── 4 KPIs with Scope Switcher (Golden Rule #22) ── */}
+        {/* ── Google Cloud Console 2-Column Portal Layout ── */}
         <div style={{
-          background: '#ffffff',
-          borderRadius: '10px',
-          border: '1px solid #e2e8f0',
-          padding: '1.25rem',
-          marginBottom: '1.5rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+          display: 'flex',
+          gap: '1.25rem',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap'
         }}>
-          {/* Scope Indicator & Switcher */}
-          <div style={{
+          {/* ── Left Navigation Rail / Sidebar ── */}
+          <aside style={{
+            width: '290px',
+            flexShrink: 0,
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1rem',
-            paddingBottom: '0.75rem',
-            borderBottom: '1px solid #f1f5f9',
-            flexWrap: 'wrap',
-            gap: '8px'
+            flexDirection: 'column',
+            gap: '1rem',
+            position: 'sticky',
+            top: '72px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                color: scopeMode === 'filtered' ? '#0284c7' : '#475569',
-                background: scopeMode === 'filtered' ? '#f0f9ff' : '#f8fafc',
-                border: `1px solid ${scopeMode === 'filtered' ? '#bae6fd' : '#e2e8f0'}`,
-                padding: '2px 8px',
-                borderRadius: '4px'
-              }}>
-                {scopeMode === 'filtered' ? `Matching Active Filters (${filteredProducts.length} Formulations)` : `Entire Database (${processedProducts.length} Formulations)`}
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
-              <span>Metrics Scope:</span>
-              <div className="pill-group" style={{ background: '#f1f5f9' }}>
-                <button
-                  onClick={() => setScopeMode('filtered')}
-                  className={`pill-btn ${scopeMode === 'filtered' ? 'active' : ''}`}
-                  style={{ color: scopeMode === 'filtered' ? '#0284c7' : '#64748b' }}
-                >
-                  Filtered View
-                </button>
-                <button
-                  onClick={() => setScopeMode('global')}
-                  className={`pill-btn ${scopeMode === 'global' ? 'active' : ''}`}
-                  style={{ color: scopeMode === 'global' ? '#0284c7' : '#64748b' }}
-                >
-                  Global Database
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 4 Standard Metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                Available Formulations
-              </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                {scopeMode === 'filtered' ? filteredProducts.length : processedProducts.length}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#0284c7', marginTop: '2px' }}>
-                Sterile Lyophilized Vials
-              </div>
-            </div>
-
-            <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                Volume Pack Tier
-              </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#059669', marginTop: '2px' }}>
-                -15% Off
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#059669', marginTop: '2px' }}>
-                On 10+ Vial Box Orders
-              </div>
-            </div>
-
-            <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                Purity Verification
-              </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                ≥99.0%
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
-                HPLC & MS Analytical Testing
-              </div>
-            </div>
-
-            <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                Analytical Quality
-              </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                100% COA
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
-                Batch HPLC & Mass Spec Tested
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Global Search & Filters (Golden Rule #7) ── */}
-        <div style={{ marginBottom: '1.25rem' }}>
-          <GlobalSearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)..."
-            size="lg"
-            resultCount={filteredProducts.length}
-            filters={
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => setSelectedCategory('all')}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '20px',
-                      fontSize: '0.72rem',
-                      fontWeight: 650,
-                      border: '1px solid',
-                      cursor: 'pointer',
-                      background: selectedCategory === 'all' ? '#0f172a' : '#ffffff',
-                      color: selectedCategory === 'all' ? '#ffffff' : '#475569',
-                      borderColor: selectedCategory === 'all' ? '#0f172a' : '#cbd5e1'
-                    }}
-                  >
-                    All Categories ({processedProducts.length})
-                  </button>
-                  {Object.entries(CATEGORY_MAP).map(([key, meta]) => {
-                    const count = processedProducts.filter(p => p.categoryKey === key).length;
-                    if (count === 0) return null;
-                    const active = selectedCategory === key;
-                    return (
-                      <button
-                        key={key}
-                        onClick={() => setSelectedCategory(key)}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '20px',
-                          fontSize: '0.72rem',
-                          fontWeight: 650,
-                          border: '1px solid',
-                          cursor: 'pointer',
-                          background: active ? meta.color : '#ffffff',
-                          color: active ? '#ffffff' : meta.color,
-                          borderColor: meta.border
-                        }}
-                      >
-                        {meta.label} ({count})
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Dosage Strength Quick Filter Pills (Mejora #5) */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
-                  <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    Strength:
+            {/* 1. Atlas AI Clinical Copilot (Key Differentiator) */}
+            <div style={{
+              background: 'linear-gradient(135deg, #0b192c 0%, #1e293b 100%)',
+              borderRadius: '10px',
+              padding: '14px',
+              color: '#ffffff',
+              border: '1px solid rgba(56, 189, 248, 0.3)',
+              boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={16} color="#38bdf8" />
+                  <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#f8fafc', letterSpacing: '-0.01em' }}>
+                    ✦ Atlas AI Clinical Copilot
                   </span>
-                  {DOSAGE_STRENGTHS.map(st => {
-                    const isSelected = selectedStrength === st.id;
-                    return (
-                      <button
-                        key={st.id}
-                        type="button"
-                        onClick={() => setSelectedStrength(st.id)}
-                        style={{
-                          padding: '2px 9px',
-                          borderRadius: '20px',
-                          fontSize: '0.70rem',
-                          fontWeight: isSelected ? 750 : 600,
-                          border: '1px solid',
-                          cursor: 'pointer',
-                          background: isSelected ? '#0284c7' : '#ffffff',
-                          color: isSelected ? '#ffffff' : '#475569',
-                          borderColor: isSelected ? '#0284c7' : '#cbd5e1',
-                          transition: 'all 0.12s ease'
-                        }}
-                      >
-                        {st.label}
-                      </button>
-                    );
-                  })}
-
-                  {(selectedCategory !== 'all' || selectedStrength !== 'all' || searchQuery) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedCategory('all');
-                        setSelectedStrength('all');
-                        setSearchQuery('');
-                      }}
-                      style={{
-                        marginLeft: 'auto',
-                        border: 'none',
-                        background: 'none',
-                        color: '#dc2626',
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Reset Filters ×
-                    </button>
-                  )}
                 </div>
+                <span style={{
+                  fontSize: '0.62rem',
+                  fontWeight: 800,
+                  background: 'rgba(56, 189, 248, 0.2)',
+                  color: '#38bdf8',
+                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  padding: '1px 5px',
+                  borderRadius: '4px'
+                }}>
+                  ACTIVE
+                </span>
               </div>
-            }
-          />
-        </div>
-
-        {/* ── 1-Click Clinical Protocol Presets (Starter Packs - Mejora #2) ── */}
-        <div style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '10px',
-          border: '1px solid #e2e8f0',
-          padding: '12px 16px',
-          marginBottom: '1.25rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Zap size={15} color="#0284c7" />
-              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Popular Clinical Protocols (1-Click Presets)
-              </span>
-            </div>
-            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-              Pre-configured synergistic combinations for medical practices
-            </span>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-            gap: '8px'
-          }}>
-            {CLINICAL_PRESETS.map(preset => (
-              <div
-                key={preset.id}
+              <p style={{ fontSize: '0.74rem', color: '#94a3b8', margin: '0 0 10px 0', lineHeight: 1.45 }}>
+                Authoritative pharmacopeia engine for clinical reconstitution math, syringe calibration, and molecular synergy analysis.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsAtlasAiOpen(true)}
                 style={{
-                  border: `1px solid ${preset.accent}30`,
-                  borderRadius: '8px',
-                  padding: '8px 10px',
-                  backgroundColor: preset.bg,
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #38bdf8',
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  color: '#38bdf8',
+                  fontSize: '0.76rem',
+                  fontWeight: 750,
+                  cursor: 'pointer',
                   display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  gap: '6px'
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '1rem' }}>{preset.icon}</span>
-                    <span style={{ fontWeight: 800, fontSize: '0.80rem', color: '#0f172a' }}>
-                      {preset.name}
-                    </span>
+                <Sparkles size={13} />
+                <span>Consult Atlas AI Copilot</span>
+              </button>
+            </div>
+
+            {/* 2. Peptide Categories Navigation Tree */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '10px',
+              border: '1px solid #e2e8f0',
+              padding: '12px 14px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+            }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                Peptide Categories
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory('all')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '6px 10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: selectedCategory === 'all' ? '#0f172a' : 'transparent',
+                    color: selectedCategory === 'all' ? '#ffffff' : '#334155',
+                    fontSize: '0.78rem',
+                    fontWeight: selectedCategory === 'all' ? 750 : 600,
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                >
+                  <span>All Formulations</span>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    background: selectedCategory === 'all' ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
+                    color: selectedCategory === 'all' ? '#ffffff' : '#64748b',
+                    padding: '1px 6px',
+                    borderRadius: '10px'
+                  }}>
+                    {processedProducts.length}
+                  </span>
+                </button>
+
+                {CATEGORY_ORDER.map(key => {
+                  const meta = CATEGORY_MAP[key];
+                  if (!meta) return null;
+                  const count = processedProducts.filter(p => p.categoryKey === key).length;
+                  if (count === 0) return null;
+                  const isSelected = selectedCategory === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSelectedCategory(key)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: isSelected ? meta.bg : 'transparent',
+                        color: isSelected ? meta.color : '#475569',
+                        fontSize: '0.76rem',
+                        fontWeight: isSelected ? 750 : 550,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>{meta.icon}</span>
+                        <span>{meta.label}</span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.66rem',
+                        fontWeight: 700,
+                        background: isSelected ? meta.color : '#f1f5f9',
+                        color: isSelected ? '#ffffff' : '#64748b',
+                        padding: '1px 6px',
+                        borderRadius: '10px'
+                      }}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Clinical Protocols Directory (5 Synergies) */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '10px',
+              border: '1px solid #e2e8f0',
+              padding: '12px 14px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Clinical Protocols
+                </div>
+                <span style={{ fontSize: '0.65rem', color: '#0284c7', fontWeight: 700 }}>5 Presets</span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {CLINICAL_PRESETS.map(preset => (
+                  <div
+                    key={preset.id}
+                    style={{
+                      padding: '9px 10px',
+                      borderRadius: '7px',
+                      border: `1px solid ${preset.accent}30`,
+                      background: preset.bg,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ fontSize: '0.90rem' }}>{preset.icon}</span>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>
+                          {preset.name}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.70rem', color: '#475569', marginTop: '2px' }}>
+                        {preset.description}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProtocol(preset)}
+                        style={{
+                          flex: 1,
+                          padding: '4px 6px',
+                          borderRadius: '4px',
+                          border: '1px solid #cbd5e1',
+                          background: '#ffffff',
+                          color: '#334155',
+                          fontSize: '0.68rem',
+                          fontWeight: 650,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '3px'
+                        }}
+                        title="View full clinical dossier, mechanism, posology & reconstitution"
+                      >
+                        <BookOpen size={11} />
+                        <span>Consultar</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddProtocolPreset(preset, false)}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: `1px solid ${preset.accent}`,
+                          background: preset.accent,
+                          color: '#ffffff',
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}
+                        title="Add 1 cycle to proforma request"
+                      >
+                        <Plus size={11} />
+                        <span>+ Añadir</span>
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px' }}>
-                    {preset.description}
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* ── Main Data Workspace Area ── */}
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            {/* ── 4 KPIs with Scope Switcher (Golden Rule #22) ── */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '10px',
+              border: '1px solid #e2e8f0',
+              padding: '1.25rem',
+              marginBottom: '1.25rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+            }}>
+              {/* Scope Indicator & Switcher */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '1rem',
+                paddingBottom: '0.75rem',
+                borderBottom: '1px solid #f1f5f9',
+                flexWrap: 'wrap',
+                gap: '8px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    color: scopeMode === 'filtered' ? '#0284c7' : '#475569',
+                    background: scopeMode === 'filtered' ? '#f0f9ff' : '#f8fafc',
+                    border: `1px solid ${scopeMode === 'filtered' ? '#bae6fd' : '#e2e8f0'}`,
+                    padding: '2px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    {scopeMode === 'filtered' ? `Matching Active Filters (${filteredProducts.length} Formulations)` : `Entire Database (${processedProducts.length} Formulations)`}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
+                  <span>Metrics Scope:</span>
+                  <div className="pill-group" style={{ background: '#f1f5f9' }}>
+                    <button
+                      onClick={() => setScopeMode('filtered')}
+                      className={`pill-btn ${scopeMode === 'filtered' ? 'active' : ''}`}
+                      style={{ color: scopeMode === 'filtered' ? '#0284c7' : '#64748b' }}
+                    >
+                      Filtered View
+                    </button>
+                    <button
+                      onClick={() => setScopeMode('global')}
+                      className={`pill-btn ${scopeMode === 'global' ? 'active' : ''}`}
+                      style={{ color: scopeMode === 'global' ? '#0284c7' : '#64748b' }}
+                    >
+                      Global Database
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Standard Metrics */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
+                    Available Formulations
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    {scopeMode === 'filtered' ? filteredProducts.length : processedProducts.length}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#0284c7', marginTop: '2px' }}>
+                    Sterile Lyophilized Vials
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleAddProtocolPreset(preset)}
-                  style={{
-                    alignSelf: 'flex-start',
-                    padding: '3px 8px',
-                    fontSize: '0.70rem',
-                    fontWeight: 700,
-                    backgroundColor: '#ffffff',
-                    border: `1px solid ${preset.accent}`,
-                    color: preset.accent,
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '3px'
-                  }}
-                >
-                  <Plus size={11} />
-                  <span>Add Protocol</span>
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
+                    Volume Pack Tier
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#059669', marginTop: '2px' }}>
+                    -15% to -52%
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#059669', marginTop: '2px' }}>
+                    On 10+ Vial Box Orders
+                  </div>
+                </div>
 
-        {/* ── Peptide DataTable (Golden Rule #3) ── */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '10px',
-          border: '1px solid #e2e8f0',
-          overflow: 'hidden',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
-        }}>
-          {filteredProducts.length === 0 ? (
-            <div style={{ padding: '3rem 1.5rem' }}>
-              <EmptyState
-                icon={FileText}
-                title="No peptide formulations found"
-                subtitle="Try adjusting your keyword search or category filter to discover available formulations."
-                action={{
-                  label: 'Clear Filters',
-                  onClick: () => {
-                    setSearchQuery('');
-                    setSelectedCategory('all');
-                  }
-                }}
+                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
+                    Purity Verification
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    ≥99.0%
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
+                    HPLC & MS Analytical Testing
+                  </div>
+                </div>
+
+                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
+                    Analytical Quality
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    100% COA
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
+                    Batch HPLC & Mass Spec Tested
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Global Search & Filters (Golden Rule #7) ── */}
+            <div style={{ marginBottom: '1.25rem' }}>
+              <GlobalSearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)..."
+                size="lg"
+                resultCount={filteredProducts.length}
+                filters={
+                  <div>
+                    {/* Dosage Strength Quick Filter Pills (Mejora #5) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Filter Strength:
+                      </span>
+                      {DOSAGE_STRENGTHS.map(st => {
+                        const isSelected = selectedStrength === st.id;
+                        return (
+                          <button
+                            key={st.id}
+                            type="button"
+                            onClick={() => setSelectedStrength(st.id)}
+                            style={{
+                              padding: '2px 9px',
+                              borderRadius: '20px',
+                              fontSize: '0.70rem',
+                              fontWeight: isSelected ? 750 : 600,
+                              border: '1px solid',
+                              cursor: 'pointer',
+                              background: isSelected ? '#0284c7' : '#ffffff',
+                              color: isSelected ? '#ffffff' : '#475569',
+                              borderColor: isSelected ? '#0284c7' : '#cbd5e1',
+                              transition: 'all 0.12s ease'
+                            }}
+                          >
+                            {st.label}
+                          </button>
+                        );
+                      })}
+
+                      {(selectedCategory !== 'all' || selectedStrength !== 'all' || searchQuery) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCategory('all');
+                            setSelectedStrength('all');
+                            setSearchQuery('');
+                          }}
+                          style={{
+                            marginLeft: 'auto',
+                            border: 'none',
+                            background: 'none',
+                            color: '#dc2626',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Reset Filters ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                }
               />
             </div>
-          ) : (
-            <DataTable
-              data={filteredProducts}
-              columns={columns}
-              keyField="id"
-              pageSize={50}
-              showPagination={true}
-              sortable={true}
-            />
-          )}
+
+            {/* ── Peptide DataTable (Golden Rule #3) ── */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '10px',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+            }}>
+              {filteredProducts.length === 0 ? (
+                <div style={{ padding: '3rem 1.5rem' }}>
+                  <EmptyState
+                    icon={FileText}
+                    title="No peptide formulations found"
+                    subtitle="Try adjusting your keyword search or category filter to discover available formulations."
+                    action={{
+                      label: 'Clear Filters',
+                      onClick: () => {
+                        setSearchQuery('');
+                        setSelectedCategory('all');
+                        setSelectedStrength('all');
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <DataTable
+                  data={filteredProducts}
+                  columns={columns}
+                  keyField="id"
+                  pageSize={50}
+                  showPagination={true}
+                  sortable={true}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </main>
 
@@ -2050,8 +2335,29 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       </div>
 
-      {/* Unified Public Footer */}
-      <PublicUnifiedFooter />
+      {/* ── Clinical Protocol Dossier Drawer ── */}
+      <ClinicalProtocolDrawer
+        isOpen={!!selectedProtocol}
+        onClose={() => setSelectedProtocol(null)}
+        protocol={selectedProtocol}
+        onAddProtocol={handleAddProtocolPreset}
+        formatPrice={formatPrice}
+        currency={currency}
+        currencySymbol={currencySymbol}
+        isDistributor={isDistributor}
+      />
+
+      {/* ── Atlas AI Clinical Copilot Drawer ── */}
+      <AtlasAiCopilotDrawer
+        isOpen={isAtlasAiOpen}
+        onClose={() => setIsAtlasAiOpen(false)}
+        currencySymbol={currencySymbol}
+      />
+
+      {/* Unified Public Footer (Pointer events disabled in B2B Price Portal to prevent distraction) */}
+      <div style={{ pointerEvents: 'none', userSelect: 'none', opacity: 0.85 }}>
+        <PublicUnifiedFooter />
+      </div>
     </div>
   );
 }

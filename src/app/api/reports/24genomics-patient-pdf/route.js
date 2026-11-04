@@ -324,22 +324,22 @@ export async function GET(request) {
 
     const patientIntakeSchedule = [
       {
-        capName: 'CAPSULE A (Morning)',
-        targetPillars: 'Pillar 3 · Verified Probiotics (LGG + BB-12)',
+        capName: 'DOSE 1: UPON WAKING',
+        targetPillars: 'Nutrient [5] · Probiotics (LGG + BB-12)',
         time: '15–30 min Before Breakfast (Empty Stomach)',
-        rule: 'Take 1 capsule with room-temperature water. Acid-resistant DRcaps® protect delicate live cultures from gastric acidity.'
+        rule: 'Take 1 capsule (Dose 1) with water. Acid-resistant DRcaps® protect delicate live cultures from gastric acidity.'
       },
       {
-        capName: 'CAPSULE B (Breakfast)',
-        targetPillars: 'Pillars 2 & 4 · 5-MTHF + Riboflavin + D3/K2',
+        capName: 'DOSE 2: BREAKFAST',
+        targetPillars: 'Nutrients [1]+[2] · Folate + D3/K2 (+[4])',
         time: 'With Breakfast (Containing Dietary Fats)',
-        rule: 'Take 1 capsule with eggs, avocado, or olive oil. Dietary fats maximize micellar absorption of Vitamin D3 and K2.'
+        rule: 'Take 1 capsule (Dose 2) with eggs, avocado, or olive oil. Dietary fats maximize micellar absorption of D3 and K2.'
       },
       {
-        capName: 'CAPSULE C (Evening · 2 Caps)',
-        targetPillars: 'Pillar 4 · 150mg Elemental Mg + Theanine 200mg',
+        capName: 'DOSE 3: BEDTIME (2 Caps)',
+        targetPillars: 'Nutrient [3] · 150mg Mg + Theanine 200mg',
         time: '30–60 min Before Bedtime (2 Capsules)',
-        rule: 'Take 2 capsules with water before sleep. Calms COMT hyper-reactivity, supports restorative sleep & neuromuscular relaxation.'
+        rule: 'Take 2 capsules (Dose 3) with water before sleep. Calms COMT hyper-reactivity, supports restorative sleep & relaxation.'
       }
     ];
 
@@ -700,15 +700,7 @@ export async function GET(request) {
     // Standardized Titles, Priorities & Gene Targets (Human-Friendly Benefit First)
     const STANDARDIZED_CARD_TITLES = [
       {
-        title: 'ENERGY · ACTIVE FOLATE (B9)',
-        priorityBadge: 'PRIORITY 1 · ESSENTIAL',
-        priorityColor: alertRed,
-        priorityBg: badgeRedBg,
-        shortGene: 'MTHFR C677T (TT)',
-        dose: '800 mcg'
-      },
-      {
-        title: 'IMMUNITY · VITAMIN D3 + K2',
+        title: '[1] IMMUNITY · VITAMIN D3 + K2',
         priorityBadge: 'PRIORITY 1 · ESSENTIAL',
         priorityColor: alertRed,
         priorityBg: badgeRedBg,
@@ -716,7 +708,15 @@ export async function GET(request) {
         dose: '4,000 IU + 100 mcg'
       },
       {
-        title: 'SLEEP · CHELATED MAGNESIUM',
+        title: '[2] ENERGY · ACTIVE FOLATE (B9)',
+        priorityBadge: 'PRIORITY 1 · ESSENTIAL',
+        priorityColor: alertRed,
+        priorityBg: badgeRedBg,
+        shortGene: 'MTHFR C677T (TT)',
+        dose: '800 mcg'
+      },
+      {
+        title: '[3] SLEEP · CHELATED MAGNESIUM',
         priorityBadge: 'PRIORITY 2 · RECOMMENDED',
         priorityColor: blueDark,
         priorityBg: blueBg,
@@ -724,7 +724,7 @@ export async function GET(request) {
         dose: '300–400 mg'
       },
       {
-        title: 'VITALITY · B-COMPLEX (B12+B6)',
+        title: '[4] VITALITY · B-COMPLEX (B12+B6)',
         priorityBadge: 'PRIORITY 2 · RECOMMENDED',
         priorityColor: blueDark,
         priorityBg: blueBg,
@@ -732,7 +732,7 @@ export async function GET(request) {
         dose: 'B12 1,000mcg · B6 25mg'
       },
       {
-        title: 'GUT SHIELD · PROBIOTICS',
+        title: '[5] GUT SHIELD · PROBIOTICS',
         priorityBadge: 'PRIORITY 3 · OPTIONAL',
         priorityColor: amberDark,
         priorityBg: amberBg,
@@ -776,7 +776,7 @@ export async function GET(request) {
       });
 
       // Left: Standardized Short Title
-      page2.drawText(`${idx + 1}. ${meta.title}`, {
+      page2.drawText(meta.title, {
         x: 46,
         y: y2 + cardH - 14,
         size: 8.2,

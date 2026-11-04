@@ -803,17 +803,17 @@ export async function GET(request) {
     y1 -= 8;
     const dailySteps = [
       {
-        time: 'UPON WAKING',
+        time: 'DOSE 1 · UPON WAKING',
         meal: 'Empty Stomach (07:30)',
         step: 'Gut Shield Probiotic',
-        action: 'Glass of water (300ml) + Capsule A (DRcaps®).',
+        action: 'Water (300ml) + Dose 1: Nutrient [5] (DRcaps®).',
         why: 'Probiotics reach gut safely without food acid interference.'
       },
       {
-        time: 'BREAKFAST',
+        time: 'DOSE 2 · BREAKFAST',
         meal: 'With Morning Meal (08:30)',
         step: 'Active Folate + D3/K2',
-        action: 'Capsule B + 2 eggs, olive oil or avocado.',
+        action: 'Dose 2: Nutrients [1]+[2] (+[4]) with dietary fats.',
         why: 'Vitamins D & K2 require healthy fats for 100% absorption.'
       },
       {
@@ -824,10 +824,10 @@ export async function GET(request) {
         why: 'Slows sugar absorption and stops 3 PM afternoon slump.'
       },
       {
-        time: 'BEDTIME',
+        time: 'DOSE 3 · BEDTIME',
         meal: '45 Min Before Sleep (22:00)',
         step: 'Magnesium Bisglycinate',
-        action: 'Capsule C + herbal chamomile tea.',
+        action: 'Dose 3: Nutrient [3] (2 capsules) + chamomile tea.',
         why: 'Relaxes muscle fibers and triggers deep REM restorative sleep.'
       }
     ];
@@ -1081,7 +1081,7 @@ export async function GET(request) {
         benefit: '[1] IMMUNITY & BONE STRENGTH',
         nutrient: 'Vitamin D3 + K2 (MK-7)',
         why: 'Your DNA shows slow Vitamin D activation. This synergistic pair directs calcium straight into bones and strengthens daily immune defense.',
-        timing: 'With morning breakfast containing healthy fats (eggs, olive oil, avocado).',
+        timing: 'Dose 2 (Breakfast): With morning meal containing healthy fats (eggs, olive oil, avocado).',
         priority: 'PRIORITY 1 · ESSENTIAL',
         pColor: redText,
         pBg: redBg
@@ -1090,7 +1090,7 @@ export async function GET(request) {
         benefit: '[2] CELLULAR ENERGY & CLARITY',
         nutrient: 'Active Folate (L-5-MTHF)',
         why: 'Bypasses your MTHFR genetic block to keep you clear-headed. Provides clean cellular energy without synthetic unmethylated buildup.',
-        timing: 'Morning with your breakfast.',
+        timing: 'Dose 2 (Breakfast): Morning with your breakfast.',
         priority: 'PRIORITY 1 · ESSENTIAL',
         pColor: redText,
         pBg: redBg
@@ -1099,7 +1099,7 @@ export async function GET(request) {
         benefit: '[3] DEEP REST & STRESS RESET',
         nutrient: 'Magnesium Bisglycinate + Theanine',
         why: 'Calms nerve excitability, relaxes muscle tension after exercise, and quiets racing thoughts for deep slow-wave restorative sleep.',
-        timing: 'Evening: Take 2 capsules 30–60 min before bed with room-temp water.',
+        timing: 'Dose 3 (Bedtime): Take 2 capsules 30–60 min before sleep with room-temp water.',
         priority: 'PRIORITY 2 · RECOMMENDED',
         pColor: blueBorder,
         pBg: blueBg
@@ -1108,7 +1108,7 @@ export async function GET(request) {
         benefit: '[4] METABOLISM & LIVER BALANCE',
         nutrient: 'Methylated B-Complex (B12 + B6)',
         why: 'Essential cofactors that support homocysteine clearance, healthy nerve myelin, and daytime alertness without jitters.',
-        timing: 'Morning with food.',
+        timing: 'Dose 2 (Breakfast): Morning with food.',
         priority: 'PRIORITY 2 · RECOMMENDED',
         pColor: blueBorder,
         pBg: blueBg
@@ -1117,7 +1117,7 @@ export async function GET(request) {
         benefit: '[5] GUT BARRIER & DIGESTION',
         nutrient: 'Targeted Enteric Probiotics',
         why: 'Protective cultures (LGG + BB-12) that re-seed healthy gut flora and defend against bloat, gas, and dairy sensitivities.',
-        timing: 'First thing upon waking with room-temperature water.',
+        timing: 'Dose 1 (Upon Waking): First thing upon waking with room-temperature water.',
         priority: 'PRIORITY 3 · OPTIONAL',
         pColor: amberText,
         pBg: amberBg
@@ -1474,14 +1474,14 @@ export async function GET(request) {
       color: gcpPillText
     });
 
-    page2.drawText('OPTION B: OFFICIAL 3-CAPSULE COMPOUNDED ORDER', {
+    page2.drawText('OPTION B: OFFICIAL 3-DOSE COMPOUNDED REGIMEN', {
       x: 48 + pathwayW + 12,
       y: y2 - 32,
       size: 7.8,
       font: helveticaBold,
       color: navyPrimary
     });
-    const p2Desc = '• Have your selected pack ([1]-[2], [1]-[4], or [1]-[5]) custom-compounded into exactly 3 daily size 0 capsules (Capsule A, B, C).\n• Pros: Only 3 daily capsules, 100% vegetable cellulose (DRcaps®), lactose-free, exact micro-dosages.\n• To order: Hand the prescription order on Page 3 to your clinic.';
+    const p2Desc = '• Have your selected pack ([1]-[2], [1]-[4], or [1]-[5]) custom-compounded into exactly 3 timed daily doses: Dose 1 (Upon Waking), Dose 2 (Breakfast), and Dose 3 (Bedtime).\n• Pros: Exactly 3 intake moments, 100% vegetable cellulose (DRcaps®), lactose-free, exact micro-dosages.\n• To order: Hand the prescription order on Page 3 to your clinic.';
     page2.drawText(p2Desc, {
       x: 48 + pathwayW + 12,
       y: y2 - 47,
