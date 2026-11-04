@@ -43,6 +43,11 @@ export async function GET(request) {
     const blueBg = rgb(224 / 255, 242 / 255, 254 / 255);         // #e0f2fe
     const white = rgb(1, 1, 1);
 
+    // Google Cloud Console UX Semantic Tokens (Neutral, Anti-Bias)
+    const gcpBorder = rgb(218 / 255, 220 / 255, 224 / 255);     // #dadce0 (GCP Card Border)
+    const gcpPillBg = rgb(241 / 255, 243 / 255, 244 / 255);     // #f1f3f4 (GCP Chip Surface)
+    const gcpPillText = rgb(60 / 255, 64 / 255, 67 / 255);      // #3c4043 (GCP Chip Label)
+
     // =========================================================================
     // PAGE 1: MEAL PLAN SELECTION GUIDE & 24-HOUR ROUTINE
     // =========================================================================
@@ -334,7 +339,7 @@ export async function GET(request) {
     // -------------------------------------------------------------------------
     // SECTION 3: THE GOLDEN PLATE SEQUENCING RULE
     // -------------------------------------------------------------------------
-    const seqH = 50;
+    const seqH = 68;
     page1.drawRectangle({
       x: 36,
       y: y1 - seqH,
@@ -361,10 +366,10 @@ export async function GET(request) {
       font: helvetica,
       color: darkSlate,
       maxWidth: p1Width - 96,
-      lineHeight: 11.0
+      lineHeight: 11.5
     });
 
-    y1 -= (seqH + 14);
+    y1 -= (seqH + 18);
 
     // -------------------------------------------------------------------------
     // SECTION 4: 24-HOUR DAILY ROUTINE WITH YOUR MEALS (Chronobiology)
@@ -888,6 +893,7 @@ export async function GET(request) {
 
     // -------------------------------------------------------------------------
     // SECTION 3: HOW DO YOU PREFER TO TAKE IT? (PHARMACY VS COMPOUNDING)
+    // Conforms strictly to Google Cloud UX: 100% symmetric, neutral cards
     // -------------------------------------------------------------------------
     y2 -= 4;
     page2.drawText('3. HOW DO YOU PREFER TO TAKE IT? (TWO SIMPLE SHOPPING PATHWAYS)', {
@@ -900,59 +906,99 @@ export async function GET(request) {
 
     y2 -= 10;
     const pathwayW = (p2Width - 72 - 12) / 2;
-    const pathwayH = 86;
+    const pathwayH = 88;
 
-    // Pathway 1: Local Doha Pharmacy
+    // Pathway 1: Local Doha Pharmacy (Neutral Google Cloud UX Card)
     page2.drawRectangle({
       x: 36,
       y: y2 - pathwayH,
       width: pathwayW,
       height: pathwayH,
-      color: lightBg,
-      borderColor: cardBorder,
+      color: white,
+      borderColor: gcpBorder,
       borderWidth: 1.0
     });
 
-    page2.drawText('OPTION A: LOCAL DOHA PHARMACIES (COMMERCIAL BOTTLES)', {
+    // Pill badge for Option A
+    const p1Pill = 'RETAIL PHARMACY TRACK';
+    const p1PillW = helveticaBold.widthOfTextAtSize(p1Pill, 6.2) + 12;
+    page2.drawRectangle({
       x: 48,
-      y: y2 - 16,
+      y: y2 - 18,
+      width: p1PillW,
+      height: 12,
+      color: gcpPillBg,
+      borderColor: gcpBorder,
+      borderWidth: 0.8
+    });
+    page2.drawText(p1Pill, {
+      x: 54,
+      y: y2 - 15,
+      size: 6.2,
+      font: helveticaBold,
+      color: gcpPillText
+    });
+
+    page2.drawText('OPTION A: LOCAL DOHA PHARMACIES (COMMERCIAL)', {
+      x: 48,
+      y: y2 - 32,
       size: 7.8,
       font: helveticaBold,
-      color: darkSlate
+      color: navyPrimary
     });
-    const p1Desc = '• Buy 2 to 5 separate bottles at retail pharmacies in Qatar (Brands: Solgar, Thorne, Now Foods).\n• Pros: Immediate local purchase.\n• Cons: Taking 4–6 pills from multiple bottles with non-customized generic doses.';
+    const p1Desc = '• Buy 2 to 5 separate bottles at retail pharmacies in Qatar (Brands: Solgar, Thorne, Now Foods).\n• Pros: Immediate local purchase at neighborhood pharmacy.\n• Cons: Taking 4–6 pills from multiple bottles with non-customized generic doses.';
     page2.drawText(p1Desc, {
       x: 48,
-      y: y2 - 34,
+      y: y2 - 47,
       size: 7.2,
       font: helvetica,
-      color: mutedSlate,
+      color: darkSlate,
       maxWidth: pathwayW - 24,
       lineHeight: 10.5
     });
 
-    // Pathway 2: Custom Compounding All-in-One
+    // Pathway 2: Custom Compounding All-in-One (Neutral Google Cloud UX Card)
     page2.drawRectangle({
       x: 36 + pathwayW + 12,
       y: y2 - pathwayH,
       width: pathwayW,
       height: pathwayH,
-      color: rgb(240 / 255, 253 / 255, 250 / 255),
-      borderColor: tealAccent,
-      borderWidth: 1.2
+      color: white,
+      borderColor: gcpBorder,
+      borderWidth: 1.0
+    });
+
+    // Pill badge for Option B
+    const p2Pill = 'CLINICAL COMPOUNDING TRACK';
+    const p2PillW = helveticaBold.widthOfTextAtSize(p2Pill, 6.2) + 12;
+    page2.drawRectangle({
+      x: 48 + pathwayW + 12,
+      y: y2 - 18,
+      width: p2PillW,
+      height: 12,
+      color: gcpPillBg,
+      borderColor: gcpBorder,
+      borderWidth: 0.8
+    });
+    page2.drawText(p2Pill, {
+      x: 54 + pathwayW + 12,
+      y: y2 - 15,
+      size: 6.2,
+      font: helveticaBold,
+      color: gcpPillText
     });
 
     page2.drawText('OPTION B: OFFICIAL 3-CAPSULE COMPOUNDED ORDER', {
       x: 48 + pathwayW + 12,
-      y: y2 - 16,
+      y: y2 - 32,
       size: 7.8,
       font: helveticaBold,
-      color: tealAccent
+      color: navyPrimary
     });
     const p2Desc = '• Have all your genetic cofactors custom-prepared into exactly 3 daily capsules by a compounding pharmacy.\n• Pros: Only 3 capsules/day, zero synthetic binders, zero lactose excipients, exact micro-dosages.\n• To order: Hand the prescription order on Page 3 to your clinic.';
     page2.drawText(p2Desc, {
       x: 48 + pathwayW + 12,
-      y: y2 - 34,
+      y: y2 - 47,
       size: 7.2,
       font: helvetica,
       color: darkSlate,
@@ -1101,9 +1147,9 @@ export async function GET(request) {
         // Generic Document Overview Box (without validation claims)
         dividerPage.drawRectangle({
           x: 76,
-          y: boxTop + 16,
+          y: boxTop + 12,
           width: dWidth - 152,
-          height: 72,
+          height: 76,
           color: lightBg,
           borderColor: cardBorder,
           borderWidth: 0.8
@@ -1111,26 +1157,31 @@ export async function GET(request) {
 
         dividerPage.drawText('DOCUMENT STRUCTURE & GENERAL OVERVIEW:', {
           x: 88,
-          y: boxTop + 68,
+          y: boxTop + 70,
           size: 8.0,
           font: helveticaBold,
           color: navyPrimary
         });
-        dividerPage.drawText('Section I contains the personalized meal plan recommendations, daily routine schedule, and dietary choices designed for daily convenience.', {
+        dividerPage.drawText('• Section I: Personalized meal plan recommendations, daily routine & dietary selections.', {
           x: 88,
-          y: boxTop + 52,
+          y: boxTop + 54,
           size: 7.2,
           font: helvetica,
-          color: darkSlate,
-          maxWidth: dWidth - 176
+          color: darkSlate
         });
-        dividerPage.drawText('Section II includes the full 55-page DNA Nutrition report issued by 24Genetics, containing the complete spectrum of nutritional predispositions, metabolic profiles, and genetic polymorphisms.', {
+        dividerPage.drawText('• Section II: Full 55-page DNA Nutrition laboratory report issued by 24Genetics.', {
           x: 88,
-          y: boxTop + 30,
+          y: boxTop + 38,
           size: 7.2,
           font: helvetica,
-          color: darkSlate,
-          maxWidth: dWidth - 176
+          color: darkSlate
+        });
+        dividerPage.drawText('• Clinical Scope: Complete nutritional predispositions, metabolic profiles & cofactors.', {
+          x: 88,
+          y: boxTop + 22,
+          size: 7.2,
+          font: helvetica,
+          color: mutedSlate
         });
 
         // ---------------------------------------------------------------------

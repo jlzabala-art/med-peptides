@@ -70,8 +70,8 @@ export default function PatientDnaPortalClient({
     if (typeof window !== 'undefined') {
       const url = window.location.href;
       const text = lang === 'es'
-        ? `Hola ${patientName}, aquí tienes tu Dossier Genómico Personalizado: ${url}\n\nIncluye tu guía de alimentación, pauta de suplementación y el informe de 24Genetics.`
-        : `Hello ${patientName}, here is your Personalized Genomic Dossier: ${url}\n\nIt includes your meal plan guide, supplement routine, and the 24Genetics report.`;
+        ? `Hola ${patientName}, aquí tienes tu Dossier Genómico Personalizado: ${url}\n\nBasado estrictamente en tu secuenciación de 24Genetics, el equipo clínico de Atlas ha desarrollado las hojas ejecutivas iniciales con tu plan nutricional y suplementación. Al ser un equipo local basado en UAE, cuentan con plena flexibilidad para realizar cualquier adaptación a medida de tus requerimientos.`
+        : `Hello ${patientName}, here is your Personalized Genomic Dossier: ${url}\n\nBased directly on your 24Genetics sequencing report, the Atlas clinical team has developed the executive opening guides for your meal plan and targeted supplementation. As a local UAE-based team, Atlas offers complete flexibility to make tailored adaptations according to your specific requirements.`;
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
       window.open(waUrl, '_blank', 'noopener,noreferrer');
     }

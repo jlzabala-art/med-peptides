@@ -1028,7 +1028,7 @@ export async function GET(request) {
 
     // Checkbox 2: Option B (Full 3-Capsule)
     page3.drawRectangle({ x: 44, y: y3 + 4, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
-    page3.drawText('OPTION B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C · 3 CAPS/DAY)', { x: 56, y: y3 + 5, size: 6.1, font: helveticaBold, color: tealAccent });
+    page3.drawText('OPTION B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C · 3 CAPS/DAY)', { x: 56, y: y3 + 5, size: 6.1, font: helveticaBold, color: navyPrimary });
     page3.drawText('Includes Capsule A (Enteric Probiotics DRcaps®) for mucosal barrier repair, dairy intolerance & tight junction seal.', { x: 308, y: y3 + 5, size: 5.5, font: helvetica, color: mutedSlate, maxWidth: 210 });
 
     // Streamlined 3-Capsule Compounding Tables (Revised Per Nikolay / Pharmapolis Pharmacist Review)
@@ -1533,9 +1533,9 @@ export async function GET(request) {
         // Generic Document Overview Box (without validation claims)
         dividerPage.drawRectangle({
           x: 76,
-          y: boxTop + 16,
+          y: boxTop + 12,
           width: dWidth - 152,
-          height: 72,
+          height: 76,
           color: lightBg,
           borderColor: cardBorder,
           borderWidth: 0.8
@@ -1543,26 +1543,31 @@ export async function GET(request) {
 
         dividerPage.drawText('DOCUMENT STRUCTURE & GENERAL OVERVIEW:', {
           x: 88,
-          y: boxTop + 68,
+          y: boxTop + 70,
           size: 8.0,
           font: helveticaBold,
           color: navyPrimary
         });
-        dividerPage.drawText('Section I contains the official clinical prescription, magistral compounding formulation, and targeted supplementation protocols designed for the patient.', {
+        dividerPage.drawText('• Section I: Official clinical prescription, magistral compounding formulation & posology.', {
           x: 88,
-          y: boxTop + 52,
+          y: boxTop + 54,
           size: 7.2,
           font: helvetica,
-          color: darkSlate,
-          maxWidth: dWidth - 176
+          color: darkSlate
         });
-        dividerPage.drawText('Section II includes the full 55-page DNA Nutrition report issued by 24Genetics, containing the complete spectrum of nutritional predispositions, metabolic profiles, and genetic polymorphisms.', {
+        dividerPage.drawText('• Section II: Full 55-page DNA Nutrition laboratory report issued by 24Genetics.', {
           x: 88,
-          y: boxTop + 30,
+          y: boxTop + 38,
           size: 7.2,
           font: helvetica,
-          color: darkSlate,
-          maxWidth: dWidth - 176
+          color: darkSlate
+        });
+        dividerPage.drawText('• Clinical Scope: Complete nutritional predispositions, metabolic profiles & cofactors.', {
+          x: 88,
+          y: boxTop + 22,
+          size: 7.2,
+          font: helvetica,
+          color: mutedSlate
         });
 
         // ---------------------------------------------------------------------
