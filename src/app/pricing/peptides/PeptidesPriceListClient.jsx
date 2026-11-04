@@ -770,12 +770,32 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         const v10x = itemInCart?.quantity10x || 0;
         const hasSelection = v1x > 0 || v10x > 0;
 
+        const targetSlug = row.slug || row.productId || '';
+        const cleanDoseParam = (row.dosage || '').replace(/\s+/g, '').toLowerCase();
+        const publicPageUrl = `/p/${encodeURIComponent(targetSlug)}${cleanDoseParam ? `?dose=${encodeURIComponent(cleanDoseParam)}` : ''}`;
+
         return (
           <div style={{ textAlign: 'left', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#202124', letterSpacing: '-0.01em' }}>
+              <a
+                href={publicPageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  fontWeight: 700,
+                  fontSize: '0.92rem',
+                  color: '#1a73e8',
+                  letterSpacing: '-0.01em',
+                  textDecoration: 'none',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
+                onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
+                title={`Open official clinical datasheet & 3D structure for ${row.productName} in new tab`}
+              >
                 {row.productName}
-              </span>
+              </a>
               {row.dosage && (
                 <span style={{
                   fontSize: '0.74rem',
@@ -792,13 +812,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   {row.dosage}
                 </span>
               )}
-              {/* Specs Button directly adjacent to dosage with preloaded specs */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedSpecsProduct(row);
-                }}
+              {/* Specs Button: Navigates directly to the comprehensive public peptide datasheet for this exact dosage */}
+              <a
+                href={publicPageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -808,8 +827,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   color: '#1a73e8',
                   background: '#ffffff',
                   border: '1px solid #c2e7ff',
-                  padding: '1px 7px',
+                  padding: '2px 7px',
                   borderRadius: '4px',
+                  textDecoration: 'none',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease'
@@ -822,11 +842,11 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   e.currentTarget.style.background = '#ffffff';
                   e.currentTarget.style.borderColor = '#c2e7ff';
                 }}
-                title={`View clinical monograph, CAS, reconstitution & COA for ${row.productName} ${row.dosage || ''}`}
+                title={`Open official clinical monograph, CAS, reconstitution & 3D structure for ${row.productName} ${row.dosage || ''} in new tab`}
               >
                 <FileText size={11} />
-                <span>Specs</span>
-              </button>
+                <span>Specs ↗</span>
+              </a>
 
               <span style={{
                 fontSize: '0.64rem',

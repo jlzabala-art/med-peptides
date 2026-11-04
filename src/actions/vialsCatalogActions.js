@@ -213,6 +213,7 @@ async function fetchLotuslandVials(referralRef = null) {
       vials.push({
         id: `${productId}_${v.id || v.sku || cleanDosage.replace(/\s+/g, '_')}`,
         productId,
+        slug: data.slug || productId,
         variantId: v.id || null,
         collection: 'vials',
         productName: cleanName,
