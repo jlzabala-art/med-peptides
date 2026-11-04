@@ -595,3 +595,17 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - El contenido debe extenderse de forma homogénea desde la cabecera (Y ≈ 815 pt) hasta la banda inferior antes del pie de página (Y ≈ 50–90 pt), evitando el aspecto de borrador o texto apretado.
 - **Codificación y Compatibilidad WinAnsi**:
   - En `pdf-lib`, usar siempre caracteres compatibles con el estándar WinAnsi (evitando emojis o caracteres de 4 bytes que disparan errores 500 al renderizar; usar en su lugar identificadores claros como `[GREEN]`, `[STEP 1]` o flechas ASCII `->`).
+
+## 49. Zero-Overlap PDF Architecture & Safe Coordinate Math (Golden Rule)
+- **Prohibido colocar dos textos dinámicos o largos en la misma coordenada Y sin partición acotada (`maxWidth`).**
+  - Si dos elementos comparten la misma línea horizontal (por ejemplo, una etiqueta a la izquierda y un badge o valor numérico a la derecha):
+    1. El elemento de la derecha debe calcular su posición fija: `xRight = totalWidth - rightMargin - textWidth`.
+    2. El elemento de la izquierda DEBE especificar explícitamente `maxWidth: xRight - leftX - padding`.
+    3. Nunca confiar en que una cadena "no será tan larga": cualquier variación en el texto provocará un solapamiento destructivo.
+- **Líneas Dedicadas para Metadatos Semánticos**:
+  - En tarjetas técnicas y monografías (como formulaciones de cápsulas magistrales), los metadatos clínicos (posología, vehículo/excipientes, indicaciones de ADN/targets) DEBEN residir cada uno en su propia línea vertical con espaciado no menor a `9-11 pt`. Nunca intentar meter múltiples frases descriptivas en una sola línea.
+- **Contención Estricta de Cajas y Opciones Multilínea**:
+  - Toda caja de directivas u opciones (por ejemplo, selección de modalidad médica con checkboxes) debe contar con una altura proporcional a sus líneas calculadas (`height >= headerOffset + numOptions * optionLineHeight`).
+  - Las descripciones subordinadas deben renderizarse en su propia línea inferior sangrada con `maxWidth` acotado, evitando que el texto salte y cuelgue por fuera del borde inferior del contenedor.
+- **Banners de Notificación estilo Google Cloud**:
+  - Todo aviso o callout al paciente/médico debe implementarse con formato Google Cloud Console: banda de acento vertical izquierda (3-4 pt), fondo sutil tintado (`#e8f0fe`), titular en negrita y cuerpo de texto descriptivo con altura suficiente (`height: 26-28 pt`), evitando títulos infinitos en una sola línea que se cortan en el margen derecho.

@@ -148,27 +148,44 @@ export async function GET(request) {
     page1.drawText('Size 0 Magistral Caps', { x: 415, y: y + 10, size: 8.0, font: helveticaBold, color: navyPrimary });
     page1.drawText('100% Lactose-Free HPMC', { x: 415, y: y + 2, size: 6.0, font: helvetica, color: tealAccent });
 
-    // Section 1: Notice to Patient
-    y -= 22;
+    // Section 1: Notice to Patient (Google Cloud Console Callout Pattern)
+    y -= 30;
+    const noticeH = 28;
     page1.drawRectangle({
       x: 36,
-      y: y - 18,
+      y: y - noticeH,
       width: p1Width - 72,
-      height: 20,
-      color: rgb(240 / 255, 249 / 255, 255 / 255),
-      borderColor: rgb(186 / 255, 230 / 255, 253 / 255),
+      height: noticeH,
+      color: rgb(232 / 255, 240 / 255, 254 / 255), // GCP Blue Tint #e8f0fe
+      borderColor: gcpBorder,
       borderWidth: 0.8
     });
-    page1.drawText('PATIENT NOTICE: This guide translates findings from your 24Genetics Nutrition DNA test into clear daily actions. Turn to PAGE 2 for the Official Compounding Pharmacy Order.', {
-      x: 44,
+    // Left Accent Bar (Google Cloud Console Callout Style)
+    page1.drawRectangle({
+      x: 36,
+      y: y - noticeH,
+      width: 3.5,
+      height: noticeH,
+      color: rgb(26 / 255, 115 / 255, 232 / 255) // #1a73e8
+    });
+    page1.drawText('PATIENT NOTICE & CLINICAL ACTION TRANSLATION', {
+      x: 46,
       y: y - 11,
-      size: 6.7,
+      size: 6.8,
       font: helveticaBold,
-      color: blueDark
+      color: rgb(26 / 255, 115 / 255, 232 / 255)
+    });
+    page1.drawText('This guide translates findings from your 24Genetics Nutrition DNA test into clear daily actions. Turn to PAGE 2 for the Official Compounding Pharmacy Order.', {
+      x: 46,
+      y: y - 22,
+      size: 5.9,
+      font: helvetica,
+      color: darkSlate,
+      maxWidth: p1Width - 92
     });
 
     // The 4 Functional DNA Pillars
-    y -= 34;
+    y -= (noticeH + 12);
     page1.drawText('1. The 4 DNA Pillars: What Your Genetics Mean in Plain Language', {
       x: 36,
       y,
@@ -1075,12 +1092,13 @@ export async function GET(request) {
     });
 
     // Technical Compounding Directive to Pharmacist & Modality Selection Checkboxes
-    y3 -= 46;
+    y3 -= 44;
+    const modalityH = 40;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 42,
+      height: modalityH,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
@@ -1088,21 +1106,21 @@ export async function GET(request) {
 
     page3.drawText('PRESCRIPTION MODALITY SELECTION · LICENSED PHYSICIAN DIRECTIVE (CHECK ONE):', {
       x: 44,
-      y: y3 + 29,
+      y: y3 + 28,
       size: 6.8,
       font: helveticaBold,
       color: navyPrimary
     });
 
     // Checkbox 1: Option A (Core 2-Capsule)
-    page3.drawRectangle({ x: 44, y: y3 + 16, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
-    page3.drawText('OPTION A · CORE 2-CAPSULE REGIMEN (CAPSULES B + C · 2 CAPS/DAY)', { x: 56, y: y3 + 17, size: 6.1, font: helveticaBold, color: navyPrimary });
-    page3.drawText('Resolves MTHFR, VDR & Neuro-Sleep. Lowers compounding cost by ~30% for patients without active gut dysbiosis.', { x: 298, y: y3 + 17, size: 5.5, font: helvetica, color: mutedSlate, maxWidth: 220 });
+    page3.drawRectangle({ x: 44, y: y3 + 15, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
+    page3.drawText('OPTION A · CORE 2-CAPSULE REGIMEN (CAPSULES B + C · 2 CAPS/DAY)', { x: 56, y: y3 + 16, size: 6.0, font: helveticaBold, color: navyPrimary });
+    page3.drawText('Resolves MTHFR, VDR & Neuro-Sleep. Lowers cost ~30% for patients without active gut dysbiosis.', { x: 278, y: y3 + 16, size: 5.4, font: helvetica, color: mutedSlate, maxWidth: 240 });
 
     // Checkbox 2: Option B (Full 3-Capsule)
-    page3.drawRectangle({ x: 44, y: y3 + 4, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
-    page3.drawText('OPTION B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C · 3 CAPS/DAY)', { x: 56, y: y3 + 5, size: 6.1, font: helveticaBold, color: navyPrimary });
-    page3.drawText('Includes Capsule A (Enteric Probiotics DRcaps®) for mucosal barrier repair, dairy intolerance & tight junction seal.', { x: 308, y: y3 + 5, size: 5.5, font: helvetica, color: mutedSlate, maxWidth: 210 });
+    page3.drawRectangle({ x: 44, y: y3 + 3, width: 8, height: 8, color: white, borderColor: darkSlate, borderWidth: 1 });
+    page3.drawText('OPTION B · FULL 3-CAPSULE REGIMEN (CAPSULES A + B + C · 3 CAPS/DAY)', { x: 56, y: y3 + 4, size: 6.0, font: helveticaBold, color: navyPrimary });
+    page3.drawText('Includes Capsule A (Enteric DRcaps®) for mucosal barrier repair, dairy intolerance & tight junction seal.', { x: 278, y: y3 + 4, size: 5.4, font: helvetica, color: mutedSlate, maxWidth: 240 });
 
     // Streamlined 3-Capsule Compounding Tables (Revised Per Nikolay / Pharmapolis Pharmacist Review)
     const PHARMACY_CAPSULES = [
@@ -1226,7 +1244,7 @@ export async function GET(request) {
     PHARMACY_CAPSULES.forEach((cap) => {
       const rowCount = cap.ingredients.length;
       const rowH = rowCount > 3 ? 20 : 22;
-      const cardHeight = 48 + (rowCount * rowH) + 6;
+      const cardHeight = 62 + (rowCount * rowH) + 6;
 
       y3 -= cardHeight;
 
@@ -1255,7 +1273,8 @@ export async function GET(request) {
         y: y3 + cardHeight - 13,
         size: 7.0,
         font: helveticaBold,
-        color: white
+        color: white,
+        maxWidth: p3Width - 190
       });
 
       page3.drawText(cap.qty, {
@@ -1266,37 +1285,41 @@ export async function GET(request) {
         color: white
       });
 
-      // Vehicle & Posology subheader lines
+      // 3 Dedicated Metadata Subheader Lines (Strict Golden Rule #32: Zero Overlap)
+      // Line 1: Posology & Administration Schedule
       page3.drawText(cap.timing, {
         x: 44,
         y: y3 + cardHeight - 27,
         size: 6.2,
         font: helveticaBold,
-        color: darkSlate
+        color: darkSlate,
+        maxWidth: p3Width - 88
       });
 
+      // Line 2: Vehicle, Size & Excipients Specification
       page3.drawText(cap.vehicle, {
         x: 44,
         y: y3 + cardHeight - 37,
-        size: 5.8,
+        size: 5.7,
         font: helveticaOblique,
-        color: mutedSlate
+        color: mutedSlate,
+        maxWidth: p3Width - 88
       });
 
-      // DNA Target Reference Tag
+      // Line 3: Genomic Indication & DNA Target Rationale (Prominent, dedicated line)
       if (cap.dnaTarget) {
-        const targetWidth = helveticaBold.widthOfTextAtSize(cap.dnaTarget, 6.0);
-        page3.drawText(cap.dnaTarget, {
-          x: p3Width - 44 - targetWidth,
-          y: y3 + cardHeight - 37,
-          size: 6.0,
+        page3.drawText(`DNA Targets: ${cap.dnaTarget.replace(/^DNA Targets?:\s*/i, '')}`, {
+          x: 44,
+          y: y3 + cardHeight - 47,
+          size: 5.9,
           font: helveticaBold,
-          color: tealAccent
+          color: tealAccent,
+          maxWidth: p3Width - 88
         });
       }
 
       // Table Header Strip
-      const thY = y3 + cardHeight - 50;
+      const thY = y3 + cardHeight - 60;
       page3.drawRectangle({
         x: 40,
         y: thY - 2,
@@ -1330,66 +1353,66 @@ export async function GET(request) {
         itemY -= rowH;
       });
 
-      y3 -= 8;
+      y3 -= 6;
     });
 
     // Optional Module D: Soluble Fiber Sachet Directive
-    y3 -= 30;
+    y3 -= 26;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 26,
+      height: 22,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
       borderWidth: 0.8
     });
     page3.drawText('OPTIONAL MODULE D · SOLUBLE FIBER SACHET (FOR GLYCEMIC REGULATION):', {
       x: 44,
-      y: y3 + 15,
-      size: 6.2,
+      y: y3 + 13,
+      size: 6.0,
       font: helveticaBold,
       color: tealAccent
     });
     page3.drawText('Psyllium Husk Powder USP (5 g per sachet in water, before largest meal). Take 2 hours apart from capsules. Add only if HbA1c 5.7–6.4% or fasting glucose elevated.', {
       x: 44,
-      y: y3 + 5,
-      size: 5.6,
+      y: y3 + 4,
+      size: 5.4,
       font: helvetica,
       color: darkSlate,
       maxWidth: p3Width - 88
     });
 
     // Baseline Lab Decision Rules Matrix (Adjusting Formulations to Labs)
-    y3 -= 42;
+    y3 -= 36;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 36,
+      height: 32,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 0.8
     });
     page3.drawText('BASELINE LABS DECISION MATRIX (CLINICAL SAFETY ADJUSTMENT RULES):', {
       x: 44,
-      y: y3 + 24,
-      size: 6.2,
+      y: y3 + 21,
+      size: 6.0,
       font: helveticaBold,
       color: navyPrimary
     });
     const labRulesLine1 = '• 25(OH)D <20 ng/mL: Increase D3 to 4,000 IU; re-test at 8–12 wks   • Homocysteine >15 µmol/L: Increase 5-MTHF to 800 mcg   • Warfarin: Contraindicated with Vit K2';
     const labRulesLine2 = '• HbA1c 5.7–6.4%: Add Chromium Picolinate (200 mcg Cr) + Module D   • eGFR <60 mL/min: Reduce elemental Mg to 100 mg & monitor serum magnesium';
-    page3.drawText(labRulesLine1, { x: 44, y: y3 + 14, size: 5.5, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
-    page3.drawText(labRulesLine2, { x: 44, y: y3 + 5, size: 5.5, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
+    page3.drawText(labRulesLine1, { x: 44, y: y3 + 12, size: 5.4, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
+    page3.drawText(labRulesLine2, { x: 44, y: y3 + 4, size: 5.4, font: helvetica, color: darkSlate, maxWidth: p3Width - 88 });
 
     // Co-Administration Restriction & Anti-Duplication Directive
-    y3 -= 32;
+    y3 -= 28;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 26,
+      height: 24,
       color: rgb(254 / 255, 242 / 255, 242 / 255), // alert light red
       borderColor: alertRed,
       borderWidth: 1
@@ -1397,27 +1420,27 @@ export async function GET(request) {
 
     page3.drawText('DISPENSING DIRECTIVE & CO-ADMINISTRATION RESTRICTION (NO DUPLICATE SUPPLEMENTATION):', {
       x: 44,
-      y: y3 + 15,
-      size: 6.2,
+      y: y3 + 14,
+      size: 6.0,
       font: helveticaBold,
       color: alertRed
     });
     page3.drawText('This master compounded protocol provides 100% of required therapeutic micronutrients. Discontinue all separate OTC multivitamins/minerals to prevent duplicate dosing.', {
       x: 44,
-      y: y3 + 5,
-      size: 5.6,
+      y: y3 + 4,
+      size: 5.4,
       font: helveticaBold,
       color: darkSlate,
       maxWidth: p3Width - 88
     });
 
     // Prescribing Physician Authorization & Medical Signature
-    y3 -= 80;
+    y3 -= 72;
     page3.drawRectangle({
       x: 36,
       y: y3,
       width: p3Width - 72,
-      height: 74,
+      height: 66,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
