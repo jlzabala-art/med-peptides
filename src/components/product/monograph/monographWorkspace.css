@@ -148,10 +148,10 @@
   width: 100%;
 }
 
-/* ── 4. Protocol Workspace Grid (Picker + Stepper) ── */
+/* ── 4. Protocol Workspace Grid (Unified GCP Resource Switcher + Full-Width Stepper) ── */
 .pds-protocol-workspace-grid {
   display: grid;
-  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
   align-items: start;
   box-sizing: border-box;
@@ -189,18 +189,9 @@
   touch-action: manipulation;
 }
 
-/* ── 4b. Protocol Picker (Desktop Aside vs Mobile GCP Switcher) ── */
+/* ── 4b. Protocol Picker (Hidden Aside in favor of Unified Top GCP Resource Switcher) ── */
 .pds-protocol-picker-aside {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  position: sticky;
-  top: 88px;
-  align-self: flex-start;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
+  display: none !important;
 }
 
 .pds-protocol-picker-header {
@@ -320,7 +311,7 @@
   border-color: #002244;
 }
 
-/* ── Google Cloud UX Protocol Switcher Strip & Deck (Mobile & Tablet) ── */
+/* ── Google Cloud UX Protocol Switcher Strip & Deck (Desktop, Laptop, Tablet & Mobile) ── */
 .pds-gcp-protocol-switcher {
   margin-bottom: 1.25rem;
   background: #ffffff;
@@ -328,12 +319,6 @@
   border-radius: 12px;
   padding: 12px 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-}
-
-@media (min-width: 1024px) {
-  .pds-gcp-protocol-switcher {
-    display: none !important;
-  }
 }
 
 .pds-gcp-switcher-header {

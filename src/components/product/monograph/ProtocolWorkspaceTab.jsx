@@ -129,13 +129,13 @@ function sanitizeProtocolTitle(rawName = '', canonicalCompound = '') {
   let cleaned = String(rawName).trim();
   // Strip parenthetical generics anywhere in first 40 chars, e.g. "(Bremelanotide)"
   cleaned = cleaned.replace(/^([^(]*)\([^)]*\)\s*[-—:]?\s*/i, '$1').trim();
-  // Strip compound names
-  cleaned = cleaned.replace(/^(PT[- ]?141|Bremelanotide|Semaglutide|Tirzepatide|GHK[- ]?Cu|BPC[- ]?157|TB[- ]?500|Ipamorelin|CJC[- ]?1295|Epitalon|NAD\+?|Tesamorelin|Retatrutide)\s*[-—:]?\s*/i, '').trim();
+  // Strip compound names only when NOT followed by multi-peptide stack separators (',', '&', '+', '/')
+  cleaned = cleaned.replace(/^(PT[- ]?141|Bremelanotide|Semaglutide|Tirzepatide|GHK[- ]?Cu|BPC[- ]?157|TB[- ]?500|Ipamorelin|CJC[- ]?1295|Epitalon|NAD\+?|Tesamorelin|Retatrutide)(?!\s*[,&+/])\s*[-—:]?\s*/i, '').trim();
   if (canonicalCompound) {
     const escaped = canonicalCompound.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    cleaned = cleaned.replace(new RegExp('^' + escaped + '\\s*[-—:]?\\s*', 'i'), '').trim();
+    cleaned = cleaned.replace(new RegExp('^' + escaped + '(?!\\s*[,&+/])\\s*[-—:]?\\s*', 'i'), '').trim();
   }
-  cleaned = cleaned.replace(/^[-—:\s]+/, '').trim();
+  cleaned = cleaned.replace(/^[-—:,\s]+/, '').trim();
   return cleaned || rawName;
 }
 

@@ -50,7 +50,7 @@ import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 import ClinicalProtocolDrawer from '@/components/pricing/ClinicalProtocolDrawer';
 import AtlasAiCopilotDrawer from '@/components/pricing/AtlasAiCopilotDrawer';
 import PeptideSpecsDrawer from '@/components/pricing/PeptideSpecsDrawer';
-import PeptidePricePdfPreviewModal from '@/components/pricing/PeptidePricePdfPreviewModal';
+import PeptidePricePdfPreviewModal, { parsePeptideBlendDisplay } from '@/components/pricing/PeptidePricePdfPreviewModal';
 import { getFdaPeptideStatus, FDA_STATUS_TYPES } from '@/data/fdaPeptidesRegistry';
 import { COUNTRIES } from '@/data/countries';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
@@ -61,7 +61,8 @@ import '../colway/ColwayPriceList.css';
  * Standardized Clinical Pharmacology & Indication resolver (¿Para qué sirve?)
  * Combines KNOWN_PEPTIDE_DATA, PEPTIDE_REFERENCE_DOSSIERS, and curated therapeutic targets.
  */
-function getPeptideClinicalSummary(productName = '', category = '') {
+function getPeptideClinicalSummary(productName = '', category = '', lang = 'en') {
+  const isEs = lang === 'es';
   const cleanName = (productName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
   const knownMatch = Object.entries(KNOWN_PEPTIDE_DATA).find(([k]) => {
@@ -74,100 +75,100 @@ function getPeptideClinicalSummary(productName = '', category = '') {
 
   const indicationsMap = {
     'bpc157': {
-      indication: 'Accelerated soft-tissue repair, tendon and ligament regeneration, gastric mucosal cytoprotection, and systemic anti-inflammatory resolution.',
-      target: 'FAK-Paxillin & VEGF Angiogenesis Axis'
+      indication: isEs ? 'Reparación acelerada de tejidos blandos, regeneración de tendones y ligamentos, citoprotección gástrica y resolución antiinflamatoria sistémica.' : 'Accelerated soft-tissue repair, tendon and ligament regeneration, gastric mucosal cytoprotection, and systemic anti-inflammatory resolution.',
+      target: isEs ? 'Eje de Angiogénesis FAK-Paxilina & VEGF' : 'FAK-Paxillin & VEGF Angiogenesis Axis'
     },
     'tb500': {
-      indication: 'Cell migration stimulation, actin regulation, myocardial tissue cytoprotection, and accelerated dermal and muscular recovery.',
-      target: 'Actin-Sequestering G-Actin Cytoskeletal Axis'
+      indication: isEs ? 'Estimulación de migración celular, regulación de actina, citoprotección miocárdica y recuperación acelerada dérmica y muscular.' : 'Cell migration stimulation, actin regulation, myocardial tissue cytoprotection, and accelerated dermal and muscular recovery.',
+      target: isEs ? 'Eje Citoesquelético de G-Actina' : 'Actin-Sequestering G-Actin Cytoskeletal Axis'
     },
     'tirzepatide': {
-      indication: 'Dual incretin co-agonism for glycemic homeostasis, chronic weight management, and visceral adiposity reduction.',
-      target: 'GIP & GLP-1 Dual Receptors'
+      indication: isEs ? 'Co-agonismo dual de incretinas para homeostasis glucémica, control crónico de peso y reducción de adiposidad visceral.' : 'Dual incretin co-agonism for glycemic homeostasis, chronic weight management, and visceral adiposity reduction.',
+      target: isEs ? 'Receptores Duales GIP & GLP-1' : 'GIP & GLP-1 Dual Receptors'
     },
     'semaglutide': {
-      indication: 'Selective GLP-1 agonist for glycemic control, hypothalamic appetite regulation, and cardiovascular risk modulation.',
-      target: 'GLP-1 Central & Pancreatic Receptors'
+      indication: isEs ? 'Agonista selectivo de GLP-1 para control glucémico, regulación hipotalámica del apetito y modulación del riesgo cardiovascular.' : 'Selective GLP-1 agonist for glycemic control, hypothalamic appetite regulation, and cardiovascular risk modulation.',
+      target: isEs ? 'Receptores Centrales y Pancreáticos GLP-1' : 'GLP-1 Central & Pancreatic Receptors'
     },
     'retatrutide': {
-      indication: 'Next-generation triple receptor agonism for intensive lipid mobilization, metabolic rate enhancement, and glycemic control.',
-      target: 'GLP-1 / GIP / Glucagon Tri-Agonist'
+      indication: isEs ? 'Triple agonismo receptor de nueva generación para movilización lipídica intensiva, incremento de tasa metabólica y control glucémico.' : 'Next-generation triple receptor agonism for intensive lipid mobilization, metabolic rate enhancement, and glycemic control.',
+      target: isEs ? 'Tri-Agonista GLP-1 / GIP / Glucagón' : 'GLP-1 / GIP / Glucagon Tri-Agonist'
     },
     'cjc1295': {
-      indication: 'Pulsatile growth hormone secretion, lean muscle mass preservation, deep sleep architecture enhancement, and collagen synthesis.',
-      target: 'GHRH Pituitary Receptors'
+      indication: isEs ? 'Secreción pulsátil de hormona de crecimiento, preservación de masa magra, mejora de arquitectura del sueño profundo y síntesis de colágeno.' : 'Pulsatile growth hormone secretion, lean muscle mass preservation, deep sleep architecture enhancement, and collagen synthesis.',
+      target: isEs ? 'Receptores Hipofisarios GHRH' : 'GHRH Pituitary Receptors'
     },
     'ipamorelin': {
-      indication: 'Selective GH secretagogue stimulating natural pituitary release without elevating prolactin, cortisol, or aldosterone.',
-      target: 'GHSR-1a Ghrelin Pituitary Receptors'
+      indication: isEs ? 'Secretagogo selectivo de GH que estimula la liberación hipofisaria natural sin elevar prolactina, cortisol ni aldosterona.' : 'Selective GH secretagogue stimulating natural pituitary release without elevating prolactin, cortisol, or aldosterone.',
+      target: isEs ? 'Receptores Hipofisarios de Grelina GHSR-1a' : 'GHSR-1a Ghrelin Pituitary Receptors'
     },
     'ghkcu': {
-      indication: 'Copper peptide complex promoting extracellular matrix remodeling, collagen I/III synthesis, and skin fibroblast rejuvenation.',
-      target: 'Fibroblast Gene Expression & TGF-β Modulation'
+      indication: isEs ? 'Complejo peptídico de cobre que promueve la remodelación de la matriz extracelular, síntesis de colágeno I/III y rejuvenecimiento de fibroblastos.' : 'Copper peptide complex promoting extracellular matrix remodeling, collagen I/III synthesis, and skin fibroblast rejuvenation.',
+      target: isEs ? 'Expresión Génica de Fibroblastos & Modulación TGF-β' : 'Fibroblast Gene Expression & TGF-β Modulation'
     },
     'epithalon': {
-      indication: 'Telomerase catalytic subunit activation, pineal melatonin regulation, and neuroendocrine circadian synchronization.',
-      target: 'Telomerase Reverse Transcriptase (TERT) & Epithalamus'
+      indication: isEs ? 'Activación de la subunidad catalítica de telomerasa, regulación pineal de melatonina y sincronización circadiana neuroendocrina.' : 'Telomerase catalytic subunit activation, pineal melatonin regulation, and neuroendocrine circadian synchronization.',
+      target: isEs ? 'Telomerasa Transcriptasa Inversa (TERT) & Epitálamo' : 'Telomerase Reverse Transcriptase (TERT) & Epithalamus'
     },
     'nad': {
-      indication: 'Essential mitochondrial cellular coenzyme for ATP bioenergetics, PARP DNA repair enzyme activation, and sirtuin longevity pathways.',
-      target: 'Mitochondrial Respiratory Chain & Sirtuins (SIRT1-7)'
+      indication: isEs ? 'Coenzima mitocondrial esencial para bioenergética de ATP, activación de enzimas de reparación de ADN (PARP) y vías de longevidad de sirtuinas.' : 'Essential mitochondrial cellular coenzyme for ATP bioenergetics, PARP DNA repair enzyme activation, and sirtuin longevity pathways.',
+      target: isEs ? 'Cadena Respiratoria Mitocondrial & Sirtuinas (SIRT1-7)' : 'Mitochondrial Respiratory Chain & Sirtuins (SIRT1-7)'
     },
     'thymosin': {
-      indication: 'Immune modulation, dendritic cell stimulation, and enhanced T-lymphocyte maturation for chronic defense and wellness.',
-      target: 'Toll-Like Receptors (TLR2/TLR9) & T-Cell Maturation'
+      indication: isEs ? 'Inmunomodulación, estimulación de células dendríticas y maduración optimizada de linfocitos T para defensa inmunitaria.' : 'Immune modulation, dendritic cell stimulation, and enhanced T-lymphocyte maturation for chronic defense and wellness.',
+      target: isEs ? 'Receptores Toll-Like (TLR2/TLR9) & Maduración de Células T' : 'Toll-Like Receptors (TLR2/TLR9) & T-Cell Maturation'
     },
     'aod9604': {
-      indication: 'Targeted lipolytic fragment stimulating beta-3 adrenergic adipose breakdown without affecting insulin or IGF-1 levels.',
-      target: 'Adipocyte Beta-3 Adrenergic Lipolysis'
+      indication: isEs ? 'Fragmento lipolítico selectivo que estimula la oxidación adiposa beta-3 adrenérgica sin alterar niveles de insulina ni IGF-1.' : 'Targeted lipolytic fragment stimulating beta-3 adrenergic adipose breakdown without affecting insulin or IGF-1 levels.',
+      target: isEs ? 'Lipólisis Beta-3 Adrenérgica Adipocitaria' : 'Adipocyte Beta-3 Adrenergic Lipolysis'
     },
     'motsc': {
-      indication: 'Mitochondrial-derived peptide regulating cellular metabolic homeostasis, insulin sensitivity, and skeletal muscle exercise capacity.',
-      target: 'AMPK Activation & Skeletal Muscle Glucose Uptake'
+      indication: isEs ? 'Péptido derivado mitocondrial que regula la homeostasis metabólica celular, sensibilidad a la insulina y capacidad física muscular.' : 'Mitochondrial-derived peptide regulating cellular metabolic homeostasis, insulin sensitivity, and skeletal muscle exercise capacity.',
+      target: isEs ? 'Activación de AMPK & Captación de Glucosa Muscular' : 'AMPK Activation & Skeletal Muscle Glucose Uptake'
     },
     'selank': {
-      indication: 'Neuroprotective and nootropic heptapeptide modulating GABAergic neurotransmission, reducing anxiety and stabilizing mood.',
-      target: 'GABA-A Receptors & Enkephalin Degradation Inhibition'
+      indication: isEs ? 'Heptapéptido neuroprotector y nootrópico que modula la neurotransmisión GABAérgica, reduciendo la ansiedad y estabilizando el ánimo.' : 'Neuroprotective and nootropic heptapeptide modulating GABAergic neurotransmission, reducing anxiety and stabilizing mood.',
+      target: isEs ? 'Receptores GABA-A & Inhibición de Degradación de Encefalinas' : 'GABA-A Receptors & Enkephalin Degradation Inhibition'
     },
     'semax': {
-      indication: 'Nootropic ACTH fragment analog enhancing BDNF neurotrophin expression, cognitive focus, memory consolidation, and neuroprotection.',
-      target: 'BDNF/TrkB Receptors & Dopaminergic/Serotonergic Axis'
+      indication: isEs ? 'Análogo nootrópico del fragmento ACTH que potencia la expresión de neurotrofina BDNF, enfoque cognitivo, memoria y neuroprotección.' : 'Nootropic ACTH fragment analog enhancing BDNF neurotrophin expression, cognitive focus, memory consolidation, and neuroprotection.',
+      target: isEs ? 'Receptores BDNF/TrkB & Eje Dopaminérgico/Serotoninérgico' : 'BDNF/TrkB Receptors & Dopaminergic/Serotonergic Axis'
     },
     'pt141': {
-      indication: 'Centrally-acting melanocortin receptor agonist stimulating physiological libido and sexual response in both men and women.',
-      target: 'Central MC3R & MC4R Melanocortin Receptors'
+      indication: isEs ? 'Agonista central de receptores de melanocortina que estimula la libido fisiológica y la respuesta sexual en hombres y mujeres.' : 'Centrally-acting melanocortin receptor agonist stimulating physiological libido and sexual response in both men and women.',
+      target: isEs ? 'Receptores Centrales de Melanocortina MC3R & MC4R' : 'Central MC3R & MC4R Melanocortin Receptors'
     },
     'melanotan': {
-      indication: 'Non-selective melanocortin agonist stimulating melanin photoprotective synthesis (eumelanin) and UV defense.',
-      target: 'MC1R Melanocortin Cutaneous Receptors'
+      indication: isEs ? 'Agonista de melanocortina que estimula la síntesis fotoprotectora de melanina (eumelanina) y la defensa cutánea UV.' : 'Non-selective melanocortin agonist stimulating melanin photoprotective synthesis (eumelanin) and UV defense.',
+      target: isEs ? 'Receptores Cutáneos de Melanocortina MC1R' : 'MC1R Melanocortin Cutaneous Receptors'
     },
     'ss31': {
-      indication: 'Cardiolipin-targeted mitochondrial antioxidant restoring inner mitochondrial membrane integrity and reducing oxidative stress.',
-      target: 'Mitochondrial Inner Membrane Cardiolipin'
+      indication: isEs ? 'Antioxidante mitocondrial dirigido a cardiolipina que restaura la integridad de la membrana mitocondrial interna y reduce el estrés oxidativo.' : 'Cardiolipin-targeted mitochondrial antioxidant restoring inner mitochondrial membrane integrity and reducing oxidative stress.',
+      target: isEs ? 'Cardiolipina de la Membrana Mitocondrial Interna' : 'Mitochondrial Inner Membrane Cardiolipin'
     },
     'dsip': {
-      indication: 'Neuromodulatory peptide promoting restorative slow-wave delta sleep and physiological neuroendocrine stress reduction.',
-      target: 'Central Serotonergic & GABAergic Sleep Centers'
+      indication: isEs ? 'Péptido neuromodulador que promueve el sueño delta profundo reparador y la reducción fisiológica del estrés neuroendocrino.' : 'Neuromodulatory peptide promoting restorative slow-wave delta sleep and physiological neuroendocrine stress reduction.',
+      target: isEs ? 'Centros Centrales del Sueño Serotoninérgicos & GABAérgicos' : 'Central Serotonergic & GABAergic Sleep Centers'
     },
     'sermorelin': {
-      indication: 'Synthetic GHRH 1-29 fragment stimulating endogenous pituitary GH production for vitality, body composition, and recovery.',
-      target: 'Pituitary GHRH-R Receptors'
+      indication: isEs ? 'Fragmento sintético GHRH 1-29 que estimula la producción hipofisaria endógena de GH para vitalidad, composición corporal y recuperación.' : 'Synthetic GHRH 1-29 fragment stimulating endogenous pituitary GH production for vitality, body composition, and recovery.',
+      target: isEs ? 'Receptores Hipofisarios GHRH-R' : 'Pituitary GHRH-R Receptors'
     },
     'tesamorelin': {
-      indication: 'Stabilized GHRH analog specifically clinically demonstrated for visceral adipose tissue reduction and lipid profile improvement.',
-      target: 'Hepatic & Pituitary GHRH Axis'
+      indication: isEs ? 'Análogo estabilizado de GHRH clínicamente demostrado para la reducción de tejido adiposo visceral y mejora del perfil lipídico.' : 'Stabilized GHRH analog specifically clinically demonstrated for visceral adipose tissue reduction and lipid profile improvement.',
+      target: isEs ? 'Eje GHRH Hepático e Hipofisario' : 'Hepatic & Pituitary GHRH Axis'
     },
     'kisspeptin': {
-      indication: 'Hypothalamic neuropeptide triggering GnRH release, optimizing LH/FSH gonadotropin pulses and physiological fertility/testosterone.',
-      target: 'GPR54 / KISS1R Hypothalamic Receptors'
+      indication: isEs ? 'Neuropéptido hipotalámico que activa la liberación de GnRH, optimizando pulsos de gonadotropinas LH/FSH y fertilidad/testosterona.' : 'Hypothalamic neuropeptide triggering GnRH release, optimizing LH/FSH gonadotropin pulses and physiological fertility/testosterone.',
+      target: isEs ? 'Receptores Hipotalámicos GPR54 / KISS1R' : 'GPR54 / KISS1R Hypothalamic Receptors'
     },
     'oxytocin': {
-      indication: 'Neuropeptide hormone mediating social bonding, emotional relaxation, stress resilience, and positive neuroendocrine modulation.',
-      target: 'OXTR Neuroendocrine Receptors'
+      indication: isEs ? 'Hormona neuropeptídica que media el vínculo social, relajación emocional, resiliencia al estrés y modulación neuroendocrina positiva.' : 'Neuropeptide hormone mediating social bonding, emotional relaxation, stress resilience, and positive neuroendocrine modulation.',
+      target: isEs ? 'Receptores Neuroendocrinos OXTR' : 'OXTR Neuroendocrine Receptors'
     },
     'glutathione': {
-      indication: 'Master cellular antioxidant facilitating hepatic phase II detoxification, free radical scavenging, and skin radiance.',
-      target: 'Intracellular Redox Glutathione Peroxidase Axis'
+      indication: isEs ? 'Antioxidante celular maestro que facilita la detoxificación hepática de fase II, neutralización de radicales libres y luminosidad cutánea.' : 'Master cellular antioxidant facilitating hepatic phase II detoxification, free radical scavenging, and skin radiance.',
+      target: isEs ? 'Eje Intracelular Redox Glutatión Peroxidasa' : 'Intracellular Redox Glutathione Peroxidase Axis'
     }
   };
 
@@ -176,34 +177,36 @@ function getPeptideClinicalSummary(productName = '', category = '') {
   const fallbackTarget = matchedKey ? indicationsMap[matchedKey].target : null;
 
   const synergyMap = {
-    'bpc157': 'Co-administered with TB-500 for enhanced soft tissue, tendon, and vascular matrix remodeling.',
-    'tb500': 'Synergizes with BPC-157 for comprehensive systemic repair and cytoprotection.',
-    'tirzepatide': 'Can be stacked with AOD-9604 or CJC-1295/Ipamorelin to preserve lean mass during metabolic deficit.',
-    'semaglutide': 'Pairs well with BPC-157 to mitigate gastrointestinal transit discomfort and preserve mucosal integrity.',
-    'retatrutide': 'Pairs with MOTS-c or L-Carnitine for maximal mitochondrial beta-oxidation and energy output.',
-    'cjc1295': 'Pairs synergistically with Ipamorelin for amplified physiological GH pulsatile release.',
-    'ipamorelin': 'Pairs with CJC-1295 for amplified GH secretion without elevating cortisol, prolactin, or aldosterone.',
-    'ghkcu': 'Pairs with BPC-157 or Epithalon for cutaneous extracellular matrix renewal and anti-aging.',
-    'epithalon': 'Pairs with Thymosin Alpha-1 or NAD+ for multi-pathway cellular longevity and immune rejuvenation.',
-    'nad': 'Pairs with SS-31 or Epithalon for inner mitochondrial membrane restoration and cellular ATP output.',
-    'thymosin': 'Pairs with BPC-157 or Epithalon for immune modulation and infection recovery.',
-    'aod9604': 'Pairs with GLP-1/GIP agonists for targeted adipocyte lipolysis without glycemic interference.',
-    'motsc': 'Pairs with NAD+ for metabolic endurance and exercise mimetic signaling.',
-    'selank': 'Pairs with Semax for balanced executive focus, stress resilience, and mood stabilization.',
-    'semax': 'Pairs with Selank for enhanced BDNF neuroplasticity and cognitive clarity.',
-    'pt141': 'Standalone on-demand administration or stacked with Kisspeptin for neuroendocrine sexual axis support.',
-    'ss31': 'Pairs with MOTS-c and NAD+ for inner mitochondrial membrane cardiolipin recovery.',
-    'dsip': 'Pairs with Epithalon for restorative slow-wave delta sleep and circadian optimization.'
+    'bpc157': isEs ? 'Co-administrado con TB-500 para remodelación sinérgica de tejidos blandos, tendones y matriz vascular.' : 'Co-administered with TB-500 for enhanced soft tissue, tendon, and vascular matrix remodeling.',
+    'tb500': isEs ? 'Actúa en sinergia con BPC-157 para reparación sistémica integral y citoprotección.' : 'Synergizes with BPC-157 for comprehensive systemic repair and cytoprotection.',
+    'tirzepatide': isEs ? 'Combinable con AOD-9604 o CJC-1295/Ipamorelin para preservar masa magra durante el déficit metabólico.' : 'Can be stacked with AOD-9604 or CJC-1295/Ipamorelin to preserve lean mass during metabolic deficit.',
+    'semaglutide': isEs ? 'Se combina con BPC-157 para mitigar molestias gastrointestinales y preservar la integridad mucosa.' : 'Pairs well with BPC-157 to mitigate gastrointestinal transit discomfort and preserve mucosal integrity.',
+    'retatrutide': isEs ? 'Se combina con MOTS-c o L-Carnitina para máxima beta-oxidación mitocondrial y rendimiento energético.' : 'Pairs with MOTS-c or L-Carnitine for maximal mitochondrial beta-oxidation and energy output.',
+    'cjc1295': isEs ? 'Sinergia óptima con Ipamorelin para amplificar la liberación pulsátil fisiológica de GH.' : 'Pairs synergistically with Ipamorelin for amplified physiological GH pulsatile release.',
+    'ipamorelin': isEs ? 'Se combina con CJC-1295 para secreción amplificada de GH sin elevar cortisol, prolactina ni aldosterona.' : 'Pairs with CJC-1295 for amplified GH secretion without elevating cortisol, prolactin, or aldosterone.',
+    'ghkcu': isEs ? 'Se combina con BPC-157 o Epithalon para renovación de matriz extracelular cutánea y antienvejecimiento.' : 'Pairs with BPC-157 or Epithalon for cutaneous extracellular matrix renewal and anti-aging.',
+    'epithalon': isEs ? 'Se combina con Thymosin Alpha-1 o NAD+ para longevidad celular multivía y rejuvenecimiento inmune.' : 'Pairs with Thymosin Alpha-1 or NAD+ for multi-pathway cellular longevity and immune rejuvenation.',
+    'nad': isEs ? 'Se combina con SS-31 o Epithalon para restauración de membrana mitocondrial interna y producción de ATP.' : 'Pairs with SS-31 or Epithalon for inner mitochondrial membrane restoration and cellular ATP output.',
+    'thymosin': isEs ? 'Se combina con BPC-157 o Epithalon para inmunomodulación y recuperación post-infecciosa.' : 'Pairs with BPC-157 or Epithalon for immune modulation and infection recovery.',
+    'aod9604': isEs ? 'Se combina con agonistas GLP-1/GIP para lipólisis adipocitaria selectiva sin interferencia glucémica.' : 'Pairs with GLP-1/GIP agonists for targeted adipocyte lipolysis without glycemic interference.',
+    'motsc': isEs ? 'Se combina con NAD+ para resistencia metabólica y señalización mimética del ejercicio.' : 'Pairs with NAD+ for metabolic endurance and exercise mimetic signaling.',
+    'selank': isEs ? 'Se combina con Semax para enfoque ejecutivo equilibrado, resiliencia al estrés y estabilidad anímica.' : 'Pairs with Semax for balanced executive focus, stress resilience, and mood stabilization.',
+    'semax': isEs ? 'Se combina con Selank para neuroplasticidad potenciada por BDNF y claridad cognitiva.' : 'Pairs with Selank for enhanced BDNF neuroplasticity and cognitive clarity.',
+    'pt141': isEs ? 'Administración a demanda o combinado con Kisspeptin para soporte del eje neuroendocrino sexual.' : 'Standalone on-demand administration or stacked with Kisspeptin for neuroendocrine sexual axis support.',
+    'ss31': isEs ? 'Se combina con MOTS-c y NAD+ para recuperación de cardiolipina en la membrana mitocondrial interna.' : 'Pairs with MOTS-c and NAD+ for inner mitochondrial membrane cardiolipin recovery.',
+    'dsip': isEs ? 'Se combina con Epithalon para sueño delta profundo reparador y optimización circadiana.' : 'Pairs with Epithalon for restorative slow-wave delta sleep and circadian optimization.'
   };
 
   const matchedSynergy = Object.keys(synergyMap).find(k => cleanName.includes(k));
-  const synergy = matchedSynergy ? synergyMap[matchedSynergy] : 'Targeted standalone compound or physician-guided multi-peptide protocol.';
+  const synergy = matchedSynergy ? synergyMap[matchedSynergy] : (isEs ? 'Compuesto individual específico o protocolo multipéptido guiado por facultativo.' : 'Targeted standalone compound or physician-guided multi-peptide protocol.');
 
   return {
-    targetSystem: known?.targetSystem || fallbackTarget || dossier?.pharmacology?.title || `${category || 'Clinical Bioactive'} Axis`,
-    indication: fallbackIndication || dossier?.regulatory?.guidance?.slice(0, 220) || 'Targeted cellular modulation, tissue repair, and clinical physiological optimization.',
-    moa: known?.mechanismOfAction || dossier?.pharmacology?.moa || 'Binds to targeted cell-surface receptors activating intracellular secondary messenger cascades for therapeutic response.',
-    halfLife: known?.halfLife || 'Physiological peptide kinetics (protease-regulated clearance)',
+    targetSystem: fallbackTarget || known?.targetSystem || dossier?.pharmacology?.title || (isEs ? `Eje ${category || 'Bioactivo Clínico'}` : `${category || 'Clinical Bioactive'} Axis`),
+    indication: fallbackIndication || dossier?.regulatory?.guidance || (isEs ? 'Modulación celular específica, reparación tisular y optimización fisiológica clínica.' : 'Targeted cellular modulation, tissue repair, and clinical physiological optimization.'),
+    moa: isEs
+      ? (dossier?.pharmacology?.moaEs || 'Se une a receptores específicos de superficie celular activando cascadas intracelulares de segundos mensajeros para respuesta terapéutica.')
+      : (known?.mechanismOfAction || dossier?.pharmacology?.moa || 'Binds to targeted cell-surface receptors activating intracellular secondary messenger cascades for therapeutic response.'),
+    halfLife: known?.halfLife || (isEs ? 'Cinética peptídica fisiológica (aclaramiento regulado por proteasas)' : 'Physiological peptide kinetics (protease-regulated clearance)'),
     sequence: known?.sequence || null,
     casNumber: known?.casNumber || dossier?.casNumber || null,
     synergy
@@ -448,8 +451,9 @@ const CLINICAL_PRESETS = [
  * Displays each peptide with 44px touch targets, 2-column pricing tiles (Single Vial vs Box ×10),
  * live proforma cart status, and public specs link.
  */
-function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }) {
+function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, lang = 'en' }) {
   const [isClinicalExpanded, setIsClinicalExpanded] = useState(false);
+  const isEs = lang === 'es';
   const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
   const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
   const discountPct = Math.max(10, Math.round((1 - (p10 / (row.unitPrice * 10))) * 100));
@@ -462,7 +466,8 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
   const inCart10x = cartItems[row.id]?.quantity10x || 0;
   const hasCart = inCart1x > 0 || inCart10x > 0;
 
-  const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category);
+  const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category, lang);
+  const blendInfo = parsePeptideBlendDisplay(row.productName, row.dosage);
 
   return (
     <div style={{
@@ -492,7 +497,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
                 wordBreak: 'break-word'
               }}
             >
-              {row.productName}
+              {blendInfo.isBlend ? blendInfo.titleLine : row.productName}
             </Link>
             <span style={{
               fontSize: '0.74rem',
@@ -504,11 +509,16 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
               borderRadius: '4px',
               whiteSpace: 'nowrap'
             }}>
-              {row.dosage}
+              {blendInfo.isBlend ? blendInfo.dosageMain : row.dosage}
             </span>
           </div>
+          {blendInfo.isBlend && blendInfo.compositionLine && (
+            <div style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 600, marginTop: '2px' }}>
+              {blendInfo.compositionLine}
+            </div>
+          )}
           <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700, marginTop: '3px' }}>
-            {row.therapeuticClass || 'Certified Clinical Peptide'}
+            {row?.categoryMeta?.label || row.therapeuticClass || (isEs ? 'Péptido Clínico Certificado' : 'Certified Clinical Peptide')}
           </div>
         </div>
 
@@ -535,7 +545,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
           }}
           title={`Open public clinical specs for ${row.productName} (${row.dosage})`}
         >
-          <span>📄 Specs</span>
+          <span>📄 {isEs ? 'Ficha' : 'Specs'}</span>
           <span>↗</span>
         </Link>
       </div>
@@ -555,7 +565,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
           gap: '5px'
         }}>
           <Check size={12} />
-          <span>In Proforma: {inCart1x > 0 ? `${inCart1x} single vial${inCart1x > 1 ? 's' : ''}` : ''}{inCart1x > 0 && inCart10x > 0 ? ' + ' : ''}{inCart10x > 0 ? `${inCart10x} box${inCart10x > 1 ? 'es' : ''} (×10)` : ''}</span>
+          <span>{isEs ? 'En Proforma:' : 'In Proforma:'} {inCart1x > 0 ? `${inCart1x} vial${inCart1x > 1 ? (isEs ? 'es' : 's') : ''}` : ''}{inCart1x > 0 && inCart10x > 0 ? ' + ' : ''}{inCart10x > 0 ? `${inCart10x} ${isEs ? 'caja' : 'box'}${inCart10x > 1 ? (isEs ? 's' : 'es') : ''} (×10)` : ''}</span>
         </div>
       )}
 
@@ -578,13 +588,13 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
         }}>
           <div>
             <div style={{ fontSize: '0.66rem', color: '#5f6368', fontWeight: 600, textTransform: 'uppercase' }}>
-              Single Vial (1x)
+              {isEs ? 'Vial Individual (1x)' : 'Single Vial (1x)'}
             </div>
             <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#202124', fontFamily: 'monospace', marginTop: '2px' }}>
               {formatPrice ? formatPrice(row.unitPrice) : `$${row.unitPrice}`}
             </div>
             <div style={{ fontSize: '0.64rem', color: '#5f6368' }}>
-              per sterile vial
+              {isEs ? 'por vial estéril' : 'per sterile vial'}
             </div>
           </div>
 
@@ -627,7 +637,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2px' }}>
               <span style={{ fontSize: '0.66rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
-                Box of 10
+                {isEs ? 'Caja de 10' : 'Box of 10'}
               </span>
               <span style={{
                 fontSize: '0.60rem',
@@ -638,7 +648,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
                 padding: '1px 4px',
                 borderRadius: '3px'
               }}>
-                -{discountPct}% Box
+                -{discountPct}% {isEs ? 'Caja' : 'Box'}
               </span>
             </div>
             <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#15803d', fontFamily: 'monospace', marginTop: '2px' }}>
@@ -675,7 +685,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
         </div>
       </div>
 
-      {/* Expandable Clinical Summary Accordion (¿Para qué sirve?) */}
+      {/* Expandable Clinical Summary Accordion */}
       <div style={{ marginTop: '2px' }}>
         <button
           type="button"
@@ -698,7 +708,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <Sparkles size={13} color={isClinicalExpanded ? '#1d4ed8' : '#64748b'} />
-            <span>¿Para qué sirve? · Clinical Quick-Ref</span>
+            <span>{isEs ? 'Resumen Farmacológico Clínico' : 'Clinical Pharmacology Quick-Ref'}</span>
           </span>
           {isClinicalExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
@@ -718,11 +728,11 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
             animation: 'fadeIn 0.15s ease'
           }}>
             <div>
-              <strong style={{ color: '#0f172a' }}>🎯 Indication:</strong>{' '}
+              <strong style={{ color: '#0f172a' }}>🎯 {isEs ? 'Indicación:' : 'Indication:'}</strong>{' '}
               <span style={{ color: '#334155' }}>{clinical.indication}</span>
             </div>
             <div>
-              <strong style={{ color: '#0f172a' }}>🧬 Target & MoA:</strong>{' '}
+              <strong style={{ color: '#0f172a' }}>🧬 {isEs ? 'Diana & MoA:' : 'Target & MoA:'}</strong>{' '}
               <span style={{ color: '#475569' }}>{clinical.moa}</span>
             </div>
             <div style={{
@@ -742,7 +752,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice }
                 padding: '2px 6px',
                 borderRadius: '4px'
               }}>
-                ⏱️ Half-life: {clinical.halfLife}
+                ⏱️ {isEs ? 'Vida media:' : 'Half-life:'} {clinical.halfLife}
               </span>
               {clinical.casNumber && (
                 <span style={{
@@ -781,16 +791,17 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
 
-  // Standard English default with Spanish toggling & persistent storage
-  const [lang, setLang] = useState(() => {
+  // Strict English default ('en') unless ?lang=es is explicitly in the URL or selected via top button
+  const [lang, setLang] = useState('en');
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search).get('lang');
-      if (p === 'es' || p === 'en') return p;
-      const s = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
-      if (s === 'es' || s === 'en') return s;
+      if (p === 'es' || p === 'en') {
+        setLang(p);
+      }
     }
-    return 'en';
-  });
+  }, []);
 
   const isEs = lang === 'es';
 
@@ -1335,7 +1346,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     },
     {
       key: 'productName',
-      label: 'Peptide Formulation & Concentration',
+      label: isEs ? 'Formulación de Péptido & Concentración' : 'Peptide Formulation & Concentration',
       width: '38%',
       align: 'left', // STRICT: Left-aligned for clean price list readability
       sortable: true,
@@ -1348,6 +1359,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         const targetSlug = row.slug || row.productId || '';
         const cleanDoseParam = (row.dosage || '').replace(/\s+/g, '').toLowerCase();
         const publicPageUrl = `/p/${encodeURIComponent(targetSlug)}${cleanDoseParam ? `?dose=${encodeURIComponent(cleanDoseParam)}` : ''}`;
+        const blendInfo = parsePeptideBlendDisplay(row.productName, row.dosage);
 
         return (
           <div style={{ textAlign: 'left', minWidth: 0 }}>
@@ -1367,9 +1379,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 }}
                 onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
                 onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
-                title={`Open official clinical datasheet & 3D structure for ${row.productName} in new tab`}
+                title={isEs ? `Abrir ficha clínica oficial y estructura 3D de ${row.productName} en nueva pestaña` : `Open official clinical datasheet & 3D structure for ${row.productName} in new tab`}
               >
-                {row.productName}
+                {blendInfo.isBlend ? blendInfo.titleLine : row.productName}
               </a>
               {row.dosage && (
                 <span style={{
@@ -1384,7 +1396,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   letterSpacing: '-0.01em',
                   whiteSpace: 'nowrap'
                 }}>
-                  {row.dosage}
+                  {blendInfo.isBlend ? blendInfo.dosageMain : row.dosage}
                 </span>
               )}
               {/* Specs Button: Navigates directly to the comprehensive public peptide datasheet for this exact dosage */}
@@ -1417,10 +1429,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   e.currentTarget.style.background = '#ffffff';
                   e.currentTarget.style.borderColor = '#c2e7ff';
                 }}
-                title={`Open official clinical monograph, CAS, reconstitution & 3D structure for ${row.productName} ${row.dosage || ''} in new tab`}
+                title={isEs ? `Abrir monografía clínica oficial, CAS, reconstitución y estructura 3D de ${row.productName} ${row.dosage || ''}` : `Open official clinical monograph, CAS, reconstitution & 3D structure for ${row.productName} ${row.dosage || ''} in new tab`}
               >
                 <FileText size={11} />
-                <span>Specs ↗</span>
+                <span>{isEs ? 'Ficha ↗' : 'Specs ↗'}</span>
               </a>
 
               <span style={{
@@ -1474,14 +1486,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   gap: '3px'
                 }}>
                   <Check size={10} />
-                  <span>In Proforma: {v1x > 0 ? `${v1x} vial${v1x > 1 ? 's' : ''}` : ''}{v1x > 0 && v10x > 0 ? ' + ' : ''}{v10x > 0 ? `${v10x} box${v10x > 1 ? 'es' : ''} (×10)` : ''}</span>
+                  <span>{isEs ? 'En Proforma:' : 'In Proforma:'} {v1x > 0 ? `${v1x} vial${v1x > 1 ? (isEs ? 'es' : 's') : ''}` : ''}{v1x > 0 && v10x > 0 ? ' + ' : ''}{v10x > 0 ? `${v10x} ${isEs ? 'caja' : 'box'}${v10x > 1 ? (isEs ? 's' : 'es') : ''} (×10)` : ''}</span>
                 </span>
               )}
             </div>
+            {blendInfo.isBlend && blendInfo.compositionLine && (
+              <div style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 600, marginTop: '2px' }}>
+                {blendInfo.compositionLine}
+              </div>
+            )}
             <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>Sterile Lyophilized Vial (10R Borosilicate)</span>
+              <span>{isEs ? 'Vial Liofilizado Estéril (Borosilicato 10R)' : 'Sterile Lyophilized Vial (10R Borosilicate)'}</span>
               <span>•</span>
-              <span style={{ color: '#137333', fontWeight: 600 }}>≥99.0% HPLC Analytical Purity</span>
+              <span style={{ color: '#137333', fontWeight: 600 }}>{isEs ? '≥99.0% Pureza Analítica HPLC' : '≥99.0% HPLC Analytical Purity'}</span>
             </div>
           </div>
         );
@@ -1489,7 +1506,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     },
     {
       key: 'unitPrice',
-      label: `Single Vial (1x) · ${currency}`,
+      label: isEs ? `Vial Individual (1x) · ${currency}` : `Single Vial (1x) · ${currency}`,
       width: '17%',
       align: 'left',
       sortable: true,
@@ -1498,13 +1515,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#202124', fontSize: '0.92rem' }}>
             {formatPrice(val ?? row.unitPrice)}
           </span>
-          <span style={{ fontSize: '0.66rem', color: '#5f6368' }}>per sterile vial</span>
+          <span style={{ fontSize: '0.66rem', color: '#5f6368' }}>{isEs ? 'por vial estéril' : 'per sterile vial'}</span>
         </div>
       )
     },
     {
       key: 'pack10Price',
-      label: `Box of 10 (Pack ×10) · ${currency}`,
+      label: isEs ? `Caja de 10 (Pack ×10) · ${currency}` : `Box of 10 (Pack ×10) · ${currency}`,
       width: '20%',
       align: 'left',
       sortable: true,
@@ -1528,7 +1545,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 borderRadius: '4px',
                 whiteSpace: 'nowrap'
               }}>
-                -{discountPct}% Box
+                -{discountPct}% {isEs ? 'Caja' : 'Box'}
               </span>
             </div>
             <span style={{ fontSize: '0.66rem', color: '#137333', fontFamily: 'monospace' }}>
@@ -1540,7 +1557,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     },
     {
       key: 'actions',
-      label: 'Order Request',
+      label: isEs ? 'Solicitud de Pedido' : 'Order Request',
       width: '175px',
       minWidth: '170px',
       align: 'right',
@@ -1566,7 +1583,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             }}
             onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
             onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
-            title="Add 1 single vial to proforma"
+            title={isEs ? 'Añadir 1 vial individual a la proforma' : 'Add 1 single vial to proforma'}
           >
             <Plus size={11} />
             <span>1 Vial</span>
@@ -1591,7 +1608,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             }}
             onMouseEnter={e => e.currentTarget.style.background = '#1557b0'}
             onMouseLeave={e => e.currentTarget.style.background = '#1a73e8'}
-            title="Add manufacturer box of 10 vials (-volume discount)"
+            title={isEs ? 'Añadir caja de 10 viales con descuento por volumen' : 'Add manufacturer box of 10 vials (-volume discount)'}
           >
             <Box size={11} />
             <span>+Pack ×10</span>
@@ -1599,11 +1616,11 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       )
     }
-  ], [formatPrice, handleAddToCart, currency, cartItems]);
+  ], [formatPrice, handleAddToCart, currency, cartItems, isEs]);
 
   // Master-Detail Expandable Clinical Summary Row for Desktop DataTable (Google Cloud Console UX - Golden Rule #4 & #11)
   const renderPeptideClinicalDetail = useCallback((row) => {
-    const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category);
+    const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category, lang);
     const isEs = lang === 'es';
 
     return (
@@ -1797,58 +1814,112 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
   }, [lang, setSelectedSpecsProduct]);
 
   return (
-    <div className="colway-price-root">
-      {/* ── Screen Navigation Bar ── */}
+    <div className="colway-price-root peptides-b2b-portal">
+      {/* ── Screen Navigation Bar (Google Cloud Console AppBar) ── */}
       <header className="screen-nav-bar">
-        <div className="nav-container">
-          <div className="nav-left">
+        <div className="nav-container peptides-nav-container">
+          <div className="nav-left peptides-nav-left">
             <Link href="/" className="nav-brand">
               <Sparkles size={16} className="text-sky-400" />
               <span>MEDILUXE B2B</span>
             </Link>
-            <span className="nav-divider">/</span>
-            <span className="nav-section">Price Schedules</span>
-            <span className="nav-divider">/</span>
-            <span className="nav-current">Lyophilized Peptide Vials</span>
+            <span className="nav-divider mobile-hide">/</span>
+            <span className="nav-section mobile-hide">{isEs ? 'Tarifas Oficiales' : 'Price Schedules'}</span>
+            <span className="nav-divider mobile-hide">/</span>
+            <span className="nav-current mobile-hide">{isEs ? 'Viales de Péptidos Liofilizados' : 'Lyophilized Peptide Vials'}</span>
           </div>
 
-          <div className="nav-actions">
-            {/* Language selector: EN standard, ES selectable */}
-            <div className="language-selector" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div className="pill-group" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                {[
-                  { code: 'en', label: 'EN' },
-                  { code: 'es', label: 'ES' }
-                ].map((item) => {
-                  const isCurrent = (lang || 'en') === item.code;
-                  return (
-                    <button
-                      key={item.code}
-                      onClick={() => handleLanguageChange(item.code)}
-                      className={`pill-btn ${isCurrent ? 'pill-active active' : ''}`}
-                      style={{
-                        border: 'none',
-                        background: isCurrent ? '#0284c7' : 'transparent',
-                        color: isCurrent ? '#ffffff' : '#cbd5e1',
-                        fontWeight: isCurrent ? 800 : 500,
-                        fontSize: '0.74rem',
-                        padding: '4px 9px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
+          <div className="nav-actions peptides-nav-actions">
+            {/* Top-right compact utility group (EN/ES, PDF, Share) */}
+            <div className="peptides-nav-utility-group">
+              {/* Language selector: EN standard, ES selectable */}
+              <div className="language-selector" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div className="pill-group" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                  {[
+                    { code: 'en', label: 'EN' },
+                    { code: 'es', label: 'ES' }
+                  ].map((item) => {
+                    const isCurrent = (lang || 'en') === item.code;
+                    return (
+                      <button
+                        key={item.code}
+                        onClick={() => handleLanguageChange(item.code)}
+                        className={`pill-btn ${isCurrent ? 'pill-active active' : ''}`}
+                        style={{
+                          border: 'none',
+                          background: isCurrent ? '#0284c7' : 'transparent',
+                          color: isCurrent ? '#ffffff' : '#cbd5e1',
+                          fontWeight: isCurrent ? 800 : 500,
+                          fontSize: '0.73rem',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+
+              {/* PDF Preview button in Header */}
+              <button
+                onClick={() => setIsPdfPreviewOpen(true)}
+                className="peptides-nav-btn"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: 'rgba(255, 255, 255, 0.12)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+                title={isEs ? 'Previsualizar y exportar tarifa oficial PDF' : 'Preview and export official PDF price schedule'}
+              >
+                <Eye size={13} />
+                <span>{isEs ? 'PDF' : 'PDF Schedule'}</span>
+              </button>
+
+              {/* Share button */}
+              <button
+                onClick={handleShareSchedule}
+                className="peptides-nav-btn"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  color: '#cbd5e1',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  padding: '5px 9px',
+                  borderRadius: '6px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+                title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
+              >
+                {copied ? <Check size={13} className="text-emerald-400" /> : <Share2 size={13} />}
+                <span className="peptides-share-label">{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
+              </button>
             </div>
 
             {/* Currency selector with prominent display (Google Cloud Console Standard) */}
-            <div className="currency-selector" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Currency:</span>
-              <div className="pill-group" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+            <div className="currency-selector peptides-currency-bar" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+                {isEs ? 'Divisa:' : 'Currency:'}
+              </span>
+              <div className="pill-group peptides-currency-pills" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
                 {[
                   { code: 'USD', symbol: '$' },
                   { code: 'EUR', symbol: '€' },
@@ -1865,7 +1936,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         background: isCurrent ? '#1a73e8' : 'transparent',
                         color: isCurrent ? '#ffffff' : '#cbd5e1',
                         fontWeight: isCurrent ? 800 : 500,
-                        fontSize: '0.74rem',
+                        fontSize: '0.73rem',
                         padding: '4px 10px',
                         borderRadius: '4px',
                         cursor: 'pointer',
@@ -1874,100 +1945,60 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         letterSpacing: '-0.01em',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        justifyContent: 'center',
+                        gap: '4px',
+                        flex: 1,
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      {isCurrent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8', display: 'inline-block' }} />}
+                      {isCurrent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8', display: 'inline-block', flexShrink: 0 }} />}
                       <span>{item.code} ({item.symbol})</span>
                     </button>
                   );
                 })}
               </div>
             </div>
-
-            {/* PDF Preview button in Header */}
-            <button
-              onClick={() => setIsPdfPreviewOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: 'rgba(255, 255, 255, 0.12)',
-                color: '#ffffff',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                padding: '5px 12px',
-                borderRadius: '6px',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-              title="Preview and export official PDF price schedule"
-            >
-              <Eye size={13} />
-              <span>PDF Schedule</span>
-            </button>
-
-            {/* Share button */}
-            <button
-              onClick={handleShareSchedule}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                color: '#cbd5e1',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '5px 10px',
-                borderRadius: '6px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-              title="Copy verified price list link"
-            >
-              {copied ? <Check size={13} className="text-emerald-400" /> : <Share2 size={13} />}
-              <span>{copied ? 'Copied' : 'Share'}</span>
-            </button>
           </div>
         </div>
       </header>
 
-      <main style={{ maxWidth: '1440px', margin: '0 auto', padding: '1.25rem 1.25rem 9.5rem 1.25rem' }}>
+      <main className="peptides-main-container" style={{ maxWidth: '1440px', margin: '0 auto', padding: '1.25rem 1.25rem 9.5rem 1.25rem' }}>
         {/* Page Header */}
-        <div style={{ marginBottom: '1.25rem' }}>
-          <Breadcrumb items={[
-            { label: 'B2B Portal', href: '/' },
-            { label: 'Official Price Schedules', href: '/pricing/peptides' },
-            { label: 'Clinical Peptide Vials' }
-          ]} />
+        <div className="peptides-page-header" style={{ marginBottom: '1rem' }}>
+          <div className="mobile-hide">
+            <Breadcrumb items={[
+              { label: isEs ? 'Portal B2B' : 'B2B Portal', href: '/' },
+              { label: isEs ? 'Tarifas Oficiales' : 'Official Price Schedules', href: '/pricing/peptides' },
+              { label: isEs ? 'Viales Clínicos de Péptidos' : 'Clinical Peptide Vials' }
+            ]} />
+          </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.75rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
               {/* Consolidated GCP Status Strip (Single Row) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', flexWrap: 'wrap' }}>
                 <span style={{
-                  fontSize: '0.70rem',
+                  fontSize: '0.68rem',
                   fontWeight: 750,
                   color: isDistributor ? '#137333' : '#1a73e8',
                   background: isDistributor ? '#e6f4ea' : '#e8f0fe',
                   border: isDistributor ? '1px solid #ceead6' : '1px solid #c2e7ff',
-                  padding: '3px 8px',
+                  padding: '2px 8px',
                   borderRadius: '6px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px'
                 }}>
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isDistributor ? '#137333' : '#1a73e8', display: 'inline-block' }} />
-                  <span>{isDistributor ? 'Official Distributor Schedule' : 'Wholesale Schedule'}</span>
+                  <span>{isDistributor ? (isEs ? 'Tarifa Oficial Distribuidor' : 'Official Distributor Schedule') : (isEs ? 'Tarifa Mayorista' : 'Wholesale Schedule')}</span>
                 </span>
                 <span style={{
-                  fontSize: '0.70rem',
+                  fontSize: '0.68rem',
                   fontWeight: 650,
                   color: '#137333',
                   background: '#e6f4ea',
                   border: '1px solid #ceead6',
-                  padding: '3px 8px',
+                  padding: '2px 8px',
                   borderRadius: '6px',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1977,36 +2008,43 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   <span>≥99.0% HPLC</span>
                 </span>
                 <span style={{
-                  fontSize: '0.70rem',
+                  fontSize: '0.68rem',
                   fontWeight: 750,
                   color: '#0d47a1',
                   background: '#e3f2fd',
                   border: '1px solid #90caf9',
-                  padding: '3px 8px',
+                  padding: '2px 8px',
                   borderRadius: '6px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}>
-                  <span>Currency: <strong>{currency} ({currencySymbol.trim()})</strong></span>
+                  <span>{isEs ? 'Divisa:' : 'Currency:'} <strong>{currency} ({currencySymbol.trim()})</strong></span>
                 </span>
               </div>
-              <h1 style={{
-                fontSize: 'clamp(1.20rem, 3.2vw, 1.65rem)',
+              <h1 className="peptides-hero-title" style={{
+                fontSize: 'clamp(1.12rem, 3vw, 1.60rem)',
                 fontWeight: 800,
                 color: '#202124',
                 letterSpacing: '-0.02em',
                 margin: 0,
-                lineHeight: 1.25,
+                lineHeight: 1.22,
                 textWrap: 'balance',
                 maxWidth: '820px'
               }}>
-                {isDistributor ? 'Certified Clinical Peptide Vials • Distributor B2B' : 'Certified Clinical Peptide Vials • Wholesaler & Clinic'}
-              </h1>
-              <p style={{ fontSize: '0.88rem', color: '#5f6368', marginTop: '4px', maxWidth: '850px' }}>
                 {isDistributor
-                  ? 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate) with verified analytical purity and manufacturer volume tiers.'
-                  : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides. Standard wholesale tier with manufacturer 10-pack volume savings.'
+                  ? (isEs ? 'Viales Clínicos de Péptidos Certificados • Distribuidor B2B' : 'Certified Clinical Peptide Vials • Distributor B2B')
+                  : (isEs ? 'Viales Clínicos de Péptidos Certificados • Mayoristas y Clínicas' : 'Certified Clinical Peptide Vials • Wholesaler & Clinic')
+                }
+              </h1>
+              <p className="peptides-hero-subtitle" style={{ fontSize: '0.84rem', color: '#5f6368', marginTop: '3px', marginBottom: 0, maxWidth: '850px', lineHeight: 1.4 }}>
+                {isDistributor
+                  ? (isEs
+                      ? 'Lista oficial B2B para distribuidores de viales liofilizados certificados (Borosilicato 10R) con pureza verificada y ahorro por volumen.'
+                      : 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate) with verified analytical purity and volume tiers.')
+                  : (isEs
+                      ? 'Tarifa oficial institucional y mayorista para péptidos bioactivos liofilizados estériles con ahorro por volumen en cajas de 10 viales.'
+                      : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides with manufacturer 10-pack volume savings.')
                 }
               </p>
             </div>
@@ -2036,19 +2074,118 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             display: flex;
             flex-direction: column;
           }
+          .gcp-kpis-summary-block {
+            order: 1;
+          }
+          .gcp-search-and-category-block {
+            order: 2;
+          }
+          .gcp-table-block {
+            order: 3;
+          }
           .mobile-only-category-selector {
             display: none;
+          }
+          .peptides-nav-utility-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+          }
+          .peptides-kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.85rem;
           }
           @media (max-width: 1024px) {
             .gcp-pricing-portal-layout {
               flex-direction: column;
-              gap: 1rem;
+              gap: 0.85rem;
             }
             .gcp-pricing-sidebar {
               display: none !important;
             }
             .mobile-only-category-selector {
               display: block !important;
+            }
+            .peptides-kpis-grid {
+              grid-template-columns: repeat(2, 1fr);
+              gap: 0.65rem;
+            }
+          }
+          @media (max-width: 768px) {
+            .mobile-hide {
+              display: none !important;
+            }
+            /* Compact 2-Row Google Cloud Mobile Top AppBar (No 3rd orphan row) */
+            .peptides-b2b-portal .peptides-nav-container {
+              padding: 8px 12px !important;
+              gap: 6px !important;
+            }
+            .peptides-b2b-portal .peptides-nav-left {
+              width: auto !important;
+              flex: 0 0 auto !important;
+            }
+            .peptides-b2b-portal .peptides-nav-actions {
+              width: 100% !important;
+              display: flex !important;
+              flex-direction: row !important;
+              flex-wrap: wrap !important;
+              align-items: center !important;
+              justify-content: space-between !important;
+              gap: 6px !important;
+            }
+            .peptides-b2b-portal .peptides-nav-utility-group {
+              margin-left: auto;
+              display: inline-flex !important;
+              align-items: center !important;
+              gap: 5px !important;
+            }
+            .peptides-b2b-portal .peptides-currency-bar {
+              width: 100% !important;
+              justify-content: space-between !important;
+              padding-top: 4px !important;
+              border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            }
+            .peptides-b2b-portal .peptides-currency-pills {
+              flex: 1 !important;
+              display: flex !important;
+            }
+            .peptides-main-container {
+              padding: 0.75rem 0.75rem 6.5rem 0.75rem !important;
+            }
+            .peptides-page-header {
+              margin-bottom: 0.65rem !important;
+            }
+            .peptides-hero-subtitle {
+              font-size: 0.76rem !important;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+            /* Golden Rule #7: Search Bar & Category Selector FIRST Above-the-Fold on Mobile */
+            .gcp-search-and-category-block {
+              order: 1 !important;
+              margin-bottom: 0.75rem !important;
+            }
+            .gcp-kpis-summary-block {
+              order: 2 !important;
+              padding: 0.75rem !important;
+              margin-bottom: 0.75rem !important;
+            }
+            .gcp-table-block {
+              order: 3 !important;
+            }
+            .peptides-kpi-card {
+              padding: 0.55rem 0.65rem !important;
+            }
+            .peptides-kpi-val {
+              font-size: 1.15rem !important;
+            }
+          }
+          @media (max-width: 390px) {
+            .peptides-share-label {
+              display: none !important;
             }
           }
         ` }} />
@@ -2066,7 +2203,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
             }}>
               <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
-                Peptide Categories
+                {isEs ? 'Categorías de Péptidos' : 'Peptide Categories'}
               </div>
               <div className="gcp-categories-horizontal" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 <button
@@ -2090,7 +2227,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   onMouseEnter={e => { if (selectedCategory !== 'all') e.currentTarget.style.background = '#f1f3f4'; }}
                   onMouseLeave={e => { if (selectedCategory !== 'all') e.currentTarget.style.background = 'transparent'; }}
                 >
-                  <span>All Formulations</span>
+                  <span>{isEs ? 'Todas las Formulaciones' : 'All Formulations'}</span>
                   <span style={{
                     fontSize: '0.66rem',
                     fontWeight: 700,
@@ -2136,7 +2273,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '16px' }}>
                           {getCategoryIcon(key, 13)}
                         </span>
-                        <span>{meta.label}</span>
+                        <span>{isEs ? meta.labelEs : meta.labelEn}</span>
                       </div>
                       <span style={{
                         fontSize: '0.65rem',
@@ -2214,13 +2351,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
 
           {/* ── Main Data Workspace Area ── */}
           <div className="gcp-pricing-workspace">
-            {/* ── 4 KPIs with Scope Switcher (Golden Rule #22) ── */}
-            <div style={{
+            {/* ── 4 KPIs with Scope Switcher (Golden Rule #22 — Zero Duplicate Metrics) ── */}
+            <div className="gcp-kpis-summary-block" style={{
               background: '#ffffff',
               borderRadius: '10px',
               border: '1px solid #e2e8f0',
-              padding: '1.25rem',
-              marginBottom: '1.25rem',
+              padding: '1.15rem',
+              marginBottom: '1.15rem',
               boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
             }}>
               {/* Scope Indicator & Switcher */}
@@ -2228,15 +2365,15 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: '1rem',
-                paddingBottom: '0.75rem',
+                marginBottom: '0.75rem',
+                paddingBottom: '0.6rem',
                 borderBottom: '1px solid #f1f5f9',
                 flexWrap: 'wrap',
-                gap: '8px'
+                gap: '6px'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                   <span style={{
-                    fontSize: '0.72rem',
+                    fontSize: '0.70rem',
                     fontWeight: 700,
                     color: scopeMode === 'filtered' ? '#0284c7' : '#475569',
                     background: scopeMode === 'filtered' ? '#f0f9ff' : '#f8fafc',
@@ -2244,11 +2381,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     padding: '2px 8px',
                     borderRadius: '4px'
                   }}>
-                    {scopeMode === 'filtered' ? `Matching Active Filters (${filteredProducts.length} Formulations)` : `Entire Database (${processedProducts.length} Formulations)`}
+                    {scopeMode === 'filtered'
+                      ? (isEs ? `Filtros Activos (${filteredProducts.length} Formulaciones)` : `Matching Active Filters (${filteredProducts.length} Formulations)`)
+                      : (isEs ? `Base de Datos Completa (${processedProducts.length} Formulaciones)` : `Entire Database (${processedProducts.length} Formulations)`)
+                    }
                   </span>
                   {totalCartCount > 0 && (
                     <span style={{
-                      fontSize: '0.72rem',
+                      fontSize: '0.70rem',
                       fontWeight: 750,
                       color: '#137333',
                       background: '#e6f4ea',
@@ -2260,144 +2400,153 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       gap: '4px'
                     }}>
                       <CheckCircle2 size={12} />
-                      <span>{totalCartCount} Vials in Proforma ({formatPrice(totalCartValueUsd)})</span>
+                      <span>{totalCartCount} {isEs ? 'Viales en Proforma' : 'Vials in Proforma'} ({formatPrice(totalCartValueUsd)})</span>
                     </span>
                   )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
-                  <span>Metrics Scope:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b' }}>
+                  <span>{isEs ? 'Alcance:' : 'Metrics Scope:'}</span>
                   <div className="pill-group" style={{ background: '#f1f5f9' }}>
                     <button
                       onClick={() => setScopeMode('filtered')}
                       className={`pill-btn ${scopeMode === 'filtered' ? 'active' : ''}`}
                       style={{ color: scopeMode === 'filtered' ? '#0284c7' : '#64748b' }}
                     >
-                      Filtered View
+                      {isEs ? 'Vista Filtrada' : 'Filtered View'}
                     </button>
                     <button
                       onClick={() => setScopeMode('global')}
                       className={`pill-btn ${scopeMode === 'global' ? 'active' : ''}`}
                       style={{ color: scopeMode === 'global' ? '#0284c7' : '#64748b' }}
                     >
-                      Global Database
+                      {isEs ? 'Base Global' : 'Global Database'}
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* 4 Standard Metrics (Dynamically updated with live selections) */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                    Available Formulations
+              {/* 4 Non-Duplicate Metrics (Golden Rule #22) */}
+              <div className="peptides-kpis-grid">
+                {/* KPI 1: Available Formulations */}
+                <div className="peptides-kpi-card" style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    {isEs ? 'Formulaciones Disponibles' : 'Available Formulations'}
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                  <div className="peptides-kpi-val" style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
                     {scopeMode === 'filtered' ? filteredProducts.length : processedProducts.length}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: '#0284c7', marginTop: '2px' }}>
-                    Sterile Lyophilized Vials
+                  <div style={{ fontSize: '0.70rem', color: '#0284c7', marginTop: '2px' }}>
+                    {isEs ? 'Viales Liofilizados Estériles' : 'Sterile Lyophilized Vials'}
                   </div>
                 </div>
 
-                <div style={{
+                {/* KPI 2: Pack ×10 Volume Savings (or Active Proforma when items added) */}
+                <div className="peptides-kpi-card" style={{
                   padding: '0.75rem',
                   background: totalCartCount > 0 ? '#f0fdf4' : '#f8fafc',
                   borderRadius: '8px',
                   border: totalCartCount > 0 ? '1px solid #bbf7d0' : '1px solid #f1f5f9',
                   transition: 'all 0.2s ease'
                 }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: totalCartCount > 0 ? '#15803d' : '#64748b', textTransform: 'uppercase' }}>
-                    {totalCartCount > 0 ? 'Active Proforma Request' : 'Volume Pack Tier'}
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: totalCartCount > 0 ? '#15803d' : '#64748b', textTransform: 'uppercase' }}>
+                    {totalCartCount > 0 ? (isEs ? 'Proforma Activa' : 'Active Proforma Request') : (isEs ? 'Ahorro Caja Pack ×10' : '10-Pack Volume Savings')}
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: totalCartCount > 0 ? '#15803d' : '#059669', marginTop: '2px' }}>
-                    {totalCartCount > 0 ? `${totalCartCount} Vials` : '-15% to -52%'}
+                  <div className="peptides-kpi-val" style={{ fontSize: '1.45rem', fontWeight: 800, color: totalCartCount > 0 ? '#15803d' : '#059669', marginTop: '2px' }}>
+                    {totalCartCount > 0 ? `${totalCartCount} ${isEs ? 'Viales' : 'Vials'}` : (isEs ? '-15% a -52%' : '-15% to -52%')}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: totalCartCount > 0 ? '#15803d' : '#059669', marginTop: '2px', fontWeight: totalCartCount > 0 ? 700 : 400 }}>
-                    {totalCartCount > 0 ? `${formatPrice(totalCartValueUsd)} Subtotal` : 'On 10+ Vial Box Orders'}
-                  </div>
-                </div>
-
-                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                    Volume Savings Range
-                  </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                    -15% to -52%
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
-                    Manufacturer 10-Pack Tier
+                  <div style={{ fontSize: '0.70rem', color: totalCartCount > 0 ? '#15803d' : '#059669', marginTop: '2px', fontWeight: totalCartCount > 0 ? 700 : 400 }}>
+                    {totalCartCount > 0 ? `${formatPrice(totalCartValueUsd)} Subtotal` : (isEs ? 'Nivel Caja 10 Viales' : 'Manufacturer 10-Vial Box Tier')}
                   </div>
                 </div>
 
-                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                    Analytical Quality & Purity
+                {/* KPI 3: Regulatory Clinical Coverage (503A & FDA Approved — replaces duplicate -15% to -52%) */}
+                <div className="peptides-kpi-card" style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    {isEs ? '503A & Aprobados FDA' : '503A & FDA Approved'}
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                  <div className="peptides-kpi-val" style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    {(scopeMode === 'filtered' ? filteredProducts : processedProducts).filter(p => p.fdaBucket === 'fda_503a' || p.fdaBucket === 'fda_approved').length}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#1a73e8', marginTop: '2px' }}>
+                    {isEs ? '20 HHS 503A · 15 NDA/BLA' : '20 HHS 503A · 15 NDA/BLA'}
+                  </div>
+                </div>
+
+                {/* KPI 4: Analytical Quality & Purity */}
+                <div className="peptides-kpi-card" style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    {isEs ? 'Calidad y Pureza Analítica' : 'Analytical Quality & Purity'}
+                  </div>
+                  <div className="peptides-kpi-val" style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
                     100% COA
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
-                    ≥99.0% HPLC & Mass Spec Tested
+                  <div style={{ fontSize: '0.70rem', color: '#0d9488', marginTop: '2px' }}>
+                    {isEs ? '≥99.0% HPLC y Masas' : '≥99.0% HPLC & Mass Spec'}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* ── Option 1: Mobile Google Cloud Category Selector Button ── */}
-            <div className="mobile-only-category-selector" style={{ marginBottom: '10px' }}>
-              <button
-                type="button"
-                onClick={() => setIsCategorySheetOpen(true)}
-                style={{
-                  width: '100%',
-                  minHeight: '44px',
-                  background: '#ffffff',
-                  border: '1.5px solid #1a73e8',
-                  borderRadius: '8px',
-                  padding: '8px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 3px rgba(26,115,232,0.12)'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                  <span style={{ color: '#1a73e8', display: 'flex', alignItems: 'center' }}>
-                    {selectedCategory === 'all' ? <Layers size={16} /> : getCategoryIcon(selectedCategory, 16)}
-                  </span>
-                  <div style={{ textAlign: 'left', minWidth: 0 }}>
-                    <div style={{ fontSize: '0.66rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>
-                      Peptide Category Filter
-                    </div>
-                    <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1a73e8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {selectedCategory === 'all' ? 'All Formulations' : (CATEGORY_MAP[selectedCategory]?.label || selectedCategory)}
+            {/* ── Search & Category Filter Block (Order 1 on Mobile per Golden Rule #7) ── */}
+            <div className="gcp-search-and-category-block" style={{ marginBottom: '1.15rem' }}>
+              {/* Mobile Google Cloud Category Selector Button */}
+              <div className="mobile-only-category-selector" style={{ marginBottom: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsCategorySheetOpen(true)}
+                  style={{
+                    width: '100%',
+                    minHeight: '44px',
+                    background: '#ffffff',
+                    border: '1.5px solid #1a73e8',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 3px rgba(26,115,232,0.12)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    <span style={{ color: '#1a73e8', display: 'flex', alignItems: 'center' }}>
+                      {selectedCategory === 'all' ? <Layers size={16} /> : getCategoryIcon(selectedCategory, 16)}
+                    </span>
+                    <div style={{ textAlign: 'left', minWidth: 0 }}>
+                      <div style={{ fontSize: '0.65rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>
+                        {isEs ? 'Filtro de Categoría de Péptidos' : 'Peptide Category Filter'}
+                      </div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1a73e8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {selectedCategory === 'all'
+                          ? (isEs ? 'Todas las Formulaciones' : 'All Formulations')
+                          : ((isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn) || selectedCategory)}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                  <span style={{
-                    fontSize: '0.70rem',
-                    fontWeight: 800,
-                    background: '#e8f0fe',
-                    color: '#1a73e8',
-                    padding: '2px 8px',
-                    borderRadius: '10px'
-                  }}>
-                    {selectedCategory === 'all' ? processedProducts.length : processedProducts.filter(p => p.categoryKey === selectedCategory).length}
-                  </span>
-                  <ChevronDown size={16} color="#1a73e8" />
-                </div>
-              </button>
-            </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                    <span style={{
+                      fontSize: '0.70rem',
+                      fontWeight: 800,
+                      background: '#e8f0fe',
+                      color: '#1a73e8',
+                      padding: '2px 8px',
+                      borderRadius: '10px'
+                    }}>
+                      {selectedCategory === 'all' ? processedProducts.length : processedProducts.filter(p => p.categoryKey === selectedCategory).length}
+                    </span>
+                    <ChevronDown size={16} color="#1a73e8" />
+                  </div>
+                </button>
+              </div>
 
-            {/* ── Global Search & Filters (Golden Rule #7) ── */}
-            <div style={{ marginBottom: '1.25rem' }}>
+              {/* Global Search & Filters (Golden Rule #7) */}
               <GlobalSearchBar
                 value={searchQuery}
                 onChange={setSearchQuery}
-                placeholder="Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)..."
+                placeholder={isEs
+                  ? 'Buscar por nombre de péptido (ej. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'
+                  : 'Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'}
                 size="lg"
                 resultCount={filteredProducts.length}
                 filters={
@@ -2405,7 +2554,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     {/* Dosage Strength Quick Filter Pills (Mejora #5) */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        Filter Strength:
+                        {isEs ? 'Concentración:' : 'Filter Strength:'}
                       </span>
                       {DOSAGE_STRENGTHS.map(st => {
                         const isSelected = selectedStrength === st.id;
@@ -2427,7 +2576,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                               transition: 'all 0.12s ease'
                             }}
                           >
-                            {st.label}
+                            {st.id === 'all' ? (isEs ? 'Todas las Dosis' : 'All Strengths') : st.label}
                           </button>
                         );
                       })}
@@ -2450,7 +2599,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                             cursor: 'pointer'
                           }}
                         >
-                          Reset Filters ×
+                          {isEs ? 'Limpiar Filtros ×' : 'Reset Filters ×'}
                         </button>
                       )}
                     </div>
@@ -2460,7 +2609,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             </div>
 
             {/* ── Peptide DataTable (Golden Rule #3) ── */}
-            <div style={{
+            <div className="gcp-table-block" style={{
               background: '#ffffff',
               borderRadius: '10px',
               border: '1px solid #e2e8f0',
@@ -2471,10 +2620,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <div style={{ padding: '3rem 1.5rem' }}>
                   <EmptyState
                     icon={FileText}
-                    title="No peptide formulations found"
-                    subtitle="Try adjusting your keyword search or category filter to discover available formulations."
+                    title={isEs ? 'No se encontraron formulaciones de péptidos' : 'No peptide formulations found'}
+                    subtitle={isEs ? 'Prueba a ajustar tu búsqueda o filtro de categoría para ver las formulaciones disponibles.' : 'Try adjusting your keyword search or category filter to discover available formulations.'}
                     action={{
-                      label: 'Clear Filters',
+                      label: isEs ? 'Limpiar Filtros' : 'Clear Filters',
                       onClick: () => {
                         setSearchQuery('');
                         setSelectedCategory('all');
@@ -2498,7 +2647,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     cartItems,
                     formatPrice,
                     currency,
-                    currencySymbol
+                    currencySymbol,
+                    lang
                   }}
                 />
               )}
@@ -2542,10 +2692,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                  Request B2B Proforma
+                  {isEs ? 'Solicitar Proforma B2B' : 'Request B2B Proforma'}
                 </h3>
                 <p style={{ margin: '3px 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
-                  Reference Code: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0284c7' }}>{referralCode}</span>
+                  {isEs ? 'Código de Referencia:' : 'Reference Code:'} <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0284c7' }}>{referralCode}</span>
                 </p>
               </div>
               <button
@@ -3221,11 +3371,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     borderRadius: '10px',
                     whiteSpace: 'nowrap'
                   }}>
-                    {selectedCategory !== 'all' ? (CATEGORY_MAP[selectedCategory]?.label || 'Category') : 'Pharmacopeia'}
+                    {selectedCategory !== 'all'
+                      ? ((isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn) || 'Category')
+                      : (isEs ? 'Farmacopea' : 'Pharmacopeia')}
                   </span>
                 </div>
                 <span className="mobile-hide" style={{ fontSize: '0.68rem', color: '#5f6368', fontWeight: 500 }}>
-                  Reconstitution math & synergies
+                  {isEs ? 'Cálculo de reconstitución y sinergias' : 'Reconstitution math & synergies'}
                 </span>
               </div>
             </button>
@@ -3250,14 +3402,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     whiteSpace: 'nowrap'
                   }}>
                     <ShoppingCart size={12} />
-                    <span>{totalCartCount} Vials</span>
+                    <span>{totalCartCount} {isEs ? 'Viales' : 'Vials'}</span>
                   </span>
                   <div>
                     <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#202124', fontFamily: 'monospace', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
                       {formatPrice(totalCartValueUsd)}
                     </div>
                     <div className="mobile-hide" style={{ fontSize: '0.64rem', color: '#5f6368', whiteSpace: 'nowrap' }}>
-                      +€60 Express Logistics added at checkout
+                      {isEs ? '+€60 Logística Médica Express al tramitar' : '+€60 Express Logistics added at checkout'}
                     </div>
                   </div>
                 </div>
@@ -3265,7 +3417,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm('Reset all items in your proforma cart?')) {
+                    if (window.confirm(isEs ? '¿Vaciar todos los viales de tu proforma?' : 'Reset all items in your proforma cart?')) {
                       setCartItems({});
                     }
                   }}
@@ -3279,9 +3431,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     textDecoration: 'underline',
                     cursor: 'pointer'
                   }}
-                  title="Clear all cart items"
+                  title={isEs ? 'Vaciar proforma' : 'Clear all cart items'}
                 >
-                  Reset
+                  {isEs ? 'Vaciar' : 'Reset'}
                 </button>
 
                 <button
@@ -3307,7 +3459,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1557b0'}
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1a73e8'}
                 >
-                  <span>Review Proforma ({totalCartCount})</span>
+                  <span>{isEs ? `Revisar Proforma (${totalCartCount})` : `Review Proforma (${totalCartCount})`}</span>
                   <ArrowRight size={14} />
                 </button>
               </>
@@ -3315,8 +3467,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
                 <span style={{ fontSize: '0.76rem', color: '#5f6368', display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
                   <ShoppingCart size={13} color="#9aa0a6" />
-                  <span>Proforma empty</span>
-                  <span className="mobile-hide" style={{ color: '#80868b' }}>• Click <strong>+ 1 Vial</strong> or <strong>+Pack ×10</strong></span>
+                  <span>{isEs ? 'Proforma vacía' : 'Proforma empty'}</span>
+                  <span className="mobile-hide" style={{ color: '#80868b' }}>
+                    {isEs ? (<>• Pulsa <strong>+ 1 Vial</strong> o <strong>+Pack ×10</strong></>) : (<>• Click <strong>+ 1 Vial</strong> or <strong>+Pack ×10</strong></>)}
+                  </span>
                 </span>
                 <button
                   type="button"
@@ -3337,9 +3491,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     whiteSpace: 'nowrap',
                     minHeight: '36px'
                   }}
-                  title="Add at least 1 vial or box from table to activate proforma review"
+                  title={isEs ? 'Añade al menos 1 vial o caja desde la tabla para revisar tu proforma' : 'Add at least 1 vial or box from table to activate proforma review'}
                 >
-                  <span>Review (0)</span>
+                  <span>{isEs ? 'Revisar (0)' : 'Review (0)'}</span>
                 </button>
               </div>
             )}
@@ -3547,10 +3701,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               }} />
               <div style={{ marginTop: '4px' }}>
                 <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1e293b' }}>
-                  Select Peptide Category
+                  {isEs ? 'Seleccionar Categoría de Péptidos' : 'Select Peptide Category'}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                  Filter 109 formulations by clinical therapeutic classification
+                  {isEs ? 'Filtrar formulaciones por clasificación terapéutica clínica' : 'Filter 109 formulations by clinical therapeutic classification'}
                 </div>
               </div>
               <button
@@ -3600,7 +3754,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Layers size={18} color={selectedCategory === 'all' ? '#1a73e8' : '#64748b'} />
-                  <span>All Formulations</span>
+                  <span>{isEs ? 'Todas las Formulaciones' : 'All Formulations'}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{
@@ -3652,7 +3806,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px' }}>
                         {getCategoryIcon(key, 16)}
                       </span>
-                      <span>{meta.label}</span>
+                      <span>{isEs ? meta.labelEs : meta.labelEn}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{
@@ -3684,6 +3838,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         currencySymbol={currencySymbol}
         formatPrice={formatPrice}
         isDistributor={isDistributor}
+        lang={lang}
       />
 
       {/* ── Technical Specs & Clinical Monograph Drawer ── */}

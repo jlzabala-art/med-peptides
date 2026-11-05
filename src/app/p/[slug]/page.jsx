@@ -577,7 +577,7 @@ async function getAssociatedProtocols(productId, productSlug, productName) {
           : (Number(data.durationWeeks || data.duration_weeks) || parseInt(data.duration, 10) || 12);
         clinicalScore += Math.min(durWeeks, 30);
 
-        let cleanDesc = (data.overview_summary || data.summary || data.description || data.clinicalRationale || '').substring(0, 220);
+        let cleanDesc = (data.overview_summary || data.summary || data.description || data.clinicalRationale || '').trim();
         if (durWeeks > 8 && cleanDesc.includes('8-week')) {
           cleanDesc = cleanDesc.replace(/\b8-week\b/gi, `${durWeeks}-week`);
         }
