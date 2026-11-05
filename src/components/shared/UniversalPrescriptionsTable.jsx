@@ -32,7 +32,8 @@ import { PRESCRIPTION_SOURCES } from '../../schemas/prescriptionSchema';
 import BuilderProtocolSearch from './order-builder/BuilderProtocolSearch';
 import MobilePrescriptionCard from './mobile/MobilePrescriptionCard';
 import MobileActionSheet from '../ui/MobileActionSheet';
-import { Eye, Edit3, XCircle, Tag, Package, Link2, ExternalLink } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Tag, Package, Link2, ExternalLink, Check } from '@/lib/icons';
+import { normalizeRxStatus } from '@/lib/normalizeRxStatus';
 import notifier from '../../services/NotificationService';
 import { exportToCSV, triggerServerExport } from '../../utils/universalExporter';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
@@ -1411,7 +1412,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
                   icon: <FlaskConical size={16} style={{ color: '#0d9488' }} />,
                   description: "Personalized capsules & 24Genetics DNA dosing",
                   onClick: () => {
-                    if (viewMode === 'doctor') {
+                    if (isDoctor) {
                       router.push('/doctor/compounding');
                     } else {
                       router.push('/compounding');
@@ -1505,7 +1506,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
             <PrescriptionsKPIs 
               serverKPIs={serverKPIs} 
               filteredCount={finalData.length} 
-              isFiltered={isAlgoliaActive || (filterStatus && filterStatus.length > 0) || activeChips.length > 0} 
+              isFiltered={isAlgoliaActive || (statusFilter && statusFilter.length > 0) || activeChips.length > 0} 
               doctorId={effectiveDoctorId}
             />
           </>
