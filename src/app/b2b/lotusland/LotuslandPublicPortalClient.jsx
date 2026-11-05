@@ -530,7 +530,7 @@ export default function LotuslandPublicPortalClient() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
             <Sparkles size={14} color="#003666" />
             <h5 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase' }}>
-              Clinical Indication & Mechanism (¿Para qué sirve?)
+              Clinical Indication & Molecular Target
             </h5>
           </div>
           <p style={{ margin: '0 0 8px 0', fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>

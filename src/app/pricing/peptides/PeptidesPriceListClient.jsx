@@ -1601,137 +1601,200 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     }
   ], [formatPrice, handleAddToCart, currency, cartItems]);
 
-  // Master-Detail Expandable Clinical Summary Row for Desktop DataTable (Golden Rule #4 & User Request)
+  // Master-Detail Expandable Clinical Summary Row for Desktop DataTable (Google Cloud Console UX - Golden Rule #4 & #11)
   const renderPeptideClinicalDetail = useCallback((row) => {
     const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category);
+    const isEs = lang === 'es';
 
     return (
       <div style={{
         backgroundColor: '#f8fafc',
         borderLeft: '3px solid #1a73e8',
         borderBottom: '1px solid #e2e8f0',
-        padding: '0.9rem 1.4rem',
-        margin: '0',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.65rem'
+        padding: '1rem 1.4rem',
+        margin: '0'
       }}>
-        {/* Subtle GCP Category & Pathway Tag + FDA Status Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: '0.68rem',
-              fontWeight: 750,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              color: '#1a73e8',
-              background: '#e8f0fe',
-              border: '1px solid #c2e7ff',
-              padding: '2px 8px',
-              borderRadius: '4px'
-            }}>
-              Clinical Pharmacology Quick-Ref
-            </span>
-            <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-              Target Pathway: <strong style={{ color: '#0f172a' }}>{clinical.targetSystem}</strong>
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {row.fdaStatus && (
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 750,
-                color: row.fdaStatus.colorScheme?.text || '#065f46',
-                background: row.fdaStatus.colorScheme?.bg || '#ecfdf5',
-                border: `1px solid ${row.fdaStatus.colorScheme?.border || '#6ee7b7'}`,
-                padding: '2px 8px',
-                borderRadius: '4px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <span>{row.fdaStatus.colorScheme?.icon || '🛡️'}</span>
-                <span>{row.fdaStatus.badgeLabel}</span>
-              </span>
-            )}
-            {clinical.casNumber && <span>CAS Registry: <strong style={{ color: '#334155' }}>{clinical.casNumber}</strong></span>}
-          </div>
-        </div>
-
-        {/* 2-Column Clean Semantic Grid without bulky duplicate cards */}
+        {/* Google Cloud Console Definition Grid (Progressive Disclosure - 3 Columns, Zero Duplicates) */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1.25fr 0.75fr',
-          gap: '1.25rem',
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '0.85rem 1.15rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '1.4rem',
+          alignItems: 'start'
         }}>
-          {/* Column 1: Indication & MoA */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {/* Column 1: Clinical Pharmacology & Indications */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
-                <Sparkles size={13} color="#1a73e8" />
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  Primary Clinical Indication (¿Para qué sirve?)
-                </span>
+              <div style={{
+                fontSize: '0.66rem',
+                fontWeight: 750,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#64748b',
+                marginBottom: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <Sparkles size={12} color="#1a73e8" />
+                <span>{isEs ? 'Indicación Clínica Primaria' : 'Primary Clinical Indication'}</span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.79rem', color: '#334155', lineHeight: 1.5 }}>
+              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#1e293b', lineHeight: 1.52 }}>
                 {clinical.indication}
               </p>
             </div>
 
-            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
-                <Activity size={13} color="#059669" />
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  Biological Pathway & Receptor MoA
-                </span>
+            <div style={{ borderTop: '1px solid #edf2f7', paddingTop: '6px' }}>
+              <div style={{
+                fontSize: '0.66rem',
+                fontWeight: 750,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#64748b',
+                marginBottom: '3px'
+              }}>
+                {isEs ? 'Sistema / Vía Diana' : 'Target System / Pathway'}
               </div>
-              <p style={{ margin: 0, fontSize: '0.77rem', color: '#475569', lineHeight: 1.48 }}>
-                {clinical.moa}
-              </p>
+              <div style={{ fontSize: '0.78rem', color: '#334155', fontWeight: 650 }}>
+                {clinical.targetSystem}
+              </div>
             </div>
           </div>
 
-          {/* Column 2: Pharmacological Specs & Synergy */}
+          {/* Column 2: Molecular MoA & Identifiers */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
-            borderLeft: '1px solid #f1f5f9',
+            gap: '0.75rem',
+            borderLeft: '1px solid #edf2f7',
             paddingLeft: '1.25rem'
           }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
-                <Clock size={13} color="#d97706" />
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  Pharmacokinetics
-                </span>
+              <div style={{
+                fontSize: '0.66rem',
+                fontWeight: 750,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#64748b',
+                marginBottom: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <Activity size={12} color="#059669" />
+                <span>{isEs ? 'Mecanismo de Acción (MoA)' : 'Mechanism of Action (MoA)'}</span>
               </div>
-              <div style={{ fontSize: '0.76rem', color: '#475569' }}>
-                Elimination Half-Life: <strong style={{ color: '#1e293b' }}>{clinical.halfLife}</strong>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.48 }}>
+                {clinical.moa}
+              </p>
+            </div>
+
+            {clinical.casNumber && (
+              <div style={{ borderTop: '1px solid #edf2f7', paddingTop: '6px' }}>
+                <div style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 750,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#64748b',
+                  marginBottom: '3px'
+                }}>
+                  {isEs ? 'Nº Registro CAS' : 'CAS Registry Number'}
+                </div>
+                <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <CopyableId value={clinical.casNumber} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Column 3: Pharmacokinetics, Synergies & Monograph Action */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            borderLeft: '1px solid #edf2f7',
+            paddingLeft: '1.25rem'
+          }}>
+            <div>
+              <div style={{
+                fontSize: '0.66rem',
+                fontWeight: 750,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#64748b',
+                marginBottom: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <Clock size={12} color="#d97706" />
+                <span>{isEs ? 'Farmacocinética' : 'Pharmacokinetics'}</span>
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#334155' }}>
+                <span style={{ color: '#64748b' }}>{isEs ? 'Vida media:' : 'Half-life:'}</span>{' '}
+                <strong style={{ color: '#0f172a' }}>{clinical.halfLife}</strong>
               </div>
             </div>
 
-            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
-                <Layers size={13} color="#7c3aed" />
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  Clinical Synergies & Protocol Stacks
-                </span>
+            <div style={{ borderTop: '1px solid #edf2f7', paddingTop: '6px' }}>
+              <div style={{
+                fontSize: '0.66rem',
+                fontWeight: 750,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#64748b',
+                marginBottom: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <Layers size={12} color="#7c3aed" />
+                <span>{isEs ? 'Sinergias & Protocolos' : 'Clinical Synergies & Stacks'}</span>
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.45 }}>
+              <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
                 {clinical.synergy}
               </div>
+            </div>
+
+            <div style={{ paddingTop: '4px' }}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedSpecsProduct(row);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: '#ffffff',
+                  color: '#1a73e8',
+                  border: '1px solid #c2e7ff',
+                  padding: '5px 10px',
+                  borderRadius: '5px',
+                  fontSize: '0.73rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#e8f0fe';
+                  e.currentTarget.style.borderColor = '#1a73e8';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#c2e7ff';
+                }}
+              >
+                <BookOpen size={12} />
+                <span>{isEs ? 'Abrir Monografía y Especificaciones →' : 'View Monograph & Full Specs →'}</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
     );
-  }, []);
+  }, [lang, setSelectedSpecsProduct]);
 
   return (
     <div className="colway-price-root">
