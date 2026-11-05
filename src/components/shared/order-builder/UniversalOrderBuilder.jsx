@@ -11,6 +11,7 @@ import BuilderTargetSelector from './BuilderTargetSelector';
 import BuilderCatalogSearch from './BuilderCatalogSearch';
 import BuilderDraftCart, { getItemResolvedPrice } from './BuilderDraftCart';
 import BuilderProtocolSearch from './BuilderProtocolSearch';
+import RefillPrescriptionWorkbench from './RefillPrescriptionWorkbench';
 import UniversalUserSelector from '../UniversalUserSelector';
 
 import Save from "lucide-react/dist/esm/icons/save";
@@ -27,7 +28,8 @@ import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import History from "lucide-react/dist/esm/icons/history";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 
-import { createPrescription } from '../../../services/prescriptionsService';
+import { createPrescription, updatePrescription } from '../../../services/prescriptionsService';
+import { getPharmapolisLabelsForPrescription } from '../../../data/pharmapolisLabelsMap';
 import { createPurchaseOrder } from '../../../repositories/supplierRepository';
 import { PRESCRIPTION_STATUSES } from '../../../schemas/prescriptionSchema';
 import toast from 'react-hot-toast';
@@ -67,6 +69,8 @@ export default function UniversalOrderBuilder({
   initialPatient = null,
   initialProtocol = null,
   initialDoctor = null,
+  initialSourceRx = null,
+  isRefill = false,
   // Legacy props (backwards compat)
   initialItems = [],
   initialTarget = null,
@@ -85,6 +89,7 @@ export default function UniversalOrderBuilder({
     setActiveTargetId,
     pendingItem,
     setSelectedTarget,
+    setDraftItems,
     addItem,
     updateItemQuantity,
     removeItem,
@@ -129,23 +134,41 @@ export default function UniversalOrderBuilder({
     : null;
 
   // ─── Determine which steps are needed (adaptive wizard) ──────────────────
+  // CRITICAL UX FIX: Never skip Step 1 ('Protocol / Items & Refill Workbench') in prescription mode!
+  // Especially when opening a Refill or pre-loaded prescription, the operator MUST see the
+  // Labels-style formula breakdown, check/uncheck items, edit concentrations, or add products.
   const activeSteps = useMemo(() => {
     if (mode !== 'prescription') return ALL_STEPS;
     const steps = [];
     if (!resolvedInitialPatient) steps.push(ALL_STEPS[0]);  // need patient
-    if (!resolvedProtocolId && initialItems.length === 0) steps.push(ALL_STEPS[1]); // need items
+    steps.push(ALL_STEPS[1]); // ALWAYS include Formulas / Items & Refill Workbench step
     steps.push(ALL_STEPS[2]); // doctor & notes always last
     return steps;
-  }, [mode, resolvedInitialPatient, resolvedProtocolId, initialItems.length]);
+  }, [mode, resolvedInitialPatient]);
 
   const [step, setStep]     = useState(0);
   const [saving, setSaving] = useState(false);
   const [protocolLoaded, setProtocolLoaded] = useState(!!resolvedProtocolId);
+  const [activeSourceRx, setActiveSourceRx] = useState(initialSourceRx || null);
+
+  // Refill Cycle & Next Refill Scheduler state
+  const [refillConfig, setRefillConfig] = useState(() => {
+    const defaultDays = Number(initialSourceRx?.refillCycleDays) || 90;
+    const d = new Date();
+    d.setDate(d.getDate() + defaultDays);
+    return {
+      cycleDays: defaultDays,
+      nextRefillDate: d.toISOString().split('T')[0],
+      refillsRemaining: 1,
+    };
+  });
 
   const [selectedDoctor, setSelectedDoctor] = useState(resolvedInitialDoctor);
-  const [clinicalIndication, setClinicalIndication] = useState('');
-  const [treatmentGoal, setTreatmentGoal]   = useState('');
-  const [activeTab, setActiveTab] = useState(resolvedInitialPatient && !resolvedProtocolId ? 'refill' : 'protocol');
+  const [clinicalIndication, setClinicalIndication] = useState(initialSourceRx?.clinicalIndication || '');
+  const [treatmentGoal, setTreatmentGoal]   = useState(initialSourceRx?.treatmentGoal || '');
+  const [activeTab, setActiveTab] = useState(
+    isRefill || initialSourceRx || (resolvedInitialPatient && !resolvedProtocolId) ? 'refill' : 'protocol'
+  );
   const [selectedRefillMap, setSelectedRefillMap] = useState({});
   const [refillQtyMap, setRefillQtyMap] = useState({});
   const [generateSupplierPO, setGenerateSupplierPO] = useState(true);
@@ -200,23 +223,88 @@ export default function UniversalOrderBuilder({
     }
   }, [selectedTarget?.id, selectedTarget?.name, prefetchPatientHistory]);
 
-  // ─── Initialize items from props ─────────────────────────────────────────
+  // ─── Initialize items from props (or enriched Labels-style formulas if initialSourceRx is passed) ───
   useEffect(() => {
+    if (initialSourceRx && draftItems.length === 0) {
+      let labels = [];
+      try {
+        labels = getPharmapolisLabelsForPrescription(initialSourceRx) || [];
+      } catch (e) {
+        console.warn('Error extracting Pharmapolis labels for initialSourceRx:', e);
+      }
+      const rawRefillItems = normalizeRxRefillItems(initialSourceRx) || [];
+      const count = Math.max(labels.length, rawRefillItems.length);
+
+      if (count > 0) {
+        for (let i = 0; i < count; i++) {
+          const lbl = labels[i] || {};
+          const raw = rawRefillItems[i] || {};
+          const key = raw.id || raw.productId || lbl.id || `refill_formula_${i + 1}`;
+          const apisList = Array.isArray(lbl.apis) && lbl.apis.length > 0
+            ? lbl.apis.map((a) => ({
+                name: a.name || a.drugName || a.activeIngredient || 'Active Ingredient',
+                dose: a.dose || a.dosage || a.strength || '',
+              }))
+            : [];
+          const formulaTitle =
+            lbl.productTitle && !/^compounded pharmaceutical protocol$/i.test(lbl.productTitle)
+              ? lbl.productTitle
+              : raw.productName || raw.name || lbl.productName || `Formula ${i + 1}`;
+          const formulaComposition =
+            lbl.formula ||
+            (apisList.length > 0 ? apisList.map((a) => `${a.name} ${a.dose}`.trim()).join(' + ') : raw.dosage || '');
+          const vehicleName =
+            typeof lbl.vehicle === 'string'
+              ? lbl.vehicle
+              : lbl.vehicle?.name || raw.vehicle || 'Pharmaceutical Compounding Base';
+          const volumeText = lbl.volume || raw.volume || raw.format || raw.dispensingForm || '100 mL / 90 Caps';
+          const dosageFormText = lbl.dosageForm || raw.dispensingForm || raw.format || 'Compounded Preparation';
+          const directionsText = lbl.directions || raw.posology || raw.instructions || '';
+
+          addItem({
+            id: key,
+            _refillKey: key,
+            productId: raw.productId || raw.id || `rx-refill-${initialSourceRx.id}-f${i + 1}`,
+            variantId: raw.variantId || null,
+            sku: raw.sku || lbl.batchCode || '',
+            name: formulaTitle,
+            productName: formulaTitle,
+            price: Number(raw.price || raw.unitPrice || 145) || 145,
+            quantity: Number(raw.quantity) || 1,
+            dosage: formulaComposition,
+            formula: formulaComposition,
+            vehicle: vehicleName,
+            volume: volumeText,
+            presentation: `${dosageFormText} · ${volumeText}`,
+            frequency: directionsText,
+            posology: directionsText,
+            instructions: directionsText,
+            route: dosageFormText,
+            duration: `${refillConfig.cycleDays || 90} days`,
+            sourceId: `refill-${initialSourceRx.id}`,
+            sourceType: 'refill',
+            apis: apisList,
+          });
+        }
+        return;
+      }
+    }
+
     if (initialItems && initialItems.length > 0 && draftItems.length === 0) {
       initialItems.forEach(item => {
         if (!item.productId) console.warn("UniversalOrderBuilder: Missing productId in initialItems", item);
         addItem({
           id:        item.id || item.productId || crypto.randomUUID(),
-          productId: item.productId,
+          productId: item.productId || item.id || crypto.randomUUID(),
           variantId: item.variantId || null,
           sku:       item.sku || '',
           name:      item.productName || item.name || 'Unknown Item',
-          price:     item.price || 0,
+          price:     item.price || item.unitPrice || 145,
           quantity:  item.quantity || 1,
           duration:  item.duration,
-          dosage:    item.dosage,
-          frequency: item.frequency,
-          route:     item.route,
+          dosage:    item.dosage || item.dose || item.formula,
+          frequency: item.frequency || item.posology || item.instructions,
+          route:     item.route || item.format || item.dispensingForm,
         });
       });
     }
@@ -316,34 +404,55 @@ export default function UniversalOrderBuilder({
     setSaving(true);
     try {
       if (mode === 'prescription') {
+        const effectiveSourceRx = activeSourceRx || (activeTab === 'refill' ? patientHistory.prescriptions?.[0] : null);
+        const isRefillSubmission = Boolean(isRefill || effectiveSourceRx);
+        const parentRxCode = effectiveSourceRx
+          ? (effectiveSourceRx.prescriptionCode || effectiveSourceRx.code || effectiveSourceRx.protocolNumber || effectiveSourceRx.id)
+          : null;
+        const nextRefillNumber = effectiveSourceRx ? (Number(effectiveSourceRx.refillCount || effectiveSourceRx.refillNumber || 0) + 1) : 1;
+
         const createDoc = async (itemsToSave, treatmentType, isGrouped) => {
           const prescriptionDoc = {
             patientId:           selectedTarget.id || selectedTarget.objectID,
             patientName:         selectedTarget.name || selectedTarget.displayName || '',
             doctorId:            selectedDoctor?.id || selectedDoctor?.objectID || null,
             doctorName:          selectedDoctor?.name || selectedDoctor?.displayName || null,
-            protocolId:          resolvedProtocolId || null,
-            protocolName:        resolvedProtocolName || null,
-            clinicalIndication:  clinicalIndication || '',
-            treatmentGoal:       treatmentGoal || '',
-            treatmentType:       treatmentType || '',
-            sourceType:          resolvedProtocolId ? 'Protocol' : 'Selected Items',
+            protocolId:          resolvedProtocolId || effectiveSourceRx?.protocolId || null,
+            protocolName:        resolvedProtocolName || effectiveSourceRx?.protocolName || effectiveSourceRx?.treatmentTitle || null,
+            clinicalIndication:  clinicalIndication || effectiveSourceRx?.clinicalIndication || '',
+            treatmentGoal:       treatmentGoal || effectiveSourceRx?.treatmentGoal || '',
+            treatmentType:       treatmentType || effectiveSourceRx?.treatmentType || '',
+            sourceType:          isRefillSubmission ? 'Refill' : (resolvedProtocolId ? 'Protocol' : 'Selected Items'),
             status:              status === 'draft' ? PRESCRIPTION_STATUSES.DRAFT : PRESCRIPTION_STATUSES.PENDING,
+            isRefill:            isRefillSubmission,
+            parentPrescriptionId: effectiveSourceRx?.id || null,
+            parentPrescriptionCode: parentRxCode || null,
+            refillNumber:        isRefillSubmission ? nextRefillNumber : 0,
+            refillCycleDays:     Number(refillConfig?.cycleDays) || 90,
+            nextRefillDate:      refillConfig?.nextRefillDate || null,
+            refillsRemaining:    Number(refillConfig?.refillsRemaining ?? 0),
             items:               itemsToSave.map(item => {
-              if (!item.productId) throw new Error(`Missing productId in item: ${item.name || item.productName}`);
+              const resolvedPid = item.productId || item.id || crypto.randomUUID();
               return {
-                id:        item.id,
-                productId: item.productId,
-                variantId: item.variantId || null,
-                productName: item.productName || item.name || '',
-                sku:       item.sku || '',
-                price:     item.price || 0,
-                quantity:  item.quantity,
-                dosage:    item.dosage || null,
+                id:           item.id || resolvedPid,
+                productId:    resolvedPid,
+                variantId:    item.variantId || null,
+                productName:  item.productName || item.name || '',
+                name:         item.productName || item.name || '',
+                sku:          item.sku || '',
+                price:        item.price || 0,
+                quantity:     item.quantity || 1,
+                dosage:       item.dosage || item.formula || null,
+                formula:      item.formula || item.dosage || null,
+                vehicle:      item.vehicle || null,
+                volume:       item.volume || null,
                 presentation: item.presentation || null,
-                frequency: item.frequency || null,
-                route:     item.route || null,
-                duration:  item.duration || null,
+                frequency:    item.frequency || item.posology || null,
+                posology:     item.posology || item.frequency || null,
+                instructions: item.instructions || item.posology || item.frequency || null,
+                route:        item.route || null,
+                duration:     item.duration || `${refillConfig?.cycleDays || 90} days`,
+                apis:         item.apis || [],
               };
             }),
             totals: {
@@ -351,10 +460,14 @@ export default function UniversalOrderBuilder({
             },
             createdBy:       currentUser?.uid || 'admin',
             expiresAt:       new Date(new Date().setMonth(new Date().getMonth() + 6)),
-            refillsRemaining: 0,
             metadata: {
               sourceModule,
-              builderVersion: '2.0',
+              builderVersion: '2.1-refill',
+              isRefill: isRefillSubmission,
+              parentPrescriptionId: effectiveSourceRx?.id || null,
+              parentPrescriptionCode: parentRxCode || null,
+              nextRefillDate: refillConfig?.nextRefillDate || null,
+              refillCycleDays: Number(refillConfig?.cycleDays) || 90,
               clinicalAlertsAtSubmit: {
                 strict: clinicalAlerts?.errors?.length || 0,
                 warnings: clinicalAlerts?.warnings?.length || 0,
@@ -365,6 +478,22 @@ export default function UniversalOrderBuilder({
           prescriptionDoc.totals.total = prescriptionDoc.totals.subtotal * 1.05;
 
           const newRxId = await createPrescription(prescriptionDoc);
+
+          // Update parent prescription in Firestore so its Refill Alert & Next Refill Cycle reflect the renewal
+          if (isRefillSubmission && effectiveSourceRx?.id && !String(effectiveSourceRx.id).startsWith('multipart_')) {
+            try {
+              await updatePrescription(effectiveSourceRx.id, {
+                lastRefilledAt: new Date().toISOString(),
+                lastRefillPrescriptionId: newRxId,
+                refillCount: nextRefillNumber,
+                refillCycleDays: Number(refillConfig?.cycleDays) || 90,
+                nextRefillDate: refillConfig?.nextRefillDate || null,
+                refillStatus: 'refilled',
+              });
+            } catch (parentErr) {
+              console.warn('Could not update parent prescription refill metadata:', parentErr);
+            }
+          }
 
           let poId = null;
           if (generateSupplierPO && status !== 'draft' && itemsToSave.length > 0) {
@@ -829,10 +958,14 @@ export default function UniversalOrderBuilder({
                   📄 Original Cloud PDF ↗
                 </a>
               )}
-              {activeTab !== 'refill' && (
+              {(activeTab !== 'refill' || currentStepDef?.id !== 'protocol') && (
                 <button
                   type="button"
-                  onClick={() => setActiveTab('refill')}
+                  onClick={() => {
+                    const protoIdx = activeSteps.findIndex((s) => s.id === 'protocol');
+                    if (protoIdx >= 0) setStep(protoIdx);
+                    setActiveTab('refill');
+                  }}
                   style={{
                     fontSize: '0.78rem',
                     fontWeight: 700,
@@ -966,289 +1099,22 @@ export default function UniversalOrderBuilder({
             </button>
           </div>
 
-          {/* Tab 1: Refill Previous (Google Cloud UX Granular Per-Item Selector & Cycle Intelligence) */}
+          {/* Tab 1: Refill Previous (Labels-Style Full Prescription Breakdown, Duplication & Next Refill Scheduler) */}
           {activeTab === 'refill' && mode === 'prescription' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {selectedTarget ? (
-                <div style={{ border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden', background: '#ffffff' }}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem',
-                    padding: '0.75rem 1rem', background: 'var(--surface-50, #f8fafc)',
-                    borderBottom: '1px solid var(--border)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <History size={15} />
-                      <span>Recent Prescriptions for {selectedTarget.name}</span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#64748b' }}>
-                        (Uncheck any formula the patient does not wish to refill)
-                      </span>
-                    </div>
-                    {patientHistory.loading && <RefreshCw size={13} style={{ animation: 'spin 1s linear infinite', opacity: 0.5 }} />}
-                  </div>
-
-                  {!patientHistory.loading && patientHistory.prescriptions.length === 0 && (
-                    <div style={{ padding: '2rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                      No previous prescriptions found for this patient.
-                    </div>
-                  )}
-
-                  {patientHistory.prescriptions.map((rx) => {
-                    const rxItems = getRxRefillItems(rx);
-                    const intel = rx._refillIntel || computeRxRefillIntelligence(rx);
-                    const isOverdue = intel.status === 'overdue';
-                    const isDueSoon = intel.status === 'due_soon';
-                    const selectedCount = rxItems.filter((it) => isRefillItemSelected(rx.id, it._refillKey)).length;
-                    const allSelected = rxItems.length > 0 && selectedCount === rxItems.length;
-                    const cloudPdfUrl = rx.pdfUrl || rx.documentUrl || rx.importedFileUrl || rx.fagron?.originalFileUrl || null;
-                    const rxCode = rx.prescriptionCode || rx.code || rx.protocolNumber || rx.id;
-
-                    return (
-                      <div key={rx.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                        {/* Prescription Header Bar */}
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          flexWrap: 'wrap',
-                          gap: '0.75rem',
-                          padding: '0.85rem 1rem',
-                          background: '#ffffff',
-                          borderBottom: rxItems.length > 0 ? '1px dashed #e2e8f0' : 'none',
-                        }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0, flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#0f172a' }}>
-                                {rx.protocolName || rx.treatmentTitle || rx.treatmentProgram || 'Custom Formulation'}
-                              </span>
-                              <span style={{
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                padding: '2px 7px',
-                                borderRadius: '4px',
-                                background: '#f1f5f9',
-                                color: '#334155',
-                                border: '1px solid #cbd5e1',
-                                fontFamily: 'monospace',
-                              }}>
-                                #{rxCode}
-                              </span>
-                              <span style={{
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                padding: '2px 8px',
-                                borderRadius: '999px',
-                                background: isOverdue ? '#fef3c7' : isDueSoon ? '#dbeafe' : '#dcfce7',
-                                color: isOverdue ? '#b45309' : isDueSoon ? '#1d4ed8' : '#15803d',
-                                border: `1px solid ${isOverdue ? '#fde68a' : isDueSoon ? '#bfdbfe' : '#bbf7d0'}`,
-                              }}>
-                                {isOverdue ? '⚠️ ' : isDueSoon ? '🔔 ' : '🟢 '}{intel.badgeLabel}
-                              </span>
-                            </div>
-
-                            <div style={{ color: '#64748b', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              <span><strong>{rxItems.length} {rxItems.length === 1 ? 'formula' : 'formulas'}</strong></span>
-                              <span>·</span>
-                              <span>{intel.detailText}</span>
-                              {cloudPdfUrl && (
-                                <>
-                                  <span>·</span>
-                                  <a
-                                    href={cloudPdfUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}
-                                  >
-                                    📄 View Original Cloud Prescription PDF ↗
-                                  </a>
-                                </>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Header Actions: Select All / None + Refill Selected (X/Y) */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            {rxItems.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => toggleAllRefillItems(rx, !allSelected)}
-                                style={{
-                                  padding: '0.38rem 0.65rem',
-                                  fontSize: '0.76rem',
-                                  fontWeight: 600,
-                                  borderRadius: '6px',
-                                  border: '1px solid #cbd5e1',
-                                  background: '#f8fafc',
-                                  color: '#334155',
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                {allSelected ? 'Deselect All' : 'Select All'}
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              disabled={selectedCount === 0}
-                              onClick={() => handleRenewPrescription(rx, true)}
-                              style={{
-                                padding: '0.42rem 0.85rem',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.4rem',
-                                borderRadius: '6px',
-                                border: 'none',
-                                background: selectedCount > 0 ? 'var(--color-primary, #003666)' : '#cbd5e1',
-                                color: '#ffffff',
-                                fontSize: '0.8rem',
-                                fontWeight: 700,
-                                cursor: selectedCount > 0 ? 'pointer' : 'not-allowed',
-                              }}
-                            >
-                              <RefreshCw size={13} />
-                              <span>Refill Selected ({selectedCount}/{rxItems.length})</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Granular Per-Product / Per-Formula Checklist */}
-                        {rxItems.length > 0 && (
-                          <div style={{ display: 'flex', flexDirection: 'column', background: '#f8fafc', padding: '0.5rem 0.75rem', gap: '0.45rem' }}>
-                            {rxItems.map((item, idx) => {
-                              const checked = isRefillItemSelected(rx.id, item._refillKey);
-                              const qty = getRefillItemQuantity(rx.id, item._refillKey, item.quantity);
-                              const alreadyInCart = draftItems.some(
-                                (d) =>
-                                  (d.productId && item.productId && d.productId === item.productId) ||
-                                  (d.name && (item.productName || item.name) && d.name === (item.productName || item.name))
-                              );
-
-                              return (
-                                <div
-                                  key={item._refillKey || idx}
-                                  onClick={() => toggleRefillItemSelection(rx.id, item._refillKey)}
-                                  style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    gap: '0.75rem',
-                                    padding: '0.6rem 0.75rem',
-                                    borderRadius: '8px',
-                                    background: checked ? '#ffffff' : '#f1f5f9',
-                                    border: checked ? '1px solid #93c5fd' : '1px solid #e2e8f0',
-                                    opacity: checked ? 1 : 0.65,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.15s ease',
-                                    flexWrap: 'wrap',
-                                  }}
-                                >
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', flex: 1, minWidth: '220px' }}>
-                                    <input
-                                      type="checkbox"
-                                      checked={checked}
-                                      onChange={() => toggleRefillItemSelection(rx.id, item._refillKey)}
-                                      onClick={(e) => e.stopPropagation()}
-                                      style={{ width: '16px', height: '16px', marginTop: '3px', accentColor: 'var(--color-primary, #003666)', cursor: 'pointer', flexShrink: 0 }}
-                                    />
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                                        <span style={{ fontWeight: 600, fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.3 }}>
-                                          {item.productName || item.name}
-                                        </span>
-                                        {(item.format || item.dispensingForm || item.volume) && (
-                                          <span style={{
-                                            fontSize: '0.68rem',
-                                            fontWeight: 600,
-                                            padding: '1px 6px',
-                                            borderRadius: '4px',
-                                            background: '#eff6ff',
-                                            color: '#1d4ed8',
-                                            border: '1px solid #bfdbfe',
-                                          }}>
-                                            {item.format || item.dispensingForm || item.volume}
-                                          </span>
-                                        )}
-                                      </div>
-                                      {(item.posology || item.instructions || item.dosage) && (
-                                        <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.3 }}>
-                                          {item.posology || item.instructions || item.dosage}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* Right Controls: Quantity Stepper + Unit Price + Individual Add */}
-                                  <div
-                                    onClick={(e) => e.stopPropagation()}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}
-                                  >
-                                    <div style={{
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      border: '1px solid #cbd5e1',
-                                      borderRadius: '6px',
-                                      background: '#ffffff',
-                                      overflow: 'hidden',
-                                    }}>
-                                      <button
-                                        type="button"
-                                        onClick={() => setRefillItemQuantity(rx.id, item._refillKey, qty - 1)}
-                                        style={{ border: 'none', background: 'transparent', padding: '2px 7px', cursor: 'pointer', fontWeight: 700, color: '#475569' }}
-                                      >
-                                        −
-                                      </button>
-                                      <span style={{ fontSize: '0.76rem', fontWeight: 700, minWidth: '22px', textAlign: 'center', color: '#0f172a' }}>
-                                        {qty}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => setRefillItemQuantity(rx.id, item._refillKey, qty + 1)}
-                                        style={{ border: 'none', background: 'transparent', padding: '2px 7px', cursor: 'pointer', fontWeight: 700, color: '#475569' }}
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-
-                                    {Number(item.price || item.unitPrice) > 0 && (
-                                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', minWidth: '48px', textAlign: 'right' }}>
-                                        ${(Number(item.price || item.unitPrice) * qty).toFixed(0)}
-                                      </span>
-                                    )}
-
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        addSingleRefillItem(rx, item);
-                                        toast.success(`Added "${item.productName || item.name}" to prescription cart`);
-                                      }}
-                                      style={{
-                                        padding: '0.3rem 0.6rem',
-                                        fontSize: '0.74rem',
-                                        fontWeight: 700,
-                                        borderRadius: '6px',
-                                        border: alreadyInCart ? '1px solid #86efac' : '1px solid #cbd5e1',
-                                        background: alreadyInCart ? '#dcfce7' : '#ffffff',
-                                        color: alreadyInCart ? '#166534' : '#0f172a',
-                                        cursor: 'pointer',
-                                        whiteSpace: 'nowrap',
-                                      }}
-                                    >
-                                      {alreadyInCart ? '✓ In Cart (+1)' : '+ Add'}
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  <div style={{ padding: '0.75rem 1rem', background: 'var(--surface-50, #f8fafc)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <a href={`/admin/prescriptions?patientId=${selectedTarget.id}`} style={{ fontSize: '0.8rem', color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600 }}>
-                      View full prescription history for {selectedTarget.name} ↗
-                    </a>
-                  </div>
-                </div>
+                <RefillPrescriptionWorkbench
+                  sourceRx={activeSourceRx || patientHistory.prescriptions?.[0] || null}
+                  patientHistoryPrescriptions={patientHistory.prescriptions || []}
+                  onSelectSourceRx={(nextRx) => {
+                    setActiveSourceRx(nextRx);
+                  }}
+                  draftItems={draftItems}
+                  setDraftItems={setDraftItems}
+                  addItem={addItem}
+                  refillConfig={refillConfig}
+                  onChangeRefillConfig={setRefillConfig}
+                />
               ) : (
                 <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border)', borderRadius: '8px' }}>
                   Please select a patient first to view their prescription history.
@@ -1366,11 +1232,17 @@ export default function UniversalOrderBuilder({
           </div>
 
           {/* Order summary */}
-          <div style={{ padding: '1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.85rem' }}>
-            <div style={{ fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-main)' }}>Summary</div>
+          <div style={{ padding: '1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <div style={{ fontWeight: 700, marginBottom: '0.25rem', color: 'var(--text-main)' }}>Summary</div>
             {selectedTarget && <div>👤 Patient: <strong>{selectedTarget.name || selectedTarget.displayName}</strong></div>}
             {resolvedProtocolName && <div>📋 Protocol: <strong>{resolvedProtocolName}</strong></div>}
-            <div>💊 Items: <strong>{draftItems.length}</strong></div>
+            {(isRefill || activeSourceRx || patientHistory.prescriptions?.length > 0) && (
+              <div style={{ color: '#15803d', fontWeight: 600 }}>
+                📅 Next Scheduled Refill: <strong>{refillConfig?.nextRefillDate} ({refillConfig?.cycleDays || 90}d cycle)</strong>
+                {refillConfig?.refillsRemaining > 0 ? ` · +${refillConfig.refillsRemaining} Authorized Refills` : ''}
+              </div>
+            )}
+            <div>💊 Items Included: <strong>{draftItems.length}</strong></div>
             <div>💰 Total: <strong>${(totals.total || 0).toFixed(2)}</strong></div>
           </div>
 

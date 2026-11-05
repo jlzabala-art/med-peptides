@@ -40,6 +40,7 @@ import { useRoleAccess } from '../../hooks/useRoleAccess';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import PatientAdministrationGuideModal from '../doctor/PatientAdministrationGuideModal';
 import { usePharmacyLabels } from '../../hooks/usePharmacyLabels';
+import PrescriptionPreview from '../prescription/preview/PrescriptionPreview';
 import ZohoApiMatcherModal from '../admin/prescriptions/ZohoApiMatcherModal';
 import { sanitizePrescriptionCode } from '@/lib/prescriptionSanitizer';
 
@@ -478,294 +479,19 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   }, [loadProductsLazy]);
 
   const prescriptionExpandableRender = useCallback((row) => {
-    const typeInfo = classifyPrescription(row);
-
-    // ── MULTI-PART / SESSION GROUP: list each sequential formulation/part ───────────
-    if (row._isSessionGroup) {
-      return (
-        <div style={{ padding: '1rem 1.25rem', backgroundColor: '#f8fafc', borderTop: '1px dashed #cbd5e1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <h4 style={{ margin: 0, fontSize: '0.85rem', color: '#202124', fontWeight: 600 }}>
-                Prescription Parts & Formulations ({row._sessionMembers.length} parts)
-              </h4>
-              <span 
-                title={`${typeInfo.label} — ${typeInfo.sublabel}`}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  background: typeInfo.badgeBg,
-                  color: typeInfo.badgeColor,
-                  border: `1px solid ${typeInfo.badgeBorder}`,
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                <span>{typeInfo.label}</span>
-                {typeInfo.sublabel && <span style={{ opacity: 0.85, fontWeight: 400 }}>· {typeInfo.sublabel}</span>}
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {!readOnly && (() => {
-                const multiApis = row._sessionMembers.flatMap(m => (m.items && m.items.length > 0) ? m.items : (m.compounds || m.prescriptionLines || []));
-                const syncedCount = multiApis.filter(item => Boolean(item.zoho_item_id || item.zoho_sku)).length;
-                const isAllZohoMatched = multiApis.length > 0 && syncedCount === multiApis.length;
-
-                return (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setZohoMatcherRx(row);
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      padding: '3px 9px',
-                      borderRadius: '4px',
-                      background: isAllZohoMatched ? '#dcfce7' : '#f0fdf4',
-                      border: isAllZohoMatched ? '1px solid #86efac' : '1px solid #bbf7d0',
-                      color: isAllZohoMatched ? '#166534' : '#15803d',
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                    title={isAllZohoMatched 
-                      ? `Todos los APIs de las ${row._sessionMembers.length} partes (${syncedCount}/${multiApis.length}) sincronizados con Zoho Books`
-                      : `Vincular APIs de las ${row._sessionMembers.length} partes con Zoho Books (${syncedCount}/${multiApis.length} sincronizados)`}
-                  >
-                    <span>{isAllZohoMatched ? '✓ Zoho Sincronizado' : `Vincular en Zoho (${syncedCount}/${multiApis.length})`}</span>
-                  </button>
-                );
-              })()}
-              <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>
-                Linked multi-part patient treatment sequence
-              </span>
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {row._sessionMembers.map((member, idx) => (
-              <div
-                key={member.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0.75rem 1rem',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
-                onClick={() => { setSelectedItem(member); loadProductsLazy(); }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    background: '#e0f2fe',
-                    color: '#0369a1',
-                    fontSize: '0.75rem',
-                    fontWeight: 700
-                  }}>
-                    {member.partNumber || idx + 1}
-                  </span>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}>
-                      {member.treatmentType || `Part ${member.partNumber || idx + 1}`}
-                      <span style={{ fontWeight: 400, color: '#64748b', fontSize: '0.75rem', marginLeft: '8px' }}>
-                        #{member.prescriptionCode || member.id?.slice(0, 8)}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
-                      {(member.items || member.compounds || []).map(i => i.name || i.productName).filter(Boolean).join(', ') || 'No compounds listed'}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <button style={{
-                    padding: '4px 10px',
-                    backgroundColor: '#eff6ff',
-                    color: '#1d4ed8',
-                    border: '1px solid #bfdbfe',
-                    borderRadius: '6px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}>
-                    View Part
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    // ── REGULAR ROW: show program / type, source details, items, and imported file ──
-    const rawSource = (row.source || 'manual').toLowerCase().trim();
-    const isImport = rawSource !== 'manual';
-    const items = row.items || row.compounds || row.products || [];
-    const importedFileUrl = row.fagron?.originalFileUrl || row.importedFileUrl || row.sourceFileUrl || null;
-    const importedFileName = row.fagron?.originalFileName || row.importedFileName || row.sourceFileName || null;
-    const sourceLabel = isImport
-      ? (rawSource === 'fagron' ? 'Fagron Genomics Report' :
-         rawSource === 'document' ? 'Scanned Document' :
-         rawSource === 'ai_report' ? 'AI Report' :
-         rawSource === 'protocol' ? 'Clinical Protocol' :
-         'Import')
-      : 'Manual Entry';
-
     return (
-      <div style={{
-        padding: '12px 16px',
-        background: '#f8fafc',
-        borderTop: '1px dashed #e2e8f0',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-      }}>
-        {/* Header bar: Program / Type badge + Source chip */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <span 
-            title={`${typeInfo.label} — ${typeInfo.sublabel}`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '0.74rem',
-              fontWeight: 600,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              background: typeInfo.badgeBg,
-              color: typeInfo.badgeColor,
-              border: `1px solid ${typeInfo.badgeBorder}`,
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <span>{typeInfo.label}</span>
-            {typeInfo.sublabel && <span style={{ opacity: 0.85, fontWeight: 400 }}>· {typeInfo.sublabel}</span>}
-          </span>
-
-          <span style={{
-            padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600,
-            background: isImport ? '#eff6ff' : '#ffffff',
-            color: isImport ? '#1a73e8' : '#5f6368',
-            border: isImport ? '1px solid #bfdbfe' : '1px solid #dadce0',
-          }}>
-            {isImport ? 'Imported' : 'Manual'}
-          </span>
-          <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>{sourceLabel}</span>
-        </div>
-
-        {/* Items list */}
-        {items.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px', flexWrap: 'wrap', gap: '6px' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Compounded APIs ({items.length})
-              </div>
-              {!readOnly && (() => {
-                const isAllZohoMatched = items.length > 0 && items.every(item => Boolean(item.zoho_item_id || item.zoho_sku));
-                return (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setZohoMatcherRx(row);
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      background: isAllZohoMatched ? '#dcfce7' : '#f0fdf4',
-                      border: isAllZohoMatched ? '1px solid #86efac' : '1px solid #bbf7d0',
-                      color: isAllZohoMatched ? '#166534' : '#15803d',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                    title={isAllZohoMatched ? `Todos los APIs (${items.length}/${items.length}) están sincronizados con Zoho Books` : 'Vincular o comprobar ítems en Zoho Books'}
-                  >
-                    {isAllZohoMatched ? <Check size={11} color="#16a34a" /> : <Link2 size={11} />}
-                    {isAllZohoMatched ? `Zoho Matched (${items.length}/${items.length})` : 'Zoho Matching'}
-                  </button>
-                );
-              })()}
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-              {items.map((item, idx) => {
-                const isZohoLinked = Boolean(item.zoho_item_id || item.zoho_sku);
-                return (
-                  <span key={idx} style={{
-                    padding: '2px 8px', borderRadius: '5px',
-                    background: '#ffffff',
-                    border: isZohoLinked ? '1px solid #86efac' : '1px solid #e2e8f0',
-                    fontSize: '0.76rem', color: '#334155', fontWeight: 500,
-                    display: 'inline-flex', alignItems: 'center', gap: '4px'
-                  }}>
-                    {item.name || item.productName || `Item ${idx + 1}`}
-                    {item.dosage || item.dose ? <span style={{ color: '#94a3b8' }}>{item.dosage || item.dose}</span> : null}
-                    {isZohoLinked && (
-                      <span style={{ fontSize: '0.62rem', color: '#16a34a', fontWeight: 700, background: '#dcfce7', padding: '0 4px', borderRadius: '3px' }}>
-                        ✓ Zoho
-                      </span>
-                    )}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Imported file link */}
-        {importedFileUrl && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            padding: '8px 10px', background: '#ffffff',
-            border: '1px solid #e2e8f0', borderRadius: '8px',
-          }}>
-            <FileText size={13} style={{ color: '#2563eb', flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>Source file</div>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {importedFileName || 'Imported document'}
-              </div>
-            </div>
-            <a
-              href={importedFileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                padding: '3px 8px', borderRadius: '5px',
-                background: '#eff6ff', color: '#2563eb',
-                border: '1px solid #bfdbfe',
-                fontSize: '0.7rem', fontWeight: 700,
-                textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
-              }}
-            >
-              Open file
-            </a>
-          </div>
-        )}
-      </div>
+      <PrescriptionPreview
+        rx={row}
+        onOpenLabels={(rxItem, idx) => openLabels(rxItem, idx)}
+        onEditLabel={(rxItem, idx) => {
+          // Open labels in edit mode
+          openLabels(rxItem, idx);
+        }}
+        onRefill={(rxItem) => handleRefill(rxItem)}
+        onOpenZohoMatcher={(rxItem) => setZohoMatcherRx(rxItem)}
+      />
     );
-  }, [loadProductsLazy]);
+  }, [openLabels, handleRefill]);
 
   // URL-driven prescription loading
   useEffect(() => {
@@ -813,8 +539,22 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const handleRefill = useCallback((rx) => {
     if (!rx) return;
     openDrawer('rx-builder', 'new', {
-      initialPatient: rx.patient?.id ? rx.patient : (rx.patientId ? { id: rx.patientId, name: rx.patientName } : null),
-      initialDoctor: rx.doctor?.id ? rx.doctor : (rx.doctorId ? { id: rx.doctorId, name: rx.doctorName } : null),
+      isRefill: true,
+      sourceModule: 'prescriptions-refill',
+      initialSourceRx: rx,
+      initialPatient: rx.patient?.id
+        ? rx.patient
+        : {
+            id: rx.patientId || rx.patient?.id || `pat_${rx.id}`,
+            name: rx.patient?.name || rx.patientName || 'Patient',
+            email: rx.patient?.email || rx.patientEmail || '',
+            phone: rx.patient?.phone || rx.patientPhone || '',
+          },
+      initialDoctor: rx.doctor?.id
+        ? rx.doctor
+        : rx.doctorId || rx.doctorName
+          ? { id: rx.doctorId || 'doc_refill', name: rx.doctor?.name || rx.doctorName }
+          : null,
       initialItems: (rx.items || rx.compounds || rx.products || []).map(item => ({
         ...item,
         id: item.id || item.productId || crypto.randomUUID(),
@@ -822,9 +562,12 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         productName: item.productName || item.name || 'Item',
       })),
       initialProtocolId: rx.protocolId || null,
-      initialProtocolName: rx.protocolName || null,
+      initialProtocolName: rx.protocolName || rx.treatmentTitle || null,
+      onSaved: () => {
+        refresh && refresh();
+      },
     });
-  }, [openDrawer]);
+  }, [openDrawer, refresh]);
 
   const handleEnrichPrescription = useCallback(async (rx) => {
     if (!rx) return;

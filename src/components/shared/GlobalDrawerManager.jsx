@@ -192,10 +192,18 @@ function PhysicianDrawerContent({ id, onClose }) {
 }
 
 // ── Rx Builder Drawer ─────────────────────────────────────────────────────────
-// Triggered by any module via: openDrawer('rx-builder', 'new', { initialPatient, initialProtocol, initialDoctor, initialItems })
+// Triggered by any module via: openDrawer('rx-builder', 'new', { initialPatient, initialProtocol, initialDoctor, initialItems, initialSourceRx, isRefill })
 function RxBuilderDrawerContent({ data, onClose }) {
   const mode = data?.mode || (data?.sourceModule === 'quotations' ? 'quotation' : 'prescription');
-  const title = mode === 'quotation' ? 'New Commercial Quotation' : 'New Prescription';
+  const isRefill = Boolean(data?.isRefill || data?.initialSourceRx);
+  const rxCode = data?.initialSourceRx
+    ? (data.initialSourceRx.prescriptionCode || data.initialSourceRx.code || data.initialSourceRx.protocolNumber || data.initialSourceRx.id)
+    : null;
+  const title = mode === 'quotation'
+    ? 'New Commercial Quotation'
+    : isRefill
+      ? `Refill & Duplicate Prescription${rxCode ? ` · #${rxCode}` : ''}`
+      : 'New Prescription';
   return (
     <StandardDrawer
       title={title}
@@ -206,16 +214,21 @@ function RxBuilderDrawerContent({ data, onClose }) {
       <div style={{ padding: '1.5rem' }}>
         <UniversalOrderBuilder
           mode={mode}
-          sourceModule={data?.sourceModule || 'unknown'}
+          sourceModule={data?.sourceModule || (isRefill ? 'refill' : 'unknown')}
           initialPatient={data?.initialPatient || null}
           initialProtocol={data?.initialProtocol || null}
           initialDoctor={data?.initialDoctor || null}
+          initialSourceRx={data?.initialSourceRx || null}
+          isRefill={isRefill}
           initialItems={data?.initialItems || []}
           initialProtocolId={data?.initialProtocolId || null}
           initialProtocolName={data?.initialProtocolName || null}
           initialDoctorId={data?.initialDoctorId || null}
           initialDoctorName={data?.initialDoctorName || null}
-          onSaved={onClose}
+          onSaved={() => {
+            if (typeof data?.onSaved === 'function') data.onSaved();
+            onClose();
+          }}
           onCanceled={onClose}
         />
       </div>

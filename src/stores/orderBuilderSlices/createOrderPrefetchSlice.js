@@ -132,6 +132,60 @@ export function computeRxRefillIntelligence(rx) {
       : 30)
   );
 
+  // If nextRefillDate is explicitly stored on the prescription (or updated after a refill), honor it first!
+  const explicitNextMs = rx?.nextRefillDate ? Date.parse(rx.nextRefillDate) : 0;
+  if (explicitNextMs && !isNaN(explicitNextMs)) {
+    const nowMs = Date.now();
+    const daysRemaining = Math.ceil((explicitNextMs - nowMs) / (1000 * 60 * 60 * 24));
+    const dueDateStr = new Date(explicitNextMs).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const issuedDateStr = issuedMs
+      ? new Date(issuedMs).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : null;
+
+    if (daysRemaining <= 0) {
+      const overdueDays = Math.abs(daysRemaining);
+      return {
+        issuedDateStr,
+        dueDateStr,
+        cycleDays,
+        daysElapsed: cycleDays + overdueDays,
+        daysRemaining: 0,
+        overdueDays,
+        status: 'overdue',
+        badgeLabel: `Refill Due · ${cycleDays}d Cycle Completed`,
+        detailText: `${issuedDateStr ? `Issued ${issuedDateStr} · ` : ''}Scheduled refill due ${dueDateStr} (${overdueDays}d past due)`,
+      };
+    }
+
+    if (daysRemaining <= 14) {
+      return {
+        issuedDateStr,
+        dueDateStr,
+        cycleDays,
+        daysElapsed: Math.max(0, cycleDays - daysRemaining),
+        daysRemaining,
+        status: 'due_soon',
+        badgeLabel: `Refill Window Open · ${daysRemaining}d left`,
+        detailText: `Next refill scheduled for ${dueDateStr} (${daysRemaining} days remaining)`,
+      };
+    }
+
+    return {
+      issuedDateStr,
+      dueDateStr,
+      cycleDays,
+      daysElapsed: Math.max(1, cycleDays - daysRemaining),
+      daysRemaining,
+      status: 'active',
+      badgeLabel: `Active Cycle · Next Refill ${dueDateStr}`,
+      detailText: `Scheduled refill on ${dueDateStr} (${daysRemaining} days remaining in ${cycleDays}d cycle)`,
+    };
+  }
+
   if (!issuedMs) {
     return {
       issuedDateStr: null,

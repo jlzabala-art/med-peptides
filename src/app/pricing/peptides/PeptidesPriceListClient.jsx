@@ -38,7 +38,8 @@ import {
   Moon,
   Dna,
   Shield,
-  Mail
+  Mail,
+  Truck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
