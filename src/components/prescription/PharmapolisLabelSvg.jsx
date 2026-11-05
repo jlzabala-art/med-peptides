@@ -95,8 +95,8 @@ export function computeDefaultHeaderBadge(labelData = {}, fallbackPartIndex = 0,
   const timeIcon = timeOfDay === 'MORNING'
     ? '☀️ '
     : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')
-        ? '🌙 '
-        : (timeOfDay === 'EVENING' ? '🌅 ' : ''));
+      ? '🌙 '
+      : (timeOfDay === 'EVENING' ? '🌅 ' : ''));
 
   if (partBadge && timeOfDay) return `${partBadge} · ${timeIcon}${timeOfDay}`;
   if (partBadge) return partBadge;
@@ -147,7 +147,7 @@ function VectorGlyph({ type, size = 16, fill = '#ffffff' }) {
  * to the right edge with text-anchor="end", and a dotted connecting line prevents eye-slip.
  */
 function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a', isMono = true, lineWidth = 0) {
-  let cleanLine = String(line).replace(/^[•*-]\s*/, '').trim();
+  const cleanLine = String(line).replace(/^[•*-]\s*/, '').trim();
   const match = cleanLine.match(/^(.*?\s+)([\d.,]+[\s\u00A0]*(?:mcg|mg|g|%|iu|fu|spu|ml|capsules?|drops?)(?:[\s\u00A0]*\/[\s\u00A0]*(?:ml|g|cap|dose))?(?:[\s\u00A0]*(?:topical|oral))?(?:[\s\u00A0]*\([^)]+\))?)\s*$/i);
 
   if (match && lineWidth > 220) {
@@ -284,7 +284,7 @@ export default function PharmapolisLabelSvg({
   // Detect clinical Time of Day / Regimen Timing (Morning, Evening, Night / Bedtime, Pre-Wash / Weekly)
   const timeOfDay = React.useMemo(() => {
     const corpus = `${labelData.timeOfDay || ''} ${labelData.productTitle || ''} ${labelData.productName || ''} ${labelData.subTitle || ''} ${labelData.directions || ''} ${labelData.instructions || ''} ${labelData.partLabel || ''} ${labelData.formula || ''}`.toLowerCase();
-    
+
     const isMorning = /\b(morning|breakfast|mañana|desayuno|matutina|am\b)/i.test(corpus);
     const isBedtime = /\b(bedtime|before bed|night|sleep|sueño|dormir|nocturna)\b/i.test(corpus);
     const isEvening = /\b(evening|dinner|afternoon|lunch.*dinner|vespertina|tarde|cena|pm\b)/i.test(corpus);
@@ -306,10 +306,10 @@ export default function PharmapolisLabelSvg({
     const timeIcon = isMono
       ? ''
       : (timeOfDay === 'MORNING'
-          ? '☀️ '
-          : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')
-              ? '🌙 '
-              : (timeOfDay === 'EVENING' ? '🌅 ' : '')));
+        ? '☀️ '
+        : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')
+          ? '🌙 '
+          : (timeOfDay === 'EVENING' ? '🌅 ' : '')));
     if (partBadge && timeOfDay) {
       return `${partBadge} · ${timeIcon}${timeOfDay}`;
     }
@@ -320,14 +320,11 @@ export default function PharmapolisLabelSvg({
 
   const headerBadgeText = React.useMemo(() => {
     if (labelData.showHeaderBadge === false) return '';
-    let raw = '';
-    if (typeof labelData.customHeaderBadge === 'string') {
-      raw = labelData.customHeaderBadge.trim();
-    } else {
-      raw = autoHeaderBadgeText;
-    }
+    const raw = typeof labelData.customHeaderBadge === 'string'
+      ? labelData.customHeaderBadge.trim()
+      : autoHeaderBadgeText;
     if (isMono && raw) {
-      return raw.replace(/[☀️🌙🌅]/g, '').replace(/\s*·\s*·\s*/g, ' · ').trim();
+      return raw.replace(/(?:☀️|🌙|🌅)/g, '').replace(/\s*·\s*·\s*/g, ' · ').trim();
     }
     return raw;
   }, [labelData.showHeaderBadge, labelData.customHeaderBadge, autoHeaderBadgeText, isMono]);
@@ -418,7 +415,7 @@ export default function PharmapolisLabelSvg({
   const batchCode = labelData.batchCode || 'PHARM-2026-B948';
   const lote = labelData.lote || '2609-PLV';
   const volume = labelData.volume || labelData.netVolume || labelData.size || labelData.netContent || labelData.totalVolume || labelData.quantity || '100 mL';
-  
+
   // Dynamic Dispensing Pharmacy Name & Address
   let rawPharmacyName = (labelData.pharmacyName || labelData.pharmacy || labelData.dispensingPharmacy || 'Pharmapolis Compounding Pharmacy').trim();
   if (/^pharmapolis(\s*compounding\s*pharmacy|\s*lab)?$/i.test(rawPharmacyName) || rawPharmacyName.toUpperCase() === 'PHARMAPOLIS' || rawPharmacyName.toUpperCase() === 'PHARMAPOLISLAB') {
@@ -426,10 +423,10 @@ export default function PharmapolisLabelSvg({
   }
   const pharmacyName = rawPharmacyName.toUpperCase();
   const pharmacyAddress = labelData.pharmacyAddress || labelData.dispensaryAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria';
-  const dynHeaderTitleSize = pharmacyName.length > 26 
-    ? Math.round(headerTitleSize * 0.72) 
-    : pharmacyName.length > 18 
-      ? Math.round(headerTitleSize * 0.84) 
+  const dynHeaderTitleSize = pharmacyName.length > 26
+    ? Math.round(headerTitleSize * 0.72)
+    : pharmacyName.length > 18
+      ? Math.round(headerTitleSize * 0.84)
       : headerTitleSize;
 
   // Unique QR URL strictly bound to this prescription (pointing to public patient refill view)
@@ -444,6 +441,14 @@ export default function PharmapolisLabelSvg({
     return `${base}&action=refill`;
   }, [labelData.targetRxUrl, labelData.url, fileNumber, labelData.partIndex, labelData.phaseIndex, labelData.totalParts]);
   const cleanDisplayUrl = targetRxUrl.replace(/^https?:\/\//, '');
+
+  // Secondary QR URL pointing to Clinical Product Monograph / Patient Guide
+  const productUrl = React.useMemo(() => {
+    if (labelData.qrProductUrl) return labelData.qrProductUrl;
+    if (labelData.productUrl) return labelData.productUrl;
+    if (labelData.productSlug) return `https://www.atlashealth-services.com/product/${encodeURIComponent(labelData.productSlug)}`;
+    return null;
+  }, [labelData.qrProductUrl, labelData.productUrl, labelData.productSlug]);
 
   // Extract active ingredients list for Block 2 (Back Label)
   const activeIngredientsList = React.useMemo(() => {
@@ -555,7 +560,7 @@ export default function PharmapolisLabelSvg({
   const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem') || dFormLower.includes('ointment') || dFormLower.includes('pomade') || pNameLower.includes('pomade') || pNameLower.includes('ointment');
   const isScalpTreatment = /\b(trichosol|trichowash|trichooil|trichofoam|scalp|hair|cabello|cuero cabelludo|shampoo|17-?a|17-?alpha|alfatradiol|igrantine)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
   const isHormone = !isScalpTreatment && (formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone') || rawVehLower.includes('pentravan'));
-  
+
   // Prioritize explicit Oral determination before generic topical scalp cues
   const isOral = !isPomadeOrOintment && !isHormone && (
     dFormLower.includes('oral') ||
@@ -582,14 +587,14 @@ export default function PharmapolisLabelSvg({
   const validSavedVehicle = (isTopicalScalp && /vegetable capsules/i.test(rawVehStr)) ? '' : rawVehStr;
   const cleanVolForVeh = (isTopicalScalp && /capsule/i.test(String(volume || ''))) ? (isTrichoOil ? '30 mL' : '100 mL') : volume;
 
-  let vehicleName = validSavedVehicle || 
-                      (labelData.apis?.find(a => a?.itemType === 'vehicle_base' || a?.isVehicleOrBase)?.name) ||
-                      (labelData.items?.find(a => a?.itemType === 'vehicle_base' || a?.isVehicleOrBase)?.name) ||
-                      (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)' :
-                      (isHormone ? 'Pentravan® Liposomal Transdermal Cream Vehicle' :
-                      (isTrichoOil || formulaLower.includes('trichooil') || pNameLower.includes('trichooil') ? `TrichoOil™ (100% Natural Scalp Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` :
-                      (isTopicalScalp || formulaLower.includes('trichosol') || pNameLower.includes('trichosol') ? `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` : 
-                      (isOral ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.' : 'Galenic Compounding Vehicle q.s.')))));
+  let vehicleName = validSavedVehicle ||
+    (labelData.apis?.find(a => a?.itemType === 'vehicle_base' || a?.isVehicleOrBase)?.name) ||
+    (labelData.items?.find(a => a?.itemType === 'vehicle_base' || a?.isVehicleOrBase)?.name) ||
+    (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)' :
+      (isHormone ? 'Pentravan® Liposomal Transdermal Cream Vehicle' :
+        (isTrichoOil || formulaLower.includes('trichooil') || pNameLower.includes('trichooil') ? `TrichoOil™ (100% Natural Scalp Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` :
+          (isTopicalScalp || formulaLower.includes('trichosol') || pNameLower.includes('trichosol') ? `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` :
+            (isOral ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.' : 'Galenic Compounding Vehicle q.s.')))));
 
   if (isOral && vehicleName.toLowerCase().includes('micronized compounded hard capsules')) {
     vehicleName = 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.';
@@ -822,9 +827,10 @@ export default function PharmapolisLabelSvg({
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // VARIANT 1: BACK LABEL WITH LARGE PROMINENT QR CODE (Reverso con QR)
+  // VARIANT 1: BACK LABEL WITH LARGE PROMINENT QR CODE OR DUAL-QR (Reverso con QR / Doble QR)
   // ───────────────────────────────────────────────────────────────────────────
-  if (variant === 'backQr') {
+  if (variant === 'backQr' || variant === 'backDualQr') {
+    const isDualQrMode = variant === 'backDualQr' || Boolean(labelData.isDualQr);
     const colY = patientBoxBottom + (isShort ? 12 : 16);
     const colHeight = footerLineY - colY - (isShort ? 12 : 16);
     // Narrow left column to 210 px (195 in short mode) to maximize clinical workspace
@@ -833,10 +839,12 @@ export default function PharmapolisLabelSvg({
     const rightColWidth = 1440 - rightColX;
     const innerUsableWidth = rightColWidth - 48;
 
-    // Integer module snapped QR size (145 = 29x5 px, 174 = 29x6 px) for zero-interpolation thermal printheads
-    const backQrSize = isShort ? 145 : 174;
+    // Snapped QR sizing: single QR uses 145/174 px; dual QR uses compact 116 px
+    const dualQrSize = isShort ? 105 : 116;
+    const singleQrSize = isShort ? 145 : 174;
+    const backQrSize = isDualQrMode ? dualQrSize : singleQrSize;
     const qrX = Math.round((leftColWidth - backQrSize) / 2);
-    const qrY = isShort ? 14 : 18;
+    const qrY = isShort ? 10 : 14;
 
     // Right column layout
     const b1Y = isShort ? 10 : 12;
@@ -901,45 +909,129 @@ export default function PharmapolisLabelSvg({
         </g>
 
         {/* ── TWO-COLUMN WORKSPACE ── */}
-        {/* LEFT COLUMN: COMPACT SNUG QR CODE + TECHNICAL DISPENSING SPECS (Zero dead space around QR) */}
+        {/* LEFT COLUMN: COMPACT SNUG QR CODE(S) + TECHNICAL DISPENSING SPECS */}
         <g transform={`translate(60, ${colY})`}>
           <rect x="0" y="0" width={leftColWidth} height={colHeight} fill="#ffffff" stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="2" rx="8" />
-          
-          {/* Snug QR Code with integer module snapping & 4-module quiet zone */}
-          <svg x={qrX} y={qrY} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
-            <QRCodeSVG
-              value={targetRxUrl}
-              size={backQrSize}
-              level="M"
-              includeMargin={true}
-              fgColor={isMono ? '#000000' : '#003666'}
-              bgColor="#ffffff"
-            />
-          </svg>
 
-          {/* Under QR Refill Callout */}
-          <text
-            x={Math.round(leftColWidth / 2)}
-            y={qrY + backQrSize + (isShort ? 16 : 20)}
-            textAnchor="middle"
-            fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-            fontSize={isShort ? 12 : 14}
-            fontWeight="900"
-            fill={isMono ? '#000000' : '#003666'}
-            letterSpacing="0.4"
-          >
-            <tspan fill={isMono ? '#000000' : '#16a34a'} fontWeight="900">✔ </tspan>SCAN FOR REFILL
-          </text>
+          {isDualQrMode ? (
+            /* ── DUAL QR CODE ARCHITECTURE: QR 1 (REFILL) + QR 2 (PRODUCT) ── */
+            <>
+              {/* QR 1: REFILL */}
+              <svg x={qrX} y={qrY} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
+                <QRCodeSVG
+                  value={targetRxUrl}
+                  size={backQrSize}
+                  level="M"
+                  includeMargin={true}
+                  fgColor={isMono ? '#000000' : '#003666'}
+                  bgColor="#ffffff"
+                />
+              </svg>
+              <text
+                x={Math.round(leftColWidth / 2)}
+                y={qrY + backQrSize + (isShort ? 13 : 15)}
+                textAnchor="middle"
+                fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                fontSize={isShort ? 10 : 11}
+                fontWeight="900"
+                fill={isMono ? '#000000' : '#003666'}
+                letterSpacing="0.3"
+              >
+                <tspan fill={isMono ? '#000000' : '#16a34a'} fontWeight="900">✔ </tspan>REFILL RX
+              </text>
 
-          {/* Hairline Divider */}
-          <line
-            x1="14"
-            y1={qrY + backQrSize + (isShort ? 20 : 24)}
-            x2={leftColWidth - 14}
-            y2={qrY + backQrSize + (isShort ? 20 : 24)}
-            stroke={isMono ? '#cccccc' : '#e2e8f0'}
-            strokeWidth="1.5"
-          />
+              {/* Hairline Divider between QRs */}
+              <line
+                x1="14"
+                y1={qrY + backQrSize + (isShort ? 18 : 22)}
+                x2={leftColWidth - 14}
+                y2={qrY + backQrSize + (isShort ? 18 : 22)}
+                stroke={isMono ? '#cccccc' : '#e2e8f0'}
+                strokeWidth="1.2"
+              />
+
+              {/* QR 2: PRODUCT DOSSIER */}
+              {(() => {
+                const qr2Y = qrY + backQrSize + (isShort ? 26 : 30);
+                const pUrl = productUrl || targetRxUrl;
+                return (
+                  <>
+                    <svg x={qrX} y={qr2Y} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
+                      <QRCodeSVG
+                        value={pUrl}
+                        size={backQrSize}
+                        level="M"
+                        includeMargin={true}
+                        fgColor={isMono ? '#000000' : '#0284c7'}
+                        bgColor="#ffffff"
+                      />
+                    </svg>
+                    <text
+                      x={Math.round(leftColWidth / 2)}
+                      y={qr2Y + backQrSize + (isShort ? 13 : 15)}
+                      textAnchor="middle"
+                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                      fontSize={isShort ? 10 : 11}
+                      fontWeight="900"
+                      fill={isMono ? '#000000' : '#0284c7'}
+                      letterSpacing="0.3"
+                    >
+                      <tspan fill={isMono ? '#000000' : '#0284c7'} fontWeight="900">ℹ </tspan>PRODUCT INFO
+                    </text>
+                  </>
+                );
+              })()}
+
+              {/* Hairline Divider before Specs */}
+              <line
+                x1="14"
+                y1={qrY + (backQrSize * 2) + (isShort ? 46 : 54)}
+                x2={leftColWidth - 14}
+                y2={qrY + (backQrSize * 2) + (isShort ? 46 : 54)}
+                stroke={isMono ? '#cccccc' : '#e2e8f0'}
+                strokeWidth="1.2"
+              />
+            </>
+          ) : (
+            /* ── SINGLE LARGE REFILL QR ── */
+            <>
+              {/* Snug QR Code with integer module snapping & 4-module quiet zone */}
+              <svg x={qrX} y={qrY} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
+                <QRCodeSVG
+                  value={targetRxUrl}
+                  size={backQrSize}
+                  level="M"
+                  includeMargin={true}
+                  fgColor={isMono ? '#000000' : '#003666'}
+                  bgColor="#ffffff"
+                />
+              </svg>
+
+              {/* Under QR Refill Callout */}
+              <text
+                x={Math.round(leftColWidth / 2)}
+                y={qrY + backQrSize + (isShort ? 16 : 20)}
+                textAnchor="middle"
+                fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                fontSize={isShort ? 12 : 14}
+                fontWeight="900"
+                fill={isMono ? '#000000' : '#003666'}
+                letterSpacing="0.4"
+              >
+                <tspan fill={isMono ? '#000000' : '#16a34a'} fontWeight="900">✔ </tspan>SCAN FOR REFILL
+              </text>
+
+              {/* Hairline Divider */}
+              <line
+                x1="14"
+                y1={qrY + backQrSize + (isShort ? 20 : 24)}
+                x2={leftColWidth - 14}
+                y2={qrY + backQrSize + (isShort ? 20 : 24)}
+                stroke={isMono ? '#cccccc' : '#e2e8f0'}
+                strokeWidth="1.5"
+              />
+            </>
+          )}
 
           {/* Clip path to strictly ensure no text ever bleeds outside left column */}
           <clipPath id="pls-left-col-clip">
@@ -951,6 +1043,11 @@ export default function PharmapolisLabelSvg({
             const effectiveVol = cleanVolForVeh || volume || '100 mL';
             const volLines = wrapLines(effectiveVol, 15);
             const storageLines = wrapLines(storage, 16);
+
+            // Specs origin: for dual-QR mode push below both QRs; for single-QR mode just below one
+            const specsOriginY = isDualQrMode
+              ? qrY + (backQrSize * 2) + (isShort ? 60 : 70)
+              : qrY + backQrSize + (isShort ? 34 : 42);
 
             // Explicit vertical coordinates with generous font sizing (batch is already in footer)
             const volTitleY = isShort ? 30 : 38;
@@ -964,7 +1061,7 @@ export default function PharmapolisLabelSvg({
             const storageBlockBottom = firstStorageLineY + ((storageLines.length - 1) * storageLineGap) + (isShort ? 10 : 14);
 
             return (
-              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 34 : 42)})`}>
+              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${specsOriginY})`}>
                 {/* Header badge */}
                 <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 20 : 24} fill={isMono ? '#000000' : '#f0f9ff'} stroke={isMono ? '#000000' : '#bae6fd'} strokeWidth="1.2" rx="4" />
                 <text x="4" y={isShort ? 14 : 17} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10.5 : 12} fontWeight="900" fill={isMono ? '#ffffff' : '#0284c7'} letterSpacing="0.8">
@@ -1015,7 +1112,7 @@ export default function PharmapolisLabelSvg({
                 <g transform={`translate(0, ${storageBlockBottom + (isShort ? 8 : 14)})`}>
                   <line x1="0" y1="0" x2={leftColWidth - 28} y2="0" stroke={isMono ? '#cccccc' : '#e2e8f0'} strokeWidth="1.2" />
                   <rect x="-4" y={isShort ? 6 : 8} width={leftColWidth - 20} height={isShort ? 44 : 52} fill={isMono ? '#ffffff' : '#f8fafc'} stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="1.2" rx="4" />
-                  
+
                   <text x="4" y={isShort ? 23 : 28} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11.5} fontWeight="800" fill={isMono ? '#000000' : '#334155'} letterSpacing="0.2">
                     PROTECT FROM LIGHT
                   </text>
@@ -1196,20 +1293,20 @@ export default function PharmapolisLabelSvg({
                   <text x="0" y={ingHeaderTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 13.5 : 15.5} fontWeight="900" fill={isMono ? '#000000' : '#0284c7'} letterSpacing="0.8">
                     ACTIVE COMPOUNDED INGREDIENTS
                   </text>
-                  
+
                   {isMultiColumn ? (
                     <g>
                       {/* Column 1 */}
-                      {col1Lines.map((line, lIdx) => 
+                      {col1Lines.map((line, lIdx) =>
                         renderIngredientLine(line, 0, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing1-${lIdx}`, '#000000', isMono, colWidth)
                       )}
                       {/* Column 2 */}
-                      {col2Lines.map((line, lIdx) => 
+                      {col2Lines.map((line, lIdx) =>
                         renderIngredientLine(line, colWidth + 36, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing2-${lIdx}`, '#000000', isMono, colWidth)
                       )}
                     </g>
                   ) : (
-                    ingLines.map((line, lIdx) => 
+                    ingLines.map((line, lIdx) =>
                       renderIngredientLine(line, 0, firstIngLineY + (lIdx * ingLineGap), ingFontSize, `ing-${lIdx}`, '#000000', isMono, innerUsableWidth)
                     )
                   )}
@@ -1233,7 +1330,7 @@ export default function PharmapolisLabelSvg({
                 <g transform={`translate(24, ${posBoxY})`}>
                   <rect x="0" y="0" width={innerUsableWidth} height={posBoxHeight} fill={isMono ? '#ffffff' : '#f0f9ff'} stroke={isMono ? '#000000' : '#0284c7'} strokeWidth={isMono ? '2.5' : '2'} rx="6" />
                   <rect x="0" y="0" width="8" height={posBoxHeight} fill={isMono ? '#000000' : (badgeTheme.fill || '#0284c7')} rx="4" />
-                  
+
                   <text x="22" y={posHeaderTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill={isMono ? '#000000' : '#0369a1'} letterSpacing="0.8">
                     {(!isMono && badgeTheme.glyph) ? <VectorGlyph type={badgeTheme.glyph} size={14} fill={badgeTheme.accent || '#0369a1'} /> : null} DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
                   </text>

@@ -304,81 +304,72 @@ export default function RefillFormulaWorkbench({
   return (
     <div style={{
       width: '100%',
-      maxWidth: '960px',
-      margin: '0 auto',
-      background: '#ffffff',
-      border: '1px solid #c2e7ff',
-      borderRadius: '8px',
-      boxShadow: '0 4px 16px rgba(26, 115, 232, 0.12)',
-      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
-      gap: '0',
+      gap: '12px',
     }}>
-      {/* ── 1. Top Clinical Header & Lineage Banner ── */}
+      {/* ── Sub-header: Refill & Duplication status ── */}
       <div style={{
         background: '#f8fafc',
-        borderBottom: '1px solid #e2e8f0',
-        padding: '12px 18px',
+        border: '1px solid #dadce0',
+        borderRadius: '8px',
+        padding: '10px 14px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '10px',
+        gap: '8px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{
-            width: '32px',
-            height: '32px',
+            width: '26px',
+            height: '26px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #1a73e8 0%, #0d9488 100%)',
-            color: '#ffffff',
+            background: '#e0f2fe',
+            color: '#0284c7',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            boxShadow: '0 2px 6px rgba(26, 115, 232, 0.25)',
           }}>
-            <RotateCcw size={16} />
+            <RotateCcw size={14} />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Laboratorio de Refill Clínico' : 'Clinical Refill & Duplication Studio'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a' }}>
+                {isEs ? 'Renovación de Prescripción & Duplicación' : 'Clinical Refill & Duplication Studio'}
               </span>
               <span style={{
                 background: '#e0f2fe',
                 color: '#0369a1',
                 border: '1px solid #bae6fd',
-                fontSize: '0.70rem',
+                fontSize: '0.68rem',
                 fontWeight: 750,
-                padding: '1px 8px',
-                borderRadius: '12px',
+                padding: '1px 6px',
+                borderRadius: '999px',
               }}>
                 Refill #{nextRefillNumber}
               </span>
             </div>
-            <div style={{ fontSize: '0.74rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>{isEs ? 'Prescripción base:' : 'Base prescription:'}</span>
-              <CopyableId value={parentRxCode} />
-              <span>• {sourceRx.patientName || sourceRx.patient?.name || 'Patient'}</span>
+            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+              {isEs
+                ? 'Selecciona qué fórmulas incluir, elimina componentes no tolerados con [×] y ajusta dosis:'
+                : 'Select formulas to refill, remove intolerant APIs with [×], and adjust doses:'}
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            color: selectedPartsCount > 0 ? '#15803d' : '#b91c1c',
-            background: selectedPartsCount > 0 ? '#f0fdf4' : '#fef2f2',
-            border: `1px solid ${selectedPartsCount > 0 ? '#86efac' : '#fca5a5'}`,
-            padding: '3px 8px',
-            borderRadius: '6px',
-          }}>
-            {selectedPartsCount} {isEs ? 'fórmulas activas' : 'formulas included'}
-          </span>
-        </div>
+        <span style={{
+          fontSize: '0.70rem',
+          fontWeight: 700,
+          color: selectedPartsCount > 0 ? '#15803d' : '#b91c1c',
+          background: selectedPartsCount > 0 ? '#f0fdf4' : '#fef2f2',
+          border: `1px solid ${selectedPartsCount > 0 ? '#86efac' : '#fca5a5'}`,
+          padding: '2px 8px',
+          borderRadius: '4px',
+        }}>
+          {selectedPartsCount} {isEs ? 'fórmulas incluidas' : 'formulas included'}
+        </span>
       </div>
 
       {/* ── 2. Formula Cards with Surgical API Editor ── */}
