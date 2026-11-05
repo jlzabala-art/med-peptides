@@ -53,7 +53,7 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
   const [currency, setCurrency] = useState('EUR'); // EUR, USD, AED
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [scopeMode, setScopeMode] = useState('global');
+  const [scopeMode] = useState('filtered');
   const [copied, setCopied] = useState(false);
   const [showCostBasis, setShowCostBasis] = useState(false);
 
@@ -768,28 +768,11 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
               padding: '2px 8px',
               borderRadius: '4px'
             }}>
-              {scopeMode === 'filtered' ? `Matching Active Filters (${filteredProducts.length} Panels)` : `Entire Database (${initialProducts.length} Panels & Subscriptions)`}
+              {filteredProducts.length === initialProducts.length
+                ? `${initialProducts.length} Available Panels & Subscriptions`
+                : `${filteredProducts.length} of ${initialProducts.length} Panels`
+              }
             </span>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
-              <span>Metrics Scope:</span>
-              <div className="pill-group" style={{ background: '#f1f5f9' }}>
-                <button
-                  onClick={() => setScopeMode('filtered')}
-                  className={`pill-btn ${scopeMode === 'filtered' ? 'active' : ''}`}
-                  style={{ color: scopeMode === 'filtered' ? '#0d9488' : '#64748b' }}
-                >
-                  Filtered View
-                </button>
-                <button
-                  onClick={() => setScopeMode('global')}
-                  className={`pill-btn ${scopeMode === 'global' ? 'active' : ''}`}
-                  style={{ color: scopeMode === 'global' ? '#0d9488' : '#64748b' }}
-                >
-                  Global Database
-                </button>
-              </div>
-            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>

@@ -872,7 +872,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFdaStatus, setSelectedFdaStatus] = useState('all');
   const [selectedStrength, setSelectedStrength] = useState('all'); // 'all' | '5mg' | '10mg' | '20mg_plus'
-  const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22)
+  const [scopeMode] = useState('filtered'); // Direct active view (no user-facing technical switcher)
   const [copied, setCopied] = useState(false);
   const [hasRestoredCart, setHasRestoredCart] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(null);
@@ -2707,15 +2707,15 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   <span style={{
                     fontSize: '0.68rem',
                     fontWeight: 700,
-                    color: scopeMode === 'filtered' ? '#0284c7' : '#475569',
-                    background: scopeMode === 'filtered' ? '#f0f9ff' : '#f8fafc',
-                    border: `1px solid ${scopeMode === 'filtered' ? '#bae6fd' : '#e2e8f0'}`,
-                    padding: '1px 6px',
+                    color: '#0284c7',
+                    background: '#f0f9ff',
+                    border: '1px solid #bae6fd',
+                    padding: '2px 8px',
                     borderRadius: '4px'
                   }}>
-                    {scopeMode === 'filtered'
-                      ? (isEs ? `Filtros Activos (${filteredProducts.length} Formulaciones)` : `Matching Active Filters (${filteredProducts.length} Formulations)`)
-                      : (isEs ? `Base de Datos Completa (${processedProducts.length} Formulaciones)` : `Entire Database (${processedProducts.length} Formulations)`)
+                    {filteredProducts.length === processedProducts.length
+                      ? (isEs ? `${processedProducts.length} Formulaciones Disponibles` : `${processedProducts.length} Available Formulations`)
+                      : (isEs ? `${filteredProducts.length} de ${processedProducts.length} Formulaciones` : `${filteredProducts.length} of ${processedProducts.length} Formulations`)
                     }
                   </span>
                   {totalCartCount > 0 && (
@@ -2725,7 +2725,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       color: '#137333',
                       background: '#e6f4ea',
                       border: '1px solid #ceead6',
-                      padding: '1px 6px',
+                      padding: '2px 8px',
                       borderRadius: '4px',
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -2735,26 +2735,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       <span>{totalCartCount} {isEs ? 'Viales' : 'Vials'} ({formatPrice(totalCartValueUsd)})</span>
                     </span>
                   )}
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', color: '#64748b' }}>
-                  <span>{isEs ? 'Alcance:' : 'Metrics Scope:'}</span>
-                  <div className="pill-group" style={{ background: '#f1f5f9' }}>
-                    <button
-                      onClick={() => setScopeMode('filtered')}
-                      className={`pill-btn ${scopeMode === 'filtered' ? 'active' : ''}`}
-                      style={{ color: scopeMode === 'filtered' ? '#0284c7' : '#64748b', fontSize: '0.67rem', padding: '2px 6px' }}
-                    >
-                      {isEs ? 'Vista Filtrada' : 'Filtered View'}
-                    </button>
-                    <button
-                      onClick={() => setScopeMode('global')}
-                      className={`pill-btn ${scopeMode === 'global' ? 'active' : ''}`}
-                      style={{ color: scopeMode === 'global' ? '#0284c7' : '#64748b', fontSize: '0.67rem', padding: '2px 6px' }}
-                    >
-                      {isEs ? 'Base Global' : 'Global Database'}
-                    </button>
-                  </div>
                 </div>
               </div>
 

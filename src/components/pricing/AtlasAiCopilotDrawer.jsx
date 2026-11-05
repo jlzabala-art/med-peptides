@@ -132,7 +132,7 @@ const PREBUILT_KNOWLEDGE = {
 export default function AtlasAiCopilotDrawer({
   isOpen,
   onClose,
-  activeCategory = 'all',
+  activeCategory: _activeCategory = 'all',
   activeCategoryLabel = null
 }) {
   const [messages, setMessages] = useState([
@@ -349,41 +349,36 @@ export default function AtlasAiCopilotDrawer({
                 )}
               </div>
 
-              {/* Starter Question Cards (Only shown below the initial welcome message when conversation is fresh) */}
+              {/* Google Gemini Style Action Starters (Prompt Pills) */}
               {idx === 0 && messages.length === 1 && (
                 <div style={{
-                  marginTop: '10px',
+                  marginTop: '12px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '10px'
+                  gap: '8px'
                 }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '4px 2px'
+                    gap: '6px',
+                    padding: '0 2px'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Sparkles size={14} color="#1a73e8" />
-                      <span style={{
-                        fontSize: '0.70rem',
-                        fontWeight: 800,
-                        color: '#5f6368',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em'
-                      }}>
-                        Suggested Clinical Questions
-                      </span>
-                    </div>
-                    <span style={{ fontSize: '0.66rem', color: '#80868b' }}>
-                      Tap to formulate
+                    <Sparkles size={13} color="#1a73e8" />
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#5f6368',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em'
+                    }}>
+                      Suggested prompts
                     </span>
                   </div>
 
                   <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-                    gap: '10px'
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px'
                   }}>
                     {SUGGESTED_INQUIRIES.map((item, qIdx) => {
                       const IconComponent = item.icon;
@@ -393,67 +388,35 @@ export default function AtlasAiCopilotDrawer({
                           type="button"
                           onClick={() => handleSend(item.prompt)}
                           style={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '10px',
-                            padding: '12px 14px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 12px',
                             background: '#ffffff',
                             border: '1px solid #dadce0',
-                            borderRadius: '8px',
-                            textAlign: 'left',
+                            borderRadius: '9999px',
                             cursor: 'pointer',
-                            transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+                            fontSize: '0.74rem',
+                            fontWeight: 600,
+                            color: '#3c4043',
+                            transition: 'all 0.15s ease',
+                            boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = '#1a73e8';
                             e.currentTarget.style.background = '#f8fafc';
-                            e.currentTarget.style.boxShadow = '0 3px 8px rgba(26,115,232,0.12)';
-                            e.currentTarget.style.transform = 'translateY(-1px)';
+                            e.currentTarget.style.color = '#1a73e8';
+                            e.currentTarget.style.boxShadow = '0 2px 6px rgba(26,115,232,0.15)';
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.borderColor = '#dadce0';
                             e.currentTarget.style.background = '#ffffff';
-                            e.currentTarget.style.boxShadow = '0 1px 2px rgba(60,64,67,0.06)';
-                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.color = '#3c4043';
+                            e.currentTarget.style.boxShadow = '0 1px 2px rgba(60,64,67,0.04)';
                           }}
                         >
-                          <div style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '8px',
-                            background: item.iconBg,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                            marginTop: '2px'
-                          }}>
-                            <IconComponent size={16} color={item.iconColor} />
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', marginBottom: '2px' }}>
-                              <span style={{ fontSize: '0.80rem', fontWeight: 750, color: '#202124' }}>
-                                {item.title}
-                              </span>
-                              <span style={{
-                                fontSize: '0.60rem',
-                                fontWeight: 700,
-                                background: item.iconBg,
-                                color: item.iconColor,
-                                padding: '1px 5px',
-                                borderRadius: '4px',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.02em',
-                                whiteSpace: 'nowrap'
-                              }}>
-                                {item.badge}
-                              </span>
-                            </div>
-                            <p style={{ margin: 0, fontSize: '0.71rem', color: '#5f6368', lineHeight: 1.4 }}>
-                              {item.subtitle}
-                            </p>
-                          </div>
+                          <IconComponent size={13} color={item.iconColor} />
+                          <span>{item.title}</span>
                         </button>
                       );
                     })}
