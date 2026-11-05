@@ -478,6 +478,39 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     };
   }, [loadProductsLazy]);
 
+  const handleRefill = useCallback((rx) => {
+    if (!rx) return;
+    openDrawer('rx-builder', 'new', {
+      isRefill: true,
+      sourceModule: 'prescriptions-refill',
+      initialSourceRx: rx,
+      initialPatient: rx.patient?.id
+        ? rx.patient
+        : {
+            id: rx.patientId || rx.patient?.id || `pat_${rx.id}`,
+            name: rx.patient?.name || rx.patientName || 'Patient',
+            email: rx.patient?.email || rx.patientEmail || '',
+            phone: rx.patient?.phone || rx.patientPhone || '',
+          },
+      initialDoctor: rx.doctor?.id
+        ? rx.doctor
+        : rx.doctorId || rx.doctorName
+          ? { id: rx.doctorId || 'doc_refill', name: rx.doctor?.name || rx.doctorName }
+          : null,
+      initialItems: (rx.items || rx.compounds || rx.products || []).map(item => ({
+        ...item,
+        id: item.id || item.productId || crypto.randomUUID(),
+        productId: item.productId || item.id,
+        productName: item.productName || item.name || 'Item',
+      })),
+      initialProtocolId: rx.protocolId || null,
+      initialProtocolName: rx.protocolName || rx.treatmentTitle || null,
+      onSaved: () => {
+        refresh && refresh();
+      },
+    });
+  }, [openDrawer, refresh]);
+
   const prescriptionExpandableRender = useCallback((row) => {
     return (
       <PrescriptionPreview
@@ -535,39 +568,6 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       window.removeEventListener('OPEN_ZOHO_API_MATCHER', handleOpenZohoMatcher);
     };
   }, []);
-
-  const handleRefill = useCallback((rx) => {
-    if (!rx) return;
-    openDrawer('rx-builder', 'new', {
-      isRefill: true,
-      sourceModule: 'prescriptions-refill',
-      initialSourceRx: rx,
-      initialPatient: rx.patient?.id
-        ? rx.patient
-        : {
-            id: rx.patientId || rx.patient?.id || `pat_${rx.id}`,
-            name: rx.patient?.name || rx.patientName || 'Patient',
-            email: rx.patient?.email || rx.patientEmail || '',
-            phone: rx.patient?.phone || rx.patientPhone || '',
-          },
-      initialDoctor: rx.doctor?.id
-        ? rx.doctor
-        : rx.doctorId || rx.doctorName
-          ? { id: rx.doctorId || 'doc_refill', name: rx.doctor?.name || rx.doctorName }
-          : null,
-      initialItems: (rx.items || rx.compounds || rx.products || []).map(item => ({
-        ...item,
-        id: item.id || item.productId || crypto.randomUUID(),
-        productId: item.productId || item.id,
-        productName: item.productName || item.name || 'Item',
-      })),
-      initialProtocolId: rx.protocolId || null,
-      initialProtocolName: rx.protocolName || rx.treatmentTitle || null,
-      onSaved: () => {
-        refresh && refresh();
-      },
-    });
-  }, [openDrawer, refresh]);
 
   const handleEnrichPrescription = useCallback(async (rx) => {
     if (!rx) return;
