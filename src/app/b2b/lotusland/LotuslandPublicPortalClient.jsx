@@ -18,7 +18,10 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
-  Sparkles
+  Sparkles,
+  Filter,
+  Check,
+  X
 } from 'lucide-react';
 import { DataTable, StatusBadge, CopyableId } from '@/components/ui';
 import MetricCard from '@/components/ui/MetricCard';
@@ -85,14 +88,18 @@ function getMacroFamilyKey(therapeuticClass = '') {
   return 'tissue_immune';
 }
 
-const MACRO_FAMILY_CHIPS = [
-  { id: 'all', label: 'All Classes' },
+const MACRO_CATEGORIES = [
   { id: 'metabolic_incretin', label: 'Metabolic & GLP-1 / GIP' },
   { id: 'gh_anabolic', label: 'GH Secretagogues & IGF' },
   { id: 'cellular_longevity', label: 'Cellular & Mitochondrial' },
   { id: 'khavinson_bioregulators', label: 'Khavinson Bioregulators' },
   { id: 'neuro_endocrine', label: 'Neuro-Cognitive & Endocrine' },
   { id: 'tissue_immune', label: 'Tissue Repair & Immune' }
+];
+
+const MACRO_FAMILY_CHIPS = [
+  { id: 'all', label: 'All Classes' },
+  ...MACRO_CATEGORIES
 ];
 
 /**
@@ -482,8 +489,9 @@ LotuslandInvoiceMobileCard.displayName = 'LotuslandInvoiceMobileCard';
 export default function LotuslandPublicPortalClient() {
   const [activeTab, setActiveTab] = useState('apis'); // 'apis' | 'invoices' | 'corporate'
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedClass, setSelectedClass] = useState('all');
-  const [valuationMode, setValuationMode] = useState('net'); // 'net' (Audited Cost) | 'transfer' (+6% Magenta Cap)
+  const [selectedClasses, setSelectedClasses] = useState([]); // Empty = all categories
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
+  const valuationMode = 'net'; // Always net audited acquisition cost per gram
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
 
   const reportData = useMemo(() => {
@@ -494,8 +502,8 @@ export default function LotuslandPublicPortalClient() {
 
   const macroFamilyCounts = useMemo(() => {
     const counts = { all: apis.length };
-    MACRO_FAMILY_CHIPS.forEach(c => {
-      if (c.id !== 'all') counts[c.id] = 0;
+    MACRO_CATEGORIES.forEach(c => {
+      counts[c.id] = 0;
     });
     apis.forEach(a => {
       const fam = getMacroFamilyKey(a.therapeuticClass);
@@ -503,6 +511,23 @@ export default function LotuslandPublicPortalClient() {
     });
     return counts;
   }, [apis]);
+
+  const toggleCategory = (categoryId) => {
+    setSelectedClasses(prev => {
+      if (prev.length === 0) {
+        return [categoryId];
+      }
+      if (prev.includes(categoryId)) {
+        const next = prev.filter(id => id !== categoryId);
+        return next;
+      }
+      const next = [...prev, categoryId];
+      if (next.length === MACRO_CATEGORIES.length) {
+        return [];
+      }
+      return next;
+    });
+  };
 
   const filteredApis = useMemo(() => {
     return apis.filter(api => {
@@ -512,14 +537,15 @@ export default function LotuslandPublicPortalClient() {
         api.casNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
         api.invoiceRefs.some(ref => ref.toLowerCase().includes(searchQuery.toLowerCase()));
 
+      const apiFamily = getMacroFamilyKey(api.therapeuticClass);
       const matchesClass =
-        selectedClass === 'all' ||
-        getMacroFamilyKey(api.therapeuticClass) === selectedClass ||
-        api.therapeuticClass === selectedClass;
+        selectedClasses.length === 0 ||
+        selectedClasses.includes(apiFamily) ||
+        selectedClasses.includes(api.therapeuticClass);
 
       return matchesSearch && matchesClass;
     });
-  }, [apis, searchQuery, selectedClass]);
+  }, [apis, searchQuery, selectedClasses]);
 
   const handleExport = () => {
     try {
@@ -1125,127 +1151,356 @@ export default function LotuslandPublicPortalClient() {
               totalCount={apis.length}
             />
 
-            {/* Consolidated GCP Macro-Family Filter Chips + Valuation Mode Toggle */}
+            {/* Google Cloud Style Filter Bar (Multi-Select Categories, Clean Mobile, No Chips Clutter) */}
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               flexWrap: 'wrap',
-              gap: '8px',
+              gap: '10px',
               background: '#ffffff',
               border: '1px solid #e2e8f0',
               borderRadius: '8px',
               padding: '8px 12px'
             }}>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '2px' }}>
-                  Filter Class:
-                </span>
-                {MACRO_FAMILY_CHIPS.map(chip => {
-                  const isSel = selectedClass === chip.id;
-                  const count = macroFamilyCounts[chip.id] || 0;
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Category Multi-Select Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setIsCategoryDrawerOpen(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: selectedClasses.length > 0 ? '#e8f0fe' : '#f8fafc',
+                    color: selectedClasses.length > 0 ? '#1967d2' : '#1e293b',
+                    border: selectedClasses.length > 0 ? '1.5px solid #1967d2' : '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '6px 12px',
+                    fontSize: '0.78rem',
+                    fontWeight: 750,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Filter size={14} color={selectedClasses.length > 0 ? '#1967d2' : '#003666'} />
+                  <span>
+                    {selectedClasses.length === 0
+                      ? 'Categories: All (6)'
+                      : `Categories: ${selectedClasses.length} selected`}
+                  </span>
+                  <ChevronDown size={14} color={selectedClasses.length > 0 ? '#1967d2' : '#64748b'} />
+                </button>
+
+                {/* Active Category Dismissible Pills */}
+                {selectedClasses.map(catId => {
+                  const cat = MACRO_CATEGORIES.find(c => c.id === catId);
+                  if (!cat) return null;
                   return (
-                    <button
-                      key={chip.id}
-                      type="button"
-                      onClick={() => setSelectedClass(chip.id)}
+                    <span
+                      key={catId}
                       style={{
-                        background: isSel ? '#e8f0fe' : '#ffffff',
-                        color: isSel ? '#1967d2' : '#3c4043',
-                        border: isSel ? '1.5px solid #1967d2' : '1px solid #dadce0',
-                        borderRadius: '16px',
-                        padding: '4px 10px',
-                        fontSize: '0.72rem',
-                        fontWeight: isSel ? 750 : 600,
-                        cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '5px',
-                        transition: 'all 0.15s ease'
+                        backgroundColor: '#e8f0fe',
+                        color: '#1967d2',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: '16px',
+                        padding: '3px 9px',
+                        fontSize: '0.70rem',
+                        fontWeight: 700
                       }}
                     >
-                      <span>{chip.label}</span>
-                      <span style={{
-                        fontSize: '0.64rem',
-                        fontWeight: 800,
-                        background: isSel ? '#1967d2' : '#f1f5f9',
-                        color: isSel ? '#ffffff' : '#64748b',
-                        padding: '0px 6px',
-                        borderRadius: '10px'
-                      }}>
-                        {count}
-                      </span>
-                    </button>
+                      <span>{cat.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleCategory(catId)}
+                        title="Remove category filter"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          color: '#1967d2',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
                   );
                 })}
-                {(selectedClass !== 'all' || searchQuery) && (
+
+                {(selectedClasses.length > 0 || searchQuery) && (
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedClass('all');
+                      setSelectedClasses([]);
                       setSearchQuery('');
                     }}
                     style={{
                       background: 'none',
                       border: 'none',
                       color: '#dc2626',
-                      fontSize: '0.72rem',
+                      fontSize: '0.74rem',
                       fontWeight: 750,
                       cursor: 'pointer',
                       padding: '2px 6px'
                     }}
                   >
-                    Reset ×
+                    Reset filters ×
                   </button>
                 )}
               </div>
 
-              {/* Valuation Basis Toggle (Net Audited Cost vs +6% Magenta Transfer Price) */}
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                background: '#f1f5f9',
-                padding: '3px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1'
-              }}>
-                <button
-                  type="button"
-                  onClick={() => setValuationMode('net')}
-                  title="Show net audited acquisition cost per gram (matches Lifetime Spend & Purchase Receipts)"
-                  style={{
-                    border: 'none',
-                    background: valuationMode === 'net' ? '#003666' : 'transparent',
-                    color: valuationMode === 'net' ? '#ffffff' : '#475569',
-                    fontSize: '0.68rem',
-                    fontWeight: 750,
-                    padding: '3px 8px',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Net Audited Cost
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setValuationMode('transfer')}
-                  title="Show Magenta wholesale transfer price (+6.00% contractual margin cap)"
-                  style={{
-                    border: 'none',
-                    background: valuationMode === 'transfer' ? '#003666' : 'transparent',
-                    color: valuationMode === 'transfer' ? '#ffffff' : '#475569',
-                    fontSize: '0.68rem',
-                    fontWeight: 750,
-                    padding: '3px 8px',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Magenta Transfer (+6%)
-                </button>
+              {/* Result Count Indicator */}
+              <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 650 }}>
+                Showing <strong style={{ color: '#003666' }}>{filteredApis.length}</strong> of {apis.length} APIs
               </div>
             </div>
+
+            {/* Google Cloud Faceted Category Multi-Select Bottom Sheet / Drawer */}
+            {isCategoryDrawerOpen && (
+              <div style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 9999,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                background: 'rgba(15, 23, 42, 0.5)',
+                backdropFilter: 'blur(3px)'
+              }}>
+                {/* Backdrop dismiss */}
+                <div
+                  onClick={() => setIsCategoryDrawerOpen(false)}
+                  style={{ flex: 1, width: '100%' }}
+                />
+
+                {/* Bottom Sheet Modal Panel */}
+                <div style={{
+                  width: '100%',
+                  maxWidth: '540px',
+                  margin: '0 auto',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '18px 18px 0 0',
+                  boxShadow: '0 -10px 40px rgba(0, 54, 102, 0.25)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  maxHeight: '82vh',
+                  overflow: 'hidden',
+                  animation: 'slideUp 0.2s ease-out'
+                }}>
+                  {/* Drag handle for mobile gesture affordance */}
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
+                    <div style={{ width: '42px', height: '4px', backgroundColor: '#cbd5e1', borderRadius: '99px' }} />
+                  </div>
+
+                  {/* Header */}
+                  <div style={{
+                    padding: '0.75rem 1.25rem 0.85rem',
+                    borderBottom: '1px solid #e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '6px',
+                        backgroundColor: '#e8f0fe',
+                        color: '#1967d2',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <Filter size={16} />
+                      </div>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#003666' }}>
+                          Therapeutic Categories
+                        </h4>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          Select one or multiple classes to filter the API catalog
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsCategoryDrawerOpen(false)}
+                      aria-label="Close"
+                      style={{
+                        background: '#f1f5f9',
+                        border: 'none',
+                        color: '#475569',
+                        cursor: 'pointer',
+                        padding: '6px',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Quick Action Toolbar */}
+                  <div style={{
+                    padding: '0.6rem 1.25rem',
+                    backgroundColor: '#f8fafc',
+                    borderBottom: '1px solid #e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontSize: '0.74rem'
+                  }}>
+                    <span style={{ color: '#475569', fontWeight: 650 }}>
+                      {selectedClasses.length === 0
+                        ? 'All 6 categories active'
+                        : `${selectedClasses.length} of 6 selected`}
+                    </span>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedClasses([])}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#1967d2',
+                          fontWeight: 700,
+                          fontSize: '0.74rem',
+                          cursor: 'pointer',
+                          padding: '2px 6px'
+                        }}
+                      >
+                        Select All
+                      </button>
+                      <span style={{ color: '#cbd5e1' }}>|</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedClasses([])}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#dc2626',
+                          fontWeight: 700,
+                          fontSize: '0.74rem',
+                          cursor: 'pointer',
+                          padding: '2px 6px'
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Categories Vertical Checkbox List */}
+                  <div style={{
+                    padding: '0.75rem 1rem',
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px'
+                  }}>
+                    {MACRO_CATEGORIES.map(cat => {
+                      const isSelected = selectedClasses.length === 0 || selectedClasses.includes(cat.id);
+                      const isExplicit = selectedClasses.includes(cat.id);
+                      const count = macroFamilyCounts[cat.id] || 0;
+
+                      return (
+                        <div
+                          key={cat.id}
+                          onClick={() => toggleCategory(cat.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '11px 14px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            backgroundColor: isExplicit ? '#f0f7ff' : '#ffffff',
+                            border: isExplicit ? '1.5px solid #1967d2' : '1px solid #e2e8f0',
+                            transition: 'all 0.15s ease',
+                            userSelect: 'none'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            {/* GCP Styled Checkbox */}
+                            <div style={{
+                              width: '20px',
+                              height: '20px',
+                              borderRadius: '4px',
+                              border: isSelected ? '1.5px solid #1967d2' : '1.5px solid #94a3b8',
+                              backgroundColor: isSelected ? '#1967d2' : '#ffffff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#ffffff',
+                              transition: 'all 0.15s ease',
+                              flexShrink: 0
+                            }}>
+                              {isSelected && <Check size={13} strokeWidth={3} />}
+                            </div>
+
+                            <span style={{
+                              fontSize: '0.84rem',
+                              fontWeight: isSelected ? 750 : 550,
+                              color: isSelected ? '#0f172a' : '#334155'
+                            }}>
+                              {cat.label}
+                            </span>
+                          </div>
+
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 750,
+                            backgroundColor: isSelected ? '#e8f0fe' : '#f1f5f9',
+                            color: isSelected ? '#1967d2' : '#64748b',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            flexShrink: 0
+                          }}>
+                            {count} {count === 1 ? 'API' : 'APIs'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Sticky Footer */}
+                  <div style={{
+                    padding: '0.85rem 1.25rem',
+                    borderTop: '1px solid #e2e8f0',
+                    backgroundColor: '#ffffff'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setIsCategoryDrawerOpen(false)}
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#003666',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '11px',
+                        fontSize: '0.88rem',
+                        fontWeight: 750,
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    >
+                      Show {filteredApis.length} APIs
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <DataTable
               data={filteredApis}
