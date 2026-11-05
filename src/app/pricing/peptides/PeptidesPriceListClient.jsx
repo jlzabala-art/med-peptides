@@ -976,6 +976,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
 
   // Order Drawer State
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
+  const [groupByCategory, setGroupByCategory] = useState(true); // Organized by therapeutic categories by default
   const [cartItems, setCartItems] = useState({}); // { [productId]: { quantity1x: 0, quantity10x: 0, product } }
   const [submittingOrder, setSubmittingOrder] = useState(false);
   const [orderForm, setOrderForm] = useState({
@@ -2839,57 +2840,112 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 resultCount={filteredProducts.length}
                 filters={
                   <div>
-                    {/* Dosage Strength Quick Filter Pills (Mejora #5) */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {isEs ? 'Concentración:' : 'Filter Strength:'}
-                      </span>
-                      {DOSAGE_STRENGTHS.map(st => {
-                        const isSelected = selectedStrength === st.id;
-                        return (
+                    {/* Dosage Strength Quick Filter Pills + Category Grouping Toggle */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {isEs ? 'Concentración:' : 'Filter Strength:'}
+                        </span>
+                        {DOSAGE_STRENGTHS.map(st => {
+                          const isSelected = selectedStrength === st.id;
+                          return (
+                            <button
+                              key={st.id}
+                              type="button"
+                              onClick={() => setSelectedStrength(st.id)}
+                              style={{
+                                padding: '2px 9px',
+                                borderRadius: '20px',
+                                fontSize: '0.70rem',
+                                fontWeight: isSelected ? 750 : 600,
+                                border: '1px solid',
+                                cursor: 'pointer',
+                                background: isSelected ? '#0284c7' : '#ffffff',
+                                color: isSelected ? '#ffffff' : '#475569',
+                                borderColor: isSelected ? '#0284c7' : '#cbd5e1',
+                                transition: 'all 0.12s ease'
+                              }}
+                            >
+                              {st.id === 'all' ? (isEs ? 'Todas las Dosis' : 'All Strengths') : st.label}
+                            </button>
+                          );
+                        })}
+
+                        {(selectedCategory !== 'all' || selectedStrength !== 'all' || searchQuery) && (
                           <button
-                            key={st.id}
                             type="button"
-                            onClick={() => setSelectedStrength(st.id)}
+                            onClick={() => {
+                              setSelectedCategory('all');
+                              setSelectedStrength('all');
+                              setSearchQuery('');
+                            }}
                             style={{
-                              padding: '2px 9px',
-                              borderRadius: '20px',
-                              fontSize: '0.70rem',
-                              fontWeight: isSelected ? 750 : 600,
-                              border: '1px solid',
-                              cursor: 'pointer',
-                              background: isSelected ? '#0284c7' : '#ffffff',
-                              color: isSelected ? '#ffffff' : '#475569',
-                              borderColor: isSelected ? '#0284c7' : '#cbd5e1',
-                              transition: 'all 0.12s ease'
+                              border: 'none',
+                              background: 'none',
+                              color: '#dc2626',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: 'pointer'
                             }}
                           >
-                            {st.id === 'all' ? (isEs ? 'Todas las Dosis' : 'All Strengths') : st.label}
+                            {isEs ? 'Limpiar Filtros ×' : 'Reset Filters ×'}
                           </button>
-                        );
-                      })}
+                        )}
+                      </div>
 
-                      {(selectedCategory !== 'all' || selectedStrength !== 'all' || searchQuery) && (
+                      {/* View Organization Switcher: Categories (Default) vs Continuous */}
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        background: '#f1f5f9',
+                        padding: '2px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        marginLeft: 'auto'
+                      }}>
                         <button
                           type="button"
-                          onClick={() => {
-                            setSelectedCategory('all');
-                            setSelectedStrength('all');
-                            setSearchQuery('');
-                          }}
+                          onClick={() => setGroupByCategory(true)}
                           style={{
-                            marginLeft: 'auto',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
                             border: 'none',
-                            background: 'none',
-                            color: '#dc2626',
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            cursor: 'pointer'
+                            background: groupByCategory ? '#ffffff' : 'transparent',
+                            color: groupByCategory ? '#003666' : '#64748b',
+                            fontWeight: groupByCategory ? 800 : 600,
+                            fontSize: '0.70rem',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            boxShadow: groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
                           }}
                         >
-                          {isEs ? 'Limpiar Filtros ×' : 'Reset Filters ×'}
+                          <Layers size={12} />
+                          <span>{isEs ? 'Categorías' : 'Categories'}</span>
                         </button>
-                      )}
+                        <button
+                          type="button"
+                          onClick={() => setGroupByCategory(false)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            border: 'none',
+                            background: !groupByCategory ? '#ffffff' : 'transparent',
+                            color: !groupByCategory ? '#003666' : '#64748b',
+                            fontWeight: !groupByCategory ? 800 : 600,
+                            fontSize: '0.70rem',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            boxShadow: !groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+                          }}
+                        >
+                          <span>≡</span>
+                          <span>{isEs ? 'Continua' : 'Continuous'}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 }
@@ -2925,10 +2981,53 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   data={filteredProducts}
                   columns={columns}
                   keyField="id"
-                  pageSize={50}
+                  pageSize={150}
+                  initialRowsPerPage={150}
                   showPagination={true}
                   sortable={true}
                   lang={lang}
+                  groupByKey={groupByCategory ? 'categoryKey' : null}
+                  renderGroupHeader={(catKey, firstRow, count) => {
+                    const meta = CATEGORY_MAP[catKey] || firstRow?.categoryMeta || CATEGORY_MAP.general_health;
+                    const title = isEs ? (meta.labelEs || meta.label) : (meta.labelEn || meta.label);
+                    return (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                        background: '#e8f0fe',
+                        borderRadius: '6px',
+                        padding: '3px 6px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                          <span style={{ color: '#003666', display: 'inline-flex', alignItems: 'center' }}>
+                            {getCategoryIcon(catKey, 14)}
+                          </span>
+                          <span style={{
+                            fontWeight: 800,
+                            fontSize: '0.76rem',
+                            color: '#003666',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            {title} ({count})
+                          </span>
+                        </div>
+                        <span style={{
+                          fontSize: '0.66rem',
+                          fontWeight: 700,
+                          color: '#1967d2',
+                          background: '#ffffff',
+                          border: '1px solid #bfdbfe',
+                          padding: '1px 7px',
+                          borderRadius: '10px'
+                        }}>
+                          {count} {isEs ? 'formulaciones' : 'formulations'}
+                        </span>
+                      </div>
+                    );
+                  }}
                   expandableRender={renderPeptideClinicalDetail}
                   mobileCardComponent={PeptideMobileCard}
                   mobileCardProps={{

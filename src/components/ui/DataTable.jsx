@@ -105,6 +105,8 @@ export default function DataTable({
   forceMobileSelectionMode,   // boolean flag to force selection mode externally
   onForceMobileSelectionModeChange, // callback to update external state
   lang = 'en',                // Optional language ('en' | 'es') for pagination chrome
+  groupByKey = null,          // Optional field name to render category group headers (e.g. 'categoryKey')
+  renderGroupHeader = null,   // Optional (groupValue, firstRow, groupCount) => ReactNode
 }) {
   const { is, can } = useRoleAccess();
   // ── Mobile detection ──────────────────────────────────────────────────────
@@ -565,6 +567,17 @@ export default function DataTable({
               const cardReactKey = `${rowKey}_${idx}`;
               const CardComponent = mobileCardComponent || MobileRecordCard;
               const isMobileSelected = mobileSelectedIds.includes(rowKey);
+
+              const showGroupBanner =
+                groupByKey &&
+                renderGroupHeader &&
+                !sortConfig.key &&
+                (idx === 0 || row[groupByKey] !== paginatedData[idx - 1]?.[groupByKey]);
+
+              const groupCount = showGroupBanner
+                ? sortedData.filter(r => r[groupByKey] === row[groupByKey]).length
+                : 0;
+
               const cardEl = (
                 <CardComponent
                   key={cardReactKey}
@@ -580,19 +593,26 @@ export default function DataTable({
                   {...mobileCardProps}
                 />
               );
-              if (swipeActions && !mobileSelectionMode) {
-                const actions = swipeActions(row) || {};
-                return (
-                  <SwipeableCard
-                    key={cardReactKey}
-                    leftAction={actions.leftAction}
-                    rightActions={actions.rightActions || []}
-                  >
-                    {cardEl}
-                  </SwipeableCard>
-                );
-              }
-              return React.cloneElement(cardEl, { key: cardReactKey });
+              const wrappedCard = (swipeActions && !mobileSelectionMode) ? (
+                <SwipeableCard
+                  key={cardReactKey}
+                  leftAction={(swipeActions(row) || {}).leftAction}
+                  rightActions={(swipeActions(row) || {}).rightActions || []}
+                >
+                  {cardEl}
+                </SwipeableCard>
+              ) : React.cloneElement(cardEl, { key: cardReactKey });
+
+              if (!showGroupBanner) return wrappedCard;
+
+              return (
+                <React.Fragment key={`grp-mob-${cardReactKey}`}>
+                  <div style={{ margin: idx === 0 ? '0 0 8px 0' : '14px 0 8px 0' }}>
+                    {renderGroupHeader(row[groupByKey], row, groupCount)}
+                  </div>
+                  {wrappedCard}
+                </React.Fragment>
+              );
             })}
           </div>
         )}
@@ -1186,9 +1206,37 @@ export default function DataTable({
 
 
                   const customProps = getRowProps ? getRowProps(row) : {};
+                  const prevRow = !isVirtual && index > 0 ? paginatedData[index - 1] : null;
+                  const showGroupRow =
+                    !isVirtual &&
+                    groupByKey &&
+                    renderGroupHeader &&
+                    !sortConfig.key &&
+                    (index === 0 || row[groupByKey] !== prevRow?.[groupByKey]);
+                  const groupCount = showGroupRow
+                    ? sortedData.filter(r => r[groupByKey] === row[groupByKey]).length
+                    : 0;
+                  const totalColSpan =
+                    activeColumns.length +
+                    (onSelectionChange ? 1 : 0) +
+                    (expandableRender && !hideExpandColumn ? 1 : 0);
 
                   return (
                     <React.Fragment key={rowReactKey}>
+                      {showGroupRow && (
+                        <tr
+                          className="gcp-table-group-banner-row"
+                          style={{
+                            backgroundColor: '#e8f0fe',
+                            borderTop: index > 0 ? '2px solid #bfdbfe' : '1px solid #bfdbfe',
+                            borderBottom: '1px solid #bfdbfe'
+                          }}
+                        >
+                          <td colSpan={totalColSpan} style={{ padding: '7px 14px' }}>
+                            {renderGroupHeader(row[groupByKey], row, groupCount)}
+                          </td>
+                        </tr>
+                      )}
                       <tr
                         ref={isVirtual ? rowVirtualizer.measureElement : null}
                         data-index={isVirtual ? virtualRowOrRow.index : index}
@@ -1494,7 +1542,7 @@ export default function DataTable({
                     outline: 'none',
                   }}
                 >
-                  {[10, 25, 50, 100].map((val) => (
+                  {[10, 25, 50, 100, 150].map((val) => (
                     <option key={`rpp-${val}`} value={val}>
                       {val}
                     </option>

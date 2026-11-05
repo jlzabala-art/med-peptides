@@ -102,7 +102,7 @@ export default function PeptidePricePdfPreviewModal({
   lang = 'en'
 }) {
   const [pdfLang, setPdfLang] = useState(lang || 'en');
-  const [groupByCategory, setGroupByCategory] = useState(false);
+  const [groupByCategory, setGroupByCategory] = useState(true);
   // Mobile view mode: 'mobile' (3-column adaptive reader without collisions) or 'a4' (scaled A4 paper sheet viewer)
   const [mobileViewMode, setMobileViewMode] = useState('mobile');
   const [a4ZoomScale, setA4ZoomScale] = useState(0.45);
@@ -498,7 +498,7 @@ export default function PeptidePricePdfPreviewModal({
 
         {/* Row 2 on Mobile / Right Controls on Desktop */}
         <div className="pdf-toolbar-row2" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {/* Grouping Mode Switcher: Continuous vs By Category */}
+          {/* Grouping Mode Switcher: By Category (Default) vs Continuous */}
           <div style={{
             display: 'inline-flex',
             background: '#f1f5f9',
@@ -506,27 +506,6 @@ export default function PeptidePricePdfPreviewModal({
             borderRadius: '6px',
             border: '1px solid #e2e8f0'
           }}>
-            <button
-              type="button"
-              onClick={() => setGroupByCategory(false)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                border: 'none',
-                background: !groupByCategory ? '#ffffff' : 'transparent',
-                color: !groupByCategory ? '#0f172a' : '#64748b',
-                fontWeight: !groupByCategory ? 700 : 500,
-                fontSize: '0.71rem',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                boxShadow: !groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-              }}
-            >
-              <List size={12} />
-              <span>{isEs ? 'Continua' : 'Continuous'}</span>
-            </button>
             <button
               type="button"
               onClick={() => setGroupByCategory(true)}
@@ -547,6 +526,27 @@ export default function PeptidePricePdfPreviewModal({
             >
               <Layers size={12} />
               <span>{isEs ? 'Categorías' : 'Categories'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setGroupByCategory(false)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                border: 'none',
+                background: !groupByCategory ? '#ffffff' : 'transparent',
+                color: !groupByCategory ? '#0f172a' : '#64748b',
+                fontWeight: !groupByCategory ? 700 : 500,
+                fontSize: '0.71rem',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                boxShadow: !groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+              }}
+            >
+              <List size={12} />
+              <span>{isEs ? 'Continua' : 'Continuous'}</span>
             </button>
           </div>
 
