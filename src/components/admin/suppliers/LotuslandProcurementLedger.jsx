@@ -137,39 +137,22 @@ export default function LotuslandProcurementLedger() {
       )
     },
     {
-      key: 'weightedAvgCost',
-      accessor: 'weightedAvgCost',
-      header: 'Weighted Cost / g',
-      label: 'Weighted Cost / g',
-      width: '11%',
-      sortable: true,
-      sortValue: (r) => r.weightedAvgCost,
-      render: (_val, row) => (
-        <div>
-          <span style={{ fontWeight: 700, color: '#0284c7', fontSize: '0.85rem' }}>
-            ${row.weightedAvgCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-          </span>
-          <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-            Latest: ${row.latestCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-          </div>
-        </div>
-      )
-    },
-    {
       key: 'catalogPrice',
       accessor: 'catalogPrice',
-      header: 'Transfer Cap (Cost + 6%)',
-      label: 'Transfer Cap (Cost + 6%)',
-      width: '12%',
+      header: 'Invoiced Cost / g',
+      label: 'Invoiced Cost / g',
+      width: '15%',
       sortable: true,
       sortValue: (r) => r.catalogPrice,
       render: (_val, row) => (
         <div>
-          <span style={{ fontWeight: 750, color: '#16a34a', fontSize: '0.85rem' }}>
+          <span style={{ fontWeight: 750, color: '#003666', fontSize: '0.88rem' }}>
             ${row.catalogPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
-          <div style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 600 }}>
-            +6.0% max cap
+          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
+            {row.invoiceCount > 1
+              ? `Avg (${row.invoiceCount} orders) · Latest: $${(row.latestCost * 1.06).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+              : 'Single release'}
           </div>
         </div>
       )
@@ -179,7 +162,7 @@ export default function LotuslandProcurementLedger() {
       accessor: 'totalSpendUSD',
       header: 'Lifetime Spend',
       label: 'Lifetime Spend',
-      width: '12%',
+      width: '13%',
       sortable: true,
       sortValue: (r) => r.totalSpendUSD,
       render: (_val, row) => (

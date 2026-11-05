@@ -45,6 +45,8 @@ export async function GET(request) {
     const blueBg = rgb(224 / 255, 242 / 255, 254 / 255);         // #e0f2fe
     const emeraldDark = rgb(22 / 255, 163 / 255, 74 / 255);      // #16a34a
     const emeraldBg = rgb(240 / 255, 253 / 255, 244 / 255);     // #f0fdf4
+    const purpleDark = rgb(124 / 255, 58 / 255, 237 / 255);      // #7c3aed
+    const purpleBg = rgb(243 / 255, 232 / 255, 255 / 255);        // #f3e8ff
     const white = rgb(1, 1, 1);
 
     // =========================================================================
@@ -206,9 +208,9 @@ export async function GET(request) {
       maxWidth: p1Width - 92
     });
 
-    // The 4 Functional DNA Pillars
+    // The 4 Functional DNA Pillars (Circadian 24h Sequence with Visual Efficiency Gauges)
     y -= (noticeH + 12);
-    page1.drawText('1. The 4 DNA Pillars: What Your Genetics Mean in Plain Language', {
+    page1.drawText('1. The 4 DNA Pillars: Circadian Action Map & Genetic Efficiency Gauges', {
       x: 36,
       y,
       size: 9.5,
@@ -218,41 +220,53 @@ export async function GET(request) {
 
     const pillarCardDefs = [
       {
-        pillarTag: 'PILLAR 1: GLYCEMIC METABOLISM (TCF7L2 / FTO)',
-        title: 'Carbohydrate Sensitivity & Postprandial Glucose',
-        status: 'GLUCOSE SENSITIVE',
-        statusColor: alertRed,
-        statusBg: badgeRedBg,
-        why: 'Refined carbs trigger rapid insulin surges, promoting mid-afternoon energy crashes and abdominal fat storage.',
-        assignedFormulation: 'Dietary Plate Sequencing + Optional Module D (Psyllium 5g sachet if HbA1c is elevated)',
-        clinicalGoal: 'Blunts postprandial glucose excursions up to 45% via food order; avoids systemic pharmacologic berberine.'
-      },
-      {
-        pillarTag: 'PILLAR 2: CELLULAR METHYLATION & ENERGY (MTHFR C677T)',
-        title: 'Active Folate & Homocysteine Recycling Pathway',
-        status: 'MTHFR PRIORITY',
-        statusColor: alertRed,
-        statusBg: badgeRedBg,
-        why: 'Your liver is slower at activating synthetic folic acid, requiring active methylfolate and its FAD enzyme cofactor.',
-        assignedFormulation: 'Formulation 2 (Capsule B · Breakfast with fat) — Active 5-MTHF + Riboflavin + B12 + P5P',
-        clinicalGoal: 'Supports cellular methylation with active 5-MTHF, Riboflavin (MTHFR FAD cofactor), Methyl-B12, and P5P.'
-      },
-      {
+        circadianSlot: '08:00 AM · MORNING FASTING',
+        circadianBg: rgb(240 / 255, 253 / 255, 250 / 255), // Soft Mint
         pillarTag: 'PILLAR 3: GUT MICROBIOME & BARRIER (MCM6 / LCT)',
         title: 'Lactose Intolerance & Microbiota Diversity',
         status: 'LACTOSE-FREE SHIELD',
         statusColor: blueDark,
         statusBg: blueBg,
+        baselinePct: 0.25,
         why: 'Adult lactase non-persistence requires dietary lactose avoidance or exogenous lactase; supports beneficial flora.',
         assignedFormulation: 'Formulation 1 (Capsule A · Morning Acid-Resistant DRcaps® with LGG 10B + BB-12 5B CFU)',
         clinicalGoal: 'Delivers verified probiotic strains in acid-resistant DRcaps®; dietary lactose-free advice recommended.'
       },
       {
-        pillarTag: 'PILLAR 4: IMMUNITY & BONE HEALTH (VDR FokI / CYP1A2)',
-        title: 'Vitamin D Receptor Signaling & Restorative Sleep',
-        status: 'VDR RESISTANCE',
+        circadianSlot: '01:30 PM · MIDDAY WITH FOOD',
+        circadianBg: rgb(254 / 255, 243 / 255, 199 / 255), // Soft Amber
+        pillarTag: 'PILLAR 1: GLYCEMIC METABOLISM (TCF7L2 / FTO)',
+        title: 'Carbohydrate Sensitivity & Postprandial Glucose',
+        status: 'GLUCOSE SENSITIVE',
         statusColor: amberDark,
         statusBg: amberBg,
+        baselinePct: 0.40,
+        why: 'Refined carbs trigger rapid insulin surges, promoting mid-afternoon energy crashes and abdominal fat storage.',
+        assignedFormulation: 'Dietary Plate Sequencing + Optional Module D (Psyllium 5g sachet if HbA1c is elevated)',
+        clinicalGoal: 'Blunts postprandial glucose excursions up to 45% via food order; avoids systemic pharmacologic berberine.'
+      },
+      {
+        circadianSlot: '01:30 PM · MIDDAY WITH FOOD',
+        circadianBg: rgb(254 / 255, 242 / 255, 242 / 255), // Soft Red
+        pillarTag: 'PILLAR 2: CELLULAR METHYLATION & ENERGY (MTHFR C677T)',
+        title: 'Active Folate & Homocysteine Recycling Pathway',
+        status: 'MTHFR PRIORITY (70% REDUCED)',
+        statusColor: alertRed,
+        statusBg: badgeRedBg,
+        baselinePct: 0.30,
+        why: 'Your liver is slower at activating synthetic folic acid, requiring active methylfolate and its FAD enzyme cofactor.',
+        assignedFormulation: 'Formulation 2 (Capsule B · Breakfast with fat) — Active 5-MTHF + Riboflavin + B12 + P5P',
+        clinicalGoal: 'Supports cellular methylation with active 5-MTHF, Riboflavin (MTHFR FAD cofactor), Methyl-B12, and P5P.'
+      },
+      {
+        circadianSlot: '10:30 PM · EVENING BEDTIME',
+        circadianBg: rgb(243 / 255, 232 / 255, 255 / 255), // Soft Purple
+        pillarTag: 'PILLAR 4: IMMUNITY & BONE HEALTH (VDR FokI / CYP1A2)',
+        title: 'Vitamin D Receptor Signaling & Restorative Sleep',
+        status: 'VDR RESISTANCE & SLEEP',
+        statusColor: purpleDark,
+        statusBg: purpleBg,
+        baselinePct: 0.35,
         why: 'Nuclear receptor variation benefits from physiological D3/K2; evening chelated magnesium supports restorative sleep.',
         assignedFormulation: 'Capsule B (Breakfast D3 2,000 IU + K2 100µg) & Capsule C (Evening 150mg elemental Mg + Theanine 200mg)',
         clinicalGoal: 'Maintains optimal 25(OH)D safely within EU adult UL, paired with evening chelated magnesium and L-theanine.'
@@ -281,42 +295,109 @@ export async function GET(request) {
         color: p.statusColor
       });
 
-      // Top Pillar Label
-      page1.drawText(p.pillarTag, {
-        x: 48,
-        y: y - 13,
-        size: 7.6,
-        font: helveticaBold,
-        color: tealAccent
-      });
-
-      // Title
-      page1.drawText(p.title, {
-        x: 48,
-        y: y - 24,
-        size: 9.2,
-        font: helveticaBold,
-        color: darkSlate
-      });
-
-      // Status Pill
-      const pillWidth = helveticaBold.widthOfTextAtSize(p.status, 6.5) + 12;
+      // Circadian Badge (Time & Context)
+      const circW = helveticaBold.widthOfTextAtSize(p.circadianSlot, 6.0) + 10;
       page1.drawRectangle({
-        x: p1Width - 46 - pillWidth,
-        y: y - 22,
-        width: pillWidth,
-        height: 14,
-        color: p.statusBg
+        x: 46,
+        y: y - 13,
+        width: circW,
+        height: 11,
+        color: p.circadianBg,
+        borderColor: p.statusColor,
+        borderWidth: 0.5
       });
-      page1.drawText(p.status, {
-        x: p1Width - 46 - pillWidth + 6,
-        y: y - 18,
-        size: 6.5,
+      page1.drawText(p.circadianSlot, {
+        x: 51,
+        y: y - 9.5,
+        size: 5.8,
         font: helveticaBold,
         color: p.statusColor
       });
 
-      // Safe font-fitting helper to guarantee zero wrap & zero collision on any screen/platform
+      // Pillar Tag
+      page1.drawText(p.pillarTag, {
+        x: 46 + circW + 6,
+        y: y - 10,
+        size: 7.2,
+        font: helveticaBold,
+        color: tealAccent
+      });
+
+      // Right Side: Status Pill & Visual Genetic Efficiency Gauge
+      const pillWidth = helveticaBold.widthOfTextAtSize(p.status, 6.2) + 10;
+      page1.drawRectangle({
+        x: p1Width - 44 - pillWidth,
+        y: y - 14,
+        width: pillWidth,
+        height: 12,
+        color: p.statusBg,
+        borderColor: p.statusColor,
+        borderWidth: 0.5
+      });
+      page1.drawText(p.status, {
+        x: p1Width - 44 - pillWidth + 5,
+        y: y - 10.5,
+        size: 6.2,
+        font: helveticaBold,
+        color: p.statusColor
+      });
+
+      // Visual Genetic Efficiency Gauge (Track + Baseline Fill + Corrected Target)
+      const gaugeW = 64;
+      const gaugeH = 5.5;
+      const gaugeX = p1Width - 44 - gaugeW;
+      const gaugeY = y - 24;
+
+      // Gauge background track
+      page1.drawRectangle({
+        x: gaugeX,
+        y: gaugeY,
+        width: gaugeW,
+        height: gaugeH,
+        color: rgb(241 / 255, 245 / 255, 249 / 255),
+        borderColor: rgb(203 / 255, 213 / 255, 225 / 255),
+        borderWidth: 0.6
+      });
+
+      // Baseline efficiency fill (Deficiency state)
+      const fillW = Math.round(gaugeW * p.baselinePct);
+      page1.drawRectangle({
+        x: gaugeX,
+        y: gaugeY,
+        width: fillW,
+        height: gaugeH,
+        color: p.statusColor
+      });
+
+      // Target tick line at 100%
+      page1.drawLine({
+        start: { x: gaugeX + gaugeW, y: gaugeY - 1 },
+        end: { x: gaugeX + gaugeW, y: gaugeY + gaugeH + 1 },
+        thickness: 1.2,
+        color: emeraldDark
+      });
+
+      // Gauge Label Text
+      const gaugeLabel = `${Math.round(p.baselinePct * 100)}% Base -> 100% Target`;
+      const gLabelW = helveticaBold.widthOfTextAtSize(gaugeLabel, 5.4);
+      page1.drawText(gaugeLabel, {
+        x: gaugeX - gLabelW - 5,
+        y: gaugeY + 1,
+        size: 5.4,
+        font: helveticaBold,
+        color: darkSlate
+      });
+
+      // Title
+      page1.drawText(p.title, {
+        x: 46,
+        y: y - 24,
+        size: 8.8,
+        font: helveticaBold,
+        color: darkSlate
+      });
+
+      // Safe font-fitting helper
       const fitTextSize = (txt, font, baseSize, maxW) => {
         let s = baseSize;
         while (s > 6.4 && font.widthOfTextAtSize(txt, s) > maxW) {
@@ -331,7 +412,7 @@ export async function GET(request) {
       const whyStr = `DNA Finding: ${p.why}`;
       const whySize = fitTextSize(whyStr, helvetica, 7.8, maxCardTextWidth);
       page1.drawText(whyStr, {
-        x: 48,
+        x: 46,
         y: y - 36,
         size: whySize,
         font: helvetica,
@@ -343,7 +424,7 @@ export async function GET(request) {
       const supportStr = `Targeted Support: ${p.assignedFormulation}`;
       const supportSize = fitTextSize(supportStr, helveticaBold, 7.6, maxCardTextWidth);
       page1.drawText(supportStr, {
-        x: 48,
+        x: 46,
         y: y - 48,
         size: supportSize,
         font: helveticaBold,
@@ -355,7 +436,7 @@ export async function GET(request) {
       const goalStr = `Clinical Goal: ${p.clinicalGoal}`;
       const goalSize = fitTextSize(goalStr, helveticaOblique, 7.2, maxCardTextWidth);
       page1.drawText(goalStr, {
-        x: 48,
+        x: 46,
         y: y - 60,
         size: goalSize,
         font: helveticaOblique,

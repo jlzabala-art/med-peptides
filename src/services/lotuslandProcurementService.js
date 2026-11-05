@@ -36,8 +36,28 @@ export const LOTUSLAND_METADATA = {
   ]
 };
 
-// 10 Authoritative Commercial Invoices with line items
+// Authoritative Commercial Invoices with line items & Spot Procurement Releases
 export const LOTUSLAND_INVOICES_REGISTRY = [
+  {
+    invoiceNumber: 'OF-LOTUS-20261104-US',
+    date: '2026-11-04',
+    buyer: 'Magenta Pharma Medicine Trading LLC',
+    currency: 'USD',
+    rateToUSD: 1.0,
+    subtotal: 35075.00,
+    discountAmount: 0,
+    shippingAmount: 0,
+    grandTotal: 35075.00,
+    grandTotalUSD: 35075.00,
+    isSpotOffer: true,
+    notes: 'US Client Allocation Stock (Discount incorporated in net unit prices)',
+    items: [
+      { name: '5-Amino-1MQ', quantityGrams: 50, unitPrice: 15.00, lineTotal: 750.00, currency: 'USD', category: 'api_raw_materials' },
+      { name: 'Prostamax', quantityGrams: 10, unitPrice: 1625.00, lineTotal: 16250.00, currency: 'USD', category: 'api_raw_materials' },
+      { name: 'Pinealon', quantityGrams: 10, unitPrice: 1537.50, lineTotal: 15375.00, currency: 'USD', category: 'api_raw_materials' },
+      { name: 'IGF-1 LR3', quantityGrams: 0.2, unitPrice: 13500.00, lineTotal: 2700.00, currency: 'USD', category: 'api_raw_materials' }
+    ]
+  },
   {
     invoiceNumber: 'MY20260519021Y',
     date: '2026-05-19',
@@ -362,12 +382,15 @@ export function getLotuslandProcurementReport() {
     // Costs
     const weightedAvgCost = api.totalGrams > 0 ? (api.totalSpendUSD / api.totalGrams) : 0;
     const latestCost = api.invoices[0]?.unitCostUSD || weightedAvgCost;
+    const previousCost = api.invoices[1]?.unitCostUSD || null;
+    const priceDeltaPct = previousCost ? Number((((latestCost - previousCost) / previousCost) * 100).toFixed(1)) : null;
     const allCosts = api.invoices.map(i => i.unitCostUSD);
     const lowestCost = Math.min(...allCosts);
     const highestCost = Math.max(...allCosts);
 
     // Wholesale Compounding Transfer Cap: Cost + 6% max contractual margin for Magenta corridor
     const catalogPrice = Number((weightedAvgCost * 1.06).toFixed(2));
+    const spotCatalogPrice = Number((latestCost * 1.06).toFixed(2));
     const marginUSD = Number((catalogPrice - weightedAvgCost).toFixed(2));
     const marginPercent = 6.0;
 
@@ -382,9 +405,13 @@ export function getLotuslandProcurementReport() {
       totalSpendUSD: Number(api.totalSpendUSD.toFixed(2)),
       weightedAvgCost: Number(weightedAvgCost.toFixed(2)),
       latestCost: Number(latestCost.toFixed(2)),
+      previousCost: previousCost ? Number(previousCost.toFixed(2)) : null,
+      priceDeltaPct,
+      hasRecentSpotOffer: !!api.invoices[0]?.isSpotOffer,
       lowestCost: Number(lowestCost.toFixed(2)),
       highestCost: Number(highestCost.toFixed(2)),
       catalogPrice,
+      spotCatalogPrice,
       marginUSD,
       marginPercent,
       invoiceCount: invoiceRefs.length,
@@ -410,12 +437,110 @@ export function getLotuslandProcurementReport() {
       uniqueApisCount: apisList.length,
       totalInvoicesCount: LOTUSLAND_INVOICES_REGISTRY.length,
       firstInvoiceDate: '2025-12-30',
-      latestInvoiceDate: '2026-05-19',
-      dateRange: 'Dec 30, 2025 – May 19, 2026'
+      latestInvoiceDate: '2026-11-04',
+      dateRange: 'Dec 30, 2025 – Nov 04, 2026'
     },
     apis: apisList,
     invoices: LOTUSLAND_INVOICES_REGISTRY,
     allLineItems: allLines
   };
 }
+
+/**
+ * Official Verified B2B Quotation for Magenta Pharma Medicine Trading LLC
+ * Issued by Mediluxe Health Solutions FZE incorporating the strict +6.00% contractual margin.
+ */
+export const MAGENTA_OFFICIAL_QUOTATION_202611 = {
+  quoteId: 'QT-MED-MAG-202611-01',
+  date: '2026-11-04',
+  validUntil: '2026-11-18', // 14-day validity for US allocation stock
+  issuer: {
+    companyName: 'Mediluxe Health Solutions FZE',
+    facility: 'European & GCC Clinical Fulfillment Corridor',
+    trn: '104906198700003',
+    jurisdiction: 'Sharjah Publishing City Free Zone / Dubai, UAE',
+    contactPerson: 'Director of Institutional Sourcing',
+    email: 'procurement@atlashealth-services.com'
+  },
+  supplier: {
+    companyName: 'Lotusland Limited',
+    jurisdiction: 'Hong Kong SAR',
+    regNumber: '71705158',
+    allocationSource: 'Pre-allocated US Client Cold-Chain Stock'
+  },
+  client: {
+    companyName: 'Magenta Pharma Medicine Trading LLC',
+    facility: 'Magenta RX Plus Compounding Pharmacy',
+    trn: '100574948400003',
+    jurisdiction: 'Dubai, United Arab Emirates',
+    paymentTerms: 'Wire Transfer / Advance Settlement on Allocation'
+  },
+  marginRate: 0.06,
+  marginPercentLabel: '+6.00%',
+  items: [
+    {
+      itemNumber: 1,
+      apiName: '5-Amino-1MQ',
+      casNumber: '42464-96-0',
+      therapeuticClass: 'Metabolic & NNMT Inhibitor',
+      grade: '≥98.5% Analytical & Compounding Grade',
+      quantityGrams: 50,
+      lotuslandUnitCostUSD: 15.00,
+      mediluxeMarginUSD: 0.90,
+      unitPriceUSD: 15.90,
+      lineTotalUSD: 795.00,
+      previousCatalogPriceUSD: 27.43,
+      leadTime: '3–5 Business Days (Air Courier Cold-Chain)'
+    },
+    {
+      itemNumber: 2,
+      apiName: 'Prostamax',
+      casNumber: '210827-83-1',
+      therapeuticClass: 'Prostate Peptide Bioregulator',
+      grade: '≥99.0% High-Purity Peptide Bioregulator',
+      quantityGrams: 10,
+      lotuslandUnitCostUSD: 1625.00,
+      mediluxeMarginUSD: 97.50,
+      unitPriceUSD: 1722.50,
+      lineTotalUSD: 17225.00,
+      previousCatalogPriceUSD: 2971.31,
+      leadTime: '3–5 Business Days (Air Courier Cold-Chain)'
+    },
+    {
+      itemNumber: 3,
+      apiName: 'Pinealon',
+      casNumber: '161040-52-2',
+      therapeuticClass: 'Brain & Pineal Neuro-Bioregulator',
+      grade: '≥99.0% High-Purity Peptide Bioregulator',
+      quantityGrams: 10,
+      lotuslandUnitCostUSD: 1537.50,
+      mediluxeMarginUSD: 92.25,
+      unitPriceUSD: 1629.75,
+      lineTotalUSD: 16297.50,
+      previousCatalogPriceUSD: 2811.32,
+      leadTime: '3–5 Business Days (Air Courier Cold-Chain)'
+    },
+    {
+      itemNumber: 4,
+      apiName: 'IGF-1 LR3',
+      casNumber: '949837-92-9',
+      therapeuticClass: 'Muscle Regeneration & Hypertrophy',
+      grade: '≥95.0% Biological Activity (Lyophilized)',
+      quantityGrams: 0.2, // 200 mg
+      lotuslandUnitCostUSD: 13500.00,
+      mediluxeMarginUSD: 810.00,
+      unitPriceUSD: 14310.00,
+      lineTotalUSD: 2862.00,
+      previousCatalogPriceUSD: 24451.87,
+      leadTime: '3–5 Business Days (Air Courier Cold-Chain)'
+    }
+  ],
+  totals: {
+    totalQuantityGrams: 60.2,
+    lotuslandNetCostUSD: 35075.00,
+    mediluxeGrossMarginUSD: 2104.50,
+    grandTotalUSD: 37179.50,
+    currency: 'USD'
+  }
+};
 

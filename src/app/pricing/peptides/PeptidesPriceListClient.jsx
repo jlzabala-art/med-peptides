@@ -51,6 +51,7 @@ import ClinicalProtocolDrawer from '@/components/pricing/ClinicalProtocolDrawer'
 import AtlasAiCopilotDrawer from '@/components/pricing/AtlasAiCopilotDrawer';
 import PeptideSpecsDrawer from '@/components/pricing/PeptideSpecsDrawer';
 import PeptidePricePdfPreviewModal from '@/components/pricing/PeptidePricePdfPreviewModal';
+import { getFdaPeptideStatus, FDA_STATUS_TYPES } from '@/data/fdaPeptidesRegistry';
 import { COUNTRIES } from '@/data/countries';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
@@ -242,15 +243,58 @@ function getPresetIcon(id, size = 15) {
 }
 
 const CATEGORY_MAP = {
-  repair: { label: 'Tissue Repair & Healing', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', icon: '🩹' },
-  metabolic: { label: 'Metabolic & GLP-1', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: '⚡' },
-  longevity: { label: 'Longevity & Cellular', color: '#7c3aed', bg: '#faf5ff', border: '#e9d5ff', icon: '🧬' },
-  neuro: { label: 'Neuro & Cognitive', color: '#ea580c', bg: '#fff7ed', border: '#ffedd5', icon: '🧠' },
-  growth_hormone: { label: 'GH Secretagogues', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: '🚀' },
-  cosmetic: { label: 'Dermal & Follicular', color: '#db2777', bg: '#fdf2f8', border: '#fbcfe8', icon: '✨' },
-  general_health: { label: 'Bioactive Peptide', color: '#475569', bg: '#f8fafc', border: '#e2e8f0', icon: '🧪' },
-  supplies: { label: 'Solvents & Supplies', color: '#0891b2', bg: '#ecfeff', border: '#a5f3fc', icon: '💧' }
+  repair: { label: 'Tissue Repair & Healing', labelEn: 'Tissue Repair & Healing', labelEs: 'Reparación Tisular', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', icon: '🩹' },
+  metabolic: { label: 'Metabolic & GLP-1', labelEn: 'Metabolic & GLP-1', labelEs: 'Metabolismo & GLP-1', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: '⚡' },
+  longevity: { label: 'Longevity & Cellular', labelEn: 'Longevity & Cellular', labelEs: 'Longevidad & Celular', color: '#7c3aed', bg: '#faf5ff', border: '#e9d5ff', icon: '🧬' },
+  neuro: { label: 'Neuro & Cognitive', labelEn: 'Neuro & Cognitive', labelEs: 'Neuro & Cognitivo', color: '#ea580c', bg: '#fff7ed', border: '#ffedd5', icon: '🧠' },
+  growth_hormone: { label: 'GH Secretagogues', labelEn: 'GH Secretagogues', labelEs: 'Secretagogos de GH', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: '🚀' },
+  cosmetic: { label: 'Dermal & Follicular', labelEn: 'Dermal & Follicular', labelEs: 'Dérmico & Folicular', color: '#db2777', bg: '#fdf2f8', border: '#fbcfe8', icon: '✨' },
+  general_health: { label: 'Bioactive Peptide', labelEn: 'Bioactive Peptide', labelEs: 'Péptidos Bioactivos', color: '#475569', bg: '#f8fafc', border: '#e2e8f0', icon: '🧪' },
+  supplies: { label: 'Solvents & Supplies', labelEn: 'Solvents & Supplies', labelEs: 'Disolventes & Suministros', color: '#0891b2', bg: '#ecfeff', border: '#a5f3fc', icon: '💧' }
 };
+
+export const FDA_FILTERS = [
+  { id: 'all', labelEn: 'All Regulatory Statuses', labelEs: 'Todos los Estados FDA', icon: '🌐' },
+  { id: 'fda_503a', labelEn: 'HHS 503A Discretion (Oct 2026)', labelEs: '503A Discreción de Ejecución', icon: '🛡️', color: '#16a34a' },
+  { id: 'fda_approved', labelEn: 'FDA Approved (NDA / BLA)', labelEs: 'Aprobados por FDA (NDA)', icon: '🏛️', color: '#1a73e8' },
+  { id: 'clinical_ind', labelEn: 'Clinical Investigational (IND)', labelEs: 'En Investigación Clínica', icon: '🔬', color: '#d97706' },
+  { id: 'analytical', labelEn: 'Analytical Reference Standards', labelEs: 'Estándar Analítico', icon: '🧪', color: '#64748b' }
+];
+
+function resolveProductFda(product) {
+  const status = getFdaPeptideStatus(product);
+  if (status) return status;
+  return {
+    status: FDA_STATUS_TYPES?.RESEARCH_ANALYTICAL_STANDARD || 'research_analytical_standard',
+    badgeLabel: 'Analytical Reference Standard',
+    shortBadge: 'Analytical Standard',
+    shortCode: 'STANDARD',
+    colorScheme: {
+      bg: '#f1f5f9',
+      border: '#cbd5e1',
+      text: '#475569',
+      icon: '🧪'
+    }
+  };
+}
+
+function getFdaFilterBucket(product) {
+  const fda = getFdaPeptideStatus(product);
+  if (!fda) return 'analytical';
+  if (
+    fda.status === FDA_STATUS_TYPES?.HHS_503A_ENFORCEMENT_DISCRETION ||
+    fda.status === FDA_STATUS_TYPES?.FDA_PCAC_503A_RECOMMENDED
+  ) {
+    return 'fda_503a';
+  }
+  if (fda.status === FDA_STATUS_TYPES?.FDA_APPROVED) {
+    return 'fda_approved';
+  }
+  if (fda.status === FDA_STATUS_TYPES?.CLINICAL_INVESTIGATIONAL) {
+    return 'clinical_ind';
+  }
+  return 'analytical';
+}
 
 const CATEGORY_ORDER = [
   'repair',
@@ -726,6 +770,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedFdaStatus, setSelectedFdaStatus] = useState('all');
   const [selectedStrength, setSelectedStrength] = useState('all'); // 'all' | '5mg' | '10mg' | '20mg_plus'
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22)
   const [copied, setCopied] = useState(false);
@@ -735,6 +780,43 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+
+  // Standard English default with Spanish toggling & persistent storage
+  const [lang, setLang] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('lang');
+      if (p === 'es' || p === 'en') return p;
+      const s = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
+      if (s === 'es' || s === 'en') return s;
+    }
+    return 'en';
+  });
+
+  const isEs = lang === 'es';
+
+  const handleLanguageChange = (nextLang) => {
+    setLang(nextLang);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_portal_lang', nextLang);
+        localStorage.setItem('atlas_catalog_lang', nextLang);
+        window.dispatchEvent(new CustomEvent('atlas-language-changed', { detail: { lang: nextLang } }));
+      } catch (_e) {}
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', nextLang);
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  useEffect(() => {
+    const onLangChange = (e) => {
+      if (e?.detail?.lang && (e.detail.lang === 'en' || e.detail.lang === 'es')) {
+        setLang(e.detail.lang);
+      }
+    };
+    window.addEventListener('atlas-language-changed', onLangChange);
+    return () => window.removeEventListener('atlas-language-changed', onLangChange);
+  }, []);
 
   // Debounce search query to keep main thread at 60fps on mobile (150ms)
   useEffect(() => {
@@ -882,10 +964,19 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
         categoryKey = 'cosmetic';
       }
 
+      const fdaStatus = resolveProductFda(p);
+      const fdaBucket = getFdaFilterBucket(p);
+      const meta = CATEGORY_MAP[categoryKey] || CATEGORY_MAP.general_health;
+
       return {
         ...p,
         categoryKey,
-        categoryMeta: CATEGORY_MAP[categoryKey] || CATEGORY_MAP.general_health
+        categoryMeta: {
+          ...meta,
+          label: isEs ? meta.labelEs : meta.labelEn
+        },
+        fdaStatus,
+        fdaBucket
       };
     });
 
@@ -908,7 +999,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       ...p,
       itemNumber: idx + 1
     }));
-  }, [initialProducts]);
+  }, [initialProducts, isEs]);
 
   // Filtering with debounced query (Keeps 60fps responsiveness on mobile devices)
   const filteredProducts = useMemo(() => {
@@ -921,6 +1012,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
         (p.categoryMeta.label || '').toLowerCase().includes(q);
 
       const matchesCat = selectedCategory === 'all' || p.categoryKey === selectedCategory;
+      const matchesFda = selectedFdaStatus === 'all' || p.fdaBucket === selectedFdaStatus;
 
       let matchesStrength = true;
       if (selectedStrength !== 'all') {
@@ -934,9 +1026,9 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
         }
       }
 
-      return matchesSearch && matchesCat && matchesStrength;
+      return matchesSearch && matchesCat && matchesFda && matchesStrength;
     });
-  }, [processedProducts, debouncedSearchQuery, selectedCategory, selectedStrength]);
+  }, [processedProducts, debouncedSearchQuery, selectedCategory, selectedFdaStatus, selectedStrength]);
 
   // Cart quantity update & removal helpers
   const updateItemQuantity = useCallback((productId, type, delta) => {
@@ -1346,6 +1438,26 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 {row?.categoryMeta?.label}
               </span>
 
+              {/* FDA Regulatory Status Badge */}
+              {row.fdaStatus && (
+                <span style={{
+                  fontSize: '0.64rem',
+                  fontWeight: 700,
+                  color: row.fdaStatus.colorScheme?.text || '#065f46',
+                  background: row.fdaStatus.colorScheme?.bg || '#ecfdf5',
+                  border: `1px solid ${row.fdaStatus.colorScheme?.border || '#6ee7b7'}`,
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  whiteSpace: 'nowrap',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px'
+                }}>
+                  <span>{row.fdaStatus.colorScheme?.icon || '🛡️'}</span>
+                  <span>{row.fdaStatus.shortBadge || '503A'}</span>
+                </span>
+              )}
+
               {/* Live Preselected Order Indicator */}
               {hasSelection && (
                 <span style={{
@@ -1504,9 +1616,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         flexDirection: 'column',
         gap: '0.65rem'
       }}>
-        {/* Subtle GCP Category & Pathway Tag (No redundant compound name or duplicate buttons) */}
+        {/* Subtle GCP Category & Pathway Tag + FDA Status Badge */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{
               fontSize: '0.68rem',
               fontWeight: 750,
@@ -1525,7 +1637,24 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             </span>
           </div>
 
-          <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {row.fdaStatus && (
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 750,
+                color: row.fdaStatus.colorScheme?.text || '#065f46',
+                background: row.fdaStatus.colorScheme?.bg || '#ecfdf5',
+                border: `1px solid ${row.fdaStatus.colorScheme?.border || '#6ee7b7'}`,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <span>{row.fdaStatus.colorScheme?.icon || '🛡️'}</span>
+                <span>{row.fdaStatus.badgeLabel}</span>
+              </span>
+            )}
             {clinical.casNumber && <span>CAS Registry: <strong style={{ color: '#334155' }}>{clinical.casNumber}</strong></span>}
           </div>
         </div>
@@ -1621,6 +1750,38 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           </div>
 
           <div className="nav-actions">
+            {/* Language selector: EN standard, ES selectable */}
+            <div className="language-selector" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div className="pill-group" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                {[
+                  { code: 'en', label: 'EN' },
+                  { code: 'es', label: 'ES' }
+                ].map((item) => {
+                  const isCurrent = (lang || 'en') === item.code;
+                  return (
+                    <button
+                      key={item.code}
+                      onClick={() => handleLanguageChange(item.code)}
+                      className={`pill-btn ${isCurrent ? 'pill-active active' : ''}`}
+                      style={{
+                        border: 'none',
+                        background: isCurrent ? '#0284c7' : 'transparent',
+                        color: isCurrent ? '#ffffff' : '#cbd5e1',
+                        fontWeight: isCurrent ? 800 : 500,
+                        fontSize: '0.74rem',
+                        padding: '4px 9px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Currency selector with prominent display (Google Cloud Console Standard) */}
             <div className="currency-selector" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Currency:</span>
@@ -1918,6 +2079,63 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         fontSize: '0.65rem',
                         fontWeight: 700,
                         background: isSelected ? meta.color : '#f1f3f4',
+                        color: isSelected ? '#ffffff' : '#5f6368',
+                        padding: '1px 6px',
+                        borderRadius: '10px'
+                      }}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '14px 0 10px 0' }} />
+
+              {/* FDA Regulatory Status Filter Rail */}
+              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+                {isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}
+              </div>
+              <div className="gcp-categories-horizontal" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                {FDA_FILTERS.map(f => {
+                  const isSelected = selectedFdaStatus === f.id;
+                  const count = f.id === 'all'
+                    ? processedProducts.length
+                    : processedProducts.filter(p => p.fdaBucket === f.id).length;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setSelectedFdaStatus(f.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        background: isSelected ? (f.id === 'all' ? '#e8f0fe' : (f.id === 'fda_503a' ? '#ecfdf5' : f.id === 'fda_approved' ? '#eff6ff' : f.id === 'clinical_ind' ? '#fffbeb' : '#f1f5f9')) : 'transparent',
+                        color: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#3c4043')) : '#3c4043',
+                        fontSize: '0.74rem',
+                        fontWeight: isSelected ? 700 : 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'background 0.15s ease'
+                      }}
+                      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f1f3f4'; }}
+                      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <span style={{ fontSize: '0.78rem' }}>{f.icon}</span>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
+                          {isEs ? f.labelEs : f.labelEn}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        background: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#5f6368')) : '#f1f3f4',
                         color: isSelected ? '#ffffff' : '#5f6368',
                         padding: '1px 6px',
                         borderRadius: '10px'

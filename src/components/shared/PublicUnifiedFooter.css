@@ -23,6 +23,13 @@
   pointer-events: none !important;
 }
 
+/* Allow interactive language switching (EN | ES) while keeping all directory & legal links static */
+.public-unified-footer .public-footer-lang-switcher,
+.public-unified-footer .public-footer-lang-switcher * {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
 .public-footer-container {
   max-width: 1280px;
   margin: 0 auto;

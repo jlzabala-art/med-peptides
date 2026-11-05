@@ -60,7 +60,17 @@ const FOOTER_SECTIONS = [
  * Completely static & non-clickable as per strict specification.
  */
 export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
-  const isEs = lang === 'es';
+  const [currentLang, setCurrentLang] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('lang');
+      if (p === 'es' || p === 'en') return p;
+      const s = localStorage.getItem('atlas_portal_lang');
+      if (s === 'es' || s === 'en') return s;
+    }
+    return lang;
+  });
+
+  const isEs = currentLang === 'es';
   const [openMobileSections, setOpenMobileSections] = useState({});
 
   const toggleMobileSection = (id) => {
@@ -68,6 +78,20 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
       ...prev,
       [id]: !prev[id]
     }));
+  };
+
+  const handleLanguageChange = (nextLang) => {
+    setCurrentLang(nextLang);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_portal_lang', nextLang);
+        localStorage.setItem('atlas_catalog_lang', nextLang);
+        window.dispatchEvent(new CustomEvent('atlas-language-changed', { detail: { lang: nextLang } }));
+      } catch (_e) {}
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', nextLang);
+      window.location.href = url.toString();
+    }
   };
 
   const textStyle = {
@@ -223,21 +247,27 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
             </span>
           </div>
 
-          <div className="public-footer-lang-switcher" aria-label="Language selector">
+          <div className="public-footer-lang-switcher" aria-label="Language selector" style={{ pointerEvents: 'auto' }}>
             <Globe size={13} style={{ color: '#5f6368', flexShrink: 0 }} />
-            <span
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('en')}
               className={`public-footer-lang-btn ${!isEs ? 'active' : ''}`}
-              style={{ cursor: 'default', pointerEvents: 'none' }}
+              title="Switch to English"
+              style={{ cursor: 'pointer', pointerEvents: 'auto' }}
             >
               EN
-            </span>
+            </button>
             <span className="public-footer-lang-divider">|</span>
-            <span
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('es')}
               className={`public-footer-lang-btn ${isEs ? 'active' : ''}`}
-              style={{ cursor: 'default', pointerEvents: 'none' }}
+              title="Cambiar a Español"
+              style={{ cursor: 'pointer', pointerEvents: 'auto' }}
             >
               ES
-            </span>
+            </button>
           </div>
         </div>
 

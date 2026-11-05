@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
 import {
   Download,
   Share2,
@@ -26,6 +27,7 @@ import { getLotuslandProcurementReport } from '@/services/lotuslandProcurementSe
 import { exportLotuslandProcurementXlsx } from '@/utils/exportLotuslandProcurementXlsx';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
+import AtlasAiLotuslandDrawer from '@/components/pricing/AtlasAiLotuslandDrawer';
 import toast from 'react-hot-toast';
 
 /**
@@ -110,25 +112,13 @@ export function LotuslandApiMobileCard({ row, renderDetailRow }) {
 
         <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
           <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-            Weighted Cost
+            Invoiced Cost / g
           </div>
-          <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0284c7' }}>
-            ${row.weightedAvgCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}/g
+          <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#003666' }}>
+            ${row.catalogPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </div>
           <div style={{ fontSize: '0.64rem', color: '#64748b' }}>
-            Latest: ${row.latestCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}/g
-          </div>
-        </div>
-
-        <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
-          <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-            Transfer Cap (Cost + 6%)
-          </div>
-          <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#16a34a' }}>
-            ${row.catalogPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}/g
-          </div>
-          <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 600 }}>
-            +6.0% max cap
+            {row.invoiceCount > 1 ? `Avg (Latest: $${(row.latestCost * 1.06).toLocaleString('en-US', { minimumFractionDigits: 2 })})` : 'Single release'}
           </div>
         </div>
 
@@ -136,7 +126,7 @@ export function LotuslandApiMobileCard({ row, renderDetailRow }) {
           <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
             Lifetime Spend
           </div>
-          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#003666' }}>
+          <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#003666' }}>
             ${row.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </div>
           <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 600 }}>
@@ -150,34 +140,36 @@ export function LotuslandApiMobileCard({ row, renderDetailRow }) {
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '100%',
+  display: 'flex',
+    alignItems: 'center',
+      justifyContent: 'space-between',
+        width: '100%',
           padding: '6px 10px',
-          background: isExpanded ? '#eff6ff' : '#f8fafc',
-          border: isExpanded ? '1px solid #bfdbfe' : '1px solid #dadce0',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '0.72rem',
-          fontWeight: 700,
-          color: isExpanded ? '#1d4ed8' : '#334155'
-        }}
+            background: isExpanded ? '#eff6ff' : '#f8fafc',
+              border: isExpanded ? '1px solid #bfdbfe' : '1px solid #dadce0',
+                borderRadius: '6px',
+                  cursor: 'pointer',
+                    fontSize: '0.72rem',
+                      fontWeight: 700,
+                        color: isExpanded ? '#1d4ed8' : '#334155'
+}}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <FileText size={12} color={isExpanded ? '#1d4ed8' : '#64748b'} />
-          <span>View Receipts & Indications ({row.invoiceCount})</span>
-        </span>
-        {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-      </button>
+  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+    <FileText size={12} color={isExpanded ? '#1d4ed8' : '#64748b'} />
+    <span>View Receipts & Indications ({row.invoiceCount})</span>
+  </span>
+{ isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} /> }
+      </button >
 
-      {/* Expanded Master-Detail Content */}
-      {isExpanded && renderDetailRow && (
-        <div style={{ marginTop: '2px' }}>
-          {renderDetailRow(row)}
-        </div>
-      )}
+  {/* Expanded Master-Detail Content */ }
+{
+  isExpanded && renderDetailRow && (
+    <div style={{ marginTop: '2px' }}>
+      {renderDetailRow(row)}
     </div>
+  )
+}
+    </div >
   );
 }
 LotuslandApiMobileCard.displayName = 'LotuslandApiMobileCard';
@@ -245,6 +237,7 @@ export default function LotuslandPublicPortalClient() {
   const [activeTab, setActiveTab] = useState('apis'); // 'apis' | 'invoices' | 'corporate'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClass, setSelectedClass] = useState('all');
+  const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
 
   const reportData = useMemo(() => {
     return getLotuslandProcurementReport();
@@ -312,7 +305,7 @@ export default function LotuslandPublicPortalClient() {
       accessor: 'name',
       header: 'API Active Principle',
       label: 'API Active Principle',
-      width: '24%',
+      width: '27%',
       sortable: true,
       sortValue: (r) => r.name,
       render: (_val, row) => (
@@ -335,7 +328,7 @@ export default function LotuslandPublicPortalClient() {
       accessor: 'therapeuticClass',
       header: 'Therapeutic Class',
       label: 'Therapeutic Class',
-      width: '16%',
+      width: '18%',
       sortable: true,
       sortValue: (r) => r.therapeuticClass,
       render: (_val, row) => (
@@ -357,7 +350,7 @@ export default function LotuslandPublicPortalClient() {
       accessor: 'totalGrams',
       header: 'Total Procured',
       label: 'Total Procured',
-      width: '11%',
+      width: '13%',
       sortable: true,
       sortValue: (r) => r.totalGrams,
       render: (_val, row) => (
@@ -394,39 +387,22 @@ export default function LotuslandPublicPortalClient() {
       )
     },
     {
-      key: 'weightedAvgCost',
-      accessor: 'weightedAvgCost',
-      header: 'Weighted Cost / g',
-      label: 'Weighted Cost / g',
-      width: '11%',
-      sortable: true,
-      sortValue: (r) => r.weightedAvgCost,
-      render: (_val, row) => (
-        <div>
-          <span style={{ fontWeight: 700, color: '#0284c7', fontSize: '0.85rem' }}>
-            ${row.weightedAvgCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-          </span>
-          <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-            Latest: ${row.latestCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-          </div>
-        </div>
-      )
-    },
-    {
       key: 'catalogPrice',
       accessor: 'catalogPrice',
-      header: 'Transfer Cap (Cost + 6%)',
-      label: 'Transfer Cap (Cost + 6%)',
-      width: '12%',
+      header: 'Invoiced Cost / g',
+      label: 'Invoiced Cost / g',
+      width: '15%',
       sortable: true,
       sortValue: (r) => r.catalogPrice,
       render: (_val, row) => (
         <div>
-          <span style={{ fontWeight: 750, color: '#16a34a', fontSize: '0.85rem' }}>
+          <span style={{ fontWeight: 750, color: '#003666', fontSize: '0.88rem' }}>
             ${row.catalogPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
-          <div style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 600 }}>
-            +6.0% max cap
+          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
+            {row.invoiceCount > 1
+              ? `Avg (${row.invoiceCount} orders) · Latest: $${(row.latestCost * 1.06).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+              : 'Single release'}
           </div>
         </div>
       )
@@ -436,7 +412,7 @@ export default function LotuslandPublicPortalClient() {
       accessor: 'totalSpendUSD',
       header: 'Lifetime Spend',
       label: 'Lifetime Spend',
-      width: '12%',
+      width: '13%',
       sortable: true,
       sortValue: (r) => r.totalSpendUSD,
       render: (_val, row) => (
@@ -1006,6 +982,133 @@ export default function LotuslandPublicPortalClient() {
           </div>
         )}
       </main>
+
+      {/* ── Fixed Bottom Operations & Copilot Bar (Google Cloud Console Pattern) ── */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#ffffff',
+        borderTop: '1px solid #dadce0',
+        boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.08)',
+        zIndex: 50,
+        padding: '8px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '10px'
+      }}>
+        {/* Left: Living Status Indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            color: '#166534',
+            padding: '4px 10px',
+            borderRadius: '12px',
+            fontSize: '0.74rem',
+            fontWeight: 750
+          }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#16a34a', display: 'inline-block' }} />
+            <span>Sourcing Audit Reconciled</span>
+          </div>
+
+          <div style={{ fontSize: '0.76rem', color: '#64748b' }}>
+            <strong style={{ color: '#003666' }}>{summary.uniqueApisCount} APIs</strong> · ${summary.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} Total Audited Capital
+          </div>
+        </div>
+
+        {/* Right Actions: Atlas AI + Magenta Quotation + Excel */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Atlas AI Copilot Button */}
+          <button
+            type="button"
+            onClick={() => setIsAtlasAiOpen(true)}
+            style={{
+              backgroundColor: '#003666',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 14px',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 1px 3px rgba(0, 54, 102, 0.25)'
+            }}
+          >
+            <Sparkles size={14} color="#38bdf8" />
+            <span>Atlas AI Procurement Copilot</span>
+            <span style={{
+              backgroundColor: '#38bdf8',
+              color: '#002244',
+              fontSize: '0.62rem',
+              padding: '1px 5px',
+              borderRadius: '4px',
+              fontWeight: 800
+            }}>
+              Ask
+            </span>
+          </button>
+
+          {/* Magenta Official Quotation Direct Link */}
+          <Link
+            href="/b2b/quotes/magenta"
+            style={{
+              backgroundColor: '#166534',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 13px',
+              fontSize: '0.78rem',
+              fontWeight: 750,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 1px 3px rgba(22, 101, 52, 0.25)'
+            }}
+          >
+            <FileText size={14} />
+            <span>Magenta Quotation ($37,179.50) →</span>
+          </Link>
+
+          {/* Download Audit Excel */}
+          <button
+            type="button"
+            onClick={handleExport}
+            style={{
+              backgroundColor: '#ffffff',
+              color: '#334155',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '0.76rem',
+              fontWeight: 650,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+          >
+            <Download size={13} />
+            <span>Excel Audit</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Atlas AI Copilot Drawer */}
+      <AtlasAiLotuslandDrawer
+        isOpen={isAtlasAiOpen}
+        onClose={() => setIsAtlasAiOpen(false)}
+      />
     </div>
   );
 }
