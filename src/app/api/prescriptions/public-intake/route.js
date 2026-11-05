@@ -217,6 +217,19 @@ export async function POST(request) {
           updatedAt: new Date().toISOString(),
         };
 
+        // Schedule Default Refill (Clinical Requirement for imported prescriptions)
+        const intakeCycleDays = Number(rx.refillCycleDays) || (rx.duration ? (parseInt(rx.duration, 10) || 60) : 60);
+        const intakeBaseDate = rx.fagron?.reportDate || rx.prescriptionDate || rx.date ? new Date(rx.fagron?.reportDate || rx.prescriptionDate || rx.date) : new Date();
+        const validIntakeBaseDate = isNaN(intakeBaseDate.getTime()) ? new Date() : intakeBaseDate;
+        const autoNextRefillDate = new Date(validIntakeBaseDate);
+        autoNextRefillDate.setDate(autoNextRefillDate.getDate() + intakeCycleDays);
+
+        payload.refillCycleDays = rx.refillCycleDays || intakeCycleDays;
+        payload.nextRefillDate = rx.nextRefillDate || autoNextRefillDate.toISOString();
+        payload.refillsRemaining = rx.refillsRemaining ?? 3;
+        payload.refillStatus = rx.refillStatus || 'scheduled';
+        payload.isRefillScheduled = true;
+
         // Two-Doctor Architecture (Strict Segregation):
         // 1) productionDoctor: Always Dr. Miguel Ángel López Aranda (internal production order, no DHA).
         // 2) treatingDoctor: The physician who examined the patient. Only one displayed on QR & label.
@@ -318,7 +331,7 @@ export async function POST(request) {
         try {
           invalidateRxCache(officialNumber);
           invalidateRxCache(docRef.id);
-        } catch (_) {}
+        } catch (_e) { /* non-critical cache invalidation */ }
 
         savedPrescriptions.push({
           id: docRef.id,
@@ -376,9 +389,9 @@ export async function DELETE(request) {
       const rxNumber = data.prescriptionNumber || data.code;
       await docRef.delete();
       if (rxNumber) {
-        try { invalidateRxCache(rxNumber); } catch (_) {}
+        try { invalidateRxCache(rxNumber); } catch (_e) { /* non-critical */ }
       }
-      try { invalidateRxCache(id); } catch (_) {}
+      try { invalidateRxCache(id); } catch (_e) { /* non-critical */ }
     }
 
     return NextResponse.json({ success: true, message: 'Prescription cancelled and discarded successfully.' });

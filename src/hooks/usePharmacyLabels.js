@@ -21,16 +21,19 @@ export function usePharmacyLabels(options = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [labels, setLabels] = useState([]);
   const [initialIndex, setInitialIndex] = useState(0);
+  const [currentTab, setCurrentTab] = useState('label'); // 'label' | 'edit' | 'refill'
+  const [currentRx, setCurrentRx] = useState(null);
 
   /**
    * Opens the labels modal for a single rx, array of rxs, or label objects.
    * @param {Object|Array} rxOrArray
    * @param {number} startIndex
+   * @param {'label'|'edit'|'refill'} initialTab
    */
-  const openLabels = useCallback((rxOrArray, startIndex = 0) => {
+  const openLabels = useCallback((rxOrArray, startIndex = 0, initialTab = 'label') => {
     if (!rxOrArray) return;
 
-    let resolved = [];
+    let resolved;
     if (Array.isArray(rxOrArray)) {
       resolved = rxOrArray.flatMap(item => {
         if (!item) return [];
@@ -40,8 +43,10 @@ export function usePharmacyLabels(options = {}) {
         }
         return getPharmapolisLabelsForPrescription(item);
       });
+      setCurrentRx(rxOrArray[startIndex] || rxOrArray[0] || null);
     } else {
       resolved = getPharmapolisLabelsForPrescription(rxOrArray);
+      setCurrentRx(rxOrArray);
     }
 
     if (!resolved || resolved.length === 0) {
@@ -51,6 +56,7 @@ export function usePharmacyLabels(options = {}) {
 
     setLabels(resolved);
     setInitialIndex(Math.max(0, Math.min(startIndex, resolved.length - 1)));
+    setCurrentTab(initialTab || 'label');
     setIsOpen(true);
   }, []);
 
@@ -88,12 +94,14 @@ export function usePharmacyLabels(options = {}) {
           onClose={closeLabels}
           labels={labels}
           initialLabelIndex={initialIndex}
+          initialTab={modalProps.initialTab || currentTab}
+          sourceRx={modalProps.sourceRx || currentRx}
           isEs={modalProps.isEs ?? options.isEs ?? false}
           {...modalProps}
         />
       );
     };
-  }, [isOpen, closeLabels, labels, initialIndex, options.isEs]);
+  }, [isOpen, closeLabels, labels, initialIndex, currentTab, currentRx, options.isEs]);
 
   return {
     isOpen,

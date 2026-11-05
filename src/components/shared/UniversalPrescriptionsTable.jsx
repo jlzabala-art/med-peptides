@@ -234,7 +234,13 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const groupedData = useMemo(() => {
     let rawData;
     if (isAlgoliaActive && searchTerm.trim()) {
-      rawData = algoliaHits.map(h => ({ ...h, id: h.objectID || h.id }));
+      // Merge Algolia slim hits with authoritative local Firestore data to avoid missing clinical fields (APIs, parts)
+      rawData = algoliaHits.map(h => {
+        const hitId = h.objectID || h.id;
+        const local = (displayPrescriptions || []).find(p => p.id === hitId);
+        // Local record wins for clinical arrays; Algolia provides searchable metadata
+        return local ? { ...h, ...local, id: hitId } : { ...h, id: hitId };
+      });
     } else if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       rawData = (displayPrescriptions || []).filter(rx => {
@@ -515,10 +521,10 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     return (
       <PrescriptionPreview
         rx={row}
-        onOpenLabels={(rxItem, idx) => openLabels(rxItem, idx)}
+        onOpenLabels={(rxItem, idx, tab) => openLabels(rxItem, idx, tab || 'label')}
         onEditLabel={(rxItem, idx) => {
           // Open labels in edit mode
-          openLabels(rxItem, idx);
+          openLabels(rxItem, idx, 'edit');
         }}
         onRefill={(rxItem) => handleRefill(rxItem)}
         onOpenZohoMatcher={(rxItem) => setZohoMatcherRx(rxItem)}

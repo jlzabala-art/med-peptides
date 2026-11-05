@@ -11,6 +11,7 @@ import ClinicPicker from '@/components/admin/patients/ClinicPicker';
 import PhysicianPicker from '@/components/admin/patients/PhysicianPicker';
 import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
 import { generateLabelZpl } from '@/utils/labels/zplGenerator';
+import RefillFormulaWorkbench from './RefillFormulaWorkbench';
 
 /**
  * Optical Print Legibility Pill Badge
@@ -83,6 +84,8 @@ export default function PharmacyLabelsModal({
   initialVariant = null,
   isEs = false,
   initialEditMode = false,
+  initialTab = 'label', // 'label' | 'edit' | 'refill'
+  sourceRx = null,
   isStandalone = false,
   hideInternalPartsSwitcher = false,
   hideShippingLabel = false,
@@ -92,6 +95,8 @@ export default function PharmacyLabelsModal({
   onConfigChange = null,
   onLabelDataChange = null
 }) {
+  const [modalMainTab, setModalMainTab] = useState(initialTab || (initialEditMode ? 'edit' : 'label'));
+
   const [selectedProductIdx, setSelectedProductIdx] = useState(typeof initialLabelIndex === 'number' ? initialLabelIndex : 0);
   const [activeVariant, setActiveVariantState] = useState(() => {
     if (initialVariant && (!hideShippingLabel || initialVariant !== 'shipping')) return initialVariant;
@@ -135,6 +140,13 @@ export default function PharmacyLabelsModal({
   const [firebaseSaveSuccess, setFirebaseSaveSuccess] = useState(false);
   const [firebaseSaveError, setFirebaseSaveError] = useState(null);
   const [showCustomsTitleSuggestions, setShowCustomsTitleSuggestions] = useState(false);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setModalMainTab(initialTab);
+      if (initialTab === 'edit') setIsEditing(true);
+    }
+  }, [initialTab]);
 
   // Sync selected index when opened or changed from outside
   React.useEffect(() => {
@@ -1841,6 +1853,93 @@ export default function PharmacyLabelsModal({
               </div>
             </div>
 
+            {/* Google Cloud Style Unified Hub Mode Navigation Tabs */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: '#f1f3f4',
+              padding: '3px',
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalMainTab('label');
+                  setIsEditing(false);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: modalMainTab === 'label' ? '#ffffff' : 'transparent',
+                  color: modalMainTab === 'label' ? '#1a73e8' : '#5f6368',
+                  fontWeight: modalMainTab === 'label' ? 800 : 600,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  boxShadow: modalMainTab === 'label' ? '0 1px 3px rgba(60,64,67,0.15)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <span>🏷️</span>
+                <span>{isEs ? 'Etiqueta' : 'Label'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalMainTab('edit');
+                  setIsEditing(true);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: modalMainTab === 'edit' ? '#ffffff' : 'transparent',
+                  color: modalMainTab === 'edit' ? '#1a73e8' : '#5f6368',
+                  fontWeight: modalMainTab === 'edit' ? 800 : 600,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  boxShadow: modalMainTab === 'edit' ? '0 1px 3px rgba(60,64,67,0.15)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <Edit3 size={12} />
+                <span>{isEs ? 'Editar' : 'Edit'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalMainTab('refill');
+                  setIsEditing(false);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: modalMainTab === 'refill' ? '#ffffff' : 'transparent',
+                  color: modalMainTab === 'refill' ? '#1a73e8' : '#5f6368',
+                  fontWeight: modalMainTab === 'refill' ? 800 : 600,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  boxShadow: modalMainTab === 'refill' ? '0 1px 3px rgba(60,64,67,0.15)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <RotateCcw size={12} />
+                <span>{isEs ? 'Refill Adaptativo' : 'Adaptive Refill'}</span>
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={onClose}
@@ -1867,7 +1966,25 @@ export default function PharmacyLabelsModal({
 
         {/* Content Body */}
         <div className="gcp-labels-body">
-          {/* Google Cloud Dedicated Primary Resource / Formula Selector Card (Only in popup modal mode) */}
+          {modalMainTab === 'refill' ? (
+            <div style={{ padding: '14px 0', width: '100%' }}>
+              <RefillFormulaWorkbench
+                sourceRx={sourceRx || currentItem?.rawRx || currentItem}
+                labels={labels}
+                currentLabelIndex={selectedProductIdx}
+                isEs={isEs}
+                onRefillCreated={(newRx, newRxId) => {
+                  if (onPrescriptionUpdated) {
+                    onPrescriptionUpdated(newRx, newRxId);
+                  }
+                  setModalMainTab('label');
+                }}
+                onCancel={() => setModalMainTab('label')}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Google Cloud Dedicated Primary Resource / Formula Selector Card (Only in popup modal mode) */}
           {!isStandalone && (
             <div className="gcp-resource-selector-card">
               <div className="gcp-resource-header-row">
@@ -3408,10 +3525,12 @@ export default function PharmacyLabelsModal({
               );
             })()}
           </div>
-
+          </>
+          )}
         </div>
 
         {/* ── GCP Sticky Action Footer / Mobile Dock Sticker ── */}
+        {modalMainTab !== 'refill' && (
         <div className="gcp-labels-sticky-footer">
           {/* Desktop Single-Line Specs */}
           <div className="gcp-footer-desktop-specs" style={{ minWidth: 0, flex: '0 1 auto', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3749,6 +3868,7 @@ export default function PharmacyLabelsModal({
             )}
           </div>
         </div>
+        )}
       </div>
 
       {/* Hidden offscreen vector container for bulk PDF and A4 grid generation */}

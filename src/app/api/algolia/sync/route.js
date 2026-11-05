@@ -123,7 +123,21 @@ export async function POST(request) {
         name: String(i.name || i.productName || i.title || '').substring(0, 80),
         dosage: String(i.dosage || i.dose || '').substring(0, 40),
         quantity: Number(i.quantity || 1),
-        partTitle: i.partTitle ? String(i.partTitle).substring(0, 60) : undefined
+        partTitle: i.partTitle ? String(i.partTitle).substring(0, 60) : undefined,
+        // Clinical fields needed for PrescriptionPreview / PharmacyLabelsModal
+        activeIngredient: i.activeIngredient ? String(i.activeIngredient).substring(0, 100) : undefined,
+        formulationIndex: i.formulationIndex != null ? Number(i.formulationIndex) : undefined,
+        isVehicleOrBase: i.isVehicleOrBase != null ? Boolean(i.isVehicleOrBase) : undefined,
+        formulationBlock: i.formulationBlock ? String(i.formulationBlock).substring(0, 60) : undefined,
+      }));
+      // Include multi-part structure if present (compact version for search index)
+      const rawParts = Array.isArray(record.parts) ? record.parts : [];
+      const slimParts = rawParts.slice(0, 10).map((p) => ({
+        partTitle: p.partTitle ? String(p.partTitle).substring(0, 60) : undefined,
+        phaseNumber: p.phaseNumber != null ? Number(p.phaseNumber) : undefined,
+        volume: p.volume ? String(p.volume).substring(0, 30) : undefined,
+        dosageForm: p.dosageForm ? String(p.dosageForm).substring(0, 60) : undefined,
+        routeTag: p.routeTag ? String(p.routeTag).substring(0, 40) : undefined,
       }));
 
       const rawDate = record.date || record.dateIssued;
@@ -163,6 +177,7 @@ export async function POST(request) {
         partNumber: record.partNumber || null,
         totalParts: record.totalParts || null,
         items: slimItems,
+        parts: slimParts.length > 0 ? slimParts : undefined,
         searchableItems: productNames.slice(0, 30),
         itemCount: rawLines.length,
         total: Number(record.total || record.amount || 0),

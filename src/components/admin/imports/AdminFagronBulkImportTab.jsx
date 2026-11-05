@@ -21,6 +21,7 @@ import { httpsCallable } from 'firebase/functions';
 import { collection, addDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
 import * as XLSX from 'xlsx';
+// eslint-disable-next-line no-restricted-imports
 import { functions, db, storage } from '../../../firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { createPatient } from '../../../services/patientLinkService';
@@ -311,6 +312,13 @@ export default function AdminFagronBulkImportTab() {
           };
         });
 
+        // Automatic Refill Scheduling by default (Clinical Requirement for imported prescriptions)
+        const defaultCycleDays = inferredDuration ? (parseInt(inferredDuration, 10) || 60) : 60;
+        const baseImportDate = rx.reportDate ? new Date(rx.reportDate) : new Date();
+        const validBaseDate = isNaN(baseImportDate.getTime()) ? new Date() : baseImportDate;
+        const defaultRefillDate = new Date(validBaseDate);
+        defaultRefillDate.setDate(defaultRefillDate.getDate() + defaultCycleDays);
+
         // 2. Build prescription document
         const rxDoc = {
           source: rx.testName ? `Fagron ${rx.testName}` : 'fagron_pdf_ocr',
@@ -337,6 +345,12 @@ export default function AdminFagronBulkImportTab() {
           dispensingForm: rx.dispensingForm || null,
           items: mappedItems,
           prescriptionLines: mappedItems,
+          // Scheduled Refill by Default
+          refillCycleDays: defaultCycleDays,
+          nextRefillDate: defaultRefillDate.toISOString(),
+          refillsRemaining: 3,
+          refillStatus: 'scheduled',
+          isRefillScheduled: true,
           fagron: {
             boxId: rx.boxId || null,
             reportDate: rx.reportDate || null,

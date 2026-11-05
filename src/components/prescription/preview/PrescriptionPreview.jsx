@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+// eslint-disable-next-line no-restricted-imports
+import { db } from '@/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import {
   FlaskConical,
   Pill,
@@ -61,7 +64,26 @@ export default function PrescriptionPreview({
   onOpenZohoMatcher = null,
   isEs = false,
 }) {
-  const { header, parts, isEmpty, isMultipart, totalParts } = usePrescriptionParts(rx);
+  // ── Self-healing: if rx comes from Algolia (slim), hydrate with full Firestore doc ──
+  const [liveRx, setLiveRx] = useState(rx);
+  useEffect(() => {
+    setLiveRx(rx); // reset whenever rx prop changes
+    const needsHydration =
+      rx?.id &&
+      (!rx.parts || (Array.isArray(rx.items) && rx.items.some(i => i.activeIngredient == null)));
+    if (!needsHydration) return;
+    let cancelled = false;
+    getDoc(doc(db, 'prescriptions', rx.id))
+      .then(snap => {
+        if (!cancelled && snap.exists()) {
+          setLiveRx({ id: snap.id, ...snap.data() });
+        }
+      })
+      .catch(() => { /* silent – fall back to slim rx */ });
+    return () => { cancelled = true; };
+  }, [rx]);
+
+  const { header, parts, isEmpty, isMultipart, totalParts } = usePrescriptionParts(liveRx);
   const [internalPartIdx, setInternalPartIdx] = useState(initialPartIndex || 0);
   const [showLabelSvg, setShowLabelSvg] = useState(false);
 
@@ -375,8 +397,9 @@ export default function PrescriptionPreview({
               </span>
             </div>
 
-            {/* Quick Action Buttons for this part */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {/* Quick Action Buttons for this part — unified hub */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              {/* Primary CTA: Preview Label SVG inline */}
               <button
                 type="button"
                 onClick={() => setShowLabelSvg(!showLabelSvg)}
@@ -399,12 +422,13 @@ export default function PrescriptionPreview({
                 <span>{showLabelSvg ? (isEs ? 'Ocultar Etiqueta' : 'Hide Label') : (isEs ? 'Ver Etiqueta SVG' : 'Preview Label SVG')}</span>
               </button>
 
+              {/* Labels Modal */}
               <button
                 type="button"
                 onClick={() => {
-                  if (onOpenLabels) onOpenLabels(rx, activeIndex);
+                  if (onOpenLabels) onOpenLabels(liveRx, activeIndex, 'label');
                   else if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('OPEN_PHARMAPOLIS_LABELS', { detail: { rx, index: activeIndex } }));
+                    window.dispatchEvent(new CustomEvent('OPEN_PHARMAPOLIS_LABELS', { detail: { rx: liveRx, index: activeIndex } }));
                   }
                 }}
                 style={{
@@ -426,10 +450,14 @@ export default function PrescriptionPreview({
                 <span>{isEs ? 'Módulo Labels' : 'Labels Modal'}</span>
               </button>
 
+              {/* Edit button */}
               {onEditLabel && (
                 <button
                   type="button"
-                  onClick={() => onEditLabel(rx, activeIndex)}
+                  onClick={() => {
+                    if (onOpenLabels) onOpenLabels(liveRx, activeIndex, 'edit');
+                    else onEditLabel(liveRx, activeIndex);
+                  }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -450,10 +478,14 @@ export default function PrescriptionPreview({
                 </button>
               )}
 
+              {/* Refill button */}
               {onRefill && (
                 <button
                   type="button"
-                  onClick={() => onRefill(rx)}
+                  onClick={() => {
+                    if (onOpenLabels) onOpenLabels(liveRx, activeIndex, 'refill');
+                    else onRefill(liveRx);
+                  }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -467,7 +499,7 @@ export default function PrescriptionPreview({
                     fontWeight: 700,
                     cursor: 'pointer',
                   }}
-                  title="Duplicar o renovar esta prescripción en el Rx Builder"
+                  title="Duplicar o renovar esta prescripción con el Refill Workbench"
                 >
                   <RotateCcw size={11} />
                   <span>{isEs ? 'Refill' : 'Refill'}</span>

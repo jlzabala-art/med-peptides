@@ -1702,28 +1702,6 @@ export default function LotuslandPublicPortalClient() {
             </span>
           </button>
 
-          {/* Magenta Official Quotation Direct Link */}
-          <Link
-            href="/b2b/quotes/magenta"
-            style={{
-              backgroundColor: '#166534',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '6px 13px',
-              fontSize: '0.78rem',
-              fontWeight: 750,
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 1px 3px rgba(22, 101, 52, 0.25)'
-            }}
-          >
-            <FileText size={14} />
-            <span>Magenta Quotation ($37,179.50) →</span>
-          </Link>
-
           {/* Download Audit Excel */}
           <button
             type="button"

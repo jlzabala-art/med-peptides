@@ -10,7 +10,6 @@ import {
   DollarSign,
   Building2,
   TrendingDown,
-  ShieldCheck,
   ArrowRight
 } from 'lucide-react';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
@@ -34,15 +33,6 @@ const LOTUSLAND_SUGGESTED_INQUIRIES = [
     title: 'Tirzepatide Acquisition Evolution',
     subtitle: 'How Tirzepatide bulk cost evolved from $450/g down to $113.40/g',
     prompt: 'What has been the historical price evolution of Tirzepatide Bulk API across the reconciled Lotusland purchase orders, and what is the weighted average cost?'
-  },
-  {
-    icon: ShieldCheck,
-    iconColor: '#7c3aed',
-    iconBg: '#faf5ff',
-    badge: 'Corridor Rules',
-    title: 'Contractual 6% Margin Cap',
-    subtitle: 'How Mediluxe Health Solutions bills Magenta Pharma without retail markup',
-    prompt: 'Explain the contractual wholesale corridor between Lotusland, Mediluxe Health Solutions FZE, and Magenta Pharma Medicine Trading LLC, and how the +6.00% transfer cap is calculated.'
   },
   {
     icon: Building2,
