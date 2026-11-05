@@ -136,9 +136,10 @@ export default function PeptidePricePdfPreviewModal({
     const params = new URLSearchParams();
     if (isDistributor) params.set('mode', 'distributor');
     if (isEs) params.set('lang', 'es');
+    if (currency && currency !== 'USD') params.set('currency', currency);
     const qs = params.toString();
     return qs ? `${base}?${qs}` : base;
-  }, [isDistributor, isEs]);
+  }, [isDistributor, isEs, currency]);
 
   const groupedSections = useMemo(() => {
     if (!groupByCategory) {
@@ -814,7 +815,7 @@ export default function PeptidePricePdfPreviewModal({
 
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '7px 11px' }}>
             <div style={{ fontSize: '6.8pt', textTransform: 'uppercase', fontWeight: 700, color: '#64748b', letterSpacing: '0.04em' }}>
-              {isEs ? 'Ventaja Caja ×10' : 'Box ×10 Advantage'}
+              {isEs ? 'Ventaja Pack ×10' : 'Pack ×10 Advantage'}
             </div>
             <div style={{ fontSize: '10.5pt', fontWeight: 800, color: '#137333', marginTop: '2px' }}>
               -15% — -52%
@@ -861,7 +862,7 @@ export default function PeptidePricePdfPreviewModal({
                 {isEs ? 'Vial (1x)' : 'Single (1x)'}
               </th>
               <th className="pdf-col-pack10" style={{ padding: '7px 8px', textAlign: 'right', width: '14%', fontWeight: 800, color: '#137333' }}>
-                {isEs ? 'Caja ×10 Viales' : 'Box of 10 (×10)'}
+                {isEs ? 'Pack ×10 Viales' : 'Pack of 10 (×10)'}
               </th>
               <th className="pdf-col-a4-only" style={{ padding: '7px 5px', textAlign: 'center', width: '65px', fontWeight: 800, color: '#137333' }}>
                 {isEs ? 'Ahorro' : 'Savings'}

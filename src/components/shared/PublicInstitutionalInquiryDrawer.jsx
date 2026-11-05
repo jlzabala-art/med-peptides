@@ -69,6 +69,57 @@ const INQUIRY_TOPICS_PEPTIDES = [
   }
 ];
 
+const INQUIRY_TOPICS_PEPTIDES_B2B_SCHEDULE = [
+  {
+    id: 'b2b_pack10_volume_quote',
+    labelEn: 'Wholesale Pack ×10 & Volume Tier Quote',
+    labelEs: 'Cotización Mayorista Pack ×10 y Volumen',
+    icon: Tag,
+    placeholderEn: 'Request official wholesale proforma quotation for Pack ×10 boxes, multi-pack clinic tiers (50+ / 100+ vials), or institutional pricing in your selected currency...',
+    placeholderEs: 'Solicite cotización formal mayorista para formatos Pack ×10, niveles de volumen para clínicas (50+ / 100+ viales) o tarifas institucionales en la divisa seleccionada...'
+  },
+  {
+    id: 'coa_hplc_batch_verification',
+    labelEn: 'Analytical COA (≥99.0% HPLC & MS) & Batch Docs',
+    labelEs: 'Certificados Analíticos COA (≥99.0% HPLC) y Lotes',
+    icon: ShieldCheck,
+    placeholderEn: 'Request lot-specific HPLC chromatograms (≥99.0% purity), Mass Spectrometry (MS) identity reports, endotoxin (<0.05 EU/mg), and sterility release dossiers...',
+    placeholderEs: 'Solicite cromatogramas HPLC por lote (pureza ≥99.0%), espectrometría de masas (MS), control de endotoxinas (<0.05 EU/mg) y certificados de esterilidad...'
+  },
+  {
+    id: 'fda_503a_compounding_status',
+    labelEn: '503A Compounding & Regulatory Classification',
+    labelEs: 'Estatus Regulatorio FDA 503A y Formulación Magistral',
+    icon: FileText,
+    placeholderEn: 'Inquire about HHS/FDA 503A enforcement discretion categories, USP/EP monograph compliance, or regulatory documentation for licensed clinics and pharmacies...',
+    placeholderEs: 'Consulte sobre la elegibilidad bajo discreción de ejecución 503A (HHS/FDA), cumplimiento de monografías USP/EP y respaldo regulatorio para clínicas y farmacias...'
+  },
+  {
+    id: 'international_dispatch_customs',
+    labelEn: 'International Express Dispatch, Customs & Lead Times',
+    labelEs: 'Envío Internacional Express, Aduanas y Plazos',
+    icon: Clock,
+    placeholderEn: 'Inquire about guaranteed international courier dispatch (US, EU, UK, UAE/GCC, LATAM), door-to-door customs clearance, and estimated transit lead times...',
+    placeholderEs: 'Consulte sobre envíos internacionales garantizados (EE. UU., Europa, Reino Unido, EAU/GCC, Latinoamérica), despacho aduanero puerta a puerta y tiempos estimados de tránsito...'
+  },
+  {
+    id: 'clinical_reconstitution_synergies',
+    labelEn: 'Clinical Reconstitution, Dosing & Synergies',
+    labelEs: 'Protocolos de Reconstitución, Posología y Sinergias',
+    icon: Sparkles,
+    placeholderEn: 'Consult our medical affairs team on bacteriostatic water (BAC) reconstitution volumes, U-100 syringe unit conversions, titration schedules, or peptide stacking...',
+    placeholderEs: 'Consulte con dirección médica sobre volúmenes de reconstitución con agua bacteriostática (BAC), conversión a unidades U-100, pautas de titulación o sinergias...'
+  },
+  {
+    id: 'clinic_distributor_onboarding',
+    labelEn: 'Clinic / Distributor Account & Custom Synthesis',
+    labelEs: 'Alta de Cuenta Clínica / Distribuidor y Marca Propia',
+    icon: Building2,
+    placeholderEn: 'Apply for a recurring wholesale clinic or regional distributor account, commercial terms, or custom contract lyophilization / private label vials...',
+    placeholderEs: 'Solicite apertura de cuenta institucional recurrente para clínica o distribuidor, condiciones comerciales o liofilización por contrato / marca propia...'
+  }
+];
+
 const INQUIRY_TOPICS_NUTRIGEN = [
   {
     id: 'quotation_request',
@@ -460,6 +511,7 @@ export default function PublicInstitutionalInquiryDrawer({
 }) {
   const brandType = useMemo(() => {
     // 0. Explicit brandType or prescriptionType passed from caller
+    if (contextType === 'peptides_b2b_schedule' || propBrandType === 'peptides_b2b') return 'peptides_b2b';
     if (propBrandType) return propBrandType;
     if (initialEntity?.brandType) return initialEntity.brandType;
     if (initialEntity?.prescriptionType === 'trichotest') return 'trichotest';
@@ -604,6 +656,7 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [initialEntity, contextType, propBrandType]);
 
   const activeTopics = useMemo(() => {
+    if (brandType === 'peptides_b2b') return INQUIRY_TOPICS_PEPTIDES_B2B_SCHEDULE;
     if (brandType === 'ultraperson' || brandType === 'ultraman') return INQUIRY_TOPICS_ULTRAPERSON;
     if (brandType === 'trichotest') return INQUIRY_TOPICS_TRICHOTEST;
     if (brandType === 'nutrigen') return INQUIRY_TOPICS_NUTRIGEN;
@@ -617,6 +670,7 @@ export default function PublicInstitutionalInquiryDrawer({
   const [topic, setTopic] = useState(() => {
     if (initialEntity?.inquiryGoal === 'renewal') return 'prescription_renewal';
     if (initialEntity?.inquiryGoal === 'quotation') return 'quotation_request';
+    if (brandType === 'peptides_b2b') return 'b2b_pack10_volume_quote';
     if (brandType === 'ultraperson' || brandType === 'ultraman') return 'wholesale_clinic';
     if (brandType === 'trichotest') return 'genomics_correlation';
     if (brandType === 'nutrigen') return 'genomics_correlation';
@@ -647,6 +701,9 @@ export default function PublicInstitutionalInquiryDrawer({
     }
     if (initialEntity?.inquiryGoal === 'quotation') {
       return lang === 'es' ? 'Solicitud de Cotización de Prescripción' : 'Prescription Quotation Request';
+    }
+    if (brandType === 'peptides_b2b') {
+      return lang === 'es' ? 'Consulta Institucional · Tarifario B2B Péptidos' : 'B2B Peptide Schedule · Institutional Inquiry';
     }
     if (brandType === 'ultraperson' || brandType === 'ultraman') {
       return lang === 'es' ? 'Consulta UltraPerson™ y Nutracéuticos Clínicos' : 'UltraPerson™ Clinical Nutraceuticals Inquiry';
@@ -679,6 +736,11 @@ export default function PublicInstitutionalInquiryDrawer({
     const docName = initialEntity?.doctorName || 'Dr. Haytham Salem';
     const clinicName = initialEntity?.clinic || 'Arthregen Clinic';
 
+    if (brandType === 'peptides_b2b') {
+      return lang === 'es'
+        ? 'Mesa Mayorista B2B & Asuntos Regulatorios • Viales Liofilizados ≥99.0% HPLC'
+        : 'Official B2B Wholesale & Regulatory Desk • ≥99.0% HPLC Lyophilized Vials';
+    }
     if (brandType === 'ultraperson' || brandType === 'ultraman') {
       return lang === 'es'
         ? 'Mesa Oficial UltraPerson™ • Fórmulas Magistrales y Nutracéuticos EU GMP'
@@ -764,9 +826,59 @@ export default function PublicInstitutionalInquiryDrawer({
   });
   const [phoneNumber, setPhoneNumber] = useState('');
   const [message, setMessage] = useState('');
+  const [messageManuallyEdited, setMessageManuallyEdited] = useState(false);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const buildPeptidesB2BDefaultMessage = useCallback((selectedTopicId) => {
+    const curr = attachedEntity?.currency || initialEntity?.currency || 'USD';
+    const cartSummary = attachedEntity?.cartSummary || initialEntity?.cartSummary || '';
+    const refName = attachedEntity?.name || initialEntity?.name || '';
+    const isEs = lang === 'es';
+
+    const contextSuffix = cartSummary
+      ? (isEs ? `\n\nSelección actual en tarifario (${curr}): ${cartSummary}` : `\n\nSelected schedule items (${curr}): ${cartSummary}`)
+      : refName
+        ? (isEs ? `\n\nReferencia en tarifario (${curr}): ${refName}` : `\n\nSchedule Reference (${curr}): ${refName}`)
+        : '';
+
+    switch (selectedTopicId) {
+      case 'b2b_pack10_volume_quote':
+        return (isEs
+          ? `Solicito cotización oficial mayorista en ${curr} para formatos Pack ×10 y descuentos por volumen para clínica/distribuidor.`
+          : `I would like to request an official wholesale quotation in ${curr} for Pack ×10 tiers and institutional clinic volume pricing.`) + contextSuffix;
+      case 'coa_hplc_batch_verification':
+        return (isEs
+          ? `Solicito los Certificados de Análisis (COA ≥99.0% HPLC, espectrometría de masas, esterilidad y endotoxinas <0.05 EU/mg) de los lotes vigentes del tarifario.`
+          : `Please provide the lot-specific Analytical Certificates of Analysis (≥99.0% HPLC, Mass Spec, sterility, and endotoxin <0.05 EU/mg) for the current schedule batches.`) + contextSuffix;
+      case 'fda_503a_compounding_status':
+        return (isEs
+          ? `Solicito información regulatoria sobre la clasificación FDA 503A, cumplimiento de monografías USP/EP y documentación para práctica clínica.`
+          : `I would like regulatory documentation regarding FDA 503A compounding status, USP/EP monograph compliance, and clinical practice eligibility.`) + contextSuffix;
+      case 'international_dispatch_customs':
+        return (isEs
+          ? `Consulto sobre envíos internacionales express garantizados, gestión aduanera puerta a puerta y plazos estimados de entrega a nuestra ubicación.`
+          : `Please share details regarding guaranteed international express dispatch, door-to-door customs clearance, and estimated delivery lead times to our location.`) + contextSuffix;
+      case 'clinical_reconstitution_synergies':
+        return (isEs
+          ? `Solicito orientación del equipo médico sobre protocolos de reconstitución con agua bacteriostática (BAC), dosificación en unidades U-100 y sinergias clínicas.`
+          : `I would like clinical guidance regarding bacteriostatic water (BAC) reconstitution volumes, U-100 unit dosing protocols, and therapeutic peptide synergies.`) + contextSuffix;
+      case 'clinic_distributor_onboarding':
+        return (isEs
+          ? `Solicito información para dar de alta una cuenta institucional recurrente de Clínica / Distribuidor y opciones de suministro B2B.`
+          : `I would like to apply for a recurring institutional Clinic / Distributor wholesale account and review B2B supply terms.`) + contextSuffix;
+      default:
+        return '';
+    }
+  }, [attachedEntity, initialEntity, lang]);
+
+  useEffect(() => {
+    if (isOpen && brandType === 'peptides_b2b' && !messageManuallyEdited) {
+      const generated = buildPeptidesB2BDefaultMessage(topic);
+      if (generated) setMessage(generated);
+    }
+  }, [isOpen, brandType, topic, messageManuallyEdited, buildPeptidesB2BDefaultMessage]);
 
   // Auto-detect visitor's country by IP
   useEffect(() => {
@@ -1562,7 +1674,10 @@ export default function PublicInstitutionalInquiryDrawer({
                   required
                   rows={4}
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    setMessageManuallyEdited(true);
+                  }}
                   placeholder={
                     lang === 'es'
                       ? 'Escriba aquí los detalles de su consulta clínica o requerimientos...'

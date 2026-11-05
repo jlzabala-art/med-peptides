@@ -93,6 +93,8 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const assignmentFilter = searchParams.get('assignment') || '';
   const urlDoctorId = searchParams.get('doctorId') || '';
   const urlDoctorName = searchParams.get('doctorName') || '';
+  const urlPatientId = searchParams.get('patientId') || searchParams.get('patient_id') || '';
+  const urlPatientName = searchParams.get('patientName') || searchParams.get('patient_name') || '';
   const urlRxId = searchParams.get('id') || '';
   const workspaceFilter = searchParams.get('workspace') || '';
 
@@ -108,6 +110,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const canGenerateLabels = !isDoctor && effectiveRole !== 'doctor';
 
   const effectiveDoctorId = doctorId || urlDoctorId;
+  const effectivePatientId = patientId || urlPatientId;
 
   const updateUrlParam = useCallback((key, value) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -138,7 +141,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const whereConditions = useMemo(() => {
     const conditions = [];
     if (effectiveDoctorId) conditions.push(['doctorId', '==', effectiveDoctorId]);
-    if (patientId) conditions.push(['patientId', '==', patientId]);
+    if (effectivePatientId) conditions.push(['patientId', '==', effectivePatientId]);
     
     if (statusFilter) {
       conditions.push(['status', '==', statusFilter]);
@@ -153,10 +156,10 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     }
     
     return conditions;
-  }, [statusFilter, rangeFilter, effectiveDoctorId, patientId]);
+  }, [statusFilter, rangeFilter, effectiveDoctorId, effectivePatientId]);
 
   // 1. Data Fetching (Server-Side Paginated)
-  // initialData from RSC pre-fetch — table renders immediately with no client round-trip.
+  // initialData from RSC pre-fetch — table renders immediately with no client round-trip (only when not filtered by patientId/doctorId).
   const { 
     data: paginatedPrescriptions, 
     isLoading: loading, 
@@ -168,7 +171,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     whereConditions,
     orderByFields: [['createdAt', 'desc']],
     pageSize: 50,
-    initialData: initialData?.length > 0 ? initialData : undefined,
+    initialData: (!effectivePatientId && !effectiveDoctorId && initialData?.length > 0) ? initialData : undefined,
   });
 
   const displayPrescriptions = paginatedPrescriptions;
@@ -205,9 +208,9 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const realtimeWhereConditions = useMemo(() => {
     const conds = [];
     if (effectiveDoctorId) conds.push(['doctorId', '==', effectiveDoctorId]);
-    if (patientId) conds.push(['patientId', '==', patientId]);
+    if (effectivePatientId) conds.push(['patientId', '==', effectivePatientId]);
     return conds;
-  }, [effectiveDoctorId, patientId]);
+  }, [effectiveDoctorId, effectivePatientId]);
 
   // Real-time synchronization (GCP UX standard: replaces manual Refresh button)
   const { hasNewData, clearNewData } = usePrescriptionsRealtimeSync({
@@ -292,7 +295,15 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       });
     }
 
-    // Filter by patient (including unassigned orphan cleanup)
+    // Filter by patient (including unassigned orphan cleanup and urlPatientId)
+    if (effectivePatientId) {
+      const patIdQ = effectivePatientId.toLowerCase();
+      rawData = rawData.filter(rx => {
+        const rxPatId = String(rx.patientId || rx.patient?.id || rx.patient?.patientId || '').toLowerCase();
+        return rxPatId === patIdQ;
+      });
+    }
+
     if (patientFilter) {
       if (patientFilter === '__unassigned__' || patientFilter === 'unassigned') {
         rawData = rawData.filter(rx => {
@@ -436,7 +447,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     });
     
     return result;
-  }, [displayPrescriptions, algoliaHits, isAlgoliaActive, searchTerm, sourceFilter, typeFilter, doctorFilter, patientFilter, assignmentFilter, statusFilter, rangeFilter, workspaceFilter, activeWsRxIds]);
+  }, [displayPrescriptions, algoliaHits, isAlgoliaActive, searchTerm, sourceFilter, typeFilter, doctorFilter, urlDoctorId, patientFilter, effectivePatientId, assignmentFilter, statusFilter, rangeFilter, workspaceFilter, activeWsRxIds]);
 
   const finalData = groupedData;
 
@@ -1254,8 +1265,21 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         } 
       });
     }
+    if (urlPatientId) {
+      const resolvedPatLabel = urlPatientName || finalData[0]?.patientName || finalData[0]?.patient?.name || urlPatientId;
+      chips.push({
+        key: 'patientId',
+        label: 'Patient',
+        value: resolvedPatLabel,
+        onRemove: () => {
+          updateUrlParam('patientId', '');
+          updateUrlParam('patient_id', '');
+          updateUrlParam('patientName', '');
+        }
+      });
+    }
     return chips;
-  }, [statusFilter, rangeFilter, doctorFilter, patientFilter, sourceFilter, typeFilter, urlDoctorId, urlDoctorName, updateUrlParam]);
+  }, [statusFilter, rangeFilter, doctorFilter, patientFilter, sourceFilter, typeFilter, urlDoctorId, urlDoctorName, urlPatientId, urlPatientName, finalData, assignmentFilter, workspaceFilter, updateUrlParam]);
 
   const handleClearAllFilters = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -1265,9 +1289,13 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     params.delete('doctorName');
     params.delete('doctorId');
     params.delete('patient');
+    params.delete('patientId');
+    params.delete('patient_id');
+    params.delete('patientName');
     params.delete('source');
     params.delete('type');
     params.delete('workspace');
+    params.delete('assignment');
     router.replace(`${pathname}?${params.toString()}`);
   }, [router, pathname, searchParams]);
 

@@ -77,6 +77,7 @@ export default function DataModule({
   children
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isMobileSelectionMode, setIsMobileSelectionMode] = useState(false);
   // Mobile filter sheet state
   const [showMobileFilters, setShowMobileFilters] = useState(false);

@@ -37,7 +37,8 @@ import {
   Droplets,
   Moon,
   Dna,
-  Shield
+  Shield,
+  Mail
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
@@ -46,6 +47,7 @@ import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import EmptyState from '@/components/ui/EmptyState';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 import ClinicalProtocolDrawer from '@/components/pricing/ClinicalProtocolDrawer';
 import AtlasAiCopilotDrawer from '@/components/pricing/AtlasAiCopilotDrawer';
@@ -76,105 +78,155 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
   const indicationsMap = {
     'bpc157': {
       indication: isEs ? 'Reparación acelerada de tejidos blandos, regeneración de tendones y ligamentos, citoprotección gástrica y resolución antiinflamatoria sistémica.' : 'Accelerated soft-tissue repair, tendon and ligament regeneration, gastric mucosal cytoprotection, and systemic anti-inflammatory resolution.',
-      target: isEs ? 'Eje de Angiogénesis FAK-Paxilina & VEGF' : 'FAK-Paxillin & VEGF Angiogenesis Axis'
+      target: isEs ? 'Eje de Angiogénesis FAK-Paxilina & VEGF' : 'FAK-Paxillin & VEGF Angiogenesis Axis',
+      moa: isEs ? 'Activa la fosforilación de la vía FAK-paxilina, sobreexpresa el receptor VEGFR2/EGR-1 y acelera la angiogénesis microvascular y migración de fibroblastos tendinosos.' : 'Activates FAK-paxillin signaling phosphorylation, upregulates VEGFR2/EGR-1 expression, and accelerates microvascular angiogenesis and tendon fibroblast migration.',
+      halfLife: isEs ? '~4–6 horas (efecto biológico tisular >24 h)' : '~4–6 hours (prolonged tissue biological activity >24h)'
     },
     'tb500': {
       indication: isEs ? 'Estimulación de migración celular, regulación de actina, citoprotección miocárdica y recuperación acelerada dérmica y muscular.' : 'Cell migration stimulation, actin regulation, myocardial tissue cytoprotection, and accelerated dermal and muscular recovery.',
-      target: isEs ? 'Eje Citoesquelético de G-Actina' : 'Actin-Sequestering G-Actin Cytoskeletal Axis'
+      target: isEs ? 'Eje Citoesquelético de G-Actina' : 'Actin-Sequestering G-Actin Cytoskeletal Axis',
+      moa: isEs ? 'Secuestra monómeros de G-actina promoviendo la polimerización citoesquelética, migración de células progenitoras endoteliales y remodelación de matriz extracelular.' : 'Sequesters G-actin monomers to promote cytoskeletal polymerization, endothelial progenitor cell migration, and extracellular matrix remodeling.',
+      halfLife: isEs ? '~2.5 horas plasmática (efecto tisular 7–14 días)' : '~2.5 hours plasma (tissue repair cascade 7–14 days)'
     },
     'tirzepatide': {
       indication: isEs ? 'Co-agonismo dual de incretinas para homeostasis glucémica, control crónico de peso y reducción de adiposidad visceral.' : 'Dual incretin co-agonism for glycemic homeostasis, chronic weight management, and visceral adiposity reduction.',
-      target: isEs ? 'Receptores Duales GIP & GLP-1' : 'GIP & GLP-1 Dual Receptors'
+      target: isEs ? 'Receptores Duales GIP & GLP-1' : 'GIP & GLP-1 Dual Receptors',
+      moa: isEs ? 'Agonista dual de receptores GIP y GLP-1 que potencia la secreción de insulina dependiente de glucosa, retrasa el vaciamiento gástrico e induce saciedad hipotalámica.' : 'Dual GIP and GLP-1 receptor co-agonist enhancing glucose-dependent insulin secretion, delaying gastric emptying, and inducing hypothalamic satiety.',
+      halfLife: isEs ? '~5 días (120 horas · dosificación semanal)' : '~5 days (120 hours · once-weekly dosing)'
     },
     'semaglutide': {
       indication: isEs ? 'Agonista selectivo de GLP-1 para control glucémico, regulación hipotalámica del apetito y modulación del riesgo cardiovascular.' : 'Selective GLP-1 agonist for glycemic control, hypothalamic appetite regulation, and cardiovascular risk modulation.',
-      target: isEs ? 'Receptores Centrales y Pancreáticos GLP-1' : 'GLP-1 Central & Pancreatic Receptors'
+      target: isEs ? 'Receptores Centrales y Pancreáticos GLP-1' : 'GLP-1 Central & Pancreatic Receptors',
+      moa: isEs ? 'Se une selectivamente al receptor GLP-1R activando la adenilato ciclasa (cAMP), suprimiendo el glucagón postprandial y modulando los centros hipotalámicos de saciedad.' : 'Selectively binds GLP-1R to activate adenylyl cyclase (cAMP), suppressing postprandial glucagon and modulating hypothalamic satiety centers.',
+      halfLife: isEs ? '~7 días (165 horas · unión a albúmina)' : '~7 days (165 hours · albumin-bound kinetics)'
     },
     'retatrutide': {
       indication: isEs ? 'Triple agonismo receptor de nueva generación para movilización lipídica intensiva, incremento de tasa metabólica y control glucémico.' : 'Next-generation triple receptor agonism for intensive lipid mobilization, metabolic rate enhancement, and glycemic control.',
-      target: isEs ? 'Tri-Agonista GLP-1 / GIP / Glucagón' : 'GLP-1 / GIP / Glucagon Tri-Agonist'
+      target: isEs ? 'Tri-Agonista GLP-1 / GIP / Glucagón' : 'GLP-1 / GIP / Glucagon Tri-Agonist',
+      moa: isEs ? 'Agonismo sinérgico sobre receptores GLP-1, GIP y Glucagón (GCGR), combinando control del apetito con beta-oxidación lipídica hepática y termogénesis mitocondrial.' : 'Synergistic agonism across GLP-1, GIP, and Glucagon (GCGR) receptors, combining appetite suppression with hepatic lipid beta-oxidation and thermogenesis.',
+      halfLife: isEs ? '~6 días (144 horas · dosificación semanal)' : '~6 days (144 hours · once-weekly dosing)'
     },
     'cjc1295': {
       indication: isEs ? 'Secreción pulsátil de hormona de crecimiento, preservación de masa magra, mejora de arquitectura del sueño profundo y síntesis de colágeno.' : 'Pulsatile growth hormone secretion, lean muscle mass preservation, deep sleep architecture enhancement, and collagen synthesis.',
-      target: isEs ? 'Receptores Hipofisarios GHRH' : 'GHRH Pituitary Receptors'
+      target: isEs ? 'Receptores Hipofisarios GHRH' : 'GHRH Pituitary Receptors',
+      moa: isEs ? 'Tetrasustituido GHRH(1-29) que estimula los receptores somatotropina hipofisarios amplificando los pulsos fisiológicos de GH e IGF-1 sin romper el ritmo circadiano.' : 'Tetrasubstituted GHRH(1-29) analog stimulating pituitary somatotroph receptors to amplify physiological GH and IGF-1 pulses.',
+      halfLife: isEs ? '~30–60 min (No-DAC) / ~6–8 días (Con DAC)' : '~30–60 min (No-DAC) / ~6–8 days (With DAC)'
     },
     'ipamorelin': {
       indication: isEs ? 'Secretagogo selectivo de GH que estimula la liberación hipofisaria natural sin elevar prolactina, cortisol ni aldosterona.' : 'Selective GH secretagogue stimulating natural pituitary release without elevating prolactin, cortisol, or aldosterone.',
-      target: isEs ? 'Receptores Hipofisarios de Grelina GHSR-1a' : 'GHSR-1a Ghrelin Pituitary Receptors'
+      target: isEs ? 'Receptores Hipofisarios de Grelina GHSR-1a' : 'GHSR-1a Ghrelin Pituitary Receptors',
+      moa: isEs ? 'Pentapéptido agonista selectivo del receptor GHSR-1a que induce liberación pulsátil de GH desde la adenohipófisis con selectividad total frente a ACTH/cortisol.' : 'Selective pentapeptide GHSR-1a agonist inducing pulsatile GH release from the anterior pituitary with zero off-target ACTH/cortisol elevation.',
+      halfLife: isEs ? '~2 horas (secretagogo pulsátil selectivo)' : '~2 hours (selective pulsatile secretagogue)'
     },
     'ghkcu': {
       indication: isEs ? 'Complejo peptídico de cobre que promueve la remodelación de la matriz extracelular, síntesis de colágeno I/III y rejuvenecimiento de fibroblastos.' : 'Copper peptide complex promoting extracellular matrix remodeling, collagen I/III synthesis, and skin fibroblast rejuvenation.',
-      target: isEs ? 'Expresión Génica de Fibroblastos & Modulación TGF-β' : 'Fibroblast Gene Expression & TGF-β Modulation'
+      target: isEs ? 'Expresión Génica de Fibroblastos & Modulación TGF-β' : 'Fibroblast Gene Expression & TGF-β Modulation',
+      moa: isEs ? 'Transporta cobre biodisponible (Cu2+) regulando más de 4,000 genes humanos de reparación tisular, síntesis de colágeno/elastina, decorina y metaloproteinasas.' : 'Delivers bioavailable copper (Cu2+) modulating over 4,000 human genes governing tissue repair, collagen/elastin synthesis, decorin, and MMPs.',
+      halfLife: isEs ? '~1–2 horas plasmática (actividad dérmica 24–48 h)' : '~1–2 hours plasma (dermal remodeling cascade 24–48h)'
     },
     'epithalon': {
       indication: isEs ? 'Activación de la subunidad catalítica de telomerasa, regulación pineal de melatonina y sincronización circadiana neuroendocrina.' : 'Telomerase catalytic subunit activation, pineal melatonin regulation, and neuroendocrine circadian synchronization.',
-      target: isEs ? 'Telomerasa Transcriptasa Inversa (TERT) & Epitálamo' : 'Telomerase Reverse Transcriptase (TERT) & Epithalamus'
+      target: isEs ? 'Telomerasa Transcriptasa Inversa (TERT) & Epitálamo' : 'Telomerase Reverse Transcriptase (TERT) & Epithalamus',
+      moa: isEs ? 'Tetrapéptido biorregulador (Ala-Glu-Asp-Gly) que induce la expresión de la subunidad hTERT para elongación telomérica y restaura la secreción pineal de melatonina.' : 'Tetrapeptide bioregulator (Ala-Glu-Asp-Gly) inducing hTERT expression for telomere maintenance and restoring pineal melatonin circadian secretion.',
+      halfLife: isEs ? 'Biorregulador epigenético (efecto nuclear prolongado)' : 'Epigenetic bioregulator (sustained nuclear transcriptional effect)'
     },
     'nad': {
       indication: isEs ? 'Coenzima mitocondrial esencial para bioenergética de ATP, activación de enzimas de reparación de ADN (PARP) y vías de longevidad de sirtuinas.' : 'Essential mitochondrial cellular coenzyme for ATP bioenergetics, PARP DNA repair enzyme activation, and sirtuin longevity pathways.',
-      target: isEs ? 'Cadena Respiratoria Mitocondrial & Sirtuinas (SIRT1-7)' : 'Mitochondrial Respiratory Chain & Sirtuins (SIRT1-7)'
+      target: isEs ? 'Cadena Respiratoria Mitocondrial & Sirtuinas (SIRT1-7)' : 'Mitochondrial Respiratory Chain & Sirtuins (SIRT1-7)',
+      moa: isEs ? 'Cofactor redox en la fosforilación oxidativa mitocondrial y sustrato directo de desacetilasas SIRT1–SIRT7 y polimerasas de reparación genómica PARP-1.' : 'Redox cofactor in mitochondrial oxidative phosphorylation and direct obligate substrate for SIRT1–SIRT7 deacetylases and PARP-1 DNA repair enzymes.',
+      halfLife: isEs ? 'Captación intracelular rápida (~1–2 h · recambio continuo)' : 'Rapid intracellular uptake (~1–2h · continuous redox turnover)'
     },
     'thymosin': {
       indication: isEs ? 'Inmunomodulación, estimulación de células dendríticas y maduración optimizada de linfocitos T para defensa inmunitaria.' : 'Immune modulation, dendritic cell stimulation, and enhanced T-lymphocyte maturation for chronic defense and wellness.',
-      target: isEs ? 'Receptores Toll-Like (TLR2/TLR9) & Maduración de Células T' : 'Toll-Like Receptors (TLR2/TLR9) & T-Cell Maturation'
+      target: isEs ? 'Receptores Toll-Like (TLR2/TLR9) & Maduración de Células T' : 'Toll-Like Receptors (TLR2/TLR9) & T-Cell Maturation',
+      moa: isEs ? 'Polipéptido tímico de 28 aminoácidos que activa receptores TLR2/TLR9 en células dendríticas, estimulando diferenciación de células T CD4+/CD8+ y NK.' : '28-amino-acid thymic polypeptide activating TLR2/TLR9 on dendritic cells to stimulate CD4+/CD8+ T-cell differentiation and NK cytotoxicity.',
+      halfLife: isEs ? '~2 horas (cascada inmunomoduladora de 72 h)' : '~2 hours (72-hour immunomodulatory signaling cascade)'
     },
     'aod9604': {
       indication: isEs ? 'Fragmento lipolítico selectivo que estimula la oxidación adiposa beta-3 adrenérgica sin alterar niveles de insulina ni IGF-1.' : 'Targeted lipolytic fragment stimulating beta-3 adrenergic adipose breakdown without affecting insulin or IGF-1 levels.',
-      target: isEs ? 'Lipólisis Beta-3 Adrenérgica Adipocitaria' : 'Adipocyte Beta-3 Adrenergic Lipolysis'
+      target: isEs ? 'Lipólisis Beta-3 Adrenérgica Adipocitaria' : 'Adipocyte Beta-3 Adrenergic Lipolysis',
+      moa: isEs ? 'Fragmento C-terminal hGH(177-191) que estimula receptores beta-3 adrenérgicos en tejido adiposo activando lipólisis e inhibiendo lipogénesis sin elevar IGF-1.' : 'C-terminal hGH(177-191) fragment stimulating beta-3 adrenergic receptors in adipose tissue to trigger lipolysis and inhibit lipogenesis without raising IGF-1.',
+      halfLife: isEs ? '~1–2 horas (acción lipolítica periférica)' : '~1–2 hours (peripheral adipocyte lipolytic action)'
     },
     'motsc': {
       indication: isEs ? 'Péptido derivado mitocondrial que regula la homeostasis metabólica celular, sensibilidad a la insulina y capacidad física muscular.' : 'Mitochondrial-derived peptide regulating cellular metabolic homeostasis, insulin sensitivity, and skeletal muscle exercise capacity.',
-      target: isEs ? 'Activación de AMPK & Captación de Glucosa Muscular' : 'AMPK Activation & Skeletal Muscle Glucose Uptake'
+      target: isEs ? 'Activación de AMPK & Captación de Glucosa Muscular' : 'AMPK Activation & Skeletal Muscle Glucose Uptake',
+      moa: isEs ? 'Péptido codificado en ADN mitocondrial (16 aa) que inhibe el ciclo folato-metionina, acumula AICAR endógeno y activa AMPK mejorando la oxidación de glucosa.' : 'Mitochondrial-encoded 16-aa peptide inhibiting the folate-methionine cycle to accumulate endogenous AICAR and activate AMPK glucose oxidation.',
+      halfLife: isEs ? '~2–4 horas (translocación nuclear regulada por estrés)' : '~2–4 hours (stress-regulated nuclear translocation)'
     },
     'selank': {
       indication: isEs ? 'Heptapéptido neuroprotector y nootrópico que modula la neurotransmisión GABAérgica, reduciendo la ansiedad y estabilizando el ánimo.' : 'Neuroprotective and nootropic heptapeptide modulating GABAergic neurotransmission, reducing anxiety and stabilizing mood.',
-      target: isEs ? 'Receptores GABA-A & Inhibición de Degradación de Encefalinas' : 'GABA-A Receptors & Enkephalin Degradation Inhibition'
+      target: isEs ? 'Receptores GABA-A & Inhibición de Degradación de Encefalinas' : 'GABA-A Receptors & Enkephalin Degradation Inhibition',
+      moa: isEs ? 'Análogo sintético de tuftsina que modula alostéricamente receptores GABA-A e inhibe las encefalinasas séricas sin causar sedación ni dependencia.' : 'Synthetic tuftsin analog allosterically modulating GABA-A receptors and inhibiting serum enkephalinases without sedation or dependence.',
+      halfLife: isEs ? 'Efecto neuroquímico funcional de 6–12 horas' : 'Functional neurochemical modulation of 6–12 hours'
     },
     'semax': {
       indication: isEs ? 'Análogo nootrópico del fragmento ACTH que potencia la expresión de neurotrofina BDNF, enfoque cognitivo, memoria y neuroprotección.' : 'Nootropic ACTH fragment analog enhancing BDNF neurotrophin expression, cognitive focus, memory consolidation, and neuroprotection.',
-      target: isEs ? 'Receptores BDNF/TrkB & Eje Dopaminérgico/Serotoninérgico' : 'BDNF/TrkB Receptors & Dopaminergic/Serotonergic Axis'
+      target: isEs ? 'Receptores BDNF/TrkB & Eje Dopaminérgico/Serotoninérgico' : 'BDNF/TrkB Receptors & Dopaminergic/Serotonergic Axis',
+      moa: isEs ? 'Heptapéptido ACTH(4-10) Pro-Gly-Pro que eleva rápidamente la transcripción de BDNF y receptores TrkB en el hipocampo y corteza prefrontal.' : 'ACTH(4-10) Pro-Gly-Pro heptapeptide rapidly elevating hippocampal and prefrontal BDNF transcription and TrkB receptor signaling.',
+      halfLife: isEs ? 'Acción neurotrófica sostenida de 12–20 horas' : 'Sustained neurotrophic signaling of 12–20 hours'
     },
     'pt141': {
       indication: isEs ? 'Agonista central de receptores de melanocortina que estimula la libido fisiológica y la respuesta sexual en hombres y mujeres.' : 'Centrally-acting melanocortin receptor agonist stimulating physiological libido and sexual response in both men and women.',
-      target: isEs ? 'Receptores Centrales de Melanocortina MC3R & MC4R' : 'Central MC3R & MC4R Melanocortin Receptors'
+      target: isEs ? 'Receptores Centrales de Melanocortina MC3R & MC4R' : 'Central MC3R & MC4R Melanocortin Receptors',
+      moa: isEs ? 'Heptapéptido cíclico agonista de receptores MC4R/MC3R en el hipotálamo que activa las vías dopaminérgicas centrales de excitación y deseo sexual.' : 'Cyclic heptapeptide MC4R/MC3R agonist in the hypothalamus activating central dopaminergic sexual desire and arousal pathways.',
+      halfLife: isEs ? '~2.7 horas (ventana clínica de 6–12 horas)' : '~2.7 hours (6–12 hour clinical response window)'
     },
     'melanotan': {
       indication: isEs ? 'Agonista de melanocortina que estimula la síntesis fotoprotectora de melanina (eumelanina) y la defensa cutánea UV.' : 'Non-selective melanocortin agonist stimulating melanin photoprotective synthesis (eumelanin) and UV defense.',
-      target: isEs ? 'Receptores Cutáneos de Melanocortina MC1R' : 'MC1R Melanocortin Cutaneous Receptors'
+      target: isEs ? 'Receptores Cutáneos de Melanocortina MC1R' : 'MC1R Melanocortin Cutaneous Receptors',
+      moa: isEs ? 'Análogo cíclico de α-MSH que activa receptores MC1R en melanocitos epidérmicos induciendo melanogénesis eumelánica fotoprotectora.' : 'Cyclic α-MSH analog activating epidermal melanocyte MC1R receptors to induce photoprotective eumelanin synthesis.',
+      halfLife: isEs ? '~1.5–2 horas (acumulación pigmentaria progresiva)' : '~1.5–2 hours (progressive pigmentary accumulation)'
     },
     'ss31': {
       indication: isEs ? 'Antioxidante mitocondrial dirigido a cardiolipina que restaura la integridad de la membrana mitocondrial interna y reduce el estrés oxidativo.' : 'Cardiolipin-targeted mitochondrial antioxidant restoring inner mitochondrial membrane integrity and reducing oxidative stress.',
-      target: isEs ? 'Cardiolipina de la Membrana Mitocondrial Interna' : 'Mitochondrial Inner Membrane Cardiolipin'
+      target: isEs ? 'Cardiolipina de la Membrana Mitocondrial Interna' : 'Mitochondrial Inner Membrane Cardiolipin',
+      moa: isEs ? 'Tetrapéptido aromático-catiónico (Elamipretide) que se une selectivamente a la cardiolipina en las crestas mitocondriales optimizando el transporte de electrones y ATP.' : 'Aromatic-cationic tetrapeptide (Elamipretide) selectively binding cardiolipin on mitochondrial cristae to optimize electron transport and ATP synthesis.',
+      halfLife: isEs ? '~2–4 horas (concentración mitocondrial selectiva)' : '~2–4 hours (selective inner mitochondrial concentration)'
     },
     'dsip': {
       indication: isEs ? 'Péptido neuromodulador que promueve el sueño delta profundo reparador y la reducción fisiológica del estrés neuroendocrino.' : 'Neuromodulatory peptide promoting restorative slow-wave delta sleep and physiological neuroendocrine stress reduction.',
-      target: isEs ? 'Centros Centrales del Sueño Serotoninérgicos & GABAérgicos' : 'Central Serotonergic & GABAergic Sleep Centers'
+      target: isEs ? 'Centros Centrales del Sueño Serotoninérgicos & GABAérgicos' : 'Central Serotonergic & GABAergic Sleep Centers',
+      moa: isEs ? 'Nonapéptido neuromodulador que sincroniza los husos de ondas lentas delta en el EEG y atenúa la hiperactividad del eje corticotropo (ACTH/cortisol).' : 'Neuromodulatory nonapeptide synchronizing slow-wave delta EEG spindles and attenuating HPA axis (ACTH/cortisol) hyperarousal.',
+      halfLife: isEs ? 'Modulación de arquitectura nocturna del sueño (6–8 h)' : 'Nocturnal sleep architecture modulation (6–8 hours)'
     },
     'sermorelin': {
       indication: isEs ? 'Fragmento sintético GHRH 1-29 que estimula la producción hipofisaria endógena de GH para vitalidad, composición corporal y recuperación.' : 'Synthetic GHRH 1-29 fragment stimulating endogenous pituitary GH production for vitality, body composition, and recovery.',
-      target: isEs ? 'Receptores Hipofisarios GHRH-R' : 'Pituitary GHRH-R Receptors'
+      target: isEs ? 'Receptores Hipofisarios GHRH-R' : 'Pituitary GHRH-R Receptors',
+      moa: isEs ? 'Secuencia bioidéntica N-terminal de 29 aminoácidos de GHRH que estimula la transcripción y liberación pulsátil nocturna de hormona de crecimiento.' : 'Bioidentical N-terminal 29-amino-acid GHRH sequence stimulating pituitary transcription and nocturnal pulsatile GH release.',
+      halfLife: isEs ? '~15–20 minutos (dispara pulso fisiológico nocturno de GH)' : '~15–20 minutes (triggers nocturnal physiological GH pulse)'
     },
     'tesamorelin': {
       indication: isEs ? 'Análogo estabilizado de GHRH clínicamente demostrado para la reducción de tejido adiposo visceral y mejora del perfil lipídico.' : 'Stabilized GHRH analog specifically clinically demonstrated for visceral adipose tissue reduction and lipid profile improvement.',
-      target: isEs ? 'Eje GHRH Hepático e Hipofisario' : 'Hepatic & Pituitary GHRH Axis'
+      target: isEs ? 'Eje GHRH Hepático e Hipofisario' : 'Hepatic & Pituitary GHRH Axis',
+      moa: isEs ? 'GHRH(1-44) modificado con ácido trans-3-hexenoico resistente a DPP-4 que estimula de forma potente la lipólisis selectiva del tejido adiposo visceral.' : 'Trans-3-hexenoic acid-modified GHRH(1-44) resistant to DPP-4 cleavage, potently stimulating selective visceral adipose tissue lipolysis.',
+      halfLife: isEs ? '~30–40 minutos (elevación sostenida de IGF-1 24 h)' : '~30–40 minutes (sustained 24-hour IGF-1 elevation)'
     },
     'kisspeptin': {
       indication: isEs ? 'Neuropéptido hipotalámico que activa la liberación de GnRH, optimizando pulsos de gonadotropinas LH/FSH y fertilidad/testosterona.' : 'Hypothalamic neuropeptide triggering GnRH release, optimizing LH/FSH gonadotropin pulses and physiological fertility/testosterone.',
-      target: isEs ? 'Receptores Hipotalámicos GPR54 / KISS1R' : 'GPR54 / KISS1R Hypothalamic Receptors'
+      target: isEs ? 'Receptores Hipotalámicos GPR54 / KISS1R' : 'GPR54 / KISS1R Hypothalamic Receptors',
+      moa: isEs ? 'Decapéptido agonista del receptor KISS1R en neuronas hipotalámicas GnRH que restaura el generador de pulsos de LH y FSH sin inhibición por retroalimentación.' : 'Decapeptide KISS1R agonist on hypothalamic GnRH neurons restoring endogenous LH and FSH pulse generation.',
+      halfLife: isEs ? '~30 minutos (disparo pulsátil neuroendocrino)' : '~30 minutes (neuroendocrine pulsatile trigger)'
     },
     'oxytocin': {
       indication: isEs ? 'Hormona neuropeptídica que media el vínculo social, relajación emocional, resiliencia al estrés y modulación neuroendocrina positiva.' : 'Neuropeptide hormone mediating social bonding, emotional relaxation, stress resilience, and positive neuroendocrine modulation.',
-      target: isEs ? 'Receptores Neuroendocrinos OXTR' : 'OXTR Neuroendocrine Receptors'
+      target: isEs ? 'Receptores Neuroendocrinos OXTR' : 'OXTR Neuroendocrine Receptors',
+      moa: isEs ? 'Nonapéptido hipotalámico que activa receptores OXTR acoplados a proteína Gq modulando el tono parasimpático vagal y la respuesta amigdalina al estrés.' : 'Hypothalamic nonapeptide activating Gq-coupled OXTR receptors to modulate parasympathetic vagal tone and amygdala stress reactivity.',
+      halfLife: isEs ? '~1–6 h central / intranasal (~15 min plasmática)' : '~1–6h central / intranasal (~15 min peripheral plasma)'
     },
     'glutathione': {
       indication: isEs ? 'Antioxidante celular maestro que facilita la detoxificación hepática de fase II, neutralización de radicales libres y luminosidad cutánea.' : 'Master cellular antioxidant facilitating hepatic phase II detoxification, free radical scavenging, and skin radiance.',
-      target: isEs ? 'Eje Intracelular Redox Glutatión Peroxidasa' : 'Intracellular Redox Glutathione Peroxidase Axis'
+      target: isEs ? 'Eje Intracelular Redox Glutatión Peroxidasa' : 'Intracellular Redox Glutathione Peroxidase Axis',
+      moa: isEs ? 'Tripéptido tiólico (γ-L-glutamil-L-cisteinil-glicina) que neutraliza especies reactivas de oxígeno (ROS), regenera vitaminas C/E y conjuga toxinas hepáticas.' : 'Thiol tripeptide (γ-L-glutamyl-L-cysteinyl-glycine) neutralizing reactive oxygen species (ROS), regenerating vitamins C/E, and conjugating hepatic toxins.',
+      halfLife: isEs ? 'Recambio redox intracelular continuo (ciclo GSH/GSSG)' : 'Continuous intracellular redox cycling (GSH/GSSG pool)'
     }
   };
 
   const matchedKey = Object.keys(indicationsMap).find(k => cleanName.includes(k));
   const fallbackIndication = matchedKey ? indicationsMap[matchedKey].indication : null;
   const fallbackTarget = matchedKey ? indicationsMap[matchedKey].target : null;
+  const fallbackMoa = matchedKey ? indicationsMap[matchedKey].moa : null;
+  const fallbackHalfLife = matchedKey ? indicationsMap[matchedKey].halfLife : null;
 
   const synergyMap = {
     'bpc157': isEs ? 'Co-administrado con TB-500 para remodelación sinérgica de tejidos blandos, tendones y matriz vascular.' : 'Co-administered with TB-500 for enhanced soft tissue, tendon, and vascular matrix remodeling.',
@@ -203,10 +255,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
   return {
     targetSystem: fallbackTarget || known?.targetSystem || dossier?.pharmacology?.title || (isEs ? `Eje ${category || 'Bioactivo Clínico'}` : `${category || 'Clinical Bioactive'} Axis`),
     indication: fallbackIndication || dossier?.regulatory?.guidance || (isEs ? 'Modulación celular específica, reparación tisular y optimización fisiológica clínica.' : 'Targeted cellular modulation, tissue repair, and clinical physiological optimization.'),
-    moa: isEs
-      ? (dossier?.pharmacology?.moaEs || 'Se une a receptores específicos de superficie celular activando cascadas intracelulares de segundos mensajeros para respuesta terapéutica.')
-      : (known?.mechanismOfAction || dossier?.pharmacology?.moa || 'Binds to targeted cell-surface receptors activating intracellular secondary messenger cascades for therapeutic response.'),
-    halfLife: known?.halfLife || (isEs ? 'Cinética peptídica fisiológica (aclaramiento regulado por proteasas)' : 'Physiological peptide kinetics (protease-regulated clearance)'),
+    moa: fallbackMoa || (isEs
+      ? (dossier?.pharmacology?.moaEs || 'Agonismo peptídico selectivo sobre receptores celulares diana con activación de cascadas de señalización intracelular (cAMP/MAPK).')
+      : (known?.mechanismOfAction || dossier?.pharmacology?.moa || 'Binds to targeted cell-surface receptors activating intracellular secondary messenger cascades for therapeutic response.')),
+    halfLife: fallbackHalfLife || known?.halfLife || (isEs ? '~2–6 horas (aclaramiento peptídico fisiológico)' : 'Physiological peptide kinetics (~2–6h clearance)'),
     sequence: known?.sequence || null,
     casNumber: known?.casNumber || dossier?.casNumber || null,
     synergy
@@ -257,11 +309,11 @@ const CATEGORY_MAP = {
 };
 
 export const FDA_FILTERS = [
-  { id: 'all', labelEn: 'All Regulatory Statuses', labelEs: 'Todos los Estados FDA', icon: '🌐' },
-  { id: 'fda_503a', labelEn: 'HHS 503A Discretion (Oct 2026)', labelEs: '503A Discreción de Ejecución', icon: '🛡️', color: '#16a34a' },
-  { id: 'fda_approved', labelEn: 'FDA Approved (NDA / BLA)', labelEs: 'Aprobados por FDA (NDA)', icon: '🏛️', color: '#1a73e8' },
-  { id: 'clinical_ind', labelEn: 'Clinical Investigational (IND)', labelEs: 'En Investigación Clínica', icon: '🔬', color: '#d97706' },
-  { id: 'analytical', labelEn: 'Analytical Reference Standards', labelEs: 'Estándar Analítico', icon: '🧪', color: '#64748b' }
+  { id: 'all', labelEn: 'All Regulatory', labelEs: 'Todos los Estatus', tooltipEn: 'All FDA Regulatory Statuses', tooltipEs: 'Todos los Estados Regulatorios FDA', icon: '🌐' },
+  { id: 'fda_503a', labelEn: '503A Discretion', labelEs: '503A Magistral', tooltipEn: 'HHS/FDA 503A Enforcement Discretion', tooltipEs: '503A Discreción de Ejecución Magistral HHS/FDA', icon: '🛡️', color: '#16a34a' },
+  { id: 'fda_approved', labelEn: 'FDA Approved', labelEs: 'Aprobados FDA', tooltipEn: 'FDA Approved (NDA / BLA)', tooltipEs: 'Aprobados por FDA (NDA / BLA)', icon: '🏛️', color: '#1a73e8' },
+  { id: 'clinical_ind', labelEn: 'Clinical (IND)', labelEs: 'Fase Clínica IND', tooltipEn: 'Clinical Investigational (IND)', tooltipEs: 'En Investigación Clínica Activa (IND)', icon: '🔬', color: '#d97706' },
+  { id: 'analytical', labelEn: 'Analytical Grade', labelEs: 'Estándar Analítico', tooltipEn: 'Analytical Reference Standards', tooltipEs: 'Estándar de Referencia Analítica', icon: '🧪', color: '#64748b' }
 ];
 
 function resolveProductFda(product) {
@@ -565,11 +617,11 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
           gap: '5px'
         }}>
           <Check size={12} />
-          <span>{isEs ? 'En Proforma:' : 'In Proforma:'} {inCart1x > 0 ? `${inCart1x} vial${inCart1x > 1 ? (isEs ? 'es' : 's') : ''}` : ''}{inCart1x > 0 && inCart10x > 0 ? ' + ' : ''}{inCart10x > 0 ? `${inCart10x} ${isEs ? 'caja' : 'box'}${inCart10x > 1 ? (isEs ? 's' : 'es') : ''} (×10)` : ''}</span>
+          <span>{isEs ? 'En Proforma:' : 'In Proforma:'} {inCart1x > 0 ? `${inCart1x} vial${inCart1x > 1 ? (isEs ? 'es' : 's') : ''}` : ''}{inCart1x > 0 && inCart10x > 0 ? ' + ' : ''}{inCart10x > 0 ? `${inCart10x} ${isEs ? 'pack' : 'pack'}${inCart10x > 1 ? 's' : ''} (×10)` : ''}</span>
         </div>
       )}
 
-      {/* 2-Column Action Tiles: Single Vial vs Box of 10 */}
+      {/* 2-Column Action Tiles: Single Vial vs Pack of 10 */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
@@ -623,7 +675,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
           </button>
         </div>
 
-        {/* Tile 2: Box of 10 */}
+        {/* Tile 2: Pack of 10 */}
         <div style={{
           background: '#f0fdf4',
           border: '1px solid #bbf7d0',
@@ -637,7 +689,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2px' }}>
               <span style={{ fontSize: '0.66rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
-                {isEs ? 'Caja de 10' : 'Box of 10'}
+                {isEs ? 'Pack de 10' : 'Pack of 10'}
               </span>
               <span style={{
                 fontSize: '0.60rem',
@@ -648,7 +700,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
                 padding: '1px 4px',
                 borderRadius: '3px'
               }}>
-                -{discountPct}% {isEs ? 'Caja' : 'Box'}
+                -{discountPct}% Pack
               </span>
             </div>
             <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#15803d', fontFamily: 'monospace', marginTop: '2px' }}>
@@ -775,8 +827,45 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
 }
 PeptideMobileCard.displayName = 'PeptideMobileCard';
 
+export const SHIPPING_DESTINATIONS = [
+  {
+    id: 'EU',
+    flag: '🇪🇺',
+    labelEn: 'Europe',
+    labelEs: 'Europa',
+    rateBadge: '€60',
+    usdCost: Math.round((60 / 0.92) * 100) / 100, // $65.22 USD
+    eurCost: 60,
+    defaultCountry: 'Spain',
+    defaultPhoneCode: 'es'
+  },
+  {
+    id: 'US',
+    flag: '🇺🇸',
+    labelEn: 'USA',
+    labelEs: 'USA',
+    rateBadge: '$25',
+    usdCost: 25,
+    eurCost: Math.round(25 * 0.92 * 100) / 100, // €23.00 EUR
+    defaultCountry: 'United States',
+    defaultPhoneCode: 'us'
+  },
+  {
+    id: 'AE',
+    flag: '🇦🇪',
+    labelEn: 'UAE',
+    labelEs: 'UAE',
+    rateBadge: '$80',
+    usdCost: 80,
+    eurCost: Math.round(80 * 0.92 * 100) / 100, // €73.60 EUR
+    defaultCountry: 'United Arab Emirates',
+    defaultPhoneCode: 'ae'
+  }
+];
+
 export default function PeptidesPriceListClient({ initialProducts = [], referralCode = 'CAT-RX-7482', isDistributor = false }) {
   const [currency, setCurrency] = useState('USD'); // USD, EUR, AED
+  const [shippingDest, setShippingDest] = useState('EU'); // EU (€60), US ($25), AE ($80)
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -789,6 +878,8 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [selectedSpecsProduct, setSelectedSpecsProduct] = useState(null);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [inquiryProductContext, setInquiryProductContext] = useState(null);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
 
   // Strict English default ('en') unless ?lang=es is explicitly in the URL or selected via top button
@@ -796,10 +887,24 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const p = new URLSearchParams(window.location.search).get('lang');
-      if (p === 'es' || p === 'en') {
-        setLang(p);
-      }
+      const url = new URL(window.location.href);
+      const pLang = (url.searchParams.get('lang') || '').toLowerCase();
+      const resolvedLang = (pLang === 'es' || pLang === 'en') ? pLang : 'en';
+      setLang(resolvedLang);
+
+      const pCurr = (url.searchParams.get('currency') || url.searchParams.get('curr') || '').toUpperCase();
+      const resolvedCurr = (pCurr === 'USD' || pCurr === 'EUR' || pCurr === 'AED') ? pCurr : 'USD';
+      setCurrency(resolvedCurr);
+
+      const pDest = (url.searchParams.get('dest') || url.searchParams.get('region') || '').toUpperCase();
+      const resolvedDest = (pDest === 'EU' || pDest === 'US' || pDest === 'AE') ? pDest : 'EU';
+      setShippingDest(resolvedDest);
+
+      // Always ensure ?lang= & ?currency= & ?dest= are explicitly visible in the browser URL
+      url.searchParams.set('lang', resolvedLang);
+      url.searchParams.set('currency', resolvedCurr);
+      url.searchParams.set('dest', resolvedDest);
+      window.history.replaceState({}, '', url.toString());
     }
   }, []);
 
@@ -815,6 +920,38 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       } catch (_e) {}
       const url = new URL(window.location.href);
       url.searchParams.set('lang', nextLang);
+      url.searchParams.set('currency', currency);
+      url.searchParams.set('dest', shippingDest);
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  const handleCurrencyChange = (nextCurrency) => {
+    setCurrency(nextCurrency);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', lang);
+      url.searchParams.set('currency', nextCurrency);
+      url.searchParams.set('dest', shippingDest);
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  const handleShippingDestChange = (nextDest) => {
+    setShippingDest(nextDest);
+    const destObj = SHIPPING_DESTINATIONS.find(d => d.id === nextDest);
+    if (destObj) {
+      setOrderForm(prev => ({
+        ...prev,
+        country: destObj.defaultCountry,
+        phoneCountryCode: destObj.defaultPhoneCode
+      }));
+    }
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', lang);
+      url.searchParams.set('currency', currency);
+      url.searchParams.set('dest', nextDest);
       window.history.replaceState({}, '', url.toString());
     }
   };
@@ -1098,17 +1235,20 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     }, 0);
   }, [cartItems]);
 
-  // Express Medical Logistics (60 EUR base)
-  const _shippingCostEur = 60;
+  // Regional Express Shipping Corridors (Parcels up to 2 kg: EU €60, USA $25, UAE $80)
+  const activeShippingCorridor = useMemo(() => {
+    return SHIPPING_DESTINATIONS.find(d => d.id === shippingDest) || SHIPPING_DESTINATIONS[0];
+  }, [shippingDest]);
+
   const shippingCostUsd = useMemo(() => {
-    return Math.round((60 / 0.92) * 100) / 100; // $65.22 USD
-  }, []);
+    return activeShippingCorridor.usdCost;
+  }, [activeShippingCorridor]);
 
   const shippingCostCurrentCurrency = useMemo(() => {
-    if (currency === 'EUR') return 60;
-    if (currency === 'AED') return Math.round((60 / 0.92) * 3.6725 * 100) / 100; // 239.50 AED
-    return shippingCostUsd; // 65.22 USD
-  }, [currency, shippingCostUsd]);
+    if (currency === 'EUR') return activeShippingCorridor.eurCost;
+    if (currency === 'AED') return Math.round(activeShippingCorridor.usdCost * 3.6725 * 100) / 100;
+    return activeShippingCorridor.usdCost;
+  }, [currency, activeShippingCorridor]);
 
   const grandTotalCartValueUsd = useMemo(() => {
     return totalCartCount > 0 ? (totalCartValueUsd + shippingCostUsd) : 0;
@@ -1158,7 +1298,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
         });
         return updated;
       });
-      toast.success(`Added ${preset.name} (${addedCount} formulations${isPack10 ? ' · Pack ×10 Boxes' : ''}) to request! ✓`);
+      toast.success(`Added ${preset.name} (${addedCount} formulations${isPack10 ? ' · Pack ×10' : ''}) to request! ✓`);
     } else {
       toast.info(`Could not automatically locate items for ${preset.name}`);
     }
@@ -1176,33 +1316,72 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       const qty10x = item.quantity10x > 0 ? `${item.quantity10x}x Pack ×10` : null;
       const qtyStr = [qty1x, qty10x].filter(Boolean).join(', ');
       const lineTotal = (item.quantity1x * item.product.unitPrice) + (item.quantity10x * (item.product.pack10Price || item.product.unitPrice * 8.5));
-      return `• ${item.product.productName} (${item.product.dosage || 'Lyophilized'}) [${qtyStr}] ── ${currencySymbol}${lineTotal.toFixed(2)}`;
+      return `• ${item.product.productName} (${item.product.dosage || 'Lyophilized'}) [${qtyStr}] ── ${currencySymbol}${(lineTotal * fxRate).toFixed(2)}`;
     }).join('\n');
 
-    const totalStr = `${currencySymbol}${grandTotalCartValueUsd.toFixed(2)} ${currency}`;
+    const totalStr = `${formatPrice(grandTotalCartValueUsd)} (${currency})`;
     const clinicStr = orderForm.clinicName || orderForm.name ? `\nClinic: ${orderForm.clinicName || orderForm.name}` : '';
     const emailStr = orderForm.email ? `\nEmail: ${orderForm.email}` : '';
-    const destinationStr = orderForm.country ? `\nDestination: ${orderForm.city ? `${orderForm.city}, ` : ''}${orderForm.country}` : '';
+    const destinationStr = `\nDestination Corridor: ${activeShippingCorridor.flag} ${activeShippingCorridor.labelEn} (${orderForm.city ? `${orderForm.city}, ` : ''}${orderForm.country || activeShippingCorridor.defaultCountry})`;
 
     const message = `Hello, I would like to place this clinical peptide proforma request (Partner Code: ${referralCode || 'CAT-RX-7482'}):
 
 ${itemsListText}
 
-Subtotal: ${currencySymbol}${totalCartValueUsd.toFixed(2)}
-Freight: Express Medical Logistics (${currencySymbol}${shippingCostCurrentCurrency.toFixed(2)})
+Subtotal: ${formatPrice(totalCartValueUsd)}
+Shipping (${activeShippingCorridor.labelEn} · Parcels ≤ 2 kg): ${currencySymbol}${shippingCostCurrentCurrency.toFixed(2)}
 Grand Total: ${totalStr}${clinicStr}${emailStr}${destinationStr}
 
 Please coordinate 24-hour proforma confirmation and secure payment link. Thank you!`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
-  }, [cartItems, currencySymbol, grandTotalCartValueUsd, currency, orderForm, referralCode, totalCartValueUsd, shippingCostCurrentCurrency]);
+  }, [cartItems, currencySymbol, fxRate, formatPrice, grandTotalCartValueUsd, currency, orderForm, referralCode, totalCartValueUsd, shippingCostCurrentCurrency, activeShippingCorridor]);
 
-  const handleShareSchedule = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    toast.success('Official B2B Price Schedule link copied to clipboard ✓');
-    setTimeout(() => setCopied(false), 2500);
+  const handleShareSchedule = async () => {
+    if (typeof window === 'undefined') return;
+    const shareUrlObj = new URL(window.location.href);
+    shareUrlObj.searchParams.set('lang', lang);
+    shareUrlObj.searchParams.set('currency', currency);
+    shareUrlObj.searchParams.set('dest', shippingDest);
+    if (selectedCategory && selectedCategory !== 'all') {
+      shareUrlObj.searchParams.set('category', selectedCategory);
+    }
+    const shareUrl = shareUrlObj.toString();
+
+    const shareTitle = isEs
+      ? `Tarifario Oficial de Viales de Péptidos B2B (${currency}) · Atlas Health Services`
+      : `Official Clinical Peptide Vials B2B Schedule (${currency}) · Atlas Health Services`;
+    const shareText = isEs
+      ? `Consulta el tarifario oficial mayorista y para clínicas de péptidos liofilizados certificados (≥99.0% HPLC) en ${currency} con descuentos en Pack ×10.`
+      : `View the official wholesale and clinic price schedule for certified lyophilized peptides (≥99.0% HPLC) in ${currency} with Pack ×10 volume savings.`;
+
+    const isMobileDevice = window.innerWidth <= 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || '');
+
+    if (isMobileDevice && typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast.success(
+        isEs
+          ? `Enlace copiado con idioma (${lang.toUpperCase()}), divisa (${currency}) y destino (${shippingDest}) ✓`
+          : `Schedule link copied with language (${lang.toUpperCase()}), currency (${currency}) & destination (${shippingDest}) ✓`
+      );
+      setTimeout(() => setCopied(false), 2500);
+    } catch (_err) {
+      toast.error(isEs ? 'No se pudo copiar el enlace' : 'Could not copy link');
+    }
   };
 
   // Submit B2B Order Request
@@ -1466,7 +1645,17 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   gap: '3px'
                 }}>
                   <span>{row.fdaStatus.colorScheme?.icon || '🛡️'}</span>
-                  <span>{row.fdaStatus.shortBadge || '503A'}</span>
+                  <span>
+                    {isEs
+                      ? (row.fdaBucket === 'fda_503a'
+                          ? '503A Magistral ✓'
+                          : row.fdaBucket === 'fda_approved'
+                            ? 'Aprobado FDA ✓'
+                            : row.fdaBucket === 'clinical_ind'
+                              ? 'Fase Clínica IND'
+                              : 'Estándar Analítico')
+                      : (row.fdaStatus.shortBadge || '503A')}
+                  </span>
                 </span>
               )}
 
@@ -1486,7 +1675,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   gap: '3px'
                 }}>
                   <Check size={10} />
-                  <span>{isEs ? 'En Proforma:' : 'In Proforma:'} {v1x > 0 ? `${v1x} vial${v1x > 1 ? (isEs ? 'es' : 's') : ''}` : ''}{v1x > 0 && v10x > 0 ? ' + ' : ''}{v10x > 0 ? `${v10x} ${isEs ? 'caja' : 'box'}${v10x > 1 ? (isEs ? 's' : 'es') : ''} (×10)` : ''}</span>
+                  <span>{isEs ? 'En Proforma:' : 'In Proforma:'} {v1x > 0 ? `${v1x} vial${v1x > 1 ? (isEs ? 'es' : 's') : ''}` : ''}{v1x > 0 && v10x > 0 ? ' + ' : ''}{v10x > 0 ? `${v10x} pack${v10x > 1 ? 's' : ''} (×10)` : ''}</span>
                 </span>
               )}
             </div>
@@ -1495,10 +1684,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 {blendInfo.compositionLine}
               </div>
             )}
-            <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>{isEs ? 'Vial Liofilizado Estéril (Borosilicato 10R)' : 'Sterile Lyophilized Vial (10R Borosilicate)'}</span>
-              <span>•</span>
-              <span style={{ color: '#137333', fontWeight: 600 }}>{isEs ? '≥99.0% Pureza Analítica HPLC' : '≥99.0% HPLC Analytical Purity'}</span>
+            <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ whiteSpace: 'nowrap' }}>{isEs ? 'Vial Liofilizado Estéril (10R)' : 'Sterile Lyophilized Vial (10R)'}</span>
+              <span style={{ color: '#cbd5e1' }}>•</span>
+              <span style={{ color: '#137333', fontWeight: 600, whiteSpace: 'nowrap' }}>{isEs ? '≥99.0% Pureza HPLC' : '≥99.0% HPLC Purity'}</span>
             </div>
           </div>
         );
@@ -1521,7 +1710,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     },
     {
       key: 'pack10Price',
-      label: isEs ? `Caja de 10 (Pack ×10) · ${currency}` : `Box of 10 (Pack ×10) · ${currency}`,
+      label: isEs ? `Pack de 10 (Pack ×10) · ${currency}` : `Pack of 10 (Pack ×10) · ${currency}`,
       width: '20%',
       align: 'left',
       sortable: true,
@@ -1545,7 +1734,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 borderRadius: '4px',
                 whiteSpace: 'nowrap'
               }}>
-                -{discountPct}% {isEs ? 'Caja' : 'Box'}
+                -{discountPct}% Pack
               </span>
             </div>
             <span style={{ fontSize: '0.66rem', color: '#137333', fontFamily: 'monospace' }}>
@@ -1608,7 +1797,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             }}
             onMouseEnter={e => e.currentTarget.style.background = '#1557b0'}
             onMouseLeave={e => e.currentTarget.style.background = '#1a73e8'}
-            title={isEs ? 'Añadir caja de 10 viales con descuento por volumen' : 'Add manufacturer box of 10 vials (-volume discount)'}
+            title={isEs ? 'Añadir pack de 10 viales con descuento por volumen' : 'Add manufacturer pack of 10 vials (-volume discount)'}
           >
             <Box size={11} />
             <span>+Pack ×10</span>
@@ -1773,7 +1962,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
             </div>
 
-            <div style={{ paddingTop: '4px' }}>
+            <div style={{ paddingTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={(e) => {
@@ -1792,6 +1981,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   fontSize: '0.73rem',
                   fontWeight: 700,
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease'
                 }}
                 onMouseEnter={(e) => {
@@ -1804,7 +1994,42 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 }}
               >
                 <BookOpen size={12} />
-                <span>{isEs ? 'Abrir Monografía y Especificaciones →' : 'View Monograph & Full Specs →'}</span>
+                <span>{isEs ? 'Ver Dossier y Posología →' : 'Dossier & Dosing Specs →'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setInquiryProductContext(row);
+                  setIsInquiryDrawerOpen(true);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: '#f0fdf4',
+                  color: '#15803d',
+                  border: '1px solid #bbf7d0',
+                  padding: '5px 10px',
+                  borderRadius: '5px',
+                  fontSize: '0.73rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#dcfce7';
+                  e.currentTarget.style.borderColor = '#15803d';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f0fdf4';
+                  e.currentTarget.style.borderColor = '#bbf7d0';
+                }}
+              >
+                <Mail size={12} />
+                <span>{isEs ? 'Consultar Info' : 'Inquire Info'}</span>
               </button>
             </div>
           </div>
@@ -1929,7 +2154,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   return (
                     <button
                       key={item.code}
-                      onClick={() => setCurrency(item.code)}
+                      onClick={() => handleCurrencyChange(item.code)}
                       className={`pill-btn ${isCurrent ? 'pill-active active' : ''}`}
                       style={{
                         border: 'none',
@@ -2021,6 +2246,67 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 }}>
                   <span>{isEs ? 'Divisa:' : 'Currency:'} <strong>{currency} ({currencySymbol.trim()})</strong></span>
                 </span>
+
+                {/* Interactive Shipping Destination Corridor Selector (≤ 2 kg) */}
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  padding: '2px 6px 2px 8px',
+                  borderRadius: '6px',
+                  flexWrap: 'wrap'
+                }}>
+                  <span style={{
+                    fontSize: '0.67rem',
+                    fontWeight: 750,
+                    color: '#334155',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <Truck size={11} color="#0284c7" />
+                    <span>{isEs ? 'Envío (≤ 2 kg):' : 'Shipping (≤ 2 kg):'}</span>
+                  </span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                    {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
+                      const isSel = shippingDest === corridor.id;
+                      return (
+                        <button
+                          key={corridor.id}
+                          type="button"
+                          onClick={() => handleShippingDestChange(corridor.id)}
+                          title={isEs ? corridor.corridorLabelEs : corridor.corridorLabelEn}
+                          style={{
+                            border: isSel ? '1px solid #0284c7' : '1px solid transparent',
+                            background: isSel ? '#e0f2fe' : 'transparent',
+                            color: isSel ? '#0369a1' : '#475569',
+                            fontWeight: isSel ? 800 : 600,
+                            fontSize: '0.66rem',
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span>{corridor.flag}</span>
+                          <span>{isEs ? corridor.labelEs : corridor.labelEn}</span>
+                          <span style={{
+                            fontFamily: 'monospace',
+                            fontWeight: 800,
+                            color: isSel ? '#0284c7' : '#64748b'
+                          }}>
+                            {corridor.rateBadge}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
               <h1 className="peptides-hero-title" style={{
                 fontSize: 'clamp(1.12rem, 3vw, 1.60rem)',
@@ -2043,7 +2329,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       ? 'Lista oficial B2B para distribuidores de viales liofilizados certificados (Borosilicato 10R) con pureza verificada y ahorro por volumen.'
                       : 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate) with verified analytical purity and volume tiers.')
                   : (isEs
-                      ? 'Tarifa oficial institucional y mayorista para péptidos bioactivos liofilizados estériles con ahorro por volumen en cajas de 10 viales.'
+                      ? 'Tarifa oficial institucional y mayorista para péptidos bioactivos liofilizados estériles con ahorro por volumen en packs de 10 viales.'
                       : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides with manufacturer 10-pack volume savings.')
                 }
               </p>
@@ -2308,6 +2594,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       key={f.id}
                       type="button"
                       onClick={() => setSelectedFdaStatus(f.id)}
+                      title={isEs ? (f.tooltipEs || f.labelEs) : (f.tooltipEn || f.labelEn)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -2326,9 +2613,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f1f3f4'; }}
                       onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                        <span style={{ fontSize: '0.78rem' }}>{f.icon}</span>
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
+                        <span style={{ fontSize: '0.78rem', flexShrink: 0 }}>{f.icon}</span>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {isEs ? f.labelEs : f.labelEn}
                         </span>
                       </div>
@@ -2450,13 +2737,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   transition: 'all 0.2s ease'
                 }}>
                   <div style={{ fontSize: '0.68rem', fontWeight: 700, color: totalCartCount > 0 ? '#15803d' : '#64748b', textTransform: 'uppercase' }}>
-                    {totalCartCount > 0 ? (isEs ? 'Proforma Activa' : 'Active Proforma Request') : (isEs ? 'Ahorro Caja Pack ×10' : '10-Pack Volume Savings')}
+                    {totalCartCount > 0 ? (isEs ? 'Proforma Activa' : 'Active Proforma Request') : (isEs ? 'Ahorro Pack ×10' : '10-Pack Volume Savings')}
                   </div>
                   <div className="peptides-kpi-val" style={{ fontSize: '1.45rem', fontWeight: 800, color: totalCartCount > 0 ? '#15803d' : '#059669', marginTop: '2px' }}>
                     {totalCartCount > 0 ? `${totalCartCount} ${isEs ? 'Viales' : 'Vials'}` : (isEs ? '-15% a -52%' : '-15% to -52%')}
                   </div>
                   <div style={{ fontSize: '0.70rem', color: totalCartCount > 0 ? '#15803d' : '#059669', marginTop: '2px', fontWeight: totalCartCount > 0 ? 700 : 400 }}>
-                    {totalCartCount > 0 ? `${formatPrice(totalCartValueUsd)} Subtotal` : (isEs ? 'Nivel Caja 10 Viales' : 'Manufacturer 10-Vial Box Tier')}
+                    {totalCartCount > 0 ? `${formatPrice(totalCartValueUsd)} Subtotal` : (isEs ? 'Nivel Pack 10 Viales' : 'Manufacturer 10-Vial Pack Tier')}
                   </div>
                 </div>
 
@@ -2544,6 +2831,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               <GlobalSearchBar
                 value={searchQuery}
                 onChange={setSearchQuery}
+                lang={lang}
                 placeholder={isEs
                   ? 'Buscar por nombre de péptido (ej. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'
                   : 'Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'}
@@ -2640,6 +2928,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   pageSize={50}
                   showPagination={true}
                   sortable={true}
+                  lang={lang}
                   expandableRender={renderPeptideClinicalDetail}
                   mobileCardComponent={PeptideMobileCard}
                   mobileCardProps={{
@@ -2916,16 +3205,55 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       gap: '8px'
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.80rem', color: '#475569' }}>
-                        <span>Subtotal Formulations ({totalCartCount} vials):</span>
+                        <span>{isEs ? `Subtotal Formulaciones (${totalCartCount} viales):` : `Subtotal Formulations (${totalCartCount} vials):`}</span>
                         <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a' }}>
                           {formatPrice(totalCartValueUsd)}
                         </span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.80rem', color: '#0369a1' }}>
-                        <span>Express Medical Logistics (€60 base):</span>
-                        <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0284c7' }}>
-                          +{currencySymbol}{shippingCostCurrentCurrency.toFixed(2)}
-                        </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.80rem', color: '#0369a1' }}>
+                          <span>
+                            {activeShippingCorridor.flag}{' '}
+                            {isEs
+                              ? `Envío Express ${activeShippingCorridor.labelEs} (≤2 kg · ${activeShippingCorridor.rateBadge}):`
+                              : `Express Courier ${activeShippingCorridor.labelEn} (≤2 kg · ${activeShippingCorridor.rateBadge}):`}
+                          </span>
+                          <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0284c7' }}>
+                            +{currencySymbol}{shippingCostCurrentCurrency.toFixed(2)}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+                            {isEs ? 'Destino (≤2 kg):' : 'Destination (≤2 kg):'}
+                          </span>
+                          {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
+                            const isSel = shippingDest === corridor.id;
+                            return (
+                              <button
+                                key={corridor.id}
+                                type="button"
+                                onClick={() => handleShippingDestChange(corridor.id)}
+                                style={{
+                                  border: isSel ? '1px solid #0284c7' : '1px solid #cbd5e1',
+                                  background: isSel ? '#e0f2fe' : '#ffffff',
+                                  color: isSel ? '#0369a1' : '#475569',
+                                  fontWeight: isSel ? 750 : 600,
+                                  fontSize: '0.66rem',
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
+                                }}
+                              >
+                                <span>{corridor.flag}</span>
+                                <span>{isEs ? corridor.labelEs : corridor.labelEn}</span>
+                                <span style={{ fontFamily: 'monospace', fontWeight: 800 }}>({corridor.rateBadge})</span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                       <div style={{
                         paddingTop: '8px',
@@ -2934,7 +3262,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         justifyContent: 'space-between',
                         alignItems: 'center'
                       }}>
-                        <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a' }}>Estimated Total:</span>
+                        <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a' }}>
+                          {isEs ? 'Total Estimado:' : 'Estimated Total:'}
+                        </span>
                         <span style={{ fontFamily: 'monospace', fontWeight: 900, fontSize: '1.10rem', color: '#0284c7' }}>
                           {formatPrice(grandTotalCartValueUsd)}
                         </span>
@@ -3381,6 +3711,46 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 </span>
               </div>
             </button>
+
+            {/* Institutional Inquire Info Trigger Button (Approved GCP UX) */}
+            <button
+              type="button"
+              onClick={() => {
+                setInquiryProductContext(null);
+                setIsInquiryDrawerOpen(true);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                background: '#ffffff',
+                border: '1.5px solid #cbd5e1',
+                borderRadius: '24px',
+                color: '#0f172a',
+                fontWeight: 750,
+                fontSize: '0.76rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)',
+                minHeight: '38px',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = '#1a73e8';
+                e.currentTarget.style.color = '#1a73e8';
+                e.currentTarget.style.background = '#f8fafc';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.color = '#0f172a';
+                e.currentTarget.style.background = '#ffffff';
+              }}
+              title={isEs ? 'Consultar información técnica, COAs, volumen B2B o despacho internacional' : 'Inquire about Pack ×10 volume pricing, COAs, 503A compliance, or international shipping'}
+            >
+              <Mail size={14} color="#1a73e8" />
+              <span>{isEs ? 'Consultar Info' : 'Inquire Info'}</span>
+            </button>
           </div>
 
           {/* Right: Live Cart Proforma Status & Primary Action */}
@@ -3409,7 +3779,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       {formatPrice(totalCartValueUsd)}
                     </div>
                     <div className="mobile-hide" style={{ fontSize: '0.64rem', color: '#5f6368', whiteSpace: 'nowrap' }}>
-                      {isEs ? '+€60 Logística Médica Express al tramitar' : '+€60 Express Logistics added at checkout'}
+                      {isEs
+                        ? `+${currencySymbol}${shippingCostCurrentCurrency.toFixed(2)} Envío ${activeShippingCorridor.flag} ${activeShippingCorridor.labelEs} (≤2 kg)`
+                        : `+${currencySymbol}${shippingCostCurrentCurrency.toFixed(2)} ${activeShippingCorridor.flag} ${activeShippingCorridor.labelEn} Shipping (≤2 kg)`}
                     </div>
                   </div>
                 </div>
@@ -3626,7 +3998,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             </tr>
             <tr style={{ borderTop: '1px solid #f1f5f9' }}>
               <td colSpan={4} style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 650, fontSize: '9pt', color: '#0369a1' }}>
-                EXPRESS MEDICAL LOGISTICS & HANDLING (€60.00 BASE):
+                EXPRESS COURIER LOGISTICS ({activeShippingCorridor.labelEn.toUpperCase()} ≤2 KG · {activeShippingCorridor.rateBadge} BASE):
               </td>
               <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, fontSize: '9.5pt', color: '#0284c7', fontFamily: 'monospace' }}>
                 +{currencySymbol}{shippingCostCurrentCurrency.toFixed(2)}
@@ -3869,7 +4241,38 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         onClose={() => setIsAtlasAiOpen(false)}
         currencySymbol={currencySymbol}
         activeCategory={selectedCategory}
-        activeCategoryLabel={selectedCategory !== 'all' ? CATEGORY_MAP[selectedCategory]?.label : null}
+        activeCategoryLabel={selectedCategory !== 'all' ? (isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn) : null}
+      />
+
+      {/* ── Institutional B2B Inquiry Drawer (Inquire Info / Consultar Info) ── */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => {
+          setIsInquiryDrawerOpen(false);
+          setInquiryProductContext(null);
+        }}
+        contextType="peptides_b2b_schedule"
+        brandType="peptides_b2b"
+        lang={lang}
+        initialEntity={
+          inquiryProductContext
+            ? {
+                name: `${inquiryProductContext.productName} ${inquiryProductContext.dosage || ''}`.trim(),
+                currency,
+                selectedItemsSummary: `${inquiryProductContext.productName} ${inquiryProductContext.dosage || ''} (${formatPrice(inquiryProductContext.unitPrice)} / vial · Pack ×10: ${formatPrice(inquiryProductContext.pack10Price)})`
+              }
+            : {
+                name: selectedCategory !== 'all'
+                  ? (isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn)
+                  : (isEs ? 'Tarifa Oficial de Péptidos B2B (109 Formulaciones)' : 'Official Peptide B2B Schedule (109 Formulations)'),
+                currency,
+                selectedItemsSummary: totalCartCount > 0
+                  ? Object.values(cartItems)
+                      .map(it => `${it.product.productName} ${it.product.dosage} (${it.quantity1x > 0 ? `${it.quantity1x}x Vial` : ''}${it.quantity1x > 0 && it.quantity10x > 0 ? ' + ' : ''}${it.quantity10x > 0 ? `${it.quantity10x}x Pack×10` : ''})`)
+                      .join(', ')
+                  : ''
+              }
+        }
       />
 
       {/* Unified Public Footer (Pointer events disabled in B2B Price Portal to prevent distraction) */}

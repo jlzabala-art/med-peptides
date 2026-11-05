@@ -104,6 +104,7 @@ export default function DataTable({
   swipeActions = null,        // fn(row) → { leftAction?, rightActions[] } | null
   forceMobileSelectionMode,   // boolean flag to force selection mode externally
   onForceMobileSelectionModeChange, // callback to update external state
+  lang = 'en',                // Optional language ('en' | 'es') for pagination chrome
 }) {
   const { is, can } = useRoleAccess();
   // ── Mobile detection ──────────────────────────────────────────────────────
@@ -1471,7 +1472,9 @@ export default function DataTable({
             {/* Rows per page selector */}
             {!hideRowsPerPageSelector && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)', fontWeight: 500 }}>Rows per page:</span>
+              <span style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)', fontWeight: 500 }}>
+                {lang === 'es' ? 'Filas por página:' : 'Rows per page:'}
+              </span>
               <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
                 <select
                   value={activeRowsPerPage}
@@ -1506,10 +1509,10 @@ export default function DataTable({
             <span style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)', fontWeight: 500, letterSpacing: '0.01em' }}>
               {paginationText || (() => {
                 const total = (totalItems != null && totalItems > 0) ? totalItems : sortedData.length;
-                if (total === 0) return '0-0 of 0';
+                if (total === 0) return lang === 'es' ? '0-0 de 0' : '0-0 of 0';
                 const start = (activePage - 1) * activeRowsPerPage + 1;
                 const end = Math.min(activePage * activeRowsPerPage, total);
-                return `${start}-${end} of ${total}`;
+                return lang === 'es' ? `${start}-${end} de ${total}` : `${start}-${end} of ${total}`;
               })()}
             </span>
 

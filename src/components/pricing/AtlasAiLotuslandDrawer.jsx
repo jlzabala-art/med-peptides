@@ -1,24 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   X,
   Sparkles,
   Send,
   Bot,
   User,
-  CheckCircle2,
-  FileText,
   DollarSign,
   Building2,
   TrendingDown,
   ShieldCheck,
-  ArrowRight,
-  Clock,
-  Layers,
-  HelpCircle
+  ArrowRight
 } from 'lucide-react';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
+import { getLotuslandProcurementReport } from '@/services/lotuslandProcurementService';
 
 const LOTUSLAND_SUGGESTED_INQUIRIES = [
   {
@@ -60,23 +56,54 @@ const LOTUSLAND_SUGGESTED_INQUIRIES = [
 ];
 
 export default function AtlasAiLotuslandDrawer({ isOpen, onClose }) {
+  const reportData = useMemo(() => getLotuslandProcurementReport(), []);
+  const { summary, apis, invoices } = reportData;
+
   const [messages, setMessages] = useState([
     {
       sender: 'ai',
-      text: `Hello, I am **Atlas AI Procurement Intelligence**. I have instant access to the entire **Lotusland Limited** sourcing ledger:
+      text: `### Lotusland Limited Procurement Ledger
 
-• **10 Commercial Releases Reconciled** ($664,874.96 USD total capital)
-• **43 Active Principle Compounds (APIs)** in Pure Lyophilized Bulk Mass
-• **Contractual Wholesale Transfer Cap (+6.00%)** for the Magenta corridor
-• **New US Client Allocation Spot Offer (Nov 2026)** with ~37% discount incorporated
+Hello, I am **Atlas AI Procurement Intelligence**. I have real-time audit access to the entire **Lotusland Limited** sourcing repository:
 
-How can I assist your sourcing, audit, or margin reconciliation today?`
+• **Reconciled Commercial Releases:** **${invoices.length} Signed Invoices** (**$${summary.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD** total capital)
+• **Active Principle Portfolio:** **${summary.uniqueApisCount} APIs** (${summary.totalGramsProcured.toLocaleString('en-US')} g pure lyophilized bulk mass)
+• **Magenta Transfer Corridor:** **+6.00% Max Cap** over net audited acquisition cost
+• **US Client Spot Allocation (Nov 2026):** **-37.1%** reduction incorporated into net unit prices
+
+How can I assist your sourcing, price trajectory audit, or margin reconciliation today?`
     }
   ]);
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
   if (!isOpen) return null;
+
+  const buildApiTrajectoryResponse = (apiRecord) => {
+    const chronological = [...(apiRecord.receipts || [])].sort((a, b) => a.date.localeCompare(b.date));
+    const firstUnit = chronological[0]?.unitCostUSD || apiRecord.weightedAvgCost;
+    const latestUnit = chronological[chronological.length - 1]?.unitCostUSD || apiRecord.latestCost;
+    const deltaPct = firstUnit > 0 ? (((latestUnit - firstUnit) / firstUnit) * 100).toFixed(1) : '0.0';
+
+    const tableRows = chronological.map((r) => {
+      const origNote = r.originalCurrency === 'EUR' ? ` *(€${r.originalUnitCost.toFixed(2)}/g)*` : '';
+      return `| \`${r.invoiceNumber}\` | ${r.date} | ${r.quantityGrams.toLocaleString('en-US')} g | **$${r.unitCostUSD.toFixed(2)}/g**${origNote} | $${r.lineTotalUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} |`;
+    });
+
+    return `### ${apiRecord.name} — Price & Procurement Trajectory
+
+**${apiRecord.name}** (CAS: \`${apiRecord.casNumber || 'N/A'}\` · ${apiRecord.grade}) has been procured across **${apiRecord.invoiceCount} commercial ${apiRecord.invoiceCount === 1 ? 'release' : 'purchase orders'} (${apiRecord.totalGrams.toLocaleString('en-US')} g total)**:
+
+| Release Invoice # | Release Date | Volume | Net Cost / g | Line Total (USD) |
+|---|---|---|---|---|
+${tableRows.join('\n')}
+
+**Executive Valuation & Corridor Metrics:**
+• **Total Lifetime Spend:** **$${apiRecord.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD** across ${apiRecord.totalGrams.toLocaleString('en-US')} g
+• **Weighted Average Net Cost:** **$${apiRecord.weightedAvgCost.toLocaleString('en-US', { minimumFractionDigits: 2 })} / g** (Lotusland Audited Cost)
+• **Latest Procurement Cost:** **$${apiRecord.latestCost.toLocaleString('en-US', { minimumFractionDigits: 2 })} / g** ${Number(deltaPct) < 0 ? `(**${deltaPct}%** vs. initial batch)` : '(Single release rate)'}
+• **Magenta Transfer Price (+6% Cap):** **$${apiRecord.catalogPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })} / g** (Avg) · **$${(apiRecord.latestCost * 1.06).toLocaleString('en-US', { minimumFractionDigits: 2 })} / g** (Latest)`;
+  };
 
   const handleSend = (textToSend) => {
     const query = textToSend || inputVal;
@@ -91,58 +118,71 @@ How can I assist your sourcing, audit, or margin reconciliation today?`
       let reply = '';
       const q = query.toLowerCase();
 
-      if (q.includes('spot') || q.includes('5-amino') || q.includes('prostamax') || q.includes('pinealon') || q.includes('igf')) {
+      if (q.includes('spot') || (q.includes('5-amino') && q.includes('prostamax'))) {
         reply = `### Official Spot Offer Analysis (Lotusland US Client Allocation)
 
-Darlan Dallacosta has confirmed a dedicated spot allocation leveraging pre-assigned US client stock with **zero additional invoice discount (incorporated into net unit prices)**:
+Darlan Dallacosta confirmed a dedicated spot allocation from pre-assigned US client stock (` + '`OF-LOTUS-20261104-US`' + `) with **net unit prices already discounted**:
 
-| Active Principle (API) | Quantity | Lotusland Cost / g | Mediluxe (+6%) Invoiced / g | Subtotal Magenta | Previous Order / g | Savings Delta |
+| Active Principle (API) | Volume | Lotusland Net / g | Magenta (+6%) / g | Magenta Line Total | Previous / g | Savings |
 |---|---|---|---|---|---|---|
-| **5-Amino-1MQ** | 50 g | **$15.00** | **$15.90** | $795.00 | $23.85 | **-37.1%** 🟢 |
-| **Prostamax** | 10 g | **$1,625.00** | **$1,722.50** | $17,225.00 | $2,583.75 | **-37.1%** 🟢 |
-| **Pinealon** | 10 g | **$1,537.50** | **$1,629.75** | $16,297.50 | $2,444.63 | **-37.1%** 🟢 |
-| **IGF-1 LR3** | 0.2 g *(200 mg)* | **$13,500.00** | **$14,310.00** | $2,862.00 | $21,262.50 | **-36.5%** 🟢 |
+| **5-Amino-1MQ** | 50 g | **$15.00/g** | **$15.90/g** | $795.00 | $23.85/g | **-37.1%** |
+| **Prostamax** | 10 g | **$1,625.00/g** | **$1,722.50/g** | $17,225.00 | $2,583.75/g | **-37.1%** |
+| **Pinealon** | 10 g | **$1,537.50/g** | **$1,629.75/g** | $16,297.50 | $2,444.63/g | **-37.1%** |
+| **IGF-1 LR3** | 0.2 g *(200 mg)* | **$13,500.00/g** | **$14,310.00/g** | $2,862.00 | $21,262.50/g | **-36.5%** |
 
 **Key Commercial Takeaways:**
-1. **Total Net Purchase Cost (Lotusland):** $35,075.00 USD.
-2. **Mediluxe Gross Margin (+6.00%):** +$2,104.50 USD.
-3. **Total Invoiced to Magenta:** **$37,179.50 USD**.
-4. **Historical Price Protection:** In Atlas, previous purchase history remains untouched in the chronological ledger, allowing full price audit comparison.`;
-      } else if (q.includes('tirzepatide') || q.includes('evolution') || q.includes('history')) {
-        reply = `### Tirzepatide Bulk API Price Trajectory
-
-Tirzepatide has been procured across **4 commercial purchase orders (1,040 g total)**:
-
-1. **MY20251230039Y (Dec 30, 2025):** 140 g @ **$450.00/g** ($63,000.00)
-2. **MY20260204022Y (Feb 04, 2026):** 250 g @ **$440.00/g** ($110,000.00)
-3. **MY20260309021Y (Mar 09, 2026):** 400 g @ **€118.00/g** ($127.44/g USD) ($50,976.00)
-4. **MY20260406021Y (Apr 06, 2026):** 250 g @ **€105.00/g** ($113.40/g USD) ($28,350.00)
-
-• **Weighted Average Cost:** **$242.62 / g** across the entire 1,040 g volume.
-• **Latest Procurement Cost:** **$113.40 / g** (a 74.8% cost decline from initial December 2025 batches).
-• **Transfer Price to Magenta:** **$257.18 / g** (Cost + 6% max cap).`;
+• **Net Purchase Cost (Lotusland):** **$35,075.00 USD**
+• **Mediluxe Corridor Margin (+6.00%):** **+$2,104.50 USD**
+• **Total Invoiced to Magenta:** **$37,179.50 USD**
+• **Audit Traceability:** All prior invoices remain intact in the chronological ledger for full historical comparison.`;
+      } else if (q.includes('tirzepatide') || q.includes('evolution') || q.includes('trajectory')) {
+        const tirz = apis.find(a => a.name.toLowerCase().includes('tirzepatide'));
+        if (tirz) {
+          reply = buildApiTrajectoryResponse(tirz);
+        }
       } else if (q.includes('margin') || q.includes('6%') || q.includes('cap') || q.includes('contractual')) {
         reply = `### Contractual +6.00% Transfer Cap Policy
 
-The B2B sourcing relationship between **Lotusland Limited**, **Mediluxe Health Solutions FZE**, and **Magenta Pharma Medicine Trading LLC** operates under an exclusive institutional compounding agreement:
+The B2B sourcing corridor between **Lotusland Limited**, **Mediluxe Health Solutions FZE**, and **Magenta Pharma Medicine Trading LLC** operates under a strict institutional agreement:
 
-• **Zero Retail Markups:** Peptides and APIs are transferred to Magenta at cost + an exact contractual service margin of **6.00%**.
-• **Invoiced Cost Rule:** The public price list and official quotation display only the net invoiced unit price (e.g. $15.90/g for 5-Amino-1MQ) without exposing internal margin calculations on the client's commercial invoice.
-• **Compliance Standard:** Every line item is verified with cGMP, HPLC analytical assay (≥98.5% to ≥99.5%), and cold-chain temperature verification.`;
+• **Zero Retail Markup:** Bulk APIs are transferred to Magenta at **Net Audited Cost + 6.00%** contractual handling cap.
+• **Dual Valuation Transparency:** In the main table you can toggle between **Net Audited Cost (Lotusland)** (e.g., **$242.62/g** weighted average for Tirzepatide) and **Magenta Transfer (+6% Cap)** (**$257.18/g**).
+• **Analytical Verification:** Every release is accompanied by cGMP batch documentation and HPLC assay (**≥98.5% to ≥99.5%** purity).`;
+      } else if (q.includes('hong kong') || q.includes('uae') || q.includes('entity') || q.includes('divided') || q.includes('settlement')) {
+        reply = `### Settlement Split: Direct USD vs. Mediluxe EUR Corridor
+
+Across the **${invoices.length} reconciled commercial releases ($${summary.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD)**:
+
+| Settlement Corridor | Receiving Entity | Billing Currency | Invoices | Reconciled Capital (USD) |
+|---|---|---|---|---|
+| **Direct UAE Compounding** | Magenta Pharma Medicine Trading LLC | USD ($) | 8 Releases | $421,496.56 |
+| **Mediluxe FZE Corridor** | Mediluxe Health Solutions FZE | EUR (€ → 1.08 FX) | 3 Releases | $278,453.40 |
+
+• **Beneficiary Bank:** **Citibank N.A., Hong Kong Branch** (Account \`395710448\` · SWIFT \`CITIHKHX\`)
+• **Audit Conversion Standard:** EUR commercial releases (\`MY20260309021Y\`, \`MY20260406021Y\`, \`MY20260414098Y\`) are normalized at the institutional audit rate of **1.08 USD/EUR**.`;
       } else {
-        reply = `### Sourcing Intelligence Synthesis
+        // Check if query matches any specific API in the 43 APIs list
+        const matchedApi = apis.find(a => {
+          const cleanName = a.name.toLowerCase().replace(/\s*bulk\s*api\s*/g, '').trim();
+          return q.includes(cleanName) || (a.casNumber && q.includes(a.casNumber.toLowerCase()));
+        });
+
+        if (matchedApi) {
+          reply = buildApiTrajectoryResponse(matchedApi);
+        } else {
+          reply = `### Sourcing Intelligence Synthesis
 
 Regarding **"${query}"**:
-The Atlas procurement repository contains complete traceability for **43 APIs** and **10 reconciled releases** totaling **$664,874.96 USD**. 
+The Atlas procurement repository contains complete line-item traceability for **${summary.uniqueApisCount} APIs** and **${invoices.length} reconciled releases** totaling **$${summary.totalSpendUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD**.
 
-All orders are settled under strict bilateral agreements between Lotusland Limited (Hong Kong SAR) and UAE licensed entities (Magenta Pharma Medicine Trading LLC & Mediluxe Health Solutions FZE).
-
-Would you like me to generate a breakdown of quantities, latest batch dates, or margin calculations for a specific compound?`;
+• **Top Procured APIs by Capital:** **Tirzepatide Bulk API** ($252,326.00), **Tesamorelin** ($52,852.50), **IGF-1 LR3** ($45,225.00), **5-Amino-1MQ** ($24,600.00), and **Retatrutide Bulk API** ($24,300.00).
+• **Instant API Lookup:** Ask me about any specific compound (e.g., *"Show BPC-157 orders"*, *"IGF-1 LR3 history"*, *"Retatrutide cost"*) to view its full purchase order table and weighted average cost.`;
+        }
       }
 
       setMessages(prev => [...prev, { sender: 'ai', text: reply }]);
       setIsTyping(false);
-    }, 450);
+    }, 350);
   };
 
   return (
@@ -153,7 +193,7 @@ Would you like me to generate a breakdown of quantities, latest batch dates, or 
         right: 0,
         bottom: 0,
         width: '100%',
-        maxWidth: '560px',
+        maxWidth: '580px',
         backgroundColor: '#ffffff',
         boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.18)',
         zIndex: 100,
@@ -243,7 +283,7 @@ Would you like me to generate a breakdown of quantities, latest batch dates, or 
               display: 'flex',
               gap: '10px',
               alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
-              maxWidth: '92%'
+              maxWidth: m.sender === 'user' ? '88%' : '97%'
             }}
           >
             {m.sender === 'ai' && (
@@ -256,7 +296,8 @@ Would you like me to generate a breakdown of quantities, latest batch dates, or 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                flexShrink: 0
+                flexShrink: 0,
+                marginTop: '2px'
               }}>
                 <Bot size={15} />
               </div>
@@ -265,11 +306,13 @@ Would you like me to generate a breakdown of quantities, latest batch dates, or 
               backgroundColor: m.sender === 'user' ? '#003666' : '#ffffff',
               color: m.sender === 'user' ? '#ffffff' : '#0f172a',
               border: m.sender === 'user' ? 'none' : '1px solid #e2e8f0',
-              borderRadius: '8px',
-              padding: '10px 14px',
+              borderRadius: '10px',
+              padding: '12px 14px',
               fontSize: '0.82rem',
               lineHeight: 1.5,
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+              boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)',
+              flex: 1,
+              minWidth: 0
             }}>
               {m.sender === 'ai' ? (
                 <DoctorAiMessageRenderer content={m.text} />
@@ -302,9 +345,9 @@ Would you like me to generate a breakdown of quantities, latest batch dates, or 
           </div>
         )}
 
-        {/* Suggested Inquiries (Show when conversation is fresh) */}
+        {/* Suggested Inquiries */}
         {messages.length <= 2 && (
-          <div style={{ marginTop: '0.5rem' }}>
+          <div style={{ marginTop: '0.25rem' }}>
             <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.04em' }}>
               Suggested Inquiries (1-Click Analysis)
             </div>
@@ -381,7 +424,7 @@ Would you like me to generate a breakdown of quantities, latest batch dates, or 
             type="text"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            placeholder="Ask anything about Lotusland invoices, margins, or spot offers..."
+            placeholder="Ask about any API (e.g. Tirzepatide, IGF-1 LR3), margins, or spot offers..."
             style={{
               flex: 1,
               padding: '9px 12px',
@@ -400,7 +443,7 @@ Would you like me to generate a breakdown of quantities, latest batch dates, or 
               border: 'none',
               borderRadius: '6px',
               padding: '0 14px',
-              cursor: inputVal.trim() && !isTyping ? 'pointer' : 'default',
+              cursor: inputVal.trim() && !isTyping ? 'pointer' : 'not-allowed',
               opacity: inputVal.trim() && !isTyping ? 1 : 0.6,
               display: 'flex',
               alignItems: 'center',
@@ -414,4 +457,3 @@ Would you like me to generate a breakdown of quantities, latest batch dates, or 
     </div>
   );
 }
-

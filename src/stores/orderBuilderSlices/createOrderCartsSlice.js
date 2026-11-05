@@ -9,7 +9,13 @@ export const createOrderCartsSlice = (set, get) => ({
   activeTargetId: null,
   pendingItem: null,
 
-  setActiveTargetId: (id) => set({ activeTargetId: id }),
+  setActiveTargetId: (id) => {
+    set({ activeTargetId: id });
+    if (id) {
+      const target = get().carts?.[id]?.target;
+      get().prefetchPatientHistory?.(id, target?.name);
+    }
+  },
   setPendingItem: (item) => set({ pendingItem: item }),
 
   setSelectedTarget: (target) => {
@@ -41,7 +47,7 @@ export const createOrderCartsSlice = (set, get) => ({
     }
 
     // Background prefetch patient prescription history
-    get().prefetchPatientHistory?.(target.id);
+    get().prefetchPatientHistory?.(target.id, target.name);
   },
 
   setDraftItems: (updater) => {

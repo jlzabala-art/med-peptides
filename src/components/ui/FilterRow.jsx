@@ -168,10 +168,8 @@ export default function FilterRow({
 }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  if (!filterOptions || filterOptions.length === 0) return null;
-
   // Derive active count if not provided
-  const computedActiveCount = activeCount || filterOptions.reduce((acc, fo) => {
+  const computedActiveCount = activeCount || (filterOptions || []).reduce((acc, fo) => {
     if (!fo) return acc;
     if (fo.multiSelect) return acc + (Array.isArray(fo.values) ? fo.values.length : 0);
     const val = fo.value !== undefined ? fo.value : (Array.isArray(fo.values) ? fo.values[0] : fo.values);
@@ -232,6 +230,8 @@ export default function FilterRow({
     });
     if (onClearAll) onClearAll();
   }, [filterOptions, onClearAll]);
+
+  if (!filterOptions || filterOptions.length === 0) return null;
 
   // If there are many filter dimensions, pin the first `maxInlinePills` and group the rest in Drawer
   const hasManyFilters = filterOptions.length > maxInlinePills;

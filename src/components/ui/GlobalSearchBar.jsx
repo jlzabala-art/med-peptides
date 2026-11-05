@@ -78,6 +78,7 @@ export default function GlobalSearchBar({
   className = '',
   onFocus,
   onBlur,
+  lang = 'en',
   // Integrated filters (Golden Rule #7)
   filters = [],          // Active filter chips rendered below the bar
   filterOptions = [],    // Quick-filter dropdowns rendered inside the bar
@@ -454,7 +455,7 @@ export default function GlobalSearchBar({
           {/* Result count badge */}
           {resultCount !== undefined && !isLoading && (
             <span className="atlas-search__count">
-              {resultCount.toLocaleString()} {resultCount === 1 ? 'result' : 'results'}
+              {resultCount.toLocaleString()} {lang === 'es' ? (resultCount === 1 ? 'resultado' : 'resultados') : (resultCount === 1 ? 'result' : 'results')}
             </span>
           )}
 

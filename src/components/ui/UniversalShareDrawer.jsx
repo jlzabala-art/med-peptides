@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import StandardDrawer from '@/components/ui/StandardDrawer';
 import notifier from '@/services/NotificationService';
-import { Copy, Check, MessageSquare, Mail, QrCode, ExternalLink, Key, Loader2, Sparkles, User, RefreshCw } from 'lucide-react';
+import { Copy, Check, MessageSquare, Mail, QrCode, ExternalLink, Key, Loader2, Sparkles, User, RefreshCw, ShieldCheck } from 'lucide-react';
 import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
 import EngagementBadge from '@/components/ui/EngagementBadge';
 import { generateDoctorWelcomeWhatsApp, generateDoctorWelcomeEmail } from '@/data/doctorOnboardingTemplates';

@@ -414,13 +414,25 @@ const resolveDoctorName = (record) => {
   return '—';
 };
 
+const unwrapString = (v) => {
+  if (!v) return '';
+  if (typeof v === 'string') return v.trim();
+  if (typeof v === 'number') return String(v);
+  if (typeof v === 'object') {
+    const cand = v.name || v.fullName || v.displayName || v.title || v.label || v.clinicName || v.clinic || v.id || '';
+    return typeof cand === 'string' ? cand.trim() : '';
+  }
+  return '';
+};
+
 const resolveClinicName = (record, docName) => {
   if (!record || typeof record !== 'object') return null;
-  const treatingDocClinic = typeof record.treatingDoctor === 'object' ? record.treatingDoctor?.clinic : null;
+  const treatingDocClinic = typeof record.treatingDoctor === 'object' ? unwrapString(record.treatingDoctor?.clinic) : null;
   const clinic = treatingDocClinic 
-    || record.doctor?.clinic 
-    || record.clinic 
-    || record.clinicName 
+    || unwrapString(record.doctor?.clinic)
+    || unwrapString(record.doctor?.clinicName)
+    || unwrapString(record.clinicName)
+    || unwrapString(record.clinic)
     || (docName && (String(docName).toLowerCase().includes('haytham') || String(docName).toLowerCase().includes('heytham')) ? 'Arthregen Clinic' : null);
 
   if (clinic) return clinic;
