@@ -354,12 +354,12 @@ export function LotuslandApiMobileCard({ row, renderDetailRow, valuationMode = '
           <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
             Latest Order Date
           </div>
-          <div style={{ fontSize: '0.80rem', fontWeight: 750, color: '#003666', display: 'flex', alignItems: 'center', gap: '3px' }}>
-            <Calendar size={11} color="#003666" />
+          <div style={{ fontSize: '0.80rem', fontWeight: 750, color: '#003666', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+            <Calendar size={11} color="#003666" style={{ flexShrink: 0 }} />
             <span>{row.latestDate}</span>
           </div>
-          <div style={{ fontSize: '0.64rem', color: '#64748b' }}>
-            {row.invoiceCount > 1 ? `${row.firstDate} → ${row.latestDate}` : 'Single release'}
+          <div style={{ fontSize: '0.64rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+            {row.invoiceCount > 1 ? `Since ${row.firstDate} · ${row.invoiceCount} releases` : 'Single release'}
           </div>
         </div>
 
@@ -673,14 +673,14 @@ export default function LotuslandPublicPortalClient() {
       sortValue: (r) => r.latestDate,
       render: (_val, row) => (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Calendar size={12} color="#003666" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+            <Calendar size={12} color="#003666" style={{ flexShrink: 0 }} />
             <span style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.80rem' }}>
               {row.latestDate}
             </span>
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px' }}>
-            {row.invoiceCount > 1 ? `${row.firstDate} → ${row.latestDate}` : 'Single release'}
+          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap' }}>
+            {row.invoiceCount > 1 ? `Since ${row.firstDate} · ${row.invoiceCount} releases` : 'Single release'}
           </div>
         </div>
       )
