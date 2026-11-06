@@ -202,9 +202,20 @@ export async function GET(request) {
     }
 
     // ── 4. Firestore Admin SDK Query Fallback ──
-    if (adminDb && results.length < 5) {
+    if (adminDb && results.length < 10) {
       try {
-        const snap = await adminDb.collection('prescriptions').limit(150).get();
+        let snap;
+        try {
+          snap = await adminDb.collection('prescriptions')
+            .orderBy('createdAt', 'desc')
+            .limit(400)
+            .get();
+        } catch {
+          snap = await adminDb.collection('prescriptions')
+            .limit(400)
+            .get();
+        }
+
         snap.forEach(docSnap => {
           const d = docSnap.data();
           const rawCode = d.code || d.prescriptionNumber || d.fileNumber || docSnap.id;
@@ -213,7 +224,7 @@ export async function GET(request) {
           const normCode = normalizeCode(code);
           const patKey = `${pName.toLowerCase()}::${normCode}`;
 
-          if ((pName.toLowerCase().includes(qLower) || normCode.includes(qLower)) && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
+          if ((pName.toLowerCase().includes(qLower) || normCode.includes(qLower) || String(docSnap.id).toLowerCase().includes(qLower)) && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
             seenCodes.add(normCode);
             seenPatientCodes.add(patKey);
             results.push({
@@ -223,7 +234,7 @@ export async function GET(request) {
               patientName: pName || 'Patient',
               doctorName: d.doctorName || d.treatingDoctor?.name || 'Treating Physician',
               clinicName: d.clinicName || d.clinic || '',
-              title: cleanTitle(d.treatmentTitle || d.title),
+              title: cleanTitle(d.treatmentTitle || d.title || d.formulaName),
               date: extractDate(d.prescriptionDate || d.date || d.dispensedDate || d.createdAt || d.created_at),
               source: 'firestore'
             });
