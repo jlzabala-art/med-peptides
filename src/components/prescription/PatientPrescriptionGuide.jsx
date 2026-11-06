@@ -303,6 +303,12 @@ export default function PatientPrescriptionGuide({
         doctorClinic={doctorClinic || 'Atlas Health Services'}
         doctorNote={rx?.patientInstructions || rx?.doctorNotes || rx?.instructions || ''}
         formulationsCount={categorizedItems.length}
+        isPen={categorizedItems.some(i => i.isPrefilledPen || i.category?.type === 'prefilled_pen' || i.isPen || i.type === 'prefilled_pen')}
+        isInjectable={categorizedItems.some(i => i.isInjectable || i.category?.type === 'peptide' || i.category?.type === 'injectable_vial')}
+        isOral={categorizedItems.some(i => i.isOral || i.category?.type === 'oral')}
+        isTopical={categorizedItems.some(i => i.isTopical || i.category?.type === 'topical')}
+        duration={rx?.duration || (categorizedItems[0]?.duration)}
+        cycleDays={rx?.cycleDays}
         onSyncCalendar={() => setShowCalendarModal(true)}
         onOpenDoctorContact={() => {
           if (onOpenDoctorContact) {

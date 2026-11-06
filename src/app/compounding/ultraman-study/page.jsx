@@ -414,12 +414,97 @@ export default function UltramanCrossBorderStudyPage() {
     }
   };
 
+  // ── 4 Executive KPIs (Google Cloud Console Standard) ────────────────────────
+  const metrics = useMemo(() => {
+    const allInOnePricesBrl = BRAZIL_ALL_IN_ONE_DATA.map(d => bottleSize === 30 ? d.brazilFinalBrl.caps30 : d.brazilFinalBrl.caps60);
+    const allInOneBulgariaEur = BRAZIL_ALL_IN_ONE_DATA.map(d => bottleSize === 30 ? d.bulgariaBenchmarkEur.caps30 : d.bulgariaBenchmarkEur.caps60);
+
+    const avgBrl = allInOnePricesBrl.reduce((a, b) => a + b, 0) / allInOnePricesBrl.length;
+    const avgBulgariaEur = allInOneBulgariaEur.reduce((a, b) => a + b, 0) / allInOneBulgariaEur.length;
+
+    const convertedAvgBrl = convertPrice(avgBrl, 'BRL');
+    const convertedAvgBulgaria = convertPrice(avgBulgariaEur, 'EUR');
+    const avgDelta = Math.round(((convertedAvgBrl - convertedAvgBulgaria) / convertedAvgBulgaria) * 100);
+
+    return {
+      avgBrazil: convertedAvgBrl,
+      avgBulgaria: convertedAvgBulgaria,
+      avgDelta,
+      totalFormulas: BRAZIL_ALL_IN_ONE_DATA.length + BRAZIL_SPLIT_DATA.length
+    };
+  }, [bottleSize, currency]);
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       
+      {/* ── Responsive Mobile Styles (Google Cloud Console UX) ─────────────── */}
+      <style>{`
+        .ultraman-card-grid {
+          display: grid;
+          grid-template-columns: minmax(280px, 1fr) auto auto auto;
+          align-items: center;
+          gap: 20px;
+        }
+        .ultraman-pricing-group {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        @media (max-width: 768px) {
+          .ultraman-card-grid {
+            grid-template-columns: 1fr !important;
+            gap: 14px !important;
+            padding: 16px 14px !important;
+          }
+          .ultraman-pricing-group {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+            width: 100% !important;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 12px;
+            margin-top: 6px;
+          }
+          .ultraman-pricing-col {
+            text-align: left !important;
+            border-left: none !important;
+            padding-left: 0 !important;
+          }
+          .ultraman-delta-badge {
+            grid-column: 1 / -1;
+            width: 100% !important;
+            text-align: center !important;
+            margin-top: 4px;
+          }
+          .ultraman-hero-section {
+            padding: 24px 14px !important;
+          }
+          .ultraman-main-container {
+            padding: 20px 14px 60px 14px !important;
+          }
+          .ultraman-header-inner {
+            padding: 10px 14px !important;
+          }
+          .ultraman-controls-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+          .ultraman-kpi-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .ultraman-kpi-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+
       {/* ── Top Header Navigation ────────────────────────────────────────── */}
       <header style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 30 }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div className="ultraman-header-inner" style={{ maxWidth: 1200, margin: '0 auto', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Link 
               href="/admin/prescriptions"
@@ -489,7 +574,7 @@ export default function UltramanCrossBorderStudyPage() {
       </header>
 
       {/* ── Hero Banner: Executive Pitch ─────────────────────────────────── */}
-      <section style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)', borderBottom: '1px solid #e2e8f0', padding: '40px 20px' }}>
+      <section className="ultraman-hero-section" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)', borderBottom: '1px solid #e2e8f0', padding: '40px 20px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#e0f2fe', color: '#0369a1', padding: '4px 12px', borderRadius: 20, fontSize: '0.76rem', fontWeight: 700, marginBottom: 16 }}>
             <Globe size={14} /> CROSS-BORDER COMPOUNDING BENCHMARK · MULTI-SUPPLIER ARCHITECTURE
@@ -528,10 +613,70 @@ export default function UltramanCrossBorderStudyPage() {
       </section>
 
       {/* ── Main Dashboard Content ────────────────────────────────────────── */}
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '30px 20px 80px 20px' }}>
+      <main className="ultraman-main-container" style={{ maxWidth: 1200, margin: '0 auto', padding: '30px 20px 80px 20px' }}>
         
+        {/* ── 4 Executive KPI Cards (Google Cloud Console Standard) ─────────── */}
+        <div className="ultraman-kpi-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 14,
+          marginBottom: 24
+        }}>
+          {/* KPI 1 */}
+          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '14px 16px' }}>
+            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Coste Medio Brasil (All-in-One)
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', margin: '4px 0 2px 0' }}>
+              {formatMoney(metrics.avgBrazil)}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+              Ciclo de {bottleSize} Cápsulas · Mano de obra y envase incluidos
+            </div>
+          </div>
+
+          {/* KPI 2 */}
+          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '14px 16px' }}>
+            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Benchmark Bulgaria (CAT-CAP)
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', margin: '4px 0 2px 0' }}>
+              {formatMoney(metrics.avgBulgaria)}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+              Farmacia Pharmapolis · Modelo cGMP Europeo
+            </div>
+          </div>
+
+          {/* KPI 3 */}
+          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '14px 16px' }}>
+            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Diferencial All-in-One
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: metrics.avgDelta <= 0 ? '#16a34a' : '#d97706', margin: '4px 0 2px 0' }}>
+              {metrics.avgDelta <= 0 ? `-${Math.abs(metrics.avgDelta)}%` : `+${metrics.avgDelta}%`}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+              {metrics.avgDelta <= 0 ? 'Ventaja galénica en preparados concentrados' : 'Paridad según volumen'}
+            </div>
+          </div>
+
+          {/* KPI 4 */}
+          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '14px 16px' }}>
+            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Formulaciones Auditadas
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', margin: '4px 0 2px 0' }}>
+              {metrics.totalFormulas} Fórmulas
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+              9 Lotes All-in-One + 7 Régimen Separado
+            </div>
+          </div>
+        </div>
+
         {/* Toggle Controls: View Mode & Bottle Duration */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
+        <div className="ultraman-controls-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
           
           {/* View mode toggle */}
           <div style={{ display: 'inline-flex', background: '#e2e8f0', padding: 4, borderRadius: 10 }}>
@@ -637,15 +782,12 @@ export default function UltramanCrossBorderStudyPage() {
                 return (
                   <div
                     key={orc.id}
+                    className="ultraman-card-grid"
                     style={{
                       background: '#ffffff',
                       border: '1px solid #e2e8f0',
                       borderRadius: 10,
                       padding: '18px 20px',
-                      display: 'grid',
-                      gridTemplateColumns: 'minmax(280px, 1fr) auto auto auto',
-                      alignItems: 'center',
-                      gap: 20
                     }}
                   >
                     <div>
@@ -670,48 +812,50 @@ export default function UltramanCrossBorderStudyPage() {
                       )}
                     </div>
 
-                    {/* Brazil Final Quote */}
-                    <div style={{ textAlign: 'right', minWidth: 130 }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#16a34a', textTransform: 'uppercase' }}>
-                        🇧🇷 Brasil (Final)
+                    <div className="ultraman-pricing-group">
+                      {/* Brazil Final Quote */}
+                      <div className="ultraman-pricing-col" style={{ textAlign: 'right', minWidth: 120 }}>
+                        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#16a34a', textTransform: 'uppercase' }}>
+                          🇧🇷 Brasil (Final)
+                        </div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                          {formatMoney(convertedBrl)}
+                        </div>
+                        <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                          {currency !== 'BRL' && `R$ ${brlVal.toFixed(2)}`}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
-                        {formatMoney(convertedBrl)}
-                      </div>
-                      <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                        {currency !== 'BRL' && `R$ ${brlVal.toFixed(2)}`}
-                      </div>
-                    </div>
 
-                    {/* Bulgaria Pharmapolis Benchmark */}
-                    <div style={{ textAlign: 'right', minWidth: 140, borderLeft: '1px solid #e2e8f0', paddingLeft: 16 }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase' }}>
-                        🇧🇬 Bulgaria (CAT-CAP)
+                      {/* Bulgaria Pharmapolis Benchmark */}
+                      <div className="ultraman-pricing-col" style={{ textAlign: 'right', minWidth: 130, borderLeft: '1px solid #e2e8f0', paddingLeft: 16 }}>
+                        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase' }}>
+                          🇧🇬 Bulgaria (CAT-CAP)
+                        </div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                          {formatMoney(convertedBulgaria)}
+                        </div>
+                        <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                          {currency !== 'EUR' && `€${bulgariaEurVal.toFixed(2)}`}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
-                        {formatMoney(convertedBulgaria)}
-                      </div>
-                      <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                        {currency !== 'EUR' && `€${bulgariaEurVal.toFixed(2)}`}
-                      </div>
-                    </div>
 
-                    {/* Variance Delta Badge */}
-                    <div style={{ minWidth: 110, textAlign: 'center' }}>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          fontSize: '0.74rem',
-                          fontWeight: 700,
-                          padding: '4px 10px',
-                          borderRadius: 20,
-                          background: deltaPercent <= 0 ? '#dcfce7' : '#fef3c7',
-                          color: deltaPercent <= 0 ? '#15803d' : '#b45309',
-                          border: `1px solid ${deltaPercent <= 0 ? '#86efac' : '#fde68a'}`
-                        }}
-                      >
-                        {deltaPercent <= 0 ? `Brasil ${Math.abs(deltaPercent)}% más bajo` : `Bulgaria ${deltaPercent}% más bajo`}
-                      </span>
+                      {/* Variance Delta Badge */}
+                      <div className="ultraman-delta-badge" style={{ minWidth: 110, textAlign: 'center' }}>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            fontSize: '0.74rem',
+                            fontWeight: 700,
+                            padding: '4px 10px',
+                            borderRadius: 20,
+                            background: deltaPercent <= 0 ? '#dcfce7' : '#fef3c7',
+                            color: deltaPercent <= 0 ? '#15803d' : '#b45309',
+                            border: `1px solid ${deltaPercent <= 0 ? '#86efac' : '#fde68a'}`
+                          }}
+                        >
+                          {deltaPercent <= 0 ? `Brasil ${Math.abs(deltaPercent)}% más bajo` : `Bulgaria ${deltaPercent}% más bajo`}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );

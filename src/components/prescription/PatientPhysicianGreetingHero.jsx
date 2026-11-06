@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { ShieldCheck, Calendar, MessageSquare, Sun, Moon, Clock, UserCheck, Stethoscope, Sparkles } from 'lucide-react';
+import { ShieldCheck, Calendar, MessageSquare, Sun, Moon, Clock, UserCheck, Stethoscope, Sparkles, ThermometerSnowflake, Droplets } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 
 /**
@@ -26,6 +26,12 @@ export default function PatientPhysicianGreetingHero({
   doctorClinic = 'Atlas Health Services',
   doctorNote = '',
   formulationsCount = 2,
+  isPen = false,
+  isInjectable = false,
+  isOral = false,
+  isTopical = false,
+  duration = '',
+  cycleDays = null,
   onSyncCalendar = null,
   onOpenDoctorContact = null,
   isEs = false
@@ -244,61 +250,242 @@ export default function PatientPhysicianGreetingHero({
         </div>
       )}
 
-      {/* High-Level Regimen Schedule Chips (Human-Readable Overview) */}
+      {/* High-Level Regimen Schedule Chips (Dynamic GCP-Style Clinical Attributes) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 10px',
-            borderRadius: '4px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            fontSize: '0.74rem',
-            fontWeight: 600,
-            color: '#334155',
-          }}
-        >
-          <Sun size={13} color="#475569" />
-          <span>{isEs ? 'Toma Matutina (Desayuno)' : 'Morning Regimen (Breakfast)'}</span>
-        </div>
-
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 10px',
-            borderRadius: '4px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            fontSize: '0.74rem',
-            fontWeight: 600,
-            color: '#334155',
-          }}
-        >
-          <Moon size={13} color="#475569" />
-          <span>{isEs ? 'Toma Nocturna (Antes de Dormir)' : 'Night Regimen (Before Sleep)'}</span>
-        </div>
-
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 10px',
-            borderRadius: '4px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            fontSize: '0.74rem',
-            fontWeight: 600,
-            color: '#475569',
-          }}
-        >
-          <Clock size={13} color="#64748b" />
-          <span>{isEs ? '60 Días de Tratamiento' : '60 Daily Doses (2 Months)'}</span>
-        </div>
+        {isPen ? (
+          <>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f5f3ff',
+                border: '1px solid #ddd6fe',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                color: '#6d28d9',
+              }}
+            >
+              <span>💉</span>
+              <span>{isEs ? 'Inyección Subcutánea Semanal' : 'Weekly Subcutaneous Injection'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                color: '#0369a1',
+              }}
+            >
+              <ThermometerSnowflake size={13} color="#0284c7" />
+              <span>{isEs ? 'Nevera Continua (2°C – 8°C) · No Congelar' : 'Mandatory Refrigeration (2°C – 8°C) · Do Not Freeze'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#faf5ff',
+                border: '1px solid #e9d5ff',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#7e22ce',
+              }}
+            >
+              <span>🖊️</span>
+              <span>{isEs ? 'Pluma Precargada · Lista para Inyectar' : 'Pre-filled SubQ Pen · Ready to Inject'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#475569',
+              }}
+            >
+              <Clock size={13} color="#64748b" />
+              <span>{duration || (isEs ? `${cycleDays || 84} Días de Tratamiento` : `${cycleDays || 84} Days Treatment`)}</span>
+            </div>
+          </>
+        ) : isInjectable ? (
+          <>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                color: '#1d4ed8',
+              }}
+            >
+              <span>💉</span>
+              <span>{isEs ? 'Inyección Subcutánea (SubQ)' : 'Subcutaneous Injection (SubQ)'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                color: '#0369a1',
+              }}
+            >
+              <ThermometerSnowflake size={13} color="#0284c7" />
+              <span>{isEs ? 'Refrigerar tras Reconstituir (2°C – 8°C)' : 'Refrigerate after Reconstitution (2°C – 8°C)'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#475569',
+              }}
+            >
+              <Clock size={13} color="#64748b" />
+              <span>{duration || (isEs ? 'Pauta de Titulación' : 'Titration Regimen')}</span>
+            </div>
+          </>
+        ) : isTopical ? (
+          <>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                color: '#15803d',
+              }}
+            >
+              <Droplets size={13} color="#16a34a" />
+              <span>{isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Regimen'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#334155',
+              }}
+            >
+              <Moon size={13} color="#475569" />
+              <span>{isEs ? 'Aplicar por la Noche (1.0 mL)' : 'Night Regimen (1.0 mL)'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#475569',
+              }}
+            >
+              <Clock size={13} color="#64748b" />
+              <span>{duration || (isEs ? 'Uso Diario Continuo' : 'Daily Ongoing Regimen')}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#334155',
+              }}
+            >
+              <Sun size={13} color="#475569" />
+              <span>{isEs ? 'Toma Matutina (Desayuno)' : 'Morning Regimen (Breakfast)'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#334155',
+              }}
+            >
+              <Moon size={13} color="#475569" />
+              <span>{isEs ? 'Toma Nocturna (Antes de Dormir)' : 'Night Regimen (Before Sleep)'}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#475569',
+              }}
+            >
+              <Clock size={13} color="#64748b" />
+              <span>{duration || (isEs ? '60 Días de Tratamiento' : '60 Daily Doses (2 Months)')}</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
