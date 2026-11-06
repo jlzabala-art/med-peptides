@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2, AlertTriangle, Printer, Info } from '@/lib/icons';
+import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2, AlertTriangle, Printer, Info, ShieldAlert } from '@/lib/icons';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { verifyLabelSaveSecurity } from '@/utils/labels/labelSecurityGuard';
 import { labelsRepository } from '@/repositories/labelsRepository';
 import PharmapolisLabelSvg, { computeDefaultHeaderBadge } from './PharmapolisLabelSvg';
 import { getCustomsFriendlySuggestions, findCustomsRisks } from '@/utils/labels/customsNaming';
@@ -95,8 +97,24 @@ export default function PharmacyLabelsModal({
   onPrescriptionUpdated = null,
   onLabelIndexChange = null,
   onConfigChange = null,
-  onLabelDataChange = null
+  onLabelDataChange = null,
+  readOnly = false,
+  canSaveOverride = null
 }) {
+  const { can, is, effectiveRole } = useRoleAccess();
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
   const [modalMainTab, setModalMainTab] = useState(initialTab || (initialEditMode ? 'edit' : 'label'));
 
   const [selectedProductIdx, setSelectedProductIdx] = useState(typeof initialLabelIndex === 'number' ? initialLabelIndex : 0);
@@ -219,10 +237,26 @@ export default function PharmacyLabelsModal({
     }
   }, [isOpen, selectedProductIdx, labels]);
 
-  if (!isOpen || !labels || labels.length === 0) return null;
+  const baseItem = labels?.[selectedProductIdx] || labels?.[0] || null;
+  const currentItem = editedOverrides[selectedProductIdx] || baseItem || {};
+  const rawId = currentItem?.rxId || currentItem?.prescriptionId || currentItem?.fileNumber || currentItem?.id || sourceRx?.id || sourceRx?.code || sourceRx?.fileNumber || null;
 
-  const baseItem = labels[selectedProductIdx] || labels[0];
-  const currentItem = editedOverrides[selectedProductIdx] || baseItem;
+  const saveSecurity = React.useMemo(() => {
+    return verifyLabelSaveSecurity({
+      rawId,
+      currentItem,
+      sourceRx,
+      readOnly,
+      canSaveOverride,
+      role: effectiveRole,
+      can,
+      isSaving: isSavingToFirebase,
+      isOnline,
+      isEs
+    });
+  }, [rawId, currentItem, sourceRx, readOnly, canSaveOverride, effectiveRole, can, isSavingToFirebase, isOnline, isEs]);
+
+  if (!isOpen || !labels || labels.length === 0) return null;
 
   // Real-data batch verification & GMP format validation
   const realDbBatch = baseItem.batchCode || baseItem.lote || baseItem.dispensingBatch || baseItem.lotNumber || null;
@@ -415,12 +449,20 @@ export default function PharmacyLabelsModal({
   };
 
   const handleSaveToFirebase = async (explicitStatus = null) => {
+    // 🛡️ Security Check: Never proceed if saving is not permitted or document cannot be saved
+    if (!saveSecurity.canSave) {
+      console.warn('[PharmacyLabelsModal] Save blocked by security policy:', saveSecurity.reason);
+      setFirebaseSaveError(saveSecurity.reason);
+      setFirebaseSaveSuccess(false);
+      return;
+    }
+
     try {
       setIsSavingToFirebase(true);
       setFirebaseSaveError(null);
       setFirebaseSaveSuccess(false);
 
-      const rawId = currentItem.rxId || currentItem.prescriptionId || currentItem.fileNumber || currentItem.id;
+      const targetId = rawId || currentItem.rxId || currentItem.prescriptionId || currentItem.fileNumber || currentItem.id;
       // Guard strictly against React SyntheticEvent being passed when used as onClick={handleSaveToFirebase}
       const safeExplicitStatus = typeof explicitStatus === 'string' && explicitStatus.trim() ? explicitStatus.trim() : null;
       const targetStatus = safeExplicitStatus 
@@ -428,7 +470,7 @@ export default function PharmacyLabelsModal({
         || 'draft';
 
       const saveResult = await labelsRepository.savePrescriptionLabel({
-        rawId,
+        rawId: targetId,
         currentItem: {
           ...currentItem,
           approvalStatus: targetStatus
@@ -441,6 +483,11 @@ export default function PharmacyLabelsModal({
         approvalStatus: targetStatus
       });
 
+      // 🛡️ Security Check: NEVER claim success unless the repository explicitly confirms persistence
+      if (!saveResult || !saveResult.success) {
+        throw new Error(saveResult?.error || (isEs ? 'Error: El servidor no confirmó el guardado.' : 'Error: Server did not confirm successful save.'));
+      }
+
       if (saveResult.updatedLabel) {
         setEditedOverrides(prev => ({
           ...prev,
@@ -452,6 +499,7 @@ export default function PharmacyLabelsModal({
       }
 
       setFirebaseSaveSuccess(true);
+      setFirebaseSaveError(null);
       setTimeout(() => setFirebaseSaveSuccess(false), 3000);
 
       // Dispatch event to inform other active components (e.g. prescription views)
@@ -459,7 +507,7 @@ export default function PharmacyLabelsModal({
         window.dispatchEvent(new CustomEvent('prescription-updated', {
           detail: {
             id: saveResult.docId,
-            rxId: rawId,
+            rxId: targetId,
             updatedFields: saveResult.payload,
             updatedData: saveResult.payload,
             item: saveResult.updatedLabel || currentItem
@@ -470,7 +518,7 @@ export default function PharmacyLabelsModal({
       if (typeof onPrescriptionUpdated === 'function') {
         onPrescriptionUpdated({
           id: saveResult.docId,
-          rxId: rawId,
+          rxId: targetId,
           updatedFields: saveResult.payload,
           updatedData: saveResult.payload,
           item: saveResult.updatedLabel || currentItem
@@ -478,8 +526,9 @@ export default function PharmacyLabelsModal({
       }
     } catch (err) {
       console.error('[PharmacyLabelsModal] Error saving to Firebase via labelsRepository:', err);
-      setFirebaseSaveError(err.message || 'Error saving to Firebase');
-      setTimeout(() => setFirebaseSaveError(null), 4000);
+      setFirebaseSaveSuccess(false);
+      setFirebaseSaveError(err.message || (isEs ? 'Error al guardar la prescripción' : 'Error saving prescription'));
+      setTimeout(() => setFirebaseSaveError(null), 5000);
     } finally {
       setIsSavingToFirebase(false);
     }
@@ -2476,11 +2525,13 @@ export default function PharmacyLabelsModal({
                     <button
                       type="button"
                       onClick={() => {
+                        if (!saveSecurity.canApprove || isSavingToFirebase) return;
                         const next = currentItem.approvalStatus === 'approved' ? 'draft' : 'approved';
                         handleFieldChange('approvalStatus', next);
                         handleSaveToFirebase(next);
                       }}
-                      disabled={isSavingToFirebase}
+                      disabled={!saveSecurity.canApprove || isSavingToFirebase}
+                      aria-disabled={!saveSecurity.canApprove || isSavingToFirebase}
                       style={{
                         padding: '3px 8px',
                         borderRadius: '4px',
@@ -2489,10 +2540,11 @@ export default function PharmacyLabelsModal({
                         border: currentItem.approvalStatus === 'approved' ? '1px solid #dadce0' : '1px solid #ceead6',
                         background: currentItem.approvalStatus === 'approved' ? '#fff' : '#e6f4ea',
                         color: currentItem.approvalStatus === 'approved' ? '#5f6368' : '#137333',
-                        cursor: 'pointer',
+                        cursor: !saveSecurity.canApprove || isSavingToFirebase ? 'not-allowed' : 'pointer',
+                        opacity: !saveSecurity.canApprove || isSavingToFirebase ? 0.45 : 1,
                         transition: 'all 0.15s ease'
                       }}
-                      title={isEs ? 'Cambiar estado de aprobación clínica' : 'Change clinical approval status'}
+                      title={saveSecurity.approveReason}
                     >
                       {currentItem.approvalStatus === 'approved'
                         ? (isEs ? '↺ Revertir a Borrador' : '↺ Revert to Draft')
@@ -2503,34 +2555,60 @@ export default function PharmacyLabelsModal({
 
                 {/* Editor Action Buttons: Save, Download .md, Reset */}
                 <div className="gcp-editor-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  {/* Informative reassurance pill */}
-                  <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    padding: '4px 8px',
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '5px',
-                    fontSize: '0.70rem',
-                    color: '#475569',
-                    lineHeight: 1.2
-                  }}>
-                    <Info size={12} color="#1a73e8" style={{ flexShrink: 0 }} />
-                    <span>
-                      {isEs 
-                        ? 'Al guardar, se sincroniza la prescripción clínica original.' 
-                        : 'Saving synchronizes directly with the master clinical prescription.'}
-                    </span>
-                  </div>
+                  {/* Informative reassurance or security guard badge */}
+                  {!saveSecurity.canSave ? (
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '4px 8px',
+                      background: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      borderRadius: '5px',
+                      fontSize: '0.70rem',
+                      color: '#991b1b',
+                      lineHeight: 1.2
+                    }}>
+                      <ShieldAlert size={12} color="#dc2626" style={{ flexShrink: 0 }} />
+                      <span>{saveSecurity.reason}</span>
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '4px 8px',
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '5px',
+                      fontSize: '0.70rem',
+                      color: '#475569',
+                      lineHeight: 1.2
+                    }}>
+                      <Info size={12} color="#1a73e8" style={{ flexShrink: 0 }} />
+                      <span>
+                        {isEs 
+                          ? 'Al guardar, se sincroniza la prescripción clínica original.' 
+                          : 'Saving synchronizes directly with the master clinical prescription.'}
+                      </span>
+                    </div>
+                  )}
 
                   {/* SAVE BUTTON */}
                   <button
                     type="button"
-                    onClick={() => handleSaveToFirebase()}
-                    disabled={isSavingToFirebase}
-                    className={`gcp-editor-save-btn ${firebaseSaveSuccess ? 'is-success' : ''}`}
-                    title={isEs ? 'Guardar y actualizar prescripción maestra' : 'Save and synchronize edits with master prescription record'}
+                    onClick={() => {
+                      if (!saveSecurity.canSave) return;
+                      handleSaveToFirebase();
+                    }}
+                    disabled={!saveSecurity.canSave}
+                    aria-disabled={!saveSecurity.canSave}
+                    className={`gcp-editor-save-btn ${firebaseSaveSuccess ? 'is-success' : ''} ${!saveSecurity.canSave ? 'is-disabled' : ''}`}
+                    title={saveSecurity.reason}
+                    style={{
+                      opacity: !saveSecurity.canSave && !isSavingToFirebase && !firebaseSaveSuccess ? 0.45 : 1,
+                      cursor: !saveSecurity.canSave ? 'not-allowed' : 'pointer'
+                    }}
                   >
                     {firebaseSaveSuccess ? (
                       <>
@@ -3691,14 +3769,20 @@ export default function PharmacyLabelsModal({
               <button
                 type="button"
                 className="gcp-btn-secondary"
-                onClick={() => handleSaveToFirebase()}
-                disabled={isSavingToFirebase}
-                title={isEs ? 'Guardar y actualizar prescripción maestra' : 'Save and synchronize edits with master prescription record'}
+                onClick={() => {
+                  if (!saveSecurity.canSave) return;
+                  handleSaveToFirebase();
+                }}
+                disabled={!saveSecurity.canSave}
+                aria-disabled={!saveSecurity.canSave}
+                title={saveSecurity.reason}
                 style={{
                   background: firebaseSaveSuccess ? '#e6f4ea' : '#ffffff',
-                  color: firebaseSaveSuccess ? '#137333' : '#1a73e8',
-                  border: firebaseSaveSuccess ? '1px solid #137333' : '1px solid #1a73e8',
-                  fontWeight: 600
+                  color: firebaseSaveSuccess ? '#137333' : (!saveSecurity.canSave ? '#94a3b8' : '#1a73e8'),
+                  border: firebaseSaveSuccess ? '1px solid #137333' : (!saveSecurity.canSave ? '1px solid #cbd5e1' : '1px solid #1a73e8'),
+                  fontWeight: 600,
+                  opacity: !saveSecurity.canSave && !isSavingToFirebase && !firebaseSaveSuccess ? 0.45 : 1,
+                  cursor: !saveSecurity.canSave ? 'not-allowed' : 'pointer'
                 }}
               >
                 {firebaseSaveSuccess ? <Check size={14} color="#137333" /> : <Database size={14} />}

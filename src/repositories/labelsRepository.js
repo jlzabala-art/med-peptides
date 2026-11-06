@@ -219,11 +219,20 @@ export const labelsRepository = {
             version: result.version,
             approvalStatus: result.approvalStatus
           };
+        } else {
+          throw new Error(result.error || 'Server rejected save operation.');
         }
+      } else {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error || `Server responded with HTTP ${response.status}`);
       }
-      logger.warn('[labelsRepository] Server-side /api/labels/save returned non-ok, falling back to client write...');
     } catch (apiErr) {
-      logger.warn('[labelsRepository] /api/labels/save network error, falling back to client write:', apiErr);
+      logger.warn('[labelsRepository] /api/labels/save error:', apiErr);
+      // If the error was an explicit server rejection, throw it immediately to avoid false success
+      if (apiErr.message && !apiErr.message.includes('Failed to fetch') && !apiErr.message.includes('NetworkError')) {
+        throw apiErr;
+      }
+      logger.warn('[labelsRepository] Network unreachable, attempting client-side write fallback...');
     }
 
     const { ref: targetDocRef, data: existingData } = await this.resolvePrescriptionDoc(

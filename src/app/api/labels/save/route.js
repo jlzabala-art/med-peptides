@@ -130,6 +130,15 @@ export async function POST(request) {
       [currentItem.fileNumber, currentItem.rxCode, currentItem.batchCode, currentItem.id]
     );
 
+    // 🛡️ Security Check: Prevent modifying archived or cancelled prescriptions
+    const existingStatus = String(existingData?.status || '').toLowerCase().trim();
+    if (['archived', 'cancelled', 'anulada', 'archivada', 'purgada'].includes(existingStatus)) {
+      return NextResponse.json({
+        success: false,
+        error: `Prescription is locked (${existingStatus}) and cannot be modified.`
+      }, { status: 403 });
+    }
+
     const nowIso = new Date().toISOString();
     const phaseIdx = Math.max(0, (currentItem.phaseNumber || selectedProductIdx + 1) - 1);
     const partKey = `part_${phaseIdx + 1}`;
@@ -342,3 +351,4 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+

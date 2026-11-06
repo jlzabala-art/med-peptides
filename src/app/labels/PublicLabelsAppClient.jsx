@@ -1668,6 +1668,7 @@ export default function PublicLabelsAppClient({
               }}
               labels={labels}
               initialLabelIndex={labelIndex}
+              sourceRx={currentRx}
               hideInternalPartsSwitcher={true}
               hideBottomShare={true}
               onLabelIndexChange={(newIdx) => {
