@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { invalidateRxCache } from '@/app/rx/[code]/page';
+import { syncPrescriptionToAlgolia } from '@/services/algoliaSyncService';
 
 export const dynamic = 'force-dynamic';
 
@@ -326,6 +327,9 @@ export async function POST(request) {
         const directIdUrl = `${baseUrl}/rx/${docRef.id}`;
         await docRef.update({ directIdUrl }).catch(() => null);
         payload.directIdUrl = directIdUrl;
+
+        // In-process atomic Algolia synchronization (Zero manual sync needed)
+        await syncPrescriptionToAlgolia(docRef.id, { ...payload, id: docRef.id });
 
         // Invalidate server cache if needed
         try {

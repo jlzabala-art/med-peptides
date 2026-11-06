@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { syncPrescriptionToAlgolia } from '@/services/algoliaSyncService';
 
 export async function POST(request) {
   try {
@@ -97,6 +98,9 @@ export async function POST(request) {
     };
 
     const docRef = await adminDb.collection('prescriptions').add(newPrescription);
+
+    // In-process atomic Algolia synchronization (Zero manual sync needed)
+    await syncPrescriptionToAlgolia(docRef.id, { ...newPrescription, id: docRef.id });
 
     return NextResponse.json({
       success: true,

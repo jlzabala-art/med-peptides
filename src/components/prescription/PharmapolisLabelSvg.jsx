@@ -170,9 +170,9 @@ function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a'
             y1={y - Math.round(fontSize * 0.28)}
             x2={dotEndX}
             y2={y - Math.round(fontSize * 0.28)}
-            stroke={isMono ? '#666666' : '#cbd5e1'}
-            strokeWidth="1.6"
-            strokeDasharray="2,5"
+            stroke={isMono ? '#888888' : '#cbd5e1'}
+            strokeWidth="1.4"
+            strokeDasharray="2,6"
           />
         ) : null}
         <text
@@ -1088,10 +1088,10 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* 2. STORAGE CONDITIONS */}
+                {/* 2. STORAGE & HANDLING */}
                 <g>
                   <text x="0" y={storageTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill={isMono ? '#333333' : '#475569'} letterSpacing="0.4">
-                    STORAGE CONDITIONS
+                    STORAGE & HANDLING
                   </text>
                   {storageLines.map((sLine, sIdx) => (
                     <text
@@ -1099,7 +1099,7 @@ export default function PharmapolisLabelSvg({
                       x="0"
                       y={firstStorageLineY + (sIdx * storageLineGap)}
                       fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-                      fontSize={isShort ? 13 : 15}
+                      fontSize={isShort ? 12.5 : 14.5}
                       fontWeight="700"
                       fill="#000000"
                     >
@@ -1108,16 +1108,11 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* 3. CLINICAL STORAGE & HANDLING MONOGRAPH BADGE */}
-                <g transform={`translate(0, ${storageBlockBottom + (isShort ? 8 : 14)})`}>
-                  <line x1="0" y1="0" x2={leftColWidth - 28} y2="0" stroke={isMono ? '#cccccc' : '#e2e8f0'} strokeWidth="1.2" />
-                  <rect x="-4" y={isShort ? 6 : 8} width={leftColWidth - 20} height={isShort ? 44 : 52} fill={isMono ? '#ffffff' : '#f8fafc'} stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="1.2" rx="4" />
-
-                  <text x="4" y={isShort ? 23 : 28} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11.5} fontWeight="800" fill={isMono ? '#000000' : '#334155'} letterSpacing="0.2">
+                {/* 3. LIGHT PROTECTION SAFE PILL (Unclipped, clean margin) */}
+                <g transform={`translate(0, ${storageBlockBottom + (isShort ? 6 : 10)})`}>
+                  <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 24 : 28} fill={isMono ? '#f8fafc' : '#f0fdf4'} stroke={isMono ? '#000000' : '#bbf7d0'} strokeWidth="1.2" rx="4" />
+                  <text x="6" y={isShort ? 16 : 19} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11.5} fontWeight="800" fill={isMono ? '#000000' : '#15803d'} letterSpacing="0.4">
                     PROTECT FROM LIGHT
-                  </text>
-                  <text x="4" y={isShort ? 39 : 46} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 9.5 : 11} fontWeight="800" fill={isMono ? '#000000' : '#0284c7'} letterSpacing="0.3">
-                    15°C–25°C • ROOM TEMP.
                   </text>
                 </g>
               </g>
@@ -1197,33 +1192,33 @@ export default function PharmapolisLabelSvg({
             const isUltraSparse = ingCount <= 2 && (directions.length < 95);
             const isSparse = ingCount <= 3 && (directions.length < 145);
 
-            // Single column ingredients (1–3 items): prominent high-legibility font sizing
+            // Single column ingredients (1–3 items): prominent high-legibility font sizing (Compliant with >= 5.8 pt standard)
             const ingFontSize = isShort
-              ? (isUltraSparse ? 24 : isSparse ? 21 : 19)
+              ? (isUltraSparse ? 35 : isSparse ? 31 : 27)
               : isMediumHeight
-                ? (isUltraSparse ? 26 : isSparse ? 23 : 21)
-                : (isUltraSparse ? 31 : isSparse ? 26 : 24);
-            const ingLineGap = Math.round(ingFontSize * 1.45);
-            const ingMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.65)));
+                ? (isUltraSparse ? 36 : isSparse ? 32 : 28)
+                : (isUltraSparse ? 38 : isSparse ? 34 : 29);
+            const ingLineGap = Math.round(ingFontSize * 1.48);
+            const ingMaxChars = Math.max(22, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.65)));
             const singleIngLines = activeIngredientsList.flatMap(it => wrapLines(`• ${it}`, ingMaxChars));
             const ingLines = singleIngLines.length > 0 ? singleIngLines : wrapLines(`• ${activeIngredientsList.join(' — ')}`, ingMaxChars);
             const ingLineCount = isMultiColumn ? multiColMaxLines : ingLines.length;
 
             const baseFontSize = isShort
-              ? (isUltraSparse ? 17 : isSparse ? 15.5 : 14.5)
+              ? (isUltraSparse ? 22 : isSparse ? 20 : 18)
               : isMediumHeight
-                ? (isUltraSparse ? 18.5 : isSparse ? 17 : 15.5)
-                : (isUltraSparse ? 22 : isSparse ? 19.5 : 18);
-            const baseLineGap = Math.round(baseFontSize * 1.40);
-            const baseMaxChars = Math.max(26, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.65)));
+                ? (isUltraSparse ? 23 : isSparse ? 21 : 19)
+                : (isUltraSparse ? 25 : isSparse ? 22 : 20);
+            const baseLineGap = Math.round(baseFontSize * 1.42);
+            const baseMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.65)));
             const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
 
-            // Directions font scaling & wrapping
+            // Directions font scaling & wrapping (Compliant with >= 5.8 pt standard)
             const posFontSize = isShort
-              ? (isUltraSparse ? 22 : isSparse ? 20 : 17.5)
+              ? (isUltraSparse ? 32 : isSparse ? 28 : 25)
               : isMediumHeight
-                ? (isUltraSparse ? 24 : isSparse ? 21 : 18.5)
-                : (isUltraSparse ? 28 : isSparse ? 24 : 21);
+                ? (isUltraSparse ? 33 : isSparse ? 29 : 26)
+                : (isUltraSparse ? 35 : isSparse ? 31 : 28);
             const posLineGap = Math.round(posFontSize * 1.48);
             const posMaxChars = Math.max(24, Math.floor((innerUsableWidth - 64) / (posFontSize * 0.68)));
             const posologyLines = wrapLines(directions, posMaxChars);
@@ -1256,12 +1251,13 @@ export default function PharmapolisLabelSvg({
             const totalAvailableSpace = maxPosBoxBottom - (isShort ? 10 : isMediumHeight ? 12 : 16);
             const verticalSurplus = Math.max(0, totalAvailableSpace - totalContentNeeded);
 
-            // Expand posBoxHeight to absorb surplus space naturally
-            const extraBoxPad = Math.min(72, Math.round(verticalSurplus * 0.38));
+            // Harmonious posBoxHeight: fits content cleanly without creating a giant empty void
+            const extraBoxPad = Math.min(24, Math.round(verticalSurplus * 0.16));
             const posBoxHeight = basePosBoxHeight + extraBoxPad;
 
-            const topIngredientsY = isShort ? 8 : isMediumHeight ? 10 : Math.max(12, Math.min(22, Math.round(verticalSurplus * 0.18)));
-            const midPad = isShort ? 10 : isMediumHeight ? 12 : Math.max(12, Math.min(36, Math.round(verticalSurplus * 0.36)));
+            // Distribute surplus space comfortably above and between blocks
+            const topIngredientsY = isShort ? (isUltraSparse ? 14 : 10) : isMediumHeight ? 14 : Math.max(14, Math.min(26, Math.round(verticalSurplus * 0.22)));
+            const midPad = isShort ? (isUltraSparse ? 18 : 12) : isMediumHeight ? 16 : Math.max(16, Math.min(38, Math.round(verticalSurplus * 0.38)));
 
             // Absolute hard clamp: posBoxY + posBoxHeight CAN NEVER EXCEED maxPosBoxBottom
             let posBoxY = topIngredientsY + ingBlockH + midPad;

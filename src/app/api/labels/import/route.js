@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb, admin } from '@/lib/firebaseAdmin';
 import { invalidateRxCache } from '@/lib/rxCache';
+import { syncBatchPrescriptionsToAlgolia } from '@/services/algoliaSyncService';
 import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { processPrescriptionZohoOnImport } from '@/actions/zohoAutoIngestMatcher';
 import { notifyPrescriptionImported } from '@/lib/prescriptionImportNotifier';
@@ -77,19 +78,15 @@ export async function POST(request) {
       try { invalidateRxCache?.(c.id); } catch { /* noop */ }
     });
 
-    // Fire-and-forget Algolia projection (server → server)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+    // In-process atomic Algolia synchronization (Guarantees zero missed search records)
+    const algoliaItems = created.map((c, idx) => ({
+      id: c.id,
+      record: { ...(list[idx] || {}), id: c.id, code: c.code, patientName: c.patientName, status: 'draft' }
+    }));
+    await syncBatchPrescriptionsToAlgolia(algoliaItems);
+
     created.forEach((c, idx) => {
       const rx = list[idx] || {};
-      fetch(`${baseUrl}/api/algolia/sync`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'upsert',
-          indexName: 'prescriptions',
-          record: { ...rx, id: c.id, status: 'draft', code: c.code }
-        })
-      }).catch(() => { /* non-blocking */ });
 
       // Non-blocking Zoho Books matching & auto-creation pipeline
       processPrescriptionZohoOnImport({

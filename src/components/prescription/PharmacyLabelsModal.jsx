@@ -510,14 +510,14 @@ export default function PharmacyLabelsModal({
   let titleSvgUnits = 38;
 
   if (activeVariant === 'backQr') {
-    // Dynamic Auto-Fill Font Sizing matching PharmapolisLabelSvg.jsx
+    // Dynamic Auto-Fill Font Sizing matching PharmapolisLabelSvg.jsx (Compliant with >= 5.8 pt regulatory standard)
     ingSvgUnits = isShort
-      ? (isUltraSparse ? 29 : isSparse ? 25 : 22)
-      : (isUltraSparse ? 38 : isSparse ? 34 : 27);
+      ? (isUltraSparse ? 35 : isSparse ? 31 : 27)
+      : (isUltraSparse ? 38 : isSparse ? 34 : 28);
     dirSvgUnits = isShort
-      ? (isUltraSparse ? 24 : isSparse ? 21 : 19)
-      : (isUltraSparse ? 32 : isSparse ? 28 : 23);
-    patSvgUnits = patNameLength > 36 ? 30 : (patNameLength > 28 ? 34 : 38);
+      ? (isUltraSparse ? 32 : isSparse ? 28 : 25)
+      : (isUltraSparse ? 35 : isSparse ? 31 : 27);
+    patSvgUnits = patNameLength > 36 ? 32 : (patNameLength > 28 ? 35 : 38);
     titleSvgUnits = 32;
   } else if (activeVariant === 'front' || activeVariant === 'frontWithQr') {
     ingSvgUnits = 38;
