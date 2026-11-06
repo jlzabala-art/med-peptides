@@ -37,7 +37,7 @@ export default function QualityTraceabilitySection({
     const items = rx.compoundedFormulations || rx.items || rx.formulas || [];
 
     const hasTrichoKeywords = /tricho|minoxidil|finasteride|dutasteride|scalp|follicular|acnetest|telotest/i.test(rxStr);
-    const hasPeptideKeywords = /peptide|vial|injectable|subq|bpc-157|tb-500|epithalon|cjc-1295|ipamorelin|semaglutide|tirzepatide/i.test(rxStr);
+    const hasPeptideKeywords = /peptide|vial|injectable|subq|bpc-157|tb-500|epithalon|cjc-1295|ipamorelin|semaglutide|tirzepatide|retatrutide|glp-3|glp3|glp-1|glp1|pen|pre-filled|prefilled|cagrilintide|mazdutide|survodutide|kisspeptin|ghk-cu|mots-c/i.test(rxStr);
 
     let tricho = hasTrichoKeywords && !hasPeptideKeywords;
     let peptide = hasPeptideKeywords;

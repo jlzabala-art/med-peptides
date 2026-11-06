@@ -284,7 +284,24 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       const routeLower = (route || '').toLowerCase();
 
       const dosageLower = (dosageForm || '').toLowerCase();
-      const isInjectable = vNameLower.includes('vial') || 
+
+      // ── Pre-filled pen detection (priority over generic injectable) ────────
+      const isPen = dosageLower.includes('pre-filled pen') || dosageLower.includes('prefilled pen') ||
+                    dosageLower.includes('pluma precargada') || dosageLower.includes('subq pen') ||
+                    vNameLower.includes('pre-filled pen') || vNameLower.includes('prefilled pen') ||
+                    vNameLower.includes('pluma precargada') || vNameLower.includes('ready-to-use pen') ||
+                    vNameLower.includes('sterile buffer solution') || vNameLower.includes('solución tampón') ||
+                    titleLower.includes('pre-filled pen') || titleLower.includes('prefilled pen') ||
+                    titleLower.includes('pluma precargada') || titleLower.includes('subq pen') ||
+                    titleLower.includes('incretin') ||
+                    apis.some(a => {
+                      const an = (a.name || a.productName || a.activeIngredient || '').toLowerCase();
+                      return (an.includes('retatrutide') || an.includes('tirzepatide') || an.includes('semaglutide') || an.includes('glp-3') || an.includes('glp-1')) &&
+                             (an.includes('pen') || (a.format || '').toLowerCase().includes('pen') || (a.presentation || '').toLowerCase().includes('pen'));
+                    });
+
+      const isInjectable = isPen ||
+                           vNameLower.includes('vial') || 
                            vNameLower.includes('lyophilized') || 
                            vNameLower.includes('liofilizado') || 
                            vNameLower.includes('diluent') || 
@@ -371,6 +388,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
                      }));
 
       const resolvedDosageForm = dosageForm || (
+        isPen ? (isEs ? 'Pluma Precargada SubQ (Multi-dosis)' : 'Pre-filled SubQ Pen (Multi-dose)') :
         isInjectable ? (isDiluent ? (isEs ? 'Vehículo Diluyente Estéril' : 'Sterile Diluent Vehicle') : (isEs ? 'Vial Liofilizado Estéril' : 'Sterile Lyophilized Vial')) :
         isTrichoOil ? (isEs ? 'Aceite Capilar Tópico' : 'Topical Scalp Oil') :
         isOral ? (isEs ? 'Cápsulas Orales' : 'Oral Capsules') :
@@ -389,8 +407,12 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
 
       const vehicleObj = {
         tag: isEs ? 'VEHÍCULO MAGISTRAL' : 'COMPOUNDING VEHICLE / BASE',
-        name: vehicleName || (isInjectable ? (isDiluent ? 'Sterile Bacteriostatic Water (0.9% Benzyl Alcohol USP)' : 'Type I Borosilicate Glass Sterile Vial (USP/Ph. Eur.)') : (isTrichoOil ? 'TrichoOil™ Natural Lipidic Carrier' : 'TrichoSol™ Liposomal Hydrophilic Base')),
-        volume: volume || (isInjectable ? (isDiluent ? '3 mL' : '10 mg') : (isTrichoOil ? '30 mL' : (isOral ? '90 Capsules' : (isPomade ? '30 g' : (isBHRT ? '90 mL' : '100 mL'))))),
+        name: vehicleName || (isPen
+          ? (isEs ? 'Solución Tampón Estéril (Lista para Inyección SubQ)' : 'Sterile Buffer Solution (Ready-to-Use Pre-filled Pen)')
+          : (isInjectable ? (isDiluent ? 'Sterile Bacteriostatic Water (0.9% Benzyl Alcohol USP)' : 'Type I Borosilicate Glass Sterile Vial (USP/Ph. Eur.)') : (isTrichoOil ? 'TrichoOil™ Natural Lipidic Carrier' : 'TrichoSol™ Liposomal Hydrophilic Base'))),
+        volume: volume || (isPen
+          ? (isEs ? '2 Plumas Precargadas (60 mg total)' : '2 Pre-filled Pens (60 mg total)')
+          : (isInjectable ? (isDiluent ? '3 mL' : '10 mg') : (isTrichoOil ? '30 mL' : (isOral ? '90 Capsules' : (isPomade ? '30 g' : (isBHRT ? '90 mL' : '100 mL')))))),
         specs: ''
       };
 
@@ -403,7 +425,24 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         steps: []
       };
 
-      if (isInjectable) {
+      if (isPen) {
+        // ── Pre-Filled Pen (SubQ) — no reconstitution, refrigerated, weekly ──
+        accentColor = '#7c3aed';
+        accentBg = '#f5f3ff';
+        badgeText += isEs ? ' · PLUMA PRECARGADA SUBCUTÁNEA (SUBQ PEN)' : ' · PRE-FILLED SUBCUTANEOUS PEN (SUBQ PEN)';
+        resolvedTitle = treatmentTitle || (isEs ? 'Terapia Incretínica con Pluma Precargada (SubQ Pen)' : 'Targeted Peptide Incretin Therapy (Pre-filled Pen)');
+        resolvedRoute = isEs ? 'Inyección Subcutánea (SubQ) · Pluma Precargada' : 'Subcutaneous Injection (SubQ) · Pre-filled Pen Device';
+        resolvedVolume = volume || (isEs ? '2 Plumas Precargadas (60 mg total)' : '2 Pre-filled Pens (60 mg total)');
+        vehicleObj.name = vehicleName || (isEs ? 'Solución Tampón Estéril (Lista para Inyección SubQ)' : 'Sterile Buffer Solution (Ready-to-Use Pre-filled Pen)');
+        vehicleObj.specs = isEs
+          ? 'Solución acuosa isotónica estéril con conservantes antimicrobianos aprobados. Lista para administración subcutánea directa sin reconstitución manual. Conservar refrigerado (2°C - 8°C). No congelar.'
+          : 'Sterile isotonic aqueous solution with approved antimicrobial preservatives. Ready for immediate subcutaneous administration — no manual reconstitution required. Store refrigerated (2°C - 8°C). Do not freeze.';
+        posologyObj.title = isEs ? 'Pauta de Administración SubQ Semanal (Pluma Precargada)' : 'Weekly SubQ Dosing Schedule (Pre-filled Pen)';
+        posologyObj.regimen = safeCustomPosology || (isEs ? '1 inyección subcutánea semanal según protocolo médico de titulación' : '1 subcutaneous injection weekly per clinical titration protocol');
+        posologyObj.timing = isEs
+          ? 'Mismo día cada semana · Rotar sitios de inyección (abdomen o muslos)'
+          : 'Same day each week · Rotate subcutaneous injection sites (abdomen or front of thigh)';
+      } else if (isInjectable) {
         accentColor = isDiluent ? '#0284c7' : '#2563eb';
         accentBg = isDiluent ? '#f0f9ff' : '#eff6ff';
         badgeText += isDiluent 
@@ -488,12 +527,15 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         volume: resolvedVolume,
         isOral,
         isInjectable,
+        isPen,
         isDiluent,
-        container: isInjectable
-          ? (isEs ? 'Vial de Vidrio Borosilicato Tipo I con Tapón de Clorobutilo y Sellado Flip-Off' : 'Type I Borosilicate Glass Vial with Chlorobutyl Stopper & Flip-Off Seal')
-          : (isOral 
-              ? (isEs ? 'Frasco HDPE Farmacéutico de Seguridad con Cierre Inviolable' : 'Pharmaceutical HDPE Safety Bottle with Tamper-Evident Cap')
-              : (isTrichoOil ? 'Amber Glass Dropper Bottle' : 'Dispensing Container')),
+        container: isPen
+          ? (isEs ? 'Dispositivo Inyector Multidosis Tipo Pluma Precargada con Agujas Ultrafinas de Seguridad (31G/32G)' : 'Multi-dose Pre-filled Pen Injector Device with Ultra-fine Safety Needles (31G/32G)')
+          : (isInjectable
+              ? (isEs ? 'Vial de Vidrio Borosilicato Tipo I con Tapón de Clorobutilo y Sellado Flip-Off' : 'Type I Borosilicate Glass Vial with Chlorobutyl Stopper & Flip-Off Seal')
+              : (isOral 
+                  ? (isEs ? 'Frasco HDPE Farmacéutico de Seguridad con Cierre Inviolable' : 'Pharmaceutical HDPE Safety Bottle with Tamper-Evident Cap')
+                  : (isTrichoOil ? 'Amber Glass Dropper Bottle' : 'Dispensing Container'))),
         isTrichoOil,
         isPomade,
         isBHRT,
@@ -707,12 +749,40 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     const solItems = [];
     const trichoOilItems = [];
     const oralItems = [];
+    const injectableItems = [];
     const vehicleLines = [];
+
+    // ── Pre-compute pen/injectable detection from rx-level fields ────────────
+    const rxSig = [
+      rx.medication, rx.productName, rx.dispensingForm, rx.format,
+      rx.treatmentType, rx.treatmentProgram,
+      ...(Array.isArray(rx.items) ? rx.items.map(i => `${i.name || ''} ${i.productName || ''} ${i.format || ''} ${i.presentation || ''} ${i.activeIngredient || ''}`) : []),
+      ...(Array.isArray(rx.prescriptionLines) ? rx.prescriptionLines.map(l => `${l.name || ''} ${l.productName || ''} ${l.format || ''} ${l.presentation || ''} ${l.activeIngredient || ''}`) : [])
+    ].join(' ').toLowerCase();
+
+    const isPenRx =
+      rxSig.includes('pre-filled pen') || rxSig.includes('prefilled pen') ||
+      rxSig.includes('pre-filled') || rxSig.includes('pluma precargada') ||
+      rxSig.includes('subq pen') || rxSig.includes('pen 30 mg') ||
+      rxSig.includes('pen 15 mg') || rxSig.includes('pen 10 mg') ||
+      rxSig.includes('pen 5 mg') || rxSig.includes('pen 7.5 mg') ||
+      (rxSig.includes('pen') && (rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') || rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') || rxSig.includes('semaglutide')));
+
+    const isInjectableRx =
+      isPenRx ||
+      rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') ||
+      rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') ||
+      rxSig.includes('semaglutide') || rxSig.includes('cagrilintide') || rxSig.includes('mazdutide') ||
+      rxSig.includes('survodutide') || rxSig.includes('bpc-157') || rxSig.includes('tb-500') ||
+      rxSig.includes('kisspeptin') || rxSig.includes('ipamorelin') || rxSig.includes('sermorelin') ||
+      rxSig.includes('ghk-cu') || rxSig.includes('epithalon') || rxSig.includes('mots-c') ||
+      rxSig.includes('lyophilized') || rxSig.includes('liofilizado') ||
+      rxSig.includes('subcutaneous') || rxSig.includes('subq');
 
     (rawLines || []).forEach(line => {
       const nameLower = (line.name || line.drugName || line.productName || line.activeIngredient || '').toLowerCase();
       const routeLower = (line.route || '').toLowerCase();
-      const formLower = (line.form || line.dosageForm || '').toLowerCase();
+      const formLower = (line.form || line.dosageForm || line.format || line.presentation || '').toLowerCase();
 
       const isVeh = line._isVehicleOrBase || line.isVehicle || 
         nameLower.includes('trichosol') || 
@@ -728,15 +798,33 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         return;
       }
 
-      const isOil = nameLower.includes('trichooil') || 
+      // ── Injectable / Pen detection (MUST be checked BEFORE topical/oral) ──
+      const lineIsPen =
+        formLower.includes('pre-filled pen') || formLower.includes('prefilled pen') ||
+        formLower.includes('pluma precargada') || formLower.includes('subq pen') ||
+        (formLower.includes('pen') && (nameLower.includes('glp') || nameLower.includes('retatrutide') || nameLower.includes('tirzepatide')));
+
+      const lineIsInjectable = lineIsPen ||
+        nameLower.includes('retatrutide') || nameLower.includes('glp-3') || nameLower.includes('glp3') ||
+        nameLower.includes('glp-1') || nameLower.includes('glp1') || nameLower.includes('tirzepatide') ||
+        nameLower.includes('semaglutide') || nameLower.includes('cagrilintide') || nameLower.includes('bpc-157') ||
+        nameLower.includes('tb-500') || nameLower.includes('kisspeptin') || nameLower.includes('ipamorelin') ||
+        nameLower.includes('sermorelin') || nameLower.includes('ghk-cu') || nameLower.includes('epithalon') ||
+        nameLower.includes('mots-c') || nameLower.includes('peptide') ||
+        routeLower.includes('subq') || routeLower.includes('subcutaneous') || routeLower.includes('inject') ||
+        formLower.includes('lyophilized') || formLower.includes('liofilizado') || formLower.includes('vial');
+
+      const isOil = !lineIsInjectable && (
+        nameLower.includes('trichooil') || 
         nameLower.includes('ginseng') || 
         nameLower.includes('ginkgo biloba') || 
         nameLower.includes('tocopherol') || 
         nameLower.includes('vitamin e') ||
         routeLower.includes('massage') ||
-        nameLower.includes('rosmarinus');
+        nameLower.includes('rosmarinus'));
 
-      const isOral = routeLower.includes('oral') || 
+      const isOral = !lineIsInjectable && (
+        routeLower.includes('oral') || 
         formLower.includes('capsule') || 
         formLower.includes('cápsula') || 
         nameLower.includes('nattokinase') || 
@@ -744,16 +832,61 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         nameLower.includes('saw palmetto') || 
         nameLower.includes('pygeum') ||
         isNutrigen || 
-        isEntirelyOral;
+        isEntirelyOral);
 
-      if (isOil && !isOral) {
+      if (lineIsInjectable) {
+        injectableItems.push({ ...line, _isPen: lineIsPen });
+      } else if (isOil && !isOral) {
         trichoOilItems.push(line);
       } else if (isOral) {
         oralItems.push(line);
       } else {
-        solItems.push(line);
+        // Only fall into TrichoSol if the entire Rx is NOT a pen/injectable
+        if (isInjectableRx) {
+          injectableItems.push(line);
+        } else {
+          solItems.push(line);
+        }
       }
     });
+
+    // ── If Rx is pen/injectable but no lines were caught (e.g. flat items), force from rx fields ──
+    if (isInjectableRx && injectableItems.length === 0 && solItems.length > 0) {
+      injectableItems.push(...solItems.splice(0, solItems.length));
+    }
+    // Also handle case where rawLines is empty but rx.items has the info
+    if (isInjectableRx && injectableItems.length === 0 && rawLines.length === 0) {
+      injectableItems.push({
+        id: 'rx-active-api',
+        name: rx.productName || rx.medication || (isEs ? 'Medicamento Activo Prescrito' : 'Prescribed Active API'),
+        productName: rx.productName || rx.medication,
+        activeIngredient: rx.medication,
+        dosage: '',
+        _isPen: isPenRx
+      });
+    }
+
+    if (injectableItems.length > 0) {
+      const anyPen = isPenRx || injectableItems.some(i => i._isPen);
+      activeBlocks.push({
+        type: anyPen ? 'prefilled_pen' : 'injectable_vial',
+        vehicleName: anyPen
+          ? (isEs ? 'Solución Tampón Estéril (Lista para Inyección SubQ)' : 'Sterile Buffer Solution (Ready-to-Use Pre-filled Pen)')
+          : 'Type I Borosilicate Glass Sterile Vial (USP/Ph. Eur.)',
+        dosageForm: anyPen
+          ? (isEs ? 'Pluma Precargada SubQ (Multi-dosis)' : 'Pre-filled SubQ Pen (Multi-dose)')
+          : (isEs ? 'Vial Liofilizado Estéril' : 'Sterile Lyophilized Vial'),
+        treatmentTitle: rx.treatmentType || (anyPen
+          ? (isEs ? 'Terapia Incretínica con Pluma Precargada (SubQ Pen)' : 'Targeted Peptide Incretin Therapy (Pre-filled Pen)')
+          : (isEs ? 'Terapia Peptídica Subcutánea (Vial SubQ)' : 'Subcutaneous Peptide Therapy (SubQ Vial)')),
+        route: isEs ? 'Inyección Subcutánea (SubQ)' : 'Subcutaneous Injection (SubQ)',
+        volume: rx.volume || (anyPen
+          ? (isEs ? '2 Plumas Precargadas (60 mg total)' : '2 Pre-filled Pens (60 mg total)')
+          : '10 mg'),
+        customPosology: getPosologyText(rx.posology) || (isEs ? '1 inyección subcutánea semanal según pauta médica' : '1 subcutaneous injection weekly per medical titration protocol'),
+        apis: injectableItems
+      });
+    }
 
     if (solItems.length > 0) {
       activeBlocks.push({
@@ -984,8 +1117,90 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     return null;
   }, [rx]);
 
-  // Localized clinical steps (tailored for oral or topical routes)
+  // Localized clinical steps (tailored for oral, pen/injectable, or topical routes)
   const steps = useMemo(() => {
+    // ── SubQ Pen steps ──────────────────────────────────────────────────────
+    const penStepsEs = [
+      {
+        step: 1,
+        title: 'Equilibrado de Temperatura',
+        timing: '30 min antes de inyectar',
+        badge: 'Pluma Precargada',
+        instruction: 'Retirar la pluma precargada de la nevera 30 minutos antes de la inyección. Dejar alcanzar temperatura ambiente. No agitar ni calentar con agua caliente. No congelar nunca.'
+      },
+      {
+        step: 2,
+        title: 'Selección del Sitio de Inyección',
+        timing: 'Rotación Semanal',
+        badge: 'Abdomen o Muslo',
+        instruction: 'Seleccionar un sitio diferente cada semana: abdomen (al menos 5 cm del ombligo) o parte anterior del muslo. No inyectar en zonas con hematomas, cicatrices o piel irritada.'
+      },
+      {
+        step: 3,
+        title: 'Asepsia y Preparación',
+        timing: 'Inmediatamente Antes',
+        badge: 'Alcohol 70%',
+        instruction: 'Limpiar la zona elegida con una torunda de alcohol al 70%. Dejar secar completamente antes de inyectar (30 segundos). Lavar manos previamente con agua y jabón.'
+      },
+      {
+        step: 4,
+        title: 'Inyección SubQ con Pluma',
+        timing: 'Ángulo 90°',
+        badge: 'Pluma Precargada 31G/32G',
+        instruction: 'Pellizcar suavemente la piel. Insertar la aguja de la pluma en ángulo de 90° con movimiento firme y seguro. Presionar el émbolo hasta el tope. Mantener 10 segundos. Retirar sin frotar.'
+      },
+      {
+        step: 5,
+        title: 'Conservación Post-Uso',
+        timing: '2°C – 8°C Nevera',
+        badge: 'No Congelar',
+        instruction: 'Volver la pluma inmediatamente a la nevera (2°C–8°C). No exponer a temperaturas extremas ni a la luz solar directa. Desechar la aguja usada en contenedor de cortopunzantes.'
+      }
+    ];
+    const penStepsEn = [
+      {
+        step: 1,
+        title: 'Temperature Equilibration',
+        timing: '30 min before injection',
+        badge: 'Pre-filled Pen',
+        instruction: 'Remove the pre-filled pen from the refrigerator 30 minutes before injecting. Allow to reach room temperature naturally. Do not shake or warm with hot water. Never freeze.'
+      },
+      {
+        step: 2,
+        title: 'Injection Site Selection',
+        timing: 'Weekly Rotation',
+        badge: 'Abdomen or Thigh',
+        instruction: 'Choose a different site each week: abdomen (at least 5 cm from the navel) or front of thigh. Avoid bruised, scarred, or irritated skin areas.'
+      },
+      {
+        step: 3,
+        title: 'Asepsis & Site Preparation',
+        timing: 'Immediately Before',
+        badge: '70% Alcohol Swab',
+        instruction: 'Clean the chosen area with a 70% alcohol swab. Allow to air-dry completely before injecting (30 seconds). Wash hands thoroughly with soap and water beforehand.'
+      },
+      {
+        step: 4,
+        title: 'SubQ Pen Injection',
+        timing: '90° Angle',
+        badge: 'Pre-filled Pen 31G/32G',
+        instruction: 'Gently pinch a fold of skin. Insert the pen needle at a 90° angle with a firm, confident motion. Depress the plunger to the full stop. Hold 10 seconds. Withdraw without rubbing.'
+      },
+      {
+        step: 5,
+        title: 'Post-Injection Storage',
+        timing: '2°C – 8°C Refrigerator',
+        badge: 'Do Not Freeze',
+        instruction: 'Return the pen immediately to the refrigerator (2°C–8°C). Avoid extreme temperatures and direct sunlight. Dispose of the used needle in a sharps container.'
+      }
+    ];
+
+    if (isInjectableRx || isPenRx) {
+      return isEs
+        ? (posology.applicationSteps || penStepsEs)
+        : (posology.applicationSteps || penStepsEn);
+    }
+
     return isEs ? (posology.applicationSteps || (isEntirelyOral ? [
       {
         step: 1,
@@ -1131,10 +1346,24 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         instruction: 'Cleanse hair the following morning using a gentle physiological shampoo (pH 5.5, free of harsh aggressive sulfates).'
       }
     ]));
-  }, [isEs, posology.applicationSteps, isEntirelyOral, rx.posology, rx.duration, doctorName]);
+  }, [isEs, posology.applicationSteps, isEntirelyOral, isInjectableRx, isPenRx, rx.posology, rx.duration, doctorName]);
 
   // Localized clinical milestones
   const timeline = useMemo(() => {
+    // ── Incretin / Peptide Pen Timeline ──────────────────────────────────────
+    if (isInjectableRx || isPenRx) {
+      const penTimelineEs = [
+        { phase: 'Semanas 1 - 4', title: 'Titulación Inicial & Cebado Incretínico', badge: 'Mes 1', description: 'Adaptación del organismo a la dosis inicial. Activación de receptores GLP-1R/GIPR. Reducción gradual del apetito y mejora de la saciedad post-prandial.' },
+        { phase: 'Semanas 5 - 8', title: 'Gasto Calórico & Lipólisis Visceral', badge: 'Mes 2', description: 'Incremento del gasto energético en reposo. Lipólisis preferencial de grasa visceral y ectópica. Mejora de sensibilidad a la insulina.' },
+        { phase: rx.duration || 'Semanas 9 - 12', title: 'Recomposición Corporal & Consolidación Metabólica', badge: 'Mes 3', description: 'Estabilización del peso y consolidación de la recomposición corporal. Revisión clínica con ' + (doctorName || 'el médico prescriptor') + ' para ajuste de titulación.' }
+      ];
+      const penTimelineEn = [
+        { phase: 'Weeks 1 - 4', title: 'Initial Titration & Incretin Priming', badge: 'Month 1', description: 'Body adaptation to the initial dose. GLP-1R/GIPR receptor activation in pancreatic beta cells. Gradual appetite reduction and improved post-prandial satiety.' },
+        { phase: 'Weeks 5 - 8', title: 'Caloric Expenditure & Visceral Lipolysis', badge: 'Month 2', description: 'Increase in resting energy expenditure. Preferential lipolysis of visceral and ectopic fat. Improvement in insulin sensitivity and metabolic biomarkers.' },
+        { phase: rx.duration || 'Weeks 9 - 12', title: 'Body Recomposition & Metabolic Consolidation', badge: 'Month 3', description: 'Body weight stabilization and consolidation of metabolic recomposition. Clinical review with ' + (doctorName || 'the prescribing physician') + ' for titration adjustment.' }
+      ];
+      return isEs ? (posology.timeline || penTimelineEs) : (posology.timeline || penTimelineEn);
+    }
     return isEs ? (posology.timeline || (isEntirelyOral ? [
       {
         phase: 'Mes 1',

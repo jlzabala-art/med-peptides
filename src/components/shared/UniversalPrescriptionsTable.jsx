@@ -233,7 +233,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   // Group data by sessionId with deep search support
   const groupedData = useMemo(() => {
     let rawData;
-    if (isAlgoliaActive && searchTerm.trim()) {
+    if (isAlgoliaActive && searchTerm.trim() && algoliaHits && algoliaHits.length > 0) {
       // Merge Algolia slim hits with authoritative local Firestore data to avoid missing clinical fields (APIs, parts)
       rawData = algoliaHits.map(h => {
         const hitId = h.objectID || h.id;
@@ -249,12 +249,17 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         const matchesBoxId = (rx.fagron?.boxId || '').toLowerCase().includes(q);
         const matchesProtocol = (rx.protocolName || rx.treatmentProgram || '').toLowerCase().includes(q);
         const matchesId = (rx.id || '').toLowerCase().includes(q);
+        const matchesCode = (rx.code || rx.prescriptionCode || rx.prescriptionNumber || rx.sanitizedCode || '').toLowerCase().includes(q);
+        const matchesMed = (rx.medication || rx.productName || rx.treatmentType || '').toLowerCase().includes(q);
         const lines = rx.prescriptionLines || rx.items || [];
         const matchesLine = lines.some(l => 
           (l.productName || l.name || '').toLowerCase().includes(q) ||
-          (l.activeIngredient || '').toLowerCase().includes(q)
+          (l.activeIngredient || '').toLowerCase().includes(q) ||
+          (l.sku || '').toLowerCase().includes(q) ||
+          (l.format || '').toLowerCase().includes(q) ||
+          (l.presentation || '').toLowerCase().includes(q)
         );
-        return matchesPatient || matchesDoctor || matchesBoxId || matchesProtocol || matchesId || matchesLine;
+        return matchesPatient || matchesDoctor || matchesBoxId || matchesProtocol || matchesId || matchesCode || matchesMed || matchesLine;
       });
     } else {
       rawData = displayPrescriptions || [];
@@ -369,7 +374,9 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       else if (rangeFilter === 'year') cutoff = new Date(now.getFullYear(), 0, 1);
 
       rawData = rawData.filter(rx => {
-        const d = rx.createdAt?.seconds ? new Date(rx.createdAt.seconds * 1000) : (rx.createdAt ? new Date(rx.createdAt) : null);
+        const d = rx.createdAt_ts
+          ? new Date(rx.createdAt_ts)
+          : (rx.createdAt?.seconds ? new Date(rx.createdAt.seconds * 1000) : (rx.createdAt ? new Date(rx.createdAt) : null));
         return !d || d >= cutoff;
       });
     }

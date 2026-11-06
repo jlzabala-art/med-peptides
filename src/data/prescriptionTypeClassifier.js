@@ -204,38 +204,7 @@ export function classifyPrescription(rx) {
     return PRESCRIPTION_TYPE_CONFIG.hormone;
   }
 
-  // 3. TrichoTest™ Detection (Hair genomics / TrichoSol / TrichoFoam / Scalp Topicals)
-  const isTrichoGenomics = fagronTest?.testKey === 'trichotest';
-  const hasTrichoKeywords = 
-    sig.includes('trichotest') ||
-    sig.includes('trichosol') ||
-    sig.includes('trichofoam') ||
-    sig.includes('trichooil') ||
-    sig.includes('trichoconcept') ||
-    sig.includes('trichology') ||
-    sig.includes('alopecia') ||
-    (sig.includes('latanoprost') && (sig.includes('minoxidil') || sig.includes('17-a') || sig.includes('17-alpha') || sig.includes('finasteride'))) ||
-    (sig.includes('minoxidil') && (sig.includes('finasteride') || sig.includes('dutasteride') || sig.includes('scalp')));
-
-  if (isTrichoGenomics || hasTrichoKeywords) {
-    return PRESCRIPTION_TYPE_CONFIG.trichotest;
-  }
-
-  // 3. NutriGen™ Detection (Nutrigenomics / Oral multi-phase chronobiology / GreenSelect / Silymarin)
-  const isNutriGenGenomics = fagronTest?.testKey === 'nutrigen';
-  const hasNutriGenKeywords = 
-    sig.includes('nutrigen') ||
-    sig.includes('greenselect') ||
-    sig.includes('silymarin') ||
-    (sig.includes('detox') && sig.includes('capsule')) ||
-    (sig.includes('phase 1') && sig.includes('phase 2') && sig.includes('phase 3')) ||
-    rx.id === 'zCXwP3MeSaid23OsGTBP';
-
-  if (isNutriGenGenomics || hasNutriGenKeywords) {
-    return PRESCRIPTION_TYPE_CONFIG.nutrigen;
-  }
-
-  // 5. Peptide Protocol Detection (SubQ injectables, vials, bioregulators)
+  // 3. Peptide Protocol Detection (SubQ injectables, vials, pre-filled pens, bioregulators)
   const PEPTIDE_KEYWORDS = [
     'bpc-157',
     'bpc 157',
@@ -258,6 +227,16 @@ export function classifyPrescription(rx) {
     'semaglutide',
     'tirzepatide',
     'retatrutide',
+    'cagrilintide',
+    'mazdutide',
+    'survodutide',
+    'glp-3',
+    'glp3',
+    'glp-1',
+    'glp1',
+    'pre-filled pen',
+    'prefilled pen',
+    'subq pen',
     'nad+',
     'selank',
     'semax',
@@ -268,9 +247,41 @@ export function classifyPrescription(rx) {
     'subcutaneous'
   ];
 
-  const hasPeptideKeywords = PEPTIDE_KEYWORDS.some(kw => sig.includes(kw));
+  const hasPeptideKeywords = PEPTIDE_KEYWORDS.some(kw => sig.includes(kw)) ||
+    (sig.includes('pen') && (sig.includes('30 mg') || sig.includes('15 mg') || sig.includes('10 mg') || sig.includes('5 mg') || sig.includes('subq')));
   if (hasPeptideKeywords) {
     return PRESCRIPTION_TYPE_CONFIG.peptide;
+  }
+
+  // 4. TrichoTest™ Detection (Hair genomics / TrichoSol / TrichoFoam / Scalp Topicals)
+  const isTrichoGenomics = fagronTest?.testKey === 'trichotest';
+  const hasTrichoKeywords = 
+    sig.includes('trichotest') ||
+    sig.includes('trichosol') ||
+    sig.includes('trichofoam') ||
+    sig.includes('trichooil') ||
+    sig.includes('trichoconcept') ||
+    sig.includes('trichology') ||
+    sig.includes('alopecia') ||
+    (sig.includes('latanoprost') && (sig.includes('minoxidil') || sig.includes('17-a') || sig.includes('17-alpha') || sig.includes('finasteride'))) ||
+    (sig.includes('minoxidil') && (sig.includes('finasteride') || sig.includes('dutasteride') || sig.includes('scalp')));
+
+  if (isTrichoGenomics || hasTrichoKeywords) {
+    return PRESCRIPTION_TYPE_CONFIG.trichotest;
+  }
+
+  // 5. NutriGen™ Detection (Nutrigenomics / Oral multi-phase chronobiology / GreenSelect / Silymarin)
+  const isNutriGenGenomics = fagronTest?.testKey === 'nutrigen';
+  const hasNutriGenKeywords = 
+    sig.includes('nutrigen') ||
+    sig.includes('greenselect') ||
+    sig.includes('silymarin') ||
+    (sig.includes('detox') && sig.includes('capsule')) ||
+    (sig.includes('phase 1') && sig.includes('phase 2') && sig.includes('phase 3')) ||
+    rx.id === 'zCXwP3MeSaid23OsGTBP';
+
+  if (isNutriGenGenomics || hasNutriGenKeywords) {
+    return PRESCRIPTION_TYPE_CONFIG.nutrigen;
   }
 
   // 6. Fallback to Compounding Rx

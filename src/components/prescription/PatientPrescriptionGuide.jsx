@@ -103,8 +103,27 @@ export default function PatientPrescriptionGuide({
       const vehicleLower = String(formulation.vehicle?.name || '').toLowerCase();
       const apis = formulation.apis || [];
 
+      // Check if it's a pre-filled pen (subcutaneous, no reconstitution needed)
+      const isPrefilledPen = Boolean(
+        formulation.type === 'prefilled_pen' ||
+        (formulation.vehicle?.name || '').toLowerCase().includes('sterile buffer') ||
+        (formulation.vehicle?.name || '').toLowerCase().includes('solución tampón') ||
+        (formulation.vehicle?.name || '').toLowerCase().includes('ready-to-use pen') ||
+        dosageLower?.includes('pre-filled pen') || dosageLower?.includes('prefilled pen') ||
+        dosageLower?.includes('pluma precargada') || dosageLower?.includes('subq pen') ||
+        titleLower.includes('incretin') || titleLower.includes('pluma precargada') ||
+        titleLower.includes('pre-filled pen') || titleLower.includes('prefilled pen') ||
+        titleLower.includes('subq pen') ||
+        apis.some(a => {
+          const n = String(a.name || a.productName || '').toLowerCase();
+          const f = String(a.format || a.presentation || '').toLowerCase();
+          return (n.includes('retatrutide') || n.includes('tirzepatide') || n.includes('semaglutide') || n.includes('glp-3') || n.includes('glp-1') || n.includes('cagrilintide')) &&
+                 (f.includes('pen') || n.includes('pen') || f.includes('pluma'));
+        })
+      );
+
       // Check if it's a peptide/injectable
-      const isPeptide = Boolean(
+      const isPeptide = isPrefilledPen || Boolean(
         formulation.isInjectable ||
         titleLower.includes('vial') ||
         titleLower.includes('lyophilized') ||
@@ -112,14 +131,18 @@ export default function PatientPrescriptionGuide({
         titleLower.includes('subq') ||
         titleLower.includes('subcutan') ||
         titleLower.includes('pept') ||
+        titleLower.includes('retatrutide') ||
+        titleLower.includes('tirzepatide') ||
+        titleLower.includes('semaglutide') ||
         routeLower.includes('subq') ||
         routeLower.includes('inyect') ||
         routeLower.includes('inject') ||
         apis.some(a => {
           const n = String(a.name || a.productName || '').toLowerCase();
           return n.includes('bpc') || n.includes('tb-') || n.includes('semax') || n.includes('selank') ||
-                 n.includes('semaglutide') || n.includes('tirzepatide') || n.includes('ghk') ||
-                 n.includes('nad') || n.includes('cjc') || n.includes('ipamorelin') || n.includes('sermorelin');
+                 n.includes('semaglutide') || n.includes('tirzepatide') || n.includes('retatrutide') ||
+                 n.includes('glp-3') || n.includes('glp3') || n.includes('glp-1') || n.includes('glp1') ||
+                 n.includes('ghk') || n.includes('nad') || n.includes('cjc') || n.includes('ipamorelin') || n.includes('sermorelin');
         })
       );
 
@@ -176,7 +199,20 @@ export default function PatientPrescriptionGuide({
         storageNote: isEs ? 'Conservar a temperatura ambiente protegida de la luz' : 'Store at room temperature protected from light'
       };
 
-      if (isPeptide) {
+      if (isPrefilledPen) {
+        category = {
+          type: 'prefilled_pen',
+          badge: isEs ? 'PLUMA PRECARGADA DE PÉPTIDOS (SUBQ PEN)' : 'PRE-FILLED PEPTIDE PEN (SUBQ PEN)',
+          icon: '🖊️',
+          color: '#7c3aed',
+          bg: '#f5f3ff',
+          border: '#ddd6fe',
+          storageNote: isEs
+            ? '❄️ Requiere Nevera (2°C – 8°C). Lista para Inyección · No Congelar'
+            : '❄️ Mandatory Refrigeration (2°C – 8°C). Ready-to-Use Pen · Do Not Freeze',
+          requiresReconstitution: false
+        };
+      } else if (isPeptide) {
         category = {
           type: 'peptide',
           badge: isEs ? 'PÉPTIDO INYECTABLE (SUBQ)' : 'INJECTABLE PEPTIDE (SUBQ)',
@@ -479,8 +515,48 @@ export default function PatientPrescriptionGuide({
                     </div>
                   </div>
 
-                  {/* Contextual Posology Advice: Supplement vs Peptide vs Topical */}
-                  {item.category.type === 'peptide' ? (
+                  {/* Contextual Posology Advice: Pre-filled Pen vs Peptide vs Supplement vs Topical */}
+                  {item.category.type === 'prefilled_pen' ? (
+                    /* PRE-FILLED PEN DOSING BOX */
+                    <div
+                      style={{
+                        background: '#faf5ff',
+                        border: '1px solid #ddd6fe',
+                        borderRadius: '6px',
+                        padding: '12px 14px',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: '12px'
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {isEs ? '🖊️ Dosis Semanal (Pluma):' : '🖊️ Weekly Dose (Pen):'}
+                        </div>
+                        <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#5b21b6' }}>
+                          {item.posology?.regimen || (isEs ? '1 inyección subcutánea semanal' : '1 subcutaneous injection weekly')}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {isEs ? '📍 Zona de Inyección:' : '📍 Injection Site:'}
+                        </div>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
+                          {item.posology?.timing || (isEs ? 'Rotación: abdomen o muslos (SubQ)' : 'Rotation: abdomen or front of thigh (SubQ)')}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {isEs ? '❄️ Conservación:' : '❄️ Storage:'}
+                        </div>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
+                          {isEs ? 'Nevera 2°C–8°C · Lista para usar · No congelar' : 'Refrigerator 2°C–8°C · Ready-to-use · Do not freeze'}
+                        </div>
+                      </div>
+                    </div>
+                  ) : item.category.type === 'peptide' ? (
                     /* PEPTIDE DOSING BOX */
                     <div
                       style={{

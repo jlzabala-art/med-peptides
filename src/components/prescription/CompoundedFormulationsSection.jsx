@@ -436,15 +436,17 @@ export default function CompoundedFormulationsSection({
                                 alignItems: 'center',
                                 gap: '3px'
                               }}>
-                                {formulation.isInjectable
-                                  ? (formulation.isDiluent 
-                                      ? `💧 ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()}` 
-                                      : `💉 ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()} / vial`)
-                                  : formulation.isOral 
-                                    ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') || String(api.dosage).includes('Dose') || String(api.dosage).toLowerCase().includes('/ cap') || String(api.dosage).toLowerCase().includes('/cap')
-                                        ? `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}` 
-                                        : `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')} / capsule`) 
-                                    : String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}
+                                {formulation.isPen || formulation.type === 'prefilled_pen'
+                                  ? `🖊️ ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()} / ${isEs ? 'pluma' : 'pen'}`
+                                  : formulation.isInjectable
+                                    ? (formulation.isDiluent 
+                                        ? `💧 ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()}` 
+                                        : `💉 ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()} / vial`)
+                                    : formulation.isOral 
+                                      ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') || String(api.dosage).includes('Dose') || String(api.dosage).toLowerCase().includes('/ cap') || String(api.dosage).toLowerCase().includes('/cap')
+                                          ? `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}` 
+                                          : `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')} / capsule`) 
+                                      : String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}
                               </span>
                               {api.dosageSafety?.evaluated && (
                                 <span 
@@ -764,8 +766,59 @@ export default function CompoundedFormulationsSection({
                     ))}
                   </div>
 
-                  {/* Sub-Section 3a: Reconstitution Guide if Injectable / Peptide Vial */}
-                  {formulation.isInjectable && (
+                  {/* Sub-Section 3a: Pre-filled Pen Banner (No Reconstitution) vs Reconstitution Guide for Vials */}
+                  {(formulation.isPen || formulation.type === 'prefilled_pen') ? (
+                    <div style={{
+                      marginTop: '0.75rem',
+                      background: '#f5f3ff',
+                      border: '1px solid #ddd6fe',
+                      borderRadius: '10px',
+                      padding: '12px 16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '12px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.4rem' }}>🖊️</span>
+                        <div>
+                          <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#5b21b6' }}>
+                            {isEs ? 'Dispositivo Tipo Pluma Precargada (SubQ Pen) · Lista para Usar' : 'Pre-filled SubQ Pen Device · Ready to Inject'}
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#6d28d9', marginTop: '2px' }}>
+                            {isEs
+                              ? '✓ No requiere reconstitución ni mezcla manual con agua bacteriostática. Viene precargada en solución isotónica estéril.'
+                              : '✓ No manual reconstitution or bacteriostatic mixing required. Pre-filled in sterile isotonic buffer solution.'}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          fontSize: '0.70rem',
+                          fontWeight: 700,
+                          background: '#ffffff',
+                          border: '1px solid #ddd6fe',
+                          color: '#7c3aed',
+                          padding: '4px 10px',
+                          borderRadius: '6px'
+                        }}>
+                          ❄️ 2°C – 8°C Nevera
+                        </span>
+                        <span style={{
+                          fontSize: '0.70rem',
+                          fontWeight: 700,
+                          background: '#ffffff',
+                          border: '1px solid #ddd6fe',
+                          color: '#7c3aed',
+                          padding: '4px 10px',
+                          borderRadius: '6px'
+                        }}>
+                          💉 Agujas 31G/32G
+                        </span>
+                      </div>
+                    </div>
+                  ) : formulation.isInjectable ? (
                     <div style={{ marginTop: '0.5rem' }}>
                       <ReconstitutionGuideCard
                         productName={formulation.title}
@@ -776,7 +829,7 @@ export default function CompoundedFormulationsSection({
                         initiallyExpanded={false}
                       />
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Sub-Section 3b: Critical Medical Safety Alerts & Pre-Procedure Guidance */}
                   {Array.isArray(formulation.extra?.criticalPrecautions) && formulation.extra.criticalPrecautions.length > 0 && (
