@@ -39,7 +39,9 @@ import {
   Dna,
   Shield,
   Mail,
-  Truck
+  Truck,
+  Menu,
+  SlidersHorizontal
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
@@ -882,6 +884,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [inquiryProductContext, setInquiryProductContext] = useState(null);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
 
   // Strict English default ('en') unless ?lang=es is explicitly in the URL or selected via top button
   const [lang, setLang] = useState('en');
@@ -2048,6 +2051,28 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       <header className="screen-nav-bar">
         <div className="nav-container peptides-nav-container">
           <div className="nav-left peptides-nav-left">
+            {/* Mobile hamburger menu trigger (visible ≤1024px) */}
+            <button
+              type="button"
+              className="mobile-nav-drawer-trigger"
+              onClick={() => setIsNavDrawerOpen(true)}
+              aria-label="Open navigation menu"
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.12)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '6px',
+                width: '34px',
+                height: '34px',
+                color: '#e2e8f0',
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Menu size={18} />
+            </button>
             <Link href="/" className="nav-brand">
               <Sparkles size={16} className="text-sky-400" />
               <span>MEDILUXE B2B</span>
@@ -2417,6 +2442,16 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           .mobile-only-category-selector {
             display: none;
           }
+          .mobile-nav-drawer-trigger {
+            display: none;
+          }
+          .mobile-only-filter-selectors {
+            display: none;
+          }
+          @keyframes slideInLeft {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+          }
           .peptides-nav-utility-group {
             display: inline-flex;
             align-items: center;
@@ -2435,12 +2470,26 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             .gcp-pricing-sidebar {
               display: none !important;
             }
+            .mobile-nav-drawer-trigger {
+              display: inline-flex !important;
+            }
+            .mobile-only-filter-selectors {
+              display: grid !important;
+              grid-template-columns: 1fr 1fr;
+              gap: 8px;
+            }
             .mobile-only-category-selector {
               display: block !important;
             }
             .peptides-kpis-grid {
               grid-template-columns: repeat(2, 1fr);
               gap: 0.65rem;
+            }
+          }
+          @media (max-width: 640px) {
+            .mobile-only-filter-selectors {
+              grid-template-columns: 1fr !important;
+              gap: 8px !important;
             }
           }
           @media (max-width: 768px) {
@@ -2810,12 +2859,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   ? 'Buscar por nombre de péptido (ej. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'
                   : 'Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'}
                 size="lg"
-                onChange={setSearchQuery}
-                lang={lang}
-                placeholder={isEs
-                  ? 'Buscar por nombre de péptido (ej. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'
-                  : 'Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'}
-                size="lg"
                 resultCount={filteredProducts.length}
                 filters={
                   <div>
@@ -2929,6 +2972,142 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   </div>
                 }
               />
+
+              {/* Dual Mobile Dropdown Selectors (Google Cloud Mobile UX Standard: Category + FDA Status) */}
+              <div className="mobile-only-filter-selectors">
+                {/* 1. Category Dropdown Selector */}
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <label htmlFor="mobile-category-dropdown" style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>🧬 {isEs ? 'Categoría' : 'Category'}</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsCategorySheetOpen(true)}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#1a73e8',
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      {isEs ? 'Ver lista ▾' : 'View sheet ▾'}
+                    </button>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      id="mobile-category-dropdown"
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '7px 26px 7px 9px',
+                        borderRadius: '6px',
+                        border: selectedCategory !== 'all' ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                        background: selectedCategory !== 'all' ? '#f0f7ff' : '#ffffff',
+                        color: selectedCategory !== 'all' ? '#1a73e8' : '#1e293b',
+                        fontSize: '0.80rem',
+                        fontWeight: selectedCategory !== 'all' ? 750 : 500,
+                        cursor: 'pointer',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="all">{isEs ? '🌐 Todas las Categorías' : '🌐 All Categories'} ({processedProducts.length})</option>
+                      {CATEGORY_ORDER.map(key => {
+                        const meta = CATEGORY_MAP[key];
+                        const count = processedProducts.filter(p => p.categoryKey === key).length;
+                        if (!meta || count === 0) return null;
+                        return (
+                          <option key={key} value={key}>
+                            {meta.icon} {isEs ? meta.labelEs : meta.labelEn} ({count})
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                  </div>
+                </div>
+
+                {/* 2. FDA Regulatory Status Dropdown Selector */}
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <label htmlFor="mobile-fda-dropdown" style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>⚖️ {isEs ? 'Estatus FDA' : 'FDA Status'}</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsNavDrawerOpen(true)}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#1a73e8',
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      {isEs ? 'Menú ☰' : 'Drawer ☰'}
+                    </button>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      id="mobile-fda-dropdown"
+                      value={selectedFdaStatus}
+                      onChange={(e) => setSelectedFdaStatus(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '7px 26px 7px 9px',
+                        borderRadius: '6px',
+                        border: selectedFdaStatus !== 'all' ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                        background: selectedFdaStatus !== 'all' ? '#f0f7ff' : '#ffffff',
+                        color: selectedFdaStatus !== 'all' ? '#1a73e8' : '#1e293b',
+                        fontSize: '0.80rem',
+                        fontWeight: selectedFdaStatus !== 'all' ? 750 : 500,
+                        cursor: 'pointer',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        outline: 'none'
+                      }}
+                    >
+                      {FDA_FILTERS.map(f => {
+                        const count = f.id === 'all'
+                          ? processedProducts.length
+                          : processedProducts.filter(p => p.fdaBucket === f.id).length;
+                        return (
+                          <option key={f.id} value={f.id}>
+                            {f.icon} {isEs ? f.labelEs : f.labelEn} ({count})
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* ── Peptide DataTable (Golden Rule #3) ── */}
@@ -4019,6 +4198,326 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       </div>
 
+      {/* ── Google Cloud Console Navigation Drawer (Left-sliding Navigation & Filters for Mobile/Tablet) ── */}
+      {isNavDrawerOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1200,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            animation: 'fadeIn 0.18s ease'
+          }}
+          onClick={() => setIsNavDrawerOpen(false)}
+        >
+          <div
+            style={{
+              width: '320px',
+              maxWidth: '85vw',
+              height: '100%',
+              background: '#ffffff',
+              boxShadow: '4px 0 24px rgba(0,0,0,0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              animation: 'slideInLeft 0.22s ease-out'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div style={{
+              padding: '14px 16px',
+              background: '#0f172a',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={16} className="text-sky-400" />
+                <span style={{ fontWeight: 800, fontSize: '0.90rem', letterSpacing: '-0.01em' }}>
+                  {isEs ? 'Navegación & Filtros' : 'Navigation & Filters'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsNavDrawerOpen(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '6px',
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Quick Reset bar if any filter active */}
+            {(selectedCategory !== 'all' || selectedFdaStatus !== 'all' || selectedStrength !== 'all' || searchQuery) && (
+              <div style={{
+                padding: '8px 16px',
+                background: '#fef2f2',
+                borderBottom: '1px solid #fee2e2',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <span style={{ fontSize: '0.72rem', color: '#991b1b', fontWeight: 600 }}>
+                  {isEs ? 'Filtros activos' : 'Active filters'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSelectedFdaStatus('all');
+                    setSelectedStrength('all');
+                    setSearchQuery('');
+                  }}
+                  style={{
+                    border: 'none',
+                    background: 'none',
+                    color: '#dc2626',
+                    fontSize: '0.72rem',
+                    fontWeight: 750,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isEs ? 'Limpiar todo ×' : 'Reset all ×'}
+                </button>
+              </div>
+            )}
+
+            {/* Drawer Body (Scrollable) */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
+              {/* 1. Peptide Categories */}
+              <div style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                color: '#5f6368',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <span>🧬</span>
+                <span>{isEs ? 'Categorías de Péptidos' : 'Peptide Categories'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '16px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setIsNavDrawerOpen(false);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: selectedCategory === 'all' ? '#e8f0fe' : 'transparent',
+                    color: selectedCategory === 'all' ? '#1a73e8' : '#3c4043',
+                    fontSize: '0.80rem',
+                    fontWeight: selectedCategory === 'all' ? 800 : 500,
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Layers size={14} color={selectedCategory === 'all' ? '#1a73e8' : '#5f6368'} />
+                    <span>{isEs ? 'Todas las Formulaciones' : 'All Formulations'}</span>
+                  </div>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    background: selectedCategory === 'all' ? '#1a73e8' : '#f1f3f4',
+                    color: selectedCategory === 'all' ? '#ffffff' : '#5f6368',
+                    padding: '1px 7px',
+                    borderRadius: '10px'
+                  }}>
+                    {processedProducts.length}
+                  </span>
+                </button>
+
+                {CATEGORY_ORDER.map(key => {
+                  const meta = CATEGORY_MAP[key];
+                  if (!meta) return null;
+                  const count = processedProducts.filter(p => p.categoryKey === key).length;
+                  if (count === 0) return null;
+                  const isSelected = selectedCategory === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCategory(key);
+                        setIsNavDrawerOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: isSelected ? meta.bg : 'transparent',
+                        color: isSelected ? meta.color : '#3c4043',
+                        fontSize: '0.80rem',
+                        fontWeight: isSelected ? 800 : 500,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '16px' }}>
+                          {getCategoryIcon(key, 14)}
+                        </span>
+                        <span>{isEs ? meta.labelEs : meta.labelEn}</span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        background: isSelected ? meta.color : '#f1f3f4',
+                        color: isSelected ? '#ffffff' : '#5f6368',
+                        padding: '1px 7px',
+                        borderRadius: '10px'
+                      }}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '14px 0' }} />
+
+              {/* 2. FDA Regulatory Status */}
+              <div style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                color: '#5f6368',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <span>⚖️</span>
+                <span>{isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '16px' }}>
+                {FDA_FILTERS.map(f => {
+                  const isSelected = selectedFdaStatus === f.id;
+                  const count = f.id === 'all'
+                    ? processedProducts.length
+                    : processedProducts.filter(p => p.fdaBucket === f.id).length;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFdaStatus(f.id);
+                        setIsNavDrawerOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: isSelected ? (f.id === 'all' ? '#e8f0fe' : (f.id === 'fda_503a' ? '#ecfdf5' : f.id === 'fda_approved' ? '#eff6ff' : f.id === 'clinical_ind' ? '#fffbeb' : '#f1f5f9')) : 'transparent',
+                        color: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#3c4043')) : '#3c4043',
+                        fontSize: '0.80rem',
+                        fontWeight: isSelected ? 800 : 500,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        <span style={{ fontSize: '0.82rem', flexShrink: 0 }}>{f.icon}</span>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {isEs ? f.labelEs : f.labelEn}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        background: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#5f6368')) : '#f1f3f4',
+                        color: isSelected ? '#ffffff' : '#5f6368',
+                        padding: '1px 7px',
+                        borderRadius: '10px'
+                      }}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '14px 0' }} />
+
+              {/* 3. Strength Filter */}
+              <div style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                color: '#5f6368',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '8px'
+              }}>
+                {isEs ? 'Concentración / Dosis' : 'Filter Strength'}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {DOSAGE_STRENGTHS.map(st => {
+                  const isSelected = selectedStrength === st.id;
+                  return (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedStrength(st.id);
+                        setIsNavDrawerOpen(false);
+                      }}
+                      style={{
+                        padding: '5px 12px',
+                        borderRadius: '16px',
+                        fontSize: '0.74rem',
+                        fontWeight: isSelected ? 750 : 600,
+                        border: '1px solid',
+                        cursor: 'pointer',
+                        background: isSelected ? '#0284c7' : '#ffffff',
+                        color: isSelected ? '#ffffff' : '#475569',
+                        borderColor: isSelected ? '#0284c7' : '#cbd5e1'
+                      }}
+                    >
+                      {st.id === 'all' ? (isEs ? 'Todas' : 'All') : st.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Option 1: Mobile Category Selection Bottom Sheet (Google Cloud Console Standard) ── */}
       {isCategorySheetOpen && (
         <div
@@ -4190,6 +4689,63 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         {count}
                       </span>
                       {isSelected && <Check size={16} color={meta.color} />}
+                    </div>
+                  </button>
+                );
+              })}
+
+              {/* Divider between Categories & FDA Regulatory Status */}
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '14px 4px 10px 4px' }} />
+
+              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 4px', marginBottom: '4px' }}>
+                {isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}
+              </div>
+
+              {FDA_FILTERS.map(f => {
+                const isSelected = selectedFdaStatus === f.id;
+                const count = f.id === 'all'
+                  ? processedProducts.length
+                  : processedProducts.filter(p => p.fdaBucket === f.id).length;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedFdaStatus(f.id);
+                      setIsCategorySheetOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '11px 14px',
+                      borderRadius: '8px',
+                      border: isSelected ? '1.5px solid #1a73e8' : '1px solid #f1f5f9',
+                      background: isSelected ? '#e8f0fe' : '#ffffff',
+                      color: isSelected ? '#1a73e8' : '#1e293b',
+                      fontWeight: isSelected ? 800 : 600,
+                      fontSize: '0.86rem',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '1.05rem' }}>{f.icon}</span>
+                      <span>{isEs ? f.labelEs : f.labelEn}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        background: isSelected ? '#1a73e8' : '#f1f3f4',
+                        color: isSelected ? '#ffffff' : '#64748b',
+                        padding: '2px 8px',
+                        borderRadius: '12px'
+                      }}>
+                        {count}
+                      </span>
+                      {isSelected && <Check size={16} color="#1a73e8" />}
                     </div>
                   </button>
                 );
