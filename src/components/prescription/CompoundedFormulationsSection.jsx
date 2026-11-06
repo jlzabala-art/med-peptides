@@ -296,11 +296,13 @@ export default function CompoundedFormulationsSection({
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <CheckCircle2 size={13} />
                       <span>
-                        {formulation.isInjectable 
-                          ? (isEs ? 'Matriz Liofilizada Estéril Libre de Pirógenos · Grado Farmacéutico cGMP' : 'Sterile Pyrogen-Free Lyophilized Matrix · cGMP Cleanroom Compliant')
-                          : formulation.isOral 
-                            ? (isEs ? '100% Cápsulas Vegetales HPMC · Sin Gluten · Sin Alérgenos' : '100% Plant-Based HPMC Capsules · Gluten-Free · Allergen-Free') 
-                            : (formulation.id?.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Enteric Bioavailable Powder')}
+                        {(formulation.isPen || formulation.type === 'prefilled_pen' || (formulation.dosageForm || '').toLowerCase().includes('pen'))
+                          ? (isEs ? 'Solución Isotónica Estéril Lista para Inyectar · Dispositivo Pluma Multidosis' : 'Sterile Ready-to-Inject Isotonic Solution · Multi-dose Pen Device')
+                          : formulation.isInjectable 
+                            ? (isEs ? 'Matriz Liofilizada Estéril Libre de Pirógenos · Grado Farmacéutico cGMP' : 'Sterile Pyrogen-Free Lyophilized Matrix · cGMP Cleanroom Compliant')
+                            : formulation.isOral 
+                              ? (isEs ? '100% Cápsulas Vegetales HPMC · Sin Gluten · Sin Alérgenos' : '100% Plant-Based HPMC Capsules · Gluten-Free · Allergen-Free') 
+                              : (formulation.id?.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Enteric Bioavailable Powder')}
                       </span>
                     </div>
                   </div>
@@ -436,12 +438,12 @@ export default function CompoundedFormulationsSection({
                                 alignItems: 'center',
                                 gap: '3px'
                               }}>
-                                {formulation.isPen || formulation.type === 'prefilled_pen'
-                                  ? `🖊️ ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()} / ${isEs ? 'pluma' : 'pen'}`
+                                {(formulation.isPen || formulation.type === 'prefilled_pen' || (formulation.dosageForm || '').toLowerCase().includes('pen'))
+                                  ? `🖊️ ${String(api.dosage || '').replace(/\/ *(vial|pluma|pen|cap|capsule|cápsula)/gi, '').replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()} / ${isEs ? 'pluma' : 'pen'}`
                                   : formulation.isInjectable
                                     ? (formulation.isDiluent 
-                                        ? `💧 ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()}` 
-                                        : `💉 ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()} / vial`)
+                                        ? `💧 ${String(api.dosage || '').replace(/\/ *(vial|pluma|pen|cap|capsule|cápsula)/gi, '').replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()}` 
+                                        : `💉 ${String(api.dosage || '').replace(/\/ *(vial|pluma|pen|cap|capsule|cápsula)/gi, '').replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()} / vial`)
                                     : formulation.isOral 
                                       ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') || String(api.dosage).includes('Dose') || String(api.dosage).toLowerCase().includes('/ cap') || String(api.dosage).toLowerCase().includes('/cap')
                                           ? `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}` 
@@ -767,7 +769,7 @@ export default function CompoundedFormulationsSection({
                   </div>
 
                   {/* Sub-Section 3a: Pre-filled Pen Banner (No Reconstitution) vs Reconstitution Guide for Vials */}
-                  {(formulation.isPen || formulation.type === 'prefilled_pen') ? (
+                  {(formulation.isPen || formulation.type === 'prefilled_pen' || (formulation.dosageForm || '').toLowerCase().includes('pen') || (formulation.container || '').toLowerCase().includes('pen')) ? (
                     <div style={{
                       marginTop: '0.75rem',
                       background: '#f5f3ff',
@@ -818,7 +820,7 @@ export default function CompoundedFormulationsSection({
                         </span>
                       </div>
                     </div>
-                  ) : formulation.isInjectable ? (
+                  ) : (formulation.isInjectable && !formulation.isPen && !formulation.type?.includes('pen') && !formulation.container?.toLowerCase().includes('pen') && !formulation.dosageForm?.toLowerCase().includes('pen')) ? (
                     <div style={{ marginTop: '0.5rem' }}>
                       <ReconstitutionGuideCard
                         productName={formulation.title}

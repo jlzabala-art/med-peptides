@@ -733,7 +733,9 @@ export default function UltramanCrossBorderStudyPage() {
                 const nightVal = bottleSize === 30 ? rx.night.capsules30 : rx.night.capsules60;
                 const totalBrl = mornVal + nightVal;
                 const convertedBrl = convertPrice(totalBrl, 'BRL');
-                const bulgariaEurVal = bottleSize === 30 ? rx.bulgariaBenchmarkEur.capsules30 : rx.bulgariaBenchmarkEur.caps60;
+                const bulgariaEurVal = bottleSize === 30 
+                  ? (rx.bulgariaBenchmarkEur.capsules30 ?? rx.bulgariaBenchmarkEur.caps30) 
+                  : (rx.bulgariaBenchmarkEur.capsules60 ?? rx.bulgariaBenchmarkEur.caps60);
                 const convertedBulgaria = convertPrice(bulgariaEurVal, 'EUR');
 
                 return (
@@ -862,3 +864,4 @@ export default function UltramanCrossBorderStudyPage() {
     </div>
   );
 }
+

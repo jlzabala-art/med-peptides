@@ -227,6 +227,35 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   const isNutrigen = prescriptionTypeInfo.key === 'nutrigen' || rxProgLower.includes('nutrigen') || rxTypeLower.includes('nutrigen') || String(rx.fagron?.testName || '').toLowerCase().includes('nutrigen');
   const isEntirelyOral = isNutrigen || rxDispLower.includes('capsule') || rxDispLower.includes('oral') || (Array.isArray(rx.prescriptionLines) && rx.prescriptionLines.length > 0 && rx.prescriptionLines.every(i => (i.route || '').toLowerCase().includes('oral')));
 
+  // ── Pre-compute pen/injectable detection from rx-level fields ────────────
+  const rxSig = [
+    rx.medication, rx.productName, rx.dispensingForm, rx.format,
+    rx.treatmentType, rx.treatmentProgram,
+    ...(Array.isArray(rx.items) ? rx.items.map(i => `${i.name || ''} ${i.productName || ''} ${i.format || ''} ${i.presentation || ''} ${i.activeIngredient || ''}`) : []),
+    ...(Array.isArray(rx.prescriptionLines) ? rx.prescriptionLines.map(l => `${l.name || ''} ${l.productName || ''} ${l.format || ''} ${l.presentation || ''} ${l.activeIngredient || ''}`) : [])
+  ].join(' ').toLowerCase();
+
+  const isPenRx =
+    rx.dispensingForm === 'prefilled_pen' ||
+    (rx.format || '').toLowerCase().includes('pen') ||
+    rxSig.includes('pre-filled pen') || rxSig.includes('prefilled pen') ||
+    rxSig.includes('pre-filled') || rxSig.includes('pluma precargada') ||
+    rxSig.includes('subq pen') || rxSig.includes('pen 30 mg') ||
+    rxSig.includes('pen 15 mg') || rxSig.includes('pen 10 mg') ||
+    rxSig.includes('pen 5 mg') || rxSig.includes('pen 7.5 mg') ||
+    (rxSig.includes('pen') && (rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') || rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') || rxSig.includes('semaglutide')));
+
+  const isInjectableRx =
+    isPenRx ||
+    rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') ||
+    rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') ||
+    rxSig.includes('semaglutide') || rxSig.includes('cagrilintide') || rxSig.includes('mazdutide') ||
+    rxSig.includes('survodutide') || rxSig.includes('bpc-157') || rxSig.includes('tb-500') ||
+    rxSig.includes('kisspeptin') || rxSig.includes('ipamorelin') || rxSig.includes('sermorelin') ||
+    rxSig.includes('ghk-cu') || rxSig.includes('epithalon') || rxSig.includes('mots-c') ||
+    rxSig.includes('lyophilized') || rxSig.includes('liofilizado') ||
+    rxSig.includes('subcutaneous') || rxSig.includes('subq');
+
   // Raw Lines Normalization
   const rawLines = useMemo(() => {
     if (rx.allSessionItems && rx.allSessionItems.length > 0) {
@@ -286,7 +315,8 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       const dosageLower = (dosageForm || '').toLowerCase();
 
       // ── Pre-filled pen detection (priority over generic injectable) ────────
-      const isPen = dosageLower.includes('pre-filled pen') || dosageLower.includes('prefilled pen') ||
+      const isPen = isPenRx ||
+                    dosageLower.includes('pre-filled pen') || dosageLower.includes('prefilled pen') ||
                     dosageLower.includes('pluma precargada') || dosageLower.includes('subq pen') ||
                     vNameLower.includes('pre-filled pen') || vNameLower.includes('prefilled pen') ||
                     vNameLower.includes('pluma precargada') || vNameLower.includes('ready-to-use pen') ||
@@ -301,6 +331,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
                     });
 
       const isInjectable = isPen ||
+                           isInjectableRx ||
                            vNameLower.includes('vial') || 
                            vNameLower.includes('lyophilized') || 
                            vNameLower.includes('liofilizado') || 
@@ -517,6 +548,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       return {
         id: `formulation-${index - 1}`,
         index,
+        type: isPen ? 'prefilled_pen' : (isInjectable ? (isDiluent ? 'diluent' : 'injectable_vial') : (isOral ? 'oral' : (isTrichoOil ? 'topical_oil' : 'topical'))),
         accentColor,
         accentBg,
         badgeText,
@@ -752,33 +784,6 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     const injectableItems = [];
     const vehicleLines = [];
 
-    // ── Pre-compute pen/injectable detection from rx-level fields ────────────
-    const rxSig = [
-      rx.medication, rx.productName, rx.dispensingForm, rx.format,
-      rx.treatmentType, rx.treatmentProgram,
-      ...(Array.isArray(rx.items) ? rx.items.map(i => `${i.name || ''} ${i.productName || ''} ${i.format || ''} ${i.presentation || ''} ${i.activeIngredient || ''}`) : []),
-      ...(Array.isArray(rx.prescriptionLines) ? rx.prescriptionLines.map(l => `${l.name || ''} ${l.productName || ''} ${l.format || ''} ${l.presentation || ''} ${l.activeIngredient || ''}`) : [])
-    ].join(' ').toLowerCase();
-
-    const isPenRx =
-      rxSig.includes('pre-filled pen') || rxSig.includes('prefilled pen') ||
-      rxSig.includes('pre-filled') || rxSig.includes('pluma precargada') ||
-      rxSig.includes('subq pen') || rxSig.includes('pen 30 mg') ||
-      rxSig.includes('pen 15 mg') || rxSig.includes('pen 10 mg') ||
-      rxSig.includes('pen 5 mg') || rxSig.includes('pen 7.5 mg') ||
-      (rxSig.includes('pen') && (rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') || rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') || rxSig.includes('semaglutide')));
-
-    const isInjectableRx =
-      isPenRx ||
-      rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') ||
-      rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') ||
-      rxSig.includes('semaglutide') || rxSig.includes('cagrilintide') || rxSig.includes('mazdutide') ||
-      rxSig.includes('survodutide') || rxSig.includes('bpc-157') || rxSig.includes('tb-500') ||
-      rxSig.includes('kisspeptin') || rxSig.includes('ipamorelin') || rxSig.includes('sermorelin') ||
-      rxSig.includes('ghk-cu') || rxSig.includes('epithalon') || rxSig.includes('mots-c') ||
-      rxSig.includes('lyophilized') || rxSig.includes('liofilizado') ||
-      rxSig.includes('subcutaneous') || rxSig.includes('subq');
-
     (rawLines || []).forEach(line => {
       const nameLower = (line.name || line.drugName || line.productName || line.activeIngredient || '').toLowerCase();
       const routeLower = (line.route || '').toLowerCase();
@@ -941,7 +946,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         apis: b.apis
       });
     });
-  }, [rawLines, rx, isEs, isNutrigen, isEntirelyOral]);
+  }, [rawLines, rx, isEs, isNutrigen, isEntirelyOral, isPenRx, isInjectableRx]);
 
   // Labels for every phase
   const prescriptionLabels = useMemo(() => {
@@ -1441,7 +1446,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         description: `Measurable caliber increase in hair shafts and visible density coverage. Completion of course. Follow-up clinical review with ${doctorName || 'the prescribing physician'}.`
       }
     ]));
-  }, [isEs, posology.timeline, isEntirelyOral, rx.duration, doctorName]);
+  }, [isEs, posology.timeline, isEntirelyOral, isInjectableRx, isPenRx, rx.duration, doctorName]);
 
   return {
     rxId,
@@ -1472,6 +1477,8 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     prescriptionTypeInfo,
     isNutrigen,
     isEntirelyOral,
+    isPenRx,
+    isInjectableRx,
     rawLines,
     compoundedFormulations,
     prescriptionLabels,
