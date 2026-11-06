@@ -27,6 +27,7 @@ import {
 import ReconstitutionGuideCard from './ReconstitutionGuideCard';
 import CalendarSyncModal from './CalendarSyncModal';
 import PatientPhysicianGreetingHero from './PatientPhysicianGreetingHero';
+import { detectPrescriptionType } from '@/utils/prescriptionTypeDetection';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
@@ -103,90 +104,13 @@ export default function PatientPrescriptionGuide({
       const vehicleLower = String(formulation.vehicle?.name || '').toLowerCase();
       const apis = formulation.apis || [];
 
-      // Check if it's a pre-filled pen (subcutaneous, no reconstitution needed)
-      const isPrefilledPen = Boolean(
-        formulation.type === 'prefilled_pen' ||
-        (formulation.vehicle?.name || '').toLowerCase().includes('sterile buffer') ||
-        (formulation.vehicle?.name || '').toLowerCase().includes('solución tampón') ||
-        (formulation.vehicle?.name || '').toLowerCase().includes('ready-to-use pen') ||
-        dosageLower?.includes('pre-filled pen') || dosageLower?.includes('prefilled pen') ||
-        dosageLower?.includes('pluma precargada') || dosageLower?.includes('subq pen') ||
-        titleLower.includes('incretin') || titleLower.includes('pluma precargada') ||
-        titleLower.includes('pre-filled pen') || titleLower.includes('prefilled pen') ||
-        titleLower.includes('subq pen') ||
-        apis.some(a => {
-          const n = String(a.name || a.productName || '').toLowerCase();
-          const f = String(a.format || a.presentation || '').toLowerCase();
-          return (n.includes('retatrutide') || n.includes('tirzepatide') || n.includes('semaglutide') || n.includes('glp-3') || n.includes('glp-1') || n.includes('cagrilintide')) &&
-                 (f.includes('pen') || n.includes('pen') || f.includes('pluma'));
-        })
-      );
-
-      // Check if it's a peptide/injectable
-      const isPeptide = isPrefilledPen || Boolean(
-        formulation.isInjectable ||
-        titleLower.includes('vial') ||
-        titleLower.includes('lyophilized') ||
-        titleLower.includes('liofilizado') ||
-        titleLower.includes('subq') ||
-        titleLower.includes('subcutan') ||
-        titleLower.includes('pept') ||
-        titleLower.includes('retatrutide') ||
-        titleLower.includes('tirzepatide') ||
-        titleLower.includes('semaglutide') ||
-        routeLower.includes('subq') ||
-        routeLower.includes('inyect') ||
-        routeLower.includes('inject') ||
-        apis.some(a => {
-          const n = String(a.name || a.productName || '').toLowerCase();
-          return n.includes('bpc') || n.includes('tb-') || n.includes('semax') || n.includes('selank') ||
-                 n.includes('semaglutide') || n.includes('tirzepatide') || n.includes('retatrutide') ||
-                 n.includes('glp-3') || n.includes('glp3') || n.includes('glp-1') || n.includes('glp1') ||
-                 n.includes('ghk') || n.includes('nad') || n.includes('cjc') || n.includes('ipamorelin') || n.includes('sermorelin');
-        })
-      );
-
-      // Check if it's an oral supplement / capsule
-      const isSupplement = !isPeptide && Boolean(
-        formulation.isOral ||
-        routeLower.includes('oral') ||
-        titleLower.includes('cápsula') ||
-        titleLower.includes('capsule') ||
-        titleLower.includes('oral') ||
-        titleLower.includes('tablet') ||
-        titleLower.includes('nutra') ||
-        vehicleLower.includes('capsule') ||
-        vehicleLower.includes('cápsula')
-      );
-
-      // Check if it's topical (hair, scalp, skin)
-      const isTopical = !isPeptide && !isSupplement && Boolean(
-        formulation.isTrichoOil ||
-        routeLower.includes('tópic') ||
-        routeLower.includes('topical') ||
-        routeLower.includes('cuero cabelludo') ||
-        routeLower.includes('scalp') ||
-        titleLower.includes('trichosol') ||
-        titleLower.includes('trichofoam') ||
-        titleLower.includes('trichooil') ||
-        titleLower.includes('lotion') ||
-        titleLower.includes('loción') ||
-        titleLower.includes('solución') ||
-        titleLower.includes('foam') ||
-        titleLower.includes('espuma')
-      );
-
-      // Check if it's transdermal cream / BHRT
-      const isTransdermal = !isPeptide && !isSupplement && !isTopical && Boolean(
-        formulation.isBHRT ||
-        routeLower.includes('transdermal') ||
-        titleLower.includes('bhrt') ||
-        titleLower.includes('hormon') ||
-        titleLower.includes('cream') ||
-        titleLower.includes('crema') ||
-        vehicleLower.includes('lipoderm') ||
-        vehicleLower.includes('pentravan')
-      );
+      // Universal classification via central detection engine
+      const detected = detectPrescriptionType(rx, [formulation]);
+      const isPrefilledPen = detected.isPen;
+      const isPeptide = detected.isInjectable || isPrefilledPen;
+      const isSupplement = detected.isOral;
+      const isTopical = detected.isTopical;
+      const isTransdermal = detected.isTransdermal;
 
       // Derive patient-friendly category details
       let category = {
@@ -303,10 +227,10 @@ export default function PatientPrescriptionGuide({
         doctorClinic={doctorClinic || 'Atlas Health Services'}
         doctorNote={rx?.patientInstructions || rx?.doctorNotes || rx?.instructions || ''}
         formulationsCount={categorizedItems.length}
-        isPen={categorizedItems.some(i => i.isPrefilledPen || i.category?.type === 'prefilled_pen' || i.isPen || i.type === 'prefilled_pen')}
-        isInjectable={categorizedItems.some(i => i.isInjectable || i.category?.type === 'peptide' || i.category?.type === 'injectable_vial')}
-        isOral={categorizedItems.some(i => i.isOral || i.category?.type === 'oral')}
-        isTopical={categorizedItems.some(i => i.isTopical || i.category?.type === 'topical')}
+        isPen={detectPrescriptionType(rx, compoundedFormulations).isPen}
+        isInjectable={detectPrescriptionType(rx, compoundedFormulations).isInjectable}
+        isOral={detectPrescriptionType(rx, compoundedFormulations).isOral}
+        isTopical={detectPrescriptionType(rx, compoundedFormulations).isTopical}
         duration={rx?.duration || (categorizedItems[0]?.duration)}
         cycleDays={rx?.cycleDays}
         onSyncCalendar={() => setShowCalendarModal(true)}

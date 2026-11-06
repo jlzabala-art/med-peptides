@@ -21,6 +21,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import PrescriptionStatusQuickAction from './PrescriptionStatusQuickAction';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { detectPrescriptionType } from '@/utils/prescriptionTypeDetection';
 
 /**
  * PrescriptionMasterHeader
@@ -347,34 +348,8 @@ export default function PrescriptionMasterHeader({
 
       {/* ── Google Cloud Console Key-Value Attribute Ribbon ──────────────────── */}
       {(() => {
-        const firstForm = compoundedFormulations?.[0] || {};
-        const isPen = firstForm.isPen || firstForm.type === 'prefilled_pen' || rx?.dispensingForm === 'prefilled_pen' || (rx?.format || '').toLowerCase().includes('pen');
-        const isInject = !isPen && (firstForm.isInjectable || rx?.route?.toLowerCase().includes('subq') || rx?.route?.toLowerCase().includes('inject'));
-        const isOral = !isPen && !isInject && (firstForm.isOral || rx?.dispensingForm?.toLowerCase().includes('capsule'));
-
-        const routeDisplay = isPen 
-          ? (isEs ? '💉 SubQ · Semanal' : '💉 SubQ · Weekly')
-          : isInject
-            ? (isEs ? '💉 SubQ · Titulado' : '💉 SubQ · Titrated')
-            : isOral
-              ? (isEs ? '💊 Vía Oral · Diario' : '💊 Oral · Daily')
-              : (isEs ? '💧 Tópica · Nocturna' : '💧 Topical · Nightly');
-
-        const deviceDisplay = isPen
-          ? (isEs ? '🖊️ Pluma Precargada (Multidosis)' : '🖊️ Pre-filled Pen (Multi-dose)')
-          : isInject
-            ? (isEs ? '🧪 Vial Liofilizado + Diluyente' : '🧪 Lyophilized Vial + Diluent')
-            : isOral
-              ? (isEs ? '💊 Cápsulas Vegetales HPMC' : '💊 HPMC Vegetable Capsules')
-              : (isEs ? '🧴 Solución Tópica' : '🧴 Topical Solution');
-
-        const storageDisplay = (isPen || isInject)
-          ? (isEs ? '❄️ 2°C – 8°C Nevera' : '❄️ 2°C – 8°C Refrigerated')
-          : (isEs ? '🏠 15°C – 25°C Ambiente' : '🏠 15°C – 25°C Room Temp');
-
-        const cycleDisplay = rx?.duration 
-          ? (isEs ? `⏱️ ${rx.duration}` : `⏱️ ${rx.duration}`)
-          : (isEs ? `⏱️ ${rx?.cycleDays || 84} Días de Suministro` : `⏱️ ${rx?.cycleDays || 84} Days Supply`);
+        const rxType = detectPrescriptionType(rx, compoundedFormulations);
+        const attrs = rxType.getAttributes(isEs);
 
         return (
           <div style={{
@@ -392,7 +367,7 @@ export default function PrescriptionMasterHeader({
                 {isEs ? 'Vía & Frecuencia' : 'Route & Frequency'}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {routeDisplay}
+                {attrs.routeDisplay}
               </div>
             </div>
             <div>
@@ -400,15 +375,15 @@ export default function PrescriptionMasterHeader({
                 {isEs ? 'Dispositivo / Formato' : 'Device / Presentation'}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {deviceDisplay}
+                {attrs.deviceDisplay}
               </div>
             </div>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isEs ? 'Almacenamiento' : 'Storage Standard'}
               </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: (isPen || isInject) ? '#0284c7' : '#0f172a', marginTop: '2px' }}>
-                {storageDisplay}
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: (rxType.isPen || rxType.isInjectable) ? '#0284c7' : '#0f172a', marginTop: '2px' }}>
+                {attrs.storageDisplay}
               </div>
             </div>
             <div>
@@ -416,13 +391,12 @@ export default function PrescriptionMasterHeader({
                 {isEs ? 'Ciclo Clínico' : 'Clinical Duration'}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {cycleDisplay}
+                {attrs.cycleDisplay}
               </div>
             </div>
           </div>
         );
       })()}
-
       {/* ── GCP Resource Horizontal Tabs Bar ──────────────────────────────────── */}
       {setActiveGcpTab && (
         <div
