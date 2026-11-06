@@ -517,6 +517,21 @@ export default function PharmapolisLabelSvg({
             if (nLower.includes('prostaquinon')) dose = '3% Topical';
             else if (nLower.includes('minoxidil')) dose = '5% Topical';
             else if (nLower.includes('latanoprost')) dose = '0.005% Topical';
+            else if (nLower.includes('vagifem')) {
+              // Extract 10 mcg from instructions or standard pharmacopeia Vagifem strength
+              const mcgMatch = String(rawDirections || '').match(/(\d+(?:\.\d+)?\s*mcg)/i);
+              dose = mcgMatch ? mcgMatch[1] : '10 mcg';
+              if (name === 'Vagifem') name = 'Estradiol (as Vagifem®)';
+            } else if (nLower.includes('progesterone')) {
+              const mgMatch = String(rawDirections || '').match(/(\d+(?:\.\d+)?\s*mg)/i);
+              if (mgMatch) dose = mgMatch[1];
+            } else if (nLower.includes('dhea')) {
+              const mgMatch = String(rawDirections || '').match(/(\d+(?:\.\d+)?\s*mg)/i);
+              if (mgMatch) dose = mgMatch[1];
+            } else if (nLower.includes('testosterone')) {
+              const pctMatch = String(rawDirections || '').match(/(\d+(?:\.\d+)?\s*%)/i);
+              if (pctMatch) dose = pctMatch[1];
+            }
           }
 
           // Anti-duplication engine: if name already ends with concentration/dosage that dose repeats
@@ -558,11 +573,12 @@ export default function PharmapolisLabelSvg({
   const rawVehLower = rawVehStr.toLowerCase();
 
   const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem') || dFormLower.includes('ointment') || dFormLower.includes('pomade') || pNameLower.includes('pomade') || pNameLower.includes('ointment');
-  const isScalpTreatment = /\b(trichosol|trichowash|trichooil|trichofoam|scalp|hair|cabello|cuero cabelludo|shampoo|17-?a|17-?alpha|alfatradiol|igrantine)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
-  const isHormone = !isScalpTreatment && (formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone') || rawVehLower.includes('pentravan'));
+  const isVaginal = /\b(vagifem|vaginal|intravaginal|intravaginally|pessary|ovule|óvulo|suppository)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
+  const isScalpTreatment = !isVaginal && /\b(trichosol|trichowash|trichooil|trichofoam|scalp|hair|cabello|cuero cabelludo|shampoo|17-?a|17-?alpha|alfatradiol|igrantine)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
+  const isHormone = !isVaginal && !isScalpTreatment && (formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone') || rawVehLower.includes('pentravan'));
 
   // Prioritize explicit Oral determination before generic topical scalp cues
-  const isOral = !isPomadeOrOintment && !isHormone && (
+  const isOral = !isVaginal && !isPomadeOrOintment && !isHormone && (
     dFormLower.includes('oral') ||
     dFormLower.includes('capsule') ||
     dFormLower.includes('cápsul') ||
@@ -576,7 +592,7 @@ export default function PharmapolisLabelSvg({
     /caps/i.test(String(volume || ''))
   );
 
-  const isTopicalScalp = !isPomadeOrOintment && !isHormone && !isOral && (
+  const isTopicalScalp = !isVaginal && !isPomadeOrOintment && !isHormone && !isOral && (
     /\b(shampoo|trichosol|trichooil|trichofoam)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`) ||
     /\b(leave the solution on your scalp|washing your hair|wash your scalp|apply.*scalp|topical scalp|massage.*rinse)\b/i.test(dirLower) ||
     (/\b(scalp|hair)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${rawVehLower}`) && !isOral)
@@ -584,17 +600,18 @@ export default function PharmapolisLabelSvg({
 
   const isTrichoOil = isTopicalScalp && /\b(trichooil|scalp oil|washing your hair|pre-wash|massage.*minutes)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
 
-  const validSavedVehicle = (isTopicalScalp && /vegetable capsules/i.test(rawVehStr)) ? '' : rawVehStr;
+  const validSavedVehicle = (isTopicalScalp && /vegetable capsules/i.test(rawVehStr)) || (isVaginal && /vegetable capsules/i.test(rawVehStr)) ? '' : rawVehStr;
   const cleanVolForVeh = (isTopicalScalp && /capsule/i.test(String(volume || ''))) ? (isTrichoOil ? '30 mL' : '100 mL') : volume;
 
   let vehicleName = validSavedVehicle ||
     (labelData.apis?.find(a => a?.itemType === 'vehicle_base' || a?.isVehicleOrBase)?.name) ||
     (labelData.items?.find(a => a?.itemType === 'vehicle_base' || a?.isVehicleOrBase)?.name) ||
-    (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)' :
-      (isHormone ? 'Pentravan® Liposomal Transdermal Cream Vehicle' :
-        (isTrichoOil || formulaLower.includes('trichooil') || pNameLower.includes('trichooil') ? `TrichoOil™ (100% Natural Scalp Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` :
-          (isTopicalScalp || formulaLower.includes('trichosol') || pNameLower.includes('trichosol') ? `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` :
-            (isOral ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.' : 'Galenic Compounding Vehicle q.s.')))));
+    (isVaginal ? 'Mucoadhesive Hydrophilic Vaginal Matrix (Supplied with Applicator)' :
+      (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)' :
+        (isHormone ? 'Pentravan® Liposomal Transdermal Cream Vehicle' :
+          (isTrichoOil || formulaLower.includes('trichooil') || pNameLower.includes('trichooil') ? `TrichoOil™ (100% Natural Scalp Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` :
+            (isTopicalScalp || formulaLower.includes('trichosol') || pNameLower.includes('trichosol') ? `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` :
+              (isOral ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.' : 'Galenic Compounding Vehicle q.s.'))))));
 
   if (isOral && vehicleName.toLowerCase().includes('micronized compounded hard capsules')) {
     vehicleName = 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.';
@@ -609,7 +626,9 @@ export default function PharmapolisLabelSvg({
   }
 
   let cautionText = 'CAUTION: FOR PATIENT USE AS PRESCRIBED • KEEP OUT OF REACH OF CHILDREN';
-  if (isPomadeOrOintment) {
+  if (isVaginal) {
+    cautionText = 'CAUTION: FOR VAGINAL USE ONLY • NOT FOR ORAL CONSUMPTION • KEEP OUT OF REACH OF CHILDREN';
+  } else if (isPomadeOrOintment) {
     cautionText = 'CAUTION: FOR TOPICAL / PERIANAL USE ONLY • KEEP OUT OF REACH OF CHILDREN';
   } else if (isHormone) {
     cautionText = 'CAUTION: FOR TRANSDERMAL / TOPICAL USE ONLY • KEEP OUT OF REACH OF CHILDREN';
@@ -617,6 +636,65 @@ export default function PharmapolisLabelSvg({
     cautionText = 'CAUTION: FOR ORAL USE ONLY • TAKE WITH WATER • KEEP OUT OF REACH OF CHILDREN';
   } else if (isTopicalScalp) {
     cautionText = 'CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN';
+  }
+
+  // ── INTELLIGENT CLINICAL STORAGE & HANDLING ENGINE ─────────────────────────
+  // Rule: If explicit storage instructions exist and are not generic, preserve them.
+  // Otherwise, automatically derive the best evidence-based storage conditions
+  // and color-coded safety pill badge for the exact formulation category.
+  const isPen = /\b(pen|cartridge|pluma|multi-dose\s*pen|semaglutide|tirzepatide|retatrutide|cagrilintide|liraglutide)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower}`);
+  const isPeptideVial = !isPen && /\b(lyophilized|liofilizado|vial|bpc-?157|tb-?500|cjc|ipamorelin|ghk-cu|epithalon|nad\+|glutathione|pept[íi]d)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower}`);
+
+  const hasExplicitNonGenericStorage = labelData.storage &&
+    !/^store at room temperature\.?$/i.test(labelData.storage.trim()) &&
+    !/^store at room temperature \(15°c - 25°c\)\.?$/i.test(labelData.storage.trim());
+
+  let resolvedStorageText = '';
+  let storagePillBadge = 'PROTECT FROM LIGHT';
+  let storagePillTheme = {
+    fill: isMono ? '#f8fafc' : '#f0fdf4',
+    stroke: isMono ? '#000000' : '#bbf7d0',
+    text: isMono ? '#000000' : '#15803d'
+  };
+
+  if (hasExplicitNonGenericStorage) {
+    resolvedStorageText = labelData.storage.trim();
+    if (/refrigerat|2°c|8°c|cold/i.test(resolvedStorageText)) {
+      storagePillBadge = 'KEEP REFRIGERATED (2°C–8°C)';
+      storagePillTheme = { fill: isMono ? '#f8fafc' : '#f0f9ff', stroke: isMono ? '#000000' : '#bae6fd', text: isMono ? '#000000' : '#0284c7' };
+    }
+  } else if (isPen) {
+    resolvedStorageText = 'Keep refrigerated at 2°C–8°C. Do not freeze. In-use pen may be kept < 25°C for up to 30 days.';
+    storagePillBadge = 'REFRIGERATE (2°C–8°C)';
+    storagePillTheme = { fill: isMono ? '#f8fafc' : '#f0f9ff', stroke: isMono ? '#000000' : '#bae6fd', text: isMono ? '#000000' : '#0284c7' };
+  } else if (isPeptideVial) {
+    resolvedStorageText = 'Store dry powder at 2°C–8°C. Once reconstituted: 2°C–8°C max 30 days. Do not freeze.';
+    storagePillBadge = 'REFRIGERATE (2°C–8°C)';
+    storagePillTheme = { fill: isMono ? '#f8fafc' : '#f0f9ff', stroke: isMono ? '#000000' : '#bae6fd', text: isMono ? '#000000' : '#0284c7' };
+  } else if (isHormone) {
+    resolvedStorageText = 'Store at room temperature (15°C–25°C). Protect from heat and direct sunlight. Do not freeze.';
+    storagePillBadge = 'ROOM TEMP (15°C–25°C)';
+    storagePillTheme = { fill: isMono ? '#f8fafc' : '#fffbeb', stroke: isMono ? '#000000' : '#fde68a', text: isMono ? '#000000' : '#b45309' };
+  } else if (isTopicalScalp) {
+    resolvedStorageText = 'Store at room temperature (15°C–25°C). Keep bottle tightly closed after use.';
+    storagePillBadge = 'PROTECT FROM LIGHT';
+    storagePillTheme = { fill: isMono ? '#f8fafc' : '#f0fdf4', stroke: isMono ? '#000000' : '#bbf7d0', text: isMono ? '#000000' : '#15803d' };
+  } else if (isVaginal) {
+    resolvedStorageText = 'Store at controlled room temperature (15°C–25°C). Do not refrigerate or freeze.';
+    storagePillBadge = 'ROOM TEMP (15°C–25°C)';
+    storagePillTheme = { fill: isMono ? '#f8fafc' : '#f5f3ff', stroke: isMono ? '#000000' : '#ddd6fe', text: isMono ? '#000000' : '#7c3aed' };
+  } else if (isOral) {
+    resolvedStorageText = 'Store in a cool, dry place (15°C–25°C). Protect from moisture and excessive humidity.';
+    storagePillBadge = 'COOL, DRY PLACE';
+    storagePillTheme = { fill: isMono ? '#f8fafc' : '#f0fdf4', stroke: isMono ? '#000000' : '#bbf7d0', text: isMono ? '#000000' : '#15803d' };
+  } else if (isPomadeOrOintment) {
+    resolvedStorageText = 'Store at room temperature (15°C–25°C). Keep tube tightly sealed. Do not freeze.';
+    storagePillBadge = 'DO NOT FREEZE';
+    storagePillTheme = { fill: isMono ? '#f8fafc' : '#f0f9ff', stroke: isMono ? '#000000' : '#bae6fd', text: isMono ? '#000000' : '#0284c7' };
+  } else {
+    resolvedStorageText = 'Store at room temperature (15°C–25°C). Protect from light and humidity.';
+    storagePillBadge = 'PROTECT FROM LIGHT';
+    storagePillTheme = { fill: isMono ? '#f8fafc' : '#f0fdf4', stroke: isMono ? '#000000' : '#bbf7d0', text: isMono ? '#000000' : '#15803d' };
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -1042,7 +1120,7 @@ export default function PharmapolisLabelSvg({
           {(() => {
             const effectiveVol = cleanVolForVeh || volume || '100 mL';
             const volLines = wrapLines(effectiveVol, 15);
-            const storageLines = wrapLines(storage, 16);
+            const storageLines = wrapLines(resolvedStorageText, 16);
 
             // Specs origin: for dual-QR mode push below both QRs; for single-QR mode just below one
             const specsOriginY = isDualQrMode
@@ -1108,11 +1186,11 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* 3. LIGHT PROTECTION SAFE PILL (Unclipped, clean margin) */}
+                {/* 3. DYNAMIC STORAGE HANDLING PILL (Evidence-based safety guidance) */}
                 <g transform={`translate(0, ${storageBlockBottom + (isShort ? 6 : 10)})`}>
-                  <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 24 : 28} fill={isMono ? '#f8fafc' : '#f0fdf4'} stroke={isMono ? '#000000' : '#bbf7d0'} strokeWidth="1.2" rx="4" />
-                  <text x="6" y={isShort ? 16 : 19} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11.5} fontWeight="800" fill={isMono ? '#000000' : '#15803d'} letterSpacing="0.4">
-                    PROTECT FROM LIGHT
+                  <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 24 : 28} fill={storagePillTheme.fill} stroke={storagePillTheme.stroke} strokeWidth="1.2" rx="4" />
+                  <text x="4" y={isShort ? 16 : 19} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 9 : 10.5} fontWeight="800" fill={storagePillTheme.text} letterSpacing="0.3">
+                    {storagePillBadge}
                   </text>
                 </g>
               </g>
@@ -1135,7 +1213,9 @@ export default function PharmapolisLabelSvg({
 
             let vehiclePrefix = 'Compounding Vehicle:';
             const vLower = (vehicleName || '').toLowerCase();
-            if (isOral || vLower.includes('capsule')) {
+            if (isVaginal) {
+              vehiclePrefix = 'Galenic Excipients:';
+            } else if (isOral || vLower.includes('capsule')) {
               vehiclePrefix = 'Compounding Vehicle / Shell:';
             } else if (isPomadeOrOintment || vLower.includes('ointment') || vLower.includes('pomade')) {
               vehiclePrefix = 'Compounding Base:';
@@ -1232,8 +1312,8 @@ export default function PharmapolisLabelSvg({
             // Maximum allowed Y coordinate for the bottom edge of posBox (zero overlap guarantee)
             const maxPosBoxBottom = bCautionDividerY - (isShort ? 10 : isMediumHeight ? 12 : 14);
 
-            // Formula title height if present
-            const formulaTitleFontSize = isShort ? 16 : isMediumHeight ? 18 : 21;
+            // Formula title height if present (Crisp clinical branding callout)
+            const formulaTitleFontSize = isShort ? 22 : isMediumHeight ? 24 : 26;
             const formulaTitleH = formulaTitleText ? (formulaTitleFontSize + 12) : 0;
 
             // Typographical baseline offsets with safe font cap-height clearance (Zero overlap)

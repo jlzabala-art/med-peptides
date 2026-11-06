@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2, AlertTriangle, Printer } from '@/lib/icons';
+import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2, AlertTriangle, Printer, Info } from '@/lib/icons';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { labelsRepository } from '@/repositories/labelsRepository';
 import PharmapolisLabelSvg, { computeDefaultHeaderBadge } from './PharmapolisLabelSvg';
@@ -2502,19 +2502,40 @@ export default function PharmacyLabelsModal({
                 </div>
 
                 {/* Editor Action Buttons: Save, Download .md, Reset */}
-                <div className="gcp-editor-actions-wrap">
+                <div className="gcp-editor-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  {/* Informative reassurance pill */}
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 8px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '5px',
+                    fontSize: '0.70rem',
+                    color: '#475569',
+                    lineHeight: 1.2
+                  }}>
+                    <Info size={12} color="#1a73e8" style={{ flexShrink: 0 }} />
+                    <span>
+                      {isEs 
+                        ? 'Al guardar, se sincroniza la prescripción clínica original.' 
+                        : 'Saving synchronizes directly with the master clinical prescription.'}
+                    </span>
+                  </div>
+
                   {/* SAVE BUTTON */}
                   <button
                     type="button"
                     onClick={() => handleSaveToFirebase()}
                     disabled={isSavingToFirebase}
                     className={`gcp-editor-save-btn ${firebaseSaveSuccess ? 'is-success' : ''}`}
-                    title={isEs ? 'Guardar' : 'Save'}
+                    title={isEs ? 'Guardar y actualizar prescripción maestra' : 'Save and synchronize edits with master prescription record'}
                   >
                     {firebaseSaveSuccess ? (
                       <>
                         <Check size={13} color="#137333" />
-                        <span>{isEs ? 'Guardado ✓' : 'Saved ✓'}</span>
+                        <span>{isEs ? 'Guardado ✓ (Receta Sincronizada)' : 'Saved ✓ (Master Rx Updated)'}</span>
                       </>
                     ) : (
                       <>
@@ -3672,7 +3693,7 @@ export default function PharmacyLabelsModal({
                 className="gcp-btn-secondary"
                 onClick={() => handleSaveToFirebase()}
                 disabled={isSavingToFirebase}
-                title={isEs ? 'Guardar' : 'Save'}
+                title={isEs ? 'Guardar y actualizar prescripción maestra' : 'Save and synchronize edits with master prescription record'}
                 style={{
                   background: firebaseSaveSuccess ? '#e6f4ea' : '#ffffff',
                   color: firebaseSaveSuccess ? '#137333' : '#1a73e8',
@@ -3681,7 +3702,7 @@ export default function PharmacyLabelsModal({
                 }}
               >
                 {firebaseSaveSuccess ? <Check size={14} color="#137333" /> : <Database size={14} />}
-                <span>{firebaseSaveSuccess ? (isEs ? 'Guardado ✓' : 'Saved ✓') : (isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar' : 'Save'))}</span>
+                <span>{firebaseSaveSuccess ? (isEs ? 'Guardado ✓ (Receta Sincronizada)' : 'Saved ✓ (Master Rx Updated)') : (isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar' : 'Save'))}</span>
               </button>
             )}
 

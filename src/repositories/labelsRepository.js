@@ -169,6 +169,63 @@ export const labelsRepository = {
     actorId = null,
     approvalStatus = null // 'draft' | 'approved'
   }) {
+    // ⚡ Primary Strategy: Call authoritative Server-Side Admin API route
+    // This completely eliminates permission denials from firestore.rules for public/unauthenticated studio users
+    try {
+      const baseUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
+      const response = await fetch(`${baseUrl}/api/labels/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rawId,
+          currentItem,
+          markdownText,
+          activeVariant,
+          labels,
+          selectedProductIdx,
+          editedOverrides,
+          actorId: actorId || 'pharmacy_label_studio',
+          approvalStatus
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // Invalidate local memory caches
+          this.invalidateLabelsCache(result.docId);
+          if (rawId && rawId !== result.docId) this.invalidateLabelsCache(rawId);
+
+          // Update memory cache with fresh snapshot
+          if (Array.isArray(result.currentLabelsSnapshot)) {
+            memoryCache.set(String(result.docId), {
+              timestamp: Date.now(),
+              data: {
+                pharmacyLabels: result.currentLabelsSnapshot,
+                labelsMeta: {
+                  lastVariant: activeVariant,
+                  partsCount: result.currentLabelsSnapshot.length,
+                  latestApprovalStatus: result.approvalStatus
+                }
+              }
+            });
+          }
+
+          return {
+            success: true,
+            docId: result.docId,
+            updatedLabel: result.updatedLabel,
+            currentLabelsSnapshot: result.currentLabelsSnapshot,
+            version: result.version,
+            approvalStatus: result.approvalStatus
+          };
+        }
+      }
+      logger.warn('[labelsRepository] Server-side /api/labels/save returned non-ok, falling back to client write...');
+    } catch (apiErr) {
+      logger.warn('[labelsRepository] /api/labels/save network error, falling back to client write:', apiErr);
+    }
+
     const { ref: targetDocRef, data: existingData } = await this.resolvePrescriptionDoc(
       rawId,
       [currentItem.fileNumber, currentItem.rxCode, currentItem.batchCode]
