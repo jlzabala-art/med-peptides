@@ -17,12 +17,16 @@ export const PRESCRIPTION_TYPES = {
   NUTRIGEN: 'nutrigen',
   HORMONE: 'hormone',
   PEPTIDE: 'peptide',
+  PEPTIDE_PEN: 'peptide_pen',
+  PEPTIDE_VIAL: 'peptide_vial',
+  IV_INFUSION: 'iv_infusion',
   COMPOUNDING: 'compounding'
 };
 
 export const PRESCRIPTION_TYPE_CONFIG = {
   trichotest: {
     key: 'trichotest',
+    archetype: 'trichotest',
     brandType: 'trichotest',
     label: 'TrichoTest™',
     sublabel: 'Topical Scalp · Galenic',
@@ -31,10 +35,13 @@ export const PRESCRIPTION_TYPE_CONFIG = {
     badgeBorder: '#ddd6fe',
     iconName: 'Dna',
     emoji: '🧬',
+    requiresReconstitution: false,
+    containerType: 'dropper_1ml',
     description: 'Fagron Genomics TrichoTest™ follicular DNA-guided compounded topical solution'
   },
   nutrigen: {
     key: 'nutrigen',
+    archetype: 'nutrigen',
     brandType: 'nutrigen',
     label: 'NutriGen™',
     sublabel: 'Oral Chrono · 3 Phases',
@@ -43,10 +50,13 @@ export const PRESCRIPTION_TYPE_CONFIG = {
     badgeBorder: '#a7f3d0',
     iconName: 'Dna',
     emoji: '🧬',
+    requiresReconstitution: false,
+    containerType: 'capsules',
     description: 'Fagron Genomics NutriGen™ nutrigenomic multi-phase oral chronobiological therapy'
   },
   hormone: {
     key: 'hormone',
+    archetype: 'hormone_oral_bhrt',
     brandType: 'hormone',
     label: 'Hormones · BHRT',
     sublabel: 'Endocrine · BHRT / TRT',
@@ -55,22 +65,75 @@ export const PRESCRIPTION_TYPE_CONFIG = {
     badgeBorder: '#ffedd5',
     iconName: 'Activity',
     emoji: '⚡',
+    requiresReconstitution: false,
+    containerType: 'pentravan_or_capsules',
     description: 'Bioidentical Hormone Replacement Therapy & endocrine optimization protocol'
   },
-  peptide: {
-    key: 'peptide',
+  peptide_pen: {
+    key: 'peptide_pen',
+    archetype: 'peptide_pen',
     brandType: 'peptides',
-    label: 'Peptide Protocol',
-    sublabel: 'Biologics · SubQ / Vials',
+    label: 'SubQ Pen Protocol',
+    sublabel: 'Pre-filled SubQ Pen · Ready to Inject',
+    badgeColor: '#7c3aed',
+    badgeBg: '#f5f3ff',
+    badgeBorder: '#ddd6fe',
+    iconName: 'PenTool',
+    emoji: '🖊️',
+    requiresReconstitution: false,
+    containerType: 'prefilled_pen',
+    storageTemp: '2°C – 8°C',
+    description: 'Pre-filled multi-dose subcutaneous peptide pen device (ready to inject, no reconstitution)'
+  },
+  peptide_vial: {
+    key: 'peptide_vial',
+    archetype: 'peptide_vial',
+    brandType: 'peptides',
+    label: 'Peptide Vial Protocol',
+    sublabel: 'Lyophilized SubQ · Reconstitution Required',
     badgeColor: '#2563eb',
     badgeBg: '#eff6ff',
     badgeBorder: '#bfdbfe',
     iconName: 'Syringe',
     emoji: '💉',
+    requiresReconstitution: true,
+    containerType: 'borosilicate_vial',
+    storageTemp: '2°C – 8°C (Post-mixing)',
+    description: 'Lyophilized subcutaneous peptide vial requiring reconstitution with bacteriostatic water'
+  },
+  peptide: {
+    key: 'peptide',
+    archetype: 'peptide_vial',
+    brandType: 'peptides',
+    label: 'Peptide Protocol',
+    sublabel: 'Biologics · SubQ',
+    badgeColor: '#2563eb',
+    badgeBg: '#eff6ff',
+    badgeBorder: '#bfdbfe',
+    iconName: 'Syringe',
+    emoji: '💉',
+    requiresReconstitution: true,
+    containerType: 'borosilicate_vial',
     description: 'Lyophilized subcutaneous peptides and cellular bioregulators'
+  },
+  iv_infusion: {
+    key: 'iv_infusion',
+    archetype: 'iv_infusion',
+    brandType: 'iv_drips',
+    label: 'IV Infusion Drip',
+    sublabel: 'Clinical Infusion · Controlled Rate',
+    badgeColor: '#0284c7',
+    badgeBg: '#f0f9ff',
+    badgeBorder: '#bae6fd',
+    iconName: 'Droplets',
+    emoji: '💧',
+    requiresReconstitution: false,
+    containerType: 'infusion_bag',
+    description: 'Clinical intravenous infusion protocol with controlled drip rate in saline carrier'
   },
   compounding: {
     key: 'compounding',
+    archetype: 'compounding',
     brandType: 'prescription',
     label: 'Compounding Rx',
     sublabel: 'Custom Galenic',
@@ -79,6 +142,8 @@ export const PRESCRIPTION_TYPE_CONFIG = {
     badgeBorder: '#cbd5e1',
     iconName: 'FlaskConical',
     emoji: '💊',
+    requiresReconstitution: false,
+    containerType: 'custom',
     description: 'Compounded magistral medical prescription'
   }
 };
@@ -204,7 +269,13 @@ export function classifyPrescription(rx) {
     return PRESCRIPTION_TYPE_CONFIG.hormone;
   }
 
-  // 3. Peptide Protocol Detection (SubQ injectables, vials, pre-filled pens, bioregulators)
+  // 2. IV Infusion Detection (Clinical Infusion, Drips, Saline bag)
+  const hasIvKeywords = sig.includes('iv drip') || sig.includes('infusion') || sig.includes('intravenous') || sig.includes('intravenosa') || sig.includes('goteo iv') || sig.includes('saline bag');
+  if (hasIvKeywords && !sig.includes('topical') && !sig.includes('cream')) {
+    return PRESCRIPTION_TYPE_CONFIG.iv_infusion;
+  }
+
+  // 3. Peptide Protocol Detection (Pre-filled Pens vs Lyophilized Vials)
   const PEPTIDE_KEYWORDS = [
     'bpc-157',
     'bpc 157',
@@ -249,8 +320,14 @@ export function classifyPrescription(rx) {
 
   const hasPeptideKeywords = PEPTIDE_KEYWORDS.some(kw => sig.includes(kw)) ||
     (sig.includes('pen') && (sig.includes('30 mg') || sig.includes('15 mg') || sig.includes('10 mg') || sig.includes('5 mg') || sig.includes('subq')));
+  
   if (hasPeptideKeywords) {
-    return PRESCRIPTION_TYPE_CONFIG.peptide;
+    const isPen = sig.includes('pre-filled pen') || sig.includes('prefilled pen') ||
+      sig.includes('pluma precargada') || sig.includes('subq pen') ||
+      sig.includes('ready-to-use pen') || sig.includes('solución tampón') || sig.includes('sterile buffer') ||
+      (sig.includes('pen') && (sig.includes('retatrutide') || sig.includes('glp') || sig.includes('tirzepatide') || sig.includes('semaglutide') || sig.includes('cagrilintide') || sig.includes('30 mg') || sig.includes('15 mg')));
+
+    return isPen ? PRESCRIPTION_TYPE_CONFIG.peptide_pen : PRESCRIPTION_TYPE_CONFIG.peptide_vial;
   }
 
   // 4. TrichoTest™ Detection (Hair genomics / TrichoSol / TrichoFoam / Scalp Topicals)
@@ -286,4 +363,15 @@ export function classifyPrescription(rx) {
 
   // 6. Fallback to Compounding Rx
   return PRESCRIPTION_TYPE_CONFIG.compounding;
+}
+
+/**
+ * Convenience helper to return just the canonical archetype key
+ * @param {Object} rx
+ * @returns {'trichotest' | 'nutrigen' | 'peptide_pen' | 'peptide_vial' | 'hormone_oral_bhrt' | 'iv_infusion' | 'compounding'}
+ */
+export function classifyArchetype(rx) {
+  if (rx?.clinicalArchetype) return rx.clinicalArchetype;
+  const config = classifyPrescription(rx);
+  return config?.archetype || config?.key || 'compounding';
 }

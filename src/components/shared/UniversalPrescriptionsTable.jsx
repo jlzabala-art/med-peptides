@@ -290,7 +290,10 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     if (typeFilter) {
       rawData = rawData.filter(rx => {
         const info = classifyPrescription(rx);
-        return info.key === typeFilter;
+        if (typeFilter === 'peptide') {
+          return info.key === 'peptide' || info.key === 'peptide_pen' || info.key === 'peptide_vial';
+        }
+        return info.key === typeFilter || info.archetype === typeFilter;
       });
     }
 
