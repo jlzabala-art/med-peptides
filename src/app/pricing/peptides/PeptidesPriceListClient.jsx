@@ -5052,9 +5052,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       <AtlasAiCopilotDrawer
         isOpen={isAtlasAiOpen}
         onClose={() => setIsAtlasAiOpen(false)}
+        currency={currency}
         currencySymbol={currencySymbol}
+        formatPrice={formatPrice}
+        products={processedProducts}
+        cartItems={cartItems}
+        totalCartCount={totalCartCount}
+        totalCartValueUsd={totalCartValueUsd}
+        isDistributor={isDistributor}
+        lang={lang}
         activeCategory={selectedCategory}
         activeCategoryLabel={selectedCategory !== 'all' ? (isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn) : null}
+        onAddToCart={handleAddToCart}
+        onOpenSpecs={setSelectedSpecsProduct}
       />
 
       {/* ── Institutional B2B Inquiry Drawer (Inquire Info / Consultar Info) ── */}
