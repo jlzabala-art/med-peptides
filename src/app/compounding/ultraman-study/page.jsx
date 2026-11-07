@@ -11,7 +11,8 @@ import {
   Check, 
   Sun, 
   Moon, 
-  Layers
+  Layers,
+  MoreVertical
 } from 'lucide-react';
 
 const FX_RATES = {
@@ -475,6 +476,7 @@ export default function UltramanCrossBorderStudyPage() {
   const [viewMode, setViewMode] = useState('all-in-one'); // 'all-in-one' | 'split'
   const [bottleSize, setBottleSize] = useState(60); // 30 | 60
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isEs = lang === 'es';
 
@@ -570,7 +572,18 @@ export default function UltramanCrossBorderStudyPage() {
             padding: 20px 14px 60px 14px !important;
           }
           .ultraman-header-inner {
-            padding: 10px 14px !important;
+            height: 48px !important;
+            padding: 0 12px !important;
+            flex-wrap: nowrap !important;
+          }
+          .ultraman-desktop-header-controls {
+            display: none !important;
+          }
+          .ultraman-mobile-header-controls {
+            display: flex !important;
+          }
+          .ultraman-brand-badge {
+            display: none !important;
           }
           .ultraman-controls-bar {
             flex-direction: column !important;
@@ -589,31 +602,31 @@ export default function UltramanCrossBorderStudyPage() {
         }
       `}</style>
 
-      {/* ── Top Header Navigation ────────────────────────────────────────── */}
-      <header style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 30 }}>
-        <div className="ultraman-header-inner" style={{ maxWidth: 1200, margin: '0 auto', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      {/* ── Top Header Navigation (Google Cloud UX: 48px sticky single-row) ── */}
+      <header style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 30, height: 48 }}>
+        <div className="ultraman-header-inner" style={{ maxWidth: 1200, margin: '0 auto', height: 48, padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
             <Link 
               href="/admin/prescriptions"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', color: '#64748b', textDecoration: 'none', padding: '6px 10px', borderRadius: 6, border: '1px solid #e2e8f0' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.78rem', color: '#475569', textDecoration: 'none', padding: '4px 8px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0 }}
+              title={isEs ? 'Volver al Desk' : 'Back to Desk'}
             >
-              <ArrowLeft size={14} /> {isEs ? 'Volver al Desk' : 'Back to Desk'}
+              <ArrowLeft size={13} />
+              <span>{isEs ? 'Desk' : 'Desk'}</span>
             </Link>
-            <span style={{ height: 16, width: 1, background: '#cbd5e1' }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, background: '#003666', color: '#ffffff', padding: '2px 8px', borderRadius: 4 }}>
-                ATLAS CLINICAL INTELLIGENCE
-              </span>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-                {isEs ? 'Estudio Farmacoeconómico Ultraman' : 'Ultraman™ Pharmacoeconomic Study'}
-              </span>
-            </div>
+            <span style={{ height: 16, width: 1, background: '#cbd5e1', flexShrink: 0 }} />
+            <span className="ultraman-brand-badge" style={{ fontSize: '0.66rem', fontWeight: 800, background: '#003666', color: '#ffffff', padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
+              ATLAS CLINICAL
+            </span>
+            <span style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {isEs ? 'Estudio Ultraman™' : 'Ultraman™ Study'}
+            </span>
           </div>
 
-          {/* Controls: Language + Currency + Share */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Language toggle: EN default */}
-            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: 3, borderRadius: 8, border: '1px solid #cbd5e1' }}>
+          {/* Desktop Controls (≥769px) */}
+          <div className="ultraman-desktop-header-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {/* Language toggle */}
+            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: 2, borderRadius: 6, border: '1px solid #cbd5e1' }}>
               {[
                 { code: 'en', label: 'EN' },
                 { code: 'es', label: 'ES' }
@@ -626,10 +639,10 @@ export default function UltramanCrossBorderStudyPage() {
                     border: 'none',
                     background: lang === code ? '#003666' : 'transparent',
                     color: lang === code ? '#ffffff' : '#475569',
-                    fontSize: '0.75rem',
+                    fontSize: '0.72rem',
                     fontWeight: 700,
-                    padding: '4px 9px',
-                    borderRadius: 6,
+                    padding: '3px 8px',
+                    borderRadius: 4,
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
                   }}
@@ -640,7 +653,7 @@ export default function UltramanCrossBorderStudyPage() {
             </div>
 
             {/* Currency selector */}
-            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: 3, borderRadius: 8, border: '1px solid #cbd5e1' }}>
+            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: 2, borderRadius: 6, border: '1px solid #cbd5e1' }}>
               {['EUR', 'USD', 'BRL'].map((cur) => (
                 <button
                   key={cur}
@@ -650,10 +663,10 @@ export default function UltramanCrossBorderStudyPage() {
                     border: 'none',
                     background: currency === cur ? '#003666' : 'transparent',
                     color: currency === cur ? '#ffffff' : '#475569',
-                    fontSize: '0.75rem',
+                    fontSize: '0.72rem',
                     fontWeight: 700,
-                    padding: '4px 10px',
-                    borderRadius: 6,
+                    padding: '3px 9px',
+                    borderRadius: 4,
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
                   }}
@@ -669,20 +682,155 @@ export default function UltramanCrossBorderStudyPage() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
+                gap: 5,
                 background: '#ffffff',
                 border: '1px solid #cbd5e1',
-                padding: '5px 12px',
+                padding: '4px 10px',
                 borderRadius: 6,
-                fontSize: '0.78rem',
-                fontWeight: 600,
+                fontSize: '0.74rem',
+                fontWeight: 650,
                 color: '#334155',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                height: 30
               }}
             >
-              {copiedLink ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-              {copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir con Cliente' : 'Share with Client')}
+              {copiedLink ? <Check size={13} color="#16a34a" /> : <Copy size={13} />}
+              <span>{copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
             </button>
+          </div>
+
+          {/* Mobile Controls (<768px: Currency Pill + More Menu) */}
+          <div className="ultraman-mobile-header-controls" style={{ display: 'none', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {/* 1-Tap Currency Switcher */}
+            <button
+              type="button"
+              onClick={() => setCurrency(currency === 'EUR' ? 'USD' : currency === 'USD' ? 'BRL' : 'EUR')}
+              style={{
+                height: 30,
+                padding: '0 8px',
+                borderRadius: 6,
+                border: '1px solid #cbd5e1',
+                background: '#f8fafc',
+                color: '#003666',
+                fontSize: '0.74rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 3
+              }}
+              title="Change currency"
+            >
+              <span>{currency}</span>
+              <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>▾</span>
+            </button>
+
+            {/* Mobile More Actions Trigger */}
+            <div style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(prev => !prev)}
+                aria-label="More options"
+                style={{
+                  width: 30,
+                  height: 30,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 6,
+                  border: isMobileMenuOpen ? '1px solid #003666' : '1px solid #cbd5e1',
+                  background: isMobileMenuOpen ? '#eff6ff' : '#ffffff',
+                  color: '#334155',
+                  cursor: 'pointer'
+                }}
+              >
+                <MoreVertical size={15} />
+              </button>
+
+              {isMobileMenuOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: '36px',
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    borderRadius: '8px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+                    padding: '6px',
+                    minWidth: '180px',
+                    zIndex: 100,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 3
+                  }}
+                >
+                  {/* Share button */}
+                  <button
+                    type="button"
+                    onClick={() => { setIsMobileMenuOpen(false); handleCopyLink(); }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '8px 10px',
+                      borderRadius: 6,
+                      border: 'none',
+                      background: 'transparent',
+                      color: '#1e293b',
+                      fontSize: '0.78rem',
+                      fontWeight: 650,
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <Copy size={13} color="#0284c7" />
+                    <span>{isEs ? 'Compartir Estudio' : 'Share Study'}</span>
+                  </button>
+
+                  <div style={{ height: 1, background: '#e2e8f0', margin: '3px 0' }} />
+
+                  {/* Language Switch */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 650 }}>{isEs ? 'Idioma' : 'Language'}</span>
+                    <div style={{ display: 'flex', gap: 3 }}>
+                      <button
+                        type="button"
+                        onClick={() => { setLang('en'); setIsMobileMenuOpen(false); }}
+                        style={{
+                          border: 'none',
+                          background: lang === 'en' ? '#003666' : '#f1f5f9',
+                          color: lang === 'en' ? '#ffffff' : '#475569',
+                          padding: '2px 7px',
+                          borderRadius: 4,
+                          fontSize: '0.70rem',
+                          fontWeight: 750,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        EN
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setLang('es'); setIsMobileMenuOpen(false); }}
+                        style={{
+                          border: 'none',
+                          background: lang === 'es' ? '#003666' : '#f1f5f9',
+                          color: lang === 'es' ? '#ffffff' : '#475569',
+                          padding: '2px 7px',
+                          borderRadius: 4,
+                          fontSize: '0.70rem',
+                          fontWeight: 750,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ES
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

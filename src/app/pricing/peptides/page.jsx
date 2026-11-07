@@ -68,6 +68,10 @@ export default async function PeptidesPricingPage({ searchParams }) {
   const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || resolvedSearch?.tier || null;
   const initialLang = normalizeLang(resolvedSearch?.lang);
   const initialCurrency = normalizeCurrency(resolvedSearch?.currency);
+  const rawDest = String(resolvedSearch?.dest || resolvedSearch?.region || '').toUpperCase();
+  const initialDest = ['EU', 'US', 'AE'].includes(rawDest) ? rawDest : 'EU';
+  const trackingCode = resolvedSearch?.tc || resolvedSearch?.track || resolvedSearch?.sid || null;
+
   const isDistributor = String(rawRef || '').toLowerCase().includes('distrib') || resolvedSearch?.margin === '15';
   const isWholesalerExplicit = String(rawRef || '').toLowerCase().includes('whole');
   const isPartnerAlias = !rawRef || ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas', 'partner-7482', 'wholesaler'].includes(String(rawRef).toLowerCase());
@@ -92,6 +96,8 @@ export default async function PeptidesPricingPage({ searchParams }) {
       isDistributor={isDistributor}
       initialLang={initialLang}
       initialCurrency={initialCurrency}
+      initialDest={initialDest}
+      trackingCode={trackingCode}
     />
   );
 }

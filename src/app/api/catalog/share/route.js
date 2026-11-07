@@ -77,6 +77,8 @@ export async function POST(request) {
         catalogId: linkId,
         catalogCode: batchCode,
         batchCode,
+        catalogTitle: body.catalogTitle || `Catálogo • ${body.supplierLabel || 'General'}`,
+        targetUrl: body.targetUrl || null,
         supplierId,
         catalogueFilter,
         productIds: Array.isArray(productIds) ? productIds : [],

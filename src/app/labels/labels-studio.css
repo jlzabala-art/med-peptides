@@ -887,8 +887,22 @@
   flex-shrink: 0;
 }
 
+/* Desktop-only action visibility default */
+.pls-desktop-only-action {
+  display: inline-flex !important;
+}
+.pls-mobile-more-btn {
+  display: none !important;
+}
+
 /* Mobile Adjustments (Golden Rule #23) */
 @media (max-width: 768px) {
+  .pls-desktop-only-action {
+    display: none !important;
+  }
+  .pls-mobile-more-btn {
+    display: inline-flex !important;
+  }
   .pls-header {
     padding: 8px 12px !important;
     gap: 8px !important;

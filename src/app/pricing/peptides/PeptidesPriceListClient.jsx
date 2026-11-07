@@ -1158,9 +1158,17 @@ export const SHIPPING_DESTINATIONS = [
   }
 ];
 
-export default function PeptidesPriceListClient({ initialProducts = [], referralCode = 'CAT-RX-7482', isDistributor = false }) {
-  const [currency, setCurrency] = useState('USD'); // USD, EUR, AED
-  const [shippingDest, setShippingDest] = useState('EU'); // EU (€60), US ($25), AE ($80)
+export default function PeptidesPriceListClient({
+  initialProducts = [],
+  referralCode = 'CAT-RX-7482',
+  isDistributor = false,
+  initialLang = 'en',
+  initialCurrency = 'USD',
+  initialDest = 'EU',
+  trackingCode = null
+}) {
+  const [currency, setCurrency] = useState(initialCurrency || 'USD'); // USD, EUR, AED
+  const [shippingDest, setShippingDest] = useState(initialDest || 'EU'); // EU (€60), US ($25), AE ($80)
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -1176,12 +1184,14 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [inquiryProductContext, setInquiryProductContext] = useState(null);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  const [isFdaSheetOpen, setIsFdaSheetOpen] = useState(false);
   const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
   const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
   const [isCurrencySheetOpen, setIsCurrencySheetOpen] = useState(false);
+  const [trackingCodeState] = useState(trackingCode);
 
   // Strict English default ('en') unless ?lang=es is explicitly in the URL or selected via top button
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState(initialLang || 'en');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -1765,6 +1775,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           customerNotes: orderForm.notes,
           shippingDestination: orderForm.country || 'International Express Medical Courier',
           referralCode: referralCode || 'CAT-RX-7482',
+          trackingCode: trackingCodeState || (typeof window !== 'undefined' ? new URL(window.location.href).searchParams.get('tc') : null) || referralCode,
+          catalogId: trackingCodeState || (typeof window !== 'undefined' ? new URL(window.location.href).searchParams.get('tc') : null) || null,
           source: 'public_peptides_price_schedule',
           collection: 'vials',
           subtotal: subtotalUsd,
@@ -2965,67 +2977,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   <CheckCircle2 size={11} />
                   <span>≥99.0% HPLC</span>
                 </span>
-
-                {/* Interactive Shipping Destination Corridor Selector (≤ 2 kg) */}
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  padding: '2px 6px 2px 8px',
-                  borderRadius: '6px',
-                  flexWrap: 'wrap'
-                }}>
-                  <span style={{
-                    fontSize: '0.67rem',
-                    fontWeight: 750,
-                    color: '#334155',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    <Truck size={11} color="#0284c7" />
-                    <span>{isEs ? 'Envío (≤ 2 kg):' : 'Shipping (≤ 2 kg):'}</span>
-                  </span>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                    {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
-                      const isSel = shippingDest === corridor.id;
-                      return (
-                        <button
-                          key={corridor.id}
-                          type="button"
-                          onClick={() => handleShippingDestChange(corridor.id)}
-                          title={isEs ? corridor.corridorLabelEs : corridor.corridorLabelEn}
-                          style={{
-                            border: isSel ? '1px solid #0284c7' : '1px solid transparent',
-                            background: isSel ? '#e0f2fe' : 'transparent',
-                            color: isSel ? '#0369a1' : '#475569',
-                            fontWeight: isSel ? 800 : 600,
-                            fontSize: '0.66rem',
-                            padding: '1px 6px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '3px',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <span>{corridor.flag}</span>
-                          <span>{isEs ? corridor.labelEs : corridor.labelEn}</span>
-                          <span style={{
-                            fontFamily: 'monospace',
-                            fontWeight: 800,
-                            color: isSel ? '#0284c7' : '#64748b'
-                          }}>
-                            {corridor.rateBadge}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
               </div>
               <h1 className="peptides-hero-title" style={{
                 fontSize: 'clamp(1.12rem, 3vw, 1.60rem)',
@@ -3546,6 +3497,64 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 resultCount={filteredProducts.length}
                 filters={
                   <div>
+                    {/* Integrated Shipping Corridor Segmented Switcher (Google Cloud Standard) */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      flexWrap: 'wrap',
+                      padding: '5px 10px',
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      marginBottom: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Truck size={13} color="#0284c7" />
+                        <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#334155' }}>
+                          {isEs ? 'Destino y Tarifa de Envío (≤ 2 kg):' : 'Shipping Corridor & Rate (≤ 2 kg):'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                        {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
+                          const isSel = shippingDest === corridor.id;
+                          return (
+                            <button
+                              key={corridor.id}
+                              type="button"
+                              onClick={() => handleShippingDestChange(corridor.id)}
+                              title={isEs ? corridor.corridorLabelEs : corridor.corridorLabelEn}
+                              style={{
+                                border: isSel ? '1px solid #0284c7' : '1px solid transparent',
+                                background: isSel ? '#e0f2fe' : 'transparent',
+                                color: isSel ? '#0369a1' : '#475569',
+                                fontWeight: isSel ? 800 : 600,
+                                fontSize: '0.68rem',
+                                padding: '2px 7px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <span>{corridor.flag}</span>
+                              <span>{isEs ? corridor.labelEs : corridor.labelEn}</span>
+                              <span style={{
+                                fontFamily: 'monospace',
+                                fontWeight: 800,
+                                color: isSel ? '#0284c7' : '#64748b'
+                              }}>
+                                {corridor.rateBadge}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     {/* Dosage Strength Quick Filter Pills + Category Grouping Toggle */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -3657,9 +3666,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 }
               />
 
-              {/* Dual Mobile Dropdown Selectors (Google Cloud Mobile UX Standard: Category + FDA Status) */}
+              {/* Dual Mobile Dropdown Selectors (Google Cloud Mobile UX Standard: Category + FDA Status Bottom Sheets) */}
               <div className="mobile-only-filter-selectors">
-                {/* 1. Category Dropdown Selector */}
+                {/* 1. Category Bottom Sheet Trigger */}
                 <div style={{
                   background: '#ffffff',
                   border: '1px solid #dadce0',
@@ -3671,9 +3680,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <label htmlFor="mobile-category-dropdown" style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span>🧬 {isEs ? 'Categoría' : 'Category'}</span>
-                    </label>
+                    </span>
                     <button
                       type="button"
                       onClick={() => setIsCategorySheetOpen(true)}
@@ -3690,43 +3699,37 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       {isEs ? 'Ver lista ▾' : 'View sheet ▾'}
                     </button>
                   </div>
-                  <div style={{ position: 'relative' }}>
-                    <select
-                      id="mobile-category-dropdown"
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '7px 26px 7px 9px',
-                        borderRadius: '6px',
-                        border: selectedCategory !== 'all' ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
-                        background: selectedCategory !== 'all' ? '#f0f7ff' : '#ffffff',
-                        color: selectedCategory !== 'all' ? '#1a73e8' : '#1e293b',
-                        fontSize: '0.80rem',
-                        fontWeight: selectedCategory !== 'all' ? 750 : 500,
-                        cursor: 'pointer',
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
-                        outline: 'none'
-                      }}
-                    >
-                      <option value="all">{isEs ? '🌐 Todas las Categorías' : '🌐 All Categories'} ({processedProducts.length})</option>
-                      {CATEGORY_ORDER.map(key => {
-                        const meta = CATEGORY_MAP[key];
-                        const count = processedProducts.filter(p => p.categoryKey === key).length;
-                        if (!meta || count === 0) return null;
-                        return (
-                          <option key={key} value={key}>
-                            {meta.icon} {isEs ? meta.labelEs : meta.labelEn} ({count})
-                          </option>
-                        );
-                      })}
-                    </select>
-                    <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsCategorySheetOpen(true)}
+                    style={{
+                      width: '100%',
+                      padding: '7px 9px',
+                      borderRadius: '6px',
+                      border: selectedCategory !== 'all' ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                      background: selectedCategory !== 'all' ? '#f0f7ff' : '#ffffff',
+                      color: selectedCategory !== 'all' ? '#1a73e8' : '#1e293b',
+                      fontSize: '0.80rem',
+                      fontWeight: selectedCategory !== 'all' ? 750 : 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '6px',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {selectedCategory === 'all'
+                        ? (isEs ? `🌐 Todas las Categorías (${processedProducts.length})` : `🌐 All Categories (${processedProducts.length})`)
+                        : `${CATEGORY_MAP[selectedCategory]?.icon || '🧬'} ${isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn} (${processedProducts.filter(p => p.categoryKey === selectedCategory).length})`
+                      }
+                    </span>
+                    <ChevronDown size={14} color="#64748b" style={{ flexShrink: 0 }} />
+                  </button>
                 </div>
 
-                {/* 2. FDA Regulatory Status Dropdown Selector */}
+                {/* 2. FDA Regulatory Status Bottom Sheet Trigger */}
                 <div style={{
                   background: '#ffffff',
                   border: '1px solid #dadce0',
@@ -3738,12 +3741,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <label htmlFor="mobile-fda-dropdown" style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span>⚖️ {isEs ? 'Estatus FDA' : 'FDA Status'}</span>
-                    </label>
+                    </span>
                     <button
                       type="button"
-                      onClick={() => setIsNavDrawerOpen(true)}
+                      onClick={() => setIsFdaSheetOpen(true)}
                       style={{
                         border: 'none',
                         background: 'transparent',
@@ -3754,42 +3757,37 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         padding: 0
                       }}
                     >
-                      {isEs ? 'Menú ☰' : 'Drawer ☰'}
+                      {isEs ? 'Ver lista ▾' : 'View sheet ▾'}
                     </button>
                   </div>
-                  <div style={{ position: 'relative' }}>
-                    <select
-                      id="mobile-fda-dropdown"
-                      value={selectedFdaStatus}
-                      onChange={(e) => setSelectedFdaStatus(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '7px 26px 7px 9px',
-                        borderRadius: '6px',
-                        border: selectedFdaStatus !== 'all' ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
-                        background: selectedFdaStatus !== 'all' ? '#f0f7ff' : '#ffffff',
-                        color: selectedFdaStatus !== 'all' ? '#1a73e8' : '#1e293b',
-                        fontSize: '0.80rem',
-                        fontWeight: selectedFdaStatus !== 'all' ? 750 : 500,
-                        cursor: 'pointer',
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
-                        outline: 'none'
-                      }}
-                    >
-                      {FDA_FILTERS.map(f => {
-                        const count = f.id === 'all'
-                          ? processedProducts.length
-                          : processedProducts.filter(p => p.fdaBucket === f.id).length;
-                        return (
-                          <option key={f.id} value={f.id}>
-                            {f.icon} {isEs ? f.labelEs : f.labelEn} ({count})
-                          </option>
-                        );
-                      })}
-                    </select>
-                    <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsFdaSheetOpen(true)}
+                    style={{
+                      width: '100%',
+                      padding: '7px 9px',
+                      borderRadius: '6px',
+                      border: selectedFdaStatus !== 'all' ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                      background: selectedFdaStatus !== 'all' ? '#f0f7ff' : '#ffffff',
+                      color: selectedFdaStatus !== 'all' ? '#1a73e8' : '#1e293b',
+                      fontSize: '0.80rem',
+                      fontWeight: selectedFdaStatus !== 'all' ? 750 : 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '6px',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {selectedFdaStatus === 'all'
+                        ? (isEs ? `🌐 Toda Regulación (${processedProducts.length})` : `🌐 All Regulatory (${processedProducts.length})`)
+                        : `${FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.icon || '⚖️'} ${isEs ? FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.labelEs : FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.labelEn} (${processedProducts.filter(p => p.fdaBucket === selectedFdaStatus).length})`
+                      }
+                    </span>
+                    <ChevronDown size={14} color="#64748b" style={{ flexShrink: 0 }} />
+                  </button>
                 </div>
               </div>
             </div>
@@ -5379,14 +5377,91 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   </button>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      )}
 
-              {/* Divider between Categories & FDA Regulatory Status */}
-              <div style={{ height: '1px', background: '#e2e8f0', margin: '14px 4px 10px 4px' }} />
-
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 4px', marginBottom: '4px' }}>
-                {isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}
+      {/* ── Mobile FDA Regulatory Status Bottom Sheet (Google Cloud Console Standard) ── */}
+      {isFdaSheetOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1100,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            animation: 'fadeIn 0.18s ease'
+          }}
+          onClick={() => setIsFdaSheetOpen(false)}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderTopLeftRadius: '16px',
+              borderTopRightRadius: '16px',
+              maxHeight: '75vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Sheet Handle & Header */}
+            <div style={{
+              padding: '12px 16px 10px',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '6px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '36px',
+                height: '4px',
+                background: '#cbd5e1',
+                borderRadius: '2px'
+              }} />
+              <div style={{ marginTop: '4px' }}>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1e293b' }}>
+                  {isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  {isEs ? 'Filtrar por formulación hospitalaria, aprobado o investigación' : 'Filter by hospital formulary, FDA approved, or IND status'}
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setIsFdaSheetOpen(false)}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#64748b',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
 
+            {/* FDA Options List */}
+            <div style={{ padding: '8px 12px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {FDA_FILTERS.map(f => {
                 const isSelected = selectedFdaStatus === f.id;
                 const count = f.id === 'all'
@@ -5398,14 +5473,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     type="button"
                     onClick={() => {
                       setSelectedFdaStatus(f.id);
-                      setIsCategorySheetOpen(false);
+                      setIsFdaSheetOpen(false);
                     }}
                     style={{
                       width: '100%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '11px 14px',
+                      padding: '12px 14px',
                       borderRadius: '8px',
                       border: isSelected ? '1.5px solid #1a73e8' : '1px solid #f1f5f9',
                       background: isSelected ? '#e8f0fe' : '#ffffff',
@@ -5417,14 +5492,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '1.05rem' }}>{f.icon}</span>
-                      <span>{isEs ? f.labelEs : f.labelEn}</span>
+                      <span style={{ fontSize: '1.1rem' }}>{f.icon}</span>
+                      <div>
+                        <div>{isEs ? f.labelEs : f.labelEn}</div>
+                        <div style={{ fontSize: '0.68rem', color: isSelected ? '#1a73e8' : '#64748b', fontWeight: 500 }}>
+                          {isEs ? f.tooltipEs : f.tooltipEn}
+                        </div>
+                      </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{
                         fontSize: '0.72rem',
                         fontWeight: 700,
-                        background: isSelected ? '#1a73e8' : '#f1f3f4',
+                        background: isSelected ? '#1a73e8' : '#f1f5f9',
                         color: isSelected ? '#ffffff' : '#64748b',
                         padding: '2px 8px',
                         borderRadius: '12px'

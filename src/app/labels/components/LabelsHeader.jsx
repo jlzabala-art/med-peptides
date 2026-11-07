@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, X, Printer, Upload, Share2, Check, ChevronDown, User, FileText, Layers, ExternalLink } from '@/lib/icons';
 import { useAuth } from '@/context/AuthContext';
 import UserDropdown from '@/navigation/UserDropdown';
+import { MoreVertical } from 'lucide-react';
 
 export default function LabelsHeader({
   searchBoxRef,
@@ -34,6 +35,7 @@ export default function LabelsHeader({
   const { user, userProfile, activeRole, logout, isProfessional, isAdmin } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const shareContainerRef = useRef(null);
 
   // Close share menu on outside click or Escape
@@ -210,7 +212,7 @@ export default function LabelsHeader({
           <button
             type="button"
             id="pls-import-rx-btn"
-            className="pls-btn-import"
+            className="pls-btn-import pls-desktop-only-action"
             onClick={onOpenImport}
             title={isEs ? 'Importar datos (Rx y Analíticas Lab)' : 'Import Data (Rx & Lab Results)'}
             aria-label={isEs ? 'Importar datos' : 'Import Data'}
@@ -220,7 +222,7 @@ export default function LabelsHeader({
           </button>
 
           {/* Unified Share Dropdown Button (Google Cloud UX Standards) */}
-          <div className="pls-share-container" ref={shareContainerRef} style={{ position: 'relative' }}>
+          <div className="pls-share-container pls-desktop-only-action" ref={shareContainerRef} style={{ position: 'relative' }}>
             <button
               type="button"
               className="pls-btn-share"
@@ -376,7 +378,7 @@ export default function LabelsHeader({
           </div>
 
           {/* Language Switcher */}
-          <div className="pls-lang-toggle" role="group" aria-label="Language selection">
+          <div className="pls-lang-toggle pls-desktop-only-action" role="group" aria-label="Language selection">
             <button
               type="button"
               onClick={() => setLang('en')}
@@ -419,7 +421,7 @@ export default function LabelsHeader({
               <span>{isEs ? 'Modo Quiosco' : 'Kiosk View'}</span>
             </Link>
           ) : (
-            <div className="pls-user-profile-wrap" style={{ position: 'relative' }}>
+            <div className="pls-user-profile-wrap pls-desktop-only-action" style={{ position: 'relative' }}>
               {user ? (
                 <button
                   type="button"
@@ -504,6 +506,169 @@ export default function LabelsHeader({
               )}
             </div>
           )}
+                  {/* Google Cloud Style Mobile More Actions Menu Trigger (⋮) */}
+          <div className="pls-mobile-more-wrap" style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className="pls-mobile-more-btn"
+              onClick={() => setIsMobileMenuOpen(prev => !prev)}
+              aria-label="More actions"
+              aria-expanded={isMobileMenuOpen}
+              style={{
+                display: 'none',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '34px',
+                height: '34px',
+                background: isMobileMenuOpen ? '#e8f0fe' : '#ffffff',
+                border: isMobileMenuOpen ? '1px solid #1a73e8' : '1px solid #dadce0',
+                borderRadius: '6px',
+                color: isMobileMenuOpen ? '#1a73e8' : '#3c4043',
+                cursor: 'pointer'
+              }}
+            >
+              <MoreVertical size={16} />
+            </button>
+
+            {isMobileMenuOpen && (
+              <div
+                className="pls-mobile-more-dropdown"
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '40px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '8px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+                  padding: '6px',
+                  minWidth: '200px',
+                  zIndex: 150,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px'
+                }}
+              >
+                {/* Import */}
+                <button
+                  type="button"
+                  onClick={() => { setIsMobileMenuOpen(false); onOpenImport(); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#1e293b',
+                    fontSize: '0.80rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                >
+                  <Upload size={14} color="#0284c7" />
+                  <span>{isEs ? 'Importar Datos (Rx)' : 'Import Data (Rx)'}</span>
+                </button>
+
+                {/* Share */}
+                <button
+                  type="button"
+                  onClick={() => { setIsMobileMenuOpen(false); if (onShare) onShare(); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#1e293b',
+                    fontSize: '0.80rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                >
+                  <Share2 size={14} color="#16a34a" />
+                  <span>{isEs ? 'Compartir Espacio' : 'Share Workspace'}</span>
+                </button>
+
+                {/* Divider */}
+                <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+
+                {/* Language */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px' }}>
+                  <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 650 }}>{isEs ? 'Idioma' : 'Language'}</span>
+                  <div style={{ display: 'flex', gap: '3px' }}>
+                    <button
+                      type="button"
+                      onClick={() => { setLang('en'); setIsMobileMenuOpen(false); }}
+                      style={{
+                        border: 'none',
+                        background: !isEs ? '#1a73e8' : '#f1f5f9',
+                        color: !isEs ? '#ffffff' : '#475569',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.72rem',
+                        fontWeight: 750,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      EN
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setLang('es'); setIsMobileMenuOpen(false); }}
+                      style={{
+                        border: 'none',
+                        background: isEs ? '#1a73e8' : '#f1f5f9',
+                        color: isEs ? '#ffffff' : '#475569',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.72rem',
+                        fontWeight: 750,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ES
+                    </button>
+                  </div>
+                </div>
+
+                {user && (
+                  <>
+                    <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+                    <div style={{ padding: '6px 10px', fontSize: '0.72rem', color: '#64748b' }}>
+                      <div style={{ fontWeight: 700, color: '#0f172a' }}>{userDisplayName}</div>
+                      <div style={{ fontSize: '0.66rem', color: '#0284c7' }}>{roleDisplay}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setIsMobileMenuOpen(false); logout(); }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#dc2626',
+                        fontSize: '0.74rem',
+                        fontWeight: 650,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <span>{isEs ? 'Cerrar Sesión' : 'Sign Out'}</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </header>
     </>

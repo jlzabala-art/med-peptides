@@ -347,6 +347,47 @@ export async function POST(request) {
       }
     }
 
+    // Update Shared Catalog Link tracking & conversion ledger if linked
+    const trackingCodeCandidate = body.trackingCode || catalogId || referralCode;
+    if (trackingCodeCandidate && adminDb) {
+      try {
+        const linkDocRef = adminDb.collection('shared_catalog_links').doc(String(trackingCodeCandidate).trim());
+        const linkSnap = await linkDocRef.get();
+        if (linkSnap.exists) {
+          const lData = linkSnap.data();
+          await linkDocRef.set({
+            status: 'converted',
+            readStatus: 'converted',
+            orderPlaced: true,
+            orderCount: FieldValue.increment(1),
+            lastOrderId: orderRef.id,
+            lastOrderCode: orderCode,
+            lastOrderAmount: orderDocData.grandTotal,
+            lastOrderAt: now.toISOString(),
+            interactions: {
+              ...(lData.interactions || {}),
+              orderPlaced: true,
+              lastInteractionAt: now.toISOString()
+            }
+          }, { merge: true });
+
+          if (lData.recipientUserId) {
+            await adminDb.collection('users').doc(lData.recipientUserId).collection('shared_assets').doc(String(trackingCodeCandidate).trim()).set({
+              status: 'converted',
+              orderPlaced: true,
+              orderCount: FieldValue.increment(1),
+              lastOrderId: orderRef.id,
+              lastOrderCode: orderCode,
+              lastOrderAmount: orderDocData.grandTotal,
+              lastOrderAt: now.toISOString(),
+            }, { merge: true }).catch(() => {});
+          }
+        }
+      } catch (trackLinkErr) {
+        console.warn('[orders/create-draft] Could not update shared_catalog_links conversion:', trackLinkErr.message);
+      }
+    }
+
     // Create high-priority notification for Admin, Wholesaler and Account Manager
     const isWholesalerOrder = Boolean(orderDocData.wholesalerId);
     const notifData = {

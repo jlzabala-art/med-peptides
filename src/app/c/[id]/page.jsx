@@ -226,8 +226,8 @@ export default async function ShortCatalogRoute({ params }) {
           console.warn('[ShortCatalogRoute] Could not update visit count:', updateErr.message);
         }
 
-        // If targetUrl exists (protocols, doctor portal, wholesaler portal, or intake), redirect smoothly
-        if (d.targetUrl && (isProto || isDoctor || isWholesaler || d.targetUrl.startsWith('/dr/') || d.targetUrl.startsWith('/wholesaler') || d.targetUrl.startsWith('/rx/'))) {
+        // If targetUrl exists (peptides pricing, protocols, doctor portal, wholesaler portal, or intake), redirect smoothly
+        if (d.targetUrl) {
           const rawTarget = d.targetUrl;
           const sep = rawTarget.includes('?') ? '&' : '?';
           const targetUrl = `${rawTarget}${sep}tc=${encodeURIComponent(id)}`;

@@ -60,7 +60,7 @@ export async function GET(request) {
       }
     }
 
-    let allDocs = [...snapshot.docs];
+    const allDocs = [...snapshot.docs];
 
     // Also query universal shared_records for any protocol or catalog shares
     try {
@@ -139,11 +139,16 @@ export async function GET(request) {
         validityDays:   d.validityDays   || 30,
         visitsCount:    d.visitsCount    || (d.interactions?.webOpened ? 1 : 0),
         status:         d.status         || 'sent',
-        // Interaction tracking
+        targetUrl:      d.targetUrl      || null,
+        // Interaction & conversion tracking
         pdfDownloaded:      d.interactions?.pdfDownloaded      ?? false,
         webOpened:          d.interactions?.webOpened          ?? (d.visitsCount > 0),
-        orderPlaced:        d.interactions?.orderPlaced        ?? false,
-        lastInteractionAt:  d.interactions?.lastInteractionAt  ?? null,
+        orderPlaced:        d.interactions?.orderPlaced        ?? d.orderPlaced ?? false,
+        orderCount:         d.orderCount                       ?? (d.orderPlaced ? 1 : 0),
+        lastOrderId:        d.lastOrderId                      || null,
+        lastOrderCode:      d.lastOrderCode                    || null,
+        lastOrderAmount:    d.lastOrderAmount                  || null,
+        lastInteractionAt:  d.interactions?.lastInteractionAt  ?? d.lastVisitedAt ?? null,
         // Share URL
         shareableUrl:   d.shareableUrl   || (catCode ? `https://www.atlashealth-services.com/c/${catCode}` : null),
         shortUrl:       catCode ? `https://www.atlashealth-services.com/c/${catCode}` : (d.shareableUrl || null),
