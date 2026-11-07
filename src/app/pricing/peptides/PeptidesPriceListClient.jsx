@@ -41,7 +41,8 @@ import {
   Mail,
   Truck,
   Menu,
-  SlidersHorizontal
+  SlidersHorizontal,
+  MoreVertical
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
@@ -885,6 +886,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [inquiryProductContext, setInquiryProductContext] = useState(null);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
+  const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
 
   // Strict English default ('en') unless ?lang=es is explicitly in the URL or selected via top button
   const [lang, setLang] = useState('en');
@@ -2048,7 +2050,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
   return (
     <div className="colway-price-root peptides-b2b-portal">
       {/* ── Screen Navigation Bar (Google Cloud Console AppBar) ── */}
-      <header className="screen-nav-bar">
+      <header className="screen-nav-bar peptides-screen-nav-bar">
         <div className="nav-container peptides-nav-container">
           <div className="nav-left peptides-nav-left">
             {/* Mobile hamburger menu trigger (visible ≤1024px) */}
@@ -2063,18 +2065,18 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 background: 'rgba(255, 255, 255, 0.12)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '6px',
-                width: '34px',
-                height: '34px',
+                width: '32px',
+                height: '32px',
                 color: '#e2e8f0',
                 cursor: 'pointer',
                 flexShrink: 0,
                 transition: 'all 0.15s ease'
               }}
             >
-              <Menu size={18} />
+              <Menu size={17} />
             </button>
             <Link href="/" className="nav-brand">
-              <Sparkles size={16} className="text-sky-400" />
+              <Sparkles size={15} className="text-sky-400" />
               <span>MEDILUXE B2B</span>
             </Link>
             <span className="nav-divider mobile-hide">/</span>
@@ -2084,8 +2086,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           </div>
 
           <div className="nav-actions peptides-nav-actions">
-            {/* Top-right compact utility group (EN/ES, Atlas AI, Inquire, PDF, Share) */}
-            <div className="peptides-nav-utility-group">
+            {/* ── Desktop & Laptop Actions Bar ── */}
+            <div className="peptides-nav-utility-group desktop-only-utilities">
               {/* Language selector: EN standard, ES selectable */}
               <div className="language-selector" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <div className="pill-group" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
@@ -2151,7 +2153,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   setInquiryProductContext(null);
                   setIsInquiryDrawerOpen(true);
                 }}
-                className="peptides-nav-btn mobile-hide"
+                className="peptides-nav-btn"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -2223,8 +2225,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </button>
             </div>
 
-            {/* Currency selector with prominent display (Google Cloud Console Standard) */}
-            <div className="currency-selector peptides-currency-bar" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Desktop Currency selector with prominent display */}
+            <div className="currency-selector peptides-currency-bar desktop-only-currency" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
                 {isEs ? 'Divisa:' : 'Currency:'}
               </span>
@@ -2265,6 +2267,228 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* ── Mobile-Only Compact 1-Row Action Group (GCP UX Standard: Currency + AI + More Menu) ── */}
+            <div className="mobile-only-header-actions" style={{ display: 'none', alignItems: 'center', gap: '6px' }}>
+              {/* Compact Currency Dropdown */}
+              <div style={{ position: 'relative' }}>
+                <select
+                  value={currency}
+                  onChange={(e) => handleCurrencyChange(e.target.value)}
+                  aria-label="Select currency"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.14)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    borderRadius: '6px',
+                    padding: '5px 22px 5px 8px',
+                    fontSize: '0.74rem',
+                    fontWeight: 750,
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    height: '32px'
+                  }}
+                >
+                  <option value="USD" style={{ color: '#0f172a', background: '#ffffff' }}>$ USD</option>
+                  <option value="EUR" style={{ color: '#0f172a', background: '#ffffff' }}>€ EUR</option>
+                  <option value="AED" style={{ color: '#0f172a', background: '#ffffff' }}>د.إ AED</option>
+                </select>
+                <ChevronDown size={12} color="#94a3b8" style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              </div>
+
+              {/* Compact Atlas AI pill */}
+              <button
+                type="button"
+                onClick={() => setIsAtlasAiOpen(true)}
+                aria-label="Open Atlas AI"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.45) 0%, rgba(13, 148, 136, 0.45) 100%)',
+                  color: '#38bdf8',
+                  border: '1px solid rgba(56, 189, 248, 0.5)',
+                  padding: '5px 8px',
+                  borderRadius: '6px',
+                  fontSize: '0.74rem',
+                  fontWeight: 750,
+                  cursor: 'pointer',
+                  height: '32px'
+                }}
+              >
+                <Sparkles size={13} className="text-sky-300" />
+                <span>AI</span>
+              </button>
+
+              {/* Mobile "More" Menu Trigger (⋮) */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMoreMenuOpen(!isMobileMoreMenuOpen)}
+                  aria-label="More actions"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: isMobileMoreMenuOpen ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '6px',
+                    width: '32px',
+                    height: '32px',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <MoreVertical size={16} />
+                </button>
+
+                {/* Dropdown Menu popover for secondary actions */}
+                {isMobileMoreMenuOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: '38px',
+                      background: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.25)',
+                      border: '1px solid #dadce0',
+                      padding: '6px',
+                      minWidth: '170px',
+                      zIndex: 150,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px',
+                      animation: 'fadeIn 0.12s ease'
+                    }}
+                  >
+                    {/* PDF Schedule */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMoreMenuOpen(false);
+                        setIsPdfPreviewOpen(true);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#1e293b',
+                        fontSize: '0.80rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <Eye size={14} color="#0284c7" />
+                      <span>{isEs ? 'Exportar PDF' : 'Export PDF'}</span>
+                    </button>
+
+                    {/* Share */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMoreMenuOpen(false);
+                        handleShareSchedule();
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#1e293b',
+                        fontSize: '0.80rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <Share2 size={14} color="#16a34a" />
+                      <span>{copied ? (isEs ? '¡Copiado!' : 'Copied!') : (isEs ? 'Compartir' : 'Share')}</span>
+                    </button>
+
+                    {/* Inquire */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMoreMenuOpen(false);
+                        setInquiryProductContext(null);
+                        setIsInquiryDrawerOpen(true);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#1e293b',
+                        fontSize: '0.80rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <Mail size={14} color="#ea580c" />
+                      <span>{isEs ? 'Consultar B2B' : 'B2B Inquiry'}</span>
+                    </button>
+
+                    {/* Divider */}
+                    <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+
+                    {/* Language Toggle */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px' }}>
+                      <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 650 }}>{isEs ? 'Idioma' : 'Language'}</span>
+                      <div style={{ display: 'flex', gap: '3px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleLanguageChange('en')}
+                          style={{
+                            border: 'none',
+                            background: lang === 'en' ? '#0284c7' : '#f1f5f9',
+                            color: lang === 'en' ? '#ffffff' : '#475569',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '0.68rem',
+                            fontWeight: 750,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          EN
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleLanguageChange('es')}
+                          style={{
+                            border: 'none',
+                            background: lang === 'es' ? '#0284c7' : '#f1f5f9',
+                            color: lang === 'es' ? '#ffffff' : '#475569',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '0.68rem',
+                            fontWeight: 750,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ES
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -2452,10 +2676,31 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             from { transform: translateX(-100%); }
             to { transform: translateX(0); }
           }
-          .peptides-nav-utility-group {
+          .screen-nav-bar.peptides-screen-nav-bar {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 100 !important;
+            background: rgba(15, 23, 42, 0.98) !important;
+            backdrop-filter: blur(12px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+          }
+          .peptides-nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .desktop-only-utilities {
             display: inline-flex;
             align-items: center;
             gap: 6px;
+          }
+          .desktop-only-currency {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .mobile-only-header-actions {
+            display: none;
           }
           .peptides-kpis-grid {
             display: grid;
@@ -2496,52 +2741,66 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             .mobile-hide {
               display: none !important;
             }
-            /* Compact 2-Row Google Cloud Mobile Top AppBar (No 3rd orphan row) */
+            .desktop-only-utilities {
+              display: none !important;
+            }
+            .desktop-only-currency {
+              display: none !important;
+            }
+            .mobile-only-header-actions {
+              display: inline-flex !important;
+            }
+            /* Ultra-Compact 1-Row Google Cloud Mobile Top AppBar (Sticky, 48px height) */
+            .screen-nav-bar.peptides-screen-nav-bar {
+              position: sticky !important;
+              top: 0 !important;
+              z-index: 100 !important;
+            }
             .peptides-b2b-portal .peptides-nav-container {
-              padding: 8px 12px !important;
-              gap: 6px !important;
+              padding: 6px 12px !important;
+              gap: 8px !important;
+              flex-direction: row !important;
+              flex-wrap: nowrap !important;
+              align-items: center !important;
+              justify-content: space-between !important;
+              height: 48px !important;
             }
             .peptides-b2b-portal .peptides-nav-left {
               width: auto !important;
-              flex: 0 0 auto !important;
+              flex: 1 1 auto !important;
+              min-width: 0 !important;
+              display: flex !important;
+              align-items: center !important;
+              gap: 8px !important;
+            }
+            .peptides-b2b-portal .nav-brand span {
+              font-size: 0.82rem !important;
+              white-space: nowrap !important;
             }
             .peptides-b2b-portal .peptides-nav-actions {
-              width: 100% !important;
+              width: auto !important;
+              flex: 0 0 auto !important;
               display: flex !important;
               flex-direction: row !important;
-              flex-wrap: wrap !important;
+              flex-wrap: nowrap !important;
               align-items: center !important;
-              justify-content: space-between !important;
+              justify-content: flex-end !important;
               gap: 6px !important;
             }
-            .peptides-b2b-portal .peptides-nav-utility-group {
-              margin-left: auto;
-              display: inline-flex !important;
-              align-items: center !important;
-              gap: 5px !important;
-            }
-            .peptides-b2b-portal .peptides-currency-bar {
-              width: 100% !important;
-              justify-content: space-between !important;
-              padding-top: 4px !important;
-              border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-            }
-            .peptides-b2b-portal .peptides-currency-pills {
-              flex: 1 !important;
-              display: flex !important;
-            }
             .peptides-main-container {
-              padding: 0.75rem 0.75rem 3.5rem 0.75rem !important;
+              padding: 0.5rem 0.65rem 3.5rem 0.65rem !important;
             }
-            .peptides-page-header {
-              margin-bottom: 0.65rem !important;
+            .peptides-hero-title {
+              font-size: 1.05rem !important;
+              line-height: 1.2 !important;
             }
             .peptides-hero-subtitle {
-              font-size: 0.76rem !important;
-              display: -webkit-box;
-              -webkit-line-clamp: 2;
-              -webkit-box-orient: vertical;
-              overflow: hidden;
+              display: none !important; /* Hide verbose 2-paragraph description on mobile */
+            }
+            .mobile-only-filter-selectors {
+              grid-template-columns: 1fr 1fr !important;
+              gap: 6px !important;
+              margin-top: 6px !important;
             }
             /* Golden Rule #7: Search Bar & Category Selector FIRST Above-the-Fold on Mobile */
             .gcp-search-and-category-block {

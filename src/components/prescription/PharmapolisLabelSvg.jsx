@@ -1293,16 +1293,6 @@ export default function PharmapolisLabelSvg({
             const baseMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.65)));
             const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
 
-            // Directions font scaling & wrapping (Compliant with >= 5.8 pt standard)
-            const posFontSize = isShort
-              ? (isUltraSparse ? 32 : isSparse ? 28 : 25)
-              : isMediumHeight
-                ? (isUltraSparse ? 33 : isSparse ? 29 : 26)
-                : (isUltraSparse ? 35 : isSparse ? 31 : 28);
-            const posLineGap = Math.round(posFontSize * 1.48);
-            const posMaxChars = Math.max(24, Math.floor((innerUsableWidth - 64) / (posFontSize * 0.68)));
-            const posologyLines = wrapLines(directions, posMaxChars);
-
             // Bottom-anchored Caution & Prescriber coordinates (crisp 2-line footer block, zero low-contrast clutter)
             const bottomMargin = isShort ? 12 : isMediumHeight ? 14 : 18;
             const bRxY = colHeight - bottomMargin;
@@ -1322,27 +1312,69 @@ export default function PharmapolisLabelSvg({
             const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 15 : isSparse ? 12 : 10) + Math.round(baseFontSize * 0.82);
             const ingBlockH = firstBaseLineY + ((baseLines.length - 1) * baseLineGap) + 8;
 
-            const posHeaderTitleY = isShort ? 16 : isMediumHeight ? 18 : 22;
-            const firstPosLineY = posHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 16) + Math.round(posFontSize * 0.82);
-            const basePosBoxHeight = firstPosLineY + ((posologyLines.length - 1) * posLineGap) + (isShort ? 14 : isMediumHeight ? 16 : 22);
+            // Ingredients baseline anchor: posBox CAN NEVER START HIGHER than topIngredientsY + ingBlockH + minGap
+            const topIngredientsY = isShort ? (isUltraSparse ? 14 : 10) : isMediumHeight ? 14 : 16;
+            const minMidPad = isShort ? 8 : 12;
+            const absoluteMinPosBoxY = topIngredientsY + ingBlockH + minMidPad;
 
-            // Available vertical space above Block 4
+            // Maximum physical height available for the posology box (without colliding with ingredients or caution footer)
+            const maxAvailablePosBoxHeight = Math.max(70, maxPosBoxBottom - absoluteMinPosBoxY);
+
+            // ── Dynamic Auto-Fitting Scale for Directions/Posology (Zero Overlap Guaranteed) ──
+            // Progressive font sizes with compliance for EU GMP / Pharmacopeia legibility (≥13.5px / 5.8pt)
+            const candidatePosFontSizes = isShort
+              ? [32, 28, 25, 22, 19, 17, 15, 13.5]
+              : isMediumHeight
+                ? [34, 30, 26, 23, 20, 18, 16, 14]
+                : [36, 31, 28, 25, 22, 19, 17, 15, 14];
+
+            let resolvedPosFontSize = candidatePosFontSizes[candidatePosFontSizes.length - 1];
+            let resolvedPosLineGap = Math.round(resolvedPosFontSize * 1.42);
+            let resolvedPosologyLines = [];
+            let resolvedFirstPosLineY = 0;
+            let resolvedBasePosBoxHeight = 0;
+            const posHeaderTitleY = isShort ? 15 : isMediumHeight ? 17 : 20;
+
+            for (const testFontSize of candidatePosFontSizes) {
+              const testLineGap = Math.round(testFontSize * 1.42);
+              const testMaxChars = Math.max(24, Math.floor((innerUsableWidth - 64) / (testFontSize * 0.64)));
+              const testLines = wrapLines(directions, testMaxChars);
+              const testFirstLineY = posHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 14) + Math.round(testFontSize * 0.82);
+              const testBoxH = testFirstLineY + Math.max(0, testLines.length - 1) * testLineGap + (isShort ? 12 : 16);
+
+              if (testBoxH <= maxAvailablePosBoxHeight || testFontSize === candidatePosFontSizes[candidatePosFontSizes.length - 1]) {
+                resolvedPosFontSize = testFontSize;
+                resolvedPosLineGap = testLineGap;
+                resolvedPosologyLines = testLines;
+                resolvedFirstPosLineY = testFirstLineY;
+                resolvedBasePosBoxHeight = testBoxH;
+                break;
+              }
+            }
+
+            const posFontSize = resolvedPosFontSize;
+            const posLineGap = resolvedPosLineGap;
+            const posologyLines = resolvedPosologyLines;
+            const firstPosLineY = resolvedFirstPosLineY;
+            const basePosBoxHeight = resolvedBasePosBoxHeight;
+
+            // Available vertical space surplus above Block 4
             const totalContentNeeded = ingBlockH + basePosBoxHeight;
             const totalAvailableSpace = maxPosBoxBottom - (isShort ? 10 : isMediumHeight ? 12 : 16);
             const verticalSurplus = Math.max(0, totalAvailableSpace - totalContentNeeded);
 
-            // Harmonious posBoxHeight: fits content cleanly without creating a giant empty void
-            const extraBoxPad = Math.min(24, Math.round(verticalSurplus * 0.16));
-            const posBoxHeight = basePosBoxHeight + extraBoxPad;
+            // Harmonious posBoxHeight: fits content cleanly without creating a giant empty void or exceeding max boundary
+            const extraBoxPad = Math.min(20, Math.round(verticalSurplus * 0.14));
+            const calculatedPosBoxHeight = basePosBoxHeight + extraBoxPad;
+            const posBoxHeight = Math.min(maxAvailablePosBoxHeight, calculatedPosBoxHeight);
 
-            // Distribute surplus space comfortably above and between blocks
-            const topIngredientsY = isShort ? (isUltraSparse ? 14 : 10) : isMediumHeight ? 14 : Math.max(14, Math.min(26, Math.round(verticalSurplus * 0.22)));
-            const midPad = isShort ? (isUltraSparse ? 18 : 12) : isMediumHeight ? 16 : Math.max(16, Math.min(38, Math.round(verticalSurplus * 0.38)));
+            // Mid padding between ingredients and posology
+            const midPad = Math.max(minMidPad, Math.min(28, minMidPad + Math.round(verticalSurplus * 0.28)));
 
-            // Absolute hard clamp: posBoxY + posBoxHeight CAN NEVER EXCEED maxPosBoxBottom
+            // Absolute invariant: posBoxY is anchored strictly below ingredients, never exceeding maxPosBoxBottom
             let posBoxY = topIngredientsY + ingBlockH + midPad;
             if (posBoxY + posBoxHeight > maxPosBoxBottom) {
-              posBoxY = maxPosBoxBottom - posBoxHeight;
+              posBoxY = Math.max(absoluteMinPosBoxY, maxPosBoxBottom - posBoxHeight);
             }
 
             const cleanDoctorLicense = doctorLicense ? String(doctorLicense).replace(/^license\s*:\s*/i, '').trim() : '';
