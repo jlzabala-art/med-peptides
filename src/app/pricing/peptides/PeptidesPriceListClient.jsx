@@ -887,6 +887,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
   const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
+  const [isCurrencySheetOpen, setIsCurrencySheetOpen] = useState(false);
 
   // Strict English default ('en') unless ?lang=es is explicitly in the URL or selected via top button
   const [lang, setLang] = useState('en');
@@ -2270,37 +2271,36 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
             </div>
 
-            {/* ── Mobile-Only Compact 1-Row Action Group (GCP UX Standard: Currency + AI + More Menu) ── */}
+            {/* ── Mobile-Only Compact 1-Row Action Group (GCP UX: uniform 32px height, bottom sheet currency) ── */}
             <div className="mobile-only-header-actions" style={{ display: 'none', alignItems: 'center', gap: '6px' }}>
-              {/* Compact Currency Dropdown */}
-              <div style={{ position: 'relative' }}>
-                <select
-                  value={currency}
-                  onChange={(e) => handleCurrencyChange(e.target.value)}
-                  aria-label="Select currency"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.14)',
-                    color: '#ffffff',
-                    border: '1px solid rgba(255, 255, 255, 0.25)',
-                    borderRadius: '6px',
-                    padding: '5px 22px 5px 8px',
-                    fontSize: '0.74rem',
-                    fontWeight: 750,
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    height: '32px'
-                  }}
-                >
-                  <option value="USD" style={{ color: '#0f172a', background: '#ffffff' }}>$ USD</option>
-                  <option value="EUR" style={{ color: '#0f172a', background: '#ffffff' }}>€ EUR</option>
-                  <option value="AED" style={{ color: '#0f172a', background: '#ffffff' }}>د.إ AED</option>
-                </select>
-                <ChevronDown size={12} color="#94a3b8" style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-              </div>
+              {/* GCP-style Currency Button — fixed width, opens bottom sheet (no native <select>) */}
+              <button
+                type="button"
+                onClick={() => setIsCurrencySheetOpen(true)}
+                aria-label="Select currency"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: 'rgba(255, 255, 255, 0.12)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.22)',
+                  borderRadius: '6px',
+                  padding: '0 10px',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  height: '32px',
+                  minWidth: '72px',
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '-0.01em'
+                }}
+              >
+                <span>{currency === 'AED' ? 'د.إ AED' : currency === 'EUR' ? '€ EUR' : '$ USD'}</span>
+                <ChevronDown size={11} color="#94a3b8" />
+              </button>
 
-              {/* Compact Atlas AI pill */}
+              {/* Atlas AI — solid GCP blue #1a73e8, no gradient, uniform 32px */}
               <button
                 type="button"
                 onClick={() => setIsAtlasAiOpen(true)}
@@ -2309,18 +2309,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
-                  background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.45) 0%, rgba(13, 148, 136, 0.45) 100%)',
-                  color: '#38bdf8',
-                  border: '1px solid rgba(56, 189, 248, 0.5)',
-                  padding: '5px 8px',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '0 10px',
                   borderRadius: '6px',
-                  fontSize: '0.74rem',
-                  fontWeight: 750,
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  height: '32px'
+                  height: '32px',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                <Sparkles size={13} className="text-sky-300" />
+                <Sparkles size={13} />
                 <span>AI</span>
               </button>
 
@@ -2494,6 +2495,76 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           </div>
         </div>
       </header>
+
+      {/* ── GCP Currency Bottom Sheet (mobile) ── */}
+      {isCurrencySheetOpen && (
+        <div
+          onClick={() => setIsCurrencySheetOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 300,
+            background: 'rgba(0, 0, 0, 0.45)',
+            display: 'flex',
+            alignItems: 'flex-end'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%',
+              background: '#1e293b',
+              borderRadius: '16px 16px 0 0',
+              padding: '8px 20px 32px',
+              boxShadow: '0 -4px 24px rgba(0,0,0,0.4)',
+              animation: 'slideUp 0.22s ease'
+            }}
+          >
+            {/* Drag handle */}
+            <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.25)', borderRadius: 2, margin: '0 auto 20px' }} />
+            {/* Title */}
+            <p style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', marginBottom: '12px', textTransform: 'uppercase' }}>
+              {isEs ? 'Selecciona Divisa' : 'Select Currency'}
+            </p>
+            {/* Options */}
+            {[
+              { code: 'USD', symbol: '$', label: isEs ? 'Dólar Estadounidense' : 'US Dollar' },
+              { code: 'EUR', symbol: '€', label: isEs ? 'Euro' : 'Euro' },
+              { code: 'AED', symbol: 'د.إ', label: isEs ? 'Dírham EAU' : 'UAE Dirham' }
+            ].map(c => {
+              const isActive = currency === c.code;
+              return (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => { handleCurrencyChange(c.code); setIsCurrencySheetOpen(false); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '14px 16px',
+                    borderRadius: '10px',
+                    marginBottom: '6px',
+                    background: isActive ? 'rgba(26, 115, 232, 0.18)' : 'rgba(255, 255, 255, 0.05)',
+                    border: isActive ? '1px solid #1a73e8' : '1px solid transparent',
+                    color: isActive ? '#60a5fa' : '#e2e8f0',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    gap: '12px'
+                  }}
+                >
+                  <span style={{ fontSize: '1.1rem', fontWeight: 800, minWidth: '28px' }}>{c.symbol}</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{c.code}</span>
+                  <span style={{ color: '#64748b', fontSize: '0.80rem', marginLeft: '4px' }}>{c.label}</span>
+                  {isActive && (
+                    <Check size={16} style={{ marginLeft: 'auto', color: '#1a73e8', flexShrink: 0 }} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <main className="peptides-main-container" style={{ maxWidth: '1440px', margin: '0 auto', padding: totalCartCount > 0 ? '1.25rem 1.25rem 5.5rem 1.25rem' : '1.25rem 1.25rem 2.5rem 1.25rem' }}>
         {/* Page Header */}
