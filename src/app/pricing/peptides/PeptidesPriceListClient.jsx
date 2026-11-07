@@ -256,6 +256,117 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
   const matchedSynergy = Object.keys(synergyMap).find(k => cleanName.includes(k));
   const synergy = matchedSynergy ? synergyMap[matchedSynergy] : (isEs ? 'Compuesto individual específico o protocolo multipéptido guiado por facultativo.' : 'Targeted standalone compound or physician-guided multi-peptide protocol.');
 
+  const dosingMap = {
+    'bpc157': {
+      dose: isEs ? '250–500 mcg/día SubQ (1–2× al día)' : '250–500 mcg/day SubQ (1–2× daily)',
+      route: 'SubQ / Local',
+      recon: '2.0 mL BAC Water → 2.5 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg en jeringa U-100' : '10 IU (0.1 mL) = 250 mcg on U-100 syringe',
+      stack: isEs ? 'TB-500 (Protocolo Wolverine: regeneración 2x)' : 'TB-500 (Wolverine Protocol: dual tissue repair)'
+    },
+    'tb500': {
+      dose: isEs ? '2.0–2.5 mg 2×/semana SubQ (ciclo 4–6 semanas)' : '2.0–2.5 mg 2×/week SubQ (4–6 week cycle)',
+      route: 'SubQ / IM',
+      recon: '2.0 mL BAC Water → 2.5 mg/mL',
+      syringeCalc: isEs ? '80–100 UI (0.8–1.0 mL) = 2.0–2.5 mg' : '80–100 IU (0.8–1.0 mL) = 2.0–2.5 mg',
+      stack: isEs ? 'BPC-157 (Reparación sistémica sinérgica)' : 'BPC-157 (Systemic dual tissue repair)'
+    },
+    'tirzepatide': {
+      dose: isEs ? '2.5 mg/semana SubQ (titulación mensual)' : '2.5 mg/week SubQ (monthly titration)',
+      route: 'SubQ',
+      recon: '2.0 mL BAC Water → 5.0 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 500 mcg · 50 UI = 2.5 mg' : '10 IU (0.1 mL) = 500 mcg · 50 IU = 2.5 mg',
+      stack: isEs ? 'AOD-9604 o CJC-1295 (preservación de masa magra)' : 'AOD-9604 or CJC-1295 (muscle preservation)'
+    },
+    'semaglutide': {
+      dose: isEs ? '0.25 mg/semana SubQ (titular mensualmente)' : '0.25 mg/week SubQ (monthly titration)',
+      route: 'SubQ',
+      recon: '2.0 mL BAC Water → 2.5 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg (dosis de inicio)' : '10 IU (0.1 mL) = 250 mcg (starting dose)',
+      stack: isEs ? 'BPC-157 (tolerabilidad gastrointestinal)' : 'BPC-157 (GI tolerability and comfort)'
+    },
+    'retatrutide': {
+      dose: isEs ? '1.0–2.0 mg/semana SubQ (titulación escalonada)' : '1.0–2.0 mg/week SubQ (gradual step titration)',
+      route: 'SubQ',
+      recon: '2.0 mL BAC Water → 5.0 mg/mL',
+      syringeCalc: isEs ? '20 UI (0.2 mL) = 1.0 mg · 40 UI = 2.0 mg' : '20 IU (0.2 mL) = 1.0 mg · 40 IU = 2.0 mg',
+      stack: isEs ? 'MOTS-c o L-Carnitina (biogénesis mitocondrial)' : 'MOTS-c or L-Carnitine (mitochondrial stamina)'
+    },
+    'cjc1295': {
+      dose: isEs ? '100 mcg SubQ nocturno (con Ipamorelin)' : '100 mcg SubQ at bedtime (with Ipamorelin)',
+      route: 'SubQ',
+      recon: '2.0 mL BAC Water → 1.0 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 100 mcg exactos' : '10 IU (0.1 mL) = exactly 100 mcg',
+      stack: isEs ? 'Ipamorelin (estimulación somatotropa dual)' : 'Ipamorelin (dual synergistic somatotroph trigger)'
+    },
+    'ipamorelin': {
+      dose: isEs ? '100–200 mcg SubQ nocturno en ayunas' : '100–200 mcg SubQ at bedtime fasted',
+      route: 'SubQ',
+      recon: '2.0 mL BAC Water → 1.0 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 100 mcg · 20 UI = 200 mcg' : '10 IU (0.1 mL) = 100 mcg · 20 IU = 200 mcg',
+      stack: isEs ? 'CJC-1295 No-DAC (picos fisiológicos nocturnos de GH)' : 'CJC-1295 No-DAC (physiological nocturnal GH peaks)'
+    },
+    'epithalon': {
+      dose: isEs ? '5–10 mg/día SubQ (ciclo anual de 10–20 días)' : '5–10 mg/day SubQ (annual 10–20 day cycle)',
+      route: 'SubQ / IM',
+      recon: '2.0 mL BAC Water → 5.0 mg/mL',
+      syringeCalc: isEs ? '20 UI (0.2 mL) = 1.0 mg · 100 UI = 5.0 mg' : '20 IU (0.2 mL) = 1.0 mg · 100 IU = 5.0 mg',
+      stack: isEs ? 'Thymosin Alpha-1 o NAD+ (inmunorejuvenecimiento)' : 'Thymosin Alpha-1 or NAD+ (immune rejuvenation)'
+    },
+    'ghkcu': {
+      dose: isEs ? '1.0–2.0 mg/día SubQ o formulación dérmica' : '1.0–2.0 mg/day SubQ or dermal formulation',
+      route: 'SubQ / Tópica',
+      recon: '3.0 mL BAC Water → 16.6 mg/mL (vial 50mg)',
+      syringeCalc: isEs ? '6–12 UI (0.06–0.12 mL) = 1.0–2.0 mg' : '6–12 IU (0.06–0.12 mL) = 1.0–2.0 mg',
+      stack: isEs ? 'BPC-157 o Epithalon (renovación de matriz dérmica)' : 'BPC-157 or Epithalon (dermal matrix renewal)'
+    },
+    'motsc': {
+      dose: isEs ? '5–10 mg 3×/semana SubQ (L/M/V)' : '5–10 mg 3×/week SubQ (Mon/Wed/Fri)',
+      route: 'SubQ',
+      recon: '2.0 mL BAC Water → 5.0 mg/mL',
+      syringeCalc: isEs ? '100 UI (1.0 mL) = 5.0 mg' : '100 IU (1.0 mL) = 5.0 mg',
+      stack: isEs ? 'NAD+ (resistencia metabólica y energía mitocondrial)' : 'NAD+ (metabolic stamina & ATP output)'
+    },
+    'nad': {
+      dose: isEs ? '50–100 mg SubQ / IM 2–3×/semana' : '50–100 mg SubQ / IM 2–3×/week',
+      route: 'SubQ / IM',
+      recon: '5.0 mL BAC Water → 100 mg/mL (vial 500mg)',
+      syringeCalc: isEs ? '50 UI (0.5 mL) = 50 mg · 100 UI = 100 mg' : '50 IU (0.5 mL) = 50 mg · 100 IU = 100 mg',
+      stack: isEs ? 'SS-31 o Epithalon (cardiolipina mitocondrial y longevidad)' : 'SS-31 or Epithalon (mitochondrial cardiolipin & longevity)'
+    },
+    'selank': {
+      dose: isEs ? '250–500 mcg/día intranasal o SubQ' : '250–500 mcg/day intranasal or SubQ',
+      route: 'Intranasal / SubQ',
+      recon: '2.0 mL BAC Water → 2.5 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg · 20 UI = 500 mcg' : '10 IU (0.1 mL) = 250 mcg · 20 IU = 500 mcg',
+      stack: isEs ? 'Semax (enfoque ejecutivo sereno y balance GABA)' : 'Semax (calm executive focus and GABA balance)'
+    },
+    'semax': {
+      dose: isEs ? '200–600 mcg/día intranasal o SubQ' : '200–600 mcg/day intranasal or SubQ',
+      route: 'Intranasal / SubQ',
+      recon: '2.0 mL BAC Water → 2.5 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg' : '10 IU (0.1 mL) = 250 mcg',
+      stack: isEs ? 'Selank (eje neurotrófico BDNF y agudeza mental)' : 'Selank (neurotrophic BDNF axis & mental clarity)'
+    },
+    'aod9604': {
+      dose: isEs ? '300–500 mcg/día SubQ matutino en ayunas' : '300–500 mcg/day SubQ morning fasted',
+      route: 'SubQ',
+      recon: '2.0 mL BAC Water → 2.5 mg/mL',
+      syringeCalc: isEs ? '12 UI (0.12 mL) = 300 mcg · 20 UI = 500 mcg' : '12 IU (0.12 mL) = 300 mcg · 20 IU = 500 mcg',
+      stack: isEs ? 'Agonistas GLP-1/GIP (lipólisis adipocitaria sinérgica)' : 'GLP-1/GIP agonists (synergistic adipocyte lipolysis)'
+    },
+    'pt141': {
+      dose: isEs ? '1.25–1.75 mg SubQ a demanda (~45 min antes)' : '1.25–1.75 mg SubQ on demand (~45 min prior)',
+      route: 'SubQ',
+      recon: '2.0 mL BAC Water → 5.0 mg/mL',
+      syringeCalc: isEs ? '25 UI (0.25 mL) = 1.25 mg · 35 UI = 1.75 mg' : '25 IU (0.25 mL) = 1.25 mg · 35 IU = 1.75 mg',
+      stack: isEs ? 'Kisspeptin-10 (soporte integral del eje neuroendocrino)' : 'Kisspeptin-10 (comprehensive neuroendocrine support)'
+    }
+  };
+
+  const matchedDosing = Object.keys(dosingMap).find(k => cleanName.includes(k));
+  const dosing = matchedDosing ? dosingMap[matchedDosing] : null;
+
   return {
     targetSystem: fallbackTarget || known?.targetSystem || dossier?.pharmacology?.title || (isEs ? `Eje ${category || 'Bioactivo Clínico'}` : `${category || 'Clinical Bioactive'} Axis`),
     indication: fallbackIndication || dossier?.regulatory?.guidance || (isEs ? 'Modulación celular específica, reparación tisular y optimización fisiológica clínica.' : 'Targeted cellular modulation, tissue repair, and clinical physiological optimization.'),
@@ -265,7 +376,12 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
     halfLife: fallbackHalfLife || known?.halfLife || (isEs ? '~2–6 horas (aclaramiento peptídico fisiológico)' : 'Physiological peptide kinetics (~2–6h clearance)'),
     sequence: known?.sequence || null,
     casNumber: known?.casNumber || dossier?.casNumber || null,
-    synergy
+    synergy,
+    dose: dosing?.dose || (isEs ? 'Dosificación individualizada según criterio facultativo.' : 'Individualized clinical dosing per physician guidance.'),
+    route: dosing?.route || 'SubQ',
+    recon: dosing?.recon || '2.0 mL BAC Water',
+    syringeCalc: dosing?.syringeCalc || (isEs ? 'Usar jeringa de insulina U-100 para dosificación de precisión.' : 'Use standard U-100 insulin syringe for precision dosing.'),
+    stack: dosing?.stack || synergy
   };
 }
 
@@ -507,7 +623,7 @@ const CLINICAL_PRESETS = [
  * Displays each peptide with 44px touch targets, 2-column pricing tiles (Single Vial vs Box ×10),
  * live proforma cart status, and public specs link.
  */
-function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, lang = 'en' }) {
+function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi }) {
   const [isClinicalExpanded, setIsClinicalExpanded] = useState(false);
   const isEs = lang === 'es';
   const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
@@ -741,7 +857,7 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
         </div>
       </div>
 
-      {/* Expandable Clinical Summary Accordion */}
+      {/* ── Google Cloud UX Clinical Pharmacology & Dosing Quick-Ref Inspector ── */}
       <div style={{ marginTop: '2px' }}>
         <button
           type="button"
@@ -751,64 +867,83 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
             alignItems: 'center',
             justifyContent: 'space-between',
             width: '100%',
-            padding: '7px 10px',
-            background: isClinicalExpanded ? '#eff6ff' : '#f8fafc',
-            border: isClinicalExpanded ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
-            borderRadius: '6px',
+            padding: '8px 10px',
+            background: isClinicalExpanded ? '#ffffff' : '#f8fafc',
+            border: isClinicalExpanded ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+            borderRadius: isClinicalExpanded ? '6px 6px 0 0' : '6px',
             cursor: 'pointer',
-            fontSize: '0.73rem',
-            fontWeight: 700,
-            color: isClinicalExpanded ? '#1d4ed8' : '#475569',
-            transition: 'all 0.15s ease'
+            fontSize: '0.74rem',
+            fontWeight: 750,
+            color: isClinicalExpanded ? '#1a73e8' : '#3c4043',
+            transition: 'all 0.15s ease',
+            boxShadow: isClinicalExpanded ? '0 1px 3px rgba(26,115,232,0.12)' : 'none'
           }}
+          aria-expanded={isClinicalExpanded}
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Sparkles size={13} color={isClinicalExpanded ? '#1d4ed8' : '#64748b'} />
-            <span>{isEs ? 'Resumen Farmacológico Clínico' : 'Clinical Pharmacology Quick-Ref'}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Sparkles size={13} color="#1a73e8" />
+            <span>{isEs ? 'Guía Clínica & Posología B2B' : 'Clinical Pharmacology & Dosing Guide'}</span>
+            <span style={{
+              fontSize: '0.62rem',
+              fontWeight: 800,
+              background: isClinicalExpanded ? '#e8f0fe' : '#f1f3f4',
+              color: isClinicalExpanded ? '#1a73e8' : '#5f6368',
+              padding: '1px 5px',
+              borderRadius: '3px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.03em'
+            }}>
+              Quick-Ref
+            </span>
           </span>
-          {isClinicalExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          {isClinicalExpanded ? <ChevronUp size={14} color="#1a73e8" /> : <ChevronDown size={14} color="#5f6368" />}
         </button>
 
         {isClinicalExpanded && (
           <div style={{
             background: '#ffffff',
-            border: '1px solid #dbeafe',
+            border: '1.5px solid #1a73e8',
             borderTop: 'none',
             borderRadius: '0 0 6px 6px',
-            padding: '9px 11px',
+            padding: '10px 12px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '6px',
+            gap: '8px',
             fontSize: '0.74rem',
-            lineHeight: 1.45,
+            lineHeight: 1.48,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
             animation: 'fadeIn 0.15s ease'
           }}>
-            <div>
-              <strong style={{ color: '#0f172a' }}>🎯 {isEs ? 'Indicación:' : 'Indication:'}</strong>{' '}
-              <span style={{ color: '#334155' }}>{clinical.indication}</span>
-            </div>
-            <div>
-              <strong style={{ color: '#0f172a' }}>🧬 {isEs ? 'Diana & MoA:' : 'Target & MoA:'}</strong>{' '}
-              <span style={{ color: '#475569' }}>{clinical.moa}</span>
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              flexWrap: 'wrap',
-              borderTop: '1px solid #f1f5f9',
-              paddingTop: '5px',
-              marginTop: '1px'
-            }}>
+            {/* GCP Cloud Details Meta Chips Ribbon */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+              <span style={{
+                fontSize: '0.66rem',
+                fontWeight: 700,
+                color: '#1a73e8',
+                background: '#e8f0fe',
+                border: '1px solid #c2e7ff',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                <Activity size={10} />
+                <span>{clinical.route || 'SubQ'}</span>
+              </span>
               <span style={{
                 fontSize: '0.66rem',
                 fontWeight: 650,
                 color: '#475569',
                 background: '#f1f5f9',
                 padding: '2px 6px',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
               }}>
-                ⏱️ {isEs ? 'Vida media:' : 'Half-life:'} {clinical.halfLife}
+                <Clock size={10} color="#d97706" />
+                <span>{isEs ? 'T1/2:' : 'Half-life:'} {clinical.halfLife}</span>
               </span>
               {clinical.casNumber && (
                 <span style={{
@@ -817,11 +952,167 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
                   color: '#475569',
                   background: '#f1f5f9',
                   padding: '2px 6px',
-                  borderRadius: '4px'
+                  borderRadius: '4px',
+                  fontFamily: 'monospace'
                 }}>
                   CAS: {clinical.casNumber}
                 </span>
               )}
+            </div>
+
+            {/* Indication Block */}
+            <div>
+              <div style={{
+                fontSize: '0.64rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: '#64748b',
+                marginBottom: '2px'
+              }}>
+                {isEs ? 'Indicación Clínica Primaria' : 'Primary Clinical Indication'}
+              </div>
+              <p style={{ margin: 0, color: '#1e293b', fontSize: '0.76rem', lineHeight: 1.48 }}>
+                {clinical.indication}
+              </p>
+            </div>
+
+            {/* MoA Block */}
+            <div>
+              <div style={{
+                fontSize: '0.64rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: '#64748b',
+                marginBottom: '2px'
+              }}>
+                {isEs ? 'Mecanismo de Acción (MoA)' : 'Mechanism of Action (MoA)'}
+              </div>
+              <p style={{ margin: 0, color: '#475569', fontSize: '0.73rem', lineHeight: 1.45 }}>
+                {clinical.moa}
+              </p>
+            </div>
+
+            {/* Reconstitution & Syringe Box (GCP Spec Box) */}
+            <div style={{
+              background: '#f0f7ff',
+              border: '1px solid #c2e7ff',
+              borderRadius: '6px',
+              padding: '8px 10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px'
+            }}>
+              <div style={{
+                fontSize: '0.65rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: '#0284c7',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <Droplets size={11} color="#0284c7" />
+                <span>{isEs ? 'Reconstitución & Regla de Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#0f172a', fontWeight: 700 }}>
+                {clinical.recon}
+              </div>
+              <div style={{ fontSize: '0.71rem', color: '#0369a1', fontFamily: 'monospace', fontWeight: 650 }}>
+                {clinical.syringeCalc}
+              </div>
+              <div style={{ fontSize: '0.70rem', color: '#334155', marginTop: '1px' }}>
+                <strong style={{ color: '#0f172a' }}>{isEs ? 'Pauta estándar:' : 'Standard posology:'}</strong> {clinical.dose}
+              </div>
+            </div>
+
+            {/* Clinical Synergy / Stack Callout (High-Conversion B2B) */}
+            <div style={{
+              background: '#faf5ff',
+              border: '1px solid #e9d5ff',
+              borderRadius: '6px',
+              padding: '7px 9px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '2px'
+            }}>
+              <div style={{
+                fontSize: '0.64rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: '#7c3aed',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <Layers size={11} color="#7c3aed" />
+                <span>{isEs ? 'Sinergia Clínica Recomendada (Stack)' : 'Recommended Clinical Stack'}</span>
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#581c87', lineHeight: 1.42 }}>
+                {clinical.stack}
+              </div>
+            </div>
+
+            {/* Action Bar (GCP 32px Buttons) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderTop: '1px solid #f1f5f9',
+              paddingTop: '6px',
+              marginTop: '2px'
+            }}>
+              <button
+                type="button"
+                onClick={() => onOpenAi && onOpenAi(row)}
+                style={{
+                  flex: 1,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(13, 148, 136, 0.12) 100%)',
+                  color: '#0284c7',
+                  border: '1px solid rgba(2, 132, 199, 0.35)',
+                  padding: '7px 10px',
+                  borderRadius: '5px',
+                  fontSize: '0.72rem',
+                  fontWeight: 750,
+                  cursor: 'pointer',
+                  minHeight: '34px'
+                }}
+              >
+                <Sparkles size={12} color="#0284c7" />
+                <span>{isEs ? 'Calcular Dosis en AI ✨' : 'Dosing Math with AI ✨'}</span>
+              </button>
+
+              <Link
+                href={specsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '3px',
+                  background: '#f8fafc',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  padding: '7px 9px',
+                  borderRadius: '5px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                  minHeight: '34px'
+                }}
+              >
+                <span>{isEs ? 'Ficha COA' : 'Specs COA'}</span>
+                <span>↗</span>
+              </Link>
             </div>
           </div>
         )}
@@ -1931,6 +2222,40 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             borderLeft: '1px solid #edf2f7',
             paddingLeft: '1.25rem'
           }}>
+            {/* Reconstitution & Syringe Math Box (GCP Clinical Spec Box) */}
+            <div style={{
+              background: '#f0f7ff',
+              border: '1px solid #c2e7ff',
+              borderRadius: '6px',
+              padding: '8px 10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '3px'
+            }}>
+              <div style={{
+                fontSize: '0.64rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: '#0284c7',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <Droplets size={11} color="#0284c7" />
+                <span>{isEs ? 'Reconstitución & Regla Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#0f172a', fontWeight: 700 }}>
+                {clinical.recon}
+              </div>
+              <div style={{ fontSize: '0.71rem', color: '#0369a1', fontFamily: 'monospace', fontWeight: 650 }}>
+                {clinical.syringeCalc}
+              </div>
+              <div style={{ fontSize: '0.70rem', color: '#334155' }}>
+                <strong>{isEs ? 'Pauta estándar:' : 'Standard dose:'}</strong> {clinical.dose}
+              </div>
+            </div>
+
             <div>
               <div style={{
                 fontSize: '0.66rem',
@@ -1944,11 +2269,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 gap: '5px'
               }}>
                 <Clock size={12} color="#d97706" />
-                <span>{isEs ? 'Farmacocinética' : 'Pharmacokinetics'}</span>
+                <span>{isEs ? 'Farmacocinética & Vía' : 'Pharmacokinetics & Route'}</span>
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#334155' }}>
-                <span style={{ color: '#64748b' }}>{isEs ? 'Vida media:' : 'Half-life:'}</span>{' '}
-                <strong style={{ color: '#0f172a' }}>{clinical.halfLife}</strong>
+              <div style={{ fontSize: '0.78rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span><span style={{ color: '#64748b' }}>{isEs ? 'Vida media:' : 'Half-life:'}</span> <strong style={{ color: '#0f172a' }}>{clinical.halfLife}</strong></span>
+                <span style={{ fontSize: '0.68rem', background: '#e8f0fe', color: '#1a73e8', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                  {clinical.route || 'SubQ'}
+                </span>
               </div>
             </div>
 
@@ -1973,6 +2300,33 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             </div>
 
             <div style={{ paddingTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAtlasAiOpen(true);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(13, 148, 136, 0.12) 100%)',
+                  color: '#0284c7',
+                  border: '1px solid rgba(2, 132, 199, 0.35)',
+                  padding: '5px 10px',
+                  borderRadius: '5px',
+                  fontSize: '0.73rem',
+                  fontWeight: 750,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+                title={isEs ? 'Consultar dosificación y reconstitución con Atlas AI' : 'Calculate clinical dosing and reconstitution with Atlas AI'}
+              >
+                <Sparkles size={12} color="#0284c7" />
+                <span>{isEs ? 'Calcular Dosis en AI ✨' : 'Dosing Math with AI ✨'}</span>
+              </button>
+
               <button
                 type="button"
                 onClick={(e) => {
@@ -3524,7 +3878,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     formatPrice,
                     currency,
                     currencySymbol,
-                    lang
+                    lang,
+                    onOpenSpecs: setSelectedSpecsProduct,
+                    onOpenAi: (prod) => setIsAtlasAiOpen(true)
                   }}
                 />
               )}
