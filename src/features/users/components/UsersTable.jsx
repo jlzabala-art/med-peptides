@@ -42,6 +42,7 @@ import User360Drawer from '../../../components/admin/users/User360Drawer';
 import InviteUserModal from '../../../components/admin/users/InviteUserModal';
 import AIUserIntelligenceModal from '../../../components/admin/users/AIUserIntelligenceModal';
 import UserSharedCatalogsPopover from './UserSharedCatalogsPopover';
+import CustomerSharedLinksCard from '../../../components/admin/customers/CustomerSharedLinksCard';
 import UserMobileCard from './UserMobileCard';
 import UniversalShareDrawer from '../../../components/ui/UniversalShareDrawer';
 import { EMAILJS_CONFIG } from '@/config/emailjs';

@@ -152,9 +152,47 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
 
   const previewTargetUrl = `/pricing/peptides?ref=${genRef}&lang=${genLang}&currency=${genCurrency}&dest=${genDest}&uid=${encodeURIComponent(user?.id || 'uid')}`;
 
+  // Telemetry & Reading State for intelligent micro-badge (Google Cloud UX)
+  const isRead = user?.lastAssetReadStatus === 'read' || (user?.lastAssetViewCount || 0) > 0 || shares.some(s => s.webOpened || (s.visitsCount || 0) > 0);
+  const totalSharesCount = shares.length > 0 ? shares.length : (user?.catalogSharesCount || (user?.lastCatalogSharedAt || user?.lastAssetViewedAt ? 1 : 0));
+  const hasShared = totalSharesCount > 0;
+  const readCount = Math.max(user?.lastAssetViewCount || 0, shares.reduce((acc, s) => acc + (s.visitsCount || 0), 0));
+  const hasOrder = shares.some(s => s.orderPlaced || s.lastOrderId) || user?.lastAssetOrderPlaced;
+
+  // Derive badge styling
+  let badgeBg = isOpen ? '#e0f2fe' : '#f8fafc';
+  let badgeBorder = isOpen ? '1px solid #7dd3fc' : '1px solid #e2e8f0';
+  let badgeColor = isOpen ? '#0369a1' : '#475569';
+  let badgeIcon = <Share2 size={11} style={{ color: isOpen ? '#0284c7' : '#64748b' }} />;
+  let badgeText = 'Catalogs';
+  let badgeTitle = 'View & generate tracked catalog links for this user';
+
+  if (hasOrder) {
+    badgeBg = '#eff6ff';
+    badgeBorder = '1px solid #bfdbfe';
+    badgeColor = '#1d4ed8';
+    badgeIcon = <ShoppingCart size={11} color="#1d4ed8" />;
+    badgeText = 'Catalogs · 🛒 Ordered';
+    badgeTitle = 'Catalog link converted to a confirmed B2B order! Click to inspect.';
+  } else if (isRead) {
+    badgeBg = '#f0fdf4';
+    badgeBorder = '1px solid #bbf7d0';
+    badgeColor = '#15803d';
+    badgeIcon = <Eye size={11} color="#16a34a" />;
+    badgeText = `Catalogs · 👁️ ${readCount > 1 ? `${readCount} opens` : 'Read'}`;
+    badgeTitle = `Catalog opened by ${userName} (${readCount > 1 ? `${readCount} times` : 'verified read'}). Click to view telemetry.`;
+  } else if (hasShared) {
+    badgeBg = '#fffbeb';
+    badgeBorder = '1px solid #fde68a';
+    badgeColor = '#b45309';
+    badgeIcon = <Clock size={11} color="#b45309" />;
+    badgeText = 'Catalogs · ⏳ Sent';
+    badgeTitle = 'Catalog shared but not yet opened by user. Click to resend or copy link.';
+  }
+
   return (
     <div style={{ position: 'relative', display: 'inline-block' }} ref={popoverRef}>
-      {/* Trigger Button */}
+      {/* Trigger Button — Intelligent GCP Telemetry Micro-Badge */}
       <button
         type="button"
         onClick={(e) => {
@@ -162,25 +200,26 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
           triggerHaptic('light');
           setIsOpen(!isOpen);
         }}
-        title="View & generate tracked catalog links for this user"
+        title={badgeTitle}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: '5px',
           fontSize: '0.72rem',
-          fontWeight: 600,
+          fontWeight: 700,
           padding: '3px 8px',
           borderRadius: '6px',
-          background: isOpen ? '#e0f2fe' : '#f8fafc',
-          color: isOpen ? '#0369a1' : '#475569',
-          border: isOpen ? '1px solid #7dd3fc' : '1px solid #e2e8f0',
+          background: badgeBg,
+          color: badgeColor,
+          border: badgeBorder,
           cursor: 'pointer',
           transition: 'all 0.15s ease',
           whiteSpace: 'nowrap',
+          boxShadow: isOpen ? '0 0 0 2px rgba(2, 132, 199, 0.2)' : 'none'
         }}
       >
-        <Share2 size={12} style={{ color: isOpen ? '#0284c7' : '#64748b' }} />
-        <span>Catalogs</span>
+        {badgeIcon}
+        <span>{badgeText}</span>
       </button>
 
       {/* Popover Menu */}
