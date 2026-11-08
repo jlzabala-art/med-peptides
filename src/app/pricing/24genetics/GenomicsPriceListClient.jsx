@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import BrandLogo from '@/components/common/BrandLogo';
 import { useRouter } from 'next/navigation';
 import {
   Dna,
@@ -517,9 +518,8 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
       <header className="screen-nav-bar">
         <div className="nav-container">
           <div className="nav-left">
-            <Link href="/" className="nav-brand">
-              <Sparkles size={16} className="text-sky-400" />
-              <span>MEDILUXE B2B</span>
+            <Link href="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
+              <BrandLogo variant="light" size="compact" />
             </Link>
             <span className="nav-divider">/</span>
             <span className="nav-section">Price Schedules</span>

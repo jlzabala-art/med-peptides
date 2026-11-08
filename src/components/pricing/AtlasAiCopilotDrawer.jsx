@@ -109,6 +109,7 @@ export default function AtlasAiCopilotDrawer({
   lang = 'en',
   activeCategory = 'all',
   activeCategoryLabel = null,
+  contextProduct = null,
   onAddToCart = null,
   onOpenSpecs = null
 }) {
@@ -152,12 +153,27 @@ export default function AtlasAiCopilotDrawer({
   const [loading, setLoading] = useState(false);
   const [addedItemCode, setAddedItemCode] = useState(null);
 
-  // Reset greeting if language or category changes on fresh session
+  // Reset greeting or initialize context product on session open
   useEffect(() => {
-    if (messages.length === 1 && messages[0].role === 'assistant') {
+    if (!isOpen) return;
+    if (contextProduct) {
+      const prodName = contextProduct.productName || 'Peptide';
+      const prodDose = contextProduct.dosage || '';
+      const promptText = isEs
+        ? `📋 **Análisis Clínico y Posología: ${prodName} (${prodDose})**\n\nHe cargado los datos farmacotécnicos de este vial:\n• **Reconstitución sugerida:** Diluir con agua bacteriostática (BAC Water) para posología estéril y estable.\n• **Jeringa U-100:** Cada 10 UI permite titulación y micro-dosificación de alta precisión.\n• **Ahorro Pack ×10:** Disponible con descuento por volumen institucional.\n\n¿Deseas calcular una pauta de tratamiento específica o añadirlo a tu proforma?`
+        : `📋 **Clinical Posology & Reconstitution Analysis: ${prodName} (${prodDose})**\n\nI have loaded the pharmacokinetic and dispensing parameters for this vial:\n• **Reconstitution:** Standard sterile dilution with BAC Water for 28-day stability.\n• **Syringe Math (U-100):** Every 10 IU tick delivers precision clinical dosing.\n• **Pack ×10 Tier:** Volume pricing available with instant tier discounts.\n\nWould you like me to calculate a specific titration cycle or add it to your proforma?`;
+
+      setMessages([
+        {
+          role: 'assistant',
+          text: promptText,
+          actionProducts: [contextProduct]
+        }
+      ]);
+    } else if (messages.length === 1 && messages[0].role === 'assistant') {
       setMessages([{ role: 'assistant', text: initialGreeting, actionProducts: [] }]);
     }
-  }, [initialGreeting, messages.length]);
+  }, [isOpen, contextProduct, initialGreeting, isEs]);
 
   // Auto-scroll chat to bottom
   useEffect(() => {

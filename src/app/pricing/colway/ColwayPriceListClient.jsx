@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import BrandLogo from '@/components/common/BrandLogo';
 import { useRouter } from 'next/navigation';
 import {
   Printer,
@@ -694,9 +695,8 @@ export default function ColwayPriceListClient({ initialProducts = [], initialCat
       <nav className="screen-nav-bar no-print">
         <div className="nav-container">
           <div className="nav-left">
-            <Link href="/" className="nav-brand">
-              <Building2 size={18} className="text-teal-400" />
-              <span>Atlas Health Services</span>
+            <Link href="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
+              <BrandLogo variant="light" size="compact" />
             </Link>
             <span className="nav-divider">/</span>
             <span className="nav-section">B2B Wholesale</span>

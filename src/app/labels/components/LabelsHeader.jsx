@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import BrandLogo from '@/components/common/BrandLogo';
 import { Search, X, Printer, Upload, Share2, Check, ChevronDown, User, FileText, Layers, ExternalLink } from '@/lib/icons';
 import { useAuth } from '@/context/AuthContext';
 import UserDropdown from '@/navigation/UserDropdown';
@@ -121,28 +122,12 @@ export default function LabelsHeader({
       >
         {/* Brand (Standalone Mode) or B2B Logistics Badge (Embedded Portal Mode) */}
         {!embedded ? (
-          <Link href="/labels" className="pls-brand-link">
-            <div className="pls-brand-icon">
-              <span>℞</span>
-            </div>
-            <div className="pls-brand-text">
-              <span className="pls-brand-title">Compounding Label Studio</span>
-              <span className="pls-brand-subtitle">Atlas Health Services • Compounding Studio</span>
-            </div>
+          <Link href="/labels" className="pls-brand-link" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
+            <BrandLogo variant="dark" size="compact" />
           </Link>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <div className="pls-brand-icon" style={{ width: '28px', height: '28px', fontSize: '0.85rem' }}>
-              <span>℞</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Etiquetas de Formulación' : 'Compounding Labels'}
-              </span>
-              <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                {isEs ? 'Logística B2B • Dispensación' : 'B2B Logistics • Dispensary'}
-              </span>
-            </div>
+            <BrandLogo variant="dark" size="compact" />
           </div>
         )}
 

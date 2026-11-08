@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import BrandLogo from '@/components/common/BrandLogo';
 import {
   FileText,
   Download,
@@ -262,6 +263,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ / Local',
       recon: '2.0 mL BAC Water → 2.5 mg/mL',
       syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg en jeringa U-100' : '10 IU (0.1 mL) = 250 mcg on U-100 syringe',
+      vialYield: isEs ? '20 dosis de 250 mcg (10–20 días de tratamiento)' : '20 doses @ 250 mcg (10–20 days of treatment)',
+      stability: isEs ? '28 días refrigerado (2–8°C) con BAC Water (no congelar)' : '28 days refrigerated (2–8°C) once mixed (do not freeze)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.5/1.0 mL) · Aguja 31G (8 mm / 5/16")' : 'U-100 Insulin Syringe (0.5/1.0 mL) · 31G Needle (8 mm / 5/16")',
+      crossSellName: 'TB-500',
       stack: isEs ? 'TB-500 (Protocolo Wolverine: regeneración 2x)' : 'TB-500 (Wolverine Protocol: dual tissue repair)'
     },
     'tb500': {
@@ -269,6 +274,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ / IM',
       recon: '2.0 mL BAC Water → 2.5 mg/mL',
       syringeCalc: isEs ? '80–100 UI (0.8–1.0 mL) = 2.0–2.5 mg' : '80–100 IU (0.8–1.0 mL) = 2.0–2.5 mg',
+      vialYield: isEs ? '2 a 4 dosis de 2.0–2.5 mg (1–2 semanas de soporte)' : '2 to 4 doses @ 2.0–2.5 mg (1–2 weeks supply)',
+      stability: isEs ? '28 días refrigerado (2–8°C) con BAC Water' : '28 days refrigerated (2–8°C) once reconstituted',
+      hardware: isEs ? 'Jeringa Insulina U-100 (1.0 mL) · Aguja 30G–31G' : 'U-100 Insulin Syringe (1.0 mL) · 30G–31G Needle',
+      crossSellName: 'BPC-157',
       stack: isEs ? 'BPC-157 (Reparación sistémica sinérgica)' : 'BPC-157 (Systemic dual tissue repair)'
     },
     'tirzepatide': {
@@ -276,6 +285,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ',
       recon: '2.0 mL BAC Water → 5.0 mg/mL',
       syringeCalc: isEs ? '10 UI (0.1 mL) = 500 mcg · 50 UI = 2.5 mg' : '10 IU (0.1 mL) = 500 mcg · 50 IU = 2.5 mg',
+      vialYield: isEs ? '4 dosis semanales de 2.5 mg (1 mes completo de inicio)' : '4 weekly doses @ 2.5 mg (1 full month induction)',
+      stability: isEs ? '28 días refrigerado (2–8°C) protegido de la luz' : '28 days refrigerated (2–8°C) light-protected',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.5 mL) · Aguja 31G (8 mm)' : 'U-100 Insulin Syringe (0.5 mL) · 31G Needle (8 mm)',
+      crossSellName: 'AOD-9604',
       stack: isEs ? 'AOD-9604 o CJC-1295 (preservación de masa magra)' : 'AOD-9604 or CJC-1295 (muscle preservation)'
     },
     'semaglutide': {
@@ -283,6 +296,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ',
       recon: '2.0 mL BAC Water → 2.5 mg/mL',
       syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg (dosis de inicio)' : '10 IU (0.1 mL) = 250 mcg (starting dose)',
+      vialYield: isEs ? '4 a 8 dosis según escalado (1 a 2 meses de tratamiento)' : '4 to 8 doses depending on escalation (1–2 months)',
+      stability: isEs ? '28–30 días refrigerado (2–8°C)' : '28–30 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.5 mL) · Aguja 31G (8 mm)' : 'U-100 Insulin Syringe (0.5 mL) · 31G Needle (8 mm)',
+      crossSellName: 'BPC-157',
       stack: isEs ? 'BPC-157 (tolerabilidad gastrointestinal)' : 'BPC-157 (GI tolerability and comfort)'
     },
     'retatrutide': {
@@ -290,6 +307,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ',
       recon: '2.0 mL BAC Water → 5.0 mg/mL',
       syringeCalc: isEs ? '20 UI (0.2 mL) = 1.0 mg · 40 UI = 2.0 mg' : '20 IU (0.2 mL) = 1.0 mg · 40 IU = 2.0 mg',
+      vialYield: isEs ? '4 a 8 dosis semanales de titulación (1–2 meses)' : '4 to 8 weekly titration doses (1–2 months)',
+      stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 · Aguja 31G (8 mm)' : 'U-100 Insulin Syringe · 31G Needle (8 mm)',
+      crossSellName: 'MOTS-c',
       stack: isEs ? 'MOTS-c o L-Carnitina (biogénesis mitocondrial)' : 'MOTS-c or L-Carnitine (mitochondrial stamina)'
     },
     'cjc1295': {
@@ -297,6 +318,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ',
       recon: '2.0 mL BAC Water → 1.0 mg/mL',
       syringeCalc: isEs ? '10 UI (0.1 mL) = 100 mcg exactos' : '10 IU (0.1 mL) = exactly 100 mcg',
+      vialYield: isEs ? '20 dosis de 100 mcg (ciclo de 20 a 30 días)' : '20 doses @ 100 mcg (20–30 day cycle)',
+      stability: isEs ? '21–28 días refrigerado (2–8°C)' : '21–28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.3/0.5 mL) · Aguja 31G (8 mm)' : 'U-100 Insulin Syringe (0.3/0.5 mL) · 31G Needle (8 mm)',
+      crossSellName: 'Ipamorelin',
       stack: isEs ? 'Ipamorelin (estimulación somatotropa dual)' : 'Ipamorelin (dual synergistic somatotroph trigger)'
     },
     'ipamorelin': {
@@ -304,6 +329,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ',
       recon: '2.0 mL BAC Water → 1.0 mg/mL',
       syringeCalc: isEs ? '10 UI (0.1 mL) = 100 mcg · 20 UI = 200 mcg' : '10 IU (0.1 mL) = 100 mcg · 20 IU = 200 mcg',
+      vialYield: isEs ? '20 dosis de 100 mcg o 10 dosis de 200 mcg' : '20 doses @ 100 mcg or 10 doses @ 200 mcg',
+      stability: isEs ? '21–28 días refrigerado (2–8°C)' : '21–28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.3/0.5 mL) · Aguja 31G (8 mm)' : 'U-100 Insulin Syringe (0.3/0.5 mL) · 31G Needle (8 mm)',
+      crossSellName: 'CJC-1295',
       stack: isEs ? 'CJC-1295 No-DAC (picos fisiológicos nocturnos de GH)' : 'CJC-1295 No-DAC (physiological nocturnal GH peaks)'
     },
     'epithalon': {
@@ -311,6 +340,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ / IM',
       recon: '2.0 mL BAC Water → 5.0 mg/mL',
       syringeCalc: isEs ? '20 UI (0.2 mL) = 1.0 mg · 100 UI = 5.0 mg' : '20 IU (0.2 mL) = 1.0 mg · 100 IU = 5.0 mg',
+      vialYield: isEs ? '10 a 20 dosis para ciclo anual de longevidad' : '10 to 20 doses for full annual cycle',
+      stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (1.0 mL) · Aguja 30G' : 'U-100 Insulin Syringe (1.0 mL) · 30G Needle',
+      crossSellName: 'NAD+',
       stack: isEs ? 'Thymosin Alpha-1 o NAD+ (inmunorejuvenecimiento)' : 'Thymosin Alpha-1 or NAD+ (immune rejuvenation)'
     },
     'ghkcu': {
@@ -318,6 +351,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ / Tópica',
       recon: '3.0 mL BAC Water → 16.6 mg/mL (vial 50mg)',
       syringeCalc: isEs ? '6–12 UI (0.06–0.12 mL) = 1.0–2.0 mg' : '6–12 IU (0.06–0.12 mL) = 1.0–2.0 mg',
+      vialYield: isEs ? '25 a 50 dosis según posología dérmica/SubQ' : '25 to 50 doses per dermal/SubQ titration',
+      stability: isEs ? '30 días refrigerado (2–8°C)' : '30 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 · Aguja 31G o gotero estéril' : 'U-100 Insulin Syringe · 31G Needle or sterile dropper',
+      crossSellName: 'BPC-157',
       stack: isEs ? 'BPC-157 o Epithalon (renovación de matriz dérmica)' : 'BPC-157 or Epithalon (dermal matrix renewal)'
     },
     'motsc': {
@@ -325,6 +362,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ',
       recon: '2.0 mL BAC Water → 5.0 mg/mL',
       syringeCalc: isEs ? '100 UI (1.0 mL) = 5.0 mg' : '100 IU (1.0 mL) = 5.0 mg',
+      vialYield: isEs ? '2 a 4 dosis intensivas de 5 mg' : '2 to 4 intensive doses @ 5 mg',
+      stability: isEs ? '14–21 días refrigerado (2–8°C)' : '14–21 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (1.0 mL) · Aguja 30G–31G' : 'U-100 Insulin Syringe (1.0 mL) · 30G–31G Needle',
+      crossSellName: 'NAD+',
       stack: isEs ? 'NAD+ (resistencia metabólica y energía mitocondrial)' : 'NAD+ (metabolic stamina & ATP output)'
     },
     'nad': {
@@ -332,6 +373,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ / IM',
       recon: '5.0 mL BAC Water → 100 mg/mL (vial 500mg)',
       syringeCalc: isEs ? '50 UI (0.5 mL) = 50 mg · 100 UI = 100 mg' : '50 IU (0.5 mL) = 50 mg · 100 IU = 100 mg',
+      vialYield: isEs ? '5 a 10 dosis de 50–100 mg' : '5 to 10 doses @ 50–100 mg',
+      stability: isEs ? '28 días refrigerado (2–8°C) protegido de la luz' : '28 days refrigerated (2–8°C) light-protected',
+      hardware: isEs ? 'Jeringa 1.0 mL · Aguja 29G–30G SubQ/IM lenta' : '1.0 mL Syringe · 29G–30G Needle SubQ/IM slow',
+      crossSellName: 'Epithalon',
       stack: isEs ? 'SS-31 o Epithalon (cardiolipina mitocondrial y longevidad)' : 'SS-31 or Epithalon (mitochondrial cardiolipin & longevity)'
     },
     'selank': {
@@ -339,6 +384,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'Intranasal / SubQ',
       recon: '2.0 mL BAC Water → 2.5 mg/mL',
       syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg · 20 UI = 500 mcg' : '10 IU (0.1 mL) = 250 mcg · 20 IU = 500 mcg',
+      vialYield: isEs ? '20 a 40 aplicaciones (1 mes de soporte)' : '20 to 40 applications (1 month supply)',
+      stability: isEs ? '30 días refrigerado (2–8°C)' : '30 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Nebulizador nasal estéril o jeringa U-100 31G' : 'Sterile nasal spray or U-100 Syringe 31G',
+      crossSellName: 'Semax',
       stack: isEs ? 'Semax (enfoque ejecutivo sereno y balance GABA)' : 'Semax (calm executive focus and GABA balance)'
     },
     'semax': {
@@ -346,6 +395,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'Intranasal / SubQ',
       recon: '2.0 mL BAC Water → 2.5 mg/mL',
       syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg' : '10 IU (0.1 mL) = 250 mcg',
+      vialYield: isEs ? '20 a 40 aplicaciones (1 mes de soporte)' : '20 to 40 applications (1 month supply)',
+      stability: isEs ? '30 días refrigerado (2–8°C)' : '30 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Nebulizador nasal estéril o jeringa U-100 31G' : 'Sterile nasal spray or U-100 Syringe 31G',
+      crossSellName: 'Selank',
       stack: isEs ? 'Selank (eje neurotrófico BDNF y agudeza mental)' : 'Selank (neurotrophic BDNF axis & mental clarity)'
     },
     'aod9604': {
@@ -353,6 +406,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ',
       recon: '2.0 mL BAC Water → 2.5 mg/mL',
       syringeCalc: isEs ? '12 UI (0.12 mL) = 300 mcg · 20 UI = 500 mcg' : '12 IU (0.12 mL) = 300 mcg · 20 IU = 500 mcg',
+      vialYield: isEs ? '10 a 16 dosis de 300–500 mcg' : '10 to 16 doses @ 300–500 mcg',
+      stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.5 mL) · Aguja 31G' : 'U-100 Insulin Syringe (0.5 mL) · 31G Needle',
+      crossSellName: 'Tirzepatide',
       stack: isEs ? 'Agonistas GLP-1/GIP (lipólisis adipocitaria sinérgica)' : 'GLP-1/GIP agonists (synergistic adipocyte lipolysis)'
     },
     'pt141': {
@@ -360,6 +417,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
       route: 'SubQ',
       recon: '2.0 mL BAC Water → 5.0 mg/mL',
       syringeCalc: isEs ? '25 UI (0.25 mL) = 1.25 mg · 35 UI = 1.75 mg' : '25 IU (0.25 mL) = 1.25 mg · 35 IU = 1.75 mg',
+      vialYield: isEs ? '6 a 8 aplicaciones a demanda' : '6 to 8 on-demand applications',
+      stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.5 mL) · Aguja 31G' : 'U-100 Insulin Syringe (0.5 mL) · 31G Needle',
+      crossSellName: 'Kisspeptin',
       stack: isEs ? 'Kisspeptin-10 (soporte integral del eje neuroendocrino)' : 'Kisspeptin-10 (comprehensive neuroendocrine support)'
     }
   };
@@ -381,6 +442,10 @@ function getPeptideClinicalSummary(productName = '', category = '', lang = 'en')
     route: dosing?.route || 'SubQ',
     recon: dosing?.recon || '2.0 mL BAC Water',
     syringeCalc: dosing?.syringeCalc || (isEs ? 'Usar jeringa de insulina U-100 para dosificación de precisión.' : 'Use standard U-100 insulin syringe for precision dosing.'),
+    vialYield: dosing?.vialYield || (isEs ? '10 a 20 dosis según pauta' : '10 to 20 doses per clinical titration'),
+    stability: dosing?.stability || (isEs ? '28 días refrigerado (2–8°C) con agua bacteriostática' : '28 days refrigerated (2–8°C) with bacteriostatic water'),
+    hardware: dosing?.hardware || (isEs ? 'Jeringa Insulina U-100 · Aguja 30G–31G (8 mm)' : 'U-100 Insulin Syringe · 30G–31G Needle (8 mm)'),
+    crossSellName: dosing?.crossSellName || null,
     stack: dosing?.stack || synergy
   };
 }
@@ -623,7 +688,7 @@ const CLINICAL_PRESETS = [
  * Displays each peptide with 44px touch targets, 2-column pricing tiles (Single Vial vs Box ×10),
  * live proforma cart status, and public specs link.
  */
-function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi }) {
+function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi, onFilterByPeptide }) {
   const [isClinicalExpanded, setIsClinicalExpanded] = useState(false);
   const isEs = lang === 'es';
   const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
@@ -869,14 +934,16 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
             width: '100%',
             padding: '8px 10px',
             background: isClinicalExpanded ? '#ffffff' : '#f8fafc',
-            border: isClinicalExpanded ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+            border: isClinicalExpanded ? '1px solid #cbd5e1' : '1px solid #dadce0',
+            borderBottom: isClinicalExpanded ? 'none' : '1px solid #dadce0',
+            borderLeft: isClinicalExpanded ? '3px solid #1a73e8' : '1px solid #dadce0',
             borderRadius: isClinicalExpanded ? '6px 6px 0 0' : '6px',
             cursor: 'pointer',
             fontSize: '0.74rem',
             fontWeight: 750,
             color: isClinicalExpanded ? '#1a73e8' : '#3c4043',
             transition: 'all 0.15s ease',
-            boxShadow: isClinicalExpanded ? '0 1px 3px rgba(26,115,232,0.12)' : 'none'
+            boxShadow: isClinicalExpanded ? '0 1px 3px rgba(0,0,0,0.05)' : 'none'
           }}
           aria-expanded={isClinicalExpanded}
         >
@@ -902,8 +969,9 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
         {isClinicalExpanded && (
           <div style={{
             background: '#ffffff',
-            border: '1.5px solid #1a73e8',
+            border: '1px solid #cbd5e1',
             borderTop: 'none',
+            borderLeft: '3px solid #1a73e8',
             borderRadius: '0 0 6px 6px',
             padding: '10px 12px',
             display: 'flex',
@@ -1026,6 +1094,24 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
               <div style={{ fontSize: '0.70rem', color: '#334155', marginTop: '1px' }}>
                 <strong style={{ color: '#0f172a' }}>{isEs ? 'Pauta estándar:' : 'Standard posology:'}</strong> {clinical.dose}
               </div>
+              {clinical.vialYield && (
+                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                  <span style={{ fontWeight: 700 }}>⏱️ {isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
+                  <span>{clinical.vialYield}</span>
+                </div>
+              )}
+              {clinical.stability && (
+                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontWeight: 700 }}>❄️ {isEs ? 'Estabilidad:' : 'Storage:'}</span>
+                  <span>{clinical.stability}</span>
+                </div>
+              )}
+              {clinical.hardware && (
+                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontWeight: 700 }}>💉 {isEs ? 'Insumos:' : 'Hardware:'}</span>
+                  <span>{clinical.hardware}</span>
+                </div>
+              )}
             </div>
 
             {/* Clinical Synergy / Stack Callout (High-Conversion B2B) */}
@@ -1054,6 +1140,32 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
               <div style={{ fontSize: '0.72rem', color: '#581c87', lineHeight: 1.42 }}>
                 {clinical.stack}
               </div>
+              {clinical.crossSellName && onFilterByPeptide && (
+                <div style={{ marginTop: '5px' }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onFilterByPeptide(clinical.crossSellName);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: '#f3e8ff',
+                      border: '1px solid #d8b4fe',
+                      color: '#6b21a8',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Action Bar (GCP 32px Buttons) */}
@@ -1073,20 +1185,21 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '4px',
-                  background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(13, 148, 136, 0.12) 100%)',
-                  color: '#0284c7',
-                  border: '1px solid rgba(2, 132, 199, 0.35)',
+                  gap: '5px',
+                  background: '#f8fafc',
+                  color: '#1a73e8',
+                  border: '1px solid #dadce0',
                   padding: '7px 10px',
-                  borderRadius: '5px',
-                  fontSize: '0.72rem',
-                  fontWeight: 750,
+                  borderRadius: '4px',
+                  fontSize: '0.73rem',
+                  fontWeight: 650,
                   cursor: 'pointer',
-                  minHeight: '34px'
+                  minHeight: '34px',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <Sparkles size={12} color="#0284c7" />
-                <span>{isEs ? 'Calcular Dosis en AI ✨' : 'Dosing Math with AI ✨'}</span>
+                <Sparkles size={13} color="#1a73e8" />
+                <span>{isEs ? 'Calcular Pauta con Atlas AI' : 'Calculate Posology with Atlas AI'}</span>
               </button>
 
               <Link
@@ -1181,6 +1294,7 @@ export default function PeptidesPriceListClient({
   const [selectedSpecsProduct, setSelectedSpecsProduct] = useState(null);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
+  const [aiContextProduct, setAiContextProduct] = useState(null);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [inquiryProductContext, setInquiryProductContext] = useState(null);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
@@ -2266,6 +2380,24 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               <div style={{ fontSize: '0.70rem', color: '#334155' }}>
                 <strong>{isEs ? 'Pauta estándar:' : 'Standard dose:'}</strong> {clinical.dose}
               </div>
+              {clinical.vialYield && (
+                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                  <span style={{ fontWeight: 700 }}>⏱️ {isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
+                  <span>{clinical.vialYield}</span>
+                </div>
+              )}
+              {clinical.stability && (
+                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontWeight: 700 }}>❄️ {isEs ? 'Estabilidad:' : 'Storage:'}</span>
+                  <span>{clinical.stability}</span>
+                </div>
+              )}
+              {clinical.hardware && (
+                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontWeight: 700 }}>💉 {isEs ? 'Insumos:' : 'Hardware:'}</span>
+                  <span>{clinical.hardware}</span>
+                </div>
+              )}
             </div>
 
             <div>
@@ -2309,6 +2441,33 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
                 {clinical.synergy}
               </div>
+              {clinical.crossSellName && (
+                <div style={{ marginTop: '5px' }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSearchQuery(clinical.crossSellName);
+                      window.scrollTo({ top: 380, behavior: 'smooth' });
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: '#f3e8ff',
+                      border: '1px solid #d8b4fe',
+                      color: '#6b21a8',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             <div style={{ paddingTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -2316,27 +2475,28 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  setAiContextProduct(row);
                   setIsAtlasAiOpen(true);
                 }}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(13, 148, 136, 0.12) 100%)',
-                  color: '#0284c7',
-                  border: '1px solid rgba(2, 132, 199, 0.35)',
-                  padding: '5px 10px',
-                  borderRadius: '5px',
+                  background: '#f8fafc',
+                  color: '#1a73e8',
+                  border: '1px solid #dadce0',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
                   fontSize: '0.73rem',
-                  fontWeight: 750,
+                  fontWeight: 650,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease'
                 }}
-                title={isEs ? 'Consultar dosificación y reconstitución con Atlas AI' : 'Calculate clinical dosing and reconstitution with Atlas AI'}
+                title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
               >
-                <Sparkles size={12} color="#0284c7" />
-                <span>{isEs ? 'Calcular Dosis en AI ✨' : 'Dosing Math with AI ✨'}</span>
+                <Sparkles size={13} color="#1a73e8" />
+                <span>{isEs ? 'Calcular Pauta con Atlas AI' : 'Calculate Posology with Atlas AI'}</span>
               </button>
 
               <button
@@ -2442,9 +2602,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             >
               <Menu size={17} />
             </button>
-            <Link href="/" className="nav-brand">
-              <Sparkles size={15} className="text-sky-400" />
-              <span>MEDILUXE B2B</span>
+            <Link href="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
+              <BrandLogo variant="light" size="compact" />
             </Link>
             <span className="nav-divider mobile-hide">/</span>
             <span className="nav-section mobile-hide">{isEs ? 'Tarifas Oficiales' : 'Price Schedules'}</span>
@@ -3683,21 +3842,28 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span>🧬 {isEs ? 'Categoría' : 'Category'}</span>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsCategorySheetOpen(true)}
-                      style={{
-                        border: 'none',
-                        background: 'transparent',
-                        color: '#1a73e8',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        padding: 0
-                      }}
-                    >
-                      {isEs ? 'Ver lista ▾' : 'View sheet ▾'}
-                    </button>
+                    {selectedCategory !== 'all' && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCategory('all');
+                        }}
+                        style={{
+                          border: 'none',
+                          background: '#f1f5f9',
+                          color: '#475569',
+                          fontSize: '0.66rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          padding: '1px 6px',
+                          borderRadius: '4px'
+                        }}
+                        title={isEs ? 'Limpiar filtro de categoría' : 'Clear category filter'}
+                      >
+                        {isEs ? 'Limpiar ×' : 'Clear ×'}
+                      </button>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -3744,21 +3910,28 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span>⚖️ {isEs ? 'Estatus FDA' : 'FDA Status'}</span>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsFdaSheetOpen(true)}
-                      style={{
-                        border: 'none',
-                        background: 'transparent',
-                        color: '#1a73e8',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        padding: 0
-                      }}
-                    >
-                      {isEs ? 'Ver lista ▾' : 'View sheet ▾'}
-                    </button>
+                    {selectedFdaStatus !== 'all' && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFdaStatus('all');
+                        }}
+                        style={{
+                          border: 'none',
+                          background: '#f1f5f9',
+                          color: '#475569',
+                          fontSize: '0.66rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          padding: '1px 6px',
+                          borderRadius: '4px'
+                        }}
+                        title={isEs ? 'Limpiar filtro FDA' : 'Clear FDA filter'}
+                      >
+                        {isEs ? 'Limpiar ×' : 'Clear ×'}
+                      </button>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -3878,7 +4051,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     currencySymbol,
                     lang,
                     onOpenSpecs: setSelectedSpecsProduct,
-                    onOpenAi: (prod) => setIsAtlasAiOpen(true)
+                    onOpenAi: (prod) => {
+                      setAiContextProduct(prod);
+                      setIsAtlasAiOpen(true);
+                    },
+                    onFilterByPeptide: (name) => {
+                      setSearchQuery(name);
+                      window.scrollTo({ top: 380, behavior: 'smooth' });
+                    }
                   }}
                 />
               )}
@@ -4669,71 +4849,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </aside>
       )}
 
-      {/* ── Atlas AI Floating Quick-Access (When cart dock is not active) ── */}
-      {totalCartCount === 0 && (
-        <aside
-          style={{
-            position: 'fixed',
-            bottom: '18px',
-            right: '18px',
-            zIndex: 890,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-          aria-label="Atlas AI Quick Access"
-        >
-          <button
-            type="button"
-            onClick={() => setIsAtlasAiOpen(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 14px',
-              background: '#ffffff',
-              border: '1.5px solid #c2e7ff',
-              borderRadius: '28px',
-              color: '#1a73e8',
-              cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(26, 115, 232, 0.20)',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              backdropFilter: 'blur(8px)',
-              backgroundColor: 'rgba(255, 255, 255, 0.95)'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = '#e8f0fe';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 18px rgba(26, 115, 232, 0.30)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 14px rgba(26, 115, 232, 0.20)';
-            }}
-            title="Open Atlas Clinical AI Assistant (Dosing Math, Synergies & Reconstitution)"
-          >
-            <div style={{
-              width: '26px',
-              height: '26px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #1a73e8 0%, #0d9488 100%)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 1px 4px rgba(26, 115, 232, 0.3)',
-              flexShrink: 0
-            }}>
-              <Sparkles size={14} />
-            </div>
-            <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1a73e8', whiteSpace: 'nowrap' }}>
-              Atlas AI Copilot
-            </span>
-          </button>
-        </aside>
-      )}
-
       {/* ── Official Printable Proforma Document (@media print) ── */}
       <div className="peptides-printable-proforma" style={{ display: 'none' }}>
         <style dangerouslySetInnerHTML={{ __html: `
@@ -4768,7 +4883,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           <div>
             <h1 style={{ margin: 0, fontSize: '18pt', fontWeight: 800, color: '#0284c7' }}>ATLAS HEALTH SERVICES</h1>
             <p style={{ margin: '4px 0 0 0', fontSize: '9pt', color: '#64748b' }}>
-              MEDILUXE B2B CLINICAL DIVISION • OFFICIAL PROFORMA QUOTE
+              ATLAS HEALTH SERVICES • CLINICAL DIVISION • OFFICIAL PROFORMA QUOTE
             </p>
             <p style={{ margin: '2px 0 0 0', fontSize: '8.5pt', color: '#64748b' }}>
               Certified Lyophilized Peptides • ≥99.0% HPLC Analytical Purity
@@ -5202,7 +5317,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       )}
 
-      {/* ── Option 1: Mobile Category Selection Bottom Sheet (Google Cloud Console Standard) ── */}
+      {/* ── Category Selection Sheet (Google Cloud Console Dense Flat List) ── */}
       {isCategorySheetOpen && (
         <div
           role="dialog"
@@ -5211,11 +5326,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             position: 'fixed',
             inset: 0,
             zIndex: 1100,
-            background: 'rgba(15, 23, 42, 0.65)',
+            background: 'rgba(15, 23, 42, 0.55)',
             backdropFilter: 'blur(3px)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
+            alignItems: 'center',
             animation: 'fadeIn 0.18s ease'
           }}
           onClick={() => setIsCategorySheetOpen(false)}
@@ -5223,19 +5339,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           <div
             style={{
               background: '#ffffff',
-              borderTopLeftRadius: '16px',
-              borderTopRightRadius: '16px',
-              maxHeight: '82vh',
+              borderTopLeftRadius: '14px',
+              borderTopRightRadius: '14px',
+              width: '100%',
+              maxWidth: '540px',
+              maxHeight: '75vh',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.20)',
               overflow: 'hidden'
             }}
             onClick={e => e.stopPropagation()}
           >
             {/* Sheet Handle & Header */}
             <div style={{
-              padding: '12px 16px 10px',
+              padding: '10px 16px 8px',
               borderBottom: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
@@ -5244,44 +5362,47 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             }}>
               <div style={{
                 position: 'absolute',
-                top: '6px',
+                top: '5px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                width: '36px',
+                width: '32px',
                 height: '4px',
                 background: '#cbd5e1',
                 borderRadius: '2px'
               }} />
               <div style={{ marginTop: '4px' }}>
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1e293b' }}>
-                  {isEs ? 'Seleccionar Categoría de Péptidos' : 'Select Peptide Category'}
+                <div style={{ fontSize: '0.86rem', fontWeight: 750, color: '#202124', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{isEs ? 'Categoría Terapéutica' : 'Therapeutic Category'}</span>
+                  <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 500 }}>
+                    ({CATEGORY_ORDER.length + 1} {isEs ? 'opciones' : 'options'})
+                  </span>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                  {isEs ? 'Filtrar formulaciones por clasificación terapéutica clínica' : 'Filter 109 formulations by clinical therapeutic classification'}
+                <div style={{ fontSize: '0.70rem', color: '#5f6368' }}>
+                  {isEs ? 'Filtrar formulaciones por indicación clínica' : 'Filter 109 formulations by clinical therapeutic classification'}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsCategorySheetOpen(false)}
                 style={{
-                  background: '#f1f5f9',
+                  background: '#f1f3f4',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
+                  width: '28px',
+                  height: '28px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#64748b',
+                  color: '#5f6368',
                   cursor: 'pointer'
                 }}
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
 
-            {/* Category Options List */}
-            <div style={{ padding: '8px 12px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {/* Flat List (Zero Card Clutter - Google Cloud List Standard) */}
+            <div style={{ padding: '4px 0 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               {/* Option: All Formulations */}
               <button
                 type="button"
@@ -5294,33 +5415,34 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '12px 14px',
-                  borderRadius: '8px',
-                  border: selectedCategory === 'all' ? '1.5px solid #1a73e8' : '1px solid #f1f5f9',
+                  padding: '10px 16px',
+                  minHeight: '44px',
+                  border: 'none',
+                  borderBottom: '1px solid #f1f5f9',
+                  borderLeft: selectedCategory === 'all' ? '3px solid #1a73e8' : '3px solid transparent',
                   background: selectedCategory === 'all' ? '#e8f0fe' : '#ffffff',
-                  color: selectedCategory === 'all' ? '#1a73e8' : '#1e293b',
-                  fontWeight: selectedCategory === 'all' ? 800 : 600,
-                  fontSize: '0.86rem',
+                  color: selectedCategory === 'all' ? '#1a73e8' : '#202124',
+                  fontWeight: selectedCategory === 'all' ? 700 : 500,
+                  fontSize: '0.82rem',
                   cursor: 'pointer',
-                  textAlign: 'left'
+                  textAlign: 'left',
+                  transition: 'background 0.12s ease'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Layers size={18} color={selectedCategory === 'all' ? '#1a73e8' : '#64748b'} />
-                  <span>{isEs ? 'Todas las Formulaciones' : 'All Formulations'}</span>
+                  <Layers size={16} color={selectedCategory === 'all' ? '#1a73e8' : '#5f6368'} />
+                  <span>{isEs ? 'Todas las Categorías' : 'All Categories'}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    background: selectedCategory === 'all' ? '#1a73e8' : '#f1f5f9',
-                    color: selectedCategory === 'all' ? '#ffffff' : '#64748b',
-                    padding: '2px 8px',
-                    borderRadius: '12px'
+                    fontSize: '0.74rem',
+                    fontFamily: 'monospace',
+                    fontWeight: 650,
+                    color: selectedCategory === 'all' ? '#1a73e8' : '#5f6368'
                   }}>
                     {processedProducts.length}
                   </span>
-                  {selectedCategory === 'all' && <Check size={16} color="#1a73e8" />}
+                  {selectedCategory === 'all' && <Check size={16} color="#1a73e8" strokeWidth={2.5} />}
                 </div>
               </button>
 
@@ -5344,35 +5466,36 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '12px 14px',
-                      borderRadius: '8px',
-                      border: isSelected ? `1.5px solid ${meta.color}` : '1px solid #f1f5f9',
-                      background: isSelected ? meta.bg : '#ffffff',
-                      color: isSelected ? meta.color : '#1e293b',
-                      fontWeight: isSelected ? 800 : 600,
-                      fontSize: '0.86rem',
+                      padding: '10px 16px',
+                      minHeight: '44px',
+                      border: 'none',
+                      borderBottom: '1px solid #f1f5f9',
+                      borderLeft: isSelected ? `3px solid ${meta.color || '#1a73e8'}` : '3px solid transparent',
+                      background: isSelected ? '#e8f0fe' : '#ffffff',
+                      color: isSelected ? '#1a73e8' : '#202124',
+                      fontWeight: isSelected ? 700 : 500,
+                      fontSize: '0.82rem',
                       cursor: 'pointer',
-                      textAlign: 'left'
+                      textAlign: 'left',
+                      transition: 'background 0.12s ease'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px' }}>
-                        {getCategoryIcon(key, 16)}
+                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px' }}>
+                        {getCategoryIcon(key, 15)}
                       </span>
                       <span>{isEs ? meta.labelEs : meta.labelEn}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        background: isSelected ? meta.color : '#f1f5f9',
-                        color: isSelected ? '#ffffff' : '#64748b',
-                        padding: '2px 8px',
-                        borderRadius: '12px'
+                        fontSize: '0.74rem',
+                        fontFamily: 'monospace',
+                        fontWeight: 650,
+                        color: isSelected ? '#1a73e8' : '#5f6368'
                       }}>
                         {count}
                       </span>
-                      {isSelected && <Check size={16} color={meta.color} />}
+                      {isSelected && <Check size={16} color="#1a73e8" strokeWidth={2.5} />}
                     </div>
                   </button>
                 );
@@ -5382,7 +5505,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </div>
       )}
 
-      {/* ── Mobile FDA Regulatory Status Bottom Sheet (Google Cloud Console Standard) ── */}
+      {/* ── Mobile FDA Regulatory Status Sheet (Google Cloud Flat List) ── */}
       {isFdaSheetOpen && (
         <div
           role="dialog"
@@ -5391,11 +5514,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             position: 'fixed',
             inset: 0,
             zIndex: 1100,
-            background: 'rgba(15, 23, 42, 0.65)',
+            background: 'rgba(15, 23, 42, 0.55)',
             backdropFilter: 'blur(3px)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
+            alignItems: 'center',
             animation: 'fadeIn 0.18s ease'
           }}
           onClick={() => setIsFdaSheetOpen(false)}
@@ -5403,19 +5527,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           <div
             style={{
               background: '#ffffff',
-              borderTopLeftRadius: '16px',
-              borderTopRightRadius: '16px',
+              borderTopLeftRadius: '14px',
+              borderTopRightRadius: '14px',
+              width: '100%',
+              maxWidth: '540px',
               maxHeight: '75vh',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.20)',
               overflow: 'hidden'
             }}
             onClick={e => e.stopPropagation()}
           >
             {/* Sheet Handle & Header */}
             <div style={{
-              padding: '12px 16px 10px',
+              padding: '10px 16px 8px',
               borderBottom: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
@@ -5424,19 +5550,22 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             }}>
               <div style={{
                 position: 'absolute',
-                top: '6px',
+                top: '5px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                width: '36px',
+                width: '32px',
                 height: '4px',
                 background: '#cbd5e1',
                 borderRadius: '2px'
               }} />
               <div style={{ marginTop: '4px' }}>
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1e293b' }}>
-                  {isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}
+                <div style={{ fontSize: '0.86rem', fontWeight: 750, color: '#202124', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}</span>
+                  <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 500 }}>
+                    ({FDA_FILTERS.length} {isEs ? 'opciones' : 'options'})
+                  </span>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                <div style={{ fontSize: '0.70rem', color: '#5f6368' }}>
                   {isEs ? 'Filtrar por formulación hospitalaria, aprobado o investigación' : 'Filter by hospital formulary, FDA approved, or IND status'}
                 </div>
               </div>
@@ -5444,24 +5573,24 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 type="button"
                 onClick={() => setIsFdaSheetOpen(false)}
                 style={{
-                  background: '#f1f5f9',
+                  background: '#f1f3f4',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
+                  width: '28px',
+                  height: '28px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#64748b',
+                  color: '#5f6368',
                   cursor: 'pointer'
                 }}
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
 
-            {/* FDA Options List */}
-            <div style={{ padding: '8px 12px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {/* Flat List (Zero Card Clutter - Google Cloud List Standard) */}
+            <div style={{ padding: '4px 0 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               {FDA_FILTERS.map(f => {
                 const isSelected = selectedFdaStatus === f.id;
                 const count = f.id === 'all'
@@ -5480,38 +5609,41 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '12px 14px',
-                      borderRadius: '8px',
-                      border: isSelected ? '1.5px solid #1a73e8' : '1px solid #f1f5f9',
+                      padding: '10px 16px',
+                      minHeight: '44px',
+                      border: 'none',
+                      borderBottom: '1px solid #f1f5f9',
+                      borderLeft: isSelected ? '3px solid #1a73e8' : '3px solid transparent',
                       background: isSelected ? '#e8f0fe' : '#ffffff',
-                      color: isSelected ? '#1a73e8' : '#1e293b',
-                      fontWeight: isSelected ? 800 : 600,
-                      fontSize: '0.86rem',
+                      color: isSelected ? '#1a73e8' : '#202124',
+                      fontWeight: isSelected ? 700 : 500,
+                      fontSize: '0.82rem',
                       cursor: 'pointer',
-                      textAlign: 'left'
+                      textAlign: 'left',
+                      transition: 'background 0.12s ease'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '1.1rem' }}>{f.icon}</span>
+                      <span style={{ fontSize: '1.05rem', lineHeight: 1 }}>{f.icon}</span>
                       <div>
-                        <div>{isEs ? f.labelEs : f.labelEn}</div>
-                        <div style={{ fontSize: '0.68rem', color: isSelected ? '#1a73e8' : '#64748b', fontWeight: 500 }}>
+                        <div style={{ color: isSelected ? '#1a73e8' : '#202124' }}>
+                          {isEs ? f.labelEs : f.labelEn}
+                        </div>
+                        <div style={{ fontSize: '0.67rem', color: isSelected ? '#1a73e8' : '#5f6368', fontWeight: 400 }}>
                           {isEs ? f.tooltipEs : f.tooltipEn}
                         </div>
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        background: isSelected ? '#1a73e8' : '#f1f5f9',
-                        color: isSelected ? '#ffffff' : '#64748b',
-                        padding: '2px 8px',
-                        borderRadius: '12px'
+                        fontSize: '0.74rem',
+                        fontFamily: 'monospace',
+                        fontWeight: 650,
+                        color: isSelected ? '#1a73e8' : '#5f6368'
                       }}>
                         {count}
                       </span>
-                      {isSelected && <Check size={16} color="#1a73e8" />}
+                      {isSelected && <Check size={16} color="#1a73e8" strokeWidth={2.5} />}
                     </div>
                   </button>
                 );
@@ -5558,7 +5690,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       {/* ── Atlas AI Clinical Copilot Drawer ── */}
       <AtlasAiCopilotDrawer
         isOpen={isAtlasAiOpen}
-        onClose={() => setIsAtlasAiOpen(false)}
+        onClose={() => {
+          setIsAtlasAiOpen(false);
+          setAiContextProduct(null);
+        }}
         currency={currency}
         currencySymbol={currencySymbol}
         formatPrice={formatPrice}
@@ -5570,6 +5705,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         lang={lang}
         activeCategory={selectedCategory}
         activeCategoryLabel={selectedCategory !== 'all' ? (isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn) : null}
+        contextProduct={aiContextProduct}
         onAddToCart={handleAddToCart}
         onOpenSpecs={setSelectedSpecsProduct}
       />

@@ -1210,7 +1210,7 @@ export default function PeptidePricePdfPreviewModal({
           }}
         >
           <div style={{ fontWeight: 700, color: '#334155' }}>
-            Atlas Health Services · Mediluxe B2B Clinical Supply Division
+            Atlas Health Services · Clinical Supply Division
           </div>
           <div>
             {isEs

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, FileText, Stethoscope, Search, ExternalLink, Check, Copy, ShieldCheck, Clock, CheckCircle2 } from '@/lib/icons';
+import { User, FileText, Stethoscope, Search, ExternalLink, Check, Copy, ShieldCheck, Clock, CheckCircle2, Edit3 } from '@/lib/icons';
 
 export default function LabelsMetaStrip({
   isEs,
@@ -28,8 +28,8 @@ export default function LabelsMetaStrip({
   return (
     <div className="pls-context-strip">
       <div className="pls-meta-row">
-        {/* Patient Item */}
-        <div className="pls-meta-item">
+        {/* Patient Item (Hidden on mobile touch screens when active batch chip is visible - Rule #23) */}
+        <div className="pls-meta-item pls-patient-meta-item">
           <span className="pls-meta-icon" style={{ background: '#f3e8fd', color: '#8430ce' }}>
             <User size={13} />
           </span>
@@ -68,6 +68,31 @@ export default function LabelsMetaStrip({
               <ExternalLink size={11} style={{ opacity: 0.6 }} />
             </a>
           </div>
+          <a
+            href={`/rx/${encodeURIComponent(cleanRxCode)}?edit=true`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pls-meta-action-btn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '3px',
+              padding: '2px 7px',
+              borderRadius: '4px',
+              background: '#f1f5f9',
+              border: '1px solid #cbd5e1',
+              color: '#1a73e8',
+              fontWeight: 700,
+              fontSize: '0.68rem',
+              textDecoration: 'none',
+              marginLeft: '4px'
+            }}
+            title={isEs ? `Editar prescripción #${cleanRxCode}` : `Edit prescription #${cleanRxCode}`}
+            aria-label={isEs ? 'Editar prescripción' : 'Edit prescription'}
+          >
+            <Edit3 size={11} color="#1a73e8" />
+            <span>{isEs ? 'Editar Rx' : 'Edit Rx'}</span>
+          </a>
           <button
             type="button"
             className="pls-meta-action-btn"
@@ -170,13 +195,15 @@ export default function LabelsMetaStrip({
           )}
         </div>
 
-        {/* Formula Parts Switcher (Part 1 / Part 2) with Full Explicit Titles */}
+        {/* Formula Parts Switcher (Part 1 / Part 2) with Clean GCP Segmented Layout */}
         {labels.length > 1 && (
           <>
-            <span className="pls-meta-divider" aria-hidden="true" />
-            <div className="pls-meta-item pls-meta-parts">
-              <span className="pls-meta-k">{isEs ? 'Fórmula' : 'Formula'}:</span>
-              <div className="pls-parts-tabs" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            <span className="pls-meta-divider pls-desktop-only" aria-hidden="true" />
+            <div className="pls-meta-item pls-meta-parts" style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'stretch' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                {isEs ? 'Parte de Formulación a Dispensar:' : 'Compounding Formula Part:'}
+              </div>
+              <div className="pls-parts-tabs" style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(labels.length, 2)}, 1fr)`, gap: '6px', width: '100%' }}>
                 {labels.map((lbl, idx) => {
                   const isActive = labelIndex === idx;
                   const rawTitle = lbl.productTitle || lbl.productName || (lbl.formula ? lbl.formula.slice(0, 24) : `Part ${idx + 1}`);
@@ -190,16 +217,24 @@ export default function LabelsMetaStrip({
                       className={`pls-part-btn ${isActive ? 'active' : ''}`}
                       style={{
                         fontWeight: isActive ? 800 : 600,
-                        fontSize: '0.78rem',
-                        padding: '4px 10px',
+                        fontSize: '0.76rem',
+                        padding: '6px 10px',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '5px'
+                        justifyContent: 'center',
+                        gap: '6px',
+                        width: '100%',
+                        borderRadius: '6px',
+                        border: isActive ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+                        background: isActive ? '#e8f0fe' : '#ffffff',
+                        color: isActive ? '#1a73e8' : '#3c4043',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
                       }}
                       onClick={() => onSelectLabelPart(idx)}
                     >
-                      {isActive && <span style={{ color: '#16a34a', fontWeight: 900 }}>✔</span>}
-                      <span>{labelText}</span>
+                      {isActive && <span style={{ color: '#1a73e8', fontWeight: 900 }}>✔</span>}
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{labelText}</span>
                     </button>
                   );
                 })}
@@ -208,8 +243,8 @@ export default function LabelsMetaStrip({
           </>
         )}
 
-        {/* Bench Laboratory Hotkeys Tip (Reimi & Kasia Quick Guide) */}
-        <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.67rem', color: '#64748b' }}>
+        {/* Bench Laboratory Hotkeys Tip (Reimi & Kasia Quick Guide) - Desktop only (Rule #23) */}
+        <div className="pls-desktop-only" style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.67rem', color: '#64748b' }}>
           <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px', fontWeight: 800, color: '#334155' }}>⌨️ A</span>
           <span>{isEs ? 'Aprobar' : 'Approve'}</span>
           <span style={{ opacity: 0.4 }}>·</span>

@@ -2201,21 +2201,20 @@ export default function PharmacyLabelsModal({
                     {isEs ? 'Modalidad de Despacho & Refill:' : 'Fulfillment & Refill Mode:'}
                   </span>
                 </div>
-                <div style={{ display: 'inline-flex', background: '#e2e8f0', padding: '2px', borderRadius: '6px', gap: '2px' }}>
+                <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '2px', borderRadius: '6px', border: '1px solid #dadce0', gap: '2px' }}>
                   <button
                     type="button"
                     onClick={() => setFulfillmentMode('internal')}
                     style={{
-                      padding: '4px 10px',
-                      borderRadius: '5px',
-                      border: 'none',
-                      background: fulfillmentMode === 'internal' ? '#003666' : 'transparent',
-                      color: fulfillmentMode === 'internal' ? '#ffffff' : '#475569',
-                      fontSize: '0.72rem',
-                      fontWeight: fulfillmentMode === 'internal' ? 800 : 600,
+                      padding: '5px 12px',
+                      borderRadius: '4px',
+                      border: fulfillmentMode === 'internal' ? '1px solid #1a73e8' : '1px solid transparent',
+                      background: fulfillmentMode === 'internal' ? '#e8f0fe' : 'transparent',
+                      color: fulfillmentMode === 'internal' ? '#1a73e8' : '#475569',
+                      fontSize: '0.74rem',
+                      fontWeight: fulfillmentMode === 'internal' ? 750 : 600,
                       cursor: 'pointer',
-                      boxShadow: fulfillmentMode === 'internal' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
-                      transition: 'all 0.15s'
+                      transition: 'all 0.15s ease'
                     }}
                   >
                     🏷️ {isEs ? 'Mi Entrega (Etiqueta Adhesiva)' : 'Atlas Dispensing (Label)'}
@@ -2224,16 +2223,15 @@ export default function PharmacyLabelsModal({
                     type="button"
                     onClick={() => setFulfillmentMode('external_supplier')}
                     style={{
-                      padding: '4px 10px',
-                      borderRadius: '5px',
-                      border: 'none',
-                      background: fulfillmentMode === 'external_supplier' ? '#003666' : 'transparent',
-                      color: fulfillmentMode === 'external_supplier' ? '#ffffff' : '#475569',
-                      fontSize: '0.72rem',
-                      fontWeight: fulfillmentMode === 'external_supplier' ? 800 : 600,
+                      padding: '5px 12px',
+                      borderRadius: '4px',
+                      border: fulfillmentMode === 'external_supplier' ? '1px solid #1a73e8' : '1px solid transparent',
+                      background: fulfillmentMode === 'external_supplier' ? '#e8f0fe' : 'transparent',
+                      color: fulfillmentMode === 'external_supplier' ? '#1a73e8' : '#475569',
+                      fontSize: '0.74rem',
+                      fontWeight: fulfillmentMode === 'external_supplier' ? 750 : 600,
                       cursor: 'pointer',
-                      boxShadow: fulfillmentMode === 'external_supplier' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
-                      transition: 'all 0.15s'
+                      transition: 'all 0.15s ease'
                     }}
                   >
                     📦 {isEs ? 'Envío Proveedor Externo (Tarjeta Refill)' : 'External Supplier (Refill Card)'}
@@ -2250,6 +2248,77 @@ export default function PharmacyLabelsModal({
                 />
               ) : (
                 <>
+          {/* Workspace Mode Switcher: [ Preview ] | [ Edit Fields ] (Google Cloud UX) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px',
+            padding: '6px 12px',
+            background: '#f8fafc',
+            border: '1px solid #dadce0',
+            borderRadius: '6px',
+            marginBottom: '8px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? 'Modo de Trabajo:' : 'Workspace Mode:'}
+              </span>
+              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                {isEditing 
+                  ? (isEs ? '• Editando textos y posología' : '• Editing formula texts & instructions') 
+                  : (isEs ? '• Renderizado listo para imprimir' : '• Ready to print / export')}
+              </span>
+            </div>
+            <div style={{ display: 'inline-flex', background: '#e2e8f0', borderRadius: '5px', padding: '2px', gap: '2px' }}>
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: !isEditing ? '#ffffff' : 'transparent',
+                  color: !isEditing ? '#1a73e8' : '#64748b',
+                  fontWeight: !isEditing ? 800 : 600,
+                  fontSize: '0.74rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  boxShadow: !isEditing ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span>👁️</span>
+                <span>{isEs ? 'Vista Previa' : 'Preview'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditing(true)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: isEditing ? '#ffffff' : 'transparent',
+                  color: isEditing ? '#1a73e8' : '#64748b',
+                  fontWeight: isEditing ? 800 : 600,
+                  fontSize: '0.74rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  boxShadow: isEditing ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Edit3 size={12} color={isEditing ? '#1a73e8' : '#64748b'} />
+                <span>{isEs ? 'Editar Campos' : 'Edit Fields'}</span>
+              </button>
+            </div>
+          </div>
+
           {/* Google Cloud Compact Controls Toolbar (Structured Layout) */}
           <div className="gcp-controls-toolbar">
             {/* Top Row: Configuration Selectors + Active Output Resolution Badge */}
@@ -2450,32 +2519,6 @@ export default function PharmacyLabelsModal({
                   </button>
                 </div>
               </div>
-            </div>
-
-            {/* Bottom Row: Tool Actions (Edit) */}
-            <div className="gcp-toolbar-row-bottom">
-              {/* Field 6: Online Label Editor Toggle */}
-              <button
-                type="button"
-                onClick={() => setIsEditing(prev => !prev)}
-                className="gcp-toolbar-btn"
-                style={{
-                  border: isEditing ? '1px solid #1a73e8' : '1px solid #dadce0',
-                  background: isEditing ? '#e8f0fe' : '#ffffff',
-                  color: isEditing ? '#1a73e8' : '#3c4043'
-                }}
-                title={isEs ? 'Editar campos de la etiqueta' : 'Edit label fields'}
-              >
-                <Edit3 size={13} />
-                <span>{isEs ? 'Editar' : 'Edit'}</span>
-                <span style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  background: isEditing ? '#1a73e8' : '#dadce0',
-                  display: 'inline-block'
-                }} />
-              </button>
             </div>
           </div>
 

@@ -897,6 +897,7 @@
 
 /* Mobile Adjustments (Golden Rule #23) */
 @media (max-width: 768px) {
+  .pls-desktop-only,
   .pls-desktop-only-action {
     display: none !important;
   }
@@ -981,30 +982,44 @@
   .pls-meta-parts {
     margin-top: 4px;
   }
-  /* Mobile Batch Queue - Vertical Stacking (Golden Rule #23) */
+  /* Mobile Batch Queue - Horizontal Swipeable Chip Row (Golden Rule #23 & GCP Standard) */
   .pls-batch-bar {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 8px !important;
-    padding: 8px 12px !important;
+    gap: 6px !important;
+    padding: 6px 10px !important;
   }
   .pls-batch-label-wrap {
     width: 100% !important;
     justify-content: space-between !important;
   }
   .pls-batch-scroll {
-    flex-direction: column !important;
-    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
     gap: 6px !important;
-    overflow-x: visible !important;
+    width: 100% !important;
+    padding: 2px 0 4px !important;
+    scrollbar-width: none;
+  }
+  .pls-batch-scroll::-webkit-scrollbar {
+    display: none;
   }
   .pls-batch-pill {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    justify-content: space-between !important;
-    min-height: 42px !important;
-    padding: 8px 12px !important;
-    white-space: normal !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
+    justify-content: flex-start !important;
+    min-height: 32px !important;
+    padding: 4px 10px !important;
+    white-space: nowrap !important;
+    font-size: 0.74rem !important;
+    border-radius: 6px !important;
+  }
+  /* On mobile touch devices, active patient is already clearly shown in the selected batch pill */
+  .pls-patient-meta-item {
+    display: none !important;
   }
 }
 
