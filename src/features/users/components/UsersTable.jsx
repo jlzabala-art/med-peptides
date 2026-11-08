@@ -42,6 +42,7 @@ import User360Drawer from '../../../components/admin/users/User360Drawer';
 import InviteUserModal from '../../../components/admin/users/InviteUserModal';
 import AIUserIntelligenceModal from '../../../components/admin/users/AIUserIntelligenceModal';
 import UserSharedCatalogsPopover from './UserSharedCatalogsPopover';
+import UserPayablesPopover from './UserPayablesPopover';
 import CustomerSharedLinksCard from '../../../components/admin/customers/CustomerSharedLinksCard';
 import UserMobileCard from './UserMobileCard';
 import UniversalShareDrawer from '../../../components/ui/UniversalShareDrawer';
@@ -550,6 +551,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                       });
                     }}
                   />
+                  <UserPayablesPopover user={u} />
                 </span>
               </div>
             </div>
@@ -713,6 +715,23 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             setAiTargetUser(u);
           }
         });
+
+        // Wholesaler / Supplier Payables Statement Action
+        const isWholesalerRole = u.role === 'wholesaler' || u.role === 'supplier' || u.roles?.includes('wholesaler') || u.payablesToken || (u.companyName || '').toLowerCase().includes('health source');
+        if (isWholesalerRole) {
+          actions.push({
+            label: 'Payables Statement (Bills)',
+            icon: DollarSign,
+            onClick: (e) => {
+              e.stopPropagation();
+              const token = u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id));
+              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+              const url = `${origin}/b2b/payables/${token}`;
+              navigator.clipboard?.writeText(url);
+              toast.success('Enlace de facturas pendientes copiado');
+            }
+          });
+        }
 
         if (!u.isArchived && canApprove && u.approved) {
           actions.push({
@@ -985,6 +1004,33 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
           <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #fed7aa', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase', marginRight: '0.5rem' }}>Wholesale Workflow:</span>
+            <button
+              className="gcp-btn-secondary"
+              style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#ea580c', color: '#c2410c', background: '#fff7ed', fontWeight: 700 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                const token = u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id));
+                const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+                const url = `${origin}/b2b/payables/${token}`;
+                navigator.clipboard?.writeText(url);
+                toast.success('Enlace de facturas pendientes copiado');
+              }}
+              title="Copiar enlace público del extracto de facturas para compartir con el mayorista"
+            >
+              <FileText size={13} color="#ea580c" />
+              <span>💰 Copiar Enlace Bills</span>
+            </button>
+            <a
+              href={`/b2b/payables/${u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gcp-btn-secondary"
+              style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412', textDecoration: 'none' }}
+              title="Abrir extracto de cuentas por pagar en vivo"
+            >
+              <ExternalLink size={13} />
+              <span>↗️ Ver Estado de Facturas</span>
+            </a>
             <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412' }} onClick={() => setDetailsUser(u)}>
               <DollarSign size={13} />
               <span>📜 Issue B2B Quote</span>
