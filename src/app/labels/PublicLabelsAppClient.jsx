@@ -317,6 +317,8 @@ export default function PublicLabelsAppClient({
     printCountsByCode: {}
   });
   const [printCountsMap, setPrintCountsMap] = useState({});
+  const [startOffset, setStartOffset] = useState(0);
+  const [printStatusFilter, setPrintStatusFilter] = useState('all'); // 'all' | 'unprinted' | 'printed' | 'reprint'
 
   // Load KPIs and per-prescription print counters on mount
   useEffect(() => {
@@ -353,11 +355,32 @@ export default function PublicLabelsAppClient({
       }));
     };
 
+    // Multi-operator background auto-revalidation when window gains focus or tab becomes visible
+    const handleWindowFocus = () => {
+      if (document.visibilityState === 'visible') {
+        fetch('/api/labels/kpis')
+          .then((res) => res.json())
+          .then((data) => {
+            if (data?.success) {
+              setLabelsKpis(data);
+              if (data.printCountsByCode) {
+                setPrintCountsMap(data.printCountsByCode);
+              }
+            }
+          })
+          .catch(() => {});
+      }
+    };
+
     window.addEventListener('rx:label-printed', handleLabelPrinted);
+    window.addEventListener('focus', handleWindowFocus);
+    document.addEventListener('visibilitychange', handleWindowFocus);
 
     return () => {
       isMounted = false;
       window.removeEventListener('rx:label-printed', handleLabelPrinted);
+      window.removeEventListener('focus', handleWindowFocus);
+      document.removeEventListener('visibilitychange', handleWindowFocus);
     };
   }, []);
 
@@ -1059,6 +1082,7 @@ export default function PublicLabelsAppClient({
         items: batchItems,
         isEs,
         dpi: 600,
+        startOffset,
         onProgress: (prog) => {
           setBatchPdfProgress(prog);
         }
@@ -1267,6 +1291,8 @@ export default function PublicLabelsAppClient({
         batchPdfProgress={batchPdfProgress}
         patientQueue={patientQueue}
         onDownloadA4BatchPdf={handleDownloadA4BatchPdf}
+        startOffset={startOffset}
+        setStartOffset={setStartOffset}
         onOpenImport={() => setShowImport(true)}
         onShare={handleShare}
         onShareType={handleShareType}
@@ -1301,6 +1327,7 @@ export default function PublicLabelsAppClient({
           totalBatchLabelsCount={totalBatchLabelsCount}
           onSwitchActivePatient={handleSwitchActivePatient}
           onRemoveFromQueue={handleRemoveFromQueue}
+          onUpdatePatientQueueItem={updatePatientQueueItem}
           onBatchApprove={handleBatchApprove}
           isBatchApproving={isBatchApproving}
           totalLabeledCount={totalLabeledCount}
@@ -1420,8 +1447,62 @@ export default function PublicLabelsAppClient({
                   </div>
                 </div>
 
+                {/* Print Status Quick Filter Pills (Golden Rules #7 & #24) */}
+                <div style={{
+                  padding: '10px 20px',
+                  background: '#f8fafc',
+                  borderBottom: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  flexWrap: 'wrap'
+                }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                    {isEs ? 'Filtrar estado:' : 'Print Status:'}
+                  </span>
+                  {[
+                    { id: 'all', labelEs: 'Todas', labelEn: 'All' },
+                    { id: 'unprinted', labelEs: '○ Pendientes', labelEn: '○ Unprinted' },
+                    { id: 'printed', labelEs: '🖨️ Impresas (1×)', labelEn: '🖨️ Printed (1×)' },
+                    { id: 'reprint', labelEs: '🔁 Reimpresiones', labelEn: '🔁 Reprints' }
+                  ].map((filterTab) => {
+                    const isTabActive = printStatusFilter === filterTab.id;
+                    return (
+                      <button
+                        key={filterTab.id}
+                        type="button"
+                        onClick={() => setPrintStatusFilter(filterTab.id)}
+                        style={{
+                          border: isTabActive ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                          background: isTabActive ? '#e8f0fe' : '#ffffff',
+                          color: isTabActive ? '#1a73e8' : '#475569',
+                          fontSize: '0.72rem',
+                          fontWeight: isTabActive ? 750 : 600,
+                          padding: '3px 10px',
+                          borderRadius: '16px',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {isEs ? filterTab.labelEs : filterTab.labelEn}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 {/* Recent Prescriptions (if any) */}
-                {recentPrescriptions.length > 0 && (
+                {recentPrescriptions
+                  .filter((r) => {
+                    const pCode = sanitizeRecentCode(r.code);
+                    const count = printCountsMap[pCode] || printCountsMap[r.code] || r.a4PrintCount || 0;
+                    if (printStatusFilter === 'unprinted') return count === 0;
+                    if (printStatusFilter === 'printed') return count === 1;
+                    if (printStatusFilter === 'reprint') return count > 1;
+                    return true;
+                  }).length > 0 && (
                   <div style={{ borderBottom: "1px solid #dadce0" }}>
                     <div style={{
                       padding: "8px 20px",
@@ -1445,7 +1526,16 @@ export default function PublicLabelsAppClient({
                         {isEs ? "Limpiar" : "Clear"}
                       </button>
                     </div>
-                    {recentPrescriptions.map((r) => {
+                    {recentPrescriptions
+                      .filter((r) => {
+                        const pCode = sanitizeRecentCode(r.code);
+                        const count = printCountsMap[pCode] || printCountsMap[r.code] || r.a4PrintCount || 0;
+                        if (printStatusFilter === 'unprinted') return count === 0;
+                        if (printStatusFilter === 'printed') return count === 1;
+                        if (printStatusFilter === 'reprint') return count > 1;
+                        return true;
+                      })
+                      .map((r) => {
                       const dateStr = formatResultDate(r.date || r.createdAt || r.uploadedAt);
                       const pCode = sanitizeRecentCode(r.code);
                       const printCount = printCountsMap[pCode] || printCountsMap[r.code] || r.a4PrintCount || 0;
@@ -1558,6 +1648,13 @@ export default function PublicLabelsAppClient({
                   </div>
                   {(searchResults.length > 0 && !searchQuery.trim() ? searchResults : FEATURED_PATIENTS)
                     .filter(p => !recentPrescriptions.some(r => String(r.code).toUpperCase() === String(p.code).toUpperCase()))
+                    .filter(p => {
+                      const printCount = printCountsMap[p.code] || p.a4PrintCount || 0;
+                      if (printStatusFilter === 'unprinted') return printCount === 0;
+                      if (printStatusFilter === 'printed') return printCount === 1;
+                      if (printStatusFilter === 'reprint') return printCount > 1;
+                      return true;
+                    })
                     .map((p) => {
                       const dateStr = formatResultDate(p.date || p.createdAt || p.uploadedAt);
                       const printCount = printCountsMap[p.code] || p.a4PrintCount || 0;

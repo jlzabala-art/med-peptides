@@ -132,6 +132,17 @@ export async function GET(request, { params }) {
     }
 
     // 🔓 UNLOCKED / AUTHORIZED STATE
+    // Record non-blocking audit trail for authorized statement access
+    if (adminDb && shareDoc) {
+      const nowIso = new Date().toISOString();
+      const docRef = (!tokenQuery.empty) ? tokenQuery.docs[0].ref : adminDb.collection('shared_payable_statements').doc(token);
+      docRef.set({
+        lastAccessedAt: nowIso,
+        accessCount: (shareDoc.accessCount || 0) + 1,
+        lastAccessEmail: providedEmail || 'quicklink_verified'
+      }, { merge: true }).catch(e => console.warn('Audit access write skipped:', e));
+    }
+
     return NextResponse.json({
       success: true,
       isLocked: false,

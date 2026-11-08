@@ -22,6 +22,8 @@ export default function LabelsHeader({
   batchPdfProgress,
   patientQueue = [],
   onDownloadA4BatchPdf,
+  startOffset = 0,
+  setStartOffset = null,
   onOpenImport,
   onShare,
   onShareType,
@@ -172,26 +174,59 @@ export default function LabelsHeader({
         {/* Action Buttons: Print Batch A4, Import, Share, Language */}
         <div className="pls-actions-wrap">
           {/* Global Action: Print All Patients in A4 PDF Sheet */}
-          <button
-            type="button"
-            className="pls-btn-print-batch"
-            onClick={onDownloadA4BatchPdf}
-            disabled={isGeneratingBatchPdf || patientQueue.length === 0}
-            title={isEs ? 'Imprimir todas las etiquetas del lote en un folio A4 en formato PDF' : 'Print all queued labels onto an A4 PDF sheet'}
-            aria-label={isEs ? 'Imprimir Lote en A4 (PDF)' : 'Print Batch in A4 (PDF)'}
-          >
-            <Printer size={14} />
-            <span className="pls-btn-print-label">
-              {isGeneratingBatchPdf
-                ? (batchPdfProgress
-                    ? `${isEs ? 'Rasterizando' : 'Rendering'} ${batchPdfProgress.current}/${batchPdfProgress.total}...`
-                    : (isEs ? 'Generando...' : 'Generating...'))
-                : (isEs ? 'Imprimir Lote A4' : 'Print Batch A4')}
-            </span>
-            <span className="pls-btn-batch-count">
-              {totalLabelsInBatch}
-            </span>
-          </button>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <button
+              type="button"
+              className="pls-btn-print-batch"
+              onClick={onDownloadA4BatchPdf}
+              disabled={isGeneratingBatchPdf || patientQueue.length === 0}
+              title={isEs ? 'Imprimir todas las etiquetas del lote en un folio A4 en formato PDF' : 'Print all queued labels onto an A4 PDF sheet'}
+              aria-label={isEs ? 'Imprimir Lote en A4 (PDF)' : 'Print Batch in A4 (PDF)'}
+            >
+              <Printer size={14} />
+              <span className="pls-btn-print-label">
+                {isGeneratingBatchPdf
+                  ? (batchPdfProgress
+                      ? `${isEs ? 'Rasterizando' : 'Rendering'} ${batchPdfProgress.current}/${batchPdfProgress.total}...`
+                      : (isEs ? 'Generando...' : 'Generating...'))
+                  : (isEs ? 'Imprimir Lote A4' : 'Print Batch A4')}
+              </span>
+              <span className="pls-btn-batch-count">
+                {totalLabelsInBatch}
+              </span>
+            </button>
+
+            {/* Start Offset selector for partially used A4 sheets */}
+            {patientQueue.length > 0 && typeof setStartOffset === 'function' && (
+              <select
+                value={startOffset}
+                onChange={(e) => setStartOffset(Number(e.target.value))}
+                className="pls-desktop-only-action"
+                style={{
+                  height: '32px',
+                  padding: '0 6px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: startOffset > 0 ? '#c2410c' : '#475569',
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+                title={isEs ? 'Posición inicial en el pliego A4 (permite saltar huecos ya usados)' : 'Start slot on A4 sheet (skip stickers already used)'}
+              >
+                <option value={0}>{isEs ? 'Slot #1 (Nuevo)' : 'Slot #1 (Fresh)'}</option>
+                <option value={1}>Slot #2</option>
+                <option value={2}>Slot #3</option>
+                <option value={3}>Slot #4</option>
+                <option value={4}>Slot #5</option>
+                <option value={5}>Slot #6</option>
+                <option value={6}>Slot #7</option>
+                <option value={7}>Slot #8</option>
+              </select>
+            )}
+          </div>
 
           {/* Import Data (Rx & Lab Results) */}
           <button

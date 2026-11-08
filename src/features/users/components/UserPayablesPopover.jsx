@@ -20,7 +20,7 @@ export default function UserPayablesPopover({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [statementData, setStatementData] = useState(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedType, setCopiedType] = useState(null); // 'quicklink' | 'discreet'
   const popoverRef = useRef(null);
 
   // Determine token or identifier
@@ -73,20 +73,22 @@ export default function UserPayablesPopover({ user }) {
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
   const userEmail = (user?.email || user?.contactEmail || '').toLowerCase().trim();
-  const shareUrl = `${origin}/b2b/payables/${token}${userEmail ? `?email=${encodeURIComponent(userEmail)}&quicklink=verified` : ''}`;
+  const discreetUrl = `${origin}/b2b/payables/${token}`;
+  const quicklinkUrl = `${origin}/b2b/payables/${token}${userEmail ? `?email=${encodeURIComponent(userEmail)}&quicklink=verified` : ''}`;
+  const shareUrl = quicklinkUrl;
 
-  const handleCopy = (e) => {
+  const handleCopyLink = (urlToCopy, type, e) => {
     if (e) e.stopPropagation();
-    navigator.clipboard?.writeText(shareUrl);
-    setCopied(true);
-    toast.success('Payables statement link copied to clipboard');
-    setTimeout(() => setCopied(false), 2500);
+    navigator.clipboard?.writeText(urlToCopy);
+    setCopiedType(type);
+    toast.success(type === 'quicklink' ? 'Pre-authenticated QuickLink copied' : 'Discreet statement link copied');
+    setTimeout(() => setCopiedType(null), 2500);
   };
 
   const handleWhatsApp = (e) => {
     if (e) e.stopPropagation();
     const phone = (user?.phone || user?.mobile || '971506167657').replace(/[^0-9]/g, '');
-    const msg = `Hello ${user?.firstName || user?.fullName || 'Valued Partner'}, here is the official commercial settlement statement link from Atlas Health Services: ${shareUrl}`;
+    const msg = `Hello ${user?.firstName || user?.fullName || 'Valued Partner'}, here is the official commercial settlement statement link from Atlas Health Services: ${quicklinkUrl}`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -233,19 +235,24 @@ export default function UserPayablesPopover({ user }) {
                   </div>
                 </div>
 
-                {/* Share URL Box */}
-                <div style={{ marginBottom: '0.85rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
-                    Public statement link for vendor:
-                  </label>
+                {/* 1. Pre-authenticated QuickLink */}
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                    <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase' }}>
+                      ⚡ Pre-authenticated QuickLink:
+                    </label>
+                    <span style={{ fontSize: '0.65rem', color: '#16a34a', fontWeight: 600 }}>
+                      Auto-unlocked
+                    </span>
+                  </div>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     <input
                       type="text"
                       readOnly
-                      value={shareUrl}
+                      value={quicklinkUrl}
                       style={{
                         flex: 1,
-                        fontSize: '0.74rem',
+                        fontSize: '0.72rem',
                         padding: '6px 8px',
                         borderRadius: '6px',
                         border: '1px solid #cbd5e1',
@@ -256,23 +263,72 @@ export default function UserPayablesPopover({ user }) {
                     />
                     <button
                       type="button"
-                      onClick={handleCopy}
+                      onClick={(e) => handleCopyLink(quicklinkUrl, 'quicklink', e)}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '4px',
-                        fontSize: '0.74rem',
-                        fontWeight: 600,
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
                         padding: '6px 10px',
                         borderRadius: '6px',
-                        backgroundColor: copied ? '#16a34a' : '#003666',
+                        backgroundColor: copiedType === 'quicklink' ? '#16a34a' : '#003666',
                         color: '#ffffff',
                         border: 'none',
                         cursor: 'pointer'
                       }}
                     >
-                      {copied ? <Check size={13} /> : <Copy size={13} />}
-                      <span>{copied ? 'Copied' : 'Copy'}</span>
+                      {copiedType === 'quicklink' ? <Check size={12} /> : <Copy size={12} />}
+                      <span>{copiedType === 'quicklink' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Discreet Public Link (Locked Zero-Trust) */}
+                <div style={{ marginBottom: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                    <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                      🔒 Discreet Link (Zero-Trust Locked):
+                    </label>
+                    <span style={{ fontSize: '0.65rem', color: '#64748b' }}>
+                      Amounts masked
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <input
+                      type="text"
+                      readOnly
+                      value={discreetUrl}
+                      style={{
+                        flex: 1,
+                        fontSize: '0.72rem',
+                        padding: '6px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#f8fafc',
+                        color: '#64748b',
+                        outline: 'none'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => handleCopyLink(discreetUrl, 'discreet', e)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        backgroundColor: copiedType === 'discreet' ? '#16a34a' : '#f1f5f9',
+                        color: copiedType === 'discreet' ? '#ffffff' : '#334155',
+                        border: '1px solid #cbd5e1',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {copiedType === 'discreet' ? <Check size={12} /> : <Copy size={12} />}
+                      <span>{copiedType === 'discreet' ? 'Copied' : 'Copy'}</span>
                     </button>
                   </div>
                 </div>

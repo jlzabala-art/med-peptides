@@ -9,6 +9,7 @@ export default function LabelsBatchBar({
   totalBatchLabelsCount,
   onSwitchActivePatient,
   onRemoveFromQueue,
+  onUpdatePatientQueueItem = null,
   onBatchApprove,
   isBatchApproving = false,
   totalLabeledCount = 0,
@@ -89,9 +90,59 @@ export default function LabelsBatchBar({
                 </span>
               )}
               <span className="pls-batch-pill-name">{pName}</span>
-              <span className={`pls-batch-pill-badge ${labelsCount > 1 ? 'multi' : 'single'}`}>
-                {partInfo}
-              </span>
+
+              {/* Quick Part Switcher for Multi-Part Prescriptions */}
+              {labelsCount > 1 && typeof onUpdatePatientQueueItem === 'function' ? (
+                <div
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', marginLeft: '2px' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onUpdatePatientQueueItem(qIdx, { selectedPartIndex: 'all' })}
+                    style={{
+                      border: 'none',
+                      background: (pItem.selectedPartIndex === 'all' || pItem.selectedPartIndex == null) ? '#003666' : '#e2e8f0',
+                      color: (pItem.selectedPartIndex === 'all' || pItem.selectedPartIndex == null) ? '#ffffff' : '#475569',
+                      fontSize: '0.62rem',
+                      fontWeight: 700,
+                      padding: '1px 5px',
+                      borderRadius: '3px',
+                      cursor: 'pointer'
+                    }}
+                    title={isEs ? 'Imprimir todas las partes' : 'Print all parts'}
+                  >
+                    {isEs ? 'Todas' : 'All'}
+                  </button>
+                  {pItem.labels.map((_, pIdx) => {
+                    const isPartActive = pItem.selectedPartIndex === pIdx;
+                    return (
+                      <button
+                        key={`part-btn-${pIdx}`}
+                        type="button"
+                        onClick={() => onUpdatePatientQueueItem(qIdx, { selectedPartIndex: pIdx })}
+                        style={{
+                          border: 'none',
+                          background: isPartActive ? '#003666' : '#e2e8f0',
+                          color: isPartActive ? '#ffffff' : '#475569',
+                          fontSize: '0.62rem',
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: '3px',
+                          cursor: 'pointer'
+                        }}
+                        title={isEs ? `Imprimir únicamente Fase ${pIdx + 1}` : `Print only Part ${pIdx + 1}`}
+                      >
+                        {pIdx + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <span className={`pls-batch-pill-badge ${labelsCount > 1 ? 'multi' : 'single'}`}>
+                  {partInfo}
+                </span>
+              )}
 
               {/* Remove button (always enabled, even for single patient) */}
               <button

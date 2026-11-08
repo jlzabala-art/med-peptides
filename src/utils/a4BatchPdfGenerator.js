@@ -77,8 +77,10 @@ function buildGuillotineOptimizedRows(items, maxRowWidth, minGapX) {
   const rows = [];
 
   for (const tier of sortedTiers) {
-    // Within the same tier, sort to keep multi-part rxCode prescriptions together
+    // Within the same tier, sort placeholders first, then multi-part rxCode prescriptions together
     tier.items.sort((a, b) => {
+      if (a.isPlaceholder && !b.isPlaceholder) return -1;
+      if (!a.isPlaceholder && b.isPlaceholder) return 1;
       const codeA = a.rxCode || '';
       const codeB = b.rxCode || '';
       if (codeA !== codeB) return codeA.localeCompare(codeB);
@@ -114,7 +116,8 @@ export async function generateA4BatchPdf({
   items = [],
   isEs = false,
   dpi = 600,
-  onProgress = null
+  onProgress = null,
+  startOffset = 0
 }) {
   if (!items || items.length === 0) {
     throw new Error(isEs ? 'No hay etiquetas en la cola para imprimir' : 'No labels in queue to print');
@@ -138,13 +141,31 @@ export async function generateA4BatchPdf({
   const CAPTION_TOTAL_H = 4.2; // mm (for crop ticks + caption text)
   const CROP_LEN = 2.0; // mm
 
-  // Normalize item dimensions
-  const normalizedItems = items.map((item, idx) => ({
-    ...item,
-    originalIdx: idx,
-    wMm: Number(item.widthMm) || 75,
-    hMm: Number(item.heightMm) || 45
+  // If startOffset > 0, insert placeholder items to skip already peeled/used sticker slots
+  const effectiveOffset = Math.max(0, parseInt(startOffset, 10) || 0);
+  const firstItemW = Number(items[0]?.widthMm) || 75;
+  const firstItemH = Number(items[0]?.heightMm) || 45;
+
+  const placeholders = Array.from({ length: effectiveOffset }, (_, i) => ({
+    isPlaceholder: true,
+    slotNumber: i + 1,
+    patientName: '—',
+    rxCode: 'SLOT-USED',
+    originalIdx: -effectiveOffset + i,
+    wMm: firstItemW,
+    hMm: firstItemH
   }));
+
+  // Normalize item dimensions
+  const normalizedItems = [
+    ...placeholders,
+    ...items.map((item, idx) => ({
+      ...item,
+      originalIdx: idx,
+      wMm: Number(item.widthMm) || 75,
+      hMm: Number(item.heightMm) || 45
+    }))
+  ];
 
   // Build guillotine-optimized shelves (strict height homogeneity + format tiering)
   const rows = buildGuillotineOptimizedRows(normalizedItems, MAX_ROW_WIDTH, STANDARD_GAP_X);
@@ -245,16 +266,37 @@ export async function generateA4BatchPdf({
     // 2. Iterate items in the row
     for (let cIdx = 0; cIdx < row.length; cIdx++) {
       const item = row[cIdx];
-      processedCount++;
-
-      if (onProgress) {
-        onProgress({ current: processedCount, total: items.length, patient: item.patientName });
-      }
 
       // Column position strictly anchored to the tier's column grid
       const itemX = tierStartX + (cIdx * (itemW + gapX));
       const wMm = item.wMm;
       const hMm = item.hMm;
+
+      // Handle placeholder slot (skip rasterizing, draw dashed boundary to protect already used sticker)
+      if (item.isPlaceholder) {
+        pdf.setDrawColor(203, 213, 225); // slate-300
+        pdf.setLineWidth(0.2);
+        pdf.setLineDashPattern([1.5, 1.5], 0);
+        pdf.roundedRect(itemX, itemY, wMm, hMm, 1.0, 1.0, 'S');
+        pdf.setLineDashPattern([], 0); // reset to solid
+
+        pdf.setFont('helvetica', 'italic');
+        pdf.setFontSize(6.5);
+        pdf.setTextColor(148, 163, 184); // slate-400
+        pdf.text(
+          isEs ? `[ Hueco #${item.slotNumber} usado ]` : `[ Slot #${item.slotNumber} used ]`,
+          itemX + (wMm / 2),
+          itemY + (hMm / 2),
+          { align: 'center' }
+        );
+        continue;
+      }
+
+      processedCount++;
+
+      if (onProgress) {
+        onProgress({ current: processedCount, total: items.length, patient: item.patientName });
+      }
 
       // Rasterize SVG element to high-res image
       let imgData = null;
