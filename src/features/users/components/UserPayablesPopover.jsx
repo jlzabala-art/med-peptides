@@ -72,7 +72,8 @@ export default function UserPayablesPopover({ user }) {
   }, [isOpen]);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
-  const shareUrl = `${origin}/b2b/payables/${token}`;
+  const userEmail = (user?.email || user?.contactEmail || '').toLowerCase().trim();
+  const shareUrl = `${origin}/b2b/payables/${token}${userEmail ? `?email=${encodeURIComponent(userEmail)}&quicklink=verified` : ''}`;
 
   const handleCopy = (e) => {
     if (e) e.stopPropagation();

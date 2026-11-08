@@ -726,7 +726,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               e.stopPropagation();
               const token = u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id));
               const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
-              const url = `${origin}/b2b/payables/${token}`;
+              const userEmail = (u.email || u.contactEmail || '').toLowerCase().trim();
+              const url = `${origin}/b2b/payables/${token}${userEmail ? `?email=${encodeURIComponent(userEmail)}&quicklink=verified` : ''}`;
               navigator.clipboard?.writeText(url);
               toast.success('Payables statement link copied to clipboard');
             }
@@ -1011,7 +1012,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                 e.stopPropagation();
                 const token = u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id));
                 const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
-                const url = `${origin}/b2b/payables/${token}`;
+                const userEmail = (u.email || u.contactEmail || '').toLowerCase().trim();
+                const url = `${origin}/b2b/payables/${token}${userEmail ? `?email=${encodeURIComponent(userEmail)}&quicklink=verified` : ''}`;
                 navigator.clipboard?.writeText(url);
                 toast.success('Payables statement link copied to clipboard');
               }}
@@ -1021,7 +1023,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               <span>💰 Copy Bills Link</span>
             </button>
             <a
-              href={`/b2b/payables/${u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id))}`}
+              href={`/b2b/payables/${u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id))}?email=${encodeURIComponent((u.email || u.contactEmail || '').toLowerCase().trim())}&quicklink=verified`}
               target="_blank"
               rel="noopener noreferrer"
               className="gcp-btn-secondary"
