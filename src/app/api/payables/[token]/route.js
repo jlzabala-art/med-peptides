@@ -76,8 +76,8 @@ export async function GET(request, { params }) {
       totalPendingAmount: Math.round(totalPending * 100) / 100,
       currency: shareDoc.currency || 'AED',
       openBillsCount: openBills.length,
-      nextDueDate: nextDueDate || 'Al día',
-      paymentTerms: shareDoc.paymentTerms || 'Net 10 tras cobro de cliente',
+      nextDueDate: nextDueDate || 'Current',
+      paymentTerms: shareDoc.paymentTerms || 'Net 10 after customer payment',
       syncStatus: 'Zoho Books Synced ✓',
       lastUpdated: new Date().toISOString()
     };

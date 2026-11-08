@@ -728,7 +728,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
               const url = `${origin}/b2b/payables/${token}`;
               navigator.clipboard?.writeText(url);
-              toast.success('Enlace de facturas pendientes copiado');
+              toast.success('Payables statement link copied to clipboard');
             }
           });
         }
@@ -1013,12 +1013,12 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                 const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
                 const url = `${origin}/b2b/payables/${token}`;
                 navigator.clipboard?.writeText(url);
-                toast.success('Enlace de facturas pendientes copiado');
+                toast.success('Payables statement link copied to clipboard');
               }}
-              title="Copiar enlace público del extracto de facturas para compartir con el mayorista"
+              title="Copy public payables statement link to share with vendor"
             >
               <FileText size={13} color="#ea580c" />
-              <span>💰 Copiar Enlace Bills</span>
+              <span>💰 Copy Bills Link</span>
             </button>
             <a
               href={`/b2b/payables/${u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id))}`}
@@ -1026,10 +1026,10 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               rel="noopener noreferrer"
               className="gcp-btn-secondary"
               style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412', textDecoration: 'none' }}
-              title="Abrir extracto de cuentas por pagar en vivo"
+              title="Open live vendor payables statement"
             >
               <ExternalLink size={13} />
-              <span>↗️ Ver Estado de Facturas</span>
+              <span>↗️ View Payables Statement</span>
             </a>
             <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412' }} onClick={() => setDetailsUser(u)}>
               <DollarSign size={13} />

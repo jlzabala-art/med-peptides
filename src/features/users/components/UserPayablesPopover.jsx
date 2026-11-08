@@ -78,15 +78,15 @@ export default function UserPayablesPopover({ user }) {
     if (e) e.stopPropagation();
     navigator.clipboard?.writeText(shareUrl);
     setCopied(true);
-    toast.success('Enlace de facturas pendientes copiado');
+    toast.success('Payables statement link copied to clipboard');
     setTimeout(() => setCopied(false), 2500);
   };
 
   const handleWhatsApp = (e) => {
     if (e) e.stopPropagation();
     const phone = (user?.phone || user?.mobile || '971506167657').replace(/[^0-9]/g, '');
-    const amount = statementData?.kpis?.totalPendingAmount != null ? `${statementData.kpis.totalPendingAmount.toLocaleString()} ${statementData.kpis.currency || 'AED'}` : 'saldo pendiente';
-    const msg = `Hola ${user?.firstName || user?.fullName || 'Estimado partner'}, aquí tienes el extracto oficial actualizado de facturas y pagos pendientes de liquidación (${amount}): ${shareUrl}`;
+    const amount = statementData?.kpis?.totalPendingAmount != null ? `${statementData.kpis.totalPendingAmount.toLocaleString()} ${statementData.kpis.currency || 'AED'}` : 'pending balance';
+    const msg = `Hello ${user?.firstName || user?.fullName || 'Valued Partner'}, here is your official updated payables statement for pending invoices (${amount}): ${shareUrl}`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -102,7 +102,7 @@ export default function UserPayablesPopover({ user }) {
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        title="Ver y compartir extracto de facturas pendientes con el proveedor"
+        title="View and share outstanding bills and payables statement with vendor"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -128,7 +128,7 @@ export default function UserPayablesPopover({ user }) {
         }}
       >
         <FileText size={12} color="#ea580c" />
-        <span>Bills Pendientes</span>
+        <span>Pending Bills</span>
         {openCount != null && (
           <span style={{
             backgroundColor: '#ea580c',
@@ -175,10 +175,10 @@ export default function UserPayablesPopover({ user }) {
               <Building2 size={15} color="#38bdf8" />
               <div>
                 <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>
-                  Extracto de Facturas Pendientes
+                  Payables & Bills Statement
                 </div>
                 <div style={{ fontSize: '0.68rem', color: '#93c5fd' }}>
-                  {user?.companyName || user?.fullName || 'Proveedor B2B'} · Zoho Books Sync
+                  {user?.companyName || user?.fullName || 'B2B Vendor'} · Zoho Books Sync
                 </div>
               </div>
             </div>
@@ -203,7 +203,7 @@ export default function UserPayablesPopover({ user }) {
             {isLoading ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', gap: '8px', color: '#64748b', fontSize: '0.82rem' }}>
                 <RefreshCw size={16} className="animate-spin" color="#003666" />
-                <span>Consultando facturas en Zoho Books...</span>
+                <span>Querying bills in Zoho Books...</span>
               </div>
             ) : (
               <>
@@ -217,10 +217,10 @@ export default function UserPayablesPopover({ user }) {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                     <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#c2410c' }}>
-                      Saldo Pendiente de Pago
+                      Outstanding Balance Due
                     </span>
                     <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#16a34a', backgroundColor: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
-                      Al día
+                      Current
                     </span>
                   </div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#9a3412', letterSpacing: '-0.02em' }}>
@@ -229,14 +229,14 @@ export default function UserPayablesPopover({ user }) {
                   </div>
                   <div style={{ fontSize: '0.72rem', color: '#7c2d12', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Clock size={11} />
-                    <span>{openCount ?? 3} facturas pendientes · Net 10 tras cobro</span>
+                    <span>{openCount ?? 3} open bills · Net 10 after customer payment</span>
                   </div>
                 </div>
 
                 {/* Share URL Box */}
                 <div style={{ marginBottom: '0.85rem' }}>
                   <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
-                    Enlace público para el proveedor:
+                    Public statement link for vendor:
                   </label>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     <input
@@ -272,7 +272,7 @@ export default function UserPayablesPopover({ user }) {
                       }}
                     >
                       {copied ? <Check size={13} /> : <Copy size={13} />}
-                      <span>{copied ? 'Copiado' : 'Copiar'}</span>
+                      <span>{copied ? 'Copied' : 'Copy'}</span>
                     </button>
                   </div>
                 </div>
@@ -299,7 +299,7 @@ export default function UserPayablesPopover({ user }) {
                     }}
                   >
                     <ExternalLink size={13} />
-                    <span>Abrir Portal ↗</span>
+                    <span>Open Portal ↗</span>
                   </a>
 
                   <button
@@ -332,4 +332,3 @@ export default function UserPayablesPopover({ user }) {
     </div>
   );
 }
-
