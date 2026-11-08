@@ -332,8 +332,32 @@ export default function PublicLabelsAppClient({
         }
       })
       .catch((err) => console.warn('Could not load labels KPIs:', err));
+
+    // Listen for live print events (e.g. from PharmacyLabelsModal)
+    const handleLabelPrinted = (e) => {
+      const code = e.detail?.code;
+      const count = e.detail?.count;
+      const updatedMap = e.detail?.printCountsByCode;
+      setPrintCountsMap((prev) => {
+        const next = { ...prev };
+        if (updatedMap) Object.assign(next, updatedMap);
+        if (code) {
+          const upper = String(code).toUpperCase();
+          next[upper] = count || (next[upper] || 0) + 1;
+        }
+        return next;
+      });
+      setLabelsKpis((prev) => ({
+        ...prev,
+        totalPrintedA4Count: (prev.totalPrintedA4Count || 0) + 1
+      }));
+    };
+
+    window.addEventListener('rx:label-printed', handleLabelPrinted);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('rx:label-printed', handleLabelPrinted);
     };
   }, []);
 
@@ -1428,7 +1452,21 @@ export default function PublicLabelsAppClient({
                                   📅 {dateStr}
                                 </span>
                               )}
-                              {printCount > 0 ? (
+                              {printCount === 0 ? (
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 600,
+                                    color: '#64748b',
+                                    background: '#f1f5f9',
+                                    border: '1px solid #e2e8f0',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px'
+                                  }}
+                                >
+                                  ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
+                                </span>
+                              ) : printCount === 1 ? (
                                 <span
                                   style={{
                                     fontSize: '0.68rem',
@@ -1442,23 +1480,28 @@ export default function PublicLabelsAppClient({
                                     alignItems: 'center',
                                     gap: '3px'
                                   }}
-                                  title={isEs ? `Se ha generado etiqueta A4 ${printCount} vez/veces` : `A4 label generated ${printCount} time(s)`}
+                                  title={isEs ? 'Etiqueta original emitida (1 vez)' : 'Original label issued (1 time)'}
                                 >
-                                  🖨️ A4 ({printCount}×)
+                                  🖨️ {isEs ? 'Impresa (1×)' : 'Printed (1×)'}
                                 </span>
                               ) : (
                                 <span
                                   style={{
                                     fontSize: '0.68rem',
-                                    fontWeight: 600,
-                                    color: '#64748b',
-                                    background: '#f1f5f9',
-                                    border: '1px solid #e2e8f0',
-                                    padding: '1px 6px',
-                                    borderRadius: '4px'
+                                    fontWeight: 800,
+                                    color: '#9a3412',
+                                    background: '#fff7ed',
+                                    border: '1px solid #fed7aa',
+                                    padding: '1px 7px',
+                                    borderRadius: '4px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    boxShadow: '0 1px 2px rgba(234, 88, 12, 0.08)'
                                   }}
+                                  title={isEs ? `Aviso: Esta etiqueta ya se ha impreso ${printCount} veces (Reimpresión)` : `Pharmacy Alert: This label has already been printed ${printCount} times (Reprint #${printCount})`}
                                 >
-                                  ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
+                                  🔁 {isEs ? `Reimpresión #${printCount}` : `Reprint #${printCount}`}
                                 </span>
                               )}
                             </div>
@@ -1521,7 +1564,21 @@ export default function PublicLabelsAppClient({
                                   📅 {dateStr}
                                 </span>
                               )}
-                              {printCount > 0 ? (
+                              {printCount === 0 ? (
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 600,
+                                    color: '#64748b',
+                                    background: '#f1f5f9',
+                                    border: '1px solid #e2e8f0',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px'
+                                  }}
+                                >
+                                  ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
+                                </span>
+                              ) : printCount === 1 ? (
                                 <span
                                   style={{
                                     fontSize: '0.68rem',
@@ -1535,23 +1592,28 @@ export default function PublicLabelsAppClient({
                                     alignItems: 'center',
                                     gap: '3px'
                                   }}
-                                  title={isEs ? `Se ha generado etiqueta A4 ${printCount} vez/veces` : `A4 label generated ${printCount} time(s)`}
+                                  title={isEs ? 'Etiqueta original emitida (1 vez)' : 'Original label issued (1 time)'}
                                 >
-                                  🖨️ A4 ({printCount}×)
+                                  🖨️ {isEs ? 'Impresa (1×)' : 'Printed (1×)'}
                                 </span>
                               ) : (
                                 <span
                                   style={{
                                     fontSize: '0.68rem',
-                                    fontWeight: 600,
-                                    color: '#64748b',
-                                    background: '#f1f5f9',
-                                    border: '1px solid #e2e8f0',
-                                    padding: '1px 6px',
-                                    borderRadius: '4px'
+                                    fontWeight: 800,
+                                    color: '#9a3412',
+                                    background: '#fff7ed',
+                                    border: '1px solid #fed7aa',
+                                    padding: '1px 7px',
+                                    borderRadius: '4px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    boxShadow: '0 1px 2px rgba(234, 88, 12, 0.08)'
                                   }}
+                                  title={isEs ? `Aviso: Esta etiqueta ya se ha impreso ${printCount} veces (Reimpresión)` : `Pharmacy Alert: This label has already been printed ${printCount} times (Reprint #${printCount})`}
                                 >
-                                  ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
+                                  🔁 {isEs ? `Reimpresión #${printCount}` : `Reprint #${printCount}`}
                                 </span>
                               )}
                             </div>

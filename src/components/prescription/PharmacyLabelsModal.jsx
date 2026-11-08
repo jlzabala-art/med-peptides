@@ -152,6 +152,44 @@ export default function PharmacyLabelsModal({
     return sourceRx?.fulfillmentMode || (sourceRx?.supplierFulfillment ? 'external_supplier' : 'internal');
   });
 
+  // Track print count and reprint index in real-time
+  const [modalPrintCount, setModalPrintCount] = useState(() => {
+    return parseInt(sourceRx?.a4PrintCount || sourceRx?.printCount || labels?.[0]?.a4PrintCount || 0, 10);
+  });
+
+  // Sync print count if sourceRx updates
+  React.useEffect(() => {
+    const nextCnt = parseInt(sourceRx?.a4PrintCount || sourceRx?.printCount || labels?.[0]?.a4PrintCount || 0, 10);
+    if (nextCnt > 0) setModalPrintCount(nextCnt);
+  }, [sourceRx, labels]);
+
+  const recordLabelPrintEvent = async () => {
+    try {
+      const code = String(currentItem.fileNumber || currentItem.rxCode || sourceRx?.prescriptionNumber || sourceRx?.code || '').trim();
+      const docId = sourceRx?.id || currentItem?.id;
+      const codesToUpdate = [code, docId].filter(Boolean);
+      if (codesToUpdate.length === 0) return;
+
+      const res = await fetch('/api/labels/kpis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codes: codesToUpdate })
+      });
+      const data = await res.json();
+      if (data?.success) {
+        const next = modalPrintCount + 1;
+        setModalPrintCount(next);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('rx:label-printed', {
+            detail: { code, count: next, printCountsByCode: data.printCountsByCode }
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('Could not record label print event:', err);
+    }
+  };
+
   // Live Online Editing & Markdown Support
   const [isEditing, setIsEditing] = useState(Boolean(initialEditMode));
   const [editorTab, setEditorTab] = useState('fields'); // 'fields' | 'markdown'
@@ -437,6 +475,7 @@ export default function PharmacyLabelsModal({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    recordLabelPrintEvent();
   };
 
   const handleCopyZpl = () => {
@@ -698,6 +737,7 @@ export default function PharmacyLabelsModal({
         const nameSegments = [supplierClean, patientClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean, `${dpi}DPI`].filter(Boolean);
         downloadLink.download = `${nameSegments.join('_')}.png`;
         downloadLink.click();
+        recordLabelPrintEvent();
         setTimeout(() => URL.revokeObjectURL(pngObjectUrl), 2000);
         setIsGeneratingPng(false);
       };
@@ -828,6 +868,7 @@ export default function PharmacyLabelsModal({
       });
 
       pdf.save(`${nameSegments.join('_')}.pdf`);
+      recordLabelPrintEvent();
     } catch (innerErr) {
       console.error('Error generating PDF with jsPDF:', innerErr);
     } finally {
@@ -2075,6 +2116,60 @@ export default function PharmacyLabelsModal({
                     )}
 
                     <StatusBadge status={currentItem.approvalStatus || 'draft'} />
+
+                    {/* Print Status & Reprint Index Badge */}
+                    {modalPrintCount === 0 ? (
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          color: '#64748b',
+                          background: '#f1f5f9',
+                          border: '1px solid #e2e8f0',
+                          padding: '2px 7px',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
+                      </span>
+                    ) : modalPrintCount === 1 ? (
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          color: '#137333',
+                          background: '#e6f4ea',
+                          border: '1px solid #ceead6',
+                          padding: '2px 7px',
+                          borderRadius: '4px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}
+                        title={isEs ? 'Etiqueta original emitida (1 vez)' : 'Original label issued (1 time)'}
+                      >
+                        🖨️ {isEs ? 'Impresa (1×)' : 'Printed (1×)'}
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 800,
+                          color: '#9a3412',
+                          background: '#fff7ed',
+                          border: '1px solid #fed7aa',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          boxShadow: '0 1px 2px rgba(234, 88, 12, 0.08)'
+                        }}
+                        title={isEs ? `Aviso de Farmacia: Esta etiqueta ya se ha impreso ${modalPrintCount} veces (Reimpresión)` : `Pharmacy Alert: This label has already been printed ${modalPrintCount} times (Reprint #${modalPrintCount})`}
+                      >
+                        🔁 {isEs ? `Reimpresión #${modalPrintCount}` : `Reprint #${modalPrintCount}`}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2562,6 +2657,60 @@ export default function PharmacyLabelsModal({
 
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
                     <StatusBadge status={currentItem.approvalStatus || 'draft'} />
+
+                    {/* Print Status & Reprint Index Badge */}
+                    {modalPrintCount === 0 ? (
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          color: '#64748b',
+                          background: '#f1f5f9',
+                          border: '1px solid #e2e8f0',
+                          padding: '2px 7px',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
+                      </span>
+                    ) : modalPrintCount === 1 ? (
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          color: '#137333',
+                          background: '#e6f4ea',
+                          border: '1px solid #ceead6',
+                          padding: '2px 7px',
+                          borderRadius: '4px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}
+                        title={isEs ? 'Etiqueta original emitida (1 vez)' : 'Original label issued (1 time)'}
+                      >
+                        🖨️ {isEs ? 'Impresa (1×)' : 'Printed (1×)'}
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 800,
+                          color: '#9a3412',
+                          background: '#fff7ed',
+                          border: '1px solid #fed7aa',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          boxShadow: '0 1px 2px rgba(234, 88, 12, 0.08)'
+                        }}
+                        title={isEs ? `Aviso de Farmacia: Esta etiqueta ya se ha impreso ${modalPrintCount} veces (Reimpresión)` : `Pharmacy Alert: This label has already been printed ${modalPrintCount} times (Reprint #${modalPrintCount})`}
+                      >
+                        🔁 {isEs ? `Reimpresión #${modalPrintCount}` : `Reprint #${modalPrintCount}`}
+                      </span>
+                    )}
                     <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700 }}>
                       v{currentItem.version || 1}
                     </span>
