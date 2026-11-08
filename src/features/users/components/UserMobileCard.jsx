@@ -10,6 +10,7 @@ import StatusBadge from '../../../components/ui/StatusBadge';
 import CopyableId from '../../../components/ui/CopyableId';
 import RoleBadge from '../../../components/ui/RoleBadge';
 import UserSharedCatalogsPopover from './UserSharedCatalogsPopover';
+import UserPayablesPopover from './UserPayablesPopover';
 
 /**
  * UserMobileCard - Google Cloud Console standard mobile resource card
@@ -395,6 +396,9 @@ export default function UserMobileCard({
                 });
               }}
             />
+
+            {/* Payables & B2B Statement Action for Wholesalers/Suppliers */}
+            <UserPayablesPopover user={u} />
 
             {/* AI Outreach Action (visible if active or compact) */}
             {u.approved && (

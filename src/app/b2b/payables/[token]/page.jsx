@@ -375,7 +375,7 @@ export default function PayablesStatementPage() {
             <form onSubmit={handleUnlockSubmit} style={{ display: 'inline-flex', gap: '8px', maxWidth: '440px', width: '100%', flexWrap: 'wrap', justifyContent: 'center' }}>
               <input
                 type="email"
-                placeholder={lang === 'es' ? 'Introduce tu email registrado (ej. jia9156@...)' : 'Enter registered email (e.g. jia9156@...)'}
+                placeholder={lang === 'es' ? 'Introduce tu email corporativo (ej. finance@partner-firm.com)' : 'Enter registered business email (e.g. finance@partner-firm.com)'}
                 value={unlockEmail}
                 onChange={(e) => setUnlockEmail(e.target.value)}
                 style={{

@@ -690,6 +690,7 @@ const CLINICAL_PRESETS = [
  */
 function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi, onFilterByPeptide }) {
   const [isClinicalExpanded, setIsClinicalExpanded] = useState(false);
+  const [clinicalTab, setClinicalTab] = useState('dosing'); // 'dosing' | 'indications' | 'stack'
   const isEs = lang === 'es';
   const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
   const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
@@ -1045,28 +1046,32 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
         {isClinicalExpanded && (
           <div style={{
             background: '#ffffff',
-            border: '1px solid #cbd5e1',
+            border: '1px solid #dadce0',
             borderTop: 'none',
-            borderLeft: '3px solid #1a73e8',
             borderRadius: '0 0 6px 6px',
-            padding: '10px 12px',
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
-            fontSize: '0.74rem',
-            lineHeight: 1.48,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+            boxShadow: '0 2px 6px rgba(60,64,67,0.08)',
             animation: 'fadeIn 0.15s ease'
           }}>
             {/* GCP Cloud Details Meta Chips Ribbon */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexWrap: 'wrap',
+              padding: '8px 12px',
+              background: '#f8f9fa',
+              borderBottom: '1px solid #eceff1'
+            }}>
               <span style={{
                 fontSize: '0.66rem',
                 fontWeight: 700,
                 color: '#1a73e8',
                 background: '#e8f0fe',
                 border: '1px solid #c2e7ff',
-                padding: '2px 6px',
+                padding: '2px 7px',
                 borderRadius: '4px',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -1077,10 +1082,11 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               </span>
               <span style={{
                 fontSize: '0.66rem',
-                fontWeight: 650,
+                fontWeight: 600,
                 color: '#475569',
-                background: '#f1f5f9',
-                padding: '2px 6px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                padding: '2px 7px',
                 borderRadius: '4px',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -1092,10 +1098,11 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               {clinical.casNumber && (
                 <span style={{
                   fontSize: '0.66rem',
-                  fontWeight: 650,
+                  fontWeight: 600,
                   color: '#475569',
-                  background: '#f1f5f9',
-                  padding: '2px 6px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  padding: '2px 7px',
                   borderRadius: '4px',
                   fontFamily: 'monospace'
                 }}>
@@ -1104,145 +1111,185 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               )}
             </div>
 
-            {/* Indication Block */}
-            <div>
-              <div style={{
-                fontSize: '0.64rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                color: '#64748b',
-                marginBottom: '2px'
-              }}>
-                {isEs ? 'Indicación Clínica Primaria' : 'Primary Clinical Indication'}
-              </div>
-              <p style={{ margin: 0, color: '#1e293b', fontSize: '0.76rem', lineHeight: 1.48 }}>
-                {clinical.indication}
-              </p>
-            </div>
-
-            {/* MoA Block */}
-            <div>
-              <div style={{
-                fontSize: '0.64rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                color: '#64748b',
-                marginBottom: '2px'
-              }}>
-                {isEs ? 'Mecanismo de Acción (MoA)' : 'Mechanism of Action (MoA)'}
-              </div>
-              <p style={{ margin: 0, color: '#475569', fontSize: '0.73rem', lineHeight: 1.45 }}>
-                {clinical.moa}
-              </p>
-            </div>
-
-            {/* Reconstitution & Syringe Box (GCP Spec Box) */}
+            {/* Segmented Tabs (Google Cloud UX Tab Bar) */}
             <div style={{
-              background: '#f0f7ff',
-              border: '1px solid #c2e7ff',
-              borderRadius: '6px',
-              padding: '8px 10px',
               display: 'flex',
-              flexDirection: 'column',
-              gap: '4px'
+              alignItems: 'center',
+              borderBottom: '1px solid #dadce0',
+              background: '#ffffff',
+              padding: '0 4px'
             }}>
-              <div style={{
-                fontSize: '0.65rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                color: '#0284c7',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <Droplets size={11} color="#0284c7" />
-                <span>{isEs ? 'Reconstitución & Regla de Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
-              </div>
-              <div style={{ fontSize: '0.74rem', color: '#0f172a', fontWeight: 700 }}>
-                {clinical.recon}
-              </div>
-              <div style={{ fontSize: '0.71rem', color: '#0369a1', fontFamily: 'monospace', fontWeight: 650 }}>
-                {clinical.syringeCalc}
-              </div>
-              <div style={{ fontSize: '0.70rem', color: '#334155', marginTop: '1px' }}>
-                <strong style={{ color: '#0f172a' }}>{isEs ? 'Pauta estándar:' : 'Standard posology:'}</strong> {clinical.dose}
-              </div>
-              {clinical.vialYield && (
-                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                  <span style={{ fontWeight: 700 }}>⏱️ {isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
-                  <span>{clinical.vialYield}</span>
-                </div>
-              )}
-              {clinical.stability && (
-                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ fontWeight: 700 }}>❄️ {isEs ? 'Estabilidad:' : 'Storage:'}</span>
-                  <span>{clinical.stability}</span>
-                </div>
-              )}
-              {clinical.hardware && (
-                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ fontWeight: 700 }}>💉 {isEs ? 'Insumos:' : 'Hardware:'}</span>
-                  <span>{clinical.hardware}</span>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => setClinicalTab('dosing')}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: clinicalTab === 'dosing' ? '2px solid #1a73e8' : '2px solid transparent',
+                  color: clinicalTab === 'dosing' ? '#1a73e8' : '#5f6368',
+                  fontWeight: clinicalTab === 'dosing' ? 700 : 500,
+                  fontSize: '0.71rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Droplets size={12} color={clinicalTab === 'dosing' ? '#1a73e8' : '#5f6368'} />
+                <span>{isEs ? 'Posología' : 'Posology & Prep'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setClinicalTab('indications')}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: clinicalTab === 'indications' ? '2px solid #1a73e8' : '2px solid transparent',
+                  color: clinicalTab === 'indications' ? '#1a73e8' : '#5f6368',
+                  fontWeight: clinicalTab === 'indications' ? 700 : 500,
+                  fontSize: '0.71rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Sparkles size={12} color={clinicalTab === 'indications' ? '#1a73e8' : '#5f6368'} />
+                <span>{isEs ? 'Indicación & MoA' : 'Indication & MoA'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setClinicalTab('stack')}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: clinicalTab === 'stack' ? '2px solid #1a73e8' : '2px solid transparent',
+                  color: clinicalTab === 'stack' ? '#1a73e8' : '#5f6368',
+                  fontWeight: clinicalTab === 'stack' ? 700 : 500,
+                  fontSize: '0.71rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Layers size={12} color={clinicalTab === 'stack' ? '#1a73e8' : '#5f6368'} />
+                <span>{isEs ? 'Stack Clínico' : 'Synergy Stack'}</span>
+              </button>
             </div>
 
-            {/* Clinical Synergy / Stack Callout (High-Conversion B2B) */}
-            <div style={{
-              background: '#faf5ff',
-              border: '1px solid #e9d5ff',
-              borderRadius: '6px',
-              padding: '7px 9px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2px'
-            }}>
-              <div style={{
-                fontSize: '0.64rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                color: '#7c3aed',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <Layers size={11} color="#7c3aed" />
-                <span>{isEs ? 'Sinergia Clínica Recomendada (Stack)' : 'Recommended Clinical Stack'}</span>
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#581c87', lineHeight: 1.42 }}>
-                {clinical.stack}
-              </div>
-              {clinical.crossSellName && onFilterByPeptide && (
-                <div style={{ marginTop: '5px' }}>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onFilterByPeptide(clinical.crossSellName);
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      background: '#f3e8ff',
-                      border: '1px solid #d8b4fe',
-                      color: '#6b21a8',
-                      borderRadius: '4px',
-                      padding: '3px 8px',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
-                  </button>
+            {/* Tab 1: Posology & Prep (Key-Value Grid) */}
+            {clinicalTab === 'dosing' && (
+              <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '115px 1fr', gap: '5px 8px', fontSize: '0.73rem', alignItems: 'baseline' }}>
+                  <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Reconstitución:' : 'Reconstitution:'}</span>
+                  <span style={{ color: '#202124', fontWeight: 700 }}>{clinical.recon}</span>
+
+                  <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Cálculo Jeringa:' : 'Syringe Math:'}</span>
+                  <span style={{ color: '#1a73e8', fontWeight: 700, fontFamily: 'monospace' }}>{clinical.syringeCalc}</span>
+
+                  <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Pauta Estándar:' : 'Standard Posology:'}</span>
+                  <span style={{ color: '#202124', fontWeight: 600 }}>{clinical.dose}</span>
+
+                  {clinical.vialYield && (
+                    <>
+                      <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
+                      <span style={{ color: '#202124' }}>{clinical.vialYield}</span>
+                    </>
+                  )}
+
+                  {clinical.stability && (
+                    <>
+                      <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Almacenamiento:' : 'Storage:'}</span>
+                      <span style={{ color: '#202124' }}>{clinical.stability}</span>
+                    </>
+                  )}
+
+                  {clinical.hardware && (
+                    <>
+                      <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Insumos / Aguja:' : 'Hardware:'}</span>
+                      <span style={{ color: '#202124' }}>{clinical.hardware}</span>
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* Tab 2: Indication & MoA */}
+            {clinicalTab === 'indications' && (
+              <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                  <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368', marginBottom: '2px' }}>
+                    {isEs ? 'Indicación Clínica Primaria' : 'Primary Clinical Indication'}
+                  </div>
+                  <p style={{ margin: 0, color: '#202124', fontSize: '0.75rem', lineHeight: 1.48 }}>
+                    {clinical.indication}
+                  </p>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368', marginBottom: '2px' }}>
+                    {isEs ? 'Mecanismo de Acción (MoA)' : 'Mechanism of Action (MoA)'}
+                  </div>
+                  <p style={{ margin: 0, color: '#3c4043', fontSize: '0.73rem', lineHeight: 1.45 }}>
+                    {clinical.moa}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Tab 3: Synergy Stack */}
+            {clinicalTab === 'stack' && (
+              <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                  <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368', marginBottom: '3px' }}>
+                    {isEs ? 'Protocolo Sinergia Recomendado' : 'Recommended Synergy Protocol'}
+                  </div>
+                  <p style={{ margin: 0, color: '#202124', fontSize: '0.74rem', lineHeight: 1.45 }}>
+                    {clinical.stack}
+                  </p>
+                </div>
+                {clinical.crossSellName && onFilterByPeptide && (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFilterByPeptide(clinical.crossSellName);
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        background: '#e8f0fe',
+                        border: '1px solid #c2e7ff',
+                        color: '#1a73e8',
+                        borderRadius: '4px',
+                        padding: '4px 10px',
+                        fontSize: '0.70rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Action Bar (GCP 32px Buttons) */}
             <div style={{
@@ -1480,6 +1527,8 @@ export default function PeptidesPriceListClient({
   const [groupByCategory, setGroupByCategory] = useState(true); // Organized by therapeutic categories by default
   const [cartItems, setCartItems] = useState({}); // { [productId]: { quantity1x: 0, quantity10x: 0, product } }
   const [submittingOrder, setSubmittingOrder] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [submittedOrderData, setSubmittedOrderData] = useState(null);
   const [orderForm, setOrderForm] = useState({
     name: '',
     clinicName: '',
@@ -1495,6 +1544,48 @@ export default function PeptidesPriceListClient({
     notes: '',
     company_fax: '' // Anti-spam Honeypot (hidden from real users)
   });
+
+  // Google Cloud UX Comprehensive Field Validator
+  const validateOrderForm = useCallback(() => {
+    const errors = {};
+    if (!orderForm.name || orderForm.name.trim().length < 2) {
+      errors.name = 'Contact name is required.';
+    }
+    if (!orderForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(orderForm.email.trim())) {
+      errors.email = 'Valid work email required (e.g. doctor@clinic.com).';
+    }
+    const phoneDigits = (orderForm.phone || '').replace(/\D/g, '');
+    if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+      errors.phone = 'Valid international phone with country code required.';
+    }
+    if (!orderForm.country || !orderForm.country.trim()) {
+      errors.country = 'Destination country is required.';
+    }
+    if (!orderForm.addressLine1 || orderForm.addressLine1.trim().length < 4) {
+      errors.addressLine1 = 'Street address line 1 is required.';
+    }
+    if (!orderForm.city || orderForm.city.trim().length < 2) {
+      errors.city = 'City is required.';
+    }
+    if (!orderForm.postalCode || orderForm.postalCode.trim().length < 2) {
+      errors.postalCode = 'Postal / ZIP code is required.';
+    }
+
+    setFormErrors(errors);
+
+    const errorKeys = Object.keys(errors);
+    if (errorKeys.length > 0) {
+      const firstKey = errorKeys[0];
+      const el = document.getElementById(`order-field-${firstKey}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        try { el.focus(); } catch (_e) {}
+      }
+      toast.error('Please complete all required fields (marked with *).');
+      return false;
+    }
+    return true;
+  }, [orderForm]);
 
   // ── Cart & Contact Draft Persistence (Anti-abandonment) ──
   const storageKey = `atlas_peptides_b2b_cart_${referralCode || 'CAT-RX-7482'}`;
@@ -1806,10 +1897,15 @@ export default function PeptidesPriceListClient({
     }
   }, [processedProducts]);
 
-  // Direct Order via WhatsApp Helper (Mejora #4)
+  // Direct Order via WhatsApp Helper (Mejora #4 with Strict Google Cloud Validation)
   const handleOrderViaWhatsApp = useCallback(() => {
     if (Object.keys(cartItems).length === 0) {
       toast.error('Please add formulations before ordering via WhatsApp');
+      return;
+    }
+
+    // Strict validation: cannot proceed without required contact & shipping fields
+    if (!validateOrderForm()) {
       return;
     }
 
@@ -1837,7 +1933,7 @@ Grand Total: ${totalStr}${clinicStr}${emailStr}${destinationStr}
 Please coordinate 24-hour proforma confirmation and secure payment link. Thank you!`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
-  }, [cartItems, currencySymbol, fxRate, formatPrice, grandTotalCartValueUsd, currency, orderForm, referralCode, totalCartValueUsd, shippingCostCurrentCurrency, activeShippingCorridor]);
+  }, [cartItems, currencySymbol, fxRate, formatPrice, grandTotalCartValueUsd, currency, orderForm, referralCode, totalCartValueUsd, shippingCostCurrentCurrency, activeShippingCorridor, validateOrderForm]);
 
   const handleShareSchedule = async () => {
     if (typeof window === 'undefined') return;
@@ -1886,30 +1982,17 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     }
   };
 
-  // Submit B2B Order Request
+  // Submit B2B Order Request (with 24-Hour SLA Commitment)
   const handleSubmitOrder = async (e) => {
-    e.preventDefault();
-    if (!orderForm.name || !orderForm.email || !orderForm.phone) {
-      toast.error('Please enter your name, email and phone number');
-      return;
-    }
-    // Professional email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(orderForm.email.trim())) {
-      toast.error('Please enter a valid professional email address.');
-      return;
-    }
-    // International phone digits validation
-    const digits = (orderForm.phone || '').replace(/\D/g, '');
-    if (digits.length < 7 || digits.length > 15) {
-      toast.error('Please enter a valid international phone number with country code (e.g. +34 600 000 000).');
-      return;
-    }
-    if (!orderForm.addressLine1 || !orderForm.city || !orderForm.postalCode) {
-      toast.error('Please provide full shipping address (Street, City, Postal Code)');
-      return;
-    }
+    if (e && e.preventDefault) e.preventDefault();
+
     if (Object.keys(cartItems).length === 0) {
       toast.error('Your order request is empty. Please select products first.');
+      return;
+    }
+
+    // Google Cloud UX validation gate: blocks submission and highlights/scrolls to missing fields
+    if (!validateOrderForm()) {
       return;
     }
 
@@ -1987,14 +2070,27 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         throw new Error(errJson.error || 'Could not submit order proforma');
       }
 
-      toast.success('Proforma request submitted successfully! Confirmation sent to your email.');
+      const resData = await res.json().catch(() => ({}));
+      const assignedRef = resData.orderNumber || resData.id || `PO-${referralCode || 'DISTRIBUTOR-15'}-${Date.now().toString().slice(-4)}`;
+
+      setSubmittedOrderData({
+        referenceId: assignedRef,
+        customerName: orderForm.name,
+        customerEmail: orderForm.email,
+        customerPhone: orderForm.phone,
+        itemsCount: totalUnits,
+        grandTotal: finalGrandTotalUsd,
+        currency: 'USD',
+        shippingDestination: fullAddress
+      });
+
+      toast.success('Proforma request submitted! Our medical logistics team will contact you within 24 hours.');
       setCartItems({});
       try {
         localStorage.removeItem(storageKey);
       } catch (storageErr) {
         console.warn('Could not clear storage cart:', storageErr);
       }
-      setIsOrderDrawerOpen(false);
     } catch (err) {
       console.error('Order submission error:', err);
       toast.error(err.message || 'Unable to send order. Please try again or contact support.');
@@ -3446,10 +3542,11 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             }
             .peptides-b2b-portal .peptides-nav-left {
               width: auto !important;
-              flex: 1 1 auto !important;
+              flex: 0 1 auto !important;
               min-width: 0 !important;
               display: flex !important;
               align-items: center !important;
+              justify-content: flex-start !important;
               gap: 8px !important;
             }
             .peptides-b2b-portal .nav-brand span {

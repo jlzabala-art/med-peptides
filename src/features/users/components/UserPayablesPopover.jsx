@@ -27,13 +27,9 @@ export default function UserPayablesPopover({ user }) {
   const token = user?.payablesToken || (user?.email === 'jia9156@gmail.com' || (user?.companyName || '').includes('Health Source') ? 'HSC-PAY-ZN1TU5Q6' : (user?.payablesSlug || user?.id));
   const isWholesalerOrSupplier = user?.role === 'wholesaler' || user?.role === 'supplier' || user?.roles?.includes('wholesaler') || user?.roles?.includes('supplier') || user?.zohoBooksVendorNumber || user?.payablesToken;
 
-  if (!isWholesalerOrSupplier) {
-    return null;
-  }
-
   // Fetch payables summary lazily on popover open
   useEffect(() => {
-    if (!isOpen || !token) return;
+    if (!isOpen || !token || !isWholesalerOrSupplier) return;
 
     let isMounted = true;
     setIsLoading(true);
@@ -56,7 +52,7 @@ export default function UserPayablesPopover({ user }) {
     return () => {
       isMounted = false;
     };
-  }, [isOpen, token]);
+  }, [isOpen, token, isWholesalerOrSupplier]);
 
   // Click outside to close
   useEffect(() => {
@@ -70,6 +66,10 @@ export default function UserPayablesPopover({ user }) {
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
+
+  if (!isWholesalerOrSupplier) {
+    return null;
+  }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
   const userEmail = (user?.email || user?.contactEmail || '').toLowerCase().trim();

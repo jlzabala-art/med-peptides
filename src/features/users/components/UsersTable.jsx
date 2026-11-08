@@ -21,7 +21,7 @@ import GlobalSearchBar from '../../../components/ui/GlobalSearchBar';
 import DataTable from '../../../components/ui/DataTable';
 import BulkActionsBar from '../../../components/ui/BulkActionsBar';
 import { ToastContainer } from '../../../components/common/Toast';
-import { StatusChip, MetricCard, AppActionGroup, RoleBadge } from '../../../components/ui';
+import { StatusChip, MetricCard, KpiScopeBar, AppActionGroup, RoleBadge } from '../../../components/ui';
 import AppEntityCell from '../../../components/ui/AppEntityCell';
 import CopyableId from '../../../components/ui/CopyableId';
 
@@ -29,7 +29,7 @@ import {
   Users, UserCheck, ShieldCheck, Mail, Archive,
   Trash2, Plus, Edit, AlertCircle, XCircle, Eye,
   Building2, DollarSign, CheckCircle2, Search, Download, UserPlus, Clock, Stethoscope, Sparkles,
-  FileText, Package, Calendar, Share2, MessageSquare, BookOpen
+  FileText, Package, Calendar, Share2, MessageSquare, BookOpen, ExternalLink
 } from 'lucide-react';
 
 import { useFirestorePaginatedCollection } from '../../../hooks/data/useFirestorePaginatedCollection';
@@ -124,6 +124,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   const [showArchived, setShowArchived] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [originFilter, setOriginFilter] = useState('all');
+  const [kpiScope, setKpiScope] = useState('filtered'); // 'filtered' | 'global' (Golden Rule #22)
+  const [showAllKpis, setShowAllKpis] = useState(false);
 
   // Build whereConditions for real pagination
   const whereConditions = useMemo(() => {
@@ -1142,88 +1144,129 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       )}
 
       {kpisData && (
-        <div className="users-kpi-grid">
-          <MetricCard
-            title="Total Users"
-            value={kpisData.total}
-            icon={Users}
-            color="var(--color-primary)"
-            onClick={() => { setRoleFilter('all'); setStatusFilter('all'); }}
-            style={{ cursor: 'pointer' }}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flexShrink: 0 }}>
+          <KpiScopeBar
+            scope={kpiScope}
+            onScopeChange={setKpiScope}
+            isFiltered={Boolean(searchTerm || roleFilter !== 'all' || statusFilter !== 'all' || originFilter !== 'all' || showArchived)}
+            filteredCount={filteredUsers.length}
+            globalCount={kpisData.total}
+            scopeLabel={kpiScope === 'global' ? 'Entire Database (Unfiltered)' : (Boolean(searchTerm || roleFilter !== 'all' || statusFilter !== 'all' || originFilter !== 'all') ? 'Matching Active Filters' : 'All Registered Users')}
           />
-          <MetricCard
-            title="Patients"
-            value={kpisData.patients}
-            icon={UserPlus}
-            color="var(--color-success)"
-            onClick={() => { setRoleFilter('patient'); setStatusFilter('all'); }}
-            style={{ cursor: 'pointer' }}
-          />
-          <MetricCard
-            title="Doctors"
-            value={kpisData.doctors}
-            icon={Stethoscope}
-            color="var(--color-warning)"
-            onClick={() => { setRoleFilter('doctor'); setStatusFilter('all'); }}
-            style={{ cursor: 'pointer' }}
-          />
-          <MetricCard
-            title="Wholesalers"
-            value={kpisData.wholesalers ?? 10}
-            icon={Building2}
-            color="#c2410c"
-            onClick={() => { setRoleFilter('wholesaler'); setStatusFilter('all'); }}
-            style={{ cursor: 'pointer' }}
-          />
-          <MetricCard
-            title="Clinics & Centers"
-            value={kpisData.clinics ?? 22}
-            icon={Building2}
-            color="#0891b2"
-            onClick={() => { setRoleFilter('clinic'); setStatusFilter('all'); }}
-            style={{ cursor: 'pointer' }}
-          />
-          <MetricCard
-            title="Pending Approval"
-            value={kpisData.pending}
-            icon={Clock}
-            color="var(--color-danger)"
-            alert={kpisData.pending > 0}
-            onClick={() => { setRoleFilter('all'); setStatusFilter('pending'); }}
-            style={{ cursor: 'pointer' }}
-          />
-          <MetricCard
-            title="Active Atlas Sessions"
-            value={kpisData.activeAtlasUsers ?? Math.max(0, kpisData.total - kpisData.pending)}
-            icon={Sparkles}
-            color="#2563eb"
-            onClick={() => { setRoleFilter('all'); setStatusFilter('active'); }}
-            style={{ cursor: 'pointer' }}
-          />
-          <MetricCard
-            title="Verified Access / 2FA"
-            value={kpisData.verifiedSecurity ?? Math.max(0, kpisData.total - kpisData.pending - 8)}
-            icon={ShieldCheck}
-            color="#16a34a"
-            onClick={() => { setRoleFilter('all'); setStatusFilter('all'); }}
-            style={{ cursor: 'pointer' }}
-          />
+          <div className="users-kpi-grid">
+            <MetricCard
+              title="Total Users"
+              value={(kpiScope === 'filtered' && Boolean(searchTerm || roleFilter !== 'all' || statusFilter !== 'all' || originFilter !== 'all')) ? filteredUsers.length : kpisData.total}
+              icon={Users}
+              color="var(--color-primary)"
+              onClick={() => { setRoleFilter('all'); setStatusFilter('all'); }}
+              style={{ cursor: 'pointer' }}
+            />
+            <MetricCard
+              title="Patients"
+              value={kpisData.patients}
+              icon={UserPlus}
+              color="var(--color-success)"
+              onClick={() => { setRoleFilter('patient'); setStatusFilter('all'); }}
+              style={{ cursor: 'pointer' }}
+            />
+            <MetricCard
+              title="Doctors"
+              value={kpisData.doctors}
+              icon={Stethoscope}
+              color="var(--color-warning)"
+              onClick={() => { setRoleFilter('doctor'); setStatusFilter('all'); }}
+              style={{ cursor: 'pointer' }}
+            />
+            <MetricCard
+              title="Wholesalers"
+              value={kpisData.wholesalers ?? 10}
+              icon={Building2}
+              color="#c2410c"
+              onClick={() => { setRoleFilter('wholesaler'); setStatusFilter('all'); }}
+              style={{ cursor: 'pointer' }}
+            />
+            {showAllKpis && (
+              <>
+                <MetricCard
+                  title="Clinics & Centers"
+                  value={kpisData.clinics ?? 22}
+                  icon={Building2}
+                  color="#0891b2"
+                  onClick={() => { setRoleFilter('clinic'); setStatusFilter('all'); }}
+                  style={{ cursor: 'pointer' }}
+                />
+                <MetricCard
+                  title="Pending Approval"
+                  value={kpisData.pending}
+                  icon={Clock}
+                  color="var(--color-danger)"
+                  alert={kpisData.pending > 0}
+                  onClick={() => { setRoleFilter('all'); setStatusFilter('pending'); }}
+                  style={{ cursor: 'pointer' }}
+                />
+                <MetricCard
+                  title="Active Atlas Sessions"
+                  value={kpisData.activeAtlasUsers ?? Math.max(0, kpisData.total - kpisData.pending)}
+                  icon={Sparkles}
+                  color="#2563eb"
+                  onClick={() => { setRoleFilter('all'); setStatusFilter('active'); }}
+                  style={{ cursor: 'pointer' }}
+                />
+                <MetricCard
+                  title="Verified Access / 2FA"
+                  value={kpisData.verifiedSecurity ?? Math.max(0, kpisData.total - kpisData.pending - 8)}
+                  icon={ShieldCheck}
+                  color="#16a34a"
+                  onClick={() => { setRoleFilter('all'); setStatusFilter('all'); }}
+                  style={{ cursor: 'pointer' }}
+                />
+              </>
+            )}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
+            <button
+              type="button"
+              onClick={() => setShowAllKpis(prev => !prev)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#64748b',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '2px 6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span>{showAllKpis ? '− Hide Advanced Metrics' : '+ 4 More Metrics (Clinics, Pending, Sessions, 2FA)'}</span>
+            </button>
+          </div>
           <style>{`
             .users-kpi-grid {
               display: grid;
               grid-template-columns: repeat(4, 1fr);
-              gap: 1rem;
+              gap: 0.75rem;
             }
             @media (max-width: 1024px) {
               .users-kpi-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 0.75rem;
+                gap: 0.65rem;
               }
             }
             @media (max-width: 640px) {
               .users-kpi-grid {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.4rem !important;
+              }
+              .users-kpi-grid .metric-card {
+                padding: 0.55rem 0.75rem !important;
+                min-height: auto !important;
+              }
+              .users-kpi-grid .metric-card .metric-card-value {
+                font-size: 1.25rem !important;
               }
             }
           `}</style>

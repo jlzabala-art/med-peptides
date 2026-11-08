@@ -99,7 +99,7 @@ export async function GET(request, { params }) {
         statement: {
           wholesalerName: 'Protected Commercial Partner',
           contactName: 'Confidential Identity',
-          contactEmail: expectedEmail.replace(/^(.{2})(.*)(@.*)$/, '$1••••$3'),
+          contactEmail: '••••••••••••@partner-domain.com',
           phone: '••••••••••',
           currency: shareDoc.currency || 'AED',
           vendorNumber: shareDoc.vendorNumberAED || 'VEN-79',
