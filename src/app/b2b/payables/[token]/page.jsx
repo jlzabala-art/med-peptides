@@ -112,9 +112,7 @@ export default function PayablesStatementPage() {
   };
 
   const handleOpenWhatsApp = () => {
-    const pendingTotal = isLocked ? '••••' : (kpis.totalPendingAmount || 0).toLocaleString();
-    const count = openBills.length;
-    const msg = `Hello Atlas Accounts Team, regarding the payables statement for ${isLocked ? 'Partner Account' : statement.wholesalerName}: we are reviewing the ${count} pending invoices totaling ${pendingTotal} AED. Link: ${typeof window !== 'undefined' ? window.location.href : ''}`;
+    const msg = `Hello Atlas Accounts Team, regarding the commercial settlement statement: ${typeof window !== 'undefined' ? window.location.href : ''}`;
     window.open(`https://wa.me/971506167657?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
