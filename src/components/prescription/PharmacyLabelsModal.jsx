@@ -156,32 +156,68 @@ export default function PharmacyLabelsModal({
   const [modalPrintCount, setModalPrintCount] = useState(() => {
     return parseInt(sourceRx?.a4PrintCount || sourceRx?.printCount || labels?.[0]?.a4PrintCount || 0, 10);
   });
+  const [modalPartCounts, setModalPartCounts] = useState(() => {
+    return sourceRx?.partPrintCounts || {};
+  });
 
   // Sync print count if sourceRx updates
   React.useEffect(() => {
     const nextCnt = parseInt(sourceRx?.a4PrintCount || sourceRx?.printCount || labels?.[0]?.a4PrintCount || 0, 10);
     if (nextCnt > 0) setModalPrintCount(nextCnt);
+    if (sourceRx?.partPrintCounts) setModalPartCounts(sourceRx.partPrintCounts);
   }, [sourceRx, labels]);
 
-  const recordLabelPrintEvent = async () => {
+  const recordLabelPrintEvent = async (options = {}) => {
     try {
       const code = String(currentItem.fileNumber || currentItem.rxCode || sourceRx?.prescriptionNumber || sourceRx?.code || '').trim();
       const docId = sourceRx?.id || currentItem?.id;
       const codesToUpdate = [code, docId].filter(Boolean);
       if (codesToUpdate.length === 0) return;
 
+      const parts = Array.isArray(options.parts) && options.parts.length > 0 ? options.parts : [selectedProductIdx];
+      const partsCount = options.partsCount || parts.length;
+      const trigger = options.trigger || 'single_part';
+
+      const items = [{
+        code: code || docId,
+        docId: docId || code,
+        partsCount,
+        parts,
+        trigger
+      }];
+
       const res = await fetch('/api/labels/kpis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codes: codesToUpdate })
+        body: JSON.stringify({ items, codes: codesToUpdate })
       });
       const data = await res.json();
       if (data?.success) {
         const next = modalPrintCount + 1;
         setModalPrintCount(next);
+
+        const cleanKey = (code || docId).toUpperCase();
+        if (data.printDetailsByCode?.[cleanKey]?.partPrintCounts) {
+          setModalPartCounts(data.printDetailsByCode[cleanKey].partPrintCounts);
+        } else {
+          setModalPartCounts(prev => {
+            const nextP = { ...prev };
+            parts.forEach(pIdx => {
+              const k = `part-${pIdx}`;
+              nextP[k] = { count: (nextP[k]?.count || 0) + 1, lastPrintedAt: new Date().toISOString() };
+            });
+            return nextP;
+          });
+        }
+
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('rx:label-printed', {
-            detail: { code, count: next, printCountsByCode: data.printCountsByCode }
+            detail: {
+              code,
+              count: next,
+              printCountsByCode: data.printCountsByCode,
+              printDetailsByCode: data.printDetailsByCode
+            }
           }));
         }
       }
@@ -475,7 +511,7 @@ export default function PharmacyLabelsModal({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    recordLabelPrintEvent();
+    recordLabelPrintEvent({ parts: [selectedProductIdx], partsCount: 1, trigger: 'zpl' });
   };
 
   const handleCopyZpl = () => {
@@ -737,7 +773,7 @@ export default function PharmacyLabelsModal({
         const nameSegments = [supplierClean, patientClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean, `${dpi}DPI`].filter(Boolean);
         downloadLink.download = `${nameSegments.join('_')}.png`;
         downloadLink.click();
-        recordLabelPrintEvent();
+        recordLabelPrintEvent({ parts: [selectedProductIdx], partsCount: 1, trigger: 'png' });
         setTimeout(() => URL.revokeObjectURL(pngObjectUrl), 2000);
         setIsGeneratingPng(false);
       };
@@ -868,7 +904,7 @@ export default function PharmacyLabelsModal({
       });
 
       pdf.save(`${nameSegments.join('_')}.pdf`);
-      recordLabelPrintEvent();
+      recordLabelPrintEvent({ parts: [selectedProductIdx], partsCount: 1, trigger: 'pdf' });
     } catch (innerErr) {
       console.error('Error generating PDF with jsPDF:', innerErr);
     } finally {
@@ -1071,6 +1107,7 @@ export default function PharmacyLabelsModal({
 
         const dateStr = new Date().toISOString().slice(0, 10);
         pdf.save(`PHARMAPOLIS_LABELS_BULK_${labels.length}_ITEMS_${dimensions.widthMm}x${dimensions.heightMm}mm_${dateStr}.pdf`);
+        recordLabelPrintEvent({ parts: labels.map((_, i) => i), partsCount: labels.length, trigger: 'modal_bulk' });
       }
     } catch (err) {
       console.error('Error generating bulk PDF:', err);
@@ -2241,6 +2278,69 @@ export default function PharmacyLabelsModal({
                           {phaseNum}
                         </span>
                         <span>{title}</span>
+                        {/* Micro-indicator per part */}
+                        {(() => {
+                          const pKey = `part-${idx}`;
+                          const pCnt = modalPartCounts[pKey]?.count || 0;
+                          if (pCnt > 1) {
+                            return (
+                              <span
+                                style={{
+                                  fontSize: '0.62rem',
+                                  padding: '1px 5px',
+                                  borderRadius: '4px',
+                                  background: isSelected ? 'rgba(255,255,255,0.28)' : '#fff7ed',
+                                  color: isSelected ? '#ffffff' : '#c2410c',
+                                  fontWeight: 800,
+                                  border: isSelected ? 'none' : '1px solid #fed7aa',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '2px'
+                                }}
+                                title={isEs ? `Esta parte se ha emitido ${pCnt} veces` : `This part has been printed ${pCnt} times`}
+                              >
+                                🔁 {pCnt}×
+                              </span>
+                            );
+                          }
+                          if (pCnt === 1) {
+                            return (
+                              <span
+                                style={{
+                                  fontSize: '0.62rem',
+                                  padding: '1px 5px',
+                                  borderRadius: '4px',
+                                  background: isSelected ? 'rgba(255,255,255,0.25)' : '#e6f4ea',
+                                  color: isSelected ? '#ffffff' : '#137333',
+                                  fontWeight: 700,
+                                  border: isSelected ? 'none' : '1px solid #ceead6',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '2px'
+                                }}
+                                title={isEs ? 'Esta parte ya ha sido impresa 1 vez' : 'This part was printed 1 time'}
+                              >
+                                ✓ 1×
+                              </span>
+                            );
+                          }
+                          return (
+                            <span
+                              style={{
+                                fontSize: '0.62rem',
+                                padding: '1px 5px',
+                                borderRadius: '4px',
+                                background: isSelected ? 'rgba(255,255,255,0.15)' : '#f1f5f9',
+                                color: isSelected ? '#ffffff' : '#94a3b8',
+                                fontWeight: 500,
+                                border: isSelected ? 'none' : '1px solid #e2e8f0'
+                              }}
+                              title={isEs ? 'Esta parte aún no ha sido impresa' : 'This part has not been printed yet'}
+                            >
+                              ○
+                            </span>
+                          );
+                        })()}
                         {vol && (
                           <span style={{
                             fontSize: '0.68rem',

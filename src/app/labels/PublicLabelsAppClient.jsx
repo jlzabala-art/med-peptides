@@ -1066,12 +1066,25 @@ export default function PublicLabelsAppClient({
 
       // Record A4 print event in Firestore atomically and update UI audit state
       try {
-        const printedCodes = patientQueue.map((p) => p.code).filter(Boolean);
-        if (printedCodes.length > 0) {
+        const granularItems = patientQueue.map((p) => {
+          const labels = Array.isArray(p.labels) && p.labels.length > 0 ? p.labels : [{}];
+          const partsToInclude = (p.selectedPartIndex != null && p.selectedPartIndex !== 'all')
+            ? [p.selectedPartIndex]
+            : labels.map((_, idx) => idx);
+          return {
+            code: p.code,
+            docId: p.rx?.id || p.rx?.docId || p.code,
+            partsCount: partsToInclude.length,
+            parts: partsToInclude,
+            trigger: 'a4_batch'
+          };
+        }).filter(item => Boolean(item.code || item.docId));
+
+        if (granularItems.length > 0) {
           fetch('/api/labels/kpis', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ codes: printedCodes })
+            body: JSON.stringify({ items: granularItems })
           })
             .then((res) => res.json())
             .then((data) => {
@@ -1081,7 +1094,8 @@ export default function PublicLabelsAppClient({
                 }
                 setLabelsKpis((prev) => ({
                   ...prev,
-                  totalPrintedA4Count: data.totalPrintedA4Count ?? (prev.totalPrintedA4Count + printedCodes.length)
+                  totalPrintedA4Count: (prev.totalPrintedA4Count || 0) + granularItems.length,
+                  totalPrintedLabelsCount: (prev.totalPrintedLabelsCount || 0) + batchItems.length
                 }));
               }
             })
