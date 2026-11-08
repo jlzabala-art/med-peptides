@@ -688,7 +688,7 @@ const CLINICAL_PRESETS = [
  * Displays each peptide with 44px touch targets, 2-column pricing tiles (Single Vial vs Box ×10),
  * live proforma cart status, and public specs link.
  */
-function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi, onFilterByPeptide }) {
+function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi, onFilterByPeptide }) {
   const [isClinicalExpanded, setIsClinicalExpanded] = useState(false);
   const isEs = lang === 'es';
   const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
@@ -835,29 +835,67 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => handleAddToCart && handleAddToCart(row, '1x')}
-            style={{
-              width: '100%',
-              minHeight: '44px',
-              fontSize: '0.80rem',
-              fontWeight: 700,
-              background: '#ffffff',
-              border: '1.5px solid #dadce0',
-              borderRadius: '6px',
-              color: '#3c4043',
-              cursor: 'pointer',
+          {inCart1x > 0 && typeof updateItemQuantity === 'function' ? (
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: '4px',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-            }}
-          >
-            <Plus size={14} />
-            <span>1 Vial</span>
-          </button>
+              justifyContent: 'space-between',
+              minHeight: '44px',
+              background: '#e8f0fe',
+              border: '1.5px solid #1a73e8',
+              borderRadius: '6px',
+              padding: '0 4px'
+            }}>
+              <button
+                type="button"
+                onClick={() => updateItemQuantity(row.id, '1x', -1)}
+                style={{ width: '38px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#ffffff', borderRadius: '4px', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem' }}
+                title={isEs ? 'Restar 1 vial' : 'Remove 1 vial'}
+              >
+                -
+              </button>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontWeight: 800, fontSize: '0.94rem', color: '#1a73e8', fontFamily: 'monospace' }}>
+                  {inCart1x}
+                </span>
+                <span style={{ fontSize: '0.62rem', color: '#1a73e8', display: 'block', lineHeight: 1 }}>
+                  {isEs ? 'en proforma' : 'in cart'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => updateItemQuantity(row.id, '1x', 1)}
+                style={{ width: '38px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#1a73e8', borderRadius: '4px', color: '#ffffff', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem' }}
+                title={isEs ? 'Sumar 1 vial' : 'Add 1 vial'}
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleAddToCart && handleAddToCart(row, '1x')}
+              style={{
+                width: '100%',
+                minHeight: '44px',
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                background: '#ffffff',
+                border: '1.5px solid #dadce0',
+                borderRadius: '6px',
+                color: '#3c4043',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+              }}
+            >
+              <Plus size={14} />
+              <span>1 Vial</span>
+            </button>
+          )}
         </div>
 
         {/* Tile 2: Pack of 10 */}
@@ -896,29 +934,67 @@ function PeptideMobileCard({ row, handleAddToCart, cartItems = {}, formatPrice, 
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => handleAddToCart && handleAddToCart(row, '10x')}
-            style={{
-              width: '100%',
-              minHeight: '44px',
-              fontSize: '0.80rem',
-              fontWeight: 700,
-              background: '#1a73e8',
-              border: '1.5px solid #1a73e8',
-              borderRadius: '6px',
-              color: '#ffffff',
-              cursor: 'pointer',
+          {inCart10x > 0 && typeof updateItemQuantity === 'function' ? (
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: '4px',
-              boxShadow: '0 1px 3px rgba(26,115,232,0.25)'
-            }}
-          >
-            <Box size={14} />
-            <span>+Pack ×10</span>
-          </button>
+              justifyContent: 'space-between',
+              minHeight: '44px',
+              background: '#dcfce7',
+              border: '1.5px solid #16a34a',
+              borderRadius: '6px',
+              padding: '0 4px'
+            }}>
+              <button
+                type="button"
+                onClick={() => updateItemQuantity(row.id, '10x', -1)}
+                style={{ width: '38px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#ffffff', borderRadius: '4px', color: '#16a34a', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem' }}
+                title={isEs ? 'Restar 1 pack ×10' : 'Remove 1 pack ×10'}
+              >
+                -
+              </button>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontWeight: 800, fontSize: '0.94rem', color: '#15803d', fontFamily: 'monospace' }}>
+                  {inCart10x}×10
+                </span>
+                <span style={{ fontSize: '0.62rem', color: '#15803d', display: 'block', lineHeight: 1 }}>
+                  {isEs ? 'en proforma' : 'in cart'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => updateItemQuantity(row.id, '10x', 1)}
+                style={{ width: '38px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#16a34a', borderRadius: '4px', color: '#ffffff', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem' }}
+                title={isEs ? 'Sumar 1 pack ×10' : 'Add 1 pack ×10'}
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleAddToCart && handleAddToCart(row, '10x')}
+              style={{
+                width: '100%',
+                minHeight: '44px',
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                background: '#1a73e8',
+                border: '1.5px solid #1a73e8',
+                borderRadius: '6px',
+                color: '#ffffff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                boxShadow: '0 1px 3px rgba(26,115,232,0.25)'
+              }}
+            >
+              <Box size={14} />
+              <span>+Pack ×10</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1287,7 +1363,8 @@ export default function PeptidesPriceListClient({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFdaStatus, setSelectedFdaStatus] = useState('all');
   const [selectedStrength, setSelectedStrength] = useState('all'); // 'all' | '5mg' | '10mg' | '20mg_plus'
-  const [scopeMode] = useState('filtered'); // Direct active view (no user-facing technical switcher)
+  const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global' (Scope Switcher per Golden Rule #22)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Collapsible filter sidebar for 100% desktop width
   const [copied, setCopied] = useState(false);
   const [hasRestoredCart, setHasRestoredCart] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(null);
@@ -2041,20 +2118,22 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <span>{isEs ? 'Ficha ↗' : 'Specs ↗'}</span>
               </a>
 
-              <span style={{
-                fontSize: '0.64rem',
-                fontWeight: 600,
-                color: row?.categoryMeta?.color,
-                background: row?.categoryMeta?.bg,
-                border: `1px solid ${row?.categoryMeta?.border}`,
-                padding: '1px 6px',
-                borderRadius: '4px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.03em',
-                whiteSpace: 'nowrap'
-              }}>
-                {row?.categoryMeta?.label}
-              </span>
+              {!groupByCategory && (
+                <span style={{
+                  fontSize: '0.64rem',
+                  fontWeight: 600,
+                  color: row?.categoryMeta?.color,
+                  background: row?.categoryMeta?.bg,
+                  border: `1px solid ${row?.categoryMeta?.border}`,
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {row?.categoryMeta?.label}
+                </span>
+              )}
 
               {/* FDA Regulatory Status Badge */}
               {row.fdaStatus && (
@@ -2174,65 +2253,132 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'actions',
       label: isEs ? 'Solicitud de Pedido' : 'Order Request',
-      width: '175px',
-      minWidth: '170px',
+      width: '185px',
+      minWidth: '180px',
       align: 'right',
-      render: (_, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px', flexWrap: 'nowrap', paddingRight: '8px' }}>
-          <button
-            onClick={() => handleAddToCart(row, '1x')}
-            style={{
-              padding: '4px 6px',
-              fontSize: '0.69rem',
-              fontWeight: 600,
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              borderRadius: '4px',
-              color: '#3c4043',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '3px',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              transition: 'background 0.15s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
-            onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
-            title={isEs ? 'Añadir 1 vial individual a la proforma' : 'Add 1 single vial to proforma'}
-          >
-            <Plus size={11} />
-            <span>1 Vial</span>
-          </button>
-          <button
-            onClick={() => handleAddToCart(row, '10x')}
-            style={{
-              padding: '4px 7px',
-              fontSize: '0.69rem',
-              fontWeight: 600,
-              background: '#1a73e8',
-              border: '1px solid #1a73e8',
-              borderRadius: '4px',
-              color: '#ffffff',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '3px',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              transition: 'background 0.15s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = '#1557b0'}
-            onMouseLeave={e => e.currentTarget.style.background = '#1a73e8'}
-            title={isEs ? 'Añadir pack de 10 viales con descuento por volumen' : 'Add manufacturer pack of 10 vials (-volume discount)'}
-          >
-            <Box size={11} />
-            <span>+Pack ×10</span>
-          </button>
-        </div>
-      )
+      render: (_, row) => {
+        const inCart1x = cartItems[row.id]?.quantity1x || 0;
+        const inCart10x = cartItems[row.id]?.quantity10x || 0;
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px', flexWrap: 'nowrap', paddingRight: '8px' }}>
+            {inCart1x > 0 && typeof updateItemQuantity === 'function' ? (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                background: '#e8f0fe',
+                border: '1px solid #1a73e8',
+                borderRadius: '4px',
+                height: '26px'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => updateItemQuantity(row.id, '1x', -1)}
+                  style={{ width: '22px', height: '100%', border: 'none', background: 'transparent', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, padding: 0 }}
+                  title={isEs ? 'Restar 1 vial' : 'Remove 1 vial'}
+                >
+                  -
+                </button>
+                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#1a73e8', padding: '0 4px', fontFamily: 'monospace' }}>
+                  {inCart1x}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => updateItemQuantity(row.id, '1x', 1)}
+                  style={{ width: '22px', height: '100%', border: 'none', background: 'transparent', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, padding: 0 }}
+                  title={isEs ? 'Sumar 1 vial' : 'Add 1 vial'}
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleAddToCart(row, '1x')}
+                style={{
+                  padding: '4px 6px',
+                  fontSize: '0.69rem',
+                  fontWeight: 600,
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '4px',
+                  color: '#3c4043',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  transition: 'background 0.15s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
+                onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
+                title={isEs ? 'Añadir 1 vial individual a la proforma' : 'Add 1 single vial to proforma'}
+              >
+                <Plus size={11} />
+                <span>1 Vial</span>
+              </button>
+            )}
+
+            {inCart10x > 0 && typeof updateItemQuantity === 'function' ? (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                background: '#dcfce7',
+                border: '1px solid #16a34a',
+                borderRadius: '4px',
+                height: '26px'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => updateItemQuantity(row.id, '10x', -1)}
+                  style={{ width: '22px', height: '100%', border: 'none', background: 'transparent', color: '#16a34a', cursor: 'pointer', fontWeight: 800, padding: 0 }}
+                  title={isEs ? 'Restar 1 pack ×10' : 'Remove 1 pack ×10'}
+                >
+                  -
+                </button>
+                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#16a34a', padding: '0 4px', fontFamily: 'monospace' }}>
+                  {inCart10x}×10
+                </span>
+                <button
+                  type="button"
+                  onClick={() => updateItemQuantity(row.id, '10x', 1)}
+                  style={{ width: '22px', height: '100%', border: 'none', background: 'transparent', color: '#16a34a', cursor: 'pointer', fontWeight: 800, padding: 0 }}
+                  title={isEs ? 'Sumar 1 pack ×10' : 'Add 1 pack ×10'}
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleAddToCart(row, '10x')}
+                style={{
+                  padding: '4px 7px',
+                  fontSize: '0.69rem',
+                  fontWeight: 600,
+                  background: '#1a73e8',
+                  border: '1px solid #1a73e8',
+                  borderRadius: '4px',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  transition: 'background 0.15s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#1557b0'}
+                onMouseLeave={e => e.currentTarget.style.background = '#1a73e8'}
+                title={isEs ? 'Añadir pack de 10 viales con descuento por volumen' : 'Add manufacturer pack of 10 vials (-volume discount)'}
+              >
+                <Box size={11} />
+                <span>+Pack ×10</span>
+              </button>
+            )}
+          </div>
+        );
+      }
     }
-  ], [formatPrice, handleAddToCart, currency, cartItems, isEs]);
+  ], [formatPrice, handleAddToCart, updateItemQuantity, currency, cartItems, isEs, groupByCategory]);
 
   // Master-Detail Expandable Clinical Summary Row for Desktop DataTable (Google Cloud Console UX - Golden Rule #4 & #11)
   const renderPeptideClinicalDetail = useCallback((row) => {
@@ -3092,17 +3238,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       )}
 
       <main className="peptides-main-container" style={{ maxWidth: '1440px', margin: '0 auto', padding: totalCartCount > 0 ? '1.25rem 1.25rem 5.5rem 1.25rem' : '1.25rem 1.25rem 2.5rem 1.25rem' }}>
-        {/* Page Header */}
+        {/* Page Header (Consolidated with TopBar Navigation - No Duplicate Breadcrumb) */}
         <div className="peptides-page-header" style={{ marginBottom: '1rem' }}>
-          <div className="mobile-hide">
-            <Breadcrumb items={[
-              { label: isEs ? 'Portal B2B' : 'B2B Portal', href: '/' },
-              { label: isEs ? 'Tarifas Oficiales' : 'Official Price Schedules', href: '/pricing/peptides' },
-              { label: isEs ? 'Viales Clínicos de Péptidos' : 'Clinical Peptide Vials' }
-            ]} />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
               {/* Consolidated GCP Status Strip (Single Row) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', flexWrap: 'wrap' }}>
@@ -3207,6 +3345,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
           .mobile-only-filter-selectors {
             display: none;
           }
+          .mobile-only-category-strip {
+            display: none;
+          }
           @keyframes slideInLeft {
             from { transform: translateX(-100%); }
             to { transform: translateX(0); }
@@ -3257,6 +3398,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               display: grid !important;
               grid-template-columns: 1fr 1fr;
               gap: 8px;
+            }
+            .mobile-only-category-strip {
+              display: flex !important;
             }
             .mobile-only-category-selector {
               display: block !important;
@@ -3366,8 +3510,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
 
         {/* ── Google Cloud Console 2-Column Portal Layout ── */}
         <div className="gcp-pricing-portal-layout">
-          {/* ── Left Navigation Rail / Sidebar ── */}
-          <aside className="gcp-pricing-sidebar">
+          {/* ── Left Navigation Rail / Sidebar (Collapsible for 100% table width on laptop) ── */}
+          <aside className="gcp-pricing-sidebar" style={{ display: isSidebarOpen ? 'flex' : 'none' }}>
             {/* 1. Peptide Categories Navigation Tree (GCP Left Rail Pattern) */}
             <div style={{
               background: '#ffffff',
@@ -3535,7 +3679,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               marginBottom: '0.75rem',
               boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
             }}>
-              {/* Scope Indicator & Switcher */}
+              {/* Scope Indicator & Switcher (Google Cloud Standard - Golden Rule #22) */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -3578,6 +3722,48 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       <span>{totalCartCount} {isEs ? 'Viales' : 'Vials'} ({formatPrice(totalCartValueUsd)})</span>
                     </span>
                   )}
+                </div>
+
+                {/* Scope Switcher: Active Filter View vs Global Catalog */}
+                <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '5px', padding: '2px', gap: '2px', border: '1px solid #e2e8f0' }}>
+                  <button
+                    type="button"
+                    onClick={() => setScopeMode('filtered')}
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      background: scopeMode === 'filtered' ? '#ffffff' : 'transparent',
+                      color: scopeMode === 'filtered' ? '#1a73e8' : '#64748b',
+                      fontWeight: scopeMode === 'filtered' ? 750 : 500,
+                      fontSize: '0.66rem',
+                      cursor: 'pointer',
+                      boxShadow: scopeMode === 'filtered' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={isEs ? 'Ver métricas del conjunto filtrado actual' : 'View metrics for current active filter'}
+                  >
+                    {isEs ? `Filtros Activos (${filteredProducts.length})` : `Active Filters (${filteredProducts.length})`}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScopeMode('global')}
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      background: scopeMode === 'global' ? '#ffffff' : 'transparent',
+                      color: scopeMode === 'global' ? '#1a73e8' : '#64748b',
+                      fontWeight: scopeMode === 'global' ? 750 : 500,
+                      fontSize: '0.66rem',
+                      cursor: 'pointer',
+                      boxShadow: scopeMode === 'global' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={isEs ? 'Ver métricas de toda la base de datos' : 'View metrics for entire database'}
+                  >
+                    {isEs ? `Catálogo Global (${processedProducts.length})` : `Entire Catalog (${processedProducts.length})`}
+                  </button>
                 </div>
               </div>
 
@@ -3644,18 +3830,202 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
 
             {/* ── Search & Category Filter Block (Prioritized Above-the-Fold per Golden Rule #7) ── */}
             <div className="gcp-search-and-category-block" style={{ marginBottom: '0.85rem' }}>
-              {/* Global Search & Filters (Golden Rule #7) */}
-              <GlobalSearchBar
-                value={searchQuery}
-                onChange={setSearchQuery}
-                lang={lang}
-                placeholder={isEs
-                  ? 'Buscar por nombre de péptido (ej. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'
-                  : 'Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'}
-                size="lg"
-                resultCount={filteredProducts.length}
-                filters={
-                  <div>
+              {/* Desktop Filter Sidebar Toggle + Global Search Bar (Google Cloud Standard) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', marginBottom: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen(prev => !prev)}
+                  className="mobile-hide"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    height: '42px',
+                    padding: '0 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #dadce0',
+                    background: isSidebarOpen ? '#e8f0fe' : '#ffffff',
+                    color: isSidebarOpen ? '#1a73e8' : '#3c4043',
+                    fontWeight: 700,
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    transition: 'all 0.15s ease',
+                    boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+                  }}
+                  title={isSidebarOpen ? (isEs ? 'Ocultar panel lateral (ampliar tabla al 100%)' : 'Hide sidebar (expand table to 100%)') : (isEs ? 'Mostrar panel lateral de filtros' : 'Show filter sidebar')}
+                >
+                  <SlidersHorizontal size={14} />
+                  <span>{isSidebarOpen ? (isEs ? 'Filtros (On)' : 'Filters (On)') : (isEs ? 'Filtros (Off)' : 'Filters (Off)')}</span>
+                </button>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <GlobalSearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    lang={lang}
+                    placeholder={isEs
+                      ? 'Buscar por nombre de péptido (ej. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'
+                      : 'Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'}
+                    size="lg"
+                    resultCount={filteredProducts.length}
+                    filters={
+                      <div>
+                        {/* Mobile Quick-Switch Category Chips (Horizontal Scrollable Strip) */}
+                        <div className="mobile-only-category-strip" style={{
+                          overflowX: 'auto',
+                          whiteSpace: 'nowrap',
+                          gap: '6px',
+                          padding: '4px 0 8px 0',
+                          WebkitOverflowScrolling: 'touch',
+                          scrollbarWidth: 'none'
+                        }}>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCategory('all')}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '16px',
+                              border: selectedCategory === 'all' ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+                              background: selectedCategory === 'all' ? '#e8f0fe' : '#ffffff',
+                              color: selectedCategory === 'all' ? '#1a73e8' : '#3c4043',
+                              fontWeight: selectedCategory === 'all' ? 750 : 500,
+                              fontSize: '0.74rem',
+                              flexShrink: 0,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isEs ? 'Todas' : 'All'} ({processedProducts.length})
+                          </button>
+                          {CATEGORY_ORDER.map(key => {
+                            const meta = CATEGORY_MAP[key];
+                            if (!meta) return null;
+                            const count = processedProducts.filter(p => p.categoryKey === key).length;
+                            if (count === 0) return null;
+                            const isSel = selectedCategory === key;
+                            return (
+                              <button
+                                key={key}
+                                type="button"
+                                onClick={() => setSelectedCategory(key)}
+                                style={{
+                                  padding: '4px 10px',
+                                  borderRadius: '16px',
+                                  border: isSel ? `1.5px solid ${meta.color}` : '1px solid #dadce0',
+                                  background: isSel ? meta.bg : '#ffffff',
+                                  color: isSel ? meta.color : '#3c4043',
+                                  fontWeight: isSel ? 750 : 500,
+                                  fontSize: '0.74rem',
+                                  flexShrink: 0,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <span>{isEs ? meta.labelEs : meta.labelEn}</span>
+                                <span style={{ marginLeft: '4px', opacity: 0.7, fontSize: '0.66rem' }}>({count})</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Active Filter Chips (Google Cloud Filter Bar - Rule #24) */}
+                        {(selectedCategory !== 'all' || selectedFdaStatus !== 'all' || selectedStrength !== 'all' || searchQuery) && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '8px', padding: '4px 0' }}>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase' }}>
+                              {isEs ? 'Filtros Activos:' : 'Active Filters:'}
+                            </span>
+                            {selectedCategory !== 'all' && (
+                              <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: '#e8f0fe',
+                                border: '1px solid #c2e7ff',
+                                color: '#1a73e8',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '14px'
+                              }}>
+                                <span>🏷️ {isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedCategory('all')}
+                                  style={{ border: 'none', background: 'transparent', color: '#1a73e8', cursor: 'pointer', padding: 0, fontWeight: 800, display: 'flex', alignItems: 'center' }}
+                                  title={isEs ? 'Quitar filtro de categoría' : 'Remove category filter'}
+                                >
+                                  <X size={11} />
+                                </button>
+                              </span>
+                            )}
+                            {selectedFdaStatus !== 'all' && (
+                              <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: '#ecfdf5',
+                                border: '1px solid #a7f3d0',
+                                color: '#065f46',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '14px'
+                              }}>
+                                <span>⚖️ {isEs ? FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.labelEs : FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.labelEn}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedFdaStatus('all')}
+                                  style={{ border: 'none', background: 'transparent', color: '#065f46', cursor: 'pointer', padding: 0, fontWeight: 800, display: 'flex', alignItems: 'center' }}
+                                  title={isEs ? 'Quitar filtro de estatus FDA' : 'Remove FDA status filter'}
+                                >
+                                  <X size={11} />
+                                </button>
+                              </span>
+                            )}
+                            {selectedStrength !== 'all' && (
+                              <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: '#fef3c7',
+                                border: '1px solid #fde68a',
+                                color: '#92400e',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '14px'
+                              }}>
+                                <span>💊 {DOSAGE_STRENGTHS.find(s => s.id === selectedStrength)?.label}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedStrength('all')}
+                                  style={{ border: 'none', background: 'transparent', color: '#92400e', cursor: 'pointer', padding: 0, fontWeight: 800, display: 'flex', alignItems: 'center' }}
+                                  title={isEs ? 'Quitar filtro de concentración' : 'Remove strength filter'}
+                                >
+                                  <X size={11} />
+                                </button>
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedCategory('all');
+                                setSelectedFdaStatus('all');
+                                setSelectedStrength('all');
+                                setSearchQuery('');
+                              }}
+                              style={{
+                                border: 'none',
+                                background: 'transparent',
+                                color: '#dc2626',
+                                fontSize: '0.70rem',
+                                fontWeight: 750,
+                                cursor: 'pointer',
+                                padding: '2px 4px'
+                              }}
+                            >
+                              {isEs ? 'Limpiar Todo ×' : 'Clear All ×'}
+                            </button>
+                          </div>
+                        )}
                     {/* Integrated Shipping Corridor Segmented Switcher (Google Cloud Standard) */}
                     <div style={{
                       display: 'flex',
@@ -3824,6 +4194,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   </div>
                 }
               />
+            </div>
+          </div>
 
               {/* Dual Mobile Dropdown Selectors (Google Cloud Mobile UX Standard: Category + FDA Status Bottom Sheets) */}
               <div className="mobile-only-filter-selectors">
@@ -4045,6 +4417,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   mobileCardComponent={PeptideMobileCard}
                   mobileCardProps={{
                     handleAddToCart,
+                    updateItemQuantity,
                     cartItems,
                     formatPrice,
                     currency,
