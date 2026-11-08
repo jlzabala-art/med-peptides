@@ -1,13 +1,13 @@
 "use client";
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Command, Loader, Clock, ChevronDown, Filter, QrCode, ArrowUpRight } from '@/lib/icons';
+import { Search, X, Command, Loader, Clock, ChevronDown, Filter, QrCode, ArrowUpRight, User } from '@/lib/icons';
 import '../../styles/search.css';
 import MultiSelectFilter from './MultiSelectFilter';
 import SingleSelectFilter from './SingleSelectFilter';
 import MobileFiltersSheet from '../mobile/MobileFiltersSheet';
 import QrScannerModal from '../shared/QrScannerModal';
-import { searchAlgolia } from '@/services/algoliaSearch';
+import { searchAlgolia, searchAlgoliaFederated } from '@/services/algoliaSearch';
 import { trackSearchClick } from '@/services/algoliaInsights';
 
 /**
@@ -89,6 +89,7 @@ export default function GlobalSearchBar({
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const isProtocolsPage = (namespace || '').includes('protocol') || (typeof window !== 'undefined' && (window.location.pathname.includes('/proto') || window.location.pathname.includes('/protocols')));
+  const isUsersPage = (namespace || '').includes('user') || (namespace || '').includes('customer') || (typeof window !== 'undefined' && (window.location.pathname.includes('/users') || window.location.pathname.includes('/admin/users') || window.location.pathname.includes('/customers')));
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState(() => {
@@ -144,64 +145,90 @@ export default function GlobalSearchBar({
     setIsSearchingSuggestions(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await searchAlgolia(effectiveValue.trim());
-        if (isMounted) {
-          // Products are now natively deduplicated by Algolia (attributeForDistinct: canonicalKey)
-          const seenProdKeys = new Set();
-          const prods = [];
-          for (const p of (res.products || [])) {
-            let key = (p.canonicalKey || p.canonicalName || '').trim().toLowerCase();
-            if (!key) {
-              const rawName = (p.name || p.productName || '').toLowerCase().trim();
-              key = rawName
-                .replace(/^api[-_\s]+/i, '')
-                .replace(/\b(bulk\s+api\s+powder|bulk\s+api|api\s+powder|api|bulk|powder|raw\s+material)\b/gi, '')
-                .trim();
-            }
-            if (!key || seenProdKeys.has(key)) continue;
-            seenProdKeys.add(key);
-
-            let displayName = (p.canonicalName || p.name || p.productName || '').trim();
-            if (displayName.toLowerCase().includes('bulk api powder')) {
-              displayName = displayName.replace(/\s*bulk\s*api\s*powder/i, '').trim();
-            }
-            const varCount = Number(p.variantsCount || p.variantCount || 1);
-
-            prods.push({
-              key,
-              id: p.productId || p.objectID || p.id,
-              name: displayName,
-              category: p.category === 'api_peptide' ? 'Peptide' : (p.category || 'Peptide'),
-              variantCount: varCount,
-              indexName: 'products'
+        if (isUsersPage) {
+          const res = await searchAlgoliaFederated(effectiveValue.trim(), ['atlas_users'], 8);
+          if (isMounted) {
+            const userHits = (res.users || []).map((u) => {
+              const displayName = (u.name || u.fullName || u.displayName || u.email || 'User').trim();
+              const roleStr = (u.role || (Array.isArray(u.roles) && u.roles[0]) || 'user').toUpperCase();
+              return {
+                key: u.objectID || u.id,
+                id: u.objectID || u.id,
+                name: displayName,
+                email: u.email || '',
+                phone: u.phone || '',
+                company: u.companyName || u.institution || '',
+                category: roleStr,
+                role: u.role || 'user',
+                status: u.status || 'active',
+                indexName: 'atlas_users'
+              };
             });
-            if (prods.length >= (isProtocolsPage ? 4 : 8)) break;
+            setSuggestions(userHits);
+            if (userHits.length > 0 && isFocused) {
+              setShowDropdown(true);
+            }
           }
+        } else {
+          const res = await searchAlgolia(effectiveValue.trim());
+          if (isMounted) {
+            // Products are now natively deduplicated by Algolia (attributeForDistinct: canonicalKey)
+            const seenProdKeys = new Set();
+            const prods = [];
+            for (const p of (res.products || [])) {
+              let key = (p.canonicalKey || p.canonicalName || '').trim().toLowerCase();
+              if (!key) {
+                const rawName = (p.name || p.productName || '').toLowerCase().trim();
+                key = rawName
+                  .replace(/^api[-_\s]+/i, '')
+                  .replace(/\b(bulk\s+api\s+powder|bulk\s+api|api\s+powder|api|bulk|powder|raw\s+material)\b/gi, '')
+                  .trim();
+              }
+              if (!key || seenProdKeys.has(key)) continue;
+              seenProdKeys.add(key);
 
-          // Deduplicate protocols by title
-          const seenProtoKeys = new Set();
-          const protos = [];
-          for (const p of (res.protocols || [])) {
-            const rawTitle = (p.title || p.name || '').trim();
-            const key = rawTitle.toLowerCase();
-            if (!key || seenProtoKeys.has(key)) continue;
-            seenProtoKeys.add(key);
+              let displayName = (p.canonicalName || p.name || p.productName || '').trim();
+              if (displayName.toLowerCase().includes('bulk api powder')) {
+                displayName = displayName.replace(/\s*bulk\s*api\s*powder/i, '').trim();
+              }
+              const varCount = Number(p.variantsCount || p.variantCount || 1);
 
-            protos.push({
-              key,
-              id: p.objectID || p.id,
-              name: rawTitle,
-              category: 'Protocol',
-              indexName: 'protocols'
-            });
-            if (protos.length >= (isProtocolsPage ? 8 : 4)) break;
-          }
+              prods.push({
+                key,
+                id: p.productId || p.objectID || p.id,
+                name: displayName,
+                category: p.category === 'api_peptide' ? 'Peptide' : (p.category || 'Peptide'),
+                variantCount: varCount,
+                indexName: 'products'
+              });
+              if (prods.length >= (isProtocolsPage ? 4 : 8)) break;
+            }
 
-          // Contextual ordering: if on protocols page, show protocols first; otherwise products first
-          const combined = (isProtocolsPage ? [...protos, ...prods] : [...prods, ...protos]).slice(0, 10);
-          setSuggestions(combined);
-          if (combined.length > 0 && isFocused) {
-            setShowDropdown(true);
+            // Deduplicate protocols by title
+            const seenProtoKeys = new Set();
+            const protos = [];
+            for (const p of (res.protocols || [])) {
+              const rawTitle = (p.title || p.name || '').trim();
+              const key = rawTitle.toLowerCase();
+              if (!key || seenProtoKeys.has(key)) continue;
+              seenProtoKeys.add(key);
+
+              protos.push({
+                key,
+                id: p.objectID || p.id,
+                name: rawTitle,
+                category: 'Protocol',
+                indexName: 'protocols'
+              });
+              if (protos.length >= (isProtocolsPage ? 8 : 4)) break;
+            }
+
+            // Contextual ordering: if on protocols page, show protocols first; otherwise products first
+            const combined = (isProtocolsPage ? [...protos, ...prods] : [...prods, ...protos]).slice(0, 10);
+            setSuggestions(combined);
+            if (combined.length > 0 && isFocused) {
+              setShowDropdown(true);
+            }
           }
         }
       } catch {
@@ -325,12 +352,19 @@ export default function GlobalSearchBar({
 
       saveRecentSearch(item.name);
       trackSearchClick({
-        indexName: item.indexName || 'products',
+        indexName: item.indexName || (isUsersPage ? 'atlas_users' : 'products'),
         objectID: item.id,
         eventName: 'GlobalSearchBar Suggestion Clicked'
       });
       setShowDropdown(false);
       setSelectedIndex(-1);
+
+      // User suggestions: select directly into search input without navigating
+      if (item.indexName === 'atlas_users') {
+        effectiveOnChange?.(item.name || item.email || '');
+        inputRef.current?.focus();
+        return;
+      }
 
       // Cross-entity navigation between Products and Protocols
       if (!isProtocolsPage && item.indexName === 'protocols') {
@@ -346,7 +380,7 @@ export default function GlobalSearchBar({
       effectiveOnChange?.(item.name);
       inputRef.current?.focus();
     },
-    [effectiveOnChange, saveRecentSearch, isProtocolsPage, router]
+    [effectiveOnChange, saveRecentSearch, isProtocolsPage, isUsersPage, router]
   );
 
   const handleKeyDown = useCallback(
@@ -621,17 +655,36 @@ export default function GlobalSearchBar({
           <div className="atlas-search__dropdown" style={{ zIndex: 100 }}>
             <div style={{ padding: '0.5rem 1rem 0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {value.trim().startsWith('/ai') ? '🤖 Atlas AI' : 'Algolia Suggestions'}
+                {value.trim().startsWith('/ai') ? '🤖 Atlas AI' : (isUsersPage ? 'Users & Accounts (Algolia)' : 'Algolia Suggestions')}
               </span>
               {isSearchingSuggestions && <Loader size={12} className="atlas-search__spinner" />}
             </div>
             {suggestions.length === 0 && !isSearchingSuggestions ? (
               <div style={{ padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                No clinical matches found
+                {isUsersPage ? 'No user matches found' : 'No clinical matches found'}
               </div>
             ) : (
               suggestions.map((item, idx) => {
                 const isCrossJump = (!isProtocolsPage && item.indexName === 'protocols') || (isProtocolsPage && item.indexName === 'products');
+                const isUserItem = item.indexName === 'atlas_users';
+
+                let roleColor = '#1e40af';
+                let roleBg = '#eff6ff';
+                let roleBorder = '#bfdbfe';
+                if (item.role === 'wholesaler' || item.role === 'distributor') {
+                  roleColor = '#c2410c';
+                  roleBg = '#fff7ed';
+                  roleBorder = '#ffedd5';
+                } else if (item.role === 'doctor') {
+                  roleColor = '#0d9488';
+                  roleBg = '#f0fdfa';
+                  roleBorder = '#ccfbf1';
+                } else if (item.role === 'patient') {
+                  roleColor = '#7c3aed';
+                  roleBg = '#faf5ff';
+                  roleBorder = '#f3e8ff';
+                }
+
                 return (
                   <div
                     key={item.id || idx}
@@ -645,7 +698,7 @@ export default function GlobalSearchBar({
                       backgroundColor: selectedIndex === idx ? (item.isAiPrompt ? '#eff6ff' : '#f1f5f9') : 'transparent'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0 }}>
                       {item.isAiPrompt ? (
                         <span style={{
                           width: '20px',
@@ -657,15 +710,40 @@ export default function GlobalSearchBar({
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontSize: '11px',
+                          flexShrink: 0
                         }}>
                           ✨
                         </span>
+                      ) : isUserItem ? (
+                        <span style={{
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '50%',
+                          backgroundColor: roleBg,
+                          border: `1px solid ${roleBorder}`,
+                          color: roleColor,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <User size={12} />
+                        </span>
                       ) : (
-                        <Search size={13} color="#003666" />
+                        <Search size={13} color="#003666" style={{ flexShrink: 0 }} />
                       )}
-                      <span style={{ fontWeight: 600, color: item.isAiPrompt ? '#1d4ed8' : '#0f172a' }}>{item.name}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <span style={{ fontWeight: 600, color: item.isAiPrompt ? '#1d4ed8' : '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.name}
+                        </span>
+                        {isUserItem && (item.email || item.company) && (
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.email}{item.company ? ` · ${item.company}` : ''}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginLeft: '0.5rem' }}>
                       {item.variantCount > 1 && (
                         <span
                           style={{
@@ -681,7 +759,22 @@ export default function GlobalSearchBar({
                           {item.variantCount} vars
                         </span>
                       )}
-                      {isCrossJump ? (
+                      {isUserItem ? (
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 7px',
+                            borderRadius: '6px',
+                            backgroundColor: roleBg,
+                            color: roleColor,
+                            border: `1px solid ${roleBorder}`,
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          {item.category}
+                        </span>
+                      ) : isCrossJump ? (
                         <span
                           style={{
                             fontSize: '0.68rem',

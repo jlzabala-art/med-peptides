@@ -205,6 +205,25 @@ export async function POST(request) {
         createdAt_ts: getTimestamp(record.createdAt),
         lastActivityDate: getTimestamp(record.lastActivityDate || record.updatedAt || record.createdAt)
       };
+    } else if (indexName === 'atlas_users') {
+      const role = record.role || (Array.isArray(record.roles) && record.roles[0]) || 'user';
+      formattedRecord = {
+        objectID: targetId,
+        id: targetId,
+        name: (record.name || record.fullName || record.displayName || `${record.firstName || ''} ${record.lastName || ''}`).trim() || 'User',
+        email: record.email || '',
+        phone: record.phone || record.mobile || record.phoneNumber || '',
+        role: role,
+        roles: Array.isArray(record.roles) && record.roles.length > 0 ? record.roles : [role],
+        status: (record.status || 'active').toLowerCase(),
+        companyName: record.companyName || record.institution || '',
+        country: record.country || record.shippingCountry || '',
+        city: record.city || record.shippingCity || '',
+        pricingTier: record.pricingTier || 'distributor',
+        clinicId: record.clinicId || '',
+        clinicIds: record.clinicIds || (record.clinicId ? [record.clinicId] : []),
+        createdAt_ts: getTimestamp(record.createdAt || record.updatedAt)
+      };
     }
 
     await client.saveObjects({
