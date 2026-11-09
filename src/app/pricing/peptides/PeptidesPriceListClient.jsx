@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import BrandLogo from '@/components/common/BrandLogo';
 import {
@@ -46,6 +46,7 @@ import {
   MoreVertical,
   User,
   LogIn,
+  LogOut,
   Loader2
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -1499,6 +1500,53 @@ export default function PeptidesPriceListClient({
   const authUser = authContext?.user || null;
   const authProfile = authContext?.userProfile || null;
   const authRole = authContext?.activeRole || authProfile?.role || null;
+
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+
+  // Close user menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isUserMenuOpen]);
+
+  const handleLogout = async () => {
+    try {
+      if (authContext?.logout) {
+        await authContext.logout();
+      }
+      toast.success(isEs ? 'Sesión cerrada correctamente' : 'Logged out successfully');
+      setIsUserMenuOpen(false);
+      window.location.reload();
+    } catch (err) {
+      console.warn('[logout]', err);
+      window.location.href = '/login';
+    }
+  };
+
+  const getUserInitials = (name, email) => {
+    if (name) {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      return name.slice(0, 2).toUpperCase();
+    }
+    if (email) return email.slice(0, 2).toUpperCase();
+    return 'U';
+  };
+
+  const effectiveDisplayName = authProfile?.fullName || authProfile?.displayName || authProfile?.name || authUser?.displayName || (authUser?.email ? authUser.email.split('@')[0] : 'User');
+  const effectiveInitials = getUserInitials(effectiveDisplayName, authUser?.email);
+  const effectiveRoleLabel = authRole === 'admin'
+    ? 'ADMIN PORTAL'
+    : (authRole === 'doctor' || authRole === 'clinic' ? 'CLINICAL PORTAL' : (authRole === 'wholeseller' ? 'WHOLESALER B2B' : (authRole ? `${authRole.toUpperCase()} PORTAL` : 'CLIENT B2B')));
+  const avatarBgColor = authRole === 'admin' ? '#16a34a' : (authRole === 'doctor' || authRole === 'clinic' ? '#0d9488' : '#003666');
 
   const [orderForm, setOrderForm] = useState({
     name: '',
@@ -3081,43 +3129,266 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
             </div>
 
-            {/* Desktop Auth / Profile Access */}
-            <div className="desktop-only-currency" style={{ marginLeft: '4px' }}>
+            {/* Desktop Auth / Profile Access — Google Cloud Console UX Standard */}
+            <div className="desktop-only-currency" style={{ marginLeft: '6px', position: 'relative' }} ref={userMenuRef}>
               {authUser ? (
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: '#e8f0fe',
-                    border: '1px solid #c2e7ff',
-                    padding: '3px 8px',
-                    borderRadius: '16px',
-                    fontSize: '0.74rem',
-                    fontWeight: 650,
-                    color: '#1a73e8'
-                  }}
-                  title={`Conectado como ${authUser.email}`}
-                >
-                  <User size={13} color="#1a73e8" />
-                  <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {authProfile?.clinicName || authProfile?.name || authUser.displayName || authUser.email?.split('@')[0]}
-                  </span>
-                  <span style={{
-                    fontSize: '0.62rem',
-                    fontWeight: 800,
-                    background: '#1a73e8',
-                    color: '#ffffff',
-                    padding: '1px 5px',
-                    borderRadius: '8px',
-                    textTransform: 'uppercase'
-                  }}>
-                    {authRole === 'wholeseller' ? 'Wholesale' : (authRole || 'Clinic')}
-                  </span>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {/* GCP User Profile Capsule Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      background: isUserMenuOpen ? '#f1f5f9' : '#ffffff',
+                      border: '1px solid',
+                      borderColor: isUserMenuOpen ? '#bfdbfe' : '#dadce0',
+                      padding: '2px 8px 2px 3px',
+                      borderRadius: '20px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      outline: 'none',
+                      boxShadow: isUserMenuOpen ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                    }}
+                    onMouseEnter={e => { if (!isUserMenuOpen) e.currentTarget.style.background = '#f8fafc'; }}
+                    onMouseLeave={e => { if (!isUserMenuOpen) e.currentTarget.style.background = '#ffffff'; }}
+                    title={`Conectado como ${authUser.email}`}
+                  >
+                    {/* Circle Avatar with Initials */}
+                    <div style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      background: avatarBgColor,
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.72rem',
+                      fontWeight: 750,
+                      letterSpacing: '-0.02em',
+                      flexShrink: 0
+                    }}>
+                      {effectiveInitials}
+                    </div>
+
+                    {/* Two-Line User Info */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', lineHeight: 1.15 }}>
+                      <span style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 750,
+                        color: '#202124',
+                        maxWidth: '120px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {effectiveDisplayName}
+                      </span>
+                      <span style={{
+                        fontSize: '0.60rem',
+                        color: '#5f6368',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                        letterSpacing: '0.04em'
+                      }}>
+                        {effectiveRoleLabel}
+                      </span>
+                    </div>
+
+                    <ChevronDown size={12} color="#5f6368" style={{ marginLeft: '2px', transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                  </button>
+
+                  {/* GCP Dedicated Quick Logout Icon Button */}
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    title={isEs ? 'Cerrar Sesión' : 'Sign Out / Logout'}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#5f6368',
+                      padding: '6px',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      transition: 'background 0.15s ease, color 0.15s ease'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#dc2626'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#5f6368'; }}
+                  >
+                    <LogOut size={16} />
+                  </button>
+
+                  {/* GCP User Dropdown Popover */}
+                  {isUserMenuOpen && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '38px',
+                        width: '240px',
+                        background: '#ffffff',
+                        borderRadius: '8px',
+                        border: '1px solid #dadce0',
+                        boxShadow: '0 8px 24px rgba(60,64,67,0.18)',
+                        zIndex: 200,
+                        padding: '12px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        animation: 'fadeIn 0.12s ease'
+                      }}
+                    >
+                      {/* User Header in Dropdown */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '8px', borderBottom: '1px solid #f1f5f9' }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          background: avatarBgColor,
+                          color: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.82rem',
+                          fontWeight: 750,
+                          flexShrink: 0
+                        }}>
+                          {effectiveInitials}
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {effectiveDisplayName}
+                          </div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {authUser.email}
+                          </div>
+                          <span style={{
+                            display: 'inline-block',
+                            marginTop: '2px',
+                            fontSize: '0.58rem',
+                            fontWeight: 800,
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            background: '#e8f0fe',
+                            color: '#1a73e8',
+                            textTransform: 'uppercase'
+                          }}>
+                            {effectiveRoleLabel}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Navigation links based on role */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {authRole === 'admin' && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '6px 8px',
+                              borderRadius: '4px',
+                              fontSize: '0.76rem',
+                              fontWeight: 600,
+                              color: '#334155',
+                              textDecoration: 'none',
+                              transition: 'background 0.12s ease'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                          >
+                            <ShieldCheck size={14} color="#1a73e8" />
+                            <span>{isEs ? 'Consola de Administración' : 'Admin Console'}</span>
+                          </Link>
+                        )}
+                        {(authRole === 'admin' || authRole === 'doctor' || authRole === 'clinic') && (
+                          <Link
+                            href="/dr"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '6px 8px',
+                              borderRadius: '4px',
+                              fontSize: '0.76rem',
+                              fontWeight: 600,
+                              color: '#334155',
+                              textDecoration: 'none',
+                              transition: 'background 0.12s ease'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                          >
+                            <User size={14} color="#0d9488" />
+                            <span>{isEs ? 'Portal Médico / Clínica' : 'Doctor Portal'}</span>
+                          </Link>
+                        )}
+                        {authRole === 'wholeseller' && (
+                          <Link
+                            href="/wholesaler"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '6px 8px',
+                              borderRadius: '4px',
+                              fontSize: '0.76rem',
+                              fontWeight: 600,
+                              color: '#334155',
+                              textDecoration: 'none',
+                              transition: 'background 0.12s ease'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                          >
+                            <Box size={14} color="#ea580c" />
+                            <span>{isEs ? 'Portal Mayorista' : 'Wholesaler Portal'}</span>
+                          </Link>
+                        )}
+                      </div>
+
+                      <div style={{ height: '1px', background: '#f1f5f9', margin: '2px 0' }} />
+
+                      {/* Explicit Logout Option */}
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '7px 8px',
+                          borderRadius: '4px',
+                          border: 'none',
+                          background: 'transparent',
+                          fontSize: '0.76rem',
+                          fontWeight: 700,
+                          color: '#dc2626',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'background 0.12s ease'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <LogOut size={14} color="#dc2626" />
+                        <span>{isEs ? 'Cerrar Sesión' : 'Sign Out'}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <a
-                  href="/login?redirect=/pricing/peptides"
+                  href={`/login?redirect=${encodeURIComponent('/pricing/peptides')}`}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -3126,7 +3397,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     border: '1px solid #1a73e8',
                     color: '#1a73e8',
                     padding: '4px 10px',
-                    borderRadius: '6px',
+                    borderRadius: '4px',
                     fontSize: '0.74rem',
                     fontWeight: 700,
                     textDecoration: 'none',
@@ -3359,6 +3630,108 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         </button>
                       </div>
                     </div>
+
+                    {/* Divider */}
+                    <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+
+                    {/* Mobile Auth & Logout Options */}
+                    {authUser ? (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', background: '#f8fafc', borderRadius: '6px' }}>
+                          <div style={{
+                            width: '26px',
+                            height: '26px',
+                            borderRadius: '50%',
+                            background: avatarBgColor,
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.68rem',
+                            fontWeight: 750,
+                            flexShrink: 0
+                          }}>
+                            {effectiveInitials}
+                          </div>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontSize: '0.76rem', fontWeight: 750, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {effectiveDisplayName}
+                            </div>
+                            <div style={{ fontSize: '0.58rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 700 }}>
+                              {effectiveRoleLabel}
+                            </div>
+                          </div>
+                        </div>
+
+                        {authRole === 'admin' && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setIsMobileMoreMenuOpen(false)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              color: '#1e293b',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <ShieldCheck size={14} color="#1a73e8" />
+                            <span>{isEs ? 'Panel Admin' : 'Admin Console'}</span>
+                          </Link>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsMobileMoreMenuOpen(false);
+                            handleLogout();
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#dc2626',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                        >
+                          <LogOut size={14} color="#dc2626" />
+                          <span>{isEs ? 'Cerrar Sesión' : 'Sign Out'}</span>
+                        </button>
+                      </>
+                    ) : (
+                      <Link
+                        href={`/login?redirect=${encodeURIComponent('/pricing/peptides')}`}
+                        onClick={() => setIsMobileMoreMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          background: 'transparent',
+                          color: '#1a73e8',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <LogIn size={14} color="#1a73e8" />
+                        <span>{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
