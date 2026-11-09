@@ -709,17 +709,18 @@ export default function PublicLabelsAppClient({
     setLabelIndex(resolvedPart);
     updateUrlWithQueue(patientQueue, idx);
 
-    // Smooth scroll to the target label workbench or part selector if user tapped a part button
-    if (typeof window !== 'undefined' && targetPartIndex != null) {
+    // Smooth scroll to the target label workbench or part selector
+    if (typeof window !== 'undefined') {
       setTimeout(() => {
         const targetEl = document.getElementById('pls-label-workbench') ||
-                         document.querySelector('.pls-part-navigation') ||
+                         document.querySelector('.pls-parts-tabs') ||
+                         document.querySelector('.pls-meta-parts') ||
                          document.querySelector('.pls-editor-section') ||
                          document.querySelector('.pls-preview-card');
         if (targetEl) {
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 50);
+      }, 60);
     }
   };
 
@@ -1384,6 +1385,14 @@ export default function PublicLabelsAppClient({
             setLabelIndex(idx);
             const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${idx + 1}&edit=true&lang=${lang}`;
             window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+            if (typeof window !== 'undefined') {
+              setTimeout(() => {
+                const targetEl = document.getElementById('pls-label-workbench');
+                if (targetEl) {
+                  targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 40);
+            }
           }}
           onQuickSearchPatient={() => {
             setSearchQuery(patientName);
@@ -1862,7 +1871,8 @@ export default function PublicLabelsAppClient({
         ) : isLoadingRx ? (
           <LabelsWorkspaceSkeleton isEs={isEs} />
         ) : (
-          <LabelsErrorBoundary isEs={isEs}>
+          <div id="pls-label-workbench" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <LabelsErrorBoundary isEs={isEs}>
             <PharmacyLabelsModal
               key={`${activeCode}-${labelIndex}`}
               isOpen={true}
@@ -1932,7 +1942,8 @@ export default function PublicLabelsAppClient({
               isEs={isEs}
             />
           </LabelsErrorBoundary>
-        )}
+        </div>
+      )}
 
         {/* ── Hidden Offscreen Container for Batch High-Res SVG Rasterization ── */}
         <LabelsOffscreenRenderer patientQueue={patientQueue} />
