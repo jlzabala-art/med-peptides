@@ -7,6 +7,7 @@ import './labels-studio.css';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import ImportPrescriptionModal from '@/features/prescriptions/components/ImportPrescriptionModal';
+import PrescriptionRefillModal from '@/components/prescription/PrescriptionRefillModal';
 import EmptyState from '@/components/ui/EmptyState';
 import LabelsHeader from './components/LabelsHeader';
 import LabelsSearchDropdown from './components/LabelsSearchDropdown';
@@ -305,6 +306,7 @@ export default function PublicLabelsAppClient({
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [copiedShareType, setCopiedShareType] = useState(null);
   const [showImport, setShowImport] = useState(false);
+  const [showRefillModal, setShowRefillModal] = useState(false);
   const [isApprovingRx, setIsApprovingRx] = useState(false);
   const [isBatchApproving, setIsBatchApproving] = useState(false);
   const [labeledMap, setLabeledMap] = useState(getInitialLabeledSet);
@@ -1364,6 +1366,7 @@ export default function PublicLabelsAppClient({
             setSearchOpen(true);
             searchInputRef.current?.focus();
           }}
+          onOpenRefillModal={() => setShowRefillModal(true)}
         />
       )}
 
@@ -1921,6 +1924,23 @@ export default function PublicLabelsAppClient({
           setShowImport(false);
           const first = Array.isArray(created) ? created[0] : null;
           if (first?.id || first?.code) handleSelectPatient(first.id || first.code);
+        }}
+      />
+
+      {/* Refill / Duplicate Prescription Modal — selective parts inclusion & next refill scheduling */}
+      <PrescriptionRefillModal
+        isOpen={showRefillModal}
+        onClose={() => setShowRefillModal(false)}
+        currentRx={currentRx}
+        labels={labels}
+        cleanRxCode={cleanRxCode || activeCode}
+        patientName={patientName}
+        docName={docName}
+        isEs={isEs}
+        onRefillCreated={(newRefillData) => {
+          if (newRefillData?.newCode) {
+            handleSelectOrAddPatient(newRefillData.newCode, true);
+          }
         }}
       />
 

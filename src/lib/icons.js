@@ -139,6 +139,7 @@ export { default as Printer } from 'lucide-react/dist/esm/icons/printer';
 export { default as QrCode } from 'lucide-react/dist/esm/icons/qr-code';
 export { default as Receipt } from 'lucide-react/dist/esm/icons/receipt';
 export { default as RefreshCw } from 'lucide-react/dist/esm/icons/refresh-cw';
+export { default as Repeat } from 'lucide-react/dist/esm/icons/repeat';
 export { default as Save } from 'lucide-react/dist/esm/icons/save';
 export { default as Scale } from 'lucide-react/dist/esm/icons/scale';
 export { default as ScanLine } from 'lucide-react/dist/esm/icons/scan-line';

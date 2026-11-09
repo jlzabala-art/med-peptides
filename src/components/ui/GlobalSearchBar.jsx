@@ -87,9 +87,14 @@ export default function GlobalSearchBar({
   const effectiveOnChange = onChange || onSearchChange;
   const router = useRouter();
   const inputRef = useRef(null);
+  const skipNextSuggestionsRef = useRef(false);
   const [isFocused, setIsFocused] = useState(false);
-  const isProtocolsPage = (namespace || '').includes('protocol') || (typeof window !== 'undefined' && (window.location.pathname.includes('/proto') || window.location.pathname.includes('/protocols')));
-  const isUsersPage = (namespace || '').includes('user') || (namespace || '').includes('customer') || (typeof window !== 'undefined' && (window.location.pathname.includes('/users') || window.location.pathname.includes('/admin/users') || window.location.pathname.includes('/customers')));
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isPatientsPage = (namespace || '').includes('patient') || currentPath.includes('/patients');
+  const isSuppliersPage = (namespace || '').includes('supplier') || (namespace || '').includes('procurement') || currentPath.includes('/procurement') || currentPath.includes('/suppliers');
+  const isPrescriptionsPage = (namespace || '').includes('prescription') || currentPath.includes('/prescriptions');
+  const isProtocolsPage = (namespace || '').includes('protocol') || currentPath.includes('/proto');
+  const isUsersPage = !isPatientsPage && ((namespace || '').includes('user') || (namespace || '').includes('customer') || currentPath.includes('/users') || currentPath.includes('/customers'));
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState(() => {
@@ -115,6 +120,12 @@ export default function GlobalSearchBar({
 
   // Debounced Algolia instant suggestions query & Natural Language /ai support
   useEffect(() => {
+    if (skipNextSuggestionsRef.current) {
+      skipNextSuggestionsRef.current = false;
+      setShowDropdown(false);
+      return;
+    }
+
     const trimmedVal = (effectiveValue || '').trim();
     if (trimmedVal.startsWith('/ai') || trimmedVal.startsWith('/copilot')) {
       const q = trimmedVal.replace(/^\/(ai|copilot)\s*/i, '').trim();
@@ -145,7 +156,60 @@ export default function GlobalSearchBar({
     setIsSearchingSuggestions(true);
     const timer = setTimeout(async () => {
       try {
-        if (isUsersPage) {
+        if (isPatientsPage) {
+          const res = await searchAlgoliaFederated(effectiveValue.trim(), ['atlas_patients'], 8);
+          if (isMounted) {
+            const patientHits = (res.patients || []).map((p) => ({
+              key: p.objectID || p.id,
+              id: p.objectID || p.id,
+              name: (p.name || p.fullName || 'Patient').trim(),
+              email: p.email || '',
+              phone: p.phone || '',
+              category: 'PATIENT',
+              status: p.status || 'active',
+              indexName: 'atlas_patients'
+            }));
+            setSuggestions(patientHits);
+            if (patientHits.length > 0 && isFocused) {
+              setShowDropdown(true);
+            }
+          }
+        } else if (isSuppliersPage) {
+          const res = await searchAlgoliaFederated(effectiveValue.trim(), ['suppliers'], 8);
+          if (isMounted) {
+            const supplierHits = (res.suppliers || []).map((s) => ({
+              key: s.objectID || s.id,
+              id: s.objectID || s.id,
+              name: (s.name || s.companyName || s.displayName || 'Supplier').trim(),
+              country: s.country || '',
+              category: (s.category || 'SUPPLIER').toUpperCase(),
+              status: s.status || s.statusB2B || 'active',
+              indexName: 'suppliers'
+            }));
+            setSuggestions(supplierHits);
+            if (supplierHits.length > 0 && isFocused) {
+              setShowDropdown(true);
+            }
+          }
+        } else if (isPrescriptionsPage) {
+          const res = await searchAlgoliaFederated(effectiveValue.trim(), ['prescriptions'], 8);
+          if (isMounted) {
+            const rxHits = (res.prescriptions || []).map((r) => ({
+              key: r.objectID || r.id,
+              id: r.objectID || r.id,
+              name: (r.prescriptionCode || r.code || `RX-${(r.id || '').slice(0, 6)}`).trim(),
+              patientName: r.patientName || '',
+              doctorName: r.doctorName || '',
+              category: (r.status || 'PRESCRIPTION').toUpperCase(),
+              status: r.status || 'pending',
+              indexName: 'prescriptions'
+            }));
+            setSuggestions(rxHits);
+            if (rxHits.length > 0 && isFocused) {
+              setShowDropdown(true);
+            }
+          }
+        } else if (isUsersPage) {
           const res = await searchAlgoliaFederated(effectiveValue.trim(), ['atlas_users'], 8);
           if (isMounted) {
             const userHits = (res.users || []).map((u) => {
@@ -242,7 +306,7 @@ export default function GlobalSearchBar({
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [value, isFocused]);
+  }, [effectiveValue, isFocused]);
 
   const effectivePlaceholder = useMemo(() => {
     if (isMobile && placeholder) {
@@ -305,6 +369,7 @@ export default function GlobalSearchBar({
 
   const handleChange = useCallback(
     (e) => {
+      skipNextSuggestionsRef.current = false;
       const term = e.target.value;
       effectiveOnChange?.(term);
       if (!term) {
@@ -317,6 +382,7 @@ export default function GlobalSearchBar({
   );
 
   const handleClear = useCallback(() => {
+    skipNextSuggestionsRef.current = false;
     effectiveOnChange?.('');
     inputRef.current?.focus();
     if (showRecent && recentSearches.length > 0) {
@@ -340,28 +406,43 @@ export default function GlobalSearchBar({
 
   const handleSuggestionClick = useCallback(
     (item) => {
+      skipNextSuggestionsRef.current = true;
+      setShowDropdown(false);
+      setSuggestions([]);
+      setSelectedIndex(-1);
+
       // Natural Language /ai suggestion click
       if (item.isAiPrompt) {
         window.dispatchEvent(new CustomEvent('open-atlas-ai', { detail: { query: item.query } }));
         saveRecentSearch(item.name);
-        setShowDropdown(false);
-        setSelectedIndex(-1);
         effectiveOnChange?.('');
         return;
       }
 
       saveRecentSearch(item.name);
       trackSearchClick({
-        indexName: item.indexName || (isUsersPage ? 'atlas_users' : 'products'),
+        indexName: item.indexName || (isUsersPage ? 'atlas_users' : isPatientsPage ? 'atlas_patients' : isSuppliersPage ? 'suppliers' : 'products'),
         objectID: item.id,
         eventName: 'GlobalSearchBar Suggestion Clicked'
       });
-      setShowDropdown(false);
-      setSelectedIndex(-1);
 
-      // User suggestions: select directly into search input without navigating
-      if (item.indexName === 'atlas_users') {
+      // User & Patient suggestions: select directly into search input without navigating
+      if (item.indexName === 'atlas_users' || item.indexName === 'atlas_patients') {
         effectiveOnChange?.(item.name || item.email || '');
+        inputRef.current?.focus();
+        return;
+      }
+
+      // Suppliers in procurement
+      if (item.indexName === 'suppliers') {
+        effectiveOnChange?.(item.name || '');
+        inputRef.current?.focus();
+        return;
+      }
+
+      // Prescriptions in prescriptions tab
+      if (item.indexName === 'prescriptions') {
+        effectiveOnChange?.(item.name || '');
         inputRef.current?.focus();
         return;
       }
@@ -380,7 +461,7 @@ export default function GlobalSearchBar({
       effectiveOnChange?.(item.name);
       inputRef.current?.focus();
     },
-    [effectiveOnChange, saveRecentSearch, isProtocolsPage, isUsersPage, router]
+    [effectiveOnChange, saveRecentSearch, isProtocolsPage, isUsersPage, isPatientsPage, isSuppliersPage, router]
   );
 
   const handleKeyDown = useCallback(
@@ -651,17 +732,37 @@ export default function GlobalSearchBar({
         )}
 
         {/* ── ALGLOLIA INSTANT SUGGESTIONS DROPDOWN ───────────────────── */}
-        {showDropdown && value.trim().length >= 2 && (
+        {showDropdown && (effectiveValue || '').trim().length >= 2 && (
           <div className="atlas-search__dropdown" style={{ zIndex: 100 }}>
             <div style={{ padding: '0.5rem 1rem 0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {value.trim().startsWith('/ai') ? '🤖 Atlas AI' : (isUsersPage ? 'Users & Accounts (Algolia)' : 'Algolia Suggestions')}
+                {(effectiveValue || '').trim().startsWith('/ai')
+                  ? '🤖 Atlas AI'
+                  : isPatientsPage
+                  ? 'Patients (Algolia)'
+                  : isSuppliersPage
+                  ? 'Suppliers (Algolia)'
+                  : isPrescriptionsPage
+                  ? 'Prescriptions (Algolia)'
+                  : isProtocolsPage
+                  ? 'Protocols (Algolia)'
+                  : isUsersPage
+                  ? 'Users & Accounts (Algolia)'
+                  : 'Algolia Suggestions'}
               </span>
               {isSearchingSuggestions && <Loader size={12} className="atlas-search__spinner" />}
             </div>
             {suggestions.length === 0 && !isSearchingSuggestions ? (
               <div style={{ padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                {isUsersPage ? 'No user matches found' : 'No clinical matches found'}
+                {isPatientsPage
+                  ? 'No patient matches found'
+                  : isSuppliersPage
+                  ? 'No supplier matches found'
+                  : isPrescriptionsPage
+                  ? 'No prescription matches found'
+                  : isUsersPage
+                  ? 'No user matches found'
+                  : 'No clinical matches found'}
               </div>
             ) : (
               suggestions.map((item, idx) => {
@@ -736,9 +837,9 @@ export default function GlobalSearchBar({
                         <span style={{ fontWeight: 600, color: item.isAiPrompt ? '#1d4ed8' : '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {item.name}
                         </span>
-                        {isUserItem && (item.email || item.company) && (
+                        {(item.email || item.company || item.patientName || item.country) && (
                           <span style={{ fontSize: '0.72rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {item.email}{item.company ? ` · ${item.company}` : ''}
+                            {item.email || item.country || (item.patientName ? `Patient: ${item.patientName}` : '')}{item.company ? ` · ${item.company}` : ''}
                           </span>
                         )}
                       </div>

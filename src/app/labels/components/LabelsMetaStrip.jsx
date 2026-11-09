@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, FileText, Stethoscope, Search, ExternalLink, Check, Copy, ShieldCheck, Clock, CheckCircle2, Edit3 } from '@/lib/icons';
+import { User, FileText, Stethoscope, Search, ExternalLink, Check, Copy, ShieldCheck, Clock, CheckCircle2, Edit3, Repeat } from '@/lib/icons';
 
 export default function LabelsMetaStrip({
   isEs,
@@ -16,6 +16,7 @@ export default function LabelsMetaStrip({
   labelIndex,
   onSelectLabelPart,
   onQuickSearchPatient,
+  onOpenRefillModal,
   rxStatus = 'approved',
   isApproving = false,
   onApprovePrescription = null,
@@ -93,6 +94,31 @@ export default function LabelsMetaStrip({
             <Edit3 size={11} color="#1a73e8" />
             <span>{isEs ? 'Editar Rx' : 'Edit Rx'}</span>
           </a>
+          {onOpenRefillModal && (
+            <button
+              type="button"
+              onClick={onOpenRefillModal}
+              className="pls-meta-action-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                padding: '2px 7px',
+                borderRadius: '4px',
+                background: '#ecfdf5',
+                border: '1px solid #a7f3d0',
+                color: '#059669',
+                fontWeight: 700,
+                fontSize: '0.68rem',
+                cursor: 'pointer',
+                marginLeft: '4px'
+              }}
+              title={isEs ? `Duplicar / Renovar prescripción #${cleanRxCode}` : `Refill / Duplicate prescription #${cleanRxCode}`}
+            >
+              <Repeat size={11} color="#059669" />
+              <span>{isEs ? 'Refill Rx' : 'Refill Rx'}</span>
+            </button>
+          )}
           <button
             type="button"
             className="pls-meta-action-btn"

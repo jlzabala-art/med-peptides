@@ -215,6 +215,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
           cursor: 'pointer',
           transition: 'all 0.15s ease',
           whiteSpace: 'nowrap',
+          flexShrink: 0,
           boxShadow: isOpen ? '0 0 0 2px rgba(2, 132, 199, 0.2)' : 'none'
         }}
       >

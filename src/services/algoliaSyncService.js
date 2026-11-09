@@ -218,6 +218,42 @@ export async function syncProductToAlgolia(prod) {
 }
 
 /**
+ * Sync a single protocol record to protocols index
+ */
+export async function syncProtocolToAlgolia(proto) {
+  if (!proto || (!proto.id && !proto.objectID)) return;
+  return postSyncRequest({
+    action: 'upsert',
+    indexName: 'protocols',
+    record: proto
+  });
+}
+
+/**
+ * Sync a single supplier record to suppliers index
+ */
+export async function syncSupplierToAlgolia(supplier) {
+  if (!supplier || (!supplier.id && !supplier.objectID)) return;
+  return postSyncRequest({
+    action: 'upsert',
+    indexName: 'suppliers',
+    record: supplier
+  });
+}
+
+/**
+ * Sync a single user record to atlas_users index
+ */
+export async function syncUserToAlgolia(user) {
+  if (!user || (!user.id && !user.objectID)) return;
+  return postSyncRequest({
+    action: 'upsert',
+    indexName: 'atlas_users',
+    record: user
+  });
+}
+
+/**
  * Remove record from an Algolia index
  */
 export async function removeObjectFromAlgolia(indexName, objectID) {

@@ -44,11 +44,36 @@ export async function GET(request) {
       throw new Error('Database connection unavailable');
     }
 
-    // 2. Load all supplier docs
-    const suppliersSnap = await adminDb.collection('suppliers').get();
-    const suppliers = suppliersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // 2. High-speed resolution: Read materialized view from _meta/supplier_coverage
+    // This avoids scanning hundreds of product docs and responds in <20ms
+    const metaSnap = await adminDb.collection('_meta').doc('supplier_coverage').get();
+    if (metaSnap.exists) {
+      const metaData = metaSnap.data();
+      const bySupplier = metaData.bySupplier || {};
 
-    // 3. Compute stats across products (Embedded-First Strategy)
+      const result = Object.entries(bySupplier).map(([id, s]) => ({
+        id,
+        productsSupplied: s.products || 0,
+        variantsSupplied: s.variants || 0,
+        productCategories: s.categories || []
+      }));
+
+      inMemoryStatsCache = result;
+      inMemoryCacheTime = Date.now();
+
+      return NextResponse.json({
+        stats: result,
+        source: 'meta-view',
+        computedAt: metaData.updatedAt || new Date().toISOString()
+      }, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1800',
+          'X-Cache': 'HIT-META'
+        }
+      });
+    }
+
+    // 3. Fallback: Load supplier docs and scan products if _meta is missing
     const supplierMap = {};
     const ensureEntry = (sid) => {
       if (!supplierMap[sid]) {

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import {
   FileText,
   Clock,
@@ -192,6 +194,10 @@ export default function PayablesStatementPage() {
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Authentication & Zero-Trust Unlock State
+  const authContext = useAuth?.() || {};
+  const authUser = authContext.user;
+  const isAdmin = authContext.isAdmin;
+
   const [unlockEmail, setUnlockEmail] = useState('');
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [activeEmail, setActiveEmail] = useState(() => {
@@ -205,7 +211,7 @@ export default function PayablesStatementPage() {
     setLoading(true);
     setError(null);
     try {
-      const emailToUse = emailOverride !== undefined ? emailOverride : activeEmail;
+      const emailToUse = emailOverride !== undefined ? emailOverride : (activeEmail || authUser?.email || '');
       const qParams = new URLSearchParams();
       if (emailToUse) qParams.set('email', emailToUse);
       if (isQuicklinkVerified) qParams.set('quicklink', 'verified');
@@ -224,8 +230,13 @@ export default function PayablesStatementPage() {
   };
 
   useEffect(() => {
-    fetchStatement();
-  }, [token]);
+    if (authUser?.email && !activeEmail) {
+      setActiveEmail(authUser.email);
+      fetchStatement(authUser.email);
+    } else {
+      fetchStatement();
+    }
+  }, [token, authUser?.email]);
 
   const statement = data?.statement || {};
   const kpis = data?.kpis || {};
@@ -512,6 +523,61 @@ export default function PayablesStatementPage() {
             {copiedLink ? <Check size={13} color="#4ade80" /> : <Share2 size={13} />}
             <span>{copiedLink ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Compartir' : 'Share')}</span>
           </button>
+
+          {/* User Sign In / Profile Action (Google Cloud Standard) */}
+          {authUser ? (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '3px 9px',
+              borderRadius: '6px',
+              backgroundColor: 'rgba(255, 255, 255, 0.14)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              color: '#ffffff',
+              fontSize: '0.74rem',
+              fontWeight: 600
+            }}>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                backgroundColor: '#0284c7',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.65rem',
+                fontWeight: 800
+              }}>
+                {(authUser.displayName || authUser.email || 'U').charAt(0).toUpperCase()}
+              </div>
+              <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {authUser.displayName || authUser.email}
+              </span>
+            </div>
+          ) : (
+            <Link
+              href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                backgroundColor: '#0284c7',
+                color: '#ffffff',
+                border: 'none',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                transition: 'all 0.15s ease',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              }}
+            >
+              <span>{lang === 'es' ? 'Iniciar Sesión' : 'Sign In'}</span>
+            </Link>
+          )}
         </div>
       </header>
 
@@ -648,16 +714,16 @@ export default function PayablesStatementPage() {
             <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
               {lang === 'es' ? 'Extracto Confidencial Protegido' : 'Confidential Financial Statement Protected'}
             </h2>
-            <p style={{ fontSize: '0.88rem', color: '#64748b', maxWidth: '580px', margin: '0 auto 1.5rem auto', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '0.88rem', color: '#64748b', maxWidth: '580px', margin: '0 auto 1.25rem auto', lineHeight: 1.5 }}>
               {lang === 'es'
-                ? 'Los importes, números de factura y datos de contacto están encriptados para proteger la privacidad comercial B2B. Introduce el correo electrónico registrado del proveedor para desbloquear el extracto o utiliza el QuickLink verificado.'
-                : 'Invoice numbers, line amounts, and partner contact details are shielded to protect commercial B2B confidentiality. Enter the partner registered email to unlock this statement or access via verified QuickLink.'}
+                ? 'Los importes, números de factura y datos de contacto están protegidos para garantizar la confidencialidad B2B. Introduce el correo registrado del proveedor o inicia sesión arriba para desbloquearlo.'
+                : 'Invoice numbers, line amounts, and partner contact details are shielded to protect commercial B2B confidentiality. Enter the partner registered email below or sign in above to unlock.'}
             </p>
 
-            <form onSubmit={handleUnlockSubmit} style={{ display: 'inline-flex', gap: '8px', maxWidth: '440px', width: '100%', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <form onSubmit={handleUnlockSubmit} style={{ display: 'inline-flex', gap: '8px', maxWidth: '460px', width: '100%', flexWrap: 'wrap', justifyContent: 'center' }}>
               <input
                 type="email"
-                placeholder={lang === 'es' ? 'Introduce tu email corporativo (ej. finance@partner-firm.com)' : 'Enter registered business email (e.g. finance@partner-firm.com)'}
+                placeholder={lang === 'es' ? 'Introduce tu email registrado' : 'Enter registered partner email'}
                 value={unlockEmail}
                 onChange={(e) => setUnlockEmail(e.target.value)}
                 style={{
@@ -691,6 +757,13 @@ export default function PayablesStatementPage() {
                 <span>{isUnlocking ? (lang === 'es' ? 'Validando...' : 'Verifying...') : (lang === 'es' ? 'Desbloquear Extracto' : 'Unlock Statement')}</span>
               </button>
             </form>
+            <div style={{ marginTop: '0.85rem', fontSize: '0.78rem', color: '#94a3b8' }}>
+              {lang === 'es' ? (
+                <>¿Ya tienes cuenta autorizada? <Link href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'underline' }}>Inicia sesión aquí</Link></>
+              ) : (
+                <>Already have an authorized account? <Link href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'underline' }}>Sign in here</Link></>
+              )}
+            </div>
           </div>
         )}
 

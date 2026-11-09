@@ -41,6 +41,7 @@ import { logger } from '../utils/logger.js';
 import { withRetry } from './_resilience.js';
 import { sanitizeClinicalEntity } from '../utils/clinicalSanitizer.js';
 import { logPHIAccess, PHI_ACTIONS } from '../services/PHIAuditService.js';
+import { syncProtocolToAlgolia, removeObjectFromAlgolia } from '../services/algoliaSyncService.js';
 
 // ── Collection helpers ────────────────────────────────────────────────────────
 const protocolsCol        = ()  => collection(db, 'protocols');        // canonical source
@@ -375,6 +376,7 @@ export async function createProtocol(protocolData) {
       updatedAt: serverTimestamp(),
     });
     invalidateProtocolCache();
+    syncProtocolToAlgolia({ id: docRef.id, ...validated }).catch(() => {});
     return docRef.id;
   } catch (err) {
     logger.error('[protocolRepository] createProtocol', { error: err.message });
@@ -397,6 +399,7 @@ export async function updateProtocol(protocolId, updates) {
       updatedAt: serverTimestamp(),
     });
     invalidateProtocolCache();
+    syncProtocolToAlgolia({ id: protocolId, ...validated }).catch(() => {});
   } catch (err) {
     logger.error('[protocolRepository] updateProtocol', { protocolId, error: err.message });
     throw err;
@@ -412,6 +415,7 @@ export async function deleteProtocol(protocolId) {
   try {
     await deleteDoc(doc(db, 'protocols', protocolId));
     invalidateProtocolCache(); // ← cache bust so deleted doc is no longer served
+    removeObjectFromAlgolia('protocols', protocolId).catch(() => {});
   } catch (err) {
     logger.error('[protocolRepository] deleteProtocol', { protocolId, error: err.message });
     throw err;

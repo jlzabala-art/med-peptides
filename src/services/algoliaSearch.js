@@ -276,6 +276,7 @@ export async function searchAlgoliaFederated(
       patients: resMap.atlas_patients || resMap.patients || [],
       users: resMap.atlas_users || resMap.users || [],
       prescriptions: resMap.prescriptions || [],
+      suppliers: resMap.suppliers || [],
       clinics: resMap.atlas_clinics || resMap.clinics || [],
       queryID: results.results[0]?.queryID,
       source: 'algolia'

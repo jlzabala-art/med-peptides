@@ -332,6 +332,29 @@ export async function POST(request) {
       }
     }
 
+    // ── Intelligent Refill Scheduling on Save ──
+    const textToAnalyze = `${currentItem.productTitle || ''} ${currentItem.directions || ''} ${currentItem.volume || ''}`.toLowerCase();
+    let detectedDurationDays = 60;
+    if (textToAnalyze.includes('3 months') || textToAnalyze.includes('90 days') || textToAnalyze.includes('90 días')) detectedDurationDays = 90;
+    else if (textToAnalyze.includes('2 months') || textToAnalyze.includes('60 days') || textToAnalyze.includes('60 días') || textToAnalyze.includes('2 meses')) detectedDurationDays = 60;
+    else if (textToAnalyze.includes('1 month') || textToAnalyze.includes('30 days') || textToAnalyze.includes('30 días') || textToAnalyze.includes('1 mes')) detectedDurationDays = 30;
+    else if (textToAnalyze.includes('15 days') || textToAnalyze.includes('15 días')) detectedDurationDays = 15;
+    else if (textToAnalyze.includes('10 days') || textToAnalyze.includes('10 días')) detectedDurationDays = 10;
+
+    const startDate = existingData?.treatmentStartDate || existingData?.dateIssued || new Date().toISOString().split('T')[0];
+    const startTime = new Date(startDate).getTime();
+    const safeStartTime = isNaN(startTime) ? Date.now() : startTime;
+    const exhaustionTime = new Date(safeStartTime + detectedDurationDays * 24 * 60 * 60 * 1000);
+    const exhaustionDateStr = exhaustionTime.toISOString().split('T')[0];
+    const alertTime = new Date(exhaustionTime.getTime() - 15 * 24 * 60 * 60 * 1000);
+    const alertDateStr = alertTime.toISOString().split('T')[0];
+
+    updatePayload.courseDurationDays = Number(currentItem.courseDurationDays || existingData?.courseDurationDays || detectedDurationDays);
+    updatePayload.exhaustionDate = exhaustionDateStr;
+    updatePayload.refillAlertDate = alertDateStr;
+    updatePayload.nextRefillDate = currentItem.nextRefillDate || existingData?.nextRefillDate || alertDateStr;
+    updatePayload.refillAlertStatus = existingData?.refillAlertStatus || 'scheduled';
+
     // Sanitize and perform Admin Firestore Update
     const sanitizedPayload = deepSanitize(updatePayload);
     await targetDocRef.update(sanitizedPayload);

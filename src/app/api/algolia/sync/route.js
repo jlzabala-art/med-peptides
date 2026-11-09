@@ -224,6 +224,37 @@ export async function POST(request) {
         clinicIds: record.clinicIds || (record.clinicId ? [record.clinicId] : []),
         createdAt_ts: getTimestamp(record.createdAt || record.updatedAt)
       };
+    } else if (indexName === 'protocols') {
+      formattedRecord = {
+        objectID: targetId,
+        id: targetId,
+        title: record.title || record.name || '',
+        name: record.title || record.name || '',
+        description: record.description ? String(record.description).substring(0, 500) : '',
+        category: record.category || record.category_main || 'anti_aging',
+        tags: record.tags || [],
+        itemCount: Array.isArray(record.items) ? record.items.length : 0,
+        status: (record.status || 'active').toLowerCase(),
+        isFeatured: Boolean(record.isFeatured),
+        updatedAt_ts: getTimestamp(record.updatedAt || record.createdAt)
+      };
+    } else if (indexName === 'suppliers') {
+      formattedRecord = {
+        objectID: targetId,
+        id: targetId,
+        name: record.name || record.companyName || '',
+        companyName: record.companyName || record.name || '',
+        displayName: record.displayName || record.name || record.companyName || '',
+        country: record.country || record.originCountry || '',
+        category: record.category || (Array.isArray(record.categories) && record.categories[0]) || '',
+        status: (record.status || record.statusB2B || 'active').toLowerCase(),
+        statusB2B: (record.statusB2B || record.status || 'active').toLowerCase(),
+        email: record.email || '',
+        website: record.website || '',
+        productsSupplied: Number(record.productsSupplied || 0),
+        variantsSupplied: Number(record.variantsSupplied || 0),
+        updatedAt_ts: getTimestamp(record.updatedAt || record.createdAt)
+      };
     }
 
     await client.saveObjects({

@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { collection, getDocs, getDoc, updateDoc, doc, setDoc, query, limit, where, writeBatch, orderBy } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
+import { syncSupplierToAlgolia } from '../../../services/algoliaSyncService';
 
 // ── In-memory cache (Layer 1) ─────────────────────────────────────────────────
 // Survives tab switches and component remounts. TTL: 5 minutes.
@@ -120,8 +121,10 @@ export function useSupplierData({ initialData } = {}) {
             setSuppliers(parsed.data);
             setLoading(false);
 
-            // Background revalidation
-            setTimeout(() => fetchAllSuppliers(true), 500);
+            // Only background revalidate if stale (older than 5 minutes)
+            if (now - parsed.ts > CACHE_TTL_MS) {
+              setTimeout(() => fetchAllSuppliers(false), 1000);
+            }
             return;
           }
         }
@@ -320,6 +323,7 @@ export function useSupplierData({ initialData } = {}) {
         _supplierCache.data = null;
         _supplierCache.ts = 0;
         if (typeof window !== 'undefined') localStorage.removeItem('__rg_suppliers_cache');
+        syncSupplierToAlgolia({ id, ...data }).catch(() => {});
         toast.success('Changes saved successfully');
       }
     } catch (err) {
@@ -375,6 +379,7 @@ export function useSupplierData({ initialData } = {}) {
       _supplierCache.data = null;
       _supplierCache.ts = 0;
       setSuppliers(prev => [{ id: newId, ...newDoc }, ...prev]);
+      syncSupplierToAlgolia({ id: newId, ...newDoc }).catch(() => {});
       toast.success('New supplier registered');
     } catch (err) {
       console.error('Create failed:', err);

@@ -117,6 +117,8 @@ export default function UserPayablesPopover({ user }) {
           color: '#c2410c',
           border: '1px solid #fed7aa',
           cursor: 'pointer',
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
           transition: 'all 0.15s ease',
           boxShadow: isOpen ? '0 0 0 2px rgba(234, 88, 12, 0.2)' : 'none'
         }}

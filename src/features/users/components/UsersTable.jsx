@@ -552,24 +552,24 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                   </span>
                 )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '190px' }} title={email}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px' }} title={email}>
                   {email}
                 </span>
                 <CopyableId value={u.id} iconOnly={true} />
-                <span className="hide-on-mobile" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <UserSharedCatalogsPopover
-                    user={u}
-                    onOpenShareDrawer={(targetUser) => {
-                      setShareDrawerConfig({
-                        user: targetUser,
-                        shareUrl: 'https://www.atlashealth-services.com/catalog',
-                        docType: 'catalog'
-                      });
-                    }}
-                  />
-                  <UserPayablesPopover user={u} />
-                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '0.35rem', flexWrap: 'wrap' }}>
+                <UserSharedCatalogsPopover
+                  user={u}
+                  onOpenShareDrawer={(targetUser) => {
+                    setShareDrawerConfig({
+                      user: targetUser,
+                      shareUrl: 'https://www.atlashealth-services.com/catalog',
+                      docType: 'catalog'
+                    });
+                  }}
+                />
+                <UserPayablesPopover user={u} />
               </div>
             </div>
           </div>
