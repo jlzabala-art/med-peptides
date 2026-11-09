@@ -29,7 +29,7 @@ import {
   Users, UserCheck, ShieldCheck, Mail, Archive,
   Trash2, Plus, Edit, AlertCircle, XCircle, Eye,
   Building2, DollarSign, CheckCircle2, Search, Download, UserPlus, Clock, Stethoscope, Sparkles,
-  FileText, Package, Calendar, Share2, MessageSquare, BookOpen, ExternalLink
+  FileText, Package, Calendar, Share2, MessageSquare, BookOpen, ExternalLink, Copy, Sliders, Upload
 } from 'lucide-react';
 
 import { useFirestorePaginatedCollection } from '../../../hooks/data/useFirestorePaginatedCollection';
@@ -485,17 +485,30 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     }
   };
 
+  const getSmartInitials = (fullName) => {
+    if (!fullName) return 'U';
+    const cleaned = fullName.replace(/^(dr\.|dra\.|doctor|doctora|prof\.|prof|lic\.|lic|mr\.|mrs\.|ms\.)\s+/i, '').trim();
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    if (parts.length === 1 && parts[0].length >= 1) {
+      return parts[0].substring(0, Math.min(2, parts[0].length)).toUpperCase();
+    }
+    return fullName.charAt(0).toUpperCase();
+  };
+
   const columns = [
     {
       key: 'user',
       header: 'User',
       mobilePriority: 1,
-      width: '28%',
+      width: '32%',
       render: (u) => {
         const name = getUserFullName(u);
         const email = u.email || u.contactEmail || 'No email';
         const role = u.role || (u.roles && u.roles[0]) || 'patient';
-        const initial = name.charAt(0).toUpperCase() || 'U';
+        const initial = getSmartInitials(name);
 
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -540,9 +553,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                 )}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', wordBreak: 'break-word' }}>{email}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '190px' }} title={email}>
+                  {email}
+                </span>
                 <CopyableId value={u.id} iconOnly={true} />
-                <span className="hide-on-mobile">
+                <span className="hide-on-mobile" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   <UserSharedCatalogsPopover
                     user={u}
                     onOpenShareDrawer={(targetUser) => {
@@ -565,11 +580,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       key: 'roles',
       header: 'Role',
       mobilePriority: 2,
-      width: '18%',
+      width: '15%',
       render: (u) => {
         const currentRole = u.role || (u.roles && u.roles[0]) || 'patient';
         return (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', position: 'relative' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', position: 'relative', whiteSpace: 'nowrap' }}>
             <RoleBadge role={currentRole} />
             <select
               value={currentRole}
@@ -600,7 +615,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       key: 'pricingChannel',
       header: 'Pricing Channel',
       mobilePriority: 2,
-      width: '20%',
+      width: '18%',
       render: (u) => {
         const currentChannel = u.pricingChannel || u.priceTier || (u.role === 'wholesaler' ? 'wholesale' : u.role === 'doctor' ? 'clinic' : 'retail');
         const channelLabels = {
@@ -618,6 +633,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               position: 'relative',
               padding: '4px 10px',
               borderRadius: '8px',
+              whiteSpace: 'nowrap',
               background: '#eff6ff',
               color: '#1d4ed8',
               border: '1px solid #bfdbfe',
@@ -895,43 +911,43 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
     if (role === 'doctor' || role === 'clinic') {
       return (
-        <div style={{ padding: '1.1rem 1.35rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', margin: '0.25rem 0' }}>
-          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ padding: '1rem 1.25rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', borderLeft: '3px solid #0d9488', margin: '0.35rem 0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Medical License</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.licenseNumber || 'LIC-89241-MD'}</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Medical License</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.licenseNumber || 'LIC-89241-MD'}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Assigned Patients</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.patientCount || 18} Active Patients</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Assigned Patients</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.patientCount || 18} Active Patients</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Clinic Affiliation</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.institution || u.clinicName || 'Atlas Regenerative Center'}</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Clinic Affiliation</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.institution || u.clinicName || 'Atlas Regenerative Center'}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Active Prescriptions</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#16a34a' }}>{u.activePrescriptionsCount || 7} Issued</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active Prescriptions</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#16a34a', marginTop: '2px' }}>{u.activePrescriptionsCount || 7} Issued</div>
             </div>
           </div>
 
           <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginRight: '0.5rem' }}>Doctor Workflow:</span>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setDetailsUser(u)}>
-              <FileText size={13} />
-              <span>➕ New Prescription</span>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '0.25rem' }}>Doctor Workflow:</span>
+            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => setDetailsUser(u)}>
+              <FileText size={13} color="#003666" />
+              <span>New Prescription</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => { setRoleFilter('patient'); setSearchTerm(getUserFullName(u)); }}>
-              <Users size={13} />
-              <span>📋 Assigned Patients</span>
+            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => { setRoleFilter('patient'); setSearchTerm(getUserFullName(u)); }}>
+              <Users size={13} color="#003666" />
+              <span>Assigned Patients</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setDetailsUser(u)}>
-              <Calendar size={13} />
-              <span>📞 Schedule Consult</span>
+            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => setDetailsUser(u)}>
+              <Calendar size={13} color="#003666" />
+              <span>Schedule Consult</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#16a34a', borderColor: '#86efac' }} onClick={() => handleSendEmail(u)}>
-              <Mail size={13} />
-              <span>✉️ Send Welcome Email</span>
+            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #bbf7d0', borderRadius: '6px', color: '#166534', fontWeight: 600, cursor: 'pointer' }} onClick={() => handleSendEmail(u)}>
+              <Mail size={13} color="#166534" />
+              <span>Send Welcome Email</span>
             </button>
           </div>
         </div>
@@ -940,43 +956,43 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
     if (role === 'patient') {
       return (
-        <div style={{ padding: '1.1rem 1.35rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', margin: '0.25rem 0' }}>
-          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ padding: '1rem 1.25rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', borderLeft: '3px solid #7c3aed', margin: '0.35rem 0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Active Protocol</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.activeProtocol || 'BPC-157 500mcg + TB-500 (12 Wk Protocol)'}</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active Protocol</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.activeProtocol || 'BPC-157 500mcg + TB-500 (12 Wk Protocol)'}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Attending Physician</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.assignedDoctorName || 'Dr. Martinez, MD'}</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Attending Physician</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.assignedDoctorName || 'Dr. Martinez, MD'}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Adherence Score</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#16a34a' }}>{u.adherenceRate || '96%'} (Consistent)</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Adherence Score</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#16a34a', marginTop: '2px' }}>{u.adherenceRate || '96%'} (Consistent)</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Shipping Destination</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.shippingCity || 'Madrid, Spain'}</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Shipping Destination</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.shippingCity || 'Madrid, Spain'}</div>
             </div>
           </div>
 
           <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginRight: '0.5rem' }}>Patient Workflow:</span>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setDetailsUser(u)}>
-              <Stethoscope size={13} />
-              <span>🩺 Assign Doctor</span>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '0.25rem' }}>Patient Workflow:</span>
+            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => setDetailsUser(u)}>
+              <Stethoscope size={13} color="#003666" />
+              <span>Assign Doctor</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setDetailsUser(u)}>
-              <FileText size={13} />
-              <span>💊 New Prescription</span>
+            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => setDetailsUser(u)}>
+              <FileText size={13} color="#003666" />
+              <span>New Prescription</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setDetailsUser(u)}>
-              <Sparkles size={13} />
-              <span>📋 Start Protocol</span>
+            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => setDetailsUser(u)}>
+              <Sparkles size={13} color="#003666" />
+              <span>Start Protocol</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setDetailsUser(u)}>
-              <Package size={13} />
-              <span>📦 View Orders</span>
+            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => setDetailsUser(u)}>
+              <Package size={13} color="#003666" />
+              <span>View Orders</span>
             </button>
           </div>
         </div>
@@ -984,32 +1000,41 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     }
 
     if (role === 'wholesaler' || role === 'supplier') {
+      const tierLabel = u.pricingTier === 'facilitator_40'
+        ? 'Facilitator Tier (40% Margin)'
+        : (u.pricingTier ? String(u.pricingTier).replace(/_/g, ' ') : 'Tier 1 Wholesale (25% Margin)');
+
       return (
-        <div style={{ padding: '1.1rem 1.35rem', background: '#fff7ed', borderRadius: '8px', border: '1px solid #ffedd5', margin: '0.25rem 0' }}>
-          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ padding: '1.1rem 1.25rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', borderLeft: '3px solid #1a73e8', margin: '0.35rem 0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          {/* Metadata Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase' }}>B2B Pricing Tier</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#9a3412' }}>{u.pricingTier || 'Tier 1 Wholesale (25% Margin)'}</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>B2B Pricing Tier</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{tierLabel}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase' }}>Active PO Orders</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#9a3412' }}>{u.activeOrdersCount || 4} Batches in transit</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active PO Orders</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.activeOrdersCount || 4} Batches in transit</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase' }}>Total Spend Volume</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#9a3412' }}>${(u.totalSpend || 42500).toLocaleString()} USD</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Spend Volume</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>${(u.totalSpend || 42500).toLocaleString()} USD</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase' }}>Credit Terms</span>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#9a3412' }}>Net 30 Days</div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Credit Terms</span>
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>Net 30 Days</div>
             </div>
           </div>
 
-          <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #fed7aa', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase', marginRight: '0.5rem' }}>Wholesale Workflow:</span>
+          {/* GCP Outlined Action Groups */}
+          <div style={{ marginTop: '0.95rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '0.25rem' }}>Wholesale Workflow:</span>
+            
+            {/* Financial Statements */}
             <button
+              type="button"
               className="gcp-btn-secondary"
-              style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#ea580c', color: '#c2410c', background: '#fff7ed', fontWeight: 700 }}
+              style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#1a73e8', fontWeight: 600, cursor: 'pointer' }}
               onClick={(e) => {
                 e.stopPropagation();
                 const token = u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id));
@@ -1021,35 +1046,62 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               }}
               title="Copy public payables statement link to share with vendor"
             >
-              <FileText size={13} color="#ea580c" />
-              <span>💰 Copy Bills Link</span>
+              <Copy size={13} color="#1a73e8" />
+              <span>Copy Bills Link</span>
             </button>
+
             <a
               href={`/b2b/payables/${u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id))}?email=${encodeURIComponent((u.email || u.contactEmail || '').toLowerCase().trim())}&quicklink=verified`}
               target="_blank"
               rel="noopener noreferrer"
               className="gcp-btn-secondary"
-              style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412', textDecoration: 'none' }}
+              style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, textDecoration: 'none' }}
               title="Open live vendor payables statement"
             >
-              <ExternalLink size={13} />
-              <span>↗️ View Payables Statement</span>
+              <ExternalLink size={13} color="#003666" />
+              <span>View Payables Statement</span>
             </a>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412' }} onClick={() => setDetailsUser(u)}>
-              <DollarSign size={13} />
-              <span>📜 Issue B2B Quote</span>
+
+            {/* Procurement & Orders */}
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#334155', fontWeight: 600, cursor: 'pointer' }}
+              onClick={() => setDetailsUser(u)}
+            >
+              <FileText size={13} color="#64748b" />
+              <span>Issue B2B Quote</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412' }} onClick={() => handleInlinePricingChange(u.id, u.pricingChannel === 'wholesale' ? 'clinic' : 'wholesale')}>
-              <ShieldCheck size={13} />
-              <span>🏷️ Change Price Tier</span>
+
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#334155', fontWeight: 600, cursor: 'pointer' }}
+              onClick={() => setDetailsUser(u)}
+            >
+              <Package size={13} color="#64748b" />
+              <span>Create PO Batch</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412' }} onClick={() => setDetailsUser(u)}>
-              <Package size={13} />
-              <span>📦 Create PO Batch</span>
+
+            {/* Configuration */}
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#334155', fontWeight: 600, cursor: 'pointer' }}
+              onClick={() => handleInlinePricingChange(u.id, u.pricingChannel === 'wholesale' ? 'clinic' : 'wholesale')}
+            >
+              <Sliders size={13} color="#64748b" />
+              <span>Adjust Price Tier</span>
             </button>
-            <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px', borderColor: '#fdba74', color: '#9a3412' }} onClick={() => setDetailsUser(u)}>
-              <Download size={13} />
-              <span>📄 Upload COA</span>
+
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#334155', fontWeight: 600, cursor: 'pointer' }}
+              onClick={() => setDetailsUser(u)}
+            >
+              <Upload size={13} color="#64748b" />
+              <span>Upload COA</span>
             </button>
           </div>
         </div>
@@ -1058,35 +1110,35 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
     // Default / Admin / Staff
     return (
-      <div style={{ padding: '1.1rem 1.35rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', margin: '0.25rem 0' }}>
-        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ padding: '1rem 1.25rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', borderLeft: '3px solid #4338ca', margin: '0.35rem 0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
           <div>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Permissions & Claims</span>
-            <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.roles?.join(', ') || u.role || 'Admin (Full Access)'}</div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Permissions & Claims</span>
+            <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.roles?.join(', ') || u.role || 'Admin (Full Access)'}</div>
           </div>
           <div>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Last Login IP</span>
-            <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.lastLoginIp || '194.224.91.12'}</div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Last Login IP</span>
+            <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.lastLoginIp || '194.224.91.12'}</div>
           </div>
           <div>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Created At</span>
-            <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'System Default'}</div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Created At</span>
+            <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a', marginTop: '2px' }}>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'System Default'}</div>
           </div>
         </div>
 
         <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginRight: '0.5rem' }}>Admin Workflow:</span>
-          <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setDetailsUser(u)}>
-            <ShieldCheck size={13} />
-            <span>🔑 Security & Claims</span>
+          <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '0.25rem' }}>Admin Workflow:</span>
+          <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => setDetailsUser(u)}>
+            <ShieldCheck size={13} color="#003666" />
+            <span>Security & Claims</span>
           </button>
-          <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => { impersonateUser(u); toast.success(`Simulating session as ${getUserFullName(u)}`); }}>
-            <Eye size={13} />
-            <span>👁️ Impersonate Session</span>
+          <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => { impersonateUser(u); toast.success(`Simulating session as ${getUserFullName(u)}`); }}>
+            <Eye size={13} color="#003666" />
+            <span>Impersonate Session</span>
           </button>
-          <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setDetailsUser(u)}>
-            <Clock size={13} />
-            <span>📜 View Audit Trail</span>
+          <button className="gcp-btn-secondary" style={{ fontSize: '0.78rem', padding: '5px 11px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', color: '#003666', fontWeight: 600, cursor: 'pointer' }} onClick={() => setDetailsUser(u)}>
+            <Clock size={13} color="#003666" />
+            <span>View Audit Trail</span>
           </button>
         </div>
       </div>

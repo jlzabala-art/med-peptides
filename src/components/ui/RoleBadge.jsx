@@ -15,6 +15,9 @@ export default function RoleBadge({ role, style = {}, className = '' }) {
     <span 
       className={className}
       style={{ 
+        display: 'inline-flex',
+        alignItems: 'center',
+        whiteSpace: 'nowrap',
         padding: '0.2rem 0.6rem', 
         borderRadius: '16px', 
         fontSize: '0.75rem', 
@@ -22,6 +25,7 @@ export default function RoleBadge({ role, style = {}, className = '' }) {
         background: bg, 
         color: color, 
         border: `1px solid ${color}33`,
+        flexShrink: 0,
         ...style 
       }}
     >

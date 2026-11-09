@@ -60,7 +60,20 @@ export default function UserMobileCard({
   const name = getUserFullName ? getUserFullName(u) : (u.fullName || u.name || u.email || 'Unknown User');
   const email = u.email || u.contactEmail || 'No email';
   const role = u.role || (u.roles && u.roles[0]) || 'patient';
-  const initial = name.charAt(0).toUpperCase() || 'U';
+
+  const getSmartInitials = (fullName) => {
+    if (!fullName) return 'U';
+    const cleaned = fullName.replace(/^(dr\.|dra\.|doctor|doctora|prof\.|prof|lic\.|lic|mr\.|mrs\.|ms\.)\s+/i, '').trim();
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    if (parts.length === 1 && parts[0].length >= 1) {
+      return parts[0].substring(0, Math.min(2, parts[0].length)).toUpperCase();
+    }
+    return fullName.charAt(0).toUpperCase();
+  };
+  const initial = getSmartInitials(name);
   const statusStr = u.isArchived ? 'archived' : (u.approved ? 'active' : 'pending');
 
   const currentChannel = u.pricingChannel || u.priceTier || (role === 'wholesaler' ? 'wholesale' : role === 'doctor' ? 'clinic' : 'retail');
@@ -191,7 +204,7 @@ export default function UserMobileCard({
         style={{
           padding: '0.55rem 1rem 0.65rem',
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)',
           gap: '0.65rem',
           borderTop: '1px solid #f1f5f9',
           background: '#fafbfc'
@@ -455,135 +468,184 @@ export default function UserMobileCard({
               <MoreVertical size={16} />
             </button>
 
-            {/* Kebab Dropdown Menu */}
+            {/* Kebab Action Sheet (Google Cloud Mobile Standard) */}
             {menuOpen && (
-              <div
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  position: 'absolute',
-                  bottom: 'calc(100% + 6px)',
-                  right: 0,
-                  background: '#ffffff',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.04)',
-                  border: '1px solid #e2e8f0',
-                  minWidth: '190px',
-                  zIndex: 200,
-                  overflow: 'hidden',
-                  padding: '4px 0'
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
+              <>
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setMenuOpen(false);
-                    setDetailsUser?.(u);
                   }}
                   style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+                    backdropFilter: 'blur(2px)',
+                    zIndex: 9998
+                  }}
+                />
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    backgroundColor: '#ffffff',
+                    borderTopLeftRadius: '16px',
+                    borderTopRightRadius: '16px',
+                    boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.15)',
+                    zIndex: 9999,
+                    padding: '1.25rem 1rem 1.75rem',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: 'none',
-                    background: 'transparent',
-                    fontSize: '0.78rem',
-                    color: '#334155',
-                    cursor: 'pointer',
-                    textAlign: 'left'
+                    flexDirection: 'column',
+                    gap: '6px'
                   }}
                 >
-                  <Edit size={13} style={{ color: '#0284c7' }} />
-                  <span>Edit Profile</span>
-                </button>
+                  <div style={{ width: '36px', height: '4px', backgroundColor: '#cbd5e1', borderRadius: '2px', margin: '0 auto 10px auto' }} />
+                  <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px', padding: '0 4px' }}>
+                    Actions for {name}
+                  </div>
 
-                {!u.isArchived && (
                   <button
                     type="button"
                     onClick={() => {
                       setMenuOpen(false);
-                      impersonateUser?.(u);
+                      setDetailsUser?.(u);
                     }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
+                      gap: '10px',
                       width: '100%',
-                      padding: '8px 12px',
-                      border: 'none',
-                      background: 'transparent',
-                      fontSize: '0.78rem',
-                      color: '#334155',
+                      padding: '12px 14px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      background: '#f8fafc',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: '#0f172a',
                       cursor: 'pointer',
                       textAlign: 'left'
                     }}
                   >
-                    <Eye size={13} style={{ color: '#475569' }} />
-                    <span>Act As User</span>
+                    <Edit size={16} style={{ color: '#0284c7' }} />
+                    <span>Edit Profile 360°</span>
                   </button>
-                )}
 
-                {/* If patient, reassign doctor */}
-                {(u.roles?.includes('patient') || u.role === 'patient' || u.linkedPatientId) && (
+                  {!u.isArchived && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        impersonateUser?.(u);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        width: '100%',
+                        padding: '12px 14px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        background: '#f8fafc',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <Eye size={16} style={{ color: '#475569' }} />
+                      <span>Act As User (Simulate Session)</span>
+                    </button>
+                  )}
+
+                  {/* If patient, reassign doctor */}
+                  {(u.roles?.includes('patient') || u.role === 'patient' || u.linkedPatientId) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setReassignModal?.({
+                          isOpen: true,
+                          patients: [{
+                            id: u.linkedPatientId || u.id,
+                            name,
+                            physician: u.physician || u.doctorName || 'Direct Desk'
+                          }]
+                        });
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        width: '100%',
+                        padding: '12px 14px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        background: '#f8fafc',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <Stethoscope size={16} style={{ color: '#0f766e' }} />
+                      <span>Reassign Doctor</span>
+                    </button>
+                  )}
+
+                  {/* Revoke access if approved */}
+                  {!u.isArchived && canApprove && u.approved && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleToggleApproval?.(u, true);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        width: '100%',
+                        padding: '12px 14px',
+                        border: '1px solid #fed7aa',
+                        borderRadius: '8px',
+                        background: '#fff7ed',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: '#c2410c',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <X size={16} style={{ color: '#c2410c' }} />
+                      <span>Revoke Access</span>
+                    </button>
+                  )}
+
+                  {/* Close / Cancel Button */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setReassignModal?.({
-                        isOpen: true,
-                        patients: [{
-                          id: u.linkedPatientId || u.id,
-                          name,
-                          physician: u.physician || u.doctorName || 'Direct Desk'
-                        }]
-                      });
-                    }}
+                    onClick={() => setMenuOpen(false)}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: 'none',
-                      background: 'transparent',
-                      fontSize: '0.78rem',
-                      color: '#334155',
-                      cursor: 'pointer',
-                      textAlign: 'left'
+                      marginTop: '6px',
+                      padding: '11px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer'
                     }}
                   >
-                    <Stethoscope size={13} style={{ color: '#0f766e' }} />
-                    <span>Reassign Doctor</span>
+                    Cancel
                   </button>
-                )}
-
-                {/* Revoke access if approved */}
-                {!u.isArchived && canApprove && u.approved && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleToggleApproval?.(u, true);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: 'none',
-                      background: 'transparent',
-                      fontSize: '0.78rem',
-                      color: '#d97706',
-                      cursor: 'pointer',
-                      textAlign: 'left'
-                    }}
-                  >
-                    <X size={13} style={{ color: '#d97706' }} />
-                    <span>Revoke Access</span>
-                  </button>
-                )}
-              </div>
+                </div>
+              </>
             )}
           </div>
         </div>

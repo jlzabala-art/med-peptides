@@ -22,8 +22,159 @@ import {
 } from '@/lib/icons';
 import BrandLogo from '@/components/common/BrandLogo';
 import CopyableId from '@/components/ui/CopyableId';
+import DataTable from '@/components/ui/DataTable';
+import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
+import StatusBadge from '@/components/ui/StatusBadge';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import toast from 'react-hot-toast';
+
+function PayableBillMobileCard({ row: bill, isLocked, lang }) {
+  if (!bill) return null;
+  const isPending = bill.status !== 'paid' && (bill.balance > 0 || bill.status === 'draft' || bill.status === 'locked');
+  const balanceNum = Number(bill.balance || 0);
+  const totalNum = Number(bill.total || 0);
+
+  return (
+    <div style={{
+      backgroundColor: '#ffffff',
+      border: '1px solid #e2e8f0',
+      borderRadius: '10px',
+      padding: '12px 14px',
+      marginBottom: '10px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '8px'
+    }}>
+      {/* Top Header: Bill ID & Status Badge */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 750, color: '#003666', fontSize: '0.88rem' }}>
+          {isLocked ? (
+            <>
+              <Lock size={12} color="#94a3b8" />
+              <span style={{ color: '#64748b' }}>FAC-••••••••</span>
+            </>
+          ) : (
+            <>
+              <span>{bill.billNumber || bill.billId}</span>
+              <CopyableId value={bill.billNumber || bill.billId} iconOnly={true} />
+            </>
+          )}
+        </div>
+
+        {isLocked ? (
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            color: '#c2410c',
+            backgroundColor: '#fff7ed',
+            border: '1px solid #ffedd5',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px'
+          }}>
+            <Lock size={10} /> PROTECTED
+          </span>
+        ) : isPending ? (
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            color: '#b45309',
+            backgroundColor: '#fef3c7',
+            border: '1px solid #fde68a',
+            padding: '2px 8px',
+            borderRadius: '4px'
+          }}>
+            PENDING
+          </span>
+        ) : (
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            color: '#16a34a',
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px'
+          }}>
+            <CheckCircle2 size={11} /> SETTLED
+          </span>
+        )}
+      </div>
+
+      {/* Description & Reference */}
+      <div style={{ fontSize: '0.78rem', color: '#1e293b' }}>
+        <div style={{ fontWeight: 600 }}>
+          {isLocked ? (lang === 'es' ? 'Facturación Comercial Protegida' : 'Protected Commercial Billing') : (bill.billType || 'Settlement / Commission')}
+        </div>
+        {bill.sourceInvoiceNumber && (
+          <div style={{ fontSize: '0.72rem', color: '#0284c7', marginTop: '2px' }}>
+            {isLocked ? (lang === 'es' ? 'Factura cliente protegida' : 'Linked to protected client invoice') : `Linked to client invoice: ${bill.sourceInvoiceNumber}`}
+          </div>
+        )}
+        {bill.referenceNumber && bill.referenceNumber !== bill.billNumber && !isLocked && (
+          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '1px' }}>
+            Ref: {bill.referenceNumber}
+          </div>
+        )}
+      </div>
+
+      {/* Dates Bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        fontSize: '0.72rem',
+        color: '#64748b',
+        backgroundColor: '#f8fafc',
+        padding: '5px 8px',
+        borderRadius: '6px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Clock size={11} />
+          <span>Issue: <strong style={{ color: '#334155' }}>{bill.date || '—'}</strong></span>
+        </div>
+        <div>
+          <span>Due: <strong style={{ color: isPending ? '#b45309' : '#334155' }}>{bill.dueDate || '—'}</strong></span>
+        </div>
+      </div>
+
+      {/* Amounts Row */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderTop: '1px solid #f1f5f9',
+        paddingTop: '6px',
+        marginTop: '2px'
+      }}>
+        <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+          Total: {isLocked ? `•••• ${bill.currency}` : `${totalNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${bill.currency}`}
+        </div>
+        <div>
+          {isLocked ? (
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#c2410c', backgroundColor: '#fff7ed', padding: '2px 8px', borderRadius: '4px' }}>
+              •••• {bill.currency}
+            </span>
+          ) : isPending ? (
+            <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#c2410c', backgroundColor: '#fff7ed', padding: '2px 8px', borderRadius: '4px', border: '1px solid #ffedd5' }}>
+              {(balanceNum > 0 ? balanceNum : totalNum).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {bill.currency}
+            </span>
+          ) : (
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#16a34a' }}>
+              0.00 {bill.currency}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PayablesStatementPage() {
   const params = useParams();
@@ -127,6 +278,128 @@ export default function PayablesStatementPage() {
       (b.sourceInvoiceNumber || '').toLowerCase().includes(q)
     );
   }, [currentBills, searchFilter]);
+
+  const columns = useMemo(() => [
+    {
+      key: 'billNumber',
+      header: lang === 'es' ? 'N.º FACTURA' : 'BILL / INVOICE #',
+      width: '24%',
+      sortable: true,
+      render: (bill) => {
+        if (isLocked) {
+          return (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#64748b' }}>
+              <Lock size={12} color="#94a3b8" />
+              <span>FAC-••••••••</span>
+            </div>
+          );
+        }
+        return (
+          <div>
+            <div style={{ fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>{bill.billNumber || bill.billId}</span>
+              <CopyableId value={bill.billNumber || bill.billId} iconOnly={true} />
+            </div>
+            {bill.referenceNumber && bill.referenceNumber !== bill.billNumber && (
+              <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                Ref: {bill.referenceNumber}
+              </div>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'date',
+      header: lang === 'es' ? 'FECHA' : 'ISSUE DATE',
+      width: '14%',
+      sortable: true,
+      render: (bill) => (
+        <span style={{ color: '#334155' }}>{bill.date || '—'}</span>
+      )
+    },
+    {
+      key: 'dueDate',
+      header: lang === 'es' ? 'VENCIMIENTO' : 'DUE DATE',
+      width: '14%',
+      sortable: true,
+      render: (bill) => {
+        const isPending = bill.status !== 'paid' && (Number(bill.balance || 0) > 0 || bill.status === 'locked');
+        return (
+          <span style={{ color: isPending ? '#b45309' : '#64748b', fontWeight: isPending ? 600 : 400 }}>
+            {bill.dueDate || '—'}
+          </span>
+        );
+      }
+    },
+    {
+      key: 'description',
+      header: lang === 'es' ? 'CONCEPTO / REF. ORIGEN' : 'DESCRIPTION / SOURCE REF',
+      width: '24%',
+      render: (bill) => (
+        <div>
+          <div style={{ color: '#0f172a', fontWeight: 600 }}>
+            {isLocked ? (lang === 'es' ? 'Facturación Comercial Protegida' : 'Protected Commercial Billing') : (bill.billType || 'Settlement / Commission')}
+          </div>
+          {bill.sourceInvoiceNumber && (
+            <div style={{ fontSize: '0.74rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+              <span>{isLocked ? (lang === 'es' ? 'Factura cliente protegida' : 'Linked to protected client invoice') : `${lang === 'es' ? 'Sobre factura cliente:' : 'Linked to client invoice:'} ${bill.sourceInvoiceNumber}`}</span>
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'total',
+      header: lang === 'es' ? 'TOTAL' : 'TOTAL',
+      width: '12%',
+      align: 'right',
+      sortable: true,
+      render: (bill) => {
+        const totalNum = Number(bill.total || 0);
+        if (isLocked) {
+          return <span style={{ color: '#94a3b8' }}>•••• {bill.currency}</span>;
+        }
+        return (
+          <span style={{ fontWeight: 600, color: '#0f172a' }}>
+            {totalNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {bill.currency}
+          </span>
+        );
+      }
+    },
+    {
+      key: 'balance',
+      header: lang === 'es' ? 'SALDO PENDIENTE' : 'BALANCE DUE',
+      width: '12%',
+      align: 'right',
+      sortable: true,
+      render: (bill) => {
+        const isPending = bill.status !== 'paid' && (Number(bill.balance || 0) > 0 || bill.status === 'locked');
+        const balanceNum = Number(bill.balance || 0);
+        const totalNum = Number(bill.total || 0);
+
+        if (isLocked) {
+          return (
+            <span style={{ fontWeight: 700, color: '#c2410c', backgroundColor: '#fff7ed', padding: '3px 8px', borderRadius: '4px', border: '1px solid #ffedd5', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <Lock size={11} /> •••• {bill.currency}
+            </span>
+          );
+        }
+        if (isPending) {
+          return (
+            <span style={{ fontWeight: 800, color: '#c2410c', backgroundColor: '#fff7ed', padding: '3px 8px', borderRadius: '4px', border: '1px solid #ffedd5' }}>
+              {(balanceNum > 0 ? balanceNum : totalNum).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {bill.currency}
+            </span>
+          );
+        }
+        return (
+          <span style={{ fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <CheckCircle2 size={13} /> {lang === 'es' ? 'Pagado' : 'Settled'}
+          </span>
+        );
+      }
+    }
+  ], [lang, isLocked]);
 
   if (loading) {
     return (
@@ -309,42 +582,51 @@ export default function PayablesStatementPage() {
             </div>
           </div>
 
-          {/* KPI 2: Open Invoices */}
+          {/* KPI 2: Open Invoices (Server-computed) */}
           <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '1.25rem 1.4rem', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <FileText size={13} /> {lang === 'es' ? 'Facturas Pendientes' : 'Open Invoices'}
             </div>
             <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#0f172a', marginTop: '0.4rem', letterSpacing: '-0.02em' }}>
-              {kpis.openBillsCount} <span style={{ fontSize: '1rem', fontWeight: 500, color: '#64748b' }}>{lang === 'es' ? 'facturas abiertas' : 'open invoices'}</span>
+              {kpis.openBillsCount ?? 0} <span style={{ fontSize: '1rem', fontWeight: 500, color: '#64748b' }}>{lang === 'es' ? 'facturas abiertas' : 'open invoices'}</span>
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem' }}>
-              {lang === 'es' ? 'En proceso de revisión contable' : 'Under accounting audit & settlement'}
+            <div style={{ fontSize: '0.75rem', color: (kpis.openBillsCount === 0) ? '#16a34a' : '#64748b', marginTop: '0.35rem', fontWeight: (kpis.openBillsCount === 0) ? 600 : 400 }}>
+              {kpis.openBillsCount === 0
+                ? (lang === 'es' ? 'Todas las facturas aprobadas están liquidadas' : 'All approved bills settled · Current')
+                : (lang === 'es' ? 'En proceso de liquidación contable' : 'Under accounting audit & settlement')}
             </div>
           </div>
 
-          {/* KPI 3: Maturity / Due Status */}
+          {/* KPI 3: Maturity / Due Status (Server-computed) */}
           <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '1.25rem 1.4rem', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Clock size={13} /> {lang === 'es' ? 'Estado de Vencimiento' : 'Account Maturity'}
             </div>
-            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', marginTop: '0.4rem', letterSpacing: '-0.01em' }}>
-              {kpis.nextDueDate || (lang === 'es' ? 'Al día' : 'Current')}
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '0.4rem', letterSpacing: '-0.01em' }}>
+              {kpis.openBillsCount === 0 ? (lang === 'es' ? 'Al día' : 'Current') : (kpis.nextDueDate || 'Current')}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#16a34a', marginTop: '0.35rem', fontWeight: 600 }}>
-              {lang === 'es' ? '0 facturas vencidas · Liquidación ordinaria' : '0 overdue bills · Standard settlement'}
+            <div style={{ fontSize: '0.75rem', color: (kpis.overdueBillsCount || 0) > 0 ? '#dc2626' : '#16a34a', marginTop: '0.35rem', fontWeight: 600 }}>
+              {(kpis.overdueBillsCount || 0) > 0
+                ? `${kpis.overdueBillsCount} ${lang === 'es' ? 'facturas vencidas' : 'overdue bills'}`
+                : (lang === 'es' ? '0 facturas vencidas · Conciliación al día' : '0 overdue bills · Standard settlement')}
             </div>
           </div>
 
-          {/* KPI 4: Payment Terms */}
+          {/* KPI 4: Payment Terms (Server-computed Financial Terminology) */}
           <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '1.25rem 1.4rem', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldCheck size={13} /> {lang === 'es' ? 'Condición de Pago' : 'Payment Terms'}
+              <ShieldCheck size={13} /> {lang === 'es' ? 'Condición Financiera' : 'Payment Terms'}
             </div>
-            <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', marginTop: '0.65rem', lineHeight: 1.3 }}>
-              {kpis.paymentTerms}
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginTop: '0.55rem', lineHeight: 1.3 }}>
+              {kpis.paymentTerms || 'Net 10th Prox. (Post-Settlement)'}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem' }}>
-              Vendor Number: <strong>{statement.vendorNumber}</strong>
+            <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '0.35rem', lineHeight: 1.35 }}>
+              {lang === 'es'
+                ? 'Día 10 del mes siguiente tras cobro al cliente (Paid-When-Paid)'
+                : (kpis.paymentTermsDetail || 'Payable by 10th prox. post client collection')}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.35rem' }}>
+              Vendor Number: <strong>{statement.vendorNumber}</strong> · Commercial PWP
             </div>
           </div>
         </div>
@@ -412,192 +694,80 @@ export default function PayablesStatementPage() {
           </div>
         )}
 
-        {/* ── TABS BAR (Google Cloud Segmented Control) ── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => setActiveTab('pending')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '0.65rem 1.25rem',
-                border: 'none',
-                borderBottom: activeTab === 'pending' ? '2.5px solid #c2410c' : '2.5px solid transparent',
-                backgroundColor: 'transparent',
-                color: activeTab === 'pending' ? '#c2410c' : '#64748b',
-                fontWeight: activeTab === 'pending' ? 800 : 600,
-                fontSize: '0.88rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span>{lang === 'es' ? 'Facturas Pendientes de Pago' : 'Pending Invoices & Bills'}</span>
-              <span style={{ backgroundColor: activeTab === 'pending' ? '#ffedd5' : '#f1f5f9', color: activeTab === 'pending' ? '#c2410c' : '#64748b', fontSize: '0.72rem', fontWeight: 800, padding: '2px 7px', borderRadius: '10px' }}>
-                {openBills.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('paid')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '0.65rem 1.25rem',
-                border: 'none',
-                borderBottom: activeTab === 'paid' ? '2.5px solid #003666' : '2.5px solid transparent',
-                backgroundColor: 'transparent',
-                color: activeTab === 'paid' ? '#003666' : '#64748b',
-                fontWeight: activeTab === 'paid' ? 800 : 600,
-                fontSize: '0.88rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span>{lang === 'es' ? 'Historial de Facturas Pagadas' : 'Settled & Paid Invoices History'}</span>
-              <span style={{ backgroundColor: activeTab === 'paid' ? '#e0f2fe' : '#f1f5f9', color: activeTab === 'paid' ? '#0369a1' : '#64748b', fontSize: '0.72rem', fontWeight: 800, padding: '2px 7px', borderRadius: '10px' }}>
-                {paidBills.length}
-              </span>
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <input
-              type="text"
-              placeholder={lang === 'es' ? 'Buscar por n.º de factura o concepto...' : 'Search by invoice number or description...'}
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.8rem',
-                minWidth: '240px',
-                outline: 'none'
-              }}
-            />
-          </div>
+        {/* ── PRIORITY SEARCH BAR (Google Cloud Standard - Golden Rule #7) ── */}
+        <div style={{ marginBottom: '1rem' }}>
+          <GlobalSearchBar
+            value={searchFilter}
+            onChange={setSearchFilter}
+            placeholder={lang === 'es' ? 'Buscar por n.º de factura, concepto o referencia...' : 'Search by bill number, description, or reference...'}
+            resultCount={filteredBills.length}
+            namespace="b2b-payables"
+            size="md"
+          />
         </div>
 
-        {/* ── BILLS TABLE (DataTable GCP Standard) ── */}
+        {/* ── TABS BAR (Google Cloud Segmented Control) ── */}
+        <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e2e8f0', marginBottom: '1.25rem', gap: '0.5rem' }}>
+          <button
+            onClick={() => setActiveTab('pending')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '0.65rem 1.25rem',
+              border: 'none',
+              borderBottom: activeTab === 'pending' ? '2.5px solid #c2410c' : '2.5px solid transparent',
+              backgroundColor: 'transparent',
+              color: activeTab === 'pending' ? '#c2410c' : '#64748b',
+              fontWeight: activeTab === 'pending' ? 800 : 600,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>{lang === 'es' ? 'Facturas Pendientes de Pago' : 'Pending Invoices & Bills'}</span>
+            <span style={{ backgroundColor: activeTab === 'pending' ? '#ffedd5' : '#f1f5f9', color: activeTab === 'pending' ? '#c2410c' : '#64748b', fontSize: '0.72rem', fontWeight: 800, padding: '2px 7px', borderRadius: '10px' }}>
+              {openBills.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('paid')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '0.65rem 1.25rem',
+              border: 'none',
+              borderBottom: activeTab === 'paid' ? '2.5px solid #003666' : '2.5px solid transparent',
+              backgroundColor: 'transparent',
+              color: activeTab === 'paid' ? '#003666' : '#64748b',
+              fontWeight: activeTab === 'paid' ? 800 : 600,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>{lang === 'es' ? 'Historial de Facturas Pagadas' : 'Settled & Paid Invoices History'}</span>
+            <span style={{ backgroundColor: activeTab === 'paid' ? '#e0f2fe' : '#f1f5f9', color: activeTab === 'paid' ? '#0369a1' : '#64748b', fontSize: '0.72rem', fontWeight: 800, padding: '2px 7px', borderRadius: '10px' }}>
+              {paidBills.length}
+            </span>
+          </button>
+        </div>
+
+        {/* ── BILLS TABLE (DataTable GCP Standard - Golden Rule #3, #23, #30) ── */}
         <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-          {filteredBills.length === 0 ? (
-            <div style={{ padding: '3.5rem 1.5rem', textAlign: 'center', color: '#64748b' }}>
-              <CheckCircle2 size={36} color="#16a34a" style={{ margin: '0 auto 0.75rem auto' }} />
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
-                {activeTab === 'pending' ? (lang === 'es' ? 'No hay facturas pendientes' : 'No pending invoices found') : (lang === 'es' ? 'No se encontraron facturas pagadas' : 'No settled invoices found matching criteria')}
-              </div>
-              <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.25rem' }}>
-                {activeTab === 'pending' ? (lang === 'es' ? 'Todas las facturas están liquidadas y al día.' : 'All vendor invoices are fully settled and current.') : (lang === 'es' ? 'Prueba a ajustar los criterios de búsqueda.' : 'Try adjusting your search criteria.')}
-              </div>
-            </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    <th style={{ padding: '12px 16px', width: '22%' }}>{lang === 'es' ? 'N.º Factura' : 'Bill / Invoice #'}</th>
-                    <th style={{ padding: '12px 14px', width: '14%' }}>{lang === 'es' ? 'Fecha' : 'Issue Date'}</th>
-                    <th style={{ padding: '12px 14px', width: '14%' }}>{lang === 'es' ? 'Vencimiento' : 'Due Date'}</th>
-                    <th style={{ padding: '12px 16px', width: '26%' }}>{lang === 'es' ? 'Concepto / Ref. Origen' : 'Description / Source Ref'}</th>
-                    <th style={{ padding: '12px 14px', width: '12%', textAlign: 'right' }}>{lang === 'es' ? 'Total' : 'Total'}</th>
-                    <th style={{ padding: '12px 16px', width: '12%', textAlign: 'right' }}>{lang === 'es' ? 'Saldo Pendiente' : 'Balance Due'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBills.map((bill, idx) => {
-                    const isPending = bill.status !== 'paid' && (bill.balance > 0 || bill.status === 'draft' || bill.status === 'locked');
-                    const balanceNum = Number(bill.balance || 0);
-                    const totalNum = Number(bill.total || 0);
-
-                    return (
-                      <tr
-                        key={bill.id || idx}
-                        style={{
-                          borderBottom: '1px solid #f1f5f9',
-                          backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa',
-                          transition: 'background 0.15s ease'
-                        }}
-                      >
-                        {/* Bill Number */}
-                        <td style={{ padding: '12px 16px' }}>
-                          <div style={{ fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {isLocked ? (
-                              <>
-                                <Lock size={12} color="#94a3b8" />
-                                <span style={{ color: '#64748b' }}>FAC-••••••••</span>
-                              </>
-                            ) : (
-                              <>
-                                <span>{bill.billNumber || bill.billId}</span>
-                                <CopyableId value={bill.billNumber || bill.billId} iconOnly={true} />
-                              </>
-                            )}
-                          </div>
-                          {bill.referenceNumber && bill.referenceNumber !== bill.billNumber && !isLocked && (
-                            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                              Ref: {bill.referenceNumber}
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Issue Date */}
-                        <td style={{ padding: '12px 14px', color: '#334155', whiteSpace: 'nowrap' }}>
-                          {bill.date || '—'}
-                        </td>
-
-                        {/* Due Date */}
-                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
-                          <span style={{ color: isPending ? '#b45309' : '#64748b', fontWeight: isPending ? 600 : 400 }}>
-                            {bill.dueDate || '—'}
-                          </span>
-                        </td>
-
-                        {/* Description / Source Invoice */}
-                        <td style={{ padding: '12px 16px' }}>
-                          <div style={{ color: '#0f172a', fontWeight: 600 }}>
-                            {isLocked ? (lang === 'es' ? 'Facturación Comercial Protegida' : 'Protected Commercial Billing') : (bill.billType || 'Settlement / Commission')}
-                          </div>
-                          {bill.sourceInvoiceNumber && (
-                            <div style={{ fontSize: '0.74rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                              <span>{isLocked ? (lang === 'es' ? 'Factura cliente protegida' : 'Linked to protected client invoice') : `${lang === 'es' ? 'Sobre factura cliente:' : 'Linked to client invoice:'} ${bill.sourceInvoiceNumber}`}</span>
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Total Amount */}
-                        <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap' }}>
-                          {isLocked ? (
-                            <span style={{ color: '#94a3b8' }}>•••• {bill.currency}</span>
-                          ) : (
-                            `${totalNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${bill.currency}`
-                          )}
-                        </td>
-
-                        {/* Balance Due */}
-                        <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                          {isLocked ? (
-                            <span style={{ fontWeight: 700, color: '#c2410c', backgroundColor: '#fff7ed', padding: '3px 8px', borderRadius: '4px', border: '1px solid #ffedd5', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <Lock size={11} /> •••• {bill.currency}
-                            </span>
-                          ) : isPending ? (
-                            <span style={{ fontWeight: 800, color: '#c2410c', backgroundColor: '#fff7ed', padding: '3px 8px', borderRadius: '4px', border: '1px solid #ffedd5' }}>
-                              {(balanceNum > 0 ? balanceNum : totalNum).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {bill.currency}
-                            </span>
-                          ) : (
-                            <span style={{ fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <CheckCircle2 size={13} /> {lang === 'es' ? 'Pagado' : 'Settled'}
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <DataTable
+            columns={columns}
+            data={filteredBills}
+            keyField="id"
+            mobileView="cards"
+            mobileCardComponent={(cardProps) => <PayableBillMobileCard {...cardProps} isLocked={isLocked} lang={lang} />}
+            pagination={false}
+            hidePagination={true}
+            emptyTitle={activeTab === 'pending' ? (lang === 'es' ? 'No hay facturas pendientes' : 'No pending invoices found') : (lang === 'es' ? 'No se encontraron facturas pagadas' : 'No settled invoices found matching criteria')}
+            emptyDescription={activeTab === 'pending' ? (lang === 'es' ? 'Todas las facturas están liquidadas y al día en Zoho Books.' : 'All vendor invoices are fully settled and current in Zoho Books.') : (lang === 'es' ? 'Prueba a ajustar los criterios de búsqueda.' : 'Try adjusting your search criteria.')}
+          />
         </div>
 
         {/* ── FOOTER NOTE (100% Atlas Health Services — NO MEDILUXE) ── */}

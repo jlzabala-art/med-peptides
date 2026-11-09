@@ -57,13 +57,33 @@ export async function GET(request, { params }) {
 
     const allBills = billsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    const openBills = allBills.filter(b => b.status !== 'paid' && (b.balance > 0 || b.status === 'draft'));
-    const paidBills = allBills.filter(b => b.status === 'paid' || b.balance === 0);
+    // STRICT: Only include bills that have been APPROVED in Zoho Books (status: open, approved, overdue, partially_paid).
+    // Under NO circumstance should 'draft' or 'void' bills be shown as outstanding.
+    const isApprovedOpenBill = (b) => {
+      const st = String(b.status || '').toLowerCase().trim();
+      if (st === 'draft' || st === 'void' || st === 'pending_approval' || st === 'rejected') {
+        return false;
+      }
+      return st !== 'paid' && Number(b.balance || 0) > 0;
+    };
 
-    const totalPending = openBills.reduce((acc, b) => acc + (b.balance > 0 ? b.balance : b.total), 0);
+    const openBills = allBills.filter(isApprovedOpenBill);
+    const paidBills = allBills.filter(b => {
+      const st = String(b.status || '').toLowerCase().trim();
+      if (st === 'draft' || st === 'void') return false;
+      return st === 'paid' || Number(b.balance || 0) === 0;
+    });
 
-    // Find nearest due date among open bills
-    let nextDueDate = null;
+    // ── ALL FINANCIAL KPIS CALCULATED AUTHORITATIVELY ON SERVER ──
+    const totalPending = openBills.reduce((acc, b) => acc + (Number(b.balance) > 0 ? Number(b.balance) : Number(b.total || 0)), 0);
+    const totalPaid = paidBills.reduce((acc, b) => acc + Number(b.total || 0), 0);
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const overdueBills = openBills.filter(b => b.dueDate && b.dueDate < todayStr);
+    const overdueBillsCount = overdueBills.length;
+
+    // Nearest due date or settled status
+    let nextDueDate = 'Current / Up to Date';
     const sortedDue = openBills
       .map(b => b.dueDate)
       .filter(Boolean)
@@ -71,6 +91,9 @@ export async function GET(request, { params }) {
     if (sortedDue.length > 0) {
       nextDueDate = sortedDue[0];
     }
+
+    const formalPaymentTerms = shareDoc.paymentTerms || 'Net 10th Prox. (Post-Settlement)';
+    const formalPaymentTermsDetail = shareDoc.paymentTermsDetail || 'Payable within first 10 calendar days of the month following client payment (Paid-When-Paid Terms)';
 
     // 3. Verification check (QuickLink email validation or admin token)
     const { searchParams } = new URL(request.url);
@@ -104,15 +127,21 @@ export async function GET(request, { params }) {
           currency: shareDoc.currency || 'AED',
           vendorNumber: shareDoc.vendorNumberAED || 'VEN-79',
           vendorNumberEUR: shareDoc.vendorNumberEUR || 'VEN-80',
-          paymentTerms: shareDoc.paymentTerms || 'Net 10 after customer payment',
+          paymentTerms: formalPaymentTerms,
+          paymentTermsDetail: formalPaymentTermsDetail,
           status: 'protected'
         },
         kpis: {
           totalPendingAmount: null,
           currency: shareDoc.currency || 'AED',
           openBillsCount: openBills.length,
-          nextDueDate: nextDueDate || 'Current',
-          paymentTerms: shareDoc.paymentTerms || 'Net 10 after customer payment',
+          paidBillsCount: paidBills.length,
+          overdueBillsCount,
+          totalPaidAmount: null,
+          nextDueDate: openBills.length === 0 ? 'Current / Up to Date' : nextDueDate,
+          paymentTerms: formalPaymentTerms,
+          paymentTermsDetail: formalPaymentTermsDetail,
+          settlementStatus: openBills.length === 0 ? 'settled' : (overdueBillsCount > 0 ? 'overdue' : 'pending'),
           lastAutomatedSync: automatedSyncTime
         },
         openBills: openBills.map(b => ({
@@ -154,15 +183,21 @@ export async function GET(request, { params }) {
         currency: shareDoc.currency || 'AED',
         vendorNumber: shareDoc.vendorNumberAED || 'VEN-79',
         vendorNumberEUR: shareDoc.vendorNumberEUR || 'VEN-80',
-        paymentTerms: shareDoc.paymentTerms || 'Net 10 after customer payment',
+        paymentTerms: formalPaymentTerms,
+        paymentTermsDetail: formalPaymentTermsDetail,
         status: shareDoc.status || 'active'
       },
       kpis: {
         totalPendingAmount: Math.round(totalPending * 100) / 100,
         currency: shareDoc.currency || 'AED',
         openBillsCount: openBills.length,
-        nextDueDate: nextDueDate || 'Current',
-        paymentTerms: shareDoc.paymentTerms || 'Net 10 after customer payment',
+        paidBillsCount: paidBills.length,
+        overdueBillsCount,
+        totalPaidAmount: Math.round(totalPaid * 100) / 100,
+        nextDueDate: openBills.length === 0 ? 'Current / Up to Date' : nextDueDate,
+        paymentTerms: formalPaymentTerms,
+        paymentTermsDetail: formalPaymentTermsDetail,
+        settlementStatus: openBills.length === 0 ? 'settled' : (overdueBillsCount > 0 ? 'overdue' : 'pending'),
         lastAutomatedSync: automatedSyncTime
       },
       openBills,

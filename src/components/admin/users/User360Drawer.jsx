@@ -285,7 +285,77 @@ export default function User360Drawer({
       onClose={onClose}
       title={formData.displayName || formData.email || 'User Profile 360°'}
       subtitle={`UID: ${user.id || user.uid || '---'} · Role: ${formData.role.toUpperCase()}${(user.zohoContactId || user.biginContactId || user.zohoSyncStatus === 'synced') ? ' · ⚡ Bigin Synced' : ''}`}
-      width="580px"
+      width="640px"
+      actions={
+        onImpersonate && (
+          <button
+            type="button"
+            onClick={() => {
+              onImpersonate(user);
+              onClose();
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 9px',
+              borderRadius: '6px',
+              border: '1px solid #fed7aa',
+              background: '#fff7ed',
+              color: '#c2410c',
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+            title="Act as this user (simulate session)"
+          >
+            <Eye size={13} />
+            <span>Simulate User</span>
+          </button>
+        )
+      }
+      footer={
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              padding: '0.55rem 1.1rem',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              backgroundColor: '#ffffff',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              color: '#475569',
+              cursor: 'pointer'
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            style={{
+              padding: '0.55rem 1.4rem',
+              borderRadius: '8px',
+              backgroundColor: 'var(--primary, #003666)',
+              border: 'none',
+              color: '#ffffff',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              opacity: isSaving ? 0.7 : 1,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Check size={15} />
+            <span>{isSaving ? 'Saving...' : 'Save User 360°'}</span>
+          </button>
+        </div>
+      }
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* Navigation Tabs */}
@@ -702,20 +772,21 @@ export default function User360Drawer({
             {/* Action Banner: Multi-Catalog B2B Sharing */}
             <div style={{
               padding: '1rem',
-              borderRadius: '12px',
-              backgroundColor: '#f0fdf4',
-              border: '1px solid #bbf7d0',
+              borderRadius: '8px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #dadce0',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.08)',
               display: 'flex',
               flexDirection: 'column',
               gap: '0.85rem'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <MessageSquare size={16} /> Multi-Portfolio B2B Document Sharing
+                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#202124', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <MessageSquare size={16} color="#1a73e8" /> Multi-Portfolio B2B Document Sharing
                   </div>
-                  <div style={{ fontSize: '0.76rem', color: '#334155', marginTop: '0.2rem', lineHeight: 1.4 }}>
-                    Generate tracked short links (<code style={{ color: '#166534', fontWeight: 700 }}>/c/CAT-...</code>) with tailored wholesale double-margins and automated order attribution.
+                  <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '0.2rem', lineHeight: 1.4 }}>
+                    Generate tracked short links (<code style={{ color: '#1a73e8', fontWeight: 600 }}>/c/CAT-...</code>) with tailored wholesale double-margins and automated order attribution.
                   </div>
                 </div>
 
@@ -725,13 +796,13 @@ export default function User360Drawer({
                     onClick={() => handleShareCatalog('copy')}
                     disabled={isSharingLotus}
                     style={{
-                      padding: '0.55rem 0.85rem',
+                      padding: '0.5rem 0.85rem',
                       backgroundColor: '#ffffff',
-                      color: '#166534',
-                      border: '1px solid #bbf7d0',
-                      borderRadius: '8px',
+                      color: '#1a73e8',
+                      border: '1px solid #dadce0',
+                      borderRadius: '6px',
                       fontSize: '0.82rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       cursor: isSharingLotus ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -748,18 +819,18 @@ export default function User360Drawer({
                     onClick={() => handleShareCatalog('whatsapp')}
                     disabled={isSharingLotus}
                     style={{
-                      padding: '0.55rem 1rem',
-                      backgroundColor: '#16a34a',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#1a73e8',
                       color: '#ffffff',
                       border: 'none',
-                      borderRadius: '8px',
+                      borderRadius: '6px',
                       fontSize: '0.82rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       cursor: isSharingLotus ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.4rem',
-                      boxShadow: '0 2px 4px rgba(22,163,74,0.3)',
+                      boxShadow: '0 1px 3px rgba(26,115,232,0.3)',
                       flexShrink: 0
                     }}
                   >
@@ -770,10 +841,10 @@ export default function User360Drawer({
 
               {/* Multi-Catalog Collection Selector */}
               <div>
-                <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#166534', display: 'block', marginBottom: '0.35rem' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#3c4043', display: 'block', marginBottom: '0.35rem' }}>
                   Select Clinical Portfolio to Share:
                 </span>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '6px' }}>
                   {CATALOG_COLLECTIONS.map(col => {
                     const isSelected = selectedCatalogCollection === col.id;
                     return (
@@ -782,22 +853,23 @@ export default function User360Drawer({
                         type="button"
                         onClick={() => setSelectedCatalogCollection(col.id)}
                         style={{
-                          padding: '0.35rem 0.65rem',
+                          padding: '0.45rem 0.75rem',
                           borderRadius: '6px',
-                          fontSize: '0.74rem',
-                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '5px',
-                          border: isSelected ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
-                          backgroundColor: isSelected ? '#16a34a' : '#ffffff',
-                          color: isSelected ? '#ffffff' : '#334155',
-                          transition: 'all 0.15s ease'
+                          gap: '6px',
+                          border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+                          backgroundColor: isSelected ? '#e8f0fe' : '#ffffff',
+                          color: isSelected ? '#1967d2' : '#3c4043',
+                          transition: 'all 0.15s ease',
+                          textAlign: 'left'
                         }}
                       >
-                        <span>{col.icon}</span>
-                        <span>{col.label}</span>
+                        <span style={{ fontSize: '0.9rem' }}>{col.icon}</span>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{col.label}</span>
                       </button>
                     );
                   })}
@@ -805,39 +877,50 @@ export default function User360Drawer({
               </div>
 
               {/* Double Margin Summary Bar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', paddingTop: '0.35rem', borderTop: '1px dashed #bbf7d0', fontSize: '0.72rem', color: '#64748b' }}>
-                <span>Recipient: <strong>{formData.displayName || 'Valued Partner'}</strong></span>
-                <span>Atlas Margin: <strong style={{ color: '#0284c7' }}>+{formData.atlasMarkupPct}%</strong></span>
-                <span>Wholesaler Margin: <strong style={{ color: '#16a34a' }}>+{formData.wholesalerMarginPct}%</strong></span>
-                <span>Effective Combined: <strong style={{ color: '#166534' }}>+{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}%</strong></span>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                flexWrap: 'wrap',
+                padding: '0.5rem 0.75rem',
+                backgroundColor: '#f8fafc',
+                borderRadius: '6px',
+                border: '1px solid #e8eaed',
+                fontSize: '0.74rem',
+                color: '#5f6368'
+              }}>
+                <span>Recipient: <strong style={{ color: '#202124' }}>{formData.displayName || 'Valued Partner'}</strong></span>
+                <span>Atlas Margin: <strong style={{ color: '#1a73e8' }}>+{formData.atlasMarkupPct}%</strong></span>
+                <span>Wholesaler Margin: <strong style={{ color: '#137333' }}>+{formData.wholesalerMarginPct}%</strong></span>
+                <span>Effective Combined: <strong style={{ color: '#1e293b' }}>+{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}%</strong></span>
               </div>
             </div>
 
             {/* Metrics Row */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
               <div style={{ padding: '0.65rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{sharedLinks.length}</div>
-                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Enlaces Compartidos</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#202124' }}>{sharedLinks.length}</div>
+                <div style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 500 }}>Shared Links</div>
               </div>
               <div style={{ padding: '0.65rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#16a34a' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#137333' }}>
                   {sharedLinks.reduce((acc, curr) => acc + (curr.visitsCount || 0), 0)}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Aperturas / Visitas</div>
+                <div style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 500 }}>Link Views</div>
               </div>
               <div style={{ padding: '0.65rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0284c7' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#1a73e8' }}>
                   {sharedLinks.filter(l => l.status === 'engaged' || l.status === 'converted' || l.cartItemsCount > 0).length}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Con Interacción</div>
+                <div style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 500 }}>Active Engagements</div>
               </div>
             </div>
 
             {/* Shared Links History List */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>
-                  Historial de Envíos y Telemetría:
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#3c4043' }}>
+                  Link Sharing History & Telemetry:
                 </div>
                 <button
                   type="button"
@@ -846,7 +929,7 @@ export default function User360Drawer({
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#64748b',
+                    color: '#5f6368',
                     cursor: 'pointer',
                     fontSize: '0.74rem',
                     display: 'flex',
@@ -854,13 +937,13 @@ export default function User360Drawer({
                     gap: '0.2rem'
                   }}
                 >
-                  <RefreshCw size={12} /> Actualizar
+                  <RefreshCw size={12} /> Refresh
                 </button>
               </div>
 
               {isLoadingLinks ? (
                 <div style={{ padding: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: '#64748b' }}>
-                  Cargando actividad...
+                  Loading telemetry...
                 </div>
               ) : sharedLinks.length === 0 ? (
                 <div style={{
@@ -872,7 +955,7 @@ export default function User360Drawer({
                   color: '#64748b',
                   fontSize: '0.8rem'
                 }}>
-                  No se han enviado catálogos a este usuario todavía. Haz clic en <strong>Enviar por WhatsApp</strong> para iniciar el contacto.
+                  No shared links found for this user yet. Select a portfolio above and click <strong>Share via WhatsApp</strong> or <strong>Copy Link</strong>.
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -899,10 +982,10 @@ export default function User360Drawer({
                             <CopyableId value={link.catalogId || link.id} />
                             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
                               {link.assetType === 'variant_datasheet' || link.catalogType === 'variant_datasheet'
-                                ? `📄 Ficha: ${link.productName || 'Compound'} ${link.dose || ''}`.trim()
+                                ? `Datasheet: ${link.productName || 'Compound'} ${link.dose || ''}`.trim()
                                 : link.assetType === 'protocol' || link.catalogType === 'protocols'
-                                ? `🩺 Protocolo: ${link.assetTitle || link.catalogId}`
-                                : `📦 Catálogo: ${link.catalogueFilter || (link.supplierId ? link.supplierId.replace(/^supplier-/, '') : 'General')}`}
+                                ? `Protocol: ${link.assetTitle || link.catalogId}`
+                                : `Catalog: ${link.catalogueFilter || (link.supplierId ? link.supplierId.replace(/^supplier-/, '') : 'General')}`}
                             </span>
                           </div>
                           
@@ -911,28 +994,28 @@ export default function User360Drawer({
                               <span style={{
                                 fontSize: '0.66rem',
                                 fontWeight: 700,
-                                color: '#166534',
-                                backgroundColor: '#f0fdf4',
-                                border: '1px solid #bbf7d0',
+                                color: '#137333',
+                                backgroundColor: '#e6f4ea',
+                                border: '1px solid #ceead6',
                                 padding: '1px 6px',
                                 borderRadius: '4px',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '3px'
                               }}>
-                                <Check size={10} color="#16a34a" /> Leído ({link.visitsCount || 1})
+                                <Check size={10} color="#137333" /> Read ({link.visitsCount || 1})
                               </span>
                             ) : (
                               <span style={{
                                 fontSize: '0.66rem',
                                 fontWeight: 600,
-                                color: '#92400e',
-                                backgroundColor: '#fffbeb',
-                                border: '1px solid #fde68a',
+                                color: '#b06000',
+                                backgroundColor: '#fef7e0',
+                                border: '1px solid #feefc3',
                                 padding: '1px 6px',
                                 borderRadius: '4px'
                               }}>
-                                Pendiente ⏳
+                                Pending
                               </span>
                             )}
                             <StatusBadge status={link.status || 'sent'} />
@@ -941,11 +1024,11 @@ export default function User360Drawer({
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#64748b' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                            <Clock size={12} /> Enviado: {createdDate} ({link.channel || 'whatsapp'})
+                            <Clock size={12} /> Sent: {createdDate} ({link.channel || 'whatsapp'})
                           </div>
                           <div>
-                            <strong>{link.visitsCount || 0} visitas</strong>
-                            {lastVisited && <span style={{ marginLeft: '0.3rem' }}>(última: {lastVisited})</span>}
+                            <strong>{link.visitsCount || 0} views</strong>
+                            {lastVisited && <span style={{ marginLeft: '0.3rem' }}>(last: {lastVisited})</span>}
                           </div>
                         </div>
 
@@ -958,7 +1041,7 @@ export default function User360Drawer({
                             fontSize: '0.72rem',
                             color: '#6d28d9'
                           }}>
-                            🛒 Carrito activo: {link.cartSummary}
+                            Active Selection: {link.cartSummary}
                           </div>
                         )}
 
@@ -967,7 +1050,7 @@ export default function User360Drawer({
                             type="button"
                             onClick={() => {
                               navigator.clipboard.writeText(shortUrl);
-                              notifier.success('Enlace corto copiado: ' + shortUrl);
+                              notifier.success('Short link copied: ' + shortUrl);
                             }}
                             style={{
                               padding: '0.3rem 0.6rem',
@@ -982,7 +1065,7 @@ export default function User360Drawer({
                               color: '#334155'
                             }}
                           >
-                            <Copy size={12} /> Copiar Link
+                            <Copy size={12} /> Copy Link
                           </button>
 
                           {formData.phone && (
@@ -991,28 +1074,28 @@ export default function User360Drawer({
                               onClick={() => {
                                 const cleanPhone = formData.phone.replace(/[^\d]/g, '');
                                 const docLabel = (link.assetType === 'variant_datasheet' || link.catalogType === 'variant_datasheet')
-                                  ? `la ficha técnica de ${link.productName || 'este compuesto'}`
+                                  ? `datasheet for ${link.productName || 'this compound'}`
                                   : (link.assetType === 'protocol' || link.catalogType === 'protocols')
-                                  ? `el protocolo clínico solicitado`
-                                  : `el catálogo oficial actualizado`;
-                                const msg = `Hola ${formData.displayName || 'Doctor / Partner'}, te comparto el enlace a ${docLabel}:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición.`;
+                                  ? `clinical protocol requested`
+                                  : `official catalog`;
+                                const msg = `Hello ${formData.displayName || 'Doctor / Partner'}, here is the link to the ${docLabel}:\n\n🔗 ${shortUrl}\n\nPlease let us know if you need any assistance.`;
                                 window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                               }}
                               style={{
                                 padding: '0.3rem 0.6rem',
-                                backgroundColor: '#f0fdf4',
-                                border: '1px solid #bbf7d0',
+                                backgroundColor: '#e6f4ea',
+                                border: '1px solid #ceead6',
                                 borderRadius: '6px',
                                 fontSize: '0.72rem',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.2rem',
-                                color: '#166534',
+                                color: '#137333',
                                 fontWeight: 600
                               }}
                             >
-                              <Send size={11} /> Reenviar WhatsApp
+                              <Send size={11} /> Resend WhatsApp
                             </button>
                           )}
 
@@ -1027,7 +1110,7 @@ export default function User360Drawer({
                               borderRadius: '6px',
                               fontSize: '0.72rem',
                               textDecoration: 'none',
-                              color: '#0284c7',
+                              color: '#1a73e8',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '0.2rem',
@@ -1036,10 +1119,10 @@ export default function User360Drawer({
                           >
                             <ExternalLink size={12} />
                             {(link.assetType === 'variant_datasheet' || link.catalogType === 'variant_datasheet')
-                              ? 'Ver Ficha Técnica'
+                              ? 'View Datasheet'
                               : (link.assetType === 'protocol' || link.catalogType === 'protocols')
-                              ? 'Ver Protocolo'
-                              : 'Ver Catálogo'}
+                              ? 'View Protocol'
+                              : 'View Catalog'}
                           </a>
                         </div>
                       </div>
@@ -1050,78 +1133,6 @@ export default function User360Drawer({
             </div>
           </div>
         )}
-
-        {/* Footer Actions */}
-        <div style={{
-          marginTop: '1rem',
-          paddingTop: '1rem',
-          borderTop: '1px solid #e2e8f0',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <button
-            onClick={() => {
-              if (onImpersonate) {
-                onImpersonate(user);
-                onClose();
-              }
-            }}
-            style={{
-              padding: '0.6rem 1rem',
-              borderRadius: '8px',
-              backgroundColor: '#fff7ed',
-              border: '1px solid #fed7aa',
-              color: '#c2410c',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem'
-            }}
-          >
-            <Eye size={15} /> Act As This User (Simulate)
-          </button>
-
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={onClose}
-              style={{
-                padding: '0.6rem 1rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                color: '#475569',
-                cursor: 'pointer'
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              style={{
-                padding: '0.6rem 1.4rem',
-                borderRadius: '8px',
-                backgroundColor: 'var(--primary)',
-                border: 'none',
-                color: '#ffffff',
-                fontSize: '0.84rem',
-                fontWeight: 700,
-                cursor: isSaving ? 'not-allowed' : 'pointer',
-                opacity: isSaving ? 0.7 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem'
-              }}
-            >
-              <Check size={16} /> {isSaving ? 'Saving...' : 'Save User 360°'}
-            </button>
-          </div>
-        </div>
       </div>
     </StandardDrawer>
   );
