@@ -19,6 +19,16 @@ export async function GET(request) {
     const limit       = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
     const startAfter  = searchParams.get('startAfter')  || null;
 
+    const code = searchParams.get('code') || searchParams.get('catalogId') || searchParams.get('shareCode');
+    if (code) {
+      const doc = await adminDb.collection('shared_catalog_links').doc(code).get();
+      if (doc.exists) {
+        const d = doc.data();
+        return NextResponse.json({ item: { id: doc.id, ...d } });
+      }
+      return NextResponse.json({ error: 'Shared link not found' }, { status: 404 });
+    }
+
     if (!recipientId) {
       return NextResponse.json({ error: 'recipientId is required' }, { status: 400 });
     }

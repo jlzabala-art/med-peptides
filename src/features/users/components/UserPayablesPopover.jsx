@@ -109,38 +109,38 @@ export default function UserPayablesPopover({ user }) {
           display: 'inline-flex',
           alignItems: 'center',
           gap: '5px',
-          fontSize: '0.72rem',
-          fontWeight: 700,
-          padding: '2px 8px',
-          borderRadius: '999px',
-          backgroundColor: '#fff7ed',
-          color: '#c2410c',
-          border: '1px solid #fed7aa',
+          fontSize: '0.70rem',
+          fontWeight: 600,
+          padding: '2px 7px',
+          borderRadius: '4px',
+          backgroundColor: '#f8fafc',
+          color: '#475569',
+          border: '1px solid #dadce0',
           cursor: 'pointer',
           whiteSpace: 'nowrap',
           flexShrink: 0,
           transition: 'all 0.15s ease',
-          boxShadow: isOpen ? '0 0 0 2px rgba(234, 88, 12, 0.2)' : 'none'
+          boxShadow: isOpen ? '0 0 0 2px rgba(60, 64, 67, 0.15)' : 'none'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#ffedd5';
-          e.currentTarget.style.borderColor = '#fdba74';
+          e.currentTarget.style.backgroundColor = '#f1f5f9';
+          e.currentTarget.style.borderColor = '#cbd5e1';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = '#fff7ed';
-          e.currentTarget.style.borderColor = '#fed7aa';
+          e.currentTarget.style.backgroundColor = '#f8fafc';
+          e.currentTarget.style.borderColor = '#dadce0';
         }}
       >
-        <FileText size={12} color="#ea580c" />
+        <FileText size={11} color="#5f6368" />
         <span>Pending Bills</span>
         {openCount != null && (
           <span style={{
-            backgroundColor: '#ea580c',
-            color: '#ffffff',
-            borderRadius: '999px',
+            backgroundColor: '#e2e8f0',
+            color: '#334155',
+            borderRadius: '4px',
             padding: '1px 5px',
             fontSize: '0.65rem',
-            fontWeight: 800
+            fontWeight: 700
           }}>
             {openCount}
           </span>

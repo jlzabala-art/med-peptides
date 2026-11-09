@@ -516,8 +516,9 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               width: '34px',
               height: '34px',
               borderRadius: '50%',
-              backgroundColor: role === 'doctor' ? '#ccfbf1' : role === 'wholesaler' ? '#ffedd5' : role === 'admin' ? '#e0e7ff' : role === 'clinic' ? '#f3e8ff' : '#f1f5f9',
-              color: role === 'doctor' ? '#0f766e' : role === 'wholesaler' ? '#c2410c' : role === 'admin' ? '#4338ca' : role === 'clinic' ? '#7e22ce' : '#475569',
+              backgroundColor: '#f1f5f9',
+              color: '#475569',
+              border: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -584,8 +585,23 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       render: (u) => {
         const currentRole = u.role || (u.roles && u.roles[0]) || 'patient';
         return (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', position: 'relative', whiteSpace: 'nowrap' }}>
-            <RoleBadge role={currentRole} />
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            position: 'relative',
+            whiteSpace: 'nowrap',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #dadce0',
+            color: '#3c4043',
+            fontSize: '0.76rem',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}>
+            <span>{currentRole.charAt(0).toUpperCase() + currentRole.slice(1).replace('_', ' ')}</span>
+            <ChevronDown size={11} color="#5f6368" />
             <select
               value={currentRole}
               onClick={(e) => e.stopPropagation()}
@@ -606,7 +622,6 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               <option value="wholesaler">Wholesaler</option>
               <option value="patient">Patient</option>
             </select>
-            <span style={{ fontSize: '0.7rem', opacity: 0.4, flexShrink: 0, marginLeft: '2px' }}>✏️</span>
           </div>
         );
       }
@@ -631,13 +646,13 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               alignItems: 'center',
               gap: '6px',
               position: 'relative',
-              padding: '4px 10px',
-              borderRadius: '8px',
+              padding: '3px 8px',
+              borderRadius: '4px',
               whiteSpace: 'nowrap',
-              background: '#eff6ff',
-              color: '#1d4ed8',
-              border: '1px solid #bfdbfe',
-              fontSize: '0.78rem',
+              background: '#f8fafc',
+              color: '#3c4043',
+              border: '1px solid #dadce0',
+              fontSize: '0.76rem',
               fontWeight: 600,
               cursor: 'pointer'
             }}
@@ -645,12 +660,12 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             <span>
               {channelLabels[currentChannel] || currentChannel}
               {Boolean(u.customDiscountPct || u.priceMarkupPercent) && (
-                <strong style={{ marginLeft: '4px', color: '#0369a1' }}>
+                <strong style={{ marginLeft: '4px', color: '#003666' }}>
                   ({u.customDiscountPct || u.priceMarkupPercent}%)
                 </strong>
               )}
             </span>
-            <span style={{ fontSize: '0.7rem', opacity: 0.4, flexShrink: 0 }}>✏️</span>
+            <ChevronDown size={11} color="#5f6368" />
             <select
               value={currentChannel}
               onClick={(e) => e.stopPropagation()}

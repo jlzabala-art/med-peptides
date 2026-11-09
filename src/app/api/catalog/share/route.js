@@ -116,7 +116,9 @@ export async function POST(request) {
           orderPlaced: false,
           lastInteractionAt: null,
         },
-        expiresAt: new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000).toISOString(),
+        priceSnapshot: body.priceSnapshot || null,
+        isPerpetual: true,
+        expiresAt: null, // Perpetual link per B2B customer requirement
         issuedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -141,6 +143,8 @@ export async function POST(request) {
             currency,
             shortUrl,
             longUrl,
+            priceSnapshot: body.priceSnapshot || null,
+            isPerpetual: true,
             status: 'sent',
             visitsCount: 0,
             lastVisitedAt: null,

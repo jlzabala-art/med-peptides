@@ -1355,6 +1355,7 @@ export default function PeptidesPriceListClient({
   const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
   const [isCurrencySheetOpen, setIsCurrencySheetOpen] = useState(false);
   const [trackingCodeState] = useState(trackingCode);
+  const [priceDriftNotice, setPriceDriftNotice] = useState(null);
 
   // Strict English default ('en') unless ?lang=es is explicitly in the URL or selected via top button
   const [lang, setLang] = useState(initialLang || 'en');
@@ -1373,6 +1374,36 @@ export default function PeptidesPriceListClient({
       const pDest = (url.searchParams.get('dest') || url.searchParams.get('region') || '').toUpperCase();
       const resolvedDest = (pDest === 'EU' || pDest === 'US' || pDest === 'AE') ? pDest : 'EU';
       setShippingDest(resolvedDest);
+
+      // Price Drift check for tracked B2B shared links
+      const trackCode = url.searchParams.get('tc') || url.searchParams.get('ref') || url.searchParams.get('code');
+      if (trackCode && (trackCode.startsWith('CAT-') || trackCode.startsWith('RP-'))) {
+        fetch(`/api/catalog/shares?code=${encodeURIComponent(trackCode)}`)
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (data?.item?.priceSnapshot) {
+              const snapshot = data.item.priceSnapshot;
+              let hasDrift = false;
+              for (const [prodId, snapVal] of Object.entries(snapshot)) {
+                const currentProd = (products || []).find(p => p.id === prodId || p.sku === prodId);
+                if (currentProd) {
+                  const currentPrice = currentProd.retail_price || currentProd.price || currentProd.calculatedPrice;
+                  if (currentPrice && snapVal && Math.abs(currentPrice - snapVal) > 0.05) {
+                    hasDrift = true;
+                    break;
+                  }
+                }
+              }
+              if (hasDrift) {
+                setPriceDriftNotice({
+                  issuedAt: data.item.issuedAt,
+                  recipientName: data.item.recipientName
+                });
+              }
+            }
+          })
+          .catch(() => {});
+      }
 
       // Always ensure ?lang= & ?currency= & ?dest= are explicitly visible in the browser URL
       url.searchParams.set('lang', resolvedLang);
@@ -2786,18 +2817,18 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               style={{
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(255, 255, 255, 0.12)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                background: '#f8fafc',
+                border: '1px solid #dadce0',
                 borderRadius: '6px',
-                width: '32px',
-                height: '32px',
-                color: '#e2e8f0',
+                width: '36px',
+                height: '36px',
+                color: '#202124',
                 cursor: 'pointer',
                 flexShrink: 0,
                 transition: 'all 0.15s ease'
               }}
             >
-              <Menu size={17} />
+              <Menu size={18} color="#202124" />
             </button>
             <Link href="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
               <BrandLogo variant="dark" size="compact" />
@@ -3004,22 +3035,22 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
-                  background: 'rgba(255, 255, 255, 0.12)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255, 255, 255, 0.22)',
+                  background: '#f1f3f4',
+                  color: '#202124',
+                  border: '1px solid #dadce0',
                   borderRadius: '6px',
-                  padding: '0 10px',
+                  padding: '0 8px',
                   fontSize: '0.78rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   height: '32px',
-                  minWidth: '72px',
+                  minWidth: '68px',
                   whiteSpace: 'nowrap',
                   letterSpacing: '-0.01em'
                 }}
               >
                 <span>{currency === 'AED' ? 'د.إ AED' : currency === 'EUR' ? '€ EUR' : '$ USD'}</span>
-                <ChevronDown size={11} color="#94a3b8" />
+                <ChevronDown size={11} color="#5f6368" />
               </button>
 
               {/* Atlas AI — solid GCP blue #1a73e8, no gradient, uniform 32px */}
@@ -3057,17 +3088,17 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: isMobileMoreMenuOpen ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: isMobileMoreMenuOpen ? '#e8f0fe' : '#f8fafc',
+                    border: '1px solid #dadce0',
                     borderRadius: '6px',
                     width: '32px',
                     height: '32px',
-                    color: '#ffffff',
+                    color: '#202124',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  <MoreVertical size={16} />
+                  <MoreVertical size={16} color="#202124" />
                 </button>
 
                 {/* Dropdown Menu popover for secondary actions */}
@@ -3481,6 +3512,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             .mobile-only-header-actions {
               display: inline-flex !important;
             }
+            .mobile-only-sticky-bar {
+              display: flex !important;
+            }
             /* Ultra-Compact 1-Row Google Cloud Mobile Top AppBar (Sticky, 48px height) */
             .screen-nav-bar.peptides-screen-nav-bar {
               position: sticky !important;
@@ -3880,6 +3914,48 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 </div>
               </div>
             </div>
+
+            {/* ── Google Cloud Price Drift Notice Banner (Automatic Drift Detection) ── */}
+            {priceDriftNotice && (
+              <div
+                style={{
+                  background: '#e8f0fe',
+                  border: '1px solid #c2e7ff',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  marginBottom: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '1.1rem' }}>ℹ️</span>
+                  <span style={{ fontSize: '0.80rem', color: '#1a73e8', fontWeight: 600 }}>
+                    {isEs
+                      ? `Aviso de Tarifas: Algunos precios han sido actualizados de acuerdo con las tarifas vigentes del catálogo desde la cotización original emitida${priceDriftNotice.issuedAt ? ` el ${new Date(priceDriftNotice.issuedAt).toLocaleDateString()}` : ''}.`
+                      : `Price Schedule Notice: Some prices have been updated according to current catalog rates since this schedule was issued${priceDriftNotice.issuedAt ? ` on ${new Date(priceDriftNotice.issuedAt).toLocaleDateString()}` : ''}.`}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPriceDriftNotice(null)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#1a73e8',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    padding: '2px 8px'
+                  }}
+                  title={isEs ? 'Descartar aviso' : 'Dismiss notice'}
+                >
+                  ×
+                </button>
+              </div>
+            )}
 
             {/* ── Search & Category Filter Block (Prioritized Above-the-Fold per Golden Rule #7) ── */}
             <div className="gcp-search-and-category-block" style={{ marginBottom: '0.85rem' }}>
@@ -5273,6 +5349,91 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <ArrowRight size={15} />
               </button>
             </div>
+          </div>
+        </aside>
+      )}
+
+      {/* ── Mobile Sticky Bar when Cart is Empty (Google Cloud Console UX) ── */}
+      {totalCartCount === 0 && (
+        <aside
+          className="gcp-mobile-empty-cart-dock mobile-only-sticky-bar"
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 890,
+            background: '#ffffff',
+            borderTop: '1px solid #dadce0',
+            boxShadow: '0 -2px 10px rgba(60, 64, 67, 0.10)',
+            padding: '8px 14px',
+            display: 'none',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.98)'
+          }}
+          aria-label="Mobile Navigation Dock"
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{
+              background: '#f1f3f4',
+              color: '#3c4043',
+              fontSize: '0.74rem',
+              fontWeight: 750,
+              padding: '4px 10px',
+              borderRadius: '16px',
+              border: '1px solid #dadce0',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <span>🔬</span>
+              <span>{filteredProducts?.length || 109} {isEs ? 'Formulaciones' : 'Formulations'}</span>
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setIsPdfPreviewOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: '#f8fafc',
+                color: '#3c4043',
+                border: '1px solid #dadce0',
+                borderRadius: '6px',
+                padding: '6px 10px',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                cursor: 'pointer'
+              }}
+            >
+              <Eye size={12} color="#5f6368" />
+              <span>PDF</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAtlasAiOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: '#1a73e8',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 1px 4px rgba(26, 115, 232, 0.3)'
+              }}
+            >
+              <Sparkles size={13} />
+              <span>Atlas AI</span>
+            </button>
           </div>
         </aside>
       )}
