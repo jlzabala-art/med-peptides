@@ -29,7 +29,8 @@ import {
   Users, UserCheck, ShieldCheck, Mail, Archive,
   Trash2, Plus, Edit, AlertCircle, XCircle, Eye,
   Building2, DollarSign, CheckCircle2, Search, Download, UserPlus, Clock, Stethoscope, Sparkles,
-  FileText, Package, Calendar, Share2, MessageSquare, BookOpen, ExternalLink, Copy, Sliders, Upload
+  FileText, Package, Calendar, Share2, MessageSquare, BookOpen, ExternalLink, Copy, Sliders, Upload,
+  ChevronDown
 } from 'lucide-react';
 
 import { useFirestorePaginatedCollection } from '../../../hooks/data/useFirestorePaginatedCollection';

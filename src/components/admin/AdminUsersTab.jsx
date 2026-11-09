@@ -11,8 +11,24 @@ import { MetricCard } from '../ui';
  * and passes the data to the interactive Client Component.
  */
 export default async function AdminUsersTab({ defaultRole = null, readOnly = false, canApprove = true, isSubTab = false }) {
-  const initialUsers = await fetchUsersAction({ limitCount: 20 });
-  const kpis = await fetchUsersAggregatesAction();
+  let initialUsers = [];
+  let kpis = null;
+
+  try {
+    const [usersResult, kpisResult] = await Promise.allSettled([
+      fetchUsersAction({ limitCount: 20 }),
+      fetchUsersAggregatesAction()
+    ]);
+
+    if (usersResult.status === 'fulfilled') {
+      initialUsers = usersResult.value || [];
+    }
+    if (kpisResult.status === 'fulfilled') {
+      kpis = kpisResult.value || null;
+    }
+  } catch (err) {
+    console.error('[AdminUsersTab] Error prefetching users:', err);
+  }
 
   const safeInitialUsers = JSON.parse(JSON.stringify(initialUsers || []));
   const safeKpis = JSON.parse(JSON.stringify(kpis || null));

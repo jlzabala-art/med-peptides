@@ -411,9 +411,14 @@ export default function PeptideMonographHeader({
               </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '4px' }}>
                 {strengthsArray.map((str, sIdx) => {
-                  const normStr = String(str || '').toLowerCase().replace(/[-_\s]+/g, '');
-                  const normSelected = String(selectedStrength?.name || selectedStrength?.id || selectedStrength?.dosage || '').toLowerCase().replace(/[-_\s]+/g, '');
-                  const isActive = normStr === normSelected || normSelected.includes(normStr) || normStr.includes(normSelected) || (isDiagnostic && strengthsArray.length === 1);
+                  const normStr = String(str || '').toLowerCase().trim().replace(/[-_\s]+/g, '');
+                  const normSelected = String(selectedStrength?.name || selectedStrength?.id || selectedStrength?.dosage || selectedStrength || '').toLowerCase().trim().replace(/[-_\s]+/g, '');
+                  // Strict dose extraction to avoid substring collisions (e.g. "5mg" substring of "15mg")
+                  const strDoseMatch = normStr.match(/^(\d+(?:\.\d+)?(?:mg|mcg|g|iu|ml)?)/);
+                  const selDoseMatch = normSelected.match(/^(\d+(?:\.\d+)?(?:mg|mcg|g|iu|ml)?)/);
+                  const strDose = strDoseMatch ? strDoseMatch[1] : normStr;
+                  const selDose = selDoseMatch ? selDoseMatch[1] : normSelected;
+                  const isActive = normStr === normSelected || strDose === selDose || (isDiagnostic && strengthsArray.length === 1);
                   return (
                     <span
                       key={`${str}-${sIdx}`}

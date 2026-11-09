@@ -388,6 +388,52 @@ export async function POST(request) {
       }
     }
 
+    // Auto-register or upsert customer profile into Firestore `users` collection
+    if (orderDocData.customerEmail && adminDb) {
+      try {
+        const cleanEmail = String(orderDocData.customerEmail).toLowerCase().trim();
+        const usersSnap = await adminDb.collection('users').where('email', '==', cleanEmail).limit(1).get();
+        if (usersSnap.empty) {
+          await adminDb.collection('users').add({
+            email: cleanEmail,
+            name: clientDisplayName,
+            displayName: clientDisplayName,
+            clinicName: contact.clinicName || contact.practiceName || null,
+            phone: orderDocData.customerPhone || null,
+            shippingAddress: {
+              street: contact.addressLine1 || contact.street || '',
+              city: contact.city || '',
+              state: contact.state || '',
+              postalCode: contact.postalCode || '',
+              country: orderDocData.shippingDestination || ''
+            },
+            role: 'clinic',
+            pricingChannel: 'clinic_b2b',
+            status: 'active',
+            source: 'pricing_proforma_request',
+            ordersCount: 1,
+            lastOrderCode: orderCode,
+            lastOrderAt: now.toISOString(),
+            createdAt: now.toISOString(),
+            updatedAt: now.toISOString()
+          });
+        } else {
+          const userDoc = usersSnap.docs[0];
+          await userDoc.ref.set({
+            name: userDoc.data().name || clientDisplayName,
+            clinicName: userDoc.data().clinicName || contact.clinicName || contact.practiceName || null,
+            phone: userDoc.data().phone || orderDocData.customerPhone || null,
+            ordersCount: FieldValue.increment(1),
+            lastOrderCode: orderCode,
+            lastOrderAt: now.toISOString(),
+            updatedAt: now.toISOString()
+          }, { merge: true });
+        }
+      } catch (userUpsertErr) {
+        console.warn('[orders/create-draft] Could not upsert user in Firestore:', userUpsertErr.message);
+      }
+    }
+
     // Create high-priority notification for Admin, Wholesaler and Account Manager
     const isWholesalerOrder = Boolean(orderDocData.wholesalerId);
     const notifData = {

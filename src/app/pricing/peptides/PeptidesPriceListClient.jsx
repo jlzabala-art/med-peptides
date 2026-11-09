@@ -43,8 +43,12 @@ import {
   Truck,
   Menu,
   SlidersHorizontal,
-  MoreVertical
+  MoreVertical,
+  User,
+  LogIn,
+  Loader2
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
@@ -1488,6 +1492,14 @@ export default function PeptidesPriceListClient({
   const [submittingOrder, setSubmittingOrder] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [submittedOrderData, setSubmittedOrderData] = useState(null);
+  const [isLookingUpUser, setIsLookingUpUser] = useState(false);
+  const [lookupUserResult, setLookupUserResult] = useState(null);
+
+  const authContext = useAuth?.() || {};
+  const authUser = authContext?.user || null;
+  const authProfile = authContext?.userProfile || null;
+  const authRole = authContext?.activeRole || authProfile?.role || null;
+
   const [orderForm, setOrderForm] = useState({
     name: '',
     clinicName: '',
@@ -1503,6 +1515,48 @@ export default function PeptidesPriceListClient({
     notes: '',
     company_fax: '' // Anti-spam Honeypot (hidden from real users)
   });
+
+  // Autofill form if user is already authenticated
+  useEffect(() => {
+    if (authUser && !orderForm.email) {
+      setOrderForm(prev => ({
+        ...prev,
+        email: authUser.email || '',
+        name: prev.name || authProfile?.name || authUser.displayName || '',
+        clinicName: prev.clinicName || authProfile?.clinicName || '',
+        phone: prev.phone || authProfile?.phone || ''
+      }));
+    }
+  }, [authUser, authProfile]);
+
+  const handleEmailLookup = async (rawEmail) => {
+    if (!rawEmail || !rawEmail.includes('@') || rawEmail.length < 5) return;
+    setIsLookingUpUser(true);
+    try {
+      const res = await fetch(`/api/users/lookup?email=${encodeURIComponent(rawEmail.trim())}`);
+      const data = await res.json();
+      if (data?.found && data.user) {
+        setLookupUserResult(data.user);
+        setOrderForm(prev => ({
+          ...prev,
+          name: prev.name || data.user.name || '',
+          clinicName: prev.clinicName || data.user.clinicName || '',
+          phone: prev.phone || data.user.phone || '',
+          country: data.user.country || prev.country,
+          addressLine1: prev.addressLine1 || data.user.addressLine1 || '',
+          city: prev.city || data.user.city || '',
+          state: prev.state || data.user.state || '',
+          postalCode: prev.postalCode || data.user.postalCode || ''
+        }));
+      } else {
+        setLookupUserResult(null);
+      }
+    } catch (err) {
+      console.warn('[handleEmailLookup] Lookup error:', err);
+    } finally {
+      setIsLookingUpUser(false);
+    }
+  };
 
   // Google Cloud UX Comprehensive Field Validator
   const validateOrderForm = useCallback(() => {
@@ -2173,22 +2227,25 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <span>{isEs ? 'Ficha ↗' : 'Specs ↗'}</span>
               </a>
 
-              {!groupByCategory && (
-                <span style={{
-                  fontSize: '0.64rem',
-                  fontWeight: 600,
-                  color: row?.categoryMeta?.color,
-                  background: row?.categoryMeta?.bg,
-                  border: `1px solid ${row?.categoryMeta?.border}`,
-                  padding: '1px 6px',
-                  borderRadius: '4px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.03em',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {row?.categoryMeta?.label}
-                </span>
-              )}
+              {/* Category Badge Pill — Always visible for instant identification */}
+              <span style={{
+                fontSize: '0.64rem',
+                fontWeight: 650,
+                color: row?.categoryMeta?.color || '#0284c7',
+                background: row?.categoryMeta?.bg || '#f0f9ff',
+                border: `1px solid ${row?.categoryMeta?.border || '#bae6fd'}`,
+                padding: '1px 6px',
+                borderRadius: '4px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.03em',
+                whiteSpace: 'nowrap',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                <span>{row?.categoryMeta?.icon || '•'}</span>
+                <span>{row?.categoryMeta?.label}</span>
+              </span>
 
               {/* FDA Regulatory Status Badge */}
               {row.fdaStatus && (
@@ -3022,6 +3079,67 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   );
                 })}
               </div>
+            </div>
+
+            {/* Desktop Auth / Profile Access */}
+            <div className="desktop-only-currency" style={{ marginLeft: '4px' }}>
+              {authUser ? (
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#e8f0fe',
+                    border: '1px solid #c2e7ff',
+                    padding: '3px 8px',
+                    borderRadius: '16px',
+                    fontSize: '0.74rem',
+                    fontWeight: 650,
+                    color: '#1a73e8'
+                  }}
+                  title={`Conectado como ${authUser.email}`}
+                >
+                  <User size={13} color="#1a73e8" />
+                  <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {authProfile?.clinicName || authProfile?.name || authUser.displayName || authUser.email?.split('@')[0]}
+                  </span>
+                  <span style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 800,
+                    background: '#1a73e8',
+                    color: '#ffffff',
+                    padding: '1px 5px',
+                    borderRadius: '8px',
+                    textTransform: 'uppercase'
+                  }}>
+                    {authRole === 'wholeseller' ? 'Wholesale' : (authRole || 'Clinic')}
+                  </span>
+                </div>
+              ) : (
+                <a
+                  href="/login?redirect=/pricing/peptides"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    background: '#ffffff',
+                    border: '1px solid #1a73e8',
+                    color: '#1a73e8',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#e8f0fe'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; }}
+                >
+                  <LogIn size={13} />
+                  <span>{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
+                </a>
+              )}
             </div>
 
             {/* ── Mobile-Only Compact 1-Row Action Group (GCP UX: uniform 32px height, bottom sheet currency) ── */}
@@ -4527,7 +4645,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                             textTransform: 'uppercase',
                             letterSpacing: '0.04em'
                           }}>
-                            {title} ({count})
+                            {title}
                           </span>
                         </div>
                         <span style={{
@@ -4627,6 +4745,53 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </button>
             </div>
 
+            {submittedOrderData ? (
+              <div style={{ flex: 1, overflowY: 'auto', padding: '2rem 1.5rem', textAlign: 'center' }}>
+                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#ecfdf5', color: '#059669', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <CheckCircle2 size={32} />
+                </div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
+                  {isEs ? '¡Solicitud de Proforma Recibida!' : 'Proforma Request Received!'}
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: '#475569', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+                  {isEs
+                    ? `Referencia: ${submittedOrderData.referenceId}. Su perfil de clínica ha sido registrado en Atlas Health.`
+                    : `Reference: ${submittedOrderData.referenceId}. Your clinic profile has been registered in the Atlas Health network.`}
+                </p>
+
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', textAlign: 'left', marginBottom: '1.5rem', fontSize: '0.80rem' }}>
+                  <div style={{ fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                    {isEs ? '🔐 Próximos accesos a tarifas B2B:' : '🔐 Future Access Instructions:'}
+                  </div>
+                  <div style={{ color: '#475569', lineHeight: 1.5 }}>
+                    {isEs
+                      ? `Al ingresar con su correo (${submittedOrderData.customerEmail}), el sistema recordará automáticamente sus datos de facturación, tarifas preferenciales de clínica y pedidos anteriores.`
+                      : `When signing in with your email (${submittedOrderData.customerEmail}), the portal will automatically apply your verified clinic tier and saved formulations.`}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmittedOrderData(null);
+                    setIsOrderDrawerOpen(false);
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    background: '#003666',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isEs ? 'Volver al Catálogo' : 'Return to Catalog'}
+                </button>
+              </div>
+            ) : (
+            <>
             {/* Drawer Body */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
               {/* Selected Items */}
@@ -4926,7 +5091,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
 
               {/* Contact Form */}
-              <form onSubmit={handleSubmitOrder}>
+              <form id="b2b-proforma-form" onSubmit={handleSubmitOrder}>
                 {/* ── Anti-Spam Bot Trap (Invisible to humans, catches automated bots) ── */}
                 <div style={{ display: 'none', position: 'absolute', left: '-9999px', opacity: 0 }} aria-hidden="true">
                   <input
@@ -4986,20 +5151,34 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                        Work Email *
-                      </label>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3px' }}>
+                        <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569' }}>
+                          Work Email *
+                        </label>
+                        {isLookingUpUser && (
+                          <span style={{ fontSize: '0.68rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Loader2 size={10} className="animate-spin" /> {isEs ? 'Buscando...' : 'Checking...'}
+                          </span>
+                        )}
+                        {!isLookingUpUser && lookupUserResult && (
+                          <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                            <CheckCircle2 size={11} /> {isEs ? 'Cuenta Verificada' : 'Verified Account'}
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="email"
                         required
                         value={orderForm.email}
                         onChange={e => setOrderForm(prev => ({ ...prev, email: e.target.value }))}
+                        onBlur={e => handleEmailLookup(e.target.value)}
                         placeholder="doctor@clinic.com"
                         style={{
                           width: '100%',
                           padding: '8px 12px',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
+                          border: `1px solid ${lookupUserResult ? '#86efac' : '#cbd5e1'}`,
+                          backgroundColor: lookupUserResult ? '#f0fdf4' : '#ffffff',
                           fontSize: '0.85rem'
                         }}
                       />
@@ -5160,7 +5339,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   </div>
                 </div>
 
-                {/* ── Section 3: Notes & Submission ── */}
+                {/* ── Section 3: Notes & Compounding Specs ── */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div>
                     <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
@@ -5181,60 +5360,81 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       }}
                     />
                   </div>
-
-                  <button
-                    type="submit"
-                    disabled={submittingOrder || Object.keys(cartItems).length === 0}
-                    style={{
-                      marginTop: '0.5rem',
-                      padding: '12px',
-                      background: Object.keys(cartItems).length === 0 ? '#94a3b8' : '#0284c7',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: 700,
-                      fontSize: '0.90rem',
-                      cursor: Object.keys(cartItems).length === 0 ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px'
-                    }}
-                  >
-                    {submittingOrder ? 'Submitting Proforma Request...' : 'Submit Proforma Request'}
-                    <ArrowRight size={16} />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleOrderViaWhatsApp}
-                    disabled={Object.keys(cartItems).length === 0}
-                    style={{
-                      padding: '11px',
-                      backgroundColor: '#25D366',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: 700,
-                      fontSize: '0.88rem',
-                      cursor: Object.keys(cartItems).length === 0 ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    <MessageCircle size={16} />
-                    <span>Send Order via WhatsApp</span>
-                  </button>
-
-                  <p style={{ fontSize: '0.70rem', color: '#94a3b8', textAlign: 'center', margin: '4px 0 0 0' }}>
-                    Upon submission, our medical logistics team will issue an official B2B proforma invoice with customs documentation and analytical COA verification.
-                  </p>
                 </div>
               </form>
             </div>
+
+            {/* ── Drawer Sticky Footer with Fixed Action Buttons (Google Cloud Golden UX) ── */}
+            <div style={{
+              flexShrink: 0,
+              padding: '12px 18px',
+              background: '#ffffff',
+              borderTop: '1px solid #e2e8f0',
+              boxShadow: '0 -4px 16px rgba(0,0,0,0.06)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              zIndex: 10
+            }}>
+              <button
+                type="submit"
+                form="b2b-proforma-form"
+                disabled={submittingOrder || Object.keys(cartItems).length === 0}
+                style={{
+                  padding: '12px',
+                  background: Object.keys(cartItems).length === 0 ? '#94a3b8' : '#0284c7',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: 700,
+                  fontSize: '0.90rem',
+                  cursor: Object.keys(cartItems).length === 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: Object.keys(cartItems).length > 0 ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
+                  transition: 'background 0.15s ease'
+                }}
+              >
+                {submittingOrder
+                  ? (isEs ? 'Enviando Solicitud...' : 'Submitting Proforma Request...')
+                  : (isEs ? 'Solicitar Proforma B2B →' : 'Submit Proforma Request →')}
+                {!submittingOrder && <ArrowRight size={16} />}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOrderViaWhatsApp}
+                disabled={Object.keys(cartItems).length === 0}
+                style={{
+                  padding: '10px',
+                  backgroundColor: '#25D366',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: 700,
+                  fontSize: '0.86rem',
+                  cursor: Object.keys(cartItems).length === 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                }}
+              >
+                <MessageCircle size={16} />
+                <span>{isEs ? 'Enviar Pedido por WhatsApp' : 'Send Order via WhatsApp'}</span>
+              </button>
+
+              <p style={{ fontSize: '0.68rem', color: '#94a3b8', textAlign: 'center', margin: '2px 0 0 0', lineHeight: 1.3 }}>
+                {isEs
+                  ? 'Facturación proforma institucional con trazabilidad analítica HPLC y documentación aduanera.'
+                  : 'Upon submission, our medical logistics team will issue an official B2B proforma invoice with HPLC COA.'}
+              </p>
+            </div>
+            </>
+            )}
           </div>
         </div>
       )}
