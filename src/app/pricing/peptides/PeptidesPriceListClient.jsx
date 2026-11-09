@@ -63,6 +63,7 @@ import ClinicalProtocolDrawer from '@/components/pricing/ClinicalProtocolDrawer'
 import AtlasAiCopilotDrawer from '@/components/pricing/AtlasAiCopilotDrawer';
 import PeptideSpecsDrawer from '@/components/pricing/PeptideSpecsDrawer';
 import PeptidePricePdfPreviewModal, { parsePeptideBlendDisplay } from '@/components/pricing/PeptidePricePdfPreviewModal';
+import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import { getFdaPeptideStatus, FDA_STATUS_TYPES } from '@/data/fdaPeptidesRegistry';
 import { COUNTRIES } from '@/data/countries';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
@@ -2363,11 +2364,11 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       key: 'unitPrice',
       label: isEs ? `Vial Individual (1x) · ${currency}` : `Single Vial (1x) · ${currency}`,
       width: '17%',
-      align: 'left',
+      align: 'right',
       sortable: true,
       render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'left' }}>
-          <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#202124', fontSize: '0.92rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'right', alignItems: 'flex-end' }}>
+          <span style={{ fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#202124', fontSize: '0.92rem' }}>
             {formatPrice(val ?? row.unitPrice)}
           </span>
           <span style={{ fontSize: '0.66rem', color: '#5f6368' }}>{isEs ? 'por vial estéril' : 'per sterile vial'}</span>
@@ -2378,16 +2379,16 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
       key: 'pack10Price',
       label: isEs ? `Pack de 10 (Pack ×10) · ${currency}` : `Pack of 10 (Pack ×10) · ${currency}`,
       width: '20%',
-      align: 'left',
+      align: 'right',
       sortable: true,
       render: (_, row) => {
         const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
         const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
         const discountPct = Math.max(10, Math.round((1 - (p10 / (row.unitPrice * 10))) * 100));
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'left' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#137333', fontSize: '0.92rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'right', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px', flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#137333', fontSize: '0.92rem' }}>
                 {formatPrice(p10)}
               </span>
               <span style={{
@@ -2403,7 +2404,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 -{discountPct}% Pack
               </span>
             </div>
-            <span style={{ fontSize: '0.66rem', color: '#137333', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.66rem', color: '#137333', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums' }}>
               ({formatPrice(perUnit)} / vial)
             </span>
           </div>
@@ -2922,34 +2923,34 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               style={{
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: '#f8fafc',
-                border: '1px solid #dadce0',
+                background: 'rgba(255, 255, 255, 0.12)',
+                border: '1px solid rgba(255, 255, 255, 0.22)',
                 borderRadius: '6px',
                 width: '36px',
                 height: '36px',
-                color: '#202124',
+                color: '#ffffff',
                 cursor: 'pointer',
                 flexShrink: 0,
                 transition: 'all 0.15s ease'
               }}
             >
-              <Menu size={18} color="#202124" />
+              <Menu size={18} color="#ffffff" />
             </button>
             <Link href="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
-              <BrandLogo variant="dark" size="compact" />
+              <BrandLogo variant="light" size="compact" />
             </Link>
-            <span className="nav-divider mobile-hide" style={{ color: '#9aa0a6', margin: '0 4px', fontSize: '0.80rem' }}>&gt;</span>
-            <span className="nav-section mobile-hide" style={{ color: '#5f6368', fontSize: '0.80rem', fontWeight: 500 }}>{isEs ? 'Tarifas Oficiales' : 'Price Schedules'}</span>
-            <span className="nav-divider mobile-hide" style={{ color: '#9aa0a6', margin: '0 4px', fontSize: '0.80rem' }}>&gt;</span>
-            <span className="nav-current mobile-hide" style={{ color: '#202124', fontSize: '0.80rem', fontWeight: 700 }}>{isEs ? 'Viales de Péptidos Liofilizados' : 'Lyophilized Peptide Vials'}</span>
+            <span className="nav-divider mobile-hide" style={{ color: 'rgba(255, 255, 255, 0.35)', margin: '0 4px', fontSize: '0.80rem' }}>&gt;</span>
+            <span className="nav-section mobile-hide" style={{ color: '#cbd5e1', fontSize: '0.80rem', fontWeight: 500 }}>{isEs ? 'Tarifas Oficiales' : 'Price Schedules'}</span>
+            <span className="nav-divider mobile-hide" style={{ color: 'rgba(255, 255, 255, 0.35)', margin: '0 4px', fontSize: '0.80rem' }}>&gt;</span>
+            <span className="nav-current mobile-hide" style={{ color: '#ffffff', fontSize: '0.80rem', fontWeight: 750 }}>{isEs ? 'Viales de Péptidos Liofilizados' : 'Lyophilized Peptide Vials'}</span>
           </div>
 
           <div className="nav-actions peptides-nav-actions">
-            {/* ── Desktop & Laptop Actions Bar (Google Cloud Standard Light Bar) ── */}
+            {/* ── Desktop & Laptop Actions Bar (Google Cloud Console Dark Bar) ── */}
             <div className="peptides-nav-utility-group desktop-only-utilities">
               {/* Language selector: EN standard, ES selectable */}
               <div className="language-selector" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div className="pill-group" style={{ display: 'inline-flex', background: '#f1f3f4', borderRadius: '6px', padding: '2px', border: '1px solid #dadce0' }}>
+                <div className="pill-group" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.22)' }}>
                   {[
                     { code: 'en', label: 'EN' },
                     { code: 'es', label: 'ES' }
@@ -2962,8 +2963,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         className={`pill-btn ${isCurrent ? 'pill-active active' : ''}`}
                         style={{
                           border: 'none',
-                          background: isCurrent ? '#1a73e8' : 'transparent',
-                          color: isCurrent ? '#ffffff' : '#3c4043',
+                          background: isCurrent ? '#0284c7' : 'transparent',
+                          color: isCurrent ? '#ffffff' : '#cbd5e1',
                           fontWeight: isCurrent ? 800 : 500,
                           fontSize: '0.73rem',
                           padding: '4px 8px',
@@ -2988,20 +2989,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: '#e8f0fe',
-                  color: '#1a73e8',
-                  border: '1px solid #c2e7ff',
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  color: '#38bdf8',
+                  border: '1px solid rgba(56, 189, 248, 0.35)',
                   padding: '5px 10px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
                   fontWeight: 750,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  backdropFilter: 'blur(4px)'
                 }}
                 title="Open Atlas Clinical AI Assistant (Dosing Math, Synergies & Reconstitution)"
               >
-                <Sparkles size={13} color="#1a73e8" />
+                <Sparkles size={13} color="#38bdf8" />
                 <span>Atlas AI</span>
               </button>
 
@@ -3017,20 +3019,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: '#ffffff',
-                  color: '#3c4043',
-                  border: '1px solid #dadce0',
+                  background: 'rgba(255, 255, 255, 0.10)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.20)',
                   padding: '5px 9px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  backdropFilter: 'blur(4px)'
                 }}
                 title={isEs ? 'Consultar información técnica, COAs o envíos' : 'Institutional Inquiry & Support'}
               >
-                <Mail size={13} color="#5f6368" />
+                <Mail size={13} color="#cbd5e1" />
                 <span>{isEs ? 'Consultar' : 'Inquire'}</span>
               </button>
 
@@ -3042,20 +3045,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: '#ffffff',
-                  color: '#3c4043',
-                  border: '1px solid #dadce0',
+                  background: 'rgba(255, 255, 255, 0.10)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.20)',
                   padding: '5px 10px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
                   fontWeight: 650,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  backdropFilter: 'blur(4px)'
                 }}
                 title={isEs ? 'Previsualizar y exportar tarifa oficial PDF' : 'Preview and export official PDF price schedule'}
               >
-                <Eye size={13} color="#5f6368" />
+                <Eye size={13} color="#cbd5e1" />
                 <span>{isEs ? 'PDF' : 'PDF Schedule'}</span>
               </button>
 
@@ -3067,29 +3071,30 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: '#ffffff',
-                  color: '#3c4043',
-                  border: '1px solid #dadce0',
+                  background: 'rgba(255, 255, 255, 0.10)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.20)',
                   padding: '5px 9px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  backdropFilter: 'blur(4px)'
                 }}
                 title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
               >
-                {copied ? <Check size={13} color="#16a34a" /> : <Share2 size={13} color="#5f6368" />}
+                {copied ? <Check size={13} color="#4ade80" /> : <Share2 size={13} color="#cbd5e1" />}
                 <span className="peptides-share-label">{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
               </button>
             </div>
 
             {/* Desktop Currency selector with prominent display */}
             <div className="currency-selector peptides-currency-bar desktop-only-currency" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
                 {isEs ? 'Divisa:' : 'Currency:'}
               </span>
-              <div className="pill-group peptides-currency-pills" style={{ display: 'inline-flex', background: '#f1f3f4', borderRadius: '6px', padding: '2px', border: '1px solid #dadce0' }}>
+              <div className="pill-group peptides-currency-pills" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.20)' }}>
                 {[
                   { code: 'USD', symbol: '$' },
                   { code: 'EUR', symbol: '€' },
@@ -3103,14 +3108,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       className={`pill-btn ${isCurrent ? 'pill-active active' : ''}`}
                       style={{
                         border: 'none',
-                        background: isCurrent ? '#1a73e8' : 'transparent',
-                        color: isCurrent ? '#ffffff' : '#3c4043',
+                        background: isCurrent ? '#0284c7' : 'transparent',
+                        color: isCurrent ? '#ffffff' : '#cbd5e1',
                         fontWeight: isCurrent ? 800 : 500,
                         fontSize: '0.73rem',
                         padding: '4px 10px',
                         borderRadius: '4px',
                         cursor: 'pointer',
-                        boxShadow: isCurrent ? '0 1px 3px rgba(26,115,232,0.3)' : 'none',
+                        boxShadow: isCurrent ? '0 1px 3px rgba(2,132,199,0.4)' : 'none',
                         transition: 'all 0.15s ease',
                         letterSpacing: '-0.01em',
                         display: 'inline-flex',
@@ -3129,288 +3134,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
             </div>
 
-            {/* Desktop Auth / Profile Access — Google Cloud Console UX Standard */}
-            <div className="desktop-only-currency" style={{ marginLeft: '6px', position: 'relative' }} ref={userMenuRef}>
-              {authUser ? (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  {/* GCP User Profile Capsule Trigger */}
-                  <button
-                    type="button"
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      background: isUserMenuOpen ? '#f1f5f9' : '#ffffff',
-                      border: '1px solid',
-                      borderColor: isUserMenuOpen ? '#bfdbfe' : '#dadce0',
-                      padding: '2px 8px 2px 3px',
-                      borderRadius: '20px',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      outline: 'none',
-                      boxShadow: isUserMenuOpen ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
-                    }}
-                    onMouseEnter={e => { if (!isUserMenuOpen) e.currentTarget.style.background = '#f8fafc'; }}
-                    onMouseLeave={e => { if (!isUserMenuOpen) e.currentTarget.style.background = '#ffffff'; }}
-                    title={`Conectado como ${authUser.email}`}
-                  >
-                    {/* Circle Avatar with Initials */}
-                    <div style={{
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '50%',
-                      background: avatarBgColor,
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.72rem',
-                      fontWeight: 750,
-                      letterSpacing: '-0.02em',
-                      flexShrink: 0
-                    }}>
-                      {effectiveInitials}
-                    </div>
-
-                    {/* Two-Line User Info */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', lineHeight: 1.15 }}>
-                      <span style={{
-                        fontSize: '0.78rem',
-                        fontWeight: 750,
-                        color: '#202124',
-                        maxWidth: '120px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {effectiveDisplayName}
-                      </span>
-                      <span style={{
-                        fontSize: '0.60rem',
-                        color: '#5f6368',
-                        textTransform: 'uppercase',
-                        fontWeight: 700,
-                        letterSpacing: '0.04em'
-                      }}>
-                        {effectiveRoleLabel}
-                      </span>
-                    </div>
-
-                    <ChevronDown size={12} color="#5f6368" style={{ marginLeft: '2px', transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
-                  </button>
-
-                  {/* GCP Dedicated Quick Logout Icon Button */}
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    title={isEs ? 'Cerrar Sesión' : 'Sign Out / Logout'}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#5f6368',
-                      padding: '6px',
-                      borderRadius: '50%',
-                      cursor: 'pointer',
-                      transition: 'background 0.15s ease, color 0.15s ease'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#dc2626'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#5f6368'; }}
-                  >
-                    <LogOut size={16} />
-                  </button>
-
-                  {/* GCP User Dropdown Popover */}
-                  {isUserMenuOpen && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: 0,
-                        top: '38px',
-                        width: '240px',
-                        background: '#ffffff',
-                        borderRadius: '8px',
-                        border: '1px solid #dadce0',
-                        boxShadow: '0 8px 24px rgba(60,64,67,0.18)',
-                        zIndex: 200,
-                        padding: '12px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px',
-                        animation: 'fadeIn 0.12s ease'
-                      }}
-                    >
-                      {/* User Header in Dropdown */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '8px', borderBottom: '1px solid #f1f5f9' }}>
-                        <div style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '50%',
-                          background: avatarBgColor,
-                          color: '#ffffff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.82rem',
-                          fontWeight: 750,
-                          flexShrink: 0
-                        }}>
-                          {effectiveInitials}
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {effectiveDisplayName}
-                          </div>
-                          <div style={{ fontSize: '0.68rem', color: '#5f6368', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {authUser.email}
-                          </div>
-                          <span style={{
-                            display: 'inline-block',
-                            marginTop: '2px',
-                            fontSize: '0.58rem',
-                            fontWeight: 800,
-                            padding: '1px 6px',
-                            borderRadius: '4px',
-                            background: '#e8f0fe',
-                            color: '#1a73e8',
-                            textTransform: 'uppercase'
-                          }}>
-                            {effectiveRoleLabel}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Navigation links based on role */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        {authRole === 'admin' && (
-                          <Link
-                            href="/admin"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              padding: '6px 8px',
-                              borderRadius: '4px',
-                              fontSize: '0.76rem',
-                              fontWeight: 600,
-                              color: '#334155',
-                              textDecoration: 'none',
-                              transition: 'background 0.12s ease'
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                          >
-                            <ShieldCheck size={14} color="#1a73e8" />
-                            <span>{isEs ? 'Consola de Administración' : 'Admin Console'}</span>
-                          </Link>
-                        )}
-                        {(authRole === 'admin' || authRole === 'doctor' || authRole === 'clinic') && (
-                          <Link
-                            href="/dr"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              padding: '6px 8px',
-                              borderRadius: '4px',
-                              fontSize: '0.76rem',
-                              fontWeight: 600,
-                              color: '#334155',
-                              textDecoration: 'none',
-                              transition: 'background 0.12s ease'
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                          >
-                            <User size={14} color="#0d9488" />
-                            <span>{isEs ? 'Portal Médico / Clínica' : 'Doctor Portal'}</span>
-                          </Link>
-                        )}
-                        {authRole === 'wholeseller' && (
-                          <Link
-                            href="/wholesaler"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              padding: '6px 8px',
-                              borderRadius: '4px',
-                              fontSize: '0.76rem',
-                              fontWeight: 600,
-                              color: '#334155',
-                              textDecoration: 'none',
-                              transition: 'background 0.12s ease'
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                          >
-                            <Box size={14} color="#ea580c" />
-                            <span>{isEs ? 'Portal Mayorista' : 'Wholesaler Portal'}</span>
-                          </Link>
-                        )}
-                      </div>
-
-                      <div style={{ height: '1px', background: '#f1f5f9', margin: '2px 0' }} />
-
-                      {/* Explicit Logout Option */}
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '7px 8px',
-                          borderRadius: '4px',
-                          border: 'none',
-                          background: 'transparent',
-                          fontSize: '0.76rem',
-                          fontWeight: 700,
-                          color: '#dc2626',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          transition: 'background 0.12s ease'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <LogOut size={14} color="#dc2626" />
-                        <span>{isEs ? 'Cerrar Sesión' : 'Sign Out'}</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <a
-                  href={`/login?redirect=${encodeURIComponent('/pricing/peptides')}`}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    background: '#ffffff',
-                    border: '1px solid #1a73e8',
-                    color: '#1a73e8',
-                    padding: '4px 10px',
-                    borderRadius: '4px',
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                    whiteSpace: 'nowrap',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = '#e8f0fe'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; }}
-                >
-                  <LogIn size={13} />
-                  <span>{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
-                </a>
-              )}
+            {/* Desktop Auth / Profile Access — Google Cloud Console UX Standard Badge with Logout */}
+            <div className="desktop-only-currency" style={{ marginLeft: '6px' }}>
+              <GcpUserBadge
+                variant="dark"
+                lang={lang}
+                loginRedirect="/pricing/peptides"
+              />
             </div>
 
             {/* ── Mobile-Only Compact 1-Row Action Group (GCP UX: uniform 32px height, bottom sheet currency) ── */}
@@ -3929,10 +3659,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             position: sticky !important;
             top: 0 !important;
             z-index: 100 !important;
-            background: #ffffff !important;
+            background: #002b4d !important;
             backdrop-filter: blur(8px) !important;
-            border-bottom: 1px solid #dadce0 !important;
-            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.08) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 4px 16px rgba(0, 30, 60, 0.22) !important;
           }
           .peptides-nav-container {
             display: flex;
@@ -4348,7 +4078,25 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               {/* 4 KPIs in a Compact Strip (GCP Style) */}
               <div className="peptides-kpis-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
                 {/* KPI 1: Available Formulations */}
-                <div className="peptides-kpi-card" style={{ padding: '6px 8px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #f1f5f9' }}>
+                <div
+                  className="peptides-kpi-card"
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSelectedFdaStatus('all');
+                    setSearchQuery('');
+                  }}
+                  title={isEs ? 'Clic para ver todas las formulaciones' : 'Click to view all formulations'}
+                  style={{
+                    padding: '6px 8px',
+                    background: '#f8fafc',
+                    borderRadius: '6px',
+                    border: '1px solid #f1f5f9',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f1f5f9'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#f1f5f9'; e.currentTarget.style.background = '#f8fafc'; }}
+                >
                   <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                     {isEs ? 'Formulaciones' : 'Formulations'}
                   </div>
@@ -4361,12 +4109,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 </div>
 
                 {/* KPI 2: Pack ×10 Volume Savings */}
-                <div className="peptides-kpi-card" style={{
-                  padding: '6px 8px',
-                  background: totalCartCount > 0 ? '#f0fdf4' : '#f8fafc',
-                  borderRadius: '6px',
-                  border: totalCartCount > 0 ? '1px solid #bbf7d0' : '1px solid #f1f5f9'
-                }}>
+                <div
+                  className="peptides-kpi-card"
+                  onClick={() => {
+                    if (totalCartCount > 0) setIsReviewDrawerOpen(true);
+                  }}
+                  title={totalCartCount > 0 ? (isEs ? 'Clic para revisar proforma' : 'Click to review proforma') : ''}
+                  style={{
+                    padding: '6px 8px',
+                    background: totalCartCount > 0 ? '#f0fdf4' : '#f8fafc',
+                    borderRadius: '6px',
+                    border: totalCartCount > 0 ? '1px solid #bbf7d0' : '1px solid #f1f5f9',
+                    cursor: totalCartCount > 0 ? 'pointer' : 'default',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
                   <div style={{ fontSize: '0.62rem', fontWeight: 700, color: totalCartCount > 0 ? '#15803d' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                     {totalCartCount > 0 ? (isEs ? 'Proforma' : 'Proforma') : (isEs ? 'Ahorro Pack ×10' : 'Pack ×10 Savings')}
                   </div>
@@ -4379,7 +4136,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 </div>
 
                 {/* KPI 3: 503A & FDA Approved */}
-                <div className="peptides-kpi-card" style={{ padding: '6px 8px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #f1f5f9' }}>
+                <div
+                  className="peptides-kpi-card"
+                  onClick={() => setSelectedFdaStatus(selectedFdaStatus === 'fda_503a' ? 'all' : 'fda_503a')}
+                  title={isEs ? 'Clic para filtrar 503A & Aprobados' : 'Click to filter 503A & Approved'}
+                  style={{
+                    padding: '6px 8px',
+                    background: selectedFdaStatus === 'fda_503a' ? '#ecfdf5' : '#f8fafc',
+                    borderRadius: '6px',
+                    border: selectedFdaStatus === 'fda_503a' ? '1px solid #10b981' : '1px solid #f1f5f9',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => { if (selectedFdaStatus !== 'fda_503a') { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f1f5f9'; } }}
+                  onMouseLeave={e => { if (selectedFdaStatus !== 'fda_503a') { e.currentTarget.style.borderColor = '#f1f5f9'; e.currentTarget.style.background = '#f8fafc'; } }}
+                >
                   <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                     {isEs ? '503A & Aprobados' : '503A & Approved'}
                   </div>

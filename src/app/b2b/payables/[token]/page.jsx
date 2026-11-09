@@ -30,6 +30,7 @@ import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import StatusBadge from '@/components/ui/StatusBadge';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import toast from 'react-hot-toast';
 
 function PayableBillMobileCard({ row: bill, isLocked, lang }) {
@@ -528,185 +529,16 @@ export default function PayablesStatementPage() {
             <span>{copiedLink ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Compartir' : 'Share')}</span>
           </button>
 
-          {/* User Sign In / Profile Action with Google Cloud Account Popover */}
-          {authUser ? (
-            <div style={{ position: 'relative' }}>
-              <button
-                type="button"
-                onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '3px 9px',
-                  borderRadius: '6px',
-                  backgroundColor: isUserMenuOpen ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.14)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  color: '#ffffff',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                title={lang === 'es' ? 'Ver cuenta y opciones de sesión' : 'View account & session options'}
-              >
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  backgroundColor: '#0284c7',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.65rem',
-                  fontWeight: 800
-                }}>
-                  {(authUser.displayName || authUser.email || 'U').charAt(0).toUpperCase()}
-                </div>
-                <span style={{ maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {authUser.displayName || authUser.email}
-                </span>
-                <ChevronDown size={11} style={{ opacity: 0.7 }} />
-              </button>
-
-              {/* Google Cloud Style Account Popover Menu */}
-              {isUserMenuOpen && (
-                <>
-                  <div
-                    style={{ position: 'fixed', inset: 0, zIndex: 90 }}
-                    onClick={() => setIsUserMenuOpen(false)}
-                  />
-                  <div style={{
-                    position: 'absolute',
-                    top: '36px',
-                    right: 0,
-                    width: '240px',
-                    backgroundColor: '#ffffff',
-                    borderRadius: '8px',
-                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-                    border: '1px solid #dadce0',
-                    padding: '12px',
-                    zIndex: 100,
-                    animation: 'fadeIn 0.15s ease'
-                  }}>
-                    {/* User Info Header */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        backgroundColor: '#0284c7',
-                        color: '#ffffff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.82rem',
-                        fontWeight: 800,
-                        flexShrink: 0
-                      }}>
-                        {(authUser.displayName || authUser.email || 'U').charAt(0).toUpperCase()}
-                      </div>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {authUser.displayName || 'Authorized Partner'}
-                        </div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {authUser.email}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '8px 0' }} />
-
-                    {/* Navigation Link for Admins */}
-                    {isAdmin && (
-                      <Link
-                        href="/admin/procurement"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '7px 8px',
-                          borderRadius: '5px',
-                          color: '#334155',
-                          fontSize: '0.74rem',
-                          fontWeight: 600,
-                          textDecoration: 'none',
-                          marginBottom: '4px'
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                      >
-                        <Building2 size={13} color="#0284c7" />
-                        <span>{lang === 'es' ? 'Consola de Procurement' : 'Procurement Console'}</span>
-                      </Link>
-                    )}
-
-                    {/* Logout Button */}
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setIsUserMenuOpen(false);
-                        try {
-                          if (typeof logout === 'function') {
-                            await logout();
-                          }
-                          setActiveEmail('');
-                          setStatement(null);
-                          setIsLocked(true);
-                        } catch (err) {
-                          console.error('Logout error:', err);
-                        }
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        width: '100%',
-                        padding: '7px 8px',
-                        borderRadius: '5px',
-                        border: 'none',
-                        backgroundColor: 'transparent',
-                        color: '#dc2626',
-                        fontSize: '0.74rem',
-                        fontWeight: 650,
-                        cursor: 'pointer',
-                        textAlign: 'left'
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                    >
-                      <LogOut size={13} color="#dc2626" />
-                      <span>{lang === 'es' ? 'Cerrar Sesión' : 'Sign Out'}</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <Link
-              href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '5px 12px',
-                borderRadius: '6px',
-                backgroundColor: '#0284c7',
-                color: '#ffffff',
-                border: 'none',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                textDecoration: 'none',
-                transition: 'all 0.15s ease',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-              }}
-            >
-              <span>{lang === 'es' ? 'Iniciar Sesión' : 'Sign In'}</span>
-            </Link>
-          )}
+          {/* Google Cloud Console UX Standard User Badge & Quick Logout */}
+          <GcpUserBadge
+            variant="dark"
+            lang={lang}
+            onLogout={() => {
+              setActiveEmail('');
+              setStatement(null);
+              setIsLocked(true);
+            }}
+          />
         </div>
       </header>
 

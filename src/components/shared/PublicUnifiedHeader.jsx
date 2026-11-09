@@ -22,6 +22,7 @@ import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer
 import PublicProviderCTA from './public/PublicProviderCTA';
 import BrandLogo from '../common/BrandLogo';
 import DatasheetQuickSearchModal from './DatasheetQuickSearchModal';
+import GcpUserBadge from './GcpUserBadge';
 import '../../styles/publicStickyHeader.css';
 
 export const SUPPORTED_LANGUAGES = [
@@ -518,68 +519,12 @@ function forceCanonicalDomain(urlOrPath) {
                 </button>
               )}
 
-              {/* GCP-Standard Single Auth Element — morphs by authentication state */}
-              {user ? (
-                <div className="puh-auth-pill-wrapper" ref={authDropdownRef}>
-                  <button
-                    type="button"
-                    className={`puh-btn puh-btn-console puh-auth-pill${authDropdownOpen ? ' puh-auth-pill--open' : ''}`}
-                    onClick={() => setAuthDropdownOpen(v => !v)}
-                    aria-haspopup="true"
-                    aria-expanded={authDropdownOpen}
-                  >
-                    <span className="puh-user-status-dot" aria-hidden="true" />
-                    <span className="puh-user-avatar">
-                      {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
-                    </span>
-                    <span className="puh-auth-label">
-                      {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || (isSpanish ? 'Cuenta' : 'Account')}
-                    </span>
-                    <ChevronDown size={11} className={`puh-pill-chevron${authDropdownOpen ? ' puh-pill-chevron--up' : ''}`} />
-                  </button>
-                  {authDropdownOpen && (
-                    <div className="puh-auth-dropdown" role="menu">
-                      <div className="puh-auth-dropdown-header">
-                        <span className="puh-dropdown-email">{user.email}</span>
-                      </div>
-                      <Link href={getDashboardPath()} className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
-                        <LayoutDashboard size={13} />
-                        <span>{isSpanish ? 'Mi Consola' : 'Console'}</span>
-                      </Link>
-                      <Link href="/account" className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
-                        <User size={13} />
-                        <span>{isSpanish ? 'Mi Cuenta' : 'Account'}</span>
-                      </Link>
-                      <Link href="/account-manager" className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
-                        <Sliders size={13} />
-                        <span>{isSpanish ? 'Consola Account Manager' : 'Account Manager Hub'}</span>
-                      </Link>
-                      <div className="puh-auth-dropdown-divider" />
-                      <button
-                        type="button"
-                        className="puh-auth-dropdown-item puh-auth-dropdown-item--danger"
-                        onClick={async () => {
-                          setAuthDropdownOpen(false);
-                          try { const { getAuth, signOut } = await import('firebase/auth'); await signOut(getAuth()); } catch (_err) { /* ignore signout error */ }
-                        }}
-                        role="menuitem"
-                      >
-                        <LogOut size={13} />
-                        <span>{isSpanish ? 'Cerrar Sesión' : 'Sign Out'}</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  href={`/login?tab=login${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
-                  className="puh-btn puh-btn-signin"
-                  title={isSpanish ? 'Iniciar sesión o registrarse' : 'Sign in or create account'}
-                >
-                  <LogIn size={13} className="puh-btn-icon" />
-                  <span className="puh-auth-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
-                </Link>
-              )}
+              {/* Google Cloud Console UX Standard User Badge & Quick Logout */}
+              <GcpUserBadge
+                variant="dark"
+                lang={lang}
+                loginRedirect={resolvedRedirect}
+              />
             </div>
           </div>
         </div>
