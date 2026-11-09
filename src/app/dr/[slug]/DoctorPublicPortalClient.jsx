@@ -6689,14 +6689,14 @@ export default function DoctorPublicPortalClient({
                           border: '1px solid #bfdbfe'
                         }}
                       >
-                        {doctorSpecialtyIntel.primaryMeta?.badgeIcon} {doctorSpecialtyIntel.primaryMeta?.label || 'Specialty Intelligence'}
+                        {doctorSpecialtyIntel.primaryMeta?.badgeIcon} {doctorSpecialtyIntel.primaryMeta?.label || 'Specialty Clinical Formulations'}
                       </span>
                       <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#64748b' }}>
-                        Specialty-tailored formulations & synergies
+                        Top 3 individual prescription formulas tailored to your specialty
                       </span>
                     </div>
                     <h3 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
-                      Atlas Clinical Intelligence
+                      {lang === 'es' ? 'Fórmulas Magistrales Recomendadas (Top 3)' : 'Recommended Clinical Formulations (Top 3)'}
                     </h3>
                   </div>
 
@@ -6738,32 +6738,36 @@ export default function DoctorPublicPortalClient({
                 >
                   {doctorSpecialtyIntel.primaryBlueprints.slice(0, 3).map((bp, bpIdx, arr) => {
                     const isLast = bpIdx === arr.length - 1;
+                    const formulaTitle = bp.compoundingFormula?.treatmentTitle || bp.title;
+                    const dispensingVehicle = bp.compoundingFormula?.dispensingForm || 'Magistral Formulation';
+                    const dispensingVolume = bp.compoundingFormula?.volume || '';
+                    const formulaActives = Array.isArray(bp.compoundingFormula?.items) ? bp.compoundingFormula.items : [];
 
                     return (
                       <div
                         key={bp.id}
                         style={{
-                          padding: '12px 16px',
+                          padding: '14px 18px',
                           borderBottom: isLast ? 'none' : '1px solid #e2e8f0',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           flexWrap: 'wrap',
-                          gap: '12px',
+                          gap: '14px',
                           transition: 'background 0.15s ease'
                         }}
                       >
                         <div style={{ flex: '1 1 340px', minWidth: '260px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
                             <span
                               style={{
-                                width: '20px',
-                                height: '20px',
+                                width: '22px',
+                                height: '22px',
                                 borderRadius: '50%',
                                 background: '#f1f5f9',
-                                color: '#475569',
-                                fontSize: '0.68rem',
-                                fontWeight: 700,
+                                color: '#334155',
+                                fontSize: '0.70rem',
+                                fontWeight: 750,
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center'
@@ -6784,101 +6788,65 @@ export default function DoctorPublicPortalClient({
                                 border: '1px solid #bae6fd'
                               }}
                             >
-                              {bp.targetProcedure}
+                              {bp.targetProcedure || bp.badge || (lang === 'es' ? 'Fórmula Clínica' : 'Clinical Rx')}
                             </span>
-                            <span
-                              style={{
-                                fontSize: '0.66rem',
-                                fontFamily: 'monospace',
-                                color: '#64748b',
-                                background: '#f1f5f9',
-                                padding: '1px 6px',
-                                borderRadius: '3px'
-                              }}
-                            >
-                              {bp.code}
-                            </span>
+                            {bp.code && (
+                              <span
+                                style={{
+                                  fontSize: '0.66rem',
+                                  fontFamily: 'monospace',
+                                  color: '#64748b',
+                                  background: '#f1f5f9',
+                                  padding: '1px 6px',
+                                  borderRadius: '3px'
+                                }}
+                              >
+                                {bp.code}
+                              </span>
+                            )}
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                            <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a73e8', background: '#e8f0fe', padding: '1px 6px', borderRadius: '3px' }}>
-                              {bp.badge || (lang === 'es' ? 'PROTOCOLO INTEGRAL' : 'INTEGRATIVE PROTOCOL')}
-                            </span>
-                            <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
-                              • {lang === 'es' ? 'Stack de 3 Pilares Sinérgicos' : '3-Pillar Synergistic Stack'}
-                            </span>
+                          {/* Individual Prescription Formula Title */}
+                          <div style={{ fontSize: '0.90rem', fontWeight: 750, color: '#0f172a', lineHeight: 1.35 }}>
+                            {formulaTitle}
                           </div>
 
-                          <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.35 }}>
-                            {bp.title || bp.compoundingFormula?.treatmentTitle}
+                          {/* Pharmaceutical Vehicle and Packaging */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '3px' }}>
+                            <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>
+                              📦 {dispensingVehicle} {dispensingVolume ? `· ${dispensingVolume}` : ''}
+                            </span>
+                            {bp.compoundingFormula?.posology && (
+                              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                                • {bp.compoundingFormula.posology.length > 60 ? bp.compoundingFormula.posology.slice(0, 60) + '…' : bp.compoundingFormula.posology}
+                              </span>
+                            )}
                           </div>
 
-                          {bp.compoundingFormula?.treatmentTitle && bp.title !== bp.compoundingFormula?.treatmentTitle && (
-                            <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
-                              <strong style={{ color: '#003666' }}>{lang === 'es' ? 'Fórmula Magistral:' : 'Rx Base Formula:'}</strong> {bp.compoundingFormula.treatmentTitle} {bp.compoundingFormula.volume && `(${bp.compoundingFormula.volume})`}
+                          {/* Key Clinical Actives Pills */}
+                          {formulaActives.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', marginTop: '7px' }}>
+                              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#003666', background: '#f1f5f9', padding: '1px 6px', borderRadius: '3px' }}>
+                                {lang === 'es' ? 'Activos:' : 'Actives:'}
+                              </span>
+                              {formulaActives.map((act, actIdx) => (
+                                <span
+                                  key={actIdx}
+                                  style={{
+                                    fontSize: '0.67rem',
+                                    fontWeight: 550,
+                                    padding: '2px 7px',
+                                    borderRadius: '4px',
+                                    background: '#f8fafc',
+                                    color: '#334155',
+                                    border: '1px solid #e2e8f0'
+                                  }}
+                                >
+                                  {act.name} {act.concentration || act.dose ? `(${act.concentration || act.dose})` : ''}
+                                </span>
+                              ))}
                             </div>
                           )}
-
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
-                            {bp.peptideSynergy?.name && (
-                              <span
-                                style={{
-                                  fontSize: '0.66rem',
-                                  fontWeight: 650,
-                                  padding: '2px 7px',
-                                  borderRadius: '4px',
-                                  background: '#eef2ff',
-                                  color: '#4338ca',
-                                  border: '1px solid #c7d2fe'
-                                }}
-                              >
-                                💊 {lang === 'es' ? 'Péptido' : 'Peptide'}: {bp.peptideSynergy.name}
-                              </span>
-                            )}
-                            {bp.dermocosmeticSynergy?.name && (
-                              <span
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  triggerHaptic('light');
-                                  setRecCategoryFilter('colway');
-                                  handleSidebarNavigate('recommendations');
-                                }}
-                                style={{
-                                  fontSize: '0.66rem',
-                                  fontWeight: 650,
-                                  padding: '2px 7px',
-                                  borderRadius: '4px',
-                                  background: '#ecfdf5',
-                                  color: '#047857',
-                                  border: '1px solid #a7f3d0',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px',
-                                  transition: 'all 0.15s ease'
-                                }}
-                                title={lang === 'es' ? 'Explorar protocolo y productos Colway® en Recomendaciones' : 'Explore Colway® protocols and products in Recommendations'}
-                              >
-                                <span>🌿 Colway®: {bp.dermocosmeticSynergy.name}</span>
-                                <ArrowUpRight size={10} style={{ opacity: 0.7 }} />
-                              </span>
-                            )}
-                            {bp.diagnosticSynergy?.name && (
-                              <span
-                                style={{
-                                  fontSize: '0.66rem',
-                                  fontWeight: 650,
-                                  padding: '2px 7px',
-                                  borderRadius: '4px',
-                                  background: '#f0f9ff',
-                                  color: '#0369a1',
-                                  border: '1px solid #bae6fd'
-                                }}
-                              >
-                                🔬 {lang === 'es' ? 'Diagnóstico' : 'Lab Diagnostic'}: {bp.diagnosticSynergy.name}
-                              </span>
-                            )}
-                          </div>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>

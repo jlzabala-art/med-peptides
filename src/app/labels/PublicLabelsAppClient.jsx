@@ -695,17 +695,32 @@ export default function PublicLabelsAppClient({
   // Legacy alias for existing callbacks
   const handleSelectPatient = (code) => handleSelectOrAddPatient(code, true);
 
-  // Switch active patient in view
-  const handleSwitchActivePatient = (idx) => {
+  // Switch active patient in view (and optionally activate a specific formula part)
+  const handleSwitchActivePatient = (idx, targetPartIndex = null) => {
     if (idx < 0 || idx >= patientQueue.length) return;
     setActiveQueueIndex(idx);
     const item = patientQueue[idx];
     setCurrentRx(item.rx);
     setLabels(item.labels);
     setActiveCode(item.code);
-    const safeIdx = typeof item.selectedPartIndex === 'number' ? item.selectedPartIndex : 0;
-    setLabelIndex(safeIdx);
+    const resolvedPart = typeof targetPartIndex === 'number'
+      ? targetPartIndex
+      : (typeof item.selectedPartIndex === 'number' ? item.selectedPartIndex : 0);
+    setLabelIndex(resolvedPart);
     updateUrlWithQueue(patientQueue, idx);
+
+    // Smooth scroll to the target label workbench or part selector if user tapped a part button
+    if (typeof window !== 'undefined' && targetPartIndex != null) {
+      setTimeout(() => {
+        const targetEl = document.getElementById('pls-label-workbench') ||
+                         document.querySelector('.pls-part-navigation') ||
+                         document.querySelector('.pls-editor-section') ||
+                         document.querySelector('.pls-preview-card');
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 50);
+    }
   };
 
   // Remove a patient from the queue (supports deleting even when 1 is remaining)
@@ -1334,6 +1349,7 @@ export default function PublicLabelsAppClient({
         <LabelsBatchBar
           patientQueue={patientQueue}
           activeQueueIndex={activeQueueIndex}
+          activeLabelIndex={labelIndex}
           totalBatchLabelsCount={totalBatchLabelsCount}
           onSwitchActivePatient={handleSwitchActivePatient}
           onRemoveFromQueue={handleRemoveFromQueue}

@@ -6,6 +6,7 @@ import { Layers, X, CheckCircle, ShieldCheck } from '@/lib/icons';
 export default function LabelsBatchBar({
   patientQueue,
   activeQueueIndex,
+  activeLabelIndex = 0,
   totalBatchLabelsCount,
   onSwitchActivePatient,
   onRemoveFromQueue,
@@ -99,7 +100,15 @@ export default function LabelsBatchBar({
                 >
                   <button
                     type="button"
-                    onClick={() => onUpdatePatientQueueItem(qIdx, { selectedPartIndex: 'all' })}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (typeof onUpdatePatientQueueItem === 'function') {
+                        onUpdatePatientQueueItem(qIdx, { selectedPartIndex: 'all' });
+                      }
+                      if (typeof onSwitchActivePatient === 'function') {
+                        onSwitchActivePatient(qIdx, 0);
+                      }
+                    }}
                     style={{
                       border: 'none',
                       background: (pItem.selectedPartIndex === 'all' || pItem.selectedPartIndex == null) ? '#003666' : '#e2e8f0',
@@ -110,28 +119,39 @@ export default function LabelsBatchBar({
                       borderRadius: '3px',
                       cursor: 'pointer'
                     }}
-                    title={isEs ? 'Imprimir todas las partes' : 'Print all parts'}
+                    title={isEs ? 'Ver e imprimir todas las partes' : 'View & print all parts'}
                   >
                     {isEs ? 'Todas' : 'All'}
                   </button>
                   {pItem.labels.map((_, pIdx) => {
-                    const isPartActive = pItem.selectedPartIndex === pIdx;
+                    const isPartActive = isActive
+                      ? (activeLabelIndex === pIdx)
+                      : (pItem.selectedPartIndex === pIdx);
                     return (
                       <button
                         key={`part-btn-${pIdx}`}
                         type="button"
-                        onClick={() => onUpdatePatientQueueItem(qIdx, { selectedPartIndex: pIdx })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (typeof onUpdatePatientQueueItem === 'function') {
+                            onUpdatePatientQueueItem(qIdx, { selectedPartIndex: pIdx });
+                          }
+                          if (typeof onSwitchActivePatient === 'function') {
+                            onSwitchActivePatient(qIdx, pIdx);
+                          }
+                        }}
                         style={{
                           border: 'none',
                           background: isPartActive ? '#003666' : '#e2e8f0',
                           color: isPartActive ? '#ffffff' : '#475569',
                           fontSize: '0.62rem',
                           fontWeight: 700,
-                          padding: '1px 5px',
+                          padding: '1px 6px',
                           borderRadius: '3px',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
                         }}
-                        title={isEs ? `Imprimir únicamente Fase ${pIdx + 1}` : `Print only Part ${pIdx + 1}`}
+                        title={isEs ? `Activar e ir a Parte ${pIdx + 1}` : `Activate & jump to Part ${pIdx + 1}`}
                       >
                         {pIdx + 1}
                       </button>

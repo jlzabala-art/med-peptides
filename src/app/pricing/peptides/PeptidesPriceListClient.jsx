@@ -2486,109 +2486,185 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         backgroundColor: '#f8fafc',
         borderLeft: '3px solid #1a73e8',
         borderBottom: '1px solid #e2e8f0',
-        padding: '1rem 1.4rem',
+        padding: '0.9rem 1.1rem',
         margin: '0'
       }}>
-        {/* Google Cloud Console Definition Grid (Progressive Disclosure - 3 Columns, Zero Duplicates) */}
+        {/* Google Cloud Console Resource Detail Split (Balanced 60/40 Laptop & Full Mobile Fluid Grid) */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.4rem',
-          alignItems: 'start'
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          alignItems: 'stretch'
         }}>
-          {/* Column 1: Clinical Pharmacology & Indications */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div>
-              <div style={{
-                fontSize: '0.66rem',
-                fontWeight: 750,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#64748b',
-                marginBottom: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Sparkles size={12} color="#1a73e8" />
-                <span>{isEs ? 'Indicación Clínica Primaria' : 'Primary Clinical Indication'}</span>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#1e293b', lineHeight: 1.52 }}>
-                {clinical.indication}
-              </p>
-            </div>
-
-            <div style={{ borderTop: '1px solid #edf2f7', paddingTop: '6px' }}>
-              <div style={{
-                fontSize: '0.66rem',
-                fontWeight: 750,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#64748b',
-                marginBottom: '3px'
-              }}>
-                {isEs ? 'Sistema / Vía Diana' : 'Target System / Pathway'}
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#334155', fontWeight: 650 }}>
-                {clinical.targetSystem}
-              </div>
-            </div>
-          </div>
-
-          {/* Column 2: Molecular MoA & Identifiers */}
+          {/* Left Column (60%): Clinical Science, Target Pathway, MoA & Synergies */}
           <div style={{
+            flex: '1 1 440px',
+            minWidth: '280px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.75rem',
-            borderLeft: '1px solid #edf2f7',
-            paddingLeft: '1.25rem'
+            gap: '0.65rem'
           }}>
-            <div>
-              <div style={{
-                fontSize: '0.66rem',
-                fontWeight: 750,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#64748b',
-                marginBottom: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Activity size={12} color="#059669" />
-                <span>{isEs ? 'Mecanismo de Acción (MoA)' : 'Mechanism of Action (MoA)'}</span>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.48 }}>
-                {clinical.moa}
-              </p>
-            </div>
-
-            {clinical.casNumber && (
-              <div style={{ borderTop: '1px solid #edf2f7', paddingTop: '6px' }}>
+            {/* Primary Indication & Molecular MoA Card */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '6px',
+              padding: '10px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
+            }}>
+              <div>
                 <div style={{
                   fontSize: '0.66rem',
                   fontWeight: 750,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
-                  color: '#64748b',
-                  marginBottom: '3px'
+                  color: '#1a73e8',
+                  marginBottom: '3px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
                 }}>
-                  {isEs ? 'Nº Registro CAS' : 'CAS Registry Number'}
+                  <Sparkles size={12} color="#1a73e8" />
+                  <span>{isEs ? 'Indicación Clínica Primaria' : 'Primary Clinical Indication'}</span>
                 </div>
-                <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-                  <CopyableId value={clinical.casNumber} />
+                <p style={{ margin: 0, fontSize: '0.80rem', color: '#1e293b', lineHeight: 1.48 }}>
+                  {clinical.indication}
+                </p>
+              </div>
+
+              <div style={{ borderTop: '1px solid #f1f3f4', paddingTop: '8px' }}>
+                <div style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 750,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#059669',
+                  marginBottom: '3px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}>
+                  <Activity size={12} color="#059669" />
+                  <span>{isEs ? 'Mecanismo de Acción (MoA)' : 'Mechanism of Action (MoA)'}</span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>
+                  {clinical.moa}
+                </p>
+              </div>
+            </div>
+
+            {/* Target Pathway & Pharmacokinetics Metric Row */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '8px',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
+            }}>
+              <div style={{ minWidth: '130px' }}>
+                <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em' }}>
+                  {isEs ? 'Sistema / Vía Diana' : 'Target System / Pathway'}
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#334155', fontWeight: 650, marginTop: '2px' }}>
+                  {clinical.targetSystem}
                 </div>
               </div>
-            )}
+
+              {clinical.casNumber && (
+                <div style={{ borderLeft: '1px solid #f1f3f4', paddingLeft: '8px' }}>
+                  <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em' }}>
+                    {isEs ? 'Nº CAS' : 'CAS Registry'}
+                  </div>
+                  <div style={{ marginTop: '2px' }}>
+                    <CopyableId value={clinical.casNumber} />
+                  </div>
+                </div>
+              )}
+
+              <div style={{ borderLeft: '1px solid #f1f3f4', paddingLeft: '8px' }}>
+                <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Clock size={10} color="#d97706" />
+                  <span>{isEs ? 'Vida Media' : 'Half-life'}</span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#0f172a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                  <span>{clinical.halfLife}</span>
+                  <span style={{ fontSize: '0.64rem', background: '#e8f0fe', color: '#1a73e8', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                    {clinical.route || 'SubQ'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Synergies & Stacks Card */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
+            }}>
+              <div style={{
+                fontSize: '0.66rem',
+                fontWeight: 750,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#7c3aed',
+                marginBottom: '3px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <Layers size={12} color="#7c3aed" />
+                <span>{isEs ? 'Sinergias & Protocolos Clínicos' : 'Clinical Synergies & Protocol Stacks'}</span>
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+                {clinical.synergy}
+              </div>
+              {clinical.crossSellName && (
+                <div style={{ marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSearchQuery(clinical.crossSellName);
+                      window.scrollTo({ top: 380, behavior: 'smooth' });
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: '#f3e8ff',
+                      border: '1px solid #d8b4fe',
+                      color: '#6b21a8',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Column 3: Pharmacokinetics, Synergies & Monograph Action */}
+          {/* Right Column (40%): Reconstitution, Dosage & Action Console */}
           <div style={{
+            flex: '0 1 340px',
+            minWidth: '270px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.75rem',
-            borderLeft: '1px solid #edf2f7',
-            paddingLeft: '1.25rem'
+            gap: '0.65rem'
           }}>
             {/* Reconstitution & Syringe Math Box (Google Cloud Console Resource Spec Card) */}
             <div style={{
@@ -2656,77 +2732,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
             </div>
 
-            <div>
-              <div style={{
-                fontSize: '0.66rem',
-                fontWeight: 750,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#64748b',
-                marginBottom: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Clock size={12} color="#d97706" />
-                <span>{isEs ? 'Farmacocinética & Vía' : 'Pharmacokinetics & Route'}</span>
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span><span style={{ color: '#64748b' }}>{isEs ? 'Vida media:' : 'Half-life:'}</span> <strong style={{ color: '#0f172a' }}>{clinical.halfLife}</strong></span>
-                <span style={{ fontSize: '0.68rem', background: '#e8f0fe', color: '#1a73e8', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                  {clinical.route || 'SubQ'}
-                </span>
-              </div>
-            </div>
-
-            <div style={{ borderTop: '1px solid #edf2f7', paddingTop: '6px' }}>
-              <div style={{
-                fontSize: '0.66rem',
-                fontWeight: 750,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#64748b',
-                marginBottom: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Layers size={12} color="#7c3aed" />
-                <span>{isEs ? 'Sinergias & Protocolos' : 'Clinical Synergies & Stacks'}</span>
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
-                {clinical.synergy}
-              </div>
-              {clinical.crossSellName && (
-                <div style={{ marginTop: '5px' }}>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSearchQuery(clinical.crossSellName);
-                      window.scrollTo({ top: 380, behavior: 'smooth' });
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      background: '#f3e8ff',
-                      border: '1px solid #d8b4fe',
-                      color: '#6b21a8',
-                      borderRadius: '4px',
-                      padding: '3px 8px',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div style={{ paddingTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            {/* Quick Action Button Group */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <button
                 type="button"
                 onClick={(e) => {
@@ -2735,94 +2742,100 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   setIsAtlasAiOpen(true);
                 }}
                 style={{
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
-                  gap: '5px',
-                  background: '#f8fafc',
-                  color: '#1a73e8',
-                  border: '1px solid #dadce0',
-                  padding: '6px 12px',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '7px 12px',
                   borderRadius: '4px',
-                  fontSize: '0.73rem',
-                  fontWeight: 650,
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  whiteSpace: 'nowrap',
+                  boxShadow: '0 1px 2px rgba(26,115,232,0.2)',
                   transition: 'all 0.15s ease'
                 }}
                 title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
               >
-                <Sparkles size={13} color="#1a73e8" />
+                <Sparkles size={13} color="#ffffff" />
                 <span>{isEs ? 'Calcular Pauta con Atlas AI' : 'Calculate Posology with Atlas AI'}</span>
               </button>
 
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedSpecsProduct(row);
-                }}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: '#ffffff',
-                  color: '#1a73e8',
-                  border: '1px solid #c2e7ff',
-                  padding: '5px 10px',
-                  borderRadius: '5px',
-                  fontSize: '0.73rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e8f0fe';
-                  e.currentTarget.style.borderColor = '#1a73e8';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.borderColor = '#c2e7ff';
-                }}
-              >
-                <BookOpen size={12} />
-                <span>{isEs ? 'Ver Dossier y Posología →' : 'Dossier & Dosing Specs →'}</span>
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedSpecsProduct(row);
+                  }}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px',
+                    background: '#ffffff',
+                    color: '#1a73e8',
+                    border: '1px solid #c2e7ff',
+                    padding: '6px 10px',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#e8f0fe';
+                    e.currentTarget.style.borderColor = '#1a73e8';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.borderColor = '#c2e7ff';
+                  }}
+                >
+                  <BookOpen size={12} />
+                  <span>{isEs ? 'Dossier & Posología →' : 'Dossier & Specs →'}</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setInquiryProductContext(row);
-                  setIsInquiryDrawerOpen(true);
-                }}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: '#f0fdf4',
-                  color: '#15803d',
-                  border: '1px solid #bbf7d0',
-                  padding: '5px 10px',
-                  borderRadius: '5px',
-                  fontSize: '0.73rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#dcfce7';
-                  e.currentTarget.style.borderColor = '#15803d';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f0fdf4';
-                  e.currentTarget.style.borderColor = '#bbf7d0';
-                }}
-              >
-                <Mail size={12} />
-                <span>{isEs ? 'Consultar Info' : 'Inquire Info'}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setInquiryProductContext(row);
+                    setIsInquiryDrawerOpen(true);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px',
+                    background: '#f0fdf4',
+                    color: '#15803d',
+                    border: '1px solid #bbf7d0',
+                    padding: '6px 10px',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#dcfce7';
+                    e.currentTarget.style.borderColor = '#15803d';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f0fdf4';
+                    e.currentTarget.style.borderColor = '#bbf7d0';
+                  }}
+                >
+                  <Mail size={12} />
+                  <span>{isEs ? 'Inquire' : 'Inquire'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
