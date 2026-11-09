@@ -690,7 +690,6 @@ const CLINICAL_PRESETS = [
  */
 function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi, onFilterByPeptide }) {
   const [isClinicalExpanded, setIsClinicalExpanded] = useState(false);
-  const [clinicalTab, setClinicalTab] = useState('dosing'); // 'dosing' | 'indications' | 'stack'
   const isEs = lang === 'es';
   const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
   const perUnit = row.tier10UnitPrice || (row.unitPrice * 0.85);
@@ -1061,7 +1060,7 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               alignItems: 'center',
               gap: '6px',
               flexWrap: 'wrap',
-              padding: '8px 12px',
+              padding: '7px 12px',
               background: '#f8f9fa',
               borderBottom: '1px solid #eceff1'
             }}>
@@ -1111,244 +1110,173 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               )}
             </div>
 
-            {/* Segmented Tabs (Google Cloud UX Tab Bar) */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              borderBottom: '1px solid #dadce0',
-              background: '#ffffff',
-              padding: '0 4px'
-            }}>
-              <button
-                type="button"
-                onClick={() => setClinicalTab('dosing')}
-                style={{
-                  flex: 1,
-                  padding: '8px 4px',
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: clinicalTab === 'dosing' ? '2px solid #1a73e8' : '2px solid transparent',
-                  color: clinicalTab === 'dosing' ? '#1a73e8' : '#5f6368',
-                  fontWeight: clinicalTab === 'dosing' ? 700 : 500,
-                  fontSize: '0.71rem',
-                  cursor: 'pointer',
+            {/* Continuous Clean Google Cloud Spec Body (Zero-Click Mobile Flow) */}
+            <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '9px' }}>
+              {/* Section 1: Reconstitution & Syringe Math Spec Card */}
+              <div style={{
+                background: '#f8fafd',
+                border: '1px solid #d0e2ff',
+                borderRadius: '5px',
+                padding: '8px 10px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px'
+              }}>
+                <div style={{
+                  fontSize: '0.64rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  color: '#185abc',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Droplets size={12} color={clinicalTab === 'dosing' ? '#1a73e8' : '#5f6368'} />
-                <span>{isEs ? 'Posología' : 'Posology & Prep'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setClinicalTab('indications')}
-                style={{
-                  flex: 1,
-                  padding: '8px 4px',
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: clinicalTab === 'indications' ? '2px solid #1a73e8' : '2px solid transparent',
-                  color: clinicalTab === 'indications' ? '#1a73e8' : '#5f6368',
-                  fontWeight: clinicalTab === 'indications' ? 700 : 500,
-                  fontSize: '0.71rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Sparkles size={12} color={clinicalTab === 'indications' ? '#1a73e8' : '#5f6368'} />
-                <span>{isEs ? 'Indicación & MoA' : 'Indication & MoA'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setClinicalTab('stack')}
-                style={{
-                  flex: 1,
-                  padding: '8px 4px',
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: clinicalTab === 'stack' ? '2px solid #1a73e8' : '2px solid transparent',
-                  color: clinicalTab === 'stack' ? '#1a73e8' : '#5f6368',
-                  fontWeight: clinicalTab === 'stack' ? 700 : 500,
-                  fontSize: '0.71rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Layers size={12} color={clinicalTab === 'stack' ? '#1a73e8' : '#5f6368'} />
-                <span>{isEs ? 'Stack Clínico' : 'Synergy Stack'}</span>
-              </button>
-            </div>
-
-            {/* Tab 1: Posology & Prep (Key-Value Grid) */}
-            {clinicalTab === 'dosing' && (
-              <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '115px 1fr', gap: '5px 8px', fontSize: '0.73rem', alignItems: 'baseline' }}>
-                  <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Reconstitución:' : 'Reconstitution:'}</span>
-                  <span style={{ color: '#202124', fontWeight: 700 }}>{clinical.recon}</span>
-
-                  <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Cálculo Jeringa:' : 'Syringe Math:'}</span>
-                  <span style={{ color: '#1a73e8', fontWeight: 700, fontFamily: 'monospace' }}>{clinical.syringeCalc}</span>
-
-                  <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Pauta Estándar:' : 'Standard Posology:'}</span>
-                  <span style={{ color: '#202124', fontWeight: 600 }}>{clinical.dose}</span>
-
-                  {clinical.vialYield && (
-                    <>
-                      <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
-                      <span style={{ color: '#202124' }}>{clinical.vialYield}</span>
-                    </>
-                  )}
-
-                  {clinical.stability && (
-                    <>
-                      <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Almacenamiento:' : 'Storage:'}</span>
-                      <span style={{ color: '#202124' }}>{clinical.stability}</span>
-                    </>
-                  )}
-
-                  {clinical.hardware && (
-                    <>
-                      <span style={{ color: '#5f6368', fontWeight: 600 }}>{isEs ? 'Insumos / Aguja:' : 'Hardware:'}</span>
-                      <span style={{ color: '#202124' }}>{clinical.hardware}</span>
-                    </>
-                  )}
+                  gap: '4px'
+                }}>
+                  <Droplets size={11} color="#185abc" />
+                  <span>{isEs ? 'Reconstitución & Regla Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
                 </div>
-              </div>
-            )}
-
-            {/* Tab 2: Indication & MoA */}
-            {clinicalTab === 'indications' && (
-              <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div>
-                  <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368', marginBottom: '2px' }}>
-                    {isEs ? 'Indicación Clínica Primaria' : 'Primary Clinical Indication'}
-                  </div>
-                  <p style={{ margin: 0, color: '#202124', fontSize: '0.75rem', lineHeight: 1.48 }}>
-                    {clinical.indication}
-                  </p>
+                <div style={{ fontSize: '0.73rem', color: '#202124', fontWeight: 700 }}>
+                  {clinical.recon}
                 </div>
-                <div>
-                  <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368', marginBottom: '2px' }}>
-                    {isEs ? 'Mecanismo de Acción (MoA)' : 'Mechanism of Action (MoA)'}
-                  </div>
-                  <p style={{ margin: 0, color: '#3c4043', fontSize: '0.73rem', lineHeight: 1.45 }}>
-                    {clinical.moa}
-                  </p>
+                <div style={{
+                  fontSize: '0.70rem',
+                  color: '#185abc',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  background: '#e8f0fe',
+                  padding: '2px 6px',
+                  borderRadius: '3px',
+                  border: '1px solid #c2e7ff',
+                  display: 'inline-block',
+                  alignSelf: 'flex-start'
+                }}>
+                  {clinical.syringeCalc}
                 </div>
-              </div>
-            )}
-
-            {/* Tab 3: Synergy Stack */}
-            {clinicalTab === 'stack' && (
-              <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div>
-                  <div style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368', marginBottom: '3px' }}>
-                    {isEs ? 'Protocolo Sinergia Recomendado' : 'Recommended Synergy Protocol'}
-                  </div>
-                  <p style={{ margin: 0, color: '#202124', fontSize: '0.74rem', lineHeight: 1.45 }}>
-                    {clinical.stack}
-                  </p>
+                <div style={{ fontSize: '0.70rem', color: '#3c4043', marginTop: '2px' }}>
+                  <strong style={{ color: '#202124' }}>{isEs ? 'Pauta estándar:' : 'Standard posology:'}</strong> {clinical.dose}
                 </div>
-                {clinical.crossSellName && onFilterByPeptide && (
-                  <div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onFilterByPeptide(clinical.crossSellName);
-                      }}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        background: '#e8f0fe',
-                        border: '1px solid #c2e7ff',
-                        color: '#1a73e8',
-                        borderRadius: '4px',
-                        padding: '4px 10px',
-                        fontSize: '0.70rem',
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
-                    </button>
+                {(clinical.vialYield || clinical.stability) && (
+                  <div style={{
+                    fontSize: '0.67rem',
+                    color: '#5f6368',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                    borderTop: '1px solid #e1eaf8',
+                    paddingTop: '4px',
+                    marginTop: '2px'
+                  }}>
+                    {clinical.vialYield && <span>⏱️ <strong>{isEs ? 'Rendimiento:' : 'Yield:'}</strong> {clinical.vialYield}</span>}
+                    {clinical.stability && <span>❄️ <strong>{isEs ? 'Estabilidad:' : 'Storage:'}</strong> {clinical.stability}</span>}
                   </div>
                 )}
               </div>
-            )}
 
-            {/* Action Bar (GCP 32px Buttons) */}
+              {/* Section 2: Clinical Indication, MoA & Synergies */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div>
+                  <div style={{
+                    fontSize: '0.64rem',
+                    fontWeight: 750,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    color: '#5f6368',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    marginBottom: '2px'
+                  }}>
+                    <Sparkles size={11} color="#1a73e8" />
+                    <span>{isEs ? 'Indicación Clínica & MoA' : 'Clinical Indication & MoA'}</span>
+                  </div>
+                  <p style={{ margin: 0, color: '#1e293b', fontSize: '0.74rem', lineHeight: 1.45 }}>
+                    {clinical.indication}
+                  </p>
+                </div>
+
+                {clinical.stack && (
+                  <div style={{ borderTop: '1px solid #f1f3f4', paddingTop: '6px' }}>
+                    <div style={{
+                      fontSize: '0.64rem',
+                      fontWeight: 750,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      color: '#7c3aed',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      marginBottom: '2px'
+                    }}>
+                      <Layers size={11} color="#7c3aed" />
+                      <span>{isEs ? 'Stack Clínico Sinergia' : 'Recommended Synergy Stack'}</span>
+                    </div>
+                    <p style={{ margin: 0, color: '#334155', fontSize: '0.73rem', lineHeight: 1.42 }}>
+                      {clinical.stack}
+                    </p>
+                    {clinical.crossSellName && onFilterByPeptide && (
+                      <div style={{ marginTop: '5px' }}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onFilterByPeptide(clinical.crossSellName);
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            background: '#f3e8ff',
+                            border: '1px solid #d8b4fe',
+                            color: '#6b21a8',
+                            borderRadius: '4px',
+                            padding: '3px 8px',
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Google Cloud UX Full-Width Primary Action Button (No duplicate specs) */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              borderTop: '1px solid #f1f5f9',
-              paddingTop: '6px',
-              marginTop: '2px'
+              padding: '8px 12px',
+              borderTop: '1px solid #f1f3f4',
+              background: '#f8fafc'
             }}>
               <button
                 type="button"
                 onClick={() => onOpenAi && onOpenAi(row)}
                 style={{
-                  flex: 1,
-                  display: 'inline-flex',
+                  width: '100%',
+                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '5px',
-                  background: '#f8fafc',
-                  color: '#1a73e8',
-                  border: '1px solid #dadce0',
-                  padding: '7px 10px',
+                  gap: '6px',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '8px 12px',
                   borderRadius: '4px',
-                  fontSize: '0.73rem',
-                  fontWeight: 650,
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  minHeight: '34px',
+                  minHeight: '36px',
+                  boxShadow: '0 1px 2px rgba(26,115,232,0.25)',
                   transition: 'all 0.15s ease'
                 }}
+                title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
               >
-                <Sparkles size={13} color="#1a73e8" />
+                <Sparkles size={14} color="#ffffff" />
                 <span>{isEs ? 'Calcular Pauta con Atlas AI' : 'Calculate Posology with Atlas AI'}</span>
               </button>
-
-              <Link
-                href={specsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '3px',
-                  background: '#f8fafc',
-                  color: '#475569',
-                  border: '1px solid #cbd5e1',
-                  padding: '7px 9px',
-                  borderRadius: '5px',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                  minHeight: '34px'
-                }}
-              >
-                <span>{isEs ? 'Ficha COA' : 'Specs COA'}</span>
-                <span>↗</span>
-              </Link>
             </div>
           </div>
         )}
