@@ -152,6 +152,27 @@ export async function POST(request) {
       || currentItem.productName
       || '';
 
+    // Dual Delivery Label Options: 1) Clinical 100% Prescription vs 2) Customs GCC Discreet
+    const customsDefaultTitle = getCustomsFriendlySuggestions(currentItem)[0] || 'Botanical Nutrient Complex';
+    const deliveryLabelsDual = {
+      clinical: {
+        title: currentItem.productTitle || currentItem.productName || deliveryTitleResolved,
+        directions: currentItem.directions || '',
+        storage: currentItem.storage || 'Store at room temperature.',
+        type: 'clinical_100_percent',
+        updatedAt: nowIso
+      },
+      customsDiscreet: {
+        title: shippingTitleResolved || customsDefaultTitle,
+        mnemonic: currentItem.customsMnemonic || '',
+        hsCode: currentItem.hsCode || '3304.99',
+        directions: currentItem.customsDirections || 'Apply as directed as part of daily wellness regimen.',
+        storage: 'Store in a cool, dry place away from direct sunlight.',
+        type: 'customs_gcc_discreet',
+        updatedAt: nowIso
+      }
+    };
+
     // Snapshot existing or new labels
     const allModalLabels = labels.map((lbl, idx) => {
       const ovr = editedOverrides[idx];
@@ -193,6 +214,8 @@ export async function POST(request) {
       approvalStatus: resolvedStatus,
       shippingTitle: shippingTitleResolved,
       deliveryTitle: deliveryTitleResolved,
+      deliveryLabels: deliveryLabelsDual,
+      boldPosology: body.boldPosology !== undefined ? body.boldPosology : (currentItem.boldPosology !== undefined ? currentItem.boldPosology : true),
       lastVariant: activeVariant,
       labelMarkdown: markdownText,
       labelSavedAt: nowIso,
@@ -206,6 +229,10 @@ export async function POST(request) {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       lastModifiedBy: actorId,
       pharmacyLabels: currentLabelsSnapshot,
+      deliveryLabels: {
+        ...(existingData?.deliveryLabels || {}),
+        [partKey]: deliveryLabelsDual
+      },
       labelsMeta: {
         lastVariant: activeVariant,
         shippingTitle: shippingTitleResolved,

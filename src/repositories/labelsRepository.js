@@ -167,7 +167,8 @@ export const labelsRepository = {
     selectedProductIdx = 0,
     editedOverrides = {},
     actorId = null,
-    approvalStatus = null // 'draft' | 'approved'
+    approvalStatus = null, // 'draft' | 'approved'
+    boldPosology = true
   }) {
     // ⚡ Primary Strategy: Call authoritative Server-Side Admin API route
     // This completely eliminates permission denials from firestore.rules for public/unauthenticated studio users
@@ -185,7 +186,8 @@ export const labelsRepository = {
           selectedProductIdx,
           editedOverrides,
           actorId: actorId || 'pharmacy_label_studio',
-          approvalStatus
+          approvalStatus,
+          boldPosology
         })
       });
 

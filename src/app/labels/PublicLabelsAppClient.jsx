@@ -327,7 +327,7 @@ export default function PublicLabelsAppClient({
       .then((res) => res.json())
       .then((data) => {
         if (isMounted && data.success) {
-          setLabelsKpis(data);
+          setLabelsKpis(data.kpis || data);
           if (data.printCountsByCode) {
             setPrintCountsMap(data.printCountsByCode);
           }
@@ -1327,7 +1327,7 @@ export default function PublicLabelsAppClient({
           totalBatchLabelsCount={totalBatchLabelsCount}
           onSwitchActivePatient={handleSwitchActivePatient}
           onRemoveFromQueue={handleRemoveFromQueue}
-          onUpdatePatientQueueItem={updatePatientQueueItem}
+          onUpdatePatientQueueItem={handleUpdatePatientConfig}
           onBatchApprove={handleBatchApprove}
           isBatchApproving={isBatchApproving}
           totalLabeledCount={totalLabeledCount}
@@ -1396,7 +1396,7 @@ export default function PublicLabelsAppClient({
                   <span>{isEs ? "Etiquetas A4 Impresas" : "A4 Labels Printed"}</span>
                   <ShieldCheck size={15} color="#16a34a" />
                 </div>
-                <div className="pls-gcp-kpi-val">{labelsKpis.totalPrintedA4Count} {isEs ? "Impresas" : "Printed"}</div>
+                <div className="pls-gcp-kpi-val">{labelsKpis.totalPrintedA4Count ?? 0} {isEs ? "Impresas" : "Printed"}</div>
                 <div className="pls-gcp-kpi-sub">{isEs ? "Trazabilidad de impresión por lote" : "Cumulative A4 batch audit trail"}</div>
               </div>
 
@@ -1405,7 +1405,7 @@ export default function PublicLabelsAppClient({
                   <span>{isEs ? "Cargas Recientes (7 Días)" : "Ingested (Last 7 Days)"}</span>
                   <Clock size={15} color="#7c3aed" />
                 </div>
-                <div className="pls-gcp-kpi-val">{labelsKpis.uploadedThisWeek} {isEs ? "Nuevas" : "New RXs"}</div>
+                <div className="pls-gcp-kpi-val">{labelsKpis.uploadedThisWeek ?? 0} {isEs ? "Nuevas" : "New RXs"}</div>
                 <div className="pls-gcp-kpi-sub">{isEs ? "Prescripciones sincronizadas esta semana" : "Prescriptions ingested this week"}</div>
               </div>
             </div>

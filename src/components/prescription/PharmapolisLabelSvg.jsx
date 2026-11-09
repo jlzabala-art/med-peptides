@@ -229,9 +229,14 @@ export default function PharmapolisLabelSvg({
   heightMm = 45,
   showCutGuides = false,
   colorMode = 'monochrome', // 'monochrome' (pure black / grayscale high-contrast for thermal & laser printing) | 'color' (preview)
-  svgRef = null
+  svgRef = null,
+  boldPosology = true
 }) {
   const isMono = colorMode === 'monochrome';
+  const isBoldPosology = (labelData.boldPosology !== undefined) ? Boolean(labelData.boldPosology) : Boolean(boldPosology);
+  const posFontWeight = isBoldPosology ? '800' : '500';
+  const posCharWidthFactor = isBoldPosology ? 0.64 : 0.53;
+  const posLineGapFactor = isBoldPosology ? 1.42 : 1.30;
 
   // Base coordinates: 1500 px base width, dynamic responsive height
   const WIDTH = 1500;
@@ -758,10 +763,10 @@ export default function PharmapolisLabelSvg({
     const prepDateFormatted = formatCustomsDate(labelData.prodDate || labelData.mfgDate, 'full');
     const budDateFormatted = formatCustomsDate(labelData.expDate, 'bud');
 
-    // Directions text with wrapping
+    // Directions text with wrapping (compact when boldPosology is false)
     const rawDir = labelData.directions || labelData.instructions || 'Take 2 capsules (one dose) with lunch and 2 capsules (one dose) with dinner.';
     const dirClean = String(rawDir).replace(/^directions\s*(for\s*use)?:\s*/i, '').trim();
-    const dirLines = wrapDirections(dirClean, 42, 54);
+    const dirLines = wrapDirections(dirClean, isBoldPosology ? 42 : 52, isBoldPosology ? 54 : 66);
 
     const baseFontSize = Math.min(35, Math.max(24, Math.round(HEIGHT * 0.040)));
     const titleFontSize = Math.min(48, Math.max(32, Math.round(HEIGHT * 0.054)));
@@ -1336,8 +1341,8 @@ export default function PharmapolisLabelSvg({
             const posHeaderTitleY = isShort ? 15 : isMediumHeight ? 17 : 20;
 
             for (const testFontSize of candidatePosFontSizes) {
-              const testLineGap = Math.round(testFontSize * 1.42);
-              const testMaxChars = Math.max(24, Math.floor((innerUsableWidth - 64) / (testFontSize * 0.64)));
+              const testLineGap = Math.round(testFontSize * posLineGapFactor);
+              const testMaxChars = Math.max(24, Math.floor((innerUsableWidth - 64) / (testFontSize * posCharWidthFactor)));
               const testLines = wrapLines(directions, testMaxChars);
               const testFirstLineY = posHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 14) + Math.round(testFontSize * 0.82);
               const testBoxH = testFirstLineY + Math.max(0, testLines.length - 1) * testLineGap + (isShort ? 12 : 16);
@@ -1450,7 +1455,7 @@ export default function PharmapolisLabelSvg({
                       y={firstPosLineY + (pIdx * posLineGap)}
                       fontFamily="Arial, Helvetica, -apple-system, sans-serif"
                       fontSize={posFontSize + 1}
-                      fontWeight="800"
+                      fontWeight={posFontWeight}
                       fill={isMono ? '#000000' : '#0f172a'}
                     >
                       {pLine}

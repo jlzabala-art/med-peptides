@@ -46,6 +46,9 @@ export function getCustomsFriendlySuggestions(item = {}) {
 
   const title = String(item.productTitle || item.productName || item.title || '').trim();
   const fullText = (title + ' ' + (item.formula || '')).toLowerCase();
+  const isHormoneFocus = /estradiol|estriol|progesteron|testosteron|dhea|pregnenolon|thyroid|\bbhrt\b|\be2\b|\be3\b|\bp4\b/.test(fullText);
+  const isPeptideFocus = /bpc|tb-?500|thymosin|ghk|copper|epithalon|mots|semaglutide|tirzepatide|dsip|peptide/.test(fullText);
+  const isPeelFocus = /peel|dermpeel|glycolic|mandelic|lactic|salicylic|tranexamic|phytic|kojic|arbutin|exfolia|resurfac/.test(fullText);
   const isHairFocus = /hair|scalp|follicle|alopecia|minoxidil|finasteride|dutasteride/.test(fullText);
   const isMetabolicFocus = /lipid|metabolic|berberine|coq10|ubiquinol|glucose|weight|cholesterol/.test(fullText);
   const isInflammation = /proteolytic|inflamm|joint|pain|serrapeptase|nattokinase|curcumin/.test(fullText);
@@ -56,12 +59,21 @@ export function getCustomsFriendlySuggestions(item = {}) {
     cleanQty = `${m[1]} caps`;
   } else if (/(\d+)\s*mL/i.test(cleanQty)) {
     cleanQty = `${cleanQty.match(/(\d+)\s*mL/i)[1]} mL`;
+  } else if (/(\d+)\s*g/i.test(cleanQty)) {
+    cleanQty = `${cleanQty.match(/(\d+)\s*g/i)[1]} g`;
   }
 
   const isEvening = /evening|night|bed|sleep|melatonin|theanine|glycine/i.test(fullText);
   const moment = isEvening ? 'Evening' : 'Daily';
 
   if (isOral) {
+    if (isHormoneFocus) {
+      return [
+        `Botanical Micronutrient Balance Capsules ${cleanQty}`,
+        `Nutricosmetic Dermal Support Capsules ${cleanQty}`,
+        `Daily Wellness & Vitality Complex ${cleanQty}`
+      ];
+    }
     // Option 1: Dietary & Botanical · Option 2: Personal Care · Option 3: Wellness
     if (isHairFocus) {
       return [
@@ -91,7 +103,28 @@ export function getCustomsFriendlySuggestions(item = {}) {
     ];
   }
 
-  // Topical / solutions / creams
+  // Topical / solutions / creams / vials (including Dra. Camacho BHRT hormone formulations & Dermpeels)
+  if (isPeelFocus) {
+    return [
+      `Exfoliating Botanical Face Elixir ${cleanQty}`,
+      `Advanced Resurfacing Dermal Care ${cleanQty}`,
+      `Multi-Fruit Acid Skin Complex ${cleanQty}`
+    ];
+  }
+  if (isHormoneFocus) {
+    return [
+      `Lipid Balancing Dermal Emulsion ${cleanQty}`,
+      `Phytosterol Cellular Skin Cream ${cleanQty}`,
+      `Advanced Rejuvenating Dermal Complex ${cleanQty}`
+    ];
+  }
+  if (isPeptideFocus) {
+    return [
+      `Biochemical Peptide Dermal Solution ${cleanQty}`,
+      `Advanced Bio-Nutrient Skin Elixir ${cleanQty}`,
+      `Protective Amino Peptide Concentrate ${cleanQty}`
+    ];
+  }
   if (isHairFocus) {
     return [
       `Botanical Scalp & Hair Drops ${cleanQty}`,

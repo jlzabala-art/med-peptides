@@ -144,6 +144,8 @@ export default function PharmacyLabelsModal({
   const [isGeneratingZip, setIsGeneratingZip] = useState(false);
   const [compareMode, setCompareMode] = useState(!hideShippingLabel); // show Delivery + Shipping side by side only if shipping label is enabled
   const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
+  const [boldPosology, setBoldPosology] = useState(true); // true = Bold 800 (standard), false = Normal 500 (compact, saves space)
+  const [deliveryLabelType, setDeliveryLabelType] = useState('customs'); // 'customs' (GCC Discreet Aduanas) | 'clinical' (100% Prescription Based)
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [colorMode, setColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (screen preview)
   const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)
@@ -548,6 +550,7 @@ export default function PharmacyLabelsModal({
         rawId: targetId,
         currentItem: {
           ...currentItem,
+          boldPosology,
           approvalStatus: targetStatus
         },
         markdownText,
@@ -555,6 +558,7 @@ export default function PharmacyLabelsModal({
         labels,
         selectedProductIdx,
         editedOverrides,
+        boldPosology,
         approvalStatus: targetStatus
       });
 
@@ -950,6 +954,7 @@ export default function PharmacyLabelsModal({
                 heightMm={dimensions.heightMm}
                 colorMode={colorMode}
                 showCutGuides={false}
+                boldPosology={boldPosology}
               />
             );
           });
@@ -2641,6 +2646,49 @@ export default function PharmacyLabelsModal({
                   </select>
                 </div>
 
+                {/* Posology Font Weight Toggle (Bold vs Compact Normal) */}
+                <div className="gcp-toolbar-control">
+                  <label htmlFor="gcp-label-posologyweight" className="gcp-toolbar-label">
+                    {isEs ? 'Posología:' : 'Posology:'}
+                  </label>
+                  <select
+                    id="gcp-label-posologyweight"
+                    value={boldPosology ? 'bold' : 'normal'}
+                    onChange={(e) => setBoldPosology(e.target.value === 'bold')}
+                    className="gcp-toolbar-select"
+                    title={isEs ? 'Cambiar grosor de fuente de la posología para ahorrar espacio' : 'Toggle posology font weight to save vertical space'}
+                  >
+                    <option value="bold">{isEs ? 'Negrita (Estándar)' : 'Bold (Standard)'}</option>
+                    <option value="normal">{isEs ? 'Normal / Compacto (Ahorra Espacio)' : 'Normal / Compact (Save Space)'}</option>
+                  </select>
+                </div>
+
+                {/* Dual Delivery Label Option (Active when shipping variant is selected) */}
+                {activeVariant === 'shipping' && (
+                  <div className="gcp-toolbar-control">
+                    <label htmlFor="gcp-label-deliverymode" className="gcp-toolbar-label">
+                      {isEs ? 'Tipo Envío:' : 'Delivery Mode:'}
+                    </label>
+                    <select
+                      id="gcp-label-deliverymode"
+                      value={deliveryLabelType}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setDeliveryLabelType(val);
+                        if (val === 'clinical') {
+                          handleFieldChange('shippingTitle', currentItem.productTitle || currentItem.productName || '');
+                        } else {
+                          handleFieldChange('shippingTitle', getCustomsFriendlySuggestions(currentItem)[0] || '');
+                        }
+                      }}
+                      className="gcp-toolbar-select"
+                    >
+                      <option value="customs">{isEs ? '✈️ Aduanas GCC (KSA/Qatar/Kuwait - Discreto)' : '✈️ Customs GCC (KSA/Qatar/Kuwait - Discreet)'}</option>
+                      <option value="clinical">{isEs ? '🏥 100% Prescripción Real (Clínico)' : '🏥 100% Prescription Based (Clinical)'}</option>
+                    </select>
+                  </div>
+                )}
+
                 {/* Field 4: Export Format Selector (PDF / PNG / MD) */}
                 <div className="gcp-toolbar-control">
                   <label htmlFor="gcp-label-format" className="gcp-toolbar-label">
@@ -3863,6 +3911,7 @@ export default function PharmacyLabelsModal({
                   heightMm={dimensions.heightMm}
                   colorMode={colorMode}
                   showCutGuides={showCutGuides}
+                  boldPosology={boldPosology}
                 />
               </div>
             </div>
@@ -3897,6 +3946,7 @@ export default function PharmacyLabelsModal({
                         heightMm={dimensions.heightMm}
                         colorMode={colorMode}
                         showCutGuides={false}
+                        boldPosology={boldPosology}
                       />
                     </div>
                   </div>
@@ -4285,6 +4335,7 @@ export default function PharmacyLabelsModal({
                 dpi={Math.max(dpi, 300)}
                 colorMode={colorMode}
                 showCutGuides={showCutGuides}
+                boldPosology={boldPosology}
               />
             </div>
           ))}
