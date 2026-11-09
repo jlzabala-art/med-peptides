@@ -916,6 +916,7 @@ export default function OverviewTab({
           data={filteredPresentationData}
           keyField="id"
           hideExpandColumn
+          showPagination={filteredPresentationData.length > 10}
           onRowClick={handleRowClick}
           mobileCardComponent={PresentationStrengthCard}
         />

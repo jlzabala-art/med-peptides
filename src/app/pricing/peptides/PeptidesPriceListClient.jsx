@@ -2590,56 +2590,70 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             borderLeft: '1px solid #edf2f7',
             paddingLeft: '1.25rem'
           }}>
-            {/* Reconstitution & Syringe Math Box (GCP Clinical Spec Box) */}
+            {/* Reconstitution & Syringe Math Box (Google Cloud Console Resource Spec Card) */}
             <div style={{
-              background: '#f0f7ff',
-              border: '1px solid #c2e7ff',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
               borderRadius: '6px',
-              padding: '8px 10px',
+              overflow: 'hidden',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
               display: 'flex',
-              flexDirection: 'column',
-              gap: '3px'
+              flexDirection: 'column'
             }}>
               <div style={{
-                fontSize: '0.64rem',
+                background: '#f8f9fa',
+                borderBottom: '1px solid #dadce0',
+                padding: '6px 10px',
+                fontSize: '0.66rem',
                 fontWeight: 800,
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
-                color: '#0284c7',
+                color: '#1a73e8',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px'
+                gap: '5px'
               }}>
-                <Droplets size={11} color="#0284c7" />
+                <Droplets size={12} color="#1a73e8" />
                 <span>{isEs ? 'Reconstitución & Regla Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#0f172a', fontWeight: 700 }}>
-                {clinical.recon}
-              </div>
-              <div style={{ fontSize: '0.71rem', color: '#0369a1', fontFamily: 'monospace', fontWeight: 650 }}>
-                {clinical.syringeCalc}
-              </div>
-              <div style={{ fontSize: '0.70rem', color: '#334155' }}>
-                <strong>{isEs ? 'Pauta estándar:' : 'Standard dose:'}</strong> {clinical.dose}
-              </div>
-              {clinical.vialYield && (
-                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                  <span style={{ fontWeight: 700 }}>⏱️ {isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
-                  <span>{clinical.vialYield}</span>
+              <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <div style={{ fontSize: '0.74rem', color: '#202124', fontWeight: 700 }}>
+                  {clinical.recon}
                 </div>
-              )}
-              {clinical.stability && (
-                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ fontWeight: 700 }}>❄️ {isEs ? 'Estabilidad:' : 'Storage:'}</span>
-                  <span>{clinical.stability}</span>
+                <div style={{
+                  fontSize: '0.71rem',
+                  color: '#185abc',
+                  fontFamily: 'monospace',
+                  fontWeight: 650,
+                  background: '#e8f0fe',
+                  padding: '3px 6px',
+                  borderRadius: '4px',
+                  border: '1px solid #c2e7ff'
+                }}>
+                  {clinical.syringeCalc}
                 </div>
-              )}
-              {clinical.hardware && (
-                <div style={{ fontSize: '0.69rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ fontWeight: 700 }}>💉 {isEs ? 'Insumos:' : 'Hardware:'}</span>
-                  <span>{clinical.hardware}</span>
+                <div style={{ fontSize: '0.70rem', color: '#3c4043' }}>
+                  <strong style={{ color: '#202124' }}>{isEs ? 'Pauta estándar:' : 'Standard dose:'}</strong> {clinical.dose}
                 </div>
-              )}
+                {clinical.vialYield && (
+                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px', borderTop: '1px solid #f1f3f4', paddingTop: '4px' }}>
+                    <span style={{ fontWeight: 700, color: '#3c4043' }}>⏱️ {isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
+                    <span>{clinical.vialYield}</span>
+                  </div>
+                )}
+                {clinical.stability && (
+                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontWeight: 700, color: '#3c4043' }}>❄️ {isEs ? 'Estabilidad:' : 'Storage:'}</span>
+                    <span>{clinical.stability}</span>
+                  </div>
+                )}
+                {clinical.hardware && (
+                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontWeight: 700, color: '#3c4043' }}>💉 {isEs ? 'Insumos:' : 'Hardware:'}</span>
+                    <span>{clinical.hardware}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>
@@ -2845,20 +2859,20 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               <Menu size={17} />
             </button>
             <Link href="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
-              <BrandLogo variant="light" size="compact" />
+              <BrandLogo variant="dark" size="compact" />
             </Link>
-            <span className="nav-divider mobile-hide">/</span>
-            <span className="nav-section mobile-hide">{isEs ? 'Tarifas Oficiales' : 'Price Schedules'}</span>
-            <span className="nav-divider mobile-hide">/</span>
-            <span className="nav-current mobile-hide">{isEs ? 'Viales de Péptidos Liofilizados' : 'Lyophilized Peptide Vials'}</span>
+            <span className="nav-divider mobile-hide" style={{ color: '#9aa0a6', margin: '0 4px', fontSize: '0.80rem' }}>&gt;</span>
+            <span className="nav-section mobile-hide" style={{ color: '#5f6368', fontSize: '0.80rem', fontWeight: 500 }}>{isEs ? 'Tarifas Oficiales' : 'Price Schedules'}</span>
+            <span className="nav-divider mobile-hide" style={{ color: '#9aa0a6', margin: '0 4px', fontSize: '0.80rem' }}>&gt;</span>
+            <span className="nav-current mobile-hide" style={{ color: '#202124', fontSize: '0.80rem', fontWeight: 700 }}>{isEs ? 'Viales de Péptidos Liofilizados' : 'Lyophilized Peptide Vials'}</span>
           </div>
 
           <div className="nav-actions peptides-nav-actions">
-            {/* ── Desktop & Laptop Actions Bar ── */}
+            {/* ── Desktop & Laptop Actions Bar (Google Cloud Standard Light Bar) ── */}
             <div className="peptides-nav-utility-group desktop-only-utilities">
               {/* Language selector: EN standard, ES selectable */}
               <div className="language-selector" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div className="pill-group" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                <div className="pill-group" style={{ display: 'inline-flex', background: '#f1f3f4', borderRadius: '6px', padding: '2px', border: '1px solid #dadce0' }}>
                   {[
                     { code: 'en', label: 'EN' },
                     { code: 'es', label: 'ES' }
@@ -2871,8 +2885,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         className={`pill-btn ${isCurrent ? 'pill-active active' : ''}`}
                         style={{
                           border: 'none',
-                          background: isCurrent ? '#0284c7' : 'transparent',
-                          color: isCurrent ? '#ffffff' : '#cbd5e1',
+                          background: isCurrent ? '#1a73e8' : 'transparent',
+                          color: isCurrent ? '#ffffff' : '#3c4043',
                           fontWeight: isCurrent ? 800 : 500,
                           fontSize: '0.73rem',
                           padding: '4px 8px',
@@ -2897,9 +2911,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.35) 0%, rgba(13, 148, 136, 0.35) 100%)',
-                  color: '#38bdf8',
-                  border: '1px solid rgba(56, 189, 248, 0.45)',
+                  background: '#e8f0fe',
+                  color: '#1a73e8',
+                  border: '1px solid #c2e7ff',
                   padding: '5px 10px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
@@ -2910,7 +2924,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 }}
                 title="Open Atlas Clinical AI Assistant (Dosing Math, Synergies & Reconstitution)"
               >
-                <Sparkles size={13} className="text-sky-300" />
+                <Sparkles size={13} color="#1a73e8" />
                 <span>Atlas AI</span>
               </button>
 
@@ -2926,9 +2940,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: '#cbd5e1',
-                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  border: '1px solid #dadce0',
                   padding: '5px 9px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
@@ -2939,7 +2953,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 }}
                 title={isEs ? 'Consultar información técnica, COAs o envíos' : 'Institutional Inquiry & Support'}
               >
-                <Mail size={13} />
+                <Mail size={13} color="#5f6368" />
                 <span>{isEs ? 'Consultar' : 'Inquire'}</span>
               </button>
 
@@ -2951,20 +2965,20 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: 'rgba(255, 255, 255, 0.12)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  border: '1px solid #dadce0',
                   padding: '5px 10px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
-                  fontWeight: 700,
+                  fontWeight: 650,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease'
                 }}
                 title={isEs ? 'Previsualizar y exportar tarifa oficial PDF' : 'Preview and export official PDF price schedule'}
               >
-                <Eye size={13} />
+                <Eye size={13} color="#5f6368" />
                 <span>{isEs ? 'PDF' : 'PDF Schedule'}</span>
               </button>
 
@@ -2976,9 +2990,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: '#cbd5e1',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  border: '1px solid #dadce0',
                   padding: '5px 9px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
@@ -2988,17 +3002,17 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 }}
                 title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
               >
-                {copied ? <Check size={13} className="text-emerald-400" /> : <Share2 size={13} />}
+                {copied ? <Check size={13} color="#16a34a" /> : <Share2 size={13} color="#5f6368" />}
                 <span className="peptides-share-label">{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
               </button>
             </div>
 
             {/* Desktop Currency selector with prominent display */}
             <div className="currency-selector peptides-currency-bar desktop-only-currency" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
                 {isEs ? 'Divisa:' : 'Currency:'}
               </span>
-              <div className="pill-group peptides-currency-pills" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.12)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+              <div className="pill-group peptides-currency-pills" style={{ display: 'inline-flex', background: '#f1f3f4', borderRadius: '6px', padding: '2px', border: '1px solid #dadce0' }}>
                 {[
                   { code: 'USD', symbol: '$' },
                   { code: 'EUR', symbol: '€' },
@@ -3013,13 +3027,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       style={{
                         border: 'none',
                         background: isCurrent ? '#1a73e8' : 'transparent',
-                        color: isCurrent ? '#ffffff' : '#cbd5e1',
+                        color: isCurrent ? '#ffffff' : '#3c4043',
                         fontWeight: isCurrent ? 800 : 500,
                         fontSize: '0.73rem',
                         padding: '4px 10px',
                         borderRadius: '4px',
                         cursor: 'pointer',
-                        boxShadow: isCurrent ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
+                        boxShadow: isCurrent ? '0 1px 3px rgba(26,115,232,0.3)' : 'none',
                         transition: 'all 0.15s ease',
                         letterSpacing: '-0.01em',
                         display: 'inline-flex',
@@ -3030,7 +3044,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         whiteSpace: 'nowrap'
                       }}
                     >
-                      {isCurrent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8', display: 'inline-block', flexShrink: 0 }} />}
+                      {isCurrent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffffff', display: 'inline-block', flexShrink: 0 }} />}
                       <span>{item.code} ({item.symbol})</span>
                     </button>
                   );
@@ -3452,9 +3466,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             position: sticky !important;
             top: 0 !important;
             z-index: 100 !important;
-            background: rgba(15, 23, 42, 0.98) !important;
-            backdrop-filter: blur(12px) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+            background: #ffffff !important;
+            backdrop-filter: blur(8px) !important;
+            border-bottom: 1px solid #dadce0 !important;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.08) !important;
           }
           .peptides-nav-container {
             display: flex;
@@ -4467,6 +4482,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   initialRowsPerPage={150}
                   showPagination={true}
                   sortable={true}
+                  stickyTopOffset={52}
                   lang={lang}
                   groupByKey={groupByCategory ? 'categoryKey' : null}
                   renderGroupHeader={(catKey, firstRow, count) => {
@@ -4480,18 +4496,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         gap: '8px',
                         background: '#e8f0fe',
                         borderRadius: '6px',
-                        padding: '3px 6px'
+                        padding: '6px 10px',
+                        scrollMarginTop: '64px'
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                          <span style={{ color: '#003666', display: 'inline-flex', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ color: '#1a73e8', display: 'inline-flex', alignItems: 'center' }}>
                             {getCategoryIcon(catKey, 14)}
                           </span>
                           <span style={{
                             fontWeight: 800,
                             fontSize: '0.76rem',
-                            color: '#003666',
+                            color: '#1a73e8',
                             textTransform: 'uppercase',
-                            letterSpacing: '0.05em'
+                            letterSpacing: '0.04em'
                           }}>
                             {title} ({count})
                           </span>
@@ -4499,10 +4516,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         <span style={{
                           fontSize: '0.66rem',
                           fontWeight: 700,
-                          color: '#1967d2',
+                          color: '#1a73e8',
                           background: '#ffffff',
                           border: '1px solid #bfdbfe',
-                          padding: '1px 7px',
+                          padding: '2px 8px',
                           borderRadius: '10px'
                         }}>
                           {count} {isEs ? 'formulaciones' : 'formulations'}

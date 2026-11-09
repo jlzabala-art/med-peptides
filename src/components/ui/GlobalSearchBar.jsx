@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Command, Loader, Clock, ChevronDown, Filter, QrCode, ArrowUpRight, User } from '@/lib/icons';
+import { Search, X, Command, Loader, Clock, ChevronDown, Filter, QrCode, ArrowUpRight, User, Edit3, Repeat } from '@/lib/icons';
 import '../../styles/search.css';
 import MultiSelectFilter from './MultiSelectFilter';
 import SingleSelectFilter from './SingleSelectFilter';
@@ -845,6 +845,53 @@ export default function GlobalSearchBar({
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginLeft: '0.5rem' }}>
+                      {/* Direct Prescription Shortcuts (Edit / Refill - Rule #4 & #26) */}
+                      {item.indexName === 'prescriptions' && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={(e) => e.stopPropagation()}>
+                          <a
+                            href={`/rx/${encodeURIComponent(item.code || item.name)}?edit=true`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              background: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              color: '#1a73e8',
+                              fontSize: '0.66rem',
+                              fontWeight: 700,
+                              textDecoration: 'none'
+                            }}
+                            title="Edit Prescription"
+                          >
+                            <Edit3 size={10} color="#1a73e8" />
+                            <span>Edit</span>
+                          </a>
+                          <a
+                            href={`/labels?rx=${encodeURIComponent(item.code || item.name)}&refill=true`}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              background: '#ecfdf5',
+                              border: '1px solid #a7f3d0',
+                              color: '#059669',
+                              fontSize: '0.66rem',
+                              fontWeight: 750,
+                              textDecoration: 'none'
+                            }}
+                            title="Issue Refill / Duplicate"
+                          >
+                            <Repeat size={10} color="#059669" />
+                            <span>Refill</span>
+                          </a>
+                        </div>
+                      )}
                       {item.variantCount > 1 && (
                         <span
                           style={{

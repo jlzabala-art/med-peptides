@@ -50,6 +50,7 @@ export default function PrescriptionRefillModal({
   patientName = '',
   docName = '',
   isEs = false,
+  presetPartIndex = null,
   onRefillCreated
 }) {
   if (!isOpen) return null;
@@ -66,8 +67,13 @@ export default function PrescriptionRefillModal({
         : [{ title: currentRx.productTitle || 'Formula 1', volume: currentRx.volume || '', directions: '' }]
       );
 
-  // Default selection: all parts selected
-  const [selectedIndices, setSelectedIndices] = useState(() => rawParts.map((_, i) => i));
+  // Default selection: if presetPartIndex is provided, select that part, else select all
+  const [selectedIndices, setSelectedIndices] = useState(() => {
+    if (typeof presetPartIndex === 'number' && presetPartIndex >= 0 && presetPartIndex < rawParts.length) {
+      return [presetPartIndex];
+    }
+    return rawParts.map((_, i) => i);
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Refill cycle calculation
@@ -268,6 +274,63 @@ export default function PrescriptionRefillModal({
               </span>
             </div>
 
+            {/* Smart Preset Quick Switches (Golden Rule #5) */}
+            {rawParts.length > 1 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 10px',
+                background: '#f8fafc',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+                marginBottom: '8px',
+                gap: '8px'
+              }}>
+                <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
+                  {typeof presetPartIndex === 'number' && presetPartIndex >= 0
+                    ? (isEs ? `Prefijado en Parte ${presetPartIndex + 1}:` : `Preset to Part ${presetPartIndex + 1}:`)
+                    : (isEs ? 'Selección rápida:' : 'Quick toggle:')}
+                </span>
+                <div style={{ display: 'inline-flex', gap: '6px' }}>
+                  {typeof presetPartIndex === 'number' && presetPartIndex >= 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedIndices([presetPartIndex])}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        border: selectedIndices.length === 1 && selectedIndices[0] === presetPartIndex ? '1.5px solid #10b981' : '1px solid #cbd5e1',
+                        background: selectedIndices.length === 1 && selectedIndices[0] === presetPartIndex ? '#ecfdf5' : '#ffffff',
+                        color: selectedIndices.length === 1 && selectedIndices[0] === presetPartIndex ? '#065f46' : '#64748b',
+                        fontSize: '0.68rem',
+                        fontWeight: 750,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isEs ? `Solo Parte ${presetPartIndex + 1}` : `Part ${presetPartIndex + 1} Only`}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIndices(rawParts.map((_, i) => i))}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      border: selectedIndices.length === rawParts.length ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                      background: selectedIndices.length === rawParts.length ? '#e8f0fe' : '#ffffff',
+                      color: selectedIndices.length === rawParts.length ? '#1a73e8' : '#64748b',
+                      fontSize: '0.68rem',
+                      fontWeight: 750,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isEs ? `Todas las Partes (${rawParts.length})` : `All Parts (${rawParts.length})`}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {rawParts.map((part, idx) => {
                 const isSelected = selectedIndices.includes(idx);
@@ -462,3 +525,4 @@ export default function PrescriptionRefillModal({
     </div>
   );
 }
+

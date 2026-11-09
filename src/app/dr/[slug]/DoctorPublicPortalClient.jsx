@@ -6800,14 +6800,24 @@ export default function DoctorPublicPortalClient({
                             </span>
                           </div>
 
-                          <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
-                            {bp.compoundingFormula?.treatmentTitle || bp.title}
-                            {bp.compoundingFormula?.volume && (
-                              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#64748b', marginLeft: '6px' }}>
-                                · {bp.compoundingFormula.volume}
-                              </span>
-                            )}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                            <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a73e8', background: '#e8f0fe', padding: '1px 6px', borderRadius: '3px' }}>
+                              {bp.badge || (lang === 'es' ? 'PROTOCOLO INTEGRAL' : 'INTEGRATIVE PROTOCOL')}
+                            </span>
+                            <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
+                              • {lang === 'es' ? 'Stack de 3 Pilares Sinérgicos' : '3-Pillar Synergistic Stack'}
+                            </span>
                           </div>
+
+                          <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.35 }}>
+                            {bp.title || bp.compoundingFormula?.treatmentTitle}
+                          </div>
+
+                          {bp.compoundingFormula?.treatmentTitle && bp.title !== bp.compoundingFormula?.treatmentTitle && (
+                            <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
+                              <strong style={{ color: '#003666' }}>{lang === 'es' ? 'Fórmula Magistral:' : 'Rx Base Formula:'}</strong> {bp.compoundingFormula.treatmentTitle} {bp.compoundingFormula.volume && `(${bp.compoundingFormula.volume})`}
+                            </div>
+                          )}
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
                             {bp.peptideSynergy?.name && (
@@ -6822,7 +6832,7 @@ export default function DoctorPublicPortalClient({
                                   border: '1px solid #c7d2fe'
                                 }}
                               >
-                                🧬 Peptide: {bp.peptideSynergy.name}
+                                💊 {lang === 'es' ? 'Péptido' : 'Peptide'}: {bp.peptideSynergy.name}
                               </span>
                             )}
                             {bp.dermocosmeticSynergy?.name && (
@@ -6849,7 +6859,7 @@ export default function DoctorPublicPortalClient({
                                 }}
                                 title={lang === 'es' ? 'Explorar protocolo y productos Colway® en Recomendaciones' : 'Explore Colway® protocols and products in Recommendations'}
                               >
-                                <span>🌿 Colway: {bp.dermocosmeticSynergy.name}</span>
+                                <span>🌿 Colway®: {bp.dermocosmeticSynergy.name}</span>
                                 <ArrowUpRight size={10} style={{ opacity: 0.7 }} />
                               </span>
                             )}
@@ -6865,7 +6875,7 @@ export default function DoctorPublicPortalClient({
                                   border: '1px solid #bae6fd'
                                 }}
                               >
-                                🔬 Lab: {bp.diagnosticSynergy.name}
+                                🔬 {lang === 'es' ? 'Diagnóstico' : 'Lab Diagnostic'}: {bp.diagnosticSynergy.name}
                               </span>
                             )}
                           </div>
@@ -6918,7 +6928,7 @@ export default function DoctorPublicPortalClient({
                             }}
                           >
                             <Plus size={12} />
-                            <span>+ Customize & Prescribe</span>
+                            <span>Customize & Prescribe</span>
                           </button>
                         </div>
                       </div>

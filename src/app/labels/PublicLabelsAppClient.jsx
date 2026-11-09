@@ -307,6 +307,7 @@ export default function PublicLabelsAppClient({
   const [copiedShareType, setCopiedShareType] = useState(null);
   const [showImport, setShowImport] = useState(false);
   const [showRefillModal, setShowRefillModal] = useState(false);
+  const [refillPresetPartIndex, setRefillPresetPartIndex] = useState(null);
   const [isApprovingRx, setIsApprovingRx] = useState(false);
   const [isBatchApproving, setIsBatchApproving] = useState(false);
   const [labeledMap, setLabeledMap] = useState(getInitialLabeledSet);
@@ -385,6 +386,13 @@ export default function PublicLabelsAppClient({
       document.removeEventListener('visibilitychange', handleWindowFocus);
     };
   }, []);
+
+  // Auto-open Refill Modal when accessed via ?refill=true parameter
+  useEffect(() => {
+    if (searchParams?.get('refill') === 'true' && currentRx) {
+      setShowRefillModal(true);
+    }
+  }, [searchParams, currentRx]);
 
   const searchBoxRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -1366,7 +1374,10 @@ export default function PublicLabelsAppClient({
             setSearchOpen(true);
             searchInputRef.current?.focus();
           }}
-          onOpenRefillModal={() => setShowRefillModal(true)}
+          onOpenRefillModal={(partIdx) => {
+            setRefillPresetPartIndex(typeof partIdx === 'number' ? partIdx : labelIndex);
+            setShowRefillModal(true);
+          }}
         />
       )}
 
@@ -1930,13 +1941,17 @@ export default function PublicLabelsAppClient({
       {/* Refill / Duplicate Prescription Modal — selective parts inclusion & next refill scheduling */}
       <PrescriptionRefillModal
         isOpen={showRefillModal}
-        onClose={() => setShowRefillModal(false)}
+        onClose={() => {
+          setShowRefillModal(false);
+          setRefillPresetPartIndex(null);
+        }}
         currentRx={currentRx}
         labels={labels}
         cleanRxCode={cleanRxCode || activeCode}
         patientName={patientName}
         docName={docName}
         isEs={isEs}
+        presetPartIndex={refillPresetPartIndex}
         onRefillCreated={(newRefillData) => {
           if (newRefillData?.newCode) {
             handleSelectOrAddPatient(newRefillData.newCode, true);

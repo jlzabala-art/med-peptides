@@ -69,62 +69,13 @@ export default function LabelsMetaStrip({
               <ExternalLink size={11} style={{ opacity: 0.6 }} />
             </a>
           </div>
-          <a
-            href={`/rx/${encodeURIComponent(cleanRxCode)}?edit=true`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pls-meta-action-btn"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '3px',
-              padding: '2px 7px',
-              borderRadius: '4px',
-              background: '#f1f5f9',
-              border: '1px solid #cbd5e1',
-              color: '#1a73e8',
-              fontWeight: 700,
-              fontSize: '0.68rem',
-              textDecoration: 'none',
-              marginLeft: '4px'
-            }}
-            title={isEs ? `Editar prescripción #${cleanRxCode}` : `Edit prescription #${cleanRxCode}`}
-            aria-label={isEs ? 'Editar prescripción' : 'Edit prescription'}
-          >
-            <Edit3 size={11} color="#1a73e8" />
-            <span>{isEs ? 'Editar Rx' : 'Edit Rx'}</span>
-          </a>
-          {onOpenRefillModal && (
-            <button
-              type="button"
-              onClick={onOpenRefillModal}
-              className="pls-meta-action-btn"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-                padding: '2px 7px',
-                borderRadius: '4px',
-                background: '#ecfdf5',
-                border: '1px solid #a7f3d0',
-                color: '#059669',
-                fontWeight: 700,
-                fontSize: '0.68rem',
-                cursor: 'pointer',
-                marginLeft: '4px'
-              }}
-              title={isEs ? `Duplicar / Renovar prescripción #${cleanRxCode}` : `Refill / Duplicate prescription #${cleanRxCode}`}
-            >
-              <Repeat size={11} color="#059669" />
-              <span>{isEs ? 'Refill Rx' : 'Refill Rx'}</span>
-            </button>
-          )}
           <button
             type="button"
             className="pls-meta-action-btn"
             onClick={onCopyCode}
             title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
             aria-label={isEs ? 'Copiar código' : 'Copy code'}
+            style={{ marginLeft: '4px' }}
           >
             {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
           </button>
@@ -219,6 +170,82 @@ export default function LabelsMetaStrip({
               <span>{isCurrentLabeled ? (isEs ? 'Etiquetado ✓' : 'Labeled ✓') : (isEs ? 'Marcar Etiquetado' : 'Mark Labeled')}</span>
             </button>
           )}
+
+          {/* ── Google Cloud Console Master Resource Operations Toolbar (Rule #9 & #26) ── */}
+          <div className="pls-meta-primary-ops" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '6px' }}>
+            <span style={{ height: '16px', width: '1px', background: '#cbd5e1', display: 'inline-block', margin: '0 2px' }} />
+
+            {/* 1. Edit Current Prescription */}
+            <a
+              href={`/rx/${encodeURIComponent(cleanRxCode)}?edit=true`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pls-gcp-btn-edit"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                height: '24px',
+                padding: '0 9px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#1a73e8',
+                fontWeight: 750,
+                fontSize: '0.71rem',
+                textDecoration: 'none',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                transition: 'all 0.15s ease'
+              }}
+              title={isEs ? `Modificar fórmula, instrucciones o notas de la prescripción actual #${cleanRxCode}` : `Modify formula, posology or instructions for #${cleanRxCode}`}
+            >
+              <Edit3 size={11} color="#1a73e8" />
+              <span>{isEs ? 'Editar Prescripción' : 'Edit Rx'}</span>
+            </a>
+
+            {/* 2. Issue Refill / Duplicate Cycle (Preset to active part if multi-part) */}
+            {onOpenRefillModal && (
+              <button
+                type="button"
+                onClick={() => onOpenRefillModal(labelIndex)}
+                className="pls-gcp-btn-refill"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  height: '24px',
+                  padding: '0 9px',
+                  borderRadius: '4px',
+                  background: '#ecfdf5',
+                  border: '1.5px solid #10b981',
+                  color: '#065f46',
+                  fontWeight: 800,
+                  fontSize: '0.71rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(16,185,129,0.15)',
+                  transition: 'all 0.15s ease'
+                }}
+                title={isEs
+                  ? `Renovar ciclo de tratamiento / Duplicar prescripción (Prefijada en Parte ${labelIndex + 1})`
+                  : `Issue new refill / Renew treatment cycle (Preset to Part ${labelIndex + 1})`}
+              >
+                <Repeat size={11} color="#059669" />
+                <span>{isEs ? 'Renovar / Refill' : 'Issue Refill'}</span>
+                {labels.length > 1 && (
+                  <span style={{
+                    background: '#d1fae5',
+                    color: '#047857',
+                    fontSize: '0.62rem',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    fontWeight: 800
+                  }}>
+                    P{labelIndex + 1}
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Formula Parts Switcher (Part 1 / Part 2) with Clean GCP Segmented Layout */}

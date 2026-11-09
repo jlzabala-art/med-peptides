@@ -107,6 +107,7 @@ export default function DataTable({
   lang = 'en',                // Optional language ('en' | 'es') for pagination chrome
   groupByKey = null,          // Optional field name to render category group headers (e.g. 'categoryKey')
   renderGroupHeader = null,   // Optional (groupValue, firstRow, groupCount) => ReactNode
+  stickyTopOffset = 0,        // Optional offset in px when page has a sticky navbar
 }) {
   const { is, can } = useRoleAccess();
   // ── Mobile detection ──────────────────────────────────────────────────────
@@ -917,7 +918,7 @@ export default function DataTable({
       {(someSelected || allSelected || isAllMatchingSelected) && (
         <div style={{
           position: 'sticky',
-          top: 0,
+          top: stickyTopOffset || 0,
           zIndex: 15,
           backgroundColor: isAllMatchingSelected ? '#ecfdf5' : '#f0fdf4',
           borderBottom: isAllMatchingSelected ? '2px solid #059669' : '2px solid #0f766e',
@@ -965,7 +966,7 @@ export default function DataTable({
               backgroundColor: 'var(--color-bg-surface)',
               borderBottom: '2px solid var(--color-border)',
               position: 'sticky',
-              top: 0,
+              top: stickyTopOffset || 0,
               zIndex: 10,
             }}
           >
