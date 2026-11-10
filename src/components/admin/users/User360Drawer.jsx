@@ -162,12 +162,12 @@ export default function User360Drawer({
   }, [activeTab, user]);
 
   const CATALOG_COLLECTIONS = [
-    { id: 'peptides', label: 'Lotusland Peptides (Lyophilized Vials)', supplierId: 'supplier-lotusland', catalogueFilter: 'peptides', icon: '🧪' },
-    { id: 'ultraperson', label: 'UltraPerson™ Precision Nutraceuticals', supplierId: 'supplier-pharmapolis', catalogueFilter: 'ultraperson', icon: '🌿' },
-    { id: 'colway', label: 'Colway® Bioactive Tropocollagen', supplierId: 'supplier-colway', catalogueFilter: 'colway', icon: '✨' },
-    { id: 'bloodo', label: 'Bloodo™ CE-IVDR Capillary Diagnostics', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
-    { id: 'eterna', label: 'ETERNA® Multi-Omics Longevity', supplierId: 'supplier-eternadx', catalogueFilter: 'eterna', icon: '🧬' },
-    { id: 'all', label: 'Master Portfolio (All Clinical Lines)', supplierId: null, catalogueFilter: 'all', icon: '🏛️' }
+    { id: 'peptides', title: 'Lotusland Peptides', subtitle: 'Péptidos Liofilizados en Vial', label: 'Lotusland Peptides', supplierId: 'supplier-lotusland', catalogueFilter: 'peptides', icon: '🧪' },
+    { id: 'ultraperson', title: 'UltraPerson™', subtitle: 'Nutracéuticos de Precisión Clínica', label: 'UltraPerson™', supplierId: 'supplier-pharmapolis', catalogueFilter: 'ultraperson', icon: '🌿' },
+    { id: 'colway', title: 'Colway® Tropocollagen', subtitle: 'Colágeno Bioactivo Nativo', label: 'Colway® Tropocollagen', supplierId: 'supplier-colway', catalogueFilter: 'colway', icon: '✨' },
+    { id: 'bloodo', title: 'Bloodo™ Diagnostics', subtitle: 'Pruebas Capilares CE-IVDR', label: 'Bloodo™ Diagnostics', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
+    { id: 'eterna', title: 'ETERNA® Longevity', subtitle: 'Multi-Ómica y Reloj Epigenético', label: 'ETERNA® Longevity', supplierId: 'supplier-eternadx', catalogueFilter: 'eterna', icon: '🧬' },
+    { id: 'all', title: 'Master Portfolio', subtitle: 'Todas las Líneas Clínicas B2B', label: 'Master Portfolio', supplierId: null, catalogueFilter: 'all', icon: '🏛️' }
   ];
 
   const handleShareCatalog = async (actionType = 'whatsapp') => {
@@ -313,64 +313,86 @@ export default function User360Drawer({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
-              padding: '4px 9px',
+              gap: '6px',
+              padding: '4px 10px',
               borderRadius: '6px',
-              border: '1px solid #fed7aa',
-              background: '#fff7ed',
-              color: '#c2410c',
+              border: '1px solid #cbd5e1',
+              background: '#f8fafc',
+              color: '#475569',
               fontSize: '0.74rem',
-              fontWeight: 700,
-              cursor: 'pointer'
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
-            title="Act as this user (simulate session)"
+            title={`Iniciar sesión como ${formData.displayName || 'este usuario'} para ver la plataforma tal y como la ve él`}
           >
-            <Eye size={13} />
-            <span>Simulate User</span>
+            <Eye size={13} color="#64748b" />
+            <span>Ver portal como {formData.displayName?.split(' ')[0] || 'usuario'}</span>
           </button>
         )
       }
       footer={
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              padding: '0.55rem 1.1rem',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#ffffff',
-              fontSize: '0.84rem',
-              fontWeight: 600,
-              color: '#475569',
-              cursor: 'pointer'
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            style={{
-              padding: '0.55rem 1.4rem',
-              borderRadius: '8px',
-              backgroundColor: 'var(--primary, #003666)',
-              border: 'none',
-              color: '#ffffff',
-              fontSize: '0.84rem',
-              fontWeight: 700,
-              cursor: isSaving ? 'not-allowed' : 'pointer',
-              opacity: isSaving ? 0.7 : 1,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Check size={15} />
-            <span>{isSaving ? 'Saving...' : 'Save User 360°'}</span>
-          </button>
-        </div>
+        activeTab === 'catalogs' ? (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '0.55rem 1.4rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                fontSize: '0.84rem',
+                fontWeight: 600,
+                color: '#475569',
+                cursor: 'pointer'
+              }}
+            >
+              Cerrar Panel
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '0.55rem 1.1rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                fontSize: '0.84rem',
+                fontWeight: 600,
+                color: '#475569',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              style={{
+                padding: '0.55rem 1.4rem',
+                borderRadius: '8px',
+                backgroundColor: 'var(--primary, #003666)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '0.84rem',
+                fontWeight: 700,
+                cursor: isSaving ? 'not-allowed' : 'pointer',
+                opacity: isSaving ? 0.7 : 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <Check size={15} />
+              <span>{isSaving ? 'Saving...' : 'Save User 360°'}</span>
+            </button>
+          </div>
+        )
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -782,52 +804,110 @@ export default function User360Drawer({
           </div>
         )}
 
-        {/* Tab 5: Shared Catalogs & Client Activity */}
+        {/* Tab 5: Shared Catalogs & Client Activity (Google Cloud Console Standard) */}
         {activeTab === 'catalogs' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Action Banner: Multi-Catalog B2B Sharing */}
+            {/* Card: Portfolio Selection & Direct Action */}
             <div style={{
-              padding: '1rem',
-              borderRadius: '8px',
+              padding: '1.1rem',
+              borderRadius: '10px',
               backgroundColor: '#ffffff',
               border: '1px solid #dadce0',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.08)',
+              boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.85rem'
+              gap: '1rem'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#202124', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <MessageSquare size={16} color="#1a73e8" /> Multi-Portfolio B2B Document Sharing
-                  </div>
-                  <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '0.2rem', lineHeight: 1.4 }}>
-                    Generate tracked short links (<code style={{ color: '#1a73e8', fontWeight: 600 }}>/c/CAT-...</code>) with tailored wholesale double-margins and automated order attribution.
-                  </div>
+              <div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <MessageSquare size={16} color="#1a73e8" />
+                  <span>Seleccionar Catálogo B2B para Compartir</span>
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '0.2rem' }}>
+                  Elige la línea comercial que deseas enviar a <strong>{formData.displayName || 'este usuario'}</strong> con atribución y margen automático.
+                </div>
+              </div>
+
+              {/* Multi-Catalog Cards Grid (2 lines per card, no truncation) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '8px' }}>
+                {CATALOG_COLLECTIONS.map(col => {
+                  const isSelected = selectedCatalogCollection === col.id;
+                  return (
+                    <button
+                      key={col.id}
+                      type="button"
+                      onClick={() => setSelectedCatalogCollection(col.id)}
+                      style={{
+                        padding: '0.7rem 0.85rem',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '10px',
+                        border: isSelected ? '2px solid #1a73e8' : '1px solid #cbd5e1',
+                        backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
+                        transition: 'all 0.15s ease',
+                        textAlign: 'left',
+                        boxShadow: isSelected ? '0 1px 4px rgba(26,115,232,0.15)' : 'none'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>{col.icon}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isSelected ? '#1d4ed8' : '#0f172a' }}>
+                          {col.title}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: isSelected ? '#3b82f6' : '#64748b', marginTop: '2px', lineHeight: 1.25 }}>
+                          {col.subtitle}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Direct Action Box: Ready Link & 1-Click Sharing */}
+              <div style={{
+                padding: '0.85rem 1rem',
+                backgroundColor: '#f8fafc',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '220px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#475569' }}>
+                    Línea activa: <strong style={{ color: '#0f172a' }}>{CATALOG_COLLECTIONS.find(c => c.id === selectedCatalogCollection)?.title || 'Lotusland Peptides'}</strong>
+                  </span>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#dcfce7', padding: '2px 8px', borderRadius: '4px' }}>
+                    Margen: +{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}%
+                  </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button
                     type="button"
                     onClick={() => handleShareCatalog('copy')}
                     disabled={isSharingLotus}
                     style={{
-                      padding: '0.5rem 0.85rem',
+                      padding: '0.55rem 1rem',
                       backgroundColor: '#ffffff',
                       color: '#1a73e8',
-                      border: '1px solid #dadce0',
+                      border: '1.5px solid #1a73e8',
                       borderRadius: '6px',
                       fontSize: '0.82rem',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       cursor: isSharingLotus ? 'not-allowed' : 'pointer',
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                      flexShrink: 0
+                      gap: '6px',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                     }}
                   >
-                    <Copy size={14} /> {isSharingLotus ? 'Generating...' : 'Copy Link'}
+                    <Copy size={14} />
+                    <span>{isSharingLotus ? 'Generando...' : 'Copiar Enlace'}</span>
                   </button>
 
                   <button
@@ -835,80 +915,24 @@ export default function User360Drawer({
                     onClick={() => handleShareCatalog('whatsapp')}
                     disabled={isSharingLotus}
                     style={{
-                      padding: '0.5rem 1rem',
-                      backgroundColor: '#1a73e8',
+                      padding: '0.55rem 1.15rem',
+                      backgroundColor: '#16a34a',
                       color: '#ffffff',
                       border: 'none',
                       borderRadius: '6px',
                       fontSize: '0.82rem',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       cursor: isSharingLotus ? 'not-allowed' : 'pointer',
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
-                      boxShadow: '0 1px 3px rgba(26,115,232,0.3)',
-                      flexShrink: 0
+                      gap: '6px',
+                      boxShadow: '0 1px 3px rgba(22,163,74,0.3)'
                     }}
                   >
-                    <Send size={14} /> {isSharingLotus ? 'Generating...' : 'Share via WhatsApp'}
+                    <Send size={14} />
+                    <span>{isSharingLotus ? 'Generando...' : 'Enviar por WhatsApp'}</span>
                   </button>
                 </div>
-              </div>
-
-              {/* Multi-Catalog Collection Selector */}
-              <div>
-                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#3c4043', display: 'block', marginBottom: '0.35rem' }}>
-                  Select Clinical Portfolio to Share:
-                </span>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '6px' }}>
-                  {CATALOG_COLLECTIONS.map(col => {
-                    const isSelected = selectedCatalogCollection === col.id;
-                    return (
-                      <button
-                        key={col.id}
-                        type="button"
-                        onClick={() => setSelectedCatalogCollection(col.id)}
-                        style={{
-                          padding: '0.45rem 0.75rem',
-                          borderRadius: '6px',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
-                          backgroundColor: isSelected ? '#e8f0fe' : '#ffffff',
-                          color: isSelected ? '#1967d2' : '#3c4043',
-                          transition: 'all 0.15s ease',
-                          textAlign: 'left'
-                        }}
-                      >
-                        <span style={{ fontSize: '0.9rem' }}>{col.icon}</span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{col.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Double Margin Summary Bar */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                flexWrap: 'wrap',
-                padding: '0.5rem 0.75rem',
-                backgroundColor: '#f8fafc',
-                borderRadius: '6px',
-                border: '1px solid #e8eaed',
-                fontSize: '0.74rem',
-                color: '#5f6368'
-              }}>
-                <span>Recipient: <strong style={{ color: '#202124' }}>{formData.displayName || 'Valued Partner'}</strong></span>
-                <span>Atlas Margin: <strong style={{ color: '#1a73e8' }}>+{formData.atlasMarkupPct}%</strong></span>
-                <span>Wholesaler Margin: <strong style={{ color: '#137333' }}>+{formData.wholesalerMarginPct}%</strong></span>
-                <span>Effective Combined: <strong style={{ color: '#1e293b' }}>+{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}%</strong></span>
               </div>
             </div>
 
