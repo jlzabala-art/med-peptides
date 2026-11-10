@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   FileText,
   Clock,
@@ -22,6 +23,39 @@ export default function UserPayablesPopover({ user }) {
   const [statementData, setStatementData] = useState(null);
   const [copiedType, setCopiedType] = useState(null); // 'quicklink' | 'discreet'
   const popoverRef = useRef(null);
+  const buttonRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const updateCoords = () => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const POPOVER_WIDTH = 340;
+    let left = rect.left;
+    if (left + POPOVER_WIDTH > window.innerWidth - 16) {
+      left = Math.max(16, window.innerWidth - POPOVER_WIDTH - 16);
+    }
+    setCoords({
+      top: rect.bottom + 6,
+      left: Math.max(8, left)
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updateCoords();
+      window.addEventListener('scroll', updateCoords, true);
+      window.addEventListener('resize', updateCoords);
+      return () => {
+        window.removeEventListener('scroll', updateCoords, true);
+        window.removeEventListener('resize', updateCoords);
+      };
+    }
+  }, [isOpen]);
 
   // Determine token or identifier
   const token = user?.payablesToken || (user?.email === 'jia9156@gmail.com' || (user?.companyName || '').includes('Health Source') ? 'HSC-PAY-ZN1TU5Q6' : (user?.payablesSlug || user?.id));
@@ -147,21 +181,22 @@ export default function UserPayablesPopover({ user }) {
         )}
       </button>
 
-      {/* Popover Dropdown Container */}
-      {isOpen && (
+      {/* Popover Dropdown Container (Portaled to document.body to escape table overflow:hidden) */}
+      {mounted && isOpen && createPortal(
         <div
+          ref={popoverRef}
           onClick={(e) => e.stopPropagation()}
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 6px)',
-            left: 0,
+            position: 'fixed',
+            top: `${coords.top}px`,
+            left: `${coords.left}px`,
             width: '360px',
-            maxWidth: '90vw',
+            maxWidth: 'calc(100vw - 24px)',
             backgroundColor: '#ffffff',
             borderRadius: '10px',
             boxShadow: '0 12px 32px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0,0,0,0.06)',
-            border: '1px solid #e2e8f0',
-            zIndex: 1050,
+            border: '1px solid #cbd5e1',
+            zIndex: 99999,
             overflow: 'hidden',
             fontFamily: 'system-ui, -apple-system, sans-serif'
           }}
@@ -385,7 +420,8 @@ export default function UserPayablesPopover({ user }) {
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

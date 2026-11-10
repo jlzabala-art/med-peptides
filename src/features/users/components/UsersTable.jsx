@@ -613,11 +613,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                 <UserSharedCatalogsPopover
                   user={u}
                   onOpenShareDrawer={(targetUser) => {
-                    setShareDrawerConfig({
-                      user: targetUser,
-                      shareUrl: 'https://www.atlashealth-services.com/catalog',
-                      docType: 'catalog'
-                    });
+                    setUser360InitialTab('catalogs');
+                    setDetailsUser(targetUser);
                   }}
                 />
                 <UserPayablesPopover user={u} />
@@ -769,20 +766,23 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           });
         }
 
-        // Share Clinical Product Catalog
+        // Multi-Portfolio Catalog Sharing Drawer
         actions.push({
-          label: 'Share Catalog',
+          label: 'Catálogos B2B',
           icon: Share2,
+          tooltip: 'Ver y generar enlaces de catálogos compartidos',
           onClick: (e) => {
             e.stopPropagation();
-            handleQuickShareCatalog(u, 'products');
+            setUser360InitialTab('catalogs');
+            setDetailsUser(u);
           }
         });
 
-        // Share Clinical Protocols Directory
+        // Direct Clinical Protocol Sharing
         actions.push({
           label: 'Share Protocols',
           icon: BookOpen,
+          tooltip: 'Enviar directorio de protocolos clínicos',
           onClick: (e) => {
             e.stopPropagation();
             handleQuickShareCatalog(u, 'protocols');

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Share2,
   Clock,
@@ -30,6 +31,39 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const popoverRef = useRef(null);
+  const buttonRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const updateCoords = () => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const POPOVER_WIDTH = 360;
+    let left = rect.left;
+    if (left + POPOVER_WIDTH > window.innerWidth - 16) {
+      left = Math.max(16, window.innerWidth - POPOVER_WIDTH - 16);
+    }
+    setCoords({
+      top: rect.bottom + 6,
+      left: Math.max(8, left)
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updateCoords();
+      window.addEventListener('scroll', updateCoords, true);
+      window.addEventListener('resize', updateCoords);
+      return () => {
+        window.removeEventListener('scroll', updateCoords, true);
+        window.removeEventListener('resize', updateCoords);
+      };
+    }
+  }, [isOpen]);
 
   // Link generation form state
   const [genRef, setGenRef] = useState('distributor'); // 'distributor' | 'clinic'
@@ -194,10 +228,12 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
     <div style={{ position: 'relative', display: 'inline-block' }} ref={popoverRef}>
       {/* Trigger Button — Intelligent GCP Telemetry Micro-Badge */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           triggerHaptic('light');
+          updateCoords();
           setIsOpen(!isOpen);
         }}
         title={badgeTitle}
@@ -223,20 +259,22 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
         <span>{badgeText}</span>
       </button>
 
-      {/* Popover Menu */}
-      {isOpen && (
+      {/* Popover Menu (Portaled to document.body to escape table overflow:hidden) */}
+      {mounted && isOpen && createPortal(
         <div
+          ref={popoverRef}
           onClick={(e) => e.stopPropagation()}
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 6px)',
-            right: 0,
+            position: 'fixed',
+            top: `${coords.top}px`,
+            left: `${coords.left}px`,
             width: '360px',
+            maxWidth: 'calc(100vw - 24px)',
             background: '#ffffff',
             borderRadius: '12px',
-            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.04)',
+            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.04)',
             border: '1px solid #cbd5e1',
-            zIndex: 1000,
+            zIndex: 99999,
             overflow: 'hidden',
             animation: 'fadeIn 0.15s ease-out'
           }}
@@ -820,7 +858,8 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
               Close
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
