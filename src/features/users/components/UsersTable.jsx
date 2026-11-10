@@ -366,12 +366,22 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
         ? `Hello ${fullName}, here is the Official Clinical Protocols and Dosing Directory:\n\n🔗 ${shortUrl}\n\nPlease let me know if you have any questions.`
         : `Hello ${fullName}, here is the Official Clinical Formulations and Products Catalog:\n\n🔗 ${shortUrl}\n\nPlease let me know if you need any assistance with orders.`;
 
+      // Always copy shortUrl to clipboard so the link is immediately available
+      try {
+        await navigator.clipboard.writeText(shortUrl);
+      } catch (clipErr) {
+        console.warn('Clipboard write prevented by browser permissions:', clipErr);
+      }
+
       if (cleanPhone) {
-        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-        toast.success(`WhatsApp opened for ${fullName} with link: ${shortUrl}`);
+        const win = window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+          toast.success(`Enlace copiado al portapapeles (${shortUrl})`);
+        } else {
+          toast.success(`WhatsApp abierto y enlace copiado para ${fullName}`);
+        }
       } else {
-        await navigator.clipboard.writeText(msg);
-        toast.success(`Catalog link copied to clipboard (${shortUrl})`);
+        toast.success(`Enlace de protocolos copiado al portapapeles: ${shortUrl}`);
       }
     } catch (err) {
       toast.dismiss(toastId);
