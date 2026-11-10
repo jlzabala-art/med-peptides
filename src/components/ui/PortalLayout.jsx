@@ -938,8 +938,10 @@ export default function PortalLayout({
             )}
           </div>
 
-          <PublicPortalsTopBarMenu iconBtnStyle={iconBtnStyle} />
-          <WorkspaceTopBarControl iconBtnStyle={iconBtnStyle} />
+          <div className="hide-on-mobile" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <PublicPortalsTopBarMenu iconBtnStyle={iconBtnStyle} />
+            <WorkspaceTopBarControl iconBtnStyle={iconBtnStyle} />
+          </div>
 
           <style>{`
             @keyframes gcpGeminiGlow {

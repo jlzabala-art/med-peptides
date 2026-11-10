@@ -618,34 +618,38 @@ export default function GlobalSearchBar({
                     e.stopPropagation();
                     setIsMobileSheetOpen(true);
                   }}
+                  aria-label="Open filter options"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.35rem',
-                    padding: '0.35rem 0.65rem',
-                    borderRadius: '8px',
-                    backgroundColor: hasActiveFilters ? '#eff6ff' : '#f1f5f9',
-                    border: hasActiveFilters ? '1px solid #93c5fd' : '1px solid #cbd5e1',
-                    color: hasActiveFilters ? '#1e40af' : '#475569',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
+                    padding: '0 0.65rem',
+                    height: '36px',
+                    borderRadius: '4px',
+                    backgroundColor: hasActiveFilters ? '#e8f0fe' : '#ffffff',
+                    border: hasActiveFilters ? '1px solid #1a73e8' : '1px solid #dadce0',
+                    color: hasActiveFilters ? '#1a73e8' : '#3c4043',
+                    fontSize: '0.78rem',
+                    fontWeight: 500,
                     cursor: 'pointer',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
                   }}
                 >
-                  <Filter size={13} color={hasActiveFilters ? '#1e40af' : '#64748b'} />
+                  <Filter size={13} color={hasActiveFilters ? '#1a73e8' : '#5f6368'} />
                   <span>Filters</span>
                   {filters.length > 0 && (
                     <span style={{
-                      background: '#2563eb',
-                      color: '#fff',
+                      background: '#1a73e8',
+                      color: '#ffffff',
                       borderRadius: '50%',
-                      width: '18px',
-                      height: '18px',
+                      width: '16px',
+                      height: '16px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '0.65rem'
+                      fontSize: '0.62rem',
+                      fontWeight: 700
                     }}>
                       {filters.length}
                     </span>

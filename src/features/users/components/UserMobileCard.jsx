@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   ChevronDown, ChevronUp, Check, X, MoreVertical, 
   Eye, Sparkles, Stethoscope, Edit, UserCheck, ShieldCheck,
-  Building2, Phone, Calendar, Mail, Share2, Pencil
+  Building2, Phone, Calendar, Mail, Share2, Pencil, FileText
 } from 'lucide-react';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import CopyableId from '../../../components/ui/CopyableId';
@@ -100,21 +100,21 @@ export default function UserMobileCard({
       className={`mobile-record-card${isSelected ? ' mobile-record-card--selected' : ''}`}
       style={{
         background: '#ffffff',
-        border: isSelected ? '1.5px solid #2563eb' : '1px solid #e2e8f0',
-        borderRadius: '12px',
-        boxShadow: isSelected ? '0 0 0 2px rgba(37,99,235,0.1)' : '0 1px 3px rgba(0,0,0,0.04)',
+        border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+        borderRadius: '8px',
+        boxShadow: isSelected ? '0 0 0 2px rgba(26,115,232,0.15)' : '0 1px 2px rgba(60,64,67,0.08)',
         marginBottom: '0.65rem',
         overflow: 'visible',
         transition: 'all 0.15s ease'
       }}
     >
-      {/* ── HEADER: Identity & Primary Status ──────────────────────────── */}
+      {/* ── HEADER: Identity & Primary Status (Google Cloud UX) ──────────── */}
       <div
         style={{
-          padding: '0.85rem 1rem 0.65rem',
+          padding: '0.75rem 0.85rem 0.5rem',
           display: 'flex',
           alignItems: 'flex-start',
-          gap: '0.75rem',
+          gap: '0.65rem',
           cursor: 'pointer'
         }}
         onClick={() => onRowClick?.(u)}
@@ -122,8 +122,8 @@ export default function UserMobileCard({
         {/* Avatar */}
         <div
           style={{
-            width: '38px',
-            height: '38px',
+            width: '36px',
+            height: '36px',
             borderRadius: '50%',
             backgroundColor: avatarTheme.bg,
             color: avatarTheme.color,
@@ -131,8 +131,9 @@ export default function UserMobileCard({
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 700,
-            fontSize: '0.9rem',
-            flexShrink: 0
+            fontSize: '0.85rem',
+            flexShrink: 0,
+            border: '1px solid rgba(0,0,0,0.06)'
           }}
         >
           {initial}
@@ -140,8 +141,8 @@ export default function UserMobileCard({
 
         {/* Identity Details */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', wordBreak: 'break-word', lineHeight: 1.25 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#202124', wordBreak: 'break-word', lineHeight: 1.25 }}>
               {name}
             </span>
             {(u.zohoContactId || u.biginContactId || u.zohoSyncStatus === 'synced') && (
@@ -152,10 +153,10 @@ export default function UserMobileCard({
                   fontSize: '0.62rem',
                   fontWeight: 700,
                   padding: '1px 5px',
-                  borderRadius: '4px',
-                  backgroundColor: '#f0fdf4',
-                  color: '#166534',
-                  border: '1px solid #bbf7d0',
+                  borderRadius: '3px',
+                  backgroundColor: '#e6f4ea',
+                  color: '#137333',
+                  border: '1px solid #ceead6',
                   flexShrink: 0
                 }}
               >
@@ -164,11 +165,26 @@ export default function UserMobileCard({
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.2rem', minWidth: 0 }}>
-            <span style={{ fontSize: '0.78rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.15rem', minWidth: 0 }}>
+            <span style={{ fontSize: '0.76rem', color: '#5f6368', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '210px' }}>
               {email}
             </span>
             <CopyableId value={u.id} iconOnly={true} />
+          </div>
+
+          {/* Telemetry metadata chips attached to identity (Google Cloud standard) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '0.35rem', flexWrap: 'wrap' }}>
+            <UserSharedCatalogsPopover
+              user={u}
+              onOpenShareDrawer={(targetUser) => {
+                setShareDrawerConfig?.({
+                  user: targetUser,
+                  shareUrl: 'https://www.atlashealth-services.com/catalog',
+                  docType: 'catalog'
+                });
+              }}
+            />
+            <UserPayablesPopover user={u} />
           </div>
         </div>
 
@@ -186,127 +202,116 @@ export default function UserMobileCard({
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              padding: '6px',
-              color: '#64748b',
+              padding: '4px',
+              color: '#5f6368',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}
           >
-            {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            {expanded ? <ChevronUp size={17} /> : <ChevronDown size={17} />}
           </button>
         </div>
       </div>
 
-      {/* ── METADATA GRID: Role & Pricing Channel ─────────────────────── */}
+      {/* ── METADATA GRID: Role & Pricing Channel (Clean Google Cloud Resource Attributes) ── */}
       <div
         style={{
-          padding: '0.55rem 1rem 0.65rem',
+          padding: '0.45rem 0.85rem',
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)',
-          gap: '0.65rem',
-          borderTop: '1px solid #f1f5f9',
-          background: '#fafbfc'
+          gap: '0.75rem',
+          borderTop: '1px solid #f1f3f4',
+          background: '#ffffff'
         }}
       >
         {/* Role Field */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: 0 }}>
-          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, position: 'relative' }}>
+          <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Role
           </span>
-          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '2px 8px',
-              borderRadius: '6px',
-              background: '#f1f5f9',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              color: '#334155',
-              width: '100%',
-              justifyContent: 'space-between'
-            }}>
-              <RoleBadge role={role} />
-              <Pencil size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
-            </div>
-            <select
-              value={role}
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => handleInlineRoleChange?.(u.id, e.target.value)}
-              title="Change role"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                opacity: 0,
-                cursor: 'pointer',
-                width: '100%',
-                height: '100%'
-              }}
-            >
-              <option value="admin">Admin</option>
-              <option value="doctor">Doctor</option>
-              <option value="clinic">Clinic</option>
-              <option value="wholesaler">Wholesaler</option>
-              <option value="patient">Patient</option>
-              <option value="guest">Guest</option>
-            </select>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '0.78rem',
+            fontWeight: 500,
+            color: '#202124',
+            cursor: 'pointer'
+          }}>
+            <RoleBadge role={role} />
+            <ChevronDown size={11} color="#5f6368" style={{ flexShrink: 0 }} />
           </div>
+          <select
+            value={role}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => handleInlineRoleChange?.(u.id, e.target.value)}
+            title="Change role"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0,
+              cursor: 'pointer',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <option value="admin">Admin</option>
+            <option value="doctor">Doctor</option>
+            <option value="clinic">Clinic</option>
+            <option value="wholesaler">Wholesaler</option>
+            <option value="patient">Patient</option>
+            <option value="guest">Guest</option>
+          </select>
         </div>
 
         {/* Pricing Channel Field */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: 0 }}>
-          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, position: 'relative' }}>
+          <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Pricing Channel
           </span>
-          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '2px 8px',
-              borderRadius: '6px',
-              background: '#eff6ff',
-              border: '1px solid #bfdbfe',
-              fontSize: '0.76rem',
-              fontWeight: 600,
-              color: '#1d4ed8',
-              width: '100%',
-              justifyContent: 'space-between'
-            }}>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {channelLabels[currentChannel] || currentChannel}
-                {Boolean(u.customDiscountPct || u.priceMarkupPercent) && (
-                  <strong style={{ marginLeft: '3px', color: '#0369a1' }}>
-                    ({u.customDiscountPct || u.priceMarkupPercent}%)
-                  </strong>
-                )}
-              </span>
-              <Pencil size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
-            </div>
-            <select
-              value={currentChannel}
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => handleInlinePricingChange?.(u.id, e.target.value)}
-              title="Change pricing channel"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                opacity: 0,
-                cursor: 'pointer',
-                width: '100%',
-                height: '100%'
-              }}
-            >
-              <option value="wholesale">Wholesale B2B</option>
-              <option value="clinic">Clinic / Doctor</option>
-              <option value="retail">Retail Public</option>
-              <option value="cost">Acquisition Cost</option>
-            </select>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '0.76rem',
+            fontWeight: 500,
+            color: '#1a73e8',
+            cursor: 'pointer',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {channelLabels[currentChannel] || currentChannel}
+              {Boolean(u.customDiscountPct || u.priceMarkupPercent) && (
+                <strong style={{ marginLeft: '3px', color: '#174ea6' }}>
+                  ({u.customDiscountPct || u.priceMarkupPercent}%)
+                </strong>
+              )}
+            </span>
+            <ChevronDown size={11} color="#5f6368" style={{ flexShrink: 0 }} />
           </div>
+          <select
+            value={currentChannel}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => handleInlinePricingChange?.(u.id, e.target.value)}
+            title="Change pricing channel"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0,
+              cursor: 'pointer',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <option value="wholesale">Wholesale B2B</option>
+            <option value="clinic">Clinic / Doctor</option>
+            <option value="retail">Retail Public</option>
+            <option value="cost">Acquisition Cost</option>
+          </select>
         </div>
       </div>
 
@@ -356,21 +361,21 @@ export default function UserMobileCard({
       {!readOnly && (
         <div
           style={{
-            padding: '0.55rem 0.85rem',
-            borderTop: '1px solid #f1f5f9',
+            padding: '0.45rem 0.85rem',
+            borderTop: '1px solid #f1f3f4',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '0.5rem',
             background: '#ffffff',
-            borderRadius: '0 0 12px 12px',
+            borderRadius: '0 0 8px 8px',
             position: 'relative'
           }}
         >
           {/* Left / Primary Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1 }}>
             {/* If user is Pending Approval -> prominent GCP Approve button */}
-            {!u.isArchived && canApprove && !u.approved && (
+            {!u.isArchived && canApprove && !u.approved ? (
               <button
                 type="button"
                 onClick={(e) => {
@@ -381,65 +386,74 @@ export default function UserMobileCard({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  background: '#16a34a',
+                  padding: '4px 12px',
+                  borderRadius: '4px',
+                  background: '#188038',
                   color: '#ffffff',
                   border: 'none',
                   fontSize: '0.76rem',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(22, 163, 74, 0.2)',
-                  minHeight: '34px'
+                  minHeight: '32px'
                 }}
               >
                 <Check size={13} />
                 <span>Approve Access</span>
               </button>
-            )}
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAiTargetUser?.(u);
+                  }}
+                  title="AI Outreach and Consultation"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    background: '#f8f9fa',
+                    color: '#1a73e8',
+                    border: '1px solid #dadce0',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    minHeight: '32px'
+                  }}
+                >
+                  <Sparkles size={12} color="#1a73e8" />
+                  <span>AI Outreach</span>
+                </button>
 
-            {/* Shared Catalogs Popover Action */}
-            <UserSharedCatalogsPopover
-              user={u}
-              onOpenShareDrawer={(targetUser) => {
-                setShareDrawerConfig?.({
-                  user: targetUser,
-                  shareUrl: 'https://www.atlashealth-services.com/catalog',
-                  docType: 'catalog'
-                });
-              }}
-            />
-
-            {/* Payables & B2B Statement Action for Wholesalers/Suppliers */}
-            <UserPayablesPopover user={u} />
-
-            {/* AI Outreach Action (visible if active or compact) */}
-            {u.approved && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setAiTargetUser?.(u);
-                }}
-                title="AI Outreach and Consultation"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  background: '#faf5ff',
-                  color: '#7c3aed',
-                  border: '1px solid #e9d5ff',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  minHeight: '34px'
-                }}
-              >
-                <Sparkles size={12} />
-                <span>AI Outreach</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDetailsUser?.(u);
+                  }}
+                  title="View User 360°"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    background: '#ffffff',
+                    color: '#3c4043',
+                    border: '1px solid #dadce0',
+                    fontSize: '0.74rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    minHeight: '32px'
+                  }}
+                >
+                  <Eye size={13} color="#5f6368" />
+                  <span>User 360°</span>
+                </button>
+              </>
             )}
           </div>
 
@@ -453,15 +467,15 @@ export default function UserMobileCard({
               }}
               title="More actions"
               style={{
-                width: '34px',
-                height: '34px',
+                width: '32px',
+                height: '32px',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0',
-                background: menuOpen ? '#f1f5f9' : '#ffffff',
-                color: '#475569',
+                borderRadius: '4px',
+                border: '1px solid #dadce0',
+                background: menuOpen ? '#f1f3f4' : '#ffffff',
+                color: '#5f6368',
                 cursor: 'pointer'
               }}
             >
@@ -532,6 +546,68 @@ export default function UserMobileCard({
                     <Edit size={16} style={{ color: '#0284c7' }} />
                     <span>Edit Profile 360°</span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setShareDrawerConfig?.({
+                        user: u,
+                        shareUrl: 'https://www.atlashealth-services.com/catalog',
+                        docType: 'catalog'
+                      });
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      width: '100%',
+                      padding: '12px 14px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      background: '#f8fafc',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: '#0f172a',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <Share2 size={16} style={{ color: '#0284c7' }} />
+                    <span>Catálogos B2B & Tracking</span>
+                  </button>
+
+                  {(u.role === 'wholesaler' || u.role === 'supplier' || u.roles?.includes('wholesaler') || u.payablesToken || (u.companyName || '').toLowerCase().includes('health source')) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        const token = u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id));
+                        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+                        const userEmail = (u.email || u.contactEmail || '').toLowerCase().trim();
+                        const url = `${origin}/b2b/payables/${token}${userEmail ? `?email=${encodeURIComponent(userEmail)}&quicklink=verified` : ''}`;
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        width: '100%',
+                        padding: '12px 14px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        background: '#f8fafc',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <FileText size={16} style={{ color: '#c2410c' }} />
+                      <span>Payables Statement (Bills)</span>
+                    </button>
+                  )}
 
                   {!u.isArchived && (
                     <button
