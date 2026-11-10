@@ -883,13 +883,13 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               onClick={() => handleAddToCart && handleAddToCart(row, '1x')}
               style={{
                 width: '100%',
-                minHeight: '44px',
+                minHeight: '40px',
                 fontSize: '0.80rem',
                 fontWeight: 700,
                 background: '#ffffff',
                 border: '1.5px solid #dadce0',
                 borderRadius: '6px',
-                color: '#3c4043',
+                color: '#1e293b',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -899,7 +899,7 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               }}
             >
               <Plus size={14} />
-              <span>1 Vial</span>
+              <span>+ 1 Vial</span>
             </button>
           )}
         </div>
@@ -982,7 +982,7 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               onClick={() => handleAddToCart && handleAddToCart(row, '10x')}
               style={{
                 width: '100%',
-                minHeight: '44px',
+                minHeight: '40px',
                 fontSize: '0.80rem',
                 fontWeight: 700,
                 background: '#1a73e8',
@@ -1251,7 +1251,7 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               </div>
             </div>
 
-            {/* Google Cloud UX Full-Width Primary Action Button (No duplicate specs) */}
+            {/* Google Cloud UX Contextual AI Action Strip */}
             <div style={{
               padding: '8px 12px',
               borderTop: '1px solid #f1f3f4',
@@ -1264,24 +1264,27 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
                   width: '100%',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  background: '#1a73e8',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '8px 12px',
-                  borderRadius: '4px',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  background: '#f0f9ff',
+                  color: '#0369a1',
+                  border: '1px solid #bae6fd',
+                  padding: '8px 14px',
+                  borderRadius: '6px',
                   fontSize: '0.76rem',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  minHeight: '36px',
-                  boxShadow: '0 1px 2px rgba(26,115,232,0.25)',
+                  minHeight: '38px',
+                  boxShadow: '0 1px 2px rgba(2,132,199,0.08)',
                   transition: 'all 0.15s ease'
                 }}
                 title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
               >
-                <Sparkles size={14} color="#ffffff" />
-                <span>{isEs ? 'Calcular Pauta con Atlas AI' : 'Calculate Posology with Atlas AI'}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={14} color="#0284c7" />
+                  <span>{isEs ? 'Calcular Pauta y Reconstitución con Atlas AI' : 'Calculate Posology & Reconstitution with Atlas AI'}</span>
+                </div>
+                <ArrowRight size={13} color="#0284c7" />
               </button>
             </div>
           </div>
@@ -2811,20 +2814,20 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '6px',
-                  background: '#1a73e8',
-                  color: '#ffffff',
-                  border: 'none',
+                  background: '#f0f9ff',
+                  color: '#0369a1',
+                  border: '1px solid #bae6fd',
                   padding: '7px 12px',
                   borderRadius: '4px',
                   fontSize: '0.74rem',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(26,115,232,0.2)',
+                  boxShadow: '0 1px 2px rgba(2,132,199,0.06)',
                   transition: 'all 0.15s ease'
                 }}
                 title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
               >
-                <Sparkles size={13} color="#ffffff" />
+                <Sparkles size={13} color="#0284c7" />
                 <span>{isEs ? 'Calcular Pauta con Atlas AI' : 'Calculate Posology with Atlas AI'}</span>
               </button>
 
@@ -3101,9 +3104,9 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
-                  background: '#1a73e8',
-                  color: '#ffffff',
-                  border: 'none',
+                  background: isAtlasAiOpen ? '#e0f2fe' : 'rgba(26, 115, 232, 0.08)',
+                  color: '#1a73e8',
+                  border: '1px solid rgba(26, 115, 232, 0.25)',
                   padding: '0 10px',
                   borderRadius: '6px',
                   fontSize: '0.78rem',

@@ -27,7 +27,12 @@ import {
   Copy,
   ExternalLink,
   ShieldAlert,
-  Percent
+  Percent,
+  Minus,
+  Maximize2,
+  Minimize2,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
@@ -153,6 +158,31 @@ export default function AtlasAiCopilotDrawer({
   const [loading, setLoading] = useState(false);
   const [addedItemCode, setAddedItemCode] = useState(null);
 
+  // Google Cloud Console UX States: Responsive Companion vs Mobile BottomSheet
+  const [isMobile, setIsMobile] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [mobileHeightMode, setMobileHeightMode] = useState('half'); // 'half' (48vh) or 'full' (92vh)
+
+  // Track viewport width for responsive mobile vs desktop GCP mode
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // When drawer transitions from closed to open, restore minimized state
+  const prevOpenRef = useRef(isOpen);
+  useEffect(() => {
+    if (isOpen && !prevOpenRef.current) {
+      setIsMinimized(false);
+    }
+    prevOpenRef.current = isOpen;
+  }, [isOpen]);
+
   // Reset greeting or initialize context product on session open
   useEffect(() => {
     if (!isOpen) return;
@@ -220,7 +250,7 @@ export default function AtlasAiCopilotDrawer({
     const mots = findCatalogItem('mots-c');
 
     let replyText = '';
-    let actionProducts = [];
+    const actionProducts = [];
 
     if (qLower.includes('reconstitut') || (qLower.includes('tirzepatide') && (qLower.includes('syringe') || qLower.includes('dose') || qLower.includes('dosis') || qLower.includes('math')))) {
       replyText = isEs
@@ -349,35 +379,121 @@ export default function AtlasAiCopilotDrawer({
     setMessages([{ role: 'assistant', text: initialGreeting, actionProducts: [] }]);
   };
 
+  // Google Cloud Console UX: Minimized floating companion pill
+  if (isMinimized) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setIsMinimized(false)}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsMinimized(false)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 1300,
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          color: '#ffffff',
+          padding: '10px 18px',
+          borderRadius: '30px',
+          boxShadow: '0 8px 24px rgba(15, 23, 42, 0.35)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          cursor: 'pointer',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          animation: 'fadeIn 0.2s ease-out'
+        }}
+        title={isEs ? 'Restaurar Atlas Clinical AI' : 'Restore Atlas Clinical AI'}
+      >
+        <div style={{
+          width: '28px',
+          height: '28px',
+          borderRadius: '7px',
+          background: 'linear-gradient(135deg, #1a73e8 0%, #0d9488 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 2px 8px rgba(26, 115, 232, 0.4)'
+        }}>
+          <Sparkles size={15} color="#ffffff" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '0.84rem', fontWeight: 800, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+            Atlas Clinical AI
+          </span>
+          <span style={{ fontSize: '0.66rem', color: '#2dd4bf', fontWeight: 600 }}>
+            {messages.length > 1
+              ? (isEs ? `${messages.length - 1} mensajes` : `${messages.length - 1} messages`)
+              : (isEs ? 'Listo para asistir' : 'Ready to assist')}
+          </span>
+        </div>
+        <ChevronUp size={16} color="#94a3b8" />
+      </div>
+    );
+  }
+
   return (
     <div
       role="dialog"
-      aria-modal="true"
+      aria-modal={isMobile ? 'true' : 'false'}
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(4px)',
+        background: isMobile ? 'rgba(15, 23, 42, 0.35)' : 'transparent',
+        pointerEvents: isMobile ? 'auto' : 'none', // Desktop allows interacting with background table!
         zIndex: 1200,
         display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'flex-end',
         animation: 'fadeIn 0.2s ease-out'
       }}
-      onClick={onClose}
+      onClick={isMobile ? onClose : undefined}
     >
       <div
         style={{
+          pointerEvents: 'auto', // Drawer captures interaction
           background: '#ffffff',
           width: '100%',
-          maxWidth: '560px',
-          height: '100%',
+          maxWidth: isMobile ? '100%' : (isExpanded ? '740px' : '440px'),
+          height: isMobile ? (mobileHeightMode === 'full' ? '92vh' : '48vh') : '100%',
+          marginTop: isMobile ? 'auto' : 0,
+          borderRadius: isMobile ? '16px 16px 0 0' : '0',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '-6px 0 28px rgba(0, 0, 0, 0.22)',
-          position: 'relative'
+          boxShadow: isMobile
+            ? '0 -6px 28px rgba(0, 0, 0, 0.22)'
+            : '-4px 0 24px rgba(15, 23, 42, 0.12)',
+          borderLeft: isMobile ? 'none' : '1px solid #dadce0',
+          position: 'relative',
+          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          overflow: 'hidden'
         }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Mobile Drag Handle Bar */}
+        {isMobile && (
+          <div
+            onClick={() => setMobileHeightMode(prev => prev === 'half' ? 'full' : 'half')}
+            style={{
+              width: '100%',
+              padding: '8px 0 4px',
+              background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+              display: 'flex',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+            title={isEs ? 'Deslizar para expandir o contraer' : 'Tap to expand or collapse'}
+          >
+            <div style={{
+              width: '40px',
+              height: '4px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.35)'
+            }} />
+          </div>
+        )}
+
         {/* ── Top AppBar (Google Cloud Console Dark Theme Pattern) ── */}
         <div style={{
           padding: '12px 16px',
@@ -426,7 +542,64 @@ export default function AtlasAiCopilotDrawer({
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {/* Minimize Control */}
+            <button
+              type="button"
+              onClick={() => setIsMinimized(true)}
+              title={isEs ? 'Minimizar a píldora flotante' : 'Minimize to floating pill'}
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                borderRadius: '6px',
+                padding: '6px',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Minus size={14} />
+            </button>
+
+            {/* Expand / Maximize Control */}
+            <button
+              type="button"
+              onClick={() => {
+                if (isMobile) {
+                  setMobileHeightMode(prev => prev === 'half' ? 'full' : 'half');
+                } else {
+                  setIsExpanded(prev => !prev);
+                }
+              }}
+              title={
+                isMobile
+                  ? (mobileHeightMode === 'full' ? 'Reducir a mitad' : 'Expandir a pantalla completa')
+                  : (isExpanded ? 'Restaurar ancho estándar' : 'Expandir ancho completo (740px)')
+              }
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                borderRadius: '6px',
+                padding: '6px',
+                color: (isExpanded || mobileHeightMode === 'full') ? '#2dd4bf' : '#94a3b8',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {(isExpanded || (isMobile && mobileHeightMode === 'full')) ? (
+                <Minimize2 size={14} />
+              ) : (
+                <Maximize2 size={14} />
+              )}
+            </button>
+
+            {/* Clear History */}
             {messages.length > 1 && (
               <button
                 type="button"
@@ -447,9 +620,12 @@ export default function AtlasAiCopilotDrawer({
                 <RotateCcw size={14} />
               </button>
             )}
+
+            {/* Close Button */}
             <button
               type="button"
               onClick={onClose}
+              title={isEs ? 'Cerrar' : 'Close'}
               style={{
                 background: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -463,7 +639,7 @@ export default function AtlasAiCopilotDrawer({
                 transition: 'background 0.15s ease'
               }}
             >
-              <X size={16} />
+              <X size={15} />
             </button>
           </div>
         </div>
@@ -725,7 +901,15 @@ export default function AtlasAiCopilotDrawer({
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'nowrap',
+                    overflowX: 'auto',
+                    gap: '8px',
+                    padding: '2px 2px 8px',
+                    scrollbarWidth: 'none',
+                    WebkitOverflowScrolling: 'touch'
+                  }}>
                     {SUGGESTED_INQUIRIES.map((item, qIdx) => {
                       const IconComponent = item.icon;
                       return (
@@ -745,6 +929,8 @@ export default function AtlasAiCopilotDrawer({
                             fontSize: '0.74rem',
                             fontWeight: 650,
                             color: '#3c4043',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
                             transition: 'all 0.15s ease',
                             boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
                           }}
