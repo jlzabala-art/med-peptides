@@ -37,6 +37,10 @@ const LABESP_SUPPLIER_DATA = {
     email: 'ceo@labesp.com',
     phone: '+34 966 526 395'
   },
+  contacts: [
+    { name: 'Mauricio Sanchis', role: 'CEO', email: 'ceo@labesp.com' },
+    { name: 'Marisa', role: 'OEM Private Label & Quotations', email: 'info@labesp.com' }
+  ],
   zohoOrg: 'Brand Business Health S.L. (721887857)',
   zohoOrgId: '721887857',
   zohoVendorNumber: 'VEN-3',
@@ -55,7 +59,8 @@ const LABESP_SUPPLIER_DATA = {
   ],
   catalogLinks: {
     dermpeelsPdf: 'https://labesp.com/wp-content/uploads/2026/11/LABESP-DERMPEELS.pdf',
-    packagingPdf: 'https://labesp.com/wp-content/uploads/2024/04/Cat-Packaging-2024.pdf'
+    packagingPdf: 'https://labesp.com/wp-content/uploads/2024/04/Cat-Packaging-2024.pdf',
+    oemChoiceLineUrl: 'https://labesp.com/cat-choice-line/'
   },
   notes: 'Spanish OEM/ODM manufacturer of professional chemical peels (Dermpeels line) and in-stock pharmaceutical primary packaging (Airless, Droppers, Vials, Jars). Master record in Zoho Books VEN-3.',
   updatedAt: new Date().toISOString()
@@ -115,7 +120,7 @@ const DERMPEEL_PRODUCTS = [
         presentation: 'bottle',
         presentationName: '50 mL Amber Dropper Bottle',
         fill_volume: '50 mL',
-        costPrice: 28.50,
+        costPrice: 8.12,
         currency: 'EUR',
         price_aed: 135,
         patientPrice_aed: 270,
@@ -197,7 +202,7 @@ const DERMPEEL_PRODUCTS = [
         presentation: 'bottle',
         presentationName: '50 mL Amber UV-Dropper Bottle',
         fill_volume: '50 mL',
-        costPrice: 36.00,
+        costPrice: 12.60,
         currency: 'EUR',
         price_aed: 170,
         patientPrice_aed: 340,
@@ -274,7 +279,7 @@ const DERMPEEL_PRODUCTS = [
         presentation: 'bottle',
         presentationName: '50 mL Amber Dropper Bottle',
         fill_volume: '50 mL',
-        costPrice: 26.00,
+        costPrice: 8.50,
         currency: 'EUR',
         price_aed: 125,
         patientPrice_aed: 250,
@@ -354,7 +359,7 @@ const DERMPEEL_PRODUCTS = [
         presentation: 'bottle',
         presentationName: '50 mL Amber UV-Dropper Bottle',
         fill_volume: '50 mL',
-        costPrice: 34.00,
+        costPrice: 11.02,
         currency: 'EUR',
         price_aed: 160,
         patientPrice_aed: 320,
@@ -433,7 +438,7 @@ const DERMPEEL_PRODUCTS = [
         presentation: 'bottle',
         presentationName: '50 mL Amber Dropper Bottle',
         fill_volume: '50 mL',
-        costPrice: 27.50,
+        costPrice: 7.00,
         currency: 'EUR',
         price_aed: 130,
         patientPrice_aed: 260,
@@ -511,7 +516,7 @@ const DERMPEEL_PRODUCTS = [
         presentation: 'bottle',
         presentationName: '50 mL Amber Dropper Bottle',
         fill_volume: '50 mL',
-        costPrice: 28.00,
+        costPrice: 8.56,
         currency: 'EUR',
         price_aed: 130,
         patientPrice_aed: 260,
