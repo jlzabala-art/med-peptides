@@ -1,6 +1,142 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 
+async function getZohoAccessToken() {
+  try {
+    const snapV2 = await adminDb.collection('zoho_token_cache').doc('access_token_v2').get();
+    const dataV2 = snapV2.exists ? snapV2.data() : null;
+    const now = Date.now();
+    if (dataV2?.access_token && (dataV2.expires_at || 0) > now + 300000) {
+      return dataV2.access_token;
+    }
+
+    const snapV1 = await adminDb.collection('zoho_token_cache').doc('access_token').get();
+    const dataV1 = snapV1.exists ? snapV1.data() : null;
+
+    const refreshToken = dataV2?.refresh_token || dataV1?.refresh_token || "1000.92de7a39c249f4560c93ad0b6a0c7108.64db63b339313d85510db1266b7a3c82";
+    const clientId = "1000.NAHBCCYF5C9B3Z3YS2URAQ4TG7O76V";
+    const clientSecret = "088b65381f7f30dfb801ff3f901e1af2c7adef11e5";
+
+    const params = new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken
+    });
+
+    const resp = await fetch("https://accounts.zoho.com/oauth/v2/token", { method: "POST", body: params });
+    const refreshed = await resp.json();
+    if (refreshed.access_token) {
+      const expiresAt = now + ((refreshed.expires_in || 3600) * 1000);
+      const updatePayload = {
+        access_token: refreshed.access_token,
+        refresh_token: refreshToken,
+        expires_at: expiresAt,
+        updated_at: now
+      };
+      await adminDb.collection('zoho_token_cache').doc('access_token_v2').set(updatePayload, { merge: true });
+      return refreshed.access_token;
+    }
+    return dataV2?.access_token || dataV1?.access_token;
+  } catch (err) {
+    console.warn('Could not refresh Zoho token:', err.message);
+    return null;
+  }
+}
+
+async function autoSyncZohoBills(wholesalerId, force = false) {
+  try {
+    const parentRef = adminDb.collection('payables_statements').doc(wholesalerId);
+    const parentSnap = await parentRef.get();
+    const parentData = parentSnap.exists ? parentSnap.data() : {};
+
+    const lastSyncTime = parentData.lastAutomatedSync ? new Date(parentData.lastAutomatedSync).getTime() : 0;
+    const now = Date.now();
+    // Cache for 3 minutes unless force === true
+    if (!force && (now - lastSyncTime < 180000)) {
+      return;
+    }
+
+    const token = await getZohoAccessToken();
+    if (!token) return;
+
+    const vendorId = parentData.vendorId || '1183263000022818023';
+    const orgId = parentData.zohoOrgId || '662274409';
+
+    const url = `https://www.zohoapis.com/books/v3/bills?organization_id=${orgId}&vendor_id=${vendorId}&per_page=200`;
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Zoho-oauthtoken ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const json = await res.json();
+    if (json.code !== 0 || !json.bills) return;
+
+    const rawBills = json.bills;
+    const batch = adminDb.batch();
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.slice(0, 10);
+
+    let totalPending = 0;
+    let totalPaid = 0;
+    let openCount = 0;
+    let paidCount = 0;
+    let overdueCount = 0;
+
+    for (const b of rawBills) {
+      const balance = Number(b.balance || 0);
+      const total = Number(b.total || 0);
+      const st = String(b.status || '').toLowerCase().trim();
+      const isPaid = (st === 'paid') || (balance === 0);
+
+      if (isPaid) {
+        totalPaid += total;
+        paidCount++;
+      } else {
+        totalPending += balance > 0 ? balance : total;
+        openCount++;
+        if (b.due_date && b.due_date <= todayStr) {
+          overdueCount++;
+        }
+      }
+
+      const billDocRef = parentRef.collection('bills').doc(b.bill_id);
+      batch.set(billDocRef, {
+        id: b.bill_id,
+        billId: b.bill_id,
+        billNumber: b.bill_number || '',
+        referenceNumber: b.reference_number || '',
+        date: b.date || '',
+        dueDate: b.due_date || '',
+        status: isPaid ? 'paid' : st,
+        total,
+        balance,
+        currency: b.currency_code || 'AED',
+        billType: 'Zoho Books Bill',
+        sourceInvoiceNumber: b.reference_number || '',
+        updatedAt: nowIso
+      }, { merge: true });
+    }
+
+    batch.set(parentRef, {
+      lastAutomatedSync: nowIso,
+      openBillsCount: openCount,
+      paidBillsCount: paidCount,
+      overdueBillsCount: overdueCount,
+      totalPendingAmount: Math.round(totalPending * 100) / 100,
+      totalPaidAmount: Math.round(totalPaid * 100) / 100,
+      currency: 'AED',
+      updatedAt: nowIso
+    }, { merge: true });
+
+    await batch.commit();
+  } catch (err) {
+    console.warn('Auto-sync from Zoho Books skipped/failed:', err.message);
+  }
+}
+
 /**
  * GET /api/payables/[token]
  * ─────────────────────────────────────────────────────────────────────────────
@@ -46,6 +182,10 @@ export async function GET(request, { params }) {
     if (!shareDoc || !wholesalerId) {
       return NextResponse.json({ error: 'Payables statement not found or expired' }, { status: 404 });
     }
+
+    const { searchParams } = new URL(request.url);
+    const forceSync = searchParams.get('refresh') === 'true';
+    await autoSyncZohoBills(wholesalerId, forceSync);
 
     // 2. Fetch bills from Firestore payables cache
     const billsSnap = await adminDb
@@ -96,7 +236,6 @@ export async function GET(request, { params }) {
     const formalPaymentTermsDetail = shareDoc.paymentTermsDetail || 'Payable within first 10 calendar days of the month following client payment (Paid-When-Paid Terms)';
 
     // 3. Verification check (QuickLink email validation or admin token)
-    const { searchParams } = new URL(request.url);
     const providedEmail = (searchParams.get('email') || '').trim().toLowerCase();
     const quicklink = searchParams.get('quicklink');
     const authHeader = request.headers.get('authorization');
@@ -154,7 +293,7 @@ export async function GET(request, { params }) {
           total: null,
           balance: null,
           currency: shareDoc.currency || 'AED',
-          status: 'locked'
+          status: (b.dueDate && b.dueDate <= todayStr) ? 'overdue' : (b.status || 'pending')
         })),
         paidBills: []
       });

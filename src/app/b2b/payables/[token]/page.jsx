@@ -211,26 +211,37 @@ export default function PayablesStatementPage() {
 
   const isQuicklinkVerified = searchParams?.get('quicklink') === 'verified';
 
-  const fetchStatement = async (emailOverride) => {
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const fetchStatement = async (emailOverride, forceRefresh = false) => {
     if (!token) return;
-    setLoading(true);
+    if (forceRefresh) setIsSyncing(true);
+    else setLoading(true);
     setError(null);
     try {
       const emailToUse = emailOverride !== undefined ? emailOverride : (activeEmail || authUser?.email || '');
       const qParams = new URLSearchParams();
       if (emailToUse) qParams.set('email', emailToUse);
       if (isQuicklinkVerified) qParams.set('quicklink', 'verified');
+      if (forceRefresh) qParams.set('refresh', 'true');
 
       const url = `/api/payables/${token}${qParams.toString() ? `?${qParams.toString()}` : ''}`;
       const res = await fetch(url);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to load payables statement');
       setData(json);
+      if (forceRefresh) {
+        toast.success(lang === 'es' ? 'Sincronizado con Zoho Books' : 'Synced with Zoho Books');
+      }
     } catch (err) {
       console.error('Error fetching statement:', err);
       setError(err.message);
+      if (forceRefresh) {
+        toast.error(lang === 'es' ? 'Error al sincronizar con Zoho Books' : 'Sync with Zoho Books failed');
+      }
     } finally {
       setLoading(false);
+      setIsSyncing(false);
     }
   };
 
@@ -299,7 +310,7 @@ export default function PayablesStatementPage() {
     {
       key: 'billNumber',
       header: lang === 'es' ? 'N.º FACTURA' : 'BILL / INVOICE #',
-      width: '24%',
+      width: '20%',
       sortable: true,
       render: (bill) => {
         if (isLocked) {
@@ -328,7 +339,7 @@ export default function PayablesStatementPage() {
     {
       key: 'date',
       header: lang === 'es' ? 'FECHA' : 'ISSUE DATE',
-      width: '14%',
+      width: '12%',
       sortable: true,
       render: (bill) => (
         <span style={{ color: '#334155' }}>{bill.date || '—'}</span>
@@ -337,7 +348,7 @@ export default function PayablesStatementPage() {
     {
       key: 'dueDate',
       header: lang === 'es' ? 'VENCIMIENTO' : 'DUE DATE',
-      width: '14%',
+      width: '12%',
       sortable: true,
       render: (bill) => {
         const isPending = bill.status !== 'paid' && (Number(bill.balance || 0) > 0 || bill.status === 'locked');
@@ -351,7 +362,7 @@ export default function PayablesStatementPage() {
     {
       key: 'description',
       header: lang === 'es' ? 'CONCEPTO / REF. ORIGEN' : 'DESCRIPTION / SOURCE REF',
-      width: '24%',
+      width: '22%',
       render: (bill) => (
         <div>
           <div style={{ color: '#0f172a', fontWeight: 600 }}>
@@ -368,7 +379,7 @@ export default function PayablesStatementPage() {
     {
       key: 'total',
       header: lang === 'es' ? 'TOTAL' : 'TOTAL',
-      width: '12%',
+      width: '11%',
       align: 'right',
       sortable: true,
       render: (bill) => {
@@ -386,7 +397,7 @@ export default function PayablesStatementPage() {
     {
       key: 'balance',
       header: lang === 'es' ? 'SALDO PENDIENTE' : 'BALANCE DUE',
-      width: '12%',
+      width: '11%',
       align: 'right',
       sortable: true,
       render: (bill) => {
@@ -413,6 +424,25 @@ export default function PayablesStatementPage() {
             <CheckCircle2 size={13} /> {lang === 'es' ? 'Pagado' : 'Settled'}
           </span>
         );
+      }
+    },
+    {
+      key: 'status',
+      header: lang === 'es' ? 'ESTADO' : 'STATUS',
+      width: '12%',
+      align: 'center',
+      render: (bill) => {
+        const st = String(bill.status || '').toLowerCase().trim();
+        const isPaid = st === 'paid' || (Number(bill.balance || 0) === 0 && !isLocked);
+        const isOverdue = st === 'overdue';
+
+        if (isPaid) {
+          return <StatusBadge status="approved" customLabel={lang === 'es' ? 'Pagado' : 'Settled'} />;
+        }
+        if (isOverdue) {
+          return <StatusBadge status="error" customLabel={lang === 'es' ? 'Vencida' : 'Overdue'} />;
+        }
+        return <StatusBadge status="pending" customLabel={lang === 'es' ? 'Pendiente' : 'Pending'} />;
       }
     }
   ], [lang, isLocked]);
@@ -551,8 +581,30 @@ export default function PayablesStatementPage() {
               <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '4px' }}>
                 Vendor Account · {statement.vendorNumber}
               </span>
-              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                {lang === 'es' ? 'Última sincronización automática:' : 'Last automated sync:'} {new Date(kpis.lastAutomatedSync || Date.now()).toLocaleTimeString()} · Real-time Zoho Books
+              <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span>{lang === 'es' ? 'Última sincronización automática:' : 'Last automated sync:'} {new Date(kpis.lastAutomatedSync || Date.now()).toLocaleTimeString()} · Real-time Zoho Books</span>
+                <button
+                  type="button"
+                  onClick={() => fetchStatement(undefined, true)}
+                  disabled={isSyncing}
+                  style={{
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    borderRadius: '4px',
+                    padding: '1px 6px',
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    color: '#0284c7',
+                    cursor: isSyncing ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px'
+                  }}
+                  title={lang === 'es' ? 'Sincronizar ahora con Zoho Books' : 'Sync now with Zoho Books'}
+                >
+                  <Clock size={10} />
+                  <span>{isSyncing ? (lang === 'es' ? 'Sincronizando...' : 'Syncing...') : (lang === 'es' ? 'Sincronizar' : 'Sync')}</span>
+                </button>
               </span>
             </div>
 

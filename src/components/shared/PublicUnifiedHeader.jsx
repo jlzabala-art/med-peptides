@@ -200,21 +200,21 @@ export default function PublicUnifiedHeader({
     }
   };
 
-const CANONICAL_BASE_DOMAIN = 'https://www.atlashealth-services.com';
+  const CANONICAL_BASE_DOMAIN = 'https://www.atlashealth-services.com';
 
-function forceCanonicalDomain(urlOrPath) {
-  if (!urlOrPath) return CANONICAL_BASE_DOMAIN;
-  const str = String(urlOrPath).trim();
-  if (str.startsWith('/')) {
-    return `${CANONICAL_BASE_DOMAIN}${str}`;
+  function forceCanonicalDomain(urlOrPath) {
+    if (!urlOrPath) return CANONICAL_BASE_DOMAIN;
+    const str = String(urlOrPath).trim();
+    if (str.startsWith('/')) {
+      return `${CANONICAL_BASE_DOMAIN}${str}`;
+    }
+    try {
+      const parsed = new URL(str);
+      return `${CANONICAL_BASE_DOMAIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
+    } catch {
+      return `${CANONICAL_BASE_DOMAIN}/${str.replace(/^https?:\/\/[^/]+/, '').replace(/^\//, '')}`;
+    }
   }
-  try {
-    const parsed = new URL(str);
-    return `${CANONICAL_BASE_DOMAIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
-  } catch {
-    return `${CANONICAL_BASE_DOMAIN}/${str.replace(/^https?:\/\/[^/]+/, '').replace(/^\//, '')}`;
-  }
-}
 
   // Copy link (distinct behavior per entity: doctor portals, prescriptions, and product monographs)
   const handleCopyLink = async () => {
