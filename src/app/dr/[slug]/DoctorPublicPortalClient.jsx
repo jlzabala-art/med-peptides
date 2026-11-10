@@ -6317,11 +6317,12 @@ export default function DoctorPublicPortalClient({
                     }}
                     style={{
                       background: '#ffffff',
-                      border: filteredTasks.length > 0 ? '1.5px solid #f59e0b' : '1px solid #dadce0',
+                      border: '1px solid #dadce0',
+                      borderTop: filteredTasks.length > 0 ? '3px solid #f59e0b' : '1px solid #dadce0',
                       borderRadius: '8px',
                       padding: '14px 16px',
                       cursor: 'pointer',
-                      boxShadow: filteredTasks.length > 0 ? '0 2px 6px rgba(245,158,11,0.12)' : '0 1px 2px rgba(60,64,67,0.06)',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
@@ -6489,8 +6490,17 @@ export default function DoctorPublicPortalClient({
                                 {taskBadge.label}
                               </span>
                             </div>
-                            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {t.treatmentTitle || t.code} {t.pendingCount && t.pendingCount > 1 ? `· ${t.pendingCount} Formulations` : ''} {t.daysPending ? `· ${t.daysPending} days pending` : ''}
+                            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <span style={{ fontWeight: 600, color: '#334155' }}>
+                                {t.treatmentTitle || 'Compounded Prescription'}
+                              </span>
+                              {t.code && (
+                                <span style={{ fontFamily: 'monospace', fontSize: '0.67rem', color: '#1a73e8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 5px', borderRadius: '3px' }}>
+                                  #{t.code.length > 12 ? `${t.code.slice(0, 6)}...${t.code.slice(-4)}` : t.code}
+                                </span>
+                              )}
+                              {t.pendingCount && t.pendingCount > 1 ? <span>· {t.pendingCount} Formulations</span> : null}
+                              {t.daysPending ? <span>· {t.daysPending} days pending</span> : null}
                             </div>
                           </div>
 
@@ -6817,8 +6827,8 @@ export default function DoctorPublicPortalClient({
                               📦 {dispensingVehicle} {dispensingVolume ? `· ${dispensingVolume}` : ''}
                             </span>
                             {bp.compoundingFormula?.posology && (
-                              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                                • {bp.compoundingFormula.posology.length > 60 ? bp.compoundingFormula.posology.slice(0, 60) + '…' : bp.compoundingFormula.posology}
+                              <span style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.35 }}>
+                                • {bp.compoundingFormula.posology}
                               </span>
                             )}
                           </div>
@@ -6849,7 +6859,7 @@ export default function DoctorPublicPortalClient({
                           )}
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, flexWrap: 'wrap' }}>
                           <button
                             type="button"
                             onClick={() => {
@@ -6857,21 +6867,23 @@ export default function DoctorPublicPortalClient({
                               setActiveBlueprintDossier(bp);
                             }}
                             style={{
-                              padding: '6px 12px',
-                              borderRadius: '5px',
-                              border: '1px solid #cbd5e1',
+                              padding: '7px 12px',
+                              minHeight: '34px',
+                              borderRadius: '4px',
+                              border: '1px solid #dadce0',
                               background: '#ffffff',
-                              color: '#1e293b',
-                              fontSize: '0.72rem',
+                              color: '#3c4043',
+                              fontSize: '0.74rem',
                               fontWeight: 650,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '5px',
-                              whiteSpace: 'nowrap'
+                              whiteSpace: 'nowrap',
+                              transition: 'all 0.15s ease'
                             }}
                           >
-                            <FileText size={12} style={{ color: '#0284c7' }} />
+                            <FileText size={13} style={{ color: '#1a73e8' }} />
                             <span>View Details</span>
                           </button>
 
@@ -6879,12 +6891,13 @@ export default function DoctorPublicPortalClient({
                             type="button"
                             onClick={() => handlePrescribeSpecialtyBlueprint(bp)}
                             style={{
-                              padding: '6px 14px',
-                              borderRadius: '5px',
-                              border: 'none',
-                              background: '#003666',
+                              padding: '7px 14px',
+                              minHeight: '34px',
+                              borderRadius: '4px',
+                              border: '1px solid #1a73e8',
+                              background: '#1a73e8',
                               color: '#ffffff',
-                              fontSize: '0.72rem',
+                              fontSize: '0.74rem',
                               fontWeight: 700,
                               cursor: 'pointer',
                               display: 'inline-flex',
@@ -6892,10 +6905,11 @@ export default function DoctorPublicPortalClient({
                               justifyContent: 'center',
                               gap: '5px',
                               whiteSpace: 'nowrap',
-                              boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
+                              boxShadow: '0 1px 2px rgba(26,115,232,0.25)',
+                              transition: 'all 0.15s ease'
                             }}
                           >
-                            <Plus size={12} />
+                            <Plus size={13} />
                             <span>Customize & Prescribe</span>
                           </button>
                         </div>
@@ -9799,7 +9813,7 @@ export default function DoctorPublicPortalClient({
               handleReprescribeFormula(target);
             }
           },
-          ...(Boolean(isAdmin || activeRole === 'admin') ? [{
+          ...((isAdmin || activeRole === 'admin') ? [{
             label: 'Official Bottle Labels',
             icon: Tag,
             onClick: () => {

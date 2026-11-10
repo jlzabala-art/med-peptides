@@ -47,53 +47,60 @@ export default function DoctorContinueBanner({ slug, onResume }) {
         display: 'flex',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: 10,
-        padding: '10px 14px',
-        marginBottom: 16,
+        gap: 8,
+        padding: '6px 12px',
+        marginBottom: 14,
         border: '1px solid #d2e3fc',
         background: '#f1f6fe',
-        borderRadius: 8,
-        fontSize: 13,
+        borderRadius: 6,
+        fontSize: '0.76rem',
         color: '#202124'
       }}
     >
-      <History size={16} color="#003666" style={{ flexShrink: 0 }} />
-      <span style={{ flex: 1, minWidth: 180 }}>
+      <History size={14} color="#1a73e8" style={{ flexShrink: 0 }} />
+      <span style={{ flex: 1, minWidth: 160 }}>
         Continue where you left off: <strong>{LABELS[last]}</strong>
       </span>
       <button
         type="button"
         onClick={() => onResume(last)}
         style={{
-          minHeight: 44,
-          padding: '0 14px',
+          height: 30,
+          padding: '0 12px',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: 6,
+          gap: 5,
           border: 'none',
-          borderRadius: 6,
-          background: '#003666',
+          borderRadius: 4,
+          background: '#1a73e8',
           color: '#fff',
-          fontWeight: 600,
-          cursor: 'pointer'
+          fontSize: '0.74rem',
+          fontWeight: 650,
+          cursor: 'pointer',
+          boxShadow: '0 1px 2px rgba(26,115,232,0.2)'
         }}
       >
-        Resume <ArrowRight size={14} />
+        <span>Resume</span>
+        <ArrowRight size={12} />
       </button>
       <button
         type="button"
         aria-label="Dismiss"
         onClick={() => setDismissed(true)}
         style={{
-          minHeight: 44,
-          minWidth: 44,
+          height: 30,
+          width: 30,
           border: 'none',
           background: 'transparent',
           cursor: 'pointer',
-          color: '#5f6368'
+          color: '#5f6368',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 4
         }}
       >
-        <X size={16} />
+        <X size={15} />
       </button>
     </div>
   );
