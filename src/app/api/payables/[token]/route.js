@@ -268,6 +268,7 @@ export async function GET(request, { params }) {
           vendorNumberEUR: shareDoc.vendorNumberEUR || 'VEN-80',
           paymentTerms: formalPaymentTerms,
           paymentTermsDetail: formalPaymentTermsDetail,
+          accountingPhone: '+971 52 129 0471',
           status: 'protected'
         },
         kpis: {
@@ -318,7 +319,8 @@ export async function GET(request, { params }) {
         wholesalerName: shareDoc.wholesalerName || 'Health Source Canada',
         contactName: shareDoc.contactName || 'Dr. Jan Alomia',
         contactEmail: shareDoc.contactEmail || 'jia9156@gmail.com',
-        phone: shareDoc.phone || '+971-506167657',
+        phone: shareDoc.phone || '+971 52 129 0471',
+        accountingPhone: '+971 52 129 0471',
         currency: shareDoc.currency || 'AED',
         vendorNumber: shareDoc.vendorNumberAED || 'VEN-79',
         vendorNumberEUR: shareDoc.vendorNumberEUR || 'VEN-80',

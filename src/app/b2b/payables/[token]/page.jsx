@@ -33,6 +33,26 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import toast from 'react-hot-toast';
 
+function formatDateDisplay(dateStr, lang = 'en') {
+  if (!dateStr || dateStr === '—') return '—';
+  try {
+    const parts = String(dateStr).split('-');
+    if (parts.length === 3) {
+      const year = parts[0];
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const day = parts[2];
+      const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthsEs = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const monthList = lang === 'es' ? monthsEs : monthsEn;
+      const monthName = monthList[monthIdx] || parts[1];
+      return `${day} ${monthName} ${year}`;
+    }
+    return dateStr;
+  } catch {
+    return dateStr;
+  }
+}
+
 function PayableBillMobileCard({ row: bill, isLocked, lang }) {
   if (!bill) return null;
   const isPending = bill.status !== 'paid' && (bill.balance > 0 || bill.status === 'draft' || bill.status === 'locked');
@@ -142,10 +162,10 @@ function PayableBillMobileCard({ row: bill, isLocked, lang }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <Clock size={11} />
-          <span>Issue: <strong style={{ color: '#334155' }}>{bill.date || '—'}</strong></span>
+          <span>Issue: <strong style={{ color: '#334155' }}>{formatDateDisplay(bill.date, lang)}</strong></span>
         </div>
         <div>
-          <span>Due: <strong style={{ color: isPending ? '#b45309' : '#334155' }}>{bill.dueDate || '—'}</strong></span>
+          <span>Due: <strong style={{ color: isPending ? '#b45309' : '#334155' }}>{formatDateDisplay(bill.dueDate, lang)}</strong></span>
         </div>
       </div>
 
@@ -282,16 +302,21 @@ export default function PayablesStatementPage() {
 
   const handleCopyShareLink = () => {
     if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
+      // Security: Strip any sensitive query parameters (e.g. ?email=...) when copying share link
+      const cleanUrl = `${window.location.origin}/b2b/payables/${token}`;
+      navigator.clipboard.writeText(cleanUrl);
       setCopiedLink(true);
-      toast.success(lang === 'es' ? 'Enlace del extracto copiado' : 'Statement link copied to clipboard');
+      toast.success(lang === 'es' ? 'Enlace protegido copiado' : 'Protected statement link copied');
       setTimeout(() => setCopiedLink(false), 2500);
     }
   };
 
   const handleOpenWhatsApp = () => {
-    const msg = `Hello Atlas Accounts Team, regarding the commercial settlement statement: ${typeof window !== 'undefined' ? window.location.href : ''}`;
-    window.open(`https://wa.me/971506167657?text=${encodeURIComponent(msg)}`, '_blank');
+    const cleanUrl = typeof window !== 'undefined' ? `${window.location.origin}/b2b/payables/${token}` : '';
+    const msg = lang === 'es'
+      ? `Hola equipo de Contabilidad de Atlas, tengo una consulta sobre el extracto de liquidación comercial: ${cleanUrl}`
+      : `Hello Atlas Accounts Team, regarding the commercial settlement statement: ${cleanUrl}`;
+    window.open(`https://wa.me/971521290471?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   const currentBills = activeTab === 'pending' ? openBills : paidBills;
@@ -342,7 +367,7 @@ export default function PayablesStatementPage() {
       width: '12%',
       sortable: true,
       render: (bill) => (
-        <span style={{ color: '#334155' }}>{bill.date || '—'}</span>
+        <span style={{ color: '#334155' }}>{formatDateDisplay(bill.date, lang)}</span>
       )
     },
     {
@@ -354,7 +379,7 @@ export default function PayablesStatementPage() {
         const isPending = bill.status !== 'paid' && (Number(bill.balance || 0) > 0 || bill.status === 'locked');
         return (
           <span style={{ color: isPending ? '#b45309' : '#64748b', fontWeight: isPending ? 600 : 400 }}>
-            {bill.dueDate || '—'}
+            {formatDateDisplay(bill.dueDate, lang)}
           </span>
         );
       }
@@ -868,9 +893,10 @@ export default function PayablesStatementPage() {
           </div>
           <button
             onClick={handleOpenWhatsApp}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 14px', backgroundColor: '#003666', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 16px', backgroundColor: '#003666', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+            title="+971 52 129 0471 (WhatsApp Accounting Desk)"
           >
-            <MessageCircle size={14} /> {lang === 'es' ? 'Contactar Departamento Financiero' : 'Contact Accounts Department'}
+            <MessageCircle size={14} /> {lang === 'es' ? 'Contactar Departamento Financiero (+971 52 129 0471)' : 'Contact Accounts Department (+971 52 129 0471)'}
           </button>
         </div>
       </main>

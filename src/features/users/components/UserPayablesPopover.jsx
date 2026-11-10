@@ -87,7 +87,7 @@ export default function UserPayablesPopover({ user }) {
 
   const handleWhatsApp = (e) => {
     if (e) e.stopPropagation();
-    const phone = (user?.phone || user?.mobile || '971506167657').replace(/[^0-9]/g, '');
+    const phone = (user?.phone || user?.mobile || '971521290471').replace(/[^0-9]/g, '');
     const msg = `Hello ${user?.firstName || user?.fullName || 'Valued Partner'}, here is the official commercial settlement statement link from Atlas Health Services: ${quicklinkUrl}`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
