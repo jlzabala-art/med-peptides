@@ -49,6 +49,7 @@ import UserMobileCard from './UserMobileCard';
 import UniversalShareDrawer from '../../../components/ui/UniversalShareDrawer';
 import { EMAILJS_CONFIG } from '@/config/emailjs';
 import { approveUserRoleAction } from '../../../actions/adminActions';
+import { updateUserRoleAction, updateUserPricingChannelAction } from '../../../actions/usersActions';
 import { normalizeRole, CANONICAL_ROLES, ROLE_METADATA } from '../../../constants/roles';
 import ReassignPhysicianModal from '../../../components/admin/patients/ReassignPhysicianModal';
 
@@ -127,6 +128,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   const [originFilter, setOriginFilter] = useState('all');
   const [kpiScope, setKpiScope] = useState('filtered'); // 'filtered' | 'global' (Golden Rule #22)
   const [showAllKpis, setShowAllKpis] = useState(false);
+  const [optimisticOverrides, setOptimisticOverrides] = useState({});
 
   // Build whereConditions for real pagination
   const whereConditions = useMemo(() => {
@@ -172,7 +174,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   }, [deepLinkStatus]);
 
   const filteredUsers = useMemo(() => {
-    let source = users || [];
+    let rawSource = users || [];
+    let source = rawSource.map(u => ({ ...u, ...(optimisticOverrides[u.id] || {}) }));
 
     if (!searchTerm || !searchTerm.trim()) {
       // no search
@@ -189,7 +192,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       });
 
       const algoliaMapped = isAlgoliaActive && !algoliaError && algoliaResults
-        ? algoliaResults.map(h => source.find(u => u.id === h.objectID) || { ...h, id: h.objectID })
+        ? algoliaResults.map(h => source.find(u => u.id === h.objectID) || { ...h, id: h.objectID, ...(optimisticOverrides[h.objectID] || {}) })
         : [];
 
       if (isAlgoliaActive && !algoliaError) {
@@ -224,7 +227,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
       return true;
     });
-  }, [users, searchTerm, algoliaResults, showArchived, roleFilter, defaultRole, statusFilter, originFilter, isAlgoliaActive, algoliaError, algoliaLoading]);
+  }, [users, optimisticOverrides, searchTerm, algoliaResults, showArchived, roleFilter, defaultRole, statusFilter, originFilter, isAlgoliaActive, algoliaError, algoliaLoading]);
 
   // Keep useDataTable just for selection logic (ignore its local pagination)
   const {
@@ -459,29 +462,69 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   }
 
   const handleInlineRoleChange = async (userId, newRole) => {
+    // 1. Optimistic UI update (instant feedback, zero delay)
+    setOptimisticOverrides(prev => ({
+      ...prev,
+      [userId]: { ...(prev[userId] || {}), role: newRole, roles: [newRole] }
+    }));
+    toast.success(`Role updated to ${newRole.toUpperCase()}`);
+
     try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
-        role: newRole,
-        roles: [newRole]
-      });
-      toast.success(`Role updated to ${newRole.toUpperCase()}`);
+      // 2. Authoritative Server Action (sets Firebase Auth claims, updates Firestore via Admin SDK, logs audit)
+      const res = await updateUserRoleAction({ userId, role: newRole });
+      if (!res.success) {
+        throw new Error(res.error || 'Server update failed');
+      }
+
+      // Also trigger client Firestore update as backup
+      try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, { role: newRole, roles: [newRole] });
+      } catch (_) {}
+
       refetch();
     } catch (err) {
+      console.error('[UsersTable] Role update error:', err);
+      // Rollback on error
+      setOptimisticOverrides(prev => {
+        const next = { ...prev };
+        delete next[userId];
+        return next;
+      });
       toast.error('Failed to update role: ' + err.message);
     }
   };
 
   const handleInlinePricingChange = async (userId, newChannel) => {
+    // 1. Optimistic UI update
+    setOptimisticOverrides(prev => ({
+      ...prev,
+      [userId]: { ...(prev[userId] || {}), pricingChannel: newChannel, priceTier: newChannel }
+    }));
+    toast.success(`Pricing channel updated to ${newChannel.toUpperCase()}`);
+
     try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
-        pricingChannel: newChannel,
-        priceTier: newChannel
-      });
-      toast.success(`Pricing channel updated to ${newChannel.toUpperCase()}`);
+      // 2. Authoritative Server Action
+      const res = await updateUserPricingChannelAction({ userId, pricingChannel: newChannel });
+      if (!res.success) {
+        throw new Error(res.error || 'Server update failed');
+      }
+
+      // Also trigger client Firestore update as backup
+      try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, { pricingChannel: newChannel, priceTier: newChannel });
+      } catch (_) {}
+
       refetch();
     } catch (err) {
+      console.error('[UsersTable] Pricing update error:', err);
+      // Rollback on error
+      setOptimisticOverrides(prev => {
+        const next = { ...prev };
+        delete next[userId];
+        return next;
+      });
       toast.error('Failed to update pricing channel: ' + err.message);
     }
   };
@@ -584,7 +627,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       mobilePriority: 2,
       width: '15%',
       render: (u) => {
-        const currentRole = u.role || (u.roles && u.roles[0]) || 'patient';
+        const currentRole = optimisticOverrides[u.id]?.role || u.role || (u.roles && u.roles[0]) || 'patient';
         return (
           <div style={{
             display: 'inline-flex',
@@ -633,7 +676,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       mobilePriority: 2,
       width: '18%',
       render: (u) => {
-        const currentChannel = u.pricingChannel || u.priceTier || (u.role === 'wholesaler' ? 'wholesale' : u.role === 'doctor' ? 'clinic' : 'retail');
+        const currentChannel = optimisticOverrides[u.id]?.pricingChannel || u.pricingChannel || u.priceTier || (u.role === 'wholesaler' ? 'wholesale' : u.role === 'doctor' ? 'clinic' : 'retail');
         const channelLabels = {
           wholesale: 'Wholesale B2B',
           clinic: 'Clinic / Doctor',

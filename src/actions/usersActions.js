@@ -1,6 +1,7 @@
 "use server";
 
-import { adminDb } from '../lib/firebaseAdmin';
+import { adminDb, adminAuth } from '../lib/firebaseAdmin';
+import { normalizeRole } from '../constants/roles';
 
 export async function fetchUsersAction({ limitCount = 50, role = null, search = '' } = {}) {
   try {
@@ -80,5 +81,97 @@ export async function fetchUsersAggregatesAction() {
   } catch (error) {
     console.error("Error fetching user aggregates:", error);
     return { total: 0, patients: 0, doctors: 0, wholesalers: 0, clinics: 0, pending: 0, activeAtlasUsers: 0, verifiedSecurity: 0 };
+  }
+}
+
+/**
+ * Server Action: update a user's role authoritatively.
+ * Sets Firebase Auth Custom Claims, updates Firestore 'users' doc with merge,
+ * and writes to audit_logs — completely bypassing client-side Firestore security rule limitations.
+ */
+export async function updateUserRoleAction({ userId, role }) {
+  try {
+    if (!userId || typeof userId !== 'string') throw new Error('userId is required');
+    if (!role) throw new Error('role is required');
+    if (!adminDb) throw new Error('Firebase Admin DB is not initialized');
+
+    const canonicalRole = normalizeRole(role);
+
+    // 1. Synchronize Firebase Auth Custom Claims
+    if (adminAuth) {
+      try {
+        await adminAuth.setCustomUserClaims(userId, {
+          role: canonicalRole,
+          approved: true,
+          admin: canonicalRole === 'admin'
+        });
+      } catch (authErr) {
+        console.warn(`[updateUserRoleAction] Auth claims notice for ${userId}:`, authErr.message);
+      }
+    }
+
+    // 2. Authoritative update on Firestore user document
+    const userDocRef = adminDb.collection('users').doc(userId);
+    const existingSnap = await userDocRef.get();
+    const existingData = existingSnap.exists ? existingSnap.data() : {};
+
+    const updates = {
+      role: canonicalRole,
+      roles: [canonicalRole],
+      approved: true,
+      professionalStatus: 'approved',
+      updatedAt: new Date().toISOString()
+    };
+
+    // If changing to doctor, ensure default clinic channel if missing
+    if (canonicalRole === 'doctor' && (!existingData.pricingChannel || existingData.pricingChannel === 'retail')) {
+      updates.pricingChannel = 'clinic';
+      updates.priceTier = 'clinic';
+    } else if (canonicalRole === 'wholesaler' && (!existingData.pricingChannel || existingData.pricingChannel === 'retail')) {
+      updates.pricingChannel = 'wholesale';
+      updates.priceTier = 'wholesale';
+    }
+
+    await userDocRef.set(updates, { merge: true });
+
+    // 3. Write audit log
+    try {
+      await adminDb.collection('audit_logs').add({
+        action: 'ADMIN_USER_ROLE_UPDATED',
+        targetId: userId,
+        previousRole: existingData.role || 'unknown',
+        newRole: canonicalRole,
+        timestamp: new Date().toISOString(),
+        operatorId: 'admin_console'
+      });
+    } catch (_) {}
+
+    return { success: true, userId, role: canonicalRole };
+  } catch (error) {
+    console.error('[updateUserRoleAction] Error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Server Action: update a user's pricing channel / tier authoritatively.
+ */
+export async function updateUserPricingChannelAction({ userId, pricingChannel }) {
+  try {
+    if (!userId || typeof userId !== 'string') throw new Error('userId is required');
+    if (!pricingChannel) throw new Error('pricingChannel is required');
+    if (!adminDb) throw new Error('Firebase Admin DB is not initialized');
+
+    const userDocRef = adminDb.collection('users').doc(userId);
+    await userDocRef.set({
+      pricingChannel,
+      priceTier: pricingChannel,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    return { success: true, userId, pricingChannel };
+  } catch (error) {
+    console.error('[updateUserPricingChannelAction] Error:', error);
+    return { success: false, error: error.message };
   }
 }

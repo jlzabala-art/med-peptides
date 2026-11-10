@@ -3825,13 +3825,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               background: '#ffffff',
               borderRadius: '8px',
               border: '1px solid #dadce0',
-              padding: '12px 14px',
+              padding: '12px 0',
               boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
             }}>
-              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '0 14px', marginBottom: '8px' }}>
                 {isEs ? 'Categorías de Péptidos' : 'Peptide Categories'}
               </div>
-              <div className="gcp-categories-horizontal" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div className="gcp-categories-horizontal" style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
                 <button
                   type="button"
                   onClick={() => setSelectedCategory('all')}
@@ -3839,27 +3839,29 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '6px 10px',
-                    borderRadius: '4px',
+                    padding: '8px 14px',
+                    borderRadius: '0 4px 4px 0',
                     border: 'none',
+                    borderLeft: selectedCategory === 'all' ? '3px solid #1a73e8' : '3px solid transparent',
                     background: selectedCategory === 'all' ? '#e8f0fe' : 'transparent',
                     color: selectedCategory === 'all' ? '#1a73e8' : '#3c4043',
-                    fontSize: '0.76rem',
+                    fontSize: '0.78rem',
                     fontWeight: selectedCategory === 'all' ? 700 : 500,
                     cursor: 'pointer',
                     textAlign: 'left',
-                    transition: 'background 0.15s ease'
+                    transition: 'all 0.15s ease'
                   }}
                   onMouseEnter={e => { if (selectedCategory !== 'all') e.currentTarget.style.background = '#f1f3f4'; }}
                   onMouseLeave={e => { if (selectedCategory !== 'all') e.currentTarget.style.background = 'transparent'; }}
                 >
                   <span>{isEs ? 'Todas las Formulaciones' : 'All Formulations'}</span>
                   <span style={{
-                    fontSize: '0.66rem',
-                    fontWeight: 700,
-                    background: selectedCategory === 'all' ? '#1a73e8' : '#f1f3f4',
-                    color: selectedCategory === 'all' ? '#ffffff' : '#5f6368',
-                    padding: '1px 6px',
+                    fontSize: '0.70rem',
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    background: selectedCategory === 'all' ? '#1a73e8' : '#e8eaed',
+                    color: selectedCategory === 'all' ? '#ffffff' : '#3c4043',
+                    padding: '2px 8px',
                     borderRadius: '10px'
                   }}>
                     {processedProducts.length}
@@ -3881,32 +3883,34 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '6px 10px',
-                        borderRadius: '4px',
+                        padding: '8px 14px',
+                        borderRadius: '0 4px 4px 0',
                         border: 'none',
+                        borderLeft: isSelected ? `3px solid ${meta.color || '#1a73e8'}` : '3px solid transparent',
                         background: isSelected ? meta.bg : 'transparent',
                         color: isSelected ? meta.color : '#3c4043',
-                        fontSize: '0.75rem',
+                        fontSize: '0.78rem',
                         fontWeight: isSelected ? 700 : 500,
                         cursor: 'pointer',
                         textAlign: 'left',
-                        transition: 'background 0.15s ease'
+                        transition: 'all 0.15s ease'
                       }}
                       onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f1f3f4'; }}
                       onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '16px' }}>
-                          {getCategoryIcon(key, 13)}
+                          {getCategoryIcon(key, 14)}
                         </span>
                         <span>{isEs ? meta.labelEs : meta.labelEn}</span>
                       </div>
                       <span style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        background: isSelected ? meta.color : '#f1f3f4',
-                        color: isSelected ? '#ffffff' : '#5f6368',
-                        padding: '1px 6px',
+                        fontSize: '0.70rem',
+                        fontWeight: 600,
+                        fontVariantNumeric: 'tabular-nums',
+                        background: isSelected ? (meta.color || '#1a73e8') : '#e8eaed',
+                        color: isSelected ? '#ffffff' : '#3c4043',
+                        padding: '2px 8px',
                         borderRadius: '10px'
                       }}>
                         {count}
@@ -3917,13 +3921,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               </div>
 
               {/* Divider */}
-              <div style={{ height: '1px', background: '#e2e8f0', margin: '14px 0 10px 0' }} />
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '12px 0 10px 0' }} />
 
               {/* FDA Regulatory Status Filter Rail */}
-              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '0 14px', marginBottom: '8px' }}>
                 {isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}
               </div>
-              <div className="gcp-categories-horizontal" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div className="gcp-categories-horizontal" style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
                 {FDA_FILTERS.map(f => {
                   const isSelected = selectedFdaStatus === f.id;
                   const count = f.id === 'all'
@@ -3939,32 +3943,34 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '6px 10px',
-                        borderRadius: '4px',
+                        padding: '8px 14px',
+                        borderRadius: '0 4px 4px 0',
                         border: 'none',
+                        borderLeft: isSelected ? `3px solid ${f.color || '#1a73e8'}` : '3px solid transparent',
                         background: isSelected ? (f.id === 'all' ? '#e8f0fe' : (f.id === 'fda_503a' ? '#ecfdf5' : f.id === 'fda_approved' ? '#eff6ff' : f.id === 'clinical_ind' ? '#fffbeb' : '#f1f5f9')) : 'transparent',
                         color: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#3c4043')) : '#3c4043',
-                        fontSize: '0.74rem',
+                        fontSize: '0.77rem',
                         fontWeight: isSelected ? 700 : 500,
                         cursor: 'pointer',
                         textAlign: 'left',
-                        transition: 'background 0.15s ease'
+                        transition: 'all 0.15s ease'
                       }}
                       onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f1f3f4'; }}
                       onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
-                        <span style={{ fontSize: '0.78rem', flexShrink: 0 }}>{f.icon}</span>
+                        <span style={{ fontSize: '0.80rem', flexShrink: 0 }}>{f.icon}</span>
                         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {isEs ? f.labelEs : f.labelEn}
                         </span>
                       </div>
                       <span style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        background: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#5f6368')) : '#f1f3f4',
-                        color: isSelected ? '#ffffff' : '#5f6368',
-                        padding: '1px 6px',
+                        fontSize: '0.70rem',
+                        fontWeight: 600,
+                        fontVariantNumeric: 'tabular-nums',
+                        background: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#5f6368')) : '#e8eaed',
+                        color: isSelected ? '#ffffff' : '#3c4043',
+                        padding: '2px 8px',
                         borderRadius: '10px'
                       }}>
                         {count}
@@ -6031,15 +6037,16 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             )}
 
             {/* Drawer Body (Scrollable) */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 0' }}>
               {/* 1. Peptide Categories */}
               <div style={{
                 fontSize: '0.68rem',
-                fontWeight: 800,
+                fontWeight: 700,
                 color: '#5f6368',
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
                 marginBottom: '8px',
+                padding: '0 14px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px'
@@ -6047,7 +6054,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <span>🧬</span>
                 <span>{isEs ? 'Categorías de Péptidos' : 'Peptide Categories'}</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginBottom: '16px' }}>
                 <button
                   type="button"
                   onClick={() => {
@@ -6058,13 +6065,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '8px 10px',
-                    borderRadius: '6px',
+                    padding: '8px 14px',
+                    borderRadius: '0 4px 4px 0',
                     border: 'none',
+                    borderLeft: selectedCategory === 'all' ? '3px solid #1a73e8' : '3px solid transparent',
                     background: selectedCategory === 'all' ? '#e8f0fe' : 'transparent',
                     color: selectedCategory === 'all' ? '#1a73e8' : '#3c4043',
                     fontSize: '0.80rem',
-                    fontWeight: selectedCategory === 'all' ? 800 : 500,
+                    fontWeight: selectedCategory === 'all' ? 700 : 500,
                     cursor: 'pointer',
                     textAlign: 'left'
                   }}
@@ -6074,11 +6082,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     <span>{isEs ? 'Todas las Formulaciones' : 'All Formulations'}</span>
                   </div>
                   <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    background: selectedCategory === 'all' ? '#1a73e8' : '#f1f3f4',
-                    color: selectedCategory === 'all' ? '#ffffff' : '#5f6368',
-                    padding: '1px 7px',
+                    fontSize: '0.70rem',
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    background: selectedCategory === 'all' ? '#1a73e8' : '#e8eaed',
+                    color: selectedCategory === 'all' ? '#ffffff' : '#3c4043',
+                    padding: '2px 8px',
                     borderRadius: '10px'
                   }}>
                     {processedProducts.length}
@@ -6103,13 +6112,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '8px 10px',
-                        borderRadius: '6px',
+                        padding: '8px 14px',
+                        borderRadius: '0 4px 4px 0',
                         border: 'none',
+                        borderLeft: isSelected ? `3px solid ${meta.color || '#1a73e8'}` : '3px solid transparent',
                         background: isSelected ? meta.bg : 'transparent',
                         color: isSelected ? meta.color : '#3c4043',
                         fontSize: '0.80rem',
-                        fontWeight: isSelected ? 800 : 500,
+                        fontWeight: isSelected ? 700 : 500,
                         cursor: 'pointer',
                         textAlign: 'left'
                       }}
@@ -6121,11 +6131,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         <span>{isEs ? meta.labelEs : meta.labelEn}</span>
                       </div>
                       <span style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        background: isSelected ? meta.color : '#f1f3f4',
-                        color: isSelected ? '#ffffff' : '#5f6368',
-                        padding: '1px 7px',
+                        fontSize: '0.70rem',
+                        fontWeight: 600,
+                        fontVariantNumeric: 'tabular-nums',
+                        background: isSelected ? (meta.color || '#1a73e8') : '#e8eaed',
+                        color: isSelected ? '#ffffff' : '#3c4043',
+                        padding: '2px 8px',
                         borderRadius: '10px'
                       }}>
                         {count}
@@ -6141,11 +6152,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               {/* 2. FDA Regulatory Status */}
               <div style={{
                 fontSize: '0.68rem',
-                fontWeight: 800,
+                fontWeight: 700,
                 color: '#5f6368',
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
                 marginBottom: '8px',
+                padding: '0 14px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px'
@@ -6153,7 +6165,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <span>⚖️</span>
                 <span>{isEs ? 'Estatus Regulatorio FDA' : 'FDA Regulatory Status'}</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginBottom: '16px' }}>
                 {FDA_FILTERS.map(f => {
                   const isSelected = selectedFdaStatus === f.id;
                   const count = f.id === 'all'
@@ -6171,13 +6183,14 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '8px 10px',
-                        borderRadius: '6px',
+                        padding: '8px 14px',
+                        borderRadius: '0 4px 4px 0',
                         border: 'none',
+                        borderLeft: isSelected ? `3px solid ${f.color || '#1a73e8'}` : '3px solid transparent',
                         background: isSelected ? (f.id === 'all' ? '#e8f0fe' : (f.id === 'fda_503a' ? '#ecfdf5' : f.id === 'fda_approved' ? '#eff6ff' : f.id === 'clinical_ind' ? '#fffbeb' : '#f1f5f9')) : 'transparent',
                         color: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#3c4043')) : '#3c4043',
                         fontSize: '0.80rem',
-                        fontWeight: isSelected ? 800 : 500,
+                        fontWeight: isSelected ? 700 : 500,
                         cursor: 'pointer',
                         textAlign: 'left'
                       }}
@@ -6189,11 +6202,12 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                         </span>
                       </div>
                       <span style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        background: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#5f6368')) : '#f1f3f4',
-                        color: isSelected ? '#ffffff' : '#5f6368',
-                        padding: '1px 7px',
+                        fontSize: '0.70rem',
+                        fontWeight: 600,
+                        fontVariantNumeric: 'tabular-nums',
+                        background: isSelected ? (f.id === 'all' ? '#1a73e8' : (f.color || '#5f6368')) : '#e8eaed',
+                        color: isSelected ? '#ffffff' : '#3c4043',
+                        padding: '2px 8px',
                         borderRadius: '10px'
                       }}>
                         {count}

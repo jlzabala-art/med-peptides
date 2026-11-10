@@ -183,7 +183,9 @@ export default function AppSidebar({
     // Extract current slug from pathname: /admin/patients -> 'patients', /admin -> ''
     const parts = pathname.split('/').filter(Boolean);
     const currentSlug = parts.length > 1 ? parts.slice(1).join('/') : '';
-    const isActive = item.id === '' ? currentSlug === '' : currentSlug === item.id || currentSlug.startsWith(item.id + '/');
+    const isCurrent = item.id === '' ? currentSlug === '' : currentSlug === item.id || currentSlug.startsWith(item.id + '/');
+    const isActive = isCurrent && prefix !== 'recent-';
+    const isRecentActive = isCurrent && prefix === 'recent-';
     const isFav = favorites.includes(item.id);
 
     const getPortalBase = (role, path = '') => {
@@ -209,7 +211,7 @@ export default function AppSidebar({
     return (
       <div
         key={`${prefix}${item.id}`}
-        className={`sb-item ${isActive ? 'active' : ''} level-${level}`}
+        className={`sb-item ${isActive ? 'active' : ''} ${isRecentActive ? 'recent-active' : ''} level-${level}`}
         data-tooltip={!expanded ? item.label : undefined}
         onMouseEnter={() => {
           try {

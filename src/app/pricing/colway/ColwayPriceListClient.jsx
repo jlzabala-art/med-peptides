@@ -43,6 +43,7 @@ import {
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
@@ -744,26 +745,11 @@ export default function ColwayPriceListClient({ initialProducts = [], initialCat
               <span>Print</span>
             </button>
 
-            {/* Login / Portal CTA Button (GCP Standard) */}
-            {user ? (
-              <Link
-                href={isAdmin ? '/admin' : isProfessional ? '/doctor' : '/dashboard'}
-                className="action-btn action-login"
-                title={isAdmin ? 'Admin Console' : 'Workspace Portal'}
-              >
-                <User size={15} />
-                <span>{isAdmin ? 'Admin' : 'Portal'}</span>
-              </Link>
-            ) : (
-              <Link
-                href="/login?redirect=/pricing/colway"
-                className="action-btn action-login"
-                title="Sign in to your verified clinical or wholesale account"
-              >
-                <LogIn size={15} />
-                <span>Login</span>
-              </Link>
-            )}
+            {/* Google Cloud Console UX Standard User Badge & Quick Logout */}
+            <GcpUserBadge
+              variant="dark"
+              loginRedirect="/pricing/colway"
+            />
           </div>
         </div>
       </nav>

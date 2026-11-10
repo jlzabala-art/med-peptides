@@ -35,6 +35,7 @@ import {
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
+import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import { useCommercialSchedule } from '@/hooks/useCommercialSchedule';
 import { FALLBACK_AGREEMENTS } from '@/repositories/commercialAgreementsRepository';
 import '../colway/ColwayPriceList.css';
@@ -120,6 +121,12 @@ export default function QatarColwayPriceClient() {
               <MessageCircle size={14} />
               <span>Contact Mediluxe</span>
             </a>
+
+            {/* Google Cloud Console UX Standard User Badge & Quick Logout */}
+            <GcpUserBadge
+              variant="dark"
+              loginRedirect="/pricing/colway-qatar"
+            />
           </div>
         </div>
       </nav>

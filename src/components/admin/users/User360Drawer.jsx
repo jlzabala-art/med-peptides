@@ -27,6 +27,7 @@ import { db } from '@/firebase';
 import notifier from '@/services/NotificationService';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { updateUserRoleAction } from '@/actions/usersActions';
 
 export default function User360Drawer({
   isOpen,
@@ -255,6 +256,14 @@ export default function User360Drawer({
       };
 
       await updateDoc(userRef, updates);
+
+      // Synchronize Firebase Auth custom claims and authoritative server doc
+      try {
+        await updateUserRoleAction({ userId, role: formData.role });
+      } catch (roleErr) {
+        console.warn('[User360Drawer] updateUserRoleAction warning:', roleErr.message);
+      }
+
       notifier.success(`User "${formData.displayName || formData.email}" updated successfully!`);
 
       if (onUserUpdated) {

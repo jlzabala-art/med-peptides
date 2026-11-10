@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import './colway/ColwayPriceList.css';
 
 export const dynamic = 'force-dynamic';
@@ -112,6 +113,13 @@ export default function PricingDirectoryPage() {
             </Link>
             <span className="nav-divider">/</span>
             <span className="nav-current">Official Price Schedules Directory</span>
+          </div>
+
+          <div className="nav-actions">
+            <GcpUserBadge
+              variant="dark"
+              loginRedirect="/pricing"
+            />
           </div>
         </div>
       </header>

@@ -142,34 +142,36 @@ export default function PeptideMonographSidebar({
       {/* ── CARD 1: Vertical Tabs Navigation (Google Cloud Console Standard) ── */}
       <div style={{
         background: '#ffffff',
-        border: '1px solid #cbd5e1',
-        borderRadius: '10px',
+        border: '1px solid #dadce0',
+        borderRadius: '8px',
         overflow: 'hidden',
-        boxShadow: '0 1px 3px rgba(0, 54, 102, 0.04)'
+        boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
       }}>
         <div style={{
-          background: '#003666',
-          color: '#ffffff',
+          background: '#f8fafc',
+          borderBottom: '1px solid #e2e8f0',
           padding: '8px 12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <span style={{ fontSize: '0.70rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Monograph Navigation
           </span>
           <span style={{
-            fontSize: '0.62rem',
-            background: 'rgba(255,255,255,0.18)',
-            padding: '1px 6px',
-            borderRadius: '4px',
-            fontWeight: 700
+            fontSize: '0.68rem',
+            background: '#e8eaed',
+            color: '#3c4043',
+            padding: '2px 8px',
+            borderRadius: '10px',
+            fontWeight: 600,
+            fontVariantNumeric: 'tabular-nums'
           }}>
             5 Sections
           </span>
         </div>
 
-        <nav role="tablist" style={{ padding: '4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <nav role="tablist" style={{ padding: '4px 0', display: 'flex', flexDirection: 'column', gap: '1px' }}>
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
@@ -190,18 +192,19 @@ export default function PeptideMonographSidebar({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   width: '100%',
-                  padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: isActive ? '1px solid #bfdbfe' : '1px solid transparent',
-                  borderLeft: isActive ? '3.5px solid #003666' : '3.5px solid transparent',
-                  background: isActive ? '#eff6ff' : 'transparent',
+                  padding: '8px 12px',
+                  borderRadius: '0 4px 4px 0',
+                  border: 'none',
+                  borderLeft: isActive ? '3px solid #1a73e8' : '3px solid transparent',
+                  background: isActive ? '#e8f0fe' : 'transparent',
+                  color: isActive ? '#1a73e8' : '#3c4043',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.15s ease',
                   outline: 'none'
                 }}
                 onMouseOver={(e) => {
-                  if (!isActive) e.currentTarget.style.background = '#f8fafc';
+                  if (!isActive) e.currentTarget.style.background = '#f1f3f4';
                 }}
                 onMouseOut={(e) => {
                   if (!isActive) e.currentTarget.style.background = 'transparent';
@@ -212,27 +215,27 @@ export default function PeptideMonographSidebar({
                     width: '26px',
                     height: '26px',
                     borderRadius: '5px',
-                    background: isActive ? '#003666' : '#f1f5f9',
+                    background: isActive ? '#1a73e8' : '#f1f5f9',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
                     transition: 'all 0.15s ease'
                   }}>
-                    <Icon size={14} color={isActive ? '#ffffff' : '#64748b'} />
+                    <Icon size={14} color={isActive ? '#ffffff' : '#5f6368'} />
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <div style={{
                       fontSize: '0.78rem',
-                      fontWeight: isActive ? 800 : 650,
-                      color: isActive ? '#003666' : '#1e293b',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? '#1a73e8' : '#202124',
                       lineHeight: 1.2
                     }}>
                       {tab.label}
                     </div>
                     <div style={{
                       fontSize: '0.64rem',
-                      color: isActive ? '#0369a1' : '#64748b',
+                      color: isActive ? '#174ea6' : '#5f6368',
                       marginTop: '1px',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
@@ -245,12 +248,13 @@ export default function PeptideMonographSidebar({
 
                 {typeof tab.count === 'number' && tab.count > 0 && (
                   <span style={{
-                    fontSize: '0.65rem',
-                    fontWeight: 800,
-                    padding: '2px 6px',
+                    fontSize: '0.70rem',
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    padding: '2px 8px',
                     borderRadius: '10px',
-                    background: isActive ? '#003666' : '#e2e8f0',
-                    color: isActive ? '#ffffff' : '#475569',
+                    background: isActive ? '#1a73e8' : '#e8eaed',
+                    color: isActive ? '#ffffff' : '#3c4043',
                     flexShrink: 0,
                     marginLeft: '4px'
                   }}>

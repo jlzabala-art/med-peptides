@@ -335,10 +335,11 @@ export default function CatalogRightSidebar({
                     alignItems: 'flex-start',
                     justifyContent: 'space-between',
                     width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: '8px',
-                    border: isSelected ? `1.5px solid ${status.color}` : '1px solid #f1f5f9',
-                    background: isSelected ? status.bg : '#ffffff',
+                    padding: '8px 12px',
+                    borderRadius: '0 6px 6px 0',
+                    border: 'none',
+                    borderLeft: isSelected ? `3px solid ${status.color}` : '3px solid transparent',
+                    background: isSelected ? status.bg : 'transparent',
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'all 0.15s ease'
@@ -347,24 +348,13 @@ export default function CatalogRightSidebar({
                     if (!isSelected) e.currentTarget.style.background = '#f8fafc';
                   }}
                   onMouseLeave={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = '#ffffff';
+                    if (!isSelected) e.currentTarget.style.background = 'transparent';
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', minWidth: 0, flex: 1 }}>
-                    {/* Radio indicator */}
-                    <div style={{
-                      width: 14,
-                      height: 14,
-                      borderRadius: '50%',
-                      border: isSelected ? `4px solid ${status.color}` : '1.5px solid #cbd5e1',
-                      background: '#ffffff',
-                      flexShrink: 0,
-                      marginTop: '2px'
-                    }} />
-
                     <div style={{ minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.78rem', color: isSelected ? status.color : '#0f172a', fontWeight: isSelected ? 800 : 600 }}>
+                        <span style={{ fontSize: '0.78rem', color: isSelected ? status.color : '#0f172a', fontWeight: isSelected ? 700 : 500 }}>
                           {status.label}
                         </span>
                       </div>
@@ -375,15 +365,14 @@ export default function CatalogRightSidebar({
                   </div>
 
                   <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    color: isSelected ? status.color : '#64748b',
-                    background: isSelected ? '#ffffff' : '#f1f5f9',
-                    border: `1px solid ${isSelected ? status.borderColor : '#e2e8f0'}`,
-                    padding: '1px 7px',
-                    borderRadius: '99px',
+                    fontSize: '0.70rem',
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    color: isSelected ? '#ffffff' : '#5f6368',
+                    background: isSelected ? status.color : '#e8eaed',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
                     flexShrink: 0,
-                    fontFamily: 'monospace',
                     marginLeft: '6px'
                   }}>
                     {count}

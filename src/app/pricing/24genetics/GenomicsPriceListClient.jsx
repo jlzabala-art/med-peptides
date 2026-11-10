@@ -37,6 +37,7 @@ import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import EmptyState from '@/components/ui/EmptyState';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import '../colway/ColwayPriceList.css';
 
 export default function GenomicsPriceListClient({ initialProducts = [] }) {
@@ -595,6 +596,11 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
               {copied ? <Check size={13} className="text-emerald-400" /> : <Share2 size={13} />}
               <span>{copied ? 'Copied' : 'Share'}</span>
             </button>
+
+            <GcpUserBadge
+              variant="dark"
+              loginRedirect="/pricing/24genetics"
+            />
           </div>
         </div>
       </header>

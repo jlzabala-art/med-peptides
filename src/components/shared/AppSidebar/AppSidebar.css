@@ -297,20 +297,34 @@
   color: var(--sb-text);
 }
 
-/* ── Active States (Single active pattern) ───────────────────────────────────── */
+/* ── Active States (Google Cloud Console Left Rail Standard) ─────────────────── */
 .sb-item.active {
-  background: var(--color-primary, #0f172a);
-  color: #ffffff;
+  background: #e8f0fe;
+  color: #1a73e8;
   font-weight: 600;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  border-left: 3px solid #1a73e8;
+  border-radius: 0 var(--sb-item-radius) var(--sb-item-radius) 0;
+  box-shadow: none;
 }
 
 .sb-item.active .sb-item-icon {
-  color: #ffffff;
+  color: #1a73e8;
 }
 
-/* Left indicator removed since we have full background */
-.sb-item.active::before {
+.sb-item.recent-active {
+  background: #f1f5f9;
+  color: #1a73e8;
+  font-weight: 600;
+  border-left: 3px solid #94a3b8;
+  border-radius: 0 var(--sb-item-radius) var(--sb-item-radius) 0;
+}
+
+.sb-item.recent-active .sb-item-icon {
+  color: #1a73e8;
+}
+
+.sb-item.active::before,
+.sb-item.recent-active::before {
   display: none;
 }
 
