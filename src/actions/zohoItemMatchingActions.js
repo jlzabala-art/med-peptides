@@ -2,81 +2,11 @@
 
 import { adminDb } from '../lib/firebaseAdmin';
 import { normalizeApiName, scoreApiAgainstZohoItem, generateSuggestedSku } from '../lib/zohoApiMatcher';
+import { getZohoAccessToken } from '@/lib/zoho/zohoClient';
 
 const ZOHO_ORG_ID = '662274409'; // Mediluxe Health Solutions (UAE - AED)
 const ZOHO_BOOKS_BASE = 'https://www.zohoapis.com/books/v3';
 const ZOHO_BOOKS_BASE_ME = 'https://www.zohoapis.me/books/v3';
-
-/**
- * Retrieves valid Zoho OAuth access token from Firestore cache,
- * auto-refreshing via refresh_token when expired.
- */
-/**
- * Retrieves valid Zoho OAuth access token from Firestore cache,
- * auto-refreshing via refresh_token when expired or when forceRefresh is requested.
- */
-async function getZohoAccessToken(forceRefresh = false) {
-  if (!adminDb) return null;
-  try {
-    const now = Date.now();
-    const snapV2 = await adminDb.collection('zoho_token_cache').doc('access_token_v2').get();
-    const dataV2 = snapV2.exists ? snapV2.data() : null;
-
-    // If cached token exists, is not forced to refresh, and has more than 5 mins of life
-    if (!forceRefresh && dataV2?.access_token && (dataV2.expires_at || 0) > now + 300000) {
-      // If scope is explicitly recorded and does NOT have write permissions, force refresh
-      const hasFullAccess = !dataV2.scope || dataV2.scope.includes('fullaccess') || dataV2.scope.includes('settings');
-      if (hasFullAccess) {
-        return dataV2.access_token;
-      }
-    }
-
-    // Auto-refresh via refresh_token from Firestore or env
-    const snapV1 = await adminDb.collection('zoho_token_cache').doc('access_token').get();
-    const dataV1 = snapV1.exists ? snapV1.data() : null;
-
-    const refreshToken = dataV2?.refresh_token || dataV1?.refresh_token || process.env.ZOHO_REFRESH_TOKEN || "1000.92de7a39c249f4560c93ad0b6a0c7108.64db63b339313d85510db1266b7a3c82";
-    const clientId = process.env.ZOHO_CLIENT_ID || "1000.NAHBCCYF5C9B3Z3YS2URAQ4TG7O76V";
-    const clientSecret = process.env.ZOHO_CLIENT_SECRET || "088b65381f7f30dfb801ff3f901e1af2c7adef11e5";
-
-    if (refreshToken) {
-      const params = new URLSearchParams({
-        grant_type: "refresh_token",
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refreshToken
-      });
-
-      const resp = await fetch("https://accounts.zoho.com/oauth/v2/token", { method: "POST", body: params });
-      const refreshed = await resp.json();
-      if (refreshed.access_token) {
-        const expiresAt = now + ((refreshed.expires_in || 3600) * 1000);
-        const updatePayload = {
-          access_token: refreshed.access_token,
-          refresh_token: refreshToken,
-          expires_at: expiresAt,
-          updated_at: now,
-          refreshed_at: now,
-          scope: refreshed.scope || "ZohoBooks.fullaccess.all ZohoInventory.fullaccess.all"
-        };
-        await adminDb.collection('zoho_token_cache').doc('access_token_v2').set(updatePayload, { merge: true });
-        await adminDb.collection('zoho_token_cache').doc('access_token').set(updatePayload, { merge: true });
-        return refreshed.access_token;
-      }
-    }
-
-    if (!forceRefresh && dataV2?.access_token) {
-      return dataV2.access_token;
-    }
-
-    if (!forceRefresh && dataV1?.access_token) {
-      return dataV1.access_token;
-    }
-  } catch (err) {
-    console.warn('[zohoItemMatchingActions] Token read error:', err.message);
-  }
-  return null;
-}
 
 /**
  * Searches items in Zoho Books via REST API (ME and Global endpoints)
@@ -237,7 +167,7 @@ export async function matchPrescriptionApisAction({ prescriptionId, apis = [] })
       }
 
       // If not persistent, also query live Zoho with the core name if needed
-      let candidatesPool = [...zohoPool];
+      const candidatesPool = [...zohoPool];
       if (!isPersistent && normalized.coreName.length >= 3) {
         const liveHits = await searchZohoBooksLiveItems(normalized.coreName);
         if (liveHits.length > 0) {

@@ -207,13 +207,27 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
     } else {
       // Neither variant nor product has an explicit catalogue brand
       const vSupplierStr = String(v.supplier || v.supplierName || v.supplierId || p.supplierId || (Array.isArray(p.supplierIds) ? p.supplierIds.join(' ') : '')).toLowerCase();
-      const isLotus = vSupplierStr.includes('lotus');
-      const isMagenta = vSupplierStr.includes('magenta');
-      const isLarimedical = vSupplierStr.includes('larimedical');
-      const isEuropeptides = vSupplierStr.includes('europeptides');
+      const pSupplierText = `${p.supplier || ''} ${p.supplierName || ''} ${p.supplierId || ''} ${(Array.isArray(p.supplierIds) ? p.supplierIds : []).join(' ')}`.toLowerCase();
+      const pNameLower = String(p.canonicalName || p.name || '').toLowerCase();
+      const isLotus = vSupplierStr.includes('lotus') || pSupplierText.includes('lotus') || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo' || p.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
+      const isMagenta = vSupplierStr.includes('magenta') || pSupplierText.includes('magenta');
+      const isLarimedical = vSupplierStr.includes('larimedical') || pSupplierText.includes('larimedical');
+      const isEuropeptides = vSupplierStr.includes('europeptides') || pSupplierText.includes('europeptides');
+      const isPharmapolis = vSupplierStr.includes('pharmapolis') || pSupplierText.includes('pharmapolis') || pNameLower.includes('ultraperson');
+      const isColway = vSupplierStr.includes('colway') || pSupplierText.includes('colway') || pNameLower.includes('colway');
+      const isBloodo = vSupplierStr.includes('bloodo') || pSupplierText.includes('bloodo') || pNameLower.includes('bloodo');
+      const isEterna = vSupplierStr.includes('eterna') || pSupplierText.includes('eterna') || pNameLower.includes('eterna');
 
-      if ((normTargetCat === 'regenpept' || normTargetCat === 'lotusland') && isLotus) {
-        // Accept Lotusland as RegenPept
+      if ((normTargetCat === 'regenpept' || normTargetCat === 'lotusland' || normTargetCat === 'peptides') && (isLotus || isEuropeptides || isPeptide)) {
+        // Accept Lotusland / Europeptides as Peptides
+      } else if (normTargetCat === 'ultraperson' && isPharmapolis) {
+        // Accept Pharmapolis as UltraPerson
+      } else if (normTargetCat === 'colway' && isColway) {
+        // Accept Colway
+      } else if (normTargetCat === 'bloodo' && isBloodo) {
+        // Accept Bloodo
+      } else if ((normTargetCat === 'eterna' || normTargetCat === 'eternadx') && isEterna) {
+        // Accept ETERNA
       } else if (normTargetCat === 'magenta-peptides') {
         if (!isMagenta || !isPeptide) return false;
       } else if (normTargetCat === 'magenta-compounding') {
@@ -224,7 +238,7 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
         // Accept Larimedical
       } else if (normTargetCat.includes('europeptides') && isEuropeptides) {
         // Accept EuroPeptides
-      } else if (vSupplierStr.includes(normTargetCat)) {
+      } else if (vSupplierStr.includes(normTargetCat) || pSupplierText.includes(normTargetCat)) {
         // Generic match on supplier string
       } else {
         return false;
@@ -260,7 +274,8 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
         return false;
       }
     } else {
-      if (!vCat.includes(normTargetCat) && !normTargetCat.includes(vCat)) {
+      const isSpecialPortfolio = ['colway', 'ultraperson', 'bloodo', 'eterna', 'eternadx'].includes(normTargetCat);
+      if (!isSpecialPortfolio && !vCat.includes(normTargetCat) && !normTargetCat.includes(vCat)) {
         return false;
       }
     }
@@ -336,7 +351,7 @@ export function sanitizePdfText(str = '') {
     .replace(/‘/g, "'")
     .replace(/’/g, "'")
     .replace(/\u00A0/g, ' ')
-    .replace(/[^\x00-\x7F]/g, c => {
+    .replace(/[\u0080-\uFFFF]/g, () => {
       // Fallback for remaining non-ASCII characters
       return '';
     });

@@ -34,10 +34,17 @@ export default function User360Drawer({
   onClose,
   user,
   onUserUpdated,
-  onImpersonate
+  onImpersonate,
+  initialTab = 'profile'
 }) {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState(initialTab || 'profile');
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
 
   // Shared Catalogs State
   const [sharedLinks, setSharedLinks] = useState([]);
@@ -111,7 +118,7 @@ export default function User360Drawer({
     const userId = user.id || user.uid;
     setIsLoadingLinks(true);
     try {
-      let links = [];
+      const links = [];
       if (userId) {
         const q = query(
           collection(db, 'shared_catalog_links'),
@@ -159,7 +166,7 @@ export default function User360Drawer({
     { id: 'ultraperson', label: 'UltraPerson™ Precision Nutraceuticals', supplierId: 'supplier-pharmapolis', catalogueFilter: 'ultraperson', icon: '🌿' },
     { id: 'colway', label: 'Colway® Bioactive Tropocollagen', supplierId: 'supplier-colway', catalogueFilter: 'colway', icon: '✨' },
     { id: 'bloodo', label: 'Bloodo™ CE-IVDR Capillary Diagnostics', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
-    { id: 'eterna', label: 'ETERNA® Multi-Omics Longevity', supplierId: 'supplier-eterna', catalogueFilter: 'eterna', icon: '🧬' },
+    { id: 'eterna', label: 'ETERNA® Multi-Omics Longevity', supplierId: 'supplier-eternadx', catalogueFilter: 'eterna', icon: '🧬' },
     { id: 'all', label: 'Master Portfolio (All Clinical Lines)', supplierId: null, catalogueFilter: 'all', icon: '🏛️' }
   ];
 

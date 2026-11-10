@@ -154,6 +154,33 @@ export async function updateUser(uid, updates) {
 }
 
 /**
+ * Direct field update without patient write-guard (admin panel operations:
+ * approve/revoke/archive/role changes). Invalidates the users cache.
+ * @param {string} uid
+ * @param {object} updates
+ */
+export async function updateUserFields(uid, updates) {
+  await updateDoc(doc(db, COLLECTION, uid), updates);
+  invalidateUsersCache(uid);
+}
+
+/**
+ * Raw users whose `roles` array contains the given role (bounded by limit).
+ * @param {string} role
+ * @param {number} limitCount
+ * @returns {Promise<object[]>}
+ */
+export async function getUsersByRoleMembership(role, limitCount = 100) {
+  const q = query(
+    collection(db, COLLECTION),
+    where('roles', 'array-contains', role),
+    limit(limitCount)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+/**
  * Busca usuarios por email (búsqueda exacta).
  * @param {string} email
  * @returns {Promise<object[]>}

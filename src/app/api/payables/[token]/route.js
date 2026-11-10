@@ -1,56 +1,12 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { getZohoAccessToken } from '@/lib/zoho/zohoClient';
+import { authorize } from '@/lib/access/payablesAccessGuard';
 
-const ADMIN_EMAILS = [
-  'jlzabala@gmail.com',
-  'jose@mediluxem.com',
-  'jose@mediluxeme.com',
-  'admin@regenpept.test',
-  'clinical@atlashealth-services.com'
-];
-
-async function getZohoAccessToken() {
-  try {
-    const snapV2 = await adminDb.collection('zoho_token_cache').doc('access_token_v2').get();
-    const dataV2 = snapV2.exists ? snapV2.data() : null;
-    const now = Date.now();
-    if (dataV2?.access_token && (dataV2.expires_at || 0) > now + 300000) {
-      return dataV2.access_token;
-    }
-
-    const snapV1 = await adminDb.collection('zoho_token_cache').doc('access_token').get();
-    const dataV1 = snapV1.exists ? snapV1.data() : null;
-
-    const refreshToken = dataV2?.refresh_token || dataV1?.refresh_token || "1000.92de7a39c249f4560c93ad0b6a0c7108.64db63b339313d85510db1266b7a3c82";
-    const clientId = "1000.NAHBCCYF5C9B3Z3YS2URAQ4TG7O76V";
-    const clientSecret = "088b65381f7f30dfb801ff3f901e1af2c7adef11e5";
-
-    const params = new URLSearchParams({
-      grant_type: "refresh_token",
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken
-    });
-
-    const resp = await fetch("https://accounts.zoho.com/oauth/v2/token", { method: "POST", body: params });
-    const refreshed = await resp.json();
-    if (refreshed.access_token) {
-      const expiresAt = now + ((refreshed.expires_in || 3600) * 1000);
-      const updatePayload = {
-        access_token: refreshed.access_token,
-        refresh_token: refreshToken,
-        expires_at: expiresAt,
-        updated_at: now
-      };
-      await adminDb.collection('zoho_token_cache').doc('access_token_v2').set(updatePayload, { merge: true });
-      return refreshed.access_token;
-    }
-    return dataV2?.access_token || dataV1?.access_token;
-  } catch (err) {
-    console.warn('Could not refresh Zoho token:', err.message);
-    return null;
-  }
-}
+// Golden Rule #1: never read unbounded collections.
+const MAX_BILLS = 1000;
+// Billing cycle start: per-statement `billingCycleStart`, env override, or default.
+const DEFAULT_CYCLE_START = process.env.PAYABLES_CYCLE_START || '2026-11-01';
 
 async function autoSyncZohoBills(wholesalerId, force = false) {
   try {
@@ -61,7 +17,10 @@ async function autoSyncZohoBills(wholesalerId, force = false) {
     const lastSyncTime = parentData.lastAutomatedSync ? new Date(parentData.lastAutomatedSync).getTime() : 0;
     const now = Date.now();
     // Cache for 3 minutes unless force === true
-    if (!force && (now - lastSyncTime < 180000)) {
+    // A Zoho webhook sets syncRequestedAt when a bill changes; honour it immediately.
+    const webhookPending = Boolean(parentData.syncRequestedAt) &&
+      new Date(parentData.syncRequestedAt).getTime() > lastSyncTime;
+    if (!force && !webhookPending && (now - lastSyncTime < 180000)) {
       return;
     }
 
@@ -201,6 +160,7 @@ export async function GET(request, { params }) {
       .doc(wholesalerId)
       .collection('bills')
       .orderBy('date', 'desc')
+      .limit(MAX_BILLS)
       .get();
 
     const allBills = billsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -215,8 +175,16 @@ export async function GET(request, { params }) {
       return st !== 'paid' && Number(b.balance || 0) > 0;
     };
 
-    const openBills = allBills.filter(isApprovedOpenBill);
-    const paidBills = allBills.filter(b => {
+    // Filter bills: Active billing cycle from November 1, 2026 onwards by default
+    const includeAllHistory = searchParams.get('include_all') === 'true';
+    const cycleStartDate = /^\d{4}-\d{2}-\d{2}$/.test(shareDoc.billingCycleStart || '') ? shareDoc.billingCycleStart : DEFAULT_CYCLE_START;
+
+    const activeCycleBills = includeAllHistory
+      ? allBills
+      : allBills.filter(b => (b.date || '') >= cycleStartDate);
+
+    const openBills = activeCycleBills.filter(isApprovedOpenBill);
+    const paidBills = activeCycleBills.filter(b => {
       const st = String(b.status || '').toLowerCase().trim();
       if (st === 'draft' || st === 'void') return false;
       return st === 'paid' || Number(b.balance || 0) === 0;
@@ -225,6 +193,36 @@ export async function GET(request, { params }) {
     // ── ALL FINANCIAL KPIS CALCULATED AUTHORITATIVELY ON SERVER ──
     const totalPending = openBills.reduce((acc, b) => acc + (Number(b.balance) > 0 ? Number(b.balance) : Number(b.total || 0)), 0);
     const totalPaid = paidBills.reduce((acc, b) => acc + Number(b.total || 0), 0);
+
+    // ── Precalculate Monthly Procurement & Settlement Evolution across all bills ──
+    const byMonth = {};
+    for (const b of allBills) {
+      const st = String(b.status || '').toLowerCase().trim();
+      if (st === 'draft' || st === 'void' || st === 'rejected') continue;
+      const m = (b.date || '2026-00').slice(0, 7);
+      if (!byMonth[m]) {
+        byMonth[m] = { month: m, total: 0, paid: 0, pending: 0, count: 0 };
+      }
+      const tot = Number(b.total || 0);
+      const bal = Number(b.balance || 0);
+      byMonth[m].total += tot;
+      byMonth[m].count += 1;
+      if (st === 'paid' || bal === 0) {
+        byMonth[m].paid += tot;
+      } else {
+        byMonth[m].pending += bal;
+        byMonth[m].paid += Math.max(0, tot - bal);
+      }
+    }
+    const monthlyEvolution = Object.values(byMonth)
+      .map(item => ({
+        ...item,
+        total: Math.round(item.total * 100) / 100,
+        paid: Math.round(item.paid * 100) / 100,
+        pending: Math.round(item.pending * 100) / 100,
+        isCurrentCycle: item.month >= cycleStartDate.slice(0, 7)
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
 
     const todayStr = new Date().toISOString().slice(0, 10);
     const overdueBills = openBills.filter(b => b.dueDate && b.dueDate < todayStr);
@@ -243,33 +241,11 @@ export async function GET(request, { params }) {
     const formalPaymentTerms = shareDoc.paymentTerms || 'Net 10th Prox. (Post-Settlement)';
     const formalPaymentTermsDetail = shareDoc.paymentTermsDetail || 'Payable within first 10 calendar days of the month following client payment (Paid-When-Paid Terms)';
 
-    // 3. Verification check (QuickLink email validation or admin token)
-    const providedEmail = (searchParams.get('email') || '').trim().toLowerCase();
-    const quicklink = searchParams.get('quicklink');
-    const authHeader = request.headers.get('authorization');
-
-    const expectedEmail = (shareDoc.contactEmail || 'jia9156@gmail.com').toLowerCase().trim();
-
-    // Verification succeeds if:
-    // a) providedEmail is in ADMIN_EMAILS or has admin credentials
-    // b) providedEmail matches expectedEmail
-    // c) quicklink === 'verified' or Bearer auth header present
-    const isMasterAdminEmail = Boolean(
-      providedEmail && (
-        ADMIN_EMAILS.includes(providedEmail) ||
-        providedEmail.includes('admin') ||
-        providedEmail.endsWith('@mediluxem.com') ||
-        providedEmail.endsWith('@mediluxeme.com') ||
-        providedEmail.endsWith('@atlas-services.com')
-      )
-    );
-
-    const isAuthorized = Boolean(
-      isMasterAdminEmail ||
-      (providedEmail && providedEmail === expectedEmail) ||
-      (quicklink === 'verified') ||
-      (authHeader && authHeader.startsWith('Bearer '))
-    );
+    // 3. Access verification (admin bearer / OTP session / legacy during grace period)
+    const access = await authorize(request, token, shareDoc);
+    const providedEmail = access.email;
+    const isMasterAdminEmail = access.isAdmin;
+    const isAuthorized = access.ok;
 
     const automatedSyncTime = shareDoc.lastAutomatedSync || new Date().toISOString();
 
@@ -302,7 +278,10 @@ export async function GET(request, { params }) {
           paymentTerms: formalPaymentTerms,
           paymentTermsDetail: formalPaymentTermsDetail,
           settlementStatus: openBills.length === 0 ? 'settled' : (overdueBillsCount > 0 ? 'overdue' : 'pending'),
-          lastAutomatedSync: automatedSyncTime
+          lastAutomatedSync: automatedSyncTime,
+          cycleStartDate,
+          cycleFilterActive: !includeAllHistory,
+          totalHistoricalCount: allBills.length
         },
         openBills: openBills.map(b => ({
           id: b.id,
@@ -328,7 +307,8 @@ export async function GET(request, { params }) {
       docRef.set({
         lastAccessedAt: nowIso,
         accessCount: (shareDoc.accessCount || 0) + 1,
-        lastAccessEmail: providedEmail || 'quicklink_verified'
+        lastAccessEmail: providedEmail || 'quicklink_verified',
+        lastAccessKind: access.kind
       }, { merge: true }).catch(e => console.warn('Audit access write skipped:', e));
     }
 
@@ -360,8 +340,12 @@ export async function GET(request, { params }) {
         paymentTerms: formalPaymentTerms,
         paymentTermsDetail: formalPaymentTermsDetail,
         settlementStatus: openBills.length === 0 ? 'settled' : (overdueBillsCount > 0 ? 'overdue' : 'pending'),
-        lastAutomatedSync: automatedSyncTime
+        lastAutomatedSync: automatedSyncTime,
+        cycleStartDate,
+        cycleFilterActive: !includeAllHistory,
+        totalHistoricalCount: allBills.length
       },
+      monthlyEvolution,
       openBills,
       paidBills
     });

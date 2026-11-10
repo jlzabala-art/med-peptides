@@ -490,7 +490,20 @@ export const MAGENTA_OFFICIAL_QUOTATION_202611 = {
       unitPriceUSD: 15.90,
       lineTotalUSD: 795.00,
       previousCatalogPriceUSD: 27.43,
-      leadTime: '3–5 Business Days (Air Courier Cold-Chain)'
+      leadTime: '3–5 Business Days (Air Courier Cold-Chain)',
+      analyticalSpecs: {
+        purity: '≥98.5% (HPLC & LC-MS)',
+        molecularWeight: '144.22 g/mol',
+        formula: 'C10H12N2',
+        storage: '-20 °C Sealed Desiccated',
+        form: 'White to Off-White Crystalline Powder',
+        coaStatus: 'Verified Lot · HPLC & Mass Spec Attached'
+      },
+      corridorSpecs: {
+        originHub: 'Lotusland US Partner Allocation Hub',
+        transitCorridor: 'Express Air Freight with Cold-Chain Pack',
+        destination: 'Magenta RX Plus Compounding Pharmacy (Dubai, UAE)'
+      }
     },
     {
       itemNumber: 2,
@@ -504,7 +517,20 @@ export const MAGENTA_OFFICIAL_QUOTATION_202611 = {
       unitPriceUSD: 1722.50,
       lineTotalUSD: 17225.00,
       previousCatalogPriceUSD: 2971.31,
-      leadTime: '3–5 Business Days (Air Courier Cold-Chain)'
+      leadTime: '3–5 Business Days (Air Courier Cold-Chain)',
+      analyticalSpecs: {
+        purity: '≥99.2% (Reversed-Phase HPLC)',
+        molecularWeight: '474.5 g/mol',
+        formula: 'Lys-Glu-Asp-Pro (KEDP)',
+        storage: '-20 °C Protected from Light',
+        form: 'Lyophilized High-Purity Cake',
+        coaStatus: 'Verified Lot · Peptide Purity Certificate Attached'
+      },
+      corridorSpecs: {
+        originHub: 'Lotusland US Partner Allocation Hub',
+        transitCorridor: 'Express Air Freight with Cold-Chain Pack',
+        destination: 'Magenta RX Plus Compounding Pharmacy (Dubai, UAE)'
+      }
     },
     {
       itemNumber: 3,
@@ -518,7 +544,20 @@ export const MAGENTA_OFFICIAL_QUOTATION_202611 = {
       unitPriceUSD: 1629.75,
       lineTotalUSD: 16297.50,
       previousCatalogPriceUSD: 2811.32,
-      leadTime: '3–5 Business Days (Air Courier Cold-Chain)'
+      leadTime: '3–5 Business Days (Air Courier Cold-Chain)',
+      analyticalSpecs: {
+        purity: '≥99.4% (Reversed-Phase HPLC)',
+        molecularWeight: '359.3 g/mol',
+        formula: 'Glu-Asp-Pro (EDP)',
+        storage: '-20 °C Protected from Light',
+        form: 'Lyophilized High-Purity White Cake',
+        coaStatus: 'Verified Lot · Sequence & Assay Certified'
+      },
+      corridorSpecs: {
+        originHub: 'Lotusland US Partner Allocation Hub',
+        transitCorridor: 'Express Air Freight with Cold-Chain Pack',
+        destination: 'Magenta RX Plus Compounding Pharmacy (Dubai, UAE)'
+      }
     },
     {
       itemNumber: 4,
@@ -532,7 +571,20 @@ export const MAGENTA_OFFICIAL_QUOTATION_202611 = {
       unitPriceUSD: 14310.00,
       lineTotalUSD: 2862.00,
       previousCatalogPriceUSD: 24451.87,
-      leadTime: '3–5 Business Days (Air Courier Cold-Chain)'
+      leadTime: '3–5 Business Days (Air Courier Cold-Chain)',
+      analyticalSpecs: {
+        purity: '≥96.5% (HPLC & SDS-PAGE Silver Stain)',
+        molecularWeight: '9,111 Da (83 amino acids recombinant)',
+        formula: 'Recombinant Human IGF-1 Analog',
+        storage: '-20 °C to -80 °C Under Nitrogen',
+        form: 'Lyophilized Recombinant Protein Cake',
+        coaStatus: 'Verified Lot · Endotoxin <0.1 EU/µg · Bioassay Active'
+      },
+      corridorSpecs: {
+        originHub: 'Lotusland US Partner Allocation Hub',
+        transitCorridor: 'Priority Cold-Chain Express (-20 °C Dry Ice Pack)',
+        destination: 'Magenta RX Plus Compounding Pharmacy (Dubai, UAE)'
+      }
     }
   ],
   totals: {

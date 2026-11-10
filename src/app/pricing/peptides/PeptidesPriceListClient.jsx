@@ -1641,7 +1641,7 @@ export default function PeptidesPriceListClient({
       const el = document.getElementById(`order-field-${firstKey}`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        try { el.focus(); } catch (_e) {}
+        try { el.focus(); } catch (_e) { /* element not focusable */ }
       }
       toast.error('Please complete all required fields (marked with *).');
       return false;
@@ -3007,86 +3007,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <span>Atlas AI</span>
               </button>
 
-              {/* Inquire Info button in Header */}
-              <button
-                type="button"
-                onClick={() => {
-                  setInquiryProductContext(null);
-                  setIsInquiryDrawerOpen(true);
-                }}
-                className="peptides-nav-btn"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: 'rgba(255, 255, 255, 0.10)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255, 255, 255, 0.20)',
-                  padding: '5px 9px',
-                  borderRadius: '6px',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease',
-                  backdropFilter: 'blur(4px)'
-                }}
-                title={isEs ? 'Consultar información técnica, COAs o envíos' : 'Institutional Inquiry & Support'}
-              >
-                <Mail size={13} color="#cbd5e1" />
-                <span>{isEs ? 'Consultar' : 'Inquire'}</span>
-              </button>
-
-              {/* PDF Preview button in Header */}
-              <button
-                onClick={() => setIsPdfPreviewOpen(true)}
-                className="peptides-nav-btn"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: 'rgba(255, 255, 255, 0.10)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255, 255, 255, 0.20)',
-                  padding: '5px 10px',
-                  borderRadius: '6px',
-                  fontSize: '0.74rem',
-                  fontWeight: 650,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease',
-                  backdropFilter: 'blur(4px)'
-                }}
-                title={isEs ? 'Previsualizar y exportar tarifa oficial PDF' : 'Preview and export official PDF price schedule'}
-              >
-                <Eye size={13} color="#cbd5e1" />
-                <span>{isEs ? 'PDF' : 'PDF Schedule'}</span>
-              </button>
-
-              {/* Share button */}
-              <button
-                onClick={handleShareSchedule}
-                className="peptides-nav-btn"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: 'rgba(255, 255, 255, 0.10)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255, 255, 255, 0.20)',
-                  padding: '5px 9px',
-                  borderRadius: '6px',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  backdropFilter: 'blur(4px)'
-                }}
-                title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
-              >
-                {copied ? <Check size={13} color="#4ade80" /> : <Share2 size={13} color="#cbd5e1" />}
-                <span className="peptides-share-label">{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
-              </button>
             </div>
 
             {/* Desktop Currency selector with prominent display */}
@@ -3603,6 +3523,84 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                       : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides with manufacturer 10-pack volume savings.')
                 }
               </p>
+            </div>
+
+            {/* Google Cloud UX: Right-Aligned Page Header Actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setInquiryProductContext(null);
+                  setIsInquiryDrawerOpen(true);
+                }}
+                style={{
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#003666',
+                  fontSize: '0.80rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.08)'
+                }}
+                title={isEs ? 'Consultar información técnica o solicitud B2B' : 'Institutional Inquiry & Support'}
+              >
+                <Mail size={14} color="#003666" />
+                <span>{isEs ? 'Consultar' : 'Inquire'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsPdfPreviewOpen(true)}
+                style={{
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#003666',
+                  fontSize: '0.80rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.08)'
+                }}
+                title={isEs ? 'Previsualizar y exportar tarifa oficial PDF' : 'Preview and export official PDF price schedule'}
+              >
+                <Eye size={14} color="#003666" />
+                <span>{isEs ? 'PDF' : 'PDF Schedule'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShareSchedule}
+                style={{
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #1a73e8',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  fontSize: '0.80rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 1px 2px rgba(26,115,232,0.3)'
+                }}
+                title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
+              >
+                {copied ? <Check size={14} color="#ffffff" /> : <Share2 size={14} color="#ffffff" />}
+                <span>{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
+              </button>
             </div>
           </div>
         </div>

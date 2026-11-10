@@ -4,8 +4,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { db, functions } from '../../../firebase';
-import { doc, updateDoc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { functions } from '../../../firebase';
+import { updateUserFields, getUsersByRoleMembership } from '../../../repositories/userRepository';
 import { httpsCallable } from 'firebase/functions';
 import { getApprovalEmailHtml } from '../../../data/emailTemplate';
 import { exportToCSV } from '../../../utils/exportUtils';
@@ -70,6 +70,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   const [editingUser, setEditingUser] = useState(null);
   const [isSavingUser, setIsSavingUser] = useState(false);
   const [detailsUser, setDetailsUser] = useState(null);
+  const [user360InitialTab, setUser360InitialTab] = useState('profile');
   const [financialWholesaler, setFinancialWholesaler] = useState(null);
   const [emailPreview, setEmailPreview] = useState(null);
   const [aiTargetUser, setAiTargetUser] = useState(null);
@@ -109,11 +110,12 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     if (isCreateModalOpen) {
       const fetchDoctorsAndWholesalers = async () => {
         try {
-          const docQuery = query(collection(db, 'users'), where('roles', 'array-contains', 'doctor'), limit(100));
-          const wsQuery = query(collection(db, 'users'), where('roles', 'array-contains', 'wholesaler'), limit(100));
-          const [docSnap, wsSnap] = await Promise.all([getDocs(docQuery), getDocs(wsQuery)]);
-          setAllDoctors(docSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-          setAllWholesalers(wsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+          const [doctors, wholesalers] = await Promise.all([
+            getUsersByRoleMembership('doctor', 100),
+            getUsersByRoleMembership('wholesaler', 100)
+          ]);
+          setAllDoctors(doctors);
+          setAllWholesalers(wholesalers);
         } catch (e) {
           console.error("Error loading doctors/wholesalers for creation modal:", e);
         }
@@ -174,7 +176,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   }, [deepLinkStatus]);
 
   const filteredUsers = useMemo(() => {
-    let rawSource = users || [];
+    const rawSource = users || [];
     let source = rawSource.map(u => ({ ...u, ...(optimisticOverrides[u.id] || {}) }));
 
     if (!searchTerm || !searchTerm.trim()) {
@@ -272,7 +274,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           const result = await approveUserRoleAction(userId, canonicalRole);
           if (result && !result.success) {
             // Fallback direct Firestore update if server action encountered an issue
-            await updateDoc(doc(db, 'users', userId), {
+            await updateUserFields(userId, {
               approved: true,
               role: canonicalRole,
               roles: [canonicalRole],
@@ -293,7 +295,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           toast.success(`User ${userName} approved as ${ROLE_METADATA[canonicalRole]?.label || canonicalRole}. Permissions synchronized.`);
         } else {
           // Revoking access
-          await updateDoc(doc(db, 'users', userId), {
+          await updateUserFields(userId, {
             approved: false,
             professionalStatus: 'revoked'
           });
@@ -313,7 +315,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     const confirmMessage = currentStatus ? 'Unarchive this user?' : 'Archive this user? They will be hidden from the main list.';
     notifier.confirmCritical(confirmMessage, async () => {
       try {
-        await updateDoc(doc(db, 'users', userId), { isArchived: !currentStatus });
+        await updateUserFields(userId, { isArchived: !currentStatus });
         await logAction(user?.uid || 'admin', 'admin', currentStatus ? 'USER_UNARCHIVE' : 'USER_ARCHIVE', userId);
         refetch();
       } catch (err) {
@@ -403,7 +405,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     e.preventDefault();
     setIsSavingUser(true);
     try {
-      await updateDoc(doc(db, 'users', editingUser.id), {
+      await updateUserFields(editingUser.id, {
         fullName: editingUser.fullName || '',
         institution: editingUser.institution || '',
         role: editingUser.role || 'guest',
@@ -445,11 +447,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     notifier.confirmCritical(msg, async () => {
       try {
         for (const uid of Array.from(selectedIds)) {
-          const userRef = doc(db, 'users', uid);
-          if (action === 'approve') await updateDoc(userRef, { approved: true });
-          if (action === 'revoke') await updateDoc(userRef, { approved: false });
-          if (action === 'archive') await updateDoc(userRef, { isArchived: true });
-          if (action === 'delete') await updateDoc(userRef, { isDeleted: true });
+          const userRef = uid;
+          if (action === 'approve') await updateUserFields(userRef, { approved: true });
+          if (action === 'revoke') await updateUserFields(userRef, { approved: false });
+          if (action === 'archive') await updateUserFields(userRef, { isArchived: true });
+          if (action === 'delete') await updateUserFields(userRef, { isDeleted: true });
           await logAction(user?.uid || 'admin', 'admin', `BULK_USER_${action.toUpperCase()}`, uid);
         }
         clearSelection();
@@ -478,9 +480,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
       // Also trigger client Firestore update as backup
       try {
-        const userRef = doc(db, 'users', userId);
-        await updateDoc(userRef, { role: newRole, roles: [newRole] });
-      } catch (_) {}
+        const userRef = userId;
+        await updateUserFields(userRef, { role: newRole, roles: [newRole] });
+      } catch (err) {
+        console.warn('Legacy client-side user update failed:', err?.message);
+      }
 
       refetch();
     } catch (err) {
@@ -512,9 +516,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
       // Also trigger client Firestore update as backup
       try {
-        const userRef = doc(db, 'users', userId);
-        await updateDoc(userRef, { pricingChannel: newChannel, priceTier: newChannel });
-      } catch (_) {}
+        const userRef = userId;
+        await updateUserFields(userRef, { pricingChannel: newChannel, priceTier: newChannel });
+      } catch (err) {
+        console.warn('Legacy client-side user update failed:', err?.message);
+      }
 
       refetch();
     } catch (err) {
@@ -739,7 +745,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       hideOnMobile: true,
       width: '14%',
       render: (u) => {
-        let statusStr = u.isArchived ? 'archived' : (u.approved ? 'active' : 'pending');
+        const statusStr = u.isArchived ? 'archived' : (u.approved ? 'active' : 'pending');
         return <StatusChip status={statusStr} />;
       }
     }
@@ -850,8 +856,23 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
         }
 
         actions.push({
+          label: 'Catálogos',
+          icon: Share2,
+          tooltip: 'Multi-Portfolio B2B Document Sharing',
+          onClick: (e) => {
+            e.stopPropagation();
+            setUser360InitialTab('catalogs');
+            setDetailsUser(u);
+          }
+        });
+
+        actions.push({
           type: 'edit',
-          onClick: (e) => { e.stopPropagation(); setDetailsUser(u); }
+          onClick: (e) => {
+            e.stopPropagation();
+            setUser360InitialTab('profile');
+            setDetailsUser(u);
+          }
         });
 
         return (
@@ -1089,6 +1110,22 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           <div style={{ marginTop: '0.95rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '0.25rem' }}>Wholesale Workflow:</span>
             
+            {/* Direct Multi-Portfolio B2B Document Sharing */}
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              style={{ fontSize: '0.78rem', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#eff6ff', border: '1.5px solid #1a73e8', borderRadius: '6px', color: '#1a73e8', fontWeight: 750, cursor: 'pointer' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setUser360InitialTab('catalogs');
+                setDetailsUser(u);
+              }}
+              title="Open Multi-Portfolio B2B Document Sharing Drawer"
+            >
+              <Share2 size={13} color="#1a73e8" />
+              <span>Multi-Portfolio Catalogs</span>
+            </button>
+            
             {/* Financial Statements */}
             <button
               type="button"
@@ -1262,7 +1299,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             isFiltered={Boolean(searchTerm || roleFilter !== 'all' || statusFilter !== 'all' || originFilter !== 'all' || showArchived)}
             filteredCount={filteredUsers.length}
             globalCount={kpisData.total}
-            scopeLabel={kpiScope === 'global' ? 'Entire Database (Unfiltered)' : (Boolean(searchTerm || roleFilter !== 'all' || statusFilter !== 'all' || originFilter !== 'all') ? 'Matching Active Filters' : 'All Registered Users')}
+            scopeLabel={kpiScope === 'global' ? 'Entire Database (Unfiltered)' : (searchTerm || roleFilter !== 'all' || statusFilter !== 'all' || originFilter !== 'all' ? 'Matching Active Filters' : 'All Registered Users')}
           />
           <div className="users-kpi-grid">
             <MetricCard
@@ -1488,8 +1525,12 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       {detailsUser && (
         <User360Drawer
           isOpen={Boolean(detailsUser)}
-          onClose={() => setDetailsUser(null)}
+          onClose={() => {
+            setDetailsUser(null);
+            setUser360InitialTab('profile');
+          }}
           user={detailsUser}
+          initialTab={user360InitialTab}
           onUserUpdated={refetch}
           onImpersonate={(u) => {
             impersonateUser(u);
