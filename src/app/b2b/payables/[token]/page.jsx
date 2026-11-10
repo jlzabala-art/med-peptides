@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -22,7 +22,9 @@ import {
   Mail,
   ArrowRight,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  HelpCircle,
+  CreditCard
 } from '@/lib/icons';
 import BrandLogo from '@/components/common/BrandLogo';
 import CopyableId from '@/components/ui/CopyableId';
@@ -216,10 +218,25 @@ export default function PayablesStatementPage() {
   const [searchFilter, setSearchFilter] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
 
+  const ADMIN_EMAILS = [
+    'jlzabala@gmail.com',
+    'jose@mediluxem.com',
+    'jose@mediluxeme.com',
+    'admin@regenpept.test',
+    'clinical@atlashealth-services.com'
+  ];
+
   // Authentication & Zero-Trust Unlock State
   const authContext = useAuth?.() || {};
   const authUser = authContext.user;
-  const isAdmin = authContext.isAdmin;
+  const isMasterAdmin = Boolean(
+    authContext.isAdmin ||
+    authContext.activeRole === 'admin' ||
+    (authUser?.email && (
+      ADMIN_EMAILS.includes(authUser.email.toLowerCase()) ||
+      authUser.email.toLowerCase().includes('admin')
+    ))
+  );
   const logout = authContext.logout;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -232,6 +249,18 @@ export default function PayablesStatementPage() {
   const isQuicklinkVerified = searchParams?.get('quicklink') === 'verified';
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isWhatsAppDropdownOpen, setIsWhatsAppDropdownOpen] = useState(false);
+  const whatsappDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (whatsappDropdownRef.current && !whatsappDropdownRef.current.contains(e.target)) {
+        setIsWhatsAppDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const fetchStatement = async (emailOverride, forceRefresh = false) => {
     if (!token) return;
@@ -266,9 +295,10 @@ export default function PayablesStatementPage() {
   };
 
   useEffect(() => {
-    if (authUser?.email && !activeEmail) {
-      setActiveEmail(authUser.email);
-      fetchStatement(authUser.email);
+    const userEmail = authUser?.email?.toLowerCase() || '';
+    if (userEmail) {
+      setActiveEmail(userEmail);
+      fetchStatement(userEmail);
     } else {
       fetchStatement();
     }
@@ -278,7 +308,14 @@ export default function PayablesStatementPage() {
   const kpis = data?.kpis || {};
   const openBills = data?.openBills || [];
   const paidBills = data?.paidBills || [];
-  const isLocked = Boolean(data?.isLocked);
+  const isLocked = Boolean(data?.isLocked) && !isMasterAdmin;
+
+  const totalPendingAmount = useMemo(() => {
+    if (kpis?.totalPendingAmount !== null && kpis?.totalPendingAmount !== undefined) {
+      return Number(kpis.totalPendingAmount);
+    }
+    return openBills.reduce((acc, b) => acc + (Number(b.balance) > 0 ? Number(b.balance) : Number(b.total || 0)), 0);
+  }, [kpis?.totalPendingAmount, openBills]);
 
   // Handle email unlock attempt
   const handleUnlockSubmit = async (e) => {
@@ -311,12 +348,14 @@ export default function PayablesStatementPage() {
     }
   };
 
-  const handleOpenWhatsApp = () => {
+  const handleOpenWhatsAppAction = (actionType = 'inquiry') => {
+    setIsWhatsAppDropdownOpen(false);
+
     if (isLocked) {
       toast.error(
         lang === 'es'
           ? 'Introduce tu email o inicia sesión para verificar tu identidad antes de contactar'
-          : 'Please verify your registered partner email or sign in to enable accounting inquiries'
+          : 'Please verify your registered partner email or sign in to enable accounting options'
       );
       const unlockEl = document.getElementById('unlock-drawer-box') || document.querySelector('input[type="email"]');
       if (unlockEl) {
@@ -332,10 +371,25 @@ export default function PayablesStatementPage() {
     const vendorCode = statement.vendorNumber ? ` (${lang === 'es' ? 'Cta.' : 'Vendor'} ${statement.vendorNumber})` : '';
     const contact = statement.contactName ? ` - ${statement.contactName}` : '';
 
-    const msg = lang === 'es'
-      ? `Hola Departamento de Contabilidad de Atlas, les contacto en nombre de ${company}${vendorCode}${contact}. Tengo una consulta sobre nuestro extracto oficial de liquidación comercial: ${cleanUrl}`
-      : `Hello Atlas Accounts Department, I am contacting you on behalf of ${company}${vendorCode}${contact}. I have an inquiry regarding our official commercial settlement statement: ${cleanUrl}`;
+    let msg = '';
+    if (actionType === 'settlement_payment') {
+      const pendingTotalFormatted = totalPendingAmount > 0
+        ? `${totalPendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${statement.currency || 'AED'}`
+        : `${openBills.length} ${lang === 'es' ? 'facturas pendientes' : 'pending bills'}`;
 
+      const billNumbers = openBills.map(b => b.billNumber || b.billId).filter(Boolean).slice(0, 3).join(', ');
+      const billsRef = billNumbers ? ` (${lang === 'es' ? 'Facturas' : 'Bills'}: ${billNumbers})` : '';
+
+      msg = lang === 'es'
+        ? `Hola Departamento de Contabilidad de Atlas, les contacto en nombre de ${company}${vendorCode}${contact}. Deseamos solicitar la liberación y pago de nuestro saldo pendiente aprobado por valor de ${pendingTotalFormatted}${billsRef}. Por favor confirmen las instrucciones de transferencia bancaria y fecha de liquidación. Extracto oficial: ${cleanUrl}`
+        : `Hello Atlas Accounts Department, I am contacting you on behalf of ${company}${vendorCode}${contact}. We would like to request the settlement and payment release of our approved outstanding balance of ${pendingTotalFormatted}${billsRef}. Please confirm wire transfer instructions and settlement schedule. Official statement: ${cleanUrl}`;
+    } else {
+      msg = lang === 'es'
+        ? `Hola Departamento de Contabilidad de Atlas, les contacto en nombre de ${company}${vendorCode}${contact}. Tengo una consulta sobre nuestro extracto oficial de liquidación comercial: ${cleanUrl}`
+        : `Hello Atlas Accounts Department, I am contacting you on behalf of ${company}${vendorCode}${contact}. I have an inquiry regarding our official commercial settlement statement: ${cleanUrl}`;
+    }
+
+    // Number embedded in code only: +971 52 129 0471 (not shown in visible UI text)
     window.open(`https://wa.me/971521290471?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -585,15 +639,19 @@ export default function PayablesStatementPage() {
             fontWeight: 700,
             padding: '3px 9px',
             borderRadius: '4px',
-            backgroundColor: isLocked ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
-            color: isLocked ? '#fca5a5' : '#86efac',
-            border: `1px solid ${isLocked ? 'rgba(239, 68, 68, 0.3)' : 'rgba(34, 197, 94, 0.3)'}`,
+            backgroundColor: isMasterAdmin ? 'rgba(2, 132, 199, 0.15)' : (isLocked ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)'),
+            color: isMasterAdmin ? '#38bdf8' : (isLocked ? '#fca5a5' : '#86efac'),
+            border: `1px solid ${isMasterAdmin ? 'rgba(56, 189, 248, 0.35)' : (isLocked ? 'rgba(239, 68, 68, 0.3)' : 'rgba(34, 197, 94, 0.3)')}`,
             display: 'inline-flex',
             alignItems: 'center',
             gap: '4px'
           }}>
-            {isLocked ? <Lock size={11} /> : <ShieldCheck size={11} />}
-            <span>{isLocked ? (lang === 'es' ? 'Acceso Protegido' : 'Protected Access') : (lang === 'es' ? 'Identidad Verificada' : 'Identity Verified')}</span>
+            {isMasterAdmin ? <ShieldCheck size={11} color="#38bdf8" /> : (isLocked ? <Lock size={11} /> : <ShieldCheck size={11} />)}
+            <span>
+              {isMasterAdmin
+                ? (lang === 'es' ? 'Vista Administrador Maestro' : 'Master Admin View')
+                : (isLocked ? (lang === 'es' ? 'Acceso Protegido' : 'Protected Access') : (lang === 'es' ? 'Identidad Verificada' : 'Identity Verified'))}
+            </span>
           </span>
 
           <button
@@ -654,7 +712,7 @@ export default function PayablesStatementPage() {
             </div>
 
             {/* Company Name (Locked or Unlocked) */}
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {isLocked ? (
                 <>
                   <Lock size={20} color="#c2410c" />
@@ -663,7 +721,26 @@ export default function PayablesStatementPage() {
                   </span>
                 </>
               ) : (
-                statement.wholesalerName
+                <>
+                  <span>{statement.wholesalerName}</span>
+                  {isMasterAdmin && (
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#0284c7',
+                      backgroundColor: '#f0f9ff',
+                      border: '1px solid #bae6fd',
+                      borderRadius: '4px',
+                      padding: '2px 8px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <ShieldCheck size={11} color="#0284c7" />
+                      <span>{lang === 'es' ? 'Acceso Total Administrador' : 'Full Admin Access'}</span>
+                    </span>
+                  )}
+                </>
               )}
             </h1>
 
@@ -818,10 +895,40 @@ export default function PayablesStatementPage() {
               </button>
             </form>
             <div style={{ marginTop: '0.85rem', fontSize: '0.78rem', color: '#94a3b8' }}>
-              {lang === 'es' ? (
-                <>¿Ya tienes cuenta autorizada? <Link href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'underline' }}>Inicia sesión aquí</Link></>
+              {authUser ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span>
+                    {lang === 'es' ? 'Sesión actual:' : 'Current session:'}{' '}
+                    <strong style={{ color: '#0f172a' }}>{authUser.email}</strong>
+                  </span>
+                  <span>·</span>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (authContext.logout) await authContext.logout();
+                      window.location.href = `/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}&switch=true`;
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      color: '#0284c7',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    {lang === 'es' ? 'Cambiar de cuenta / Iniciar con otro usuario' : 'Switch account / Sign in as different user'}
+                  </button>
+                </div>
               ) : (
-                <>Already have an authorized account? <Link href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'underline' }}>Sign in here</Link></>
+                <>
+                  {lang === 'es' ? (
+                    <>¿Ya tienes cuenta autorizada? <Link href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}&switch=true`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'underline' }}>Inicia sesión aquí</Link></>
+                  ) : (
+                    <>Already have an authorized account? <Link href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}&switch=true`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'underline' }}>Sign in here</Link></>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -913,36 +1020,152 @@ export default function PayablesStatementPage() {
                 : 'This statement is an official commercial record synchronized in real-time with Zoho Books accounts payable.'}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleOpenWhatsApp}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '7px 16px',
-              backgroundColor: isLocked ? '#f1f5f9' : '#003666',
-              color: isLocked ? '#64748b' : '#ffffff',
-              border: isLocked ? '1px solid #cbd5e1' : 'none',
-              borderRadius: '6px',
-              fontSize: '0.78rem',
-              fontWeight: 650,
-              cursor: isLocked ? 'pointer' : 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            title={
-              isLocked
-                ? (lang === 'es' ? 'Identifícate con tu email para consultar al contable' : 'Verify your email to contact Accounts')
-                : (lang === 'es' ? 'Contactar con el departamento contable' : 'Contact Accounts Department')
-            }
-          >
-            {isLocked ? <Lock size={13} color="#94a3b8" /> : <MessageCircle size={14} />}
-            <span>
-              {isLocked
-                ? (lang === 'es' ? 'Identifícate para Consultar' : 'Sign In to Contact Accounts')
-                : (lang === 'es' ? 'Contactar Departamento Financiero' : 'Contact Accounts Department')}
-            </span>
-          </button>
+          {/* ── WhatsApp Financial Desk Dropdown / Actions ── */}
+          {isLocked ? (
+            <button
+              type="button"
+              onClick={() => handleOpenWhatsAppAction('inquiry')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                backgroundColor: '#f1f5f9',
+                color: '#64748b',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+              title={lang === 'es' ? 'Identifícate con tu email para consultar al contable' : 'Verify your email to contact Accounts'}
+            >
+              <Lock size={13} color="#94a3b8" />
+              <span>
+                {lang === 'es' ? 'Identifícate para Opciones de Pago' : 'Sign In for Payment Options'}
+              </span>
+            </button>
+          ) : (
+            <div ref={whatsappDropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
+              <button
+                type="button"
+                onClick={() => setIsWhatsAppDropdownOpen(prev => !prev)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  backgroundColor: '#003666',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '0.80rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                  transition: 'all 0.15s ease'
+                }}
+                title={lang === 'es' ? 'Opciones de gestión con el departamento contable' : 'Accounts Department Actions'}
+              >
+                <MessageCircle size={15} color="#38bdf8" />
+                <span>{lang === 'es' ? 'Gestión WhatsApp con Contabilidad' : 'Accounts WhatsApp Actions'}</span>
+                <ChevronDown size={14} style={{ transform: isWhatsAppDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+              </button>
+
+              {isWhatsAppDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 'calc(100% + 8px)',
+                  right: 0,
+                  width: '320px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                  zIndex: 50,
+                  overflow: 'hidden',
+                  padding: '6px 0'
+                }}>
+                  <div style={{ padding: '8px 14px 6px 14px', borderBottom: '1px solid #f1f5f9', fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {lang === 'es' ? 'Canal Oficial Departamento Contable' : 'Official Accounts Desk Channel'}
+                  </div>
+
+                  {/* Option 1: Accounting Clarifications */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenWhatsAppAction('inquiry')}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '10px',
+                      padding: '10px 14px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <div style={{ width: '32px', height: '32px', borderRadius: '6px', backgroundColor: '#e0f2fe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                      <HelpCircle size={16} color="#0284c7" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                        {lang === 'es' ? 'Pedir Aclaraciones Contables' : 'Request Accounting Clarification'}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', lineHeight: 1.3 }}>
+                        {lang === 'es' ? 'Resolver dudas sobre conceptos, facturas o deducciones' : 'Ask questions regarding terms, invoices, or deductions'}
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Option 2: Request Settlement Payment */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenWhatsAppAction('settlement_payment')}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '10px',
+                      padding: '10px 14px',
+                      border: 'none',
+                      borderTop: '1px solid #f1f5f9',
+                      backgroundColor: 'transparent',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fff7ed'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <div style={{ width: '32px', height: '32px', borderRadius: '6px', backgroundColor: '#ffedd5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                      <CreditCard size={16} color="#c2410c" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                          {lang === 'es' ? 'Solicitar Pago del Saldo' : 'Request Balance Payment'}
+                        </span>
+                        {totalPendingAmount > 0 && (
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#c2410c', backgroundColor: '#ffedd5', padding: '1px 6px', borderRadius: '4px' }}>
+                            {totalPendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {statement.currency || 'AED'}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', lineHeight: 1.3 }}>
+                        {lang === 'es' ? 'Coordinar transferencia bancaria del importe pendiente' : 'Coordinate wire transfer release for approved balance'}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
 

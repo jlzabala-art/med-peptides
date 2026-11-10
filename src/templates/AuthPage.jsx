@@ -44,6 +44,7 @@ export default function AuthPage({ onBack }) {
     || searchParams.get('returnUrl')
     || searchParams.get('next');
   const redirectTo = (explicitSearchRedirect && explicitSearchRedirect !== '/customer') ? explicitSearchRedirect : null;
+  const isSwitchAccount = searchParams.get('switch') === 'true' || searchParams.get('action') === 'switch';
   const { user, userProfile, updateProfileData, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, logout, resetPassword, linkPassword, loginWithGoogle, loading: authLoading } = useAuth();
   const { register, loading: registerLoading, error: registerError } = useRegistration();
   const loading = authLoading || registerLoading;
@@ -152,15 +153,23 @@ export default function AuthPage({ onBack }) {
     return cleanRole === 'pending' ? null : '/admin';
   };
 
+  // When ?switch=true is passed, logout current session so the user can sign in with another account
+  useEffect(() => {
+    if (isSwitchAccount && user && logout) {
+      logout();
+    }
+  }, [isSwitchAccount, user, logout]);
+
   // Auto-redirect logged-in users to their respective dashboards
   useEffect(() => {
+    if (isSwitchAccount) return;
     if (!loading && user && userProfile) {
       const targetPath = resolveTargetPortal(userProfile.role, user.email, redirectTo);
       if (targetPath) {
         router.push(targetPath, { replace: true });
       }
     }
-  }, [user, userProfile, loading, redirectTo, router]);
+  }, [user, userProfile, loading, redirectTo, router, isSwitchAccount]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -406,6 +415,7 @@ export default function AuthPage({ onBack }) {
 
   // Immediate redirect for Authenticated users to avoid rendering limbo
   useEffect(() => {
+    if (isSwitchAccount) return;
     if (!loading && user && userProfile) {
       if (userProfile?.role === 'pending') {
         // Pending profile onboarding: keep on auth page to complete details
@@ -430,12 +440,12 @@ export default function AuthPage({ onBack }) {
         }
       }
     }
-  }, [user, loading, userProfile, redirectTo, router]);
+  }, [user, loading, userProfile, redirectTo, router, isSwitchAccount]);
 
 
 
   // If user is logged in and not pending onboarding, show loading state while redirecting
-  if (user && userProfile && userProfile.role !== 'pending') {
+  if (user && userProfile && userProfile.role !== 'pending' && !isSwitchAccount) {
     return (
       <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '1rem' }}>
         <div className="global-spinner" style={{ width: '32px', height: '32px' }}></div>

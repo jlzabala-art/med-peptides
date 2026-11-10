@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 
+const ADMIN_EMAILS = [
+  'jlzabala@gmail.com',
+  'jose@mediluxem.com',
+  'jose@mediluxeme.com',
+  'admin@regenpept.test',
+  'clinical@atlashealth-services.com'
+];
+
 async function getZohoAccessToken() {
   try {
     const snapV2 = await adminDb.collection('zoho_token_cache').doc('access_token_v2').get();
@@ -243,10 +251,22 @@ export async function GET(request, { params }) {
     const expectedEmail = (shareDoc.contactEmail || 'jia9156@gmail.com').toLowerCase().trim();
 
     // Verification succeeds if:
-    // a) providedEmail matches expectedEmail (either via quicklink parameter or user input in unlock drawer)
-    // b) Or admin authorization header is present
+    // a) providedEmail is in ADMIN_EMAILS or has admin credentials
+    // b) providedEmail matches expectedEmail
+    // c) quicklink === 'verified' or Bearer auth header present
+    const isMasterAdminEmail = Boolean(
+      providedEmail && (
+        ADMIN_EMAILS.includes(providedEmail) ||
+        providedEmail.includes('admin') ||
+        providedEmail.endsWith('@mediluxem.com') ||
+        providedEmail.endsWith('@mediluxeme.com') ||
+        providedEmail.endsWith('@atlas-services.com')
+      )
+    );
+
     const isAuthorized = Boolean(
-      (providedEmail && (providedEmail === expectedEmail || providedEmail.includes('admin') || providedEmail === 'clinical@atlashealth-services.com')) ||
+      isMasterAdminEmail ||
+      (providedEmail && providedEmail === expectedEmail) ||
       (quicklink === 'verified') ||
       (authHeader && authHeader.startsWith('Bearer '))
     );
@@ -315,6 +335,7 @@ export async function GET(request, { params }) {
     return NextResponse.json({
       success: true,
       isLocked: false,
+      isMasterAdmin: isMasterAdminEmail,
       statement: {
         wholesalerName: shareDoc.wholesalerName || 'Health Source Canada',
         contactName: shareDoc.contactName || 'Dr. Jan Alomia',
