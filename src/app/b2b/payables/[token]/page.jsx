@@ -894,9 +894,9 @@ export default function PayablesStatementPage() {
           <button
             onClick={handleOpenWhatsApp}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 16px', backgroundColor: '#003666', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
-            title="+971 52 129 0471 (WhatsApp Accounting Desk)"
+            title={lang === 'es' ? 'Contactar con el departamento contable' : 'Contact Accounts Department'}
           >
-            <MessageCircle size={14} /> {lang === 'es' ? 'Contactar Departamento Financiero (+971 52 129 0471)' : 'Contact Accounts Department (+971 52 129 0471)'}
+            <MessageCircle size={14} /> {lang === 'es' ? 'Contactar Departamento Financiero' : 'Contact Accounts Department'}
           </button>
         </div>
       </main>
