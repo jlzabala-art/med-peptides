@@ -312,10 +312,30 @@ export default function PayablesStatementPage() {
   };
 
   const handleOpenWhatsApp = () => {
+    if (isLocked) {
+      toast.error(
+        lang === 'es'
+          ? 'Introduce tu email o inicia sesión para verificar tu identidad antes de contactar'
+          : 'Please verify your registered partner email or sign in to enable accounting inquiries'
+      );
+      const unlockEl = document.getElementById('unlock-drawer-box') || document.querySelector('input[type="email"]');
+      if (unlockEl) {
+        unlockEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const inputEl = unlockEl.querySelector?.('input') || unlockEl;
+        inputEl?.focus?.();
+      }
+      return;
+    }
+
     const cleanUrl = typeof window !== 'undefined' ? `${window.location.origin}/b2b/payables/${token}` : '';
+    const company = statement.wholesalerName || (lang === 'es' ? 'Empresa Colaboradora' : 'Commercial Partner');
+    const vendorCode = statement.vendorNumber ? ` (${lang === 'es' ? 'Cta.' : 'Vendor'} ${statement.vendorNumber})` : '';
+    const contact = statement.contactName ? ` - ${statement.contactName}` : '';
+
     const msg = lang === 'es'
-      ? `Hola equipo de Contabilidad de Atlas, tengo una consulta sobre el extracto de liquidación comercial: ${cleanUrl}`
-      : `Hello Atlas Accounts Team, regarding the commercial settlement statement: ${cleanUrl}`;
+      ? `Hola Departamento de Contabilidad de Atlas, les contacto en nombre de ${company}${vendorCode}${contact}. Tengo una consulta sobre nuestro extracto oficial de liquidación comercial: ${cleanUrl}`
+      : `Hello Atlas Accounts Department, I am contacting you on behalf of ${company}${vendorCode}${contact}. I have an inquiry regarding our official commercial settlement statement: ${cleanUrl}`;
+
     window.open(`https://wa.me/971521290471?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -737,7 +757,9 @@ export default function PayablesStatementPage() {
 
         {/* ── ZERO-TRUST UNLOCK CARD (Visible when Locked) ── */}
         {isLocked && (
-          <div style={{
+          <div
+            id="unlock-drawer-box"
+            style={{
             backgroundColor: '#ffffff',
             borderRadius: '12px',
             border: '2px dashed #fdba74',
@@ -892,11 +914,34 @@ export default function PayablesStatementPage() {
             </div>
           </div>
           <button
+            type="button"
             onClick={handleOpenWhatsApp}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 16px', backgroundColor: '#003666', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
-            title={lang === 'es' ? 'Contactar con el departamento contable' : 'Contact Accounts Department'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 16px',
+              backgroundColor: isLocked ? '#f1f5f9' : '#003666',
+              color: isLocked ? '#64748b' : '#ffffff',
+              border: isLocked ? '1px solid #cbd5e1' : 'none',
+              borderRadius: '6px',
+              fontSize: '0.78rem',
+              fontWeight: 650,
+              cursor: isLocked ? 'pointer' : 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            title={
+              isLocked
+                ? (lang === 'es' ? 'Identifícate con tu email para consultar al contable' : 'Verify your email to contact Accounts')
+                : (lang === 'es' ? 'Contactar con el departamento contable' : 'Contact Accounts Department')
+            }
           >
-            <MessageCircle size={14} /> {lang === 'es' ? 'Contactar Departamento Financiero' : 'Contact Accounts Department'}
+            {isLocked ? <Lock size={13} color="#94a3b8" /> : <MessageCircle size={14} />}
+            <span>
+              {isLocked
+                ? (lang === 'es' ? 'Identifícate para Consultar' : 'Sign In to Contact Accounts')
+                : (lang === 'es' ? 'Contactar Departamento Financiero' : 'Contact Accounts Department')}
+            </span>
           </button>
         </div>
       </main>
