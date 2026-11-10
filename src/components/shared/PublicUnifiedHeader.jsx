@@ -412,19 +412,30 @@ export default function PublicUnifiedHeader({
 
 
 
-              {/* Language Selector */}
-              <select
-                className="puh-lang-select"
-                value={lang}
-                onChange={(e) => handleLanguageChange(e.target.value)}
-                aria-label="Select Language"
-              >
+              {/* Language Selector (Segmented Pills Google Cloud UX Standard) */}
+              <div className="puh-lang-pills" style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '6px', padding: '2px' }}>
                 {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.flag} {l.label}
-                  </option>
+                  <button
+                    key={l.code}
+                    type="button"
+                    onClick={() => handleLanguageChange(l.code)}
+                    style={{
+                      border: 'none',
+                      background: lang === l.code ? '#0284c7' : 'transparent',
+                      color: lang === l.code ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                      fontWeight: lang === l.code ? 800 : 500,
+                      fontSize: '0.72rem',
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={l.code === 'es' ? 'Español' : 'English'}
+                  >
+                    {l.label}
+                  </button>
                 ))}
-              </select>
+              </div>
 
               {/* Copy Canonical Link */}
               <button

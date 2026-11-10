@@ -14,6 +14,8 @@ import {
   Layers,
   MoreVertical
 } from 'lucide-react';
+import BrandLogo from '@/components/common/BrandLogo';
+import GcpUserBadge from '@/components/shared/GcpUserBadge';
 
 const FX_RATES = {
   BRL_PER_EUR: 6.10,
@@ -602,58 +604,60 @@ export default function UltramanCrossBorderStudyPage() {
         }
       `}</style>
 
-      {/* ── Top Header Navigation (Google Cloud UX: 48px sticky single-row) ── */}
-      <header style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 30, height: 48 }}>
-        <div className="ultraman-header-inner" style={{ maxWidth: 1200, margin: '0 auto', height: 48, padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+      {/* ── Top Header Navigation (Google Cloud UX: 48px sticky single-row, Midnight Navy) ── */}
+      <header style={{ background: '#002b4d', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 30, height: 48 }}>
+        <div className="ultraman-header-inner" style={{ maxWidth: 1280, margin: '0 auto', height: 48, padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          {/* Left Zone: Brand + Breadcrumbs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
             <Link 
               href="/admin/prescriptions"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.78rem', color: '#475569', textDecoration: 'none', padding: '4px 8px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.74rem', color: '#cbd5e1', textDecoration: 'none', padding: '3px 8px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', flexShrink: 0 }}
               title={isEs ? 'Volver al Desk' : 'Back to Desk'}
             >
-              <ArrowLeft size={13} />
+              <ArrowLeft size={12} color="#ffffff" />
               <span>{isEs ? 'Desk' : 'Desk'}</span>
             </Link>
-            <span style={{ height: 16, width: 1, background: '#cbd5e1', flexShrink: 0 }} />
-            <span className="ultraman-brand-badge" style={{ fontSize: '0.66rem', fontWeight: 800, background: '#003666', color: '#ffffff', padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
-              ATLAS CLINICAL
+            <span style={{ height: 16, width: 1, background: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+            <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              <BrandLogo variant="light" size="compact" />
+            </Link>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>/</span>
+            <span style={{ fontSize: '0.76rem', fontWeight: 650, color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {isEs ? 'Estudios Clínicos' : 'Clinical Studies'}
             </span>
-            <span style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>/</span>
+            <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {isEs ? 'Estudio Ultraman™' : 'Ultraman™ Study'}
             </span>
           </div>
 
           {/* Desktop Controls (≥769px) */}
           <div className="ultraman-desktop-header-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            {/* Language toggle */}
-            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: 2, borderRadius: 6, border: '1px solid #cbd5e1' }}>
-              {[
-                { code: 'en', label: 'EN' },
-                { code: 'es', label: 'ES' }
-              ].map(({ code, label }) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => setLang(code)}
-                  style={{
-                    border: 'none',
-                    background: lang === code ? '#003666' : 'transparent',
-                    color: lang === code ? '#ffffff' : '#475569',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    padding: '3px 8px',
-                    borderRadius: 4,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            {/* Share button */}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                background: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                padding: '4px 10px',
+                borderRadius: 6,
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#ffffff',
+                cursor: 'pointer',
+                height: 30
+              }}
+            >
+              {copiedLink ? <Check size={13} color="#4ade80" /> : <Copy size={13} />}
+              <span>{copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
+            </button>
 
-            {/* Currency selector */}
-            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: 2, borderRadius: 6, border: '1px solid #cbd5e1' }}>
+            {/* Currency selector (Segmented GCP Chip) */}
+            <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.25)', padding: 2, borderRadius: 6, border: '1px solid rgba(255,255,255,0.18)' }}>
               {['EUR', 'USD', 'BRL'].map((cur) => (
                 <button
                   key={cur}
@@ -661,8 +665,8 @@ export default function UltramanCrossBorderStudyPage() {
                   onClick={() => setCurrency(cur)}
                   style={{
                     border: 'none',
-                    background: currency === cur ? '#003666' : 'transparent',
-                    color: currency === cur ? '#ffffff' : '#475569',
+                    background: currency === cur ? '#0284c7' : 'transparent',
+                    color: currency === cur ? '#ffffff' : 'rgba(255,255,255,0.7)',
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     padding: '3px 9px',
@@ -676,27 +680,35 @@ export default function UltramanCrossBorderStudyPage() {
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                padding: '4px 10px',
-                borderRadius: 6,
-                fontSize: '0.74rem',
-                fontWeight: 650,
-                color: '#334155',
-                cursor: 'pointer',
-                height: 30
-              }}
-            >
-              {copiedLink ? <Check size={13} color="#16a34a" /> : <Copy size={13} />}
-              <span>{copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
-            </button>
+            {/* Language toggle (Segmented GCP Chip) */}
+            <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.25)', padding: 2, borderRadius: 6, border: '1px solid rgba(255,255,255,0.18)' }}>
+              {[
+                { code: 'en', label: 'EN' },
+                { code: 'es', label: 'ES' }
+              ].map(({ code, label }) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setLang(code)}
+                  style={{
+                    border: 'none',
+                    background: lang === code ? '#0284c7' : 'transparent',
+                    color: lang === code ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    padding: '3px 8px',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Google Cloud Console UX Standard User Badge & Quick Logout */}
+            <GcpUserBadge variant="dark" lang={lang} />
           </div>
 
           {/* Mobile Controls (<768px: Currency Pill + More Menu) */}
@@ -709,9 +721,9 @@ export default function UltramanCrossBorderStudyPage() {
                 height: 30,
                 padding: '0 8px',
                 borderRadius: 6,
-                border: '1px solid #cbd5e1',
-                background: '#f8fafc',
-                color: '#003666',
+                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'rgba(255,255,255,0.1)',
+                color: '#ffffff',
                 fontSize: '0.74rem',
                 fontWeight: 800,
                 cursor: 'pointer',
@@ -738,9 +750,9 @@ export default function UltramanCrossBorderStudyPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: 6,
-                  border: isMobileMenuOpen ? '1px solid #003666' : '1px solid #cbd5e1',
-                  background: isMobileMenuOpen ? '#eff6ff' : '#ffffff',
-                  color: '#334155',
+                  border: isMobileMenuOpen ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.2)',
+                  background: isMobileMenuOpen ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.1)',
+                  color: '#ffffff',
                   cursor: 'pointer'
                 }}
               >
