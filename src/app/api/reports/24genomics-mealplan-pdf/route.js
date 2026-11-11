@@ -513,7 +513,7 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    const badge1 = 'PAGE 2 OF 4 · FOOD-FIRST CLINICAL GUIDE';
+    const badge1 = 'PAGE 2 OF 5 · FOOD-FIRST CLINICAL GUIDE & FOOD LIST';
     const badge1W = helveticaBold.widthOfTextAtSize(badge1, 7.5) + 16;
     page1.drawRectangle({
       x: p1Width - 36 - badge1W,
@@ -1040,7 +1040,7 @@ export async function GET(request) {
     }
 
     // Page 2 Footer
-    page1.drawText('Page 2 of 3 · Meal Plan & Daily Routine · Turn to Page 3 for Simplified Supplement Packs & Shopping Guide', {
+    page1.drawText('Page 2 of 5 · Genetic Foundations & Food Traffic Light · Atlas Health Services · www.atlashealthservices.com', {
       x: 36,
       y: 18,
       size: 6.8,
@@ -1072,7 +1072,9 @@ export async function GET(request) {
     }
 
     // =========================================================================
-    // PAGE 2: 7-DAY PRECISION MEAL PLAN & GROCERY CHECKLIST (PAGE 3 OF 4)
+    // PAGE 3: 7-DAY NUTRIGENOMIC MEAL PLAN (MON TO SUN) (PAGE 3 OF 5)
+    // Conforms strictly to Google Cloud UX: Dedicated page, generous height,
+    // zero text overlap, full-width Day 7 card with independent columns.
     // =========================================================================
     const page2 = pdfDoc.addPage([595.28, 841.89]);
     const { width: p2Width, height: p2Height } = page2.getSize();
@@ -1097,7 +1099,7 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    const badge2 = 'PAGE 3 OF 4 · 7-DAY PRECISION MEAL PLAN & GROCERY';
+    const badge2 = 'PAGE 3 OF 5 · 7-DAY PRECISION MEAL PLAN';
     const badge2W = helveticaBold.widthOfTextAtSize(badge2, 7.5) + 16;
     page2.drawRectangle({
       x: p2Width - 36 - badge2W,
@@ -1117,7 +1119,7 @@ export async function GET(request) {
     });
 
     y2 -= 18;
-    page2.drawText('7-DAY NUTRIGENOMIC MEAL PLAN & GROCERY GUIDE', {
+    page2.drawText('7-DAY NUTRIGENOMIC MEAL PLAN (MONDAY TO SUNDAY)', {
       x: 36,
       y: y2,
       size: 14.0,
@@ -1126,7 +1128,7 @@ export async function GET(request) {
     });
 
     y2 -= 13;
-    page2.drawText('Scientifically formulated dishes supporting methylation, leptin signaling, and glycemic control', {
+    page2.drawText('Precision culinary formulation using strictly allowed green-light foods · Sourced for Qatar & GCC', {
       x: 36,
       y: y2,
       size: 8.5,
@@ -1143,11 +1145,10 @@ export async function GET(request) {
     });
 
     // -------------------------------------------------------------------------
-    // SECTION 1: 7-DAY PRECISION MEAL PLAN (2-Column Grid + Day 7 Banner)
-    // Conforms strictly to Google Cloud UX: Zero text overlap, auto-wrapped lines
+    // DAYS 1 TO 6: 2-COLUMN GRID (Height: 182pt each, ample breathing room)
     // -------------------------------------------------------------------------
     y2 -= 16;
-    page2.drawText('1. 7-DAY NUTRIGENOMIC MEAL PLAN (MON TO SUN · INGREDIENTS ADAPTED TO QATAR)', {
+    page2.drawText('1. WEEKDAY PRECISION NUTRITION (MON TO SAT)', {
       x: 36,
       y: y2,
       size: 10.0,
@@ -1157,13 +1158,13 @@ export async function GET(request) {
 
     y2 -= 8;
     const planColW = (p2Width - 72 - 12) / 2;
-    const dayBoxH = 88;
+    const dayBoxH = 175;
 
     plan.sevenDayMealPlan.slice(0, 6).forEach((d, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
       const dX = 36 + col * (planColW + 12);
-      const dY = y2 - (row * (dayBoxH + 6)) - dayBoxH;
+      const dY = y2 - (row * (dayBoxH + 8)) - dayBoxH;
 
       page2.drawRectangle({
         x: dX,
@@ -1175,74 +1176,114 @@ export async function GET(request) {
         borderWidth: 1.0
       });
 
-      // Top strip
+      // Top Header Strip
       page2.drawRectangle({
         x: dX,
-        y: dY + dayBoxH - 17,
+        y: dY + dayBoxH - 22,
         width: planColW,
-        height: 17,
+        height: 22,
         color: rgb(241 / 255, 245 / 255, 249 / 255)
       });
 
-      page2.drawText(`DAY ${d.day} | ${d.dayName.toUpperCase()}: ${d.themeEn}`, {
-        x: dX + 6,
-        y: dY + dayBoxH - 12,
-        size: 6.8,
+      page2.drawText(`DAY ${d.day} | ${d.dayName.toUpperCase()}`, {
+        x: dX + 8,
+        y: dY + dayBoxH - 11,
+        size: 7.2,
         font: helveticaBold,
-        color: navyPrimary,
-        maxWidth: planColW - 12
+        color: navyPrimary
       });
 
-      // Meals text with dynamic line wrapping (no hardcoded colliding Y coordinates!)
-      let mealY = dY + dayBoxH - 26;
-      mealY = drawWrappedBlock(page2, `- Breakfast: ${d.breakfast}`, {
-        x: dX + 6,
+      page2.drawText(d.themeEn, {
+        x: dX + 8,
+        y: dY + dayBoxH - 19,
+        size: 5.8,
+        font: helveticaBold,
+        color: tealAccent,
+        maxWidth: planColW - 16
+      });
+
+      // Meals text with generous line wrapping & separation
+      let mealY = dY + dayBoxH - 32;
+
+      // Breakfast block
+      page2.drawText('BREAKFAST', {
+        x: dX + 8,
+        y: mealY,
+        size: 5.6,
+        font: helveticaBold,
+        color: mutedSlate
+      });
+      mealY -= 8;
+      mealY = drawWrappedBlock(page2, d.breakfast, {
+        x: dX + 8,
         y: mealY,
         size: 6.2,
         font: helvetica,
         color: darkSlate,
-        maxWidth: planColW - 12,
-        lineHeight: 7.6,
-        maxLines: 2
-      });
-      mealY -= 2;
-
-      mealY = drawWrappedBlock(page2, `- Lunch: ${d.lunch}`, {
-        x: dX + 6,
-        y: mealY,
-        size: 6.2,
-        font: helvetica,
-        color: darkSlate,
-        maxWidth: planColW - 12,
-        lineHeight: 7.6,
+        maxWidth: planColW - 16,
+        lineHeight: 8.0,
         maxLines: 3
       });
-      mealY -= 2;
+      mealY -= 5;
 
-      drawWrappedBlock(page2, `- Dinner: ${d.dinner}`, {
-        x: dX + 6,
+      // Lunch block
+      page2.drawText('LUNCH (PLATE SEQUENCING)', {
+        x: dX + 8,
+        y: mealY,
+        size: 5.6,
+        font: helveticaBold,
+        color: mutedSlate
+      });
+      mealY -= 8;
+      mealY = drawWrappedBlock(page2, d.lunch, {
+        x: dX + 8,
         y: mealY,
         size: 6.2,
         font: helvetica,
         color: darkSlate,
-        maxWidth: planColW - 12,
-        lineHeight: 7.6,
-        maxLines: 2
+        maxWidth: planColW - 16,
+        lineHeight: 8.0,
+        maxLines: 4
+      });
+      mealY -= 5;
+
+      // Dinner block
+      page2.drawText('DINNER', {
+        x: dX + 8,
+        y: mealY,
+        size: 5.6,
+        font: helveticaBold,
+        color: mutedSlate
+      });
+      mealY -= 8;
+      drawWrappedBlock(page2, d.dinner, {
+        x: dX + 8,
+        y: mealY,
+        size: 6.2,
+        font: helvetica,
+        color: darkSlate,
+        maxWidth: planColW - 16,
+        lineHeight: 8.0,
+        maxLines: 3
       });
     });
 
-    y2 -= (3 * (dayBoxH + 6) + 4);
+    y2 -= (3 * (dayBoxH + 8) + 6);
 
-    // DAY 7: Sunday Circadian Reset & Weekly Preparation Full-Width Card
+    // -------------------------------------------------------------------------
+    // DAY 7: SUNDAY CIRCADIAN RESET FULL-WIDTH CARD (Height: 90pt)
+    // 3 Dedicated Sub-Columns for Breakfast, Lunch, Dinner - Zero collision!
+    // -------------------------------------------------------------------------
     const d7 = plan.sevenDayMealPlan[6] || {
       day: 7,
       dayName: 'Sunday',
-      themeEn: 'Circadian Fasting & Digestive Rest',
-      breakfast: 'Bone broth or organic pasture eggs with baby spinach.',
-      lunch: 'Steamed local wild fish with fennel, arugula and cold-pressed EVOO.',
-      dinner: 'Light Mediterranean vegetable broth with poached cod.'
+      themeEn: 'Circadian Fasting & Gastrointestinal Rest',
+      breakfast: 'Fasting friendly morning: Filtered water with Celtic salt, then 2 soft-boiled eggs with arugula.',
+      lunch: 'Plate Sequencing: Massaged kale salad -> 180g wild tuna steak -> 1/3 cup brown rice.',
+      dinner: 'Mineral-rich vegetable broth with poached cod fillet and steamed zucchini.'
     };
-    const d7H = 26;
+    const d7H = 92;
+
     page2.drawRectangle({
       x: 36,
       y: y2 - d7H,
@@ -1252,128 +1293,159 @@ export async function GET(request) {
       borderColor: cardBorder,
       borderWidth: 1.0
     });
+
+    // Sunday Header Strip
     page2.drawRectangle({
       x: 36,
-      y: y2 - 13,
+      y: y2 - 20,
       width: p2Width - 72,
-      height: 13,
+      height: 20,
       color: rgb(241 / 255, 245 / 255, 249 / 255)
     });
-    page2.drawText(`DAY 7 | SUNDAY: ${d7.themeEn.toUpperCase()} (CIRCADIAN FASTING & PREP)`, {
-      x: 42,
-      y: y2 - 10,
-      size: 6.5,
+
+    page2.drawText('DAY 7 | SUNDAY: CIRCADIAN FASTING & DEEP GASTROINTESTINAL REST', {
+      x: 46,
+      y: y2 - 13,
+      size: 7.2,
       font: helveticaBold,
       color: navyPrimary
     });
-    page2.drawText(`- Breakfast: ${d7.breakfast}   - Lunch: ${d7.lunch}   - Dinner: ${d7.dinner}`, {
-      x: 42,
-      y: y2 - 21,
-      size: 6.0,
-      font: helvetica,
-      color: darkSlate,
-      maxWidth: p2Width - 84
-    });
-
-    y2 -= (d7H + 14);
-
-    // -------------------------------------------------------------------------
-    // SECTION 2: MINIMAL TARGETED CO-FACTORS (3 Columns)
-    // -------------------------------------------------------------------------
-    page2.drawText('2. MINIMAL TARGETED CO-FACTORS (FOOD-FIRST SYNERGY | ONLY 3 ESSENTIALS)', {
-      x: 36,
-      y: y2,
-      size: 10.0,
+    page2.drawText('REST & WEEKLY RESET PROTOCOL', {
+      x: p2Width - 36 - 150,
+      y: y2 - 13,
+      size: 6.2,
       font: helveticaBold,
-      color: navyPrimary
+      color: tealAccent
     });
 
-    y2 -= 8;
-    const coW = (p2Width - 72 - 16) / 3;
-    const coH = 82;
+    // 3 Sub-columns for Sunday meals
+    const d7ColW = (p2Width - 72 - 32) / 3;
+    const d7Meals = [
+      { label: 'BREAKFAST (GENTLE AWAKENING)', desc: d7.breakfast },
+      { label: 'LUNCH (METABOLIC NOURISHMENT)', desc: d7.lunch },
+      { label: 'DINNER (CELLULAR REST)', desc: d7.dinner }
+    ];
 
-    plan.minimalTargetedCoFactors.forEach((co, idx) => {
-      const cX = 36 + idx * (coW + 8);
-      const cY = y2 - coH;
+    d7Meals.forEach((m, mIdx) => {
+      const colX = 46 + mIdx * (d7ColW + 12);
+      const colTopY = y2 - 30;
 
-      page2.drawRectangle({
-        x: cX,
-        y: cY,
-        width: coW,
-        height: coH,
-        color: white,
-        borderColor: tealAccent,
-        borderWidth: 1.0
-      });
-
-      // Header strip
-      page2.drawRectangle({
-        x: cX,
-        y: cY + coH - 17,
-        width: coW,
-        height: 17,
-        color: rgb(240 / 255, 253 / 255, 250 / 255)
-      });
-
-      page2.drawText(co.nutrient, {
-        x: cX + 6,
-        y: cY + coH - 12,
-        size: 6.6,
+      page2.drawText(m.label, {
+        x: colX,
+        y: colTopY,
+        size: 5.6,
         font: helveticaBold,
-        color: navyPrimary,
-        maxWidth: coW - 12
+        color: mutedSlate
       });
 
-      page2.drawText(`Dose: ${co.dose} | ${co.timing}`, {
-        x: cX + 6,
-        y: cY + coH - 26,
-        size: 6.4,
-        font: helveticaBold,
-        color: tealAccent,
-        maxWidth: coW - 12
-      });
-
-      let coY = cY + coH - 37;
-      coY = drawWrappedBlock(page2, `Food Synergy: ${co.foodSynergy}`, {
-        x: cX + 6,
-        y: coY,
-        size: 6.0,
-        font: helveticaOblique,
-        color: darkSlate,
-        maxWidth: coW - 12,
-        lineHeight: 7.2,
-        maxLines: 2
-      });
-      coY -= 2;
-
-      drawWrappedBlock(page2, co.rationaleEn, {
-        x: cX + 6,
-        y: coY,
-        size: 5.8,
+      drawWrappedBlock(page2, m.desc, {
+        x: colX,
+        y: colTopY - 9,
+        size: 6.2,
         font: helvetica,
-        color: mutedSlate,
-        maxWidth: coW - 12,
-        lineHeight: 7.0,
-        maxLines: 3
+        color: darkSlate,
+        maxWidth: d7ColW,
+        lineHeight: 8.0,
+        maxLines: 5
       });
     });
 
-    y2 -= (coH + 14);
+    // Page 3 Footer
+    page2.drawText('Page 3 of 5 · Atlas Health Services · Precision 7-Day Meal Plan · Sourced for Qatar & GCC · www.atlashealthservices.com', {
+      x: 36,
+      y: 18,
+      size: 6.8,
+      font: helvetica,
+      color: mutedSlate
+    });
+
+    // =========================================================================
+    // PAGE 4: SUPERMARKET GROCERY CHECKLIST & PANTRY DETOX (PAGE 4 OF 5)
+    // Conforms strictly to Google Cloud UX: Dedicated full-page shopping aisle guide
+    // =========================================================================
+    const pageGrocery = pdfDoc.addPage([595.28, 841.89]);
+    const { width: pgWidth, height: pgHeight } = pageGrocery.getSize();
+
+    // Top Accent Strip
+    pageGrocery.drawRectangle({
+      x: 0,
+      y: pgHeight - 8,
+      width: pgWidth,
+      height: 8,
+      color: tealAccent
+    });
+
+    let yg = pgHeight - 28;
+
+    // Header Area
+    pageGrocery.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
+      x: 36,
+      y: yg,
+      size: 9.0,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    const badgeG = 'PAGE 4 OF 5 · SUPERMARKET GROCERY & PANTRY';
+    const badgeGW = helveticaBold.widthOfTextAtSize(badgeG, 7.5) + 16;
+    pageGrocery.drawRectangle({
+      x: pgWidth - 36 - badgeGW,
+      y: yg - 4,
+      width: badgeGW,
+      height: 18,
+      color: rgb(240 / 255, 253 / 255, 250 / 255),
+      borderColor: tealAccent,
+      borderWidth: 1.2
+    });
+    pageGrocery.drawText(badgeG, {
+      x: pgWidth - 36 - badgeGW + 8,
+      y: yg + 1,
+      size: 7.5,
+      font: helveticaBold,
+      color: tealAccent
+    });
+
+    yg -= 18;
+    pageGrocery.drawText('PATIENT SUPERMARKET GROCERY CHECKLIST', {
+      x: 36,
+      y: yg,
+      size: 14.0,
+      font: helveticaBold,
+      color: darkSlate
+    });
+
+    yg -= 13;
+    pageGrocery.drawText('Aisle-by-aisle shopping companion calibrated to Monoprix, Carrefour, Lulu & local Qatar markets', {
+      x: 36,
+      y: yg,
+      size: 8.5,
+      font: helvetica,
+      color: mutedSlate
+    });
+
+    yg -= 10;
+    pageGrocery.drawLine({
+      start: { x: 36, y: yg },
+      end: { x: pgWidth - 36, y: yg },
+      thickness: 1.0,
+      color: cardBorder
+    });
 
     // -------------------------------------------------------------------------
-    // SECTION 3: PATIENT SUPERMARKET GROCERY CHECKLIST (4 Columns)
+    // SECTION 1: 4-COLUMN SUPERMARKET CHECKLIST (Height: 330pt)
     // -------------------------------------------------------------------------
-    page2.drawText('3. PATIENT SUPERMARKET GROCERY CHECKLIST (QATAR & GCC READY)', {
+    yg -= 16;
+    pageGrocery.drawText('1. AISLE-BY-AISLE SHOPPING BASKET', {
       x: 36,
-      y: y2,
+      y: yg,
       size: 10.0,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y2 -= 8;
-    const grocW = (p2Width - 72 - 24) / 4;
-    const grocH = 135;
+    yg -= 8;
+    const grocW = (pgWidth - 72 - 24) / 4;
+    const grocH = 340;
 
     const cleanCategoryNames = [
       '[Veg] Fresh Produce & Greens',
@@ -1384,9 +1456,9 @@ export async function GET(request) {
 
     plan.supermarketGroceryList.forEach((cat, idx) => {
       const gX = 36 + idx * (grocW + 8);
-      const gY = y2 - grocH;
+      const gY = yg - grocH;
 
-      page2.drawRectangle({
+      pageGrocery.drawRectangle({
         x: gX,
         y: gY,
         width: grocW,
@@ -1397,52 +1469,162 @@ export async function GET(request) {
       });
 
       // Header strip
-      page2.drawRectangle({
+      pageGrocery.drawRectangle({
         x: gX,
-        y: gY + grocH - 18,
+        y: gY + grocH - 22,
         width: grocW,
-        height: 18,
+        height: 22,
         color: rgb(241 / 255, 245 / 255, 249 / 255)
       });
 
       const catHeader = cleanCategoryNames[idx] || cat.category.split('(')[0].trim();
-      page2.drawText(catHeader, {
-        x: gX + 5,
-        y: gY + grocH - 13,
-        size: 6.3,
+      pageGrocery.drawText(catHeader, {
+        x: gX + 6,
+        y: gY + grocH - 15,
+        size: 6.8,
         font: helveticaBold,
         color: navyPrimary,
-        maxWidth: grocW - 10
+        maxWidth: grocW - 12
       });
 
-      let itemY = gY + grocH - 28;
-      cat.items.slice(0, 5).forEach((it) => {
+      let itemY = gY + grocH - 36;
+      cat.items.forEach((it) => {
         const cleanItem = `[ ] ${it.split('(')[0].trim()}`;
-        itemY = drawWrappedBlock(page2, cleanItem, {
-          x: gX + 5,
+        itemY = drawWrappedBlock(pageGrocery, cleanItem, {
+          x: gX + 6,
           y: itemY,
-          size: 5.9,
+          size: 6.8,
           font: helvetica,
           color: darkSlate,
-          maxWidth: grocW - 10,
-          lineHeight: 7.2,
-          maxLines: 2
+          maxWidth: grocW - 12,
+          lineHeight: 8.8,
+          maxLines: 3
         });
-        itemY -= 3.5;
+        itemY -= 6.0;
       });
     });
 
-    // Page 3 Footer
-    page2.drawText('Page 3 of 4 · Atlas Health Services · Precision 7-Day Meal Plan & Grocery Guide · www.atlashealthservices.com', {
+    yg -= (grocH + 18);
+
+    // -------------------------------------------------------------------------
+    // SECTION 2: KITCHEN PANTRY DETOX & DIRECT REPLACEMENTS (Height: 180pt)
+    // -------------------------------------------------------------------------
+    pageGrocery.drawText('2. KITCHEN PANTRY DETOX: ELIMINATE VS. REPLACE IMMEDIATELY', {
       x: 36,
-      y: 20,
+      y: yg,
+      size: 10.0,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    yg -= 8;
+    const detoxH = 185;
+    pageGrocery.drawRectangle({
+      x: 36,
+      y: yg - detoxH,
+      width: pgWidth - 72,
+      height: detoxH,
+      color: white,
+      borderColor: cardBorder,
+      borderWidth: 1.0
+    });
+
+    // Left Column: What to Discard/Donate (Red Accent)
+    const dColW = (pgWidth - 72 - 32) / 2;
+    pageGrocery.drawRectangle({
+      x: 46,
+      y: yg - 26,
+      width: dColW,
+      height: 18,
+      color: redBg,
+      borderColor: redBorder,
+      borderWidth: 0.8
+    });
+    pageGrocery.drawText('REMOVE FROM PANTRY (CELLULAR INFLAMMATION)', {
+      x: 52,
+      y: yg - 21,
+      size: 6.4,
+      font: helveticaBold,
+      color: redText
+    });
+
+    const discardItems = [
+      '• Industrial Seed & Cooking Oils: Canola, corn, sunflower, soybean oil, margarine.',
+      '• Ultra-Processed Refined Flours: White bread, commercial pastries, sandwich rolls.',
+      '• Hidden Liquid Sugars: High-fructose corn syrup, bottled juices, sodas, flavored milks.',
+      '• Commercial Cow Dairy: Pasteurized A1 cow milk, processed cheese slices, sugary yogurts.',
+      '• Ultra-Processed Cold Cuts: Sausages, hot dogs, commercial mortadella with nitrates.'
+    ];
+
+    let dyLeft = yg - 36;
+    discardItems.forEach(item => {
+      dyLeft = drawWrappedBlock(pageGrocery, item, {
+        x: 46,
+        y: dyLeft,
+        size: 6.5,
+        font: helvetica,
+        color: darkSlate,
+        maxWidth: dColW,
+        lineHeight: 8.5,
+        maxLines: 3
+      });
+      dyLeft -= 4;
+    });
+
+    // Right Column: Direct Clinically Approved Swaps (Green Accent)
+    pageGrocery.drawRectangle({
+      x: 46 + dColW + 12,
+      y: yg - 26,
+      width: dColW,
+      height: 18,
+      color: rgb(240 / 255, 253 / 255, 244 / 255),
+      borderColor: rgb(34 / 255, 197 / 255, 94 / 255),
+      borderWidth: 0.8
+    });
+    pageGrocery.drawText('EXACT HEALTHY SWAP (GENETICALLY ALIGNED)', {
+      x: 52 + dColW + 12,
+      y: yg - 21,
+      size: 6.4,
+      font: helveticaBold,
+      color: rgb(22 / 255, 101 / 255, 52 / 255)
+    });
+
+    const swapItems = [
+      '-> Swap with: First cold-pressed Extra Virgin Olive Oil (EVOO) in dark glass bottles.',
+      '-> Swap with: Sourdough 100% rye bread or grain-free coconut / almond alternatives.',
+      '-> Swap with: Infused sparkling water with fresh mint, lime, or Japanese ceremonial matcha.',
+      '-> Swap with: A2 organic goat yogurt, sheep feta in brine, or unsweetened coconut yogurt.',
+      '-> Swap with: Fresh wild salmon cuts, free-range chicken breast, grass-fed beef tenderloin.'
+    ];
+
+    let dyRight = yg - 36;
+    swapItems.forEach(item => {
+      dyRight = drawWrappedBlock(pageGrocery, item, {
+        x: 46 + dColW + 12,
+        y: dyRight,
+        size: 6.5,
+        font: helveticaBold,
+        color: rgb(22 / 255, 101 / 255, 52 / 255),
+        maxWidth: dColW,
+        lineHeight: 8.5,
+        maxLines: 3
+      });
+      dyRight -= 4;
+    });
+
+    // Page 4 Footer
+    pageGrocery.drawText('Page 4 of 5 · Atlas Health Services · Supermarket Grocery Checklist & Pantry Guide · www.atlashealthservices.com', {
+      x: 36,
+      y: 18,
       size: 6.8,
       font: helvetica,
       color: mutedSlate
     });
 
     // =========================================================================
-    // PAGE 4: PERSONALIZED SUPPLEMENTS MADE SIMPLE (PATIENT EDITION)
+    // PAGE 5: PERSONALIZED SUPPLEMENTS MADE SIMPLE (PATIENT EDITION) (PAGE 5 OF 5)
+    // Conforms strictly to Clinical Golden Rule: Targeted Supplements placed at
+    // the end as supporting co-factors, never before food-first nutrition.
     // =========================================================================
     const page3 = pdfDoc.addPage([595.28, 841.89]);
     const { width: p3Width, height: p3Height } = page3.getSize();
@@ -1467,7 +1649,7 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    const badge3 = 'PAGE 4 OF 4 · TARGETED SUPPLEMENTS & CLINICAL DISPENSING';
+    const badge3 = 'PAGE 5 OF 5 · TARGETED SUPPLEMENTS & CLINICAL DISPENSING';
     const badge3W = helveticaBold.widthOfTextAtSize(badge3, 6.8) + 14;
     page3.drawRectangle({
       x: p3Width - 36 - badge3W,
@@ -1970,8 +2152,8 @@ export async function GET(request) {
       maxWidth: p3Width - 96
     });
 
-    // Page 4 Footer
-    page3.drawText('Page 4 of 4 · Atlas Health Services · Personalized Supplement Guide · Designed for patient clarity & adherence · www.atlashealthservices.com', {
+    // Page 5 Footer
+    page3.drawText('Page 5 of 5 · Atlas Health Services · Personalized Supplement Guide · Designed for patient clarity & adherence · www.atlashealthservices.com', {
       x: 36,
       y: 18,
       size: 6.8,

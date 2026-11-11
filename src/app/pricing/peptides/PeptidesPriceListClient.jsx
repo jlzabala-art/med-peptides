@@ -742,7 +742,7 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
                 wordBreak: 'break-word'
               }}
             >
-              {blendInfo.isBlend ? blendInfo.titleLine : row.productName}
+              {blendInfo.isBlend ? (blendInfo.titleLine || blendInfo.mainTitle || row.productName) : row.productName}
             </Link>
             <span style={{
               fontSize: '0.74rem',
@@ -754,7 +754,7 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               borderRadius: '4px',
               whiteSpace: 'nowrap'
             }}>
-              {blendInfo.isBlend ? blendInfo.dosageMain : row.dosage}
+              {blendInfo.isBlend ? (blendInfo.dosageMain || blendInfo.primaryDose || row.dosage) : row.dosage}
             </span>
           </div>
           {blendInfo.isBlend && blendInfo.compositionLine && (
@@ -2260,7 +2260,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
                 title={isEs ? `Abrir ficha clínica oficial y estructura 3D de ${row.productName} en nueva pestaña` : `Open official clinical datasheet & 3D structure for ${row.productName} in new tab`}
               >
-                {blendInfo.isBlend ? blendInfo.titleLine : row.productName}
+                {blendInfo.isBlend ? (blendInfo.titleLine || blendInfo.mainTitle || row.productName) : row.productName}
               </a>
               {row.dosage && (
                 <span style={{
@@ -2275,7 +2275,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   letterSpacing: '-0.01em',
                   whiteSpace: 'nowrap'
                 }}>
-                  {blendInfo.isBlend ? blendInfo.dosageMain : row.dosage}
+                  {blendInfo.isBlend ? (blendInfo.dosageMain || blendInfo.primaryDose || row.dosage) : row.dosage}
                 </span>
               )}
               {/* Specs Button: Navigates directly to the comprehensive public peptide datasheet for this exact dosage */}

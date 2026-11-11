@@ -17,21 +17,29 @@ export function parsePeptideBlendDisplay(productName = '', rawDose = '') {
 
   // Explicit handling for GLOW & KLOW multi-peptide regenerative blends
   if (upperName.startsWith('GLOW')) {
+    const mainTitle = 'GLOW Blend (3-Peptide Stack)';
+    const primaryDose = '70 mg Total';
     return {
       isBlend: true,
-      mainTitle: 'GLOW Blend (3-Peptide Stack)',
+      mainTitle,
+      titleLine: mainTitle,
       compositionLine: 'BPC-157 (10 mg) + TB-500 (10 mg) + GHK-Cu (50 mg)',
-      primaryDose: '70 mg Total',
+      primaryDose,
+      dosageMain: primaryDose,
       subDose: '10 / 10 / 50 mg'
     };
   }
 
   if (upperName.startsWith('KLOW')) {
+    const mainTitle = 'KLOW Blend (4-Peptide Stack)';
+    const primaryDose = '80 mg Total';
     return {
       isBlend: true,
-      mainTitle: 'KLOW Blend (4-Peptide Stack)',
+      mainTitle,
+      titleLine: mainTitle,
       compositionLine: 'BPC-157 (10 mg) + TB-500 (10 mg) + GHK-Cu (50 mg) + KPV (10 mg)',
-      primaryDose: '80 mg Total',
+      primaryDose,
+      dosageMain: primaryDose,
       subDose: '10 / 10 / 50 / 10 mg'
     };
   }
@@ -48,12 +56,15 @@ export function parsePeptideBlendDisplay(productName = '', rawDose = '') {
       const m = part.match(/(\d+(?:\.\d+)?)\s*mg/i);
       return m ? acc + parseFloat(m[1]) : acc;
     }, 0);
+    const primaryDose = numericSum > 0 ? `${numericSum} mg Total` : doseParts.join(' + ');
 
     return {
       isBlend: true,
       mainTitle: baseTitle,
+      titleLine: baseTitle,
       compositionLine: paired,
-      primaryDose: numericSum > 0 ? `${numericSum} mg Total` : doseParts.join(' + '),
+      primaryDose,
+      dosageMain: primaryDose,
       subDose: doseParts.map(d => d.replace(/\s*mg/i, '')).join(' / ') + ' mg'
     };
   }
@@ -63,11 +74,15 @@ export function parsePeptideBlendDisplay(productName = '', rawDose = '') {
       const m = part.match(/(\d+(?:\.\d+)?)\s*mg/i);
       return m ? acc + parseFloat(m[1]) : acc;
     }, 0);
+    const primaryDose = numericSum > 0 ? `${numericSum} mg Total` : doseParts.join(' · ');
+
     return {
       isBlend: true,
       mainTitle: nameStr,
+      titleLine: nameStr,
       compositionLine: null,
-      primaryDose: numericSum > 0 ? `${numericSum} mg Total` : doseParts.join(' · '),
+      primaryDose,
+      dosageMain: primaryDose,
       subDose: doseParts.join(' + ')
     };
   }
@@ -75,8 +90,10 @@ export function parsePeptideBlendDisplay(productName = '', rawDose = '') {
   return {
     isBlend: false,
     mainTitle: nameStr,
+    titleLine: nameStr,
     compositionLine: null,
     primaryDose: doseStr || '—',
+    dosageMain: doseStr || '—',
     subDose: null
   };
 }
