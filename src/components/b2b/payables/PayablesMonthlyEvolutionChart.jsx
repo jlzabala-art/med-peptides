@@ -13,25 +13,34 @@ export default function PayablesMonthlyEvolutionChart({ monthlyEvolution = [], c
   const [isOpen, setIsOpen] = useState(true);
   const [hoveredMonth, setHoveredMonth] = useState(null);
 
+  // Filter to only show active cycle from cycleStartDate onwards (default Nov 1, 2026)
+  const cycleMonthStr = (cycleStartDate || '2026-11-01').slice(0, 7);
+  const visibleEvolution = useMemo(() => {
+    const filtered = (monthlyEvolution || []).filter(m => (m.month || '') >= cycleMonthStr);
+    return filtered.length > 0 ? filtered : monthlyEvolution;
+  }, [monthlyEvolution, cycleMonthStr]);
+
   const maxTotal = useMemo(() => {
-    return Math.max(...monthlyEvolution.map(m => m.total), 1);
-  }, [monthlyEvolution]);
+    return Math.max(...visibleEvolution.map(m => m.total), 1);
+  }, [visibleEvolution]);
 
   const totalContractedAll = useMemo(() => {
-    return monthlyEvolution.reduce((acc, m) => acc + (m.total || 0), 0);
-  }, [monthlyEvolution]);
+    return visibleEvolution.reduce((acc, m) => acc + (m.total || 0), 0);
+  }, [visibleEvolution]);
 
   const totalPaidAll = useMemo(() => {
-    return monthlyEvolution.reduce((acc, m) => acc + (m.paid || 0), 0);
-  }, [monthlyEvolution]);
+    return visibleEvolution.reduce((acc, m) => acc + (m.paid || 0), 0);
+  }, [visibleEvolution]);
 
   const totalPendingAll = useMemo(() => {
-    return monthlyEvolution.reduce((acc, m) => acc + (m.pending || 0), 0);
-  }, [monthlyEvolution]);
+    return visibleEvolution.reduce((acc, m) => acc + (m.pending || 0), 0);
+  }, [visibleEvolution]);
 
   const paidPercent = totalContractedAll > 0 ? (totalPaidAll / totalContractedAll) * 100 : 100;
 
-  if (!monthlyEvolution || monthlyEvolution.length === 0) return null;
+  if (!visibleEvolution || visibleEvolution.length === 0) return null;
+
+  const isFewMonths = visibleEvolution.length <= 4;
 
   return (
     <div style={{
@@ -60,14 +69,14 @@ export default function PayablesMonthlyEvolutionChart({ monthlyEvolution = [], c
           <div>
             <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>{lang === 'es' ? 'Evolución Mensual de Contratación y Estado de Liquidación' : 'Monthly Procurement & Settlement Evolution'}</span>
-              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#dcfce7', padding: '1px 7px', borderRadius: '4px' }}>
+              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: paidPercent >= 90 ? '#16a34a' : '#ea580c', backgroundColor: paidPercent >= 90 ? '#dcfce7' : '#ffedd5', padding: '1px 7px', borderRadius: '4px' }}>
                 {paidPercent.toFixed(1)}% {lang === 'es' ? 'Liquidado' : 'Settled'}
               </span>
             </div>
             <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>
               {lang === 'es'
-                ? `Historial oficial de ${monthlyEvolution.length} meses auditados en Zoho Books · Ciclo activo desde el ${formatCycleStart(cycleStartDate, lang)}`
-                : `Authoritative ${monthlyEvolution.length}-month audit from Zoho Books · Active cycle starting ${formatCycleStart(cycleStartDate, lang)}`}
+                ? `Ciclo de facturación activo auditado en Zoho Books · Desde el ${formatCycleStart(cycleStartDate, lang)}`
+                : `Active billing cycle audit from Zoho Books · Starting ${formatCycleStart(cycleStartDate, lang)}`}
             </div>
           </div>
         </div>
@@ -115,7 +124,8 @@ export default function PayablesMonthlyEvolutionChart({ monthlyEvolution = [], c
           <div style={{
             display: 'flex',
             alignItems: 'flex-end',
-            gap: '8px',
+            justifyContent: isFewMonths ? 'center' : 'flex-start',
+            gap: isFewMonths ? '24px' : '8px',
             height: '190px',
             paddingTop: '20px',
             paddingBottom: '26px',
@@ -123,9 +133,9 @@ export default function PayablesMonthlyEvolutionChart({ monthlyEvolution = [], c
             borderBottom: '1px solid #cbd5e1',
             overflowX: 'auto'
           }}>
-            {monthlyEvolution.map((item) => {
+            {visibleEvolution.map((item) => {
               const isCurrent = item.isCurrentCycle;
-              const barHeightPct = Math.max(8, (item.total / maxTotal) * 100);
+              const barHeightPct = Math.max(12, (item.total / maxTotal) * 100);
               const paidHeightPct = item.total > 0 ? (item.paid / item.total) * 100 : 0;
               const pendingHeightPct = item.total > 0 ? (item.pending / item.total) * 100 : 0;
 
@@ -147,8 +157,9 @@ export default function PayablesMonthlyEvolutionChart({ monthlyEvolution = [], c
                   onMouseEnter={() => setHoveredMonth(item)}
                   onMouseLeave={() => setHoveredMonth(null)}
                   style={{
-                    flex: 1,
-                    minWidth: '42px',
+                    flex: isFewMonths ? '0 0 auto' : 1,
+                    minWidth: isFewMonths ? '90px' : '42px',
+                    maxWidth: isFewMonths ? '140px' : '80px',
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
@@ -157,7 +168,7 @@ export default function PayablesMonthlyEvolutionChart({ monthlyEvolution = [], c
                     position: 'relative',
                     cursor: 'pointer',
                     borderRadius: '6px',
-                    padding: '2px',
+                    padding: '4px',
                     backgroundColor: isCurrent ? 'rgba(2, 132, 199, 0.08)' : (isHovered ? '#f1f5f9' : 'transparent'),
                     border: isCurrent ? '1.5px dashed #0284c7' : '1px solid transparent',
                     transition: 'all 0.15s ease'
@@ -185,7 +196,7 @@ export default function PayablesMonthlyEvolutionChart({ monthlyEvolution = [], c
                   {/* The Bar itself */}
                   <div style={{
                     width: '100%',
-                    maxWidth: '32px',
+                    maxWidth: isFewMonths ? '58px' : '32px',
                     height: `${barHeightPct}%`,
                     display: 'flex',
                     flexDirection: 'column-reverse',
@@ -223,7 +234,7 @@ export default function PayablesMonthlyEvolutionChart({ monthlyEvolution = [], c
                   <div style={{
                     position: 'absolute',
                     bottom: '-22px',
-                    fontSize: '0.68rem',
+                    fontSize: '0.70rem',
                     fontWeight: isCurrent ? 800 : 600,
                     color: isCurrent ? '#0284c7' : '#64748b',
                     whiteSpace: 'nowrap'

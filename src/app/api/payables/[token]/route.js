@@ -194,9 +194,13 @@ export async function GET(request, { params }) {
     const totalPending = openBills.reduce((acc, b) => acc + (Number(b.balance) > 0 ? Number(b.balance) : Number(b.total || 0)), 0);
     const totalPaid = paidBills.reduce((acc, b) => acc + Number(b.total || 0), 0);
 
-    // ── Precalculate Monthly Procurement & Settlement Evolution across all bills ──
+    // ── Precalculate Monthly Procurement & Settlement Evolution (Active cycle starting cycleStartDate) ──
+    const chartBills = includeAllHistory
+      ? allBills
+      : allBills.filter(b => (b.date || '') >= cycleStartDate);
+
     const byMonth = {};
-    for (const b of allBills) {
+    for (const b of chartBills) {
       const st = String(b.status || '').toLowerCase().trim();
       if (st === 'draft' || st === 'void' || st === 'rejected') continue;
       const m = (b.date || '2026-00').slice(0, 7);

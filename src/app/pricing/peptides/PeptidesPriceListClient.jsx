@@ -35,6 +35,8 @@ import {
   Brain,
   Activity,
   FlaskConical,
+  Award,
+  TrendingDown,
   Droplets,
   Moon,
   Dna,
@@ -3704,9 +3706,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               display: inline-flex !important;
             }
             .mobile-only-filter-selectors {
-              display: grid !important;
-              grid-template-columns: 1fr 1fr;
-              gap: 8px;
+              display: none !important;
             }
             .mobile-only-category-strip {
               display: flex !important;
@@ -3715,14 +3715,13 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               display: block !important;
             }
             .peptides-kpis-grid {
-              grid-template-columns: repeat(2, 1fr);
-              gap: 0.65rem;
+              grid-template-columns: repeat(2, 1fr) !important;
+              gap: 10px !important;
             }
           }
           @media (max-width: 640px) {
             .mobile-only-filter-selectors {
-              grid-template-columns: 1fr !important;
-              gap: 8px !important;
+              display: none !important;
             }
           }
           @media (max-width: 768px) {
@@ -3989,247 +3988,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
 
           {/* ── Main Data Workspace Area ── */}
           <div className="gcp-pricing-workspace">
-            {/* ── 4 KPIs with Scope Switcher (Google Cloud Metric Strip — Compact & Dense) ── */}
-            <div className="gcp-kpis-summary-block" style={{
-              background: '#ffffff',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              padding: '8px 12px',
-              marginBottom: '0.75rem',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
-            }}>
-              {/* Scope Indicator & Switcher (Google Cloud Standard - Golden Rule #22) */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingBottom: '6px',
-                marginBottom: '6px',
-                borderBottom: '1px solid #f1f5f9',
-                flexWrap: 'wrap',
-                gap: '6px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    color: '#0284c7',
-                    background: '#f0f9ff',
-                    border: '1px solid #bae6fd',
-                    padding: '2px 8px',
-                    borderRadius: '4px'
-                  }}>
-                    {filteredProducts.length === processedProducts.length
-                      ? (isEs ? `${processedProducts.length} Formulaciones Disponibles` : `${processedProducts.length} Available Formulations`)
-                      : (isEs ? `${filteredProducts.length} de ${processedProducts.length} Formulaciones` : `${filteredProducts.length} of ${processedProducts.length} Formulations`)
-                    }
-                  </span>
-                  {totalCartCount > 0 && (
-                    <span style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 750,
-                      color: '#137333',
-                      background: '#e6f4ea',
-                      border: '1px solid #ceead6',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
-                      <CheckCircle2 size={11} />
-                      <span>{totalCartCount} {isEs ? 'Viales' : 'Vials'} ({formatPrice(totalCartValueUsd)})</span>
-                    </span>
-                  )}
-                </div>
-
-                {/* Scope Switcher: Active Filter View vs Global Catalog */}
-                <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '5px', padding: '2px', gap: '2px', border: '1px solid #e2e8f0' }}>
-                  <button
-                    type="button"
-                    onClick={() => setScopeMode('filtered')}
-                    style={{
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      background: scopeMode === 'filtered' ? '#ffffff' : 'transparent',
-                      color: scopeMode === 'filtered' ? '#1a73e8' : '#64748b',
-                      fontWeight: scopeMode === 'filtered' ? 750 : 500,
-                      fontSize: '0.66rem',
-                      cursor: 'pointer',
-                      boxShadow: scopeMode === 'filtered' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                      transition: 'all 0.15s ease'
-                    }}
-                    title={isEs ? 'Ver métricas del conjunto filtrado actual' : 'View metrics for current active filter'}
-                  >
-                    {isEs ? `Filtros Activos (${filteredProducts.length})` : `Active Filters (${filteredProducts.length})`}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setScopeMode('global')}
-                    style={{
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      background: scopeMode === 'global' ? '#ffffff' : 'transparent',
-                      color: scopeMode === 'global' ? '#1a73e8' : '#64748b',
-                      fontWeight: scopeMode === 'global' ? 750 : 500,
-                      fontSize: '0.66rem',
-                      cursor: 'pointer',
-                      boxShadow: scopeMode === 'global' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                      transition: 'all 0.15s ease'
-                    }}
-                    title={isEs ? 'Ver métricas de toda la base de datos' : 'View metrics for entire database'}
-                  >
-                    {isEs ? `Catálogo Global (${processedProducts.length})` : `Entire Catalog (${processedProducts.length})`}
-                  </button>
-                </div>
-              </div>
-
-              {/* 4 KPIs in a Compact Strip (GCP Style) */}
-              <div className="peptides-kpis-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
-                {/* KPI 1: Available Formulations */}
-                <div
-                  className="peptides-kpi-card"
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setSelectedFdaStatus('all');
-                    setSearchQuery('');
-                  }}
-                  title={isEs ? 'Clic para ver todas las formulaciones' : 'Click to view all formulations'}
-                  style={{
-                    padding: '6px 8px',
-                    background: '#f8fafc',
-                    borderRadius: '6px',
-                    border: '1px solid #f1f5f9',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f1f5f9'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#f1f5f9'; e.currentTarget.style.background = '#f8fafc'; }}
-                >
-                  <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                    {isEs ? 'Formulaciones' : 'Formulations'}
-                  </div>
-                  <div className="peptides-kpi-val" style={{ fontSize: '1.20rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1, marginTop: '2px' }}>
-                    {scopeMode === 'filtered' ? filteredProducts.length : processedProducts.length}
-                  </div>
-                  <div style={{ fontSize: '0.64rem', color: '#0284c7', marginTop: '1px' }}>
-                    {isEs ? 'Viales Liofilizados' : 'Sterile Vials'}
-                  </div>
-                </div>
-
-                {/* KPI 2: Pack ×10 Volume Savings */}
-                <div
-                  className="peptides-kpi-card"
-                  onClick={() => {
-                    if (totalCartCount > 0) setIsOrderDrawerOpen(true);
-                  }}
-                  title={totalCartCount > 0 ? (isEs ? 'Clic para revisar proforma' : 'Click to review proforma') : ''}
-                  style={{
-                    padding: '6px 8px',
-                    background: totalCartCount > 0 ? '#f0fdf4' : '#f8fafc',
-                    borderRadius: '6px',
-                    border: totalCartCount > 0 ? '1px solid #bbf7d0' : '1px solid #f1f5f9',
-                    cursor: totalCartCount > 0 ? 'pointer' : 'default',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <div style={{ fontSize: '0.62rem', fontWeight: 700, color: totalCartCount > 0 ? '#15803d' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                    {totalCartCount > 0 ? (isEs ? 'Proforma' : 'Proforma') : (isEs ? 'Ahorro Pack ×10' : 'Pack ×10 Savings')}
-                  </div>
-                  <div className="peptides-kpi-val" style={{ fontSize: '1.20rem', fontWeight: 800, color: totalCartCount > 0 ? '#15803d' : '#059669', lineHeight: 1.1, marginTop: '2px' }}>
-                    {totalCartCount > 0 ? `${totalCartCount} ${isEs ? 'Viales' : 'Vials'}` : (isEs ? '-15% a -52%' : '-15% to -52%')}
-                  </div>
-                  <div style={{ fontSize: '0.64rem', color: totalCartCount > 0 ? '#15803d' : '#059669', fontWeight: totalCartCount > 0 ? 700 : 400, marginTop: '1px' }}>
-                    {totalCartCount > 0 ? `${formatPrice(totalCartValueUsd)} Subtotal` : (isEs ? 'Nivel Pack 10' : 'Pack ×10 Tier')}
-                  </div>
-                </div>
-
-                {/* KPI 3: 503A & FDA Approved */}
-                <div
-                  className="peptides-kpi-card"
-                  onClick={() => setSelectedFdaStatus(selectedFdaStatus === 'fda_503a' ? 'all' : 'fda_503a')}
-                  title={isEs ? 'Clic para filtrar 503A & Aprobados' : 'Click to filter 503A & Approved'}
-                  style={{
-                    padding: '6px 8px',
-                    background: selectedFdaStatus === 'fda_503a' ? '#ecfdf5' : '#f8fafc',
-                    borderRadius: '6px',
-                    border: selectedFdaStatus === 'fda_503a' ? '1px solid #10b981' : '1px solid #f1f5f9',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={e => { if (selectedFdaStatus !== 'fda_503a') { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f1f5f9'; } }}
-                  onMouseLeave={e => { if (selectedFdaStatus !== 'fda_503a') { e.currentTarget.style.borderColor = '#f1f5f9'; e.currentTarget.style.background = '#f8fafc'; } }}
-                >
-                  <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                    {isEs ? '503A & Aprobados' : '503A & Approved'}
-                  </div>
-                  <div className="peptides-kpi-val" style={{ fontSize: '1.20rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1, marginTop: '2px' }}>
-                    {(scopeMode === 'filtered' ? filteredProducts : processedProducts).filter(p => p.fdaBucket === 'fda_503a' || p.fdaBucket === 'fda_approved').length}
-                  </div>
-                  <div style={{ fontSize: '0.64rem', color: '#1a73e8', marginTop: '1px' }}>
-                    {isEs ? '20 HHS · 15 NDA' : '20 HHS · 15 NDA'}
-                  </div>
-                </div>
-
-                {/* KPI 4: Analytical Quality & Purity */}
-                <div className="peptides-kpi-card" style={{ padding: '6px 8px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #f1f5f9' }}>
-                  <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                    {isEs ? 'Pureza y Calidad' : 'Quality & Purity'}
-                  </div>
-                  <div className="peptides-kpi-val" style={{ fontSize: '1.20rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1, marginTop: '2px' }}>
-                    100% COA
-                  </div>
-                  <div style={{ fontSize: '0.64rem', color: '#0d9488', marginTop: '1px' }}>
-                    {isEs ? '≥99.0% HPLC' : '≥99.0% HPLC'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Google Cloud Price Drift Notice Banner (Automatic Drift Detection) ── */}
-            {priceDriftNotice && (
-              <div
-                style={{
-                  background: '#e8f0fe',
-                  border: '1px solid #c2e7ff',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  marginBottom: '0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '1.1rem' }}>ℹ️</span>
-                  <span style={{ fontSize: '0.80rem', color: '#1a73e8', fontWeight: 600 }}>
-                    {isEs
-                      ? `Aviso de Tarifas: Algunos precios han sido actualizados de acuerdo con las tarifas vigentes del catálogo desde la cotización original emitida${priceDriftNotice.issuedAt ? ` el ${new Date(priceDriftNotice.issuedAt).toLocaleDateString()}` : ''}.`
-                      : `Price Schedule Notice: Some prices have been updated according to current catalog rates since this schedule was issued${priceDriftNotice.issuedAt ? ` on ${new Date(priceDriftNotice.issuedAt).toLocaleDateString()}` : ''}.`}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setPriceDriftNotice(null)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#1a73e8',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                    fontSize: '1rem',
-                    padding: '2px 8px'
-                  }}
-                  title={isEs ? 'Descartar aviso' : 'Dismiss notice'}
-                >
-                  ×
-                </button>
-              </div>
-            )}
-
             {/* ── Search & Category Filter Block (Prioritized Above-the-Fold per Golden Rule #7) ── */}
             <div className="gcp-search-and-category-block" style={{ marginBottom: '0.85rem' }}>
               {/* Desktop Filter Sidebar Toggle + Global Search Bar (Google Cloud Standard) */}
@@ -4428,176 +4186,476 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                             </button>
                           </div>
                         )}
-                    {/* Integrated Shipping Corridor Segmented Switcher (Google Cloud Standard) */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '8px',
-                      flexWrap: 'wrap',
-                      padding: '5px 10px',
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      marginBottom: '8px'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Truck size={13} color="#0284c7" />
-                        <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#334155' }}>
-                          {isEs ? 'Destino y Tarifa de Envío (≤ 2 kg):' : 'Shipping Corridor & Rate (≤ 2 kg):'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-                        {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
-                          const isSel = shippingDest === corridor.id;
-                          return (
+
+                        {/* Integrated Shipping Corridor Segmented Switcher (Google Cloud Standard) */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px',
+                          flexWrap: 'wrap',
+                          padding: '5px 10px',
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          marginBottom: '8px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Truck size={13} color="#0284c7" />
+                            <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#334155' }}>
+                              {isEs ? 'Destino y Tarifa de Envío (≤ 2 kg):' : 'Shipping Corridor & Rate (≤ 2 kg):'}
+                            </span>
+                          </div>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                            {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
+                              const isSel = shippingDest === corridor.id;
+                              return (
+                                <button
+                                  key={corridor.id}
+                                  type="button"
+                                  onClick={() => handleShippingDestChange(corridor.id)}
+                                  title={isEs ? corridor.corridorLabelEs : corridor.corridorLabelEn}
+                                  style={{
+                                    border: isSel ? '1px solid #0284c7' : '1px solid transparent',
+                                    background: isSel ? '#e0f2fe' : 'transparent',
+                                    color: isSel ? '#0369a1' : '#475569',
+                                    fontWeight: isSel ? 800 : 600,
+                                    fontSize: '0.68rem',
+                                    padding: '2px 7px',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  <span>{corridor.flag}</span>
+                                  <span>{isEs ? corridor.labelEs : corridor.labelEn}</span>
+                                  <span style={{
+                                    fontFamily: 'monospace',
+                                    fontWeight: 800,
+                                    color: isSel ? '#0284c7' : '#64748b'
+                                  }}>
+                                    {corridor.rateBadge}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Dosage Strength Quick Filter Pills + Category Grouping Toggle */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                              {isEs ? 'Concentración:' : 'Filter Strength:'}
+                            </span>
+                            {DOSAGE_STRENGTHS.map(st => {
+                              const isSelected = selectedStrength === st.id;
+                              return (
+                                <button
+                                  key={st.id}
+                                  type="button"
+                                  onClick={() => setSelectedStrength(st.id)}
+                                  style={{
+                                    padding: '2px 9px',
+                                    borderRadius: '20px',
+                                    fontSize: '0.70rem',
+                                    fontWeight: isSelected ? 750 : 600,
+                                    border: '1px solid',
+                                    cursor: 'pointer',
+                                    background: isSelected ? '#0284c7' : '#ffffff',
+                                    color: isSelected ? '#ffffff' : '#475569',
+                                    borderColor: isSelected ? '#0284c7' : '#cbd5e1',
+                                    transition: 'all 0.12s ease'
+                                  }}
+                                >
+                                  {st.id === 'all' ? (isEs ? 'Todas las Dosis' : 'All Strengths') : st.label}
+                                </button>
+                              );
+                            })}
+
+                            {(selectedCategory !== 'all' || selectedStrength !== 'all' || searchQuery) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCategory('all');
+                                  setSelectedStrength('all');
+                                  setSearchQuery('');
+                                }}
+                                style={{
+                                  border: 'none',
+                                  background: 'none',
+                                  color: '#dc2626',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {isEs ? 'Limpiar Filtros ×' : 'Reset Filters ×'}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* View Organization Switcher: Categories (Default) vs Continuous */}
+                          <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            background: '#f1f5f9',
+                            padding: '2px',
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            marginLeft: 'auto'
+                          }}>
                             <button
-                              key={corridor.id}
                               type="button"
-                              onClick={() => handleShippingDestChange(corridor.id)}
-                              title={isEs ? corridor.corridorLabelEs : corridor.corridorLabelEn}
+                              onClick={() => setGroupByCategory(true)}
                               style={{
-                                border: isSel ? '1px solid #0284c7' : '1px solid transparent',
-                                background: isSel ? '#e0f2fe' : 'transparent',
-                                color: isSel ? '#0369a1' : '#475569',
-                                fontWeight: isSel ? 800 : 600,
-                                fontSize: '0.68rem',
-                                padding: '2px 7px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '3px',
-                                transition: 'all 0.15s ease'
-                              }}
-                            >
-                              <span>{corridor.flag}</span>
-                              <span>{isEs ? corridor.labelEs : corridor.labelEn}</span>
-                              <span style={{
-                                fontFamily: 'monospace',
-                                fontWeight: 800,
-                                color: isSel ? '#0284c7' : '#64748b'
-                              }}>
-                                {corridor.rateBadge}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Dosage Strength Quick Filter Pills + Category Grouping Toggle */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          {isEs ? 'Concentración:' : 'Filter Strength:'}
-                        </span>
-                        {DOSAGE_STRENGTHS.map(st => {
-                          const isSelected = selectedStrength === st.id;
-                          return (
-                            <button
-                              key={st.id}
-                              type="button"
-                              onClick={() => setSelectedStrength(st.id)}
-                              style={{
-                                padding: '2px 9px',
-                                borderRadius: '20px',
+                                gap: '4px',
+                                border: 'none',
+                                background: groupByCategory ? '#ffffff' : 'transparent',
+                                color: groupByCategory ? '#003666' : '#64748b',
+                                fontWeight: groupByCategory ? 800 : 600,
                                 fontSize: '0.70rem',
-                                fontWeight: isSelected ? 750 : 600,
-                                border: '1px solid',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
                                 cursor: 'pointer',
-                                background: isSelected ? '#0284c7' : '#ffffff',
-                                color: isSelected ? '#ffffff' : '#475569',
-                                borderColor: isSelected ? '#0284c7' : '#cbd5e1',
-                                transition: 'all 0.12s ease'
+                                boxShadow: groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
                               }}
                             >
-                              {st.id === 'all' ? (isEs ? 'Todas las Dosis' : 'All Strengths') : st.label}
+                              <Layers size={12} />
+                              <span>{isEs ? 'Categorías' : 'Categories'}</span>
                             </button>
-                          );
-                        })}
-
-                        {(selectedCategory !== 'all' || selectedStrength !== 'all' || searchQuery) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedCategory('all');
-                              setSelectedStrength('all');
-                              setSearchQuery('');
-                            }}
-                            style={{
-                              border: 'none',
-                              background: 'none',
-                              color: '#dc2626',
-                              fontSize: '0.72rem',
-                              fontWeight: 700,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {isEs ? 'Limpiar Filtros ×' : 'Reset Filters ×'}
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() => setGroupByCategory(false)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                border: 'none',
+                                background: !groupByCategory ? '#ffffff' : 'transparent',
+                                color: !groupByCategory ? '#003666' : '#64748b',
+                                fontWeight: !groupByCategory ? 800 : 600,
+                                fontSize: '0.70rem',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                boxShadow: !groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+                              }}
+                            >
+                              <span>≡</span>
+                              <span>{isEs ? 'Continua' : 'Continuous'}</span>
+                            </button>
+                          </div>
+                        </div>
                       </div>
+                    }
+                  />
+                </div>
+              </div>
+            </div>
 
-                      {/* View Organization Switcher: Categories (Default) vs Continuous */}
-                      <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        background: '#f1f5f9',
-                        padding: '2px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        marginLeft: 'auto'
-                      }}>
-                        <button
-                          type="button"
-                          onClick={() => setGroupByCategory(true)}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            border: 'none',
-                            background: groupByCategory ? '#ffffff' : 'transparent',
-                            color: groupByCategory ? '#003666' : '#64748b',
-                            fontWeight: groupByCategory ? 800 : 600,
-                            fontSize: '0.70rem',
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            boxShadow: groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-                          }}
-                        >
-                          <Layers size={12} />
-                          <span>{isEs ? 'Categorías' : 'Categories'}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setGroupByCategory(false)}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            border: 'none',
-                            background: !groupByCategory ? '#ffffff' : 'transparent',
-                            color: !groupByCategory ? '#003666' : '#64748b',
-                            fontWeight: !groupByCategory ? 800 : 600,
-                            fontSize: '0.70rem',
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            boxShadow: !groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-                          }}
-                        >
-                          <span>≡</span>
-                          <span>{isEs ? 'Continua' : 'Continuous'}</span>
-                        </button>
-                      </div>
+            {/* ── Google Cloud Price Drift Notice Banner (Automatic Drift Detection) ── */}
+            {priceDriftNotice && (
+              <div
+                style={{
+                  background: '#e8f0fe',
+                  border: '1px solid #c2e7ff',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  marginBottom: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '1.1rem' }}>ℹ️</span>
+                  <span style={{ fontSize: '0.80rem', color: '#1a73e8', fontWeight: 600 }}>
+                    {isEs
+                      ? `Aviso de Tarifas: Algunos precios han sido actualizados de acuerdo con las tarifas vigentes del catálogo desde la cotización original emitida${priceDriftNotice.issuedAt ? ` el ${new Date(priceDriftNotice.issuedAt).toLocaleDateString()}` : ''}.`
+                      : `Price Schedule Notice: Some prices have been updated according to current catalog rates since this schedule was issued${priceDriftNotice.issuedAt ? ` on ${new Date(priceDriftNotice.issuedAt).toLocaleDateString()}` : ''}.`}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPriceDriftNotice(null)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#1a73e8',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    padding: '2px 8px'
+                  }}
+                  title={isEs ? 'Descartar aviso' : 'Dismiss notice'}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {/* ── 4 KPIs with Scope Switcher (Google Cloud Metric Strip — 2x2 Grid on Mobile, Rule #22) ── */}
+            <div className="gcp-kpis-summary-block" style={{
+              background: '#ffffff',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              padding: '10px 14px',
+              marginBottom: '0.85rem',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
+            }}>
+              {/* Scope Indicator & Switcher (Google Cloud Standard - Golden Rule #22) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: '8px',
+                marginBottom: '10px',
+                borderBottom: '1px solid #f1f5f9',
+                flexWrap: 'wrap',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#0284c7',
+                    background: '#f0f9ff',
+                    border: '1px solid #bae6fd',
+                    padding: '2px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    {filteredProducts.length === processedProducts.length
+                      ? (isEs ? `${processedProducts.length} Formulaciones Disponibles` : `${processedProducts.length} Available Formulations`)
+                      : (isEs ? `${filteredProducts.length} de ${processedProducts.length} Formulaciones` : `${filteredProducts.length} of ${processedProducts.length} Formulations`)
+                    }
+                  </span>
+                  {totalCartCount > 0 && (
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 750,
+                      color: '#137333',
+                      background: '#e6f4ea',
+                      border: '1px solid #ceead6',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <CheckCircle2 size={11} />
+                      <span>{totalCartCount} {isEs ? 'Viales' : 'Vials'} ({formatPrice(totalCartValueUsd)})</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Scope Switcher: Active Filter View vs Global Catalog */}
+                <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '5px', padding: '2px', gap: '2px', border: '1px solid #e2e8f0' }}>
+                  <button
+                    type="button"
+                    onClick={() => setScopeMode('filtered')}
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      background: scopeMode === 'filtered' ? '#ffffff' : 'transparent',
+                      color: scopeMode === 'filtered' ? '#1a73e8' : '#64748b',
+                      fontWeight: scopeMode === 'filtered' ? 750 : 500,
+                      fontSize: '0.66rem',
+                      cursor: 'pointer',
+                      boxShadow: scopeMode === 'filtered' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={isEs ? 'Ver métricas del conjunto filtrado actual' : 'View metrics for current active filter'}
+                  >
+                    {isEs ? `Filtros Activos (${filteredProducts.length})` : `Active Filters (${filteredProducts.length})`}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScopeMode('global')}
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      background: scopeMode === 'global' ? '#ffffff' : 'transparent',
+                      color: scopeMode === 'global' ? '#1a73e8' : '#64748b',
+                      fontWeight: scopeMode === 'global' ? 750 : 500,
+                      fontSize: '0.66rem',
+                      cursor: 'pointer',
+                      boxShadow: scopeMode === 'global' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={isEs ? 'Ver métricas de toda la base de datos' : 'View metrics for entire database'}
+                  >
+                    {isEs ? `Catálogo Global (${processedProducts.length})` : `Entire Catalog (${processedProducts.length})`}
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 KPIs in a 2x2 Mobile Grid / 4-Col Desktop Grid (GCP Standard) */}
+              <div className="peptides-kpis-grid">
+                {/* KPI 1: Available Formulations */}
+                <div
+                  className="peptides-kpi-card"
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSelectedFdaStatus('all');
+                    setSearchQuery('');
+                  }}
+                  title={isEs ? 'Clic para ver todas las formulaciones' : 'Click to view all formulations'}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: '102px',
+                    transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? 'Formulaciones' : 'Formulations'}
+                    </span>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FlaskConical size={15} style={{ color: '#1a73e8' }} />
                     </div>
                   </div>
-                }
-              />
+                  <div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 700, color: '#202124', lineHeight: 1.15 }}>
+                      {scopeMode === 'filtered' ? filteredProducts.length : processedProducts.length}
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>{isEs ? 'Viales Liofilizados' : 'Sterile Vials'}</span>
+                      <span style={{ color: '#1a73e8', fontWeight: 600 }}>{isEs ? 'Filtrar →' : 'Filter →'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* KPI 2: Pack ×10 Volume Savings */}
+                <div
+                  className="peptides-kpi-card"
+                  onClick={() => {
+                    if (totalCartCount > 0) setIsOrderDrawerOpen(true);
+                  }}
+                  title={totalCartCount > 0 ? (isEs ? 'Clic para revisar proforma' : 'Click to review proforma') : ''}
+                  style={{
+                    background: '#ffffff',
+                    border: totalCartCount > 0 ? '1px solid #bbf7d0' : '1px solid #dadce0',
+                    borderTop: totalCartCount > 0 ? '3px solid #16a34a' : '1px solid #dadce0',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    cursor: totalCartCount > 0 ? 'pointer' : 'default',
+                    boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: '102px',
+                    transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: totalCartCount > 0 ? '#15803d' : '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {totalCartCount > 0 ? (isEs ? 'Proforma' : 'Proforma') : (isEs ? 'Ahorro Pack ×10' : 'Pack ×10 Savings')}
+                    </span>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {totalCartCount > 0 ? <ShoppingCart size={15} style={{ color: '#16a34a' }} /> : <TrendingDown size={15} style={{ color: '#16a34a' }} />}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 700, color: '#15803d', lineHeight: 1.15 }}>
+                      {totalCartCount > 0 ? `${totalCartCount} ${isEs ? 'Viales' : 'Vials'}` : (isEs ? '-15% a -52%' : '-15% to -52%')}
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>{totalCartCount > 0 ? `${formatPrice(totalCartValueUsd)} Subtotal` : (isEs ? 'Nivel Pack 10' : 'Pack ×10 Tier')}</span>
+                      <span style={{ color: '#16a34a', fontWeight: 600 }}>{totalCartCount > 0 ? (isEs ? 'Revisar →' : 'Review →') : (isEs ? 'Explorar →' : 'Explore →')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* KPI 3: 503A & FDA Approved */}
+                <div
+                  className="peptides-kpi-card"
+                  onClick={() => setSelectedFdaStatus(selectedFdaStatus === 'fda_503a' ? 'all' : 'fda_503a')}
+                  title={isEs ? 'Clic para filtrar 503A & Aprobados' : 'Click to filter 503A & Approved'}
+                  style={{
+                    background: '#ffffff',
+                    border: selectedFdaStatus === 'fda_503a' ? '1.5px solid #0284c7' : '1px solid #dadce0',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: '102px',
+                    transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? '503A & Aprobados' : '503A & Approved'}
+                    </span>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ShieldCheck size={15} style={{ color: '#0284c7' }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.15 }}>
+                      {(scopeMode === 'filtered' ? filteredProducts : processedProducts).filter(p => p.fdaBucket === 'fda_503a' || p.fdaBucket === 'fda_approved').length}
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>20 HHS · 15 NDA</span>
+                      <span style={{ color: '#0284c7', fontWeight: 600 }}>{isEs ? 'Ver →' : 'View →'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* KPI 4: Analytical Quality & Purity */}
+                <div
+                  className="peptides-kpi-card"
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: '102px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? 'Pureza y Calidad' : 'Quality & Purity'}
+                    </span>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Award size={15} style={{ color: '#0d9488' }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.15 }}>
+                      100% COA
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>≥99.0% HPLC</span>
+                      <span style={{ color: '#0d9488', fontWeight: 600 }}>{isEs ? 'Fichas →' : 'Specs →'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
               {/* Dual Mobile Dropdown Selectors (Google Cloud Mobile UX Standard: Category + FDA Status Bottom Sheets) */}
               <div className="mobile-only-filter-selectors">
@@ -4841,8 +4899,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               )}
             </div>
           </div>
-        </div>
-      </main>
+        </main>
 
       {/* ── Quick Order Request Drawer ── */}
       {isOrderDrawerOpen && (
