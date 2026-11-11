@@ -43,6 +43,7 @@ node_modules_bad/
 med-peptides-app-*.json
 
 .next
+.hosting_public/
 
 *.log
 *.txt

@@ -5,6 +5,7 @@
 .next/dev
 .next/diagnostics
 .firebase
+.hosting_public
 
 # Ignore git and CI/CD metadata
 .git

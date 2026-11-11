@@ -1,13 +1,7 @@
 {
   "hosting": {
     "target": "production",
-    "source": ".",
-    "frameworksBackend": {
-      "memory": "2GiB",
-      "timeoutSeconds": 180,
-      "maxInstances": 20,
-      "concurrency": 80
-    },
+    "public": ".hosting_public",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -18,9 +12,25 @@
         "source": "/api/analytics-overview",
         "function": "analyticsOverview",
         "region": "europe-west1"
+      },
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "ssrmedpeptidesapp27a3a",
+          "region": "us-central1"
+        }
       }
     ],
     "headers": [
+      {
+        "source": "/_next/static/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
       {
         "source": "/blueprint/**",
         "headers": [
