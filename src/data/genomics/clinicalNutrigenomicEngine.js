@@ -17,6 +17,13 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+import {
+  MASTER_FOOD_CATALOG,
+  FOOD_TRAFFIC_LEVELS,
+  evaluateFoodForGeneticProfile,
+  getPersonalizedGroceryAisles
+} from './masterFoodCatalog.js';
+
 export const GALENIC_COMPATIBILITY_ANALYSIS = {
   rationale: 'Galenic and pharmacokinetic analysis strictly contraindicates combining all 9 active ingredients into a single monolithic capsule due to physical volume overload, botanical antimicrobial antagonism against live probiotics, and conflicting absorption kinetics.',
   conflictsIdentified: [
@@ -1223,6 +1230,26 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
     ]
   };
 
+  // Dynamically evaluated Master Food Catalog (Fagron-inspired standard)
+  const masterFoodItemsEvaluated = MASTER_FOOD_CATALOG.map(f => evaluateFoodForGeneticProfile(f, {
+    mthfrRisk: 'HIGH',
+    mcm6Intolerant: true,
+    mc4rLowSatiety: true,
+    irs1Resistant: true,
+    cyp4f2Risk: true,
+    caffeineSensitive: true
+  }));
+
+  // Sourced directly from Fagron Master Catalog via personalized genetic filtering
+  const dynamicGroceryAisles = getPersonalizedGroceryAisles({
+    mthfrRisk: 'HIGH',
+    mcm6Intolerant: true,
+    mc4rLowSatiety: true,
+    irs1Resistant: true,
+    cyp4f2Risk: true,
+    caffeineSensitive: true
+  });
+
   return {
     patient: {
       name: patientName,
@@ -1238,7 +1265,8 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
     circadianChronoSchedule,
     sevenDayMealPlan,
     minimalTargetedCoFactors,
-    supermarketGroceryList,
+    supermarketGroceryList: dynamicGroceryAisles.length > 0 ? dynamicGroceryAisles : supermarketGroceryList,
+    masterFoodCatalog: masterFoodItemsEvaluated,
     nutritionistConsultationDirectives,
     // Preserves backward compatibility with existing components
     concreteDietGuidelines: CONCRETE_DIET_GUIDELINES,

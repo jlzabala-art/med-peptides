@@ -70,6 +70,8 @@ export default function PatientDnaPortalClient({
   const [selectedDay, setSelectedDay] = useState(1);
   const [checkedGroceryItems, setCheckedGroceryItems] = useState({});
   const [foodTrafficFilter, setFoodTrafficFilter] = useState('all');
+  const [foodViewMode, setFoodViewMode] = useState('summary'); // 'summary' | 'master_catalog'
+  const [fagronMacroGroup, setFagronMacroGroup] = useState('ALL'); // 'ALL' | 'CARBO+' | 'PROTEIN+' | 'LIPID+' | 'EXTRAS'
 
   const toggleGroceryItem = (itemKey) => {
     setCheckedGroceryItems(prev => ({
@@ -607,141 +609,297 @@ export default function PatientDnaPortalClient({
             <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    FOOD AS MEDICINE MATRIX
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      FOOD AS MEDICINE MATRIX
+                    </span>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '2px 7px', borderRadius: '4px' }}>
+                      Fagron NutriGen™ Taxonomy Standard
+                    </span>
+                  </div>
                   <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
-                    Personalized Food Traffic Light
+                    Personalized Food List &amp; Traffic Light
                   </h3>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                    Categorized by functional impact on your genetic variants. Hand this directly to your clinical nutritionist or catering chef.
+                    Individualized evaluation of allowed, controlled, reduced, and excluded foods based on your genetic SNPs.
                   </p>
                 </div>
 
-                {/* Filter chips */}
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {[
-                    { id: 'all', label: 'All Items' },
-                    { id: 'green', label: '🟢 Superfoods (8)' },
-                    { id: 'yellow', label: '🟡 Caution (4)' },
-                    { id: 'red', label: '🔴 Strict Exclusions (5)' }
-                  ].map((flt) => (
-                    <button
-                      key={flt.id}
-                      onClick={() => setFoodTrafficFilter(flt.id)}
-                      style={{
-                        padding: '6px 12px',
-                        fontSize: '0.76rem',
-                        fontWeight: 750,
-                        borderRadius: '6px',
-                        border: '1px solid',
-                        borderColor: foodTrafficFilter === flt.id ? '#0284c7' : '#cbd5e1',
-                        backgroundColor: foodTrafficFilter === flt.id ? '#e0f2fe' : '#ffffff',
-                        color: foodTrafficFilter === flt.id ? '#0369a1' : '#475569',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {flt.label}
-                    </button>
-                  ))}
+                {/* View Mode Toggle (Clinical Highlights vs Full Master Catalog) */}
+                <div style={{ display: 'flex', gap: '6px', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <button
+                    onClick={() => setFoodViewMode('summary')}
+                    style={{
+                      padding: '6px 14px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: foodViewMode === 'summary' ? '#ffffff' : 'transparent',
+                      color: foodViewMode === 'summary' ? '#003666' : '#64748b',
+                      boxShadow: foodViewMode === 'summary' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Clinical Summary
+                  </button>
+                  <button
+                    onClick={() => setFoodViewMode('master_catalog')}
+                    style={{
+                      padding: '6px 14px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: foodViewMode === 'master_catalog' ? '#ffffff' : 'transparent',
+                      color: foodViewMode === 'master_catalog' ? '#003666' : '#64748b',
+                      boxShadow: foodViewMode === 'master_catalog' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Comprehensive Catalog ({clinicalProfile.masterFoodCatalog?.length || 47})
+                  </button>
                 </div>
               </div>
 
-              {/* Traffic Light Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
-                {/* Green Superfoods */}
-                {(foodTrafficFilter === 'all' || foodTrafficFilter === 'green') && (
-                  <div style={{ backgroundColor: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '10px', padding: '1.25rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '1.2rem' }}>🟢</span>
-                      <div>
-                        <strong style={{ fontSize: '0.92rem', color: '#166534', fontWeight: 850, display: 'block' }}>
-                          MEDICINE SUPERFOODS (Always Include)
-                        </strong>
-                        <span style={{ fontSize: '0.70rem', color: '#15803d' }}>Genetically targeted therapeutic food allies</span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {clinicalProfile.foodTrafficLight.greenSuperfoods.map((food, idx) => (
-                        <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
-                            <strong style={{ fontSize: '0.82rem', color: '#14532d' }}>{food.name}</strong>
-                            <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#dcfce7', color: '#166534', padding: '2px 6px', borderRadius: '3px' }}>
-                              {food.geneTarget}
-                            </span>
-                          </div>
-                          <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
-                            <em>Active:</em> {food.activeCompound}
-                          </div>
-                          <div style={{ fontSize: '0.74rem', color: '#166534', marginTop: '4px', lineHeight: 1.4 }}>
-                            {food.benefitEn}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+              {foodViewMode === 'summary' ? (
+                <>
+                  {/* Summary Filters */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+                    {[
+                      { id: 'all', label: 'All Items' },
+                      { id: 'green', label: '🟢 Superfoods (8)' },
+                      { id: 'yellow', label: '🟡 Caution (4)' },
+                      { id: 'red', label: '🔴 Strict Exclusions (5)' }
+                    ].map((flt) => (
+                      <button
+                        key={flt.id}
+                        onClick={() => setFoodTrafficFilter(flt.id)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '0.76rem',
+                          fontWeight: 750,
+                          borderRadius: '6px',
+                          border: '1px solid',
+                          borderColor: foodTrafficFilter === flt.id ? '#0284c7' : '#cbd5e1',
+                          backgroundColor: foodTrafficFilter === flt.id ? '#e0f2fe' : '#ffffff',
+                          color: foodTrafficFilter === flt.id ? '#0369a1' : '#475569',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {flt.label}
+                      </button>
+                    ))}
                   </div>
-                )}
 
-                {/* Yellow Caution */}
-                {(foodTrafficFilter === 'all' || foodTrafficFilter === 'yellow') && (
-                  <div style={{ backgroundColor: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '10px', padding: '1.25rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '1.2rem' }}>🟡</span>
-                      <div>
-                        <strong style={{ fontSize: '0.92rem', color: '#92400e', fontWeight: 850, display: 'block' }}>
-                          CONSUME WITH CAUTION (Portion &amp; Time Rules)
-                        </strong>
-                        <span style={{ fontSize: '0.70rem', color: '#b45309' }}>Requires specific timing or culinary preparation</span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {clinicalProfile.foodTrafficLight.yellowCaution.map((item, idx) => (
-                        <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #fef08a' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
-                            <strong style={{ fontSize: '0.82rem', color: '#78350f' }}>{item.name}</strong>
-                            <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: '3px' }}>
-                              {item.geneTarget}
-                            </span>
-                          </div>
-                          <div style={{ fontSize: '0.74rem', color: '#92400e', marginTop: '4px', lineHeight: 1.4 }}>
-                            <strong>Rule:</strong> {item.conditionEn}
+                  {/* Summary Traffic Light Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+                    {/* Green Superfoods */}
+                    {(foodTrafficFilter === 'all' || foodTrafficFilter === 'green') && (
+                      <div style={{ backgroundColor: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '10px', padding: '1.25rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '1.2rem' }}>🟢</span>
+                          <div>
+                            <strong style={{ fontSize: '0.92rem', color: '#166534', fontWeight: 850, display: 'block' }}>
+                              MEDICINE SUPERFOODS (Always Include)
+                            </strong>
+                            <span style={{ fontSize: '0.70rem', color: '#15803d' }}>Genetically targeted therapeutic food allies</span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {clinicalProfile.foodTrafficLight.greenSuperfoods.map((food, idx) => (
+                            <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                                <strong style={{ fontSize: '0.82rem', color: '#14532d' }}>{food.name}</strong>
+                                <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#dcfce7', color: '#166534', padding: '2px 6px', borderRadius: '3px' }}>
+                                  {food.geneTarget}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
+                                <em>Active:</em> {food.activeCompound}
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#166534', marginTop: '4px', lineHeight: 1.4 }}>
+                                {food.benefitEn}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {/* Red Strict Exclusions */}
-                {(foodTrafficFilter === 'all' || foodTrafficFilter === 'red') && (
-                  <div style={{ backgroundColor: '#fef2f2', border: '1.5px solid #fca5a5', borderRadius: '10px', padding: '1.25rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '1.2rem' }}>🔴</span>
-                      <div>
-                        <strong style={{ fontSize: '0.92rem', color: '#991b1b', fontWeight: 850, display: 'block' }}>
-                          STRICT EXCLUSIONS (Genetically Harmful)
-                        </strong>
-                        <span style={{ fontSize: '0.70rem', color: '#dc2626' }}>Strictly contraindicate or eliminate from diet</span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {clinicalProfile.foodTrafficLight.redStrictExclusions.map((item, idx) => (
-                        <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #fecaca' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
-                            <strong style={{ fontSize: '0.82rem', color: '#7f1d1d' }}>{item.name}</strong>
-                            <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#fee2e2', color: '#991b1b', padding: '2px 6px', borderRadius: '3px' }}>
-                              {item.geneTarget}
-                            </span>
+                    {/* Yellow Caution */}
+                    {(foodTrafficFilter === 'all' || foodTrafficFilter === 'yellow') && (
+                      <div style={{ backgroundColor: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '10px', padding: '1.25rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '1.2rem' }}>🟡</span>
+                          <div>
+                            <strong style={{ fontSize: '0.92rem', color: '#92400e', fontWeight: 850, display: 'block' }}>
+                              CONSUME WITH CAUTION (Portion &amp; Time Rules)
+                            </strong>
+                            <span style={{ fontSize: '0.70rem', color: '#b45309' }}>Requires specific timing or culinary preparation</span>
                           </div>
-                          <div style={{ fontSize: '0.74rem', color: '#991b1b', marginTop: '4px', lineHeight: 1.4 }}>
-                            <strong>Hazard:</strong> {item.hazardEn}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {clinicalProfile.foodTrafficLight.yellowCaution.map((item, idx) => (
+                            <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #fef08a' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                                <strong style={{ fontSize: '0.82rem', color: '#78350f' }}>{item.name}</strong>
+                                <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: '3px' }}>
+                                  {item.geneTarget}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#92400e', marginTop: '4px', lineHeight: 1.4 }}>
+                                <strong>Rule:</strong> {item.conditionEn}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Red Strict Exclusions */}
+                    {(foodTrafficFilter === 'all' || foodTrafficFilter === 'red') && (
+                      <div style={{ backgroundColor: '#fef2f2', border: '1.5px solid #fca5a5', borderRadius: '10px', padding: '1.25rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '1.2rem' }}>🔴</span>
+                          <div>
+                            <strong style={{ fontSize: '0.92rem', color: '#991b1b', fontWeight: 850, display: 'block' }}>
+                              STRICT EXCLUSIONS (Genetically Harmful)
+                            </strong>
+                            <span style={{ fontSize: '0.70rem', color: '#dc2626' }}>Strictly contraindicate or eliminate from diet</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {clinicalProfile.foodTrafficLight.redStrictExclusions.map((item, idx) => (
+                            <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #fecaca' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                                <strong style={{ fontSize: '0.82rem', color: '#7f1d1d' }}>{item.name}</strong>
+                                <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#fee2e2', color: '#991b1b', padding: '2px 6px', borderRadius: '3px' }}>
+                                  {item.geneTarget}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#991b1b', marginTop: '4px', lineHeight: 1.4 }}>
+                                <strong>Hazard:</strong> {item.hazardEn}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                /* Fagron NutriGen™ Master Food Catalog Explorer */
+                <div>
+                  {/* Macro-Group Filters */}
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+                    {[
+                      { id: 'ALL', label: 'All Macro-Groups' },
+                      { id: 'CARBO+', label: '🌾 3.1 CARBO+ (Veg, Fruit, Cereals)' },
+                      { id: 'PROTEIN+', label: '🥩 3.2 PROTEIN+ (Fish, Meats, Eggs, A2)' },
+                      { id: 'LIPID+', label: '🫒 3.3 LIPID+ (Oils & Healthy Fats)' },
+                      { id: 'EXTRAS', label: '🍵 3.4 EXTRAS (Beverages, Seeds, Snacks)' }
+                    ].map(grp => (
+                      <button
+                        key={grp.id}
+                        onClick={() => setFagronMacroGroup(grp.id)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '0.76rem',
+                          fontWeight: 700,
+                          borderRadius: '6px',
+                          border: '1px solid',
+                          borderColor: fagronMacroGroup === grp.id ? '#003666' : '#cbd5e1',
+                          backgroundColor: fagronMacroGroup === grp.id ? '#003666' : '#ffffff',
+                          color: fagronMacroGroup === grp.id ? '#ffffff' : '#475569',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {grp.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Food Items Cards Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+                    {(clinicalProfile.masterFoodCatalog || [])
+                      .filter(f => fagronMacroGroup === 'ALL' || f.categoryGroup === fagronMacroGroup)
+                      .map((food, fIdx) => (
+                        <div
+                          key={food.id || fIdx}
+                          style={{
+                            backgroundColor: '#ffffff',
+                            border: `1px solid ${food.levelMeta?.badgeBorder || '#dadce0'}`,
+                            borderRadius: '8px',
+                            padding: '12px 14px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                              <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                {food.categoryGroup} · {food.categoryFamily}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '0.66rem',
+                                  fontWeight: 800,
+                                  backgroundColor: food.levelMeta?.badgeBg || '#f1f5f9',
+                                  color: food.levelMeta?.badgeColor || '#475569',
+                                  border: `1px solid ${food.levelMeta?.badgeBorder || '#cbd5e1'}`,
+                                  padding: '2px 6px',
+                                  borderRadius: '4px'
+                                }}
+                              >
+                                {food.levelMeta?.shortLabelEn || food.trafficLevel}
+                              </span>
+                            </div>
+
+                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem', marginBottom: '2px' }}>
+                              {food.nameEn}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '6px' }}>
+                              {food.nameEs}
+                            </div>
+
+                            {/* Nutrients Chips */}
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
+                              {(food.nutrients || []).map((n, nIdx) => (
+                                <span
+                                  key={nIdx}
+                                  style={{
+                                    fontSize: '0.64rem',
+                                    fontWeight: 600,
+                                    backgroundColor: '#f1f5f9',
+                                    color: '#334155',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px'
+                                  }}
+                                >
+                                  {n}
+                                </span>
+                              ))}
+                            </div>
+
+                            {/* DNA Drivers */}
+                            {food.geneticDrivers && food.geneticDrivers.length > 0 ? (
+                              <div style={{ fontSize: '0.72rem', color: food.levelMeta?.badgeColor || '#475569', backgroundColor: food.levelMeta?.badgeBg || '#f8fafc', padding: '6px 8px', borderRadius: '4px', lineHeight: 1.4 }}>
+                                🧬 {food.geneticDrivers[0]}
+                              </div>
+                            ) : (
+                              <div style={{ fontSize: '0.72rem', color: '#475569', lineHeight: 1.4 }}>
+                                {food.rationaleEn}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
-                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* ── Circadian Chrono-Nutrition (24h Routine Timeline) ── */}
@@ -908,51 +1066,6 @@ export default function PatientDnaPortalClient({
               })()}
             </div>
 
-            {/* ── Minimal Targeted Co-Factors (Food-First Complement · Google Cloud UX) ── */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #dadce0', padding: '1.5rem', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  TARGETED CO-FACTORS (FOOD-FIRST SYNERGY · ONLY 3 ESSENTIALS)
-                </span>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 4px 0' }}>
-                  Minimal Targeted Co-Factors
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.80rem', color: '#64748b' }}>
-                  Only 3 precision cofactors that genetic polymorphisms prevent your cells from rapidly generating from diet alone.
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
-                {clinicalProfile.minimalTargetedCoFactors.map((co, idx) => (
-                  <div key={idx} style={{ backgroundColor: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ height: '20px', fontSize: '0.66rem', lineHeight: '18px', backgroundColor: '#f1f3f4', color: '#3c4043', border: '1px solid #dadce0', padding: '0 6px', borderRadius: '4px', fontWeight: 600 }}>
-                          Cofactor {idx + 1}
-                        </span>
-                        <span style={{ height: '20px', fontSize: '0.68rem', lineHeight: '18px', backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '0 6px', borderRadius: '4px', fontWeight: 700 }}>
-                          {co.dose}
-                        </span>
-                      </div>
-                      <h4 style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
-                        {co.nutrient}
-                      </h4>
-                      <div style={{ fontSize: '0.72rem', color: '#0f766e', fontWeight: 600, marginBottom: '6px' }}>
-                        Food Synergy: {co.foodSynergy}
-                      </div>
-                      <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                        {co.rationaleEn}
-                      </p>
-                    </div>
-
-                    <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f5f9', fontSize: '0.72rem', color: '#64748b' }}>
-                      Timing: {co.timing}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* ── Interactive Supermarket Grocery Checklist (GCC / Doha) ── */}
             <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1.5px solid #ccfbf1', padding: '1.75rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.06)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
@@ -1020,6 +1133,51 @@ export default function PatientDnaPortalClient({
                           </label>
                         );
                       })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Minimal Targeted Co-Factors (Food-First Complement · Google Cloud UX) ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #dadce0', padding: '1.5rem', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  TARGETED CO-FACTORS (FOOD-FIRST SYNERGY · ONLY 3 ESSENTIALS)
+                </span>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 4px 0' }}>
+                  Minimal Targeted Co-Factors
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.80rem', color: '#64748b' }}>
+                  Only 3 precision cofactors that genetic polymorphisms prevent your cells from rapidly generating from diet alone.
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+                {clinicalProfile.minimalTargetedCoFactors.map((co, idx) => (
+                  <div key={idx} style={{ backgroundColor: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ height: '20px', fontSize: '0.66rem', lineHeight: '18px', backgroundColor: '#f1f3f4', color: '#3c4043', border: '1px solid #dadce0', padding: '0 6px', borderRadius: '4px', fontWeight: 600 }}>
+                          Cofactor {idx + 1}
+                        </span>
+                        <span style={{ height: '20px', fontSize: '0.68rem', lineHeight: '18px', backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '0 6px', borderRadius: '4px', fontWeight: 700 }}>
+                          {co.dose}
+                        </span>
+                      </div>
+                      <h4 style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
+                        {co.nutrient}
+                      </h4>
+                      <div style={{ fontSize: '0.72rem', color: '#0f766e', fontWeight: 600, marginBottom: '6px' }}>
+                        Food Synergy: {co.foodSynergy}
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
+                        {co.rationaleEn}
+                      </p>
+                    </div>
+
+                    <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f5f9', fontSize: '0.72rem', color: '#64748b' }}>
+                      Timing: {co.timing}
                     </div>
                   </div>
                 ))}

@@ -283,13 +283,15 @@ export default function NormaPharmaceuticalDetail({
               <span>{isEs ? 'Solicitar Asignación Clínica / Hospital' : 'Request Clinic / Hospital Allocation'}</span>
             </button>
 
-            {/* Storage Warning Card */}
-            <div className="norma-card" style={{ borderLeft: '4px solid #0284c7', margin: 0, padding: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#0369a1', fontSize: '0.78rem' }}>
-                <Thermometer size={15} />
+            {/* Storage Warning Card (Google Cloud Standard) */}
+            <div className="norma-card" style={{ margin: 0, padding: '12px 14px', border: '1px solid #dadce0', borderRadius: '8px', backgroundColor: '#ffffff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#202124', fontSize: '0.80rem' }}>
+                <div style={{ width: '24px', height: '24px', borderRadius: '4px', backgroundColor: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Thermometer size={14} />
+                </div>
                 <span>{isEs ? 'Condiciones de Conservación' : 'Storage Guidelines'}</span>
               </div>
-              <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.4', margin: '4px 0 0' }}>
+              <p style={{ fontSize: '0.74rem', color: '#5f6368', marginTop: '6px', lineHeight: '1.45', margin: '6px 0 0' }}>
                 {isEs
                   ? 'Conservar por debajo de 25°C en su envase original para protegerlo de la luz. NO CONGELAR NI REFRIGERAR.'
                   : 'Store below 25°C in original carton to protect from light. DO NOT REFRIGERATE OR FREEZE.'}
@@ -408,33 +410,39 @@ export default function NormaPharmaceuticalDetail({
                         : 'Testosterone enanthate is an esterified pro-drug. Following deep intramuscular injection into the gluteal muscle depot, tissue esterases progressively cleave the 17β-heptanoyl ester linkage, delivering pure, bioidentical free testosterone into systemic circulation. It exerts physiological action across three essential biological pathways:'}
                     </p>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px', marginTop: '12px' }}>
-                      <div className="gcp-pathway-card" style={{ borderLeft: '3px solid #003666' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#003666', fontSize: '0.8125rem' }}>
-                          <Dna size={15} />
-                          <span>1. Direct AR Genomic Signaling</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginTop: '14px' }}>
+                      <div className="gcp-pathway-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Dna size={16} />
+                          </div>
+                          <span style={{ fontWeight: 700, color: '#202124', fontSize: '0.84rem' }}>1. Direct AR Genomic Signaling</span>
                         </div>
-                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
+                        <p style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
                           Binds intracellular Androgen Receptors (AR), translocating to the nucleus to bind Androgen Response Elements (ARE), upregulating nitrogen retention, structural protein synthesis, and myoglobin expression.
                         </p>
                       </div>
 
-                      <div className="gcp-pathway-card" style={{ borderLeft: '3px solid #c2410c' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#c2410c', fontSize: '0.8125rem' }}>
-                          <Zap size={15} />
-                          <span>2. 5α-Reductase Amplification (DHT)</span>
+                      <div className="gcp-pathway-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#fef7e0', color: '#b06000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Zap size={16} />
+                          </div>
+                          <span style={{ fontWeight: 700, color: '#202124', fontSize: '0.84rem' }}>2. 5α-Reductase Amplification (DHT)</span>
                         </div>
-                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
+                        <p style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
                           Irreversibly reduced in target tissues (prostate, scalp, CNS) to Dihydrotestosterone (DHT), which displays 3–5× higher receptor affinity, supporting virilization, CNS dopaminergic signaling, and libido.
                         </p>
                       </div>
 
-                      <div className="gcp-pathway-card" style={{ borderLeft: '3px solid #0d9488' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#0d9488', fontSize: '0.8125rem' }}>
-                          <HeartPulse size={15} />
-                          <span>3. Aromatase (CYP19A1) Homeostasis</span>
+                      <div className="gcp-pathway-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#e6f4ea', color: '#137333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <HeartPulse size={16} />
+                          </div>
+                          <span style={{ fontWeight: 700, color: '#202124', fontSize: '0.84rem' }}>3. Aromatase (CYP19A1) Homeostasis</span>
                         </div>
-                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
+                        <p style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
                           A controlled fraction (~0.3%) converts via aromatase into 17β-Estradiol (E2). Physiological E2 is critical for vascular nitric oxide, bone mineral density, lipid homeostasis, and neurocognitive resilience.
                         </p>
                       </div>
@@ -451,55 +459,65 @@ export default function NormaPharmaceuticalDetail({
                     <div className="norma-pillars-grid">
                       {/* Pillar 1 */}
                       <div className="norma-pillar-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
-                          <Flame size={16} color="#c2410c" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#202124', fontWeight: 700, fontSize: '0.84rem' }}>
+                          <div style={{ width: '26px', height: '26px', borderRadius: '6px', backgroundColor: '#f1f3f4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Flame size={15} color="#c2410c" />
+                          </div>
                           <span>Muscle & Body Recomposition</span>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                        <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '8px', lineHeight: '1.5' }}>
                           Increases fractional synthetic rate of mixed muscle proteins, stimulates IGF-1 synthesis, and mobilizes androgen-sensitive visceral adipocyte lipolysis.
                         </div>
                       </div>
 
                       {/* Pillar 2 */}
                       <div className="norma-pillar-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
-                          <Brain size={16} color="#7c3aed" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#202124', fontWeight: 700, fontSize: '0.84rem' }}>
+                          <div style={{ width: '26px', height: '26px', borderRadius: '6px', backgroundColor: '#f1f3f4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Brain size={15} color="#7c3aed" />
+                          </div>
                           <span>Cognitive Drive & Neuroprotection</span>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                        <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '8px', lineHeight: '1.5' }}>
                           Stimulates mesolimbic dopamine synthesis, sharpens executive processing speed, enhances spatial memory, and resolves chronic male brain fog.
                         </div>
                       </div>
 
                       {/* Pillar 3 */}
                       <div className="norma-pillar-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
-                          <Activity size={16} color="#0d9488" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#202124', fontWeight: 700, fontSize: '0.84rem' }}>
+                          <div style={{ width: '26px', height: '26px', borderRadius: '6px', backgroundColor: '#f1f3f4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Activity size={15} color="#0d9488" />
+                          </div>
                           <span>Metabolism & Glycemic Control</span>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                        <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '8px', lineHeight: '1.5' }}>
                           Upregulates skeletal GLUT-4 glucose transporters, enhances peripheral insulin sensitivity, and promotes consistent reduction in circulating HbA1c.
                         </div>
                       </div>
 
                       {/* Pillar 4 */}
                       <div className="norma-pillar-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
-                          <Scale size={16} color="#0284c7" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#202124', fontWeight: 700, fontSize: '0.84rem' }}>
+                          <div style={{ width: '26px', height: '26px', borderRadius: '6px', backgroundColor: '#f1f3f4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Scale size={15} color="#0284c7" />
+                          </div>
                           <span>Bone Density & Erythropoiesis</span>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                        <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '8px', lineHeight: '1.5' }}>
                           Promotes osteoblast mineralization and calcium retention while stimulating bone marrow erythropoietin (EPO) for optimal tissue oxygen delivery.
                         </div>
                       </div>
 
                       {/* Pillar 5 */}
                       <div className="norma-pillar-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
-                          <HeartPulse size={16} color="#dc2626" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#202124', fontWeight: 700, fontSize: '0.84rem' }}>
+                          <div style={{ width: '26px', height: '26px', borderRadius: '6px', backgroundColor: '#f1f3f4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <HeartPulse size={15} color="#dc2626" />
+                          </div>
                           <span>Endothelial Health & Libido</span>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                        <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '8px', lineHeight: '1.5' }}>
                           Upregulates endothelial Nitric Oxide Synthase (eNOS) in vascular and cavernosal beds, restoring nocturnal tumescence and spontaneous libido.
                         </div>
                       </div>
@@ -767,52 +785,68 @@ export default function NormaPharmaceuticalDetail({
                         : 'Authoritative clinical directives from the Endocrine Society & European Association of Urology (EAU) for responsible testosterone administration:'}
                     </p>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
-                      <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
-                        <div style={{ fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
-                          1. Total & Free Testosterone + SHBG
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                      <div style={{ backgroundColor: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '14px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#202124', fontSize: '0.84rem' }}>
+                            1. Total & Free Testosterone + SHBG
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '6px', lineHeight: '1.45' }}>
+                            Sample fasting between 8:00–10:00 AM. In established protocols, measure strictly at the <strong>trough (nadir)</strong> immediately prior to the subsequent injection.
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px' }}>
-                          Sample fasting between 8:00–10:00 AM. In established protocols, measure strictly at the <strong>trough (nadir)</strong> immediately prior to the subsequent injection.
-                        </div>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#166534', marginTop: '6px' }}>
-                          Clinical Target: Mid-to-high normal range (550 – 850 ng/dL)
-                        </div>
-                      </div>
-
-                      <div style={{ backgroundColor: '#fff7ed', border: '1px solid #ffedd5', borderRadius: '8px', padding: '12px' }}>
-                        <div style={{ fontWeight: 800, color: '#c2410c', fontSize: '0.82rem' }}>
-                          2. Hematocrit (Hct) / Complete Blood Count
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px' }}>
-                          Check baseline, 3 months, 6 months, and annually. Androgen-induced bone marrow erythropoietin stimulation may cause secondary erythrocytosis.
-                        </div>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#dc2626', marginTop: '6px' }}>
-                          Critical Action Threshold: Hct &gt; 54% (Prompt dose reduction or therapeutic phlebotomy)
+                        <div style={{ marginTop: '10px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#e6f4ea', color: '#137333', fontSize: '0.72rem', fontWeight: 700, border: '1px solid #ceead6' }}>
+                            Clinical Target: Mid-to-high normal range (550 – 850 ng/dL)
+                          </span>
                         </div>
                       </div>
 
-                      <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
-                        <div style={{ fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
-                          3. PSA & Digital Rectal Examination
+                      <div style={{ backgroundColor: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '14px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#202124', fontSize: '0.84rem' }}>
+                            2. Hematocrit (Hct) / Complete Blood Count
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '6px', lineHeight: '1.45' }}>
+                            Check baseline, 3 months, 6 months, and annually. Androgen-induced bone marrow erythropoietin stimulation may cause secondary erythrocytosis.
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px' }}>
-                          Mandatory in males &gt; 45 years. Exclude subclinical prostate adenocarcinoma prior to initiation. Follow up at 3, 6, and 12 months.
-                        </div>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0369a1', marginTop: '6px' }}>
-                          Clinical Ceilings: PSA &lt; 4.0 ng/mL or velocity &lt; 1.4 ng/mL/year
+                        <div style={{ marginTop: '10px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fce8e6', color: '#c5221f', fontSize: '0.72rem', fontWeight: 700, border: '1px solid #fad2cf' }}>
+                            Critical Action Threshold: Hct &gt; 54% (Dose reduction / phlebotomy)
+                          </span>
                         </div>
                       </div>
 
-                      <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
-                        <div style={{ fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
-                          4. Ultra-Sensitive Estradiol (E2)
+                      <div style={{ backgroundColor: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '14px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#202124', fontSize: '0.84rem' }}>
+                            3. PSA & Digital Rectal Examination
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '6px', lineHeight: '1.45' }}>
+                            Mandatory in males &gt; 45 years. Exclude subclinical prostate adenocarcinoma prior to initiation. Follow up at 3, 6, and 12 months.
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px' }}>
-                          Crucial for bone density, libido, and vascular protection. Avoid reflexively crashing E2 with aromatase inhibitors unless symptomatic gynecomastia develops.
+                        <div style={{ marginTop: '10px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#e8f0fe', color: '#1a73e8', fontSize: '0.72rem', fontWeight: 700, border: '1px solid #d2e3fc' }}>
+                            Clinical Ceilings: PSA &lt; 4.0 ng/mL or velocity &lt; 1.4 ng/mL/yr
+                          </span>
                         </div>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginTop: '6px' }}>
-                          Optimal Ratio: Total T (ng/dL) to E2 (pg/mL) ratio ~ 20:1 to 30:1
+                      </div>
+
+                      <div style={{ backgroundColor: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '14px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#202124', fontSize: '0.84rem' }}>
+                            4. Ultra-Sensitive Estradiol (E2)
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '6px', lineHeight: '1.45' }}>
+                            Crucial for bone density, libido, and vascular protection. Avoid reflexively crashing E2 with aromatase inhibitors unless symptomatic gynecomastia develops.
+                          </div>
+                        </div>
+                        <div style={{ marginTop: '10px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f1f3f4', color: '#3c4043', fontSize: '0.72rem', fontWeight: 700, border: '1px solid #dadce0' }}>
+                            Optimal Ratio: Total T (ng/dL) to E2 (pg/mL) ~ 20:1 to 30:1
+                          </span>
                         </div>
                       </div>
                     </div>

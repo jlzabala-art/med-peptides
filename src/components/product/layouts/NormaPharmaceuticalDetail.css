@@ -74,23 +74,23 @@
 /* Hero Presentation Card (Google Cloud UX) */
 .norma-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dadce0;
   border-radius: 8px;
   padding: 1.25rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 .norma-card-title {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #202124;
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 0.85rem;
   padding-bottom: 0.65rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f3f4;
 }
 
 /* Google Cloud Console Tab Navigation */
@@ -204,10 +204,10 @@
 }
 
 .gcp-kv-item {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: #f8f9fa;
+  border: 1px solid #dadce0;
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -216,8 +216,8 @@
 
 .gcp-kv-label {
   font-size: 0.6875rem;
-  font-weight: 600;
-  color: #64748b;
+  font-weight: 500;
+  color: #5f6368;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -225,7 +225,7 @@
 .gcp-kv-value {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #202124;
 }
 
 /* Specific Highlight Boxes (GCP Notice Standard) */
@@ -252,16 +252,16 @@
 /* Pathway Cards (GCP Sub-Resource Style) */
 .gcp-pathway-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 12px 14px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: none;
   transition: all 0.15s ease;
 }
 
 .gcp-pathway-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border-color: #bdc1c6;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.08);
 }
 
 /* Clinical Pillars Grid */
@@ -273,16 +273,16 @@
 
 .norma-pillar-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 12px 14px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .norma-pillar-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.08);
+  border-color: #bdc1c6;
+  box-shadow: 0 2px 6px rgba(60, 64, 67, 0.10);
 }
 
 /* Protocol Comparison Table */

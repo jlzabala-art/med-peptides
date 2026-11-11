@@ -1487,20 +1487,21 @@ export async function GET(request) {
         maxWidth: grocW - 12
       });
 
-      let itemY = gY + grocH - 36;
+      let itemY = gY + grocH - 32;
       cat.items.forEach((it) => {
+        if (itemY < gY + 12) return;
         const cleanItem = `[ ] ${it.split('(')[0].trim()}`;
         itemY = drawWrappedBlock(pageGrocery, cleanItem, {
           x: gX + 6,
           y: itemY,
-          size: 6.8,
+          size: 6.0,
           font: helvetica,
           color: darkSlate,
           maxWidth: grocW - 12,
-          lineHeight: 8.8,
-          maxLines: 3
+          lineHeight: 7.6,
+          maxLines: 2
         });
-        itemY -= 6.0;
+        itemY -= 3.8;
       });
     });
 
