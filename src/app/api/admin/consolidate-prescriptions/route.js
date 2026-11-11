@@ -32,9 +32,15 @@ export async function POST(request) {
     const filterPatient = (searchParams.get('patient') || '').toLowerCase().trim();
     const filterCode = (searchParams.get('code') || '').toLowerCase().trim();
 
-    // 1. Fetch prescriptions from Firestore
-    let query = adminDb.collection('prescriptions').limit(200);
-    const snap = await query.get();
+    // 1. Fetch prescriptions from Firestore ordered by creation date desc
+    let query = adminDb.collection('prescriptions').orderBy('createdAt', 'desc').limit(500);
+    let snap;
+    try {
+      snap = await query.get();
+    } catch {
+      // Fallback if index missing
+      snap = await adminDb.collection('prescriptions').limit(500).get();
+    }
 
     // Group split candidates by base code and patient
     const candidateGroups = new Map();
@@ -63,32 +69,30 @@ export async function POST(request) {
         });
       }
 
-      // Check if code has multipart suffix like -1, -2, -3 or _1, _2
+      // Check if code has multipart suffix like -1, -2, -3 or _1, _2 OR base code itself
       const splitMatch = rawCode.match(/^(.*?)[-_](\d+)$/);
-      if (splitMatch) {
-        const baseCode = splitMatch[1].trim();
-        const partIndex = parseInt(splitMatch[2], 10);
-        const groupKey = `${patientName.toLowerCase()}::${baseCode.toLowerCase()}`;
+      const baseCode = splitMatch ? splitMatch[1].trim() : rawCode;
+      const partIndex = splitMatch ? parseInt(splitMatch[2], 10) : 0;
+      const groupKey = `${patientName.toLowerCase()}::${baseCode.toLowerCase()}`;
 
-        if (!candidateGroups.has(groupKey)) {
-          candidateGroups.set(groupKey, {
-            baseCode,
-            patientName,
-            docs: []
-          });
-        }
-        candidateGroups.get(groupKey).docs.push({
-          ...data,
-          _partIndex: partIndex
+      if (!candidateGroups.has(groupKey)) {
+        candidateGroups.set(groupKey, {
+          baseCode,
+          patientName,
+          docs: []
         });
       }
+      candidateGroups.get(groupKey).docs.push({
+        ...data,
+        _partIndex: partIndex
+      });
     });
 
     const consolidationPlans = [];
 
     // Formulate consolidation plans for groups with > 1 split doc
     for (const [key, group] of candidateGroups.entries()) {
-      if (group.docs.length >= 1) {
+      if (group.docs.length > 1) {
         // Sort by part index
         group.docs.sort((a, b) => (a._partIndex || 0) - (b._partIndex || 0));
 
@@ -149,20 +153,31 @@ export async function POST(request) {
             volume: combinedVolumes.join(' + ') || primaryDoc.volume || '',
             posology: combinedPosologies.join('\n\n') || primaryDoc.posology || '',
             treatmentType: group.docs.map(d => d.treatmentType).filter(Boolean).join(' + ') || primaryDoc.treatmentType || 'Compounded Formula',
-            doctorId: 'dr-sobia',
-            doctorSlug: 'dr-sobia',
-            doctorName: 'Dr. Sobia Mirza',
-            doctorLicense: 'DHA Registered',
-            clinicName: 'My London Skin Clinic',
-            clinicId: 'IdDU1oK1VuAVVYrGz6E7',
-            doctor: {
-              id: 'dr-sobia',
-              name: 'Dr. Sobia Mirza',
-              displayName: 'Dr. Sobia Mirza',
-              license: 'DHA Registered',
-              clinic: 'My London Skin Clinic',
-              clinicName: 'My London Skin Clinic'
-            }
+            // Auto-assign Dr. Sobia Mirza if Poorna Sindhu Jetty, or preserve primary doctor
+            ...(group.patientName.toLowerCase().includes('poorna') || masterCode.includes('03505') || (primaryDoc.doctorName && primaryDoc.doctorName.toLowerCase().includes('sobia')) || !primaryDoc.doctorId ? {
+              doctorId: 'dr-sobia',
+              doctorSlug: 'dr-sobia',
+              doctorName: 'Dr. Sobia Mirza',
+              doctorLicense: 'DHA Registered',
+              clinicName: 'My London Skin Clinic',
+              clinicId: 'IdDU1oK1VuAVVYrGz6E7',
+              doctor: {
+                id: 'dr-sobia',
+                name: 'Dr. Sobia Mirza',
+                displayName: 'Dr. Sobia Mirza',
+                license: 'DHA Registered',
+                clinic: 'My London Skin Clinic',
+                clinicName: 'My London Skin Clinic'
+              }
+            } : {
+              doctorId: primaryDoc.doctorId || '',
+              doctorSlug: primaryDoc.doctorSlug || '',
+              doctorName: primaryDoc.doctorName || '',
+              doctorLicense: primaryDoc.doctorLicense || '',
+              clinicName: primaryDoc.clinicName || '',
+              clinicId: primaryDoc.clinicId || '',
+              doctor: primaryDoc.doctor || null
+            })
           }
         });
       }

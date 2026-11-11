@@ -375,57 +375,97 @@ export default function PayablesStatementPage() {
                 )}
               </div>
             )}
-            {Array.isArray(row.associatedProducts) && row.associatedProducts.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '3px' }}>
-                {row.associatedProducts.slice(0, 2).map((p, idx) => (
+            {/* ── GOOGLE CLOUD UX METADATA CHIPS (Clean, Monochromatic SVG, High Density) ── */}
+            {((Array.isArray(row.associatedProducts) && row.associatedProducts.length > 0) || (Array.isArray(row.associatedSuppliers) && row.associatedSuppliers.length > 0)) && (
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                {Array.isArray(row.associatedProducts) && row.associatedProducts.slice(0, 1).map((p, idx) => (
                   <span
                     key={p.id || idx}
                     style={{
-                      fontSize: '0.66rem',
-                      backgroundColor: isLocked ? '#eff6ff' : '#f0fdf4',
-                      color: isLocked ? '#1d4ed8' : '#166534',
-                      border: `1px solid ${isLocked ? '#bfdbfe' : '#bbf7d0'}`,
-                      borderRadius: '3px',
-                      padding: '0 5px',
-                      fontWeight: 650,
+                      height: '20px',
+                      fontSize: '0.68rem',
+                      lineHeight: '18px',
+                      backgroundColor: isLocked ? '#f1f3f4' : '#e8f0fe',
+                      color: isLocked ? '#3c4043' : '#1a73e8',
+                      border: `1px solid ${isLocked ? '#dadce0' : '#d2e3fc'}`,
+                      borderRadius: '4px',
+                      padding: '0 6px',
+                      fontWeight: 500,
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '3px'
+                      gap: '4px',
+                      maxWidth: '190px',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis'
                     }}
+                    title={p.name}
                   >
-                    {isLocked ? <Lock size={8} /> : '📦'} {p.name}
+                    {isLocked ? <Lock size={9} color="#5f6368" /> : <Package size={10} color="#1a73e8" />}
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
                   </span>
                 ))}
-                {row.associatedProducts.length > 2 && (
-                  <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
-                    +{row.associatedProducts.length - 2}
+                {Array.isArray(row.associatedProducts) && row.associatedProducts.length > 1 && (
+                  <span
+                    style={{
+                      height: '20px',
+                      fontSize: '0.65rem',
+                      lineHeight: '18px',
+                      backgroundColor: '#f1f3f4',
+                      color: '#5f6368',
+                      border: '1px solid #dadce0',
+                      borderRadius: '4px',
+                      padding: '0 5px',
+                      fontWeight: 600
+                    }}
+                    title={row.associatedProducts.slice(1).map(p => p.name).join(', ')}
+                  >
+                    +{row.associatedProducts.length - 1}
                   </span>
                 )}
-              </div>
-            )}
-            {Array.isArray(row.associatedSuppliers) && row.associatedSuppliers.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '2px' }}>
-                {row.associatedSuppliers.slice(0, 1).map((s, idx) => (
+
+                {Array.isArray(row.associatedSuppliers) && row.associatedSuppliers.slice(0, 1).map((s, idx) => (
                   <span
                     key={s.id || idx}
                     style={{
-                      fontSize: '0.66rem',
-                      backgroundColor: isLocked ? '#f8fafc' : '#eff6ff',
-                      color: isLocked ? '#334155' : '#1e3a8a',
-                      border: `1px solid ${isLocked ? '#cbd5e1' : '#bfdbfe'}`,
-                      borderRadius: '3px',
-                      padding: '0 5px',
-                      fontWeight: 650,
+                      height: '20px',
+                      fontSize: '0.68rem',
+                      lineHeight: '18px',
+                      backgroundColor: '#f8fafc',
+                      color: '#475569',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '4px',
+                      padding: '0 6px',
+                      fontWeight: 500,
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '3px'
+                      gap: '4px',
+                      maxWidth: '170px',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis'
                     }}
+                    title={s.name}
                   >
-                    {isLocked ? <Lock size={8} color="#003666" /> : '🏢'} {s.name}
+                    {isLocked ? <Lock size={9} color="#64748b" /> : <Building2 size={10} color="#475569" />}
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</span>
                   </span>
                 ))}
-                {row.associatedSuppliers.length > 1 && (
-                  <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
+                {Array.isArray(row.associatedSuppliers) && row.associatedSuppliers.length > 1 && (
+                  <span
+                    style={{
+                      height: '20px',
+                      fontSize: '0.65rem',
+                      lineHeight: '18px',
+                      backgroundColor: '#f1f3f4',
+                      color: '#5f6368',
+                      border: '1px solid #dadce0',
+                      borderRadius: '4px',
+                      padding: '0 5px',
+                      fontWeight: 600
+                    }}
+                    title={row.associatedSuppliers.slice(1).map(s => s.name).join(', ')}
+                  >
                     +{row.associatedSuppliers.length - 1}
                   </span>
                 )}
