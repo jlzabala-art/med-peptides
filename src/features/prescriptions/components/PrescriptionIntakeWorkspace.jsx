@@ -194,7 +194,7 @@ export default function PrescriptionIntakeWorkspace({
       const normalized = await normalizeExtractedPrescriptions(aiData, {
         currentUser: user,
         context: doctorContext || {},
-        splitBlocksIntoSeparatePrescriptions: true,
+        splitBlocksIntoSeparatePrescriptions: false,
       });
 
       // 3. Deduplicate against Firestore

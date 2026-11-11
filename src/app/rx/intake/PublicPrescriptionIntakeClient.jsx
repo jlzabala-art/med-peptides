@@ -839,7 +839,7 @@ export default function PublicPrescriptionIntakeClient() {
 
         const normalizedList = await normalizeExtractedPrescriptions(aiData, {
           currentUser: user || null,
-          splitBlocksIntoSeparatePrescriptions: true,
+          splitBlocksIntoSeparatePrescriptions: false,
         });
 
         if (!normalizedList || normalizedList.length === 0) {

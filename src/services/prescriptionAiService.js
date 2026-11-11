@@ -17,6 +17,7 @@ import { db } from '../firebase.js';
 import { PRESCRIPTION_SOURCES, PRESCRIPTION_STATUSES, prescriptionSchema, prescriptionLineSchema } from '../schemas/prescriptionSchema.js';
 import { resolveIngredients } from './apiIngredientMatcher.js';
 import { createPatient } from './patientLinkService.js';
+import { resolveDoctorProfile, findDoctorInDirectory } from './doctorDirectoryService.js';
 import { logger } from '../utils/logger';
 import { getPharmapolisLabelsForPrescription } from '../data/pharmapolisLabelsMap.js';
 
@@ -52,7 +53,7 @@ export function isGalenicVehicleOrBase(name) {
 }
 
 /**
- * Searches for an existing doctor in Firestore by license or full name.
+ * Searches for an existing doctor in Firestore or authoritative Atlas directory by license or full name.
  * 
  * @param {string} doctorName 
  * @param {string} doctorLicense 
@@ -61,9 +62,30 @@ export function isGalenicVehicleOrBase(name) {
 export async function lookupDoctorByNameOrLicense(doctorName = '', doctorLicense = '') {
   try {
     const cleanLic = (doctorLicense || '').trim();
-    const cleanName = (doctorName || '').trim().replace(/^dr\.?\s+/i, '');
+    const cleanName = (doctorName || '').trim();
 
-    // 1. Try matching license number if provided
+    // 0. Primary Atlas authoritative doctor directory match (e.g. Dr. Sobia Mirza, Dr. Leila, etc.)
+    const directoryDoctor = resolveDoctorProfile(cleanName || cleanLic);
+    if (directoryDoctor && directoryDoctor.id) {
+      return {
+        id: directoryDoctor.id,
+        name: directoryDoctor.name,
+        displayName: directoryDoctor.name,
+        slug: directoryDoctor.id,
+        licenseNumber: directoryDoctor.license || cleanLic,
+        medicalLicense: directoryDoctor.license || cleanLic,
+        clinicName: directoryDoctor.clinicName || directoryDoctor.clinic || '',
+        practiceName: directoryDoctor.clinicName || directoryDoctor.clinic || '',
+        clinicAddress: directoryDoctor.address || '',
+        specialty: directoryDoctor.specialty || '',
+        phone: directoryDoctor.phone || '',
+        email: directoryDoctor.email || ''
+      };
+    }
+
+    const strippedName = cleanName.replace(/^dr\.?\s+/i, '');
+
+    // 1. Try matching license number if provided in Firestore
     if (cleanLic) {
       const qLic = query(
         collection(db, 'users'),
