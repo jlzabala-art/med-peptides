@@ -5848,8 +5848,8 @@ export default function DoctorPublicPortalClient({
               </div>
             </div>
 
-            {/* Consolidated Header Actions (Clean Physician Command Center) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Consolidated Header Actions (Clean Physician Command Center - Right Aligned GCP Standard) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginLeft: 'auto', justifyContent: 'flex-end' }}>
               {/* Notifications Icon & Flyout Dropdown (Pending Clinical Actions) */}
               <div style={{ position: 'relative' }} ref={notifMenuRef}>
                 <button
@@ -6754,7 +6754,8 @@ export default function DoctorPublicPortalClient({
                       fontSize: '0.74rem',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'nowrap',
+                      marginLeft: 'auto'
                     }}
                   >
                     <span>Explore All Atlas Recommendations</span>
@@ -6885,7 +6886,8 @@ export default function DoctorPublicPortalClient({
                           )}
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, flexWrap: 'wrap' }}>
+                        {/* GCP Card Action Area: Strictly Right-Aligned per Material Design 3 */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, flexWrap: 'wrap', marginLeft: 'auto', justifyContent: 'flex-end' }}>
                           <button
                             type="button"
                             onClick={() => {

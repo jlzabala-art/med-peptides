@@ -709,7 +709,7 @@ export default function DoctorCredentialsModal({
           })}
         </div>
 
-        {/* Modal Footer */}
+        {/* Modal Footer (Google Cloud Console Dialog Standard: Right-Aligned Action) */}
         <div
           style={{
             display: 'flex',
@@ -721,29 +721,34 @@ export default function DoctorCredentialsModal({
             gap: '12px'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#5f6368' }}>
-            <CheckCircle2 size={14} style={{ color: '#137333' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#5f6368', flex: '1 1 240px' }}>
+            <CheckCircle2 size={14} style={{ color: '#137333', flexShrink: 0 }} />
             <span>Changes synchronize automatically across prescriptions and doctor portal.</span>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              height: '36px',
-              padding: '0 20px',
-              borderRadius: '4px',
-              border: 'none',
-              background: '#1a73e8',
-              color: '#ffffff',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.3)'
-            }}
-          >
-            Done
-          </button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft: 'auto' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                height: '36px',
+                padding: '0 24px',
+                borderRadius: '4px',
+                border: 'none',
+                background: '#1a73e8',
+                color: '#ffffff',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
+                transition: 'background 0.15s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
+            >
+              Done
+            </button>
+          </div>
         </div>
       </div>
     </div>

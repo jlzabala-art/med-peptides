@@ -292,29 +292,6 @@ export default function DoctorMobileSidebarDrawer({
             <Sparkles size={16} />
             <span>New Prescription Intake</span>
           </button>
-
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: '100%',
-              height: '34px',
-              borderRadius: '4px',
-              border: '1px solid #dadce0',
-              background: '#ffffff',
-              color: '#5f6368',
-              fontSize: '0.80rem',
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              cursor: 'pointer'
-            }}
-          >
-            <X size={14} />
-            <span>Close Menu</span>
-          </button>
         </div>
       </div>
     </div>
