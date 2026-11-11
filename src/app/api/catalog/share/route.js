@@ -28,6 +28,28 @@ export async function POST(request) {
       notes = ''
     } = body;
 
+    let resolvedCompanyName = body.companyName || body.institution || '';
+    if (!resolvedCompanyName && adminDb && (recipientUserId || recipientEmail)) {
+      try {
+        if (recipientUserId) {
+          const uDoc = await adminDb.collection('users').doc(String(recipientUserId)).get();
+          if (uDoc.exists) {
+            const uData = uDoc.data() || {};
+            resolvedCompanyName = uData.companyName || uData.institution || uData.clinicName || '';
+          }
+        }
+        if (!resolvedCompanyName && recipientEmail) {
+          const uSnap = await adminDb.collection('users').where('email', '==', recipientEmail).limit(1).get();
+          if (!uSnap.empty) {
+            const uData = uSnap.docs[0].data() || {};
+            resolvedCompanyName = uData.companyName || uData.institution || uData.clinicName || '';
+          }
+        }
+      } catch (_) {}
+    }
+
+    const effectiveRecipientName = resolvedCompanyName || recipientName;
+
     const issuedAt = new Date().toISOString();
     const batchCode = generatePharmaBatchCode({
       supplierId,
@@ -58,7 +80,8 @@ export async function POST(request) {
       lang: body.lang || body.language || 'en',
       language: body.lang || body.language || 'en',
       recipientUserId,
-      recipientName,
+      recipientName: effectiveRecipientName,
+      companyName: resolvedCompanyName || null,
       recipientEmail,
       recipientPhone,
       recipientType,
@@ -98,7 +121,8 @@ export async function POST(request) {
         lang: body.lang || body.language || 'en',
         language: body.lang || body.language || 'en',
         recipientUserId: recipientUserId || null,
-        recipientName,
+        recipientName: effectiveRecipientName,
+        companyName: resolvedCompanyName || null,
         recipientEmail: recipientEmail || null,
         recipientPhone: recipientPhone || null,
         recipientType,

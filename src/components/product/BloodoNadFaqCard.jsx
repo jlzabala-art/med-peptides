@@ -35,7 +35,7 @@ const DEFAULT_NAD_FAQS = [
     tag: 'Clinical Intent Stratification',
     questionEn: 'Clinical Intent Stratification: Baseline Native Level vs. Active Protocol Therapeutic Monitoring',
     questionEs: 'Estratificación de Objetivo Clínico: Nivel Basal Endógeno vs. Monitorización Terapéutica en Tratamiento Activo',
-    answerEn: 'Clinicians must establish the diagnostic objective prior to specimen collection:\n• Baseline Assessment: Quantifies unsupplemented endogenous NAD status prior to therapy initiation (requires a planned precursor washout period).\n• In-Treatment Therapeutic Monitoring: Assesses bioavailability and biological cellular response during an active regimen to titrate dosing and administration cadence (does NOT require therapy cessation or precursor washout).',
+    answerEn: 'Clinicians must establish the analytical objective prior to specimen collection:\n• Baseline Assessment: Quantifies unsupplemented endogenous NAD status prior to therapy initiation (requires a planned precursor washout period).\n• In-Treatment Therapeutic Monitoring: Assesses bioavailability and biological cellular response during an active regimen to titrate dosing and administration cadence (does NOT require therapy cessation or precursor washout).',
     answerEs: 'El facultativo debe definir el objetivo clínico previo a la extracción:\n• Evaluación Basal: Cuantifica el estado endógeno sin suplementar previo al inicio terapéutico (requiere período de lavado programado).\n• Monitorización Terapéutica en Curso: Evalúa la biodisponibilidad y respuesta celular durante una pauta activa para calibrar dosis y cadencia (NO requiere suspensión del tratamiento ni períodos de lavado).'
   },
   {
@@ -69,8 +69,8 @@ const DEFAULT_NAD_FAQS = [
     id: 'faq-nad-06',
     category: 'clinical',
     tag: 'Regulatory Status (CE-IVDR)',
-    questionEn: 'Diagnostic Scope & Regulatory Status (CE-IVDR)',
-    questionEs: 'Alcance Diagnóstico y Marco Regulatorio (CE-IVDR)',
+    questionEn: 'Analytical Scope & Regulatory Status (CE-IVDR)',
+    questionEs: 'Alcance Analítico y Marco Regulatorio (CE-IVDR)',
     answerEn: 'The Bloodo™ NAD test is a quantitative cellular biomarker assay performed in a certified central laboratory (LifeLab1, Vilnius, EU) under CE-IVDR compliance. Results provide objective biochemical data to support licensed medical practitioners in clinical protocol calibration and therapeutic monitoring.',
     answerEs: 'El test de NAD de Bloodo™ es un ensayo cuantitativo de biomarcadores celulares procesado en laboratorio central certificado (LifeLab1, Vilna, UE) bajo directiva CE-IVDR. Los resultados aportan datos bioquímicos objetivos para orientar al facultativo en la calibración posológica y monitorización clínica.'
   }
@@ -470,8 +470,8 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
         <div className="bnf-notice-text">
           <strong>{isEs ? 'Gobernanza y Trazabilidad Centralizada:' : 'Centralized Analytical Governance:'}</strong>{' '}
           {isEs
-            ? 'Todos los kits diagnósticos de Bloodo™ se procesan en laboratorio central acreditado LifeLab1 (Vilna, Lituania) bajo especificaciones CE-IVDR y trazabilidad ISO 15189. Los informes incluyen curvas de calibración y rango de referencia estratificado por edad y sexo.'
-            : 'All Bloodo™ diagnostic test kits are processed at LifeLab1 central accredited facilities (Vilnius, Lithuania) adhering to CE-IVDR directives and ISO 15189 traceability. Clinical laboratory reports include calibration curves and age/sex-stratified reference ranges.'}
+            ? 'Todos los kits de biomarcadores Bloodo™ se procesan en laboratorio central acreditado LifeLab1 (Vilna, Lituania) bajo especificaciones CE-IVDR y trazabilidad ISO 15189. Los informes incluyen curvas de calibración y rango de referencia estratificado por edad y sexo.'
+            : 'All Bloodo™ biomarker test kits are processed at LifeLab1 central accredited facilities (Vilnius, Lithuania) adhering to CE-IVDR directives and ISO 15189 traceability. Clinical laboratory reports include calibration curves and age/sex-stratified reference ranges.'}
         </div>
       </div>
     </section>

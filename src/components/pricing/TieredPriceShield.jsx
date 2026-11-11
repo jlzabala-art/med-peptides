@@ -76,18 +76,90 @@ export function resolveProductTierPricing(product, capsCount = 60) {
     landedCost = product.cost;
   }
 
+  // Direct explicit Firestore tier fields on product or primary variant
+  const v0 = Array.isArray(product.variants) && product.variants.length > 0 ? product.variants[0] : null;
+  if (!landedCost && typeof v0?.costPrice === 'number' && v0.costPrice > 0) {
+    landedCost = v0.costPrice;
+  }
+  if (typeof product.wholesalePrice === 'number' && product.wholesalePrice > 0) {
+    wholesalePrice = product.wholesalePrice;
+  } else if (typeof v0?.wholesalePrice === 'number' && v0.wholesalePrice > 0) {
+    wholesalePrice = v0.wholesalePrice;
+  }
+  if (typeof product.clinicPrice === 'number' && product.clinicPrice > 0) {
+    clinicPrice = product.clinicPrice;
+  } else if (typeof v0?.clinicPrice === 'number' && v0.clinicPrice > 0) {
+    clinicPrice = v0.clinicPrice;
+  }
+  if (typeof product.retailPrice === 'number' && product.retailPrice > 0) {
+    retailPrice = product.retailPrice;
+  } else if (typeof v0?.retailPrice === 'number' && v0.retailPrice > 0) {
+    retailPrice = v0.retailPrice;
+  }
+
   // Direct pricing object in Firestore schema
   if (product.pricing && typeof product.pricing === 'object') {
     if (typeof product.pricing.supplierCost === 'number' && product.pricing.supplierCost > 0) landedCost = product.pricing.supplierCost;
+    if (typeof product.pricing.wholesale === 'number' && product.pricing.wholesale > 0) wholesalePrice = product.pricing.wholesale;
+    if (typeof product.pricing.clinic === 'number' && product.pricing.clinic > 0) clinicPrice = product.pricing.clinic;
     if (typeof product.pricing.retail === 'number' && product.pricing.retail > 0) retailPrice = product.pricing.retail;
+  }
+
+  // Authoritative Bloodo™ Capillary Biomarker Kits (matches Firestore products collection)
+  if (
+    id.includes('bloodo') ||
+    id === 'cortisol-test' ||
+    id === 'hemoglobin-a1c-hba1c-test' ||
+    id === 'omega-ratio-test' ||
+    id === 'testosterone-test' ||
+    id === 'vitamin-d-test'
+  ) {
+    if (id.includes('nad')) {
+      landedCost = landedCost || 199.00;
+      wholesalePrice = wholesalePrice || 238.80;
+      clinicPrice = clinicPrice || 268.65;
+      retailPrice = retailPrice || 298.50;
+    } else if (id.includes('testosterone') || id.includes('testosterona')) {
+      landedCost = landedCost || 49.50;
+      wholesalePrice = wholesalePrice || 59.40;
+      clinicPrice = clinicPrice || 66.80;
+      retailPrice = retailPrice || 99.00;
+    } else if (id.includes('cortisol')) {
+      landedCost = landedCost || 39.50;
+      wholesalePrice = wholesalePrice || 47.40;
+      clinicPrice = clinicPrice || 53.30;
+      retailPrice = retailPrice || 79.00;
+    } else if (id.includes('hba1c') || id.includes('hemoglobin')) {
+      landedCost = landedCost || 29.50;
+      wholesalePrice = wholesalePrice || 35.40;
+      clinicPrice = clinicPrice || 39.80;
+      retailPrice = retailPrice || 59.00;
+    } else if (id.includes('omega')) {
+      landedCost = landedCost || 39.50;
+      wholesalePrice = wholesalePrice || 47.40;
+      clinicPrice = clinicPrice || 53.30;
+      retailPrice = retailPrice || 79.00;
+    } else if (id.includes('vitamin-d') || id.includes('vitd') || id.includes('vit-d')) {
+      landedCost = landedCost || 29.50;
+      wholesalePrice = wholesalePrice || 35.40;
+      clinicPrice = clinicPrice || 39.80;
+      retailPrice = retailPrice || 59.00;
+    }
+    return {
+      cost: landedCost,
+      wholesaler: wholesalePrice,
+      clinic: clinicPrice,
+      retail: retailPrice,
+      isCompounded: false
+    };
   }
 
   // Cost-Plus Rule: When cost price is registered:
   // - Wholeseller: +20% over cost (cost * 1.20)
-  // - Clinic / Doctor: +30% over cost (cost * 1.30)
+  // - Clinic / Doctor: +30% over cost (cost * 1.30) unless explicit clinicPrice exists
   if (landedCost && landedCost > 0) {
-    wholesalePrice = Math.round(landedCost * 1.20 * 100) / 100;
-    clinicPrice = Math.round(landedCost * 1.30 * 100) / 100;
+    if (!wholesalePrice) wholesalePrice = Math.round(landedCost * 1.20 * 100) / 100;
+    if (!clinicPrice) clinicPrice = Math.round(landedCost * 1.30 * 100) / 100;
     if (!retailPrice) {
       retailPrice = (typeof product.priceEur === 'number' && product.priceEur > clinicPrice)
         ? product.priceEur
@@ -118,37 +190,37 @@ export function resolveProductTierPricing(product, capsCount = 60) {
     } else {
       const id = (product.id || product.slug || product.canonicalId || product.name || '').toLowerCase();
       
-      // 1. Bloodo™ Diagnostic Panels (Capillary DBS LC-MS/MS)
+      // 1. Bloodo™ Capillary Biomarker Panels (Capillary DBS LC-MS/MS)
       if (id.includes('nad') || id.includes('bloodo-nad')) {
-        clinicPrice = 149.00;
-        wholesalePrice = 119.00;
-        retailPrice = 195.00;
-        landedCost = 79.00;
+        clinicPrice = 268.65;
+        wholesalePrice = 238.80;
+        retailPrice = 298.50;
+        landedCost = 199.00;
       } else if (id.includes('testosterone') || id.includes('testosterona')) {
-        clinicPrice = 115.00;
-        wholesalePrice = 92.00;
-        retailPrice = 149.00;
-        landedCost = 62.00;
+        clinicPrice = 66.80;
+        wholesalePrice = 59.40;
+        retailPrice = 99.00;
+        landedCost = 49.50;
       } else if (id.includes('cortisol')) {
-        clinicPrice = 129.00;
-        wholesalePrice = 105.00;
-        retailPrice = 169.00;
-        landedCost = 72.00;
-      } else if (id.includes('hba1c') || id.includes('hemoglobin') || id.includes('glucose') || id.includes('glicacion')) {
-        clinicPrice = 69.00;
-        wholesalePrice = 55.00;
-        retailPrice = 89.00;
-        landedCost = 38.00;
-      } else if (id.includes('omega') || id.includes('lipid')) {
-        clinicPrice = 119.00;
-        wholesalePrice = 95.00;
-        retailPrice = 159.00;
-        landedCost = 65.00;
-      } else if (id.includes('vitamin-d') || id.includes('vitd') || id.includes('vit-d')) {
-        clinicPrice = 59.00;
-        wholesalePrice = 47.00;
+        clinicPrice = 53.30;
+        wholesalePrice = 47.40;
         retailPrice = 79.00;
-        landedCost = 32.00;
+        landedCost = 39.50;
+      } else if (id.includes('hba1c') || id.includes('hemoglobin') || id.includes('glucose') || id.includes('glicacion')) {
+        clinicPrice = 39.80;
+        wholesalePrice = 35.40;
+        retailPrice = 59.00;
+        landedCost = 29.50;
+      } else if (id.includes('omega') || id.includes('lipid')) {
+        clinicPrice = 53.30;
+        wholesalePrice = 47.40;
+        retailPrice = 79.00;
+        landedCost = 39.50;
+      } else if (id.includes('vitamin-d') || id.includes('vitd') || id.includes('vit-d')) {
+        clinicPrice = 39.80;
+        wholesalePrice = 35.40;
+        retailPrice = 59.00;
+        landedCost = 29.50;
       }
       
       // 2. TeleTest Laboratory Spain (HTMA, HLA, Toxicology)
@@ -260,6 +332,16 @@ export function formatTierPrice(amount, currency = 'EUR') {
   return `${cfg.symbol}${converted.toFixed(2)}`;
 }
 
+export function normalizeRoleTierKey(rawRoleOrTier) {
+  if (!rawRoleOrTier) return null;
+  const r = String(rawRoleOrTier).toLowerCase().trim();
+  if (r === 'cost' || r === 'b2b-dir' || r === 'master') return 'cost';
+  if (r.includes('whole') || r === 'supplier' || r === 'distributor') return 'wholesaler';
+  if (r.includes('clinic') || r.includes('doctor') || r === 'b2b' || r === 'practitioner' || r === 'fagron_clinic' || r === 'compounding_pharmacy' || r === 'medical_director') return 'clinic';
+  if (r.includes('retail') || r.includes('patient') || r === 'public' || r === 'guest') return 'retail';
+  return null;
+}
+
 export default function TieredPriceShield({
   product,
   currency = 'EUR',
@@ -268,121 +350,176 @@ export default function TieredPriceShield({
   isEs = false,
   adminSimulationTier = null,
   onSelectAdminSimulationTier = null,
+  onResolvedRoleChange = null,
   embedded = false,
   capsCount = 60
 }) {
   const { user } = useAuth();
-  const { is, can } = useRoleAccess();
+  const { is } = useRoleAccess();
   const [localPreview, setLocalPreview] = React.useState(null);
+  const [catalogContext, setCatalogContext] = React.useState(null);
+  const [urlContext, setUrlContext] = React.useState(null);
+  const [liveSyncedContext, setLiveSyncedContext] = React.useState(null);
 
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
     try {
-      const stored = localStorage.getItem('atlas_b2b_verified_preview');
-      if (stored) setLocalPreview(JSON.parse(stored));
-    } catch (e) {
-      // Safe localStorage fallback
+      const storedPreview = localStorage.getItem('atlas_b2b_verified_preview');
+      if (storedPreview) setLocalPreview(JSON.parse(storedPreview));
+    } catch (_) {}
+
+    let parsedCatCtx = null;
+    try {
+      const storedCat = localStorage.getItem('atlas_shared_catalog_context');
+      if (storedCat) {
+        parsedCatCtx = JSON.parse(storedCat);
+        setCatalogContext(parsedCatCtx);
+      }
+    } catch (_) {}
+
+    let parsedUrlCtx = null;
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const uTier = sp.get('tier') || sp.get('priceSource') || sp.get('role');
+      const uCat = sp.get('cat') || sp.get('catalogId');
+      const uMarkup = sp.get('markup');
+      const uCur = sp.get('cur') || sp.get('currency');
+      if (uTier || uCat || uMarkup || uCur) {
+        parsedUrlCtx = {
+          tier: normalizeRoleTierKey(uTier),
+          catalogId: uCat || '',
+          markupPercent: uMarkup ? Number(uMarkup) : 0,
+          currency: uCur ? uCur.toUpperCase() : null
+        };
+        setUrlContext(parsedUrlCtx);
+      }
+    } catch (_) {}
+
+    // Live check with Firebase so if the user registers or their role/pricingChannel changes, we display the updated role price
+    const targetCat = parsedUrlCtx?.catalogId || parsedCatCtx?.catalogId || '';
+    const targetUid = user?.uid || parsedCatCtx?.recipientUserId || '';
+    const targetEmail = user?.email || parsedCatCtx?.recipientEmail || '';
+
+    if (targetCat || targetUid || targetEmail) {
+      const q = new URLSearchParams();
+      if (targetCat) q.set('cat', targetCat);
+      if (targetUid) q.set('uid', targetUid);
+      if (targetEmail) q.set('email', targetEmail);
+      fetch(`/api/catalog/context-tier?${q.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.ok && data.tier) {
+            setLiveSyncedContext(data);
+          }
+        })
+        .catch(() => {});
     }
-  }, []);
+  }, [user?.uid, user?.email]);
 
   const tiers = useMemo(() => resolveProductTierPricing(product, capsCount), [product, capsCount]);
 
-  if (!tiers || (!tiers.clinic && !tiers.wholesaler)) {
-    return null;
+  // Determine user authorization & role hierarchy
+  const isAdmin = is('admin') || is('medical_director') || (localPreview?.role === 'admin');
+  const authChannelTier = normalizeRoleTierKey(user?.pricingChannel || user?.priceTier || user?.role);
+  const isWholesaler = authChannelTier === 'wholesaler' || is('wholesaler') || is('supplier') || is('distributor');
+  const isDoctor = authChannelTier === 'clinic' || is('doctor') || is('clinic') || is('fagron_clinic') || is('compounding_pharmacy');
+  const isPatient = authChannelTier === 'retail' || is('patient');
+
+  // Resolve exclusive single role tier to display:
+  // 1. Admin simulation selector (when Admin explicitly clicks a tier pill)
+  // 2. Live Firebase user / catalog recipient role (auto-updates if conditions change in Firebase)
+  // 3. Authenticated user's Firebase role/pricingChannel
+  // 4. Shared catalog URL parameter (?tier=...) or persisted shared catalog context
+  // 5. Verified B2B preview
+  // 6. Default visitor role ('retail' — shows only the standard role price corresponding to a public visitor)
+  let activeTierKey = 'retail';
+  if (isAdmin && adminSimulationTier) {
+    activeTierKey = adminSimulationTier;
+  } else if (liveSyncedContext?.tier) {
+    activeTierKey = liveSyncedContext.tier;
+  } else if (user) {
+    if (isWholesaler && !isAdmin) activeTierKey = 'wholesaler';
+    else if (isDoctor && !isAdmin) activeTierKey = 'clinic';
+    else if (isPatient && !isAdmin) activeTierKey = 'retail';
+    else if (isAdmin) activeTierKey = 'clinic';
+  } else if (urlContext?.tier) {
+    activeTierKey = urlContext.tier;
+  } else if (catalogContext?.priceSource) {
+    activeTierKey = normalizeRoleTierKey(catalogContext.priceSource) || 'wholesaler';
+  } else if (localPreview?.role) {
+    activeTierKey = normalizeRoleTierKey(localPreview.role) || 'clinic';
   }
 
-  // Determine user authorization & role hierarchy
-  // STRICT RULE: "NO LOGIN, NO PRECIO". Unauthenticated visitors must NEVER see wholesale numeric prices.
-  const isAdmin = is('admin') || is('medical_director') || (localPreview?.role === 'admin');
-  const isAuthenticated = Boolean(user) || (Boolean(localPreview) && Boolean(localPreview?.timestamp)) || (isAdmin && Boolean(adminSimulationTier));
-  const isWholesaler = is('wholesaler') || is('supplier') || is('distributor') || (localPreview?.role === 'wholesaler');
-  const isDoctor = is('doctor') || is('clinic') || is('medical_director') || is('fagron_clinic') || is('compounding_pharmacy') || (localPreview?.role === 'clinic');
-  const isPatient = is('patient') || (localPreview?.role === 'patient');
+  const markupPercent = Number(
+    liveSyncedContext?.markupPercent ??
+    urlContext?.markupPercent ??
+    catalogContext?.priceMarkupPercent ??
+    0
+  );
+  const markupFactor = (!user && markupPercent > 0) ? (1 + markupPercent / 100) : 1;
+  const effectiveCurrency = urlContext?.currency || currency || 'EUR';
 
-  // Determine which tier to display based on canonical role
-  let activeTierKey = 'clinic';
-  if (isWholesaler && !isAdmin) {
-    activeTierKey = 'wholesaler';
-  } else if (isDoctor && !isAdmin) {
-    activeTierKey = 'clinic';
-  } else if (isPatient && !isAdmin) {
-    activeTierKey = 'retail';
-  } else if (isAdmin && adminSimulationTier) {
-    activeTierKey = adminSimulationTier;
+  const currentAmountRaw = tiers ? (tiers[activeTierKey] ?? tiers.retail ?? tiers.clinic ?? 0) : 0;
+  const currentAmount = Math.round(currentAmountRaw * markupFactor * 100) / 100;
+
+  React.useEffect(() => {
+    if (typeof onResolvedRoleChange === 'function' && currentAmount > 0) {
+      onResolvedRoleChange({
+        tierKey: activeTierKey,
+        unitPrice: currentAmount,
+        currency: effectiveCurrency
+      });
+    }
+  }, [activeTierKey, currentAmount, effectiveCurrency, onResolvedRoleChange]);
+
+  if (!tiers || (!tiers.clinic && !tiers.wholesaler && !tiers.retail)) {
+    return null;
   }
 
   const tierMeta = {
     cost: {
-      label: isEs ? 'COSTE DE ORIGEN (LANDED)' : 'LANDED COST (EXW)',
-      badge: 'Internal Cost',
+      label: isEs ? 'COSTE DE ORIGEN (EXW)' : 'LANDED COST (EXW)',
+      badge: isEs ? 'Coste Interno' : 'Internal Cost',
       badgeBg: '#fef2f2',
       badgeColor: '#dc2626',
       badgeBorder: '#fee2e2',
       incoterm: 'EXW',
-      amount: tiers.cost
+      amount: Math.round((tiers.cost || 0) * markupFactor * 100) / 100
     },
     wholesaler: {
-      label: isEs ? 'TARIFA MAYORISTA (+20% COSTE)' : 'WHOLESELLER TIER (+20% COST)',
-      badge: isEs ? 'Mayorista (+20%)' : 'Wholeseller (+20%)',
+      label: isEs ? 'TARIFA MAYORISTA B2B (EXW)' : 'WHOLESALE B2B TIER (EXW)',
+      badge: isAdmin ? (isEs ? 'Mayorista (+20%)' : 'Wholesaler (+20%)') : (isEs ? 'Mayorista B2B' : 'Wholesale B2B'),
       badgeBg: '#fff7ed',
       badgeColor: '#c2410c',
       badgeBorder: '#ffedd5',
-      incoterm: '+20% Cost-Plus',
-      amount: tiers.wholesaler
+      incoterm: 'Wholesale EXW',
+      amount: Math.round((tiers.wholesaler || 0) * markupFactor * 100) / 100
     },
     clinic: {
-      label: isEs ? 'TARIFA CLÍNICA / MÉDICO (+30% COSTE)' : 'CLINIC / DOCTOR TIER (+30% COST)',
-      badge: isEs ? 'Clínica / Médico (+30%)' : 'Clinic / Doctor (+30%)',
+      label: isEs ? 'TARIFA CLÍNICA / MÉDICO' : 'CLINICAL / PRACTITIONER TIER',
+      badge: isAdmin ? (isEs ? 'Clínica / Médico (+35%)' : 'Clinic / Doctor') : (isEs ? 'Clínica / Médico' : 'Clinical B2B'),
       badgeBg: '#f0fdfa',
       badgeColor: '#0d9488',
       badgeBorder: '#ccfbf1',
-      incoterm: '+30% Cost-Plus',
-      amount: tiers.clinic
+      incoterm: 'Clinical B2B',
+      amount: Math.round((tiers.clinic || 0) * markupFactor * 100) / 100
     },
     retail: {
-      label: isEs ? 'PVP RECOMENDADO (RRP)' : 'RECOMMENDED RETAIL (RRP)',
-      badge: isEs ? 'PVP Ref.' : 'MSRP / Retail',
+      label: isEs ? 'TARIFA OFICIAL (PVP)' : 'OFFICIAL UNIT PRICE (RRP)',
+      badge: isEs ? 'PVP Oficial' : 'Official RRP',
       badgeBg: '#f5f3ff',
       badgeColor: '#7c3aed',
       badgeBorder: '#ede9fe',
-      incoterm: isEs ? 'PVP Final' : 'Final RRP',
-      amount: tiers.retail
+      incoterm: isEs ? 'PVP Final' : 'Unit Price',
+      amount: Math.round((tiers.retail || 0) * markupFactor * 100) / 100
     }
   };
 
-  const currentTier = tierMeta[activeTierKey] || tierMeta.clinic;
-  const formattedPrice = formatTierPrice(currentTier.amount, currency);
+  const currentTier = tierMeta[activeTierKey] || tierMeta.retail;
+  const formattedPrice = formatTierPrice(currentTier.amount, effectiveCurrency);
 
   // ── CASE 1: COMPACT LIST VIEW ──
   if (compact) {
-    if (!isAuthenticated) {
-      return (
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            triggerHaptic('light');
-            if (onUnlockRequest) onUnlockRequest();
-          }}
-          style={{ textAlign: 'right', marginRight: '6px', cursor: 'pointer' }}
-          title={isEs ? "Inicie sesión o regístrese para ver precios" : "Sign in or register to view pricing"}
-        >
-          <span style={{
-            fontSize: '0.64rem',
-            color: '#0d9488',
-            fontWeight: 750,
-            background: '#f0fdfa',
-            border: '1px solid #99f6e4',
-            padding: '2px 7px',
-            borderRadius: '4px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}>
-            <Lock size={10} /> {isEs ? 'Tarifa B2B (Bloqueada)' : 'B2B Locked · Sign In'}
-          </span>
-        </div>
-      );
-    }
-
     return (
       <div style={{ textAlign: 'right', marginRight: '6px' }}>
         <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 700, display: 'block' }}>
@@ -395,205 +532,92 @@ export default function TieredPriceShield({
     );
   }
 
-  // ── CASE 2: UNLOCKED CARD VIEW (Authenticated) ──
-  if (isAuthenticated) {
-    return (
-      <div style={{
-        marginBottom: embedded ? '6px' : '0.65rem',
-        padding: embedded ? '6px 8px' : '8px 12px',
-        borderRadius: '8px',
-        background: embedded ? '#ffffff' : '#f8fafc',
-        border: embedded ? '1px solid #e2e8f0' : '1px solid #e2e8f0',
-        transition: 'all 0.2s ease'
-      }}>
-        {/* Top Header: Tier Label + Incoterm Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          <span style={{
-            fontSize: '0.67rem',
-            color: '#64748b',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.03em',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}>
-            {isAdmin && <ShieldCheck size={13} color="#003666" />}
-            {isWholesaler && <Sparkles size={12} color="#c2410c" />}
-            {currentTier.label}
-          </span>
-
-          <span style={{
-            fontSize: '0.66rem',
-            color: currentTier.badgeColor,
-            fontWeight: 750,
-            background: currentTier.badgeBg,
-            padding: '2px 7px',
-            borderRadius: '4px',
-            border: `1px solid ${currentTier.badgeBorder}`,
-            whiteSpace: 'nowrap'
-          }}>
-            {currentTier.badge}
-          </span>
-        </div>
-
-        {/* Big Price Display */}
-        <div style={{ marginTop: '3px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '1.15rem', fontWeight: 850, color: '#0f172a', letterSpacing: '-0.02em' }}>
-            {formattedPrice}
-          </span>
-
-          {/* Admin Simulation Pill Selector (AGENTS.md Rule #14 & #22) */}
-          {isAdmin && onSelectAdminSimulationTier && (
-            <div
-              style={{ display: 'flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '5px', border: '1px solid #cbd5e1' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {['cost', 'wholesaler', 'clinic', 'retail'].map((tierKey) => (
-                <button
-                  key={tierKey}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    triggerHaptic('light');
-                    onSelectAdminSimulationTier(tierKey);
-                  }}
-                  style={{
-                    background: activeTierKey === tierKey ? '#003666' : 'transparent',
-                    color: activeTierKey === tierKey ? '#ffffff' : '#64748b',
-                    border: 'none',
-                    borderRadius: '3px',
-                    padding: '2px 5px',
-                    fontSize: '0.60rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    cursor: 'pointer'
-                  }}
-                  title={`Audit pricing as ${tierKey.toUpperCase()}`}
-                >
-                  {tierKey === 'cost' ? 'Cost' : tierKey === 'wholesaler' ? 'Whole' : tierKey === 'clinic' ? 'B2B' : 'RRP'}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // ── CASE 3: LOCKED CARD VIEW (Unauthenticated / Public Visitors) ──
+  // ── CASE 2: SINGLE ROLE-SPECIFIC PRICE CARD VIEW ──
   return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation();
-        triggerHaptic('medium');
-        if (onUnlockRequest) onUnlockRequest();
-      }}
-      style={{
-        marginBottom: embedded ? '8px' : '0.65rem',
-        padding: embedded ? '8px 10px' : '8px 12px',
-        borderRadius: '8px',
-        background: embedded ? '#ffffff' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-        border: embedded ? '1px solid #cbd5e1' : '1px solid #cbd5e1',
-        cursor: 'pointer',
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: embedded ? 'none' : '0 1px 3px rgba(0,0,0,0.03)',
-        transition: 'transform 0.15s ease, border-color 0.15s ease'
-      }}
-      title={isEs ? "Haga clic para desbloquear las tarifas profesionales B2B" : "Click to unlock practitioner B2B pricing"}
-    >
-      {/* Top Header: Locked label + Unlock CTA button */}
+    <div style={{
+      marginBottom: embedded ? '6px' : '0.65rem',
+      padding: embedded ? '8px 10px' : '8px 12px',
+      borderRadius: '8px',
+      background: embedded ? '#ffffff' : '#f8fafc',
+      border: '1px solid #e2e8f0',
+      transition: 'all 0.2s ease'
+    }}>
+      {/* Top Header: Role Tier Label + Role Badge */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{
-            width: '18px',
-            height: '18px',
-            borderRadius: '4px',
-            background: 'rgba(13, 148, 136, 0.12)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#0d9488'
-          }}>
-            <Lock size={11} strokeWidth={2.5} />
-          </div>
-          <span style={{
-            fontSize: '0.68rem',
-            color: '#475569',
-            fontWeight: 750,
-            textTransform: 'uppercase',
-            letterSpacing: '0.03em'
-          }}>
-            {isEs ? 'Tarifa Profesional B2B' : 'Practitioner B2B (EXW)'}
-          </span>
-        </div>
-
-        {/* 1-Click Unlock Pill */}
         <span style={{
-          fontSize: '0.66rem',
-          color: '#0d9488',
-          fontWeight: 750,
-          background: '#f0fdfa',
-          padding: '2px 8px',
-          borderRadius: '4px',
-          border: '1px solid #99f6e4',
+          fontSize: '0.67rem',
+          color: '#64748b',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.03em',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '4px',
-          boxShadow: '0 1px 2px rgba(13, 148, 136, 0.08)'
+          gap: '4px'
         }}>
-          <Unlock size={10} />
-          {isEs ? 'Desbloquear' : 'Unlock'}
+          {isAdmin && <ShieldCheck size={13} color="#003666" />}
+          {activeTierKey === 'wholesaler' && <Sparkles size={12} color="#c2410c" />}
+          {currentTier.label}
+        </span>
+
+        <span style={{
+          fontSize: '0.66rem',
+          color: currentTier.badgeColor,
+          fontWeight: 750,
+          background: currentTier.badgeBg,
+          padding: '2px 7px',
+          borderRadius: '4px',
+          border: `1px solid ${currentTier.badgeBorder}`,
+          whiteSpace: 'nowrap'
+        }}>
+          {currentTier.badge}
         </span>
       </div>
 
-      {/* Gated Message — NO price amounts displayed to unregistered users */}
-      <div style={{
-        marginTop: '8px',
-        padding: '8px 10px',
-        background: '#ffffff',
-        borderRadius: '6px',
-        border: '1px dashed #cbd5e1',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '8px'
-      }}>
-        <div>
-          <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
-            {isEs ? 'Precios disponibles tras iniciar sesión' : 'Pricing available for registered accounts'}
-          </div>
-          <div style={{ fontSize: '0.66rem', color: '#64748b', marginTop: '1px' }}>
-            {isEs 
-              ? 'Tarifas B2B de clínica, laboratorio y venta directa reservadas.'
-              : 'Verified wholesale B2B and clinical pricing restricted to registered users.'}
-          </div>
+      {/* Exclusive Role Price Display */}
+      <div style={{ marginTop: '4px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '5px' }}>
+          <span style={{ fontSize: '1.22rem', fontWeight: 850, color: '#0f172a', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+            {formattedPrice}
+          </span>
+          <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+            {isEs ? '/ kit completo' : '/ complete kit'}
+          </span>
         </div>
-        <button
-          type="button"
-          style={{
-            fontSize: '0.70rem',
-            fontWeight: 700,
-            color: '#ffffff',
-            background: '#0d9488',
-            border: 'none',
-            padding: '5px 9px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            flexShrink: 0
-          }}
-        >
-          {isEs ? 'Ver Precios' : 'Sign In'}
-        </button>
-      </div>
 
-      <p style={{ margin: '4px 0 0 0', fontSize: '0.64rem', color: '#64748b', lineHeight: 1.25 }}>
-        {isEs
-          ? 'Tarifa reducida disponible para centros médicos, clínicas y distribuidores.'
-          : 'Verified wholesale rates available for clinics, doctors and authorized wholesalers.'}
-      </p>
+        {/* Admin Simulation Pill Selector (AGENTS.md Rule #14 & #22) */}
+        {isAdmin && onSelectAdminSimulationTier && (
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '5px', border: '1px solid #cbd5e1' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {['cost', 'wholesaler', 'clinic', 'retail'].map((tierKey) => (
+              <button
+                key={tierKey}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerHaptic('light');
+                  onSelectAdminSimulationTier(tierKey);
+                }}
+                style={{
+                  background: activeTierKey === tierKey ? '#003666' : 'transparent',
+                  color: activeTierKey === tierKey ? '#ffffff' : '#64748b',
+                  border: 'none',
+                  borderRadius: '3px',
+                  padding: '2px 5px',
+                  fontSize: '0.60rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  cursor: 'pointer'
+                }}
+                title={`Audit pricing as ${tierKey.toUpperCase()}`}
+              >
+                {tierKey === 'cost' ? 'Cost' : tierKey === 'wholesaler' ? 'Whole' : tierKey === 'clinic' ? 'B2B' : 'RRP'}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -227,12 +227,12 @@ export default function BloodoSuiteNav({
   // ═══════════════════════════════════════════════════════════════════════════
   if (variant === 'chips') {
     return (
-      <div className="bloodo-suite-chips" role="navigation" aria-label="Bloodo Diagnostic Suite">
+      <div className="bloodo-suite-chips" role="navigation" aria-label="Bloodo Biomarker Suite">
         <div className="bloodo-suite-chips__header">
           <div className="bloodo-suite-chips__title-group">
             <Sparkles size={13} className="bloodo-suite-chips__icon" />
             <span className="bloodo-suite-chips__label">
-              {isEs ? 'Suite Diagnóstica Bloodo™ (6 Paneles Clínicos):' : 'Bloodo™ Diagnostic Suite (6 Clinical Panels):'}
+              {isEs ? 'Suite de Biomarcadores Bloodo™ (6 Paneles Capilares):' : 'Bloodo™ Biomarker Suite (6 Capillary Panels):'}
             </span>
           </div>
           <span className="bloodo-suite-chips__subtag">
@@ -296,7 +296,7 @@ export default function BloodoSuiteNav({
           <div className="bloodo-suite-drawer-widget__title-group">
             <FlaskConical size={14} className="bloodo-suite-drawer-widget__icon" />
             <span className="bloodo-suite-drawer-widget__title">
-              {isEs ? 'SUITE DIAGNÓSTICA BLOODÔ (6)' : 'BLOODÔ DIAGNOSTIC SUITE (6)'}
+              {isEs ? 'SUITE DE BIOMARCADORES BLOODÔ (6)' : 'BLOODÔ BIOMARKER SUITE (6)'}
             </span>
           </div>
           <span className="bloodo-suite-drawer-widget__badge">DBS LC-MS</span>
@@ -382,7 +382,7 @@ export default function BloodoSuiteNav({
           <span>{isEs ? 'ECOSISTEMA DE BIOMARCADORES DBS • BLOODÔ BIOINFORMATICS' : 'DBS BIOMARKER ECOSYSTEM • BLOODÔ BIOINFORMATICS'}</span>
         </div>
         <h2 className="bloodo-suite-section__title">
-          {isEs ? '6. Suite Diagnóstica Bloodo™ (6 Paneles DBS)' : '6. Bloodo™ Diagnostic Suite (All 6 DBS Panels)'}
+          {isEs ? '6. Suite de Biomarcadores Bloodo™ (6 Paneles DBS)' : '6. Bloodo™ Biomarker Suite (All 6 DBS Panels)'}
         </h2>
         <p className="bloodo-suite-section__subtitle">
           {isEs

@@ -81,20 +81,20 @@ export function resolveBrandCollectionInfo(product) {
     };
   }
 
-  // 2. Bloodo Diagnostics
+  // 2. Bloodo Capillary Biomarkers
   if (id.includes('bloodo') || slug.includes('bloodo') || brand.includes('bloodo') || name.includes('bloodo') ||
-      ((cat.includes('diagnostic') || id.includes('test')) && (product.sampleType?.includes('DBS') || name.includes('dbs')))) {
+      ((cat.includes('diagnostic') || cat.includes('biomarker') || id.includes('test')) && (product.sampleType?.includes('DBS') || name.includes('dbs')))) {
     return {
       brandSlug: 'bloodo',
-      brandName: 'Bloodo™ Diagnostics',
-      collectionTitle: 'Bloodo™ Capillary Blood Diagnostics',
+      brandName: 'Bloodo™ Capillary Biomarkers',
+      collectionTitle: 'Bloodo™ Capillary Blood Biomarkers',
       collectionUrl: '/collection/bloodo',
       accentColor: '#e11d48',
       accentBg: '#fff1f2',
       borderColor: '#ffe4e6',
-      badgeLabel: 'Bloodo™ Diagnostic Suite',
+      badgeLabel: 'Bloodo™ Biomarker Suite',
       icon: Droplets,
-      systemName: 'Bloodo™ CE-IVDR Capillary Diagnostics Suite',
+      systemName: 'Bloodo™ CE-IVDR Capillary Biomarker Suite',
       systemSubtitle: '6 Accredited Panels: NAD+, Testosterone, Cortisol, HbA1c, Omega-3/6, Vitamin D3',
       ctaLabel: 'View All 6 Bloodo™ Kits',
       quickChips: ['NAD+ Cellular', 'Testosterone+', 'Cortisol CAR', 'HbA1c 90-Day', 'Omega Ratio', 'Vitamin D3']

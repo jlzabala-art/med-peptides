@@ -38,6 +38,10 @@ function setCachedResult(key, data) {
   searchCache.set(key, { data, timestamp: Date.now() });
 }
 
+export function clearAlgoliaSearchCache() {
+  searchCache.clear();
+}
+
 /**
  * Extracts and highlights search terms from Algolia `_highlightResult`.
  * @param {Object} hit - Algolia hit object

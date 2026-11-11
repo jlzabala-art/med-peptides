@@ -524,7 +524,7 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
           </h4>
           <p className="brp-intro-text">
             {isEs 
-              ? 'Compuestos peptídicos con sólida evidencia preclínica y clínica indicados para optimización fisiológica, intervención metabólica o modulación según los biomarcadores evaluados en este panel diagnóstico.' 
+              ? 'Compuestos peptídicos con sólida evidencia preclínica y clínica indicados para optimización fisiológica, intervención metabólica o modulación según los biomarcadores evaluados en este panel capilar.' 
               : 'Evidence-based peptide compounds indicated for physiological modulation, clinical optimization, or therapeutic intervention based on this biomarker profile.'}
           </p>
         </div>

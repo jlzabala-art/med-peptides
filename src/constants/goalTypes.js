@@ -28,5 +28,5 @@ export const GOAL_LABELS = {
   libido_wellness:   'Hormonal & Sexual Wellness',
   hair_restoration:  'Trichology & Hair Restoration',
   skin_regeneration: 'Dermal Care & Skin Regeneration',
-  general_health:    'General Health & Diagnostics',
+  general_health:    'Immunity & Micronutrient Wellness',
 };

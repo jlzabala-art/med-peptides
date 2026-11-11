@@ -35,13 +35,14 @@ export function resolveRolePrice(product, role = 'clinic') {
   if (!tiers) {
     return typeof product.price === 'number' && product.price > 0 ? product.price : 0;
   }
-  if (role === 'wholesaler' || role === 'supplier' || role === 'distributor') {
+  const r = String(role || '').toLowerCase();
+  if (r.includes('whole') || r === 'supplier' || r === 'distributor') {
     return tiers.wholesaler || tiers.clinic || 0;
   }
-  if (role === 'patient') {
+  if (r === 'patient' || r === 'retail' || r === 'public' || r === 'guest') {
     return tiers.retail || tiers.clinic || 0;
   }
-  if (role === 'cost' || role === 'admin_cost') {
+  if (r === 'cost' || r === 'admin_cost' || r === 'b2b-dir') {
     return tiers.cost || tiers.clinic || 0;
   }
   return tiers.clinic || tiers.wholesaler || 0;
@@ -127,10 +128,13 @@ export function useB2BOrder() {
     let unitPrice = 0;
     if (typeof priceOverride === 'number' && priceOverride > 0) {
       unitPrice = priceOverride;
-    } else if (typeof variant?.price === 'number' && variant.price > 0) {
-      unitPrice = variant.price;
     } else {
-      unitPrice = resolveRolePrice(product, role);
+      const roleResolved = resolveRolePrice(product, role);
+      if (roleResolved > 0) {
+        unitPrice = roleResolved;
+      } else if (typeof variant?.price === 'number' && variant.price > 0) {
+        unitPrice = variant.price;
+      }
     }
 
     setItems((prev) => {

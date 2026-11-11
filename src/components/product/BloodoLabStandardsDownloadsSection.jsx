@@ -172,7 +172,7 @@ export default function BloodoLabStandardsDownloadsSection({
             CE-IVDR (UE 2017/746)
           </strong>
           <span style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 600 }}>
-            {isEs ? 'Diagnóstico In Vitro Certificado' : 'Certified In Vitro Diagnostic Device'}
+            {isEs ? 'Dispositivo In Vitro Certificado' : 'Certified In Vitro Analytical Device'}
           </span>
         </div>
 
@@ -361,7 +361,7 @@ export default function BloodoLabStandardsDownloadsSection({
               <p style={{ fontSize: '0.76rem', color: '#475569', lineHeight: '1.45', margin: 0 }}>
                 {isEs 
                   ? 'Guía completa con los 6 paneles analíticos DBS, especificaciones de muestreo, validación preanalítica y directrices de implementación en clínicas.'
-                  : 'Comprehensive brochure detailing all 6 DBS diagnostic panels, pre-analytical validation criteria, and clinical integration frameworks for practices.'}
+                  : 'Comprehensive brochure detailing all 6 DBS biomarker panels, pre-analytical validation criteria, and clinical integration frameworks for practices.'}
               </p>
             </div>
 

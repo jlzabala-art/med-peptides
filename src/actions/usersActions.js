@@ -2,6 +2,53 @@
 
 import { adminDb, adminAuth } from '../lib/firebaseAdmin';
 import { normalizeRole } from '../constants/roles';
+import { algoliasearch } from 'algoliasearch';
+
+const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'G722EVODUJ';
+const ALGOLIA_ADMIN_KEY = process.env.ALGOLIA_ADMIN_KEY;
+
+async function syncUserRecordToAlgolia(userId, userData) {
+  if (!ALGOLIA_ADMIN_KEY || !userId || !userData) return;
+  try {
+    const client = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY);
+    const role = userData.role || (Array.isArray(userData.roles) && userData.roles[0]) || 'patient';
+    const isApproved = userData.approved === true || (userData.approved !== false && (userData.status === 'active' || userData.professionalStatus === 'approved'));
+    const resolvedChannel = userData.pricingChannel || userData.priceTier || userData.pricingTier || (role === 'wholesaler' || role === 'wholeseller' ? 'wholesale' : role === 'doctor' || role === 'clinic' ? 'clinic' : 'retail');
+    const createdAtTs = userData.createdAt ? new Date(userData.createdAt).getTime() || Date.now() : Date.now();
+
+    const formattedRecord = {
+      objectID: String(userId),
+      id: String(userId),
+      name: (userData.name || userData.fullName || userData.displayName || `${userData.firstName || ''} ${userData.lastName || ''}`).trim() || 'User',
+      displayName: userData.displayName || userData.fullName || userData.name || '',
+      email: userData.email || '',
+      phone: userData.phone || userData.mobile || userData.phoneNumber || '',
+      role: role,
+      roles: Array.isArray(userData.roles) && userData.roles.length > 0 ? userData.roles : [role],
+      status: (userData.status || (isApproved ? 'active' : 'pending')).toLowerCase(),
+      approved: isApproved,
+      companyName: userData.companyName || userData.institution || '',
+      institution: userData.institution || userData.companyName || '',
+      country: userData.country || userData.shippingCountry || '',
+      city: userData.city || userData.shippingCity || '',
+      pricingChannel: resolvedChannel,
+      priceTier: resolvedChannel,
+      pricingTier: resolvedChannel,
+      zohoContactId: userData.zohoContactId || '',
+      zohoBiginContactId: userData.zohoBiginContactId || '',
+      clinicId: userData.clinicId || '',
+      clinicIds: userData.clinicIds || (userData.clinicId ? [userData.clinicId] : []),
+      createdAt_ts: createdAtTs
+    };
+
+    await client.saveObjects({
+      indexName: 'atlas_users',
+      objects: [formattedRecord]
+    });
+  } catch (err) {
+    console.warn('[syncUserRecordToAlgolia] Non-blocking warning:', err.message);
+  }
+}
 
 export async function fetchUsersAction({ limitCount = 50, role = null, search = '' } = {}) {
   try {
@@ -115,24 +162,44 @@ export async function updateUserRoleAction({ userId, role }) {
     const existingSnap = await userDocRef.get();
     const existingData = existingSnap.exists ? existingSnap.data() : {};
 
+    const defaultChannelForRole =
+      canonicalRole === 'wholesaler' || canonicalRole === 'wholeseller' ? 'wholesale' :
+      canonicalRole === 'doctor' || canonicalRole === 'clinic' ? 'clinic' :
+      canonicalRole === 'patient' ? 'retail' :
+      (existingData.pricingChannel || existingData.priceTier || 'retail');
+
     const updates = {
       role: canonicalRole,
       roles: [canonicalRole],
       approved: true,
+      status: 'active',
       professionalStatus: 'approved',
+      pricingChannel: defaultChannelForRole,
+      priceTier: defaultChannelForRole,
+      pricingTier: defaultChannelForRole,
       updatedAt: new Date().toISOString()
     };
 
-    // If changing to doctor, ensure default clinic channel if missing
-    if (canonicalRole === 'doctor' && (!existingData.pricingChannel || existingData.pricingChannel === 'retail')) {
-      updates.pricingChannel = 'clinic';
-      updates.priceTier = 'clinic';
-    } else if (canonicalRole === 'wholesaler' && (!existingData.pricingChannel || existingData.pricingChannel === 'retail')) {
-      updates.pricingChannel = 'wholesale';
-      updates.priceTier = 'wholesale';
+    await userDocRef.set(updates, { merge: true });
+
+    const mergedData = { ...existingData, ...updates, id: userId };
+
+    // 2b. Sync linked customers / wholesellers documents by email
+    if (mergedData.email) {
+      try {
+        const custSnap = await adminDb.collection('customers').where('email', '==', mergedData.email).limit(5).get();
+        for (const cDoc of custSnap.docs) {
+          await cDoc.ref.set({
+            customerType: canonicalRole,
+            pricingTier: defaultChannelForRole,
+            updatedAt: updates.updatedAt
+          }, { merge: true });
+        }
+      } catch (_) {}
     }
 
-    await userDocRef.set(updates, { merge: true });
+    // 2c. Immediately synchronize Algolia search index
+    await syncUserRecordToAlgolia(userId, mergedData);
 
     // 3. Write audit log
     try {
@@ -146,7 +213,13 @@ export async function updateUserRoleAction({ userId, role }) {
       });
     } catch (_) {}
 
-    return { success: true, userId, role: canonicalRole };
+    return {
+      success: true,
+      userId,
+      role: canonicalRole,
+      pricingChannel: defaultChannelForRole,
+      updates
+    };
   } catch (error) {
     console.error('[updateUserRoleAction] Error:', error);
     return { success: false, error: error.message };
@@ -163,13 +236,22 @@ export async function updateUserPricingChannelAction({ userId, pricingChannel })
     if (!adminDb) throw new Error('Firebase Admin DB is not initialized');
 
     const userDocRef = adminDb.collection('users').doc(userId);
-    await userDocRef.set({
+    const existingSnap = await userDocRef.get();
+    const existingData = existingSnap.exists ? existingSnap.data() : {};
+
+    const updates = {
       pricingChannel,
       priceTier: pricingChannel,
+      pricingTier: pricingChannel,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
+    };
 
-    return { success: true, userId, pricingChannel };
+    await userDocRef.set(updates, { merge: true });
+
+    const mergedData = { ...existingData, ...updates, id: userId };
+    await syncUserRecordToAlgolia(userId, mergedData);
+
+    return { success: true, userId, pricingChannel, updates };
   } catch (error) {
     console.error('[updateUserPricingChannelAction] Error:', error);
     return { success: false, error: error.message };

@@ -10,7 +10,7 @@ export const BLOODO_SECTIONS = [
   { id: 'diagnostic-specs', step: 3, labelEn: '3. Reference Ranges & Biomarkers', labelEs: '3. ¿Qué Dice el Resultado? (Rangos)' },
   { id: 'collection-protocol', step: 4, labelEn: '4. How It Works (Sampling Guide)', labelEs: '4. ¿Cómo se Realiza? (Toma de Muestra)' },
   { id: 'specs-section', step: 5, labelEn: '5. Lab Standards & Clinical Downloads', labelEs: '5. Acreditación ISO y Descargas' },
-  { id: 'bloodo-suite', step: 6, labelEn: '6. Bloodo™ Diagnostic Suite', labelEs: '6. Suite Diagnóstica Bloodo™' },
+  { id: 'bloodo-suite', step: 6, labelEn: '6. Bloodo™ Biomarker Suite', labelEs: '6. Suite de Biomarcadores Bloodo™' },
   { id: 'clinical-synergy', step: 7, labelEn: '7. Atlas Recommendations', labelEs: '7. Recomendaciones Atlas' }
 ];
 

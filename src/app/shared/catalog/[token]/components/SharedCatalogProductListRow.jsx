@@ -83,6 +83,16 @@ export default function SharedCatalogProductListRow({
     return 'supplier-lotusland';
   }, [prod, catalogMeta]);
 
+  const catalogContextQuery = React.useMemo(() => {
+    const p = [];
+    const tier = catalogMeta?.priceSource || catalogMeta?.priceTier || '';
+    if (tier) p.push(`tier=${encodeURIComponent(tier)}`);
+    if (catalogMeta?.catalogId) p.push(`cat=${encodeURIComponent(catalogMeta.catalogId)}`);
+    if (catalogMeta?.priceMarkupPercent) p.push(`markup=${encodeURIComponent(catalogMeta.priceMarkupPercent)}`);
+    if (currentCurrency) p.push(`cur=${encodeURIComponent(currentCurrency)}`);
+    return p.length > 0 ? `&${p.join('&')}` : '';
+  }, [catalogMeta, currentCurrency]);
+
   return (
     <div className={`catalog-list-item ${isExpanded ? 'is-expanded' : ''}`}>
       {/* Product Row Header — Balanced GCP Mobile & Desktop Layout */}
@@ -207,15 +217,15 @@ export default function SharedCatalogProductListRow({
 
           <div className="catalog-row-buttons">
             <a
-              href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
+              href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}${catalogContextQuery}`}
               target="_blank"
               rel="noopener noreferrer"
               className="catalog-row-monograph-btn"
-              title={isProductPeptide ? "Official Clinical Monograph" : isProductDiagnostic ? "Validated Diagnostic Biomarker Sheet" : "Product Dossier & Formulation Details"}
+              title={isProductPeptide ? "Official Clinical Monograph" : isProductDiagnostic ? "Validated Capillary Biomarker Sheet" : "Product Dossier & Formulation Details"}
             >
               <ExternalLink size={13} />
               <span className="monograph-btn-label">
-                {isProductPeptide ? (t ? t('product.monograph', 'Monograph') : 'Monograph') : isProductDiagnostic ? 'Diagnostic' : 'Product Sheet'}
+                {isProductPeptide ? (t ? t('product.monograph', 'Monograph') : 'Monograph') : isProductDiagnostic ? 'Biomarker Kit' : 'Product Sheet'}
               </span>
             </a>
 

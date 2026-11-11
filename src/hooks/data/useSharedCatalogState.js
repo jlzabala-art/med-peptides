@@ -127,6 +127,16 @@ export function resolveProductCanonicalGoals(product) {
     return [GOAL_TYPES.SKIN_REGENERATION];
   }
 
+  // 3. Bloodo™ Capillary Biomarkers & Cellular Longevity Panels: map to specific physiological goals
+  if (supp.includes('bloodo') || slug.includes('bloodo') || slug.endsWith('-test')) {
+    if (slug.includes('nad') || name.includes('nad')) return [GOAL_TYPES.ANTI_AGING];
+    if (slug.includes('hba1c') || slug.includes('hemoglobin') || name.includes('hba1c')) return [GOAL_TYPES.FAT_LOSS];
+    if (slug.includes('omega') || name.includes('omega')) return [GOAL_TYPES.TISSUE_REPAIR];
+    if (slug.includes('cortisol') || name.includes('cortisol')) return [GOAL_TYPES.COGNITIVE];
+    if (slug.includes('testosterone') || name.includes('testosterone')) return [GOAL_TYPES.LIBIDO_WELLNESS];
+    if (slug.includes('vitamin-d') || name.includes('vitamin d')) return [GOAL_TYPES.GENERAL_HEALTH];
+  }
+
   const goals = new Set();
   
   if (Array.isArray(product.canonicalGoals) && product.canonicalGoals.length > 0) {

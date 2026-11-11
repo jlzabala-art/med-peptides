@@ -120,7 +120,7 @@ export default function BloodoDiagnosticOverviewCard({
           </h2>
           <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>
             {isEs 
-              ? 'Fundamentos moleculares, rol biológico celular y justificación diagnóstica de la cuantificación intracelular.'
+              ? 'Fundamentos moleculares, rol biológico celular y justificación analítica de la cuantificación intracelular.'
               : 'Molecular foundations, cellular biological mechanisms, and clinical rationale for intracellular quantification.'}
           </p>
         </div>
@@ -189,9 +189,9 @@ export default function BloodoDiagnosticOverviewCard({
             )
           ) : (
             isEs ? (
-              'Dispositivo de diagnóstico in vitro con marcado CE-IVDR para la cuantificación precisa de biomarcadores metabólicos y endocrinos mediante tarjeta de sangre seca DBS en laboratorio clínico central acreditado (LifeLab1, ISO 15189).'
+              'Dispositivo de análisis in vitro con marcado CE-IVDR para la cuantificación precisa de biomarcadores metabólicos y endocrinos mediante tarjeta de sangre seca DBS en laboratorio clínico central acreditado (LifeLab1, ISO 15189).'
             ) : (
-              'CE-IVDR in vitro diagnostic device for the quantitative measurement of key metabolic and endocrine biomarkers via capillary dried blood spot (DBS) processed at an accredited European central laboratory (LifeLab1, ISO 15189).'
+              'CE-IVDR in vitro analytical device for the quantitative measurement of key metabolic and endocrine biomarkers via capillary dried blood spot (DBS) processed at an accredited European central laboratory (LifeLab1, ISO 15189).'
             )
           )}
         </p>
@@ -257,35 +257,9 @@ export default function BloodoDiagnosticOverviewCard({
         </div>
       </div>
 
-      {/* ── Action Buttons: Gated Pricing, Sample Report & Brochure Downloads ── */}
+      {/* ── Action Buttons: Sample Report & Brochure Downloads ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', paddingTop: '6px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('medium');
-              if (onUnlockRequest) onUnlockRequest();
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: '#0d9488',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '7px 14px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(13, 148, 136, 0.25)',
-              transition: 'background 0.15s ease'
-            }}
-          >
-            <Lock size={13} />
-            <span>{isEs ? 'Iniciar Sesión para Consultar Tarifas' : 'Sign In to View Clinical Pricing'}</span>
-          </button>
-
           {/* 1. Official Sample Report PDF Preview */}
           <button
             type="button"
@@ -296,8 +270,8 @@ export default function BloodoDiagnosticOverviewCard({
                 downloadName: reportPdf.split('/').pop() || 'bloodo-report-sample.pdf',
                 title: isEs ? 'Informe Clínico Muestra (PDF)' : 'Sample Clinical Report (PDF)',
                 subtitle: isEs
-                  ? `Bloodo Diagnostics • Simulación de Informe Clínico Real (${testName})`
-                  : `Bloodo Diagnostics • Official Specimen Report Simulation (${testName})`
+                  ? `Bloodo™ Biomarkers • Simulación de Informe Analítico Real (${testName})`
+                  : `Bloodo™ Biomarkers • Official Specimen Report Simulation (${testName})`
               });
             }}
             style={{
@@ -364,8 +338,8 @@ export default function BloodoDiagnosticOverviewCard({
                 downloadName: catalogPdf.split('/').pop() || 'bloodo-product-catalog-2026.pdf',
                 title: isEs ? 'Catálogo 2026 (PDF)' : 'Brochure / Catalog (PDF)',
                 subtitle: isEs
-                  ? 'Catálogo Diagnóstico Bloodo 2026 • Portafolio Clínico Completo'
-                  : 'Bloodo 2026 Diagnostic Catalog • Complete Clinical Test Portfolio'
+                  ? 'Catálogo de Biomarcadores Bloodo™ 2026 • Portafolio Completo'
+                  : 'Bloodo™ 2026 Biomarker Catalog • Complete Test Portfolio'
               });
             }}
             style={{

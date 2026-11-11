@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 import { useFirestorePaginatedCollection } from '../../../hooks/data/useFirestorePaginatedCollection';
-import { useAlgoliaSearch } from '../../../hooks/data/useAlgoliaSearch';
+import { useAlgoliaSearch, clearAlgoliaSearchCache } from '../../../hooks/data/useAlgoliaSearch';
 import { useDataTable } from '../../../hooks/ui/useDataTable';
 
 import UserFormDrawer from '../../../components/admin/UserFormDrawer';
@@ -160,7 +160,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   });
 
   const [searchTerm, setSearchTerm] = useState('');
-  const { hits: algoliaResults, isAlgoliaActive, loading: algoliaLoading, error: algoliaError } = useAlgoliaSearch('atlas_users', searchTerm);
+  const { hits: algoliaResults, isAlgoliaActive, loading: algoliaLoading, error: algoliaError, search: reSearchAlgolia } = useAlgoliaSearch('atlas_users', searchTerm);
 
   useEffect(() => {
     if (deepLinkSearch) {
@@ -194,7 +194,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       });
 
       const algoliaMapped = isAlgoliaActive && !algoliaError && algoliaResults
-        ? algoliaResults.map(h => source.find(u => u.id === h.objectID) || { ...h, id: h.objectID, ...(optimisticOverrides[h.objectID] || {}) })
+        ? algoliaResults.map(h => {
+            const foundLocal = source.find(u => u.id === h.objectID);
+            const baseObj = foundLocal ? { ...h, ...foundLocal } : { ...h, id: h.objectID };
+            return { ...baseObj, ...(optimisticOverrides[h.objectID] || {}) };
+          })
         : [];
 
       if (isAlgoliaActive && !algoliaError) {
@@ -221,8 +225,9 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       const appliedRole = defaultRole || (roleFilter !== 'all' ? roleFilter : null);
       if (appliedRole && !roles.includes(appliedRole)) return false;
 
-      if (statusFilter === 'active' && !u.approved) return false;
-      if (statusFilter === 'pending' && u.approved) return false;
+      const isApproved = u.approved === true || (u.approved !== false && u.status === 'active');
+      if (statusFilter === 'active' && !isApproved) return false;
+      if (statusFilter === 'pending' && isApproved) return false;
 
       if (originFilter === 'zoho' && !u.zohoContactId) return false;
       if (originFilter === 'local' && u.zohoContactId) return false;
@@ -326,6 +331,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
   async function handleQuickShareCatalog(targetUser, catalogType = 'products') {
     const fullName = getUserFullName(targetUser);
+    const companyName = targetUser.companyName || targetUser.institution || targetUser.clinicName || '';
+    const recipientDisplayName = companyName || fullName;
     const phone = targetUser.phone || targetUser.phoneNumber || '';
     const email = targetUser.email || targetUser.contactEmail || '';
     const userId = targetUser.id || targetUser.uid;
@@ -334,7 +341,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     const currency = targetUser.currency || 'USD';
 
     const typeLabel = catalogType === 'protocols' ? 'Clinical Protocols' : 'Product Catalog';
-    const toastId = toast.loading(`Generating ${typeLabel} link for ${fullName}...`);
+    const toastId = toast.loading(`Generating ${typeLabel} link for ${recipientDisplayName}...`);
 
     try {
       const res = await fetch('/api/catalog/share', {
@@ -344,7 +351,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           supplierId: catalogType === 'protocols' ? 'protocols-clinical' : 'catalog-general',
           catalogueFilter: catalogType === 'protocols' ? 'Clinical Protocols' : 'General Catalog',
           recipientUserId: userId,
-          recipientName: fullName,
+          recipientName: recipientDisplayName,
+          companyName,
           recipientPhone: phone,
           recipientEmail: email,
           recipientType: targetUser.role || 'clinic',
@@ -474,28 +482,52 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   }
 
   const handleInlineRoleChange = async (userId, newRole) => {
+    const defaultChannelForRole =
+      newRole === 'wholesaler' || newRole === 'wholeseller' ? 'wholesale' :
+      newRole === 'doctor' || newRole === 'clinic' ? 'clinic' :
+      newRole === 'patient' ? 'retail' : 'retail';
+
     // 1. Optimistic UI update (instant feedback, zero delay)
     setOptimisticOverrides(prev => ({
       ...prev,
-      [userId]: { ...(prev[userId] || {}), role: newRole, roles: [newRole] }
+      [userId]: {
+        ...(prev[userId] || {}),
+        role: newRole,
+        roles: [newRole],
+        approved: true,
+        status: 'active',
+        pricingChannel: defaultChannelForRole,
+        priceTier: defaultChannelForRole
+      }
     }));
     toast.success(`Role updated to ${newRole.toUpperCase()}`);
 
     try {
-      // 2. Authoritative Server Action (sets Firebase Auth claims, updates Firestore via Admin SDK, logs audit)
+      // 2. Authoritative Server Action (sets Firebase Auth claims, updates Firestore & Algolia via Admin SDK, logs audit)
       const res = await updateUserRoleAction({ userId, role: newRole });
       if (!res.success) {
         throw new Error(res.error || 'Server update failed');
       }
 
-      // Also trigger client Firestore update as backup
+      // 3. Also trigger client Firestore update as backup
       try {
-        const userRef = userId;
-        await updateUserFields(userRef, { role: newRole, roles: [newRole] });
+        await updateUserFields(userId, {
+          role: newRole,
+          roles: [newRole],
+          approved: true,
+          status: 'active',
+          pricingChannel: res.pricingChannel || defaultChannelForRole,
+          priceTier: res.pricingChannel || defaultChannelForRole
+        });
       } catch (err) {
         console.warn('Legacy client-side user update failed:', err?.message);
       }
 
+      // 4. Clear Algolia cache & refresh both Firestore and Algolia hits
+      clearAlgoliaSearchCache();
+      if (searchTerm && searchTerm.trim() && typeof reSearchAlgolia === 'function') {
+        setTimeout(() => reSearchAlgolia(searchTerm, 0, false), 600);
+      }
       refetch();
     } catch (err) {
       console.error('[UsersTable] Role update error:', err);
@@ -526,12 +558,15 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
       // Also trigger client Firestore update as backup
       try {
-        const userRef = userId;
-        await updateUserFields(userRef, { pricingChannel: newChannel, priceTier: newChannel });
+        await updateUserFields(userId, { pricingChannel: newChannel, priceTier: newChannel });
       } catch (err) {
         console.warn('Legacy client-side user update failed:', err?.message);
       }
 
+      clearAlgoliaSearchCache();
+      if (searchTerm && searchTerm.trim() && typeof reSearchAlgolia === 'function') {
+        setTimeout(() => reSearchAlgolia(searchTerm, 0, false), 600);
+      }
       refetch();
     } catch (err) {
       console.error('[UsersTable] Pricing update error:', err);
@@ -591,9 +626,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             <div style={{ minWidth: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                 <span style={{ fontWeight: 600, color: 'var(--text-main)', wordBreak: 'break-word' }}>
-                  {name}
+                  {(u.companyName || u.institution) && (u.companyName || u.institution) !== name
+                    ? `${u.companyName || u.institution} · ${name}`
+                    : name}
                 </span>
-                {(u.zohoContactId || u.biginContactId || u.zohoSyncStatus === 'synced') && (
+                {(u.zohoContactId || u.biginContactId || u.zohoBiginContactId || u.zohoSyncStatus === 'synced') && (
                   <span
                     title={`Sincronizado con Zoho Bigin (ID: ${u.zohoContactId || u.biginContactId})`}
                     style={{
@@ -752,7 +789,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       hideOnMobile: true,
       width: '14%',
       render: (u) => {
-        const statusStr = u.isArchived ? 'archived' : (u.approved ? 'active' : 'pending');
+        const isApproved = optimisticOverrides[u.id]?.approved ?? (u.approved === true || (u.approved !== false && u.status === 'active'));
+        const statusStr = u.isArchived ? 'archived' : (isApproved ? 'active' : 'pending');
         return <StatusChip status={statusStr} />;
       }
     }

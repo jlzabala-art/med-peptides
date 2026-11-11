@@ -222,6 +222,7 @@ export default function PublicDatasheetView({
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const [adminSimulationTier, setAdminSimulationTier] = useState(null);
+  const [resolvedRolePricing, setResolvedRolePricing] = useState(null);
   const requestedLangs = useRef(new Set());
 
   const primaryProtocol = useMemo(() => {
@@ -626,7 +627,7 @@ export default function PublicDatasheetView({
   const name = useMemo(() => {
     const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
     if (pSlug.includes('bloodo-nad') || pSlug.includes('nad-level-test')) {
-      return lang === 'es' ? 'Bloodo™ Test Cuantitativo de NAD+ Intracelular' : 'Bloodo™ Intracellular NAD+ Level Diagnostic Test';
+      return lang === 'es' ? 'Bloodo™ Test Cuantitativo de NAD+ Intracelular' : 'Bloodo™ Intracellular NAD+ / NADP+ Capillary Biomarker Test';
     }
     if (pSlug.includes('cortisol')) {
       return lang === 'es' ? 'Bloodo™ Test de Ritmo Circadiano Cortisol AM/PM' : 'Bloodo™ Diurnal Cortisol & Circadian Rhythm Test';
@@ -652,7 +653,7 @@ export default function PublicDatasheetView({
     if (pSlug.includes('teletest-estudio-genetico-celiaca') || pSlug.includes('celiaca')) {
       return lang === 'es' ? 'TeleTest™ Estudio Genético Enfermedad Celíaca' : 'TeleTest™ Celiac Disease Genetic Panel';
     }
-    return product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA® Precision Health & Multiomics Platform') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
+    return product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA® Precision Health & Multiomics Platform') : (isDiagnosticKit ? 'Bloodo™ Capillary Biomarker Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
   }, [product, slug, isSolventProduct, isEternaDiagnostic, isDiagnosticKit, isIvDrip, isCosmeticProduct, isSupplementProduct, lang]);
 
   const category = isLipProduct
@@ -668,9 +669,9 @@ export default function PublicDatasheetView({
             : isEternaDiagnostic
               ? (lang === 'es' ? 'Plataforma Multiómica y Portal Clínico' : 'Multiomic Platform & Clinical Portal')
               : isTeletestDiagnostic
-                ? (lang === 'es' ? 'Diagnóstico Clínico y Toxicología' : 'Clinical Diagnostics & Toxicology')
+                ? (lang === 'es' ? 'Panel Analítico y Toxicología' : 'Clinical Analytics & Toxicology')
                 : isDiagnosticKit
-                  ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
+                  ? (lang === 'es' ? 'Biomarcadores Capilares y Longevidad' : 'Capillary Blood Biomarkers & Wellness')
                   : isIvDrip
                     ? (lang === 'es' ? 'Terapia Intravenosa y Nutrición Parenteral' : 'Sterile IV Infusion & Micronutrient Formulation')
                     : isSupplementProduct
@@ -1388,7 +1389,7 @@ export default function PublicDatasheetView({
         { id: 'diagnostic-specs', label: lang === 'es' ? '3. ¿Qué Dice el Resultado? (Rango)' : '3. Reference Ranges & Biomarkers', icon: Activity },
         { id: 'collection-protocol', label: lang === 'es' ? '4. ¿Cómo se Realiza? (Toma de Muestra)' : '4. How It Works (Sampling Guide)', icon: Droplets },
         { id: 'specs-section', label: lang === 'es' ? '5. Acreditación ISO y Descargas' : '5. Lab Standards & Clinical Downloads', icon: ShieldCheck },
-        { id: 'bloodo-suite', label: lang === 'es' ? '6. Suite Diagnóstica Bloodo™' : '6. Bloodo™ Diagnostic Suite', icon: Layers },
+        { id: 'bloodo-suite', label: lang === 'es' ? '6. Suite de Biomarcadores Bloodo™' : '6. Bloodo™ Biomarker Suite', icon: Layers },
         { id: 'clinical-synergy', label: lang === 'es' ? '7. Recomendaciones Atlas' : '7. Atlas Recommendations', icon: Sparkles }
       ];
     }
@@ -2124,7 +2125,7 @@ export default function PublicDatasheetView({
                         <CollectionBadgePill product={product} />
                         <span className="pds-cat-tag">
                           {(isDiagnosticKit || isBloodoDiagnostic)
-                            ? (lang === 'es' ? 'DIAGNÓSTICO CLÍNICO & BIOMARCADORES' : 'CLINICAL DIAGNOSTICS & BIOMARKERS')
+                            ? (lang === 'es' ? 'BIOMARCADORES CAPILARES & LONGEVIDAD' : 'CAPILLARY BLOOD BIOMARKERS & WELLNESS')
                             : isTeletestDiagnostic
                               ? (lang === 'es' ? 'PANEL ANALÍTICO CLÍNICO' : 'CLINICAL ANALYTIC PANEL')
                               : lang === 'es' && (category === 'PEPTIDE' || category === 'Peptide' || !category) ? 'PÉPTIDO' : category}
@@ -2270,7 +2271,7 @@ export default function PublicDatasheetView({
                               : isSolventProduct
                                 ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:')
                                 : isDiagnosticKit
-                                  ? (lang === 'es' ? 'Utilidad Diagnóstica y Aplicación:' : 'Diagnostic Utility & Target Axis:')
+                                  ? (lang === 'es' ? 'Utilidad del Biomarcador y Eje Celular:' : 'Biomarker Utility & Target Axis:')
                                   : (t.targetReceptorAxis || 'Target Receptor Axis:')}
                           </strong>{' '}
                           {targetSystem}
@@ -2560,16 +2561,18 @@ export default function PublicDatasheetView({
                               onUnlockRequest={() => setIsUnlockModalOpen(true)}
                               adminSimulationTier={adminSimulationTier}
                               onSelectAdminSimulationTier={setAdminSimulationTier}
+                              onResolvedRoleChange={setResolvedRolePricing}
                             />
 
-                            {/* 1-Click Order Button for Registered Clinicians */}
+                            {/* 1-Click Order Button */}
                             <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
                               <InlineOrderButton
                                 product={product}
                                 variant={selectedStrength || product.variants?.[0] || null}
                                 isEs={lang === 'es'}
                                 compact={false}
-                                role={activeRole || 'clinic'}
+                                role={resolvedRolePricing?.tierKey || activeRole || 'retail'}
+                                priceOverride={resolvedRolePricing?.unitPrice || null}
                                 brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
                                 onUnlockRequest={() => setIsUnlockModalOpen(true)}
                               />
@@ -2645,6 +2648,7 @@ export default function PublicDatasheetView({
                               onUnlockRequest={() => setIsUnlockModalOpen(true)}
                               adminSimulationTier={adminSimulationTier}
                               onSelectAdminSimulationTier={setAdminSimulationTier}
+                              onResolvedRoleChange={setResolvedRolePricing}
                             />
 
                             <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
@@ -2653,7 +2657,8 @@ export default function PublicDatasheetView({
                                 variant={selectedStrength || product.variants?.[0] || null}
                                 isEs={lang === 'es'}
                                 compact={false}
-                                role={activeRole || 'clinic'}
+                                role={resolvedRolePricing?.tierKey || activeRole || 'retail'}
+                                priceOverride={resolvedRolePricing?.unitPrice || null}
                                 brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
                                 onUnlockRequest={() => setIsUnlockModalOpen(true)}
                               />
@@ -3391,7 +3396,7 @@ export default function PublicDatasheetView({
         }
         badge={
           isDiagnosticKit
-            ? (lang === 'es' ? 'Test Diagnóstico' : 'Diagnostic Kit')
+            ? (lang === 'es' ? 'Kit de Biomarcador' : 'Biomarker Kit')
             : isSpainResidency
               ? (lang === 'es' ? 'Programa Legal' : 'Residency Program')
               : isCompoundingService

@@ -2226,7 +2226,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'productName',
       label: isEs ? 'Formulación de Péptido & Concentración' : 'Peptide Formulation & Concentration',
-      width: '38%',
+      width: '50%',
       align: 'left', // STRICT: Left-aligned for clean price list readability
       sortable: true,
       render: (_, row) => {
@@ -2401,7 +2401,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'unitPrice',
       label: isEs ? `Vial Individual (1x) · ${currency}` : `Single Vial (1x) · ${currency}`,
-      width: '17%',
+      width: '13%',
       align: 'right',
       sortable: true,
       render: (val, row) => (
@@ -2416,7 +2416,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'pack10Price',
       label: isEs ? `Pack de 10 (Pack ×10) · ${currency}` : `Pack of 10 (Pack ×10) · ${currency}`,
-      width: '20%',
+      width: '16%',
       align: 'right',
       sortable: true,
       render: (_, row) => {
@@ -2452,22 +2452,32 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
     {
       key: 'actions',
       label: isEs ? 'Solicitud de Pedido' : 'Order Request',
-      width: '185px',
-      minWidth: '180px',
+      width: '162px',
+      minWidth: '156px',
       align: 'right',
       render: (_, row) => {
         const inCart1x = cartItems[row.id]?.quantity1x || 0;
         const inCart10x = cartItems[row.id]?.quantity10x || 0;
         return (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px', flexWrap: 'nowrap', paddingRight: '8px' }}>
+          <div
+            className="peptide-row-actions-group"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: '4px',
+              flexWrap: 'nowrap',
+              width: '100%'
+            }}
+          >
             {inCart1x > 0 && typeof updateItemQuantity === 'function' ? (
               <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 background: '#e8f0fe',
                 border: '1px solid #1a73e8',
-                borderRadius: '4px',
-                height: '26px'
+                borderRadius: '5px',
+                height: '28px'
               }}>
                 <button
                   type="button"
@@ -2493,23 +2503,25 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               <button
                 onClick={() => handleAddToCart(row, '1x')}
                 style={{
-                  padding: '4px 6px',
-                  fontSize: '0.69rem',
-                  fontWeight: 600,
+                  height: '28px',
+                  padding: '0 8px',
+                  fontSize: '0.70rem',
+                  fontWeight: 650,
                   background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  borderRadius: '4px',
-                  color: '#3c4043',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '5px',
+                  color: '#334155',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '3px',
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
-                  transition: 'background 0.15s'
+                  transition: 'all 0.15s ease'
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f1f3f4'}
-                onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
+                onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
                 title={isEs ? 'Añadir 1 vial individual a la proforma' : 'Add 1 single vial to proforma'}
               >
                 <Plus size={11} />
@@ -2523,8 +2535,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 alignItems: 'center',
                 background: '#dcfce7',
                 border: '1px solid #16a34a',
-                borderRadius: '4px',
-                height: '26px'
+                borderRadius: '5px',
+                height: '28px'
               }}>
                 <button
                   type="button"
@@ -2550,20 +2562,23 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               <button
                 onClick={() => handleAddToCart(row, '10x')}
                 style={{
-                  padding: '4px 7px',
-                  fontSize: '0.69rem',
-                  fontWeight: 600,
+                  height: '28px',
+                  padding: '0 8px',
+                  fontSize: '0.70rem',
+                  fontWeight: 700,
                   background: '#1a73e8',
                   border: '1px solid #1a73e8',
-                  borderRadius: '4px',
+                  borderRadius: '5px',
                   color: '#ffffff',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '3px',
+                  justifyContent: 'center',
+                  gap: '3.5px',
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
-                  transition: 'background 0.15s'
+                  boxShadow: '0 1px 2px rgba(26,115,232,0.18)',
+                  transition: 'background 0.15s ease'
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#1557b0'}
                 onMouseLeave={e => e.currentTarget.style.background = '#1a73e8'}
@@ -2761,10 +2776,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             </div>
           </div>
 
-          {/* Right Column (40%): Reconstitution, Dosage & Action Console */}
+          {/* Right Column (44%): Reconstitution, Dosage & Integrated Action Bar */}
           <div style={{
-            flex: '0 1 340px',
-            minWidth: '270px',
+            flex: '1 1 380px',
+            minWidth: '280px',
             display: 'flex',
             flexDirection: 'column',
             gap: '0.65rem'
@@ -2777,96 +2792,111 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               overflow: 'hidden',
               boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              height: '100%',
+              justifyContent: 'space-between'
             }}>
-              <div style={{
-                background: '#f8f9fa',
-                borderBottom: '1px solid #dadce0',
-                padding: '6px 10px',
-                fontSize: '0.66rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                color: '#1a73e8',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Droplets size={12} color="#1a73e8" />
-                <span>{isEs ? 'Reconstitución & Regla Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
-              </div>
-              <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ fontSize: '0.74rem', color: '#202124', fontWeight: 700 }}>
-                  {clinical.recon}
-                </div>
+              <div>
                 <div style={{
-                  fontSize: '0.71rem',
-                  color: '#185abc',
-                  fontFamily: 'monospace',
-                  fontWeight: 650,
-                  background: '#e8f0fe',
-                  padding: '3px 6px',
-                  borderRadius: '4px',
-                  border: '1px solid #c2e7ff'
-                }}>
-                  {clinical.syringeCalc}
-                </div>
-                <div style={{ fontSize: '0.70rem', color: '#3c4043' }}>
-                  <strong style={{ color: '#202124' }}>{isEs ? 'Pauta estándar:' : 'Standard dose:'}</strong> {clinical.dose}
-                </div>
-                {clinical.vialYield && (
-                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px', borderTop: '1px solid #f1f3f4', paddingTop: '4px' }}>
-                    <span style={{ fontWeight: 700, color: '#3c4043' }}>⏱️ {isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
-                    <span>{clinical.vialYield}</span>
-                  </div>
-                )}
-                {clinical.stability && (
-                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ fontWeight: 700, color: '#3c4043' }}>❄️ {isEs ? 'Estabilidad:' : 'Storage:'}</span>
-                    <span>{clinical.stability}</span>
-                  </div>
-                )}
-                {clinical.hardware && (
-                  <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ fontWeight: 700, color: '#3c4043' }}>💉 {isEs ? 'Insumos:' : 'Hardware:'}</span>
-                    <span>{clinical.hardware}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Quick Action Button Group */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setAiContextProduct(row);
-                  setIsAtlasAiOpen(true);
-                }}
-                style={{
+                  background: '#f8f9fa',
+                  borderBottom: '1px solid #dadce0',
+                  padding: '6px 10px',
+                  fontSize: '0.66rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  color: '#1a73e8',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  background: '#f0f9ff',
-                  color: '#0369a1',
-                  border: '1px solid #bae6fd',
-                  padding: '7px 12px',
-                  borderRadius: '4px',
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(2,132,199,0.06)',
-                  transition: 'all 0.15s ease'
-                }}
-                title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
-              >
-                <Sparkles size={13} color="#0284c7" />
-                <span>{isEs ? 'Calcular Pauta con Atlas AI' : 'Calculate Posology with Atlas AI'}</span>
-              </button>
+                  gap: '5px'
+                }}>
+                  <Droplets size={12} color="#1a73e8" />
+                  <span>{isEs ? 'Reconstitución & Regla Jeringa (U-100)' : 'Reconstitution & Syringe Math (U-100)'}</span>
+                </div>
+                <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#202124', fontWeight: 700 }}>
+                    {clinical.recon}
+                  </div>
+                  <div style={{
+                    fontSize: '0.71rem',
+                    color: '#185abc',
+                    fontFamily: 'monospace',
+                    fontWeight: 650,
+                    background: '#e8f0fe',
+                    padding: '3px 6px',
+                    borderRadius: '4px',
+                    border: '1px solid #c2e7ff'
+                  }}>
+                    {clinical.syringeCalc}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#3c4043' }}>
+                    <strong style={{ color: '#202124' }}>{isEs ? 'Pauta estándar:' : 'Standard dose:'}</strong> {clinical.dose}
+                  </div>
+                  {clinical.vialYield && (
+                    <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px', borderTop: '1px solid #f1f3f4', paddingTop: '4px' }}>
+                      <span style={{ fontWeight: 700, color: '#3c4043' }}>⏱️ {isEs ? 'Rendimiento:' : 'Vial Yield:'}</span>
+                      <span>{clinical.vialYield}</span>
+                    </div>
+                  )}
+                  {clinical.stability && (
+                    <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontWeight: 700, color: '#3c4043' }}>❄️ {isEs ? 'Estabilidad:' : 'Storage:'}</span>
+                      <span>{clinical.stability}</span>
+                    </div>
+                  )}
+                  {clinical.hardware && (
+                    <div style={{ fontSize: '0.69rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontWeight: 700, color: '#3c4043' }}>💉 {isEs ? 'Insumos:' : 'Hardware:'}</span>
+                      <span>{clinical.hardware}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {/* Integrated Google Cloud Action Toolbar Footer (Compact on Laptop, Touch-Responsive on Mobile) */}
+              <div
+                style={{
+                  borderTop: '1px solid #f1f3f4',
+                  background: '#f8fafc',
+                  padding: '8px 10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  flexWrap: 'wrap',
+                  gap: '6px'
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAiContextProduct(row);
+                    setIsAtlasAiOpen(true);
+                  }}
+                  style={{
+                    flex: '1 1 auto',
+                    minHeight: '30px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px',
+                    background: '#f0f9ff',
+                    color: '#0369a1',
+                    border: '1px solid #bae6fd',
+                    padding: '4px 10px',
+                    borderRadius: '5px',
+                    fontSize: '0.71rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
+                >
+                  <Sparkles size={12} color="#0284c7" />
+                  <span>{isEs ? 'Posología IA' : 'Posology AI'}</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={(e) => {
@@ -2874,17 +2904,18 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     setSelectedSpecsProduct(row);
                   }}
                   style={{
-                    flex: 1,
-                    display: 'flex',
+                    flex: '1 1 auto',
+                    minHeight: '30px',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '5px',
                     background: '#ffffff',
                     color: '#1a73e8',
                     border: '1px solid #c2e7ff',
-                    padding: '6px 10px',
-                    borderRadius: '4px',
-                    fontSize: '0.72rem',
+                    padding: '4px 10px',
+                    borderRadius: '5px',
+                    fontSize: '0.71rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
@@ -2900,7 +2931,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   }}
                 >
                   <BookOpen size={12} />
-                  <span>{isEs ? 'Dossier & Posología →' : 'Dossier & Specs →'}</span>
+                  <span>{isEs ? 'Dossier & Ficha →' : 'Dossier & Specs →'}</span>
                 </button>
 
                 <button
@@ -2911,16 +2942,18 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     setIsInquiryDrawerOpen(true);
                   }}
                   style={{
-                    display: 'flex',
+                    flex: '0 1 auto',
+                    minHeight: '30px',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '5px',
+                    gap: '4px',
                     background: '#f0fdf4',
                     color: '#15803d',
                     border: '1px solid #bbf7d0',
-                    padding: '6px 10px',
-                    borderRadius: '4px',
-                    fontSize: '0.72rem',
+                    padding: '4px 10px',
+                    borderRadius: '5px',
+                    fontSize: '0.71rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
@@ -2936,7 +2969,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   }}
                 >
                   <Mail size={12} />
-                  <span>{isEs ? 'Inquire' : 'Inquire'}</span>
+                  <span>{isEs ? 'Consultar' : 'Inquire'}</span>
                 </button>
               </div>
             </div>

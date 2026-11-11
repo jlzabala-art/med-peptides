@@ -435,7 +435,7 @@ export default function CatalogRightSidebar({
                   CE-IVDR Certified Micro-Sampling
                 </div>
                 <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
-                  Conforms to European In-Vitro Diagnostic Regulation (EU 2017/746) for medical collection devices.
+                  Conforms to European CE-IVDR (EU 2017/746) quality standards for capillary blood collection devices.
                 </div>
               </div>
             </div>

@@ -12,6 +12,7 @@ export default function InlineOrderButton({
   isEs = true,
   compact = false,
   role = 'clinic',
+  priceOverride = null,
   brandSlug = 'peptides',
   onUnlockRequest = null
 }) {
@@ -20,46 +21,13 @@ export default function InlineOrderButton({
   const [qty, setQty] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
 
-  // Check if unauthenticated
-  const isAuthenticated = Boolean(user);
-
-  if (!isAuthenticated) {
-    return (
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerHaptic('light');
-          if (onUnlockRequest) onUnlockRequest();
-        }}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '5px',
-          padding: compact ? '4px 8px' : '6px 12px',
-          borderRadius: '6px',
-          background: '#f8fafc',
-          border: '1px solid #cbd5e1',
-          color: '#003666',
-          fontSize: '0.74rem',
-          fontWeight: 700,
-          cursor: 'pointer',
-          transition: 'all 0.15s ease'
-        }}
-        title={isEs ? 'Iniciar sesión para ver precios y hacer pedidos' : 'Log in to view pricing and place orders'}
-      >
-        <Lock size={12} color="#0d9488" />
-        <span>{isEs ? 'Ver Precios / Pedir' : 'View Pricing / Order'}</span>
-      </button>
-    );
-  }
-
   const handleAdd = (e) => {
     e.stopPropagation();
     addItem(product, {
       variant,
       quantity: qty,
       role,
+      priceOverride,
       brandSlug
     });
     setJustAdded(true);

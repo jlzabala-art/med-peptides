@@ -90,12 +90,22 @@ export default function SharedCatalogProductCard({
     return 'supplier-lotusland';
   }, [prod, catalogMeta]);
 
+  const catalogContextQuery = React.useMemo(() => {
+    const p = [];
+    const tier = catalogMeta?.priceSource || catalogMeta?.priceTier || '';
+    if (tier) p.push(`tier=${encodeURIComponent(tier)}`);
+    if (catalogMeta?.catalogId) p.push(`cat=${encodeURIComponent(catalogMeta.catalogId)}`);
+    if (catalogMeta?.priceMarkupPercent) p.push(`markup=${encodeURIComponent(catalogMeta.priceMarkupPercent)}`);
+    if (currentCurrency) p.push(`cur=${encodeURIComponent(currentCurrency)}`);
+    return p.length > 0 ? `&${p.join('&')}` : '';
+  }, [catalogMeta, currentCurrency]);
+
   const monographLabel = React.useMemo(() => {
     if (isProductCosmetic) {
       return 'Product Sheet ↗';
     }
     if (isProductDiagnostic) {
-      return 'Diagnostic Sheet ↗';
+      return 'Biomarker Sheet ↗';
     }
     if (resolvedSupplier.includes('magenta')) {
       return t ? t('product.officialMonographMagenta', 'Monograph (Magenta) ↗') : 'Monograph (Magenta) ↗';
@@ -196,7 +206,7 @@ export default function SharedCatalogProductCard({
 
           <div style={{ marginTop: 'auto', paddingTop: '8px' }}>
             <a
-              href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
+              href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}${catalogContextQuery}`}
               target="_blank"
               rel="noopener noreferrer"
               className="gcp-dossier-monograph-link"
@@ -287,7 +297,7 @@ export default function SharedCatalogProductCard({
                         )}
                         <span>•</span>
                         <a
-                          href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}${v.dosage ? `&dose=${encodeURIComponent(v.dosage)}` : ''}${v.presentation ? `&presentation=${encodeURIComponent(v.presentation)}` : ''}`}
+                          href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}${v.dosage ? `&dose=${encodeURIComponent(v.dosage)}` : ''}${v.presentation ? `&presentation=${encodeURIComponent(v.presentation)}` : ''}${catalogContextQuery}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="pds-variant-protocol-pill"
@@ -633,7 +643,7 @@ export default function SharedCatalogProductCard({
                 {prod.category}
               </span>
               <a
-                href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
+                href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}${catalogContextQuery}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pds-catalog-monograph-btn"

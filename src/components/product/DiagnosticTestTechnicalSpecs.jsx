@@ -2292,7 +2292,7 @@ export default function DiagnosticTestTechnicalSpecs({
               <div className="dts-action-rationale">
                 <div className="dts-rationale-label">
                   <FileText size={13} color="#0284c7" />
-                  <span>{isEs ? 'Juicio Diagnóstico & Mecanismo Celular' : 'Diagnostic Rationale & Cellular Mechanism'}</span>
+                  <span>{isEs ? 'Fundamento Fisiológico & Mecanismo Celular' : 'Physiological Rationale & Cellular Mechanism'}</span>
                 </div>
                 <p className="dts-rationale-text">
                   {activeRange.clinicalProtocol.clinicalRationale}
@@ -2976,13 +2976,13 @@ export default function DiagnosticTestTechnicalSpecs({
               <div className="dts-showcase-img-wrap">
                 <img 
                   src={kitImage} 
-                  alt={product?.canonicalName || product?.name || 'Bloodo Diagnostic Kit'} 
+                  alt={product?.canonicalName || product?.name || 'Bloodo Biomarker Kit'} 
                   className="dts-showcase-img"
                   loading="lazy"
                 />
               </div>
               <div className="dts-showcase-caption">
-                <strong>{product?.canonicalName || product?.name || 'Bloodo Diagnostic Test'}</strong>
+                <strong>{product?.canonicalName || product?.name || 'Bloodo Biomarker Test'}</strong>
                 <p>
                   {isEs 
                     ? 'Empaque exterior oficial y suministros sellados estériles para toma capilar en domicilio.' 
@@ -2996,7 +2996,7 @@ export default function DiagnosticTestTechnicalSpecs({
               <div className="dts-contents-header">
                 <h5 className="dts-contents-title">
                   <Layers size={16} color="#003666" />
-                  {isEs ? 'Contenido del Kit de Diagnóstico' : 'Diagnostic Kit Included Accessories'}
+                  {isEs ? 'Contenido del Kit de Muestreo' : 'Sampling Kit Included Accessories'}
                 </h5>
                 <span className="dts-contents-badge">
                   {isEs ? 'Suministros Estériles' : 'Sterile Medical Supplies'}

@@ -583,6 +583,43 @@ export default async function SharedCatalogPage({ params }) {
   // Live Firestore linkData takes precedence over JWT token payload
   const catalogMeta = { ...payload, ...linkData, catalogId };
 
+  // Dynamic User Profile Sync: Resolve companyName & latest role/pricingChannel if user exists in Firestore
+  if (adminDb && (catalogMeta.recipientUserId || catalogMeta.recipientEmail || catalogMeta.recipientName === 'Lorenzo')) {
+    try {
+      let liveUser = null;
+      if (catalogMeta.recipientUserId) {
+        const uSnap = await adminDb.collection('users').doc(String(catalogMeta.recipientUserId)).get();
+        if (uSnap.exists) liveUser = uSnap.data();
+      }
+      if (!liveUser && catalogMeta.recipientEmail) {
+        const uQuery = await adminDb.collection('users').where('email', '==', catalogMeta.recipientEmail).limit(1).get();
+        if (!uQuery.empty) liveUser = uQuery.docs[0].data();
+      }
+      if (!liveUser && String(catalogMeta.recipientName || '').toLowerCase() === 'lorenzo') {
+        const uSnap = await adminDb.collection('users').doc('EFQ1QoRxhZOyFotVwgTd2DlVwME2').get();
+        if (uSnap.exists) liveUser = uSnap.data();
+      }
+      if (liveUser) {
+        const resolvedComp = liveUser.companyName || liveUser.institution || liveUser.clinicName || '';
+        if (resolvedComp) {
+          catalogMeta.companyName = resolvedComp;
+          catalogMeta.recipientName = resolvedComp;
+        }
+        if (liveUser.role) {
+          catalogMeta.recipientType = liveUser.role;
+        }
+        const liveChannel = liveUser.pricingChannel || liveUser.priceTier;
+        if (liveChannel) {
+          catalogMeta.priceSource = liveChannel === 'wholesale' ? 'wholeseller' : liveChannel;
+        }
+      }
+    } catch (_) {}
+  }
+
+  if (catalogMeta.title && /bloodo.*diagnostics/i.test(String(catalogMeta.title))) {
+    catalogMeta.title = String(catalogMeta.title).replace(/diagnostics/gi, 'Capillary Biomarkers');
+  }
+
   const priceSource = catalogMeta.priceSource || 'cost';
   const includePrices = catalogMeta.includePrices !== false;
   const currency = catalogMeta.currency || 'USD';
@@ -917,7 +954,7 @@ export default async function SharedCatalogPage({ params }) {
 
     // 3. Diagnostics & Telemetry Benchmarks
     isDiagnostic: true,
-    formulasTitle: 'Diagnostic Panels',
+    formulasTitle: 'Biomarker Panels',
     formulasSubtitle: 'Capillary DBS & dried blood spot tests',
     purityTitle: 'Lab Accreditation',
     purityValue: 'CLIA / CAP',

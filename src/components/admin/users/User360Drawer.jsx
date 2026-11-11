@@ -183,7 +183,7 @@ export default function User360Drawer({
     { id: 'peptides', title: 'Lotusland Peptides', subtitle: 'Sterile Lyophilized Peptide Vials (10R)', label: 'Lotusland Peptides', supplierId: 'supplier-lotusland', catalogueFilter: 'peptides', icon: '🧪' },
     { id: 'ultraperson', title: 'UltraPerson™', subtitle: 'Clinical-Grade Precision Nutraceuticals', label: 'UltraPerson™', supplierId: 'supplier-pharmapolis', catalogueFilter: 'ultraperson', icon: '🌿' },
     { id: 'colway', title: 'Colway® Tropocollagen', subtitle: 'Native Bioactive Transdermal Collagen', label: 'Colway® Tropocollagen', supplierId: 'supplier-colway', catalogueFilter: 'colway', icon: '✨' },
-    { id: 'bloodo', title: 'Bloodo™ Diagnostics', subtitle: 'CE-IVDR Certified Capillary Testing', label: 'Bloodo™ Diagnostics', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
+    { id: 'bloodo', title: 'Bloodo™ Capillary Biomarkers', subtitle: 'CE-IVDR Certified Dried Blood Spot (DBS) Panels', label: 'Bloodo™ Capillary Biomarkers', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
     { id: 'eterna', title: 'ETERNA® Longevity', subtitle: 'Multi-Omics & Epigenetic Aging Clocks', label: 'ETERNA® Longevity', supplierId: 'supplier-eternadx', catalogueFilter: 'eterna', icon: '🧬' },
     { id: 'compounding', title: 'Magenta Compounding', subtitle: 'Lipoderm Transdermals & Compounded APIs', label: 'Magenta Compounding', supplierId: 'supplier-magenta', catalogueFilter: 'compounding', icon: '⚗️' },
     { id: 'all', title: 'Master Portfolio', subtitle: 'All Clinical B2B Product Lines Combined', label: 'Master Portfolio', supplierId: null, catalogueFilter: 'all', icon: '🏛️' }
@@ -191,7 +191,9 @@ export default function User360Drawer({
 
   const handleShareCatalog = async (actionType = 'whatsapp') => {
     const userId = user?.id || user?.uid;
-    const fullName = formData.displayName || 'Doctor / Partner';
+    const companyName = formData.companyName || formData.institution || user?.companyName || user?.institution || user?.clinicName || '';
+    const fullName = companyName || formData.displayName || 'Doctor / Partner';
+    const contactPerson = formData.displayName || companyName || 'Partner';
     const phone = formData.phone || '';
     const email = formData.email || '';
     const isWs = formData.role === 'wholesaler' || formData.role === 'wholeseller' || user?.role === 'wholesaler' || user?.role === 'wholeseller';
@@ -219,6 +221,7 @@ export default function User360Drawer({
           supplierLabel: colConfig.label,
           recipientUserId: userId,
           recipientName: fullName,
+          companyName: companyName,
           recipientPhone: phone,
           recipientEmail: email,
           recipientType: isWs ? 'wholesaler' : (formData.role || 'clinic'),
@@ -243,8 +246,8 @@ export default function User360Drawer({
       // Contextual bilingual message
       const isSpanish = shareLang === 'es';
       const message = isSpanish
-        ? `Hola ${fullName}, le comparto su catálogo oficial de ${colConfig.label} de Atlas Health Services con las condiciones comerciales acordadas (+${effectiveMarkup}%) en ${shareCurrency}:\n\n🔗 ${shortUrl}\n\nQuedo a su disposición para cualquier consulta o pedido.`
-        : `Hello ${fullName}, here is your customized ${colConfig.label} B2B catalog from Atlas Health Services with configured practice margins (+${effectiveMarkup}%) in ${shareCurrency}:\n\n🔗 ${shortUrl}\n\nPlease let me know if you need any adjustments or bulk orders.`;
+        ? `Hola ${contactPerson}${companyName && companyName !== contactPerson ? ` (${companyName})` : ''}, le comparto su catálogo oficial de ${colConfig.label} de Atlas Health Services con las condiciones comerciales acordadas en ${shareCurrency}:\n\n🔗 ${shortUrl}\n\nQuedo a su disposición para cualquier consulta o pedido.`
+        : `Hello ${contactPerson}${companyName && companyName !== contactPerson ? ` (${companyName})` : ''}, here is your customized ${colConfig.label} B2B catalog from Atlas Health Services in ${shareCurrency}:\n\n🔗 ${shortUrl}\n\nPlease let me know if you need any adjustments or bulk orders.`;
 
       if (actionType === 'copy') {
         await navigator.clipboard.writeText(shortUrl);

@@ -56,7 +56,7 @@ export default function SharedCatalogHeader({
   const [showShareDropdown, setShowShareDropdown] = useState(false);
   const [includeFiltersInQr, setIncludeFiltersInQr] = useState(true);
 
-  const rawRecipientName = String(catalogMeta?.recipientName || '')
+  const rawRecipientName = String(catalogMeta?.companyName || catalogMeta?.institution || catalogMeta?.recipientName || '')
     .replace(/\b(?:lotusland|lotus\s*land|nplabs|np\s*labs|nplab|regenpept|psathas|nikolaos|nikolas)\b/gi, '')
     .replace(/\s*[•·\-–]\s*$/g, '')
     .replace(/^\s*[•·\-–]\s*/g, '')
@@ -290,7 +290,7 @@ export default function SharedCatalogHeader({
                 fontSize: '0.66rem',
                 fontWeight: 700
               }}>
-                📦 {products.length} {isBloodoOrDiagnostic ? (products.length === 1 ? 'Diagnostic Panel' : 'Diagnostic Panels') : (products.length === 1 ? 'Formulation' : 'Formulations')} • {totalVariants || products.length} SKUs
+                📦 {products.length} {isBloodoOrDiagnostic ? (products.length === 1 ? 'Biomarker Panel' : 'Biomarker Panels') : (products.length === 1 ? 'Formulation' : 'Formulations')} • {totalVariants || products.length} SKUs
               </span>
             </div>
 
@@ -304,12 +304,15 @@ export default function SharedCatalogHeader({
               lineHeight: 1.2
             }}>
               {catalogMeta?.title && !catalogMeta.title.toLowerCase().includes('wholesale peptide catalog')
-                ? (cleanRecipientName && !catalogMeta.title.includes(cleanRecipientName)
-                    ? `${catalogMeta.title} • ${cleanRecipientName}`
-                    : catalogMeta.title)
+                ? (() => {
+                    const cleanTitle = String(catalogMeta.title).replace(/\bDiagnostics\b/gi, 'Capillary Biomarkers');
+                    return cleanRecipientName && !cleanTitle.includes(cleanRecipientName)
+                      ? `${cleanTitle} • ${cleanRecipientName}`
+                      : cleanTitle;
+                  })()
                 : cleanRecipientName
                   ? (isBloodoOrDiagnostic
-                      ? (isWholesaler ? `Wholesale Diagnostics & Biomarkers • ${cleanRecipientName}` : `Clinical Diagnostics & Biomarkers • ${cleanRecipientName}`)
+                      ? `Bloodo™ Capillary Biomarkers • ${cleanRecipientName}`
                       : isUltraPersonOrNutra
                         ? (isWholesaler ? `Wholesale Precision Nutraceuticals • ${cleanRecipientName}` : `Clinical Precision Nutraceuticals • ${cleanRecipientName}`)
                         : isColway
@@ -320,7 +323,7 @@ export default function SharedCatalogHeader({
                               ? (isWholesaler ? `Wholesale Formulations • ${cleanRecipientName}` : `Curated Formulations Portfolio • ${cleanRecipientName}`)
                               : (isWholesaler ? `Wholesale Peptide Catalog • ${cleanRecipientName}` : `Clinical Peptide Catalog • ${cleanRecipientName}`))
                   : (isBloodoOrDiagnostic
-                      ? (isWholesaler ? 'Bloodo™ Wholesale Diagnostics Portfolio' : 'Clinical Diagnostics & Biomarkers Directory')
+                      ? 'Bloodo™ Capillary Biomarkers & Longevity Panels'
                       : isUltraPersonOrNutra
                         ? 'Clinical Precision Nutraceuticals Portfolio'
                         : isColway
@@ -341,7 +344,7 @@ export default function SharedCatalogHeader({
               maxWidth: '720px'
             }}>
               {isBloodoOrDiagnostic
-                ? 'CE-IVDR & CLIA/CAP certified blood biomarker panels, capillary dried blood spot (DBS) tests & multi-omics telemetry. Verified institutional terms.'
+                ? 'CE-IVDR & ISO 15189 certified capillary dried blood spot (DBS) biomarker panels, cellular bioenergetics & longevity screening. Verified institutional terms.'
                 : isUltraPersonOrNutra
                   ? 'Clinical-grade precision nutraceuticals, standardized botanical bio-actives and therapeutic micronutrient complexes. Verified institutional terms.'
                   : isColway

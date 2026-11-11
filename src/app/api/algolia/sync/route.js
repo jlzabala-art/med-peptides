@@ -207,19 +207,28 @@ export async function POST(request) {
       };
     } else if (indexName === 'atlas_users') {
       const role = record.role || (Array.isArray(record.roles) && record.roles[0]) || 'user';
+      const isApproved = record.approved === true || (record.approved !== false && (record.status === 'active' || record.professionalStatus === 'approved'));
+      const resolvedChannel = record.pricingChannel || record.priceTier || record.pricingTier || (role === 'wholesaler' || role === 'wholeseller' ? 'wholesale' : role === 'doctor' || role === 'clinic' ? 'clinic' : 'retail');
       formattedRecord = {
         objectID: targetId,
         id: targetId,
         name: (record.name || record.fullName || record.displayName || `${record.firstName || ''} ${record.lastName || ''}`).trim() || 'User',
+        displayName: record.displayName || record.fullName || record.name || '',
         email: record.email || '',
         phone: record.phone || record.mobile || record.phoneNumber || '',
         role: role,
         roles: Array.isArray(record.roles) && record.roles.length > 0 ? record.roles : [role],
-        status: (record.status || 'active').toLowerCase(),
+        status: (record.status || (isApproved ? 'active' : 'pending')).toLowerCase(),
+        approved: isApproved,
         companyName: record.companyName || record.institution || '',
+        institution: record.institution || record.companyName || '',
         country: record.country || record.shippingCountry || '',
         city: record.city || record.shippingCity || '',
-        pricingTier: record.pricingTier || 'distributor',
+        pricingChannel: resolvedChannel,
+        priceTier: resolvedChannel,
+        pricingTier: resolvedChannel,
+        zohoContactId: record.zohoContactId || '',
+        zohoBiginContactId: record.zohoBiginContactId || '',
         clinicId: record.clinicId || '',
         clinicIds: record.clinicIds || (record.clinicId ? [record.clinicId] : []),
         createdAt_ts: getTimestamp(record.createdAt || record.updatedAt)

@@ -35,7 +35,7 @@ export default function BloodoClinicalAdvantageCard({ lang = 'en' }) {
       titleEs: 'Toma Directa en Consulta en 3 Minutos',
       highlightEn: 'Zero Phlebotomy Delays',
       highlightEs: 'Cero Pérdida de Adherencia',
-      descEn: 'Physicians or nurses collect validated capillary micro-volumes during the medical consultation, eliminating patient travel to external phlebotomy centers, queues, and diagnostic attrition.',
+      descEn: 'Physicians or nurses collect validated capillary micro-volumes during the medical consultation, eliminating patient travel to external phlebotomy centers, queues, and sampling attrition.',
       descEs: 'El facultativo o personal de enfermería realiza la micro-extracción durante la propia consulta médica, evitando esperas en centros de analítica externos, desplazamientos del paciente y pérdida de adherencia.'
     },
     {
@@ -79,7 +79,7 @@ export default function BloodoClinicalAdvantageCard({ lang = 'en' }) {
       <div className="bca-header">
         <div className="bca-header-badge-row">
           <span className="bca-badge bca-badge-pharma">
-            <ShieldCheck size={13} /> {isEs ? 'INNOVACIÓN DIAGNÓSTICA CE-IVDR' : 'CE-IVDR DIAGNOSTIC INNOVATION'}
+            <ShieldCheck size={13} /> {isEs ? 'INNOVACIÓN EN BIOMARCADORES CE-IVDR' : 'CE-IVDR BIOMARKER INNOVATION'}
           </span>
           <span className="bca-badge bca-badge-teal">
             <Building2 size={13} /> {isEs ? 'MEDICINA DE PRECISIÓN EN CONSULTA' : 'IN-OFFICE PRECISION MEDICINE'}

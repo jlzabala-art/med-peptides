@@ -201,6 +201,25 @@ export default function SharedCatalogClientView({
 
   const catalogId = catalogMeta?.catalogId || 'catalog';
 
+  // Persist active shared catalog context so product detail pages (/p/[slug]) display the exact role price
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const ctx = {
+        catalogId: catalogMeta?.catalogId || '',
+        priceSource: priceSource || catalogMeta?.priceSource || 'wholesaler',
+        recipientType: catalogMeta?.recipientType || '',
+        recipientUserId: catalogMeta?.recipientUserId || '',
+        recipientEmail: catalogMeta?.recipientEmail || '',
+        companyName: catalogMeta?.companyName || catalogMeta?.recipientName || '',
+        priceMarkupPercent: Number(catalogMeta?.priceMarkupPercent || 0),
+        currency: currentCurrency || currency || 'EUR',
+        updatedAt: Date.now()
+      };
+      localStorage.setItem('atlas_shared_catalog_context', JSON.stringify(ctx));
+    } catch (_) {}
+  }, [catalogMeta, priceSource, currentCurrency, currency]);
+
   const shareUrl = React.useMemo(() => {
     if (typeof window === 'undefined') return '';
     const origin = window.location.origin;
