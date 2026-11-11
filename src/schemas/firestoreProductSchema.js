@@ -85,6 +85,55 @@ export const PEN_TYPES = Object.freeze([
 ]);
 
 /**
+ * Canonical pharmaceutical container formats:
+ * - glass_ampoule      : single-use glass ampoule (e.g. Norma Hellas 1 ml)
+ * - lyophilized_vial   : multi-dose borosilicate glass vial with butyl stopper
+ * - prefilled_pen      : disposable prefilled subcutaneous pen
+ * - cartridge_pen      : multi-dose reusable injector cartridge (1.5ml / 3ml)
+ * - topical_gel_pump   : transdermal metered-dose container
+ * - oral_capsule_blister: pharmaceutical blister pack
+ * @readonly
+ */
+export const PHARMA_CONTAINER_TYPES = Object.freeze([
+  'glass_ampoule',
+  'lyophilized_vial',
+  'prefilled_pen',
+  'cartridge_pen',
+  'topical_gel_pump',
+  'oral_capsule_blister',
+]);
+
+/**
+ * Canonical formulation matrices:
+ * - depot_oil_solution : sterile oily solution for slow depot release (e.g. castor oil/sesame oil - NO water reconstitution)
+ * - lyophilized_powder : freeze-dried peptide/protein cake (requires BAC water reconstitution)
+ * - aqueous_solution   : sterile ready-to-inject liquid solution
+ * - transdermal_liposomal : topical absorption matrix
+ * @readonly
+ */
+export const FORMULATION_MATRICES = Object.freeze([
+  'depot_oil_solution',
+  'lyophilized_powder',
+  'aqueous_solution',
+  'transdermal_liposomal',
+]);
+
+/**
+ * Canonical clinical routes of administration:
+ * - deep_intramuscular : intragluteal / vastus lateralis deep injection
+ * - subcutaneous       : abdominal / thigh subcutaneous tissue
+ * - transdermal        : dermal absorption
+ * - oral               : gastrointestinal ingestion
+ * @readonly
+ */
+export const CLINICAL_ROUTES = Object.freeze([
+  'deep_intramuscular',
+  'subcutaneous',
+  'transdermal',
+  'oral',
+]);
+
+/**
  * Canonical pharmaceutical and regulatory grades for APIs and Raw Materials:
  * @readonly
  */
@@ -299,6 +348,11 @@ export const PRODUCT_FIELD_CONTRACT = Object.freeze({
   // ── AI-generated content ──
   aiContent:    { type: 'object',  required: false, default: null },
   pharmacology: { type: 'object',  required: false, default: null },
+
+  // ── Finished Pharmaceuticals, Hormones & Galenic Specifications ──
+  pharmaDetails:      { type: 'object',  required: false, default: null },
+  galenicSpecs:       { type: 'object',  required: false, default: null },
+  clinicalMonitoring: { type: 'object',  required: false, default: null },
 
   // ── Flags ──
   isActive:           { type: 'boolean', required: false, default: true },

@@ -10,6 +10,7 @@ import AestheticInjectableDetail from '../../../components/product/layouts/Aesth
 import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
 import EternaGenomicsDetail from '../../../components/product/layouts/EternaGenomicsDetail';
 import TeletestDiagnosticDetail from '../../../components/product/layouts/TeletestDiagnosticDetail';
+import NormaPharmaceuticalDetail from '../../../components/product/layouts/NormaPharmaceuticalDetail';
 import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
 import { getTeletestProductBySlug } from '../../../data/teletestRegistry';
 import { getLotuslandPeptideBySlug } from '../../../data/lotuslandPeptidesRegistry';
@@ -416,12 +417,23 @@ export async function generateMetadata({ params, searchParams }) {
     (product.name || '').toLowerCase().includes('teletest') ||
     (product.brand || '').toLowerCase().includes('teletest');
 
-  const pageTitle = isTeletest
+  const isNorma = (product.brand || '').toLowerCase().includes('norma') ||
+    (product.supplierId || '').toLowerCase().includes('norma') ||
+    (product.canonicalKey || '').toLowerCase().includes('norma') ||
+    slug.toLowerCase().includes('norma') ||
+    slug.toLowerCase() === 'testosterone-enanthate-norma-250mg' ||
+    slug.toLowerCase() === 'testosterone-enanthate';
+
+  const pageTitle = isNorma
+    ? `${name} | Norma Hellas S.A. • EU GMP Human Pharmaceuticals & TRT`
+    : isTeletest
     ? `${name} | TeleTest Analytika® ISO 17025 Clinical Diagnostics`
     : isEterna
     ? 'ETERNA® DNA & Epigenetic Longevity Test | ETERNA DX · Fagron Genomics'
     : (resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — ${typeSuffix}`);
-  const pageDesc = isTeletest
+  const pageDesc = isNorma
+    ? 'Testosterone Enanthate/Norma® 250 mg/ml oily solution for injection (1 mL ampoule). EOF Greece MA # 45945/03-10-2008. Batch release by EVER Pharma Jena GmbH. Authoritative SmPC and clinical monograph.'
+    : isTeletest
     ? (product.shortDescription || product.description || 'TeleTest Analytika® accredited clinical diagnostics: High-resolution HLA immunogenetics, heavy metal toxicology, and cellular fatty acid profiling. Generalitat de Catalunya E08750211 & ISO 17025 accredited.')
     : isEterna
     ? 'Prueba genética y epigenética de alta resolución a partir de saliva (+700.000 SNPs). Mide edad biológica, 5 pilares de salud y sincronización con wearables (Apple, Garmin, Oura).'
@@ -668,14 +680,41 @@ export default async function PublicProductRoute({ params, searchParams }) {
     (safeProduct.name || '').toLowerCase().includes('teletest') ||
     (safeProduct.brand || '').toLowerCase().includes('teletest');
 
+  const isNorma = (safeProduct.brand || '').toLowerCase().includes('norma') ||
+    (safeProduct.supplierId || '').toLowerCase().includes('norma') ||
+    (safeProduct.canonicalKey || '').toLowerCase().includes('norma') ||
+    slug.toLowerCase().includes('norma') ||
+    slug.toLowerCase() === 'testosterone-enanthate-norma-250mg' ||
+    slug.toLowerCase() === 'testosterone-enanthate';
+
   const productName = safeProduct.canonicalName || safeProduct.name || slug;
-  const sectionLabel = isTeletest ? 'TeleTest Analytika®' : isEterna ? 'Genomics & Longevity' : isCosmetics ? ((safeProduct.brand || '').toLowerCase().includes('mcg') ? 'MCG Trichology' : 'Cosmetics') : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
-  const sectionUrl = isTeletest ? '/collection/teletest' : isEterna ? '/c/CAT-MU9L9GBN' : isCosmetics ? ((safeProduct.brand || '').toLowerCase().includes('mcg') ? '/collection/mcg' : '/collection/colway') : '/catalog';
+  const sectionLabel = isNorma ? 'Human Pharmaceuticals & TRT' : isTeletest ? 'TeleTest Analytika®' : isEterna ? 'Genomics & Longevity' : isCosmetics ? ((safeProduct.brand || '').toLowerCase().includes('mcg') ? 'MCG Trichology' : 'Cosmetics') : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
+  const sectionUrl = isNorma ? '/catalog' : isTeletest ? '/collection/teletest' : isEterna ? '/c/CAT-MU9L9GBN' : isCosmetics ? ((safeProduct.brand || '').toLowerCase().includes('mcg') ? '/collection/mcg' : '/collection/colway') : '/catalog';
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: '/' },
     { name: sectionLabel, url: sectionUrl },
     { name: productName, url: `/p/${slug}` }
   ], BASE_URL);
+
+  if (isNorma) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
+        <NormaPharmaceuticalDetail product={safeProduct} slug={slug} baseUrl={BASE_URL} />
+      </>
+    );
+  }
 
   if (isTeletest) {
     return (

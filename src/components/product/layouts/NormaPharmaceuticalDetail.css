@@ -1,0 +1,214 @@
+/* src/components/product/layouts/NormaPharmaceuticalDetail.css */
+
+.norma-page-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Institutional Sticky Sub-Header */
+.norma-institutional-bar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: sticky;
+  top: 56px;
+  z-index: 30;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.norma-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.norma-badge-gmp {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.norma-badge-rx {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.norma-badge-eof {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+/* Main Content Wrapper */
+.norma-content-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .norma-hero-split {
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+}
+
+/* Hero Presentation Card */
+.norma-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.norma-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+/* Tab Navigation (GCP Style) */
+.norma-tabs-container {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.norma-tab-btn {
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.norma-tab-btn:hover {
+  color: #003666;
+}
+
+.norma-tab-btn.active {
+  color: #003666;
+  border-bottom-color: #003666;
+}
+
+/* Specific Highlight Boxes */
+.norma-alert-box {
+  background-color: #fffbeb;
+  border-left: 4px solid #d97706;
+  padding: 12px 14px;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.80rem;
+  color: #92400e;
+}
+
+.norma-vehicle-box {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 0.80rem;
+  color: #166534;
+}
+
+/* Steps list for ampoule administration */
+.norma-step-card {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.norma-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #003666;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+/* COA Table */
+.norma-coa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.norma-coa-table th {
+  background-color: #f1f5f9;
+  color: #475569;
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 700;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.norma-coa-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.norma-coa-status-pass {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  color: #16a34a;
+  background-color: #f0fdf4;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .norma-content-grid {
+    padding: 1rem;
+    gap: 1.25rem;
+  }
+  .norma-card {
+    padding: 1rem;
+  }
+}
+
