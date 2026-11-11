@@ -98,7 +98,7 @@ jobs:
             --cpu=1 \
             --concurrency=80 \
             --timeout=180 \
-            --update-env-vars="GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }},PORT=8080"
+            --update-env-vars="GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}"
 
       - name: Prepare Firebase Hosting Static CDN Assets
         run: node scripts/prepare-hosting.mjs

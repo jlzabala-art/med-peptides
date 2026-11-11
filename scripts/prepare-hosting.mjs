@@ -68,3 +68,4 @@ function countFiles(dir) {
 
 const totalFiles = countFiles(HOSTING_DIR);
 console.log(`✨ [Prepare Hosting] Static CDN bundle ready: ${totalFiles} files in .hosting_public`);
+
