@@ -65,7 +65,100 @@ export async function GET(request, { params }) {
     // 2. Authorization check (admin bearer / OTP session / legacy during grace period)
     const access = await authorize(request, token, shareDoc);
     if (!access.ok) {
-      return NextResponse.json({ error: 'Unauthorized to view bill PDF' }, { status: 403 });
+      const acceptHeader = request.headers.get('accept') || '';
+      if (acceptHeader.includes('text/html')) {
+        return new NextResponse(
+          `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documento Oficial Protegido · Atlas Health Services</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 36px 28px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+      font-size: 22px;
+    }
+    .pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #1e40af;
+      background: #dbeafe;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 10px 0;
+    }
+    p {
+      font-size: 0.84rem;
+      color: #64748b;
+      line-height: 1.55;
+      margin: 0 0 20px 0;
+    }
+    .footer {
+      font-size: 0.70rem;
+      color: #94a3b8;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🔒</div>
+    <span class="pill">Acceso Restringido · Protected Document</span>
+    <h2>Previsualización Protegida</h2>
+    <p>Para visualizar o descargar este documento en PDF con su desglose fiscal completo, es necesario identificarse o registrarse con la cuenta autorizada del proveedor.</p>
+    <div class="footer">Atlas Health Services · Zoho Books Official Settlement Record</div>
+  </div>
+</body>
+</html>`,
+          {
+            status: 403,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+          }
+        );
+      }
+      return NextResponse.json({
+        error: 'Unauthorized: Registration or sign in required to view bill PDF',
+        message: 'Para consultar o descargar la factura oficial en PDF, identifícate o regístrate con tu correo autorizado.'
+      }, { status: 403 });
     }
 
     // 2b. Ownership: bill must belong to this wholesaler's statement

@@ -97,6 +97,25 @@ export default function BillExpandableDetail({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleScrollToUnlock = () => {
+    const el = document.getElementById('unlock-drawer-box');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const input = el.querySelector('input[type="email"]');
+      if (input) {
+        input.focus();
+        input.style.transition = 'box-shadow 0.2s ease, border-color 0.2s ease';
+        input.style.borderColor = '#003666';
+        input.style.boxShadow = '0 0 0 3px rgba(0, 54, 102, 0.2)';
+        setTimeout(() => {
+          input.style.boxShadow = '';
+        }, 1500);
+      }
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // Debounced product search: Algolia first, graceful fallback to public catalog API
   useEffect(() => {
     if (!productQuery || productQuery.trim().length < 2) {
@@ -399,49 +418,101 @@ export default function BillExpandableDetail({
 
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', paddingTop: '4px' }}>
-            <a
-              href={pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 14px',
-                backgroundColor: '#003666',
-                color: '#ffffff',
-                borderRadius: '6px',
-                fontSize: '0.76rem',
-                fontWeight: 700,
-                textDecoration: 'none',
-                minHeight: '36px'
-              }}
-            >
-              <ExternalLink size={13} />
-              <span>{lang === 'es' ? 'Abrir PDF en Pantalla Completa' : 'Open PDF Full Screen'}</span>
-            </a>
+            {isLocked ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleScrollToUnlock}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 14px',
+                    backgroundColor: '#003666',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    minHeight: '36px'
+                  }}
+                  title={lang === 'es' ? 'Identifícate con tu correo registrado para abrir el PDF oficial' : 'Sign in to access official settlement PDF'}
+                >
+                  <Lock size={12} color="#38bdf8" />
+                  <span>{lang === 'es' ? 'Identificarse para Ver PDF' : 'Sign In to View PDF'}</span>
+                </button>
 
-            <a
-              href={pdfUrl}
-              download={`Bill-${billNum}.pdf`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 14px',
-                backgroundColor: '#ffffff',
-                color: '#334155',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                fontSize: '0.76rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                minHeight: '36px'
-              }}
-            >
-              <Download size={13} />
-              <span>{lang === 'es' ? 'Descargar PDF' : 'Download PDF'}</span>
-            </a>
+                <button
+                  type="button"
+                  onClick={handleScrollToUnlock}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 14px',
+                    backgroundColor: '#f8fafc',
+                    color: '#64748b',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    minHeight: '36px'
+                  }}
+                  title={lang === 'es' ? 'Identifícate con tu correo para descargar el documento' : 'Sign in to download'}
+                >
+                  <Lock size={12} color="#94a3b8" />
+                  <span>{lang === 'es' ? 'Descarga Protegida' : 'Protected Download'}</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 14px',
+                    backgroundColor: '#003666',
+                    color: '#ffffff',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    minHeight: '36px'
+                  }}
+                >
+                  <ExternalLink size={13} />
+                  <span>{lang === 'es' ? 'Abrir PDF en Pantalla Completa' : 'Open PDF Full Screen'}</span>
+                </a>
+
+                <a
+                  href={pdfUrl}
+                  download={`Bill-${billNum}.pdf`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 14px',
+                    backgroundColor: '#ffffff',
+                    color: '#334155',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    minHeight: '36px'
+                  }}
+                >
+                  <Download size={13} />
+                  <span>{lang === 'es' ? 'Descargar PDF' : 'Download PDF'}</span>
+                </a>
+              </>
+            )}
           </div>
         </div>
 
@@ -1170,13 +1241,119 @@ export default function BillExpandableDetail({
           </span>
         </div>
 
-        <div style={{ flex: 1, width: '100%', minHeight: '430px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #cbd5e1', backgroundColor: '#e2e8f0' }}>
-          <iframe
-            src={pdfUrl}
-            title={`PDF Preview ${billNum}`}
-            style={{ width: '100%', height: '100%', minHeight: '430px', border: 'none' }}
-          />
-        </div>
+        {isLocked ? (
+          <div style={{
+            flex: 1,
+            width: '100%',
+            minHeight: '430px',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0',
+            backgroundColor: '#f8fafc',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '32px 24px',
+            textAlign: 'center',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px'
+            }}>
+              <Lock size={24} color="#003666" />
+            </div>
+
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#1e40af',
+              backgroundColor: '#dbeafe',
+              padding: '3px 10px',
+              borderRadius: '12px',
+              marginBottom: '10px',
+              letterSpacing: '0.02em'
+            }}>
+              <ShieldCheck size={11} />
+              <span>{lang === 'es' ? 'Documento Oficial Protegido' : 'Protected Official Document'}</span>
+            </span>
+
+            <h3 style={{
+              fontSize: '1.02rem',
+              fontWeight: 750,
+              color: '#0f172a',
+              margin: '0 0 8px 0'
+            }}>
+              {lang === 'es' ? 'Previsualización Restringida por Seguridad' : 'Official PDF Preview Restricted'}
+            </h3>
+
+            <p style={{
+              fontSize: '0.82rem',
+              color: '#64748b',
+              lineHeight: '1.55',
+              maxWidth: '380px',
+              margin: '0 0 20px 0'
+            }}>
+              {lang === 'es'
+                ? 'El archivo PDF original emitido en Zoho Books incluye datos fiscales y de liquidación comercial confidenciales. Para visualizar o descargar el documento completo, identifícate o regístrate con tu correo autorizado.'
+                : 'The official invoice PDF issued in Zoho Books includes confidential tax and commercial settlement details. To preview or download the complete document, please sign in or register with your authorized partner email.'}
+            </p>
+
+            <button
+              type="button"
+              onClick={handleScrollToUnlock}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 20px',
+                backgroundColor: '#003666',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Lock size={13} color="#38bdf8" />
+              <span>{lang === 'es' ? 'Identificarse para Desbloquear PDF' : 'Sign In to Unlock PDF'}</span>
+            </button>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginTop: '20px',
+              fontSize: '0.68rem',
+              color: '#94a3b8'
+            }}>
+              <span>🔒 256-Bit SSL Protected</span>
+              <span>•</span>
+              <span>Zoho Books Authoritative</span>
+            </div>
+          </div>
+        ) : (
+          <div style={{ flex: 1, width: '100%', minHeight: '430px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #cbd5e1', backgroundColor: '#e2e8f0' }}>
+            <iframe
+              src={pdfUrl}
+              title={`PDF Preview ${billNum}`}
+              style={{ width: '100%', height: '100%', minHeight: '430px', border: 'none' }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
