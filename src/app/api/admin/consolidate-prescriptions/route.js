@@ -132,7 +132,7 @@ export async function POST(request) {
         });
 
         consolidationPlans.push({
-          groupKey,
+          groupKey: key,
           masterCode,
           patientName: group.patientName,
           primaryDocId: primaryDoc.id,
