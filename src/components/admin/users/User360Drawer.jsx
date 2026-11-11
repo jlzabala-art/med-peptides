@@ -52,6 +52,9 @@ export default function User360Drawer({
   const [isSharingLotus, setIsSharingLotus] = useState(false);
   const [lotusMarkup, setLotusMarkup] = useState(15);
   const [selectedCatalogCollection, setSelectedCatalogCollection] = useState('peptides');
+  const [shareCurrency, setShareCurrency] = useState('USD');
+  const [shareLang, setShareLang] = useState('en');
+  const [sharePriceTier, setSharePriceTier] = useState('clinic');
 
   // Form State
   const [formData, setFormData] = useState({
@@ -157,7 +160,22 @@ export default function User360Drawer({
     }
     if (user) {
       const isWs = user.role === 'wholesaler' || user.role === 'wholeseller';
+      const isPt = user.role === 'patient';
       setLotusMarkup(Number(user.customDiscountPct || user.priceMarkupPercent || (isWs ? 15 : 30)));
+
+      // Auto-detect currency from user profile or country/phone
+      const userCurr = user.currency || (user.country === 'ES' || user.country === 'GR' ? 'EUR' : user.country === 'GB' ? 'GBP' : user.country === 'AE' ? 'AED' : user.country === 'SA' ? 'SAR' : 'USD');
+      setShareCurrency(userCurr);
+
+      // Auto-detect language (Spanish if phone has Spanish/LatAm prefix or user.language === 'es')
+      const phone = String(user.phone || user.phoneNumber || '');
+      const isSpanishPhone = phone.startsWith('+34') || phone.startsWith('0034') || phone.startsWith('+52') || phone.startsWith('+54') || phone.startsWith('+57') || phone.startsWith('+56') || phone.startsWith('+51');
+      const userLang = (user.language === 'es' || user.lang === 'es' || user.country === 'ES' || isSpanishPhone) ? 'es' : 'en';
+      setShareLang(userLang);
+
+      // Auto-detect price tier
+      const defaultTier = isWs ? 'wholeseller' : isPt ? 'retail' : 'clinic';
+      setSharePriceTier(user.pricingChannel || user.priceTier || defaultTier);
     }
   }, [activeTab, user]);
 
@@ -167,6 +185,7 @@ export default function User360Drawer({
     { id: 'colway', title: 'Colway® Tropocollagen', subtitle: 'Native Bioactive Transdermal Collagen', label: 'Colway® Tropocollagen', supplierId: 'supplier-colway', catalogueFilter: 'colway', icon: '✨' },
     { id: 'bloodo', title: 'Bloodo™ Diagnostics', subtitle: 'CE-IVDR Certified Capillary Testing', label: 'Bloodo™ Diagnostics', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
     { id: 'eterna', title: 'ETERNA® Longevity', subtitle: 'Multi-Omics & Epigenetic Aging Clocks', label: 'ETERNA® Longevity', supplierId: 'supplier-eternadx', catalogueFilter: 'eterna', icon: '🧬' },
+    { id: 'compounding', title: 'Magenta Compounding', subtitle: 'Lipoderm Transdermals & Compounded APIs', label: 'Magenta Compounding', supplierId: 'supplier-magenta', catalogueFilter: 'compounding', icon: '⚗️' },
     { id: 'all', title: 'Master Portfolio', subtitle: 'All Clinical B2B Product Lines Combined', label: 'Master Portfolio', supplierId: null, catalogueFilter: 'all', icon: '🏛️' }
   ];
 
@@ -203,9 +222,11 @@ export default function User360Drawer({
           recipientPhone: phone,
           recipientEmail: email,
           recipientType: isWs ? 'wholesaler' : (formData.role || 'clinic'),
-          priceSource: isWs ? 'wholeseller' : (formData.pricingChannel || 'clinic'),
+          priceSource: sharePriceTier || (isWs ? 'wholeseller' : 'clinic'),
           priceMarkupPercent: effectiveMarkup,
-          currency: user?.currency || 'USD',
+          currency: shareCurrency || 'USD',
+          lang: shareLang || 'en',
+          language: shareLang || 'en',
           channel: actionType === 'whatsapp' ? 'whatsapp' : 'clipboard',
           sentBy: 'Atlas Commercial Desk'
         })
@@ -214,13 +235,20 @@ export default function User360Drawer({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to generate link');
 
-      const shortUrl = data.shortUrl || data.shareableUrl;
+      const baseShortUrl = data.shortUrl || data.shareableUrl;
+      const separator = baseShortUrl.includes('?') ? '&' : '?';
+      const shortUrl = `${baseShortUrl}${separator}lang=${shareLang}`;
       const cleanPhone = phone.replace(/[^\d]/g, '');
-      const message = `Hello ${fullName}, here is your customized ${colConfig.label} B2B wholesale catalog with configured practice margins (+${effectiveMarkup}%):\n\n🔗 ${shortUrl}\n\nPlease let me know if you need any adjustments or bulk orders.`;
+
+      // Contextual bilingual message
+      const isSpanish = shareLang === 'es';
+      const message = isSpanish
+        ? `Hola ${fullName}, le comparto su catálogo oficial de ${colConfig.label} de Atlas Health Services con las condiciones comerciales acordadas (+${effectiveMarkup}%) en ${shareCurrency}:\n\n🔗 ${shortUrl}\n\nQuedo a su disposición para cualquier consulta o pedido.`
+        : `Hello ${fullName}, here is your customized ${colConfig.label} B2B catalog from Atlas Health Services with configured practice margins (+${effectiveMarkup}%) in ${shareCurrency}:\n\n🔗 ${shortUrl}\n\nPlease let me know if you need any adjustments or bulk orders.`;
 
       if (actionType === 'copy') {
         await navigator.clipboard.writeText(shortUrl);
-        notifier.success(`Catalog link copied (+${effectiveMarkup}% total margin): ${shortUrl}`);
+        notifier.success(`Catalog link copied (+${effectiveMarkup}% margin · ${shareCurrency} · ${shareLang.toUpperCase()}): ${shortUrl}`);
       } else if (actionType === 'whatsapp' && cleanPhone) {
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
         notifier.success(`WhatsApp link generated and opened: ${shortUrl}`);
@@ -888,6 +916,102 @@ export default function User360Drawer({
                 })}
               </div>
 
+              {/* Commercial Issuance Parameters Bar (Google Cloud Standard) */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '10px',
+                padding: '0.75rem 0.95rem',
+                backgroundColor: '#ffffff',
+                border: '1px solid #dadce0',
+                borderRadius: '8px'
+              }}>
+                {/* 1. Price Source / Role Tier */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    Target Role / Price Tier
+                  </label>
+                  <select
+                    value={sharePriceTier}
+                    onChange={(e) => setSharePriceTier(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '32px',
+                      borderRadius: '4px',
+                      border: '1px solid #dadce0',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#202124',
+                      padding: '0 8px',
+                      background: '#ffffff',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="wholeseller">Wholesale B2B (Wholesaler)</option>
+                    <option value="clinic">Doctor / Clinic Formulary</option>
+                    <option value="retail">Patient MSRP (Retail)</option>
+                  </select>
+                </div>
+
+                {/* 2. Target Currency */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    Issuance Currency
+                  </label>
+                  <select
+                    value={shareCurrency}
+                    onChange={(e) => setShareCurrency(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '32px',
+                      borderRadius: '4px',
+                      border: '1px solid #dadce0',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#202124',
+                      padding: '0 8px',
+                      background: '#ffffff',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="USD">USD ($) — Global Standard</option>
+                    <option value="EUR">EUR (€) — Eurozone</option>
+                    <option value="GBP">GBP (£) — United Kingdom</option>
+                    <option value="AED">AED (د.إ) — UAE / GCC</option>
+                    <option value="SAR">SAR (﷼) — Saudi Arabia</option>
+                  </select>
+                </div>
+
+                {/* 3. Target Language */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    Portal & WhatsApp Language
+                  </label>
+                  <select
+                    value={shareLang}
+                    onChange={(e) => setShareLang(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '32px',
+                      borderRadius: '4px',
+                      border: '1px solid #dadce0',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#202124',
+                      padding: '0 8px',
+                      background: '#ffffff',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="es">🇪🇸 Español (es)</option>
+                    <option value="en">🇬🇧 English (en)</option>
+                  </select>
+                </div>
+              </div>
+
               {/* Direct Action Box: Ready Link & 1-Click Sharing (Google Cloud Standard) */}
               <div style={{
                 padding: '0.85rem 1rem',
@@ -902,10 +1026,13 @@ export default function User360Drawer({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '220px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.78rem', color: '#475569' }}>
-                    Active Portfolio: <strong style={{ color: '#0f172a' }}>{CATALOG_COLLECTIONS.find(c => c.id === selectedCatalogCollection)?.title || 'Lotusland Peptides'}</strong>
+                    Active: <strong style={{ color: '#0f172a' }}>{CATALOG_COLLECTIONS.find(c => c.id === selectedCatalogCollection)?.title || 'Lotusland Peptides'}</strong>
                   </span>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#dcfce7', padding: '2px 8px', borderRadius: '4px' }}>
-                    Practice Margin: +{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}%
+                  <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#1d4ed8', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px' }}>
+                    {shareCurrency} · {shareLang.toUpperCase()}
+                  </span>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#dcfce7', border: '1px solid #bbf7d0', padding: '1px 6px', borderRadius: '4px' }}>
+                    +{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}% Margin
                   </span>
                 </div>
 

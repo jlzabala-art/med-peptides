@@ -429,7 +429,15 @@ export function useSharedCatalogState({
   const setSelectedCategory = setSelectedGoal;
 
   // ── Currency & Shipping ───────────────────────────────────────────────────
-  const [currentCurrency,    setCurrentCurrency]    = useState(currency || 'USD');
+  const [currentCurrency,    setCurrentCurrency]    = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlCur = new URLSearchParams(window.location.search).get('cur') || new URLSearchParams(window.location.search).get('currency');
+      if (urlCur && ['USD', 'EUR', 'GBP', 'AED', 'SAR'].includes(urlCur.toUpperCase())) {
+        return urlCur.toUpperCase();
+      }
+    }
+    return currency || catalogMeta?.currency || 'USD';
+  });
   const [selectedShipping,   setSelectedShipping]   = useState('eu');
 
   // ── UI toggles ────────────────────────────────────────────────────────────
@@ -504,8 +512,17 @@ export function useSharedCatalogState({
   }, [cart, catalogId]);
 
   // ── FX & Shipping ─────────────────────────────────────────────────────────
-  const fxMultiplier   = currentCurrency === 'EUR' ? 0.92 : currentCurrency === 'AED' ? 3.6725 : 1;
-  const currencySymbol = currentCurrency === 'EUR' ? '€' : currentCurrency === 'AED' ? 'AED ' : '$';
+  const fxMultiplier = 
+    currentCurrency === 'EUR' ? 0.92 :
+    currentCurrency === 'GBP' ? 0.79 :
+    currentCurrency === 'AED' ? 3.6725 :
+    currentCurrency === 'SAR' ? 3.75 : 1;
+
+  const currencySymbol = 
+    currentCurrency === 'EUR' ? '€' :
+    currentCurrency === 'GBP' ? '£' :
+    currentCurrency === 'AED' ? 'AED ' :
+    currentCurrency === 'SAR' ? 'SAR ' : '$';
 
   const activeShipping = useMemo(
     () => SHIPPING_DESTINATIONS.find(s => s.id === selectedShipping) || SHIPPING_DESTINATIONS[0],
@@ -514,7 +531,9 @@ export function useSharedCatalogState({
 
   const shippingCost = useMemo(
     () => currentCurrency === 'EUR' ? activeShipping.costEUR
+        : currentCurrency === 'GBP' ? Math.round(activeShipping.costUSD * 0.79)
         : currentCurrency === 'AED' ? (activeShipping.costAED || Math.round(activeShipping.costUSD * 3.6725))
+        : currentCurrency === 'SAR' ? Math.round(activeShipping.costUSD * 3.75)
         : activeShipping.costUSD,
     [activeShipping, currentCurrency]
   );

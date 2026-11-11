@@ -208,8 +208,23 @@ export default function SharedCatalogClientView({
     return `${origin}${cleanPath}`;
   }, [catalogMeta?.catalogId]);
 
-  // ── Language toggle (EN by default, ES optional) ──────────────────────────
-  const [lang, setLang] = React.useState(getPersistedLang);
+  // ── Language toggle (URL ?lang= first priority, then catalogMeta.lang, then persisted) ──
+  const [lang, setLang] = React.useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get('lang') || urlParams.get('l');
+      if (urlLang && SUPPORTED_LANGS.includes(urlLang.toLowerCase())) {
+        return urlLang.toLowerCase();
+      }
+    }
+    if (catalogMeta?.lang && SUPPORTED_LANGS.includes(String(catalogMeta.lang).toLowerCase())) {
+      return String(catalogMeta.lang).toLowerCase();
+    }
+    if (catalogMeta?.language && SUPPORTED_LANGS.includes(String(catalogMeta.language).toLowerCase())) {
+      return String(catalogMeta.language).toLowerCase();
+    }
+    return getPersistedLang();
+  });
   const t = buildTranslator(lang);
   const handleLangToggle = (newLang) => {
     setLang(newLang);
