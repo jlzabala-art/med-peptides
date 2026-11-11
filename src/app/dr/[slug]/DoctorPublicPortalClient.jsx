@@ -743,6 +743,12 @@ export default function DoctorPublicPortalClient({
     setLastRefreshed(new Date());
   }, []);
 
+  const handleRefresh = useCallback(() => {
+    triggerHaptic('light');
+    setLastRefreshed(new Date());
+    toast.success('Synchronized with medical record registry');
+  }, []);
+
   // UI Actions State
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedIntake, setCopiedIntake] = useState(false);
@@ -7259,7 +7265,7 @@ export default function DoctorPublicPortalClient({
               handleOpenHandout={handleOpenHandout}
               handleReprescribeFormula={handleReprescribeFormula}
               handleContactAtlasWhatsApp={handleContactAtlasWhatsApp}
-              handleOpenLabelsModal={(rx) => setLabelsModalRx(rx)}
+              handleOpenLabelsModal={handleOpenLabelsModal}
               toast={toast}
             />
           )}
@@ -7946,7 +7952,7 @@ export default function DoctorPublicPortalClient({
         onClose={() => setIsAtlasAiOpen(false)}
         doctor={doctor}
         prescriptions={filteredPrescriptions}
-        tasks={actionQueueTasks}
+        tasks={filteredTasks}
         aiUsesRemaining={aiUsesRemaining}
         isAuthorizedViewer={isAuthorizedViewer}
         onDecrementUses={() => setAiUsesRemaining(prev => Math.max(0, prev - 1))}
@@ -7991,17 +7997,14 @@ export default function DoctorPublicPortalClient({
 
       {/* ── GCP Resource Inspector Drawer (Golden Rule #4: Master-Detail) (Modularized) ── */}
       <DoctorResourceInspectorDrawer
-        selectedInspectorItem={isInspectorDrawerOpen ? selectedInspectorItem : null}
-        onClose={() => {
-          setIsInspectorDrawerOpen(false);
-          setSelectedInspectorItem(null);
-        }}
+        selectedInspectorItem={selectedInspectorItem}
+        onClose={() => setSelectedInspectorItem(null)}
         doctor={doctor}
         isAuthorizedViewer={isAuthorizedViewer}
         opaqueCode={opaqueCode}
         signingTaskId={signingTaskId}
         onSignOffPrescription={handleSignOffPrescription}
-        onOpenLabelsModal={(rx) => setLabelsModalRx(rx)}
+        onOpenLabelsModal={handleOpenLabelsModal}
         onShareProposalWhatsApp={handleShareProposalWhatsApp}
         onCopyProposalLink={handleCopyProposalLink}
       />

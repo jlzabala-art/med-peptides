@@ -887,19 +887,20 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
                 fontSize: '0.80rem',
                 fontWeight: 700,
                 background: '#ffffff',
-                border: '1.5px solid #dadce0',
+                border: '1.5px solid #1a73e8',
                 borderRadius: '6px',
-                color: '#1e293b',
+                color: '#1a73e8',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '4px',
-                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+                gap: '5px',
+                boxShadow: '0 1px 2px rgba(26,115,232,0.08)',
+                transition: 'all 0.15s ease'
               }}
             >
               <Plus size={14} />
-              <span>+ 1 Vial</span>
+              <span>1 Vial</span>
             </button>
           )}
         </div>
@@ -1394,7 +1395,7 @@ export default function PeptidesPriceListClient({
               const snapshot = data.item.priceSnapshot;
               let hasDrift = false;
               for (const [prodId, snapVal] of Object.entries(snapshot)) {
-                const currentProd = (products || []).find(p => p.id === prodId || p.sku === prodId);
+                const currentProd = (initialProducts || []).find(p => p.id === prodId || p.sku === prodId);
                 if (currentProd) {
                   const currentPrice = currentProd.retail_price || currentProd.price || currentProd.calculatedPrice;
                   if (currentPrice && snapVal && Math.abs(currentPrice - snapVal) > 0.05) {
@@ -3542,18 +3543,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   borderRadius: '6px',
                   border: '1px solid #dadce0',
                   background: '#ffffff',
-                  color: '#003666',
+                  color: '#3c4043',
                   fontSize: '0.80rem',
                   fontWeight: 650,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.08)'
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                  transition: 'background 0.15s ease'
                 }}
                 title={isEs ? 'Consultar información técnica o solicitud B2B' : 'Institutional Inquiry & Support'}
               >
-                <Mail size={14} color="#003666" />
+                <Mail size={14} color="#5f6368" />
                 <span>{isEs ? 'Consultar' : 'Inquire'}</span>
               </button>
 
@@ -3566,18 +3568,19 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   borderRadius: '6px',
                   border: '1px solid #dadce0',
                   background: '#ffffff',
-                  color: '#003666',
+                  color: '#3c4043',
                   fontSize: '0.80rem',
                   fontWeight: 650,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.08)'
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                  transition: 'background 0.15s ease'
                 }}
                 title={isEs ? 'Previsualizar y exportar tarifa oficial PDF' : 'Preview and export official PDF price schedule'}
               >
-                <Eye size={14} color="#003666" />
+                <Eye size={14} color="#5f6368" />
                 <span>{isEs ? 'PDF' : 'PDF Schedule'}</span>
               </button>
 
@@ -3588,20 +3591,21 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   height: '34px',
                   padding: '0 12px',
                   borderRadius: '6px',
-                  border: '1px solid #1a73e8',
-                  background: '#1a73e8',
-                  color: '#ffffff',
+                  border: copied ? '1px solid #1a73e8' : '1px solid #dadce0',
+                  background: copied ? '#e8f0fe' : '#ffffff',
+                  color: copied ? '#1a73e8' : '#3c4043',
                   fontSize: '0.80rem',
                   fontWeight: 650,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 1px 2px rgba(26,115,232,0.3)'
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                  transition: 'all 0.15s ease'
                 }}
                 title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
               >
-                {copied ? <Check size={14} color="#ffffff" /> : <Share2 size={14} color="#ffffff" />}
+                {copied ? <Check size={14} color="#1a73e8" /> : <Share2 size={14} color="#5f6368" />}
                 <span>{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
               </button>
             </div>
@@ -4119,7 +4123,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 <div
                   className="peptides-kpi-card"
                   onClick={() => {
-                    if (totalCartCount > 0) setIsReviewDrawerOpen(true);
+                    if (totalCartCount > 0) setIsOrderDrawerOpen(true);
                   }}
                   title={totalCartCount > 0 ? (isEs ? 'Clic para revisar proforma' : 'Click to review proforma') : ''}
                   style={{
@@ -5704,90 +5708,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
         </aside>
       )}
 
-      {/* ── Mobile Sticky Bar when Cart is Empty (Google Cloud Console UX) ── */}
-      {totalCartCount === 0 && (
-        <aside
-          className="gcp-mobile-empty-cart-dock mobile-only-sticky-bar"
-          style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 890,
-            background: '#ffffff',
-            borderTop: '1px solid #dadce0',
-            boxShadow: '0 -2px 10px rgba(60, 64, 67, 0.10)',
-            padding: '8px 14px',
-            display: 'none',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            backdropFilter: 'blur(8px)',
-            backgroundColor: 'rgba(255, 255, 255, 0.98)'
-          }}
-          aria-label="Mobile Navigation Dock"
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{
-              background: '#f1f3f4',
-              color: '#3c4043',
-              fontSize: '0.74rem',
-              fontWeight: 750,
-              padding: '4px 10px',
-              borderRadius: '16px',
-              border: '1px solid #dadce0',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}>
-              <span>🔬</span>
-              <span>{filteredProducts?.length || 109} {isEs ? 'Formulaciones' : 'Formulations'}</span>
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={() => setIsPdfPreviewOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                background: '#f8fafc',
-                color: '#3c4043',
-                border: '1px solid #dadce0',
-                borderRadius: '6px',
-                padding: '6px 10px',
-                fontSize: '0.74rem',
-                fontWeight: 650,
-                cursor: 'pointer'
-              }}
-            >
-              <Eye size={12} color="#5f6368" />
-              <span>PDF</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsAtlasAiOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: '#1a73e8',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                fontSize: '0.76rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 1px 4px rgba(26, 115, 232, 0.3)'
-              }}
-            >
-              <Sparkles size={13} />
-              <span>Atlas AI</span>
-            </button>
-          </div>
-        </aside>
-      )}
+
 
       {/* ── Official Printable Proforma Document (@media print) ── */}
       <div className="peptides-printable-proforma" style={{ display: 'none' }}>
