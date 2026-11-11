@@ -162,12 +162,12 @@ export default function User360Drawer({
   }, [activeTab, user]);
 
   const CATALOG_COLLECTIONS = [
-    { id: 'peptides', title: 'Lotusland Peptides', subtitle: 'Péptidos Liofilizados en Vial', label: 'Lotusland Peptides', supplierId: 'supplier-lotusland', catalogueFilter: 'peptides', icon: '🧪' },
-    { id: 'ultraperson', title: 'UltraPerson™', subtitle: 'Nutracéuticos de Precisión Clínica', label: 'UltraPerson™', supplierId: 'supplier-pharmapolis', catalogueFilter: 'ultraperson', icon: '🌿' },
-    { id: 'colway', title: 'Colway® Tropocollagen', subtitle: 'Colágeno Bioactivo Nativo', label: 'Colway® Tropocollagen', supplierId: 'supplier-colway', catalogueFilter: 'colway', icon: '✨' },
-    { id: 'bloodo', title: 'Bloodo™ Diagnostics', subtitle: 'Pruebas Capilares CE-IVDR', label: 'Bloodo™ Diagnostics', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
-    { id: 'eterna', title: 'ETERNA® Longevity', subtitle: 'Multi-Ómica y Reloj Epigenético', label: 'ETERNA® Longevity', supplierId: 'supplier-eternadx', catalogueFilter: 'eterna', icon: '🧬' },
-    { id: 'all', title: 'Master Portfolio', subtitle: 'Todas las Líneas Clínicas B2B', label: 'Master Portfolio', supplierId: null, catalogueFilter: 'all', icon: '🏛️' }
+    { id: 'peptides', title: 'Lotusland Peptides', subtitle: 'Sterile Lyophilized Peptide Vials (10R)', label: 'Lotusland Peptides', supplierId: 'supplier-lotusland', catalogueFilter: 'peptides', icon: '🧪' },
+    { id: 'ultraperson', title: 'UltraPerson™', subtitle: 'Clinical-Grade Precision Nutraceuticals', label: 'UltraPerson™', supplierId: 'supplier-pharmapolis', catalogueFilter: 'ultraperson', icon: '🌿' },
+    { id: 'colway', title: 'Colway® Tropocollagen', subtitle: 'Native Bioactive Transdermal Collagen', label: 'Colway® Tropocollagen', supplierId: 'supplier-colway', catalogueFilter: 'colway', icon: '✨' },
+    { id: 'bloodo', title: 'Bloodo™ Diagnostics', subtitle: 'CE-IVDR Certified Capillary Testing', label: 'Bloodo™ Diagnostics', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
+    { id: 'eterna', title: 'ETERNA® Longevity', subtitle: 'Multi-Omics & Epigenetic Aging Clocks', label: 'ETERNA® Longevity', supplierId: 'supplier-eternadx', catalogueFilter: 'eterna', icon: '🧬' },
+    { id: 'all', title: 'Master Portfolio', subtitle: 'All Clinical B2B Product Lines Combined', label: 'Master Portfolio', supplierId: null, catalogueFilter: 'all', icon: '🏛️' }
   ];
 
   const handleShareCatalog = async (actionType = 'whatsapp') => {
@@ -324,10 +324,10 @@ export default function User360Drawer({
               cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
-            title={`Iniciar sesión como ${formData.displayName || 'este usuario'} para ver la plataforma tal y como la ve él`}
+            title={`Sign in as ${formData.displayName || 'this user'} to inspect the portal exactly as seen by them`}
           >
             <Eye size={13} color="#64748b" />
-            <span>Ver portal como {formData.displayName?.split(' ')[0] || 'usuario'}</span>
+            <span>View Portal as {formData.displayName?.split(' ')[0] || 'User'}</span>
           </button>
         )
       }
@@ -348,7 +348,7 @@ export default function User360Drawer({
                 cursor: 'pointer'
               }}
             >
-              Cerrar Panel
+              Close
             </button>
           </div>
         ) : (
@@ -821,14 +821,14 @@ export default function User360Drawer({
               <div>
                 <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <MessageSquare size={16} color="#1a73e8" />
-                  <span>Seleccionar Catálogo B2B para Compartir</span>
+                  <span>Select B2B Catalog to Share</span>
                 </div>
                 <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '0.2rem' }}>
-                  Elige la línea comercial que deseas enviar a <strong>{formData.displayName || 'este usuario'}</strong> con atribución y margen automático.
+                  Choose the commercial line to share with <strong>{formData.displayName || 'this partner'}</strong> with automatic referral attribution and configured practice margin.
                 </div>
               </div>
 
-              {/* Multi-Catalog Cards Grid (2 lines per card, no truncation) */}
+              {/* Multi-Catalog Cards Grid (Google Cloud Card Grid Standard) */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '8px' }}>
                 {CATALOG_COLLECTIONS.map(col => {
                   const isSelected = selectedCatalogCollection === col.id;
@@ -838,7 +838,7 @@ export default function User360Drawer({
                       type="button"
                       onClick={() => setSelectedCatalogCollection(col.id)}
                       style={{
-                        padding: '0.7rem 0.85rem',
+                        padding: '0.75rem 0.85rem',
                         borderRadius: '8px',
                         cursor: 'pointer',
                         display: 'flex',
@@ -848,24 +848,42 @@ export default function User360Drawer({
                         backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
                         transition: 'all 0.15s ease',
                         textAlign: 'left',
+                        position: 'relative',
                         boxShadow: isSelected ? '0 1px 4px rgba(26,115,232,0.15)' : 'none'
                       }}
                     >
                       <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>{col.icon}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ flex: 1, minWidth: 0, paddingRight: isSelected ? '18px' : '0' }}>
                         <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isSelected ? '#1d4ed8' : '#0f172a' }}>
                           {col.title}
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: isSelected ? '#3b82f6' : '#64748b', marginTop: '2px', lineHeight: 1.25 }}>
+                        <div style={{ fontSize: '0.72rem', color: isSelected ? '#2563eb' : '#64748b', marginTop: '2px', lineHeight: 1.25 }}>
                           {col.subtitle}
                         </div>
                       </div>
+                      {isSelected && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          backgroundColor: '#1a73e8',
+                          color: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Check size={11} strokeWidth={3} />
+                        </div>
+                      )}
                     </button>
                   );
                 })}
               </div>
 
-              {/* Direct Action Box: Ready Link & 1-Click Sharing */}
+              {/* Direct Action Box: Ready Link & 1-Click Sharing (Google Cloud Standard) */}
               <div style={{
                 padding: '0.85rem 1rem',
                 backgroundColor: '#f8fafc',
@@ -879,10 +897,10 @@ export default function User360Drawer({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '220px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.78rem', color: '#475569' }}>
-                    Línea activa: <strong style={{ color: '#0f172a' }}>{CATALOG_COLLECTIONS.find(c => c.id === selectedCatalogCollection)?.title || 'Lotusland Peptides'}</strong>
+                    Active Portfolio: <strong style={{ color: '#0f172a' }}>{CATALOG_COLLECTIONS.find(c => c.id === selectedCatalogCollection)?.title || 'Lotusland Peptides'}</strong>
                   </span>
                   <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#dcfce7', padding: '2px 8px', borderRadius: '4px' }}>
-                    Margen: +{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}%
+                    Practice Margin: +{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}%
                   </span>
                 </div>
 
@@ -907,7 +925,7 @@ export default function User360Drawer({
                     }}
                   >
                     <Copy size={14} />
-                    <span>{isSharingLotus ? 'Generando...' : 'Copiar Enlace'}</span>
+                    <span>{isSharingLotus ? 'Generating...' : 'Copy Shareable Link'}</span>
                   </button>
 
                   <button
@@ -930,7 +948,7 @@ export default function User360Drawer({
                     }}
                   >
                     <Send size={14} />
-                    <span>{isSharingLotus ? 'Generando...' : 'Enviar por WhatsApp'}</span>
+                    <span>{isSharingLotus ? 'Generating...' : 'Send via WhatsApp'}</span>
                   </button>
                 </div>
               </div>
