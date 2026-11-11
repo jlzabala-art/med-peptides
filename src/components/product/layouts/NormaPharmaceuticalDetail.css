@@ -93,7 +93,7 @@
 /* Tab Navigation (GCP Style) */
 .norma-tabs-container {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   border-bottom: 2px solid #e2e8f0;
   overflow-x: auto;
   padding-bottom: 2px;
@@ -101,7 +101,7 @@
 }
 
 .norma-tab-btn {
-  padding: 10px 16px;
+  padding: 10px 14px;
   font-size: 0.82rem;
   font-weight: 700;
   color: #64748b;
@@ -112,7 +112,7 @@
   white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   transition: all 0.15s ease;
 }
 
@@ -142,6 +142,39 @@
   padding: 14px;
   font-size: 0.80rem;
   color: #166534;
+}
+
+/* Clinical Pillars Grid */
+.norma-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.norma-pillar-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.norma-pillar-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 54, 102, 0.06);
+}
+
+/* Protocol Comparison Table */
+.norma-protocol-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  background-color: #ffffff;
+}
+
+.norma-protocol-card.highlight {
+  border-color: #0284c7;
+  background-color: #f0f9ff;
 }
 
 /* Steps list for ampoule administration */
@@ -211,4 +244,3 @@
     padding: 1rem;
   }
 }
-

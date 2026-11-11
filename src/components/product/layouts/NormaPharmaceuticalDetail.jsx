@@ -24,6 +24,15 @@ import {
   ChevronRight,
   HeartPulse,
   Syringe,
+  Brain,
+  TrendingUp,
+  Zap,
+  Flame,
+  Scale,
+  Microscope,
+  Dna,
+  Sparkles,
+  FlaskConical,
   X
 } from '@/lib/icons';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -39,12 +48,12 @@ export default function NormaPharmaceuticalDetail({
   slug = 'testosterone-enanthate-norma-250mg',
   baseUrl = 'https://www.atlashealth-services.com'
 }) {
-  const [lang, setLang] = useState('es');
-  const [activeTab, setActiveTab] = useState('smpc'); // 'smpc' | 'administration' | 'coa' | 'monitoring' | 'b2b'
+  // English by default as explicitly requested by user
+  const [lang, setLang] = useState('en');
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'protocols' | 'administration' | 'coa' | 'monitoring' | 'b2b'
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isDoctorUnlocked, setIsDoctorUnlocked] = useState(false);
-  const [isCoaModalOpen, setIsCoaModalOpen] = useState(false);
 
   const isEs = lang === 'es';
 
@@ -99,7 +108,7 @@ export default function NormaPharmaceuticalDetail({
           </span>
 
           <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
-            ATC: <strong style={{ color: '#003666' }}>G03BA03</strong> (Androgens)
+            ATC: <strong style={{ color: '#003666' }}>G03BA03</strong> (Androgens, 3-oxoandrosten)
           </span>
         </div>
 
@@ -107,24 +116,10 @@ export default function NormaPharmaceuticalDetail({
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ display: 'flex', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
             <button
-              onClick={() => setLang('es')}
-              style={{
-                padding: '4px 8px',
-                fontSize: '0.70rem',
-                fontWeight: 700,
-                border: 'none',
-                backgroundColor: lang === 'es' ? '#003666' : '#ffffff',
-                color: lang === 'es' ? '#ffffff' : '#64748b',
-                cursor: 'pointer'
-              }}
-            >
-              ES
-            </button>
-            <button
               onClick={() => setLang('en')}
               style={{
-                padding: '4px 8px',
-                fontSize: '0.70rem',
+                padding: '4px 10px',
+                fontSize: '0.72rem',
                 fontWeight: 700,
                 border: 'none',
                 backgroundColor: lang === 'en' ? '#003666' : '#ffffff',
@@ -133,6 +128,20 @@ export default function NormaPharmaceuticalDetail({
               }}
             >
               EN
+            </button>
+            <button
+              onClick={() => setLang('es')}
+              style={{
+                padding: '4px 10px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                border: 'none',
+                backgroundColor: lang === 'es' ? '#003666' : '#ffffff',
+                color: lang === 'es' ? '#ffffff' : '#64748b',
+                cursor: 'pointer'
+              }}
+            >
+              ES
             </button>
           </div>
 
@@ -187,7 +196,8 @@ export default function NormaPharmaceuticalDetail({
                 color: '#166534',
                 backgroundColor: '#dcfce7',
                 padding: '3px 8px',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                border: '1px solid #bbf7d0'
               }}>
                 100% ORIGINAL EU PHARMA
               </div>
@@ -217,7 +227,7 @@ export default function NormaPharmaceuticalDetail({
                 <div style={{ display: 'none', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                   <Package size={64} color="#003666" />
                   <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#003666' }}>
-                    Norma Hellas S.A. • 1 ml Ampoule
+                    Norma Hellas S.A. • 1 mL Amber Ampoule
                   </span>
                 </div>
               </div>
@@ -226,30 +236,30 @@ export default function NormaPharmaceuticalDetail({
               <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', textAlign: 'left', fontSize: '0.76rem' }}>
                 <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px' }}>
                   <div style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 600 }}>
-                    {isEs ? 'DOSIFICACIÓN' : 'STRENGTH'}
+                    {isEs ? 'DOSIFICACIÓN' : 'ESTABLISHED DOSE'}
                   </div>
                   <div style={{ fontWeight: 800, color: '#0f172a' }}>250 mg / 1 mL</div>
                 </div>
 
                 <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px' }}>
                   <div style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 600 }}>
-                    {isEs ? 'TESTOSTERONA PURA' : 'FREE TESTOSTERONE'}
+                    {isEs ? 'BASE ACTIVA PURA' : 'ACTIVE BASE EQUIV.'}
                   </div>
-                  <div style={{ fontWeight: 800, color: '#003666' }}>~180 mg Base</div>
+                  <div style={{ fontWeight: 800, color: '#003666' }}>~180 mg Testosterone</div>
                 </div>
 
                 <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px' }}>
                   <div style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 600 }}>
-                    {isEs ? 'ENVASE GALÉNICO' : 'PACKAGING'}
+                    {isEs ? 'ENVASE GALÉNICO' : 'GALENIC CONTAINER'}
                   </div>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>Ampolla Vidrio Ámbar Tipo I</div>
+                  <div style={{ fontWeight: 700, color: '#0f172a' }}>Type I Amber Glass Ampoule</div>
                 </div>
 
                 <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px' }}>
                   <div style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 600 }}>
-                    {isEs ? 'VÍA DE APLICACIÓN' : 'ROUTE'}
+                    {isEs ? 'VÍA DE APLICACIÓN' : 'CLINICAL ROUTE'}
                   </div>
-                  <div style={{ fontWeight: 700, color: '#991b1b' }}>I.M. Profunda (Glúteo)</div>
+                  <div style={{ fontWeight: 700, color: '#991b1b' }}>Deep Intramuscular (I.M.)</div>
                 </div>
               </div>
 
@@ -297,7 +307,7 @@ export default function NormaPharmaceuticalDetail({
                   }}
                 >
                   <Download size={14} />
-                  <span>{isEs ? 'Descargar Ficha Analítica / COA (PDF)' : 'Download Analytical COA (PDF)'}</span>
+                  <span>{isEs ? 'Descargar Ficha Analítica / COA (PDF)' : 'Download Certified Batch COA (PDF)'}</span>
                 </button>
               </div>
             </div>
@@ -306,12 +316,12 @@ export default function NormaPharmaceuticalDetail({
             <div className="norma-card" style={{ borderLeft: '4px solid #0284c7' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#0369a1', fontSize: '0.84rem' }}>
                 <Thermometer size={16} />
-                <span>{isEs ? 'Condiciones de Conservación Oficial' : 'Official Storage Conditions'}</span>
+                <span>{isEs ? 'Condiciones de Conservación Oficial' : 'Authoritative Storage Guidelines'}</span>
               </div>
               <p style={{ fontSize: '0.78rem', color: '#475569', marginTop: '6px', lineHeight: '1.45' }}>
                 {isEs
                   ? 'Conservar por debajo de 25°C en su envase original para protegerlo de la luz. NO CONGELAR NI REFRIGERAR (las bajas temperaturas pueden precipitar cristales en el vehículo de aceite de ricino).'
-                  : 'Store below 25°C in the original carton to protect from light. DO NOT REFRIGERATE OR FREEZE (low temperatures may cause crystal precipitation in the castor oil vehicle).'}
+                  : 'Store below 25°C in the original carton to protect from light. DO NOT REFRIGERATE OR FREEZE (cold temperatures induce crystallization within the Castor Oil depot matrix).'}
               </p>
             </div>
           </div>
@@ -328,14 +338,14 @@ export default function NormaPharmaceuticalDetail({
                 <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Athens, Greece</span>
               </div>
 
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', margin: '0 0 8px 0' }}>
+              <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', margin: '0 0 8px 0' }}>
                 Testosterone Enanthate/Norma® 250 mg/ml
               </h1>
 
-              <p style={{ fontSize: '0.90rem', color: '#475569', lineHeight: '1.5', margin: 0 }}>
+              <p style={{ fontSize: '0.92rem', color: '#475569', lineHeight: '1.5', margin: 0 }}>
                 {isEs
                   ? 'Solución oleosa estéril inyectable para terapia de sustitución androgénica masculina (TRT). Formulación de depósito de liberación prolongada en ampolla de vidrio ámbar de 1 ml.'
-                  : 'Sterile oily solution for male androgen replacement therapy (TRT). Slow-release depot formulation supplied in 1 mL Type I amber glass ampoules.'}
+                  : 'Sterile depot oily solution for adult male androgen replacement therapy (TRT). Long-acting ester formulation engineered for sustained physiological testosterone release via deep intramuscular injection.'}
               </p>
             </div>
 
@@ -343,12 +353,12 @@ export default function NormaPharmaceuticalDetail({
             <div className="norma-vehicle-box">
               <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                 <Droplets size={16} />
-                <span>{isEs ? 'Vehículo Oleoso Depot — Listo para Inyección (Sin Reconstitución)' : 'Depot Oil Vehicle — Ready to Inject (No Reconstitution)'}</span>
+                <span>{isEs ? 'Vehículo Oleoso Depot — Listo para Inyección (Sin Reconstitución)' : 'Sterile Depot Oil Matrix — Ready to Inject (Zero Reconstitution Required)'}</span>
               </div>
-              <div style={{ fontSize: '0.76rem', lineHeight: '1.45' }}>
+              <div style={{ fontSize: '0.78rem', lineHeight: '1.45' }}>
                 {isEs
                   ? 'A diferencia de los péptidos liofilizados, este medicamento ya está formulado en una matriz estéril de Aceite de Ricino (Oleum Ricini, 439.6 mg) y Benzoato de Bencilo (342.0 mg). NUNCA debe mezclarse con agua bacteriostática ni diluirse.'
-                  : 'Unlike lyophilized peptides, this drug is pre-formulated in a sterile depot vehicle of Castor Oil (Oleum Ricini, 439.6 mg) and Benzyl Benzoate (342.0 mg). NEVER reconstitute with bacteriostatic water or dilute.'}
+                  : 'Unlike lyophilized peptides, this finished pharmaceutical is pre-solubilized in an authoritative pharmacopoeial depot vehicle of Castor Oil (Oleum Ricini, 439.6 mg) and Benzyl Benzoate (342.0 mg). STRICTLY DO NOT reconstitute with bacteriostatic water or aqueous diluents.'}
               </div>
             </div>
 
@@ -356,11 +366,19 @@ export default function NormaPharmaceuticalDetail({
             <div>
               <div className="norma-tabs-container">
                 <button
-                  onClick={() => setActiveTab('smpc')}
-                  className={`norma-tab-btn ${activeTab === 'smpc' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('overview')}
+                  className={`norma-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
                 >
-                  <FileText size={15} />
-                  <span>{isEs ? 'Ficha Técnica SmPC' : 'SmPC Monograph'}</span>
+                  <Sparkles size={15} />
+                  <span>{isEs ? 'Mecanismo & Impacto Clínico' : 'Mechanism & Clinical Impact'}</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('protocols')}
+                  className={`norma-tab-btn ${activeTab === 'protocols' ? 'active' : ''}`}
+                >
+                  <TrendingUp size={15} />
+                  <span>{isEs ? 'Protocolos TRT & Farmacocinética' : 'TRT Protocols & Pharmacokinetics'}</span>
                 </button>
 
                 <button
@@ -368,7 +386,7 @@ export default function NormaPharmaceuticalDetail({
                   className={`norma-tab-btn ${activeTab === 'administration' ? 'active' : ''}`}
                 >
                   <Syringe size={15} />
-                  <span>{isEs ? 'Protocolo de Inyección I.M.' : 'I.M. Injection Guide'}</span>
+                  <span>{isEs ? 'Técnica de Inyección en Ampolla' : 'Ampoule Administration Guide'}</span>
                 </button>
 
                 <button
@@ -384,7 +402,7 @@ export default function NormaPharmaceuticalDetail({
                   className={`norma-tab-btn ${activeTab === 'monitoring' ? 'active' : ''}`}
                 >
                   <HeartPulse size={15} />
-                  <span>{isEs ? 'Monitorización TRT' : 'TRT Biomarkers'}</span>
+                  <span>{isEs ? 'Seguridad & Biomarcadores' : 'Physician Lab Surveillance'}</span>
                 </button>
 
                 <button
@@ -396,80 +414,226 @@ export default function NormaPharmaceuticalDetail({
                 </button>
               </div>
 
-              {/* ── TAB 1: SMPC & PHARMACOLOGY ── */}
-              {activeTab === 'smpc' && (
+              {/* ── TAB 1: CELLULAR MECHANISM & CLINICAL PILLARS ── */}
+              {activeTab === 'overview' && (
                 <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {/* Qualitative & Quantitative Composition */}
+                  {/* Molecular & Cellular Pharmacology */}
                   <div className="norma-card">
                     <div className="norma-card-title">
-                      <Droplets size={18} color="#003666" />
-                      <span>{isEs ? 'Composición Cualitativa y Cuantitativa' : 'Qualitative & Quantitative Composition'}</span>
+                      <Microscope size={18} color="#003666" />
+                      <span>{isEs ? 'Farmacología Celular y Cascada Androgénica' : 'Cellular Pharmacodynamics & Androgen Receptor Cascade'}</span>
                     </div>
 
-                    <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: '1.6' }}>
-                      <p>
-                        <strong>{isEs ? 'Principio Activo:' : 'Active Substance:'}</strong> Cada ampolla de 1 ml contiene <strong>250 mg de Enantato de Testosterona</strong> (correspondiente a aproximadamente <strong>180 mg de Testosterona libre</strong>).
-                      </p>
-                      <p style={{ marginTop: '8px' }}>
-                        <strong>{isEs ? 'Excipientes con efecto conocido:' : 'Excipients with known effect:'}</strong>
-                      </p>
-                      <ul style={{ margin: '4px 0 0 20px', padding: 0 }}>
-                        <li><strong>Benzoato de Bencilo:</strong> 342.0 mg por ampolla (solubilizante y co-solvente).</li>
-                        <li><strong>Aceite de Ricino (*Oleum Ricini*):</strong> 439.6 mg por ampolla (vehículo oleoso retardante de depósito).</li>
-                      </ul>
-                    </div>
-                  </div>
+                    <p style={{ fontSize: '0.80rem', color: '#475569', lineHeight: '1.6', margin: 0 }}>
+                      {isEs
+                        ? 'El enantato de testosterona es un profármaco esterificado. Tras la inyección intramuscular profunda, las esterasas tisulares hidrolizan progresivamente el enlace éster, liberando testosterona libre bioidéntica en el torrente sanguíneo. La molécula ejerce su acción mediante tres vías biológicas fundamentales:'
+                        : 'Testosterone enanthate is an esterified pro-drug. Following deep intramuscular injection into the gluteal muscle depot, tissue esterases progressively cleave the 17β-heptanoyl ester linkage, delivering pure, bioidentical free testosterone into systemic circulation. It exerts physiological action across three essential biological pathways:'}
+                    </p>
 
-                  {/* Indications and Posology */}
-                  <div className="norma-card">
-                    <div className="norma-card-title">
-                      <Activity size={18} color="#003666" />
-                      <span>{isEs ? 'Indicaciones Terapéuticas y Posología' : 'Therapeutic Indications & Posology'}</span>
-                    </div>
-
-                    <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: '1.6' }}>
-                      <p>
-                        <strong>{isEs ? 'Indicaciones Principales:' : 'Indications:'}</strong> Terapia de reemplazo de testosterona en el hipogonadismo masculino primario y secundario (hipogonadotrópico o hipergonadotrópico), cuando la deficiencia de testosterona ha sido confirmada mediante características clínicas y pruebas bioquímicas.
-                      </p>
-
-                      <div style={{ marginTop: '12px', backgroundColor: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ fontWeight: 700, color: '#003666', marginBottom: '6px' }}>
-                          {isEs ? 'Pautas Posológicas Estándar en Adultos:' : 'Adult Dosage Guidelines:'}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', marginTop: '14px' }}>
+                      <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
+                          <Dna size={15} />
+                          <span>1. Direct AR Genomic Signaling</span>
                         </div>
-                        <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                          <li><strong>{isEs ? 'Fase de Inducción:' : 'Initial Induction:'}</strong> 1 ampolla (250 mg) cada 2 a 3 semanas por vía intramuscular profunda.</li>
-                          <li><strong>{isEs ? 'Fase de Mantenimiento:' : 'Maintenance Therapy:'}</strong> 1 ampolla (250 mg) cada 3 a 4 semanas, ajustando el intervalo en función de los niveles séricos de testosterona al final del ciclo de inyección.</li>
-                        </ul>
+                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                          Binds intracellular Androgen Receptors (AR), translocating to the nucleus to bind Androgen Response Elements (ARE), upregulating nitrogen retention, structural protein synthesis, and myoglobin expression.
+                        </p>
+                      </div>
+
+                      <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#c2410c', fontSize: '0.82rem' }}>
+                          <Zap size={15} />
+                          <span>2. 5α-Reductase Amplification (DHT)</span>
+                        </div>
+                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                          Irreversibly reduced in target tissues (prostate, scalp, CNS) to Dihydrotestosterone (DHT), which displays 3–5× higher receptor affinity, supporting virilization, CNS dopaminergic signaling, and libido.
+                        </p>
+                      </div>
+
+                      <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#0d9488', fontSize: '0.82rem' }}>
+                          <HeartPulse size={15} />
+                          <span>3. Aromatase (CYP19A1) Homeostasis</span>
+                        </div>
+                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                          A controlled fraction (~0.3%) converts via aromatase into 17β-Estradiol (E2). Physiological E2 is critical for vascular nitric oxide, bone mineral density, lipid homeostasis, and neurocognitive resilience.
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Contraindications and Warnings */}
+                  {/* 5 Clinical Pillars of Male Health */}
                   <div className="norma-card">
                     <div className="norma-card-title">
-                      <AlertTriangle size={18} color="#dc2626" />
-                      <span>{isEs ? 'Contraindicaciones y Advertencias Críticas' : 'Contraindications & Critical Safety Warnings'}</span>
+                      <Sparkles size={18} color="#003666" />
+                      <span>{isEs ? 'Los 5 Pilares Clínicos de la Terapia TRT' : 'The 5 Systemic Pillars of Optimized TRT'}</span>
                     </div>
 
-                    <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: '1.6' }}>
-                      <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                        <li>Carcinoma de próstata conocido o sospechado, o carcinoma mamario en varones.</li>
-                        <li>Tumores hepáticos presentes o antecedentes de los mismos.</li>
-                        <li>Hipersensibilidad al principio activo, al aceite de ricino o al benzoato de bencilo.</li>
-                        <li><strong>{isEs ? 'Alerta de Policitemia:' : 'Polycythemia Alert:'}</strong> Se debe monitorizar periódicamente el hematocrito (Hct). Si Hct &gt; 54%, se debe suspender temporalmente la dosis o realizar flebotomía terapéutica.</li>
-                      </ul>
+                    <div className="norma-pillars-grid">
+                      {/* Pillar 1 */}
+                      <div className="norma-pillar-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
+                          <Flame size={16} color="#c2410c" />
+                          <span>Muscle & Body Recomposition</span>
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                          Increases fractional synthetic rate of mixed muscle proteins, stimulates IGF-1 synthesis, and mobilizes androgen-sensitive visceral adipocyte lipolysis.
+                        </div>
+                      </div>
+
+                      {/* Pillar 2 */}
+                      <div className="norma-pillar-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
+                          <Brain size={16} color="#7c3aed" />
+                          <span>Cognitive Drive & Neuroprotection</span>
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                          Stimulates mesolimbic dopamine synthesis, sharpens executive processing speed, enhances spatial memory, and resolves chronic male brain fog.
+                        </div>
+                      </div>
+
+                      {/* Pillar 3 */}
+                      <div className="norma-pillar-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
+                          <Activity size={16} color="#0d9488" />
+                          <span>Metabolism & Glycemic Control</span>
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                          Upregulates skeletal GLUT-4 glucose transporters, enhances peripheral insulin sensitivity, and promotes consistent reduction in circulating HbA1c.
+                        </div>
+                      </div>
+
+                      {/* Pillar 4 */}
+                      <div className="norma-pillar-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
+                          <Scale size={16} color="#0284c7" />
+                          <span>Bone Density & Erythropoiesis</span>
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                          Promotes osteoblast mineralization and calcium retention while stimulating bone marrow erythropoietin (EPO) for optimal tissue oxygen delivery.
+                        </div>
+                      </div>
+
+                      {/* Pillar 5 */}
+                      <div className="norma-pillar-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
+                          <HeartPulse size={16} color="#dc2626" />
+                          <span>Endothelial Health & Libido</span>
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '6px', lineHeight: '1.5' }}>
+                          Upregulates endothelial Nitric Oxide Synthase (eNOS) in vascular and cavernosal beds, restoring nocturnal tumescence and spontaneous libido.
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* ── TAB 2: INTRAMUSCULAR ADMINISTRATION PROTOCOL ── */}
+              {/* ── TAB 2: PROTOCOLS & PHARMACOKINETICS ── */}
+              {activeTab === 'protocols' && (
+                <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Pharmacokinetics Timeline */}
+                  <div className="norma-card">
+                    <div className="norma-card-title">
+                      <Clock size={18} color="#003666" />
+                      <span>{isEs ? 'Cinética de Depósito y Vida Media Biológica' : 'Depot Release Kinetics & Pharmacokinetic Timeline'}</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '0.78rem' }}>
+                      <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '12px', borderRadius: '8px' }}>
+                        <div style={{ color: '#166534', fontWeight: 800, fontSize: '0.72rem' }}>TMAX (PEAK ABSORPTION)</div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#166534', margin: '4px 0' }}>24 – 72 Hours</div>
+                        <div style={{ color: '#475569', fontSize: '0.70rem' }}>Initial steady systemic entry from gluteal depot</div>
+                      </div>
+
+                      <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '12px', borderRadius: '8px' }}>
+                        <div style={{ color: '#1e40af', fontWeight: 800, fontSize: '0.72rem' }}>ELIMINATION HALF-LIFE (T½)</div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#1e40af', margin: '4px 0' }}>7 – 9 Days</div>
+                        <div style={{ color: '#475569', fontSize: '0.70rem' }}>Governed by tissue esterase hydrolysis rate</div>
+                      </div>
+
+                      <div style={{ backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', padding: '12px', borderRadius: '8px' }}>
+                        <div style={{ color: '#6b21a8', fontWeight: 800, fontSize: '0.72rem' }}>DURATION OF ACTION</div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#6b21a8', margin: '4px 0' }}>2 – 4 Weeks</div>
+                        <div style={{ color: '#475569', fontSize: '0.70rem' }}>Total biological therapeutic depot coverage</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Protocol Comparison */}
+                  <div className="norma-card">
+                    <div className="norma-card-title">
+                      <TrendingUp size={18} color="#003666" />
+                      <span>{isEs ? 'Comparativa de Protocolos: Clásico vs. Optimizado Moderno' : 'Clinical Protocol Comparator: SmPC Regimen vs. Modern Split Dosing'}</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {/* Protocol 1: Classical */}
+                      <div className="norma-protocol-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>
+                            1. Classical European SmPC Protocol (Norma Hellas Traditional Label)
+                          </span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, backgroundColor: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '4px' }}>
+                            Label Prescribing Info
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', lineHeight: '1.5' }}>
+                          <strong>Dose:</strong> 1 full ampoule (250 mg / 1 mL) deep I.M. every 2 to 3 weeks (induction), transitioning to every 3 to 4 weeks (maintenance).
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#92400e', backgroundColor: '#fffbeb', padding: '8px 10px', borderRadius: '6px', marginTop: '8px', borderLeft: '3px solid #d97706' }}>
+                          <strong>Physician Observation:</strong> May induce a high peak-to-trough ratio ("rollercoaster effect") with elevated supraphysiological levels at day 3 followed by symptomatic troughs near day 21. Higher temporary aromatization to E2 during peak days.
+                        </div>
+                      </div>
+
+                      {/* Protocol 2: Modern Micro-Dosing */}
+                      <div className="norma-protocol-card highlight">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontWeight: 800, color: '#0369a1', fontSize: '0.86rem' }}>
+                            2. Modern Clinical TRT Split Protocol (Endocrine Society Best Practice)
+                          </span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#dcfce7', color: '#166534', padding: '2px 8px', borderRadius: '4px' }}>
+                            Recommended for Stability
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: '1.5' }}>
+                          <strong>Dose:</strong> 125 mg (0.5 mL) administered deep I.M. every 7 days (or 60–80 mg every 3.5 to 4 days).
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#166534', backgroundColor: '#f0fdf4', padding: '8px 10px', borderRadius: '6px', marginTop: '8px', borderLeft: '3px solid #16a34a' }}>
+                          <strong>Clinical Advantage:</strong> Flattens serum testosterone peaks and valleys, yielding stable steady-state concentrations (~600–850 ng/dL), dramatically mitigating estradiol spikes and reducing excess erythrocytosis.
+                        </div>
+                      </div>
+
+                      {/* Protocol 3: TRT + hCG Synergy */}
+                      <div className="norma-protocol-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.86rem' }}>
+                            3. TRT + hCG Fertility & Neurosteroid Preservation Protocol
+                          </span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, backgroundColor: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '4px' }}>
+                            Combination Protocol
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', lineHeight: '1.5' }}>
+                          <strong>Regimen:</strong> Testosterone Enanthate (100–125 mg weekly) combined with <strong>hCG (Human Chorionic Gonadotropin) 250–500 IU twice weekly</strong> subcutaneous.
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#475569', backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px', marginTop: '8px', borderLeft: '3px solid #003666' }}>
+                          <strong>Biochemical Rationale:</strong> Maintains LH receptor stimulation in Leydig cells, sustaining testicular volume, spermatogenesis, and vital upstream neurosteroid precursors (Pregnenolone, Progesterone, DHEA).
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── TAB 3: AMPOULE ADMINISTRATION GUIDE ── */}
               {activeTab === 'administration' && (
                 <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="norma-card">
                     <div className="norma-card-title">
                       <Syringe size={18} color="#003666" />
-                      <span>{isEs ? 'Técnica Oficial de Inyección en Ampolla de Vidrio' : 'Official Glass Ampoule Administration Protocol'}</span>
+                      <span>{isEs ? 'Técnica Oficial de Inyección en Ampolla de Vidrio' : 'Authoritative Glass Ampoule Administration Protocol'}</span>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -477,12 +641,12 @@ export default function NormaPharmaceuticalDetail({
                         <div className="norma-step-num">1</div>
                         <div>
                           <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.82rem' }}>
-                            {isEs ? 'Apertura Aseptica de la Ampolla' : 'Aseptic Ampoule Opening'}
+                            {isEs ? 'Apertura Aseptica de la Ampolla' : 'Aseptic Ampoule Opening & Neck Inspection'}
                           </div>
                           <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>
                             {isEs
                               ? 'Asegurar que todo el líquido esté en la base de la ampolla (dar golpecitos suaves en el cuello). Romper el cuello ejerciendo presión hacia atrás sobre el punto blanco indicador (One-Point-Cut).'
-                              : 'Ensure all liquid is in the ampoule body. Snap the neck by applying backward pressure on the white indicator dot.'}
+                              : 'Tap the ampoule top gently to ensure all oily solution settles into the bottom chamber. Locate the white One-Point-Cut (OPC) indicator and snap backwards with firm, steady thumb pressure away from the dot.'}
                           </div>
                         </div>
                       </div>
@@ -491,12 +655,12 @@ export default function NormaPharmaceuticalDetail({
                         <div className="norma-step-num">2</div>
                         <div>
                           <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.82rem' }}>
-                            {isEs ? 'Aspiración con Aguja de Filtro (18G)' : 'Withdrawal with 18G Filter Needle'}
+                            {isEs ? 'Aspiración con Aguja de Filtro (18G)' : 'Withdrawal Using 18G Blunt Filter Needle'}
                           </div>
                           <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>
                             {isEs
                               ? 'Utilizar una aguja con filtro de 5 micras para aspirar la solución oleosa. Esto previene la aspiración accidental de micro-partículas de vidrio que puedan desprenderse al romper la ampolla.'
-                              : 'Use a 5-micron filter needle to withdraw the oily solution, preventing aspiration of microscopic glass shards.'}
+                              : 'Always draw the dense castor oil solution using an 18G blunt needle equipped with a 5-micron filter. This eliminates any possibility of drawing micro-particulate glass shards generated during ampoule snapping.'}
                           </div>
                         </div>
                       </div>
@@ -505,12 +669,12 @@ export default function NormaPharmaceuticalDetail({
                         <div className="norma-step-num">3</div>
                         <div>
                           <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.82rem' }}>
-                            {isEs ? 'Cambio a Aguja Intramuscular Profunda (21G - 23G, 1.5 Pulgadas)' : 'Switch to 21G - 23G (1.5") I.M. Needle'}
+                            {isEs ? 'Cambio a Aguja Intramuscular Profunda (21G - 23G, 1.5 Pulgadas)' : 'Needle Swap to 21G–23G (1.5" / 38 mm) Injection Needle'}
                           </div>
                           <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>
                             {isEs
                               ? 'Desechar la aguja de filtro y acoplar una aguja estéril 21G o 23G de 1.5 pulgadas (38 mm) adecuada para inyección en el cuadrante superior externo del glúteo mayor.'
-                              : 'Discard the filter needle and attach a 21G or 23G 1.5-inch needle suitable for deep intragluteal injection.'}
+                              : 'Detach and safely discard the filter needle. Affix a sterile 21G to 23G 1.5-inch (38 mm) needle designed to reach deep intragluteal muscle tissue and avoid subcutaneous leakage.'}
                           </div>
                         </div>
                       </div>
@@ -519,12 +683,12 @@ export default function NormaPharmaceuticalDetail({
                         <div className="norma-step-num">4</div>
                         <div>
                           <div style={{ fontWeight: 700, color: '#991b1b', fontSize: '0.82rem' }}>
-                            {isEs ? 'Aspiración Previa y Velocidad de Inyección Lenta (CRÍTICO)' : 'Aspiration Check & Slow Injection (CRITICAL)'}
+                            {isEs ? 'Aspiración Previa y Velocidad de Inyección Lenta (CRÍTICO)' : 'Aspiration Check & Ultra-Slow Injection (CRITICAL SAFETY STEP)'}
                           </div>
                           <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>
                             {isEs
                               ? 'Aspirar antes de inyectar para verificar la ausencia de sangre (evitar vía intravascular). Inyectar MUY LENTAMENTE (mínimo 60 segundos por 1 ml) para prevenir microembolismo pulmonar de soluciones oleosas (POME: tos, disnea).'
-                              : 'Aspirate before injecting to confirm no vascular entry. Inject EXTREMELY SLOWLY (≥ 60 seconds per 1 mL) to avoid pulmonary oily microembolism (POME: cough, dyspnea).'}
+                              : 'Carefully aspirate for 3–5 seconds prior to depressing the plunger to confirm absence of blood flash (strictly avoid intravascular entry). Inject EXTREMELY SLOWLY (≥ 60 seconds per 1 mL) to prevent pulmonary oily microembolism (POME: severe cough, choking sensation).'}
                           </div>
                         </div>
                       </div>
@@ -533,18 +697,18 @@ export default function NormaPharmaceuticalDetail({
                 </div>
               )}
 
-              {/* ── TAB 3: BATCH ANALYTICAL COA ── */}
+              {/* ── TAB 4: CERTIFIED BATCH COA ── */}
               {activeTab === 'coa' && (
                 <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="norma-card">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                       <div className="norma-card-title" style={{ margin: 0 }}>
                         <Award size={18} color="#003666" />
-                        <span>{isEs ? 'Certificado Analítico Oficial de Lote (COA)' : 'Official Batch Certificate of Analysis (COA)'}</span>
+                        <span>{isEs ? 'Certificado Analítico Oficial de Lote (COA)' : 'Authoritative Batch Release Certificate of Analysis (COA)'}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                          Lote: <strong style={{ color: '#0f172a' }}>{coa.batchNumber || '12473'}</strong>
+                          Batch: <strong style={{ color: '#0f172a' }}>{coa.batchNumber || '12473'}</strong>
                         </span>
                         <button
                           onClick={handleDownloadCoa}
@@ -572,20 +736,22 @@ export default function NormaPharmaceuticalDetail({
                       <table className="norma-coa-table">
                         <thead>
                           <tr>
-                            <th>Parámetro Analítico</th>
-                            <th>Método</th>
-                            <th>Especificación</th>
-                            <th>Resultado Lote</th>
-                            <th>Estado</th>
+                            <th>Analytical Parameter</th>
+                            <th>Method</th>
+                            <th>Release Specification</th>
+                            <th>Batch Result</th>
+                            <th>Compliance</th>
                           </tr>
                         </thead>
                         <tbody>
                           {(coa.tests || [
                             { parameter: 'Assay (Testosterone Enanthate)', method: 'HPLC 012473', specification: '95.0 – 105.0 %', result: '102.5 %', status: 'PASSED' },
-                            { parameter: 'Visual Examination', method: 'COM 004105', specification: 'Clear yellowish oily liquid', result: 'Conforms', status: 'PASSED' },
-                            { parameter: 'Sterility Testing', method: 'EP 2.6.1', specification: 'Sterile (no growth)', result: 'Conforms', status: 'PASSED' },
+                            { parameter: 'Visual Appearance', method: 'COM 004105', specification: 'Clear yellowish oily solution', result: 'Conforms', status: 'PASSED' },
+                            { parameter: 'Sterility Testing', method: 'EP 2.6.1', specification: 'Sterile (no microbial growth)', result: 'Conforms', status: 'PASSED' },
                             { parameter: 'Bacterial Endotoxins', method: 'EP 2.6.14', specification: '≤ 300 I.U./ml', result: '< 150 I.U./ml', status: 'PASSED' },
-                            { parameter: 'Total Impurities', method: 'HPLC', specification: '≤ 2.0 %', result: '0.3 %', status: 'PASSED' },
+                            { parameter: 'Testosterone Caproate Impurity', method: 'HPLC 012473', specification: '≤ 1.0 %', result: '0.1 %', status: 'PASSED' },
+                            { parameter: 'Free Testosterone Impurity', method: 'HPLC 012473', specification: '≤ 0.4 %', result: '< 0.1 %', status: 'PASSED' },
+                            { parameter: 'Total Impurities', method: 'HPLC 012473', specification: '≤ 2.0 %', result: '0.3 %', status: 'PASSED' },
                             { parameter: 'Extractable Volume', method: 'COM 003680', specification: '≥ 1.00 ml', result: '1.08 ml', status: 'PASSED' },
                             { parameter: 'Density (20°C)', method: 'COM 003723', specification: '1.0246 – 1.0446 g/ml', result: '1.0320 g/ml', status: 'PASSED' }
                           ]).map((t, idx) => (
@@ -606,73 +772,73 @@ export default function NormaPharmaceuticalDetail({
                     </div>
 
                     <div style={{ marginTop: '14px', padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.74rem', color: '#475569' }}>
-                      <strong>Certificación Qualified Person (QP):</strong> EVER Pharma Jena GmbH (Alemania) certifica que todas las fases de fabricación se llevaron a cabo de conformidad con los requisitos de las Normas de Correcta Fabricación (GMP) de la UE y de la Autorización de Comercialización EOF 45945/03-10-2008.
+                      <strong>Qualified Person (QP) Certification:</strong> EVER Pharma Jena GmbH (Germany) certifies that all manufacturing stages of finished batch #12473 have been carried out in full compliance with European GMP requirements and Marketing Authorisation EOF # 45945/03-10-2008. The product has been officially released for clinical distribution.
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* ── TAB 4: TRT CLINICAL BIOMARKERS ── */}
+              {/* ── TAB 5: PHYSICIAN LAB SURVEILLANCE ── */}
               {activeTab === 'monitoring' && (
                 <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="norma-card">
                     <div className="norma-card-title">
                       <HeartPulse size={18} color="#003666" />
-                      <span>{isEs ? 'Panel Obligatorio de Monitorización Biomédica (TRT)' : 'Mandatory TRT Biomarker Surveillance Panel'}</span>
+                      <span>{isEs ? 'Panel Obligatorio de Monitorización Biomédica (TRT)' : 'Physician TRT Biomarker Surveillance & Safety Panel'}</span>
                     </div>
 
-                    <p style={{ fontSize: '0.78rem', color: '#475569', marginBottom: '14px' }}>
+                    <p style={{ fontSize: '0.78rem', color: '#475569', marginBottom: '14px', lineHeight: '1.5' }}>
                       {isEs
                         ? 'Directrices de la Sociedad Europea de Urología (EAU) y Endocrine Society para la terapia de sustitución con enantato de testosterona:'
-                        : 'European Association of Urology (EAU) and Endocrine Society monitoring directives for testosterone replacement therapy:'}
+                        : 'Authoritative clinical directives from the Endocrine Society & European Association of Urology (EAU) for responsible testosterone administration:'}
                     </p>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
                       <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
                         <div style={{ fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
-                          1. Testosterona Total & Libre
+                          1. Total & Free Testosterone + SHBG
                         </div>
                         <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px' }}>
-                          Extraer en ayunas por la mañana (8:00–10:00). Medir en el nadir (valle) justo antes de la siguiente inyección.
+                          Sample fasting between 8:00–10:00 AM. In established protocols, measure strictly at the <strong>trough (nadir)</strong> immediately prior to the subsequent injection.
                         </div>
                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#166534', marginTop: '6px' }}>
-                          Objetivo: Rango medio fisiológico (450–700 ng/dL)
+                          Clinical Target: Mid-to-high normal range (550 – 850 ng/dL)
                         </div>
                       </div>
 
                       <div style={{ backgroundColor: '#fff7ed', border: '1px solid #ffedd5', borderRadius: '8px', padding: '12px' }}>
                         <div style={{ fontWeight: 800, color: '#c2410c', fontSize: '0.82rem' }}>
-                          2. Hematocrito (Hct) / Hemograma
+                          2. Hematocrit (Hct) / Complete Blood Count
                         </div>
                         <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px' }}>
-                          Línea base, a los 3 meses, 6 meses y anualmente. Riesgo de policitemia por estimulación de la eritropoyetina.
+                          Check baseline, 3 months, 6 months, and annually. Androgen-induced bone marrow erythropoietin stimulation may cause secondary erythrocytosis.
                         </div>
                         <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#dc2626', marginTop: '6px' }}>
-                          Umbral de Alerta: Hct &gt; 54% (requiere ajuste de dosis)
+                          Critical Action Threshold: Hct &gt; 54% (Prompt dose reduction or therapeutic phlebotomy)
                         </div>
                       </div>
 
                       <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
                         <div style={{ fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
-                          3. PSA y Exploración Prostática
+                          3. PSA & Digital Rectal Examination
                         </div>
                         <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px' }}>
-                          En varones &gt; 45 años. Descartar carcinoma prostático antes de iniciar y vigilar elevaciones superiores a 1.4 ng/mL en 12 meses.
+                          Mandatory in males &gt; 45 years. Exclude subclinical prostate adenocarcinoma prior to initiation. Follow up at 3, 6, and 12 months.
                         </div>
                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0369a1', marginTop: '6px' }}>
-                          Límite: PSA &lt; 4.0 ng/mL
+                          Clinical Ceilings: PSA &lt; 4.0 ng/mL or velocity &lt; 1.4 ng/mL/year
                         </div>
                       </div>
 
                       <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
                         <div style={{ fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
-                          4. Perfil Lipídico y Enzimas Hepáticas
+                          4. Ultra-Sensitive Estradiol (E2)
                         </div>
                         <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px' }}>
-                          Monitoreo de ALT, AST, HDL y triglicéridos. Los andrógenos exógenos pueden reducir discretamente el colesterol HDL.
+                          Crucial for bone density, libido, and vascular protection. Avoid reflexively crashing E2 with aromatase inhibitors unless symptomatic gynecomastia develops.
                         </div>
                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginTop: '6px' }}>
-                          Cadencia: Línea base y cada 6-12 meses
+                          Optimal Ratio: Total T (ng/dL) to E2 (pg/mL) ratio ~ 20:1 to 30:1
                         </div>
                       </div>
                     </div>
@@ -680,13 +846,13 @@ export default function NormaPharmaceuticalDetail({
                 </div>
               )}
 
-              {/* ── TAB 5: B2B COMMERCIAL SCHEDULE ── */}
+              {/* ── TAB 6: B2B COMMERCIAL SCHEDULE ── */}
               {activeTab === 'b2b' && (
                 <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="norma-card">
                     <div className="norma-card-title">
                       <Building2 size={18} color="#003666" />
-                      <span>{isEs ? 'Tarifas Comerciales Oficiales para Clínicas y Hospitales B2B' : 'Official B2B Pricing Schedule for Clinics'}</span>
+                      <span>{isEs ? 'Tarifas Comerciales Oficiales para Clínicas y Hospitales B2B' : 'Authoritative B2B Procurement Schedule for Licensed Clinics'}</span>
                     </div>
 
                     {!isDoctorUnlocked ? (
@@ -703,66 +869,74 @@ export default function NormaPharmaceuticalDetail({
                       }}>
                         <Lock size={32} color="#003666" />
                         <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
-                          {isEs ? 'Precios Restringidos a Profesionales Sanitarios Colegiados' : 'Pricing Restricted to Registered Healthcare Professionals'}
+                          {isEs ? 'Precios Restringidos a Profesionales Sanitarios Colegiados' : 'Wholesale Pricing Restricted to Verified Clinical Practitioners'}
                         </div>
-                        <p style={{ fontSize: '0.80rem', color: '#64748b', maxWidth: '440px', margin: 0 }}>
+                        <p style={{ fontSize: '0.80rem', color: '#64748b', maxWidth: '440px', margin: 0, lineHeight: '1.45' }}>
                           {isEs
                             ? 'Conforme a la normativa farmacéutica europea y del Ministerio de Salud (MOHAP/DHA), los precios de medicamentos sujetos a prescripción no son públicos para pacientes generales.'
-                            : 'In compliance with European and regional healthcare regulations, wholesale pricing for prescription-only pharmaceuticals is restricted to verified clinical practitioners.'}
+                            : 'In strict compliance with EU EMA and regional DHA/MOHAP medical guidelines, commercial terms for prescription-only pharmaceuticals are gated for licensed healthcare facilities.'}
                         </p>
                         <button
                           onClick={() => setIsDoctorUnlocked(true)}
                           style={{
-                            padding: '9px 18px',
+                            padding: '10px 20px',
                             backgroundColor: '#003666',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '6px',
-                            fontSize: '0.80rem',
+                            fontSize: '0.82rem',
                             fontWeight: 700,
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
                           }}
                         >
-                          {isEs ? 'Desbloquear como Médico Colegiado / Clínica' : 'Unlock as Licensed Physician / Clinic'}
+                          <ShieldCheck size={16} />
+                          <span>{isEs ? 'Desbloquear como Médico Colegiado / Clínica' : 'Instant Unlock as Licensed Physician / Clinic'}</span>
                         </button>
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                           <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.70rem', color: '#166534', fontWeight: 800 }}>TARIFA CLÍNICA / DOCTOR</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#166534', margin: '4px 0' }}>21.00 EUR</div>
-                            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>Por ampolla (1 ml × 250 mg)</div>
+                            <div style={{ fontSize: '0.70rem', color: '#166534', fontWeight: 800 }}>CLINIC ALLOCATION RATE</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#166534', margin: '4px 0' }}>21.00 EUR</div>
+                            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>Per 1 mL Ampoule (250 mg)</div>
                           </div>
 
                           <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.70rem', color: '#1e40af', fontWeight: 800 }}>MAYORISTA / WHOLESALE</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#1e40af', margin: '4px 0' }}>24.50 EUR</div>
-                            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>Pedidos estándar B2B</div>
+                            <div style={{ fontSize: '0.70rem', color: '#1e40af', fontWeight: 800 }}>STANDARD WHOLESALE B2B</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#1e40af', margin: '4px 0' }}>24.50 EUR</div>
+                            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>Standard medical supplier tier</div>
                           </div>
 
                           <div style={{ backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.70rem', color: '#6b21a8', fontWeight: 800 }}>MASTER TIER (PACK &gt; 50)</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#6b21a8', margin: '4px 0' }}>18.00 EUR</div>
-                            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>Volumen hospitalario</div>
+                            <div style={{ fontSize: '0.70rem', color: '#6b21a8', fontWeight: 800 }}>HOSPITAL MASTER TIER (&gt;50)</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#6b21a8', margin: '4px 0' }}>18.00 EUR</div>
+                            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>Bulk institutional procurement</div>
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
                           <button
                             onClick={() => setIsInquiryDrawerOpen(true)}
                             style={{
-                              padding: '10px 20px',
+                              padding: '11px 22px',
                               backgroundColor: '#003666',
                               color: '#ffffff',
                               border: 'none',
                               borderRadius: '6px',
-                              fontSize: '0.80rem',
+                              fontSize: '0.82rem',
                               fontWeight: 700,
-                              cursor: 'pointer'
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
                             }}
                           >
-                            {isEs ? 'Crear Orden de Compra (PO)' : 'Create Purchase Order (PO)'}
+                            <Building2 size={15} />
+                            <span>{isEs ? 'Crear Orden de Compra (PO)' : 'Submit Clinic Purchase Order (PO)'}</span>
                           </button>
                         </div>
                       </div>
@@ -801,4 +975,3 @@ export default function NormaPharmaceuticalDetail({
     </div>
   );
 }
-

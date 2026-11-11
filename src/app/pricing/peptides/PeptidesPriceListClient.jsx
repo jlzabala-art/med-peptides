@@ -1427,6 +1427,38 @@ export default function PeptidesPriceListClient({
 
   const isEs = lang === 'es';
 
+  // Active filter chips structured for Google Cloud Standard <GlobalSearchBar>
+  const activeFilterChips = useMemo(() => {
+    const list = [];
+    if (selectedCategory !== 'all') {
+      list.push({
+        key: 'category',
+        label: isEs ? 'Categoría' : 'Category',
+        value: isEs ? (CATEGORY_MAP[selectedCategory]?.labelEs || selectedCategory) : (CATEGORY_MAP[selectedCategory]?.labelEn || selectedCategory),
+        onRemove: () => setSelectedCategory('all')
+      });
+    }
+    if (selectedFdaStatus !== 'all') {
+      const fdaMatch = FDA_FILTERS.find(f => f.id === selectedFdaStatus);
+      list.push({
+        key: 'fda',
+        label: isEs ? 'Estatus FDA' : 'FDA Status',
+        value: isEs ? (fdaMatch?.labelEs || selectedFdaStatus) : (fdaMatch?.labelEn || selectedFdaStatus),
+        onRemove: () => setSelectedFdaStatus('all')
+      });
+    }
+    if (selectedStrength !== 'all') {
+      const strengthMatch = DOSAGE_STRENGTHS.find(s => s.id === selectedStrength);
+      list.push({
+        key: 'strength',
+        label: isEs ? 'Dosis' : 'Strength',
+        value: strengthMatch?.label || selectedStrength,
+        onRemove: () => setSelectedStrength('all')
+      });
+    }
+    return list;
+  }, [selectedCategory, selectedFdaStatus, selectedStrength, isEs]);
+
   const handleLanguageChange = (nextLang) => {
     setLang(nextLang);
     if (typeof window !== 'undefined') {
@@ -3637,14 +3669,17 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             display: flex;
             flex-direction: column;
           }
-          .gcp-kpis-summary-block {
+          .gcp-search-and-category-block {
             order: 1;
           }
-          .gcp-search-and-category-block {
+          .gcp-kpis-summary-block {
             order: 2;
           }
-          .gcp-table-block {
+          .mobile-only-filter-selectors {
             order: 3;
+          }
+          .gcp-table-block {
+            order: 4;
           }
           .mobile-only-category-selector {
             display: none;
@@ -3803,8 +3838,11 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               padding: 0.75rem !important;
               margin-bottom: 0.75rem !important;
             }
-            .gcp-table-block {
+            .mobile-only-filter-selectors {
               order: 3 !important;
+            }
+            .gcp-table-block {
+              order: 4 !important;
             }
             .peptides-kpi-card {
               padding: 0.55rem 0.65rem !important;
@@ -4024,337 +4062,218 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     onChange={setSearchQuery}
                     lang={lang}
                     placeholder={isEs
-                      ? 'Buscar por nombre de péptido (ej. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'
-                      : 'Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)...'}
+                      ? "Buscar por nombre de péptido (ej. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)..."
+                      : "Search by peptide name (e.g. BPC-157, Semaglutide, Tirzepatide, GHK-Cu, Epithalon)..."}
                     size="lg"
                     resultCount={filteredProducts.length}
-                    filters={
-                      <div>
-                        {/* Mobile Quick-Switch Category Chips (Horizontal Scrollable Strip) */}
-                        <div className="mobile-only-category-strip" style={{
-                          overflowX: 'auto',
-                          whiteSpace: 'nowrap',
-                          gap: '6px',
-                          padding: '4px 0 8px 0',
-                          WebkitOverflowScrolling: 'touch',
-                          scrollbarWidth: 'none'
-                        }}>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedCategory('all')}
-                            style={{
-                              padding: '4px 10px',
-                              borderRadius: '16px',
-                              border: selectedCategory === 'all' ? '1.5px solid #1a73e8' : '1px solid #dadce0',
-                              background: selectedCategory === 'all' ? '#e8f0fe' : '#ffffff',
-                              color: selectedCategory === 'all' ? '#1a73e8' : '#3c4043',
-                              fontWeight: selectedCategory === 'all' ? 750 : 500,
-                              fontSize: '0.74rem',
-                              flexShrink: 0,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {isEs ? 'Todas' : 'All'} ({processedProducts.length})
-                          </button>
-                          {CATEGORY_ORDER.map(key => {
-                            const meta = CATEGORY_MAP[key];
-                            if (!meta) return null;
-                            const count = processedProducts.filter(p => p.categoryKey === key).length;
-                            if (count === 0) return null;
-                            const isSel = selectedCategory === key;
-                            return (
-                              <button
-                                key={key}
-                                type="button"
-                                onClick={() => setSelectedCategory(key)}
-                                style={{
-                                  padding: '4px 10px',
-                                  borderRadius: '16px',
-                                  border: isSel ? `1.5px solid ${meta.color}` : '1px solid #dadce0',
-                                  background: isSel ? meta.bg : '#ffffff',
-                                  color: isSel ? meta.color : '#3c4043',
-                                  fontWeight: isSel ? 750 : 500,
-                                  fontSize: '0.74rem',
-                                  flexShrink: 0,
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                <span>{isEs ? meta.labelEs : meta.labelEn}</span>
-                                <span style={{ marginLeft: '4px', opacity: 0.7, fontSize: '0.66rem' }}>({count})</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Active Filter Chips (Google Cloud Filter Bar - Rule #24) */}
-                        {(selectedCategory !== 'all' || selectedFdaStatus !== 'all' || selectedStrength !== 'all' || searchQuery) && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '8px', padding: '4px 0' }}>
-                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase' }}>
-                              {isEs ? 'Filtros Activos:' : 'Active Filters:'}
-                            </span>
-                            {selectedCategory !== 'all' && (
-                              <span style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                background: '#e8f0fe',
-                                border: '1px solid #c2e7ff',
-                                color: '#1a73e8',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                padding: '2px 8px',
-                                borderRadius: '14px'
-                              }}>
-                                <span>🏷️ {isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedCategory('all')}
-                                  style={{ border: 'none', background: 'transparent', color: '#1a73e8', cursor: 'pointer', padding: 0, fontWeight: 800, display: 'flex', alignItems: 'center' }}
-                                  title={isEs ? 'Quitar filtro de categoría' : 'Remove category filter'}
-                                >
-                                  <X size={11} />
-                                </button>
-                              </span>
-                            )}
-                            {selectedFdaStatus !== 'all' && (
-                              <span style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                background: '#ecfdf5',
-                                border: '1px solid #a7f3d0',
-                                color: '#065f46',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                padding: '2px 8px',
-                                borderRadius: '14px'
-                              }}>
-                                <span>⚖️ {isEs ? FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.labelEs : FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.labelEn}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedFdaStatus('all')}
-                                  style={{ border: 'none', background: 'transparent', color: '#065f46', cursor: 'pointer', padding: 0, fontWeight: 800, display: 'flex', alignItems: 'center' }}
-                                  title={isEs ? 'Quitar filtro de estatus FDA' : 'Remove FDA status filter'}
-                                >
-                                  <X size={11} />
-                                </button>
-                              </span>
-                            )}
-                            {selectedStrength !== 'all' && (
-                              <span style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                background: '#fef3c7',
-                                border: '1px solid #fde68a',
-                                color: '#92400e',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                padding: '2px 8px',
-                                borderRadius: '14px'
-                              }}>
-                                <span>💊 {DOSAGE_STRENGTHS.find(s => s.id === selectedStrength)?.label}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedStrength('all')}
-                                  style={{ border: 'none', background: 'transparent', color: '#92400e', cursor: 'pointer', padding: 0, fontWeight: 800, display: 'flex', alignItems: 'center' }}
-                                  title={isEs ? 'Quitar filtro de concentración' : 'Remove strength filter'}
-                                >
-                                  <X size={11} />
-                                </button>
-                              </span>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedCategory('all');
-                                setSelectedFdaStatus('all');
-                                setSelectedStrength('all');
-                                setSearchQuery('');
-                              }}
-                              style={{
-                                border: 'none',
-                                background: 'transparent',
-                                color: '#dc2626',
-                                fontSize: '0.70rem',
-                                fontWeight: 750,
-                                cursor: 'pointer',
-                                padding: '2px 4px'
-                              }}
-                            >
-                              {isEs ? 'Limpiar Todo ×' : 'Clear All ×'}
-                            </button>
-                          </div>
-                        )}
-
-                        {/* Integrated Shipping Corridor Segmented Switcher (Google Cloud Standard) */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: '8px',
-                          flexWrap: 'wrap',
-                          padding: '5px 10px',
-                          background: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px',
-                          marginBottom: '8px'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Truck size={13} color="#0284c7" />
-                            <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#334155' }}>
-                              {isEs ? 'Destino y Tarifa de Envío (≤ 2 kg):' : 'Shipping Corridor & Rate (≤ 2 kg):'}
-                            </span>
-                          </div>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-                            {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
-                              const isSel = shippingDest === corridor.id;
-                              return (
-                                <button
-                                  key={corridor.id}
-                                  type="button"
-                                  onClick={() => handleShippingDestChange(corridor.id)}
-                                  title={isEs ? corridor.corridorLabelEs : corridor.corridorLabelEn}
-                                  style={{
-                                    border: isSel ? '1px solid #0284c7' : '1px solid transparent',
-                                    background: isSel ? '#e0f2fe' : 'transparent',
-                                    color: isSel ? '#0369a1' : '#475569',
-                                    fontWeight: isSel ? 800 : 600,
-                                    fontSize: '0.68rem',
-                                    padding: '2px 7px',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '3px',
-                                    transition: 'all 0.15s ease'
-                                  }}
-                                >
-                                  <span>{corridor.flag}</span>
-                                  <span>{isEs ? corridor.labelEs : corridor.labelEn}</span>
-                                  <span style={{
-                                    fontFamily: 'monospace',
-                                    fontWeight: 800,
-                                    color: isSel ? '#0284c7' : '#64748b'
-                                  }}>
-                                    {corridor.rateBadge}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Dosage Strength Quick Filter Pills + Category Grouping Toggle */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                              {isEs ? 'Concentración:' : 'Filter Strength:'}
-                            </span>
-                            {DOSAGE_STRENGTHS.map(st => {
-                              const isSelected = selectedStrength === st.id;
-                              return (
-                                <button
-                                  key={st.id}
-                                  type="button"
-                                  onClick={() => setSelectedStrength(st.id)}
-                                  style={{
-                                    padding: '2px 9px',
-                                    borderRadius: '20px',
-                                    fontSize: '0.70rem',
-                                    fontWeight: isSelected ? 750 : 600,
-                                    border: '1px solid',
-                                    cursor: 'pointer',
-                                    background: isSelected ? '#0284c7' : '#ffffff',
-                                    color: isSelected ? '#ffffff' : '#475569',
-                                    borderColor: isSelected ? '#0284c7' : '#cbd5e1',
-                                    transition: 'all 0.12s ease'
-                                  }}
-                                >
-                                  {st.id === 'all' ? (isEs ? 'Todas las Dosis' : 'All Strengths') : st.label}
-                                </button>
-                              );
-                            })}
-
-                            {(selectedCategory !== 'all' || selectedStrength !== 'all' || searchQuery) && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedCategory('all');
-                                  setSelectedStrength('all');
-                                  setSearchQuery('');
-                                }}
-                                style={{
-                                  border: 'none',
-                                  background: 'none',
-                                  color: '#dc2626',
-                                  fontSize: '0.72rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                {isEs ? 'Limpiar Filtros ×' : 'Reset Filters ×'}
-                              </button>
-                            )}
-                          </div>
-
-                          {/* View Organization Switcher: Categories (Default) vs Continuous */}
-                          <div style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            background: '#f1f5f9',
-                            padding: '2px',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            marginLeft: 'auto'
-                          }}>
-                            <button
-                              type="button"
-                              onClick={() => setGroupByCategory(true)}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                border: 'none',
-                                background: groupByCategory ? '#ffffff' : 'transparent',
-                                color: groupByCategory ? '#003666' : '#64748b',
-                                fontWeight: groupByCategory ? 800 : 600,
-                                fontSize: '0.70rem',
-                                padding: '3px 8px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                boxShadow: groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-                              }}
-                            >
-                              <Layers size={12} />
-                              <span>{isEs ? 'Categorías' : 'Categories'}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setGroupByCategory(false)}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                border: 'none',
-                                background: !groupByCategory ? '#ffffff' : 'transparent',
-                                color: !groupByCategory ? '#003666' : '#64748b',
-                                fontWeight: !groupByCategory ? 800 : 600,
-                                fontSize: '0.70rem',
-                                padding: '3px 8px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                boxShadow: !groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-                              }}
-                            >
-                              <span>≡</span>
-                              <span>{isEs ? 'Continua' : 'Continuous'}</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    }
+                    filters={activeFilterChips}
                   />
+                </div>
+              </div>
+
+              {/* Mobile Quick-Switch Category Chips (Horizontal Scrollable Strip) */}
+              <div className="mobile-only-category-strip" style={{
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                gap: "6px",
+                padding: "4px 0 8px 0",
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none"
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("all")}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: "16px",
+                    border: selectedCategory === "all" ? "1.5px solid #1a73e8" : "1px solid #dadce0",
+                    background: selectedCategory === "all" ? "#e8f0fe" : "#ffffff",
+                    color: selectedCategory === "all" ? "#1a73e8" : "#3c4043",
+                    fontWeight: selectedCategory === "all" ? 750 : 500,
+                    fontSize: "0.74rem",
+                    flexShrink: 0,
+                    cursor: "pointer"
+                  }}
+                >
+                  {isEs ? "Todas" : "All"} ({processedProducts.length})
+                </button>
+                {CATEGORY_ORDER.map(key => {
+                  const meta = CATEGORY_MAP[key];
+                  if (!meta) return null;
+                  const count = processedProducts.filter(p => p.categoryKey === key).length;
+                  if (count === 0) return null;
+                  const isSel = selectedCategory === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSelectedCategory(key)}
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: "16px",
+                        border: isSel ? `1.5px solid ${meta.color}` : "1px solid #dadce0",
+                        background: isSel ? meta.bg : "#ffffff",
+                        color: isSel ? meta.color : "#3c4043",
+                        fontWeight: isSel ? 750 : 500,
+                        fontSize: "0.74rem",
+                        flexShrink: 0,
+                        cursor: "pointer"
+                      }}
+                    >
+                      <span>{isEs ? meta.labelEs : meta.labelEn}</span>
+                      <span style={{ marginLeft: "4px", opacity: 0.7, fontSize: "0.66rem" }}>({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Sub-bar with Shipping Corridor, Dosage Strength Pills & Grouping View */}
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px",
+                padding: "8px 12px"
+              }}>
+                {/* Integrated Shipping Corridor Segmented Switcher (Google Cloud Standard) */}
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "8px",
+                  flexWrap: "wrap"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Truck size={13} color="#0284c7" />
+                    <span style={{ fontSize: "0.70rem", fontWeight: 750, color: "#334155" }}>
+                      {isEs ? "Destino y Tarifa de Envío (≤ 2 kg):" : "Shipping Corridor & Rate (≤ 2 kg):"}
+                    </span>
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "3px", background: "#ffffff", padding: "2px", borderRadius: "6px", border: "1px solid #cbd5e1" }}>
+                    {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
+                      const isSel = shippingDest === corridor.id;
+                      return (
+                        <button
+                          key={corridor.id}
+                          type="button"
+                          onClick={() => handleShippingDestChange(corridor.id)}
+                          title={isEs ? corridor.corridorLabelEs : corridor.corridorLabelEn}
+                          style={{
+                            border: isSel ? "1px solid #0284c7" : "1px solid transparent",
+                            background: isSel ? "#e0f2fe" : "transparent",
+                            color: isSel ? "#0369a1" : "#475569",
+                            fontWeight: isSel ? 800 : 600,
+                            fontSize: "0.68rem",
+                            padding: "2px 7px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "3px",
+                            transition: "all 0.15s ease"
+                          }}
+                        >
+                          <span>{corridor.flag}</span>
+                          <span>{isEs ? corridor.labelEs : corridor.labelEn}</span>
+                          <span style={{
+                            fontFamily: "monospace",
+                            fontWeight: 800,
+                            color: isSel ? "#0284c7" : "#64748b"
+                          }}>
+                            {corridor.rateBadge}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Dosage Strength Quick Filter Pills + Category Grouping Toggle */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "0.70rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                      {isEs ? "Concentración:" : "Filter Strength:"}
+                    </span>
+                    {DOSAGE_STRENGTHS.map(st => {
+                      const isSelected = selectedStrength === st.id;
+                      return (
+                        <button
+                          key={st.id}
+                          type="button"
+                          onClick={() => setSelectedStrength(st.id)}
+                          style={{
+                            padding: "2px 8px",
+                            borderRadius: "12px",
+                            fontSize: "0.68rem",
+                            fontWeight: isSelected ? 800 : 600,
+                            border: isSelected ? "1px solid #0284c7" : "1px solid #cbd5e1",
+                            background: isSelected ? "#0284c7" : "#ffffff",
+                            color: isSelected ? "#ffffff" : "#475569",
+                            cursor: "pointer",
+                            transition: "all 0.15s ease"
+                          }}
+                        >
+                          {st.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* View Organization Switcher: Categories (Default) vs Continuous */}
+                  <div style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    background: "#ffffff",
+                    padding: "2px",
+                    borderRadius: "6px",
+                    border: "1px solid #cbd5e1",
+                    gap: "2px"
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setGroupByCategory(true)}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        border: "none",
+                        background: groupByCategory ? "#e8f0fe" : "transparent",
+                        color: groupByCategory ? "#003666" : "#64748b",
+                        fontWeight: groupByCategory ? 800 : 600,
+                        fontSize: "0.70rem",
+                        padding: "3px 8px",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        boxShadow: groupByCategory ? "0 1px 2px rgba(0,0,0,0.08)" : "none"
+                      }}
+                    >
+                      <Layers size={12} />
+                      <span>{isEs ? "Categorías" : "Categories"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGroupByCategory(false)}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        border: "none",
+                        background: !groupByCategory ? "#e8f0fe" : "transparent",
+                        color: !groupByCategory ? "#003666" : "#64748b",
+                        fontWeight: !groupByCategory ? 800 : 600,
+                        fontSize: "0.70rem",
+                        padding: "3px 8px",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        boxShadow: !groupByCategory ? "0 1px 2px rgba(0,0,0,0.08)" : "none"
+                      }}
+                    >
+                      <span>≡</span>
+                      <span>{isEs ? "Continua" : "Continuous"}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -4795,7 +4714,6 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   </button>
                 </div>
               </div>
-            </div>
 
             {/* ── Peptide DataTable (Golden Rule #3) ── */}
             <div className="gcp-table-block" style={{
@@ -4899,7 +4817,8 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
               )}
             </div>
           </div>
-        </main>
+        </div>
+      </main>
 
       {/* ── Quick Order Request Drawer ── */}
       {isOrderDrawerOpen && (
