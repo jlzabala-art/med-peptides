@@ -11,6 +11,7 @@ import { ShieldCheck } from '@/lib/icons';
 import { Smartphone } from '@/lib/icons';
 import { Cpu } from '@/lib/icons';
 import { ArrowRight } from '@/lib/icons';
+import { Package } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

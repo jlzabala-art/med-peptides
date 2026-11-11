@@ -207,40 +207,93 @@ export function useSharedCatalogState({
     (products.length === 0 && protocols.length > 0)
   );
 
-  const isPeptideCatalog = useMemo(() => {
+  const isDiagnosticCatalog = useMemo(() => {
     const cat = String(catalogMeta?.catalogueFilter || catalogMeta?.category || '').toLowerCase();
     const title = String(catalogMeta?.title || catalogMeta?.name || '').toLowerCase();
     const supplier = String(catalogMeta?.supplierId || '').toLowerCase();
 
-    // If explicitly configured as a dedicated cosmetics catalog
-    if (
+    return (
+      cat === 'bloodo' || cat === 'eterna' || cat === 'diagnostic' || cat === 'diagnostics' ||
+      supplier === 'supplier-bloodo' || supplier === 'supplier-eternadx' ||
+      title.includes('bloodo') || title.includes('diagnostic') || title.includes('blood') ||
+      (products && products.length > 0 && products.every(p => {
+        const pCat = String(p.category || '').toLowerCase();
+        const pSlug = String(p.slug || p.id || '').toLowerCase();
+        const pName = String(p.canonicalName || p.name || '').toLowerCase();
+        return pSlug.includes('bloodo') || pSlug.includes('eterna') || pCat.includes('diagnostic') || pSlug.includes('test') || pName.includes('test');
+      }))
+    );
+  }, [catalogMeta, products]);
+
+  const isNutraceuticalCatalog = useMemo(() => {
+    if (isDiagnosticCatalog) return false;
+    const cat = String(catalogMeta?.catalogueFilter || catalogMeta?.category || '').toLowerCase();
+    const title = String(catalogMeta?.title || catalogMeta?.name || '').toLowerCase();
+    const supplier = String(catalogMeta?.supplierId || '').toLowerCase();
+
+    return (
+      cat === 'ultraperson' || cat === 'supplements' || cat === 'nutra' || cat === 'nutraceutical' ||
+      supplier === 'supplier-pharmapolis' ||
+      title.includes('ultraperson') || title.includes('nutra') ||
+      (products && products.length > 0 && products.every(p => {
+        const pCat = String(p.category || '').toLowerCase();
+        const pSlug = String(p.slug || p.id || '').toLowerCase();
+        return pCat.includes('supplement') || pCat.includes('nutra') || pSlug.includes('ultraperson');
+      }))
+    );
+  }, [catalogMeta, products, isDiagnosticCatalog]);
+
+  const isCosmeticCatalog = useMemo(() => {
+    if (isDiagnosticCatalog || isNutraceuticalCatalog) return false;
+    const cat = String(catalogMeta?.catalogueFilter || catalogMeta?.category || '').toLowerCase();
+    const title = String(catalogMeta?.title || catalogMeta?.name || '').toLowerCase();
+    const supplier = String(catalogMeta?.supplierId || '').toLowerCase();
+
+    return (
       cat === 'cosmetic' || cat === 'cosmetics' || cat === 'colway' ||
       title.includes('colway') || title.includes('cosmetic catalog') ||
-      (supplier === 'supplier-colway' && !title.includes('peptid'))
-    ) {
+      (supplier === 'supplier-colway' && !title.includes('peptid')) ||
+      (products && products.length > 0 && products.every(p => {
+        const pCat = String(p.category || '').toLowerCase();
+        const pSlug = String(p.slug || p.id || '').toLowerCase();
+        const brand = String(p.brand || '').toLowerCase();
+        return (
+          pCat === 'cosmetics' || pCat === 'cosmeceuticals' || pCat === 'skincare' ||
+          brand.includes('colway') || pSlug.startsWith('colway')
+        );
+      }))
+    );
+  }, [catalogMeta, products, isDiagnosticCatalog, isNutraceuticalCatalog]);
+
+  const isPeptideCatalog = useMemo(() => {
+    if (isDiagnosticCatalog || isNutraceuticalCatalog || isCosmeticCatalog) {
       return false;
     }
 
+    const cat = String(catalogMeta?.catalogueFilter || catalogMeta?.category || '').toLowerCase();
+    const supplier = String(catalogMeta?.supplierId || '').toLowerCase();
+
+    if (cat === 'peptides' || cat === 'magenta-peptides' || supplier === 'supplier-lotusland') {
+      return true;
+    }
+
     if (products && products.length > 0) {
-      // If products contain any peptide / therapeutic API (not pure cosmetic), it's a peptide catalog
-      const hasTherapeuticPeptides = products.some(p => {
+      return products.some(p => {
         const pCat = String(p.category || '').toLowerCase();
         const pSlug = String(p.slug || p.id || '').toLowerCase();
         const pType = String(p.productType || p.type || '').toLowerCase();
         const pName = String(p.canonicalName || p.name || '').toLowerCase();
-        const isCosm = (
-          pSlug.startsWith('colway-') ||
-          pCat.includes('cosmetic') || pCat.includes('skincare') || pCat.includes('trichology') ||
-          pType.includes('cosmetic') || pName.includes('shampoo') || pName.includes('conditioner') ||
-          pName.includes('blue diamond') || pName.includes('peeling')
+        return (
+          pCat.includes('peptide') || pType.includes('peptide') ||
+          pSlug.includes('ghk') || pSlug.includes('bpc') || pSlug.includes('tb-500') ||
+          pSlug.includes('cjc') || pSlug.includes('ipamorelin') || pSlug.includes('epithalon') ||
+          pSlug.includes('semax') || pSlug.includes('selank') || pName.includes('peptide')
         );
-        return !isCosm;
       });
-      return hasTherapeuticPeptides;
     }
 
     return true;
-  }, [catalogMeta, products]);
+  }, [catalogMeta, products, isDiagnosticCatalog, isNutraceuticalCatalog, isCosmeticCatalog]);
 
   const catalogId = catalogMeta?.catalogId || 'default';
 
@@ -931,6 +984,9 @@ export function useSharedCatalogState({
     handleConfirmWhatsApp,
     isProtocolCatalog,
     isPeptideCatalog,
+    isDiagnosticCatalog,
+    isNutraceuticalCatalog,
+    isCosmeticCatalog,
 
     // PDF generation state setters (kept in view to avoid dynamic import coupling)
     setIsGeneratingPdf,

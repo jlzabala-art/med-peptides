@@ -27,7 +27,8 @@ import {
   CreditCard,
   Calendar,
   Download,
-  Activity
+  Activity,
+  Package
 } from '@/lib/icons';
 import BrandLogo from '@/components/common/BrandLogo';
 import CopyableId from '@/components/ui/CopyableId';

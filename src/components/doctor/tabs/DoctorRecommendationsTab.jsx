@@ -768,7 +768,71 @@ export default function DoctorRecommendationsTab({
           ENGINE 1: SPECIALTY PRACTICE BLUEPRINTS
          ══════════════════════════════════════════════════════════════════════════ */}
       {recommendationEngineMode === 'specialty' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* ── 1. SEARCH TOOLBAR (GOLDEN RULE #7: SEARCH FIRST BEFORE FILTERS) ── */}
+          <div
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '8px',
+              padding: '2px 10px 2px 14px',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+            }}
+          >
+            <Search size={16} style={{ color: '#5f6368', flexShrink: 0, marginRight: '10px' }} />
+            <input
+              type="text"
+              value={recSearchQuery}
+              onChange={(e) => setRecSearchQuery(e.target.value)}
+              placeholder="Search formulations by clinical target, API, or active compound... (e.g. Minoxidil, GHK-Cu, Tropocollagen, Finasteride)"
+              style={{
+                flex: 1,
+                height: '36px',
+                fontSize: '0.84rem',
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                color: '#202124'
+              }}
+            />
+            {recSearchQuery && (
+              <button
+                type="button"
+                onClick={() => setRecSearchQuery('')}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '6px',
+                  cursor: 'pointer',
+                  color: '#5f6368',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <X size={15} />
+              </button>
+            )}
+            <div
+              style={{
+                marginLeft: '8px',
+                padding: '3px 8px',
+                background: '#f1f3f4',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                color: '#5f6368',
+                whiteSpace: 'nowrap',
+                border: '1px solid #dadce0'
+              }}
+            >
+              {blueprintsForSelectedSpecialty.length} {blueprintsForSelectedSpecialty.length === 1 ? 'Blueprint' : 'Blueprints'}
+            </div>
+          </div>
+
           {/* Specialty Vertical Filter Chips (GCP Standard) */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -1155,70 +1219,6 @@ export default function DoctorRecommendationsTab({
                 Reset Filter ✕
               </button>
             )}
-          </div>
-
-          {/* ── SEARCH TOOLBAR FOR SPECIALTY BLUEPRINTS ── */}
-          <div
-            style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              width: '100%',
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              borderRadius: '8px',
-              padding: '2px 10px 2px 14px',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-            }}
-          >
-            <Search size={16} style={{ color: '#5f6368', flexShrink: 0, marginRight: '10px' }} />
-            <input
-              type="text"
-              value={recSearchQuery}
-              onChange={(e) => setRecSearchQuery(e.target.value)}
-              placeholder="Search formulations by clinical target, API, or active compound... (e.g. Minoxidil, GHK-Cu, Tropocollagen, Finasteride)"
-              style={{
-                flex: 1,
-                height: '36px',
-                fontSize: '0.84rem',
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                color: '#202124'
-              }}
-            />
-            {recSearchQuery && (
-              <button
-                type="button"
-                onClick={() => setRecSearchQuery('')}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: '6px',
-                  cursor: 'pointer',
-                  color: '#5f6368',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <X size={15} />
-              </button>
-            )}
-            <div
-              style={{
-                marginLeft: '8px',
-                padding: '3px 8px',
-                background: '#f1f3f4',
-                borderRadius: '4px',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                color: '#5f6368',
-                whiteSpace: 'nowrap',
-                border: '1px solid #dadce0'
-              }}
-            >
-              {blueprintsForSelectedSpecialty.length} {blueprintsForSelectedSpecialty.length === 1 ? 'Blueprint' : 'Blueprints'}
-            </div>
           </div>
 
           {/* Specialty Blueprints Cards Grid (Google Cloud Console UX) */}

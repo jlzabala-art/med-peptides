@@ -84,9 +84,25 @@ export async function generateMetadata({ params, searchParams }) {
   const hasFilter = filterSummary.length > 0;
 
   const hasSpecificProductIds = Array.isArray(catalogData.productIds) && catalogData.productIds.length > 0;
+  const normCat = String(catalogData.category || '').toLowerCase();
+  const normFilt = String(catalogData.catalogueFilter || '').toLowerCase();
+  const normTitle = String(catalogData.title || '').toLowerCase();
+  const normSupp = String(catalogData.supplierId || '').toLowerCase();
+
+  const isDiagnosticMeta =
+    normCat === 'bloodo' || normCat === 'eterna' || normCat.includes('diagnostic') ||
+    normFilt === 'bloodo' || normFilt === 'eterna' || normFilt.includes('diagnostic') ||
+    normSupp === 'supplier-bloodo' || normSupp === 'supplier-eternadx' ||
+    normTitle.includes('bloodo') || normTitle.includes('diagnostic') || normTitle.includes('blood');
+
+  const isNutraMeta =
+    normCat === 'ultraperson' || normCat === 'supplements' || normCat.includes('nutra') ||
+    normFilt === 'ultraperson' || normSupp === 'supplier-pharmapolis' ||
+    normTitle.includes('ultraperson') || normTitle.includes('nutra');
+
   const isColwayOrCosmeticMeta =
-    catalogData.category === 'cosmetics' ||
-    String(catalogData.title || '').toLowerCase().includes('colway') ||
+    normCat === 'cosmetics' || normCat === 'colway' ||
+    normTitle.includes('colway') || normFilt === 'colway' || normSupp === 'supplier-colway' ||
     (hasSpecificProductIds && catalogData.productIds.every(id => String(id).toLowerCase().includes('colway')));
 
   // Generic metadata definition — never leaks partner, wholesaler, or supplier brand names
@@ -94,7 +110,19 @@ export async function generateMetadata({ params, searchParams }) {
   let description = '';
   let ogSiteName = '';
 
-  if (isColwayOrCosmeticMeta) {
+  if (isDiagnosticMeta) {
+    ogSiteName = 'Clinical Diagnostics & Biomarkers';
+    title = hasFilter
+      ? `Clinical Diagnostics: ${filterSummary} • Formulations Directory`
+      : 'Bloodo™ Clinical Diagnostics & Biomarkers • Formulations Directory';
+    description = `CE-IVDR & CLIA/CAP certified blood biomarker panels, capillary dried blood spot (DBS) tests & multi-omics telemetry in ${currency}. Verified institutional delivery terms.`;
+  } else if (isNutraMeta) {
+    ogSiteName = 'Precision Nutraceuticals Portfolio';
+    title = hasFilter
+      ? `Precision Nutraceuticals: ${filterSummary} • Formulations Directory`
+      : 'UltraPerson™ Precision Nutraceuticals • Formulations Directory';
+    description = `Clinical-grade precision nutraceuticals, liposomal bio-actives and therapeutic micronutrient complexes in ${currency}. Verified institutional delivery terms.`;
+  } else if (isColwayOrCosmeticMeta) {
     ogSiteName = 'Colway Clinical Portfolio';
     title = hasFilter
       ? `Curated Dermocosmetics: ${filterSummary} • Formulations Directory`
@@ -776,47 +804,93 @@ export default async function SharedCatalogPage({ params }) {
     }
   }
 
-  const isCosmeticCatalog = products.length > 0 && products.every(p => {
-    const cat = String(p.category || '').toLowerCase();
-    const id = String(p.id || '').toLowerCase();
-    const name = String(p.canonicalName || p.name || '').toLowerCase();
-    const brand = String(p.brand || '').toLowerCase();
-    return (
-      cat === 'cosmetics' ||
-      cat === 'cosmeceuticals' ||
-      cat === 'skincare' ||
-      brand.includes('colway') ||
-      name.includes('colway') ||
-      id.startsWith('colway')
-    );
-  });
-
-  const hasPeptides = products.some(p => {
-    const cat = String(p.category || '').toLowerCase();
-    const type = String(p.productType || p.type || '').toLowerCase();
-    const slug = String(p.slug || p.id || '').toLowerCase();
-    const name = String(p.canonicalName || p.name || '').toLowerCase();
-    const isCosm = (
-      slug.startsWith('colway-') ||
-      cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') ||
-      type.includes('cosmetic') || name.includes('shampoo') || name.includes('conditioner') ||
-      name.includes('blue diamond') || name.includes('peeling')
-    );
-    const isDiag = slug.includes('eterna') || slug.includes('bloodo') || cat.includes('diagnostic');
-    return !isCosm && !isDiag;
-  });
-
   const normCatFilter = String(catalogueFilter || '').toLowerCase().trim();
-  const isCompoundingCatalog = !isCosmeticCatalog && (
-    normCatFilter === 'magenta-compounding' ||
-    normCatFilter === 'compounding' ||
-    catalogMeta?.category === 'compounding'
+  const normCategory = String(catalogMeta?.category || category || '').toLowerCase().trim();
+  const normSupplier = String(catalogMeta?.supplierId || supplierId || '').toLowerCase().trim();
+  const normMetaTitle = String(catalogMeta?.title || '').toLowerCase().trim();
+
+  // 1. Diagnostic & Blood Testing Portfolio (Bloodo, Eterna, DBS, capillary tests)
+  const isDiagnosticCatalog = (
+    normCatFilter === 'bloodo' || normCatFilter === 'eterna' || normCatFilter.includes('diagnostic') ||
+    normCategory === 'bloodo' || normCategory === 'eterna' || normCategory.includes('diagnostic') ||
+    normSupplier === 'supplier-bloodo' || normSupplier === 'supplier-eternadx' ||
+    normMetaTitle.includes('bloodo') || normMetaTitle.includes('diagnostic') || normMetaTitle.includes('blood') ||
+    (products.length > 0 && products.every(p => {
+      const pCat = String(p.category || '').toLowerCase();
+      const pSlug = String(p.slug || p.id || '').toLowerCase();
+      const pName = String(p.canonicalName || p.name || '').toLowerCase();
+      return pSlug.includes('bloodo') || pSlug.includes('eterna') || pCat.includes('diagnostic') || pSlug.includes('test') || pName.includes('test');
+    }))
   );
 
-  const isCuratedCustomView = hasSpecificProductIds && !hasPeptides && !isCosmeticCatalog;
+  // 2. Precision Nutraceuticals Portfolio (UltraPerson)
+  const isNutraceuticalCatalog = !isDiagnosticCatalog && (
+    normCatFilter === 'ultraperson' || normCatFilter === 'supplements' || normCatFilter.includes('nutra') ||
+    normCategory === 'ultraperson' || normCategory === 'supplements' || normCategory.includes('nutra') ||
+    normSupplier === 'supplier-pharmapolis' ||
+    normMetaTitle.includes('ultraperson') || normMetaTitle.includes('nutra') ||
+    (products.length > 0 && products.every(p => {
+      const pCat = String(p.category || '').toLowerCase();
+      const pSlug = String(p.slug || p.id || '').toLowerCase();
+      return pCat.includes('supplement') || pCat.includes('nutra') || pSlug.includes('ultraperson');
+    }))
+  );
 
-  if (!catalogMeta.title) {
-    if (isCosmeticCatalog) {
+  // 3. Dermocosmetics Portfolio (Colway)
+  const isCosmeticCatalog = !isDiagnosticCatalog && !isNutraceuticalCatalog && (
+    products.length > 0 && products.every(p => {
+      const cat = String(p.category || '').toLowerCase();
+      const id = String(p.id || '').toLowerCase();
+      const name = String(p.canonicalName || p.name || '').toLowerCase();
+      const brand = String(p.brand || '').toLowerCase();
+      return (
+        cat === 'cosmetics' ||
+        cat === 'cosmeceuticals' ||
+        cat === 'skincare' ||
+        brand.includes('colway') ||
+        name.includes('colway') ||
+        id.startsWith('colway')
+      );
+    }) ||
+    normCatFilter === 'colway' || normCategory === 'colway' || normSupplier === 'supplier-colway'
+  );
+
+  // 4. Compounding Formulations
+  const isCompoundingCatalog = !isCosmeticCatalog && !isDiagnosticCatalog && !isNutraceuticalCatalog && (
+    normCatFilter === 'magenta-compounding' ||
+    normCatFilter === 'compounding' ||
+    normCategory === 'compounding' ||
+    normMetaTitle.includes('compounding')
+  );
+
+  // 5. Bioactive Peptides
+  const hasPeptides = !isDiagnosticCatalog && !isNutraceuticalCatalog && !isCosmeticCatalog && !isCompoundingCatalog && (
+    normCatFilter === 'peptides' || normCatFilter === 'magenta-peptides' ||
+    normCategory === 'peptides' || normSupplier === 'supplier-lotusland' ||
+    products.some(p => {
+      const cat = String(p.category || '').toLowerCase();
+      const type = String(p.productType || p.type || '').toLowerCase();
+      const slug = String(p.slug || p.id || '').toLowerCase();
+      const name = String(p.canonicalName || p.name || '').toLowerCase();
+      return (
+        cat.includes('peptide') || type.includes('peptide') ||
+        slug.includes('ghk') || slug.includes('bpc') || slug.includes('tb-500') ||
+        slug.includes('cjc') || slug.includes('ipamorelin') || slug.includes('epithalon') ||
+        slug.includes('semax') || slug.includes('selank') || name.includes('peptide')
+      );
+    })
+  );
+
+  const isCuratedCustomView = hasSpecificProductIds && !hasPeptides && !isCosmeticCatalog && !isDiagnosticCatalog && !isNutraceuticalCatalog;
+
+  if (!catalogMeta.title || catalogMeta.title.toLowerCase().includes('wholesale peptide catalog')) {
+    if (isDiagnosticCatalog) {
+      catalogMeta.title = normCatFilter === 'eterna' || normCategory === 'eterna'
+        ? 'ETERNA® Longevity Epigenetics Portfolio'
+        : 'Bloodo™ Clinical Diagnostics & Biomarkers';
+    } else if (isNutraceuticalCatalog) {
+      catalogMeta.title = 'UltraPerson™ Precision Nutraceuticals Portfolio';
+    } else if (isCosmeticCatalog) {
       catalogMeta.title = 'Colway Cellular Bio-Cosmetics & Nutricosmetics';
     } else if (normCatFilter === 'magenta-peptides') {
       catalogMeta.title = 'Magenta Medical — Clinical Peptides Portfolio';
@@ -824,10 +898,70 @@ export default async function SharedCatalogPage({ params }) {
       catalogMeta.title = 'Magenta Medical — Compounding & Wellness Portfolio';
     } else if (isCuratedCustomView) {
       catalogMeta.title = 'Curated Clinical Formulations Portfolio';
+    } else if (hasPeptides) {
+      catalogMeta.title = 'Clinical Peptide Formulations Portfolio';
     }
   }
 
-  const serverKpis = isCosmeticCatalog ? {
+  const serverKpis = isDiagnosticCatalog ? {
+    // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
+    globalTotalProducts: metaFacets?.totals?.products || 430,
+    globalTotalVariants: metaFacets?.totals?.variants || 830,
+    globalActiveProducts: metaFacets?.totals?.activeProducts || 429,
+
+    // 2. Pre-calculated Catalog-slice Metrics
+    catalogTotalProducts: products.length,
+    catalogTotalVariants: totalCatalogVariants,
+    readyStockCount: readyStockVariants,
+    coaVerifiedCount,
+
+    // 3. Diagnostics & Telemetry Benchmarks
+    isDiagnostic: true,
+    formulasTitle: 'Diagnostic Panels',
+    formulasSubtitle: 'Capillary DBS & dried blood spot tests',
+    purityTitle: 'Lab Accreditation',
+    purityValue: 'CLIA / CAP',
+    purityBadge: 'CE-IVDR',
+    puritySubtitle: 'Validated micro-sampling & clinical telemetry',
+    dispatchTitle: 'Dispatch SLA',
+    dispatchSlaValue: '24-48h Dispatch',
+    dispatchBadge: 'Express Transit',
+    dispatchSubtitle: 'Sample collection kit packaging',
+    traceabilityTitle: 'Lab Traceability',
+    traceabilityValue: '100% Barcoded',
+    traceabilityBadge: 'LIMS Sync',
+    traceabilitySubtitle: 'Automated digital results & lab reports',
+    updatedAt: metaFacets?.updatedAt || new Date().toISOString()
+  } : isNutraceuticalCatalog ? {
+    // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
+    globalTotalProducts: metaFacets?.totals?.products || 430,
+    globalTotalVariants: metaFacets?.totals?.variants || 830,
+    globalActiveProducts: metaFacets?.totals?.activeProducts || 429,
+
+    // 2. Pre-calculated Catalog-slice Metrics
+    catalogTotalProducts: products.length,
+    catalogTotalVariants: totalCatalogVariants,
+    readyStockCount: readyStockVariants,
+    coaVerifiedCount,
+
+    // 3. Precision Nutraceuticals Benchmarks
+    isNutra: true,
+    formulasTitle: 'Active Formulations',
+    formulasSubtitle: 'Precision nutraceutical complexes',
+    purityTitle: 'Quality Standard',
+    purityValue: 'GMP Grade',
+    purityBadge: 'ISO 22000',
+    puritySubtitle: 'Third-party assayed active ingredients',
+    dispatchTitle: 'Dispatch SLA',
+    dispatchSlaValue: '24-48h Dispatch',
+    dispatchBadge: 'Express Transit',
+    dispatchSubtitle: 'Climate-controlled warehouse stock',
+    traceabilityTitle: 'Batch Traceability',
+    traceabilityValue: '100% CoA',
+    traceabilityBadge: 'Batch Trace',
+    traceabilitySubtitle: 'Certificate of Analysis for every lot',
+    updatedAt: metaFacets?.updatedAt || new Date().toISOString()
+  } : isCosmeticCatalog ? {
     // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
     globalTotalProducts: metaFacets?.totals?.products || 430,
     globalTotalVariants: metaFacets?.totals?.variants || 830,

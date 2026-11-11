@@ -67,7 +67,36 @@ export default function SharedCatalogHeader({
     : (isWholesaler && rawRecipientName.includes(' • ') ? rawRecipientName.split(' • ')[0].trim() : rawRecipientName);
 
   const hasSpecificProductIds = Array.isArray(catalogMeta?.productIds) && catalogMeta.productIds.length > 0;
-  const isCosmeticCatalog = products.length > 0 && products.every(p => {
+  const catFilter = String(catalogMeta?.catalogueFilter || catalogMeta?.category || '').toLowerCase();
+  const suppFilter = String(catalogMeta?.supplierId || '').toLowerCase();
+  const metaTitle = String(catalogMeta?.title || '').toLowerCase();
+
+  // 1. Diagnostics & Blood Testing (Bloodo / ETERNA / Dried Blood Spot tests)
+  const isBloodoOrDiagnostic = 
+    catFilter === 'bloodo' || catFilter === 'eterna' || catFilter === 'diagnostic' || catFilter === 'diagnostics' ||
+    suppFilter === 'supplier-bloodo' || suppFilter === 'supplier-eternadx' ||
+    metaTitle.includes('bloodo') || metaTitle.includes('diagnostic') || metaTitle.includes('blood') ||
+    (products.length > 0 && products.every(p => {
+      const pCat = String(p.category || '').toLowerCase();
+      const pSlug = String(p.slug || p.id || '').toLowerCase();
+      const pName = String(p.canonicalName || p.name || '').toLowerCase();
+      return pSlug.includes('bloodo') || pSlug.includes('eterna') || pCat.includes('diagnostic') || pSlug.includes('test') || pName.includes('test');
+    }));
+
+  // 2. Precision Nutraceuticals (UltraPerson)
+  const isUltraPersonOrNutra = !isBloodoOrDiagnostic && (
+    catFilter === 'ultraperson' || catFilter === 'supplements' || catFilter === 'nutra' ||
+    suppFilter === 'supplier-pharmapolis' ||
+    metaTitle.includes('ultraperson') || metaTitle.includes('nutra') ||
+    (products.length > 0 && products.every(p => {
+      const pCat = String(p.category || '').toLowerCase();
+      const pSlug = String(p.slug || p.id || '').toLowerCase();
+      return pCat.includes('supplement') || pCat.includes('nutra') || pSlug.includes('ultraperson');
+    }))
+  );
+
+  // 3. Dermocosmetics (Colway)
+  const isCosmeticCatalog = !isBloodoOrDiagnostic && !isUltraPersonOrNutra && products.length > 0 && products.every(p => {
     const cat = String(p.category || '').toLowerCase();
     const id = String(p.id || '').toLowerCase();
     const name = String(p.canonicalName || p.name || '').toLowerCase();
@@ -82,17 +111,37 @@ export default function SharedCatalogHeader({
     );
   });
 
-  const isColway = isCosmeticCatalog || 
-    String(catalogMeta?.title || '').toLowerCase().includes('colway') ||
-    (hasSpecificProductIds && catalogMeta.productIds.every(id => String(id).toLowerCase().includes('colway')));
+  const isColway = !isBloodoOrDiagnostic && !isUltraPersonOrNutra && (
+    isCosmeticCatalog || 
+    metaTitle.includes('colway') ||
+    catFilter === 'colway' ||
+    suppFilter === 'supplier-colway' ||
+    (hasSpecificProductIds && catalogMeta.productIds.every(id => String(id).toLowerCase().includes('colway')))
+  );
 
-  const hasPeptides = products.some(p => {
-    const cat = String(p.category || '').toLowerCase();
-    const type = String(p.type || '').toLowerCase();
-    return cat.includes('peptide') || type.includes('peptide');
-  });
+  // 4. Compounding
+  const isCompounding = !isBloodoOrDiagnostic && !isUltraPersonOrNutra && !isColway && (
+    catFilter === 'magenta-compounding' || catFilter === 'compounding' || metaTitle.includes('compounding')
+  );
 
-  const isNeutralCustom = hasSpecificProductIds && !hasPeptides && !isCosmeticCatalog;
+  // 5. Peptides
+  const hasPeptides = !isBloodoOrDiagnostic && !isUltraPersonOrNutra && !isColway && !isCompounding && (
+    catFilter === 'peptides' || catFilter === 'magenta-peptides' || suppFilter === 'supplier-lotusland' ||
+    products.some(p => {
+      const cat = String(p.category || '').toLowerCase();
+      const type = String(p.type || '').toLowerCase();
+      const slug = String(p.slug || p.id || '').toLowerCase();
+      const name = String(p.canonicalName || p.name || '').toLowerCase();
+      return (
+        cat.includes('peptide') || type.includes('peptide') ||
+        slug.includes('ghk') || slug.includes('bpc') || slug.includes('tb-500') ||
+        slug.includes('cjc') || slug.includes('ipamorelin') || slug.includes('epithalon') ||
+        slug.includes('semax') || slug.includes('selank') || name.includes('peptide')
+      );
+    })
+  );
+
+  const isNeutralCustom = hasSpecificProductIds && !hasPeptides && !isColway && !isBloodoOrDiagnostic && !isUltraPersonOrNutra;
 
   const verifiedCode = batchCode || catalogCode || 'RP-CATALOG';
   const cleanBaseUrl = shareUrl || (typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : 'https://www.atlashealth-services.com');
@@ -186,11 +235,17 @@ export default function SharedCatalogHeader({
               }}>
                 <ShieldCheck size={11} color="#16a34a" />
                 <span>
-                  {isColway
-                    ? 'CPNP & EU 1223/2009 Certified'
-                    : isNeutralCustom
-                      ? 'Institutional Quality Certified'
-                      : 'RP-HPLC & LC-MS Certified'}
+                  {isBloodoOrDiagnostic
+                    ? 'CE-IVDR & CLIA/CAP Certified'
+                    : isUltraPersonOrNutra
+                      ? 'GMP & ISO 22000 Certified'
+                      : isColway
+                        ? 'CPNP & EU 1223/2009 Certified'
+                        : isCompounding
+                          ? 'USP / Ph. Eur. API Grade'
+                          : isNeutralCustom
+                            ? 'Institutional Quality Certified'
+                            : 'RP-HPLC & LC-MS Certified'}
                 </span>
               </span>
 
@@ -235,7 +290,7 @@ export default function SharedCatalogHeader({
                 fontSize: '0.66rem',
                 fontWeight: 700
               }}>
-                📦 {products.length} Formulations • {totalVariants || products.length} SKUs
+                📦 {products.length} {isBloodoOrDiagnostic ? (products.length === 1 ? 'Diagnostic Panel' : 'Diagnostic Panels') : (products.length === 1 ? 'Formulation' : 'Formulations')} • {totalVariants || products.length} SKUs
               </span>
             </div>
 
@@ -248,21 +303,33 @@ export default function SharedCatalogHeader({
               letterSpacing: '-0.02em',
               lineHeight: 1.2
             }}>
-              {catalogMeta?.title
+              {catalogMeta?.title && !catalogMeta.title.toLowerCase().includes('wholesale peptide catalog')
                 ? (cleanRecipientName && !catalogMeta.title.includes(cleanRecipientName)
                     ? `${catalogMeta.title} • ${cleanRecipientName}`
                     : catalogMeta.title)
                 : cleanRecipientName
-                  ? (isColway
-                      ? (isWholesaler ? `Wholesale Colway Portfolio • ${cleanRecipientName}` : `Colway Cellular Formulations • ${cleanRecipientName}`)
-                      : isNeutralCustom
-                        ? (isWholesaler ? `Wholesale Formulations • ${cleanRecipientName}` : `Curated Formulations Portfolio • ${cleanRecipientName}`)
-                        : (isWholesaler ? `Wholesale Peptide Catalog • ${cleanRecipientName}` : `Clinical Peptide Catalog • ${cleanRecipientName}`))
-                  : (isColway
-                      ? 'Colway Cellular Bio-Cosmetics & Nutricosmetics'
-                      : isNeutralCustom
-                        ? 'Curated Clinical Formulations Portfolio'
-                        : 'Clinical Peptide Catalog')}
+                  ? (isBloodoOrDiagnostic
+                      ? (isWholesaler ? `Wholesale Diagnostics & Biomarkers • ${cleanRecipientName}` : `Clinical Diagnostics & Biomarkers • ${cleanRecipientName}`)
+                      : isUltraPersonOrNutra
+                        ? (isWholesaler ? `Wholesale Precision Nutraceuticals • ${cleanRecipientName}` : `Clinical Precision Nutraceuticals • ${cleanRecipientName}`)
+                        : isColway
+                          ? (isWholesaler ? `Wholesale Colway Portfolio • ${cleanRecipientName}` : `Colway Cellular Formulations • ${cleanRecipientName}`)
+                          : isCompounding
+                            ? (isWholesaler ? `Wholesale Compounding Formulations • ${cleanRecipientName}` : `Compounding Formulations • ${cleanRecipientName}`)
+                            : isNeutralCustom
+                              ? (isWholesaler ? `Wholesale Formulations • ${cleanRecipientName}` : `Curated Formulations Portfolio • ${cleanRecipientName}`)
+                              : (isWholesaler ? `Wholesale Peptide Catalog • ${cleanRecipientName}` : `Clinical Peptide Catalog • ${cleanRecipientName}`))
+                  : (isBloodoOrDiagnostic
+                      ? (isWholesaler ? 'Bloodo™ Wholesale Diagnostics Portfolio' : 'Clinical Diagnostics & Biomarkers Directory')
+                      : isUltraPersonOrNutra
+                        ? 'Clinical Precision Nutraceuticals Portfolio'
+                        : isColway
+                          ? 'Colway Cellular Bio-Cosmetics & Nutricosmetics'
+                          : isCompounding
+                            ? 'Compounding Formulations & Wellness Portfolio'
+                            : isNeutralCustom
+                              ? 'Curated Clinical Formulations Portfolio'
+                              : 'Clinical Peptide Catalog')}
             </h1>
 
             {/* Description (Compact 1-line summary) */}
@@ -273,11 +340,17 @@ export default function SharedCatalogHeader({
               lineHeight: 1.35,
               maxWidth: '720px'
             }}>
-              {isColway
-                ? 'Biologically active native tropocollagen, botanical complexes and specialized dermocosmetic systems. Verified institutional terms.'
-                : isNeutralCustom
-                  ? 'Curated clinical formulations portfolio and technical specifications. Verified institutional delivery terms.'
-                  : 'Analytical-grade lyophilized peptide vials & standardized therapeutic protocols. Verified institutional terms.'}
+              {isBloodoOrDiagnostic
+                ? 'CE-IVDR & CLIA/CAP certified blood biomarker panels, capillary dried blood spot (DBS) tests & multi-omics telemetry. Verified institutional terms.'
+                : isUltraPersonOrNutra
+                  ? 'Clinical-grade precision nutraceuticals, standardized botanical bio-actives and therapeutic micronutrient complexes. Verified institutional terms.'
+                  : isColway
+                    ? 'Biologically active native tropocollagen, botanical complexes and specialized dermocosmetic systems. Verified institutional terms.'
+                    : isCompounding
+                      ? 'Pharmaceutical compounding formulations, liposomal transdermal matrices and clinical API monographs. Verified institutional terms.'
+                      : isNeutralCustom
+                        ? 'Curated clinical formulations portfolio and technical specifications. Verified institutional delivery terms.'
+                        : 'Analytical-grade lyophilized peptide vials & standardized therapeutic protocols. Verified institutional terms.'}
             </p>
 
             {/* GCP High-Density Unified Action Toolbar */}

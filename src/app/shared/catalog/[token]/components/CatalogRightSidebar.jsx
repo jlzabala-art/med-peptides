@@ -67,6 +67,9 @@ export default function CatalogRightSidebar({
   isOpenMobile = false,
   onCloseMobile = () => {},
   isPeptideCatalog = true,
+  isDiagnosticCatalog = false,
+  isNutraceuticalCatalog = false,
+  isCosmeticCatalog = false,
   t = (k) => k
 }) {
   const activeGoalsCount = selectedGoals.length;
@@ -380,6 +383,190 @@ export default function CatalogRightSidebar({
                 </button>
               );
             })}
+          </div>
+        </div>
+      ) : isDiagnosticCatalog ? (
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+          overflow: 'hidden'
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: '0.85rem 1rem',
+            borderBottom: '1px solid #f1f5f9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: '#f8fafc'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <ShieldCheck size={16} style={{ color: '#003666' }} />
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.04em' }}>
+                LAB & ACCREDITATION STANDARDS
+              </span>
+            </div>
+            <span style={{
+              fontSize: '0.66rem',
+              fontWeight: 700,
+              color: '#16a34a',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              padding: '2px 6px',
+              borderRadius: '4px'
+            }}>
+              ACCREDITED
+            </span>
+          </div>
+
+          {/* Standards List */}
+          <div style={{
+            padding: '0.85rem 1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  CE-IVDR Certified Micro-Sampling
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Conforms to European In-Vitro Diagnostic Regulation (EU 2017/746) for medical collection devices.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  CLIA / CAP High-Complexity Labs
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Clinical biomarker telemetry analyzed exclusively in CLIA-certified and CAP-accredited reference facilities.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  Capillary Dried Blood Spot (DBS)
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Room-temperature analytical stability during international transit with zero cold-chain dependency.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  ISO 15189 Quality Management
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Medical laboratory chain-of-custody, end-to-end encrypted telemetry and automated physician LIMS export.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : isNutraceuticalCatalog ? (
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+          overflow: 'hidden'
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: '0.85rem 1rem',
+            borderBottom: '1px solid #f1f5f9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: '#f8fafc'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <ShieldCheck size={16} style={{ color: '#003666' }} />
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.04em' }}>
+                NUTRACEUTICAL QUALITY STANDARDS
+              </span>
+            </div>
+            <span style={{
+              fontSize: '0.66rem',
+              fontWeight: 700,
+              color: '#16a34a',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              padding: '2px 6px',
+              borderRadius: '4px'
+            }}>
+              GMP CERTIFIED
+            </span>
+          </div>
+
+          {/* Standards List */}
+          <div style={{
+            padding: '0.85rem 1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  cGMP Certified (21 CFR Part 111)
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Manufactured in strictly audited pharmaceutical facilities with full batch release controls.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  ISO 22000 & HACCP Standards
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Certified food safety management systems across formulation, raw ingredients, and packaging.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  Standardized Bio-Active Titration
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Quantified active compounds verified via HPLC assays and certified botanical extracts.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  Heavy Metals & Purity Screened
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Independently assayed for heavy metals, micro-contaminants, and residual solvent purity.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ) : (

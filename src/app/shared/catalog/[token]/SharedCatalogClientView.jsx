@@ -182,6 +182,9 @@ export default function SharedCatalogClientView({
     handleConfirmWhatsApp,
     isProtocolCatalog,
     isPeptideCatalog,
+    isDiagnosticCatalog,
+    isNutraceuticalCatalog,
+    isCosmeticCatalog,
   } = useSharedCatalogState({
     catalogMeta,
     products,
@@ -1229,6 +1232,9 @@ export default function SharedCatalogClientView({
                           setSelectedPublicProtocol={setSelectedPublicProtocol}
                           catalogMeta={catalogMeta}
                           isPeptideCatalog={isPeptideCatalog}
+            isDiagnosticCatalog={isDiagnosticCatalog}
+            isNutraceuticalCatalog={isNutraceuticalCatalog}
+            isCosmeticCatalog={isCosmeticCatalog}
                           isPriceListOnly={isPriceListOnly}
                           t={t}
                         />
@@ -1252,6 +1258,9 @@ export default function SharedCatalogClientView({
                           setSelectedPublicProtocol={setSelectedPublicProtocol}
                           catalogMeta={catalogMeta}
                           isPeptideCatalog={isPeptideCatalog}
+            isDiagnosticCatalog={isDiagnosticCatalog}
+            isNutraceuticalCatalog={isNutraceuticalCatalog}
+            isCosmeticCatalog={isCosmeticCatalog}
                           isPriceListOnly={isPriceListOnly}
                           t={t}
                         />
@@ -1293,6 +1302,9 @@ export default function SharedCatalogClientView({
             isOpenMobile={isMobileSidebarOpen}
             onCloseMobile={() => setIsMobileSidebarOpen(false)}
             isPeptideCatalog={isPeptideCatalog}
+            isDiagnosticCatalog={isDiagnosticCatalog}
+            isNutraceuticalCatalog={isNutraceuticalCatalog}
+            isCosmeticCatalog={isCosmeticCatalog}
             t={t}
           />
         </div> {/* end .catalog-content-with-sidebar */}

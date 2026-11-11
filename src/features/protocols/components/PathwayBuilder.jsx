@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, BrainCircuit, X, Plus } from '@/lib/icons';
+import { Sparkles, BrainCircuit, X, Plus, Package } from '@/lib/icons';
 import { TextField, Select } from '../../../components/ui';
 
 // ── PathwayBuilder Modal ────────────────────────────────────────────────────────

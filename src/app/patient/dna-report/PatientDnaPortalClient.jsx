@@ -31,7 +31,6 @@ import {
   Zap
 } from 'lucide-react';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
-import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import {
   evaluateNutrigenomicProfile,
   DEFAULT_HOSSAM_GENOTYPES,
@@ -2134,8 +2133,6 @@ export default function PatientDnaPortalClient({
         )}
 
       </main>
-
-      <PublicUnifiedFooter />
     </div>
   );
 }
