@@ -803,143 +803,150 @@ export default function PatientDnaPortalClient({
                   </p>
                 </div>
 
-                {/* Day selector pills */}
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                {/* Day selector pills (Google Cloud Console UX Segmented Chips) */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
                   {clinicalProfile.sevenDayMealPlan.map((d) => (
                     <button
                       key={d.day}
+                      type="button"
                       onClick={() => setSelectedDay(d.day)}
                       style={{
-                        padding: '6px 14px',
-                        borderRadius: '6px',
-                        fontSize: '0.80rem',
-                        fontWeight: 800,
+                        height: '28px',
+                        padding: '0 12px',
+                        borderRadius: '4px',
+                        fontSize: '0.74rem',
+                        fontWeight: selectedDay === d.day ? 700 : 500,
                         border: '1px solid',
-                        borderColor: selectedDay === d.day ? '#0284c7' : '#cbd5e1',
-                        backgroundColor: selectedDay === d.day ? '#0284c7' : '#ffffff',
-                        color: selectedDay === d.day ? '#ffffff' : '#475569',
+                        borderColor: selectedDay === d.day ? '#0284c7' : '#dadce0',
+                        backgroundColor: selectedDay === d.day ? '#e0f2fe' : '#ffffff',
+                        color: selectedDay === d.day ? '#0369a1' : '#3c4043',
                         cursor: 'pointer',
-                        boxShadow: selectedDay === d.day ? '0 2px 6px rgba(2, 132, 199, 0.25)' : 'none'
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        transition: 'all 0.12s ease'
                       }}
                     >
-                      {d.dayName}
+                      <span>Day {d.day}</span>
+                      <span style={{ opacity: 0.7 }}>({d.dayName})</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Active Day Card */}
+              {/* Active Day Card (Google Cloud Console UX) */}
               {(() => {
                 const dayPlan = clinicalProfile.sevenDayMealPlan.find(d => d.day === selectedDay) || clinicalProfile.sevenDayMealPlan[0];
                 return (
-                  <div style={{ backgroundColor: '#f0f9ff', border: '1.5px solid #7dd3fc', borderRadius: '10px', padding: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ backgroundColor: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '1.25rem', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
                       <div>
-                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
+                        <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                           Day {dayPlan.day} · {dayPlan.dayName}
                         </span>
-                        <h4 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: '2px 0 0 0' }}>
+                        <h4 style={{ fontSize: '1.10rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 0 0' }}>
                           {dayPlan.themeEn}
                         </h4>
                       </div>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', border: '1px solid #bae6fd' }}>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 600, backgroundColor: '#e8f0fe', color: '#1a73e8', border: '1px solid #d2e3fc', padding: '3px 8px', borderRadius: '4px' }}>
                         Plate Sequencing Enforced
                       </span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
                       {/* Breakfast */}
-                      <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0d9488', fontWeight: 800, fontSize: '0.80rem', marginBottom: '4px' }}>
-                          <Sun size={15} />
+                      <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0d9488', fontWeight: 700, fontSize: '0.78rem', marginBottom: '6px' }}>
+                          <Sun size={14} />
                           <span>Breakfast (High Protein Ignition)</span>
                         </div>
-                        <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
                           {dayPlan.breakfast}
                         </p>
                       </div>
 
                       {/* Lunch */}
-                      <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontWeight: 800, fontSize: '0.80rem', marginBottom: '4px' }}>
-                          <Utensils size={15} />
+                      <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontWeight: 700, fontSize: '0.78rem', marginBottom: '6px' }}>
+                          <Utensils size={14} />
                           <span>Lunch (Peak Digestion &amp; Sequencing)</span>
                         </div>
-                        <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
                           {dayPlan.lunch}
                         </p>
                       </div>
 
                       {/* PM Snack */}
-                      <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#b45309', fontWeight: 800, fontSize: '0.80rem', marginBottom: '4px' }}>
-                          <Flame size={15} />
+                      <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#b45309', fontWeight: 700, fontSize: '0.78rem', marginBottom: '6px' }}>
+                          <Flame size={14} />
                           <span>PM Snack (Dopamine Anti-Craving)</span>
                         </div>
-                        <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
                           {dayPlan.snack}
                         </p>
                       </div>
 
                       {/* Dinner */}
-                      <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#1e40af', fontWeight: 800, fontSize: '0.80rem', marginBottom: '4px' }}>
-                          <Moon size={15} />
+                      <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#1e40af', fontWeight: 700, fontSize: '0.78rem', marginBottom: '6px' }}>
+                          <Moon size={14} />
                           <span>Dinner (Light Cellular Repair)</span>
                         </div>
-                        <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
                           {dayPlan.dinner}
                         </p>
                       </div>
                     </div>
 
-                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #bae6fd', fontSize: '0.76rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>🫖 <strong>Bedtime Restorative Infusion:</strong> {dayPlan.bedtimeTea}</span>
+                    <div style={{ marginTop: '0.85rem', paddingTop: '0.65rem', borderTop: '1px solid #f1f5f9', fontSize: '0.74rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontWeight: 600 }}>Bedtime Restorative Infusion:</span>
+                      <span style={{ color: '#475569' }}>{dayPlan.bedtimeTea}</span>
                     </div>
                   </div>
                 );
               })()}
             </div>
 
-            {/* ── Minimal Targeted Co-Factors (Food-First Complement) ── */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+            {/* ── Minimal Targeted Co-Factors (Food-First Complement · Google Cloud UX) ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #dadce0', padding: '1.5rem', boxShadow: '0 1px 2px rgba(60,64,67,0.06)' }}>
               <div style={{ marginBottom: '1.25rem' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  TARGETED CO-FACTORS (SUPPORTING CAST, NOT LEAD ACTOR)
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  TARGETED CO-FACTORS (FOOD-FIRST SYNERGY · ONLY 3 ESSENTIALS)
                 </span>
-                <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 4px 0' }}>
                   Minimal Targeted Co-Factors
                 </h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                <p style={{ margin: 0, fontSize: '0.80rem', color: '#64748b' }}>
                   Only 3 precision cofactors that genetic polymorphisms prevent your cells from rapidly generating from diet alone.
                 </p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
                 {clinicalProfile.minimalTargetedCoFactors.map((co, idx) => (
-                  <div key={idx} style={{ backgroundColor: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '10px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div key={idx} style={{ backgroundColor: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#e2e8f0', color: '#334155', padding: '2px 6px', borderRadius: '3px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ height: '20px', fontSize: '0.66rem', lineHeight: '18px', backgroundColor: '#f1f3f4', color: '#3c4043', border: '1px solid #dadce0', padding: '0 6px', borderRadius: '4px', fontWeight: 600 }}>
                           Cofactor {idx + 1}
                         </span>
-                        <span style={{ fontSize: '0.74rem', fontWeight: 750, color: '#0d9488' }}>
+                        <span style={{ height: '20px', fontSize: '0.68rem', lineHeight: '18px', backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '0 6px', borderRadius: '4px', fontWeight: 700 }}>
                           {co.dose}
                         </span>
                       </div>
-                      <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a', margin: '0 0 6px 0' }}>
+                      <h4 style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
                         {co.nutrient}
                       </h4>
-                      <div style={{ fontSize: '0.74rem', color: '#0f766e', fontWeight: 650, marginBottom: '6px' }}>
-                        🥗 <strong>Food Synergy:</strong> {co.foodSynergy}
+                      <div style={{ fontSize: '0.72rem', color: '#0f766e', fontWeight: 600, marginBottom: '6px' }}>
+                        Food Synergy: {co.foodSynergy}
                       </div>
-                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
+                      <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
                         {co.rationaleEn}
                       </p>
                     </div>
 
-                    <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', fontSize: '0.74rem', color: '#64748b' }}>
-                      ⏰ <strong>Timing:</strong> {co.timing}
+                    <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f5f9', fontSize: '0.72rem', color: '#64748b' }}>
+                      Timing: {co.timing}
                     </div>
                   </div>
                 ))}
