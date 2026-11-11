@@ -30,6 +30,41 @@ export async function GET(request) {
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const helveticaOblique = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
+    // Universal WinAnsi font and text sanitizer (prevents WinAnsi encoding crashes)
+    const sanitizePdfText = (str = '') => {
+      if (!str || typeof str !== 'string') return '';
+      const map = {
+        '🥬': '[Veg]', '🐟': '[Fish]', '🫒': '[Oil]', '🍵': '[Tea]', '🥗': '[Diet]',
+        '🌍': '[Global]', '✨': '[*]', '⚡': '[!]', '🧠': '[Brain]',
+        '≥': '>=', '≤': '<=', '•': '-', '·': '|', '—': '-', '–': '-', '≈': '~',
+        'µ': 'u', '²': '2', 'º': 'o', '®': '(R)', '™': '(TM)', '€': 'EUR',
+        'é': 'e', 'á': 'a', 'í': 'i', 'ó': 'o', 'ú': 'u', 'ñ': 'n',
+        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U'
+      };
+      let res = str;
+      for (const [k, v] of Object.entries(map)) {
+        res = res.replaceAll(k, v);
+      }
+      return res.replace(/[^\x20-\x7E\t\n\r]/g, '');
+    };
+
+    const origWidthOfTextAtSize = helvetica.widthOfTextAtSize.bind(helvetica);
+    helvetica.widthOfTextAtSize = (t, s) => origWidthOfTextAtSize(sanitizePdfText(t), s);
+
+    const origBoldWidthOfTextAtSize = helveticaBold.widthOfTextAtSize.bind(helveticaBold);
+    helveticaBold.widthOfTextAtSize = (t, s) => origBoldWidthOfTextAtSize(sanitizePdfText(t), s);
+
+    const origObliqueWidthOfTextAtSize = helveticaOblique.widthOfTextAtSize.bind(helveticaOblique);
+    helveticaOblique.widthOfTextAtSize = (t, s) => origObliqueWidthOfTextAtSize(sanitizePdfText(t), s);
+
+    const origAddPage = pdfDoc.addPage.bind(pdfDoc);
+    pdfDoc.addPage = (dims) => {
+      const pg = origAddPage(dims);
+      const origDrawText = pg.drawText.bind(pg);
+      pg.drawText = (text, options) => origDrawText(sanitizePdfText(text), options);
+      return pg;
+    };
+
     // Color Palette
     const navyPrimary = rgb(0 / 255, 54 / 255, 102 / 255);       // #003666
     const tealAccent = rgb(13 / 255, 148 / 255, 136 / 255);      // #0d9488
@@ -2021,24 +2056,28 @@ export async function GET(request) {
 
         const tocItems = [
           {
-            title: '1. Nutrigenomic Sensitivities & Food Intolerances',
-            sub: 'Lactose intolerance, salt sensitivity, caffeine metabolism, and gluten predisposition',
-            page: 'Page 4'
+            title: '1. Dietary Effectiveness & Weight Control (Mediterranean vs Low-Carb)',
+            sub: 'Low-carb responsiveness, fat/carb energy efficiency, satiety index and BMI predispositions',
+            page: 'PDF P. 16-29',
+            orig: '(Doc P. 11-24)'
           },
           {
-            title: '2. Vitamin & Mineral Metabolic Needs',
-            sub: 'Vitamins D, B9 (Folate), B12, C, Iron, Calcium, and antioxidant defenses',
-            page: 'Page 12'
+            title: '2. Nutrigenomic Sensitivities & Food Intolerances (Lactose, Gluten, Salt, DAO)',
+            sub: 'Lactose intolerance, salt-sensitive hypertension, DAO histamine metabolism & coeliac risk',
+            page: 'PDF P. 30-38',
+            orig: '(Doc P. 25-33)'
           },
           {
-            title: '3. Macronutrients & Metabolic Profile',
-            sub: 'Lipid metabolism, saturated fat response, carbohydrate absorption, and satiety index',
-            page: 'Page 24'
+            title: '3. Micronutrient Metabolism & Co-Factors (Folate B9, D, B6, Iron, Calcium, Zn)',
+            sub: 'MTHFR methylation, VDR vitamin D utilization, B-complex and essential cellular minerals',
+            page: 'PDF P. 39-51',
+            orig: '(Doc P. 34-46)'
           },
           {
-            title: '4. Dietary Effectiveness & Energy Balance',
-            sub: 'Low-carb vs Mediterranean diet effectiveness, caloric restriction, and exercise impact',
-            page: 'Page 42'
+            title: '4. Lipids, Cardiovascular & Caffeine Metabolism (Cholesterol, Triglycerides, Coffee)',
+            sub: 'LDL cholesterol regulation, hepatic triglyceride clearance, omega-6 and caffeine half-life',
+            page: 'PDF P. 52-59',
+            orig: '(Doc P. 47-54)'
           }
         ];
 
@@ -2052,8 +2091,8 @@ export async function GET(request) {
             color: darkSlate
           });
 
-          // Page Badge on Right
-          const pBadgeW = 50;
+          // Page Badge on Right (Showing Real PDF page + Original 24Genetics report page)
+          const pBadgeW = 100;
           dividerPage.drawRectangle({
             x: dWidth - 56 - pBadgeW - 16,
             y: tocY - 3,
@@ -2063,10 +2102,10 @@ export async function GET(request) {
             borderColor: tealAccent,
             borderWidth: 0.8
           });
-          dividerPage.drawText(item.page, {
+          dividerPage.drawText(`${item.page} ${item.orig}`, {
             x: dWidth - 56 - pBadgeW - 10,
             y: tocY + 1,
-            size: 6.8,
+            size: 6.2,
             font: helveticaBold,
             color: tealAccent
           });

@@ -37,6 +37,7 @@ import {
 } from '@/lib/icons';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
 import CopyableId from '@/components/ui/CopyableId';
@@ -50,7 +51,7 @@ export default function NormaPharmaceuticalDetail({
 }) {
   // English by default as explicitly requested by user
   const [lang, setLang] = useState('en');
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'protocols' | 'administration' | 'coa' | 'monitoring' | 'b2b'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'protocols' | 'administration' | 'monitoring' | 'coa' | 'b2b'
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isDoctorUnlocked, setIsDoctorUnlocked] = useState(false);
@@ -78,11 +79,6 @@ export default function NormaPharmaceuticalDetail({
   const galenic = p.galenicSpecs || {};
   const pharma = p.pharmaDetails || {};
   const monitoring = p.clinicalMonitoring || {};
-
-  const handleDownloadCoa = () => {
-    const coaUrl = `/documents/coa/norma/COA-EVER-PHARMA-NORMA-TE-250MG-BATCH-12473.pdf`;
-    window.open(coaUrl, '_blank');
-  };
 
   return (
     <div className="norma-page-container">
@@ -182,208 +178,219 @@ export default function NormaPharmaceuticalDetail({
 
       {/* ── MAIN CONTENT ── */}
       <main className="norma-content-grid">
-        {/* ── HERO SECTION: SPLIT PRESENTATION ── */}
-        <div className="norma-hero-split">
-          {/* Left Column: Visual Box & Key Attributes Card */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="norma-card" style={{ textAlign: 'center', position: 'relative' }}>
-              <div style={{
-                position: 'absolute',
-                top: '14px',
-                left: '14px',
-                fontSize: '0.70rem',
-                fontWeight: 800,
-                color: '#166534',
-                backgroundColor: '#dcfce7',
-                padding: '3px 8px',
-                borderRadius: '4px',
-                border: '1px solid #bbf7d0'
-              }}>
-                100% ORIGINAL EU PHARMA
-              </div>
-
-              {/* Pharmaceutical Product Image / Render */}
-              <div style={{
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                padding: '2rem 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '260px',
-                border: '1px solid #f1f5f9'
-              }}>
-                <img
-                  src={p.imageUrl || '/images/products/norma/testosterone-enanthate-norma-250mg.svg'}
-                  alt="Testosterone Enanthate Norma Hellas 250mg"
-                  style={{ maxHeight: '220px', maxWidth: '100%', objectFit: 'contain' }}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    if (e.currentTarget.nextSibling) {
-                      e.currentTarget.nextSibling.style.display = 'flex';
-                    }
-                  }}
-                />
-                <div style={{ display: 'none', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                  <Package size={64} color="#003666" />
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#003666' }}>
-                    Norma Hellas S.A. • 1 mL Amber Ampoule
-                  </span>
-                </div>
-              </div>
-
-              {/* Quick Specs Under Visual (Google Cloud Key-Value Resource Format) */}
-              <div className="gcp-kv-grid">
-                <div className="gcp-kv-item">
-                  <span className="gcp-kv-label">
-                    {isEs ? 'Dosificación' : 'Established Dose'}
-                  </span>
-                  <span className="gcp-kv-value">250 mg / 1 mL</span>
-                </div>
-
-                <div className="gcp-kv-item">
-                  <span className="gcp-kv-label">
-                    {isEs ? 'Base Activa Pura' : 'Active Base Equiv.'}
-                  </span>
-                  <span className="gcp-kv-value" style={{ color: '#003666' }}>~180 mg Testosterone</span>
-                </div>
-
-                <div className="gcp-kv-item">
-                  <span className="gcp-kv-label">
-                    {isEs ? 'Envase Galénico' : 'Galenic Container'}
-                  </span>
-                  <span className="gcp-kv-value">Type I Amber Glass</span>
-                </div>
-
-                <div className="gcp-kv-item">
-                  <span className="gcp-kv-label">
-                    {isEs ? 'Vía de Aplicación' : 'Clinical Route'}
-                  </span>
-                  <span className="gcp-kv-value" style={{ color: '#991b1b' }}>Deep Intramuscular (I.M.)</span>
-                </div>
-              </div>
-
-              {/* Google Cloud Console CTA Action Buttons */}
-              <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <button
-                  onClick={() => setIsInquiryDrawerOpen(true)}
-                  className="gcp-btn-primary"
-                >
-                  <Building2 size={16} />
-                  <span>{isEs ? 'Solicitar Suministro para Clínica / Hospital' : 'Request Clinic / Hospital Allocation'}</span>
-                </button>
-
-                <button
-                  onClick={handleDownloadCoa}
-                  className="gcp-btn-secondary"
-                >
-                  <Download size={14} />
-                  <span>{isEs ? 'Descargar Ficha Analítica / COA (PDF)' : 'Download Certified Batch COA (PDF)'}</span>
-                </button>
-              </div>
+        {/* ── TOP HERO PANORAMA: FULL WIDTH OVERVIEW (GOOGLE CLOUD STANDARD) ── */}
+        <div className="norma-hero-panorama">
+          {/* 1. Visual Box */}
+          <div className="norma-hero-image-box">
+            <div style={{
+              position: 'absolute',
+              top: '10px',
+              left: '10px',
+              fontSize: '0.66rem',
+              fontWeight: 800,
+              color: '#166534',
+              backgroundColor: '#dcfce7',
+              padding: '2px 7px',
+              borderRadius: '4px',
+              border: '1px solid #bbf7d0'
+            }}>
+              100% ORIGINAL EU PHARMA
             </div>
 
-            {/* Storage Warning Card (GCP Notice Style) */}
-            <div className="norma-card" style={{ borderLeft: '4px solid #0284c7' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#0369a1', fontSize: '0.82rem' }}>
-                <Thermometer size={16} />
-                <span>{isEs ? 'Condiciones de Conservación Oficial' : 'Authoritative Storage Guidelines'}</span>
-              </div>
-              <p style={{ fontSize: '0.78rem', color: '#475569', marginTop: '6px', lineHeight: '1.45', margin: '6px 0 0' }}>
-                {isEs
-                  ? 'Conservar por debajo de 25°C en su envase original para protegerlo de la luz. NO CONGELAR NI REFRIGERAR (las bajas temperaturas pueden precipitar cristales en el vehículo de aceite de ricino).'
-                  : 'Store below 25°C in the original carton to protect from light. DO NOT REFRIGERATE OR FREEZE (cold temperatures induce crystallization within the Castor Oil depot matrix).'}
-              </p>
+            <img
+              src={p.imageUrl || '/images/products/norma/testosterone-enanthate-norma-250mg.svg'}
+              alt="Testosterone Enanthate Norma Hellas 250mg"
+              style={{ maxHeight: '180px', maxWidth: '100%', objectFit: 'contain' }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                if (e.currentTarget.nextSibling) {
+                  e.currentTarget.nextSibling.style.display = 'flex';
+                }
+              }}
+            />
+            <div style={{ display: 'none', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <Package size={52} color="#003666" />
+              <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#003666' }}>
+                Norma Hellas S.A. • 1 mL Ampoule
+              </span>
             </div>
           </div>
 
-          {/* Right Column: Title, Identity & Tabbed Medical Sections */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Header info */}
+          {/* 2. Center Identity & Quick Specs */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   NORMA HELLAS PHARMACEUTICALS • EST. 1970
                 </span>
-                <span style={{ fontSize: '0.68rem', color: '#64748b' }}>•</span>
-                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Athens, Greece</span>
+                <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>•</span>
+                <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>Athens, Greece</span>
               </div>
 
-              <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', margin: '0 0 8px 0' }}>
+              <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', margin: '0 0 6px 0', lineHeight: 1.25 }}>
                 Testosterone Enanthate/Norma® 250 mg/ml
               </h1>
 
-              <p style={{ fontSize: '0.92rem', color: '#475569', lineHeight: '1.5', margin: 0 }}>
+              <p style={{ fontSize: '0.86rem', color: '#475569', lineHeight: '1.5', margin: 0 }}>
                 {isEs
                   ? 'Solución oleosa estéril inyectable para terapia de sustitución androgénica masculina (TRT). Formulación de depósito de liberación prolongada en ampolla de vidrio ámbar de 1 ml.'
                   : 'Sterile depot oily solution for adult male androgen replacement therapy (TRT). Long-acting ester formulation engineered for sustained physiological testosterone release via deep intramuscular injection.'}
               </p>
             </div>
 
-            {/* Quick Vehicle Highlight Box */}
-            <div className="norma-vehicle-box">
-              <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                <Droplets size={16} />
-                <span>{isEs ? 'Vehículo Oleoso Depot — Listo para Inyección (Sin Reconstitución)' : 'Sterile Depot Oil Matrix — Ready to Inject (Zero Reconstitution Required)'}</span>
+            {/* Quick Specs Grid (Google Cloud Key-Value Resource Format) */}
+            <div className="gcp-kv-grid" style={{ marginTop: '2px' }}>
+              <div className="gcp-kv-item">
+                <span className="gcp-kv-label">{isEs ? 'Dosificación' : 'Established Dose'}</span>
+                <span className="gcp-kv-value">250 mg / 1 mL</span>
               </div>
-              <div style={{ fontSize: '0.78rem', lineHeight: '1.45' }}>
-                {isEs
-                  ? 'A diferencia de los péptidos liofilizados, este medicamento ya está formulado en una matriz estéril de Aceite de Ricino (Oleum Ricini, 439.6 mg) y Benzoato de Bencilo (342.0 mg). NUNCA debe mezclarse con agua bacteriostática ni diluirse.'
-                  : 'Unlike lyophilized peptides, this finished pharmaceutical is pre-solubilized in an authoritative pharmacopoeial depot vehicle of Castor Oil (Oleum Ricini, 439.6 mg) and Benzyl Benzoate (342.0 mg). STRICTLY DO NOT reconstitute with bacteriostatic water or aqueous diluents.'}
+              <div className="gcp-kv-item">
+                <span className="gcp-kv-label">{isEs ? 'Base Activa Pura' : 'Active Base Equiv.'}</span>
+                <span className="gcp-kv-value" style={{ color: '#003666' }}>~180 mg Testosterone</span>
+              </div>
+              <div className="gcp-kv-item">
+                <span className="gcp-kv-label">{isEs ? 'Envase Galénico' : 'Galenic Container'}</span>
+                <span className="gcp-kv-value">Type I Amber Glass</span>
+              </div>
+              <div className="gcp-kv-item">
+                <span className="gcp-kv-label">{isEs ? 'Vía de Aplicación' : 'Clinical Route'}</span>
+                <span className="gcp-kv-value" style={{ color: '#991b1b' }}>Deep Intramuscular (I.M.)</span>
               </div>
             </div>
 
-            {/* ── GOOGLE CLOUD STYLE TABS ── */}
-            <div>
-              <div className="norma-tabs-container">
-                <button
-                  onClick={() => setActiveTab('overview')}
-                  className={`norma-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-                >
-                  <Sparkles size={15} />
-                  <span>{isEs ? 'Mecanismo & Impacto Clínico' : 'Mechanism & Clinical Impact'}</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('protocols')}
-                  className={`norma-tab-btn ${activeTab === 'protocols' ? 'active' : ''}`}
-                >
-                  <TrendingUp size={15} />
-                  <span>{isEs ? 'Protocolos TRT & Farmacocinética' : 'TRT Protocols & Pharmacokinetics'}</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('administration')}
-                  className={`norma-tab-btn ${activeTab === 'administration' ? 'active' : ''}`}
-                >
-                  <Syringe size={15} />
-                  <span>{isEs ? 'Técnica de Inyección en Ampolla' : 'Ampoule Administration Guide'}</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('coa')}
-                  className={`norma-tab-btn ${activeTab === 'coa' ? 'active' : ''}`}
-                >
-                  <Award size={15} />
-                  <span>{isEs ? 'Analítica de Lote COA' : 'Certified Batch COA'}</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('monitoring')}
-                  className={`norma-tab-btn ${activeTab === 'monitoring' ? 'active' : ''}`}
-                >
-                  <HeartPulse size={15} />
-                  <span>{isEs ? 'Seguridad & Biomarcadores' : 'Physician Lab Surveillance'}</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('b2b')}
-                  className={`norma-tab-btn ${activeTab === 'b2b' ? 'active' : ''}`}
-                >
-                  <Building2 size={15} />
-                  <span>{isEs ? 'Tarifas Clínicas B2B' : 'B2B Clinic Pricing'}</span>
-                </button>
+            {/* Quick Vehicle Highlight Box */}
+            <div className="norma-vehicle-box" style={{ margin: 0, padding: '10px 12px' }}>
+              <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', fontSize: '0.78rem' }}>
+                <Droplets size={14} />
+                <span>{isEs ? 'Vehículo Oleoso Depot — Listo para Inyección (Sin Reconstitución)' : 'Sterile Depot Oil Matrix — Ready to Inject (Zero Reconstitution Required)'}</span>
               </div>
+              <div style={{ fontSize: '0.74rem', lineHeight: '1.4' }}>
+                {isEs
+                  ? 'Matriz estéril de Aceite de Ricino (Oleum Ricini, 439.6 mg) y Benzoato de Bencilo (342.0 mg). NUNCA debe mezclarse con agua bacteriostática ni diluirse.'
+                  : 'Pre-solubilized in Castor Oil (Oleum Ricini, 439.6 mg) and Benzyl Benzoate (342.0 mg). STRICTLY DO NOT reconstitute with bacteriostatic water or aqueous diluents.'}
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Right Action Box & Storage Card */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button
+              onClick={() => setIsInquiryDrawerOpen(true)}
+              className="gcp-btn-primary"
+              style={{ width: '100%', padding: '11px 16px', fontSize: '0.84rem' }}
+            >
+              <Building2 size={16} />
+              <span>{isEs ? 'Solicitar Asignación Clínica / Hospital' : 'Request Clinic / Hospital Allocation'}</span>
+            </button>
+
+            {/* Storage Warning Card */}
+            <div className="norma-card" style={{ borderLeft: '4px solid #0284c7', margin: 0, padding: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#0369a1', fontSize: '0.78rem' }}>
+                <Thermometer size={15} />
+                <span>{isEs ? 'Condiciones de Conservación' : 'Storage Guidelines'}</span>
+              </div>
+              <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.4', margin: '4px 0 0' }}>
+                {isEs
+                  ? 'Conservar por debajo de 25°C en su envase original para protegerlo de la luz. NO CONGELAR NI REFRIGERAR.'
+                  : 'Store below 25°C in original carton to protect from light. DO NOT REFRIGERATE OR FREEZE.'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── CLINICAL MONOGRAPH EXPLORER (SIDEBAR + DEDICATED CANVAS) ── */}
+        <div className="norma-explorer-layout">
+          {/* Mobile Sticky Section Chips Bar */}
+          <div className="norma-mobile-tabs-bar">
+            {[
+              { id: 'overview', icon: Sparkles, label: isEs ? 'Mecanismo' : 'Mechanism' },
+              { id: 'protocols', icon: TrendingUp, label: isEs ? 'Protocolos TRT' : 'TRT Protocols' },
+              { id: 'administration', icon: Syringe, label: isEs ? 'Guía Inyección' : 'Administration' },
+              { id: 'monitoring', icon: HeartPulse, label: isEs ? 'Biomarcadores' : 'Surveillance' },
+              { id: 'coa', icon: Award, label: isEs ? 'Analítica Lote' : 'Batch COA' },
+              { id: 'b2b', icon: Building2, label: isEs ? 'Tarifas B2B' : 'B2B Terms' },
+            ].map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`norma-mobile-tab-chip ${activeTab === tab.id ? 'active' : ''}`}
+                >
+                  <Icon size={13} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Desktop Left Sidebar Navigation (Google Cloud Standard) */}
+          <aside className="norma-sidebar-nav">
+            <div className="norma-sidebar-header">
+              <FileText size={13} color="#003666" />
+              <span>{isEs ? 'Secciones de la Monografía' : 'Clinical Monograph Sections'}</span>
+            </div>
+
+            {[
+              {
+                id: 'overview',
+                icon: Sparkles,
+                title: isEs ? 'Mecanismo & Impacto Clínico' : 'Mechanism & Clinical Impact',
+                desc: isEs ? 'Farmacología Celular y Cascada AR' : 'Cellular Pharmacodynamics & AR Cascade'
+              },
+              {
+                id: 'protocols',
+                icon: TrendingUp,
+                title: isEs ? 'Protocolos TRT & Farmacocinética' : 'TRT Protocols & Pharmacokinetics',
+                desc: isEs ? 'Vida Media y Ventanas de Dosificación' : 'Half-Life & Clinical Dosage Windows'
+              },
+              {
+                id: 'administration',
+                icon: Syringe,
+                title: isEs ? 'Guía de Inyección en Ampolla' : 'Ampoule Administration Guide',
+                desc: isEs ? 'Apertura de Vidrio y Técnica I.M.' : 'Glass Ampoule Snapping & I.M. Technique'
+              },
+              {
+                id: 'monitoring',
+                icon: HeartPulse,
+                title: isEs ? 'Seguridad & Biomarcadores TRT' : 'Physician Lab Surveillance',
+                desc: isEs ? 'Hematocrito, PSA, Lípidos y Estradiol' : 'Hematocrit, PSA, Lipids & Estradiol'
+              },
+              {
+                id: 'coa',
+                icon: Award,
+                title: isEs ? 'Analítica de Lote & COA' : 'Certified Batch COA & Standards',
+                desc: isEs ? 'Liberación Oficial de Lote EOF/QP' : 'Batch-Specific Regulatory Lot Release'
+              },
+              {
+                id: 'b2b',
+                icon: Building2,
+                title: isEs ? 'Tarifas y Suministro B2B' : 'B2B Clinic / Hospital Allocation',
+                desc: isEs ? 'Distribución Hospitalaria y Cadena de Frío' : 'Hospital Supply Terms & Requisition'
+              }
+            ].map(sec => {
+              const Icon = sec.icon;
+              const isActive = activeTab === sec.id;
+              return (
+                <button
+                  key={sec.id}
+                  onClick={() => setActiveTab(sec.id)}
+                  className={`norma-sidebar-item ${isActive ? 'active' : ''}`}
+                >
+                  <div className="norma-sidebar-item-icon">
+                    <Icon size={16} />
+                  </div>
+                  <div className="norma-sidebar-item-content">
+                    <span className="norma-sidebar-item-title">{sec.title}</span>
+                    <span className="norma-sidebar-item-desc">{sec.desc}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </aside>
+
+          {/* Right Main Content Canvas (Displays ONLY Selected Section and Nothing Else) */}
+          <div className="norma-canvas-panel">
 
               {/* ── TAB 1: CELLULAR MECHANISM & CLINICAL PILLARS ── */}
               {activeTab === 'overview' && (
@@ -681,25 +688,21 @@ export default function NormaPharmaceuticalDetail({
                         <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
                           Batch: <strong style={{ color: '#0f172a' }}>{coa.batchNumber || '12473'}</strong>
                         </span>
-                        <button
-                          onClick={handleDownloadCoa}
-                          style={{
-                            padding: '4px 10px',
-                            backgroundColor: '#003666',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <Download size={12} />
-                          <span>PDF</span>
-                        </button>
+                        <span style={{
+                          padding: '3px 8px',
+                          backgroundColor: '#f0fdf4',
+                          color: '#166534',
+                          border: '1px solid #bbf7d0',
+                          borderRadius: '4px',
+                          fontSize: '0.70rem',
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <Check size={11} />
+                          <span>Official QP Released</span>
+                        </span>
                       </div>
                     </div>
 
@@ -895,16 +898,28 @@ export default function NormaPharmaceuticalDetail({
               )}
             </div>
           </div>
-        </div>
       </main>
 
       {/* ── DRAWERS ── */}
       <PublicInstitutionalInquiryDrawer
         isOpen={isInquiryDrawerOpen}
         onClose={() => setIsInquiryDrawerOpen(false)}
-        productName="Testosterone Enanthate/Norma® 250 mg/ml"
-        productSku="NORMA-TE-250-1AMP"
-        category="Hormones & TRT"
+        contextType="product"
+        brandType="hormone"
+        lang={lang}
+        initialEntity={{
+          name: 'Testosterone Enanthate/Norma® 250 mg/ml',
+          slug: slug,
+          code: 'NORMA-TE-250-1AMP',
+          strength: '250 mg / 1 mL (Active: ~180 mg Testosterone)',
+          category: 'Human Pharmaceuticals & TRT (Finished EU GMP Medicine)',
+          supplier: 'Norma Hellas Pharmaceuticals',
+          brand: 'Norma Hellas S.A. (Athens, Greece)',
+          atcCode: 'G03BA03',
+          eofMarketingAuth: '45945/03-10-2008',
+          galenicForm: 'Type I Amber Glass Ampoule (Castor Oil Depot)',
+          inquiryGoal: 'hospital_clinic_allocation'
+        }}
       />
 
       <ShareProductMonographDrawer
@@ -917,6 +932,28 @@ export default function NormaPharmaceuticalDetail({
           category: 'hormone'
         }}
         shareUrl={`${baseUrl}/p/testosterone-enanthate-norma-250mg`}
+      />
+
+      {/* ── STICKY GCP BOTTOM ACTION BAR WITH CLINICAL ATLAS AI ── */}
+      <PublicStickyActionBar
+        title="Testosterone Enanthate/Norma® 250 mg/ml"
+        subtitle="1 mL Amber Ampoule · Castor Oil Depot · EOF #45945/03-10-2008"
+        badge="EU GMP Certified"
+        badgeType="success"
+        inquireLabel={isEs ? 'Solicitar Asignación Clínica' : 'Request Allocation'}
+        onInquire={() => setIsInquiryDrawerOpen(true)}
+        showClinicalAI={true}
+        aiPreset="peptide"
+        aiCategory="hormone"
+        aiContextQuery="Testosterone Enanthate Norma 250mg ampoule pharmacology, pharmacokinetics, injection protocol, castor oil depot, physician lab monitoring, and B2B hospital supply"
+        aiMeta={{
+          productName: 'Testosterone Enanthate/Norma® 250 mg/ml',
+          brand: 'Norma Hellas S.A.',
+          activeDose: '250 mg/mL (180 mg free base equivalent)',
+          galenicForm: 'Type I Amber Glass Ampoule (Oleum Ricini depot)',
+          regulatory: 'EOF Greece MA # 45945/03-10-2008 · POM'
+        }}
+        lang={lang}
       />
 
       {/* ── UNIFIED PUBLIC FOOTER ── */}

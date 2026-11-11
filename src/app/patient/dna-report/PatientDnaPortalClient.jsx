@@ -177,7 +177,7 @@ export default function PatientDnaPortalClient({
               href={mealPlanPdfUrl}
               target="_blank"
               rel="noopener noreferrer"
-              title="Download full 58-page dossier including executive meal plan guide, 24h routine, and complete original 24Genetics report"
+              title="Download full 59-page dossier including executive meal plan guide, 24h routine, grocery list, and complete original 24Genetics report"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -193,7 +193,7 @@ export default function PatientDnaPortalClient({
               }}
             >
               <Utensils size={14} />
-              <span>Meal Plan Dossier (58 Pgs)</span>
+              <span>Meal Plan Dossier (59 Pgs)</span>
             </a>
 
             <a
