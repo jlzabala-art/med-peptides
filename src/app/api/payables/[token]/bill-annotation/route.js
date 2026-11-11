@@ -144,17 +144,20 @@ export async function GET(request, { params }) {
       .limit(1)
       .get();
 
+    let shareDoc = null;
     let wholesalerId = null;
     if (!tokenQuery.empty) {
-      wholesalerId = tokenQuery.docs[0].data().wholesalerId || tokenQuery.docs[0].id;
+      shareDoc = tokenQuery.docs[0].data();
+      wholesalerId = shareDoc.wholesalerId || tokenQuery.docs[0].id;
     } else {
       const directDoc = await adminDb.collection('shared_payable_statements').doc(token).get();
       if (directDoc.exists) {
-        wholesalerId = directDoc.data().wholesalerId || directDoc.id;
+        shareDoc = directDoc.data();
+        wholesalerId = shareDoc.wholesalerId || directDoc.id;
       }
     }
 
-    if (!wholesalerId) {
+    if (!shareDoc || !wholesalerId) {
       return NextResponse.json({ error: 'Statement not found' }, { status: 404 });
     }
 
@@ -164,12 +167,66 @@ export async function GET(request, { params }) {
     }
 
     const d = billSnap.data();
+    const auth = await authorize(request, token, shareDoc);
+
+    // If unauthenticated / locked, return masked info confirming existence without leaking confidential data
+    if (!auth.ok) {
+      const hasProducts = Array.isArray(d.associatedProducts) && d.associatedProducts.length > 0;
+      const hasSuppliers = Array.isArray(d.associatedSuppliers) && d.associatedSuppliers.length > 0;
+      const hasNotes = Boolean(d.adminDescription && d.adminDescription.trim());
+
+      const maskClinicalName = (str) => {
+        if (!str) return '••••••••';
+        const s = String(str).trim();
+        return s.length <= 4 ? '••••••••' : `${s.slice(0, 4)}••••••••`;
+      };
+
+      const maskSku = (sku) => {
+        if (!sku) return 'SKU-••••';
+        const s = String(sku).trim();
+        return s.length <= 4 ? `${s.slice(0, 2)}••••` : `${s.slice(0, 4)}••••`;
+      };
+
+      return NextResponse.json({
+        billId,
+        isMasked: true,
+        hasAdminDescription: hasNotes,
+        adminDescription: hasNotes
+          ? '•••••••••••••••••••••••••••••••••••••••• (Confidential Clinical & Financial Reconciliation Notes — Sign In to View)'
+          : '',
+        adminDescriptionUpdatedAt: d.adminDescriptionUpdatedAt || null,
+        hasAssociatedProducts: hasProducts,
+        associatedProductsCount: hasProducts ? d.associatedProducts.length : 0,
+        associatedProducts: hasProducts
+          ? d.associatedProducts.map(p => ({
+              id: 'PROD-••••',
+              name: maskClinicalName(p.name || p.productName),
+              sku: maskSku(p.sku),
+              quantity: p.quantity || 1,
+              isMasked: true
+            }))
+          : [],
+        hasAssociatedSuppliers: hasSuppliers,
+        associatedSuppliersCount: hasSuppliers ? d.associatedSuppliers.length : 0,
+        associatedSuppliers: hasSuppliers
+          ? d.associatedSuppliers.map(s => ({
+              id: 'SUP-••••',
+              name: maskClinicalName(s.name || s.supplierName),
+              vendorNumber: s.vendorNumber ? 'VEN-••••' : null,
+              isMasked: true
+            }))
+          : []
+      });
+    }
+
     return NextResponse.json({
       billId,
+      isMasked: false,
       adminDescription: d.adminDescription || '',
       adminDescriptionUpdatedAt: d.adminDescriptionUpdatedAt || null,
       adminDescriptionUpdatedBy: d.adminDescriptionUpdatedBy || null,
-      associatedProducts: d.associatedProducts || []
+      associatedProducts: d.associatedProducts || [],
+      associatedSuppliers: d.associatedSuppliers || []
     });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

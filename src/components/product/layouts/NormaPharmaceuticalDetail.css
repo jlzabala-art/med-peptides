@@ -11,7 +11,7 @@
 .norma-institutional-bar {
   background-color: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  padding: 0.75rem 1.5rem;
+  padding: 0.65rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,17 +20,17 @@
   position: sticky;
   top: 56px;
   z-index: 30;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .norma-badge-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 0.72rem;
-  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 0.70rem;
+  font-weight: 600;
   letter-spacing: 0.02em;
 }
 
@@ -56,81 +56,185 @@
 .norma-content-grid {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1.5rem 3rem;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 1024px) {
   .norma-hero-split {
     display: grid;
-    grid-template-columns: 440px 1fr;
-    gap: 2.5rem;
+    grid-template-columns: 380px 1fr;
+    gap: 2rem;
     align-items: start;
   }
 }
 
-/* Hero Presentation Card */
+/* Hero Presentation Card (Google Cloud UX) */
 .norma-card {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .norma-card-title {
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 0.9375rem;
+  font-weight: 700;
   color: #0f172a;
+  letter-spacing: -0.01em;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-/* Tab Navigation (GCP Style) */
+/* Google Cloud Console Tab Navigation */
 .norma-tabs-container {
   display: flex;
-  gap: 6px;
-  border-bottom: 2px solid #e2e8f0;
+  gap: 0;
+  border-bottom: 1px solid #e2e8f0;
   overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: none;
+  overflow-y: hidden;
+  padding: 0;
+  background: #ffffff;
+  border-radius: 8px 8px 0 0;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .norma-tab-btn {
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #64748b;
+  flex-shrink: 0; /* CRITICAL: Prevents horizontal overlap and text collapsing in Safari/Chrome */
+  padding: 11px 18px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #475569;
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
   cursor: pointer;
   white-space: nowrap;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.15s ease;
+  gap: 8px;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .norma-tab-btn:hover {
   color: #003666;
+  background-color: #f8fafc;
 }
 
 .norma-tab-btn.active {
   color: #003666;
+  font-weight: 700;
   border-bottom-color: #003666;
+  background-color: #f8fafc;
 }
 
-/* Specific Highlight Boxes */
+/* Google Cloud Buttons */
+.gcp-btn-primary {
+  width: 100%;
+  padding: 10px 18px;
+  min-height: 40px;
+  background-color: #003666;
+  color: #ffffff;
+  border: 1px solid #00284d;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 54, 102, 0.15);
+  transition: all 0.15s ease;
+}
+
+.gcp-btn-primary:hover {
+  background-color: #00284d;
+  box-shadow: 0 2px 4px rgba(0, 54, 102, 0.25);
+}
+
+.gcp-btn-primary:active {
+  transform: translateY(1px);
+}
+
+.gcp-btn-secondary {
+  width: 100%;
+  padding: 9px 16px;
+  min-height: 38px;
+  background-color: #ffffff;
+  color: #003666;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.gcp-btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #00284d;
+}
+
+.gcp-btn-secondary:active {
+  transform: translateY(1px);
+}
+
+/* Google Cloud Key-Value Specification Grid */
+.gcp-kv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.gcp-kv-item {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.gcp-kv-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gcp-kv-value {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Specific Highlight Boxes (GCP Notice Standard) */
 .norma-alert-box {
   background-color: #fffbeb;
+  border: 1px solid #fde68a;
   border-left: 4px solid #d97706;
   padding: 12px 14px;
-  border-radius: 0 8px 8px 0;
+  border-radius: 6px;
   font-size: 0.80rem;
   color: #92400e;
 }
@@ -138,67 +242,87 @@
 .norma-vehicle-box {
   background-color: #f0fdf4;
   border: 1px solid #bbf7d0;
-  border-radius: 8px;
-  padding: 14px;
+  border-left: 4px solid #16a34a;
+  border-radius: 6px;
+  padding: 12px 14px;
   font-size: 0.80rem;
   color: #166534;
+}
+
+/* Pathway Cards (GCP Sub-Resource Style) */
+.gcp-pathway-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+}
+
+.gcp-pathway-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* Clinical Pillars Grid */
 .norma-pillars-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
 
 .norma-pillar-card {
-  background-color: #f8fafc;
+  background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 14px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 6px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .norma-pillar-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 54, 102, 0.06);
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.08);
 }
 
 /* Protocol Comparison Table */
 .norma-protocol-card {
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 6px;
+  padding: 14px 16px;
   background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .norma-protocol-card.highlight {
-  border-color: #0284c7;
+  border: 1px solid #7dd3fc;
+  border-left: 4px solid #0284c7;
   background-color: #f0f9ff;
 }
 
 /* Steps list for ampoule administration */
 .norma-step-card {
   display: flex;
-  gap: 14px;
-  padding: 14px;
-  background-color: #f8fafc;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .norma-step-num {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
   background-color: #003666;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 0.78rem;
+  font-weight: 700;
+  font-size: 0.75rem;
   flex-shrink: 0;
 }
 
@@ -210,17 +334,20 @@
 }
 
 .norma-coa-table th {
-  background-color: #f1f5f9;
+  background-color: #f8fafc;
   color: #475569;
   text-align: left;
-  padding: 8px 12px;
-  font-weight: 700;
-  border-bottom: 2px solid #cbd5e1;
+  padding: 9px 12px;
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid #cbd5e1;
 }
 
 .norma-coa-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .norma-coa-status-pass {
@@ -228,10 +355,12 @@
   align-items: center;
   gap: 4px;
   font-weight: 700;
-  color: #16a34a;
+  font-size: 0.70rem;
+  color: #166534;
   background-color: #f0fdf4;
   padding: 2px 8px;
   border-radius: 4px;
+  border: 1px solid #bbf7d0;
 }
 
 /* Responsive adjustments */
@@ -242,5 +371,12 @@
   }
   .norma-card {
     padding: 1rem;
+  }
+  .gcp-kv-grid {
+    grid-template-columns: 1fr;
+  }
+  .norma-tab-btn {
+    padding: 9px 12px;
+    font-size: 0.75rem;
   }
 }

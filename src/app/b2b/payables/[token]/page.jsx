@@ -349,43 +349,84 @@ export default function PayablesStatementPage() {
                 <span>{isLocked ? (lang === 'es' ? 'Factura cliente protegida' : 'Linked to protected client invoice') : `${lang === 'es' ? 'Sobre factura cliente:' : 'Linked to client invoice:'} ${row.sourceInvoiceNumber}`}</span>
               </div>
             )}
-            {row.adminDescription && !isLocked && (
+            {row.adminDescription && (
               <div
                 style={{
                   fontSize: '0.72rem',
-                  color: '#475569',
+                  color: isLocked ? '#64748b' : '#475569',
                   marginTop: '3px',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  maxWidth: '260px'
+                  maxWidth: '260px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
                 }}
-                title={row.adminDescription}
+                title={isLocked ? (lang === 'es' ? 'Nota administrativa confidencial registrada' : 'Confidential administrative note recorded') : row.adminDescription}
               >
-                📝 {row.adminDescription}
+                {isLocked ? (
+                  <>
+                    <Lock size={10} color="#003666" />
+                    <span>{lang === 'es' ? 'Nota admin (protegida)' : 'Admin note (protected)'}</span>
+                  </>
+                ) : (
+                  <>📝 {row.adminDescription}</>
+                )}
               </div>
             )}
-            {Array.isArray(row.associatedProducts) && row.associatedProducts.length > 0 && !isLocked && (
+            {Array.isArray(row.associatedProducts) && row.associatedProducts.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '3px' }}>
                 {row.associatedProducts.slice(0, 2).map((p, idx) => (
                   <span
                     key={p.id || idx}
                     style={{
                       fontSize: '0.66rem',
-                      backgroundColor: '#f0fdf4',
-                      color: '#166534',
-                      border: '1px solid #bbf7d0',
+                      backgroundColor: isLocked ? '#eff6ff' : '#f0fdf4',
+                      color: isLocked ? '#1d4ed8' : '#166534',
+                      border: `1px solid ${isLocked ? '#bfdbfe' : '#bbf7d0'}`,
                       borderRadius: '3px',
-                      padding: '0 4px',
-                      fontWeight: 600
+                      padding: '0 5px',
+                      fontWeight: 650,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px'
                     }}
                   >
-                    📦 {p.name}
+                    {isLocked ? <Lock size={8} /> : '📦'} {p.name}
                   </span>
                 ))}
                 {row.associatedProducts.length > 2 && (
                   <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
                     +{row.associatedProducts.length - 2}
+                  </span>
+                )}
+              </div>
+            )}
+            {Array.isArray(row.associatedSuppliers) && row.associatedSuppliers.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '2px' }}>
+                {row.associatedSuppliers.slice(0, 1).map((s, idx) => (
+                  <span
+                    key={s.id || idx}
+                    style={{
+                      fontSize: '0.66rem',
+                      backgroundColor: isLocked ? '#f8fafc' : '#eff6ff',
+                      color: isLocked ? '#334155' : '#1e3a8a',
+                      border: `1px solid ${isLocked ? '#cbd5e1' : '#bfdbfe'}`,
+                      borderRadius: '3px',
+                      padding: '0 5px',
+                      fontWeight: 650,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px'
+                    }}
+                  >
+                    {isLocked ? <Lock size={8} color="#003666" /> : '🏢'} {s.name}
+                  </span>
+                ))}
+                {row.associatedSuppliers.length > 1 && (
+                  <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
+                    +{row.associatedSuppliers.length - 1}
                   </span>
                 )}
               </div>

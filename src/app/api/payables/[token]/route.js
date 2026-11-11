@@ -287,18 +287,64 @@ export async function GET(request, { params }) {
           cycleFilterActive: !includeAllHistory,
           totalHistoricalCount: allBills.length
         },
-        openBills: openBills.map(b => ({
-          id: b.id,
-          billNumber: 'FAC-••••••••',
-          date: b.date || '—',
-          dueDate: b.dueDate || '—',
-          billType: 'Protected Commercial Billing',
-          sourceInvoiceNumber: 'INV-••••',
-          total: null,
-          balance: null,
-          currency: shareDoc.currency || 'AED',
-          status: (b.dueDate && b.dueDate <= todayStr) ? 'overdue' : (b.status || 'pending')
-        })),
+        openBills: openBills.map(b => {
+          const hasProducts = Array.isArray(b.associatedProducts) && b.associatedProducts.length > 0;
+          const hasSuppliers = Array.isArray(b.associatedSuppliers) && b.associatedSuppliers.length > 0;
+          const hasNotes = Boolean(b.adminDescription && b.adminDescription.trim());
+
+          const maskClinicalName = (str) => {
+            if (!str) return '••••••••';
+            const s = String(str).trim();
+            return s.length <= 4 ? '••••••••' : `${s.slice(0, 4)}••••••••`;
+          };
+
+          const maskSku = (sku) => {
+            if (!sku) return 'SKU-••••';
+            const s = String(sku).trim();
+            return s.length <= 4 ? `${s.slice(0, 2)}••••` : `${s.slice(0, 4)}••••`;
+          };
+
+          return {
+            id: b.id,
+            billNumber: 'FAC-••••••••',
+            date: b.date || '—',
+            dueDate: b.dueDate || '—',
+            billType: 'Protected Commercial Billing',
+            sourceInvoiceNumber: 'INV-••••',
+            total: null,
+            balance: null,
+            currency: shareDoc.currency || 'AED',
+            status: (b.dueDate && b.dueDate <= todayStr) ? 'overdue' : (b.status || 'pending'),
+            // Masked Clinical & Administrative Traceability (Confirms data presence while preserving confidentiality)
+            hasAdminDescription: hasNotes,
+            adminDescription: hasNotes
+              ? '•••••••••••••••••••••••••••••••••••••••• (Confidential Clinical & Financial Reconciliation Notes — Sign In to View)'
+              : '',
+            adminDescriptionUpdatedAt: b.adminDescriptionUpdatedAt || null,
+            isAdminDescriptionMasked: hasNotes,
+            hasAssociatedProducts: hasProducts,
+            associatedProductsCount: hasProducts ? b.associatedProducts.length : 0,
+            associatedProducts: hasProducts
+              ? b.associatedProducts.map(p => ({
+                  id: 'PROD-••••',
+                  name: maskClinicalName(p.name || p.productName),
+                  sku: maskSku(p.sku),
+                  quantity: p.quantity || 1,
+                  isMasked: true
+                }))
+              : [],
+            hasAssociatedSuppliers: hasSuppliers,
+            associatedSuppliersCount: hasSuppliers ? b.associatedSuppliers.length : 0,
+            associatedSuppliers: hasSuppliers
+              ? b.associatedSuppliers.map(s => ({
+                  id: 'SUP-••••',
+                  name: maskClinicalName(s.name || s.supplierName),
+                  vendorNumber: s.vendorNumber ? 'VEN-••••' : null,
+                  isMasked: true
+                }))
+              : []
+          };
+        }),
         paidBills: []
       });
     }

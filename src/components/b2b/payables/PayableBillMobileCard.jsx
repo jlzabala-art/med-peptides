@@ -105,7 +105,7 @@ export default function PayableBillMobileCard(props) {
             Ref: {bill.referenceNumber}
           </div>
         )}
-        {bill.adminDescription && !isLocked && (
+        {bill.adminDescription && (
           <div style={{
             fontSize: '0.72rem',
             backgroundColor: '#f8fafc',
@@ -115,22 +115,54 @@ export default function PayableBillMobileCard(props) {
             color: '#334155',
             marginTop: '4px'
           }}>
-            <strong style={{ color: '#003666' }}>{lang === 'es' ? 'Nota Admin:' : 'Admin Note:'}</strong> {bill.adminDescription}
+            {isLocked ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#475569', fontSize: '0.70rem' }}>
+                <Lock size={10} color="#003666" />
+                <span>{lang === 'es' ? 'Nota admin registrada (codificada · requiere login)' : 'Admin note recorded (masked · login required)'}</span>
+              </span>
+            ) : (
+              <>
+                <strong style={{ color: '#003666' }}>{lang === 'es' ? 'Nota Admin:' : 'Admin Note:'}</strong> {bill.adminDescription}
+              </>
+            )}
           </div>
         )}
-        {Array.isArray(bill.associatedProducts) && bill.associatedProducts.length > 0 && !isLocked && (
+        {Array.isArray(bill.associatedProducts) && bill.associatedProducts.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
             {bill.associatedProducts.map((p, idx) => (
               <span key={p.id || idx} style={{
                 fontSize: '0.66rem',
-                backgroundColor: '#f0fdf4',
-                color: '#166534',
-                border: '1px solid #bbf7d0',
+                backgroundColor: isLocked ? '#eff6ff' : '#f0fdf4',
+                color: isLocked ? '#1d4ed8' : '#166534',
+                border: `1px solid ${isLocked ? '#bfdbfe' : '#bbf7d0'}`,
                 borderRadius: '4px',
                 padding: '1px 6px',
-                fontWeight: 600
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
               }}>
-                📦 {p.name} {p.quantity > 1 ? `(×${p.quantity})` : ''}
+                {isLocked ? <Lock size={9} /> : '📦'} {p.name} {p.quantity > 1 ? `(×${p.quantity})` : ''}
+              </span>
+            ))}
+          </div>
+        )}
+        {Array.isArray(bill.associatedSuppliers) && bill.associatedSuppliers.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+            {bill.associatedSuppliers.map((s, idx) => (
+              <span key={s.id || idx} style={{
+                fontSize: '0.66rem',
+                backgroundColor: isLocked ? '#f8fafc' : '#eff6ff',
+                color: isLocked ? '#334155' : '#1e3a8a',
+                border: `1px solid ${isLocked ? '#cbd5e1' : '#bfdbfe'}`,
+                borderRadius: '4px',
+                padding: '1px 6px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                {isLocked ? <Lock size={9} color="#003666" /> : '🏢'} {s.name}
               </span>
             ))}
           </div>

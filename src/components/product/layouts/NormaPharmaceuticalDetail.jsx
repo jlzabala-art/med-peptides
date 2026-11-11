@@ -232,57 +232,42 @@ export default function NormaPharmaceuticalDetail({
                 </div>
               </div>
 
-              {/* Quick Specs Under Visual */}
-              <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', textAlign: 'left', fontSize: '0.76rem' }}>
-                <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px' }}>
-                  <div style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 600 }}>
-                    {isEs ? 'DOSIFICACIÓN' : 'ESTABLISHED DOSE'}
-                  </div>
-                  <div style={{ fontWeight: 800, color: '#0f172a' }}>250 mg / 1 mL</div>
+              {/* Quick Specs Under Visual (Google Cloud Key-Value Resource Format) */}
+              <div className="gcp-kv-grid">
+                <div className="gcp-kv-item">
+                  <span className="gcp-kv-label">
+                    {isEs ? 'Dosificación' : 'Established Dose'}
+                  </span>
+                  <span className="gcp-kv-value">250 mg / 1 mL</span>
                 </div>
 
-                <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px' }}>
-                  <div style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 600 }}>
-                    {isEs ? 'BASE ACTIVA PURA' : 'ACTIVE BASE EQUIV.'}
-                  </div>
-                  <div style={{ fontWeight: 800, color: '#003666' }}>~180 mg Testosterone</div>
+                <div className="gcp-kv-item">
+                  <span className="gcp-kv-label">
+                    {isEs ? 'Base Activa Pura' : 'Active Base Equiv.'}
+                  </span>
+                  <span className="gcp-kv-value" style={{ color: '#003666' }}>~180 mg Testosterone</span>
                 </div>
 
-                <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px' }}>
-                  <div style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 600 }}>
-                    {isEs ? 'ENVASE GALÉNICO' : 'GALENIC CONTAINER'}
-                  </div>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>Type I Amber Glass Ampoule</div>
+                <div className="gcp-kv-item">
+                  <span className="gcp-kv-label">
+                    {isEs ? 'Envase Galénico' : 'Galenic Container'}
+                  </span>
+                  <span className="gcp-kv-value">Type I Amber Glass</span>
                 </div>
 
-                <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '6px' }}>
-                  <div style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 600 }}>
-                    {isEs ? 'VÍA DE APLICACIÓN' : 'CLINICAL ROUTE'}
-                  </div>
-                  <div style={{ fontWeight: 700, color: '#991b1b' }}>Deep Intramuscular (I.M.)</div>
+                <div className="gcp-kv-item">
+                  <span className="gcp-kv-label">
+                    {isEs ? 'Vía de Aplicación' : 'Clinical Route'}
+                  </span>
+                  <span className="gcp-kv-value" style={{ color: '#991b1b' }}>Deep Intramuscular (I.M.)</span>
                 </div>
               </div>
 
-              {/* CTA Action Buttons */}
-              <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {/* Google Cloud Console CTA Action Buttons */}
+              <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <button
                   onClick={() => setIsInquiryDrawerOpen(true)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: '#003666',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '0.84rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: '0 2px 4px rgba(0,54,102,0.2)'
-                  }}
+                  className="gcp-btn-primary"
                 >
                   <Building2 size={16} />
                   <span>{isEs ? 'Solicitar Suministro para Clínica / Hospital' : 'Request Clinic / Hospital Allocation'}</span>
@@ -290,21 +275,7 @@ export default function NormaPharmaceuticalDetail({
 
                 <button
                   onClick={handleDownloadCoa}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    backgroundColor: '#ffffff',
-                    color: '#003666',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    fontSize: '0.80rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
-                  }}
+                  className="gcp-btn-secondary"
                 >
                   <Download size={14} />
                   <span>{isEs ? 'Descargar Ficha Analítica / COA (PDF)' : 'Download Certified Batch COA (PDF)'}</span>
@@ -312,13 +283,13 @@ export default function NormaPharmaceuticalDetail({
               </div>
             </div>
 
-            {/* Storage Warning Card */}
+            {/* Storage Warning Card (GCP Notice Style) */}
             <div className="norma-card" style={{ borderLeft: '4px solid #0284c7' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#0369a1', fontSize: '0.84rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#0369a1', fontSize: '0.82rem' }}>
                 <Thermometer size={16} />
                 <span>{isEs ? 'Condiciones de Conservación Oficial' : 'Authoritative Storage Guidelines'}</span>
               </div>
-              <p style={{ fontSize: '0.78rem', color: '#475569', marginTop: '6px', lineHeight: '1.45' }}>
+              <p style={{ fontSize: '0.78rem', color: '#475569', marginTop: '6px', lineHeight: '1.45', margin: '6px 0 0' }}>
                 {isEs
                   ? 'Conservar por debajo de 25°C en su envase original para protegerlo de la luz. NO CONGELAR NI REFRIGERAR (las bajas temperaturas pueden precipitar cristales en el vehículo de aceite de ricino).'
                   : 'Store below 25°C in the original carton to protect from light. DO NOT REFRIGERATE OR FREEZE (cold temperatures induce crystallization within the Castor Oil depot matrix).'}
@@ -430,33 +401,33 @@ export default function NormaPharmaceuticalDetail({
                         : 'Testosterone enanthate is an esterified pro-drug. Following deep intramuscular injection into the gluteal muscle depot, tissue esterases progressively cleave the 17β-heptanoyl ester linkage, delivering pure, bioidentical free testosterone into systemic circulation. It exerts physiological action across three essential biological pathways:'}
                     </p>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', marginTop: '14px' }}>
-                      <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#003666', fontSize: '0.82rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px', marginTop: '12px' }}>
+                      <div className="gcp-pathway-card" style={{ borderLeft: '3px solid #003666' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#003666', fontSize: '0.8125rem' }}>
                           <Dna size={15} />
                           <span>1. Direct AR Genomic Signaling</span>
                         </div>
-                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
                           Binds intracellular Androgen Receptors (AR), translocating to the nucleus to bind Androgen Response Elements (ARE), upregulating nitrogen retention, structural protein synthesis, and myoglobin expression.
                         </p>
                       </div>
 
-                      <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#c2410c', fontSize: '0.82rem' }}>
+                      <div className="gcp-pathway-card" style={{ borderLeft: '3px solid #c2410c' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#c2410c', fontSize: '0.8125rem' }}>
                           <Zap size={15} />
                           <span>2. 5α-Reductase Amplification (DHT)</span>
                         </div>
-                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
                           Irreversibly reduced in target tissues (prostate, scalp, CNS) to Dihydrotestosterone (DHT), which displays 3–5× higher receptor affinity, supporting virilization, CNS dopaminergic signaling, and libido.
                         </p>
                       </div>
 
-                      <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#0d9488', fontSize: '0.82rem' }}>
+                      <div className="gcp-pathway-card" style={{ borderLeft: '3px solid #0d9488' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#0d9488', fontSize: '0.8125rem' }}>
                           <HeartPulse size={15} />
                           <span>3. Aromatase (CYP19A1) Homeostasis</span>
                         </div>
-                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                        <p style={{ fontSize: '0.74rem', color: '#475569', marginTop: '4px', lineHeight: '1.5', margin: '4px 0 0' }}>
                           A controlled fraction (~0.3%) converts via aromatase into 17β-Estradiol (E2). Physiological E2 is critical for vascular nitric oxide, bone mineral density, lipid homeostasis, and neurocognitive resilience.
                         </p>
                       </div>
@@ -878,19 +849,8 @@ export default function NormaPharmaceuticalDetail({
                         </p>
                         <button
                           onClick={() => setIsDoctorUnlocked(true)}
-                          style={{
-                            padding: '10px 20px',
-                            backgroundColor: '#003666',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '0.82rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}
+                          className="gcp-btn-primary"
+                          style={{ width: 'auto', padding: '10px 22px' }}
                         >
                           <ShieldCheck size={16} />
                           <span>{isEs ? 'Desbloquear como Médico Colegiado / Clínica' : 'Instant Unlock as Licensed Physician / Clinic'}</span>
@@ -921,19 +881,8 @@ export default function NormaPharmaceuticalDetail({
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
                           <button
                             onClick={() => setIsInquiryDrawerOpen(true)}
-                            style={{
-                              padding: '11px 22px',
-                              backgroundColor: '#003666',
-                              color: '#ffffff',
-                              border: 'none',
-                              borderRadius: '6px',
-                              fontSize: '0.82rem',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px'
-                            }}
+                            className="gcp-btn-primary"
+                            style={{ width: 'auto', padding: '11px 24px' }}
                           >
                             <Building2 size={15} />
                             <span>{isEs ? 'Crear Orden de Compra (PO)' : 'Submit Clinic Purchase Order (PO)'}</span>

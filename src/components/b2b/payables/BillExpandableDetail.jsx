@@ -13,7 +13,9 @@ import {
   Check,
   Loader2,
   Tag,
-  Building2
+  Building2,
+  Lock,
+  ShieldCheck
 } from '@/lib/icons';
 import CopyableId from '@/components/ui/CopyableId';
 import { formatDateDisplay } from './payablesFormat';
@@ -476,13 +478,19 @@ export default function BillExpandableDetail({
             ) : (
               <span style={{
                 fontSize: '0.68rem',
-                fontWeight: 600,
-                color: '#64748b',
-                backgroundColor: '#f1f5f9',
+                fontWeight: 650,
+                color: isLocked ? '#9a3412' : '#64748b',
+                backgroundColor: isLocked ? '#ffedd5' : '#f1f5f9',
                 padding: '2px 8px',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
               }}>
-                {lang === 'es' ? 'Solo Lectura' : 'Read-Only'}
+                {isLocked && <Lock size={10} color="#9a3412" />}
+                {isLocked
+                  ? (lang === 'es' ? 'Solo Lectura · Datos Protegidos' : 'Read-Only · Protected Data')
+                  : (lang === 'es' ? 'Solo Lectura' : 'Read-Only')}
               </span>
             )}
           </div>
@@ -492,6 +500,11 @@ export default function BillExpandableDetail({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
               <label style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span>{lang === 'es' ? 'Descripción / Observaciones Administrativas:' : 'Administrative Description & Notes:'}</span>
+                {row.isAdminDescriptionMasked && (
+                  <span style={{ fontSize: '0.64rem', color: '#1d4ed8', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                    {lang === 'es' ? 'Codificado' : 'Masked / Protected'}
+                  </span>
+                )}
               </label>
               {row.adminDescriptionUpdatedAt && (
                 <span style={{ fontSize: '0.66rem', color: '#94a3b8' }}>
@@ -533,10 +546,26 @@ export default function BillExpandableDetail({
                 border: '1px solid #e2e8f0',
                 borderRadius: '6px',
                 fontSize: '0.78rem',
-                color: description ? '#1e293b' : '#94a3b8',
-                fontStyle: description ? 'normal' : 'italic'
+                color: description ? '#1e293b' : '#94a3b8'
               }}>
-                {description || (lang === 'es' ? 'Sin observaciones registradas por administración.' : 'No notes recorded by administration.')}
+                {(row.isAdminDescriptionMasked || (isLocked && description && description.includes('••••'))) ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 700, fontSize: '0.74rem' }}>
+                      <Lock size={12} color="#003666" />
+                      <span>{lang === 'es' ? 'Nota Administrativa Confidencial Registrada' : 'Confidential Administrative Note Recorded'}</span>
+                    </div>
+                    <div style={{ letterSpacing: '2px', color: '#475569', fontSize: '0.74rem', fontFamily: 'monospace' }}>
+                      ••••••••••••••••••••••••••••••••••••••••
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                      {lang === 'es'
+                        ? 'Existen observaciones de conciliación y trazabilidad registradas por administración. Inicia sesión con el correo registrado para consultar el texto íntegro.'
+                        : 'Reconciliation and batch traceability observations are recorded on this bill. Sign in with registered partner email to view full text.'}
+                    </div>
+                  </div>
+                ) : (
+                  description || (lang === 'es' ? 'Sin observaciones registradas por administración.' : 'No notes recorded by administration.')
+                )}
               </div>
             )}
           </div>
@@ -549,120 +578,177 @@ export default function BillExpandableDetail({
                 <span>{lang === 'es' ? 'Productos del Catálogo Asociados:' : 'Associated Catalog Products:'}</span>
                 <span style={{
                   fontSize: '0.68rem',
-                  backgroundColor: '#f1f5f9',
-                  color: '#475569',
+                  backgroundColor: associatedProducts.length > 0 ? (isLocked ? '#eff6ff' : '#dcfce7') : '#f1f5f9',
+                  color: associatedProducts.length > 0 ? (isLocked ? '#1d4ed8' : '#15803d') : '#475569',
+                  border: associatedProducts.length > 0 ? (isLocked ? '1px solid #bfdbfe' : '1px solid #bbf7d0') : 'none',
                   padding: '1px 6px',
                   borderRadius: '10px',
                   fontWeight: 700
                 }}>
                   {associatedProducts.length}
                 </span>
+                {isLocked && associatedProducts.length > 0 && (
+                  <span style={{ fontSize: '0.64rem', color: '#1e40af', backgroundColor: '#dbeafe', padding: '1px 6px', borderRadius: '4px', fontWeight: 650 }}>
+                    {lang === 'es' ? 'Codificado / Protegido' : 'Protected / Masked'}
+                  </span>
+                )}
               </label>
             </div>
 
             {/* Product Chips List */}
             {associatedProducts.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: isMasterAdmin ? '10px' : '0' }}>
-                {associatedProducts.map((prod, idx) => (
-                  <div
-                    key={prod.id || idx}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      backgroundColor: '#f0fdf4',
-                      border: '1px solid #bbf7d0',
-                      borderRadius: '6px',
-                      padding: '6px 10px',
-                      fontSize: '0.76rem',
-                      gap: '8px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                      <span style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        color: '#166534',
-                        backgroundColor: '#dcfce7',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {prod.sku || 'SKU-GEN'}
-                      </span>
-                      <span style={{ fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {prod.name}
-                      </span>
-                      <a
-                        href={prod.url || (prod.slug ? `/p/${prod.slug}` : `/p/${prod.id}`)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px',
+                {associatedProducts.map((prod, idx) => {
+                  const isMaskedProd = prod.isMasked || isLocked;
+                  return (
+                    <div
+                      key={prod.id || idx}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: isMaskedProd ? '#f8fafc' : '#f0fdf4',
+                        border: `1px solid ${isMaskedProd ? '#cbd5e1' : '#bbf7d0'}`,
+                        borderRadius: '6px',
+                        padding: '6px 10px',
+                        fontSize: '0.76rem',
+                        gap: '8px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        {isMaskedProd && (
+                          <Lock size={13} color="#003666" style={{ flexShrink: 0 }} />
+                        )}
+                        <span style={{
                           fontSize: '0.68rem',
                           fontWeight: 700,
-                          color: '#0284c7',
-                          textDecoration: 'none',
-                          backgroundColor: '#e0f2fe',
+                          color: isMaskedProd ? '#334155' : '#166534',
+                          backgroundColor: isMaskedProd ? '#e2e8f0' : '#dcfce7',
                           padding: '2px 6px',
                           borderRadius: '4px',
-                          whiteSpace: 'nowrap',
-                          transition: 'background-color 0.15s ease'
-                        }}
-                        title={lang === 'es' ? 'Ver especificaciones y ficha clínica del producto' : 'View product clinical specs & monograph'}
-                      >
-                        <ExternalLink size={10} />
-                        <span>{lang === 'es' ? 'Ver Ficha' : 'View Specs'}</span>
-                      </a>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                      {isMasterAdmin ? (
-                        <>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Cant:</span>
-                            <input
-                              type="number"
-                              min="1"
-                              value={prod.quantity || 1}
-                              onChange={(e) => handleUpdateProductQty(idx, e.target.value)}
-                              style={{
-                                width: '48px',
-                                padding: '2px 4px',
-                                fontSize: '0.74rem',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '4px',
-                                textAlign: 'center'
-                              }}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveProduct(idx)}
-                            title={lang === 'es' ? 'Quitar producto' : 'Remove product'}
-                            style={{
-                              border: 'none',
-                              background: 'transparent',
-                              color: '#dc2626',
-                              cursor: 'pointer',
-                              padding: '2px',
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </>
-                      ) : (
-                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#166534' }}>
-                          × {prod.quantity || 1}
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {prod.sku || (isMaskedProd ? 'SKU-••••' : 'SKU-GEN')}
                         </span>
-                      )}
+                        <span style={{ fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {prod.name}
+                        </span>
+                        {isMaskedProd ? (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              fontSize: '0.66rem',
+                              fontWeight: 700,
+                              color: '#64748b',
+                              backgroundColor: '#f1f5f9',
+                              border: '1px solid #e2e8f0',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              whiteSpace: 'nowrap'
+                            }}
+                            title={lang === 'es' ? 'Ficha confidencial codificada. Inicia sesión para ver especificaciones completas' : 'Confidential encoded formulation. Sign in to view full monograph'}
+                          >
+                            <Lock size={10} color="#64748b" />
+                            <span>{lang === 'es' ? 'Ficha Protegida' : 'Protected Specs'}</span>
+                          </span>
+                        ) : (
+                          <a
+                            href={prod.url || (prod.slug ? `/p/${prod.slug}` : `/p/${prod.id}`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              color: '#0284c7',
+                              textDecoration: 'none',
+                              backgroundColor: '#e0f2fe',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              whiteSpace: 'nowrap',
+                              transition: 'background-color 0.15s ease'
+                            }}
+                            title={lang === 'es' ? 'Ver especificaciones y ficha clínica del producto' : 'View product clinical specs & monograph'}
+                          >
+                            <ExternalLink size={10} />
+                            <span>{lang === 'es' ? 'Ver Ficha' : 'View Specs'}</span>
+                          </a>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        {isMasterAdmin ? (
+                          <>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Cant:</span>
+                              <input
+                                type="number"
+                                min="1"
+                                value={prod.quantity || 1}
+                                onChange={(e) => handleUpdateProductQty(idx, e.target.value)}
+                                style={{
+                                  width: '48px',
+                                  padding: '2px 4px',
+                                  fontSize: '0.74rem',
+                                  border: '1px solid #cbd5e1',
+                                  borderRadius: '4px',
+                                  textAlign: 'center'
+                                }}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveProduct(idx)}
+                              title={lang === 'es' ? 'Quitar producto' : 'Remove product'}
+                              style={{
+                                border: 'none',
+                                background: 'transparent',
+                                color: '#dc2626',
+                                cursor: 'pointer',
+                                padding: '2px',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: isMaskedProd ? '#475569' : '#166534' }}>
+                            × {prod.quantity || 1}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                  );
+                })}
+
+                {/* GCP Security notice if locked or masked */}
+                {(isLocked || associatedProducts.some(p => p.isMasked)) && (
+                  <div style={{
+                    marginTop: '4px',
+                    padding: '6px 10px',
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '0.71rem',
+                    color: '#475569'
+                  }}>
+                    <ShieldCheck size={13} color="#15803d" style={{ flexShrink: 0 }} />
+                    <span>
+                      {lang === 'es'
+                        ? `${associatedProducts.length} formulación/es del catálogo verificadas y enlazadas a esta factura. Ficha clínica y lote restringidos a cuentas autorizadas.`
+                        : `${associatedProducts.length} verified catalog formulation(s) cryptographically linked to this bill. Full clinical monograph and batch details restricted to authorized clinical accounts.`}
+                    </span>
                   </div>
-                ))}
+                )}
               </div>
             ) : (
               <div style={{
@@ -777,59 +863,97 @@ export default function BillExpandableDetail({
                 <span>{lang === 'es' ? 'Proveedores / Laboratorios Asociados (Opcional):' : 'Associated Suppliers / Labs (Optional):'}</span>
                 <span style={{
                   fontSize: '0.68rem',
-                  backgroundColor: '#f1f5f9',
-                  color: '#475569',
+                  backgroundColor: associatedSuppliers.length > 0 ? (isLocked ? '#eff6ff' : '#dbeafe') : '#f1f5f9',
+                  color: associatedSuppliers.length > 0 ? (isLocked ? '#1d4ed8' : '#1e40af') : '#475569',
+                  border: associatedSuppliers.length > 0 ? (isLocked ? '1px solid #bfdbfe' : '1px solid #93c5fd') : 'none',
                   padding: '1px 6px',
                   borderRadius: '10px',
                   fontWeight: 700
                 }}>
                   {associatedSuppliers.length}
                 </span>
+                {isLocked && associatedSuppliers.length > 0 && (
+                  <span style={{ fontSize: '0.64rem', color: '#1e40af', backgroundColor: '#dbeafe', padding: '1px 6px', borderRadius: '4px', fontWeight: 650 }}>
+                    {lang === 'es' ? 'Codificado / Protegido' : 'Protected / Masked'}
+                  </span>
+                )}
               </label>
             </div>
 
             {/* Selected Supplier Pills */}
             {associatedSuppliers.length > 0 ? (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: isMasterAdmin ? '10px' : '0' }}>
-                {associatedSuppliers.map((sup, sIdx) => (
-                  <div
-                    key={sup.id || sIdx}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      backgroundColor: '#eff6ff',
-                      border: '1px solid #bfdbfe',
-                      borderRadius: '6px',
-                      padding: '4px 8px',
-                      fontSize: '0.74rem'
-                    }}
-                  >
-                    <Building2 size={12} color="#1d4ed8" />
-                    <span style={{ fontWeight: 700, color: '#1e3a8a' }}>{sup.name}</span>
-                    {sup.vendorNumber && (
-                      <span style={{ fontSize: '0.66rem', color: '#64748b' }}>({sup.vendorNumber})</span>
-                    )}
-                    {isMasterAdmin && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSupplier(sIdx)}
-                        title={lang === 'es' ? 'Quitar proveedor' : 'Remove supplier'}
-                        style={{
-                          border: 'none',
-                          background: 'transparent',
-                          color: '#dc2626',
-                          cursor: 'pointer',
-                          padding: '1px',
-                          display: 'flex',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <Trash2 size={11} />
-                      </button>
-                    )}
+                {associatedSuppliers.map((sup, sIdx) => {
+                  const isMaskedSup = sup.isMasked || isLocked;
+                  return (
+                    <div
+                      key={sup.id || sIdx}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        backgroundColor: isMaskedSup ? '#f8fafc' : '#eff6ff',
+                        border: `1px solid ${isMaskedSup ? '#cbd5e1' : '#bfdbfe'}`,
+                        borderRadius: '6px',
+                        padding: '4px 8px',
+                        fontSize: '0.74rem'
+                      }}
+                    >
+                      {isMaskedSup ? <Lock size={12} color="#003666" /> : <Building2 size={12} color="#1d4ed8" />}
+                      <span style={{ fontWeight: 700, color: isMaskedSup ? '#1e293b' : '#1e3a8a' }}>{sup.name}</span>
+                      {sup.vendorNumber && (
+                        <span style={{ fontSize: '0.66rem', color: '#64748b' }}>({sup.vendorNumber})</span>
+                      )}
+                      {isMaskedSup && (
+                        <span style={{ fontSize: '0.64rem', fontWeight: 650, color: '#15803d', backgroundColor: '#dcfce7', padding: '1px 5px', borderRadius: '3px' }}>
+                          {lang === 'es' ? 'Verificado' : 'Verified'}
+                        </span>
+                      )}
+                      {isMasterAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSupplier(sIdx)}
+                          title={lang === 'es' ? 'Quitar proveedor' : 'Remove supplier'}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#dc2626',
+                            cursor: 'pointer',
+                            padding: '1px',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* GCP Security notice if locked or masked */}
+                {(isLocked || associatedSuppliers.some(s => s.isMasked)) && (
+                  <div style={{
+                    width: '100%',
+                    marginTop: '4px',
+                    padding: '6px 10px',
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '0.71rem',
+                    color: '#475569'
+                  }}>
+                    <ShieldCheck size={13} color="#15803d" style={{ flexShrink: 0 }} />
+                    <span>
+                      {lang === 'es'
+                        ? `${associatedSuppliers.length} laboratorio/proveedor oficial verificado y vinculado. Certificados de habilitación comercial restringidos a cuentas autorizadas.`
+                        : `${associatedSuppliers.length} licensed supplier(s)/laboratory verified and linked. Full vendor accreditation dossier restricted to authorized accounts.`}
+                    </span>
                   </div>
-                ))}
+                )}
               </div>
             ) : (
               <div style={{
