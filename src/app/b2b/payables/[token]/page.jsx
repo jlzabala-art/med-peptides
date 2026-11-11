@@ -349,6 +349,47 @@ export default function PayablesStatementPage() {
                 <span>{isLocked ? (lang === 'es' ? 'Factura cliente protegida' : 'Linked to protected client invoice') : `${lang === 'es' ? 'Sobre factura cliente:' : 'Linked to client invoice:'} ${row.sourceInvoiceNumber}`}</span>
               </div>
             )}
+            {row.adminDescription && !isLocked && (
+              <div
+                style={{
+                  fontSize: '0.72rem',
+                  color: '#475569',
+                  marginTop: '3px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '260px'
+                }}
+                title={row.adminDescription}
+              >
+                📝 {row.adminDescription}
+              </div>
+            )}
+            {Array.isArray(row.associatedProducts) && row.associatedProducts.length > 0 && !isLocked && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '3px' }}>
+                {row.associatedProducts.slice(0, 2).map((p, idx) => (
+                  <span
+                    key={p.id || idx}
+                    style={{
+                      fontSize: '0.66rem',
+                      backgroundColor: '#f0fdf4',
+                      color: '#166534',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '3px',
+                      padding: '0 4px',
+                      fontWeight: 600
+                    }}
+                  >
+                    📦 {p.name}
+                  </span>
+                ))}
+                {row.associatedProducts.length > 2 && (
+                  <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
+                    +{row.associatedProducts.length - 2}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         );
       }
@@ -466,8 +507,22 @@ export default function PayablesStatementPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      {/* ── TOP INSTITUTIONAL BAR (Google Cloud Header Style) ── */}
-      <header style={{ backgroundColor: '#002244', borderBottom: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      {/* ── TOP INSTITUTIONAL BAR (Google Cloud Header Style — Sticky) ── */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        backgroundColor: '#002244',
+        borderBottom: '1px solid rgba(255,255,255,0.12)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.30)',
+        padding: '0.75rem 1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        width: '100%'
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>Atlas Health</span>
@@ -956,6 +1011,7 @@ export default function PayablesStatementPage() {
                 activeEmail={activeEmail}
                 isMasterAdmin={isMasterAdmin}
                 paymentTerms={statement.paymentTerms}
+                onBillUpdated={() => fetchStatement(activeEmail, false)}
               />
             )}
             mobileView="cards"

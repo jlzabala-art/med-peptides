@@ -105,6 +105,36 @@ export default function PayableBillMobileCard(props) {
             Ref: {bill.referenceNumber}
           </div>
         )}
+        {bill.adminDescription && !isLocked && (
+          <div style={{
+            fontSize: '0.72rem',
+            backgroundColor: '#f8fafc',
+            borderLeft: '3px solid #003666',
+            padding: '4px 8px',
+            borderRadius: '0 4px 4px 0',
+            color: '#334155',
+            marginTop: '4px'
+          }}>
+            <strong style={{ color: '#003666' }}>{lang === 'es' ? 'Nota Admin:' : 'Admin Note:'}</strong> {bill.adminDescription}
+          </div>
+        )}
+        {Array.isArray(bill.associatedProducts) && bill.associatedProducts.length > 0 && !isLocked && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+            {bill.associatedProducts.map((p, idx) => (
+              <span key={p.id || idx} style={{
+                fontSize: '0.66rem',
+                backgroundColor: '#f0fdf4',
+                color: '#166534',
+                border: '1px solid #bbf7d0',
+                borderRadius: '4px',
+                padding: '1px 6px',
+                fontWeight: 600
+              }}>
+                📦 {p.name} {p.quantity > 1 ? `(×${p.quantity})` : ''}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Dates Bar */}
