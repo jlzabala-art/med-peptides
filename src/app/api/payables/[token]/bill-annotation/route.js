@@ -80,9 +80,20 @@ async function handleSaveAnnotation(request, { params }) {
           name: String(p.name || p.productName || '').trim(),
           sku: String(p.sku || '').trim(),
           category: String(p.category || '').trim(),
+          slug: String(p.slug || '').trim(),
+          url: String(p.url || (p.slug ? `/p/${p.slug}` : (p.id ? `/p/${p.id}` : ''))).trim(),
           quantity: Math.max(1, Number(p.quantity) || 1),
           allocatedCostAed: Math.max(0, Number(p.allocatedCostAed) || 0)
         })).filter(p => p.id || p.name)
+      : [];
+
+    const associatedSuppliers = Array.isArray(body.associatedSuppliers)
+      ? body.associatedSuppliers.map(s => ({
+          id: String(s.id || s.supplierId || '').trim(),
+          name: String(s.name || s.supplierName || '').trim(),
+          vendorNumber: String(s.vendorNumber || s.code || '').trim(),
+          country: String(s.country || '').trim()
+        })).filter(s => s.id || s.name)
       : [];
 
     const billRef = adminDb.collection('payables_statements').doc(wholesalerId).collection('bills').doc(billId);
@@ -92,6 +103,7 @@ async function handleSaveAnnotation(request, { params }) {
       adminDescriptionUpdatedAt: nowIso,
       adminDescriptionUpdatedBy: callerEmail || 'admin@atlashealth-services.com',
       associatedProducts,
+      associatedSuppliers,
       updatedAt: nowIso
     };
 

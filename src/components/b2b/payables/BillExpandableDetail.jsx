@@ -12,11 +12,25 @@ import {
   Search,
   Check,
   Loader2,
-  Tag
+  Tag,
+  Building2
 } from '@/lib/icons';
 import CopyableId from '@/components/ui/CopyableId';
 import { formatDateDisplay } from './payablesFormat';
+import { searchAlgoliaProducts } from '@/services/algoliaSearch';
 import toast from 'react-hot-toast';
+
+const PRESET_SUPPLIERS = [
+  { id: 'supplier-bioblend', name: 'Bioblend Compounding Pharmacy', vendorNumber: 'VEN-BIOBLEND', country: 'AE' },
+  { id: 'supplier-health-source-canada', name: 'Health Source Canada', vendorNumber: 'VEN-79', country: 'AE' },
+  { id: 'supplier-norma-hellas', name: 'Norma Hellas S.A.', vendorNumber: 'VEN-92', country: 'GR' },
+  { id: 'supplier-mediluxe', name: 'MediLuxe Health Solutions', vendorNumber: 'VEN-81', country: 'AE' },
+  { id: 'supplier-lotusland', name: 'Lotusland Peptides', vendorNumber: 'VEN-15', country: 'CA' },
+  { id: 'supplier-pharmapolis', name: 'Pharmapolis / UltraPerson', vendorNumber: 'VEN-34', country: 'ES' },
+  { id: 'supplier-colway', name: 'Colway Collagen', vendorNumber: 'VEN-28', country: 'PL' },
+  { id: 'supplier-bloodo', name: 'Bloodo Diagnostics', vendorNumber: 'VEN-55', country: 'CH' },
+  { id: 'supplier-eternadx', name: 'ETERNA Longevity DX', vendorNumber: 'VEN-60', country: 'US' }
+];
 
 export default function BillExpandableDetail({
   bill,
@@ -42,34 +56,46 @@ export default function BillExpandableDetail({
   const [associatedProducts, setAssociatedProducts] = useState(
     Array.isArray(row.associatedProducts) ? row.associatedProducts : []
   );
+  const [associatedSuppliers, setAssociatedSuppliers] = useState(
+    Array.isArray(row.associatedSuppliers) ? row.associatedSuppliers : []
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // State for product search & autocomplete
+  // State for product search & autocomplete (Algolia + Fallback)
   const [productQuery, setProductQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const searchContainerRef = useRef(null);
 
+  // State for supplier search & autocomplete
+  const [supplierQuery, setSupplierQuery] = useState('');
+  const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
+  const supplierContainerRef = useRef(null);
+
   // Sync state if prop changes
   useEffect(() => {
     setDescription(row.adminDescription || '');
     setAssociatedProducts(Array.isArray(row.associatedProducts) ? row.associatedProducts : []);
-  }, [row.adminDescription, row.associatedProducts]);
+    setAssociatedSuppliers(Array.isArray(row.associatedSuppliers) ? row.associatedSuppliers : []);
+  }, [row.adminDescription, row.associatedProducts, row.associatedSuppliers]);
 
-  // Close search dropdown on click outside
+  // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
         setShowProductDropdown(false);
+      }
+      if (supplierContainerRef.current && !supplierContainerRef.current.contains(e.target)) {
+        setShowSupplierDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounced product search from public catalog API
+  // Debounced product search: Algolia first, graceful fallback to public catalog API
   useEffect(() => {
     if (!productQuery || productQuery.trim().length < 2) {
       setSearchResults([]);
@@ -79,37 +105,84 @@ export default function BillExpandableDetail({
 
     const timer = setTimeout(async () => {
       setIsSearching(true);
+      const cleanTerm = productQuery.trim();
       try {
-        const res = await fetch(`/api/catalog/public?search=${encodeURIComponent(productQuery.trim())}&limit=8`);
-        const json = await res.json();
-        if (json.products && Array.isArray(json.products)) {
-          setSearchResults(json.products);
+        const hits = await searchAlgoliaProducts(cleanTerm, { hitsPerPage: 8 });
+        if (Array.isArray(hits) && hits.length > 0) {
+          const mappedHits = hits.map(h => {
+            const id = h.objectID || h.id || `prod_${Date.now()}`;
+            const slug = h.slug || h.handle || '';
+            return {
+              id,
+              name: h.name || h.title || h.canonicalName || 'Unnamed Product',
+              sku: h.sku || '',
+              category: h.category || h.therapeuticClass || 'General',
+              slug,
+              url: slug ? `/p/${slug}` : `/p/${id}`
+            };
+          });
+          setSearchResults(mappedHits);
           setShowProductDropdown(true);
+        } else {
+          // Fallback to public catalog API endpoint
+          const res = await fetch(`/api/catalog/public?search=${encodeURIComponent(cleanTerm)}&limit=8`);
+          const json = await res.json();
+          if (json.products && Array.isArray(json.products)) {
+            const mapped = json.products.map(p => ({
+              id: p.id,
+              name: p.name,
+              sku: p.sku || '',
+              category: p.category || 'General',
+              slug: p.slug || '',
+              url: p.slug ? `/p/${p.slug}` : `/p/${p.id}`
+            }));
+            setSearchResults(mapped);
+            setShowProductDropdown(true);
+          } else {
+            setSearchResults([]);
+          }
         }
       } catch (err) {
-        console.error('Error fetching catalog products:', err);
+        console.error('Error fetching catalog products with Algolia:', err);
+        try {
+          const res = await fetch(`/api/catalog/public?search=${encodeURIComponent(cleanTerm)}&limit=8`);
+          const json = await res.json();
+          if (json.products && Array.isArray(json.products)) {
+            setSearchResults(json.products);
+            setShowProductDropdown(true);
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback catalog search error:', fallbackErr);
+        }
       } finally {
         setIsSearching(false);
       }
-    }, 280);
+    }, 240);
 
     return () => clearTimeout(timer);
   }, [productQuery]);
 
   const handleAddProduct = (prod) => {
     if (!prod) return;
-    const exists = associatedProducts.some(p => p.id === prod.id || (p.sku && p.sku === prod.sku));
+    const prodId = prod.id || prod.objectID || `prod_${Date.now()}`;
+    const prodSku = prod.sku || '';
+    const exists = associatedProducts.some(p => p.id === prodId || (p.sku && prodSku && p.sku === prodSku));
     if (exists) {
       toast(lang === 'es' ? 'Este producto ya está asociado' : 'Product is already linked', { icon: 'ℹ️' });
       setShowProductDropdown(false);
       return;
     }
 
+    const prodSlug = prod.slug || '';
+    const prodUrl = prod.url || (prodSlug ? `/p/${prodSlug}` : `/p/${prodId}`);
+
     const newProd = {
-      id: prod.id || `prod_${Date.now()}`,
+      id: prodId,
       name: prod.name || 'Unnamed Product',
-      sku: prod.sku || '',
+      sku: prodSku,
       category: prod.category || 'General',
+      slug: prodSlug,
+      url: prodUrl,
       quantity: 1,
       allocatedCostAed: 0
     };
@@ -129,6 +202,35 @@ export default function BillExpandableDetail({
     setAssociatedProducts(prev => prev.map((p, idx) => idx === index ? { ...p, quantity: qty } : p));
   };
 
+  const handleAddSupplier = (supplier) => {
+    if (!supplier || !supplier.name) return;
+    const cleanName = supplier.name.trim();
+    const exists = associatedSuppliers.some(
+      s => s.id === supplier.id || (s.name && s.name.toLowerCase() === cleanName.toLowerCase())
+    );
+    if (exists) {
+      toast(lang === 'es' ? 'Este proveedor ya está asociado' : 'Supplier is already linked', { icon: 'ℹ️' });
+      setShowSupplierDropdown(false);
+      return;
+    }
+
+    const newSup = {
+      id: supplier.id || `sup_${Date.now()}`,
+      name: cleanName,
+      vendorNumber: supplier.vendorNumber || '',
+      country: supplier.country || ''
+    };
+
+    setAssociatedSuppliers(prev => [...prev, newSup]);
+    setSupplierQuery('');
+    setShowSupplierDropdown(false);
+    toast.success(lang === 'es' ? `Proveedor asociado: ${newSup.name}` : `Supplier linked: ${newSup.name}`);
+  };
+
+  const handleRemoveSupplier = (indexToRemove) => {
+    setAssociatedSuppliers(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const handleSaveToFirebase = async () => {
     setIsSaving(true);
     setSaveSuccess(false);
@@ -140,6 +242,7 @@ export default function BillExpandableDetail({
           billId,
           description,
           associatedProducts,
+          associatedSuppliers,
           email: activeEmail
         })
       });
@@ -152,8 +255,8 @@ export default function BillExpandableDetail({
       setSaveSuccess(true);
       toast.success(
         lang === 'es'
-          ? 'Descripción y productos guardados en Firebase con éxito'
-          : 'Description & products saved to Firebase successfully'
+          ? 'Trazabilidad y observaciones guardadas en Firebase'
+          : 'Traceability & notes saved to Firebase'
       );
 
       if (typeof onBillUpdated === 'function') {
@@ -490,6 +593,29 @@ export default function BillExpandableDetail({
                       <span style={{ fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {prod.name}
                       </span>
+                      <a
+                        href={prod.url || (prod.slug ? `/p/${prod.slug}` : `/p/${prod.id}`)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          color: '#0284c7',
+                          textDecoration: 'none',
+                          backgroundColor: '#e0f2fe',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          whiteSpace: 'nowrap',
+                          transition: 'background-color 0.15s ease'
+                        }}
+                        title={lang === 'es' ? 'Ver especificaciones y ficha clínica del producto' : 'View product clinical specs & monograph'}
+                      >
+                        <ExternalLink size={10} />
+                        <span>{lang === 'es' ? 'Ver Ficha' : 'View Specs'}</span>
+                      </a>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
@@ -639,6 +765,215 @@ export default function BillExpandableDetail({
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Section C: Associated Suppliers / Labs (Optional) */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Building2 size={14} color="#003666" />
+                <span>{lang === 'es' ? 'Proveedores / Laboratorios Asociados (Opcional):' : 'Associated Suppliers / Labs (Optional):'}</span>
+                <span style={{
+                  fontSize: '0.68rem',
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  padding: '1px 6px',
+                  borderRadius: '10px',
+                  fontWeight: 700
+                }}>
+                  {associatedSuppliers.length}
+                </span>
+              </label>
+            </div>
+
+            {/* Selected Supplier Pills */}
+            {associatedSuppliers.length > 0 ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: isMasterAdmin ? '10px' : '0' }}>
+                {associatedSuppliers.map((sup, sIdx) => (
+                  <div
+                    key={sup.id || sIdx}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      backgroundColor: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '6px',
+                      padding: '4px 8px',
+                      fontSize: '0.74rem'
+                    }}
+                  >
+                    <Building2 size={12} color="#1d4ed8" />
+                    <span style={{ fontWeight: 700, color: '#1e3a8a' }}>{sup.name}</span>
+                    {sup.vendorNumber && (
+                      <span style={{ fontSize: '0.66rem', color: '#64748b' }}>({sup.vendorNumber})</span>
+                    )}
+                    {isMasterAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSupplier(sIdx)}
+                        title={lang === 'es' ? 'Quitar proveedor' : 'Remove supplier'}
+                        style={{
+                          border: 'none',
+                          background: 'transparent',
+                          color: '#dc2626',
+                          cursor: 'pointer',
+                          padding: '1px',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <Trash2 size={11} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{
+                padding: '8px 10px',
+                backgroundColor: '#f8fafc',
+                border: '1px dashed #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.74rem',
+                color: '#64748b',
+                marginBottom: isMasterAdmin ? '10px' : '0'
+              }}>
+                {lang === 'es' ? 'Sin proveedores específicos asociados a esta factura.' : 'No specific suppliers linked to this bill.'}
+              </div>
+            )}
+
+            {/* Supplier Quick Selector / Search (Master Admin Only) */}
+            {isMasterAdmin && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div ref={supplierContainerRef} style={{ position: 'relative' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                    <Search size={14} color="#64748b" style={{ position: 'absolute', left: '10px', pointerEvents: 'none' }} />
+                    <input
+                      type="text"
+                      value={supplierQuery}
+                      onChange={(e) => {
+                        setSupplierQuery(e.target.value);
+                        setShowSupplierDropdown(true);
+                      }}
+                      onFocus={() => setShowSupplierDropdown(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && supplierQuery.trim()) {
+                          e.preventDefault();
+                          handleAddSupplier({ name: supplierQuery.trim() });
+                        }
+                      }}
+                      placeholder={lang === 'es' ? 'Escribe o busca proveedor (Enter para añadir)...' : 'Type or search supplier (Enter to add)...'}
+                      style={{
+                        width: '100%',
+                        padding: '7px 10px 7px 30px',
+                        fontSize: '0.76rem',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        outline: 'none',
+                        backgroundColor: '#ffffff'
+                      }}
+                    />
+                  </div>
+
+                  {/* Supplier Autocomplete Dropdown */}
+                  {showSupplierDropdown && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      marginTop: '4px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      zIndex: 40,
+                      maxHeight: '180px',
+                      overflowY: 'auto'
+                    }}>
+                      {PRESET_SUPPLIERS
+                        .filter(s => !supplierQuery || s.name.toLowerCase().includes(supplierQuery.toLowerCase()) || (s.vendorNumber && s.vendorNumber.toLowerCase().includes(supplierQuery.toLowerCase())))
+                        .map(s => (
+                          <div
+                            key={s.id}
+                            onClick={() => handleAddSupplier(s)}
+                            style={{
+                              padding: '7px 10px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #f1f5f9',
+                              fontSize: '0.75rem'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Building2 size={13} color="#003666" />
+                              <span style={{ fontWeight: 600, color: '#0f172a' }}>{s.name}</span>
+                              <span style={{ fontSize: '0.66rem', color: '#64748b' }}>({s.vendorNumber})</span>
+                            </div>
+                            <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 700 }}>+ {lang === 'es' ? 'Añadir' : 'Add'}</span>
+                          </div>
+                        ))}
+                      {supplierQuery.trim().length > 0 && !PRESET_SUPPLIERS.some(s => s.name.toLowerCase() === supplierQuery.trim().toLowerCase()) && (
+                        <div
+                          onClick={() => handleAddSupplier({ name: supplierQuery.trim() })}
+                          style={{
+                            padding: '8px 10px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            color: '#15803d',
+                            backgroundColor: '#f0fdf4',
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <Plus size={13} />
+                          <span>{lang === 'es' ? `Añadir "${supplierQuery.trim()}" como nuevo proveedor` : `Add "${supplierQuery.trim()}" as custom supplier`}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Add Preset Buttons */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
+                    {lang === 'es' ? 'Sugerencias:' : 'Quick Select:'}
+                  </span>
+                  {PRESET_SUPPLIERS.slice(0, 4).map(s => {
+                    const isAdded = associatedSuppliers.some(as => as.name.toLowerCase() === s.name.toLowerCase());
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        disabled={isAdded}
+                        onClick={() => handleAddSupplier(s)}
+                        style={{
+                          fontSize: '0.66rem',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: isAdded ? '#f1f5f9' : '#ffffff',
+                          color: isAdded ? '#94a3b8' : '#334155',
+                          cursor: isAdded ? 'default' : 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}
+                      >
+                        {isAdded ? '✓' : '+'} {s.name}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
