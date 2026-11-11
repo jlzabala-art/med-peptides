@@ -608,4 +608,646 @@ export const PRESCRIPTION_COMPARISON = {
   }
 };
 
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * DYNAMIC CLINICAL NUTRIGENOMICS RULES ENGINE (24Genetics / NutriGen / Atlas)
+ * Automated inference system for clinical nutritionists and patients.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+export const DEFAULT_HOSSAM_GENOTYPES = {
+  MC4R: { gene: 'MC4R', rsId: 'rs17782313', genotype: 'TC', effect: 'delayed_satiety', risk: 'high', label: 'Delayed Satiety Response' },
+  TAS2R38: { gene: 'TAS2R38', rsId: 'rs713598', genotype: 'AG', effect: 'emotional_eater', risk: 'high', label: 'Stress & Emotional Craving' },
+  FUT1: { gene: 'FUT1', rsId: 'rs601338', genotype: 'AA', effect: 'sweet_craving_low_fat', risk: 'high', label: 'Elevated Sweet Craving / Low Fat Tendency' },
+  FTO: { gene: 'FTO', rsId: 'rs9939609', genotype: 'AC', effect: 'overweight_carb_sensitivity', risk: 'high', label: 'Overweight Predisposition & Carb Vulnerability' },
+  IRS1: { gene: 'IRS1', rsId: 'rs1801278', genotype: 'TT', effect: 'insulin_sensitivity_deficit', risk: 'high', label: 'Reduced Insulin Sensitivity' },
+  CLOCK: { gene: 'CLOCK', rsId: 'rs1801260', genotype: 'AA', effect: 'evening_metabolic_slowdown', risk: 'moderate', label: 'Circadian Phase Delay' },
+  MTHFR: { gene: 'MTHFR', rsId: 'rs1801133', genotype: 'TT', effect: 'homocysteine_methylation_deficit', risk: 'critical', label: 'MTHFR 677TT Severe Methylation Impairment' },
+  ZPR1: { gene: 'ZPR1', rsId: 'rs964184', genotype: 'CG', effect: 'synthetic_vit_e_toxicity_risk', risk: 'critical', label: 'Synthetic Vitamin E Hyper-Accumulation Alert' },
+  CYP4F2: { gene: 'CYP4F2', rsId: 'rs2108622', genotype: 'TC', effect: 'altered_tocopherol_clearance', risk: 'critical', label: 'Altered Tocopherol Degradation' },
+  MCM6: { gene: 'MCM6', rsId: 'rs4988235', genotype: 'AG', effect: 'moderate_hypolactasia', risk: 'moderate', label: 'Adult Hypolactasia (Lactose Malabsorption)' },
+  ADORA2A: { gene: 'ADORA2A', rsId: 'rs5751876', genotype: 'TC', effect: 'caffeine_induced_anxiety', risk: 'high', label: 'Adenosine Receptor Caffeine Anxiety' },
+  CYP1A2: { gene: 'CYP1A2', rsId: 'rs762551', genotype: 'AC', effect: 'slow_caffeine_clearance', risk: 'moderate', label: 'Slow Hepatic Caffeine Clearance' },
+  VDR: { gene: 'VDR', rsId: 'rs2228570', genotype: 'CT', effect: 'reduced_vitamin_d_nuclear_affinity', risk: 'moderate', label: 'FokI Nuclear Vitamin D Receptor Resistance' }
+};
+
+/**
+ * Universal evaluator function that processes any patient genetic payload
+ * (24Genetics nutrition PDF, Fagron NutriGen, raw JSON or default).
+ * Returns complete, structured, food-first clinical nutritionist data.
+ */
+export function evaluateNutrigenomicProfile(inputData = {}) {
+  const patientName = inputData.patientName || inputData.patient || 'Hossam Ahmed';
+  const sampleCode = inputData.sampleCode || inputData.sample || '24G-QA-90421';
+  const clinic = inputData.clinic || 'Atlas Health Services · Doha, Qatar';
+  const testPlatform = inputData.testPlatform || '24Genetics / Illumina GSA-24 Human Multi-Disease BeadChip';
+  const analysisDate = inputData.analysisDate || 'November 2026';
+
+  // Normalize genotypes map
+  const rawG = inputData.genotypes || {};
+  const g = {
+    MC4R: typeof rawG.MC4R === 'string' ? rawG.MC4R : (rawG.MC4R?.genotype || DEFAULT_HOSSAM_GENOTYPES.MC4R.genotype),
+    TAS2R38: typeof rawG.TAS2R38 === 'string' ? rawG.TAS2R38 : (rawG.TAS2R38?.genotype || DEFAULT_HOSSAM_GENOTYPES.TAS2R38.genotype),
+    FUT1: typeof rawG.FUT1 === 'string' ? rawG.FUT1 : (rawG.FUT1?.genotype || DEFAULT_HOSSAM_GENOTYPES.FUT1.genotype),
+    FTO: typeof rawG.FTO === 'string' ? rawG.FTO : (rawG.FTO?.genotype || DEFAULT_HOSSAM_GENOTYPES.FTO.genotype),
+    IRS1: typeof rawG.IRS1 === 'string' ? rawG.IRS1 : (rawG.IRS1?.genotype || DEFAULT_HOSSAM_GENOTYPES.IRS1.genotype),
+    CLOCK: typeof rawG.CLOCK === 'string' ? rawG.CLOCK : (rawG.CLOCK?.genotype || DEFAULT_HOSSAM_GENOTYPES.CLOCK.genotype),
+    MTHFR: typeof rawG.MTHFR === 'string' ? rawG.MTHFR : (rawG.MTHFR?.genotype || DEFAULT_HOSSAM_GENOTYPES.MTHFR.genotype),
+    ZPR1: typeof rawG.ZPR1 === 'string' ? rawG.ZPR1 : (rawG.ZPR1?.genotype || DEFAULT_HOSSAM_GENOTYPES.ZPR1.genotype),
+    CYP4F2: typeof rawG.CYP4F2 === 'string' ? rawG.CYP4F2 : (rawG.CYP4F2?.genotype || DEFAULT_HOSSAM_GENOTYPES.CYP4F2.genotype),
+    MCM6: typeof rawG.MCM6 === 'string' ? rawG.MCM6 : (rawG.MCM6?.genotype || DEFAULT_HOSSAM_GENOTYPES.MCM6.genotype),
+    ADORA2A: typeof rawG.ADORA2A === 'string' ? rawG.ADORA2A : (rawG.ADORA2A?.genotype || DEFAULT_HOSSAM_GENOTYPES.ADORA2A.genotype),
+    CYP1A2: typeof rawG.CYP1A2 === 'string' ? rawG.CYP1A2 : (rawG.CYP1A2?.genotype || DEFAULT_HOSSAM_GENOTYPES.CYP1A2.genotype),
+    VDR: typeof rawG.VDR === 'string' ? rawG.VDR : (rawG.VDR?.genotype || DEFAULT_HOSSAM_GENOTYPES.VDR.genotype)
+  };
+
+  // 1. Calculate Axis 1: Satiety & Appetite Regulation
+  const hasMc4rVariant = g.MC4R === 'TC' || g.MC4R === 'CC';
+  const hasTas2r38Variant = g.TAS2R38 === 'AG' || g.TAS2R38 === 'GG';
+  const hasFut1Variant = g.FUT1 === 'AA' || g.FUT1 === 'AG';
+  const hasFtoVariant = g.FTO === 'AC' || g.FTO === 'AA';
+
+  let satietyScore = 20;
+  if (hasMc4rVariant) satietyScore += 30;
+  if (hasTas2r38Variant) satietyScore += 20;
+  if (hasFut1Variant) satietyScore += 15;
+  if (hasFtoVariant) satietyScore += 15;
+  satietyScore = Math.min(satietyScore, 95);
+
+  const axis1 = {
+    id: 'axis_satiety_appetite',
+    number: 1,
+    titleEn: 'Satiety, Appetite & Emotional Eating',
+    titleEs: 'Saciedad, Apetito & Hambre Emocional',
+    score: satietyScore,
+    riskLevel: satietyScore >= 75 ? 'HIGH RISK' : satietyScore >= 45 ? 'MODERATE RISK' : 'LOW RISK',
+    badgeColor: satietyScore >= 75 ? '#c5221f' : satietyScore >= 45 ? '#b06000' : '#137333',
+    badgeBg: satietyScore >= 75 ? '#fce8e6' : satietyScore >= 45 ? '#fef7e0' : '#e6f4ea',
+    keyGenes: `MC4R (${g.MC4R}), TAS2R38 (${g.TAS2R38}), FUT1 (${g.FUT1}), FTO (${g.FTO})`,
+    clinicalFindingEn: 'Hypothalamic leptin signaling delay with marked hedonic food reward seeking and sweet-tooth vulnerability.',
+    clinicalFindingEs: 'Retardo en la señalización hipotalámica de leptina con búsqueda de recompensa hedónica y apetencia por dulce.',
+    proteinTargetEn: '30–35g high-biological-value protein per main meal to trigger PYY and GLP-1 satiety peptide release.',
+    proteinTargetEs: '30–35g de proteína de alto valor biológico por comida principal para estimular la liberación de PYY y GLP-1.',
+    emotionalEatingProtocolEn: 'Oral dopamine swaps: >85% raw bitter cacao, crunchy celery/cucumbers with sea salt & lime, 3-minute pre-meal vagal breathing pause.',
+    emotionalEatingProtocolEs: 'Sustitutos de dopamina oral: cacao amargo >85%, apio/pepino crujientes con sal marina y lima, pausa respiratoria vagal de 3 min.',
+    sweetCravingProtocolEn: 'Ceylon cinnamon on wild berries to blunt insulin and reset FGF21 hepatic-brain reward loop. Strictly avoid artificial sweeteners.',
+    sweetCravingProtocolEs: 'Canela de Ceilán en frutos rojos silvestres para aplanar insulina y reajustar FGF21. Prohibir edulcorantes artificiales.'
+  };
+
+  // 2. Calculate Axis 2: Methylation & Homocysteine Clearance
+  const hasMthfrTT = g.MTHFR === 'TT';
+  const hasMthfrCT = g.MTHFR === 'CT';
+  let methylationScore = 25;
+  if (hasMthfrTT) methylationScore = 92;
+  else if (hasMthfrCT) methylationScore = 65;
+
+  const axis2 = {
+    id: 'axis_methylation_homocysteine',
+    number: 2,
+    titleEn: 'Cellular Methylation & Homocysteine Clearance',
+    titleEs: 'Metilación Celular & Depuración de Homocisteína',
+    score: methylationScore,
+    riskLevel: methylationScore >= 75 ? 'HIGH RISK' : methylationScore >= 45 ? 'MODERATE RISK' : 'LOW RISK',
+    badgeColor: methylationScore >= 75 ? '#c5221f' : methylationScore >= 45 ? '#b06000' : '#137333',
+    badgeBg: methylationScore >= 75 ? '#fce8e6' : methylationScore >= 45 ? '#fef7e0' : '#e6f4ea',
+    keyGenes: `MTHFR C677T (${g.MTHFR}), MTR, MTRR`,
+    clinicalFindingEn: hasMthfrTT
+      ? 'Severe enzymatic reduction (≈70% loss of MTHFR capacity). Extreme elevation risk for plasma homocysteine and impaired detox.'
+      : 'Moderate methylation efficiency. Sensitive to synthetic folic acid accumulation.',
+    clinicalFindingEs: hasMthfrTT
+      ? 'Reducción enzimática severa (≈70% de pérdida de actividad MTHFR). Riesgo crítico de homocisteína elevada y déficit de metilación.'
+      : 'Eficiencia de metilación moderada. Vulnerable a la acumulación de ácido fólico sintético.',
+    foodPrescriptionEn: 'Daily natural folates & betaine: lightly steamed baby spinach, arugula, steamed asparagus, beetroot, and choline from organic egg yolks (BHMT alternate pathway).',
+    foodPrescriptionEs: 'Folatos naturales y betaína diarios: espinacas baby al vapor, rúcula, espárragos, remolacha y colina de yemas de huevo ecológico (vía alterna BHMT).',
+    criticalWarningEn: 'STRICT EXCLUSION: Synthetic Folic Acid (Pteroylmonoglutamic Acid) in fortified flours, commercial breads, and energy bars.',
+    criticalWarningEs: 'EXCLUSIÓN ESTRICTA: Ácido fólico sintético (pteroilmonoglutámico) en harinas enriquecidas, panes de molde y barritas.'
+  };
+
+  // 3. Calculate Axis 3: Glycemia & Carbohydrate Sensitivity
+  const hasIrs1TT = g.IRS1 === 'TT' || g.IRS1 === 'CT';
+  let glycemicScore = 30;
+  if (hasIrs1TT) glycemicScore += 35;
+  if (hasFtoVariant) glycemicScore += 20;
+  glycemicScore = Math.min(glycemicScore, 90);
+
+  const axis3 = {
+    id: 'axis_glycemia_carbohydrates',
+    number: 3,
+    titleEn: 'Glycemia & Carbohydrate Sensitivity',
+    titleEs: 'Glucemia & Sensibilidad a Carbohidratos',
+    score: glycemicScore,
+    riskLevel: glycemicScore >= 70 ? 'HIGH RISK' : glycemicScore >= 45 ? 'MODERATE RISK' : 'LOW RISK',
+    badgeColor: glycemicScore >= 70 ? '#c5221f' : glycemicScore >= 45 ? '#b06000' : '#137333',
+    badgeBg: glycemicScore >= 70 ? '#fce8e6' : glycemicScore >= 45 ? '#fef7e0' : '#e6f4ea',
+    keyGenes: `IRS1 (${g.IRS1}), FTO (${g.FTO}), TCF7L2`,
+    clinicalFindingEn: 'High postprandial glucose volatility and reduced insulin receptor tyrosine phosphorylation with refined carbs.',
+    clinicalFindingEs: 'Alta volatilidad glucémica postprandial y menor fosforilación del receptor de insulina ante carbohidratos refinados.',
+    maxNetCarbsPerMeal: '<35–40g net carbs per meal',
+    plateSequencingRuleEn: 'Plate Sequencing: 1st Soluble Fiber/Greens -> 2nd Proteins & Lipids -> 3rd Complex Low-GI Carbs last.',
+    plateSequencingRuleEs: 'Secuencia de Plato: 1º Fibra Soluble/Verdura -> 2º Proteínas & Grasas Buenas -> 3º Carbohidratos complejos al final.'
+  };
+
+  // 4. Calculate Axis 4: Micronutrients & Safety Toxicity Alerts
+  const hasVitEToxicityRisk = g.ZPR1 === 'CG' || g.ZPR1 === 'GG' || g.CYP4F2 === 'TC' || g.CYP4F2 === 'CC';
+  const hasVdrRisk = g.VDR === 'CT' || g.VDR === 'TT';
+
+  let micronutrientScore = 40;
+  if (hasVitEToxicityRisk) micronutrientScore += 35;
+  if (hasVdrRisk) micronutrientScore += 15;
+  micronutrientScore = Math.min(micronutrientScore, 95);
+
+  const axis4 = {
+    id: 'axis_micronutrients_safety',
+    number: 4,
+    titleEn: 'Micronutrient Bioavailability & Toxicity Alerts',
+    titleEs: 'Biodisponibilidad de Micronutrientes & Alertas de Toxicidad',
+    score: micronutrientScore,
+    riskLevel: hasVitEToxicityRisk ? 'CRITICAL ALERT' : 'MODERATE RISK',
+    badgeColor: '#c5221f',
+    badgeBg: '#fce8e6',
+    keyGenes: `ZPR1 (${g.ZPR1}), CYP4F2 (${g.CYP4F2}), VDR FokI (${g.VDR})`,
+    criticalToxicityAlertEn: 'CRITICAL SAFETY ALERT: High genetic risk of synthetic Vitamin E (alpha-tocopherol) accumulation. DO NOT PRESCRIBE synthetic Vitamin E supplements. Dietary sources only (raw almonds, sunflower seeds, EVOO).',
+    criticalToxicityAlertEs: 'ALERTA CRÍTICA DE SEGURIDAD: Alto riesgo de acumulación de Vitamina E sintética (alfa-tocoferol). NO PRESCRIBIR suplementos de Vitamina E sintética. Fuentes exclusivamente dietéticas (almendras crudas, semillas de girasol, AOVE).',
+    vitaminDStrategyEn: 'VDR nuclear resistance requires maintaining serum 25(OH)D at 50–70 ng/mL. Always take D3 with dietary breakfast fats and MK-7 K2.',
+    vitaminDStrategyEs: 'La resistencia VDR nuclear exige mantener 25(OH)D en 50–70 ng/mL. Tomar D3 siempre con grasas en el desayuno y MK-7 K2.'
+  };
+
+  // 5. Calculate Axis 5: Food Sensitivities & Neuro-Stimulants
+  const hasLactoseIntolerance = g.MCM6 === 'AG' || g.MCM6 === 'GG';
+  const hasCaffeineAnxiety = g.ADORA2A === 'TC' || g.ADORA2A === 'CC';
+  const hasSlowCaffeineClearance = g.CYP1A2 === 'AC' || g.CYP1A2 === 'CC';
+
+  let sensitivityScore = 35;
+  if (hasLactoseIntolerance) sensitivityScore += 25;
+  if (hasCaffeineAnxiety) sensitivityScore += 25;
+  if (hasSlowCaffeineClearance) sensitivityScore += 10;
+  sensitivityScore = Math.min(sensitivityScore, 95);
+
+  const axis5 = {
+    id: 'axis_sensitivities_neuro',
+    number: 5,
+    titleEn: 'Food Sensitivities, Gut Barrier & Neuro-Stimulants',
+    titleEs: 'Sensibilidades Alimentarias, Barrera Intestinal & Neuroestimulantes',
+    score: sensitivityScore,
+    riskLevel: sensitivityScore >= 70 ? 'HIGH RISK' : 'MODERATE RISK',
+    badgeColor: sensitivityScore >= 70 ? '#c5221f' : '#b06000',
+    badgeBg: sensitivityScore >= 70 ? '#fce8e6' : '#fef7e0',
+    keyGenes: `MCM6 (${g.MCM6}), ADORA2A (${g.ADORA2A}), CYP1A2 (${g.CYP1A2})`,
+    lactoseDirectiveEn: 'Adult hypolactasia confirmed. Eliminate liquid cow milk & fresh cheeses. Allow A2 goat/sheep kefir or hard aged cheeses in moderation.',
+    lactoseDirectiveEs: 'Hipolactasia del adulto confirmada. Eliminar leche de vaca y quesos frescos. Permitir kéfir de cabra/oveja A2 o quesos curados con moderación.',
+    caffeineCutoffEn: 'STRICT CAFFEINE CUTOFF AT 11:00 AM. Replace afternoon coffee with ceremonial matcha (buffered by L-Theanine) or chamomile.',
+    caffeineCutoffEs: 'CORTE ESTRICTO DE CAFEÍNA A LAS 11:00 AM. Sustituir el café de tarde por té matcha ceremonial (amortiguado por L-teanina) o manzanilla.'
+  };
+
+  const fiveClinicalAxes = [axis1, axis2, axis3, axis4, axis5];
+
+  // Food Traffic Light Matrix
+  const foodTrafficLight = {
+    greenSuperfoods: [
+      {
+        name: 'Wild Rocket (Arugula) & Baby Spinach',
+        category: 'Produce & Greens',
+        activeCompound: 'Natural Folate & Betaine',
+        geneTarget: 'MTHFR C677T',
+        benefitEn: 'Supplies bioavailable methyl donors without the unmetabolized toxicity of synthetic folic acid.',
+        benefitEs: 'Aporta donantes de metilo bioactivos sin la toxicidad del ácido fólico sintético.'
+      },
+      {
+        name: 'Steamed Asparagus & Raw Beetroot',
+        category: 'Produce & Roots',
+        activeCompound: 'Betaine & Prebiotic Inulin',
+        geneTarget: 'MTHFR / Gut Barrier',
+        benefitEn: 'Feeds Akkermansia muciniphila and provides substrate for hepatic homocysteine transmethylation.',
+        benefitEs: 'Nutre a Akkermansia muciniphila y aporta sustratos para la transmetilación hepática.'
+      },
+      {
+        name: 'Wild Alaskan Salmon & Sardines',
+        category: 'Clean Marine Proteins',
+        activeCompound: 'Preformed EPA/DHA & Selenium',
+        geneTarget: 'IRS1 & FTO',
+        benefitEn: 'Enhances cell membrane fluidity, lowers insulin resistance, and activates leptin signaling.',
+        benefitEs: 'Aumenta la fluidez de membrana, atenúa la resistencia a la insulina y activa leptina.'
+      },
+      {
+        name: 'Pasture-Raised Organic Eggs (Soft Yolk)',
+        category: 'Whole Protein & Lipids',
+        activeCompound: 'Phosphatidylcholine & Lutein',
+        geneTarget: 'MTHFR Alternate Pathway',
+        benefitEn: 'Powers the BHMT alternative transmethylation pathway, preserving vital SAMe production.',
+        benefitEs: 'Alimenta la vía alterna BHMT de transmetilación, preservando la síntesis de SAMe.'
+      },
+      {
+        name: 'Dark Wild Berries + Ceylon Cinnamon',
+        category: 'Polyphenols & Spices',
+        activeCompound: 'Anthocyanins & Cinnamaldehyde',
+        geneTarget: 'FUT1 / FGF21 Sweet Loop',
+        benefitEn: 'Resets central sweet reward pathways and inhibits alpha-glucosidase digestive enzymes.',
+        benefitEs: 'Reajusta la vía de recompensa de dulce e inhibe las enzimas alfa-glucosidasas.'
+      },
+      {
+        name: 'Cold-Pressed Extra Virgin Olive Oil & Avocado',
+        category: 'Monounsaturated Fats',
+        activeCompound: 'Oleocanthal & Natural Vit E (Gamma-Tocopherol)',
+        geneTarget: 'ZPR1 / CYP4F2 Safe Vit E',
+        benefitEn: 'Provides safe, natural, whole-food vitamin E without triggering synthetic over-accumulation risk.',
+        benefitEs: 'Aporta vitamina E natural y segura sin riesgo de acumulación de alfa-tocoferol sintético.'
+      },
+      {
+        name: 'Ceremonial Grade Japanese Matcha Tea',
+        category: 'Functional Beverages',
+        activeCompound: 'EGCG + Natural L-Theanine',
+        geneTarget: 'ADORA2A Neuro-Shield',
+        benefitEn: 'Sustained cognitive energy without anxiety or heart rate spikes thanks to natural L-Theanine buffering.',
+        benefitEs: 'Energía cognitiva sostenida sin ansiedad ni taquicardia gracias al amortiguador de L-teanina.'
+      },
+      {
+        name: 'Raw Walnuts & Pumpkin Seeds',
+        category: 'Nuts & Seeds',
+        activeCompound: 'Plant Omega-3 ALA, Zinc & Magnesium',
+        geneTarget: 'MC4R Satiety & VDR',
+        benefitEn: 'High satiety density; supplies elemental cofactors for enzymatic phosphorylation.',
+        benefitEs: 'Alta densidad de saciedad; aporta cofactores elementales para fosforilación enzimática.'
+      }
+    ],
+    yellowCaution: [
+      {
+        name: 'A2 Fermented Goat/Sheep Milk Kefir',
+        conditionEn: 'Consume maximum 150 mL daily. Avoid cow dairy completely.',
+        conditionEs: 'Consumir máximo 150 mL al día. Evitar por completo lácteos de vaca.',
+        geneTarget: 'MCM6 Hypolactasia'
+      },
+      {
+        name: 'Cooked & Cooled Resistant Starch (Potatoes / Quinoa / Basmati)',
+        conditionEn: 'Must be cooked and refrigerated for 24h before eating to convert starch into resistant Type-3.',
+        conditionEs: 'Debe cocinarse y refrigerarse 24h antes para generar almidón resistente Tipo-3.',
+        geneTarget: 'IRS1 Glycemia & Microbiota'
+      },
+      {
+        name: 'Single Morning Espresso / Black Coffee',
+        conditionEn: 'Strictly before 11:00 AM. Maximum 1 serving. Zero sugar or commercial syrups.',
+        conditionEs: 'Estrictamente antes de las 11:00 AM. Máximo 1 taza. Cero azúcar ni siropes.',
+        geneTarget: 'ADORA2A Anxiety & CYP1A2'
+      },
+      {
+        name: 'Organic Sourdough Bread (Fermented 48h)',
+        conditionEn: 'Only 1 slice (30g) as carb portion during lunch, never at dinner.',
+        conditionEs: 'Solo 1 rebanada (30g) como porción de carbohidrato en el almuerzo, nunca en la cena.',
+        geneTarget: 'TCF7L2 & IRS1'
+      }
+    ],
+    redStrictExclusions: [
+      {
+        name: 'Commercial Multivitamins with Synthetic Folic Acid',
+        hazardEn: 'Pteroylmonoglutamic acid blocks folate receptors and circulates un-metabolized (UMFA) in MTHFR 677TT.',
+        hazardEs: 'El ácido pteroilmonoglutámico bloquea receptores de folato y circula sin metabolizar en MTHFR 677TT.',
+        geneTarget: 'MTHFR 677TT'
+      },
+      {
+        name: 'Synthetic Alpha-Tocopherol Supplements (High-Dose Vit E)',
+        hazardEn: 'ZPR1 / CYP4F2 genetic variants prevent normal hepatic clearance, leading to vascular endothelial stress.',
+        hazardEs: 'Las variantes ZPR1 y CYP4F2 impiden la depuración normal, provocando sobreacumulación endotelial.',
+        geneTarget: 'ZPR1 / CYP4F2'
+      },
+      {
+        name: 'Refined Flours, Commercial Fruit Juices & Sodas',
+        hazardEn: 'Triggers severe insulin spikes, driving ectopic visceral adipogenesis under FTO and IRS1 risk alleles.',
+        hazardEs: 'Dispara picos severos de insulina, acelerando lipogénesis visceral bajo alelos FTO e IRS1.',
+        geneTarget: 'FTO & IRS1'
+      },
+      {
+        name: 'Artificial Sweeteners (Sucralose, Aspartame, Acesulfame-K)',
+        hazardEn: 'Perpetuates hypothalamic sweet craving loop via FUT1/FGF21 and alters beneficial colonic microbiome.',
+        hazardEs: 'Perpetúa el bucle de apetencia por dulce vía FUT1/FGF21 y daña la microbiota intestinal.',
+        geneTarget: 'FUT1 / FGF21'
+      },
+      {
+        name: 'Unfermented Cow Milk, Fresh Cheeses & Commercial Ice Cream',
+        hazardEn: 'High lactose osmotic draw causes colonic fermentation, mucosal endotoxemia, and chronic bloating.',
+        hazardEs: 'La carga osmótica de lactosa causa fermentación colónica, endotoxemia e hinchazón crónica.',
+        geneTarget: 'MCM6'
+      }
+    ]
+  };
+
+  // Plate Sequencing Architecture
+  const plateSequencing = {
+    titleEn: 'The 3-Step Genetic Plate Sequencing Protocol',
+    titleEs: 'Protocolo de Secuencia en el Plato en 3 Pasos',
+    impactEn: 'Reduces postprandial glucose spike by up to 45% and stimulates satiety hormones 20 minutes earlier.',
+    impactEs: 'Reduce el pico glucémico postprandial hasta un 45% y adelanta la saciedad 20 minutos.',
+    steps: [
+      {
+        step: 1,
+        titleEn: 'Step 1: Fiber & Cruciferous Greens First (50% Plate Volume)',
+        titleEs: 'Paso 1: Fibra & Verduras Crucíferas Primero (50% del Plato)',
+        examplesEn: 'Arugula, baby spinach, steamed broccoli, asparagus, cucumbers dressed with extra virgin olive oil and lemon.',
+        examplesEs: 'Rúcula, espinacas, brócoli al vapor, espárragos, pepino aliñados con AOVE y zumo de limón.',
+        rationaleEn: 'Soluble fiber creates a viscous mesh in the duodenum, physically slowing glucose absorption.'
+      },
+      {
+        step: 2,
+        titleEn: 'Step 2: Clean Protein & Healthy Lipids Second (30–35% Plate)',
+        titleEs: 'Paso 2: Proteínas Limpias & Grasas Saludables Segundo (30–35%)',
+        examplesEn: 'Wild salmon, chicken breast, pasture eggs, sardines, grass-fed lean beef, avocado.',
+        examplesEs: 'Salmón salvaje, pechuga de pollo, huevos ecológicos, sardinas, ternera magra, aguacate.',
+        rationaleEn: 'Triggers CCK and peptide YY release in the distal ileum to turn off the hypothalamic MC4R hunger signal.'
+      },
+      {
+        step: 3,
+        titleEn: 'Step 3: Low-GI Complex Carbs Last (<15–20% Plate Volume)',
+        titleEs: 'Paso 3: Carbohidratos Complejos de Bajo IG al Final (<15–20%)',
+        examplesEn: 'Chilled sweet potato, resistant starch basmati/quinoa, lentils or chickpeas (maximum 35–40g net carbs).',
+        examplesEs: 'Boniato asado frío, arroz basmati o quinoa enfriados 24h, lentejas o garbanzos (máx 35–40g netos).',
+        rationaleEn: 'Reaching the intestine after fiber and protein blunts the glycemic curve and prevents fat storage.'
+      }
+    ]
+  };
+
+  // Circadian Chrono-Nutrition 24h Schedule
+  const circadianChronoSchedule = [
+    {
+      time: '07:30 – 08:30 AM',
+      phaseEn: 'Morning Metabolic Ignition',
+      phaseEs: 'Arranque Metabólico Matutino',
+      actionEn: 'High-protein breakfast (30g protein + healthy lipids). E.g., 3 pasture-raised scrambled eggs with baby spinach and avocado. Natural light exposure.',
+      actionEs: 'Desayuno alto en proteína (30g + grasas saludables). Ej: 3 huevos revueltos con espinacas y aguacate. Exposición a luz natural.',
+      target: 'MC4R Satiety & Cortisol Sync'
+    },
+    {
+      time: '11:00 AM SHARP',
+      phaseEn: 'Strict Caffeine Curfew',
+      phaseEs: 'Tope Estricto de Cafeína',
+      actionEn: 'Final allowable coffee serving. After 11:00 AM, switch strictly to ceremonial green matcha or herbal infusions.',
+      actionEs: 'Último café permitido. A partir de las 11:00 AM, cambiar exclusivamente a té matcha ceremonial o infusiones.',
+      target: 'ADORA2A Anxiety & Sleep Architecture'
+    },
+    {
+      time: '01:00 – 02:30 PM',
+      phaseEn: 'Peak Digestion Lunch',
+      phaseEs: 'Almuerzo Principal (Máxima Eficiencia)',
+      actionEn: 'Apply Plate Sequencing strictly: Arugula & steamed asparagus first -> Grilled wild salmon second -> Chilled quinoa last.',
+      actionEs: 'Aplicar secuencia estricta: Rúcula y espárragos primero -> Salmón salvaje segundo -> Quinoa enfriada al final.',
+      target: 'IRS1 Glycemia & MTHFR Betaine'
+    },
+    {
+      time: '05:30 – 06:00 PM',
+      phaseEn: 'Anti-Craving Dopamine Window',
+      phaseEs: 'Ventana Dopaminérgica Anti-Snacking',
+      actionEn: '2 squares of >85% dark raw cacao + 1 handful of raw walnuts + warm Ceylon cinnamon rooibos tea.',
+      actionEs: '2 onzas de cacao amargo >85% + puñado de nueces crudas + infusión de rooibos con canela de Ceilán.',
+      target: 'TAS2R38 & FUT1 Emotional Craving'
+    },
+    {
+      time: '08:00 – 08:45 PM',
+      phaseEn: 'Evening Cellular Repair Dinner',
+      phaseEs: 'Cena Ligera de Reparación Celular',
+      actionEn: 'Zucchini-leek cream soup with olive oil + baked white fish (sea bass or cod). Zero starchy carbs to prevent nocturnal lipogenesis.',
+      actionEs: 'Crema de calabacín y puerro con AOVE + pescado blanco al horno (lubina o bacalao). Cero carbohidratos simples.',
+      target: 'CLOCK Evening Metabolic Reset'
+    },
+    {
+      time: '09:30 PM – 07:30 AM',
+      phaseEn: '10–12 Hour Fasting & Melatonin Window',
+      phaseEs: 'Ventana de Ayuno Nocturno & Melatonina (10–12h)',
+      actionEn: 'Zero caloric intake. Room-temperature water or chamomile tea only. Deep parasympathetic nervous system recovery.',
+      actionEs: 'Cero calorías. Agua o manzanilla templada. Recuperación parasimpática y detoxificación glial nocturna.',
+      target: 'Autophagy & Hepatic Regeneration'
+    }
+  ];
+
+  // 7-Day Precision Meal Plan (Appetizing, GCC/Qatar realistic, culturally versatile)
+  const sevenDayMealPlan = [
+    {
+      day: 1,
+      dayName: 'Monday',
+      themeEn: 'Cellular Methylation & Leptin Satiety Reset',
+      themeEs: 'Metilación Celular & Reset de Saciedad Leptínica',
+      breakfast: 'Omelette of 3 organic pasture-raised eggs with 2 cups of fresh baby spinach and 1/4 ripe avocado cooked in extra virgin olive oil.',
+      lunch: 'Plate Sequencing: Large bitter arugula & radish salad with lemon-EVOO dressing -> 180g grilled wild sea bass fillet -> 1/2 cup cooked and refrigerated brown basmati.',
+      snack: '20g raw walnuts + 2 squares of 90% dark raw cacao + hot Ceylon cinnamon rooibos infusion.',
+      dinner: 'Velvety zucchini and leek soup made with bone broth and EVOO + 170g steamed cod fillet with asparagus spears.',
+      bedtimeTea: 'Pure Egyptian chamomile & fresh peppermint leaves infusion.'
+    },
+    {
+      day: 2,
+      dayName: 'Tuesday',
+      themeEn: 'Insulin Sensitization & Marine Omega-3 Optimization',
+      themeEs: 'Sensibilización a la Insulina & Omega-3 Marino',
+      breakfast: 'Bowl of full-fat coconut yogurt with 1 scoop of clean grass-fed collagen, 1 tbsp crushed chia seeds, wild blueberries, and a pinch of Ceylon cinnamon.',
+      lunch: 'Plate Sequencing: Steamed broccoli florets with toasted sesame and EVOO -> 200g wild Norwegian salmon steak -> 1 small roasted chilled sweet potato.',
+      snack: 'Crunchy cucumber spears and celery sticks with raw tahini paste and sea salt.',
+      dinner: 'Free-range chicken breast paillard marinated in garlic and rosemary + grilled zucchini and yellow bell peppers.',
+      bedtimeTea: 'Lemon balm & lavender restorative night infusion.'
+    },
+    {
+      day: 3,
+      dayName: 'Wednesday',
+      themeEn: 'Gut Microbiome Colonization & Resistant Starch',
+      themeEs: 'Colonización de Microbiota & Almidón Resistente',
+      breakfast: 'Shakshuka with 3 eggs poached in fresh tomato, bell pepper, and cumin sauce with fresh cilantro and olive oil.',
+      lunch: 'Plate Sequencing: Shaved fennel, cucumber, and dill salad -> 180g grass-fed beef tenderloin medallions -> 1/2 cup warm pre-cooled green lentils.',
+      snack: 'Small handful of raw pumpkin seeds + 1 cup of unsweetened ceremonial green matcha tea (before 11 AM) or herbal tea.',
+      dinner: 'Oven-roasted sea bream with thyme and sliced lemon + large bowl of steamed green beans and artichoke hearts.',
+      bedtimeTea: 'Warm ginger and chamomile tisane.'
+    },
+    {
+      day: 4,
+      dayName: 'Thursday',
+      themeEn: 'Neurotransmitter Dopamine & Focus Alignment',
+      themeEs: 'Alineación de Neurotransmisores & Dopamina',
+      breakfast: '3 pasture-raised poached eggs over a bed of sautéed kale and sliced portobello mushrooms in virgin olive oil.',
+      lunch: 'Plate Sequencing: Crispy mixed green salad with pumpkin seed oil -> 180g grilled turkey breast with rosemary -> 1/2 cup pre-cooled quinoa pilaf.',
+      snack: '15 raw almonds + 1 cup fresh wild blackberries with ground Ceylon cinnamon.',
+      dinner: 'Steamed wild gulf prawns with garlic-parsley olive oil dressing over a warm cauliflower mash with nutritional yeast.',
+      bedtimeTea: 'Passionflower and holy basil (Tulsi) nervous system calm infusion.'
+    },
+    {
+      day: 5,
+      dayName: 'Friday',
+      themeEn: 'Mitochondrial Energy & Endothelial VDR Support',
+      themeEs: 'Energía Mitocondrial & Soporte Endotelial VDR',
+      breakfast: 'Smoked wild salmon (120g) rolled around cucumber slices with 2 soft-boiled organic eggs and fresh dill.',
+      lunch: 'Plate Sequencing: Steamed asparagus dressed with lemon and flaky sea salt -> 200g grilled local hammour fish -> 1/2 cup roasted beetroot wedges.',
+      snack: 'Crunchy raw celery with unsweetened almond butter and raw cocoa nibs.',
+      dinner: 'Slow-cooked lamb shank (lean meat only) in cumin-coriander broth served over a generous bed of steamed baby spinach.',
+      bedtimeTea: 'Chamomile flower infusion with fresh mint.'
+    },
+    {
+      day: 6,
+      dayName: 'Saturday',
+      themeEn: 'Social Circadian Dining & Metabolic Flexibility',
+      themeEs: 'Flexibilidad Metabólica & Cena Social Consciente',
+      breakfast: 'Weekend Scramble: 3 organic eggs scrambled with smoked turkey breast, cherry tomatoes, and fresh chives in EVOO.',
+      lunch: 'Mediterranean seafood grill: Calamari and sea bass with a massive Greek salad (cucumber, olives, bell peppers, olive oil; no cow feta).',
+      snack: 'Handful of raw macadamia nuts + chilled hibiscus iced tea with fresh mint (sugar-free).',
+      dinner: 'Grilled tender chicken skewers (shish tawook style, garlic and olive oil marinade) with grilled eggplant and tahini dip.',
+      bedtimeTea: 'Warm lemon verbena & chamomile tea.'
+    },
+    {
+      day: 7,
+      dayName: 'Sunday',
+      themeEn: 'Longevity Autophagy & Deep Gastrointestinal Rest',
+      themeEs: 'Autofagia de Longevidad & Descanso Gastrointestinal',
+      breakfast: 'Fasting friendly morning: Large glass of filtered water with pinch of Celtic salt -> 10:00 AM: 2 soft-boiled eggs with fresh avocado and arugula.',
+      lunch: 'Plate Sequencing: Massaged kale salad with lemon and olive oil -> 180g grilled wild tuna steak with sesame crust -> 1/3 cup chilled brown rice.',
+      snack: '2 squares of >85% single-origin dark chocolate + warm cinnamon rooibos tea.',
+      dinner: 'Mineral-rich vegetable broth with poached chicken shreds, ginger root, and baby bok choy.',
+      bedtimeTea: 'Pure German chamomile flower infusion.'
+    }
+  ];
+
+  // Minimal Targeted Co-Factors (Food-First Complement)
+  const minimalTargetedCoFactors = [
+    {
+      nutrient: 'Active L-5-Methyltetrahydrofolate ([6S]-5-MTHF)',
+      dose: '400–800 µg daily',
+      timing: 'Morning with breakfast',
+      foodSynergy: 'Synergizes with natural folates from spinach & arugula',
+      rationaleEn: 'Completely circumvents the MTHFR 677TT enzymatic bottleneck without creating toxic un-metabolized synthetic folic acid (UMFA).',
+      rationaleEs: 'Bypassea el bloqueo enzimático MTHFR 677TT sin generar ácido fólico sintético no metabolizado.'
+    },
+    {
+      nutrient: 'Magnesium Bisglycinate Chelate (TRAACS® elemental Mg)',
+      dose: '150–200 mg elemental Mg',
+      timing: 'Evening 45 min before sleep',
+      foodSynergy: 'Supplements dietary magnesium from pumpkin seeds & raw cacao',
+      rationaleEn: 'Activates parasympathetic GABA receptors, dampens evening COMT adrenergic activity, and eases restorative deep sleep.',
+      rationaleEs: 'Activa receptores GABA, modula la hiperactividad de COMT y propicia el sueño delta profundo.'
+    },
+    {
+      nutrient: 'Gastrorresistant Probiotics (LGG + BB-12 in DRcaps®)',
+      dose: '10–15 Billion CFU',
+      timing: 'Upon waking on empty stomach with water',
+      foodSynergy: 'Reinforced by dietary prebiotic fibers from asparagus & inulin',
+      rationaleEn: 'Acid-resistant delivery protects live cultures from stomach acid to colonize the distal ileum and offset MCM6 hypolactasia dysbiosis.',
+      rationaleEs: 'Cápsula gastrorresistente que permite a las cepas vivas colonizar el íleon y contrarrestar la disbiosis de hipolactasia.'
+    }
+  ];
+
+  // Supermarket Grocery Checklist (categorized for easy patient shopping in Doha/GCC)
+  const supermarketGroceryList = [
+    {
+      category: 'Fresh Produce & Greens (Metabolism & Methylation)',
+      categoryEs: 'Verdulería & Hojas Verdes (Metilación & Saciedad)',
+      icon: '🥬',
+      items: [
+        'Wild Rocket / Arugula (4 packs)',
+        'Baby Spinach (fresh, organic)',
+        'Fresh Asparagus spears (2 bunches)',
+        'Raw Beetroot (fresh, not pickled)',
+        'English Cucumbers (crunchy snacks)',
+        'Celery stalks (organic)',
+        'Broccoli & Cauliflower heads',
+        'Zucchini & Leeks (for evening creams)',
+        'Fresh Lemons & Limes (daily dressing)',
+        'Fresh Avocados (Hass, semi-ripe)'
+      ]
+    },
+    {
+      category: 'Clean Wild Proteins (Leptin & Muscle Preservation)',
+      categoryEs: 'Proteínas Limpias & Pesca Salvaje (Saciedad & PYY)',
+      icon: '🐟',
+      items: [
+        'Pasture-Raised Organic Eggs (3 dozen)',
+        'Wild Alaskan Salmon fillets',
+        'Fresh Local Sea Bass / Hammour fillets',
+        'Fresh Sardines or Mackerel in olive oil',
+        'Free-Range Chicken Breast (hormone-free)',
+        'Grass-Fed Beef tenderloin or lean steak',
+        'Clean collagen peptides powder (unflavored)'
+      ]
+    },
+    {
+      category: 'Healthy Fats, Seeds & Spices (Safe Vit E & Glycemia)',
+      categoryEs: 'Grasas Buenas, Semillas & Especias (Vit E Dietética)',
+      icon: '🫒',
+      items: [
+        'Extra Virgin Olive Oil (First cold-pressed, dark bottle)',
+        'Raw Walnuts & Raw Almonds (unroasted, unsalted)',
+        'Raw Pumpkin Seeds (rich in zinc/magnesium)',
+        'Whole Chia Seeds',
+        'Raw Tahini Paste (100% sesame)',
+        'Ceylon Cinnamon powder (True Cinnamon, Cinnamomum verum)',
+        'Pure Dark Raw Cacao (>85% or 90% cocoa)',
+        'Raw cocoa nibs (unrefined)'
+      ]
+    },
+    {
+      category: 'Functional Beverages & Ferments',
+      categoryEs: 'Bebidas Funcionales & Fermentados',
+      icon: '🍵',
+      items: [
+        'Ceremonial Grade Japanese Matcha Green Tea',
+        'Organic German Chamomile dried flowers',
+        'Pure Peppermint leaf tea',
+        'Caffeine-free South African Rooibos tea',
+        'A2 Goat Milk Kefir or Raw Coconut Water Kefir',
+        'Celtic Sea Salt or Himalayan Flaky Salt'
+      ]
+    }
+  ];
+
+  // Clinical Nutritionist Consultation Guide
+  const nutritionistConsultationDirectives = {
+    intakeQuestions: [
+      {
+        questionEn: 'Do you feel a sharp energy crash or intense craving for sweets 90–120 minutes after eating pasta, rice, or bread?',
+        rationale: 'Screens for IRS1 / TCF7L2 reactive hypoglycemia and postprandial glucose surges.'
+      },
+      {
+        questionEn: 'When under acute work stress or evening fatigue, do you feel an irresistible urge to open the fridge or snack on crunchies?',
+        rationale: 'Screens for TAS2R38 and MC4R emotional dopamine reward behaviors.'
+      },
+      {
+        questionEn: 'Have you ever experienced abdominal bloating, distension, or gas within 2–4 hours of drinking cow milk or eating fresh soft cheese?',
+        rationale: 'Correlates MCM6 genotype with symptomatic adult hypolactasia.'
+      },
+      {
+        questionEn: 'Does a coffee taken after 1:00 PM make you feel jittery, anxious, or interfere with your sleep onset at night?',
+        rationale: 'Directly validates ADORA2A adenosine receptor sensitivity and CYP1A2 slow clearance.'
+      }
+    ],
+    actionPlanPhases: [
+      {
+        phase: 'Weeks 1–2: Glycemic & Appetite Foundation',
+        milestone: 'Implement Plate Sequencing strictly at lunch and dinner. Eliminate synthetic folic acid and all liquid sugars.'
+      },
+      {
+        phase: 'Weeks 3–4: Gut Barrier & Neuro-Stimulant Calibration',
+        milestone: 'Transition to A2 goat kefir and enforce the 11:00 AM caffeine curfew. Start morning active L-5-MTHF co-factor.'
+      },
+      {
+        phase: 'Weeks 5–8: Metabolic Consolidation & Biomarker Re-check',
+        milestone: 'Evaluate HbA1c, serum 25(OH)D, and plasma homocysteine to verify full metabolic recalibration.'
+      }
+    ]
+  };
+
+  return {
+    patient: {
+      name: patientName,
+      sampleCode,
+      clinic,
+      testPlatform,
+      analysisDate
+    },
+    genotypesEvaluated: g,
+    fiveClinicalAxes,
+    plateSequencing,
+    foodTrafficLight,
+    circadianChronoSchedule,
+    sevenDayMealPlan,
+    minimalTargetedCoFactors,
+    supermarketGroceryList,
+    nutritionistConsultationDirectives,
+    // Preserves backward compatibility with existing components
+    concreteDietGuidelines: CONCRETE_DIET_GUIDELINES,
+    threeCapsuleProtocol: THREE_CAPSULE_PROTOCOL,
+    commercialLocalSupplements: COMMERCIAL_LOCAL_SUPPLEMENTS,
+    galenicCompatibility: GALENIC_COMPATIBILITY_ANALYSIS,
+    treatmentCycle: TREATMENT_CYCLE
+  };
+}
+
+
 

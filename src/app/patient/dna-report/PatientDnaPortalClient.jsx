@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Download,
   Share2,
@@ -23,11 +23,18 @@ import {
   Clock,
   Sun,
   Moon,
-  MessageSquare
+  MessageSquare,
+  ListChecks,
+  ShoppingBag,
+  Leaf,
+  Flame,
+  Zap
 } from 'lucide-react';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import {
+  evaluateNutrigenomicProfile,
+  DEFAULT_HOSSAM_GENOTYPES,
   GALENIC_COMPATIBILITY_ANALYSIS,
   CLINICAL_PILLARS,
   THREE_CAPSULE_PROTOCOL,
@@ -50,6 +57,26 @@ export default function PatientDnaPortalClient({
   const [activeSection, setActiveSection] = useState('mealplan');
   const [selectedModality, setSelectedModality] = useState('modalityB');
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Dynamic Clinical Rules Engine Inference
+  const clinicalProfile = useMemo(() => {
+    return evaluateNutrigenomicProfile({
+      patientName,
+      sampleCode,
+      clinic
+    });
+  }, [patientName, sampleCode, clinic]);
+
+  const [selectedDay, setSelectedDay] = useState(1);
+  const [checkedGroceryItems, setCheckedGroceryItems] = useState({});
+  const [foodTrafficFilter, setFoodTrafficFilter] = useState('all');
+
+  const toggleGroceryItem = (itemKey) => {
+    setCheckedGroceryItems(prev => ({
+      ...prev,
+      [itemKey]: !prev[itemKey]
+    }));
+  };
 
   // Official PDF download URLs (Synchronized with interactive modality selection)
   const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&modality=${selectedModality}&includeOriginal=true`;
@@ -303,7 +330,7 @@ export default function PatientDnaPortalClient({
             }}
           >
             <Utensils size={15} />
-            <span>🥗 Patient Meal Plan &amp; Daily Routine (Easy Guide)</span>
+            <span>🥗 Clinical Nutritionist Plan (Food-First &amp; Precision Diet)</span>
           </button>
 
           <button
@@ -387,7 +414,7 @@ export default function PatientDnaPortalClient({
           </button>
         </div>
 
-        {/* ── SECTION 0: PATIENT MEAL PLAN & EASY SUPPLEMENT ROUTINE ── */}
+        {/* ── SECTION 0: CLINICAL NUTRITIONIST & FOOD-FIRST PRECISION DOSSIER ── */}
         {activeSection === 'mealplan' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
 
@@ -395,19 +422,22 @@ export default function PatientDnaPortalClient({
             <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1.5px solid #bae6fd', padding: '1.75rem', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.08)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #7dd3fc', padding: '3px 9px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                      Meal Plan &amp; Daily Routine Edition
+                      Clinical Nutritionist Edition
                     </span>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: '4px' }}>
-                      ✓ Simplified for Daily Life
+                      ✓ Precision Food-First Strategy
+                    </span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 9px', borderRadius: '4px' }}>
+                      ⚡ 5 Genomic Axes Evaluated
                     </span>
                   </div>
                   <h2 style={{ fontSize: '1.5rem', fontWeight: 850, color: '#003666', margin: '4px 0 6px 0' }}>
-                    Your Personalized Meal Plan &amp; Supplement Routine
+                    Personalized Genomic Nutrition &amp; Food-First Strategy
                   </h2>
-                  <p style={{ margin: 0, fontSize: '0.90rem', color: '#475569', lineHeight: 1.6, maxWidth: '780px' }}>
-                    How to customize your catering meal subscription, pick your dishes, and take your supplements in total sync with your day—without confusing medical jargon.
+                  <p style={{ margin: 0, fontSize: '0.90rem', color: '#475569', lineHeight: 1.6, maxWidth: '820px' }}>
+                    Translating genetic polymorphisms (MC4R, MTHFR, IRS1, ZPR1/CYP4F2, MCM6, ADORA2A) into food medicine, plate sequencing, satiety thresholds, and circadian chronobiology — empowering clinical nutritionists and patients beyond mere pill prescriptions.
                   </p>
                 </div>
 
@@ -431,7 +461,7 @@ export default function PatientDnaPortalClient({
                     }}
                   >
                     <Utensils size={16} />
-                    <span>Download Full Dossier (58 Pgs: Guide + 24Genetics)</span>
+                    <span>Download Full Dossier (59 Pgs: Guide + 24Genetics)</span>
                   </a>
 
                   <a
@@ -446,368 +476,596 @@ export default function PatientDnaPortalClient({
                       paddingLeft: '4px'
                     }}
                   >
-                    ⚡ Download 2-Page Executive Guide Only (Light · Kitchen Print)
+                    ⚡ Download 4-Page Executive Clinical Guide (Light · Kitchen / Clinic Print)
                   </a>
                 </div>
               </div>
 
-              {/* 4 Plain-English DNA Findings */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9' }}>
-                <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 800, fontSize: '0.82rem', marginBottom: '4px' }}>
-                    <Sparkles size={14} color="#0284c7" />
-                    <span>Energy &amp; Mental Focus</span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
-                    Your cells require active B-vitamins (Methylfolate) for non-stop daily stamina. Avoid white flour fortified with synthetic folic acid.
-                  </p>
+              {/* 5 Clinical Genomic Axes Scorecards */}
+              <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    THE 5 CLINICAL GENOMIC AXES (RULES ENGINE EVALUATION)
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                    Specimen: <strong>{sampleCode}</strong> · Patient: <strong>{patientName}</strong>
+                  </span>
                 </div>
 
-                <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 800, fontSize: '0.82rem', marginBottom: '4px' }}>
-                    <AlertTriangle size={14} color="#b45309" />
-                    <span>Lactose Sensitivity</span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
-                    Your genetics show low lactase enzyme. Select 100% dairy-free meals in your meal plan to eliminate bloating and sluggishness.
-                  </p>
-                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                  {clinicalProfile.fiveClinicalAxes.map((axis) => (
+                    <div
+                      key={axis.id}
+                      style={{
+                        backgroundColor: '#f8fafc',
+                        padding: '14px 16px',
+                        borderRadius: '10px',
+                        border: `1.5px solid ${axis.badgeBg === '#fce8e6' ? '#fecaca' : '#e2e8f0'}`,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase' }}>
+                            Axis {axis.number} · {axis.titleEn}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '0.68rem',
+                              fontWeight: 800,
+                              color: axis.badgeColor,
+                              backgroundColor: axis.badgeBg,
+                              padding: '2px 7px',
+                              borderRadius: '4px',
+                              border: `1px solid ${axis.badgeColor}33`
+                            }}
+                          >
+                            {axis.riskLevel} ({axis.score}/100)
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 650, marginBottom: '6px' }}>
+                          Genes: {axis.keyGenes}
+                        </div>
+                        <p style={{ margin: '0 0 8px 0', fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
+                          {axis.clinicalFindingEn}
+                        </p>
+                      </div>
 
-                <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 800, fontSize: '0.82rem', marginBottom: '4px' }}>
-                    <Sun size={14} color="#d97706" />
-                    <span>Vitamin D + Healthy Fats</span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
-                    Your Vitamin D receptors need support. Always take your Vitamin D with breakfast fats (eggs, avocado, olive oil) for real absorption.
-                  </p>
-                </div>
-
-                <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 800, fontSize: '0.82rem', marginBottom: '4px' }}>
-                    <Coffee size={14} color="#78350f" />
-                    <span>Slow Caffeine Clearance</span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
-                    Your liver metabolizes caffeine slowly. Drink your last coffee before 2:00 PM to protect nighttime restorative deep sleep.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Meal Plan Traffic Light (What to order in catering) ── */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  CATERING MENU SELECTION GUIDE
-                </span>
-                <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
-                  Your Meal Plan Traffic Light
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                  Show this list to your meal prep provider or use it when selecting your weekly dishes in the app.
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.25rem' }}>
-                {/* Green Card */}
-                <div style={{ backgroundColor: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '1.1rem' }}>🟢</span>
-                    <strong style={{ fontSize: '0.92rem', color: '#166534', fontWeight: 850 }}>
-                      ALWAYS ORDER (DNA Favorites)
-                    </strong>
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: '#14532d', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <li><strong>Lean &amp; Marine Proteins:</strong> Wild salmon, sea bass, lean poultry, grass-fed beef, pastured eggs.</li>
-                    <li><strong>Dark Greens:</strong> Spinach, arugula, kale, broccoli, zucchini, asparagus.</li>
-                    <li><strong>Healthy Fats:</strong> Extra virgin olive oil, avocado, chia seeds, walnuts, pumpkin seeds.</li>
-                    <li><strong>Prebiotic Carbs:</strong> Quinoa, basmati rice, sweet potatoes, cooked &amp; cooled potatoes.</li>
-                  </ul>
-                </div>
-
-                {/* Yellow Card */}
-                <div style={{ backgroundColor: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '1.1rem' }}>🟡</span>
-                    <strong style={{ fontSize: '0.92rem', color: '#92400e', fontWeight: 850 }}>
-                      ENJOY IN MODERATION (Portion Control)
-                    </strong>
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: '#78350f', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <li><strong>Carbohydrate Cap:</strong> Keep net carbs under 40g per meal to avoid post-lunch sleepiness and glucose spikes.</li>
-                    <li><strong>Soaked Legumes:</strong> Lentils, chickpeas, edamame (well-soaked to reduce lectins).</li>
-                    <li><strong>Low-Glycemic Fruits:</strong> Blueberries, blackberries, raspberries, green apples.</li>
-                    <li><strong>Red Meat:</strong> Cap at 2–3 times per week maximum.</li>
-                  </ul>
-                </div>
-
-                {/* Red Card */}
-                <div style={{ backgroundColor: '#fef2f2', border: '1.5px solid #fca5a5', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '1.1rem' }}>🔴</span>
-                    <strong style={{ fontSize: '0.92rem', color: '#991b1b', fontWeight: 850 }}>
-                      EXCLUDE FROM YOUR CATERING
-                    </strong>
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: '#7f1d1d', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <li><strong>Dairy &amp; Creams:</strong> Cow&apos;s milk, heavy cream, parmesan/cheddar cheeses, creamy bechamel sauces.</li>
-                    <li><strong>Industrial Seed Oils:</strong> Refined soybean, corn, sunflower, and commercial palm oil.</li>
-                    <li><strong>Refined Grains:</strong> White baguette, pastries, commercial wraps, sweetened cereals.</li>
-                    <li><strong>Liquid Sugars:</strong> Commercial boxed fruit juices, soft drinks, flavored energy drinks.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* The Golden Plate Sequencing Rule Box */}
-              <div style={{ marginTop: '1.5rem', backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                <div style={{ fontSize: '2rem' }}>💡</div>
-                <div style={{ flex: 1 }}>
-                  <strong style={{ fontSize: '0.92rem', color: '#0f766e', display: 'block', marginBottom: '2px' }}>
-                    The Golden Plate Sequencing Rule (Eat in This Exact Order):
-                  </strong>
-                  <p style={{ margin: 0, fontSize: '0.84rem', color: '#134e4a', lineHeight: 1.5 }}>
-                    <strong>1º Vegetables &amp; Fiber first</strong>  →  <strong>2º Protein &amp; Fats second</strong>  →  <strong>3º Rice or Potatoes LAST.</strong>
-                    <br />
-                    <em>Why it matters:</em> This creates a protective fiber mesh in your stomach, lowering blood sugar spikes by up to 45% and eliminating post-lunch sluggishness.
-                  </p>
+                      <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '8px', marginTop: '4px' }}>
+                        {axis.proteinTargetEn && (
+                          <div style={{ fontSize: '0.74rem', color: '#0f766e', fontWeight: 700, marginBottom: '4px' }}>
+                            🎯 <strong>Target:</strong> {axis.proteinTargetEn}
+                          </div>
+                        )}
+                        {axis.emotionalEatingProtocolEn && (
+                          <div style={{ fontSize: '0.73rem', color: '#7c2d12', lineHeight: 1.4 }}>
+                            🧠 <strong>Dopamine Swaps:</strong> {axis.emotionalEatingProtocolEn}
+                          </div>
+                        )}
+                        {axis.criticalWarningEn && (
+                          <div style={{ fontSize: '0.73rem', color: '#991b1b', fontWeight: 750, lineHeight: 1.4 }}>
+                            ⚠️ {axis.criticalWarningEn}
+                          </div>
+                        )}
+                        {axis.criticalToxicityAlertEn && (
+                          <div style={{ fontSize: '0.73rem', color: '#991b1b', fontWeight: 750, lineHeight: 1.4 }}>
+                            🚫 {axis.criticalToxicityAlertEn}
+                          </div>
+                        )}
+                        {axis.caffeineCutoffEn && (
+                          <div style={{ fontSize: '0.73rem', color: '#92400e', fontWeight: 750, lineHeight: 1.4 }}>
+                            ☕ {axis.caffeineCutoffEn}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* ── 24-Hour Routine with Your Meals ── */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  DAILY CHRONOBIOLOGY TIMELINE
+            {/* ── The 3-Step Genetic Plate Sequencing Protocol ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1.5px solid #99f6e4', padding: '1.75rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '3px 9px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                  Biochemical Eating Order
                 </span>
-                <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
-                  Your 24-Hour Routine: Synchronized With Your Meals
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                  No complicated alarms. Just pair each nutrient with the right meal of your day.
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '1rem' }}>
-                {/* Morning */}
-                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontWeight: 800, fontSize: '0.82rem', marginBottom: '6px' }}>
-                    <Sun size={16} />
-                    <span>1. Upon Waking (Empty Stomach)</span>
-                  </div>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a', margin: '0 0 6px 0' }}>
-                    Probiotic Gut Shield
-                  </h4>
-                  <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: 1.5, marginBottom: '8px' }}>
-                    Drink a full glass of room-temperature water. Take <strong>Capsule A (Probiotic DRcaps®)</strong>.
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
-                    <em>Why:</em> Live cultures travel through an empty stomach without acid interference to repair your gut flora.
-                  </div>
-                </div>
-
-                {/* Breakfast */}
-                <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0d9488', fontWeight: 800, fontSize: '0.82rem', marginBottom: '6px' }}>
-                    <Utensils size={16} />
-                    <span>2. With Your Breakfast</span>
-                  </div>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a', margin: '0 0 6px 0' }}>
-                    Energy &amp; Vitamin D3/K2
-                  </h4>
-                  <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: 1.5, marginBottom: '8px' }}>
-                    Take <strong>Capsule B (Active Folate + B-Complex + D3/K2)</strong> with your meal.
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#0f766e', borderTop: '1px solid #ccfbf1', paddingTop: '6px' }}>
-                    <em>Why:</em> Must be taken with dietary fats (eggs, olive oil, avocado) so your body can absorb Vitamin D.
-                  </div>
-                </div>
-
-                {/* Lunch / Dinner */}
-                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontWeight: 800, fontSize: '0.82rem', marginBottom: '6px' }}>
-                    <Clock size={16} />
-                    <span>3. With Main Lunch / Dinner</span>
-                  </div>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a', margin: '0 0 6px 0' }}>
-                    Plate Sequencing &amp; Hydration
-                  </h4>
-                  <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: 1.5, marginBottom: '8px' }}>
-                    Follow the 1-2-3 plate order. Optional: 1 glass of water with fiber sachet (Psyllium).
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
-                    <em>Why:</em> Keeps your glucose curve flat and eliminates the 3:00 PM energy slump.
-                  </div>
-                </div>
-
-                {/* Bedtime */}
-                <div style={{ backgroundColor: '#eff6ff', border: '1.5px solid #bfdbfe', borderRadius: '10px', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#1e40af', fontWeight: 800, fontSize: '0.82rem', marginBottom: '6px' }}>
-                    <Moon size={16} />
-                    <span>4. 30–60 Min Before Bed</span>
-                  </div>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a', margin: '0 0 6px 0' }}>
-                    Deep Sleep &amp; Muscle Reset
-                  </h4>
-                  <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: 1.5, marginBottom: '8px' }}>
-                    Take <strong>Capsule C (2 capsules of Magnesium + Theanine)</strong> with water.
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#1d4ed8', borderTop: '1px solid #dbeafe', paddingTop: '6px' }}>
-                    <em>Why:</em> Shuts off racing thoughts, relaxes neuromuscular tension, and promotes restorative REM sleep.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Simplified 3-Tier Budget Decision Packs ── */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  FLEXIBLE PATIENT BUDGET TIERS
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488' }}>
+                  ⚡ Blunts glucose spikes by up to 45%
                 </span>
-                <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
-                  Choose Your Supplement Pack (Buy Only What You Need)
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                  You do not need to buy all 5 bottles. Pick the tier that best matches your health goals and budget.
-                </p>
               </div>
+              <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 6px 0' }}>
+                {clinicalProfile.plateSequencing.titleEn}
+              </h3>
+              <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.86rem', color: '#475569', lineHeight: 1.5 }}>
+                {clinicalProfile.plateSequencing.impactEn}
+              </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.25rem' }}>
-                {/* Pack 1 */}
-                <div style={{ backgroundColor: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '10px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                      2 BOTTLES · MINIMUM BASE
-                    </span>
-                    <h4 style={{ fontSize: '1.10rem', fontWeight: 850, color: '#0f172a', margin: '8px 0 4px 0' }}>
-                      Pack 1: Essential Core
-                    </h4>
-                    <p style={{ fontSize: '0.82rem', color: '#0d9488', fontWeight: 700, margin: '0 0 10px 0' }}>
-                      Covers 80% of Core Genetic Risk
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                {clinicalProfile.plateSequencing.steps.map((st) => (
+                  <div key={st.step} style={{ backgroundColor: '#f0fdfa', border: '1px solid #5eead4', borderRadius: '10px', padding: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 850 }}>
+                        {st.step}
+                      </span>
+                      <strong style={{ fontSize: '0.88rem', color: '#0f766e' }}>{st.titleEn}</strong>
+                    </div>
+                    <p style={{ margin: '0 0 8px 0', fontSize: '0.80rem', color: '#134e4a', lineHeight: 1.5 }}>
+                      <strong>Examples:</strong> {st.examplesEn}
                     </p>
-                    <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.80rem', color: '#334155', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <li>☀️ <strong>Vitamin D3 + K2 (4,000 IU)</strong></li>
-                      <li>⚡ <strong>Active Folate (L-5-MTHF 800 mcg)</strong></li>
-                    </ul>
+                    <div style={{ fontSize: '0.74rem', color: '#0f766e', borderTop: '1px solid #ccfbf1', paddingTop: '6px' }}>
+                      <em>Biochemical rationale:</em> {st.rationaleEn}
+                    </div>
                   </div>
-                  <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>
-                    <em>Ideal for:</em> Starting your personalized routine with the two highest-impact nutrients without extra cost.
-                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Food Traffic Light Matrix (Superfoods vs Caution vs Strict Exclusions) ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    FOOD AS MEDICINE MATRIX
+                  </span>
+                  <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
+                    Personalized Food Traffic Light
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                    Categorized by functional impact on your genetic variants. Hand this directly to your clinical nutritionist or catering chef.
+                  </p>
                 </div>
 
-                {/* Pack 2 (Recommended) */}
-                <div style={{ backgroundColor: '#f0fdfa', border: '2px solid #0d9488', borderRadius: '10px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.12)' }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                        ⭐ MOST POPULAR · 4 BOTTLES
+                {/* Filter chips */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {[
+                    { id: 'all', label: 'All Items' },
+                    { id: 'green', label: '🟢 Superfoods (8)' },
+                    { id: 'yellow', label: '🟡 Caution (4)' },
+                    { id: 'red', label: '🔴 Strict Exclusions (5)' }
+                  ].map((flt) => (
+                    <button
+                      key={flt.id}
+                      onClick={() => setFoodTrafficFilter(flt.id)}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '0.76rem',
+                        fontWeight: 750,
+                        borderRadius: '6px',
+                        border: '1px solid',
+                        borderColor: foodTrafficFilter === flt.id ? '#0284c7' : '#cbd5e1',
+                        backgroundColor: foodTrafficFilter === flt.id ? '#e0f2fe' : '#ffffff',
+                        color: foodTrafficFilter === flt.id ? '#0369a1' : '#475569',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {flt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Traffic Light Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+                {/* Green Superfoods */}
+                {(foodTrafficFilter === 'all' || foodTrafficFilter === 'green') && (
+                  <div style={{ backgroundColor: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '10px', padding: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>🟢</span>
+                      <div>
+                        <strong style={{ fontSize: '0.92rem', color: '#166534', fontWeight: 850, display: 'block' }}>
+                          MEDICINE SUPERFOODS (Always Include)
+                        </strong>
+                        <span style={{ fontSize: '0.70rem', color: '#15803d' }}>Genetically targeted therapeutic food allies</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {clinicalProfile.foodTrafficLight.greenSuperfoods.map((food, idx) => (
+                        <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                            <strong style={{ fontSize: '0.82rem', color: '#14532d' }}>{food.name}</strong>
+                            <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#dcfce7', color: '#166534', padding: '2px 6px', borderRadius: '3px' }}>
+                              {food.geneTarget}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
+                            <em>Active:</em> {food.activeCompound}
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#166534', marginTop: '4px', lineHeight: 1.4 }}>
+                            {food.benefitEn}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Yellow Caution */}
+                {(foodTrafficFilter === 'all' || foodTrafficFilter === 'yellow') && (
+                  <div style={{ backgroundColor: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '10px', padding: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>🟡</span>
+                      <div>
+                        <strong style={{ fontSize: '0.92rem', color: '#92400e', fontWeight: 850, display: 'block' }}>
+                          CONSUME WITH CAUTION (Portion &amp; Time Rules)
+                        </strong>
+                        <span style={{ fontSize: '0.70rem', color: '#b45309' }}>Requires specific timing or culinary preparation</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {clinicalProfile.foodTrafficLight.yellowCaution.map((item, idx) => (
+                        <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #fef08a' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                            <strong style={{ fontSize: '0.82rem', color: '#78350f' }}>{item.name}</strong>
+                            <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: '3px' }}>
+                              {item.geneTarget}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#92400e', marginTop: '4px', lineHeight: 1.4 }}>
+                            <strong>Rule:</strong> {item.conditionEn}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Red Strict Exclusions */}
+                {(foodTrafficFilter === 'all' || foodTrafficFilter === 'red') && (
+                  <div style={{ backgroundColor: '#fef2f2', border: '1.5px solid #fca5a5', borderRadius: '10px', padding: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>🔴</span>
+                      <div>
+                        <strong style={{ fontSize: '0.92rem', color: '#991b1b', fontWeight: 850, display: 'block' }}>
+                          STRICT EXCLUSIONS (Genetically Harmful)
+                        </strong>
+                        <span style={{ fontSize: '0.70rem', color: '#dc2626' }}>Strictly contraindicate or eliminate from diet</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {clinicalProfile.foodTrafficLight.redStrictExclusions.map((item, idx) => (
+                        <div key={idx} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #fecaca' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                            <strong style={{ fontSize: '0.82rem', color: '#7f1d1d' }}>{item.name}</strong>
+                            <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#fee2e2', color: '#991b1b', padding: '2px 6px', borderRadius: '3px' }}>
+                              {item.geneTarget}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#991b1b', marginTop: '4px', lineHeight: 1.4 }}>
+                            <strong>Hazard:</strong> {item.hazardEn}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ── Circadian Chrono-Nutrition (24h Routine Timeline) ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  CIRCADIAN CHRONOBIOLOGY TIMELINE
+                </span>
+                <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
+                  Your 24-Hour Metabolic Routine
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                  Aligning your nutrient intake with the biological clock (CLOCK gene) to synchronize cortisol, leptin, and insulin sensitivity.
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                {clinicalProfile.circadianChronoSchedule.map((phase, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      backgroundColor: phase.time.includes('11:00 AM') ? '#fef2f2' : phase.time.includes('05:30') ? '#fffbeb' : '#f8fafc',
+                      border: `1.5px solid ${phase.time.includes('11:00 AM') ? '#fecaca' : phase.time.includes('05:30') ? '#fde68a' : '#cbd5e1'}`,
+                      borderRadius: '10px',
+                      padding: '1.25rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0284c7' }}>
+                        {phase.time}
+                      </span>
+                      <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#ffffff', color: '#475569', padding: '2px 6px', borderRadius: '3px', border: '1px solid #e2e8f0' }}>
+                        {phase.target}
                       </span>
                     </div>
-                    <h4 style={{ fontSize: '1.10rem', fontWeight: 850, color: '#003666', margin: '8px 0 4px 0' }}>
-                      Pack 2: Performance &amp; Deep Sleep
+                    <h4 style={{ fontSize: '0.94rem', fontWeight: 850, color: '#0f172a', margin: '0 0 6px 0' }}>
+                      {phase.phaseEn}
                     </h4>
-                    <p style={{ fontSize: '0.82rem', color: '#0f766e', fontWeight: 700, margin: '0 0 10px 0' }}>
-                      Daytime Energy + Restful Recovery
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
+                      {phase.actionEn}
                     </p>
-                    <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.80rem', color: '#134e4a', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <li>☀️ <strong>Vitamin D3 + K2</strong> &amp; ⚡ <strong>Active Folate</strong></li>
-                      <li>🌙 <strong>Chelated Magnesium + Theanine</strong> (Bedtime)</li>
-                      <li>🔋 <strong>Methylated B-Complex (B12 + B6)</strong></li>
-                    </ul>
                   </div>
-                  <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #ccfbf1', fontSize: '0.75rem', color: '#0f766e' }}>
-                    <em>Ideal for:</em> Busy professionals with high cognitive demand, stress, or trouble falling asleep.
-                  </div>
-                </div>
-
-                {/* Pack 3 */}
-                <div style={{ backgroundColor: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '10px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                      5 BOTTLES · COMPLETE OPTIMIZATION
-                    </span>
-                    <h4 style={{ fontSize: '1.10rem', fontWeight: 850, color: '#0f172a', margin: '8px 0 4px 0' }}>
-                      Pack 3: Total Digestion
-                    </h4>
-                    <p style={{ fontSize: '0.82rem', color: '#0284c7', fontWeight: 700, margin: '0 0 10px 0' }}>
-                      Complete Microbiome &amp; Mucosal Defense
-                    </p>
-                    <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.80rem', color: '#334155', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <li>All 4 nutrients from Pack 2</li>
-                      <li>🛡️ <strong>Targeted Enteric Probiotics (LGG + BB-12)</strong></li>
-                    </ul>
-                  </div>
-                  <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>
-                    <em>Ideal for:</em> Anyone experiencing bloating, gas, food sensitivities, or lactose discomfort.
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* ── Two Shopping Options: Local Doha Pharmacy vs All-In-One Compounding ── */}
+            {/* ── 7-Day Precision Meal Plan (Interactive Day-by-Day Selector) ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1.5px solid #bae6fd', padding: '1.75rem', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.08)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    CLINICAL DIETARY PRESCRIPTION
+                  </span>
+                  <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
+                    7-Day Precision Meal Plan
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                    Gastronomic recipes tailored to Doha / GCC ingredients, optimized for insulin stabilization, methylation, and satiety.
+                  </p>
+                </div>
+
+                {/* Day selector pills */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {clinicalProfile.sevenDayMealPlan.map((d) => (
+                    <button
+                      key={d.day}
+                      onClick={() => setSelectedDay(d.day)}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        fontSize: '0.80rem',
+                        fontWeight: 800,
+                        border: '1px solid',
+                        borderColor: selectedDay === d.day ? '#0284c7' : '#cbd5e1',
+                        backgroundColor: selectedDay === d.day ? '#0284c7' : '#ffffff',
+                        color: selectedDay === d.day ? '#ffffff' : '#475569',
+                        cursor: 'pointer',
+                        boxShadow: selectedDay === d.day ? '0 2px 6px rgba(2, 132, 199, 0.25)' : 'none'
+                      }}
+                    >
+                      {d.dayName}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active Day Card */}
+              {(() => {
+                const dayPlan = clinicalProfile.sevenDayMealPlan.find(d => d.day === selectedDay) || clinicalProfile.sevenDayMealPlan[0];
+                return (
+                  <div style={{ backgroundColor: '#f0f9ff', border: '1.5px solid #7dd3fc', borderRadius: '10px', padding: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
+                          Day {dayPlan.day} · {dayPlan.dayName}
+                        </span>
+                        <h4 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: '2px 0 0 0' }}>
+                          {dayPlan.themeEn}
+                        </h4>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', border: '1px solid #bae6fd' }}>
+                        Plate Sequencing Enforced
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                      {/* Breakfast */}
+                      <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0d9488', fontWeight: 800, fontSize: '0.80rem', marginBottom: '4px' }}>
+                          <Sun size={15} />
+                          <span>Breakfast (High Protein Ignition)</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                          {dayPlan.breakfast}
+                        </p>
+                      </div>
+
+                      {/* Lunch */}
+                      <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontWeight: 800, fontSize: '0.80rem', marginBottom: '4px' }}>
+                          <Utensils size={15} />
+                          <span>Lunch (Peak Digestion &amp; Sequencing)</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                          {dayPlan.lunch}
+                        </p>
+                      </div>
+
+                      {/* PM Snack */}
+                      <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#b45309', fontWeight: 800, fontSize: '0.80rem', marginBottom: '4px' }}>
+                          <Flame size={15} />
+                          <span>PM Snack (Dopamine Anti-Craving)</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                          {dayPlan.snack}
+                        </p>
+                      </div>
+
+                      {/* Dinner */}
+                      <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#1e40af', fontWeight: 800, fontSize: '0.80rem', marginBottom: '4px' }}>
+                          <Moon size={15} />
+                          <span>Dinner (Light Cellular Repair)</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                          {dayPlan.dinner}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #bae6fd', fontSize: '0.76rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>🫖 <strong>Bedtime Restorative Infusion:</strong> {dayPlan.bedtimeTea}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* ── Minimal Targeted Co-Factors (Food-First Complement) ── */}
             <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
               <div style={{ marginBottom: '1.25rem' }}>
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  HOW DO YOU PREFER TO TAKE IT?
+                  TARGETED CO-FACTORS (SUPPORTING CAST, NOT LEAD ACTOR)
                 </span>
                 <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
-                  Choose Your Preferred Shopping Format
+                  Minimal Targeted Co-Factors
                 </h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                  Only 3 precision cofactors that genetic polymorphisms prevent your cells from rapidly generating from diet alone.
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                {clinicalProfile.minimalTargetedCoFactors.map((co, idx) => (
+                  <div key={idx} style={{ backgroundColor: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '10px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#e2e8f0', color: '#334155', padding: '2px 6px', borderRadius: '3px' }}>
+                          Cofactor {idx + 1}
+                        </span>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 750, color: '#0d9488' }}>
+                          {co.dose}
+                        </span>
+                      </div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a', margin: '0 0 6px 0' }}>
+                        {co.nutrient}
+                      </h4>
+                      <div style={{ fontSize: '0.74rem', color: '#0f766e', fontWeight: 650, marginBottom: '6px' }}>
+                        🥗 <strong>Food Synergy:</strong> {co.foodSynergy}
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
+                        {co.rationaleEn}
+                      </p>
+                    </div>
+
+                    <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', fontSize: '0.74rem', color: '#64748b' }}>
+                      ⏰ <strong>Timing:</strong> {co.timing}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Interactive Supermarket Grocery Checklist (GCC / Doha) ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1.5px solid #ccfbf1', padding: '1.75rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.06)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                      Mobile-Ready Shopping Guide
+                    </span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488' }}>
+                      🛒 Monoprix, Lulu &amp; Carrefour Qatar Ready
+                    </span>
+                  </div>
+                  <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
+                    Patient Supermarket Grocery Checklist
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                    Tap each item on your phone as you place it into your supermarket shopping cart.
+                  </p>
+                </div>
+
+                <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '6px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 750, color: '#0f766e' }}>
+                  ✓ {Object.values(checkedGroceryItems).filter(Boolean).length} items checked
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+                {clinicalProfile.supermarketGroceryList.map((cat, cIdx) => (
+                  <div key={cIdx} style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>{cat.icon}</span>
+                      <strong style={{ fontSize: '0.86rem', color: '#003666', fontWeight: 850 }}>
+                        {cat.category}
+                      </strong>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {cat.items.map((item, iIdx) => {
+                        const key = `${cIdx}_${iIdx}`;
+                        const isChecked = !!checkedGroceryItems[key];
+                        return (
+                          <label
+                            key={iIdx}
+                            onClick={() => toggleGroceryItem(key)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              fontSize: '0.80rem',
+                              color: isChecked ? '#94a3b8' : '#334155',
+                              textDecoration: isChecked ? 'line-through' : 'none',
+                              cursor: 'pointer',
+                              padding: '4px 6px',
+                              borderRadius: '4px',
+                              backgroundColor: isChecked ? '#f1f5f9' : 'transparent',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}}
+                              style={{ cursor: 'pointer', accentColor: '#0d9488' }}
+                            />
+                            <span>{item}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Clinical Nutritionist Consultation Guide ── */}
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  CLINICAL PROTOCOL FOR PRACTITIONERS
+                </span>
+                <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
+                  Nutritionist Consultation Directives &amp; Action Plan
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                  Directives to validate genetic findings during patient consultation and guide the 8-week phased intervention.
+                </p>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
-                {/* Local Pharmacy */}
-                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '1.2rem' }}>🏪</span>
-                    <strong style={{ fontSize: '1.0rem', color: '#0f172a' }}>Option A: Local Doha Pharmacies (OTC Bottles)</strong>
+                {/* Screening questions */}
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.25rem' }}>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 850, color: '#003666', margin: '0 0 10px 0' }}>
+                    🔍 Key Intake Screening Questions
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {clinicalProfile.nutritionistConsultationDirectives.intakeQuestions.map((q, idx) => (
+                      <div key={idx} style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5, borderLeft: '3px solid #0284c7', paddingLeft: '8px' }}>
+                        <div style={{ fontWeight: 750, color: '#0f172a' }}>{idx + 1}. &quot;{q.questionEn}&quot;</div>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', marginTop: '2px' }}>
+                          Rationale: {q.rationale}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, margin: '0 0 12px 0' }}>
-                    Buy commercial pharmaceutical-grade bottles at local pharmacies. You take 4 to 6 pills daily from multiple separate containers.
-                  </p>
-                  <button
-                    onClick={() => setActiveSection('commercial')}
-                    style={{
-                      padding: '8px 14px',
-                      fontSize: '0.80rem',
-                      fontWeight: 700,
-                      backgroundColor: '#ffffff',
-                      color: '#0d9488',
-                      border: '1px solid #0d9488',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    View Active Chemical Forms Guide →
-                  </button>
                 </div>
 
-                {/* Custom Compounding */}
-                <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '1.2rem' }}>💊</span>
-                    <strong style={{ fontSize: '1.0rem', color: '#003666' }}>Option B: Custom &quot;All-in-One&quot; Compounding (Recommended)</strong>
+                {/* 8-Week roadmap */}
+                <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem' }}>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 850, color: '#0f766e', margin: '0 0 10px 0' }}>
+                    📅 8-Week Phased Intervention Roadmap
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {clinicalProfile.nutritionistConsultationDirectives.actionPlanPhases.map((ph, idx) => (
+                      <div key={idx} style={{ fontSize: '0.78rem', color: '#134e4a', lineHeight: 1.5, borderLeft: '3px solid #0d9488', paddingLeft: '8px' }}>
+                        <div style={{ fontWeight: 800, color: '#0f766e' }}>{ph.phase}</div>
+                        <div style={{ fontSize: '0.74rem', color: '#334155', marginTop: '2px' }}>
+                          {ph.milestone}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <p style={{ fontSize: '0.84rem', color: '#134e4a', lineHeight: 1.6, margin: '0 0 12px 0' }}>
-                    Our partner compounding pharmacy combines all your pure active nutrients into just 3 synchronized daily capsules labeled with your name. 100% lactose-free, zero filler bottles in your kitchen.
-                  </p>
-                  <button
-                    onClick={() => setActiveSection('prescription')}
-                    style={{
-                      padding: '8px 14px',
-                      fontSize: '0.80rem',
-                      fontWeight: 700,
-                      backgroundColor: '#003666',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    View Official Compounding Order →
-                  </button>
                 </div>
               </div>
             </div>
