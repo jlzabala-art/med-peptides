@@ -397,161 +397,74 @@
   min-height: 220px;
 }
 
-/* ── CLINICAL MONOGRAPH EXPLORER (Sidebar + Dedicated Canvas) ── */
+/* ── CLINICAL MONOGRAPH EXPLORER (Full-Width with GCP Horizontal Tabs) ── */
 .norma-explorer-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1.25rem;
 }
 
-@media (min-width: 1024px) {
-  .norma-explorer-layout {
-    grid-template-columns: 280px 1fr;
-    gap: 1.75rem;
-  }
-}
-
-/* Left Sidebar Navigation (Google Cloud Resource Drawer) */
-.norma-sidebar-nav {
+.norma-horizontal-tabs-container {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   position: sticky;
-  top: 110px;
-  z-index: 20;
+  top: 106px;
+  z-index: 25;
 }
 
-.norma-sidebar-header {
-  padding: 12px 16px;
-  background-color: #f8fafc;
+.norma-horizontal-tabs-bar {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  background-color: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
-.norma-sidebar-item {
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 13px 16px;
+.norma-horizontal-tab-btn {
+  flex-shrink: 0; /* CRITICAL: Prevents horizontal overlap and text collapsing */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+  background: transparent;
   border: none;
-  background-color: transparent;
-  border-left: 3.5px solid transparent;
-  border-bottom: 1px solid #f8fafc;
-  text-align: left;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s ease;
 }
 
-.norma-sidebar-item:hover {
+.norma-horizontal-tab-btn:hover {
+  color: #003666;
   background-color: #f8fafc;
 }
 
-.norma-sidebar-item.active {
-  background-color: #eff6ff;
-  border-left-color: #003666;
-}
-
-.norma-sidebar-item.active .norma-sidebar-item-title {
+.norma-horizontal-tab-btn.active {
   color: #003666;
-  font-weight: 800;
+  font-weight: 750;
+  border-bottom-color: #003666;
+  background-color: #f8fafc;
 }
 
-.norma-sidebar-item-icon {
-  margin-top: 2px;
-  flex-shrink: 0;
-  color: #64748b;
-  transition: color 0.15s ease;
-}
-
-.norma-sidebar-item.active .norma-sidebar-item-icon {
+.norma-horizontal-tab-btn.active svg {
   color: #003666;
 }
 
-.norma-sidebar-item-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.norma-sidebar-item-title {
-  font-size: 0.82rem;
-  font-weight: 650;
-  color: #1e293b;
-  line-height: 1.3;
-}
-
-.norma-sidebar-item-desc {
-  font-size: 0.70rem;
-  color: #64748b;
-  line-height: 1.35;
-}
-
-/* Right Content Canvas */
+/* Main Content Canvas (Takes 100% Full Width) */
 .norma-canvas-panel {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
   min-width: 0;
-}
-
-/* Mobile Sticky Section Selector */
-.norma-mobile-tabs-bar {
-  display: none;
-}
-
-@media (max-width: 1023px) {
-  .norma-sidebar-nav {
-    display: none;
-  }
-  .norma-mobile-tabs-bar {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 8px 4px 12px 4px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    position: sticky;
-    top: 105px;
-    z-index: 25;
-    background-color: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 8px;
-  }
-  .norma-mobile-tab-chip {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    border-radius: 20px;
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    font-size: 0.74rem;
-    font-weight: 600;
-    color: #475569;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s ease;
-  }
-  .norma-mobile-tab-chip.active {
-    background-color: #003666;
-    border-color: #003666;
-    color: #ffffff;
-    font-weight: 750;
-    box-shadow: 0 1px 3px rgba(0, 54, 102, 0.2);
-  }
 }
 
 /* Responsive adjustments */

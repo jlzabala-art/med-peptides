@@ -297,101 +297,67 @@ export default function NormaPharmaceuticalDetail({
                   : 'Store below 25°C in original carton to protect from light. DO NOT REFRIGERATE OR FREEZE.'}
               </p>
             </div>
+
+            {/* Regulatory Release & Lot Specifications Card (Hero Equalizer) */}
+            <div className="norma-card" style={{ margin: 0, padding: '12px 14px', border: '1px solid #dadce0', borderRadius: '8px', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#202124', fontSize: '0.80rem', marginBottom: '8px' }}>
+                <div style={{ width: '24px', height: '24px', borderRadius: '4px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={14} />
+                </div>
+                <span>{isEs ? 'Ficha Regulatoria & Lote QP' : 'Regulatory Release & Lot Specs'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.74rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#5f6368' }}>{isEs ? 'Licencia AEMPS/EOF' : 'MA License'}</span>
+                  <span style={{ fontWeight: 600, color: '#0f172a' }}>EOF # 45945/03-10-2008</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#5f6368' }}>{isEs ? 'Fabricante Titular' : 'Manufacturer'}</span>
+                  <span style={{ fontWeight: 600, color: '#0f172a' }}>Norma Hellas S.A.</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#5f6368' }}>{isEs ? 'Formato Galénico' : 'Packaging'}</span>
+                  <span style={{ fontWeight: 600, color: '#0f172a' }}>1 × 1 mL Type I Amber</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#5f6368' }}>{isEs ? 'Estándar de Lote' : 'Release Status'}</span>
+                  <span style={{ fontWeight: 700, color: '#15803d' }}>EU GMP / QP Released</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* ── CLINICAL MONOGRAPH EXPLORER (SIDEBAR + DEDICATED CANVAS) ── */}
+        {/* ── CLINICAL MONOGRAPH EXPLORER (GCP FULL-WIDTH WITH HORIZONTAL TABS) ── */}
         <div className="norma-explorer-layout">
-          {/* Mobile Sticky Section Chips Bar */}
-          <div className="norma-mobile-tabs-bar">
-            {[
-              { id: 'overview', icon: Sparkles, label: isEs ? 'Mecanismo' : 'Mechanism' },
-              { id: 'protocols', icon: TrendingUp, label: isEs ? 'Protocolos TRT' : 'TRT Protocols' },
-              { id: 'administration', icon: Syringe, label: isEs ? 'Guía Inyección' : 'Administration' },
-              { id: 'monitoring', icon: HeartPulse, label: isEs ? 'Biomarcadores' : 'Surveillance' },
-              { id: 'coa', icon: Award, label: isEs ? 'Analítica Lote' : 'Batch COA' },
-              { id: 'b2b', icon: Building2, label: isEs ? 'Tarifas B2B' : 'B2B Terms' },
-            ].map(tab => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`norma-mobile-tab-chip ${activeTab === tab.id ? 'active' : ''}`}
-                >
-                  <Icon size={13} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+          {/* Responsive Sticky Horizontal Tabs Bar (Google Cloud Standard) */}
+          <div className="norma-horizontal-tabs-container">
+            <div className="norma-horizontal-tabs-bar">
+              {[
+                { id: 'overview', icon: Sparkles, label: isEs ? 'Mecanismo & Farmacología' : 'Mechanism & Pharmacology' },
+                { id: 'protocols', icon: TrendingUp, label: isEs ? 'Protocolos TRT & PK' : 'TRT Protocols & PK' },
+                { id: 'administration', icon: Syringe, label: isEs ? 'Guía de Inyección' : 'Administration Guide' },
+                { id: 'monitoring', icon: HeartPulse, label: isEs ? 'Biomarcadores & Seguridad' : 'Physician Surveillance' },
+                { id: 'coa', icon: Award, label: isEs ? 'Analítica de Lote & COA' : 'Certified Batch COA' },
+                { id: 'b2b', icon: Building2, label: isEs ? 'Tarifas B2B & Suministro' : 'B2B Hospital Allocation' }
+              ].map(tab => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`norma-horizontal-tab-btn ${isActive ? 'active' : ''}`}
+                  >
+                    <Icon size={15} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Desktop Left Sidebar Navigation (Google Cloud Standard) */}
-          <aside className="norma-sidebar-nav">
-            <div className="norma-sidebar-header">
-              <FileText size={13} color="#003666" />
-              <span>{isEs ? 'Secciones de la Monografía' : 'Clinical Monograph Sections'}</span>
-            </div>
-
-            {[
-              {
-                id: 'overview',
-                icon: Sparkles,
-                title: isEs ? 'Mecanismo & Impacto Clínico' : 'Mechanism & Clinical Impact',
-                desc: isEs ? 'Farmacología Celular y Cascada AR' : 'Cellular Pharmacodynamics & AR Cascade'
-              },
-              {
-                id: 'protocols',
-                icon: TrendingUp,
-                title: isEs ? 'Protocolos TRT & Farmacocinética' : 'TRT Protocols & Pharmacokinetics',
-                desc: isEs ? 'Vida Media y Ventanas de Dosificación' : 'Half-Life & Clinical Dosage Windows'
-              },
-              {
-                id: 'administration',
-                icon: Syringe,
-                title: isEs ? 'Guía de Inyección en Ampolla' : 'Ampoule Administration Guide',
-                desc: isEs ? 'Apertura de Vidrio y Técnica I.M.' : 'Glass Ampoule Snapping & I.M. Technique'
-              },
-              {
-                id: 'monitoring',
-                icon: HeartPulse,
-                title: isEs ? 'Seguridad & Biomarcadores TRT' : 'Physician Lab Surveillance',
-                desc: isEs ? 'Hematocrito, PSA, Lípidos y Estradiol' : 'Hematocrit, PSA, Lipids & Estradiol'
-              },
-              {
-                id: 'coa',
-                icon: Award,
-                title: isEs ? 'Analítica de Lote & COA' : 'Certified Batch COA & Standards',
-                desc: isEs ? 'Liberación Oficial de Lote EOF/QP' : 'Batch-Specific Regulatory Lot Release'
-              },
-              {
-                id: 'b2b',
-                icon: Building2,
-                title: isEs ? 'Tarifas y Suministro B2B' : 'B2B Clinic / Hospital Allocation',
-                desc: isEs ? 'Distribución Hospitalaria y Cadena de Frío' : 'Hospital Supply Terms & Requisition'
-              }
-            ].map(sec => {
-              const Icon = sec.icon;
-              const isActive = activeTab === sec.id;
-              return (
-                <button
-                  key={sec.id}
-                  onClick={() => setActiveTab(sec.id)}
-                  className={`norma-sidebar-item ${isActive ? 'active' : ''}`}
-                >
-                  <div className="norma-sidebar-item-icon">
-                    <Icon size={16} />
-                  </div>
-                  <div className="norma-sidebar-item-content">
-                    <span className="norma-sidebar-item-title">{sec.title}</span>
-                    <span className="norma-sidebar-item-desc">{sec.desc}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </aside>
-
-          {/* Right Main Content Canvas (Displays ONLY Selected Section and Nothing Else) */}
+          {/* Main Content Canvas (Displays ONLY Selected Section, 100% Full Width) */}
           <div className="norma-canvas-panel">
 
               {/* ── TAB 1: CELLULAR MECHANISM & CLINICAL PILLARS ── */}
