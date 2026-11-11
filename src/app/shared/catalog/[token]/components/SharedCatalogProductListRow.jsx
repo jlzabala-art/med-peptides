@@ -235,7 +235,7 @@ export default function SharedCatalogProductListRow({
 
       {/* Expanded Details Panel (Google Cloud Console Drawer Flow) */}
       {isExpanded && (
-        <div style={{ padding: '6px 16px 16px 16px', borderTop: '1px solid #f1f5f9', background: '#fafbfc' }}>
+        <div className="catalog-row-expanded-panel" style={{ padding: '10px 14px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
           <SharedCatalogProductCard
             prod={prod}
             includePrices={includePrices}

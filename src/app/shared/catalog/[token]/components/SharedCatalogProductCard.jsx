@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Package, CheckCircle2, ClipboardList, ExternalLink, FlaskConical } from 'lucide-react';
+import { Package, CheckCircle2, ClipboardList, ExternalLink, FlaskConical, FileText } from 'lucide-react';
 import ProductPresentationIcon from '@/components/ui/ProductPresentationIcon';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
@@ -128,14 +128,397 @@ export default function SharedCatalogProductCard({
     });
   }
 
+  // ── BRANCH A: GOOGLE CLOUD CONSOLE DUAL-PANE MASTER-DETAIL (EXPANDED ROW) ──
+  if (hideMasterImage) {
+    return (
+      <div className="gcp-catalog-master-detail">
+        {/* ── LEFT COLUMN: CLINICAL DOSSIER & METADATA ── */}
+        <div className="gcp-dossier-column">
+          <div className="gcp-dossier-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <FileText size={14} color="#003666" />
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Clinical Dossier & Specs
+              </span>
+            </div>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              backgroundColor: '#f1f5f9',
+              color: '#475569',
+              padding: '1.5px 6px',
+              borderRadius: '4px',
+              textTransform: 'uppercase'
+            }}>
+              {prod.category || 'Clinical'}
+            </span>
+          </div>
+
+          {prod.description ? (
+            <p className="gcp-dossier-description">
+              {prod.description}
+            </p>
+          ) : (
+            <p className="gcp-dossier-description" style={{ fontStyle: 'italic', color: '#94a3b8' }}>
+              Formulation monograph and dosing specifications available in official technical sheet.
+            </p>
+          )}
+
+          {/* Structured Key Attributes Table */}
+          <div className="gcp-dossier-attributes">
+            <div className="gcp-dossier-attr-row">
+              <span className="attr-label">Formulation Type:</span>
+              <span className="attr-val">{prod.category || 'Therapeutic'}</span>
+            </div>
+            {prod.purity && (
+              <div className="gcp-dossier-attr-row">
+                <span className="attr-label">Analytical Purity:</span>
+                <span className="attr-val" style={{ color: '#16a34a' }}>{prod.purity}</span>
+              </div>
+            )}
+            <div className="gcp-dossier-attr-row">
+              <span className="attr-label">Available Presentations:</span>
+              <span className="attr-val">{cleanVariants.length} format{cleanVariants.length > 1 ? 's' : ''}</span>
+            </div>
+            {isProductCosmetic && (
+              <div className="gcp-dossier-attr-row">
+                <span className="attr-label">EU Regulatory:</span>
+                <span className="attr-val" style={{ color: '#16a34a' }}>CPNP (EC No 1223/2009)</span>
+              </div>
+            )}
+            {isProductPeptide && fdaStatus && (
+              <div className="gcp-dossier-attr-row">
+                <span className="attr-label">FDA Regulatory:</span>
+                <span className="attr-val">{fdaStatus.shortBadge}</span>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: 'auto', paddingTop: '8px' }}>
+            <a
+              href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gcp-dossier-monograph-link"
+              title={monographLabel}
+            >
+              <ExternalLink size={12} />
+              <span>{monographLabel}</span>
+            </a>
+          </div>
+        </div>
+
+        {/* ── RIGHT COLUMN: HIGH-DENSITY FORMATS TABLE ── */}
+        <div className="gcp-formats-table-column">
+          <div className="gcp-formats-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Package size={14} color="#003666" />
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {t ? t('product.availableFormats', 'Available Formats & Dosages') : 'Available Formats & Dosages'} ({cleanVariants.length})
+              </span>
+            </div>
+            <span style={{
+              fontSize: '0.68rem',
+              color: '#0284c7',
+              fontWeight: 700,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              padding: '1.5px 6px',
+              borderRadius: '4px'
+            }}>
+              Verified Analytical Grade
+            </span>
+          </div>
+
+          {/* Desktop Column Header (≥ 768px) */}
+          <div className="gcp-format-table-col-header">
+            <div className="col-format">Format & Presentation</div>
+            <div className="col-single">Single Unit (1–9)</div>
+            <div className="col-pack">Volume Pack ×10 Units</div>
+          </div>
+
+          {/* Format Rows */}
+          <div className="gcp-format-rows-container">
+            {cleanVariants.map((v, vIdx) => {
+              const displayPrice = (v.price > 0 ? v.price : 0) * fxMultiplier;
+              const tier10Rate = (v.tier10UnitPrice && v.tier10UnitPrice > 0 ? v.tier10UnitPrice : (v.price > 0 ? v.price * 0.9 : 0)) * fxMultiplier;
+              const kitDisplayPrice = (v.kitPrice && v.kitPrice > 0 ? v.kitPrice : tier10Rate * 10) * fxMultiplier;
+
+              const formatLower = (v.presentation || prod.dosageForm || '').toLowerCase();
+              const unitPlural = formatLower.includes('pen') ? 'Pens'
+                : formatLower.includes('spray') ? 'Sprays'
+                : (formatLower.includes('capsule') || formatLower.includes('bottle') || formatLower.includes('jar') || formatLower.includes('tube') || formatLower.includes('stick') || formatLower.includes('cream') || formatLower.includes('gel')) ? 'Units'
+                : (formatLower.includes('serum') || formatLower.includes('topical')) ? 'Units'
+                : (formatLower.includes('vial') ? 'Vials' : 'Units');
+
+              const savingsPct = displayPrice > 0 && tier10Rate > 0 && tier10Rate < displayPrice
+                ? Math.round((1 - (tier10Rate / displayPrice)) * 100)
+                : 0;
+
+              const stockRaw = (v.stockType || v.availability || prod.stockType || 'on_demand').toLowerCase();
+              const isOutOfStock = stockRaw.includes('out') || stockRaw.includes('agotado');
+              const isDemand = stockRaw.includes('demand') || stockRaw.includes('pedido') || !stockRaw;
+
+              const showUnits = packagingMode === 'all' || packagingMode === 'units';
+              const showKits = (packagingMode === 'all' || packagingMode === 'kits') && kitDisplayPrice > 0;
+              const kitsInCart = Math.floor((cart[v.id]?.quantity || 0) / 10);
+              const unitSingular = (v.presentation || prod.dosageForm || 'unit').toLowerCase();
+
+              return (
+                <div key={v.id || vIdx} className="gcp-format-row">
+                  {/* Format Identity */}
+                  <div className="col-format">
+                    <ProductPresentationIcon
+                      product={prod}
+                      variant={v}
+                      size="sm"
+                    />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div className="format-title">{v.dosage || v.name || 'Standard Presentation'}</div>
+                      <div className="format-meta">
+                        <span style={{ textTransform: 'capitalize' }}>Format: {v.presentation || (prod.category === 'cosmetics' ? 'Dermocosmetic' : 'Unit')}</span>
+                        <span>•</span>
+                        {isOutOfStock ? (
+                          <span style={{ color: '#dc2626', fontWeight: 700 }}>🔴 Out of Stock</span>
+                        ) : isDemand ? (
+                          <span style={{ color: '#d97706', fontWeight: 600 }}>🟡 On Demand (3–7 Days)</span>
+                        ) : (
+                          <span style={{ color: '#16a34a', fontWeight: 600 }}>🟢 In Stock</span>
+                        )}
+                        <span>•</span>
+                        <a
+                          href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}${v.dosage ? `&dose=${encodeURIComponent(v.dosage)}` : ''}${v.presentation ? `&presentation=${encodeURIComponent(v.presentation)}` : ''}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pds-variant-protocol-pill"
+                          title={t ? t('product.protocolDilution', 'Protocol & Dilution') : 'Protocol & Dilution'}
+                        >
+                          <FlaskConical size={11} />
+                          <span>{t ? t('product.protocolDilution', 'Protocol & Dilution') : 'Protocol & Dilution'}</span>
+                          <ExternalLink size={10} style={{ marginLeft: 2 }} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Single Unit (Desktop View) */}
+                  {includePrices && showUnits && (
+                    <div className="col-single">
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                          <span style={{ fontSize: '0.94rem', fontWeight: 800, color: '#003666', lineHeight: 1.1 }}>
+                            {currencySymbol}{displayPrice.toFixed(2)}
+                          </span>
+                          <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 600 }}>
+                            / {unitSingular}
+                          </span>
+                        </div>
+                      </div>
+                      {!isPriceListOnly && typeof updateQuantity === 'function' && (
+                        <div className="gcp-stepper">
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(v, prod, -1)}
+                            disabled={!cart[v.id]?.quantity}
+                            className="stepper-btn"
+                            title="Decrease 1 Unit"
+                          >
+                            -
+                          </button>
+                          <span className="stepper-qty">{cart[v.id]?.quantity || 0}</span>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(v, prod, 1)}
+                            className="stepper-btn stepper-btn-primary"
+                            title="Add 1 Unit"
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Volume Pack ×10 (Desktop View) */}
+                  {includePrices && showKits && (
+                    <div className="col-pack">
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                          <span style={{ fontSize: '0.94rem', fontWeight: 800, color: '#15803d', lineHeight: 1.1 }}>
+                            {currencySymbol}{kitDisplayPrice.toFixed(2)}
+                          </span>
+                          <span style={{ fontSize: '0.65rem', color: '#166534', fontWeight: 600 }}>
+                            / pack
+                          </span>
+                          {savingsPct > 0 && (
+                            <span style={{ backgroundColor: '#16a34a', color: '#ffffff', fontSize: '0.55rem', padding: '1px 4px', borderRadius: '3px', fontWeight: 800 }}>
+                              -{savingsPct}%
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '0.64rem', color: '#15803d', fontWeight: 650 }}>
+                          ({currencySymbol}{tier10Rate.toFixed(2)}/ea)
+                        </div>
+                      </div>
+
+                      {!isPriceListOnly && typeof updateQuantity === 'function' && (
+                        <div>
+                          {kitsInCart >= 1 ? (
+                            <div className="gcp-stepper gcp-stepper-kit">
+                              <button
+                                type="button"
+                                onClick={() => updateQuantity(v, prod, -10)}
+                                className="stepper-btn stepper-btn-kit"
+                                title="Remove 1 Kit (-10)"
+                              >
+                                -
+                              </button>
+                              <span className="stepper-qty stepper-qty-kit">{kitsInCart} Kit{kitsInCart > 1 ? 's' : ''}</span>
+                              <button
+                                type="button"
+                                onClick={() => updateQuantity(v, prod, 10)}
+                                className="stepper-btn stepper-btn-kit-add"
+                                title="Add 1 Kit (+10)"
+                              >
+                                +
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(v, prod, 10)}
+                              className="gcp-add-kit-btn"
+                            >
+                              + Add Kit (10)
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Mobile Pricing Row (< 768px) */}
+                  {includePrices && (
+                    <div className="gcp-mobile-pricing-row">
+                      {showUnits && (
+                        <div className="gcp-mobile-pricing-cell single">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Single (1–9)</span>
+                            <span style={{ fontSize: '0.64rem', color: '#64748b' }}>/ {unitSingular}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
+                            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#003666' }}>
+                              {currencySymbol}{displayPrice.toFixed(2)}
+                            </span>
+                            {!isPriceListOnly && typeof updateQuantity === 'function' && (
+                              <div className="gcp-stepper">
+                                <button
+                                  type="button"
+                                  onClick={() => updateQuantity(v, prod, -1)}
+                                  disabled={!cart[v.id]?.quantity}
+                                  className="stepper-btn"
+                                  title="Decrease 1 Unit"
+                                >
+                                  -
+                                </button>
+                                <span className="stepper-qty">{cart[v.id]?.quantity || 0}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => updateQuantity(v, prod, 1)}
+                                  className="stepper-btn stepper-btn-primary"
+                                  title="Add 1 Unit"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {showKits && (
+                        <div className="gcp-mobile-pricing-cell pack">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.62rem', color: '#166534', fontWeight: 800, textTransform: 'uppercase' }}>Pack ×10</span>
+                            {savingsPct > 0 && (
+                              <span style={{ backgroundColor: '#16a34a', color: '#ffffff', fontSize: '0.55rem', padding: '0.5px 3px', borderRadius: '3px', fontWeight: 800 }}>
+                                -{savingsPct}%
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
+                            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#15803d' }}>
+                              {currencySymbol}{kitDisplayPrice.toFixed(2)}
+                            </span>
+                            {!isPriceListOnly && typeof updateQuantity === 'function' && (
+                              <div>
+                                {kitsInCart >= 1 ? (
+                                  <div className="gcp-stepper gcp-stepper-kit">
+                                    <button
+                                      type="button"
+                                      onClick={() => updateQuantity(v, prod, -10)}
+                                      className="stepper-btn stepper-btn-kit"
+                                      title="Remove 1 Kit (-10)"
+                                    >
+                                      -
+                                    </button>
+                                    <span className="stepper-qty stepper-qty-kit">{kitsInCart}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => updateQuantity(v, prod, 10)}
+                                      className="stepper-btn stepper-btn-kit-add"
+                                      title="Add 1 Kit (+10)"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => updateQuantity(v, prod, 10)}
+                                    className="gcp-add-kit-btn"
+                                  >
+                                    + Kit
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Live Order Indicator underneath row if items selected */}
+                  {(cart[v.id]?.quantity || 0) > 0 && (
+                    <div style={{ width: '100%', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '4px', padding: '4px 8px', fontSize: '0.74rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#166534', fontWeight: 700 }}>
+                        <CheckCircle2 size={12} color="#16a34a" />
+                        <span>In Order: <strong>{cart[v.id].quantity} {unitPlural}</strong></span>
+                        {Math.floor(cart[v.id].quantity / 10) > 0 && (
+                          <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '1px 4px', borderRadius: '3px', fontSize: '0.68rem', fontWeight: 800 }}>
+                            {Math.floor(cart[v.id].quantity / 10)} Kit{Math.floor(cart[v.id].quantity / 10) > 1 ? 's' : ''}
+                            {cart[v.id].quantity % 10 > 0 ? ` + ${cart[v.id].quantity % 10} Single` : ''}
+                          </span>
+                        )}
+                      </div>
+                      <span style={{ color: '#15803d', fontWeight: 800 }}>
+                        Subtotal: {currencySymbol}{(cart[v.id].quantity * (cart[v.id].quantity >= 10 && v.tier10UnitPrice ? v.tier10UnitPrice : v.price) * fxMultiplier).toFixed(2)} {currentCurrency}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── BRANCH B: STANDALONE PRODUCT CARD (NON-ACCORDION VIEW) ──
   return (
-    <div className="product-card" style={hideMasterImage ? {
-      backgroundColor: 'transparent',
-      border: 'none',
-      borderRadius: '0',
-      padding: '8px 2px 2px 2px',
-      boxShadow: 'none'
-    } : {
+    <div className="product-card" style={{
       backgroundColor: '#ffffff',
       border: '1px solid #e2e8f0',
       borderRadius: '12px',
@@ -144,155 +527,122 @@ export default function SharedCatalogProductCard({
       transition: 'all 0.2s ease',
     }}>
       {/* Product Master Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: hideMasterImage ? '10px' : '16px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '16px' }}>
         <div style={{ display: 'flex', gap: '14px', flex: '1 1 300px' }}>
-          {!hideMasterImage && (
-            <ProductPresentationIcon
-              product={prod}
-              variant={prod.variants?.[0]}
-              size="lg"
-            />
-          )}
+          <ProductPresentationIcon
+            product={prod}
+            variant={prod.variants?.[0]}
+            size="lg"
+          />
           <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-            {!hideMasterImage ? (
-              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
-                  {String(prod.canonicalName || prod.name || '')
-                    .replace(/\s*\([^)]*(?:body protection compound|thymosin beta|nicotinamide)[^)]*\)/gi, '')
-                    .replace(/\s+(?:Blend|Stack)$/i, '')
-                    .trim()}
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
+                {String(prod.canonicalName || prod.name || '')
+                  .replace(/\s*\([^)]*(?:body protection compound|thymosin beta|nicotinamide)[^)]*\)/gi, '')
+                  .replace(/\s+(?:Blend|Stack)$/i, '')
+                  .trim()}
+              </span>
+              {isProductPeptide && fdaStatus && (
+                <span
+                  className="catalog-card-fda-badge"
+                  title={`${fdaStatus.badgeLabel} (${fdaStatus.rulingDate || 'FDA'}): ${fdaStatus.summary || ''}`}
+                  style={{
+                    fontSize: '0.70rem',
+                    fontWeight: 700,
+                    backgroundColor: fdaStatus.colorScheme?.bg || '#f8fafc',
+                    color: fdaStatus.colorScheme?.text || '#475569',
+                    padding: '2.5px 7px',
+                    borderRadius: '5px',
+                    border: `1px solid ${fdaStatus.colorScheme?.border || '#cbd5e1'}`,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    lineHeight: 1.2
+                  }}
+                >
+                  <span style={{ fontSize: '0.78rem', lineHeight: 1 }}>{fdaStatus.colorScheme?.icon}</span>
+                  <span>{fdaStatus.shortBadge}</span>
                 </span>
-                {isProductPeptide && fdaStatus && (
-                  <span
-                    className="catalog-card-fda-badge"
-                    title={`${fdaStatus.badgeLabel} (${fdaStatus.rulingDate || 'FDA'}): ${fdaStatus.summary || ''}`}
-                    style={{
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                      backgroundColor: fdaStatus.colorScheme?.bg || '#f8fafc',
-                      color: fdaStatus.colorScheme?.text || '#475569',
-                      padding: '2.5px 7px',
-                      borderRadius: '5px',
-                      border: `1px solid ${fdaStatus.colorScheme?.border || '#cbd5e1'}`,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      lineHeight: 1.2
-                    }}
-                  >
-                    <span style={{ fontSize: '0.78rem', lineHeight: 1 }}>{fdaStatus.colorScheme?.icon}</span>
-                    <span>{fdaStatus.shortBadge}</span>
-                  </span>
-                )}
-                {isProductCosmetic && (
-                  <span
-                    className="catalog-card-fda-badge"
-                    title="Formally registered on the EU Cosmetic Products Notification Portal (EC No 1223/2009)"
-                    style={{
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                      backgroundColor: '#f0fdf4',
-                      color: '#16a34a',
-                      padding: '2.5px 7px',
-                      borderRadius: '5px',
-                      border: '1px solid #bbf7d0',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      lineHeight: 1.2
-                    }}
-                  >
-                    <span>✓</span>
-                    <span>EU CPNP</span>
-                  </span>
-                )}
-                {isProductDiagnostic && (
-                  <span
-                    className="catalog-card-fda-badge"
-                    title="Validated Clinical Epigenetic Biomarker & Laboratory Diagnostic Panel"
-                    style={{
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                      backgroundColor: '#eff6ff',
-                      color: '#2563eb',
-                      padding: '2.5px 7px',
-                      borderRadius: '5px',
-                      border: '1px solid #bfdbfe',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      lineHeight: 1.2
-                    }}
-                  >
-                    <span>🧬</span>
-                    <span>CLIA / CAP</span>
-                  </span>
-                )}
-                {isProductPeptide && prod.purity && (
-                  <span style={{
-                    fontSize: '0.72rem',
+              )}
+              {isProductCosmetic && (
+                <span
+                  className="catalog-card-fda-badge"
+                  title="Formally registered on the EU Cosmetic Products Notification Portal (EC No 1223/2009)"
+                  style={{
+                    fontSize: '0.70rem',
                     fontWeight: 700,
                     backgroundColor: '#f0fdf4',
                     color: '#16a34a',
-                    padding: '3px 8px',
+                    padding: '2.5px 7px',
                     borderRadius: '5px',
-                    border: '1px solid #bbf7d0'
-                  }}>
-                    {prod.purity}
-                  </span>
-                )}
+                    border: '1px solid #bbf7d0',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    lineHeight: 1.2
+                  }}
+                >
+                  <span>✓</span>
+                  <span>EU CPNP</span>
+                </span>
+              )}
+              {isProductDiagnostic && (
+                <span
+                  className="catalog-card-fda-badge"
+                  title="Validated Clinical Epigenetic Biomarker & Laboratory Diagnostic Panel"
+                  style={{
+                    fontSize: '0.70rem',
+                    fontWeight: 700,
+                    backgroundColor: '#eff6ff',
+                    color: '#2563eb',
+                    padding: '2.5px 7px',
+                    borderRadius: '5px',
+                    border: '1px solid #bfdbfe',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    lineHeight: 1.2
+                  }}
+                >
+                  <span>🧬</span>
+                  <span>CLIA / CAP</span>
+                </span>
+              )}
+              {isProductPeptide && prod.purity && (
                 <span style={{
                   fontSize: '0.72rem',
-                  fontWeight: 600,
-                  backgroundColor: '#f8fafc',
-                  color: '#64748b',
+                  fontWeight: 700,
+                  backgroundColor: '#f0fdf4',
+                  color: '#16a34a',
                   padding: '3px 8px',
                   borderRadius: '5px',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid #bbf7d0'
                 }}>
-                  {prod.category}
+                  {prod.purity}
                 </span>
-                <a
-                  href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pds-catalog-monograph-btn"
-                  title={monographLabel}
-                >
-                  <ExternalLink size={13} />
-                  <span>{monographLabel}</span>
-                </a>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-                <span style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  backgroundColor: '#f1f5f9',
-                  color: '#475569',
-                  padding: '2px 7px',
-                  borderRadius: '4px',
-                  border: '1px solid #e2e8f0',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em'
-                }}>
-                  {prod.category}
-                </span>
-                {prod.purity && (
-                  <span style={{
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    backgroundColor: '#f0fdf4',
-                    color: '#16a34a',
-                    padding: '2px 7px',
-                    borderRadius: '4px',
-                    border: '1px solid #bbf7d0'
-                  }}>
-                    {prod.purity}
-                  </span>
-                )}
-              </div>
-            )}
+              )}
+              <span style={{
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                backgroundColor: '#f8fafc',
+                color: '#64748b',
+                padding: '3px 8px',
+                borderRadius: '5px',
+                border: '1px solid #e2e8f0'
+              }}>
+                {prod.category}
+              </span>
+              <a
+                href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pds-catalog-monograph-btn"
+                title={monographLabel}
+              >
+                <ExternalLink size={13} />
+                <span>{monographLabel}</span>
+              </a>
+            </div>
             {prod.description && (
               <p className="product-desc-clamp" style={{
                 marginTop: '4px',
@@ -307,8 +657,8 @@ export default function SharedCatalogProductCard({
           </div>
         </div>
 
-        {/* Starting From Price Box (Only shown on standalone card, NEVER duplicated in expanded row) */}
-        {includePrices && cleanVariants.length > 0 && !hideMasterImage && (
+        {/* Starting From Price Box */}
+        {includePrices && cleanVariants.length > 0 && (
           <div className="mobile-hide" style={{
             backgroundColor: '#f8fafc',
             border: '1px solid #e2e8f0',
@@ -327,7 +677,7 @@ export default function SharedCatalogProductCard({
         )}
       </div>
 
-      {/* Variant Presentations Section (Google Cloud Console Sub-Table UX) */}
+      {/* Variant Presentations Section */}
       <div style={{
         backgroundColor: '#f8fafc',
         border: '1px solid #e2e8f0',

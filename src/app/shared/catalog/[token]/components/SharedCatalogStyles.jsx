@@ -903,6 +903,283 @@ export default function SharedCatalogStyles() {
           border-color: #4ade80;
         }
 
+        /* ── Google Cloud Console Master-Detail Layout Standard ── */
+        .gcp-catalog-master-detail {
+          display: grid;
+          grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+          gap: 14px;
+          align-items: stretch;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .gcp-dossier-column {
+          background-color: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 12px 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+          box-sizing: border-box;
+        }
+        .gcp-dossier-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid #f1f5f9;
+          padding-bottom: 6px;
+        }
+        .gcp-dossier-description {
+          font-size: 0.80rem;
+          line-height: 1.55;
+          color: #475569;
+          margin: 0;
+        }
+        .gcp-dossier-attributes {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          font-size: 0.74rem;
+          background-color: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 8px 10px;
+          margin-top: 4px;
+        }
+        .gcp-dossier-attr-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+        }
+        .gcp-dossier-attr-row .attr-label {
+          color: #64748b;
+          font-weight: 600;
+        }
+        .gcp-dossier-attr-row .attr-val {
+          color: #0f172a;
+          font-weight: 750;
+        }
+        .gcp-dossier-monograph-link {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          width: 100%;
+          padding: 6px 12px;
+          background-color: #003666;
+          color: #ffffff;
+          border-radius: 6px;
+          font-size: 0.74rem;
+          font-weight: 700;
+          text-decoration: none;
+          box-sizing: border-box;
+          transition: background-color 0.15s ease;
+        }
+        .gcp-dossier-monograph-link:hover {
+          background-color: #002244;
+        }
+
+        .gcp-formats-table-column {
+          background-color: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+          min-width: 0;
+          box-sizing: border-box;
+        }
+        .gcp-formats-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid #f1f5f9;
+          padding-bottom: 8px;
+          margin-bottom: 2px;
+        }
+        .gcp-format-table-col-header {
+          display: grid;
+          grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1.15fr);
+          gap: 10px;
+          padding: 4px 8px;
+          font-size: 0.68rem;
+          font-weight: 750;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        .gcp-format-rows-container {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .gcp-format-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1.15fr);
+          gap: 10px;
+          align-items: center;
+          padding: 8px 10px;
+          background-color: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          box-sizing: border-box;
+          transition: border-color 0.15s ease, background-color 0.15s ease;
+        }
+        .gcp-format-row:hover {
+          background-color: #f1f5f9;
+          border-color: #cbd5e1;
+        }
+        .gcp-format-row .col-format {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+        }
+        .gcp-format-row .col-format .format-title {
+          font-size: 0.88rem;
+          font-weight: 750;
+          color: #0f172a;
+          line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .gcp-format-row .col-format .format-meta {
+          font-size: 0.72rem;
+          color: #64748b;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          flex-wrap: wrap;
+          margin-top: 2px;
+        }
+        .gcp-format-row .col-single {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 6px;
+          background-color: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          padding: 4px 8px;
+          height: 38px;
+          box-sizing: border-box;
+        }
+        .gcp-format-row .col-pack {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 6px;
+          background-color: #f0fdf4;
+          border: 1px solid #86efac;
+          border-radius: 6px;
+          padding: 4px 8px;
+          height: 38px;
+          box-sizing: border-box;
+        }
+        .gcp-stepper {
+          display: inline-flex;
+          align-items: center;
+          background-color: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 5px;
+          height: 28px;
+          flex-shrink: 0;
+          box-sizing: border-box;
+          overflow: hidden;
+        }
+        .stepper-btn {
+          width: 26px;
+          height: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          font-weight: 800;
+          font-size: 0.95rem;
+          color: #003666;
+          transition: background-color 0.1s ease;
+        }
+        .stepper-btn:hover:not(:disabled) {
+          background-color: #e2e8f0;
+        }
+        .stepper-btn:disabled {
+          color: #cbd5e1;
+          cursor: default;
+        }
+        .stepper-btn-primary {
+          background: #003666;
+          color: #ffffff;
+        }
+        .stepper-btn-primary:hover {
+          background-color: #002244;
+        }
+        .stepper-qty {
+          min-width: 24px;
+          text-align: center;
+          font-weight: 800;
+          font-size: 0.80rem;
+          color: #003666;
+        }
+        .gcp-stepper-kit {
+          border-color: #86efac;
+        }
+        .stepper-btn-kit {
+          color: #166534;
+        }
+        .stepper-btn-kit:hover:not(:disabled) {
+          background-color: #dcfce7;
+        }
+        .stepper-btn-kit-add {
+          background: #16a34a;
+          color: #ffffff;
+        }
+        .stepper-btn-kit-add:hover {
+          background-color: #15803d;
+        }
+        .stepper-qty-kit {
+          color: #15803d;
+        }
+        .gcp-add-kit-btn {
+          height: 28px;
+          padding: 0 10px;
+          font-size: 0.72rem;
+          font-weight: 800;
+          background-color: #16a34a;
+          color: #ffffff;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          white-space: nowrap;
+          box-sizing: border-box;
+          transition: background-color 0.15s ease;
+        }
+        .gcp-add-kit-btn:hover {
+          background-color: #15803d;
+        }
+        .gcp-mobile-pricing-row {
+          display: none;
+        }
+
+        @media (max-width: 1023px) {
+          .gcp-catalog-master-detail {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+        }
+
         @media (max-width: 768px) {
           .catalog-container {
             padding: 10px 8px calc(140px + env(safe-area-inset-bottom, 16px)) 8px !important;
@@ -1022,6 +1299,53 @@ export default function SharedCatalogStyles() {
             align-items: center !important;
             justify-content: space-between !important;
             border-radius: 8px !important;
+          }
+
+          /* GCP Master-Detail Mobile Rules */
+          .gcp-catalog-master-detail {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+          }
+          .gcp-format-table-col-header {
+            display: none !important;
+          }
+          .gcp-format-row {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 8px 10px !important;
+            gap: 6px !important;
+          }
+          .gcp-format-row .col-format {
+            width: 100% !important;
+          }
+          .gcp-format-row .col-single,
+          .gcp-format-row .col-pack {
+            display: none !important;
+          }
+          .gcp-mobile-pricing-row {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+            width: 100% !important;
+            margin-top: 4px !important;
+          }
+          .gcp-mobile-pricing-cell {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            padding: 6px 8px !important;
+            border-radius: 6px !important;
+            min-height: 52px !important;
+            box-sizing: border-box !important;
+          }
+          .gcp-mobile-pricing-cell.single {
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+          }
+          .gcp-mobile-pricing-cell.pack {
+            background-color: #f0fdf4 !important;
+            border: 1px solid #86efac !important;
           }
           .catalog-filter-row {
             display: flex;
