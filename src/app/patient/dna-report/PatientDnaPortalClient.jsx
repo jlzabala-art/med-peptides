@@ -403,7 +403,7 @@ export default function PatientDnaPortalClient({
               },
               {
                 step: 'PART 2',
-                title: 'Complete Food List (17 Fagron Families)',
+                title: 'Complete Food List (All 17 Food Families)',
                 desc: 'All 116 foods classified into 🟢 Eat Freely, 🟡 Normal Portion (1-2x/wk), and 🔴 Avoid across CARBO+, PROTEIN+, LIPID+, and EXTRAS.',
                 shareWith: '🛒 For Supermarket / Home Kitchen',
                 shareBg: '#dcfce7',
@@ -774,7 +774,7 @@ export default function PatientDnaPortalClient({
               </div>
             </div>
 
-            {/* ── Food Traffic Light Matrix (Fagron 17 Families · 116 Foods · Search & Filters) ── */}
+            {/* ── Food Traffic Light Matrix (17 Families · 116 Foods · Search & Filters) ── */}
             <div id="fagron-food-matrix-section" style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
                 <div>
@@ -783,7 +783,7 @@ export default function PatientDnaPortalClient({
                       PART 2 · COMPLETE FOOD LIST (SUPERMARKET &amp; KITCHEN GUIDE)
                     </span>
                     <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '2px 7px', borderRadius: '4px' }}>
-                      Fagron NutriGen™ 100% Standard · 4 Groups · 17 Families · {clinicalProfile.masterFoodCatalog?.length || 116} Foods
+                      Complete Clinical Taxonomy · 4 Groups · 17 Families · {clinicalProfile.masterFoodCatalog?.length || 116} Foods
                     </span>
                   </div>
                   <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>

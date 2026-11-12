@@ -372,8 +372,8 @@ export async function GET(request) {
         audience: 'FOR SUPERMARKET SHOPPING',
         badgeColor: gcpGreen,
         badgeBg: gcpGreenBg,
-        title: 'Complete Fagron NutriGen(TM) Food List (All 4 Groups & 17 Food Families)',
-        desc: '115+ foods across all 17 Fagron families classified by traffic light: GREEN (Eat Freely), AMBER (1-3x/week or timing rule), and RED (Avoid).'
+        title: 'Complete Personalized Food List (All 4 Groups & 17 Food Families)',
+        desc: '115+ foods across all 17 food families classified by traffic light: GREEN (Eat Freely), AMBER (1-3x/week or timing rule), and RED (Avoid).'
       },
       {
         badge: 'STEP 4 · PAGE 5',
@@ -1490,7 +1490,7 @@ export async function GET(request) {
     });
 
     yg -= 16;
-    pageGrocery.drawText('COMPLETE FAGRON NUTRIGEN(TM) FOOD LIST (ALL 17 FAMILIES)', {
+    pageGrocery.drawText('COMPLETE PERSONALIZED FOOD LIST (ALL 17 FAMILIES)', {
       x: 36,
       y: yg,
       size: 13.0,
@@ -1539,7 +1539,7 @@ export async function GET(request) {
       height: thH,
       color: navyPrimary
     });
-    pageGrocery.drawText('FAGRON FAMILY (17)', {
+    pageGrocery.drawText('FOOD FAMILY (17)', {
       x: col1X + 5,
       y: yg - 12,
       size: 6.2,
@@ -1751,7 +1751,7 @@ export async function GET(request) {
     });
 
     // Page 4 Footer
-    pageGrocery.drawText('Page 4 of 5 · Complete Fagron NutriGen(TM) 17-Family Food Matrix (115+ Foods) · Atlas Health Services · www.atlashealthservices.com', {
+    pageGrocery.drawText('Page 4 of 5 · Complete 17-Family Personalized Food Matrix (115+ Foods) · Atlas Health Services · www.atlashealthservices.com', {
       x: 36,
       y: 18,
       size: 6.8,
