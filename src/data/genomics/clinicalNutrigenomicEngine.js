@@ -20,7 +20,9 @@
 import {
   MASTER_FOOD_CATALOG,
   FOOD_TRAFFIC_LEVELS,
+  FAGRON_17_SUBFAMILIES,
   evaluateFoodForGeneticProfile,
+  getFagron17SubfamilyMatrix,
   getPersonalizedGroceryAisles
 } from './masterFoodCatalog.js';
 
@@ -684,21 +686,21 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
   const axis1 = {
     id: 'axis_satiety_appetite',
     number: 1,
-    titleEn: 'Satiety, Appetite & Emotional Eating',
-    titleEs: 'Saciedad, Apetito & Hambre Emocional',
+    titleEn: 'Appetite & Fullness Signal (Genes MC4R & FTO)',
+    titleEs: 'Control del Apetito y Saciedad (Genes MC4R y FTO)',
     score: satietyScore,
-    riskLevel: satietyScore >= 75 ? 'HIGH RISK' : satietyScore >= 45 ? 'MODERATE RISK' : 'LOW RISK',
+    riskLevel: satietyScore >= 75 ? 'HIGH PRIORITY' : satietyScore >= 45 ? 'MODERATE' : 'OPTIMAL',
     badgeColor: satietyScore >= 75 ? '#c5221f' : satietyScore >= 45 ? '#b06000' : '#137333',
     badgeBg: satietyScore >= 75 ? '#fce8e6' : satietyScore >= 45 ? '#fef7e0' : '#e6f4ea',
     keyGenes: `MC4R (${g.MC4R}), TAS2R38 (${g.TAS2R38}), FUT1 (${g.FUT1}), FTO (${g.FTO})`,
-    clinicalFindingEn: 'Hypothalamic leptin signaling delay with marked hedonic food reward seeking and sweet-tooth vulnerability.',
-    clinicalFindingEs: 'Retardo en la señalización hipotalámica de leptina con búsqueda de recompensa hedónica y apetencia por dulce.',
-    proteinTargetEn: '30–35g high-biological-value protein per main meal to trigger PYY and GLP-1 satiety peptide release.',
-    proteinTargetEs: '30–35g de proteína de alto valor biológico por comida principal para estimular la liberación de PYY y GLP-1.',
-    emotionalEatingProtocolEn: 'Oral dopamine swaps: >85% raw bitter cacao, crunchy celery/cucumbers with sea salt & lime, 3-minute pre-meal vagal breathing pause.',
-    emotionalEatingProtocolEs: 'Sustitutos de dopamina oral: cacao amargo >85%, apio/pepino crujientes con sal marina y lima, pausa respiratoria vagal de 3 min.',
-    sweetCravingProtocolEn: 'Ceylon cinnamon on wild berries to blunt insulin and reset FGF21 hepatic-brain reward loop. Strictly avoid artificial sweeteners.',
-    sweetCravingProtocolEs: 'Canela de Ceilán en frutos rojos silvestres para aplanar insulina y reajustar FGF21. Prohibir edulcorantes artificiales.'
+    clinicalFindingEn: 'Your brain receives the "I am full" signal slower after eating, making it easier to crave sweet or crunchy snacks in the afternoon.',
+    clinicalFindingEs: 'Tu cerebro recibe la señal de saciedad más despacio al comer, facilitando el deseo de picotear dulce o salado por la tarde.',
+    proteinTargetEn: 'Eat 1 palm-sized protein portion (30–35g: eggs, fish, or poultry) at every meal to keep you full for 5 hours.',
+    proteinTargetEs: 'Toma 1 ración de proteína (30–35g: huevos, pescado o ave) en cada comida para mantenerte saciado 5 horas.',
+    emotionalEatingProtocolEn: 'Healthy afternoon swaps: 2 squares of 85% dark chocolate, crunchy cucumber/celery with olive oil, or 1 handful of raw walnuts.',
+    emotionalEatingProtocolEs: 'Snacks saludables de tarde: 2 onzas de chocolate negro 85%, pepino/apio crujiente o 1 puñado de nueces crudas.',
+    sweetCravingProtocolEn: 'Add Ceylon cinnamon to berries to calm sweet cravings naturally. Avoid artificial sweeteners (sucralose/aspartame).',
+    sweetCravingProtocolEs: 'Añade canela de Ceilán a los frutos rojos para calmar el deseo de dulce. Evita edulcorantes artificiales.'
   };
 
   // 2. Calculate Axis 2: Methylation & Homocysteine Clearance
@@ -711,23 +713,23 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
   const axis2 = {
     id: 'axis_methylation_homocysteine',
     number: 2,
-    titleEn: 'Cellular Methylation & Homocysteine Clearance',
-    titleEs: 'Metilación Celular & Depuración de Homocisteína',
+    titleEn: 'Active Vitamins & Daily Vitality (Gene MTHFR)',
+    titleEs: 'Vitaminas Activas y Vitalidad (Gen MTHFR)',
     score: methylationScore,
-    riskLevel: methylationScore >= 75 ? 'HIGH RISK' : methylationScore >= 45 ? 'MODERATE RISK' : 'LOW RISK',
+    riskLevel: methylationScore >= 75 ? 'HIGH PRIORITY' : methylationScore >= 45 ? 'MODERATE' : 'OPTIMAL',
     badgeColor: methylationScore >= 75 ? '#c5221f' : methylationScore >= 45 ? '#b06000' : '#137333',
     badgeBg: methylationScore >= 75 ? '#fce8e6' : methylationScore >= 45 ? '#fef7e0' : '#e6f4ea',
     keyGenes: `MTHFR C677T (${g.MTHFR}), MTR, MTRR`,
     clinicalFindingEn: hasMthfrTT
-      ? 'Severe enzymatic reduction (≈70% loss of MTHFR capacity). Extreme elevation risk for plasma homocysteine and impaired detox.'
-      : 'Moderate methylation efficiency. Sensitive to synthetic folic acid accumulation.',
+      ? 'Your body utilizes only about 30% of common synthetic folic acid. You need Active Natural Folate (L-5-MTHF) and daily leafy greens for clean energy.'
+      : 'Moderate folate conversion. Prioritize natural food folates over synthetic fortified products.',
     clinicalFindingEs: hasMthfrTT
-      ? 'Reducción enzimática severa (≈70% de pérdida de actividad MTHFR). Riesgo crítico de homocisteína elevada y déficit de metilación.'
-      : 'Eficiencia de metilación moderada. Vulnerable a la acumulación de ácido fólico sintético.',
-    foodPrescriptionEn: 'Daily natural folates & betaine: lightly steamed baby spinach, arugula, steamed asparagus, beetroot, and choline from organic egg yolks (BHMT alternate pathway).',
-    foodPrescriptionEs: 'Folatos naturales y betaína diarios: espinacas baby al vapor, rúcula, espárragos, remolacha y colina de yemas de huevo ecológico (vía alterna BHMT).',
-    criticalWarningEn: 'STRICT EXCLUSION: Synthetic Folic Acid (Pteroylmonoglutamic Acid) in fortified flours, commercial breads, and energy bars.',
-    criticalWarningEs: 'EXCLUSIÓN ESTRICTA: Ácido fólico sintético (pteroilmonoglutámico) en harinas enriquecidas, panes de molde y barritas.'
+      ? 'Tu cuerpo aprovecha solo el 30% del ácido fólico común. Necesitas Folato Natural Activo (L-5-MTHF) y hojas verdes a diario.'
+      : 'Conversión moderada de folato. Prioriza folatos naturales frente a harinas enriquecidas.',
+    foodPrescriptionEn: 'Eat daily natural folate foods: baby spinach, wild arugula, asparagus, lentils, beetroot, and pasture-raised egg yolks.',
+    foodPrescriptionEs: 'Consume a diario alimentos ricos en folato natural: espinacas, rúcula, espárragos, lentejas, remolacha y yema de huevo.',
+    criticalWarningEn: 'AVOID: Common synthetic "Folic Acid" found in cheap multivitamins, white flour bread, and commercial breakfast cereals.',
+    criticalWarningEs: 'EVITAR: El "Ácido Fólico" sintético presente en multivitamínicos comunes, pan blanco y cereales industriales.'
   };
 
   // 3. Calculate Axis 3: Glycemia & Carbohydrate Sensitivity
@@ -740,18 +742,18 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
   const axis3 = {
     id: 'axis_glycemia_carbohydrates',
     number: 3,
-    titleEn: 'Glycemia & Carbohydrate Sensitivity',
-    titleEs: 'Glucemia & Sensibilidad a Carbohidratos',
+    titleEn: 'Steady Blood Sugar & Energy (Gene IRS1)',
+    titleEs: 'Azúcar y Energía Estable (Gen IRS1)',
     score: glycemicScore,
-    riskLevel: glycemicScore >= 70 ? 'HIGH RISK' : glycemicScore >= 45 ? 'MODERATE RISK' : 'LOW RISK',
+    riskLevel: glycemicScore >= 70 ? 'HIGH PRIORITY' : glycemicScore >= 45 ? 'MODERATE' : 'OPTIMAL',
     badgeColor: glycemicScore >= 70 ? '#c5221f' : glycemicScore >= 45 ? '#b06000' : '#137333',
     badgeBg: glycemicScore >= 70 ? '#fce8e6' : glycemicScore >= 45 ? '#fef7e0' : '#e6f4ea',
     keyGenes: `IRS1 (${g.IRS1}), FTO (${g.FTO}), TCF7L2`,
-    clinicalFindingEn: 'High postprandial glucose volatility and reduced insulin receptor tyrosine phosphorylation with refined carbs.',
-    clinicalFindingEs: 'Alta volatilidad glucémica postprandial y menor fosforilación del receptor de insulina ante carbohidratos refinados.',
-    maxNetCarbsPerMeal: '<35–40g net carbs per meal',
-    plateSequencingRuleEn: 'Plate Sequencing: 1st Soluble Fiber/Greens -> 2nd Proteins & Lipids -> 3rd Complex Low-GI Carbs last.',
-    plateSequencingRuleEs: 'Secuencia de Plato: 1º Fibra Soluble/Verdura -> 2º Proteínas & Grasas Buenas -> 3º Carbohidratos complejos al final.'
+    clinicalFindingEn: 'White bread, hot white rice, and sugary drinks trigger a fast insulin spike that makes you feel sleepy after lunch.',
+    clinicalFindingEs: 'El pan blanco, el arroz rápido y los dulces te provocan un pico de azúcar que da sueño después de comer.',
+    maxNetCarbsPerMeal: 'Max 1 small fist-sized carb side per meal (<35–40g)',
+    plateSequencingRuleEn: '1-2-3 Plate Rule: Eat salad/veggies FIRST -> fish/meat/eggs SECOND -> rice/potato/quinoa LAST.',
+    plateSequencingRuleEs: 'Regla del Plato 1-2-3: Come primero la ensalada -> luego la proteína -> deja el arroz/patata para el final.'
   };
 
   // 4. Calculate Axis 4: Micronutrients & Safety Toxicity Alerts
@@ -766,17 +768,17 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
   const axis4 = {
     id: 'axis_micronutrients_safety',
     number: 4,
-    titleEn: 'Micronutrient Bioavailability & Toxicity Alerts',
-    titleEs: 'Biodisponibilidad de Micronutrientes & Alertas de Toxicidad',
+    titleEn: 'Caution With Vitamin E Pills & Vitamin D Needs (Genes ZPR1 & VDR)',
+    titleEs: 'Cuidado con Pastillas de Vitamina E y Vitamina D (Genes ZPR1 y VDR)',
     score: micronutrientScore,
-    riskLevel: hasVitEToxicityRisk ? 'CRITICAL ALERT' : 'MODERATE RISK',
+    riskLevel: hasVitEToxicityRisk ? 'SAFETY ALERT' : 'MODERATE',
     badgeColor: '#c5221f',
     badgeBg: '#fce8e6',
     keyGenes: `ZPR1 (${g.ZPR1}), CYP4F2 (${g.CYP4F2}), VDR FokI (${g.VDR})`,
-    criticalToxicityAlertEn: 'CRITICAL SAFETY ALERT: High genetic risk of synthetic Vitamin E (alpha-tocopherol) accumulation. DO NOT PRESCRIBE synthetic Vitamin E supplements. Dietary sources only (raw almonds, sunflower seeds, EVOO).',
-    criticalToxicityAlertEs: 'ALERTA CRÍTICA DE SEGURIDAD: Alto riesgo de acumulación de Vitamina E sintética (alfa-tocoferol). NO PRESCRIBIR suplementos de Vitamina E sintética. Fuentes exclusivamente dietéticas (almendras crudas, semillas de girasol, AOVE).',
-    vitaminDStrategyEn: 'VDR nuclear resistance requires maintaining serum 25(OH)D at 50–70 ng/mL. Always take D3 with dietary breakfast fats and MK-7 K2.',
-    vitaminDStrategyEs: 'La resistencia VDR nuclear exige mantener 25(OH)D en 50–70 ng/mL. Tomar D3 siempre con grasas en el desayuno y MK-7 K2.'
+    criticalToxicityAlertEn: 'SAFETY RULE: Your body clears synthetic Vitamin E pills slowly. Do NOT take Vitamin E capsules; get Vitamin E naturally from Extra Virgin Olive Oil, avocado, and raw almonds.',
+    criticalToxicityAlertEs: 'REGLA DE SEGURIDAD: Tu cuerpo acumula la Vitamina E sintética de bote. No tomes suplementos con Vitamina E; obtenla de alimentos naturales (AOVE, aguacate y almendras).',
+    vitaminDStrategyEn: 'Your Vitamin D receptors work slower (VDR gene): take Vitamin D3 + K2 with breakfast fats (eggs or olive oil) for full absorption.',
+    vitaminDStrategyEs: 'Tus receptores de Vitamina D son más lentos (gen VDR): toma Vitamina D3 + K2 en el desayuno con grasas buenas.'
   };
 
   // 5. Calculate Axis 5: Food Sensitivities & Neuro-Stimulants
@@ -793,17 +795,17 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
   const axis5 = {
     id: 'axis_sensitivities_neuro',
     number: 5,
-    titleEn: 'Food Sensitivities, Gut Barrier & Neuro-Stimulants',
-    titleEs: 'Sensibilidades Alimentarias, Barrera Intestinal & Neuroestimulantes',
+    titleEn: 'Lactose Digestion & Sleep-Friendly Coffee (Genes MCM6 & ADORA2A)',
+    titleEs: 'Digestión de Lácteos y Café según tu Sueño (Genes MCM6 y ADORA2A)',
     score: sensitivityScore,
-    riskLevel: sensitivityScore >= 70 ? 'HIGH RISK' : 'MODERATE RISK',
+    riskLevel: sensitivityScore >= 70 ? 'ACTIONABLE' : 'MODERATE',
     badgeColor: sensitivityScore >= 70 ? '#c5221f' : '#b06000',
     badgeBg: sensitivityScore >= 70 ? '#fce8e6' : '#fef7e0',
     keyGenes: `MCM6 (${g.MCM6}), ADORA2A (${g.ADORA2A}), CYP1A2 (${g.CYP1A2})`,
-    lactoseDirectiveEn: 'Adult hypolactasia confirmed. Eliminate liquid cow milk & fresh cheeses. Allow A2 goat/sheep kefir or hard aged cheeses in moderation.',
-    lactoseDirectiveEs: 'Hipolactasia del adulto confirmada. Eliminar leche de vaca y quesos frescos. Permitir kéfir de cabra/oveja A2 o quesos curados con moderación.',
-    caffeineCutoffEn: 'STRICT CAFFEINE CUTOFF AT 11:00 AM. Replace afternoon coffee with ceremonial matcha (buffered by L-Theanine) or chamomile.',
-    caffeineCutoffEs: 'CORTE ESTRICTO DE CAFEÍNA A LAS 11:00 AM. Sustituir el café de tarde por té matcha ceremonial (amortiguado por L-teanina) o manzanilla.'
+    lactoseDirectiveEn: 'Cow milk and soft cheeses cause bloating (MCM6 gene). Swap for fermented goat/sheep kefir, sheep feta, or almond/coconut milk.',
+    lactoseDirectiveEs: 'La leche de vaca y quesos blandos causan hinchazón (gen MCM6). Usa kéfir de cabra/oveja, queso feta de oveja o bebida de almendra/coco.',
+    caffeineCutoffEn: 'Enjoy coffee only before 11:00 AM. Afternoon caffeine stays active for 8+ hours and blocks deep sleep (switch to matcha before noon or chamomile at night).',
+    caffeineCutoffEs: 'Toma café solo antes de las 11:00 AM. El café de tarde bloquea tu sueño profundo durante más de 8 horas (pasa a infusiones sin cafeína).'
   };
 
   const fiveClinicalAxes = [axis1, axis2, axis3, axis4, axis5];
@@ -1106,28 +1108,28 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
   // Minimal Targeted Co-Factors (Food-First Complement)
   const minimalTargetedCoFactors = [
     {
-      nutrient: 'Active L-5-Methyltetrahydrofolate ([6S]-5-MTHF)',
-      dose: '400–800 µg daily',
+      nutrient: 'Active Natural Folate (L-5-MTHF)',
+      dose: '400–800 mcg daily',
       timing: 'Morning with breakfast',
-      foodSynergy: 'Synergizes with natural folates from spinach & arugula',
-      rationaleEn: 'Completely circumvents the MTHFR 677TT enzymatic bottleneck without creating toxic un-metabolized synthetic folic acid (UMFA).',
-      rationaleEs: 'Bypassea el bloqueo enzimático MTHFR 677TT sin generar ácido fólico sintético no metabolizado.'
+      foodSynergy: 'Works together with natural folates from spinach, arugula & egg yolks',
+      rationaleEn: 'Directly provides active folate that your body can use 100% (bypassing the slow MTHFR gene) without leaving synthetic folic acid buildup.',
+      rationaleEs: 'Aporta folato natural activo que tu cuerpo aprovecha al 100% (compensando tu gen MTHFR) sin acumular ácido fólico sintético.'
     },
     {
-      nutrient: 'Magnesium Bisglycinate Chelate (TRAACS® elemental Mg)',
+      nutrient: 'Chelated Magnesium Bisglycinate + L-Theanine',
       dose: '150–200 mg elemental Mg',
       timing: 'Evening 45 min before sleep',
-      foodSynergy: 'Supplements dietary magnesium from pumpkin seeds & raw cacao',
-      rationaleEn: 'Activates parasympathetic GABA receptors, dampens evening COMT adrenergic activity, and eases restorative deep sleep.',
-      rationaleEs: 'Activa receptores GABA, modula la hiperactividad de COMT y propicia el sueño delta profundo.'
+      foodSynergy: 'Complements dietary magnesium from pumpkin seeds, almonds & 85% dark cacao',
+      rationaleEn: 'Calms the nervous system, relaxes muscles, and promotes deep restorative sleep without causing stomach discomfort.',
+      rationaleEs: 'Relaja el sistema nervioso y la musculatura favoreciendo el sueño profundo sin molestias digestivas.'
     },
     {
-      nutrient: 'Gastrorresistant Probiotics (LGG + BB-12 in DRcaps®)',
-      dose: '10–15 Billion CFU',
-      timing: 'Upon waking on empty stomach with water',
-      foodSynergy: 'Reinforced by dietary prebiotic fibers from asparagus & inulin',
-      rationaleEn: 'Acid-resistant delivery protects live cultures from stomach acid to colonize the distal ileum and offset MCM6 hypolactasia dysbiosis.',
-      rationaleEs: 'Cápsula gastrorresistente que permite a las cepas vivas colonizar el íleon y contrarrestar la disbiosis de hipolactasia.'
+      nutrient: 'Targeted Probiotics in Acid-Resistant Vegetable Capsule (LGG + BB-12)',
+      dose: '15 Billion Live Cultures',
+      timing: 'Upon waking on an empty stomach with water',
+      foodSynergy: 'Nourished by prebiotic fibers from asparagus, artichokes & cooled rice/potato',
+      rationaleEn: 'Protected in a delayed-release vegetable capsule so live beneficial bacteria pass through stomach acid intact and protect your gut from lactose irritation (MCM6).',
+      rationaleEs: 'En cápsula vegetal gastrorresistente para que las bacterias vivas lleguen intactas al intestino y reduzcan la sensibilidad a la lactosa (MCM6).'
     }
   ];
 
@@ -1250,6 +1252,15 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
     caffeineSensitive: true
   });
 
+  const fagron17SubfamilyMatrix = getFagron17SubfamilyMatrix({
+    mthfrRisk: 'HIGH',
+    mcm6Intolerant: true,
+    mc4rLowSatiety: true,
+    irs1Resistant: true,
+    cyp4f2Risk: true,
+    caffeineSensitive: true
+  });
+
   return {
     patient: {
       name: patientName,
@@ -1267,6 +1278,8 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
     minimalTargetedCoFactors,
     supermarketGroceryList: dynamicGroceryAisles.length > 0 ? dynamicGroceryAisles : supermarketGroceryList,
     masterFoodCatalog: masterFoodItemsEvaluated,
+    fagron17Subfamilies: FAGRON_17_SUBFAMILIES,
+    fagron17SubfamilyMatrix,
     nutritionistConsultationDirectives,
     // Preserves backward compatibility with existing components
     concreteDietGuidelines: CONCRETE_DIET_GUIDELINES,

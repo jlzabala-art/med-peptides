@@ -332,42 +332,69 @@ export async function GET(request) {
 
     yCover -= (cardH + 18);
 
-    // 4. DOSSIER ARCHITECTURE & SECTION DIRECTORY (GCP Services Grid)
-    coverPage.drawText('DOSSIER ARCHITECTURE & SECTION DIRECTORY', {
+    // 4. HOW THIS REPORT IS ORGANIZED — STEP-BY-STEP READING & SHARING GUIDE
+    coverPage.drawText('HOW THIS REPORT IS ORGANIZED · YOUR STEP-BY-STEP GUIDE', {
       x: 44,
       y: yCover,
-      size: 9.5,
+      size: 9.8,
       font: helveticaBold,
-      color: darkSlate
+      color: navyPrimary
+    });
+    yCover -= 11;
+    coverPage.drawText('Start here: each page of this guide has one clear purpose and tells you who to use or share it with.', {
+      x: 44,
+      y: yCover,
+      size: 7.4,
+      font: helvetica,
+      color: mutedSlate
     });
 
-    yCover -= 12;
+    yCover -= 10;
     const coverRoadmap = [
       {
-        badge: 'PART I · PAGE 2',
+        badge: 'STEP 1 · PAGE 2',
+        audience: 'FOR YOU (DAILY HABITS)',
         badgeColor: googleBlue,
         badgeBg: rgb(232 / 255, 240 / 255, 254 / 255),
-        title: 'Actionable Daily Meal Plan & 24-Hour Chronobiology Routine',
-        desc: 'Translates your genetic markers into practical daily catering choices: Green (Always Order), Amber (In Moderation), and Red (Exclude). Includes the Golden Plate Sequencing rule and your synchronized 24-hour nutrition & supplement timeline.'
+        title: 'Your DNA in Plain English, Plate Rule & 24-Hour Routine',
+        desc: 'Explains your 4 key DNA traits without medical jargon, the 1-2-3 Plate Rule (Veggies -> Protein -> Carbs last), and your morning-to-bedtime routine.'
       },
       {
-        badge: 'PART II · PAGE 3',
+        badge: 'STEP 2 · PAGE 3',
+        audience: 'FOR YOUR KITCHEN / CATERING CHEF',
+        badgeColor: tealAccent,
+        badgeBg: rgb(240 / 255, 253 / 255, 250 / 255),
+        title: 'Your 7-Day Precision Meal Plan (Monday to Sunday)',
+        desc: 'Ready-to-use breakfast, lunch, and dinner menu for all 7 days of the week. Share this page directly with your home kitchen or meal delivery service.'
+      },
+      {
+        badge: 'STEP 3 · PAGE 4',
+        audience: 'FOR SUPERMARKET SHOPPING',
         badgeColor: gcpGreen,
         badgeBg: gcpGreenBg,
-        title: 'Targeted Supplement Protocols & Shopping Pathways',
-        desc: 'Cellular cofactors (Active Folate 5-MTHF, D3/K2, Probiotics, Magnesium Bisglycinate). Formulated exclusively with 100% vegetable DRcaps® (lactose-free, zero synthetic binders). Neutral comparison between retail pharmacies and compounding.'
+        title: 'Complete Fagron NutriGen(TM) Food List (All 4 Groups & 17 Food Families)',
+        desc: '115+ foods across all 17 Fagron families classified by traffic light: GREEN (Eat Freely), AMBER (1-3x/week or timing rule), and RED (Avoid).'
       },
       {
-        badge: 'PART III · PAGES 4–59',
+        badge: 'STEP 4 · PAGE 5',
+        audience: 'FOR YOUR DOCTOR / PHARMACY',
+        badgeColor: gcpAmber,
+        badgeBg: gcpAmberBg,
+        title: 'Your 5 Targeted Nutrients, 3 Simple Packs & Pharmacy Options',
+        desc: 'Explains what each vitamin/mineral does, lets you pick Pack 1, 2, or 3, and compares buying at a local pharmacy (Option A) vs. 3-Capsule Compounding (Option B).'
+      },
+      {
+        badge: 'ANNEX · PAGES 6+',
+        audience: 'FOR CLINICAL ARCHIVE',
         badgeColor: mutedSlate,
         badgeBg: rgb(241 / 255, 243 / 255, 244 / 255),
-        title: 'Complete 24Genetics Laboratory Sequencing Report (55 Pages)',
-        desc: 'The official biometric laboratory analysis across Nutrition, Vitamins, Minerals, Metabolic Profile, and Food Sensitivities (Lactase Non-Persistence), complete with structured quick-jump directory index.'
+        title: 'Full 24Genetics Laboratory Sequencing Report (55 Pages)',
+        desc: 'Official raw laboratory report across Vitamins, Minerals, Metabolism, and Food Intolerances with a quick-jump page directory.'
       }
     ];
 
     coverRoadmap.forEach((sec) => {
-      const sH = 52;
+      const sH = 44;
       coverPage.drawRectangle({
         x: 44,
         y: yCover - sH,
@@ -378,45 +405,74 @@ export async function GET(request) {
         borderWidth: 1.0
       });
 
-      // Badge
-      const bW = helveticaBold.widthOfTextAtSize(sec.badge, 6.5) + 12;
+      // Left accent strip
+      coverPage.drawRectangle({
+        x: 44,
+        y: yCover - sH,
+        width: 3.5,
+        height: sH,
+        color: sec.badgeColor
+      });
+
+      // Step Badge
+      const bW = helveticaBold.widthOfTextAtSize(sec.badge, 6.2) + 10;
       coverPage.drawRectangle({
         x: 54,
-        y: yCover - 16,
+        y: yCover - 15,
         width: bW,
-        height: 12,
+        height: 11,
         color: sec.badgeBg,
         borderColor: cardBorder,
-        borderWidth: 0.8
+        borderWidth: 0.7
       });
       coverPage.drawText(sec.badge, {
-        x: 60,
-        y: yCover - 13,
-        size: 6.5,
+        x: 59,
+        y: yCover - 12,
+        size: 6.2,
         font: helveticaBold,
         color: sec.badgeColor
       });
 
+      // Title
       coverPage.drawText(sec.title, {
-        x: 60 + bW + 6,
-        y: yCover - 14,
-        size: 7.8,
+        x: 54 + bW + 6,
+        y: yCover - 12,
+        size: 7.6,
         font: helveticaBold,
-        color: darkSlate,
-        maxWidth: cWidth - 88 - bW - 32
+        color: darkSlate
       });
 
-      coverPage.drawText(sec.desc, {
+      // Audience Pill on Right
+      const audW = helveticaBold.widthOfTextAtSize(sec.audience, 5.6) + 10;
+      coverPage.drawRectangle({
+        x: cWidth - 52 - audW,
+        y: yCover - 15,
+        width: audW,
+        height: 11,
+        color: lightBg,
+        borderColor: cardBorder,
+        borderWidth: 0.6
+      });
+      coverPage.drawText(sec.audience, {
+        x: cWidth - 52 - audW + 5,
+        y: yCover - 12,
+        size: 5.6,
+        font: helveticaBold,
+        color: navyPrimary
+      });
+
+      drawWrappedBlock(coverPage, sec.desc, {
         x: 54,
-        y: yCover - 29,
-        size: 7.0,
+        y: yCover - 25,
+        size: 6.7,
         font: helvetica,
         color: mutedSlate,
         maxWidth: cWidth - 108,
-        lineHeight: 9.8
+        lineHeight: 8.8,
+        maxLines: 2
       });
 
-      yCover -= (sH + 7);
+      yCover -= (sH + 5);
     });
 
     // 5. INTERACTIVE DIGITAL PORTAL ACTION BANNER (GCP Action Banner)
@@ -577,48 +633,55 @@ export async function GET(request) {
     });
 
     // -------------------------------------------------------------------------
-    // SECTION 1: YOUR DNA IN 4 PLAIN-ENGLISH FINDINGS (2x2 Grid, Legible 8.5pt)
+    // SECTION 1: YOUR DNA IN 4 PLAIN-ENGLISH FINDINGS (2x2 Grid, Zero Overlap)
     // -------------------------------------------------------------------------
-    y1 -= 18;
-    page1.drawText('1. YOUR GENETIC PROFILE IN PLAIN ENGLISH (WHAT YOUR DNA SAYS)', {
+    y1 -= 15;
+    page1.drawText('1. YOUR GENETIC PROFILE IN PLAIN ENGLISH (HUMAN-FIRST SUMMARY)', {
       x: 36,
       y: y1,
-      size: 11.0,
+      size: 10.2,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y1 -= 8;
+    y1 -= 7;
     const plainFindings = [
       {
-        badge: `${plan.fiveClinicalAxes[0].riskLevel} · MC4R/FTO`,
-        title: 'Satiety & Appetite Threshold',
-        action: 'Delayed leptin satiety. Target 30-35g protein per meal to trigger PYY/GLP-1. Use raw cacao >85% for dopamine cravings.'
+        badge: 'SATIETY · GEN MC4R',
+        title: 'Appetite & Fullness Signal',
+        action: 'Your brain receives the "I am full" signal slower. Eat 1 palm-sized protein (30-35g) per meal and chew slowly to stay full for 5 hours.'
       },
       {
-        badge: `${plan.fiveClinicalAxes[1].riskLevel} · MTHFR 677TT`,
-        title: 'Methylation & Natural Folate',
-        action: 'Liver activates synthetic folic 70% slower. Eat daily steamed spinach, arugula & pastured eggs. Strictly avoid synthetic folic acid.'
+        badge: 'VITALITY · GEN MTHFR',
+        title: 'Active Vitamins & Vitality',
+        action: 'Your body uses only 30% of common synthetic folic acid. Take Active Natural Folate (L-5-MTHF) and eat leafy greens & eggs daily.'
       },
       {
-        badge: `${plan.fiveClinicalAxes[2].riskLevel} · IRS1 GLYCEMIA`,
-        title: 'Carbohydrate Sensitivity',
-        action: 'High glucose volatility with refined carbs. Follow Plate Sequencing strictly and cap net carbs at <35-40g per meal.'
+        badge: 'ENERGY · GEN IRS1',
+        title: 'Steady Sugar & Energy',
+        action: 'White bread and fast rice cause afternoon sleepiness. Eat salad first, protein second, and leave rice/potato for last (max 1 fist).'
       },
       {
-        badge: `${plan.fiveClinicalAxes[3].riskLevel} · ZPR1/CYP4F2`,
-        title: 'Safe Dietary Vitamin E Alert',
-        action: 'High risk of synthetic alpha-tocopherol accumulation. Do NOT take synthetic Vit E pills; obtain strictly from food (almonds, EVOO).'
+        badge: 'SAFETY · GEN ZPR1',
+        title: 'Skip Vitamin E Pills',
+        action: 'Your body accumulates synthetic Vitamin E from pills. Never take Vitamin E supplements; get it naturally from olive oil & raw almonds.'
       }
     ];
 
     const boxW = (p1Width - 72 - 14) / 2;
-    const boxH = 58;
+    let maxFindingTextH = 0;
+    plainFindings.forEach((f) => {
+      const lines = getWrappedLines(f.action, helvetica, 7.2, boxW - 20);
+      const h = 26 + lines.length * 9.5 + 12;
+      if (h > maxFindingTextH) maxFindingTextH = h;
+    });
+    const boxH = Math.max(66, maxFindingTextH);
+
     plainFindings.forEach((f, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
       const bX = 36 + col * (boxW + 14);
-      const bY = y1 - (row * (boxH + 10)) - boxH;
+      const bY = y1 - (row * (boxH + 7)) - boxH;
 
       page1.drawRectangle({
         x: bX,
@@ -631,7 +694,7 @@ export async function GET(request) {
       });
 
       // Accent pill
-      const bW = helveticaBold.widthOfTextAtSize(f.badge, 6.2) + 10;
+      const bW = helveticaBold.widthOfTextAtSize(f.badge, 5.8) + 10;
       page1.drawRectangle({
         x: bX + 8,
         y: bY + boxH - 16,
@@ -644,97 +707,109 @@ export async function GET(request) {
       page1.drawText(f.badge, {
         x: bX + 13,
         y: bY + boxH - 13,
-        size: 6.2,
+        size: 5.8,
         font: helveticaBold,
         color: tealAccent
       });
 
       page1.drawText(f.title, {
         x: bX + 12 + bW,
-        y: bY + boxH - 14,
-        size: 8.8,
+        y: bY + boxH - 13.5,
+        size: 8.0,
         font: helveticaBold,
         color: navyPrimary
       });
 
-      page1.drawText(f.action, {
+      drawWrappedBlock(page1, f.action, {
         x: bX + 10,
-        y: bY + boxH - 30,
-        size: 8.0,
+        y: bY + boxH - 27,
+        size: 7.2,
         font: helvetica,
         color: darkSlate,
         maxWidth: boxW - 20,
-        lineHeight: 11.0
+        lineHeight: 9.5,
+        maxLines: 3
       });
     });
 
-    y1 -= (2 * boxH + 10 + 16);
+    y1 -= (2 * boxH + 7 + 13);
 
     // -------------------------------------------------------------------------
-    // SECTION 2: MEAL PLAN TRAFFIC LIGHT (DNA OPTIMIZED CATERING)
+    // SECTION 2: MEAL PLAN TRAFFIC LIGHT (DNA OPTIMIZED CATERING - ZERO OVERLAP)
     // -------------------------------------------------------------------------
-    page1.drawText('2. MEAL PLAN SELECTION GUIDE (TRAFFIC LIGHT FOR YOUR DAILY CATERING MENU)', {
+    page1.drawText('2. DAILY FOOD TRAFFIC LIGHT (QUICK SUMMARY · SEE ALL 17 FAMILIES ON PAGE 4)', {
       x: 36,
       y: y1,
-      size: 11.0,
+      size: 10.2,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y1 -= 8;
+    y1 -= 7;
     const trafficCols = [
       {
-        badge: 'GREEN · SUPERFOODS',
-        subtitle: 'Medicine Foods & DNA Favs',
+        badge: 'GREEN · EAT FREELY',
+        subtitle: 'Daily DNA Superfoods (Unlimited)',
         badgeColor: gcpGreen,
         badgeBg: gcpGreenBg,
         badgeBorder: gcpGreenBorder,
         accentColor: gcpGreen,
         items: [
-          'Wild rocket (arugula) & baby spinach (folate)',
-          'Steamed asparagus & raw beetroot (betaine)',
-          'Wild Alaskan salmon & sardines (EPA/DHA)',
-          'Pasture-raised eggs with soft yolk (choline)',
-          'Dark wild berries + Ceylon cinnamon',
-          'Cold-pressed EVOO & raw walnuts (safe Vit E)'
+          'Arugula, spinach, broccoli & asparagus',
+          'Wild salmon, sardines, cod & shellfish',
+          'Pasture eggs & organic chicken/turkey',
+          'Blueberries, blackberries & avocado',
+          'Extra virgin olive oil, walnuts & almonds',
+          'Goat/sheep kefir & feta (A2 lactose-safe)'
         ]
       },
       {
-        badge: 'AMBER · IN MODERATION',
-        subtitle: 'Portion Control & Timing Rules',
+        badge: 'AMBER · MODERATE / RULE',
+        subtitle: '1-2x/Week or Portion Rule',
         badgeColor: gcpAmber,
         badgeBg: gcpAmberBg,
         badgeBorder: gcpAmberBorder,
         accentColor: gcpAmber,
         items: [
-          'Net Carbs: Cap at <35-40g per meal',
-          'A2 Goat/sheep kefir (max 150 mL daily)',
-          'Resistant starch (cooked & cooled 24h)',
-          '1 Morning black espresso (strictly before 11 AM)',
-          'Raw pumpkin & chia seeds (zinc & magnesium)',
-          'Organic sourdough bread (1 slice max at lunch)'
+          'Quinoa, buckwheat & red lentils (1/2 cup)',
+          'Cooled basmati rice or sweet potato (eat LAST)',
+          'Rye sourdough bread (max 1 slice at lunch)',
+          'Grass-fed beef or lamb (max 2x per week)',
+          'Morning black coffee (strictly before 11 AM)',
+          'Raw Sidr honey (max 1/2 tsp pre-workout)'
         ]
       },
       {
-        badge: 'RED · STRICT EXCLUSIONS',
-        subtitle: 'Genetically Harmful Disruptors',
+        badge: 'RED · AVOID STRICTLY',
+        subtitle: 'Conflicts with Your Genes',
         badgeColor: gcpRed,
         badgeBg: gcpRedBg,
         badgeBorder: gcpRedBorder,
         accentColor: gcpRed,
         items: [
-          'Synthetic Folic Acid flours & commercial cereals',
-          'Synthetic Vitamin E supplements (ZPR1 risk)',
-          'Refined flours, commercial juices & sodas',
-          'Artificial sweeteners (sucralose, aspartame)',
-          'Unfermented cow milk & soft dairy creams',
-          'Commercial seed oils (corn, canola, palm)'
+          'White flour & cereals with synthetic folic acid',
+          'Synthetic Vitamin E supplement pills',
+          'Cow milk, cream & unfermented soft cheese',
+          'Seed oils (sunflower, corn, soy, canola)',
+          'Sugary drinks, juices & artificial sweeteners',
+          'Afternoon coffee (after 11 AM) & alcohol'
         ]
       }
     ];
 
     const colW = (p1Width - 72 - 16) / 3;
-    const cH = 148;
+    // Dynamically compute required column height with 16pt bottom breathing room
+    let maxColContentH = 0;
+    trafficCols.forEach((tc) => {
+      let colH = 44; // header + top spacing
+      tc.items.forEach((it) => {
+        const wrapped = getWrappedLines(it, helvetica, 6.8, colW - 22);
+        colH += wrapped.length * 8.8 + 4.0;
+      });
+      if (colH > maxColContentH) maxColContentH = colH;
+    });
+    const cH = Math.max(138, maxColContentH + 14);
+
     trafficCols.forEach((tc, cIdx) => {
       const cX = 36 + cIdx * (colW + 8);
 
@@ -768,7 +843,7 @@ export async function GET(request) {
       });
 
       // Line 1: Status Chip Badge
-      const bW = helveticaBold.widthOfTextAtSize(tc.badge, 6.2) + 12;
+      const bW = helveticaBold.widthOfTextAtSize(tc.badge, 6.0) + 12;
       page1.drawRectangle({
         x: cX + 8,
         y: y1 - 18,
@@ -781,7 +856,7 @@ export async function GET(request) {
       page1.drawText(tc.badge, {
         x: cX + 14,
         y: y1 - 15,
-        size: 6.2,
+        size: 6.0,
         font: helveticaBold,
         color: tc.badgeColor
       });
@@ -790,7 +865,7 @@ export async function GET(request) {
       page1.drawText(tc.subtitle, {
         x: cX + 8,
         y: y1 - 29,
-        size: 6.8,
+        size: 6.5,
         font: helveticaBold,
         color: darkSlate,
         maxWidth: colW - 16
@@ -804,38 +879,36 @@ export async function GET(request) {
         color: gcpBorder
       });
 
-      // Items list with colored bullet dot, hanging indent and dynamic line height
-      let iY = y1 - 47;
+      // Items list with colored bullet dot and exact wrapped line stepping
+      let iY = y1 - 44;
       tc.items.forEach((it) => {
         page1.drawText('•', {
           x: cX + 8,
           y: iY,
-          size: 7.5,
+          size: 7.0,
           font: helveticaBold,
           color: tc.accentColor
         });
-        page1.drawText(it, {
+        iY = drawWrappedBlock(page1, it, {
           x: cX + 16,
           y: iY,
-          size: 7.2,
+          size: 6.8,
           font: helvetica,
           color: darkSlate,
           maxWidth: colW - 22,
-          lineHeight: 9.8
+          lineHeight: 8.8,
+          maxLines: 2
         });
-        const textWidth = helvetica.widthOfTextAtSize(it, 7.2);
-        const numLines = Math.max(1, Math.ceil(textWidth / (colW - 22)));
-        const step = numLines > 1 ? 14.5 + (numLines - 1) * 9.8 : 15.5;
-        iY -= step;
+        iY -= 4.0;
       });
     });
 
-    y1 -= (cH + 14);
+    y1 -= (cH + 11);
 
     // -------------------------------------------------------------------------
     // SECTION 3: THE GOLDEN PLATE SEQUENCING RULE
     // -------------------------------------------------------------------------
-    const seqH = 68;
+    const seqH = 54;
     page1.drawRectangle({
       x: 36,
       y: y1 - seqH,
@@ -846,72 +919,81 @@ export async function GET(request) {
       borderWidth: 1.2
     });
 
-    page1.drawText('THE GOLDEN PLATE SEQUENCING RULE (ELIMINATES AFTERNOON BRAIN FOG):', {
+    page1.drawText('THE 1-2-3 PLATE ORDER RULE (STOPS AFTERNOON SUGAR CRASHES):', {
       x: 48,
-      y: y1 - 16,
-      size: 8.5,
+      y: y1 - 14,
+      size: 8.0,
       font: helveticaBold,
       color: tealAccent
     });
 
-    const seqText = 'Inside each meal tray, eat your food in this sequence: (1) Salad & vegetables first  ->  (2) Protein & healthy fats second  ->  (3) Rice or potatoes LAST.\nClinical impact: This creates a protective fiber mesh in your stomach, reducing glucose spikes by 45% and eliminating post-lunch sluggishness.';
-    page1.drawText(seqText, {
+    const seqText = 'Eat every meal in this order:  (1) Salad & veggies FIRST  ->  (2) Fish, meat or eggs SECOND  ->  (3) Rice, potato or bread LAST.\nWhy it works: Fiber and protein coat your stomach first, cutting blood sugar spikes by 45% and keeping your energy steady all afternoon.';
+    drawWrappedBlock(page1, seqText, {
       x: 48,
-      y: y1 - 32,
-      size: 7.8,
+      y: y1 - 27,
+      size: 7.2,
       font: helvetica,
       color: darkSlate,
       maxWidth: p1Width - 96,
-      lineHeight: 11.5
+      lineHeight: 10.0,
+      maxLines: 3
     });
 
-    y1 -= (seqH + 18);
+    y1 -= (seqH + 12);
 
     // -------------------------------------------------------------------------
     // SECTION 4: 24-HOUR DAILY ROUTINE WITH YOUR MEALS (Chronobiology)
     // -------------------------------------------------------------------------
-    page1.drawText('3. 24-HOUR DAILY ROUTINE: SYNCHRONIZED WITH YOUR MEALS & SUPPLEMENTS', {
+    page1.drawText('3. YOUR 24-HOUR DAILY ROUTINE (MEALS & 3 SIMPLE SUPPLEMENT MOMENTS)', {
       x: 36,
       y: y1,
-      size: 11.0,
+      size: 10.2,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y1 -= 8;
+    y1 -= 7;
     const dailySteps = [
       {
-        time: 'DOSE 1 · UPON WAKING',
-        meal: 'Empty Stomach (07:30)',
-        step: 'Gut Shield Probiotic',
-        action: 'Water (300ml) + Dose 1: Nutrient [5] (DRcaps®).',
-        why: 'Probiotics reach gut safely without food acid interference.'
+        time: '1 · UPON WAKING (07:30)',
+        meal: 'On an Empty Stomach',
+        step: 'Morning Gut Probiotic',
+        action: 'Drink 1 glass of water + take Nutrient [5] (Probiotic in vegetable capsule).',
+        why: 'Reaches your gut alive before stomach acid rises.'
       },
       {
-        time: 'DOSE 2 · BREAKFAST',
-        meal: 'With Morning Meal (08:30)',
-        step: 'Active Folate + D3/K2',
-        action: 'Dose 2: Nutrients [1]+[2] (+[4]) with dietary fats.',
-        why: 'Vitamins D & K2 require healthy fats for 100% absorption.'
+        time: '2 · BREAKFAST (08:30)',
+        meal: 'With Savory Breakfast',
+        step: 'Active Folate + Vit D3/K2',
+        action: 'Take Nutrients [1]+[2] (+[4]) with eggs, avocado or olive oil.',
+        why: 'Healthy fats unlock 100% absorption of Vitamin D3 & K2.'
       },
       {
-        time: 'LUNCH / DINNER',
-        meal: 'Catering Dish (13:00)',
-        step: 'Plate Sequence & Focus',
-        action: 'Eat Veggies -> Protein -> Carbs. Take Omega-3.',
-        why: 'Slows sugar absorption and stops 3 PM afternoon slump.'
+        time: '3 · LUNCH & DINNER',
+        meal: 'Main Meals (13:30 / 19:30)',
+        step: '1-2-3 Plate Sequence',
+        action: 'Eat Veggies first -> Protein second -> Small complex carb last.',
+        why: 'Prevents post-lunch sleepiness and stops evening cravings.'
       },
       {
-        time: 'DOSE 3 · BEDTIME',
-        meal: '45 Min Before Sleep (22:00)',
-        step: 'Magnesium Bisglycinate',
-        action: 'Dose 3: Nutrient [3] (2 capsules) + chamomile tea.',
-        why: 'Relaxes muscle fibers and triggers deep REM restorative sleep.'
+        time: '4 · BEDTIME (22:00)',
+        meal: '45 Min Before Sleep',
+        step: 'Nighttime Magnesium',
+        action: 'Take Nutrient [3] (Chelated Magnesium) + warm chamomile tea.',
+        why: 'Relaxes muscles and nervous system for deep sleep.'
       }
     ];
 
     const stepW = (p1Width - 72 - 18) / 4;
-    const sH = 145;
+    let maxStepH = 0;
+    dailySteps.forEach((st) => {
+      const actLines = getWrappedLines(st.action, helvetica, 6.8, stepW - 12);
+      const whyLines = getWrappedLines(`Why help: ${st.why}`, helveticaOblique, 6.4, stepW - 12);
+      const neededH = 56 + actLines.length * 8.8 + 12 + whyLines.length * 8.2 + 14;
+      if (neededH > maxStepH) maxStepH = neededH;
+    });
+    const sH = Math.max(134, maxStepH);
+
     dailySteps.forEach((st, sIdx) => {
       const sX = 36 + sIdx * (stepW + 6);
 
@@ -927,16 +1009,16 @@ export async function GET(request) {
 
       page1.drawRectangle({
         x: sX,
-        y: y1 - 22,
+        y: y1 - 20,
         width: stepW,
-        height: 22,
+        height: 20,
         color: rgb(241 / 255, 245 / 255, 249 / 255)
       });
 
       page1.drawText(st.time, {
         x: sX + 6,
-        y: y1 - 15,
-        size: 7.2,
+        y: y1 - 13,
+        size: 6.5,
         font: helveticaBold,
         color: tealAccent,
         maxWidth: stepW - 12
@@ -944,8 +1026,8 @@ export async function GET(request) {
 
       page1.drawText(st.meal, {
         x: sX + 6,
-        y: y1 - 34,
-        size: 7.0,
+        y: y1 - 31,
+        size: 6.5,
         font: helveticaOblique,
         color: mutedSlate,
         maxWidth: stepW - 12
@@ -953,42 +1035,44 @@ export async function GET(request) {
 
       page1.drawText(st.step, {
         x: sX + 6,
-        y: y1 - 50,
-        size: 8.5,
+        y: y1 - 44,
+        size: 7.6,
         font: helveticaBold,
         color: navyPrimary,
         maxWidth: stepW - 12
       });
 
-      page1.drawText(st.action, {
+      drawWrappedBlock(page1, st.action, {
         x: sX + 6,
-        y: y1 - 70,
-        size: 7.8,
+        y: y1 - 57,
+        size: 6.8,
         font: helvetica,
         color: darkSlate,
         maxWidth: stepW - 12,
-        lineHeight: 10.2
+        lineHeight: 8.8,
+        maxLines: 3
       });
 
       page1.drawLine({
-        start: { x: sX + 6, y: y1 - 104 },
-        end: { x: sX + stepW - 6, y: y1 - 104 },
+        start: { x: sX + 6, y: y1 - 88 },
+        end: { x: sX + stepW - 6, y: y1 - 88 },
         thickness: 0.6,
         color: cardBorder
       });
 
-      page1.drawText(st.why, {
+      drawWrappedBlock(page1, `Why it helps: ${st.why}`, {
         x: sX + 6,
-        y: y1 - 118,
-        size: 7.2,
+        y: y1 - 98,
+        size: 6.4,
         font: helveticaOblique,
         color: mutedSlate,
         maxWidth: stepW - 12,
-        lineHeight: 9.5
+        lineHeight: 8.2,
+        maxLines: 3
       });
     });
 
-    y1 -= (sH + 12);
+    y1 -= (sH + 10);
 
     // -------------------------------------------------------------------------
     // SECTION 5: KITCHEN FRIDGE REMINDER (High Legibility 8.0pt)
@@ -1360,8 +1444,8 @@ export async function GET(request) {
     });
 
     // =========================================================================
-    // PAGE 4: SUPERMARKET GROCERY CHECKLIST & PANTRY DETOX (PAGE 4 OF 5)
-    // Conforms strictly to Google Cloud UX: Dedicated full-page shopping aisle guide
+    // PAGE 4: COMPLETE FAGRON NUTRIGEN™ 17-FAMILY FOOD MATRIX (PAGE 4 OF 5)
+    // Covers 100% of the 4 Official Macro-Groups & 17 Sub-Families (116 Foods)
     // =========================================================================
     const pageGrocery = pdfDoc.addPage([595.28, 841.89]);
     const { width: pgWidth, height: pgHeight } = pageGrocery.getSize();
@@ -1375,246 +1459,299 @@ export async function GET(request) {
       color: tealAccent
     });
 
-    let yg = pgHeight - 28;
+    let yg = pgHeight - 26;
 
     // Header Area
     pageGrocery.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
       x: 36,
       y: yg,
-      size: 9.0,
+      size: 8.5,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    const badgeG = 'PAGE 4 OF 5 · SUPERMARKET GROCERY & PANTRY';
-    const badgeGW = helveticaBold.widthOfTextAtSize(badgeG, 7.5) + 16;
+    const badgeG = 'PAGE 4 OF 5 · COMPLETE 17-FAMILY FOOD LIST';
+    const badgeGW = helveticaBold.widthOfTextAtSize(badgeG, 7.0) + 14;
     pageGrocery.drawRectangle({
       x: pgWidth - 36 - badgeGW,
-      y: yg - 4,
+      y: yg - 3,
       width: badgeGW,
-      height: 18,
+      height: 16,
       color: rgb(240 / 255, 253 / 255, 250 / 255),
       borderColor: tealAccent,
-      borderWidth: 1.2
+      borderWidth: 1.0
     });
     pageGrocery.drawText(badgeG, {
-      x: pgWidth - 36 - badgeGW + 8,
-      y: yg + 1,
-      size: 7.5,
+      x: pgWidth - 36 - badgeGW + 7,
+      y: yg + 1.5,
+      size: 7.0,
       font: helveticaBold,
       color: tealAccent
     });
 
-    yg -= 18;
-    pageGrocery.drawText('PATIENT SUPERMARKET GROCERY CHECKLIST', {
+    yg -= 16;
+    pageGrocery.drawText('COMPLETE FAGRON NUTRIGEN(TM) FOOD LIST (ALL 17 FAMILIES)', {
       x: 36,
       y: yg,
-      size: 14.0,
+      size: 13.0,
       font: helveticaBold,
       color: darkSlate
     });
 
-    yg -= 13;
-    pageGrocery.drawText('Aisle-by-aisle shopping companion calibrated to Monoprix, Carrefour, Lulu & local Qatar markets', {
+    yg -= 11;
+    pageGrocery.drawText('115+ foods across all 4 Macro-Groups (CARBO+, PROTEIN+, LIPID+, EXTRAS) & 17 Sub-Families classified for your DNA', {
       x: 36,
       y: yg,
-      size: 8.5,
+      size: 7.6,
       font: helvetica,
       color: mutedSlate
     });
 
-    yg -= 10;
+    yg -= 8;
     pageGrocery.drawLine({
       start: { x: 36, y: yg },
       end: { x: pgWidth - 36, y: yg },
-      thickness: 1.0,
+      thickness: 0.9,
       color: cardBorder
     });
 
     // -------------------------------------------------------------------------
-    // SECTION 1: 4-COLUMN SUPERMARKET CHECKLIST (Height: 330pt)
+    // SECTION 1: 17-SUBFAMILY TRAFFIC-LIGHT MATRIX TABLE
     // -------------------------------------------------------------------------
-    yg -= 16;
-    pageGrocery.drawText('1. AISLE-BY-AISLE SHOPPING BASKET', {
-      x: 36,
-      y: yg,
-      size: 10.0,
-      font: helveticaBold,
+    yg -= 6;
+    const tableW = pgWidth - 72; // 523.28pt
+    const col1W = 108; // Sub-Family & Group
+    const col2W = 148; // GREEN: Eat Freely
+    const col3W = 136; // AMBER: Moderate / Rule
+    const col4W = tableW - col1W - col2W - col3W; // RED: Avoid (~131.28pt)
+
+    const col1X = 36;
+    const col2X = col1X + col1W;
+    const col3X = col2X + col2W;
+    const col4X = col3X + col3W;
+
+    // Table Header Bar
+    const thH = 18;
+    pageGrocery.drawRectangle({
+      x: col1X,
+      y: yg - thH,
+      width: col1W,
+      height: thH,
       color: navyPrimary
     });
+    pageGrocery.drawText('FAGRON FAMILY (17)', {
+      x: col1X + 5,
+      y: yg - 12,
+      size: 6.2,
+      font: helveticaBold,
+      color: white
+    });
 
-    yg -= 8;
-    const grocW = (pgWidth - 72 - 24) / 4;
-    const grocH = 340;
+    pageGrocery.drawRectangle({
+      x: col2X,
+      y: yg - thH,
+      width: col2W,
+      height: thH,
+      color: gcpGreen
+    });
+    pageGrocery.drawText('GREEN · EAT FREELY (SUPERFOODS)', {
+      x: col2X + 5,
+      y: yg - 12,
+      size: 6.2,
+      font: helveticaBold,
+      color: white
+    });
 
-    const cleanCategoryNames = [
-      '[Veg] Fresh Produce & Greens',
-      '[Fish] Clean Wild Proteins',
-      '[Oil] Healthy Fats & Seeds',
-      '[Tea] Functional Beverages'
-    ];
+    pageGrocery.drawRectangle({
+      x: col3X,
+      y: yg - thH,
+      width: col3W,
+      height: thH,
+      color: gcpAmber
+    });
+    pageGrocery.drawText('AMBER · 1-2x/WK OR RULE', {
+      x: col3X + 5,
+      y: yg - 12,
+      size: 6.2,
+      font: helveticaBold,
+      color: white
+    });
 
-    plan.supermarketGroceryList.forEach((cat, idx) => {
-      const gX = 36 + idx * (grocW + 8);
-      const gY = yg - grocH;
+    pageGrocery.drawRectangle({
+      x: col4X,
+      y: yg - thH,
+      width: col4W,
+      height: thH,
+      color: gcpRed
+    });
+    pageGrocery.drawText('RED · AVOID (DNA CONFLICT)', {
+      x: col4X + 5,
+      y: yg - 12,
+      size: 6.2,
+      font: helveticaBold,
+      color: white
+    });
 
+    yg -= thH;
+
+    const matrixRows = plan.fagron17SubfamilyMatrix || [];
+    const rowH = 36.2;
+
+    matrixRows.forEach((sub, rIdx) => {
+      const rY = yg - rowH;
+      const isEven = rIdx % 2 === 0;
+
+      // Row Background & Cell Tints
       pageGrocery.drawRectangle({
-        x: gX,
-        y: gY,
-        width: grocW,
-        height: grocH,
-        color: lightBg,
+        x: col1X,
+        y: rY,
+        width: col1W,
+        height: rowH,
+        color: isEven ? rgb(248 / 255, 250 / 255, 252 / 255) : white,
         borderColor: cardBorder,
-        borderWidth: 1.0
+        borderWidth: 0.5
       });
-
-      // Header strip
       pageGrocery.drawRectangle({
-        x: gX,
-        y: gY + grocH - 22,
-        width: grocW,
-        height: 22,
-        color: rgb(241 / 255, 245 / 255, 249 / 255)
+        x: col2X,
+        y: rY,
+        width: col2W,
+        height: rowH,
+        color: isEven ? rgb(244 / 255, 253 / 255, 247 / 255) : white,
+        borderColor: cardBorder,
+        borderWidth: 0.5
+      });
+      pageGrocery.drawRectangle({
+        x: col3X,
+        y: rY,
+        width: col3W,
+        height: rowH,
+        color: isEven ? rgb(255 / 255, 252 / 255, 240 / 255) : white,
+        borderColor: cardBorder,
+        borderWidth: 0.5
+      });
+      pageGrocery.drawRectangle({
+        x: col4X,
+        y: rY,
+        width: col4W,
+        height: rowH,
+        color: isEven ? rgb(254 / 255, 246 / 255, 246 / 255) : white,
+        borderColor: cardBorder,
+        borderWidth: 0.5
       });
 
-      const catHeader = cleanCategoryNames[idx] || cat.category.split('(')[0].trim();
-      pageGrocery.drawText(catHeader, {
-        x: gX + 6,
-        y: gY + grocH - 15,
-        size: 6.8,
+      // Col 1: Macro-Group Pill + Sub-family Name
+      const grpColor =
+        sub.group === 'CARBO+' ? tealAccent :
+        sub.group === 'PROTEIN+' ? googleBlue :
+        sub.group === 'LIPID+' ? gcpAmber : navyPrimary;
+
+      pageGrocery.drawText(`${sub.group} · ${sub.code}`, {
+        x: col1X + 5,
+        y: rY + rowH - 10,
+        size: 5.5,
         font: helveticaBold,
-        color: navyPrimary,
-        maxWidth: grocW - 12
+        color: grpColor
       });
 
-      let itemY = gY + grocH - 32;
-      cat.items.forEach((it) => {
-        if (itemY < gY + 12) return;
-        const cleanItem = `[ ] ${it.split('(')[0].trim()}`;
-        itemY = drawWrappedBlock(pageGrocery, cleanItem, {
-          x: gX + 6,
-          y: itemY,
-          size: 6.0,
-          font: helvetica,
-          color: darkSlate,
-          maxWidth: grocW - 12,
-          lineHeight: 7.6,
-          maxLines: 2
-        });
-        itemY -= 3.8;
+      const cleanSubName = sub.labelEn.replace(/^\d+\.\d+\.\d+\s*/, '');
+      drawWrappedBlock(pageGrocery, cleanSubName, {
+        x: col1X + 5,
+        y: rY + rowH - 19,
+        size: 6.2,
+        font: helveticaBold,
+        color: darkSlate,
+        maxWidth: col1W - 10,
+        lineHeight: 7.4,
+        maxLines: 2
       });
-    });
 
-    yg -= (grocH + 18);
-
-    // -------------------------------------------------------------------------
-    // SECTION 2: KITCHEN PANTRY DETOX & DIRECT REPLACEMENTS (Height: 180pt)
-    // -------------------------------------------------------------------------
-    pageGrocery.drawText('2. KITCHEN PANTRY DETOX: ELIMINATE VS. REPLACE IMMEDIATELY', {
-      x: 36,
-      y: yg,
-      size: 10.0,
-      font: helveticaBold,
-      color: navyPrimary
-    });
-
-    yg -= 8;
-    const detoxH = 185;
-    pageGrocery.drawRectangle({
-      x: 36,
-      y: yg - detoxH,
-      width: pgWidth - 72,
-      height: detoxH,
-      color: white,
-      borderColor: cardBorder,
-      borderWidth: 1.0
-    });
-
-    // Left Column: What to Discard/Donate (Red Accent)
-    const dColW = (pgWidth - 72 - 32) / 2;
-    pageGrocery.drawRectangle({
-      x: 46,
-      y: yg - 26,
-      width: dColW,
-      height: 18,
-      color: redBg,
-      borderColor: redBorder,
-      borderWidth: 0.8
-    });
-    pageGrocery.drawText('REMOVE FROM PANTRY (CELLULAR INFLAMMATION)', {
-      x: 52,
-      y: yg - 21,
-      size: 6.4,
-      font: helveticaBold,
-      color: redText
-    });
-
-    const discardItems = [
-      '• Industrial Seed & Cooking Oils: Canola, corn, sunflower, soybean oil, margarine.',
-      '• Ultra-Processed Refined Flours: White bread, commercial pastries, sandwich rolls.',
-      '• Hidden Liquid Sugars: High-fructose corn syrup, bottled juices, sodas, flavored milks.',
-      '• Commercial Cow Dairy: Pasteurized A1 cow milk, processed cheese slices, sugary yogurts.',
-      '• Ultra-Processed Cold Cuts: Sausages, hot dogs, commercial mortadella with nitrates.'
-    ];
-
-    let dyLeft = yg - 36;
-    discardItems.forEach(item => {
-      dyLeft = drawWrappedBlock(pageGrocery, item, {
-        x: 46,
-        y: dyLeft,
-        size: 6.5,
+      // Col 2: Green Foods
+      drawWrappedBlock(pageGrocery, sub.greenSummaryEn, {
+        x: col2X + 5,
+        y: rY + rowH - 10,
+        size: 5.6,
         font: helvetica,
         color: darkSlate,
-        maxWidth: dColW,
-        lineHeight: 8.5,
-        maxLines: 3
+        maxWidth: col2W - 10,
+        lineHeight: 7.2,
+        maxLines: 4
       });
-      dyLeft -= 4;
+
+      // Col 3: Amber Foods
+      drawWrappedBlock(pageGrocery, sub.yellowSummaryEn, {
+        x: col3X + 5,
+        y: rY + rowH - 10,
+        size: 5.6,
+        font: helvetica,
+        color: darkSlate,
+        maxWidth: col3W - 10,
+        lineHeight: 7.2,
+        maxLines: 4
+      });
+
+      // Col 4: Red Foods
+      drawWrappedBlock(pageGrocery, sub.redSummaryEn, {
+        x: col4X + 5,
+        y: rY + rowH - 10,
+        size: 5.6,
+        font: helvetica,
+        color: redText,
+        maxWidth: col4W - 10,
+        lineHeight: 7.2,
+        maxLines: 4
+      });
+
+      yg -= rowH;
     });
 
-    // Right Column: Direct Clinically Approved Swaps (Green Accent)
+    // -------------------------------------------------------------------------
+    // SECTION 2: 4 QUICK KITCHEN SWAPS (BOTTOM SUMMARY STRIP)
+    // -------------------------------------------------------------------------
+    yg -= 8;
+    const swapBoxH = 54;
     pageGrocery.drawRectangle({
-      x: 46 + dColW + 12,
-      y: yg - 26,
-      width: dColW,
-      height: 18,
-      color: rgb(240 / 255, 253 / 255, 244 / 255),
-      borderColor: rgb(34 / 255, 197 / 255, 94 / 255),
-      borderWidth: 0.8
-    });
-    pageGrocery.drawText('EXACT HEALTHY SWAP (GENETICALLY ALIGNED)', {
-      x: 52 + dColW + 12,
-      y: yg - 21,
-      size: 6.4,
-      font: helveticaBold,
-      color: rgb(22 / 255, 101 / 255, 52 / 255)
+      x: 36,
+      y: yg - swapBoxH,
+      width: pgWidth - 72,
+      height: swapBoxH,
+      color: lightBg,
+      borderColor: cardBorder,
+      borderWidth: 0.9
     });
 
-    const swapItems = [
-      '-> Swap with: First cold-pressed Extra Virgin Olive Oil (EVOO) in dark glass bottles.',
-      '-> Swap with: Sourdough 100% rye bread or grain-free coconut / almond alternatives.',
-      '-> Swap with: Infused sparkling water with fresh mint, lime, or Japanese ceremonial matcha.',
-      '-> Swap with: A2 organic goat yogurt, sheep feta in brine, or unsweetened coconut yogurt.',
-      '-> Swap with: Fresh wild salmon cuts, free-range chicken breast, grass-fed beef tenderloin.'
+    pageGrocery.drawText('4 ESSENTIAL KITCHEN SWAPS FOR YOUR GENES (REMOVE -> REPLACE):', {
+      x: 46,
+      y: yg - 12,
+      size: 7.2,
+      font: helveticaBold,
+      color: navyPrimary
+    });
+
+    const quickSwaps = [
+      '1. Cooking Oils: Replace sunflower/corn/canola oil -> with Cold-Pressed Extra Virgin Olive Oil (EVOO) or Ghee.',
+      '2. Bread & Grains: Replace white bread & fortified cereals -> with quinoa, buckwheat, lentils or 1 slice rye sourdough.',
+      '3. Dairy (MCM6): Replace cow milk & soft cream cheese -> with fermented goat/sheep kefir, sheep feta or almond milk.',
+      '4. Drinks (ADORA2A): Replace afternoon coffee & sodas -> with morning matcha (before 11 AM), sparkling water & chamomile.'
     ];
 
-    let dyRight = yg - 36;
-    swapItems.forEach(item => {
-      dyRight = drawWrappedBlock(pageGrocery, item, {
-        x: 46 + dColW + 12,
-        y: dyRight,
-        size: 6.5,
-        font: helveticaBold,
-        color: rgb(22 / 255, 101 / 255, 52 / 255),
-        maxWidth: dColW,
-        lineHeight: 8.5,
-        maxLines: 3
+    const swColW = (pgWidth - 72 - 28) / 2;
+    quickSwaps.forEach((sw, sIdx) => {
+      const sCol = sIdx % 2;
+      const sRow = Math.floor(sIdx / 2);
+      drawWrappedBlock(pageGrocery, sw, {
+        x: 46 + sCol * (swColW + 10),
+        y: yg - 24 - sRow * 15,
+        size: 5.9,
+        font: helvetica,
+        color: darkSlate,
+        maxWidth: swColW,
+        lineHeight: 7.0,
+        maxLines: 2
       });
-      dyRight -= 4;
     });
 
     // Page 4 Footer
-    pageGrocery.drawText('Page 4 of 5 · Atlas Health Services · Supermarket Grocery Checklist & Pantry Guide · www.atlashealthservices.com', {
+    pageGrocery.drawText('Page 4 of 5 · Complete Fagron NutriGen(TM) 17-Family Food Matrix (115+ Foods) · Atlas Health Services · www.atlashealthservices.com', {
       x: 36,
       y: 18,
       size: 6.8,
@@ -1679,7 +1816,7 @@ export async function GET(request) {
     });
 
     y3 -= 11;
-    page3.drawText('Understand what each nutrient does for you, choose your budget level, and pick how you prefer to take it', {
+    page3.drawText('Understand what each nutrient does in plain language, choose your pack, and pick how you prefer to take it', {
       x: 36,
       y: y3,
       size: 7.4,
@@ -1698,11 +1835,11 @@ export async function GET(request) {
     // -------------------------------------------------------------------------
     // SECTION 1: THE 5 SUPPLEMENTS EXPLAINED BY BENEFIT (PLAIN LANGUAGE)
     // -------------------------------------------------------------------------
-    y3 -= 16;
+    y3 -= 15;
     page3.drawText('1. YOUR 5 TARGETED NUTRIENTS (WHAT THEY DO FOR YOUR BODY)', {
       x: 36,
       y: y3,
-      size: 11.0,
+      size: 10.5,
       font: helveticaBold,
       color: navyPrimary
     });
@@ -1711,44 +1848,44 @@ export async function GET(request) {
       {
         benefit: '[1] IMMUNITY & BONE STRENGTH',
         nutrient: 'Vitamin D3 + K2 (MK-7)',
-        why: 'Your DNA shows slow Vitamin D activation. This synergistic pair directs calcium straight into bones and strengthens daily immune defense.',
-        timing: 'Dose 2 (Breakfast): With morning meal containing healthy fats (eggs, olive oil, avocado).',
+        why: 'Your Vitamin D receptors work slower (VDR gene). This pair directs calcium safely into bones and supports immunity.',
+        timing: 'Dose 2 (Breakfast): Take with breakfast containing healthy fats (eggs, olive oil, or avocado).',
         priority: 'PRIORITY 1 · ESSENTIAL',
         pColor: redText,
         pBg: redBg
       },
       {
-        benefit: '[2] CELLULAR ENERGY & CLARITY',
-        nutrient: 'Active Folate (L-5-MTHF)',
-        why: 'Bypasses your MTHFR genetic block to keep you clear-headed. Provides clean cellular energy without synthetic unmethylated buildup.',
-        timing: 'Dose 2 (Breakfast): Morning with your breakfast.',
+        benefit: '[2] ACTIVE VITAMINS & VITALITY',
+        nutrient: 'Active Natural Folate (L-5-MTHF)',
+        why: 'Your body uses only 30% of common synthetic folic acid (MTHFR gene). Active Folate gives clean cellular energy directly.',
+        timing: 'Dose 2 (Breakfast): Take in the morning with your breakfast.',
         priority: 'PRIORITY 1 · ESSENTIAL',
         pColor: redText,
         pBg: redBg
       },
       {
-        benefit: '[3] DEEP REST & STRESS RESET',
-        nutrient: 'Magnesium Bisglycinate + Theanine',
-        why: 'Calms nerve excitability, relaxes muscle tension after exercise, and quiets racing thoughts for deep slow-wave restorative sleep.',
-        timing: 'Dose 3 (Bedtime): Take 2 capsules 30–60 min before sleep with room-temp water.',
+        benefit: '[3] DEEP SLEEP & MUSCLE RECOVERY',
+        nutrient: 'Magnesium Bisglycinate + L-Theanine',
+        why: 'Calms evening nerve tension, relaxes muscles after exercise, and helps you fall into deep restorative sleep.',
+        timing: 'Dose 3 (Bedtime): Take 2 capsules 30-60 min before sleep with water.',
         priority: 'PRIORITY 2 · RECOMMENDED',
         pColor: blueBorder,
         pBg: blueBg
       },
       {
-        benefit: '[4] METABOLISM & LIVER BALANCE',
-        nutrient: 'Methylated B-Complex (B12 + B6)',
-        why: 'Essential cofactors that support homocysteine clearance, healthy nerve myelin, and daytime alertness without jitters.',
-        timing: 'Dose 2 (Breakfast): Morning with food.',
+        benefit: '[4] METABOLISM & MENTAL FOCUS',
+        nutrient: 'Active B-Complex (Methyl-B12 + Active B6)',
+        why: 'Works alongside Active Folate to clear homocysteine, protect nerves, and keep daytime energy steady.',
+        timing: 'Dose 2 (Breakfast): Take in the morning with breakfast.',
         priority: 'PRIORITY 2 · RECOMMENDED',
         pColor: blueBorder,
         pBg: blueBg
       },
       {
-        benefit: '[5] GUT BARRIER & DIGESTION',
-        nutrient: 'Targeted Enteric Probiotics',
-        why: 'Protective cultures (LGG + BB-12) that re-seed healthy gut flora and defend against bloat, gas, and dairy sensitivities.',
-        timing: 'Dose 1 (Upon Waking): First thing upon waking with room-temperature water.',
+        benefit: '[5] GUT COMFORT & DAIRY SHIELD',
+        nutrient: 'Probiotics in Acid-Resistant Vegetable Capsule',
+        why: 'Live beneficial bacteria (LGG + BB-12) protected in a delayed-release vegetable capsule to prevent bloating and sensitivity.',
+        timing: 'Dose 1 (Upon Waking): Take 15-30 min before breakfast on an empty stomach with water.',
         priority: 'PRIORITY 3 · OPTIONAL',
         pColor: amberText,
         pBg: amberBg
@@ -1757,7 +1894,7 @@ export async function GET(request) {
 
     y3 -= 6;
     humanSupplements.forEach((s) => {
-      const cardH = 76;
+      const cardH = 66;
       y3 -= cardH;
 
       page3.drawRectangle({
@@ -1782,86 +1919,86 @@ export async function GET(request) {
       // Header strip inside card
       page3.drawRectangle({
         x: 40.5,
-        y: y3 + cardH - 22,
+        y: y3 + cardH - 20,
         width: p3Width - 76.5,
-        height: 22,
+        height: 20,
         color: rgb(248 / 255, 250 / 255, 252 / 255)
       });
 
       // Benefit Header & Nutrient Name
       page3.drawText(s.benefit, {
         x: 48,
-        y: y3 + cardH - 15,
-        size: 8.8,
+        y: y3 + cardH - 14,
+        size: 8.2,
         font: helveticaBold,
         color: navyPrimary
       });
 
       page3.drawText(`· ${s.nutrient}`, {
-        x: 48 + helveticaBold.widthOfTextAtSize(s.benefit, 8.8) + 8,
-        y: y3 + cardH - 15,
-        size: 8.4,
+        x: 48 + helveticaBold.widthOfTextAtSize(s.benefit, 8.2) + 6,
+        y: y3 + cardH - 14,
+        size: 7.8,
         font: helveticaBold,
         color: tealAccent
       });
 
       // Priority Pill
-      const pillW = helveticaBold.widthOfTextAtSize(s.priority, 6.4) + 12;
+      const pillW = helveticaBold.widthOfTextAtSize(s.priority, 6.0) + 12;
       page3.drawRectangle({
         x: p3Width - 44 - pillW,
-        y: y3 + cardH - 17,
+        y: y3 + cardH - 16,
         width: pillW,
-        height: 14,
+        height: 13,
         color: s.pBg,
         borderColor: s.pColor,
         borderWidth: 0.8
       });
       page3.drawText(s.priority, {
         x: p3Width - 44 - pillW + 6,
-        y: y3 + cardH - 13,
-        size: 6.4,
+        y: y3 + cardH - 12,
+        size: 6.0,
         font: helveticaBold,
         color: s.pColor
       });
 
-      // Why Text (High legibility 8.0pt)
-      page3.drawText(`Why your DNA needs this: ${s.why}`, {
+      // Why Text
+      drawWrappedBlock(page3, `Why it helps you: ${s.why}`, {
         x: 48,
-        y: y3 + 34,
-        size: 8.0,
+        y: y3 + 33,
+        size: 7.3,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p3Width - 100,
-        lineHeight: 11.0
+        maxWidth: p3Width - 96,
+        lineHeight: 9.2,
+        maxLines: 2
       });
 
       // Timing Text
-      page3.drawText(`How to take: ${s.timing}`, {
+      page3.drawText(`When to take: ${s.timing}`, {
         x: 48,
-        y: y3 + 13,
-        size: 7.6,
+        y: y3 + 8,
+        size: 7.0,
         font: helveticaBold,
         color: mutedSlate
       });
 
-      y3 -= 7;
+      y3 -= 5.5;
     });
 
     // -------------------------------------------------------------------------
-    // SECTION 2: CHOOSE YOUR LEVEL (3 SIMPLE DECISION PACKS - GOOGLE CLOUD UX)
+    // SECTION 2: CHOOSE YOUR LEVEL (3 SIMPLE DECISION PACKS - ZERO OVERLAP)
     // -------------------------------------------------------------------------
-    y3 -= 8;
+    y3 -= 7;
     page3.drawText('2. CHOOSE YOUR LEVEL: 3 SIMPLE DECISION PACKS (BUY ONLY WHAT YOU NEED)', {
       x: 36,
       y: y3,
-      size: 11.0,
+      size: 10.5,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y3 -= 10;
+    y3 -= 8;
     const pkW = (p3Width - 72 - 16) / 3;
-    const pkH = 114;
     const packs = [
       {
         badge: 'ESSENTIAL · BASELINE',
@@ -1869,12 +2006,12 @@ export async function GET(request) {
         badgeBg: gcpPillBg,
         badgeBorder: gcpBorder,
         name: 'PACK 1 · ESSENTIAL CORE',
-        subtitle: '2 Supplements · Baseline DNA Coverage',
+        subtitle: '2 Nutrients · Core DNA Support',
         items: [
           '• [1] Vitamin D3 + K2 (MK-7)',
           '• [2] Active Folate (L-5-MTHF)'
         ],
-        note: 'Covers 80% of core DNA needs with minimal routine.',
+        note: 'Covers 80% of core DNA needs.',
         isFeatured: false
       },
       {
@@ -1882,14 +2019,14 @@ export async function GET(request) {
         badgeColor: googleBlue,
         badgeBg: googleBlueBg,
         badgeBorder: googleBlueBorder,
-        name: 'PACK 2 · PERFORMANCE & SLEEP',
-        subtitle: '4 Supplements · Daytime + Night Rest',
+        name: 'PACK 2 · ENERGY & DEEP SLEEP',
+        subtitle: '4 Nutrients · Day Focus + Night Rest',
         items: [
           '+ Includes All Pack 1 ([1] + [2])',
           '• [3] Magnesium Bisglycinate',
-          '• [4] Methylated B-Complex'
+          '• [4] Active B-Complex (B12+B6)'
         ],
-        note: 'Stops afternoon fatigue & restores deep REM sleep.',
+        note: 'Steady energy & deep REM sleep.',
         isFeatured: true
       },
       {
@@ -1897,22 +2034,28 @@ export async function GET(request) {
         badgeColor: gcpGreen,
         badgeBg: gcpGreenBg,
         badgeBorder: gcpGreenBorder,
-        name: 'PACK 3 · TOTAL DIGESTION',
-        subtitle: '5 Supplements · Full Program',
+        name: 'PACK 3 · COMPLETE + GUT SHIELD',
+        subtitle: '5 Nutrients · Full Program',
         items: [
           '+ Includes All Pack 2 ([1]..[4])',
-          '• [5] Targeted Enteric Probiotics'
+          '• [5] Probiotics (Veg Capsule)'
         ],
-        note: 'Complete coverage for gut defense & lactose.',
+        note: 'Full gut & lactose protection.',
         isFeatured: false
       }
     ];
 
+    let maxPkH = 0;
+    packs.forEach((pk) => {
+      const noteLines = getWrappedLines(`Why: ${pk.note}`, helveticaOblique, 6.2, pkW - 16);
+      const h = 58 + pk.items.length * 11.5 + 8 + noteLines.length * 8.0 + 12;
+      if (h > maxPkH) maxPkH = h;
+    });
+    const pkH = Math.max(118, maxPkH);
+
     packs.forEach((pk, pIdx) => {
       const pkX = 36 + pIdx * (pkW + 8);
 
-      // Card surface: Clean White surface with GCP subtle border
-      // Featured card gets Google Blue 1.5px border
       page3.drawRectangle({
         x: pkX,
         y: y3 - pkH,
@@ -1926,9 +2069,9 @@ export async function GET(request) {
       // Top subtle header strip
       page3.drawRectangle({
         x: pkX + (pk.isFeatured ? 1.5 : 1),
-        y: y3 - 24,
+        y: y3 - 23,
         width: pkW - (pk.isFeatured ? 3 : 2),
-        height: 23,
+        height: 22,
         color: pk.isFeatured ? rgb(248 / 255, 251 / 255, 255 / 255) : rgb(250 / 255, 251 / 255, 252 / 255)
       });
 
@@ -1954,8 +2097,8 @@ export async function GET(request) {
       // Title
       page3.drawText(pk.name, {
         x: pkX + 8,
-        y: y3 - 34,
-        size: 7.2,
+        y: y3 - 33,
+        size: 7.0,
         font: helveticaBold,
         color: pk.isFeatured ? googleBlue : darkSlate,
         maxWidth: pkW - 16
@@ -1964,8 +2107,8 @@ export async function GET(request) {
       // Items subtitle
       page3.drawText(pk.subtitle, {
         x: pkX + 8,
-        y: y3 - 44,
-        size: 6.4,
+        y: y3 - 43,
+        size: 6.2,
         font: helveticaBold,
         color: mutedSlate,
         maxWidth: pkW - 16
@@ -1973,160 +2116,155 @@ export async function GET(request) {
 
       // Divider line
       page3.drawLine({
-        start: { x: pkX + 8, y: y3 - 48 },
-        end: { x: pkX + pkW - 8, y: y3 - 48 },
+        start: { x: pkX + 8, y: y3 - 47 },
+        end: { x: pkX + pkW - 8, y: y3 - 47 },
         thickness: 0.6,
         color: gcpBorder
       });
 
       // Items list
-      let itemY = y3 - 59;
+      let itemY = y3 - 58;
       pk.items.forEach((it) => {
         const isIncludes = it.startsWith('+ Includes');
         page3.drawText(it, {
           x: pkX + 8,
           y: itemY,
-          size: 6.7,
+          size: 6.6,
           font: isIncludes ? helveticaBold : helvetica,
           color: isIncludes ? (pk.isFeatured ? googleBlue : darkSlate) : darkSlate,
           maxWidth: pkW - 16
         });
-        itemY -= 12.0;
+        itemY -= 11.5;
       });
 
-      // Note at bottom
-      page3.drawText(`Why: ${pk.note}`, {
+      // Note at bottom with guaranteed 12pt bottom padding
+      drawWrappedBlock(page3, `Why: ${pk.note}`, {
         x: pkX + 8,
-        y: y3 - pkH + 9,
-        size: 6.0,
+        y: y3 - pkH + 20,
+        size: 6.2,
         font: helveticaOblique,
         color: mutedSlate,
         maxWidth: pkW - 16,
-        lineHeight: 8.0
+        lineHeight: 8.0,
+        maxLines: 2
       });
     });
 
-    y3 -= (pkH + 16);
+    y3 -= (pkH + 13);
 
     // -------------------------------------------------------------------------
-    // SECTION 3: HOW DO YOU PREFER TO TAKE IT? (PHARMACY VS COMPOUNDING)
-    // Conforms strictly to Google Cloud UX: 100% symmetric, neutral cards
+    // SECTION 3: HOW DO YOU PREFER TO TAKE IT? (PHARMACY VS COMPOUNDING - ZERO OVERLAP)
     // -------------------------------------------------------------------------
-    y3 -= 4;
-    page3.drawText('3. HOW DO YOU PREFER TO TAKE IT? (TWO SIMPLE SHOPPING PATHWAYS)', {
+    page3.drawText('3. HOW DO YOU PREFER TO TAKE IT? (TWO SIMPLE WAYS TO GET YOUR PACK)', {
       x: 36,
       y: y3,
-      size: 11.0,
+      size: 10.5,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y3 -= 10;
+    y3 -= 8;
     const pathwayW = (p3Width - 72 - 12) / 2;
-    const pathwayH = 88;
 
-    // Pathway 1: Local Doha Pharmacy (Neutral Google Cloud UX Card)
-    page3.drawRectangle({
-      x: 36,
-      y: y3 - pathwayH,
-      width: pathwayW,
-      height: pathwayH,
-      color: white,
-      borderColor: gcpBorder,
-      borderWidth: 1.0
-    });
+    const pathwayOptions = [
+      {
+        pill: 'OPTION A · LOCAL PHARMACY',
+        title: 'OPTION A: BUY COMMERCIAL BOTTLES AT A PHARMACY',
+        bullets: [
+          'What it is: Buy 2 to 5 separate commercial bottles at any local pharmacy.',
+          'Advantage: Immediate same-day purchase without waiting for lab preparation.',
+          'How to buy: Show the active nutrient list above to your local pharmacist.'
+        ]
+      },
+      {
+        pill: 'OPTION B · CUSTOM COMPOUNDED',
+        title: 'OPTION B: ALL-IN-ONE 3 DAILY CAPSULES (PHARMACY LAB)',
+        bullets: [
+          'What it is: Your pack custom-made into 3 daily capsules (Waking, Breakfast, Bedtime).',
+          'Advantage: Fewer pills, 100% lactose-free vegetable capsules, exact DNA doses.',
+          'How to order: Share the prescription order with your doctor or compounding pharmacy.'
+        ]
+      }
+    ];
 
-    // Pill badge for Option A
-    const p1Pill = 'RETAIL PHARMACY TRACK';
-    const p1PillW = helveticaBold.widthOfTextAtSize(p1Pill, 6.2) + 12;
-    page3.drawRectangle({
-      x: 48,
-      y: y3 - 18,
-      width: p1PillW,
-      height: 12,
-      color: gcpPillBg,
-      borderColor: gcpBorder,
-      borderWidth: 0.8
+    let maxPathwayContentH = 0;
+    pathwayOptions.forEach((opt) => {
+      let h = 42;
+      opt.bullets.forEach((b) => {
+        const lines = getWrappedLines(b, helvetica, 6.8, pathwayW - 26);
+        h += lines.length * 8.8 + 4.0;
+      });
+      if (h > maxPathwayContentH) maxPathwayContentH = h;
     });
-    page3.drawText(p1Pill, {
-      x: 54,
-      y: y3 - 15,
-      size: 6.2,
-      font: helveticaBold,
-      color: gcpPillText
-    });
+    const pathwayH = Math.max(98, maxPathwayContentH + 12);
 
-    page3.drawText('OPTION A: LOCAL DOHA PHARMACIES (COMMERCIAL)', {
-      x: 48,
-      y: y3 - 32,
-      size: 7.8,
-      font: helveticaBold,
-      color: navyPrimary
-    });
-    const p1Desc = '• Buy 2 to 5 separate bottles at retail pharmacies in Qatar (Commercial OTC Bottles).\n• Pros: Immediate local purchase at neighborhood pharmacy.\n• Cons: Taking 4–6 pills from multiple bottles with non-customized generic doses.';
-    page3.drawText(p1Desc, {
-      x: 48,
-      y: y3 - 47,
-      size: 7.2,
-      font: helvetica,
-      color: darkSlate,
-      maxWidth: pathwayW - 24,
-      lineHeight: 10.5
-    });
+    pathwayOptions.forEach((opt, optIdx) => {
+      const pX = 36 + optIdx * (pathwayW + 12);
 
-    // Pathway 2: Custom Compounding All-in-One (Neutral Google Cloud UX Card)
-    page3.drawRectangle({
-      x: 36 + pathwayW + 12,
-      y: y3 - pathwayH,
-      width: pathwayW,
-      height: pathwayH,
-      color: white,
-      borderColor: gcpBorder,
-      borderWidth: 1.0
-    });
+      page3.drawRectangle({
+        x: pX,
+        y: y3 - pathwayH,
+        width: pathwayW,
+        height: pathwayH,
+        color: white,
+        borderColor: gcpBorder,
+        borderWidth: 1.0
+      });
 
-    // Pill badge for Option B
-    const p2Pill = 'CLINICAL COMPOUNDING TRACK';
-    const p2PillW = helveticaBold.widthOfTextAtSize(p2Pill, 6.2) + 12;
-    page3.drawRectangle({
-      x: 48 + pathwayW + 12,
-      y: y3 - 18,
-      width: p2PillW,
-      height: 12,
-      color: gcpPillBg,
-      borderColor: gcpBorder,
-      borderWidth: 0.8
-    });
-    page3.drawText(p2Pill, {
-      x: 54 + pathwayW + 12,
-      y: y3 - 15,
-      size: 6.2,
-      font: helveticaBold,
-      color: gcpPillText
-    });
+      const pillW = helveticaBold.widthOfTextAtSize(opt.pill, 6.0) + 12;
+      page3.drawRectangle({
+        x: pX + 10,
+        y: y3 - 17,
+        width: pillW,
+        height: 12,
+        color: gcpPillBg,
+        borderColor: gcpBorder,
+        borderWidth: 0.8
+      });
+      page3.drawText(opt.pill, {
+        x: pX + 16,
+        y: y3 - 14,
+        size: 6.0,
+        font: helveticaBold,
+        color: gcpPillText
+      });
 
-    page3.drawText('OPTION B: OFFICIAL 3-DOSE COMPOUNDED REGIMEN', {
-      x: 48 + pathwayW + 12,
-      y: y3 - 32,
-      size: 7.8,
-      font: helveticaBold,
-      color: navyPrimary
-    });
-    const p2Desc = '• Have your selected pack ([1]-[2], [1]-[4], or [1]-[5]) custom-compounded into exactly 3 timed daily doses: Dose 1 (Upon Waking), Dose 2 (Breakfast), and Dose 3 (Bedtime).\n• Pros: Exactly 3 intake moments, 100% vegetable cellulose (DRcaps®), lactose-free, exact micro-dosages.\n• To order: Hand the prescription order on Page 3 to your clinic.';
-    page3.drawText(p2Desc, {
-      x: 48 + pathwayW + 12,
-      y: y3 - 47,
-      size: 7.2,
-      font: helvetica,
-      color: darkSlate,
-      maxWidth: pathwayW - 24,
-      lineHeight: 10.5
+      page3.drawText(opt.title, {
+        x: pX + 10,
+        y: y3 - 30,
+        size: 7.3,
+        font: helveticaBold,
+        color: navyPrimary,
+        maxWidth: pathwayW - 20
+      });
+
+      let bY = y3 - 43;
+      opt.bullets.forEach((b) => {
+        page3.drawText('•', {
+          x: pX + 10,
+          y: bY,
+          size: 7.0,
+          font: helveticaBold,
+          color: tealAccent
+        });
+        bY = drawWrappedBlock(page3, b, {
+          x: pX + 18,
+          y: bY,
+          size: 6.8,
+          font: helvetica,
+          color: darkSlate,
+          maxWidth: pathwayW - 26,
+          lineHeight: 8.8,
+          maxLines: 2
+        });
+        bY -= 4.0;
+      });
     });
 
-    y3 -= (pathwayH + 12);
+    y3 -= (pathwayH + 10);
 
     // Safety Alert
-    const safeH = 40;
+    const safeH = 38;
     page3.drawRectangle({
       x: 36,
       y: y3 - safeH,
@@ -2137,16 +2275,16 @@ export async function GET(request) {
       borderWidth: 0.8
     });
 
-    page3.drawText('CRITICAL SAFETY RULE: MUTUALLY EXCLUSIVE PATHWAYS', {
+    page3.drawText('CRITICAL SAFETY RULE: CHOOSE EITHER OPTION A OR OPTION B (NEVER BOTH AT ONCE)', {
       x: 48,
-      y: y3 - 14,
-      size: 7.0,
+      y: y3 - 13,
+      size: 6.9,
       font: helveticaBold,
       color: redText
     });
-    page3.drawText('Choose either Option A OR Option B. Never take both together to prevent accidental double-dosing of Vitamin D or minerals.', {
+    page3.drawText('Option A and Option B contain the exact same nutrients. Pick one track only to avoid taking a double dose of Vitamin D or minerals.', {
       x: 48,
-      y: y3 - 28,
+      y: y3 - 26,
       size: 6.4,
       font: helvetica,
       color: darkSlate,

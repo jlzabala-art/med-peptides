@@ -207,9 +207,9 @@ export async function GET(request) {
     page1.drawText('Size 0 Magistral Caps', { x: 418, y: y + 11, size: 8.0, font: helveticaBold, color: navyPrimary });
     page1.drawText('100% Lactose-Free HPMC', { x: 418, y: y + 3, size: 5.6, font: helvetica, color: tealAccent });
 
-    // Section 1: Notice to Patient (Google Cloud Console Callout Pattern)
-    y -= 30;
-    const noticeH = 28;
+    // Section 1: How This Report Is Organized (3-Page Step-by-Step Guide)
+    y -= 28;
+    const noticeH = 34;
     page1.drawRectangle({
       x: 36,
       y: y - noticeH,
@@ -227,25 +227,40 @@ export async function GET(request) {
       height: noticeH,
       color: rgb(26 / 255, 115 / 255, 232 / 255) // #1a73e8
     });
-    page1.drawText('PATIENT NOTICE & CLINICAL ACTION TRANSLATION', {
+    page1.drawText('HOW THIS REPORT IS ORGANIZED — YOUR 3-PAGE STEP-BY-STEP GUIDE', {
       x: 46,
-      y: y - 11,
+      y: y - 10,
       size: 6.8,
       font: helveticaBold,
       color: rgb(26 / 255, 115 / 255, 232 / 255)
     });
-    page1.drawText('This guide translates findings from your 24Genetics Nutrition DNA test into clear daily actions. Turn to PAGE 2 for the Official Compounding Pharmacy Order.', {
-      x: 46,
-      y: y - 22,
-      size: 5.9,
-      font: helvetica,
-      color: darkSlate,
-      maxWidth: p1Width - 92
+    const roadmapCols = [
+      { step: 'PAGE 1 · YOUR DNA IN PLAIN ENGLISH', desc: 'Your 4 body priorities & daily routine [For You]' },
+      { step: 'PAGE 2 · OPTION A: LOCAL PHARMACY', desc: 'Ready-made bottles if you prefer retail [For Pharmacy]' },
+      { step: 'PAGE 3 · OPTION B: 3-CAPSULE ORDER', desc: 'All-in-one custom pharmacy formula [For Doctor / Lab]' }
+    ];
+    const rmColW = (p1Width - 96) / 3;
+    roadmapCols.forEach((rm, rIdx) => {
+      const rx = 46 + rIdx * rmColW;
+      page1.drawText(rm.step, {
+        x: rx,
+        y: y - 20,
+        size: 5.8,
+        font: helveticaBold,
+        color: navyPrimary
+      });
+      page1.drawText(rm.desc, {
+        x: rx,
+        y: y - 29,
+        size: 5.5,
+        font: helvetica,
+        color: darkSlate
+      });
     });
 
     // The 4 Functional DNA Pillars (Circadian 24h Sequence with Visual Efficiency Gauges)
-    y -= (noticeH + 12);
-    page1.drawText('1. The 4 DNA Pillars: Circadian Action Map & Genetic Efficiency Gauges', {
+    y -= (noticeH + 10);
+    page1.drawText('1. Your DNA Priorities in Plain Language (Morning to Night)', {
       x: 36,
       y,
       size: 9.5,
@@ -257,54 +272,54 @@ export async function GET(request) {
       {
         circadianSlot: '08:00 AM · MORNING FASTING',
         circadianBg: rgb(240 / 255, 253 / 255, 250 / 255), // Soft Mint
-        pillarTag: 'PILLAR 3: GUT MICROBIOME & BARRIER (MCM6 / LCT)',
-        title: 'Lactose Intolerance & Microbiota Diversity',
-        status: 'LACTOSE-FREE SHIELD',
+        pillarTag: 'GUT DIGESTION & LACTOSE (Genes MCM6 / LCT)',
+        title: 'Dairy Digestion & Gut Protection',
+        status: 'LACTOSE SENSITIVE',
         statusColor: blueDark,
         statusBg: blueBg,
         baselinePct: 0.25,
-        why: 'Adult lactase non-persistence requires dietary lactose avoidance or exogenous lactase; supports beneficial flora.',
-        assignedFormulation: 'Formulation 1 (Capsule A · Morning Acid-Resistant DRcaps® with LGG 10B + BB-12 5B CFU)',
-        clinicalGoal: 'Delivers verified probiotic strains in acid-resistant DRcaps®; dietary lactose-free advice recommended.'
+        why: 'Your body makes less lactase enzyme in adulthood, so regular cow milk can cause bloating; your gut flora benefits from daily support.',
+        assignedFormulation: 'Morning Capsule (Dose 1 · Acid-resistant vegetable capsule with 15 Billion live probiotics LGG + BB-12)',
+        clinicalGoal: 'Delivers live friendly bacteria safely past stomach acid; swap regular cow milk for sheep/goat A2 dairy or lactose-free options.'
       },
       {
         circadianSlot: '01:30 PM · MIDDAY WITH FOOD',
         circadianBg: rgb(254 / 255, 243 / 255, 199 / 255), // Soft Amber
-        pillarTag: 'PILLAR 1: GLYCEMIC METABOLISM (TCF7L2 / FTO)',
-        title: 'Carbohydrate Sensitivity & Postprandial Glucose',
-        status: 'GLUCOSE SENSITIVE',
+        pillarTag: 'STEADY BLOOD SUGAR & ENERGY (Genes TCF7L2 / FTO / IRS1)',
+        title: 'Steady Blood Sugar & Post-Meal Energy',
+        status: 'CARB SENSITIVE',
         statusColor: amberDark,
         statusBg: amberBg,
         baselinePct: 0.40,
-        why: 'Refined carbs trigger rapid insulin surges, promoting mid-afternoon energy crashes and abdominal fat storage.',
-        assignedFormulation: 'Dietary Plate Sequencing + Optional Module D (Psyllium 5g sachet if HbA1c is elevated)',
-        clinicalGoal: 'Blunts postprandial glucose excursions up to 45% via food order; avoids systemic pharmacologic berberine.'
+        why: 'White bread, rice, and sweets trigger fast blood sugar spikes, leading to afternoon tiredness and easier waist fat storage.',
+        assignedFormulation: '1-2-3 Plate Order Rule (Vegetables first -> Protein second -> Whole carbs last)',
+        clinicalGoal: 'Reduces post-meal blood sugar spikes by up to 45% naturally through food order, keeping afternoon energy steady.'
       },
       {
         circadianSlot: '01:30 PM · MIDDAY WITH FOOD',
         circadianBg: rgb(254 / 255, 242 / 255, 242 / 255), // Soft Red
-        pillarTag: 'PILLAR 2: CELLULAR METHYLATION & ENERGY (MTHFR C677T)',
-        title: 'Active Folate & Homocysteine Recycling Pathway',
-        status: 'MTHFR PRIORITY (70% REDUCED)',
+        pillarTag: 'ACTIVE VITAMINS & VITALITY (Gene MTHFR C677T)',
+        title: 'Active B-Vitamins & Daily Cellular Energy',
+        status: 'ACTIVE FOLATE NEEDED',
         statusColor: alertRed,
         statusBg: badgeRedBg,
         baselinePct: 0.30,
-        why: 'Your liver is slower at activating synthetic folic acid, requiring active methylfolate and its FAD enzyme cofactor.',
-        assignedFormulation: 'Formulation 2 (Capsule B · Breakfast with fat) — Active 5-MTHF + Riboflavin + B12 + P5P',
-        clinicalGoal: 'Supports cellular methylation with active 5-MTHF, Riboflavin (MTHFR FAD cofactor), Methyl-B12, and P5P.'
+        why: 'Your liver converts synthetic "folic acid" slowly (~30% efficiency), so you need natural pre-activated B-vitamins.',
+        assignedFormulation: 'Breakfast Capsule (Dose 2 · With healthy fat) — Active Natural Folate (L-5-MTHF) + B2 + Active B12 + B6',
+        clinicalGoal: 'Provides ready-to-use folate and B-vitamins directly to your cells for daily energy and cardiovascular health.'
       },
       {
         circadianSlot: '10:30 PM · EVENING BEDTIME',
         circadianBg: rgb(243 / 255, 232 / 255, 255 / 255), // Soft Purple
-        pillarTag: 'PILLAR 4: IMMUNITY & BONE HEALTH (VDR FokI / CYP1A2)',
-        title: 'Vitamin D Receptor Signaling & Restorative Sleep',
-        status: 'VDR RESISTANCE & SLEEP',
+        pillarTag: 'VITAMIN D, BONES & DEEP SLEEP (Genes VDR / CYP1A2)',
+        title: 'Vitamin D Absorption & Restorative Night Sleep',
+        status: 'VITAMIN D & SLEEP',
         statusColor: purpleDark,
         statusBg: purpleBg,
         baselinePct: 0.35,
-        why: 'Nuclear receptor variation benefits from physiological D3/K2; evening chelated magnesium supports restorative sleep.',
-        assignedFormulation: 'Capsule B (Breakfast D3 2,000 IU + K2 100µg) & Capsule C (Evening 150mg elemental Mg + Theanine 200mg)',
-        clinicalGoal: 'Maintains optimal 25(OH)D safely within EU adult UL, paired with evening chelated magnesium and L-theanine.'
+        why: 'Your Vitamin D receptors need steady daily D3 + K2 with food, while gentle evening magnesium helps calm your nervous system.',
+        assignedFormulation: 'Breakfast Capsule (D3 2,000 IU + K2 100µg) & Evening Capsules (Gentle Magnesium 150mg + L-Theanine 200mg)',
+        clinicalGoal: 'Supports strong bones and immunity by day, and deep, uninterrupted muscle and mental relaxation at night.'
       }
     ];
 
@@ -484,7 +499,7 @@ export async function GET(request) {
 
     // Section 2: Patient Daily Compounded Schedule (Revised Per Pharmacist Review)
     y -= 6;
-    page1.drawText('2. How to Take Your Personalized Formulations (Revised Daily Schedule)', {
+    page1.drawText('2. Your Simple Daily Capsule Routine (3 Moments of the Day)', {
       x: 36,
       y,
       size: 9.8,
@@ -498,21 +513,21 @@ export async function GET(request) {
     const patientIntakeSchedule = [
       {
         capName: 'DOSE 1: UPON WAKING',
-        targetPillars: 'Nutrient [5] · Probiotics (LGG + BB-12)',
+        targetPillars: 'Gut Shield · Live Probiotics (LGG + BB-12)',
         time: '15–30 min Before Breakfast (Empty Stomach)',
-        rule: 'Take 1 capsule (Dose 1) with water. Acid-resistant DRcaps® protect delicate live cultures from gastric acidity.'
+        rule: 'Take 1 capsule (Dose 1) with a glass of water. Special acid-resistant vegetable capsules protect live bacteria past stomach acid.'
       },
       {
         capName: 'DOSE 2: BREAKFAST',
-        targetPillars: 'Nutrients [1]+[2] · Folate + D3/K2 (+[4])',
-        time: 'With Breakfast (Containing Dietary Fats)',
-        rule: 'Take 1 capsule (Dose 2) with eggs, avocado, or olive oil. Dietary fats maximize micellar absorption of D3 and K2.'
+        targetPillars: 'Morning Vitality · Active Folate + D3 & K2',
+        time: 'With Breakfast (Include Healthy Fats)',
+        rule: 'Take 1 capsule (Dose 2) with eggs, avocado, or olive oil. Healthy fats help your body absorb Vitamins D3 and K2.'
       },
       {
         capName: 'DOSE 3: BEDTIME (2 Caps)',
-        targetPillars: 'Nutrient [3] · 150mg Mg + Theanine 200mg',
+        targetPillars: 'Night Calm · Gentle Magnesium + L-Theanine',
         time: '30–60 min Before Bedtime (2 Capsules)',
-        rule: 'Take 2 capsules (Dose 3) with water before sleep. Calms COMT hyper-reactivity, supports restorative sleep & relaxation.'
+        rule: 'Take 2 capsules (Dose 3) with water before sleep. Relaxes muscles and calms evening mind activity for deep sleep.'
       }
     ];
 

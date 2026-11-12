@@ -9,6 +9,7 @@ import {
   HeartPulse,
   Activity,
   AlertTriangle,
+  AlertCircle,
   Pill,
   Sparkles,
   Info,
@@ -66,17 +67,52 @@ export default function PatientDnaPortalClient({
     });
   }, [patientName, sampleCode, clinic]);
 
+  const groceryStorageKey = `atlas_grocery_${sampleCode || 'default'}`;
+
   const [selectedDay, setSelectedDay] = useState(1);
-  const [checkedGroceryItems, setCheckedGroceryItems] = useState({});
+  const [checkedGroceryItems, setCheckedGroceryItems] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = window.localStorage.getItem(`atlas_grocery_${sampleCode || 'default'}`);
+        if (saved) return JSON.parse(saved);
+      } catch {
+        // Ignore storage errors
+      }
+    }
+    return {};
+  });
   const [foodTrafficFilter, setFoodTrafficFilter] = useState('all');
-  const [foodViewMode, setFoodViewMode] = useState('summary'); // 'summary' | 'master_catalog'
+  const [foodViewMode, setFoodViewMode] = useState('fagron_matrix'); // 'fagron_matrix' | 'master_catalog' | 'summary'
   const [fagronMacroGroup, setFagronMacroGroup] = useState('ALL'); // 'ALL' | 'CARBO+' | 'PROTEIN+' | 'LIPID+' | 'EXTRAS'
+  const [fagronSubfamilyFilter, setFagronSubfamilyFilter] = useState('ALL'); // 'ALL' | '3.1.1' .. '3.4.5'
+  const [foodSearchQuery, setFoodSearchQuery] = useState('');
 
   const toggleGroceryItem = (itemKey) => {
-    setCheckedGroceryItems(prev => ({
-      ...prev,
-      [itemKey]: !prev[itemKey]
-    }));
+    setCheckedGroceryItems(prev => {
+      const next = {
+        ...prev,
+        [itemKey]: !prev[itemKey]
+      };
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem(groceryStorageKey, JSON.stringify(next));
+        } catch {
+          // Ignore storage errors
+        }
+      }
+      return next;
+    });
+  };
+
+  const resetGroceryChecklist = () => {
+    setCheckedGroceryItems({});
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(groceryStorageKey);
+      } catch {
+        // Ignore storage errors
+      }
+    }
   };
 
   // Official PDF download URLs (Synchronized with interactive modality selection)
@@ -101,6 +137,22 @@ export default function PatientDnaPortalClient({
       const text = lang === 'es'
         ? `Hola ${patientName}, aquí tienes tu Dossier Genómico Personalizado: ${url}\n\nBasado estrictamente en tu secuenciación de 24Genetics, el equipo clínico de Atlas ha desarrollado las hojas ejecutivas iniciales con tu plan nutricional y suplementación. Al ser un equipo local basado en UAE, cuentan con plena flexibilidad para realizar cualquier adaptación a medida de tus requerimientos.`
         : `Hello ${patientName}, here is your Personalized Genomic Dossier: ${url}\n\nBased directly on your 24Genetics sequencing report, the Atlas clinical team has developed the executive opening guides for your meal plan and targeted supplementation. As a local UAE-based team, Atlas offers complete flexibility to make tailored adaptations according to your specific requirements.`;
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleChefWhatsAppShare = () => {
+    if (typeof window !== 'undefined') {
+      const origin = window.location.origin;
+      const lightPdfFullUrl = `${origin}${mealPlanPdfUrlLight}`;
+      const text =
+        `👨‍🍳 *7-Day Personalized Menu & Kitchen Guide for ${patientName}*\n\n` +
+        `*3 Simple Kitchen Rules for Every Meal:*\n` +
+        `1️⃣ *1-2-3 Plate Order:* Serve leafy greens/vegetables first -> protein (fish/poultry/eggs) second -> complex carbs (quinoa/sweet potato/lentils) last.\n` +
+        `2️⃣ *Cooking Oils:* Cook exclusively with Extra Virgin Olive Oil (EVOO), Avocado Oil, or Grass-Fed Ghee (no sunflower/corn/canola seed oils).\n` +
+        `3️⃣ *Dairy & Flour:* 100% cow-lactose-free (use goat/sheep feta, aged Parmigiano, or almond/coconut milk) and avoid refined white bread/flour.\n\n` +
+        `📄 *Download 5-Page Printable Menu & 17-Family Food List (PDF):*\n${lightPdfFullUrl}`;
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
       window.open(waUrl, '_blank', 'noopener,noreferrer');
     }
@@ -227,10 +279,10 @@ export default function PatientDnaPortalClient({
                 href={mealPlanPdfUrlLight}
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Download 2-page executive summary only (lightweight, ideal for WhatsApp/mobile)"
+                title="Download 5-page executive summary only (lightweight, ideal for WhatsApp/kitchen/supermarket)"
                 style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0284c7', textDecoration: 'none', padding: '3px 6px', borderRadius: '4px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
               >
-                Diet (2p)
+                Diet (5p)
               </a>
               <a
                 href={pdfDownloadUrlLight}
@@ -291,11 +343,11 @@ export default function PatientDnaPortalClient({
             </div>
 
             <div style={{ backgroundColor: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 650 }}>GUT BARRIER & MICROBIOTA</span>
+              <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 650 }}>GUT BARRIER &amp; MICROBIOTA</span>
               <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0284c7', marginTop: '2px' }}>
                 Fasting Microbiota Shield
               </div>
-              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>15B CFU in acid-resistant DRcaps®</span>
+              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>15B live probiotics (acid-resistant cap)</span>
             </div>
 
             <div style={{ backgroundColor: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
@@ -308,7 +360,125 @@ export default function PatientDnaPortalClient({
           </div>
         </div>
 
-        {/* ── Section Tabs: Clearly Marking Patient Guide, Pathway 1 (OTC), Pathway 2 (Compounded), and Lifestyle ── */}
+        {/* ── HOW THIS REPORT IS ORGANIZED: 4-STEP ROADMAP ── */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            border: '1.5px solid #bae6fd',
+            padding: '1.25rem 1.5rem',
+            marginBottom: '1.5rem',
+            boxShadow: '0 2px 10px rgba(2, 132, 199, 0.05)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '0.85rem' }}>
+            <div>
+              <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                HOW THIS REPORT IS ORGANIZED · 15-SECOND ROADMAP
+              </span>
+              <h2 style={{ fontSize: '1.10rem', fontWeight: 850, color: '#003666', margin: '2px 0 0 0' }}>
+                What Is Inside Your Guide &amp; Who to Share Each Section With
+              </h2>
+            </div>
+            <span style={{ fontSize: '0.74rem', color: '#475569', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
+              Click any card below to jump directly to that section
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(225px, 1fr))', gap: '0.85rem' }}>
+            {[
+              {
+                step: 'PART 1',
+                title: 'Your DNA in Plain Language',
+                desc: 'Your 5 body priorities (appetite, energy, blood sugar, dairy digestion & sleep) explained without medical jargon.',
+                shareWith: '👤 For You (2-min read)',
+                shareBg: '#e0f2fe',
+                shareColor: '#0369a1',
+                onClick: () => {
+                  setActiveSection('mealplan');
+                  if (typeof document !== 'undefined') {
+                    document.getElementById('dna-axes-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }
+              },
+              {
+                step: 'PART 2',
+                title: 'Complete Food List (17 Fagron Families)',
+                desc: 'All 116 foods classified into 🟢 Eat Freely, 🟡 Normal Portion (1-2x/wk), and 🔴 Avoid across CARBO+, PROTEIN+, LIPID+, and EXTRAS.',
+                shareWith: '🛒 For Supermarket / Home Kitchen',
+                shareBg: '#dcfce7',
+                shareColor: '#166534',
+                onClick: () => {
+                  setActiveSection('mealplan');
+                  setFoodViewMode('fagron_matrix');
+                  if (typeof document !== 'undefined') {
+                    setTimeout(() => document.getElementById('fagron-food-matrix-section')?.scrollIntoView({ behavior: 'smooth' }), 60);
+                  }
+                }
+              },
+              {
+                step: 'PART 3',
+                title: '7-Day Meal Plan & 24h Routine',
+                desc: 'Breakfast, lunch, snack, and dinner for the whole week + the 1-2-3 plate order rule (Vegetables → Protein → Carbs).',
+                shareWith: '👨‍🍳 For Catering / Chef / Family',
+                shareBg: '#fef3c7',
+                shareColor: '#92400e',
+                onClick: () => {
+                  setActiveSection('mealplan');
+                  if (typeof document !== 'undefined') {
+                    setTimeout(() => document.getElementById('weekly-menu-section')?.scrollIntoView({ behavior: 'smooth' }), 60);
+                  }
+                }
+              },
+              {
+                step: 'PART 4',
+                title: 'Your 3 Daily Capsules & Pharmacy Order',
+                desc: 'Your key nutrients grouped into 3 simple decision packs + ready-to-dispense local or compounded pharmacy order.',
+                shareWith: '💊 For Your Doctor or Pharmacy',
+                shareBg: '#f3e8ff',
+                shareColor: '#6b21a8',
+                onClick: () => {
+                  setActiveSection('prescription');
+                }
+              }
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                onClick={item.onClick}
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '10px',
+                  padding: '12px 14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 850, backgroundColor: '#003666', color: '#ffffff', padding: '2px 7px', borderRadius: '4px' }}>
+                      {item.step}
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 750, backgroundColor: item.shareBg, color: item.shareColor, padding: '2px 7px', borderRadius: '4px' }}>
+                      {item.shareWith}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+                    {item.title}
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Section Tabs: Aligned with the 4-Part Step-by-Step Roadmap in Plain Language ── */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setActiveSection('mealplan')}
@@ -331,7 +501,7 @@ export default function PatientDnaPortalClient({
             }}
           >
             <Utensils size={15} />
-            <span>🥗 Clinical Nutritionist Plan (Food-First &amp; Precision Diet)</span>
+            <span>🥗 Parts 1–3: Food List (17 Families) &amp; 7-Day Meal Plan</span>
           </button>
 
           <button
@@ -351,7 +521,7 @@ export default function PatientDnaPortalClient({
               boxShadow: activeSection === 'summary' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            <span>📄 Sheet 1: Clinical Guide &amp; DNA Findings</span>
+            <span>🧬 Summary: Your 4 DNA Priorities</span>
           </button>
 
           <button
@@ -371,7 +541,7 @@ export default function PatientDnaPortalClient({
               boxShadow: activeSection === 'commercial' ? '0 2px 4px rgba(13, 148, 136, 0.2)' : 'none'
             }}
           >
-            <span>🏪 Pathway 1: Local Commercial Supplements (OTC)</span>
+            <span>🏪 Part 4 · Option A: Local Pharmacy Supplements</span>
           </button>
 
           <button
@@ -391,7 +561,7 @@ export default function PatientDnaPortalClient({
               boxShadow: activeSection === 'prescription' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            <span>💊 Pathway 2: Master Compounding Order</span>
+            <span>💊 Part 4 · Option B: 3-Capsule Custom Pharmacy Order</span>
           </button>
 
           <button
@@ -411,7 +581,7 @@ export default function PatientDnaPortalClient({
               boxShadow: activeSection === 'lifestyle' ? '0 2px 4px rgba(0, 54, 102, 0.2)' : 'none'
             }}
           >
-            <span>🥗 Dietary &amp; Lifestyle Rules</span>
+            <span>☀️ Daily Routine &amp; Plate Rules</span>
           </button>
         </div>
 
@@ -477,16 +647,16 @@ export default function PatientDnaPortalClient({
                       paddingLeft: '4px'
                     }}
                   >
-                    ⚡ Download 4-Page Executive Clinical Guide (Light · Kitchen / Clinic Print)
+                    ⚡ Download 5-Page Executive Guide (Light · Kitchen / Supermarket Print)
                   </a>
                 </div>
               </div>
 
               {/* 5 Clinical Genomic Axes Scorecards */}
-              <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9' }}>
+              <div id="dna-axes-section" style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
                   <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    THE 5 CLINICAL GENOMIC AXES (RULES ENGINE EVALUATION)
+                    PART 1 · YOUR DNA IN PLAIN LANGUAGE (THE 5 KEY BODY PRIORITIES)
                   </span>
                   <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
                     Specimen: <strong>{sampleCode}</strong> · Patient: <strong>{patientName}</strong>
@@ -604,50 +774,50 @@ export default function PatientDnaPortalClient({
               </div>
             </div>
 
-            {/* ── Food Traffic Light Matrix (Superfoods vs Caution vs Strict Exclusions) ── */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+            {/* ── Food Traffic Light Matrix (Fagron 17 Families · 116 Foods · Search & Filters) ── */}
+            <div id="fagron-food-matrix-section" style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      FOOD AS MEDICINE MATRIX
+                      PART 2 · COMPLETE FOOD LIST (SUPERMARKET &amp; KITCHEN GUIDE)
                     </span>
                     <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '2px 7px', borderRadius: '4px' }}>
-                      Fagron NutriGen™ Taxonomy Standard
+                      Fagron NutriGen™ 100% Standard · 4 Groups · 17 Families · {clinicalProfile.masterFoodCatalog?.length || 116} Foods
                     </span>
                   </div>
                   <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
-                    Personalized Food List &amp; Traffic Light
+                    Personalized Food List &amp; 17-Family Traffic Light
                   </h3>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                    Individualized evaluation of allowed, controlled, reduced, and excluded foods based on your genetic SNPs.
+                    Every food classified into 🟢 Eat Freely, 🟡 Normal Portion (1-2x/week or rule), and 🔴 Avoid for your DNA.
                   </p>
                 </div>
 
-                {/* View Mode Toggle (Clinical Highlights vs Full Master Catalog) */}
-                <div style={{ display: 'flex', gap: '6px', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                {/* View Mode Toggle (17-Family Matrix vs All 116 Foods vs Clinical Summary) */}
+                <div style={{ display: 'flex', gap: '6px', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px', border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
                   <button
-                    onClick={() => setFoodViewMode('summary')}
+                    onClick={() => setFoodViewMode('fagron_matrix')}
                     style={{
                       padding: '6px 14px',
                       fontSize: '0.75rem',
-                      fontWeight: 700,
+                      fontWeight: 750,
                       borderRadius: '6px',
                       border: 'none',
-                      backgroundColor: foodViewMode === 'summary' ? '#ffffff' : 'transparent',
-                      color: foodViewMode === 'summary' ? '#003666' : '#64748b',
-                      boxShadow: foodViewMode === 'summary' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                      backgroundColor: foodViewMode === 'fagron_matrix' ? '#ffffff' : 'transparent',
+                      color: foodViewMode === 'fagron_matrix' ? '#003666' : '#64748b',
+                      boxShadow: foodViewMode === 'fagron_matrix' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                       cursor: 'pointer'
                     }}
                   >
-                    Clinical Summary
+                    17-Family Matrix (At a Glance)
                   </button>
                   <button
                     onClick={() => setFoodViewMode('master_catalog')}
                     style={{
                       padding: '6px 14px',
                       fontSize: '0.75rem',
-                      fontWeight: 700,
+                      fontWeight: 750,
                       borderRadius: '6px',
                       border: 'none',
                       backgroundColor: foodViewMode === 'master_catalog' ? '#ffffff' : 'transparent',
@@ -656,12 +826,156 @@ export default function PatientDnaPortalClient({
                       cursor: 'pointer'
                     }}
                   >
-                    Comprehensive Catalog ({clinicalProfile.masterFoodCatalog?.length || 47})
+                    All {clinicalProfile.masterFoodCatalog?.length || 116} Foods Explorer
+                  </button>
+                  <button
+                    onClick={() => setFoodViewMode('summary')}
+                    style={{
+                      padding: '6px 14px',
+                      fontSize: '0.75rem',
+                      fontWeight: 750,
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: foodViewMode === 'summary' ? '#ffffff' : 'transparent',
+                      color: foodViewMode === 'summary' ? '#003666' : '#64748b',
+                      boxShadow: foodViewMode === 'summary' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Top Clinical Highlights
                   </button>
                 </div>
               </div>
 
-              {foodViewMode === 'summary' ? (
+              {foodViewMode === 'fagron_matrix' ? (
+                <div>
+                  {/* Macro-Group Filter Bar for the 17-Family Matrix */}
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {[
+                        { id: 'ALL', label: 'All 17 Families (4 Groups)' },
+                        { id: 'CARBO+', label: '🌾 Group 1: CARBO+ (5 Families)' },
+                        { id: 'PROTEIN+', label: '🥩 Group 2: PROTEIN+ (5 Families)' },
+                        { id: 'LIPID+', label: '🫒 Group 3: LIPID+ (2 Families)' },
+                        { id: 'EXTRAS', label: '🍵 Group 4: EXTRAS (5 Families)' }
+                      ].map(grp => (
+                        <button
+                          key={grp.id}
+                          onClick={() => setFagronMacroGroup(grp.id)}
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '0.75rem',
+                            fontWeight: 750,
+                            borderRadius: '6px',
+                            border: '1px solid',
+                            borderColor: fagronMacroGroup === grp.id ? '#003666' : '#cbd5e1',
+                            backgroundColor: fagronMacroGroup === grp.id ? '#003666' : '#ffffff',
+                            color: fagronMacroGroup === grp.id ? '#ffffff' : '#475569',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {grp.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 17-Family Table / Cards Matrix */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {(clinicalProfile.fagron17SubfamilyMatrix || [])
+                      .filter(fam => fagronMacroGroup === 'ALL' || fam.macroGroup === fagronMacroGroup)
+                      .map((fam) => (
+                        <div
+                          key={fam.code}
+                          style={{
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '10px',
+                            overflow: 'hidden',
+                            backgroundColor: '#ffffff'
+                          }}
+                        >
+                          <div
+                            style={{
+                              backgroundColor: '#f8fafc',
+                              padding: '8px 14px',
+                              borderBottom: '1px solid #e2e8f0',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: '8px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#003666', color: '#ffffff', padding: '2px 7px', borderRadius: '4px' }}>
+                                {fam.code} · {fam.macroGroup}
+                              </span>
+                              <strong style={{ fontSize: '0.90rem', color: '#0f172a' }}>{fam.familyEn}</strong>
+                              <span style={{ fontSize: '0.76rem', color: '#64748b' }}>({fam.familyEs})</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setFagronMacroGroup('ALL');
+                                setFagronSubfamilyFilter(fam.code);
+                                setFoodViewMode('master_catalog');
+                              }}
+                              style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                color: '#0284c7',
+                                backgroundColor: '#e0f2fe',
+                                border: '1px solid #bae6fd',
+                                borderRadius: '5px',
+                                padding: '3px 9px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Inspect {fam.totalCount} items →
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0' }}>
+                            {/* Green Column */}
+                            <div style={{ padding: '10px 14px', backgroundColor: '#f0fdf4', borderRight: '1px solid #e2e8f0' }}>
+                              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#166534', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                🟢 EAT FREELY ({fam.greenFoods.length})
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#14532d', lineHeight: 1.45 }}>
+                                {fam.greenFoods.length > 0
+                                  ? fam.greenFoods.map(f => f.nameEn.split(' (')[0]).join(' • ')
+                                  : 'None in this group (see Moderate or Avoid)'}
+                              </div>
+                            </div>
+
+                            {/* Amber Column */}
+                            <div style={{ padding: '10px 14px', backgroundColor: '#fffbeb', borderRight: '1px solid #e2e8f0' }}>
+                              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#92400e', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                🟡 NORMAL PORTION / 1-2x WK ({fam.amberFoods.length})
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#78350f', lineHeight: 1.45 }}>
+                                {fam.amberFoods.length > 0
+                                  ? fam.amberFoods.map(f => f.nameEn.split(' (')[0]).join(' • ')
+                                  : 'No special portion restrictions'}
+                              </div>
+                            </div>
+
+                            {/* Red Column */}
+                            <div style={{ padding: '10px 14px', backgroundColor: '#fef2f2' }}>
+                              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#991b1b', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                🔴 AVOID ({fam.redFoods.length})
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#7f1d1d', lineHeight: 1.45 }}>
+                                {fam.redFoods.length > 0
+                                  ? fam.redFoods.map(f => f.nameEn.split(' (')[0]).join(' • ')
+                                  : 'None excluded'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ) : foodViewMode === 'summary' ? (
                 <>
                   {/* Summary Filters */}
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
@@ -788,23 +1102,92 @@ export default function PatientDnaPortalClient({
                   </div>
                 </>
               ) : (
-                /* Fagron NutriGen™ Master Food Catalog Explorer */
+                /* Fagron NutriGen™ Master Food Catalog Explorer (All 116 Foods) */
                 <div>
+                  {/* Instant Search Input + Traffic Light Filter */}
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px', alignItems: 'center' }}>
+                    <div style={{ flex: '1 1 280px', position: 'relative' }}>
+                      <input
+                        type="text"
+                        value={foodSearchQuery}
+                        onChange={(e) => setFoodSearchQuery(e.target.value)}
+                        placeholder="Search any of the 116 foods in English or Spanish (e.g. salmon, oats, feta, honey, shrimp)..."
+                        style={{
+                          width: '100%',
+                          padding: '9px 32px 9px 12px',
+                          fontSize: '0.82rem',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#f8fafc',
+                          color: '#0f172a'
+                        }}
+                      />
+                      {foodSearchQuery && (
+                        <button
+                          onClick={() => setFoodSearchQuery('')}
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            fontWeight: 800
+                          }}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {[
+                        { id: 'all', label: 'All Colors' },
+                        { id: 'green', label: '🟢 Eat Freely' },
+                        { id: 'yellow', label: '🟡 Moderate / Rule' },
+                        { id: 'red', label: '🔴 Avoid' }
+                      ].map(tl => (
+                        <button
+                          key={tl.id}
+                          onClick={() => setFoodTrafficFilter(tl.id)}
+                          style={{
+                            padding: '7px 11px',
+                            fontSize: '0.74rem',
+                            fontWeight: 750,
+                            borderRadius: '6px',
+                            border: '1px solid',
+                            borderColor: foodTrafficFilter === tl.id ? '#0284c7' : '#cbd5e1',
+                            backgroundColor: foodTrafficFilter === tl.id ? '#e0f2fe' : '#ffffff',
+                            color: foodTrafficFilter === tl.id ? '#0369a1' : '#475569',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {tl.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Macro-Group Filters */}
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
                     {[
-                      { id: 'ALL', label: 'All Macro-Groups' },
-                      { id: 'CARBO+', label: '🌾 3.1 CARBO+ (Veg, Fruit, Cereals)' },
-                      { id: 'PROTEIN+', label: '🥩 3.2 PROTEIN+ (Fish, Meats, Eggs, A2)' },
-                      { id: 'LIPID+', label: '🫒 3.3 LIPID+ (Oils & Healthy Fats)' },
-                      { id: 'EXTRAS', label: '🍵 3.4 EXTRAS (Beverages, Seeds, Snacks)' }
+                      { id: 'ALL', label: 'All 4 Macro-Groups' },
+                      { id: 'CARBO+', label: '🌾 3.1 CARBO+ (Veg, Fruit, Cereals, Legumes, Tubers)' },
+                      { id: 'PROTEIN+', label: '🥩 3.2 PROTEIN+ (Dairy, Eggs, Meats, Fish, Shellfish)' },
+                      { id: 'LIPID+', label: '🫒 3.3 LIPID+ (Oils, Fats, Spices & Sauces)' },
+                      { id: 'EXTRAS', label: '🍵 3.4 EXTRAS (Sweeteners, Nuts, Cacao, Drinks)' }
                     ].map(grp => (
                       <button
                         key={grp.id}
-                        onClick={() => setFagronMacroGroup(grp.id)}
+                        onClick={() => {
+                          setFagronMacroGroup(grp.id);
+                          setFagronSubfamilyFilter('ALL');
+                        }}
                         style={{
                           padding: '6px 12px',
-                          fontSize: '0.76rem',
+                          fontSize: '0.75rem',
                           fontWeight: 700,
                           borderRadius: '6px',
                           border: '1px solid',
@@ -819,10 +1202,70 @@ export default function PatientDnaPortalClient({
                     ))}
                   </div>
 
+                  {/* 17 Sub-Family Filter Pills */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+                    <button
+                      onClick={() => setFagronSubfamilyFilter('ALL')}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '0.71rem',
+                        fontWeight: 750,
+                        borderRadius: '999px',
+                        border: '1px solid',
+                        borderColor: fagronSubfamilyFilter === 'ALL' ? '#0d9488' : '#cbd5e1',
+                        backgroundColor: fagronSubfamilyFilter === 'ALL' ? '#f0fdfa' : '#ffffff',
+                        color: fagronSubfamilyFilter === 'ALL' ? '#0f766e' : '#64748b',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      All 17 Sub-Families
+                    </button>
+                    {(clinicalProfile.fagron17SubfamilyMatrix || [])
+                      .filter(sf => fagronMacroGroup === 'ALL' || sf.macroGroup === fagronMacroGroup)
+                      .map(sf => (
+                        <button
+                          key={sf.code}
+                          onClick={() => setFagronSubfamilyFilter(sf.code)}
+                          style={{
+                            padding: '4px 10px',
+                            fontSize: '0.71rem',
+                            fontWeight: 700,
+                            borderRadius: '999px',
+                            border: '1px solid',
+                            borderColor: fagronSubfamilyFilter === sf.code ? '#0d9488' : '#e2e8f0',
+                            backgroundColor: fagronSubfamilyFilter === sf.code ? '#f0fdfa' : '#f8fafc',
+                            color: fagronSubfamilyFilter === sf.code ? '#0f766e' : '#475569',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {sf.code} {sf.familyEn} ({sf.totalCount})
+                        </button>
+                      ))}
+                  </div>
+
                   {/* Food Items Cards Grid */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
                     {(clinicalProfile.masterFoodCatalog || [])
                       .filter(f => fagronMacroGroup === 'ALL' || f.categoryGroup === fagronMacroGroup)
+                      .filter(f => fagronSubfamilyFilter === 'ALL' || f.fagronCode === fagronSubfamilyFilter)
+                      .filter(f => {
+                        if (foodTrafficFilter === 'all') return true;
+                        if (foodTrafficFilter === 'green') return f.trafficColor === 'green';
+                        if (foodTrafficFilter === 'yellow') return f.trafficColor === 'amber';
+                        if (foodTrafficFilter === 'red') return f.trafficColor === 'red';
+                        return true;
+                      })
+                      .filter(f => {
+                        if (!foodSearchQuery.trim()) return true;
+                        const q = foodSearchQuery.toLowerCase();
+                        return (
+                          (f.nameEn && f.nameEn.toLowerCase().includes(q)) ||
+                          (f.nameEs && f.nameEs.toLowerCase().includes(q)) ||
+                          (f.categoryFamily && f.categoryFamily.toLowerCase().includes(q)) ||
+                          (f.rationaleEn && f.rationaleEn.toLowerCase().includes(q)) ||
+                          (f.nutrients && f.nutrients.some(n => n.toLowerCase().includes(q)))
+                        );
+                      })
                       .map((food, fIdx) => (
                         <div
                           key={food.id || fIdx}
@@ -840,7 +1283,7 @@ export default function PatientDnaPortalClient({
                           <div>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                               <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                                {food.categoryGroup} · {food.categoryFamily}
+                                {food.fagronCode} · {food.categoryFamily}
                               </span>
                               <span
                                 style={{
@@ -946,11 +1389,11 @@ export default function PatientDnaPortalClient({
             </div>
 
             {/* ── 7-Day Precision Meal Plan (Interactive Day-by-Day Selector) ── */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1.5px solid #bae6fd', padding: '1.75rem', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.08)' }}>
+            <div id="weekly-menu-section" style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1.5px solid #bae6fd', padding: '1.75rem', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.08)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
                 <div>
                   <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    CLINICAL DIETARY PRESCRIPTION
+                    PART 3 · 7-DAY PRECISION MEAL PLAN (FOR CATERING / CHEF / HOME)
                   </span>
                   <h3 style={{ fontSize: '1.30rem', fontWeight: 850, color: '#003666', margin: '2px 0 4px 0' }}>
                     7-Day Precision Meal Plan
@@ -960,34 +1403,57 @@ export default function PatientDnaPortalClient({
                   </p>
                 </div>
 
-                {/* Day selector pills (Google Cloud Console UX Segmented Chips) */}
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {clinicalProfile.sevenDayMealPlan.map((d) => (
-                    <button
-                      key={d.day}
-                      type="button"
-                      onClick={() => setSelectedDay(d.day)}
-                      style={{
-                        height: '28px',
-                        padding: '0 12px',
-                        borderRadius: '4px',
-                        fontSize: '0.74rem',
-                        fontWeight: selectedDay === d.day ? 700 : 500,
-                        border: '1px solid',
-                        borderColor: selectedDay === d.day ? '#0284c7' : '#dadce0',
-                        backgroundColor: selectedDay === d.day ? '#e0f2fe' : '#ffffff',
-                        color: selectedDay === d.day ? '#0369a1' : '#3c4043',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        transition: 'all 0.12s ease'
-                      }}
-                    >
-                      <span>Day {d.day}</span>
-                      <span style={{ opacity: 0.7 }}>({d.dayName})</span>
-                    </button>
-                  ))}
+                {/* Chef WhatsApp Share + Day selector pills */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={handleChefWhatsAppShare}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 12px',
+                      fontSize: '0.75rem',
+                      fontWeight: 750,
+                      backgroundColor: '#f0fdf4',
+                      border: '1px solid #86efac',
+                      borderRadius: '6px',
+                      color: '#15803d',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <MessageSquare size={14} />
+                    <span>📲 Send Menu &amp; 3 Kitchen Rules to Chef / Family (WhatsApp)</span>
+                  </button>
+
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {clinicalProfile.sevenDayMealPlan.map((d) => (
+                      <button
+                        key={d.day}
+                        type="button"
+                        onClick={() => setSelectedDay(d.day)}
+                        style={{
+                          height: '28px',
+                          padding: '0 12px',
+                          borderRadius: '4px',
+                          fontSize: '0.74rem',
+                          fontWeight: selectedDay === d.day ? 700 : 500,
+                          border: '1px solid',
+                          borderColor: selectedDay === d.day ? '#0284c7' : '#dadce0',
+                          backgroundColor: selectedDay === d.day ? '#e0f2fe' : '#ffffff',
+                          color: selectedDay === d.day ? '#0369a1' : '#3c4043',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.12s ease'
+                        }}
+                      >
+                        <span>Day {d.day}</span>
+                        <span style={{ opacity: 0.7 }}>({d.dayName})</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -1071,7 +1537,7 @@ export default function PatientDnaPortalClient({
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-                      Mobile-Ready Shopping Guide
+                      Mobile-Ready Shopping Guide (Auto-Saved)
                     </span>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488' }}>
                       🛒 Monoprix, Lulu &amp; Carrefour Qatar Ready
@@ -1081,12 +1547,32 @@ export default function PatientDnaPortalClient({
                     Patient Supermarket Grocery Checklist
                   </h3>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                    Tap each item on your phone as you place it into your supermarket shopping cart.
+                    Tap each item on your phone as you place it into your supermarket shopping cart (saved automatically on your device).
                   </p>
                 </div>
 
-                <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '6px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 750, color: '#0f766e' }}>
-                  ✓ {Object.values(checkedGroceryItems).filter(Boolean).length} items checked
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '6px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 750, color: '#0f766e' }}>
+                    ✓ {Object.values(checkedGroceryItems).filter(Boolean).length} items checked
+                  </div>
+                  {Object.values(checkedGroceryItems).some(Boolean) && (
+                    <button
+                      type="button"
+                      onClick={resetGroceryChecklist}
+                      style={{
+                        padding: '6px 10px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        color: '#64748b',
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Reset List
+                    </button>
+                  )}
                 </div>
               </div>
 
