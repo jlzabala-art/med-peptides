@@ -696,7 +696,7 @@ const CLINICAL_PRESETS = [
  * Displays each peptide with 44px touch targets, 2-column pricing tiles (Single Vial vs Box ×10),
  * live proforma cart status, and public specs link.
  */
-function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi, onFilterByPeptide }) {
+function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems = {}, formatPrice, lang = 'en', onOpenSpecs, onOpenAi, onFilterByPeptide, onInquire }) {
   const [isClinicalExpanded, setIsClinicalExpanded] = useState(false);
   const isEs = lang === 'es';
   const p10 = row.pack10Price || (row.unitPrice * 10 * 0.85);
@@ -724,7 +724,11 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
       boxShadow: hasCart ? '0 2px 8px rgba(26,115,232,0.18)' : '0 1px 3px rgba(60,64,67,0.08)',
       display: 'flex',
       flexDirection: 'column',
-      gap: '10px'
+      gap: '10px',
+      width: '100%',
+      maxWidth: '100%',
+      minWidth: 0,
+      boxSizing: 'border-box'
     }}>
       {/* Top Header: Compound Name, Dosage & Specs Button */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
@@ -767,11 +771,12 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
           </div>
         </div>
 
-        {/* Specs link button (Golden Rule: Opens public specs page in new tab) */}
+        {/* Specs link button */}
         <Link
           href={specsUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => onOpenSpecs && onOpenSpecs(row)}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -814,31 +819,36 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
         </div>
       )}
 
-      {/* 2-Column Action Tiles: Single Vial vs Pack of 10 */}
-      <div style={{
+      {/* 2-Column Action Tiles: Single Vial vs Pack of 10 (Rule #23: Mobile-First, Never Clipped) */}
+      <div className="peptide-mobile-tiles-grid" style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '8px'
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gap: '8px',
+        width: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box'
       }}>
         {/* Tile 1: Single Vial */}
         <div style={{
           background: '#f8f9fa',
           border: '1px solid #dadce0',
           borderRadius: '6px',
-          padding: '10px 10px',
+          padding: '9px 10px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          gap: '8px'
+          gap: '8px',
+          minWidth: 0,
+          boxSizing: 'border-box'
         }}>
           <div>
-            <div style={{ fontSize: '0.66rem', color: '#5f6368', fontWeight: 600, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.64rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {isEs ? 'Vial Individual (1x)' : 'Single Vial (1x)'}
             </div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#202124', fontFamily: 'monospace', marginTop: '2px' }}>
+            <div style={{ fontSize: '1.02rem', fontWeight: 800, color: '#202124', fontFamily: 'monospace', marginTop: '2px', whiteSpace: 'nowrap' }}>
               {formatPrice ? formatPrice(row.unitPrice) : `$${row.unitPrice}`}
             </div>
-            <div style={{ fontSize: '0.64rem', color: '#5f6368' }}>
+            <div style={{ fontSize: '0.62rem', color: '#5f6368', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {isEs ? 'por vial estéril' : 'per sterile vial'}
             </div>
           </div>
@@ -848,32 +858,34 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              minHeight: '44px',
+              minHeight: '40px',
               background: '#e8f0fe',
               border: '1.5px solid #1a73e8',
               borderRadius: '6px',
-              padding: '0 4px'
+              padding: '0 4px',
+              boxSizing: 'border-box',
+              width: '100%'
             }}>
               <button
                 type="button"
                 onClick={() => updateItemQuantity(row.id, '1x', -1)}
-                style={{ width: '38px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#ffffff', borderRadius: '4px', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem' }}
+                style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#ffffff', borderRadius: '4px', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}
                 title={isEs ? 'Restar 1 vial' : 'Remove 1 vial'}
               >
                 -
               </button>
-              <div style={{ textAlign: 'center' }}>
-                <span style={{ fontWeight: 800, fontSize: '0.94rem', color: '#1a73e8', fontFamily: 'monospace' }}>
+              <div style={{ textAlign: 'center', minWidth: 0 }}>
+                <span style={{ fontWeight: 800, fontSize: '0.90rem', color: '#1a73e8', fontFamily: 'monospace' }}>
                   {inCart1x}
                 </span>
-                <span style={{ fontSize: '0.62rem', color: '#1a73e8', display: 'block', lineHeight: 1 }}>
-                  {isEs ? 'en proforma' : 'in cart'}
+                <span style={{ fontSize: '0.60rem', color: '#1a73e8', display: 'block', lineHeight: 1 }}>
+                  {isEs ? 'en carro' : 'in cart'}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => updateItemQuantity(row.id, '1x', 1)}
-                style={{ width: '38px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#1a73e8', borderRadius: '4px', color: '#ffffff', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem' }}
+                style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#1a73e8', borderRadius: '4px', color: '#ffffff', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}
                 title={isEs ? 'Sumar 1 vial' : 'Add 1 vial'}
               >
                 +
@@ -886,7 +898,7 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               style={{
                 width: '100%',
                 minHeight: '40px',
-                fontSize: '0.80rem',
+                fontSize: '0.78rem',
                 fontWeight: 700,
                 background: '#ffffff',
                 border: '1.5px solid #1a73e8',
@@ -896,49 +908,53 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '5px',
+                gap: '4px',
                 boxShadow: '0 1px 2px rgba(26,115,232,0.08)',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.15s ease',
+                boxSizing: 'border-box'
               }}
             >
-              <Plus size={14} />
+              <Plus size={13} style={{ flexShrink: 0 }} />
               <span>1 Vial</span>
             </button>
           )}
         </div>
 
-        {/* Tile 2: Pack of 10 */}
+        {/* Tile 2: Pack of 10 (Restored & Guaranteed Visible) */}
         <div style={{
           background: '#f0fdf4',
           border: '1px solid #bbf7d0',
           borderRadius: '6px',
-          padding: '10px 10px',
+          padding: '9px 10px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          gap: '8px'
+          gap: '8px',
+          minWidth: 0,
+          boxSizing: 'border-box'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2px' }}>
-              <span style={{ fontSize: '0.66rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '0.64rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 {isEs ? 'Pack de 10' : 'Pack of 10'}
               </span>
               <span style={{
-                fontSize: '0.60rem',
+                fontSize: '0.58rem',
                 fontWeight: 800,
                 color: '#15803d',
                 background: '#dcfce7',
                 border: '1px solid #86efac',
-                padding: '1px 4px',
-                borderRadius: '3px'
+                padding: '1px 3px',
+                borderRadius: '3px',
+                whiteSpace: 'nowrap'
               }}>
-                -{discountPct}% Pack
+                -{discountPct}%
               </span>
             </div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#15803d', fontFamily: 'monospace', marginTop: '2px' }}>
+            <div style={{ fontSize: '1.02rem', fontWeight: 800, color: '#15803d', fontFamily: 'monospace', marginTop: '2px', whiteSpace: 'nowrap' }}>
               {formatPrice ? formatPrice(p10) : `$${p10.toFixed(2)}`}
             </div>
-            <div style={{ fontSize: '0.64rem', color: '#166534', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '0.62rem', color: '#166534', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               ({formatPrice ? formatPrice(perUnit) : `$${perUnit.toFixed(2)}`}/vial)
             </div>
           </div>
@@ -948,32 +964,34 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              minHeight: '44px',
+              minHeight: '40px',
               background: '#dcfce7',
               border: '1.5px solid #16a34a',
               borderRadius: '6px',
-              padding: '0 4px'
+              padding: '0 4px',
+              boxSizing: 'border-box',
+              width: '100%'
             }}>
               <button
                 type="button"
                 onClick={() => updateItemQuantity(row.id, '10x', -1)}
-                style={{ width: '38px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#ffffff', borderRadius: '4px', color: '#16a34a', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem' }}
+                style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#ffffff', borderRadius: '4px', color: '#16a34a', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}
                 title={isEs ? 'Restar 1 pack ×10' : 'Remove 1 pack ×10'}
               >
                 -
               </button>
-              <div style={{ textAlign: 'center' }}>
-                <span style={{ fontWeight: 800, fontSize: '0.94rem', color: '#15803d', fontFamily: 'monospace' }}>
+              <div style={{ textAlign: 'center', minWidth: 0 }}>
+                <span style={{ fontWeight: 800, fontSize: '0.90rem', color: '#15803d', fontFamily: 'monospace' }}>
                   {inCart10x}×10
                 </span>
-                <span style={{ fontSize: '0.62rem', color: '#15803d', display: 'block', lineHeight: 1 }}>
-                  {isEs ? 'en proforma' : 'in cart'}
+                <span style={{ fontSize: '0.60rem', color: '#15803d', display: 'block', lineHeight: 1 }}>
+                  {isEs ? 'en carro' : 'in cart'}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => updateItemQuantity(row.id, '10x', 1)}
-                style={{ width: '38px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#16a34a', borderRadius: '4px', color: '#ffffff', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem' }}
+                style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: '#16a34a', borderRadius: '4px', color: '#ffffff', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}
                 title={isEs ? 'Sumar 1 pack ×10' : 'Add 1 pack ×10'}
               >
                 +
@@ -986,7 +1004,7 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
               style={{
                 width: '100%',
                 minHeight: '40px',
-                fontSize: '0.80rem',
+                fontSize: '0.78rem',
                 fontWeight: 700,
                 background: '#1a73e8',
                 border: '1.5px solid #1a73e8',
@@ -997,14 +1015,110 @@ function PeptideMobileCard({ row, handleAddToCart, updateItemQuantity, cartItems
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '4px',
-                boxShadow: '0 1px 3px rgba(26,115,232,0.25)'
+                boxShadow: '0 1px 3px rgba(26,115,232,0.25)',
+                transition: 'all 0.15s ease',
+                boxSizing: 'border-box'
               }}
             >
-              <Box size={14} />
+              <Box size={13} style={{ flexShrink: 0 }} />
               <span>+Pack ×10</span>
             </button>
           )}
         </div>
+      </div>
+
+      {/* Laptop-Parity Quick Action Strip for Mobile (AI Posology, Specs, Inquire) */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+        gap: '6px',
+        width: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box'
+      }}>
+        <button
+          type="button"
+          onClick={() => onOpenAi && onOpenAi(row)}
+          style={{
+            minHeight: '32px',
+            padding: '4px 6px',
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            background: '#f0f9ff',
+            border: '1px solid #bae6fd',
+            borderRadius: '5px',
+            color: '#0369a1',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '3px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+          title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
+        >
+          <Sparkles size={11} color="#0284c7" style={{ flexShrink: 0 }} />
+          <span>{isEs ? 'Posología IA' : 'Posology AI'}</span>
+        </button>
+
+        <Link
+          href={specsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => onOpenSpecs && onOpenSpecs(row)}
+          style={{
+            minHeight: '32px',
+            padding: '4px 6px',
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            background: '#ffffff',
+            border: '1px solid #c2e7ff',
+            borderRadius: '5px',
+            color: '#1a73e8',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '3px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+          title={`Open public clinical specs for ${row.productName} (${row.dosage})`}
+        >
+          <BookOpen size={11} color="#1a73e8" style={{ flexShrink: 0 }} />
+          <span>{isEs ? 'Ficha' : 'Specs'}</span>
+          <span style={{ fontSize: '0.60rem' }}>↗</span>
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => onInquire && onInquire(row)}
+          style={{
+            minHeight: '32px',
+            padding: '4px 6px',
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            background: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: '5px',
+            color: '#15803d',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '3px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+          title={isEs ? 'Consultar pedido institucional o lote' : 'Inquire about institutional volume or custom batch'}
+        >
+          <Mail size={11} color="#15803d" style={{ flexShrink: 0 }} />
+          <span>{isEs ? 'Consultar' : 'Inquire'}</span>
+        </button>
       </div>
 
       {/* ── Google Cloud UX Clinical Pharmacology & Dosing Quick-Ref Inspector ── */}
@@ -1368,6 +1482,7 @@ export default function PeptidesPriceListClient({
   const [isCurrencySheetOpen, setIsCurrencySheetOpen] = useState(false);
   const [trackingCodeState] = useState(trackingCode);
   const [priceDriftNotice, setPriceDriftNotice] = useState(null);
+  const [isMobileKpiExpanded, setIsMobileKpiExpanded] = useState(false);
 
   // Strict English default ('en') unless ?lang=es is explicitly in the URL or selected via top button
   const [lang, setLang] = useState(initialLang || 'en');
@@ -3868,8 +3983,24 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
             }
             .gcp-kpis-summary-block {
               order: 2 !important;
-              padding: 0.75rem !important;
-              margin-bottom: 0.75rem !important;
+              padding: 0.5rem 0.65rem !important;
+              margin-bottom: 0.5rem !important;
+            }
+            .mobile-kpi-summary-strip {
+              display: flex !important;
+            }
+            .peptides-kpis-grid.mobile-kpi-collapsed {
+              display: none !important;
+            }
+            .peptides-kpis-grid.mobile-kpi-expanded {
+              display: grid !important;
+              grid-template-columns: repeat(2, 1fr) !important;
+              gap: 8px !important;
+              margin-top: 8px !important;
+            }
+            .peptide-mobile-tiles-grid {
+              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+              gap: 8px !important;
             }
             .mobile-only-filter-selectors {
               order: 3 !important;
@@ -4450,8 +4581,54 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                 </div>
               </div>
 
+              {/* Mobile-Only Compact KPI Summary Bar (Rule #23: Prevents bulky GCP cards from pushing products below fold on mobile) */}
+              <div className="mobile-kpi-summary-strip" style={{
+                display: 'none',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+                padding: '4px 0',
+                fontSize: '0.72rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                    🧬 {scopeMode === 'filtered' ? filteredProducts.length : processedProducts.length} {isEs ? 'Formulaciones' : 'Formulations'}
+                  </span>
+                  <span style={{ color: '#cbd5e1' }}>•</span>
+                  <span style={{ fontWeight: 650, color: '#0284c7' }}>
+                    🏛️ {(scopeMode === 'filtered' ? filteredProducts : processedProducts).filter(p => p.fdaBucket === 'fda_503a' || p.fdaBucket === 'fda_approved').length} {isEs ? 'Aprobadas' : 'Approved'}
+                  </span>
+                  <span style={{ color: '#cbd5e1' }}>•</span>
+                  <span style={{ fontWeight: 650, color: '#16a34a' }}>
+                    📦 -15% Pack
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileKpiExpanded(!isMobileKpiExpanded)}
+                  style={{
+                    background: isMobileKpiExpanded ? '#e8f0fe' : '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#1a73e8',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    flexShrink: 0
+                  }}
+                  title={isMobileKpiExpanded ? (isEs ? 'Ocultar tarjetas de métricas' : 'Hide metric cards') : (isEs ? 'Ver tarjetas de métricas completas' : 'Show full metric cards')}
+                >
+                  <span>{isMobileKpiExpanded ? (isEs ? 'Ocultar' : 'Hide') : (isEs ? 'KPIs' : 'KPIs')}</span>
+                  {isMobileKpiExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                </button>
+              </div>
+
               {/* 4 KPIs in a 2x2 Mobile Grid / 4-Col Desktop Grid (GCP Standard) */}
-              <div className="peptides-kpis-grid">
+              <div className={`peptides-kpis-grid ${!isMobileKpiExpanded ? 'mobile-kpi-collapsed' : 'mobile-kpi-expanded'}`}>
                 {/* KPI 1: Available Formulations */}
                 <div
                   className="peptides-kpi-card"
@@ -4840,6 +5017,10 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                     onOpenAi: (prod) => {
                       setAiContextProduct(prod);
                       setIsAtlasAiOpen(true);
+                    },
+                    onInquire: (prod) => {
+                      setInquiryProductContext(prod);
+                      setIsInquiryDrawerOpen(true);
                     },
                     onFilterByPeptide: (name) => {
                       setSearchQuery(name);
