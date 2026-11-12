@@ -15,7 +15,8 @@ import {
   Layers,
   ArrowRight,
   BookOpen,
-  Mail
+  Mail,
+  FileText
 } from 'lucide-react';
 import { getPeptideClinicalSummary } from '@/constants/peptidePharmacology';
 import { parsePeptideBlendDisplay } from '@/components/pricing/PeptidePricePdfPreviewModal';
@@ -71,10 +72,26 @@ export default function PeptideMobileCard({
       minWidth: 0,
       boxSizing: 'border-box'
     }}>
-      {/* Top Header: Compound Name, Dosage & Specs Button */}
+      {/* Top Header: # Item + Compound Name + Dosage + Specs Link + Category + FDA Badges */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Row 1: Item #, Name, Dosage pill & Specs button */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            {row.itemNumber && (
+              <span style={{
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                color: '#5f6368',
+                background: '#f1f3f4',
+                border: '1px solid #e8eaed',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                flexShrink: 0
+              }}>
+                #{row.itemNumber}
+              </span>
+            )}
             <Link
               href={specsUrl}
               target="_blank"
@@ -90,56 +107,117 @@ export default function PeptideMobileCard({
             >
               {blendInfo.isBlend ? (blendInfo.titleLine || blendInfo.mainTitle || row.productName) : row.productName}
             </Link>
-            <span style={{
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              background: '#e8f0fe',
-              color: '#1a73e8',
-              border: '1px solid #c2e7ff',
-              padding: '2px 7px',
-              borderRadius: '4px',
-              whiteSpace: 'nowrap'
-            }}>
-              {blendInfo.isBlend ? (blendInfo.dosageMain || blendInfo.primaryDose || row.dosage) : row.dosage}
-            </span>
+            {row.dosage && (
+              <span style={{
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                fontFamily: 'monospace',
+                background: '#e8f0fe',
+                color: '#1a73e8',
+                border: '1px solid #c2e7ff',
+                padding: '2px 7px',
+                borderRadius: '4px',
+                whiteSpace: 'nowrap'
+              }}>
+                {blendInfo.isBlend ? (blendInfo.dosageMain || blendInfo.primaryDose || row.dosage) : row.dosage}
+              </span>
+            )}
+            {/* Specs ↗ Quick Link */}
+            <Link
+              href={specsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => onOpenSpecs && onOpenSpecs(row)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                color: '#1a73e8',
+                background: '#ffffff',
+                border: '1px solid #c2e7ff',
+                padding: '2px 7px',
+                borderRadius: '4px',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease',
+                flexShrink: 0
+              }}
+              title={isEs ? `Abrir ficha técnica y estructura 3D de ${row.productName}` : `Open clinical specs & 3D structure for ${row.productName}`}
+            >
+              <FileText size={11} />
+              <span>{isEs ? 'Ficha ↗' : 'Specs ↗'}</span>
+            </Link>
           </div>
+
+          {/* Row 2: Category Pill + FDA Regulatory Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+            {/* Category Badge Pill with Icon & Theme Colors */}
+            <span style={{
+              fontSize: '0.64rem',
+              fontWeight: 650,
+              color: row?.categoryMeta?.color || '#0284c7',
+              background: row?.categoryMeta?.bg || '#f0f9ff',
+              border: `1px solid ${row?.categoryMeta?.border || '#bae6fd'}`,
+              padding: '1px 6px',
+              borderRadius: '4px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.03em',
+              whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '3px'
+            }}>
+              <span>{row?.categoryMeta?.icon || '•'}</span>
+              <span>{row?.categoryMeta?.label || row.therapeuticClass || (isEs ? 'Péptido Clínico' : 'Clinical Peptide')}</span>
+            </span>
+
+            {/* FDA Regulatory Status Badge (100% parity with laptop) */}
+            {row.fdaStatus && (
+              <span style={{
+                fontSize: '0.64rem',
+                fontWeight: 700,
+                color: row.fdaStatus.colorScheme?.text || '#065f46',
+                background: row.fdaStatus.colorScheme?.bg || '#ecfdf5',
+                border: `1px solid ${row.fdaStatus.colorScheme?.border || '#6ee7b7'}`,
+                padding: '1px 6px',
+                borderRadius: '4px',
+                whiteSpace: 'nowrap',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                <span>{row.fdaStatus.colorScheme?.icon || '🛡️'}</span>
+                <span>
+                  {isEs
+                    ? (row.fdaBucket === 'fda_503a'
+                        ? '503A Magistral ✓'
+                        : row.fdaBucket === 'fda_approved'
+                          ? 'Aprobado FDA ✓'
+                          : row.fdaBucket === 'clinical_ind'
+                            ? 'Fase Clínica IND'
+                            : 'Estándar Analítico')
+                    : (row.fdaStatus.shortBadge || '503A')}
+                </span>
+              </span>
+            )}
+          </div>
+
+          {/* Row 3: Blend composition breakdown (if blend) */}
           {blendInfo.isBlend && blendInfo.compositionLine && (
-            <div style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 600, marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 600, marginTop: '4px' }}>
               {blendInfo.compositionLine}
             </div>
           )}
-          <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700, marginTop: '3px' }}>
-            {row?.categoryMeta?.label || row.therapeuticClass || (isEs ? 'Péptido Clínico Certificado' : 'Certified Clinical Peptide')}
+
+          {/* Row 4: Pharmaceutical Presentation & Purity Subtitle (100% parity with laptop) */}
+          <div style={{ fontSize: '0.68rem', color: '#5f6368', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+            <span style={{ whiteSpace: 'nowrap' }}>{isEs ? 'Vial Liofilizado Estéril (10R)' : 'Sterile Lyophilized Vial (10R)'}</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ color: '#137333', fontWeight: 650, whiteSpace: 'nowrap' }}>{isEs ? '≥99.0% Pureza HPLC' : '≥99.0% HPLC Purity'}</span>
           </div>
         </div>
-
-        {/* Specs link button */}
-        <Link
-          href={specsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => onOpenSpecs && onOpenSpecs(row)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '3px',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            color: '#1a73e8',
-            background: '#ffffff',
-            border: '1px solid #c2e7ff',
-            padding: '6px 9px',
-            borderRadius: '4px',
-            textDecoration: 'none',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-            minHeight: '34px'
-          }}
-          title={`Open public clinical specs for ${row.productName} (${row.dosage})`}
-        >
-          <span>📄 {isEs ? 'Ficha' : 'Specs'}</span>
-          <span>↗</span>
-        </Link>
       </div>
 
       {/* In-Cart Active Badge */}
@@ -257,7 +335,7 @@ export default function PeptideMobileCard({
               }}
             >
               <Plus size={13} style={{ flexShrink: 0 }} />
-              <span>1 Vial</span>
+              <span>+ 1 Vial</span>
             </button>
           )}
         </div>
