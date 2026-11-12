@@ -1,5 +1,6 @@
 import React from 'react';
 import PatientDnaPortalClient from './PatientDnaPortalClient';
+import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -50,12 +51,21 @@ export default async function PatientDnaReportPage({ searchParams }) {
   const clinic = sp?.clinic || 'Ryhanh Medical Company · Doha';
   const doctor = sp?.doctor || 'Clinical Genomic Director';
 
+  // Rule #21: Server-side evaluation of clinical nutrigenomics profile
+  const initialProfile = evaluateNutrigenomicProfile({
+    patientName,
+    sampleCode,
+    clinic,
+    doctor
+  });
+
   return (
     <PatientDnaPortalClient
       initialPatientName={patientName}
       initialSampleCode={sampleCode}
       initialClinic={clinic}
       initialDoctor={doctor}
+      initialProfile={initialProfile}
     />
   );
 }

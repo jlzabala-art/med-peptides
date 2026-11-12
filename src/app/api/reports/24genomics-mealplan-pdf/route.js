@@ -7,6 +7,13 @@ import {
   evaluateNutrigenomicProfile,
   DEFAULT_HOSSAM_GENOTYPES
 } from '@/data/genomics/clinicalNutrigenomicEngine';
+import {
+  patchPdfDoc,
+  getWrappedLines,
+  drawWrappedBlock,
+  pdfColors,
+  sanitizePdfText
+} from '@/lib/pdf/clinicalPdfKit';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,113 +37,43 @@ export async function GET(request) {
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const helveticaOblique = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-    // Universal WinAnsi font and text sanitizer (prevents WinAnsi encoding crashes)
-    const sanitizePdfText = (str = '') => {
-      if (!str || typeof str !== 'string') return '';
-      const map = {
-        '🥬': '[Veg]', '🐟': '[Fish]', '🫒': '[Oil]', '🍵': '[Tea]', '🥗': '[Diet]',
-        '🌍': '[Global]', '✨': '[*]', '⚡': '[!]', '🧠': '[Brain]',
-        '≥': '>=', '≤': '<=', '•': '-', '·': '|', '—': '-', '–': '-', '≈': '~',
-        'µ': 'u', '²': '2', 'º': 'o', '®': '(R)', '™': '(TM)', '€': 'EUR',
-        'é': 'e', 'á': 'a', 'í': 'i', 'ó': 'o', 'ú': 'u', 'ñ': 'n',
-        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U'
-      };
-      let res = str;
-      for (const [k, v] of Object.entries(map)) {
-        res = res.replaceAll(k, v);
-      }
-      return res.replace(/[^\x20-\x7E\t\n\r]/g, '');
-    };
+    patchPdfDoc(pdfDoc, { helvetica, helveticaBold, helveticaOblique });
 
-    const origWidthOfTextAtSize = helvetica.widthOfTextAtSize.bind(helvetica);
-    helvetica.widthOfTextAtSize = (t, s) => origWidthOfTextAtSize(sanitizePdfText(t), s);
-
-    const origBoldWidthOfTextAtSize = helveticaBold.widthOfTextAtSize.bind(helveticaBold);
-    helveticaBold.widthOfTextAtSize = (t, s) => origBoldWidthOfTextAtSize(sanitizePdfText(t), s);
-
-    const origObliqueWidthOfTextAtSize = helveticaOblique.widthOfTextAtSize.bind(helveticaOblique);
-    helveticaOblique.widthOfTextAtSize = (t, s) => origObliqueWidthOfTextAtSize(sanitizePdfText(t), s);
-
-    const origAddPage = pdfDoc.addPage.bind(pdfDoc);
-    pdfDoc.addPage = (dims) => {
-      const pg = origAddPage(dims);
-      const origDrawText = pg.drawText.bind(pg);
-      pg.drawText = (text, options) => origDrawText(sanitizePdfText(text), options);
-      return pg;
-    };
-
-    // Robust, dynamic word-wrapping & text block renderer (Prevents text overlap on PDFs)
-    const getWrappedLines = (text, font, size, maxWidth) => {
-      if (!text) return [];
-      const clean = sanitizePdfText(text);
-      const words = clean.trim().split(/\s+/);
-      const lines = [];
-      let curLine = '';
-
-      for (const word of words) {
-        const testLine = curLine ? `${curLine} ${word}` : word;
-        const testW = font.widthOfTextAtSize(testLine, size);
-        if (testW <= maxWidth) {
-          curLine = testLine;
-        } else {
-          if (curLine) lines.push(curLine);
-          curLine = word;
-        }
-      }
-      if (curLine) lines.push(curLine);
-      return lines;
-    };
-
-    const drawWrappedBlock = (targetPage, text, { x, y, size, font, color, maxWidth, lineHeight, maxLines = 10 }) => {
-      const lines = getWrappedLines(text, font, size, maxWidth).slice(0, maxLines);
-      let curY = y;
-      for (const line of lines) {
-        targetPage.drawText(line, { x, y: curY, size, font, color });
-        curY -= lineHeight;
-      }
-      return curY;
-    };
-
-    // Color Palette
-    const navyPrimary = rgb(0 / 255, 54 / 255, 102 / 255);       // #003666
-    const tealAccent = rgb(13 / 255, 148 / 255, 136 / 255);      // #0d9488
-    const darkSlate = rgb(15 / 255, 23 / 255, 42 / 255);         // #0f172a
-    const mutedSlate = rgb(100 / 255, 116 / 255, 139 / 255);    // #64748b
-    const lightBg = rgb(248 / 255, 250 / 255, 252 / 255);        // #f8fafc
-    const cardBorder = rgb(226 / 255, 232 / 255, 240 / 255);    // #e2e8f0
-
-    const greenBorder = rgb(34 / 255, 197 / 255, 94 / 255);     // #22c55e
-    const greenBg = rgb(240 / 255, 253 / 255, 244 / 255);        // #f0fdf4
-    const greenText = rgb(21 / 255, 128 / 255, 61 / 255);        // #15803d
-
-    const amberBorder = rgb(245 / 255, 158 / 255, 11 / 255);    // #f59e0b
-    const amberBg = rgb(254 / 255, 243 / 255, 199 / 255);        // #fef3c7
-    const amberText = rgb(180 / 255, 83 / 255, 9 / 255);         // #b45309
-
-    const redBorder = rgb(239 / 255, 68 / 255, 68 / 255);        // #ef4444
-    const redBg = rgb(254 / 255, 242 / 255, 242 / 255);          // #fef2f2
-    const redText = rgb(185 / 255, 28 / 255, 28 / 255);          // #b91c1c
-
-    const blueBorder = rgb(2 / 255, 132 / 255, 199 / 255);       // #0284c7
-    const blueBg = rgb(224 / 255, 242 / 255, 254 / 255);         // #e0f2fe
-    const white = rgb(1, 1, 1);
-
-    // Google Cloud Console UX Semantic Tokens (Neutral, Anti-Bias)
-    const gcpBorder = rgb(218 / 255, 220 / 255, 224 / 255);      // #dadce0 (GCP Card Border)
-    const gcpPillBg = rgb(241 / 255, 243 / 255, 244 / 255);      // #f1f3f4 (GCP Chip Surface)
-    const gcpPillText = rgb(60 / 255, 64 / 255, 67 / 255);       // #3c4043 (GCP Chip Label)
-    const googleBlue = rgb(26 / 255, 115 / 255, 232 / 255);       // #1a73e8 (GCP Blue)
-    const googleBlueBg = rgb(232 / 255, 240 / 255, 254 / 255);   // #e8f0fe (GCP Blue Light Surface)
-    const googleBlueBorder = rgb(210 / 255, 227 / 255, 252 / 255);// #d2e3fc
-    const gcpGreen = rgb(19 / 255, 115 / 255, 51 / 255);         // #137333 (GCP Active Green)
-    const gcpGreenBg = rgb(230 / 255, 244 / 255, 234 / 255);     // #e6f4ea (GCP Active Green Bg)
-    const gcpGreenBorder = rgb(206 / 255, 234 / 255, 214 / 255);  // #ceead6
-    const gcpAmber = rgb(176 / 255, 96 / 255, 0 / 255);          // #b06000 (GCP Amber)
-    const gcpAmberBg = rgb(254 / 255, 247 / 255, 224 / 255);     // #fef7e0 (GCP Amber Bg)
-    const gcpAmberBorder = rgb(254 / 255, 239 / 255, 195 / 255); // #feefc3
-    const gcpRed = rgb(197 / 255, 34 / 255, 31 / 255);           // #c5221f (GCP Red)
-    const gcpRedBg = rgb(252 / 255, 232 / 255, 230 / 255);       // #fce8e6 (GCP Red Bg)
-    const gcpRedBorder = rgb(250 / 255, 210 / 255, 207 / 255);   // #fad2cf
+    const {
+      navyPrimary,
+      tealAccent,
+      darkSlate,
+      mutedSlate,
+      lightBg,
+      cardBorder,
+      greenBorder,
+      greenBg,
+      greenText,
+      amberBorder,
+      amberBg,
+      amberText,
+      redBorder,
+      redBg,
+      redText,
+      blueBorder,
+      blueBg,
+      white,
+      gcpBorder,
+      gcpPillBg,
+      gcpPillText,
+      googleBlue,
+      googleBlueBg,
+      googleBlueBorder,
+      gcpGreen,
+      gcpGreenBg,
+      gcpGreenBorder,
+      gcpAmber,
+      gcpAmberBg,
+      gcpAmberBorder,
+      gcpRed,
+      gcpRedBg,
+      gcpRedBorder
+    } = pdfColors;
 
     // =========================================================================
     // COVER PAGE: EXECUTIVE LUXURY ATLAS BRAND COVER & CREDENTIALS (GOOGLE CLOUD UX)

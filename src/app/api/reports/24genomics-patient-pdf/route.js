@@ -12,6 +12,11 @@ import {
   COMMERCIAL_LOCAL_SUPPLEMENTS,
   PRESCRIPTION_COMPARISON
 } from '@/data/genomics/clinicalNutrigenomicEngine';
+import {
+  patchPdfDoc,
+  pdfColors,
+  sanitizePdfText
+} from '@/lib/pdf/clinicalPdfKit';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,60 +34,28 @@ export async function GET(request) {
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const helveticaOblique = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-    // Universal WinAnsi font and text sanitizer (prevents WinAnsi encoding crashes)
-    const sanitizePdfText = (str = '') => {
-      if (!str || typeof str !== 'string') return '';
-      const map = {
-        '🥬': '[Veg]', '🐟': '[Fish]', '🫒': '[Oil]', '🍵': '[Tea]', '🥗': '[Diet]',
-        '🌍': '[Global]', '✨': '[*]', '⚡': '[!]', '🧠': '[Brain]',
-        '≥': '>=', '≤': '<=', '•': '-', '·': '|', '—': '-', '–': '-', '≈': '~',
-        'µ': 'u', '²': '2', 'º': 'o', '®': '(R)', '™': '(TM)', '€': 'EUR',
-        'é': 'e', 'á': 'a', 'í': 'i', 'ó': 'o', 'ú': 'u', 'ñ': 'n',
-        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U'
-      };
-      let res = str;
-      for (const [k, v] of Object.entries(map)) {
-        res = res.replaceAll(k, v);
-      }
-      return res.replace(/[^\x20-\x7E\t\n\r]/g, '');
-    };
+    patchPdfDoc(pdfDoc, { helvetica, helveticaBold, helveticaOblique });
 
-    const origWidthOfTextAtSize = helvetica.widthOfTextAtSize.bind(helvetica);
-    helvetica.widthOfTextAtSize = (t, s) => origWidthOfTextAtSize(sanitizePdfText(t), s);
-
-    const origBoldWidthOfTextAtSize = helveticaBold.widthOfTextAtSize.bind(helveticaBold);
-    helveticaBold.widthOfTextAtSize = (t, s) => origBoldWidthOfTextAtSize(sanitizePdfText(t), s);
-
-    const origObliqueWidthOfTextAtSize = helveticaOblique.widthOfTextAtSize.bind(helveticaOblique);
-    helveticaOblique.widthOfTextAtSize = (t, s) => origObliqueWidthOfTextAtSize(sanitizePdfText(t), s);
-
-    const origAddPage = pdfDoc.addPage.bind(pdfDoc);
-    pdfDoc.addPage = (dims) => {
-      const pg = origAddPage(dims);
-      const origDrawText = pg.drawText.bind(pg);
-      pg.drawText = (text, options) => origDrawText(sanitizePdfText(text), options);
-      return pg;
-    };
-
-    // Color palette
-    const navyPrimary = rgb(0 / 255, 54 / 255, 102 / 255);       // #003666
-    const tealAccent = rgb(13 / 255, 148 / 255, 136 / 255);      // #0d9488
-    const darkSlate = rgb(15 / 255, 23 / 255, 42 / 255);         // #0f172a
-    const mutedSlate = rgb(100 / 255, 116 / 255, 139 / 255);    // #64748b
-    const lightBg = rgb(248 / 255, 250 / 255, 252 / 255);        // #f8fafc
-    const cardBorder = rgb(226 / 255, 232 / 255, 240 / 255);    // #e2e8f0
-    const gcpBorder = rgb(218 / 255, 220 / 255, 224 / 255);     // #dadce0 (GCP Card Border)
-    const alertRed = rgb(185 / 255, 28 / 255, 28 / 255);         // #b91c1c
-    const badgeRedBg = rgb(254 / 255, 242 / 255, 242 / 255);     // #fef2f2
-    const amberDark = rgb(180 / 255, 83 / 255, 9 / 255);         // #b45309
-    const amberBg = rgb(254 / 255, 243 / 255, 199 / 255);        // #fef3c7
-    const blueDark = rgb(2 / 255, 132 / 255, 199 / 255);         // #0284c7
-    const blueBg = rgb(224 / 255, 242 / 255, 254 / 255);         // #e0f2fe
-    const emeraldDark = rgb(22 / 255, 163 / 255, 74 / 255);      // #16a34a
-    const emeraldBg = rgb(240 / 255, 253 / 255, 244 / 255);     // #f0fdf4
-    const purpleDark = rgb(124 / 255, 58 / 255, 237 / 255);      // #7c3aed
-    const purpleBg = rgb(243 / 255, 232 / 255, 255 / 255);        // #f3e8ff
-    const white = rgb(1, 1, 1);
+    const {
+      navyPrimary,
+      tealAccent,
+      darkSlate,
+      mutedSlate,
+      lightBg,
+      cardBorder,
+      gcpBorder,
+      alertRed,
+      badgeRedBg,
+      amberDark,
+      amberBg,
+      blueDark,
+      blueBg,
+      emeraldDark,
+      emeraldBg,
+      purpleDark,
+      purpleBg,
+      white
+    } = pdfColors;
 
     // =========================================================================
     // PAGE 1: PATIENT CLINICAL & NUTRIGENOMIC GUIDE (COPIA PARA EL PACIENTE)
