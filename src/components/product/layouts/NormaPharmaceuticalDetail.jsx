@@ -40,6 +40,7 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
+import PublicDatasheetTableOfContents from '@/components/product/PublicDatasheetTableOfContents';
 import CopyableId from '@/components/ui/CopyableId';
 import { getNormaProductBySlug } from '@/data/normaHellasRegistry';
 import './NormaPharmaceuticalDetail.css';
@@ -328,41 +329,14 @@ export default function NormaPharmaceuticalDetail({
           </div>
         </div>
 
-        {/* ── CLINICAL MONOGRAPH EXPLORER (GCP FULL-WIDTH WITH HORIZONTAL TABS) ── */}
+        {/* ── CLINICAL MONOGRAPH EXPLORER (2-COLUMN WORKSPACE WITH STICKY RIGHT SIDEBAR) ── */}
         <div className="norma-explorer-layout">
-          {/* Responsive Sticky Horizontal Tabs Bar (Google Cloud Standard) */}
-          <div className="norma-horizontal-tabs-container">
-            <div className="norma-horizontal-tabs-bar">
-              {[
-                { id: 'overview', icon: Sparkles, label: isEs ? 'Mecanismo & Farmacología' : 'Mechanism & Pharmacology' },
-                { id: 'protocols', icon: TrendingUp, label: isEs ? 'Protocolos TRT & PK' : 'TRT Protocols & PK' },
-                { id: 'administration', icon: Syringe, label: isEs ? 'Guía de Inyección' : 'Administration Guide' },
-                { id: 'monitoring', icon: HeartPulse, label: isEs ? 'Biomarcadores & Seguridad' : 'Physician Surveillance' },
-                { id: 'coa', icon: Award, label: isEs ? 'Analítica de Lote & COA' : 'Certified Batch COA' },
-                { id: 'b2b', icon: Building2, label: isEs ? 'Tarifas B2B & Suministro' : 'B2B Hospital Allocation' }
-              ].map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`norma-horizontal-tab-btn ${isActive ? 'active' : ''}`}
-                  >
-                    <Icon size={15} />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Main Content Canvas (Displays ONLY Selected Section, 100% Full Width) */}
+          {/* Left Column: Active Section Content Canvas */}
           <div className="norma-canvas-panel">
 
               {/* ── TAB 1: CELLULAR MECHANISM & CLINICAL PILLARS ── */}
               {activeTab === 'overview' && (
-                <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {/* Molecular & Cellular Pharmacology */}
                   <div className="norma-card">
                     <div className="norma-card-title">
@@ -494,7 +468,7 @@ export default function NormaPharmaceuticalDetail({
 
               {/* ── TAB 2: PROTOCOLS & PHARMACOKINETICS ── */}
               {activeTab === 'protocols' && (
-                <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {/* Pharmacokinetics Timeline */}
                   <div className="norma-card">
                     <div className="norma-card-title">
@@ -591,7 +565,7 @@ export default function NormaPharmaceuticalDetail({
 
               {/* ── TAB 3: AMPOULE ADMINISTRATION GUIDE ── */}
               {activeTab === 'administration' && (
-                <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="norma-card">
                     <div className="norma-card-title">
                       <Syringe size={18} color="#003666" />
@@ -661,7 +635,7 @@ export default function NormaPharmaceuticalDetail({
 
               {/* ── TAB 4: CERTIFIED BATCH COA ── */}
               {activeTab === 'coa' && (
-                <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="norma-card">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                       <div className="norma-card-title" style={{ margin: 0 }}>
@@ -738,7 +712,7 @@ export default function NormaPharmaceuticalDetail({
 
               {/* ── TAB 5: PHYSICIAN LAB SURVEILLANCE ── */}
               {activeTab === 'monitoring' && (
-                <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="norma-card">
                     <div className="norma-card-title">
                       <HeartPulse size={18} color="#003666" />
@@ -822,7 +796,7 @@ export default function NormaPharmaceuticalDetail({
 
               {/* ── TAB 6: B2B COMMERCIAL SCHEDULE ── */}
               {activeTab === 'b2b' && (
-                <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="norma-card">
                     <div className="norma-card-title">
                       <Building2 size={18} color="#003666" />
@@ -897,6 +871,98 @@ export default function NormaPharmaceuticalDetail({
                 </div>
               )}
             </div>
+
+          {/* Right Column: Sticky Sidebar TOC ("ON THIS PAGE" 1/6 + Pharmaceutical Specifications) */}
+          <PublicDatasheetTableOfContents
+            lang={lang}
+            activeSection={activeTab}
+            onSelectSection={(targetId) => setActiveTab(targetId)}
+            sections={[
+              { id: 'overview', icon: Sparkles, label: isEs ? '1. Mecanismo & Farmacología' : '1. Mechanism & Pharmacology' },
+              { id: 'protocols', icon: TrendingUp, label: isEs ? '2. Protocolos TRT & PK' : '2. TRT Protocols & PK' },
+              { id: 'administration', icon: Syringe, label: isEs ? '3. Guía de Inyección' : '3. Administration Guide' },
+              { id: 'monitoring', icon: HeartPulse, label: isEs ? '4. Biomarcadores & Seguridad' : '4. Physician Surveillance' },
+              { id: 'coa', icon: Award, label: isEs ? '5. Analítica de Lote & COA' : '5. Certified Batch COA' },
+              { id: 'b2b', icon: Building2, label: isEs ? '6. Tarifas B2B & Suministro' : '6. B2B Hospital Allocation' }
+            ]}
+          >
+            {/* Pharmaceutical Specifications Summary Card inside Sidebar */}
+            <div style={{
+              marginTop: '14px',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              backgroundColor: '#f8fafc',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  <Activity size={13} color="#003666" />
+                  <span>{isEs ? 'Especificaciones Farmacéuticas' : 'Pharma Specifications'}</span>
+                </div>
+                <span style={{
+                  fontSize: '0.62rem',
+                  fontWeight: 800,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  backgroundColor: '#dcfce7',
+                  color: '#166534',
+                  border: '1px solid #bbf7d0'
+                }}>
+                  EU GMP
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.73rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#64748b' }}>{isEs ? 'Titular MA' : 'MA Holder'}</span>
+                  <strong style={{ color: '#0f172a', textAlign: 'right' }}>Norma Hellas S.A.</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#64748b' }}>{isEs ? 'Planta Liberación' : 'QP Release Facility'}</span>
+                  <strong style={{ color: '#0f172a', textAlign: 'right' }}>EVER Pharma Jena</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#64748b' }}>EOF License</span>
+                  <CopyableId value="45945/03-10-2008" />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#64748b' }}>Batch / Lot</span>
+                  <CopyableId value={coa.batchNumber || '12473'} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#64748b' }}>{isEs ? 'Matriz' : 'Vehicle'}</span>
+                  <strong style={{ color: '#0f172a', textAlign: 'right' }}>Castor Oil Depot</strong>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('coa')}
+                style={{
+                  marginTop: '4px',
+                  width: '100%',
+                  padding: '7px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #0d9488',
+                  backgroundColor: '#0d9488',
+                  color: '#ffffff',
+                  fontSize: '0.73rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                <FileText size={13} />
+                <span>{isEs ? 'Ver COA Oficial de Lote' : 'View Official Batch COA'}</span>
+              </button>
+            </div>
+          </PublicDatasheetTableOfContents>
           </div>
       </main>
 

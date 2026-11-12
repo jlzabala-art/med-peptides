@@ -209,6 +209,7 @@ export function isBloodoProduct(product = {}, slug = '') {
 export default function BloodoSuiteNav({
   currentSlug = '',
   lang = 'en',
+  currency = 'EUR',
   variant = 'drawer', // 'drawer' | 'chips' | 'section'
   onSelect = null
 }) {
@@ -451,6 +452,7 @@ export default function BloodoSuiteNav({
                     name: test.nameEn,
                     category: 'Biomarker Test'
                   }}
+                  currency={currency}
                   isEs={isEs}
                   compact={false}
                   onUnlockRequest={() => setIsUnlockModalOpen(true)}

@@ -4781,7 +4781,7 @@ Please coordinate 24-hour proforma confirmation and secure payment link. Thank y
                   initialRowsPerPage={150}
                   showPagination={true}
                   sortable={true}
-                  stickyTopOffset={52}
+                  stickyTopOffset={0}
                   lang={lang}
                   groupByKey={groupByCategory ? 'categoryKey' : null}
                   renderGroupHeader={(catKey, firstRow, count) => {

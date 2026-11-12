@@ -966,7 +966,7 @@ export default function DataTable({
               backgroundColor: 'var(--color-bg-surface)',
               borderBottom: '2px solid var(--color-border)',
               position: 'sticky',
-              top: stickyTopOffset || 0,
+              top: 0,
               zIndex: 10,
             }}
           >

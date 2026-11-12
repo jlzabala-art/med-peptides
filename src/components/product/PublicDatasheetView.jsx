@@ -139,6 +139,18 @@ export default function PublicDatasheetView({
     }
     return 'en';
   });
+  const [currency, setCurrency] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const sp = new URLSearchParams(window.location.search);
+        const urlCur = (sp.get('cur') || sp.get('currency') || '').toUpperCase();
+        if (['EUR', 'USD', 'AED'].includes(urlCur)) return urlCur;
+        const storedCur = (localStorage.getItem('atlas_portal_currency') || '').toUpperCase();
+        if (['EUR', 'USD', 'AED'].includes(storedCur)) return storedCur;
+      } catch (_e) {}
+    }
+    return 'EUR';
+  });
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
@@ -2066,9 +2078,10 @@ export default function PublicDatasheetView({
         track={isDiagnosticKit ? 'diagnostics' : isCosmeticProduct ? 'cosmetics' : isSupplementProduct ? 'supplements' : isCorporateService ? 'corporate' : 'peptides'}
         lang={lang}
         onLangChange={setLang}
+        currency={currency}
+        onCurrencyChange={setCurrency}
         copyUrl={dynamicPublicUrl}
         shortUrl={shortMonographUrl}
-        supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || (isBloodoDiagnostic ? 'Bloodo' : isTeletestDiagnostic ? 'TeleTest' : 'Lotusland')}
         supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || (isBloodoDiagnostic ? 'Bloodo' : isTeletestDiagnostic ? 'TeleTest' : 'Clinical Laboratory')}
         currentSlug={slug}
         inquiryContextType="product"
@@ -2554,7 +2567,7 @@ export default function PublicDatasheetView({
                           <div className="pds-square-price-dock">
                             <TieredPriceShield
                               product={product}
-                              currency="EUR"
+                              currency={currency}
                               compact={false}
                               embedded={true}
                               isEs={lang === 'es'}
@@ -2571,7 +2584,7 @@ export default function PublicDatasheetView({
                                 variant={selectedStrength || product.variants?.[0] || null}
                                 isEs={lang === 'es'}
                                 compact={false}
-                                role={resolvedRolePricing?.tierKey || activeRole || 'retail'}
+                                role={resolvedRolePricing?.tierKey || activeRole || 'wholesaler'}
                                 priceOverride={resolvedRolePricing?.unitPrice || null}
                                 brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
                                 onUnlockRequest={() => setIsUnlockModalOpen(true)}
@@ -2641,7 +2654,7 @@ export default function PublicDatasheetView({
                           }}>
                             <TieredPriceShield
                               product={product}
-                              currency="EUR"
+                              currency={currency}
                               compact={false}
                               embedded={true}
                               isEs={lang === 'es'}
@@ -2657,7 +2670,7 @@ export default function PublicDatasheetView({
                                 variant={selectedStrength || product.variants?.[0] || null}
                                 isEs={lang === 'es'}
                                 compact={false}
-                                role={resolvedRolePricing?.tierKey || activeRole || 'retail'}
+                                role={resolvedRolePricing?.tierKey || activeRole || 'wholesaler'}
                                 priceOverride={resolvedRolePricing?.unitPrice || null}
                                 brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
                                 onUnlockRequest={() => setIsUnlockModalOpen(true)}
@@ -3123,7 +3136,7 @@ export default function PublicDatasheetView({
                   {/* ── Block 6: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
                   {effectiveActiveSection === 'bloodo-suite' && isBloodoDiagnostic && (
                     <section id="bloodo-suite" className="pds-section-card">
-                      <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
+                      <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} currency={currency} variant="section" />
                     </section>
                   )}
 

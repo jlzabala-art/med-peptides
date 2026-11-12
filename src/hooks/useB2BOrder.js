@@ -29,7 +29,7 @@ function saveStoredOrder(items) {
   }
 }
 
-export function resolveRolePrice(product, role = 'clinic') {
+export function resolveRolePrice(product, role = 'wholesaler') {
   if (!product) return 0;
   const tiers = resolveProductTierPricing(product);
   if (!tiers) {
@@ -40,12 +40,15 @@ export function resolveRolePrice(product, role = 'clinic') {
     return tiers.wholesaler || tiers.clinic || 0;
   }
   if (r === 'patient' || r === 'retail' || r === 'public' || r === 'guest') {
-    return tiers.retail || tiers.clinic || 0;
+    return tiers.retail || tiers.wholesaler || 0;
   }
   if (r === 'cost' || r === 'admin_cost' || r === 'b2b-dir') {
-    return tiers.cost || tiers.clinic || 0;
+    return tiers.cost || tiers.wholesaler || 0;
   }
-  return tiers.clinic || tiers.wholesaler || 0;
+  if (r.includes('clinic') || r.includes('doctor') || r === 'b2b') {
+    return tiers.clinic || tiers.wholesaler || 0;
+  }
+  return tiers.wholesaler || tiers.clinic || 0;
 }
 
 export function useB2BOrder() {

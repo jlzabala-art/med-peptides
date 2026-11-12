@@ -30,12 +30,22 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'es', label: 'ES', flag: '🇪🇸' }
 ];
 
+export const SUPPORTED_CURRENCIES = [
+  { code: 'EUR', symbol: '€', label: '€ EUR' },
+  { code: 'USD', symbol: '$', label: '$ USD' },
+  { code: 'AED', symbol: 'د.إ', label: 'AED' }
+];
+
 export default function PublicUnifiedHeader({
   // Active catalog track: 'peptides' | 'compounds' | 'protocols'
   track = 'peptides',
   // Active language code
   lang = 'en',
   onLangChange,
+  // Active currency code ('EUR' | 'USD' | 'AED')
+  currency = null,
+  onCurrencyChange = null,
+  hideCurrencySelector = false,
   // Custom canonical URL to copy, if any
   copyUrl,
   shortUrl,
@@ -197,6 +207,43 @@ export default function PublicUnifiedHeader({
     }
     if (onLangChange) {
       onLangChange(nextLang);
+    }
+  };
+
+  // Currency selector state & handler (EUR / USD / AED)
+  const [internalCurrency, setInternalCurrency] = useState(currency || 'EUR');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const urlCur = (sp.get('cur') || sp.get('currency') || '').toUpperCase();
+      const storedCur = (localStorage.getItem('atlas_portal_currency') || '').toUpperCase();
+      const resolved = SUPPORTED_CURRENCIES.some(c => c.code === urlCur)
+        ? urlCur
+        : SUPPORTED_CURRENCIES.some(c => c.code === storedCur)
+          ? storedCur
+          : (currency || 'EUR');
+      setInternalCurrency(resolved);
+    } catch (_e) {}
+  }, [currency]);
+
+  const effectiveCurrency = currency || internalCurrency || 'EUR';
+
+  const handleCurrencyChange = (nextCurrency) => {
+    triggerHaptic('light');
+    setInternalCurrency(nextCurrency);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_portal_currency', nextCurrency);
+      } catch (_e) {}
+      const url = new URL(window.location.href);
+      url.searchParams.set('cur', nextCurrency);
+      window.history.replaceState({}, '', url.toString());
+      window.dispatchEvent(new CustomEvent('atlas-currency-changed', { detail: nextCurrency }));
+    }
+    if (onCurrencyChange) {
+      onCurrencyChange(nextCurrency);
     }
   };
 
@@ -411,6 +458,53 @@ export default function PublicUnifiedHeader({
               )}
 
 
+
+              {/* Currency Selector (Segmented Pills Google Cloud UX Standard: EUR / USD / AED) */}
+              {!hideCurrencySelector && (
+                <div
+                  className="puh-currency-pills"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.25)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    borderRadius: '6px',
+                    padding: '2px',
+                    gap: '1px'
+                  }}
+                  role="group"
+                  aria-label={isSpanish ? 'Selector de divisa' : 'Currency selector'}
+                >
+                  {SUPPORTED_CURRENCIES.map((c) => {
+                    const isCurrent = effectiveCurrency === c.code;
+                    return (
+                      <button
+                        key={c.code}
+                        type="button"
+                        onClick={() => handleCurrencyChange(c.code)}
+                        style={{
+                          border: 'none',
+                          background: isCurrent ? '#0284c7' : 'transparent',
+                          color: isCurrent ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                          fontWeight: isCurrent ? 800 : 500,
+                          fontSize: '0.72rem',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={`${isSpanish ? 'Mostrar precios en' : 'Display prices in'} ${c.code}`}
+                      >
+                        <span>{c.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Language Selector (Segmented Pills Google Cloud UX Standard) */}
               <div className="puh-lang-pills" style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '6px', padding: '2px' }}>

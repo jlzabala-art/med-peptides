@@ -105,7 +105,7 @@ export function resolveProductTierPricing(product, capsCount = 60) {
     if (typeof product.pricing.retail === 'number' && product.pricing.retail > 0) retailPrice = product.pricing.retail;
   }
 
-  // Authoritative Bloodo™ Capillary Biomarker Kits (matches Firestore products collection)
+  // Authoritative Bloodo™ Capillary Biomarker Kits (matches Firestore products collection: Wholeseller = Cost + 15% + 15%)
   if (
     id.includes('bloodo') ||
     id === 'cortisol-test' ||
@@ -115,42 +115,43 @@ export function resolveProductTierPricing(product, capsCount = 60) {
     id === 'vitamin-d-test'
   ) {
     if (id.includes('nad')) {
-      landedCost = landedCost || 199.00;
-      wholesalePrice = wholesalePrice || 238.80;
-      clinicPrice = clinicPrice || 268.65;
-      retailPrice = retailPrice || 298.50;
+      landedCost = 199.00;
+      wholesalePrice = 263.18; // 199.00 * 1.15 * 1.15
+      clinicPrice = 288.55;
+      retailPrice = 298.50;
     } else if (id.includes('testosterone') || id.includes('testosterona')) {
-      landedCost = landedCost || 49.50;
-      wholesalePrice = wholesalePrice || 59.40;
-      clinicPrice = clinicPrice || 66.80;
-      retailPrice = retailPrice || 99.00;
+      landedCost = 49.50;
+      wholesalePrice = 65.46;  // 49.50 * 1.15 * 1.15
+      clinicPrice = 74.25;
+      retailPrice = 99.00;
     } else if (id.includes('cortisol')) {
-      landedCost = landedCost || 39.50;
-      wholesalePrice = wholesalePrice || 47.40;
-      clinicPrice = clinicPrice || 53.30;
-      retailPrice = retailPrice || 79.00;
+      landedCost = 39.50;
+      wholesalePrice = 52.24;  // 39.50 * 1.15 * 1.15
+      clinicPrice = 59.25;
+      retailPrice = 79.00;
     } else if (id.includes('hba1c') || id.includes('hemoglobin')) {
-      landedCost = landedCost || 29.50;
-      wholesalePrice = wholesalePrice || 35.40;
-      clinicPrice = clinicPrice || 39.80;
-      retailPrice = retailPrice || 59.00;
+      landedCost = 29.50;
+      wholesalePrice = 39.01;  // 29.50 * 1.15 * 1.15
+      clinicPrice = 44.25;
+      retailPrice = 59.00;
     } else if (id.includes('omega')) {
-      landedCost = landedCost || 39.50;
-      wholesalePrice = wholesalePrice || 47.40;
-      clinicPrice = clinicPrice || 53.30;
-      retailPrice = retailPrice || 79.00;
+      landedCost = 39.50;
+      wholesalePrice = 52.24;  // 39.50 * 1.15 * 1.15
+      clinicPrice = 59.25;
+      retailPrice = 79.00;
     } else if (id.includes('vitamin-d') || id.includes('vitd') || id.includes('vit-d')) {
-      landedCost = landedCost || 29.50;
-      wholesalePrice = wholesalePrice || 35.40;
-      clinicPrice = clinicPrice || 39.80;
-      retailPrice = retailPrice || 59.00;
+      landedCost = 29.50;
+      wholesalePrice = 39.01;  // 29.50 * 1.15 * 1.15
+      clinicPrice = 44.25;
+      retailPrice = 59.00;
     }
     return {
       cost: landedCost,
       wholesaler: wholesalePrice,
       clinic: clinicPrice,
       retail: retailPrice,
-      isCompounded: false
+      isCompounded: false,
+      isBloodo: true
     };
   }
 
@@ -190,35 +191,35 @@ export function resolveProductTierPricing(product, capsCount = 60) {
     } else {
       const id = (product.id || product.slug || product.canonicalId || product.name || '').toLowerCase();
       
-      // 1. Bloodo™ Capillary Biomarker Panels (Capillary DBS LC-MS/MS)
+      // 1. Bloodo™ Capillary Biomarker Panels (Capillary DBS LC-MS/MS — Wholeseller: Cost + 15% + 15%)
       if (id.includes('nad') || id.includes('bloodo-nad')) {
-        clinicPrice = 268.65;
-        wholesalePrice = 238.80;
+        clinicPrice = 288.55;
+        wholesalePrice = 263.18;
         retailPrice = 298.50;
         landedCost = 199.00;
       } else if (id.includes('testosterone') || id.includes('testosterona')) {
-        clinicPrice = 66.80;
-        wholesalePrice = 59.40;
+        clinicPrice = 74.25;
+        wholesalePrice = 65.46;
         retailPrice = 99.00;
         landedCost = 49.50;
       } else if (id.includes('cortisol')) {
-        clinicPrice = 53.30;
-        wholesalePrice = 47.40;
+        clinicPrice = 59.25;
+        wholesalePrice = 52.24;
         retailPrice = 79.00;
         landedCost = 39.50;
       } else if (id.includes('hba1c') || id.includes('hemoglobin') || id.includes('glucose') || id.includes('glicacion')) {
-        clinicPrice = 39.80;
-        wholesalePrice = 35.40;
+        clinicPrice = 44.25;
+        wholesalePrice = 39.01;
         retailPrice = 59.00;
         landedCost = 29.50;
       } else if (id.includes('omega') || id.includes('lipid')) {
-        clinicPrice = 53.30;
-        wholesalePrice = 47.40;
+        clinicPrice = 59.25;
+        wholesalePrice = 52.24;
         retailPrice = 79.00;
         landedCost = 39.50;
       } else if (id.includes('vitamin-d') || id.includes('vitd') || id.includes('vit-d')) {
-        clinicPrice = 39.80;
-        wholesalePrice = 35.40;
+        clinicPrice = 44.25;
+        wholesalePrice = 39.01;
         retailPrice = 59.00;
         landedCost = 29.50;
       }
@@ -360,6 +361,26 @@ export default function TieredPriceShield({
   const [catalogContext, setCatalogContext] = React.useState(null);
   const [urlContext, setUrlContext] = React.useState(null);
   const [liveSyncedContext, setLiveSyncedContext] = React.useState(null);
+  const [syncedCurrency, setSyncedCurrency] = React.useState(null);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const storedCur = localStorage.getItem('atlas_portal_currency');
+      if (storedCur && ['EUR', 'USD', 'AED'].includes(storedCur.toUpperCase())) {
+        setSyncedCurrency(storedCur.toUpperCase());
+      }
+    } catch (_) {}
+
+    const handleCurrencyEvent = (e) => {
+      const nextCur = e?.detail;
+      if (nextCur && ['EUR', 'USD', 'AED'].includes(String(nextCur).toUpperCase())) {
+        setSyncedCurrency(String(nextCur).toUpperCase());
+      }
+    };
+    window.addEventListener('atlas-currency-changed', handleCurrencyEvent);
+    return () => window.removeEventListener('atlas-currency-changed', handleCurrencyEvent);
+  }, []);
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -431,8 +452,8 @@ export default function TieredPriceShield({
   // 3. Authenticated user's Firebase role/pricingChannel
   // 4. Shared catalog URL parameter (?tier=...) or persisted shared catalog context
   // 5. Verified B2B preview
-  // 6. Default visitor role ('retail' — shows only the standard role price corresponding to a public visitor)
-  let activeTierKey = 'retail';
+  // 6. Default visitor role without login ('wholesaler' — shows Wholeseller price = Cost + 15% + 15%)
+  let activeTierKey = 'wholesaler';
   if (isAdmin && adminSimulationTier) {
     activeTierKey = adminSimulationTier;
   } else if (liveSyncedContext?.tier) {
@@ -441,13 +462,13 @@ export default function TieredPriceShield({
     if (isWholesaler && !isAdmin) activeTierKey = 'wholesaler';
     else if (isDoctor && !isAdmin) activeTierKey = 'clinic';
     else if (isPatient && !isAdmin) activeTierKey = 'retail';
-    else if (isAdmin) activeTierKey = 'clinic';
+    else if (isAdmin) activeTierKey = 'wholesaler';
   } else if (urlContext?.tier) {
     activeTierKey = urlContext.tier;
   } else if (catalogContext?.priceSource) {
     activeTierKey = normalizeRoleTierKey(catalogContext.priceSource) || 'wholesaler';
   } else if (localPreview?.role) {
-    activeTierKey = normalizeRoleTierKey(localPreview.role) || 'clinic';
+    activeTierKey = normalizeRoleTierKey(localPreview.role) || 'wholesaler';
   }
 
   const markupPercent = Number(
@@ -456,10 +477,13 @@ export default function TieredPriceShield({
     catalogContext?.priceMarkupPercent ??
     0
   );
-  const markupFactor = (!user && markupPercent > 0) ? (1 + markupPercent / 100) : 1;
-  const effectiveCurrency = urlContext?.currency || currency || 'EUR';
+  // Bloodo™ wholesaler tier already includes the full +15% over cost + 15% margin, so never double-apply markupFactor
+  const markupFactor = (!user && markupPercent > 0 && !tiers?.isBloodo && activeTierKey === 'cost')
+    ? (1 + markupPercent / 100)
+    : 1;
+  const effectiveCurrency = syncedCurrency || urlContext?.currency || currency || 'EUR';
 
-  const currentAmountRaw = tiers ? (tiers[activeTierKey] ?? tiers.retail ?? tiers.clinic ?? 0) : 0;
+  const currentAmountRaw = tiers ? (tiers[activeTierKey] ?? tiers.wholesaler ?? tiers.clinic ?? 0) : 0;
   const currentAmount = Math.round(currentAmountRaw * markupFactor * 100) / 100;
 
   React.useEffect(() => {
@@ -488,7 +512,7 @@ export default function TieredPriceShield({
     },
     wholesaler: {
       label: isEs ? 'TARIFA MAYORISTA B2B (EXW)' : 'WHOLESALE B2B TIER (EXW)',
-      badge: isAdmin ? (isEs ? 'Mayorista (+20%)' : 'Wholesaler (+20%)') : (isEs ? 'Mayorista B2B' : 'Wholesale B2B'),
+      badge: isAdmin ? (isEs ? 'Mayorista (+15%+15%)' : 'Wholesaler (+15%+15%)') : (isEs ? 'Mayorista B2B' : 'Wholesale B2B'),
       badgeBg: '#fff7ed',
       badgeColor: '#c2410c',
       badgeBorder: '#ffedd5',
