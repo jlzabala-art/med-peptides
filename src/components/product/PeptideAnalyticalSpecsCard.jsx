@@ -43,8 +43,22 @@ export default function PeptideAnalyticalSpecsCard({
     return match ? parseFloat(match[1]) : 10;
   }, [selectedStrength]);
 
+  const activeCoaData = useMemo(() => {
+    return (
+      selectedStrength?.coaData ||
+      (selectedStrength?.supplierId && product?.coaDataBySupplier?.[selectedStrength.supplierId]) ||
+      product?.coaData ||
+      null
+    );
+  }, [selectedStrength, product]);
+
+  const activeCoaPdfUrl = useMemo(() => {
+    return activeCoaData?.coaPdfUrl || selectedStrength?.coaUrl || product?.coaUrl || null;
+  }, [activeCoaData, selectedStrength, product]);
+
   // Derive sequence or realistic analytical benchmark
   const sequence = useMemo(() => {
+    if (activeCoaData?.sequence) return activeCoaData.sequence;
     if (product?.sequence || product?.aminoAcidSequence) {
       return product.sequence || product.aminoAcidSequence;
     }
@@ -123,6 +137,21 @@ export default function PeptideAnalyticalSpecsCard({
             <span>ISO/IEC 17025 Certified</span>
           </span>
 
+          {activeCoaPdfUrl && (
+            <a
+              href={activeCoaPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-inspect-coa"
+              style={{ textDecoration: 'none', backgroundColor: '#f8fafc', color: '#003666', borderColor: '#cbd5e1' }}
+              title={lang === 'es' ? 'Descargar PDF Original del Laboratorio' : 'Download Original Lab COA PDF'}
+            >
+              <FileCheck2 size={15} />
+              <span>{lang === 'es' ? 'PDF Lab Original' : 'Original Lab PDF'}</span>
+              <ExternalLink size={12} className="btn-ext-icon" />
+            </a>
+          )}
+
           {onOpenCoa && (
             <button 
               type="button" 
@@ -149,33 +178,63 @@ export default function PeptideAnalyticalSpecsCard({
             <span className="badge-tag tag-spec">LC-MS ESI+ Positive Ion</span>
           </div>
           <span className="panel-batch-id">
-            Batch Lot: <strong>#{product?.lotNumber || product?.batchNumber || 'RP-2026-B9'}</strong>
+            Batch Lot: <strong>#{activeCoaData?.lotNumber || selectedStrength?.lotNumber || selectedStrength?.batchNumber || product?.lotNumber || product?.batchNumber || 'RP-2026-B9'}</strong>
           </span>
         </div>
 
         <div className="hplc-metric-grid-full">
           <div className="hplc-metric-item">
-            <span className="metric-lbl">{lang === 'es' ? 'Pureza Cromatográfica' : 'Peak Purity (HPLC)'}</span>
-            <span className="metric-val text-emerald">≥ 99.4%</span>
-            <span className="metric-sub">{lang === 'es' ? 'Umbral Estándar: ≥ 99.0%' : 'Specification: ≥ 99.0% Area'}</span>
+            <span className="metric-lbl">{lang === 'es' ? 'Pureza / Potencia' : 'Peak Purity / Potency'}</span>
+            <span className="metric-val text-emerald">{activeCoaData?.purity || '≥ 99.4%'}</span>
+            <span className="metric-sub">
+              {activeCoaData?.tests?.find(t => /purity|potency/i.test(t.parameter))?.specification
+                ? `Spec: ${activeCoaData.tests.find(t => /purity|potency/i.test(t.parameter)).specification}`
+                : (lang === 'es' ? 'Umbral Estándar: ≥ 99.0%' : 'Specification: ≥ 99.0% Area')}
+            </span>
           </div>
 
           <div className="hplc-metric-item">
-            <span className="metric-lbl">{lang === 'es' ? 'Masa Medida (LC-MS)' : 'Observed Mass (LC-MS)'}</span>
-            <span className="metric-val">{observedMass} Da</span>
-            <span className="metric-sub">{lang === 'es' ? `Teórica: ${theoreticalMass} Da (Δ < 0.01%)` : `Theoretical: ${theoreticalMass} Da (Δ < 0.01%)`}</span>
+            <span className="metric-lbl">{lang === 'es' ? 'Masa / Ensayo Medido' : 'Observed Mass / Assay'}</span>
+            <span className="metric-val">{activeCoaData?.observedMass || `${observedMass} Da`}</span>
+            <span className="metric-sub">
+              {activeCoaData?.theoreticalMass
+                ? (lang === 'es' ? `Referencia: ${activeCoaData.theoreticalMass}` : `Reference: ${activeCoaData.theoreticalMass}`)
+                : (lang === 'es' ? `Teórica: ${theoreticalMass} Da (Δ < 0.01%)` : `Theoretical: ${theoreticalMass} Da (Δ < 0.01%)`)}
+            </span>
           </div>
 
           <div className="hplc-metric-item">
-            <span className="metric-lbl">{lang === 'es' ? 'Tiempo de Retención (tR)' : 'Retention Time (tR)'}</span>
-            <span className="metric-val">14.28 min</span>
-            <span className="metric-sub">C18 Column · 0.1% TFA Acetonitrile</span>
+            <span className="metric-lbl">
+              {activeCoaData?.peptideContent || activeCoaData?.waterContent
+                ? (lang === 'es' ? 'Contenido Peptídico / Agua' : 'Peptide & Water Content')
+                : (lang === 'es' ? 'Tiempo de Retención (tR)' : 'Retention Time (tR)')}
+            </span>
+            <span className="metric-val">
+              {activeCoaData?.peptideContent
+                ? `${activeCoaData.peptideContent} (${activeCoaData.waterContent || '3.9%'} H₂O)`
+                : activeCoaData?.waterContent
+                  ? `${activeCoaData.waterContent} H₂O (pH 6.6)`
+                  : '14.28 min'}
+            </span>
+            <span className="metric-sub">
+              {activeCoaData?.manufactureDate
+                ? `Mfg: ${activeCoaData.manufactureDate} · Retest: ${activeCoaData.retestDate}`
+                : 'C18 Column · 0.1% TFA Acetonitrile'}
+            </span>
           </div>
 
           <div className="hplc-metric-item">
             <span className="metric-lbl">{lang === 'es' ? 'Aspecto Físico' : 'Physical Appearance'}</span>
-            <span className="metric-val-sm">{lang === 'es' ? 'Liofilizado Blanco Estéril' : 'White Lyophilized Cake'}</span>
-            <span className="metric-sub">{lang === 'es' ? 'Sellado al Vacío bajo Nitrógeno' : 'Nitrogen Vacuum-Sealed'}</span>
+            <span className="metric-val-sm">
+              {activeCoaData?.tests?.[0]?.result && activeCoaData.tests[0].result !== 'Conform'
+                ? activeCoaData.tests[0].result
+                : (lang === 'es' ? 'Liofilizado Blanco Estéril' : 'White Lyophilized Powder')}
+            </span>
+            <span className="metric-sub">
+              {activeCoaData?.productNumber
+                ? `Product No. #${activeCoaData.productNumber} · Enterprise Std`
+                : (lang === 'es' ? 'Sellado al Vacío bajo Nitrógeno' : 'Nitrogen Vacuum-Sealed')}
+            </span>
           </div>
         </div>
 
@@ -222,11 +281,11 @@ export default function PeptideAnalyticalSpecsCard({
         <div className="sequence-meta-row">
           <div className="meta-pill">
             <span className="meta-pill-lbl">CAS:</span>
-            <strong className="meta-pill-val">{product?.cas || product?.casNumber || '2381089-83-2'}</strong>
+            <strong className="meta-pill-val">{activeCoaData?.casNumber || product?.cas || product?.casNumber || '2381089-83-2'}</strong>
           </div>
           <div className="meta-pill">
             <span className="meta-pill-lbl">{lang === 'es' ? 'Fórmula Molecular:' : 'Formula:'}</span>
-            <strong className="meta-pill-val">{product?.molecularFormula || 'C221H342N46O68'}</strong>
+            <strong className="meta-pill-val">{activeCoaData?.molecularFormula || product?.molecularFormula || 'C221H342N46O68'}</strong>
           </div>
           <div className="meta-pill">
             <span className="meta-pill-lbl">{lang === 'es' ? 'Solubilidad BAC:' : 'Solubility:'}</span>

@@ -7,24 +7,31 @@
 
 export function generateCoaData(product, variant) {
   const activeVariant = variant || product?.variants?.[0] || {};
-  if (product?.coaData) {
+  const resolvedCoaData =
+    activeVariant?.coaData ||
+    (activeVariant?.supplierId && product?.coaDataBySupplier?.[activeVariant.supplierId]) ||
+    product?.coaData;
+
+  if (resolvedCoaData) {
     return {
-      documentId: product.coaData.documentId || `COA-${product.coaData.lotNumber || 'BATCH'}`,
-      company: product.coaData.company || 'EVER PHARMA JENA GMBH',
-      labStandard: product.coaData.labStandard || 'EU GMP Pharmacopeial Release Standard',
-      productName: product.coaData.productName || product?.name || 'Medicinal Product',
-      scientificName: product.coaData.scientificName || product?.scientificName || '',
-      dosage: activeVariant?.dosage || product?.dosage || '250 mg/ml',
-      lotNumber: product.coaData.lotNumber || 'G3WTW1E',
-      manufactureDate: product.coaData.manufactureDate || '2026-04-06',
-      retestDate: product.coaData.retestDate || '2028-04-30',
-      storageCondition: product.coaData.storageCondition || product?.storage || 'Do not store above 25°C. Protect from light.',
-      casNumber: product.coaData.casNumber || product?.molecular?.casNumber || '315-37-7',
-      molecularFormula: product.coaData.molecularFormula || product?.molecular?.formula || 'C26H40O3',
-      molecularWeight: product.coaData.molecularWeight || '400.60 g/mol',
-      sequence: product.coaData.sequence || 'N/A (Steroid Hormone Ester)',
-      tests: product.coaData.tests || [],
-      hplcChromatogram: product.coaData.hplcChromatogram || {
+      documentId: resolvedCoaData.documentId || `COA-${resolvedCoaData.lotNumber || 'BATCH'}`,
+      company: resolvedCoaData.company || 'EVER PHARMA JENA GMBH',
+      labStandard: resolvedCoaData.labStandard || 'EU GMP Pharmacopeial Release Standard',
+      productName: resolvedCoaData.productName || product?.name || 'Medicinal Product',
+      scientificName: resolvedCoaData.scientificName || product?.scientificName || '',
+      productNumber: resolvedCoaData.productNumber || '',
+      dosage: activeVariant?.dosage || activeVariant?.dose || resolvedCoaData.dosage || product?.dosage || '250 mg/ml',
+      lotNumber: activeVariant?.lotNumber || activeVariant?.batchNumber || resolvedCoaData.lotNumber || 'G3WTW1E',
+      manufactureDate: activeVariant?.mfgDate || resolvedCoaData.manufactureDate || '2026-04-06',
+      retestDate: activeVariant?.retestDate || resolvedCoaData.retestDate || '2028-04-30',
+      storageCondition: resolvedCoaData.storageCondition || product?.storage || 'Do not store above 25°C. Protect from light.',
+      casNumber: resolvedCoaData.casNumber || product?.casNumber || product?.molecular?.casNumber || '315-37-7',
+      molecularFormula: resolvedCoaData.molecularFormula || product?.molecularFormula || product?.molecular?.formula || 'C26H40O3',
+      molecularWeight: resolvedCoaData.molecularWeight || product?.molecularWeight || '400.60 g/mol',
+      sequence: resolvedCoaData.sequence || product?.sequence || 'N/A (Steroid Hormone Ester)',
+      coaPdfUrl: resolvedCoaData.coaPdfUrl || activeVariant?.coaUrl || product?.coaUrl || null,
+      tests: resolvedCoaData.tests || [],
+      hplcChromatogram: resolvedCoaData.hplcChromatogram || {
         retentionTimeMin: 9.84,
         theoreticalPlates: 52000,
         symmetryFactor: 1.02,
@@ -33,10 +40,10 @@ export function generateCoaData(product, variant) {
         flowRate: '1.2 mL/min',
         column: 'RP-C18 4.6 × 250 mm, 5 µm (Ph. Eur.)'
       },
-      conclusion: product.coaData.conclusion || 'This batch conforms to all EU GMP release specifications.',
-      qaOfficer: product.coaData.qaOfficer || 'Irina Schmitt',
-      qaTitle: product.coaData.qaTitle || 'Qualified Person (QP), EVER Pharma Jena GmbH',
-      signedDate: product.coaData.signedDate || '2026-06-09'
+      conclusion: resolvedCoaData.conclusion || 'This batch conforms to all EU GMP release specifications.',
+      qaOfficer: resolvedCoaData.qaOfficer || 'Irina Schmitt',
+      qaTitle: resolvedCoaData.qaTitle || 'Qualified Person (QP), EVER Pharma Jena GmbH',
+      signedDate: resolvedCoaData.signedDate || '2026-06-09'
     };
   }
   const productName = product?.canonicalName || product?.name || 'Peptide Compound';

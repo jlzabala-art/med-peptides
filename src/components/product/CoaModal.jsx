@@ -100,6 +100,31 @@ export default function CoaModal({ product, variant, isOpen, onClose }) {
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {coa.coaPdfUrl && (
+              <a
+                href={coa.coaPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.14)',
+                  color: '#ffffff',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  border: '1px solid rgba(255, 255, 255, 0.28)',
+                  textDecoration: 'none',
+                  cursor: 'pointer'
+                }}
+                title="Open Original Lab Certificate of Analysis PDF"
+              >
+                <FileText size={14} />
+                <span>Original Lab PDF ↗</span>
+              </a>
+            )}
             <button
               type="button"
               onClick={handlePrint}
@@ -213,6 +238,18 @@ export default function CoaModal({ product, variant, isOpen, onClose }) {
               <span style={{ fontSize: '9px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', display: 'block' }}>CAS Registry</span>
               <span style={{ fontSize: '12px', color: '#334155', fontFamily: 'monospace', fontWeight: 700 }}>{coa.casNumber}</span>
             </div>
+            <div>
+              <span style={{ fontSize: '9px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', display: 'block' }}>Mfg. / Re-Test Date</span>
+              <span style={{ fontSize: '11px', color: '#334155', fontFamily: 'monospace', fontWeight: 700 }}>
+                {coa.manufactureDate} → {coa.retestDate}
+              </span>
+            </div>
+            {coa.productNumber && (
+              <div>
+                <span style={{ fontSize: '9px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', display: 'block' }}>Product No.</span>
+                <span style={{ fontSize: '12px', color: '#334155', fontFamily: 'monospace', fontWeight: 700 }}>#{coa.productNumber}</span>
+              </div>
+            )}
           </div>
 
           {/* Analytical Release Specifications */}
