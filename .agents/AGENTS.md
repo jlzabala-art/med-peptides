@@ -609,3 +609,20 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - Las descripciones subordinadas deben renderizarse en su propia línea inferior sangrada con `maxWidth` acotado, evitando que el texto salte y cuelgue por fuera del borde inferior del contenedor.
 - **Banners de Notificación estilo Google Cloud**:
   - Todo aviso o callout al paciente/médico debe implementarse con formato Google Cloud Console: banda de acento vertical izquierda (3-4 pt), fondo sutil tintado (`#e8f0fe`), titular en negrita y cuerpo de texto descriptivo con altura suficiente (`height: 26-28 pt`), evitando títulos infinitos en una sola línea que se cortan en el margen derecho.
+
+## 50. Importación Automática de Informes 24Genetics → Motor Clínico Atlas (Golden Rule)
+- **Regla general**: Cada vez que se importe un informe de Nutrigen de 24Genetics (PDF de Nutrition 2.0 o similares), Atlas DEBE:
+  1. **Extraer TODOS los genotipos** presentes en ese informe específico (cada sección "GenotypeGene" → gen + genotipo).
+  2. **Mapear los genotipos extraídos** al formato de entrada del motor clínico (`clinicalNutrigenomicEngine.js` → `evaluateNutrigenomicProfile({ genotypes: {...} })`).
+  3. **Generar automáticamente** el informe personalizado de Atlas con valor añadido:
+     - 5 ejes clínicos (saciedad, metilación, glucemia, micronutrientes, sensibilidades).
+     - Semáforo alimentario (verde/amarillo/rojo).
+     - Protocolo de 3 cápsulas magistrales.
+     - Menú semanal de 7 días.
+     - Lista de compras.
+     - Guía de consulta para el nutricionista.
+  4. **Producir ambos formatos**: portal online interactivo (`/patient/dna-report`) Y PDF clínico (`/api/reports/24genomics-patient-pdf`).
+- **Los genotipos no presentes en el informe 24Genetics** (ej. CYP4F2, CYP1A2, VDR si no aparecen) se rellenan con valores wild-type/normales por defecto (los genotipos de menor riesgo), documentando claramente cuáles fueron extraídos del informe y cuáles son defaults.
+- **Cada nuevo paciente importado** debe registrarse en `PATIENT_GENOTYPE_PROFILES` y `PATIENT_DEFAULTS` dentro de `clinicalNutrigenomicEngine.js`, identificado por su `sampleCode` (ej. `G000943568`).
+- **El motor DEBE generar textos clínicos condicionales** — nunca texto estático. Los hallazgos, alertas y recomendaciones deben variar según los genotipos reales del paciente (ej. MTHFR GG = "Methylation Normal" vs TT = "Severe Impairment").
+- **Nunca reutilices los datos de un paciente para otro.** Cada informe es personalizado con los genotipos REALES extraídos del PDF de ese paciente concreto.

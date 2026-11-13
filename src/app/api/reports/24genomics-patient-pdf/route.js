@@ -10,7 +10,8 @@ import {
   CONCRETE_DIET_GUIDELINES,
   TREATMENT_CYCLE,
   COMMERCIAL_LOCAL_SUPPLEMENTS,
-  PRESCRIPTION_COMPARISON
+  PRESCRIPTION_COMPARISON,
+  evaluateNutrigenomicProfile
 } from '@/data/genomics/clinicalNutrigenomicEngine';
 import {
   patchPdfDoc,
@@ -23,11 +24,23 @@ export const dynamic = 'force-dynamic';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const patientName = searchParams.get('patient') || 'Hossam Ahmed';
     const sampleId = searchParams.get('sample') || '24G-QA-90421';
-    const clinicName = searchParams.get('clinic') || 'Ryhanh Medical Wellness · Doha, Qatar';
+    const isWafa = sampleId === 'G000943568';
+    const patientName = searchParams.get('patient') || (isWafa ? 'Ms. Wafa Burud' : 'Hossam Ahmed');
+    const doctorNameParam = searchParams.get('doctor') || (isWafa ? 'Dr. Sajid Burud' : 'Dr. Ryhanh Medical');
+    const clinicName = searchParams.get('clinic') || (isWafa ? 'Dr. Sajid Burud Medical Practice' : 'Ryhanh Medical Wellness · Doha, Qatar');
     const modalityParam = searchParams.get('modality') || 'modalityB';
     const isOptionA = modalityParam === 'optionA' || modalityParam === 'modalityA';
+
+    // Dynamic genotype-aware profile (auto-selects by sampleCode via PATIENT_GENOTYPE_PROFILES)
+    const gProfile = evaluateNutrigenomicProfile({ patient: patientName, sampleCode: sampleId, clinic: clinicName, doctor: doctorNameParam });
+    const gEval = gProfile.genotypesEvaluated;
+    const isMthfrRisk = gEval.MTHFR === 'TT' || gEval.MTHFR === 'CT';
+    const isMthfrSevere = gEval.MTHFR === 'TT';
+    const isVdrRisk = gEval.VDR === 'CT' || gEval.VDR === 'TT';
+    const isVitERisk = gEval.ZPR1 === 'CG' || gEval.ZPR1 === 'GG' || gEval.CYP4F2 === 'TC' || gEval.CYP4F2 === 'CC';
+    const isLactoseIntolerant = gEval.MCM6 === 'AG' || gEval.MCM6 === 'GG';
+    const doctorName = gProfile.patient.doctor || doctorNameParam || 'Clinical Genomic Director';
 
     const pdfDoc = await PDFDocument.create();
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -270,28 +283,38 @@ export async function GET(request) {
       },
       {
         circadianSlot: '01:30 PM · MIDDAY WITH FOOD',
-        circadianBg: rgb(254 / 255, 242 / 255, 242 / 255), // Soft Red
-        pillarTag: 'ACTIVE VITAMINS & VITALITY (Gene MTHFR C677T)',
-        title: 'Active B-Vitamins & Daily Cellular Energy',
-        status: 'ACTIVE FOLATE NEEDED',
-        statusColor: alertRed,
-        statusBg: badgeRedBg,
-        baselinePct: 0.30,
-        why: 'Your liver converts synthetic "folic acid" slowly (~30% efficiency), so you need natural pre-activated B-vitamins.',
-        assignedFormulation: 'Breakfast Capsule (Dose 2 · With healthy fat) — Active Natural Folate (L-5-MTHF) + B2 + Active B12 + B6',
-        clinicalGoal: 'Provides ready-to-use folate and B-vitamins directly to your cells for daily energy and cardiovascular health.'
+        circadianBg: isMthfrRisk ? rgb(254 / 255, 242 / 255, 242 / 255) : emeraldBg, // Soft Red or Soft Green
+        pillarTag: `ACTIVE VITAMINS & VITALITY (Gene MTHFR ${gEval.MTHFR || 'C677T'})`,
+        title: isMthfrRisk ? 'Active B-Vitamins & Daily Cellular Energy' : 'Cellular Methylation & Daily Vitality',
+        status: isMthfrRisk ? 'ACTIVE FOLATE NEEDED' : 'METHYLATION OPTIMAL',
+        statusColor: isMthfrRisk ? alertRed : emeraldDark,
+        statusBg: isMthfrRisk ? badgeRedBg : emeraldBg,
+        baselinePct: isMthfrSevere ? 0.30 : isMthfrRisk ? 0.65 : 1.0,
+        why: isMthfrRisk
+          ? 'Your liver converts synthetic "folic acid" slowly (~30% efficiency), so you need natural pre-activated B-vitamins.'
+          : 'Your MTHFR gene functions normally (wild-type GG). Natural dietary folates maintain optimal methylation without high-dose synthetic supplements.',
+        assignedFormulation: isMthfrRisk
+          ? 'Breakfast Capsule (Dose 2 · With healthy fat) — Active Natural Folate (L-5-MTHF) + B2 + Active B12 + B6'
+          : 'Standard Diet & Whole Greens (Spinach, arugula, pasture eggs) — Standard daily micronutrient support.',
+        clinicalGoal: isMthfrRisk
+          ? 'Provides ready-to-use folate and B-vitamins directly to your cells for daily energy and cardiovascular health.'
+          : 'Maintains balanced homocysteine and normal cellular vitality through whole-food nutrition.'
       },
       {
         circadianSlot: '10:30 PM · EVENING BEDTIME',
         circadianBg: rgb(243 / 255, 232 / 255, 255 / 255), // Soft Purple
-        pillarTag: 'VITAMIN D, BONES & DEEP SLEEP (Genes VDR / CYP1A2)',
-        title: 'Vitamin D Absorption & Restorative Night Sleep',
-        status: 'VITAMIN D & SLEEP',
+        pillarTag: `VITAMIN D, BONES & DEEP SLEEP (Genes ${isVdrRisk ? 'VDR ' + gEval.VDR : 'GC ' + (gEval.GC || 'TT')} / ADORA2A ${gEval.ADORA2A})`,
+        title: isVdrRisk ? 'Vitamin D Absorption & Restorative Night Sleep' : 'Circadian Rhythm & Neuro-Sleep Architecture',
+        status: isVdrRisk ? 'VITAMIN D & SLEEP' : 'SLEEP & ADENOSINE SUPPORT',
         statusColor: purpleDark,
         statusBg: purpleBg,
-        baselinePct: 0.35,
-        why: 'Your Vitamin D receptors need steady daily D3 + K2 with food, while gentle evening magnesium helps calm your nervous system.',
-        assignedFormulation: 'Breakfast Capsule (D3 2,000 IU + K2 100µg) & Evening Capsules (Gentle Magnesium 150mg + L-Theanine 200mg)',
+        baselinePct: isVdrRisk ? 0.35 : 0.85,
+        why: isVdrRisk
+          ? 'Your Vitamin D receptors need steady daily D3 + K2 with food, while gentle evening magnesium helps calm your nervous system.'
+          : 'Your Vitamin D utilization is within normal range. Gentle evening magnesium & L-Theanine support restorative deep sleep and balance caffeine sensitivity.',
+        assignedFormulation: isVdrRisk
+          ? 'Breakfast Capsule (D3 2,000 IU + K2 100µg) & Evening Capsules (Gentle Magnesium 150mg + L-Theanine 200mg)'
+          : 'Evening Capsules (Gentle Magnesium 150mg + L-Theanine 200mg) for neuro-calm and deep sleep recovery.',
         clinicalGoal: 'Supports strong bones and immunity by day, and deep, uninterrupted muscle and mental relaxation at night.'
       }
     ];
@@ -871,26 +894,26 @@ export async function GET(request) {
     const STANDARDIZED_CARD_TITLES = [
       {
         title: '[1] IMMUNITY · VITAMIN D3 + K2',
-        priorityBadge: 'PRIORITY 1 · ESSENTIAL',
-        priorityColor: alertRed,
-        priorityBg: badgeRedBg,
-        shortGene: 'VDR FokI / CYP2R1',
-        dose: '4,000 IU + 100 mcg'
+        priorityBadge: isVdrRisk ? 'PRIORITY 1 · ESSENTIAL' : 'PRIORITY 2 · RECOMMENDED',
+        priorityColor: isVdrRisk ? alertRed : blueDark,
+        priorityBg: isVdrRisk ? badgeRedBg : blueBg,
+        shortGene: isVdrRisk ? `VDR FokI (${gEval.VDR})` : `GC (${gEval.GC || 'TT'}) · NORMAL`,
+        dose: isVdrRisk ? '4,000 IU + 100 mcg' : '2,000 IU + 75 mcg'
       },
       {
         title: '[2] ENERGY · ACTIVE FOLATE (B9)',
-        priorityBadge: 'PRIORITY 1 · ESSENTIAL',
-        priorityColor: alertRed,
-        priorityBg: badgeRedBg,
-        shortGene: 'MTHFR C677T (TT)',
-        dose: '800 mcg'
+        priorityBadge: isMthfrRisk ? 'PRIORITY 1 · ESSENTIAL' : 'PRIORITY 3 · DIETARY',
+        priorityColor: isMthfrRisk ? alertRed : emeraldDark,
+        priorityBg: isMthfrRisk ? badgeRedBg : emeraldBg,
+        shortGene: isMthfrRisk ? `MTHFR C677T (${gEval.MTHFR})` : `MTHFR (${gEval.MTHFR}) · OPTIMAL`,
+        dose: isMthfrRisk ? '800 mcg' : 'Dietary Greens'
       },
       {
         title: '[3] SLEEP · CHELATED MAGNESIUM',
         priorityBadge: 'PRIORITY 2 · RECOMMENDED',
         priorityColor: blueDark,
         priorityBg: blueBg,
-        shortGene: 'COMT / TRPM6',
+        shortGene: `ADORA2A (${gEval.ADORA2A}) / TRPM6`,
         dose: '300–400 mg'
       },
       {
@@ -903,10 +926,10 @@ export async function GET(request) {
       },
       {
         title: '[5] GUT SHIELD · PROBIOTICS',
-        priorityBadge: 'PRIORITY 3 · OPTIONAL',
-        priorityColor: amberDark,
-        priorityBg: amberBg,
-        shortGene: 'MCM6 / LCT (CC)',
+        priorityBadge: isLactoseIntolerant ? 'PRIORITY 1 · HIGH BENEFIT' : 'PRIORITY 3 · OPTIONAL',
+        priorityColor: isLactoseIntolerant ? alertRed : amberDark,
+        priorityBg: isLactoseIntolerant ? badgeRedBg : amberBg,
+        shortGene: `MCM6 (${gEval.MCM6}) · ${isLactoseIntolerant ? 'HYPOLACTASIA' : 'TOLERANT'}`,
         dose: '15 Billion CFU'
       }
     ];
@@ -1622,15 +1645,17 @@ export async function GET(request) {
     });
 
     // Left Panel: Physician Information
-    page3.drawText('Prescribing Physician (Full Name): _______________________________________________', {
+    const physicianDisplay = doctorName ? `Prescribing Physician: ${doctorName}` : 'Prescribing Physician (Full Name): _______________________________________________';
+    page3.drawText(physicianDisplay, {
       x: 44,
       y: y3 + 38,
       size: 6.2,
-      font: helvetica,
+      font: doctorName ? helveticaBold : helvetica,
       color: darkSlate
     });
 
-    page3.drawText('Medical License / Registry Reg. No.: ____________________________________________', {
+    const clinicDisplay = clinicName ? `Clinical Center: ${clinicName}` : 'Medical License / Registry Reg. No.: ____________________________________________';
+    page3.drawText(clinicDisplay, {
       x: 44,
       y: y3 + 24,
       size: 6.2,

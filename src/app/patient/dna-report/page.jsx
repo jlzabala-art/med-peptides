@@ -9,8 +9,9 @@ const BASE_URL = 'https://www.atlashealth-services.com';
 
 export async function generateMetadata({ searchParams }) {
   const sp = await searchParams;
-  const patient = sp?.patient || 'Hossam Ahmed';
   const sample = sp?.sample || '24G-QA-90421';
+  const isWafa = sample === 'G000943568';
+  const patient = sp?.patient || (isWafa ? 'Ms. Wafa Burud' : 'Hossam Ahmed');
 
   const title = `Genomic Nutrition & Formulation Report · ${patient}`;
   const description = `Confidential CE-IVD DNA Analysis & Magistral Compounded Prescription (Sample #${sample}). Issued by Atlas Health Services.`;
@@ -46,10 +47,11 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function PatientDnaReportPage({ searchParams }) {
   const sp = await searchParams;
-  const patientName = sp?.patient || 'Hossam Ahmed';
   const sampleCode = sp?.sample || '24G-QA-90421';
-  const clinic = sp?.clinic || 'Ryhanh Medical Company · Doha';
-  const doctor = sp?.doctor || 'Clinical Genomic Director';
+  const isWafa = sampleCode === 'G000943568';
+  const patientName = sp?.patient || (isWafa ? 'Ms. Wafa Burud' : 'Hossam Ahmed');
+  const clinic = sp?.clinic || (isWafa ? 'Dr. Sajid Burud Medical Practice' : 'Ryhanh Medical Company · Doha');
+  const doctor = sp?.doctor || (isWafa ? 'Dr. Sajid Burud' : 'Clinical Genomic Director');
 
   // Rule #21: Server-side evaluation of clinical nutrigenomics profile
   const initialProfile = evaluateNutrigenomicProfile({

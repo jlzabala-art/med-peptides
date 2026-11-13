@@ -123,10 +123,11 @@ export default function PatientDnaPortalClient({
   };
 
   // Official PDF download URLs
-  const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&modality=${prescriptionModality}&includeOriginal=true`;
-  const pdfDownloadUrlLight = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&modality=${prescriptionModality}&full=false`;
-  const mealPlanPdfUrl = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&includeOriginal=true`;
-  const mealPlanPdfUrlLight = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&full=false`;
+  const currentDoctor = clinicalProfile.patient?.doctor || initialDoctor || '';
+  const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&modality=${prescriptionModality}&includeOriginal=true`;
+  const pdfDownloadUrlLight = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&modality=${prescriptionModality}&full=false`;
+  const mealPlanPdfUrl = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&includeOriginal=true`;
+  const mealPlanPdfUrlLight = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&full=false`;
 
   const handleShareClick = () => {
     if (typeof window !== 'undefined') {
@@ -395,6 +396,11 @@ export default function PatientDnaPortalClient({
               <div style={{ fontSize: '0.72rem', color: '#475569', borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
                 <strong>Clinic:</strong> {clinic}
               </div>
+              {currentDoctor && (
+                <div style={{ fontSize: '0.72rem', color: '#475569', paddingTop: '4px' }}>
+                  <strong>Doctor:</strong> {currentDoctor}
+                </div>
+              )}
             </div>
 
             {/* Vertical Chapter Navigation */}

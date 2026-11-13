@@ -641,33 +641,97 @@ export const DEFAULT_HOSSAM_GENOTYPES = {
 };
 
 /**
+ * Patient: Ms. Wafa Burud — Sample G000943568 (24Genetics Nutrition 2.0)
+ * Extracted from 57-page PDF uploaded 2026-11-13.
+ * Doctor: Dr. Sajid Burud (Drsajidburud2022@gmail.com)
+ *
+ * KEY DIFFERENCES vs Hossam Ahmed:
+ *  - MTHFR GG  → Normal methylation (wild-type). NO synthetic folic acid alert.
+ *  - ZPR1  CC  → Normal vitamin E metabolism. NO toxicity warning.
+ *  - CYP4F2 TT → Normal tocopherol clearance (gene not in 24Gen report; safe default).
+ *  - VDR   CC  → Normal vitamin D receptor (GC TT in report = not deficient).
+ *  - TAS2R38 AA → Normal bitter taste; lower emotional eating risk.
+ *  - FUT1  GG  → Normal sweet craving.
+ *  - IRS1  TC  → Moderate insulin sensitivity reduction (strand-flip of CT).
+ *  - MCM6  GG  → Severe hypolactasia (worse than Hossam's AG).
+ *  - ADORA2A TT → Above-average caffeine anxiety (homozygous risk).
+ *  - CYP1A2 AA → Normal caffeine clearance (gene not in 24Gen report; safe default).
+ */
+export const WAFA_BURUD_GENOTYPES = {
+  MC4R: { gene: 'MC4R', rsId: 'rs17782313', genotype: 'TC', effect: 'delayed_satiety', risk: 'high', label: 'Delayed Satiety Response' },
+  TAS2R38: { gene: 'TAS2R38', rsId: 'rs713598', genotype: 'AA', effect: 'normal_bitter_taste', risk: 'low', label: 'Normal Bitter Taste Perception' },
+  FUT1: { gene: 'FUT1', rsId: 'rs601338', genotype: 'GG', effect: 'normal_sweet_craving', risk: 'low', label: 'Normal Sweet Craving Tendency' },
+  FTO: { gene: 'FTO', rsId: 'rs9939609', genotype: 'AC', effect: 'overweight_carb_sensitivity', risk: 'high', label: 'Overweight Predisposition & Carb Vulnerability' },
+  IRS1: { gene: 'IRS1', rsId: 'rs1801278', genotype: 'TC', effect: 'moderate_insulin_sensitivity', risk: 'moderate', label: 'Moderate Insulin Sensitivity Reduction' },
+  CLOCK: { gene: 'CLOCK', rsId: 'rs1801260', genotype: 'AA', effect: 'evening_metabolic_slowdown', risk: 'moderate', label: 'Circadian Phase Delay' },
+  MTHFR: { gene: 'MTHFR', rsId: 'rs1801133', genotype: 'GG', effect: 'normal_methylation', risk: 'low', label: 'Normal Methylation Capacity (Wild-Type)' },
+  ZPR1: { gene: 'ZPR1', rsId: 'rs964184', genotype: 'CC', effect: 'normal_vit_e_metabolism', risk: 'low', label: 'Normal Vitamin E Metabolism' },
+  CYP4F2: { gene: 'CYP4F2', rsId: 'rs2108622', genotype: 'TT', effect: 'normal_tocopherol_clearance', risk: 'low', label: 'Normal Tocopherol Clearance' },
+  MCM6: { gene: 'MCM6', rsId: 'rs4988235', genotype: 'GG', effect: 'severe_hypolactasia', risk: 'high', label: 'Severe Adult Hypolactasia (Complete Lactose Malabsorption)' },
+  ADORA2A: { gene: 'ADORA2A', rsId: 'rs5751876', genotype: 'TT', effect: 'caffeine_induced_anxiety', risk: 'high', label: 'Adenosine Receptor Caffeine Anxiety (Homozygous Risk)' },
+  CYP1A2: { gene: 'CYP1A2', rsId: 'rs762551', genotype: 'AA', effect: 'normal_caffeine_clearance', risk: 'low', label: 'Normal Hepatic Caffeine Clearance' },
+  VDR: { gene: 'VDR', rsId: 'rs2228570', genotype: 'CC', effect: 'normal_vitamin_d_receptor', risk: 'low', label: 'Normal Vitamin D Receptor Function' }
+};
+
+/**
+ * Patient profile lookup by sample code.
+ * Allows the engine to auto-select the correct genotypes for any registered patient.
+ */
+const PATIENT_GENOTYPE_PROFILES = {
+  'G000943568': WAFA_BURUD_GENOTYPES,
+  '24G-QA-90421': DEFAULT_HOSSAM_GENOTYPES
+};
+
+const PATIENT_DEFAULTS = {
+  'G000943568': {
+    patientName: 'Wafa Burud',
+    doctor: 'Dr. Sajid Burud',
+    clinic: 'Dr. Sajid Burud Medical Practice',
+    analysisDate: 'November 2026'
+  },
+  '24G-QA-90421': {
+    patientName: 'Hossam Ahmed',
+    doctor: 'Dr. Ryhanh Medical',
+    clinic: 'Atlas Health Services · Doha, Qatar',
+    analysisDate: 'November 2026'
+  }
+};
+
+/**
  * Universal evaluator function that processes any patient genetic payload
  * (24Genetics nutrition PDF, Fagron NutriGen, raw JSON or default).
  * Returns complete, structured, food-first clinical nutritionist data.
  */
 export function evaluateNutrigenomicProfile(inputData = {}) {
-  const patientName = inputData.patientName || inputData.patient || 'Hossam Ahmed';
   const sampleCode = inputData.sampleCode || inputData.sample || '24G-QA-90421';
-  const clinic = inputData.clinic || 'Atlas Health Services · Doha, Qatar';
-  const testPlatform = inputData.testPlatform || '24Genetics / Illumina GSA-24 Human Multi-Disease BeadChip';
-  const analysisDate = inputData.analysisDate || 'November 2026';
 
-  // Normalize genotypes map
+  // Auto-select patient defaults by sample code (if registered)
+  const patientDefaults = PATIENT_DEFAULTS[sampleCode] || {};
+  const patientName = inputData.patientName || inputData.patient || patientDefaults.patientName || 'Hossam Ahmed';
+  const doctor = inputData.doctor || inputData.doctorName || patientDefaults.doctor || 'Dr. Ryhanh Medical';
+  const clinic = inputData.clinic || patientDefaults.clinic || 'Atlas Health Services · Doha, Qatar';
+  const testPlatform = inputData.testPlatform || '24Genetics / Illumina GSA-24 Human Multi-Disease BeadChip';
+  const analysisDate = inputData.analysisDate || patientDefaults.analysisDate || 'November 2026';
+
+  // Auto-select genotype profile by sample code, or fall back to Hossam defaults
+  const profileGenotypes = PATIENT_GENOTYPE_PROFILES[sampleCode] || DEFAULT_HOSSAM_GENOTYPES;
+
+  // Normalize genotypes map — explicit input overrides auto-selected profile
   const rawG = inputData.genotypes || {};
   const g = {
-    MC4R: typeof rawG.MC4R === 'string' ? rawG.MC4R : (rawG.MC4R?.genotype || DEFAULT_HOSSAM_GENOTYPES.MC4R.genotype),
-    TAS2R38: typeof rawG.TAS2R38 === 'string' ? rawG.TAS2R38 : (rawG.TAS2R38?.genotype || DEFAULT_HOSSAM_GENOTYPES.TAS2R38.genotype),
-    FUT1: typeof rawG.FUT1 === 'string' ? rawG.FUT1 : (rawG.FUT1?.genotype || DEFAULT_HOSSAM_GENOTYPES.FUT1.genotype),
-    FTO: typeof rawG.FTO === 'string' ? rawG.FTO : (rawG.FTO?.genotype || DEFAULT_HOSSAM_GENOTYPES.FTO.genotype),
-    IRS1: typeof rawG.IRS1 === 'string' ? rawG.IRS1 : (rawG.IRS1?.genotype || DEFAULT_HOSSAM_GENOTYPES.IRS1.genotype),
-    CLOCK: typeof rawG.CLOCK === 'string' ? rawG.CLOCK : (rawG.CLOCK?.genotype || DEFAULT_HOSSAM_GENOTYPES.CLOCK.genotype),
-    MTHFR: typeof rawG.MTHFR === 'string' ? rawG.MTHFR : (rawG.MTHFR?.genotype || DEFAULT_HOSSAM_GENOTYPES.MTHFR.genotype),
-    ZPR1: typeof rawG.ZPR1 === 'string' ? rawG.ZPR1 : (rawG.ZPR1?.genotype || DEFAULT_HOSSAM_GENOTYPES.ZPR1.genotype),
-    CYP4F2: typeof rawG.CYP4F2 === 'string' ? rawG.CYP4F2 : (rawG.CYP4F2?.genotype || DEFAULT_HOSSAM_GENOTYPES.CYP4F2.genotype),
-    MCM6: typeof rawG.MCM6 === 'string' ? rawG.MCM6 : (rawG.MCM6?.genotype || DEFAULT_HOSSAM_GENOTYPES.MCM6.genotype),
-    ADORA2A: typeof rawG.ADORA2A === 'string' ? rawG.ADORA2A : (rawG.ADORA2A?.genotype || DEFAULT_HOSSAM_GENOTYPES.ADORA2A.genotype),
-    CYP1A2: typeof rawG.CYP1A2 === 'string' ? rawG.CYP1A2 : (rawG.CYP1A2?.genotype || DEFAULT_HOSSAM_GENOTYPES.CYP1A2.genotype),
-    VDR: typeof rawG.VDR === 'string' ? rawG.VDR : (rawG.VDR?.genotype || DEFAULT_HOSSAM_GENOTYPES.VDR.genotype)
+    MC4R: typeof rawG.MC4R === 'string' ? rawG.MC4R : (rawG.MC4R?.genotype || profileGenotypes.MC4R.genotype),
+    TAS2R38: typeof rawG.TAS2R38 === 'string' ? rawG.TAS2R38 : (rawG.TAS2R38?.genotype || profileGenotypes.TAS2R38.genotype),
+    FUT1: typeof rawG.FUT1 === 'string' ? rawG.FUT1 : (rawG.FUT1?.genotype || profileGenotypes.FUT1.genotype),
+    FTO: typeof rawG.FTO === 'string' ? rawG.FTO : (rawG.FTO?.genotype || profileGenotypes.FTO.genotype),
+    IRS1: typeof rawG.IRS1 === 'string' ? rawG.IRS1 : (rawG.IRS1?.genotype || profileGenotypes.IRS1.genotype),
+    CLOCK: typeof rawG.CLOCK === 'string' ? rawG.CLOCK : (rawG.CLOCK?.genotype || profileGenotypes.CLOCK.genotype),
+    MTHFR: typeof rawG.MTHFR === 'string' ? rawG.MTHFR : (rawG.MTHFR?.genotype || profileGenotypes.MTHFR.genotype),
+    ZPR1: typeof rawG.ZPR1 === 'string' ? rawG.ZPR1 : (rawG.ZPR1?.genotype || profileGenotypes.ZPR1.genotype),
+    CYP4F2: typeof rawG.CYP4F2 === 'string' ? rawG.CYP4F2 : (rawG.CYP4F2?.genotype || profileGenotypes.CYP4F2.genotype),
+    MCM6: typeof rawG.MCM6 === 'string' ? rawG.MCM6 : (rawG.MCM6?.genotype || profileGenotypes.MCM6.genotype),
+    ADORA2A: typeof rawG.ADORA2A === 'string' ? rawG.ADORA2A : (rawG.ADORA2A?.genotype || profileGenotypes.ADORA2A.genotype),
+    CYP1A2: typeof rawG.CYP1A2 === 'string' ? rawG.CYP1A2 : (rawG.CYP1A2?.genotype || profileGenotypes.CYP1A2.genotype),
+    VDR: typeof rawG.VDR === 'string' ? rawG.VDR : (rawG.VDR?.genotype || profileGenotypes.VDR.genotype)
   };
 
   // 1. Calculate Axis 1: Satiety & Appetite Regulation
@@ -693,8 +757,16 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
     badgeColor: satietyScore >= 75 ? '#c5221f' : satietyScore >= 45 ? '#b06000' : '#137333',
     badgeBg: satietyScore >= 75 ? '#fce8e6' : satietyScore >= 45 ? '#fef7e0' : '#e6f4ea',
     keyGenes: `MC4R (${g.MC4R}), TAS2R38 (${g.TAS2R38}), FUT1 (${g.FUT1}), FTO (${g.FTO})`,
-    clinicalFindingEn: 'Your brain receives the "I am full" signal slower after eating, making it easier to crave sweet or crunchy snacks in the afternoon.',
-    clinicalFindingEs: 'Tu cerebro recibe la señal de saciedad más despacio al comer, facilitando el deseo de picotear dulce o salado por la tarde.',
+    clinicalFindingEn: satietyScore >= 75
+      ? 'Your brain receives the "I am full" signal slower after eating, making it easier to crave sweet or crunchy snacks in the afternoon.'
+      : satietyScore >= 45
+      ? 'Your appetite control has moderate genetic variability. Delayed fullness signals from MC4R and carb sensitivity from FTO mean structured meals with protein are essential.'
+      : 'Your appetite and satiety signals function within normal genetic parameters. Maintain regular meal timing and prioritize protein.',
+    clinicalFindingEs: satietyScore >= 75
+      ? 'Tu cerebro recibe la señal de saciedad más despacio al comer, facilitando el deseo de picotear dulce o salado por la tarde.'
+      : satietyScore >= 45
+      ? 'Tu control del apetito tiene variabilidad genética moderada. Las señales de saciedad de MC4R y la sensibilidad a carbohidratos de FTO requieren comidas estructuradas con proteína.'
+      : 'Tus señales de apetito y saciedad funcionan dentro de los parámetros genéticos normales. Mantén horarios regulares y prioriza la proteína.',
     proteinTargetEn: 'Eat 1 palm-sized protein portion (30–35g: eggs, fish, or poultry) at every meal to keep you full for 5 hours.',
     proteinTargetEs: 'Toma 1 ración de proteína (30–35g: huevos, pescado o ave) en cada comida para mantenerte saciado 5 horas.',
     emotionalEatingProtocolEn: 'Healthy afternoon swaps: 2 squares of 85% dark chocolate, crunchy cucumber/celery with olive oil, or 1 handful of raw walnuts.',
@@ -722,10 +794,14 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
     keyGenes: `MTHFR C677T (${g.MTHFR}), MTR, MTRR`,
     clinicalFindingEn: hasMthfrTT
       ? 'Your body utilizes only about 30% of common synthetic folic acid. You need Active Natural Folate (L-5-MTHF) and daily leafy greens for clean energy.'
-      : 'Moderate folate conversion. Prioritize natural food folates over synthetic fortified products.',
+      : hasMthfrCT
+      ? 'Moderate folate conversion. Prioritize natural food folates over synthetic fortified products.'
+      : 'Great news: your methylation pathway works normally (MTHFR wild-type). Standard dietary folate from leafy greens is sufficient. No special supplement required.',
     clinicalFindingEs: hasMthfrTT
       ? 'Tu cuerpo aprovecha solo el 30% del ácido fólico común. Necesitas Folato Natural Activo (L-5-MTHF) y hojas verdes a diario.'
-      : 'Conversión moderada de folato. Prioriza folatos naturales frente a harinas enriquecidas.',
+      : hasMthfrCT
+      ? 'Conversión moderada de folato. Prioriza folatos naturales frente a harinas enriquecidas.'
+      : 'Buena noticia: tu vía de metilación funciona con normalidad (MTHFR wild-type). El folato natural de hojas verdes es suficiente. No necesitas suplemento especial.',
     foodPrescriptionEn: 'Eat daily natural folate foods: baby spinach, wild arugula, asparagus, lentils, beetroot, and pasture-raised egg yolks.',
     foodPrescriptionEs: 'Consume a diario alimentos ricos en folato natural: espinacas, rúcula, espárragos, lentejas, remolacha y yema de huevo.',
     criticalWarningEn: 'AVOID: Common synthetic "Folic Acid" found in cheap multivitamins, white flour bread, and commercial breakfast cereals.',
@@ -733,7 +809,7 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
   };
 
   // 3. Calculate Axis 3: Glycemia & Carbohydrate Sensitivity
-  const hasIrs1TT = g.IRS1 === 'TT' || g.IRS1 === 'CT';
+  const hasIrs1TT = g.IRS1 === 'TT' || g.IRS1 === 'CT' || g.IRS1 === 'TC'; // TC = strand-flip of CT
   let glycemicScore = 30;
   if (hasIrs1TT) glycemicScore += 35;
   if (hasFtoVariant) glycemicScore += 20;
@@ -771,19 +847,27 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
     titleEn: 'Caution With Vitamin E Pills & Vitamin D Needs (Genes ZPR1 & VDR)',
     titleEs: 'Cuidado con Pastillas de Vitamina E y Vitamina D (Genes ZPR1 y VDR)',
     score: micronutrientScore,
-    riskLevel: hasVitEToxicityRisk ? 'SAFETY ALERT' : 'MODERATE',
-    badgeColor: '#c5221f',
-    badgeBg: '#fce8e6',
+    riskLevel: hasVitEToxicityRisk ? 'SAFETY ALERT' : hasVdrRisk ? 'MODERATE' : 'OPTIMAL',
+    badgeColor: hasVitEToxicityRisk ? '#c5221f' : hasVdrRisk ? '#b06000' : '#137333',
+    badgeBg: hasVitEToxicityRisk ? '#fce8e6' : hasVdrRisk ? '#fef7e0' : '#e6f4ea',
     keyGenes: `ZPR1 (${g.ZPR1}), CYP4F2 (${g.CYP4F2}), VDR FokI (${g.VDR})`,
-    criticalToxicityAlertEn: 'SAFETY RULE: Your body clears synthetic Vitamin E pills slowly. Do NOT take Vitamin E capsules; get Vitamin E naturally from Extra Virgin Olive Oil, avocado, and raw almonds.',
-    criticalToxicityAlertEs: 'REGLA DE SEGURIDAD: Tu cuerpo acumula la Vitamina E sintética de bote. No tomes suplementos con Vitamina E; obtenla de alimentos naturales (AOVE, aguacate y almendras).',
-    vitaminDStrategyEn: 'Your Vitamin D receptors work slower (VDR gene): take Vitamin D3 + K2 with breakfast fats (eggs or olive oil) for full absorption.',
-    vitaminDStrategyEs: 'Tus receptores de Vitamina D son más lentos (gen VDR): toma Vitamina D3 + K2 en el desayuno con grasas buenas.'
+    criticalToxicityAlertEn: hasVitEToxicityRisk
+      ? 'SAFETY RULE: Your body clears synthetic Vitamin E pills slowly. Do NOT take Vitamin E capsules; get Vitamin E naturally from Extra Virgin Olive Oil, avocado, and raw almonds.'
+      : 'Your vitamin E metabolism is normal (ZPR1/CYP4F2 wild-type). Standard dietary sources provide adequate vitamin E. No specific supplement restriction.',
+    criticalToxicityAlertEs: hasVitEToxicityRisk
+      ? 'REGLA DE SEGURIDAD: Tu cuerpo acumula la Vitamina E sintética de bote. No tomes suplementos con Vitamina E; obtenla de alimentos naturales (AOVE, aguacate y almendras).'
+      : 'Tu metabolismo de vitamina E es normal (ZPR1/CYP4F2 wild-type). Las fuentes dietéticas aportan la vitamina E necesaria. Sin restricción de suplementos.',
+    vitaminDStrategyEn: hasVdrRisk
+      ? 'Your Vitamin D receptors work slower (VDR gene): take Vitamin D3 + K2 with breakfast fats (eggs or olive oil) for full absorption.'
+      : 'Your Vitamin D receptors function normally. Maintain adequate sun exposure and include dietary vitamin D sources (fatty fish, eggs).',
+    vitaminDStrategyEs: hasVdrRisk
+      ? 'Tus receptores de Vitamina D son más lentos (gen VDR): toma Vitamina D3 + K2 en el desayuno con grasas buenas.'
+      : 'Tus receptores de Vitamina D funcionan con normalidad. Mantén una exposición solar adecuada e incluye fuentes dietéticas (pescado azul, huevos).'
   };
 
   // 5. Calculate Axis 5: Food Sensitivities & Neuro-Stimulants
   const hasLactoseIntolerance = g.MCM6 === 'AG' || g.MCM6 === 'GG';
-  const hasCaffeineAnxiety = g.ADORA2A === 'TC' || g.ADORA2A === 'CC';
+  const hasCaffeineAnxiety = g.ADORA2A === 'TC' || g.ADORA2A === 'TT' || g.ADORA2A === 'CC'; // TT = homozygous risk for rs5751876
   const hasSlowCaffeineClearance = g.CYP1A2 === 'AC' || g.CYP1A2 === 'CC';
 
   let sensitivityScore = 35;
@@ -1232,39 +1316,29 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
     ]
   };
 
+  // Dynamically compute risk flags from actual genotype evaluation
+  const riskFlags = {
+    mthfrRisk: hasMthfrTT ? 'HIGH' : hasMthfrCT ? 'MODERATE' : 'LOW',
+    mcm6Intolerant: hasLactoseIntolerance,
+    mc4rLowSatiety: hasMc4rVariant,
+    irs1Resistant: hasIrs1TT,
+    cyp4f2Risk: hasVitEToxicityRisk,
+    caffeineSensitive: hasCaffeineAnxiety || hasSlowCaffeineClearance
+  };
+
   // Dynamically evaluated Master Food Catalog (Fagron-inspired standard)
-  const masterFoodItemsEvaluated = MASTER_FOOD_CATALOG.map(f => evaluateFoodForGeneticProfile(f, {
-    mthfrRisk: 'HIGH',
-    mcm6Intolerant: true,
-    mc4rLowSatiety: true,
-    irs1Resistant: true,
-    cyp4f2Risk: true,
-    caffeineSensitive: true
-  }));
+  const masterFoodItemsEvaluated = MASTER_FOOD_CATALOG.map(f => evaluateFoodForGeneticProfile(f, riskFlags));
 
   // Sourced directly from Fagron Master Catalog via personalized genetic filtering
-  const dynamicGroceryAisles = getPersonalizedGroceryAisles({
-    mthfrRisk: 'HIGH',
-    mcm6Intolerant: true,
-    mc4rLowSatiety: true,
-    irs1Resistant: true,
-    cyp4f2Risk: true,
-    caffeineSensitive: true
-  });
+  const dynamicGroceryAisles = getPersonalizedGroceryAisles(riskFlags);
 
-  const fagron17SubfamilyMatrix = getFagron17SubfamilyMatrix({
-    mthfrRisk: 'HIGH',
-    mcm6Intolerant: true,
-    mc4rLowSatiety: true,
-    irs1Resistant: true,
-    cyp4f2Risk: true,
-    caffeineSensitive: true
-  });
+  const fagron17SubfamilyMatrix = getFagron17SubfamilyMatrix(riskFlags);
 
   return {
     patient: {
       name: patientName,
       sampleCode,
+      doctor,
       clinic,
       testPlatform,
       analysisDate

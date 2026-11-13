@@ -20,16 +20,19 @@ export const dynamic = 'force-dynamic';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const patientName = searchParams.get('patient') || 'Hossam Ahmed';
     const sampleId = searchParams.get('sample') || '24G-QA-90421';
-    const clinicName = searchParams.get('clinic') || 'Ryhanh Medical Wellness · Doha, Qatar';
-    const mealPlanPartner = searchParams.get('partner') || 'Ryhanh Healthy Meal Plan & Diet Delivery';
+    const isWafa = sampleId === 'G000943568';
+    const patientName = searchParams.get('patient') || (isWafa ? 'Ms. Wafa Burud' : 'Hossam Ahmed');
+    const doctorName = searchParams.get('doctor') || (isWafa ? 'Dr. Sajid Burud' : 'Dr. Ryhanh Medical');
+    const clinicName = searchParams.get('clinic') || (isWafa ? 'Dr. Sajid Burud Medical Practice' : 'Ryhanh Medical Wellness · Doha, Qatar');
+    const mealPlanPartner = searchParams.get('partner') || (isWafa ? 'Dr. Sajid Burud Clinical Nutrition' : 'Ryhanh Healthy Meal Plan & Diet Delivery');
 
     // Execute dynamic clinical nutrigenomics rules engine
     const plan = evaluateNutrigenomicProfile({
       patientName,
       sampleCode: sampleId,
-      clinic: clinicName
+      clinic: clinicName,
+      doctor: doctorName
     });
 
     const pdfDoc = await PDFDocument.create();
