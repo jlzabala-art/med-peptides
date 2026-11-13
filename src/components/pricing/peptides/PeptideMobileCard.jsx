@@ -14,7 +14,6 @@ import {
   Droplets,
   Layers,
   ArrowRight,
-  BookOpen,
   Mail,
   FileText
 } from 'lucide-react';
@@ -447,10 +446,10 @@ export default function PeptideMobileCard({
         </div>
       </div>
 
-      {/* Laptop-Parity Quick Action Strip for Mobile (AI Posology, Specs, Inquire) */}
+      {/* Laptop-Parity Quick Action Strip for Mobile (AI Posology & Direct Inquiry) */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
         gap: '6px',
         width: '100%',
         minWidth: 0,
@@ -460,84 +459,54 @@ export default function PeptideMobileCard({
           type="button"
           onClick={() => onOpenAi && onOpenAi(row)}
           style={{
-            minHeight: '32px',
-            padding: '4px 6px',
-            fontSize: '0.68rem',
+            minHeight: '34px',
+            padding: '5px 8px',
+            fontSize: '0.72rem',
             fontWeight: 700,
             background: '#f0f9ff',
             border: '1px solid #bae6fd',
-            borderRadius: '5px',
+            borderRadius: '6px',
             color: '#0369a1',
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '3px',
+            gap: '5px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
           }}
           title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
         >
-          <Sparkles size={11} color="#0284c7" style={{ flexShrink: 0 }} />
+          <Sparkles size={13} color="#0284c7" style={{ flexShrink: 0 }} />
           <span>{isEs ? 'Posología IA' : 'Posology AI'}</span>
         </button>
-
-        <Link
-          href={specsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => onOpenSpecs && onOpenSpecs(row)}
-          style={{
-            minHeight: '32px',
-            padding: '4px 6px',
-            fontSize: '0.68rem',
-            fontWeight: 700,
-            background: '#ffffff',
-            border: '1px solid #c2e7ff',
-            borderRadius: '5px',
-            color: '#1a73e8',
-            textDecoration: 'none',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '3px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}
-          title={`Open public clinical specs for ${row.productName} (${row.dosage})`}
-        >
-          <BookOpen size={11} color="#1a73e8" style={{ flexShrink: 0 }} />
-          <span>{isEs ? 'Ficha' : 'Specs'}</span>
-          <span style={{ fontSize: '0.60rem' }}>↗</span>
-        </Link>
 
         <button
           type="button"
           onClick={() => onInquire && onInquire(row)}
           style={{
-            minHeight: '32px',
-            padding: '4px 6px',
-            fontSize: '0.68rem',
+            minHeight: '34px',
+            padding: '5px 8px',
+            fontSize: '0.72rem',
             fontWeight: 700,
             background: '#f0fdf4',
             border: '1px solid #bbf7d0',
-            borderRadius: '5px',
+            borderRadius: '6px',
             color: '#15803d',
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '3px',
+            gap: '5px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
           }}
           title={isEs ? 'Consultar pedido institucional o lote' : 'Inquire about institutional volume or custom batch'}
         >
-          <Mail size={11} color="#15803d" style={{ flexShrink: 0 }} />
-          <span>{isEs ? 'Consultar' : 'Inquire'}</span>
+          <Mail size={13} color="#15803d" style={{ flexShrink: 0 }} />
+          <span>{isEs ? 'Consultar Pedido' : 'Inquire'}</span>
         </button>
       </div>
 

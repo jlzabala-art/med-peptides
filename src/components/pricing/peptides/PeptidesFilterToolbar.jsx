@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { SlidersHorizontal, Truck, Layers, ChevronDown } from 'lucide-react';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import {
-  CATEGORY_ORDER,
-  CATEGORY_MAP,
   SHIPPING_DESTINATIONS,
   DOSAGE_STRENGTHS
 } from '@/constants/peptideCategories';
@@ -80,69 +78,6 @@ export default function PeptidesFilterToolbar({
             filters={activeFilterChips}
           />
         </div>
-      </div>
-
-      {/* Mobile Quick-Switch Category Chips (Horizontal Scrollable Strip) */}
-      <div
-        className="mobile-only-category-strip"
-        style={{
-          width: '100%',
-          maxWidth: '100%',
-          minWidth: 0,
-          boxSizing: 'border-box',
-          overflowX: 'auto',
-          whiteSpace: 'nowrap',
-          gap: '6px',
-          padding: '4px 0 8px 0',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none'
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setSelectedCategory('all')}
-          style={{
-            padding: '4px 10px',
-            borderRadius: '16px',
-            border: selectedCategory === 'all' ? '1.5px solid #1a73e8' : '1px solid #dadce0',
-            background: selectedCategory === 'all' ? '#e8f0fe' : '#ffffff',
-            color: selectedCategory === 'all' ? '#1a73e8' : '#3c4043',
-            fontWeight: selectedCategory === 'all' ? 750 : 500,
-            fontSize: '0.74rem',
-            flexShrink: 0,
-            cursor: 'pointer'
-          }}
-        >
-          {isEs ? 'Todas' : 'All'} ({processedProducts.length})
-        </button>
-        {CATEGORY_ORDER.map(key => {
-          const meta = CATEGORY_MAP[key];
-          if (!meta) return null;
-          const count = processedProducts.filter(p => p.categoryKey === key).length;
-          if (count === 0) return null;
-          const isSel = selectedCategory === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setSelectedCategory(key)}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '16px',
-                border: isSel ? `1.5px solid ${meta.color}` : '1px solid #dadce0',
-                background: isSel ? meta.bg : '#ffffff',
-                color: isSel ? meta.color : '#3c4043',
-                fontWeight: isSel ? 750 : 500,
-                fontSize: '0.74rem',
-                flexShrink: 0,
-                cursor: 'pointer'
-              }}
-            >
-              <span>{isEs ? meta.labelEs : meta.labelEn}</span>
-              <span style={{ marginLeft: '4px', opacity: 0.7, fontSize: '0.66rem' }}>({count})</span>
-            </button>
-          );
-        })}
       </div>
 
       {/* Mobile Progressive Disclosure Toggle for Shipping & Strength Sub-bar */}

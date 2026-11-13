@@ -32,8 +32,8 @@ export function getPeptidesColumns({
     {
       key: 'itemNumber',
       label: '#',
-      width: '54px',
-      minWidth: '50px',
+      width: '42px',
+      minWidth: '38px',
       nowrap: true,
       align: 'center',
       sortable: true,
@@ -54,7 +54,7 @@ export function getPeptidesColumns({
     {
       key: 'productName',
       label: isEs ? 'Formulación de Péptido & Concentración' : 'Peptide Formulation & Concentration',
-      width: '50%',
+      width: '36%',
       align: 'left',
       sortable: true,
       render: (_, row) => {
@@ -229,7 +229,7 @@ export function getPeptidesColumns({
     {
       key: 'unitPrice',
       label: isEs ? `Vial Individual (1x) · ${currency}` : `Single Vial (1x) · ${currency}`,
-      width: '13%',
+      width: '14%',
       align: 'right',
       sortable: true,
       render: (val, row) => (
@@ -244,7 +244,7 @@ export function getPeptidesColumns({
     {
       key: 'pack10Price',
       label: isEs ? `Pack de 10 (Pack ×10) · ${currency}` : `Pack of 10 (Pack ×10) · ${currency}`,
-      width: '16%',
+      width: '18%',
       align: 'right',
       sortable: true,
       render: (_, row) => {
@@ -280,8 +280,8 @@ export function getPeptidesColumns({
     {
       key: 'actions',
       label: isEs ? 'Solicitud de Pedido' : 'Order Request',
-      width: '162px',
-      minWidth: '156px',
+      width: '138px',
+      minWidth: '128px',
       align: 'right',
       render: (_, row) => {
         const inCart1x = cartItems[row.id]?.quantity1x || 0;
@@ -293,9 +293,13 @@ export function getPeptidesColumns({
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
-              gap: '4px',
-              flexWrap: 'nowrap',
-              width: '100%'
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              background: '#f8fafc',
+              overflow: 'hidden',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+              height: '28px',
+              flexShrink: 0
             }}
           >
             {inCart1x > 0 && typeof updateItemQuantity === 'function' ? (
@@ -303,25 +307,24 @@ export function getPeptidesColumns({
                 display: 'inline-flex',
                 alignItems: 'center',
                 background: '#e8f0fe',
-                border: '1px solid #1a73e8',
-                borderRadius: '5px',
-                height: '28px'
+                borderRight: '1px solid #cbd5e1',
+                height: '100%'
               }}>
                 <button
                   type="button"
                   onClick={() => updateItemQuantity(row.id, '1x', -1)}
-                  style={{ width: '22px', height: '100%', border: 'none', background: 'transparent', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, padding: 0 }}
+                  style={{ width: '20px', height: '100%', border: 'none', background: 'transparent', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, padding: 0 }}
                   title={isEs ? 'Restar 1 vial' : 'Remove 1 vial'}
                 >
                   -
                 </button>
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#1a73e8', padding: '0 4px', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1a73e8', padding: '0 3px', fontFamily: 'monospace' }}>
                   {inCart1x}
                 </span>
                 <button
                   type="button"
                   onClick={() => updateItemQuantity(row.id, '1x', 1)}
-                  style={{ width: '22px', height: '100%', border: 'none', background: 'transparent', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, padding: 0 }}
+                  style={{ width: '20px', height: '100%', border: 'none', background: 'transparent', color: '#1a73e8', cursor: 'pointer', fontWeight: 800, padding: 0 }}
                   title={isEs ? 'Sumar 1 vial' : 'Add 1 vial'}
                 >
                   +
@@ -331,14 +334,14 @@ export function getPeptidesColumns({
               <button
                 onClick={() => handleAddToCart(row, '1x')}
                 style={{
-                  height: '28px',
-                  padding: '0 8px',
-                  fontSize: '0.70rem',
+                  height: '100%',
+                  padding: '0 7px',
+                  fontSize: '0.69rem',
                   fontWeight: 650,
                   background: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '5px',
-                  color: '#334155',
+                  border: 'none',
+                  borderRight: '1px solid #cbd5e1',
+                  color: '#1a73e8',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -346,13 +349,13 @@ export function getPeptidesColumns({
                   gap: '3px',
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
-                  transition: 'all 0.15s ease'
+                  transition: 'background 0.15s ease'
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#94a3b8'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#f0f7ff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; }}
                 title={isEs ? 'Añadir 1 vial individual a la proforma' : 'Add 1 single vial to proforma'}
               >
-                <Plus size={11} />
+                <Plus size={10} />
                 <span>1 Vial</span>
               </button>
             )}
@@ -362,25 +365,23 @@ export function getPeptidesColumns({
                 display: 'inline-flex',
                 alignItems: 'center',
                 background: '#dcfce7',
-                border: '1px solid #16a34a',
-                borderRadius: '5px',
-                height: '28px'
+                height: '100%'
               }}>
                 <button
                   type="button"
                   onClick={() => updateItemQuantity(row.id, '10x', -1)}
-                  style={{ width: '22px', height: '100%', border: 'none', background: 'transparent', color: '#16a34a', cursor: 'pointer', fontWeight: 800, padding: 0 }}
+                  style={{ width: '20px', height: '100%', border: 'none', background: 'transparent', color: '#16a34a', cursor: 'pointer', fontWeight: 800, padding: 0 }}
                   title={isEs ? 'Restar 1 pack ×10' : 'Remove 1 pack ×10'}
                 >
                   -
                 </button>
-                <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#16a34a', padding: '0 4px', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a', padding: '0 3px', fontFamily: 'monospace' }}>
                   {inCart10x}×10
                 </span>
                 <button
                   type="button"
                   onClick={() => updateItemQuantity(row.id, '10x', 1)}
-                  style={{ width: '22px', height: '100%', border: 'none', background: 'transparent', color: '#16a34a', cursor: 'pointer', fontWeight: 800, padding: 0 }}
+                  style={{ width: '20px', height: '100%', border: 'none', background: 'transparent', color: '#16a34a', cursor: 'pointer', fontWeight: 800, padding: 0 }}
                   title={isEs ? 'Sumar 1 pack ×10' : 'Add 1 pack ×10'}
                 >
                   +
@@ -390,29 +391,27 @@ export function getPeptidesColumns({
               <button
                 onClick={() => handleAddToCart(row, '10x')}
                 style={{
-                  height: '28px',
+                  height: '100%',
                   padding: '0 8px',
-                  fontSize: '0.70rem',
+                  fontSize: '0.69rem',
                   fontWeight: 700,
                   background: '#1a73e8',
-                  border: '1px solid #1a73e8',
-                  borderRadius: '5px',
+                  border: 'none',
                   color: '#ffffff',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '3.5px',
+                  gap: '3px',
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
-                  boxShadow: '0 1px 2px rgba(26,115,232,0.18)',
                   transition: 'background 0.15s ease'
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#1557b0'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = '#1a73e8'; }}
                 title={isEs ? 'Añadir pack de 10 viales con descuento por volumen' : 'Add manufacturer pack of 10 vials (-volume discount)'}
               >
-                <Box size={11} />
+                <Box size={10} />
                 <span>Pack ×10</span>
               </button>
             )}
