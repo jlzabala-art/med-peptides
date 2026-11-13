@@ -466,11 +466,21 @@
    MOBILE RECORD CARDS — universal table→card transform
    ───────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .ptr-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
   .data-table-mobile-cards {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
     padding: 0.5rem 0 calc(80px + env(safe-area-inset-bottom));
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .mobile-record-card {

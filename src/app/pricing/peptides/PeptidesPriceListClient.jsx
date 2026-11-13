@@ -490,10 +490,10 @@ export default function PeptidesPriceListClient({
           .gcp-pricing-portal-layout { display: flex; gap: 1.25rem; align-items: flex-start; width: 100%; }
           .gcp-pricing-sidebar { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.85rem; position: sticky; top: 72px; }
           .gcp-pricing-workspace { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-          .gcp-search-and-category-block { order: 1; }
-          .gcp-kpis-summary-block { order: 2; }
-          .mobile-only-filter-selectors { order: 3; display: none; }
-          .gcp-table-block { order: 4; }
+          .gcp-search-and-category-block { order: 1; width: 100%; min-width: 0; }
+          .gcp-kpis-summary-block { order: 2; width: 100%; min-width: 0; }
+          .mobile-only-filter-selectors { order: 3; display: none; width: 100%; min-width: 0; }
+          .gcp-table-block { order: 4; width: 100%; min-width: 0; }
           .mobile-only-category-selector, .mobile-nav-drawer-trigger, .mobile-only-category-strip, .mobile-only-header-actions { display: none; }
           @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
           .screen-nav-bar.peptides-screen-nav-bar { position: sticky !important; top: 0 !important; z-index: 100 !important; background: #002b4d !important; backdrop-filter: blur(8px) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important; box-shadow: 0 4px 16px rgba(0, 30, 60, 0.22) !important; }
@@ -502,12 +502,19 @@ export default function PeptidesPriceListClient({
           .desktop-only-currency { display: inline-flex; align-items: center; gap: 8px; }
           .peptides-kpis-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
           @media (max-width: 1024px) {
-            .gcp-pricing-portal-layout { flex-direction: column; gap: 0.85rem; }
+            .gcp-pricing-portal-layout { flex-direction: column; gap: 0.85rem; width: 100% !important; max-width: 100% !important; min-width: 0 !important; align-items: stretch !important; }
             .gcp-pricing-sidebar { display: none !important; }
+            .gcp-pricing-workspace { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .gcp-search-and-category-block { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .gcp-kpis-summary-block { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .mobile-nav-drawer-trigger { display: inline-flex !important; }
-            .mobile-only-category-strip { display: flex !important; }
+            .mobile-only-category-strip { display: flex !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
             .mobile-only-category-selector { display: block !important; }
             .peptides-kpis-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .gcp-table-block { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .ptr-container { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .data-table-mobile-cards { width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+            .peptide-mobile-tiles-grid { width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
           }
           @media (max-width: 768px) {
             .mobile-hide, .desktop-only-utilities, .desktop-only-currency { display: none !important; }
@@ -515,17 +522,19 @@ export default function PeptidesPriceListClient({
             .peptides-b2b-portal .peptides-nav-container { padding: 6px 12px !important; gap: 8px !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: space-between !important; height: 48px !important; }
             .peptides-b2b-portal .peptides-nav-left { width: auto !important; flex: 0 1 auto !important; min-width: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; }
             .peptides-b2b-portal .peptides-nav-actions { width: auto !important; flex: 0 0 auto !important; display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: flex-end !important; gap: 6px !important; }
-            .peptides-main-container { padding: 0.5rem 0.65rem 3.5rem 0.65rem !important; }
+            .peptides-main-container { padding: 0.5rem 0.65rem 3.5rem 0.65rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
             .peptides-hero-title { font-size: 1.05rem !important; line-height: 1.2 !important; }
             .peptides-hero-subtitle { display: none !important; }
-            .mobile-only-filter-selectors { grid-template-columns: 1fr 1fr !important; gap: 6px !important; margin-top: 6px !important; display: grid !important; order: 3 !important; }
-            .gcp-search-and-category-block { order: 1 !important; margin-bottom: 0.75rem !important; }
-            .gcp-kpis-summary-block { order: 2 !important; padding: 0.5rem 0.65rem !important; margin-bottom: 0.5rem !important; }
-            .mobile-kpi-summary-strip { display: flex !important; }
+            .mobile-only-filter-selectors { grid-template-columns: 1fr 1fr !important; gap: 6px !important; margin-top: 6px !important; display: grid !important; order: 3 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+            .gcp-search-and-category-block { order: 1 !important; margin-bottom: 0.75rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .gcp-kpis-summary-block { order: 2 !important; padding: 0.5rem 0.65rem !important; margin-bottom: 0.5rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .mobile-kpi-summary-strip { display: flex !important; width: 100% !important; min-width: 0 !important; }
             .peptides-kpis-grid.mobile-kpi-collapsed { display: none !important; }
-            .peptides-kpis-grid.mobile-kpi-expanded { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-top: 8px !important; }
-            .peptide-mobile-tiles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
-            .gcp-table-block { order: 4 !important; }
+            .peptides-kpis-grid.mobile-kpi-expanded { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-top: 8px !important; width: 100% !important; min-width: 0 !important; }
+            .peptide-mobile-tiles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+            .gcp-table-block { order: 4 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .ptr-container { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .data-table-mobile-cards { width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
             .peptides-kpi-card { padding: 0.55rem 0.65rem !important; }
             .peptides-kpi-val { font-size: 1.15rem !important; }
           }

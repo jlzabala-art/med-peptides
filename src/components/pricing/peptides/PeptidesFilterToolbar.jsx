@@ -85,6 +85,10 @@ export default function PeptidesFilterToolbar({
       <div
         className="mobile-only-category-strip"
         style={{
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
           overflowX: 'auto',
           whiteSpace: 'nowrap',
           gap: '6px',
@@ -168,7 +172,7 @@ export default function PeptidesFilterToolbar({
               {isEs ? 'Destino y Tarifa de Envío (≤ 2 kg):' : 'Shipping Corridor & Rate (≤ 2 kg):'}
             </span>
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '6px', border: '1px solid #cbd5e1', flexWrap: 'wrap', maxWidth: '100%' }}>
             {Object.values(SHIPPING_DESTINATIONS).map(corridor => {
               const isSel = shippingDest === corridor.id;
               return (
