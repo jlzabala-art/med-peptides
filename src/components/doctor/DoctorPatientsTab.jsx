@@ -45,6 +45,7 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onStartPrescri
     { id: 'all', fullLabel: '🌐 Todos los Pacientes', shortLabel: '🌐 Todos', color: '#003666' },
     { id: 'rx_active', fullLabel: '🧬 Con Prescripción Activa', shortLabel: '🧬 Prescripción', color: '#059669' },
     { id: 'external', fullLabel: '🩺 Solo Consulta Propia', shortLabel: '🩺 Consulta Propia', color: '#0d9488' },
+    { id: 'genomics', fullLabel: '🔬 Análisis Genéticos (Nutrigen)', shortLabel: '🔬 Genética', color: '#0284c7' },
     { id: 'peptides', fullLabel: '🧪 Cohorte Péptidos', shortLabel: '🧪 Péptidos', color: '#4338ca' },
     { id: 'supplements', fullLabel: '💊 Suplementación', shortLabel: '💊 Suplementos', color: '#7c3aed' },
   ];
@@ -234,6 +235,7 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onStartPrescri
 
       {activeCohort === 'peptides' && <PeptideCohortTable doctorId={effectiveDocId} />}
       {activeCohort === 'supplements' && <SupplementsCohortTable doctorId={effectiveDocId} />}
+      {activeCohort === 'genomics' && <GenomicsCohortTable doctorId={effectiveDocId} />}
 
       {/* Quick Intake Slide-Over Drawer */}
       <QuickPatientDrawer

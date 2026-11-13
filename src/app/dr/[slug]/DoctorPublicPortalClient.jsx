@@ -4143,6 +4143,23 @@ export default function DoctorPublicPortalClient({
       align: 'left',
       render: (val, row) => {
         const pat = row || val || {};
+        if (pat.isGenomicPatient) {
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#003666' }}>
+                  24Genetics Nutrition 2.0
+                </span>
+                <span style={{ fontSize: '0.66rem', fontWeight: 700, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px' }}>
+                  CE-IVD Lab
+                </span>
+              </div>
+              <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                Sample: <code style={{ background: '#f1f5f9', padding: '1px 4px', borderRadius: '3px', color: '#0f172a' }}>{pat.sampleCode}</code> · 3-Capsule Magistral Protocol
+              </div>
+            </div>
+          );
+        }
         const count = (pat.prescriptions || []).length;
         const mainProduct = pat.latestProduct || (pat.prescriptions?.[0]?.treatmentTitle || pat.prescriptions?.[0]?.regimenShortTitle);
         return (
@@ -4174,6 +4191,31 @@ export default function DoctorPublicPortalClient({
         const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : null;
         return (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+            {pat.isGenomicPatient && pat.dnaPortalUrl && (
+              <a
+                href={pat.dnaPortalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  background: '#003666',
+                  color: '#ffffff',
+                  fontSize: '0.72rem',
+                  fontWeight: 650,
+                  textDecoration: 'none',
+                  cursor: 'pointer'
+                }}
+                title={`Open interactive 24Genetics DNA Report for ${pat.name}`}
+              >
+                <span>🧬 DNA Portal</span>
+                <ArrowUpRight size={11} />
+              </a>
+            )}
             {waUrl && (
               <a
                 href={waUrl}
@@ -4289,20 +4331,24 @@ export default function DoctorPublicPortalClient({
       sortable: true,
       render: (row) => {
         const tName = String(row.testName || row.biomarker || 'Diagnostic Biomarker Assay');
+        const isNutrigen = tName.toLowerCase().includes('nutri') || tName.toLowerCase().includes('24gen') || row.category === 'Nutrigenomics' || row.testType?.toLowerCase().includes('nutri');
         const isTelo = tName.toLowerCase().includes('telo') || row.testType?.includes('telo') || row.keyFindings?.telomereLength || row.estimatedBiologicalAge;
         const isTricho = tName.toLowerCase().includes('tricho') || row.testType?.includes('tricho');
         const isEterna = tName.toLowerCase().includes('eterna') || tName.toLowerCase().includes('proteomic');
 
-        const title = isTelo ? 'Fagron TeloTest™ · Biological Age DNA' :
+        const title = isNutrigen ? '24Genetics · Nutrition 2.0 CE-IVD' :
+                      isTelo ? 'Fagron TeloTest™ · Biological Age DNA' :
                       isTricho ? 'Fagron TrichoTest™ · Pharmacogenetic Panel' :
                       isEterna ? 'ETERNA® · Multi-Organ Proteomics' :
                       (row.testName || row.biomarker || 'NAD+ Quantitative Test');
 
-        const labName = isTelo || isTricho ? 'Fagron Genomics' :
+        const labName = isNutrigen ? '24Genetics CE-IVD Lab' :
+                        isTelo || isTricho ? 'Fagron Genomics' :
                         isEterna ? 'Eurofins Genomics' :
                         (row.laboratory?.name || 'LifeLab1');
 
-        const method = isTelo ? 'Absolute qPCR (Telomere/Single Gene Ratio)' :
+        const method = isNutrigen ? 'Illumina Infinium GSA-24 BeadChip' :
+                       isTelo ? 'Absolute qPCR (Telomere/Single Gene Ratio)' :
                        isTricho ? 'DNA Microarray Pharmacogenetics' :
                        isEterna ? 'GrimAge-Calibrated Plasma Proteomics' :
                        (row.method || 'Enzymatic cyclic assay');
@@ -4328,9 +4374,52 @@ export default function DoctorPublicPortalClient({
       sortable: true,
       render: (row) => {
         const tName = String(row.testName || row.biomarker || '').toLowerCase();
+        const isNutrigen = tName.includes('nutri') || tName.includes('24gen') || row.category === 'Nutrigenomics' || row.testType?.toLowerCase().includes('nutri');
         const isTelo = tName.includes('telo') || row.testType?.includes('telo') || row.keyFindings?.telomereLength || row.estimatedBiologicalAge;
         const isTricho = tName.includes('tricho') || row.testType?.includes('tricho');
         const isEterna = tName.includes('eterna') || tName.includes('proteomic');
+
+        // 0. 24Genetics / Nutrigenomics
+        if (isNutrigen) {
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                  Nutrigenomic Profile
+                </span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#15803d',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    width: 'fit-content'
+                  }}
+                >
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#15803d' }} />
+                  CE-IVD Verified
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', fontSize: '0.68rem' }}>
+                <span style={{ background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                  MCM6 GG (Lactose)
+                </span>
+                <span style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                  ADORA2A TT (Caffeine)
+                </span>
+                <span style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                  MTHFR GG (Normal)
+                </span>
+              </div>
+            </div>
+          );
+        }
 
         // 1. Fagron TeloTest: Biological Age vs Chronological Age
         if (isTelo) {
@@ -4503,49 +4592,105 @@ export default function DoctorPublicPortalClient({
       width: '16%',
       render: (row) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          <Link
-            href={`/lab/${row.code || row.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Open Dedicated Interactive Dossier"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '5px 10px',
-              borderRadius: '6px',
-              background: '#003666',
-              color: '#ffffff',
-              fontSize: '0.74rem',
-              fontWeight: 650,
-              textDecoration: 'none',
-              boxShadow: '0 1px 2px rgba(0,54,102,0.12)'
-            }}
-          >
-            <span>Public Dossier</span>
-            <ArrowUpRight size={12} />
-          </Link>
+          {row.reportUrl ? (
+            <Link
+              href={row.reportUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open Dedicated Interactive DNA Portal"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                background: '#003666',
+                color: '#ffffff',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                textDecoration: 'none',
+                boxShadow: '0 1px 2px rgba(0,54,102,0.12)'
+              }}
+            >
+              <span>DNA Portal</span>
+              <ArrowUpRight size={12} />
+            </Link>
+          ) : (
+            <Link
+              href={`/lab/${row.code || row.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open Dedicated Interactive Dossier"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                background: '#003666',
+                color: '#ffffff',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                textDecoration: 'none',
+                boxShadow: '0 1px 2px rgba(0,54,102,0.12)'
+              }}
+            >
+              <span>Public Dossier</span>
+              <ArrowUpRight size={12} />
+            </Link>
+          )}
           {row.pdfReportUrl && (
             <a
               href={row.pdfReportUrl}
               target="_blank"
               rel="noopener noreferrer"
               download
-              title="Download Original Laboratory Report PDF"
+              title="Download Clinical Prescription PDF"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '28px',
+                padding: '0 8px',
                 height: '28px',
                 borderRadius: '6px',
                 background: '#f8fafc',
                 border: '1px solid #cbd5e1',
                 color: '#475569',
-                cursor: 'pointer'
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                gap: '4px'
               }}
             >
-              <Download size={13} />
+              <Download size={12} />
+              <span>PDF Rx</span>
+            </a>
+          )}
+          {row.mealPlanPdfUrl && (
+            <a
+              href={row.mealPlanPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              title="Download 7-Day Precision Meal Plan PDF"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 8px',
+                height: '28px',
+                borderRadius: '6px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                color: '#15803d',
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                gap: '4px'
+              }}
+            >
+              <Download size={12} />
+              <span>Meal Plan</span>
             </a>
           )}
         </div>

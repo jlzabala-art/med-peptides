@@ -234,6 +234,35 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     authority: 'MOH'
   },
   {
+    id: 'dr-sajid-burud',
+    name: 'Dr. Sajid Burud',
+    aliases: [
+      'dr. sajid burud', 'sajid burud', 'dr sajid', 'dr. sajith', 'dr sajith', 
+      'sajith burud', 'drsajidburud2022@gmail.com', 'dr.sajid@trnscnd.health'
+    ],
+    title: 'Dr. Sajid Burud',
+    specialty: 'Internal Medicine & Longevity Specialist · Functional Medicine',
+    mainArea: 'Longevity Medicine & Personalized Health Optimization',
+    clinic: 'Transcend Healthcare',
+    clinicName: 'Transcend Healthcare FZCO',
+    clinicId: 'transcend-healthcare-dubai',
+    address: 'Gulf Tower, Block B, Office 903',
+    city: 'Dubai',
+    country: 'United Arab Emirates',
+    phone: '+971 55 405 0405',
+    mobile: '+971 55 405 0405',
+    email: 'dr.sajid@trnscnd.health',
+    secondaryEmail: 'drsajidburud2022@gmail.com',
+    license: 'DHA 00132881',
+    licenseNumber: 'DHA 00132881',
+    authority: 'DHA',
+    website: 'https://www.drsajidburud.com',
+    companyWebsite: 'https://www.trnscnd.health',
+    zohoContactId: '7006116000001150188',
+    opaqueCode: 'DR-SAJID01',
+    doctorCode: 'DR-SAJID01'
+  },
+  {
     id: 'dr-atlas-health-services',
     name: 'Atlas Health Services',
     aliases: [

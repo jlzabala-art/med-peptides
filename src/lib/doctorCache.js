@@ -990,6 +990,63 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     });
   }
 
+  // 3.8 Ensure Assigned Genomic Patients (24Genetics / Nutrigen) are present in patientMap
+  const isDoctorSajid = (doctorId === 'dr-sajid-burud') || 
+                        cleanSlug.includes('sajid') || cleanSlug.includes('sajith') || 
+                        cleanDoctorQuery.includes('sajid') || cleanDoctorQuery.includes('sajith') || 
+                        (doctorDoc?.zohoContactId === '7006116000001150188');
+
+  if (isDoctorSajid) {
+    if (!patientMap.has('wafa burud')) {
+      patientMap.set('wafa burud', {
+        name: 'Ms. Wafa Burud',
+        patientName: 'Ms. Wafa Burud',
+        dob: 'N/A',
+        gender: 'Female',
+        age: 38,
+        prescriptionsCount: 1,
+        totalSpentAed: 0,
+        currency: 'AED',
+        lastPrescriptionDate: '2026-11-13',
+        latestRxCode: 'G000943568',
+        latestRxStatus: 'active',
+        hasSold: true,
+        hasUnaccepted: false,
+        isGenomicPatient: true,
+        sampleCode: 'G000943568',
+        testType: '24Genetics Nutrition 2.0 (CE-IVD)',
+        dnaPortalUrl: '/patient/dna-report?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
+        prescriptionPdfUrl: '/api/reports/24genomics-patient-pdf?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
+        mealPlanPdfUrl: '/api/reports/24genomics-mealplan-pdf?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare&partner=Transcend+Clinical+Nutrition',
+        tags: ['🧬 24Genetics DNA', '🥛 MCM6 Hypolactasia', '💊 Magistral 3-Capsule'],
+        prescriptions: [{
+          id: 'rx-dna-g000943568',
+          code: 'G000943568',
+          status: 'active',
+          treatmentTitle: '24Genetics Precision Nutrigenomic Regimen (3-Capsule Magistral)',
+          date: '2026-11-13',
+          patientName: 'Ms. Wafa Burud'
+        }]
+      });
+    }
+
+    clinicalTasks.unshift({
+      id: 'task-genomics-wafa-burud',
+      rxId: 'rx-dna-g000943568',
+      code: 'G000943568',
+      patientName: 'Ms. Wafa Burud',
+      patient: { name: 'Ms. Wafa Burud', gender: 'Female' },
+      patientDob: 'N/A',
+      type: 'genomics_review',
+      priority: 'high',
+      title: 'Review 24Genetics Nutrigenomic Profile & 3-Capsule Protocol',
+      description: 'Review 24Genetics Nutrition 2.0 report for Ms. Wafa Burud. Key action: MCM6 GG severe lactose malabsorption, normal MTHFR GG, and ADORA2A TT caffeine anxiety.',
+      dueDate: 'Action Required',
+      actionLabel: 'Open DNA Portal',
+      actionUrl: '/patient/dna-report?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare'
+    });
+  }
+
   // 4. Compute GCP Standard KPIs (Server-calculated for instant 0ms response)
   const deduplicatedPatients = Array.from(patientMap.values());
   const activePrescriptions = prescriptions.filter(p => isRxSold(p)).length;
@@ -1281,6 +1338,44 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       } catch (labErr) {
         console.warn('Could not load lab_results in doctorCache:', labErr);
       }
+    }
+
+    // 7.6 24Genetics / Nutrigenomics Assigned Patient Tests (Ms. Wafa Burud for Dr. Sajid Burud)
+    if (isDoctorSajid) {
+      labResults.unshift({
+        id: '24G-G000943568',
+        code: 'G000943568',
+        protocolNumber: '24G-G000943568',
+        testName: '24Genetics Nutrition 2.0 (CE-IVD Genomic Assay)',
+        testType: 'Nutrigenomics DNA Profile',
+        biomarker: 'Nutrigenomic Profile & 3-Capsule Magistral Regimen',
+        patientName: 'Ms. Wafa Burud',
+        patient: {
+          name: 'Ms. Wafa Burud',
+          specimenId: 'G000943568',
+          sampleCode: 'G000943568',
+          gender: 'Female',
+          age: 38
+        },
+        sampleId: 'G000943568',
+        sampleType: 'Saliva DNA Specimen',
+        analysisDate: '2026-11-13',
+        date: '2026-11-13',
+        status: 'ready',
+        zone: 'optimal',
+        zoneLabel: 'Optimal Methylation · Severe Hypolactasia Protocol',
+        category: 'Nutrigenomics',
+        value: 85,
+        unit: 'Clinical Score',
+        laboratory: {
+          name: '24Genetics / Illumina GSA-24'
+        },
+        method: 'Illumina Infinium GSA-24 BeadChip',
+        interpretation: 'Normal methylation capacity (MTHFR GG wild-type). Severe adult hypolactasia (MCM6 GG) requiring complete cow dairy exclusion and active probiotic shield. Elevated caffeine anxiety risk (ADORA2A TT) requiring morning caffeine cutoff. Carb sensitivity (FTO/IRS1) managed with 1-2-3 Plate Sequencing.',
+        reportUrl: '/patient/dna-report?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
+        pdfReportUrl: '/api/reports/24genomics-patient-pdf?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
+        mealPlanPdfUrl: '/api/reports/24genomics-mealplan-pdf?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare&partner=Transcend+Clinical+Nutrition'
+      });
     }
 
     // 8. Enrich each prescription with tailored Atlas Recommendations (Peptides & Colway)
