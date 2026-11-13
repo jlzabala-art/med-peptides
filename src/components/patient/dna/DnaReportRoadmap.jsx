@@ -68,57 +68,66 @@ export default function DnaReportRoadmap({ onSelectSection, onSetFoodViewMode })
     <div
       style={{
         backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        border: '1.5px solid #bae6fd',
-        padding: '1.25rem 1.5rem',
-        marginBottom: '1.5rem',
-        boxShadow: '0 2px 10px rgba(2, 132, 199, 0.05)'
+        borderRadius: '8px',
+        border: '1px solid #dadce0',
+        padding: '16px 20px',
+        marginBottom: '1.25rem',
+        boxShadow: '0 1px 2px rgba(60, 64, 67, 0.06)'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '0.85rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
         <div>
-          <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            HOW THIS REPORT IS ORGANIZED · 15-SECOND ROADMAP
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            15-SECOND EXECUTIVE ROADMAP
           </span>
-          <h2 style={{ fontSize: '1.10rem', fontWeight: 850, color: '#003666', margin: '2px 0 0 0' }}>
-            What Is Inside Your Guide &amp; Who to Share Each Section With
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#202124', margin: '2px 0 0 0' }}>
+            Guide Structure &amp; Who to Share Each Section With
           </h2>
         </div>
-        <span style={{ fontSize: '0.74rem', color: '#475569', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
-          Click any card below to jump directly to that section
+        <span style={{ fontSize: '0.72rem', color: '#5f6368', backgroundColor: '#f1f3f4', border: '1px solid #e8eaed', padding: '3px 8px', borderRadius: '4px', fontWeight: 500 }}>
+          Click any card to jump to section
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(225px, 1fr))', gap: '0.85rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '10px' }}>
         {steps.map((item, idx) => (
           <div
             key={idx}
             onClick={item.onClick}
             style={{
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: '10px',
-              padding: '12px 14px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '6px',
+              padding: '14px',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#1a73e8';
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(60,64,67,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#dadce0';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(60,64,67,0.04)';
             }}
           >
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 850, backgroundColor: '#003666', color: '#ffffff', padding: '2px 7px', borderRadius: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.66rem', fontWeight: 700, backgroundColor: '#e8f0fe', color: '#1a73e8', border: '1px solid #d2e3fc', padding: '2px 6px', borderRadius: '4px' }}>
                   {item.step}
                 </span>
-                <span style={{ fontSize: '0.68rem', fontWeight: 750, backgroundColor: item.shareBg, color: item.shareColor, padding: '2px 7px', borderRadius: '4px' }}>
+                <span style={{ fontSize: '0.66rem', fontWeight: 600, backgroundColor: '#f1f3f4', color: '#3c4043', border: '1px solid #dadce0', padding: '2px 6px', borderRadius: '4px' }}>
                   {item.shareWith}
                 </span>
               </div>
-              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+              <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124', marginBottom: '4px' }}>
                 {item.title}
               </div>
-              <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+              <p style={{ margin: 0, fontSize: '0.74rem', color: '#5f6368', lineHeight: 1.45 }}>
                 {item.desc}
               </p>
             </div>

@@ -804,8 +804,12 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
       : 'Buena noticia: tu vía de metilación funciona con normalidad (MTHFR wild-type). El folato natural de hojas verdes es suficiente. No necesitas suplemento especial.',
     foodPrescriptionEn: 'Eat daily natural folate foods: baby spinach, wild arugula, asparagus, lentils, beetroot, and pasture-raised egg yolks.',
     foodPrescriptionEs: 'Consume a diario alimentos ricos en folato natural: espinacas, rúcula, espárragos, lentejas, remolacha y yema de huevo.',
-    criticalWarningEn: 'AVOID: Common synthetic "Folic Acid" found in cheap multivitamins, white flour bread, and commercial breakfast cereals.',
-    criticalWarningEs: 'EVITAR: El "Ácido Fólico" sintético presente en multivitamínicos comunes, pan blanco y cereales industriales.'
+    criticalWarningEn: (hasMthfrTT || hasMthfrCT)
+      ? 'AVOID: Common synthetic "Folic Acid" found in cheap multivitamins, white flour bread, and commercial breakfast cereals.'
+      : null,
+    criticalWarningEs: (hasMthfrTT || hasMthfrCT)
+      ? 'EVITAR: El "Ácido Fólico" sintético presente en multivitamínicos comunes, pan blanco y cereales industriales.'
+      : null,
   };
 
   // 3. Calculate Axis 3: Glycemia & Carbohydrate Sensitivity

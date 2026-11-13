@@ -144,6 +144,10 @@ const DoctorLabResultsTab = dynamic(
   () => import('@/components/doctor/tabs/DoctorLabResultsTab'),
   { ssr: false }
 );
+const DoctorDnaAnalysisTab = dynamic(
+  () => import('@/components/doctor/tabs/DoctorDnaAnalysisTab'),
+  { ssr: false }
+);
 const DoctorDiagnosticsTab = dynamic(
   () => import('@/components/doctor/tabs/DoctorDiagnosticsTab'),
   { ssr: false }
@@ -1198,6 +1202,36 @@ export default function DoctorPublicPortalClient({
       };
     });
   }, [data?.labResults, isAuthorizedViewer, opaqueCode]);
+
+  // Separate DNA / Genomics from Blood & Capillary DBS Assays
+  const isDnaTest = useCallback((row) => {
+    const tName = String(row.testName || row.biomarker || '').toLowerCase();
+    const cat = String(row.category || '').toLowerCase();
+    const type = String(row.testType || '').toLowerCase();
+    return (
+      cat.includes('nutri') ||
+      cat.includes('genom') ||
+      cat.includes('dna') ||
+      tName.includes('24gen') ||
+      tName.includes('nutri') ||
+      tName.includes('telo') ||
+      tName.includes('tricho') ||
+      tName.includes('eterna') ||
+      tName.includes('proteomic') ||
+      type.includes('nutri') ||
+      type.includes('telo') ||
+      type.includes('tricho') ||
+      type.includes('dna')
+    );
+  }, []);
+
+  const dnaResults = useMemo(() => {
+    return allLabResults.filter(isDnaTest);
+  }, [allLabResults, isDnaTest]);
+
+  const bloodLabResults = useMemo(() => {
+    return allLabResults.filter((r) => !isDnaTest(r));
+  }, [allLabResults, isDnaTest]);
 
   const labKpis = useMemo(() => {
     let optimal = 0;
@@ -4313,11 +4347,14 @@ export default function DoctorPublicPortalClient({
       sortable: true,
       render: (row) => {
         const dateStr = row.analysisDate || row.resultsDate || row.date || row.receiptDate || '';
+        const tName = String(row.testName || row.biomarker || '').toLowerCase();
+        const isGenetic = tName.includes('nutri') || tName.includes('24gen') || tName.includes('telo') || tName.includes('tricho');
+        const defaultSample = isGenetic ? 'Saliva CE-IVD (2.0 mL)' : 'Capillary Dried Blood Spot (DBS)';
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <CopyableId value={row.code || row.protocolNumber || row.id} iconOnly={false} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.70rem', color: '#64748b' }}>
-              <span>{row.sampleType || (row.testType?.includes('telo') ? 'Oral Buccal Swab' : 'Dried Blood Spot (DBS)')}</span>
+              <span>{row.sampleType || defaultSample}</span>
               {dateStr && <span>• {dateStr.slice(0, 10)}</span>}
             </div>
           </div>
@@ -4340,7 +4377,7 @@ export default function DoctorPublicPortalClient({
                       isTelo ? 'Fagron TeloTest™ · Biological Age DNA' :
                       isTricho ? 'Fagron TrichoTest™ · Pharmacogenetic Panel' :
                       isEterna ? 'ETERNA® · Multi-Organ Proteomics' :
-                      (row.testName || row.biomarker || 'NAD+ Quantitative Test');
+                      (row.testName || row.biomarker || 'Diagnostic Biomarker Assay');
 
         const labName = isNutrigen ? '24Genetics CE-IVD Lab' :
                         isTelo || isTricho ? 'Fagron Genomics' :
@@ -4973,10 +5010,16 @@ export default function DoctorPublicPortalClient({
             badge: doctorSpecialtyIntel.primaryBlueprints.length > 0 ? doctorSpecialtyIntel.primaryBlueprints.length : null
           },
           {
+            id: 'dna_analysis',
+            label: 'DNA Analysis',
+            icon: Dna,
+            badge: dnaResults.length > 0 ? dnaResults.length : null
+          },
+          {
             id: 'lab_results',
             label: 'Lab Diagnostics',
             icon: FlaskConical,
-            badge: allLabResults.length > 0 ? allLabResults.length : null
+            badge: bloodLabResults.length > 0 ? bloodLabResults.length : null
           },
           {
             id: 'analytics',
@@ -5006,7 +5049,7 @@ export default function DoctorPublicPortalClient({
         ]
       }
     ];
-  }, [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length, quickCounts.active, quickCounts.pending, quickCounts.drafts, quickCounts.proposals, doctorSpecialtyIntel.primaryBlueprints.length, soldPatientsCount, unacceptedPatientsCount, isAuthorizedViewer]);
+  }, [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, dnaResults.length, bloodLabResults.length, allLabResults.length, quickCounts.active, quickCounts.pending, quickCounts.drafts, quickCounts.proposals, doctorSpecialtyIntel.primaryBlueprints.length, soldPatientsCount, unacceptedPatientsCount, isAuthorizedViewer]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
@@ -5933,11 +5976,54 @@ export default function DoctorPublicPortalClient({
                   {activeAnchor === 'prescriptions' && 'Prescriptions'}
                   {activeAnchor === 'patients' && 'Patients'}
                   {activeAnchor === 'recommendations' && 'Specialty Blueprints & Rx Synergies'}
-                  {activeAnchor === 'lab_results' && `Lab Diagnostics (${allLabResults.length})`}
+                  {activeAnchor === 'dna_analysis' && `DNA Analysis (${dnaResults.length})`}
+                  {activeAnchor === 'lab_results' && `Lab Diagnostics (${bloodLabResults.length})`}
                   {activeAnchor === 'analytics' && 'Practice Analytics'}
                   {activeAnchor === 'credentials' && 'Clinic Credentials & Verification'}
                   {activeAnchor === 'services_tiers' && 'Platform Services & Compounding Access'}
                 </h1>
+
+                {/* 1-Click Segmented Switcher for DNA Analysis vs Blood Lab Diagnostics */}
+                {(['dna_analysis', 'lab_results'].includes(activeAnchor)) && (
+                  <div role="tablist" aria-label="Diagnostic modalities" style={{ display: 'flex', maxWidth: '100%', overflowX: 'auto', background: '#f1f3f4', padding: '3px', borderRadius: '8px', gap: '2px', border: '1px solid #dadce0' }}>
+                    {[
+                      { id: 'dna_analysis', label: '🧬 DNA Analysis', count: dnaResults.length },
+                      { id: 'lab_results', label: '🧪 Lab Diagnostics', count: bloodLabResults.length }
+                    ].map((tab) => {
+                      const isTabActive = activeAnchor === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={isTabActive}
+                          onClick={() => handleSidebarNavigate(tab.id)}
+                          style={{
+                            padding: '4px 12px',
+                            minHeight: '32px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: isTabActive ? '#ffffff' : 'transparent',
+                            color: isTabActive ? '#1a73e8' : '#5f6368',
+                            fontWeight: isTabActive ? 600 : 500,
+                            fontSize: '0.78rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: isTabActive ? '0 1px 2px rgba(60,64,67,0.1)' : 'none',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <span>{tab.label}</span>
+                          <span style={{ fontSize: '0.70rem', opacity: 0.8, backgroundColor: isTabActive ? '#e8f0fe' : '#e8eaed', padding: '1px 6px', borderRadius: '10px' }}>
+                            {tab.count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Unified 1-Click Segmented Switcher for Prescriptions / Patients / Pending Actions */}
                 {(['prescriptions', 'patients', 'tasks'].includes(activeAnchor)) && (
@@ -7775,10 +7861,20 @@ export default function DoctorPublicPortalClient({
             </section>
           )}
 
-          {/* ── View 3.5: Bloodo™ & Fagron Diagnostic Lab Results (Modularized) ── */}
+          {/* ── View 3.4: DNA & Genomic Analysis (CE-IVD Microarrays & qPCR) ── */}
+          {activeAnchor === 'dna_analysis' && (
+            <DoctorDnaAnalysisTab
+              dnaResults={dnaResults}
+              slug={slug}
+              handleRefresh={handleRefresh}
+              isSwitchingDoctor={isSwitchingDoctor}
+            />
+          )}
+
+          {/* ── View 3.5: Blood & Capillary DBS Diagnostic Lab Results ── */}
           {activeAnchor === 'lab_results' && (
             <DoctorLabResultsTab
-              allLabResults={allLabResults}
+              allLabResults={bloodLabResults}
               labResultsColumns={labResultsColumns}
               slug={slug}
               handleRefresh={handleRefresh}

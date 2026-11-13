@@ -94,6 +94,53 @@ export default function DoctorLabResultsTab({
         emptyTitle="No Diagnostic Lab Results Found"
         emptyDescription="No laboratory blood or metabolic biomarker reports registered for this physician yet."
         expandableRender={(row) => {
+          const tName = String(row.testName || row.biomarker || '').toLowerCase();
+          const isDna = tName.includes('nutri') || tName.includes('24gen') || tName.includes('telo') || tName.includes('tricho') || row.category === 'Nutrigenomics';
+
+          if (isDna) {
+            return (
+              <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <div>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#1a73e8', textTransform: 'uppercase' }}>
+                      Clinical Genomic Analysis · CE-IVD Microarray
+                    </span>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#202124' }}>
+                      {row.testName} · Specimen {row.sampleId || row.code}
+                    </div>
+                  </div>
+                  <Link
+                    href={row.reportUrl || `/patient/dna-report?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      color: '#1a73e8',
+                      background: '#e8f0fe',
+                      border: '1px solid #d2e3fc',
+                      padding: '4px 10px',
+                      borderRadius: '4px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span>Open Dedicated DNA Portal</span>
+                    <ArrowUpRight size={12} />
+                  </Link>
+                </div>
+                {row.interpretation && (
+                  <div style={{ fontSize: '0.78rem', color: '#3c4043', lineHeight: 1.5, background: '#ffffff', padding: '10px 14px', borderRadius: '6px', border: '1px solid #dadce0' }}>
+                    <strong style={{ color: '#202124' }}>Genomic Interpretation: </strong>
+                    {row.interpretation}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           const val = Number(row.value) || 14.1;
           const unit = row.unit || 'µmol/L';
           const percentagePos = Math.min(Math.max(((val - 0) / 40) * 100, 2), 98);

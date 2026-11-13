@@ -206,28 +206,27 @@ export default function PatientDnaPortalClient({
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                backgroundColor: '#003666',
+                width: '34px',
+                height: '34px',
+                borderRadius: '6px',
+                backgroundColor: '#1a73e8',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontWeight: 900,
-                fontSize: '1rem',
-                letterSpacing: '-0.03em'
+                fontWeight: 700,
+                fontSize: '0.95rem'
               }}
             >
               A
             </div>
             <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 ATLAS HEALTH SERVICES · PRECISION GENOMICS
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '1px' }}>
-                <span style={{ fontSize: '0.92rem', fontWeight: 850, color: '#0f172a' }}>{patientName}</span>
-                <span style={{ fontSize: '0.70rem', color: '#64748b', backgroundColor: '#f1f5f9', padding: '2px 7px', borderRadius: '4px', fontWeight: 650 }}>
+                <span style={{ fontSize: '0.92rem', fontWeight: 600, color: '#202124' }}>{patientName}</span>
+                <span style={{ fontSize: '0.68rem', color: '#5f6368', backgroundColor: '#f1f3f4', border: '1px solid #dadce0', padding: '1px 6px', borderRadius: '4px', fontWeight: 500 }}>
                   #{sampleCode}
                 </span>
               </div>
@@ -244,12 +243,12 @@ export default function PatientDnaPortalClient({
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 12px',
-                fontSize: '0.76rem',
-                fontWeight: 650,
+                fontSize: '0.74rem',
+                fontWeight: 500,
                 backgroundColor: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                color: copiedLink ? '#16a34a' : '#475569',
+                border: '1px solid #dadce0',
+                borderRadius: '4px',
+                color: copiedLink ? '#188038' : '#3c4043',
                 cursor: 'pointer'
               }}
             >
@@ -265,12 +264,12 @@ export default function PatientDnaPortalClient({
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 12px',
-                fontSize: '0.76rem',
-                fontWeight: 700,
-                backgroundColor: '#f0fdf4',
-                border: '1px solid #86efac',
-                borderRadius: '6px',
-                color: '#15803d',
+                fontSize: '0.74rem',
+                fontWeight: 500,
+                backgroundColor: '#ffffff',
+                border: '1px solid #dadce0',
+                borderRadius: '4px',
+                color: '#188038',
                 cursor: 'pointer'
               }}
             >
@@ -286,12 +285,13 @@ export default function PatientDnaPortalClient({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '6px 13px',
-                fontSize: '0.76rem',
-                fontWeight: 750,
-                backgroundColor: '#0284c7',
-                color: '#ffffff',
-                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '0.74rem',
+                fontWeight: 500,
+                backgroundColor: '#e8f0fe',
+                border: '1px solid #d2e3fc',
+                color: '#1a73e8',
+                borderRadius: '4px',
                 textDecoration: 'none'
               }}
             >
@@ -307,12 +307,12 @@ export default function PatientDnaPortalClient({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '6px 13px',
-                fontSize: '0.76rem',
-                fontWeight: 750,
-                backgroundColor: '#0d9488',
+                padding: '6px 12px',
+                fontSize: '0.74rem',
+                fontWeight: 500,
+                backgroundColor: '#1a73e8',
                 color: '#ffffff',
-                borderRadius: '6px',
+                borderRadius: '4px',
                 textDecoration: 'none'
               }}
             >
@@ -336,18 +336,17 @@ export default function PatientDnaPortalClient({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '7px 14px',
-                borderRadius: '999px',
-                fontSize: '0.76rem',
-                fontWeight: isActive ? 800 : 600,
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '0.74rem',
+                fontWeight: isActive ? 600 : 500,
                 border: '1px solid',
-                borderColor: isActive ? '#003666' : '#e2e8f0',
-                backgroundColor: isActive ? '#003666' : '#ffffff',
-                color: isActive ? '#ffffff' : '#475569',
+                borderColor: isActive ? '#1a73e8' : '#dadce0',
+                backgroundColor: isActive ? '#e8f0fe' : '#ffffff',
+                color: isActive ? '#1a73e8' : '#3c4043',
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
-                flexShrink: 0,
-                boxShadow: isActive ? '0 2px 6px rgba(0, 54, 102, 0.2)' : 'none'
+                flexShrink: 0
               }}
             >
               <span>{ch.icon}</span>
@@ -374,30 +373,30 @@ export default function PatientDnaPortalClient({
             <div
               style={{
                 backgroundColor: '#ffffff',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                padding: '1.25rem',
-                marginBottom: '1rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                borderRadius: '8px',
+                border: '1px solid #dadce0',
+                padding: '1rem',
+                marginBottom: '0.75rem',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.66rem', fontWeight: 800, backgroundColor: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '2px 7px', borderRadius: '4px' }}>
+                <span style={{ fontSize: '0.64rem', fontWeight: 600, backgroundColor: '#e6f4ea', color: '#137333', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px' }}>
                   CE-IVD CERTIFIED
                 </span>
-                <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 750 }}>✓ Active</span>
+                <span style={{ fontSize: '0.66rem', color: '#137333', fontWeight: 600 }}>✓ Active</span>
               </div>
-              <h3 style={{ margin: '0 0 2px 0', fontSize: '1.05rem', fontWeight: 850, color: '#003666' }}>
+              <h3 style={{ margin: '0 0 2px 0', fontSize: '1.0rem', fontWeight: 600, color: '#202124' }}>
                 {patientName}
               </h3>
-              <div style={{ fontSize: '0.74rem', color: '#64748b', marginBottom: '8px' }}>
-                Specimen ID: <code style={{ backgroundColor: '#f1f5f9', padding: '1px 5px', borderRadius: '3px', color: '#0f172a' }}>{sampleCode}</code>
+              <div style={{ fontSize: '0.72rem', color: '#5f6368', marginBottom: '8px' }}>
+                Specimen ID: <code style={{ backgroundColor: '#f1f3f4', padding: '1px 5px', borderRadius: '3px', color: '#202124' }}>{sampleCode}</code>
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#475569', borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+              <div style={{ fontSize: '0.70rem', color: '#5f6368', borderTop: '1px solid #dadce0', paddingTop: '6px' }}>
                 <strong>Clinic:</strong> {clinic}
               </div>
               {currentDoctor && (
-                <div style={{ fontSize: '0.72rem', color: '#475569', paddingTop: '4px' }}>
+                <div style={{ fontSize: '0.70rem', color: '#5f6368', paddingTop: '3px' }}>
                   <strong>Doctor:</strong> {currentDoctor}
                 </div>
               )}
@@ -407,16 +406,16 @@ export default function PatientDnaPortalClient({
             <nav
               style={{
                 backgroundColor: '#ffffff',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                padding: '0.75rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                borderRadius: '8px',
+                border: '1px solid #dadce0',
+                padding: '0.5rem',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '4px'
+                gap: '2px'
               }}
             >
-              <div style={{ padding: '6px 10px', fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ padding: '6px 10px', fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Report Chapters
               </div>
 
@@ -431,28 +430,29 @@ export default function PatientDnaPortalClient({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
+                      padding: '8px 10px',
+                      borderRadius: isActive ? '0 4px 4px 0' : '4px',
                       border: 'none',
-                      backgroundColor: isActive ? '#003666' : 'transparent',
-                      color: isActive ? '#ffffff' : '#334155',
+                      borderLeft: isActive ? '3px solid #1a73e8' : '3px solid transparent',
+                      backgroundColor: isActive ? '#e8f0fe' : 'transparent',
+                      color: isActive ? '#1a73e8' : '#3c4043',
                       cursor: 'pointer',
                       textAlign: 'left',
                       transition: 'all 0.12s ease'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '1.1rem' }}>{ch.icon}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1.0rem' }}>{ch.icon}</span>
                       <div>
-                        <div style={{ fontSize: '0.82rem', fontWeight: isActive ? 800 : 650 }}>
+                        <div style={{ fontSize: '0.80rem', fontWeight: isActive ? 600 : 500 }}>
                           {ch.label}
                         </div>
-                        <div style={{ fontSize: '0.68rem', color: isActive ? '#93c5fd' : '#64748b', marginTop: '1px' }}>
+                        <div style={{ fontSize: '0.66rem', color: isActive ? '#1a73e8' : '#70757a', marginTop: '1px' }}>
                           {ch.subtitle}
                         </div>
                       </div>
                     </div>
-                    {isActive && <ChevronRight size={16} color="#93c5fd" />}
+                    {isActive && <ChevronRight size={14} color="#1a73e8" />}
                   </button>
                 );
               })}
@@ -462,17 +462,17 @@ export default function PatientDnaPortalClient({
             <div
               style={{
                 backgroundColor: '#ffffff',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                padding: '1.25rem',
-                marginTop: '1rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                borderRadius: '8px',
+                border: '1px solid #dadce0',
+                padding: '1rem',
+                marginTop: '0.75rem',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '8px'
               }}
             >
-              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Quick Action Links
               </div>
               <button
@@ -482,17 +482,17 @@ export default function PatientDnaPortalClient({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '9px 12px',
-                  borderRadius: '6px',
-                  backgroundColor: '#f0fdf4',
-                  color: '#15803d',
-                  border: '1px solid #86efac',
-                  fontSize: '0.76rem',
-                  fontWeight: 750,
+                  padding: '8px 10px',
+                  borderRadius: '4px',
+                  backgroundColor: '#ffffff',
+                  color: '#188038',
+                  border: '1px solid #dadce0',
+                  fontSize: '0.74rem',
+                  fontWeight: 500,
                   cursor: 'pointer'
                 }}
               >
-                <MessageSquare size={15} />
+                <MessageSquare size={14} />
                 <span>Send Menu to Chef (WA)</span>
               </button>
 
@@ -504,17 +504,17 @@ export default function PatientDnaPortalClient({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '9px 12px',
-                  borderRadius: '6px',
-                  backgroundColor: '#f0f9ff',
-                  color: '#0284c7',
-                  border: '1px solid #bae6fd',
-                  fontSize: '0.76rem',
-                  fontWeight: 750,
+                  padding: '8px 10px',
+                  borderRadius: '4px',
+                  backgroundColor: '#ffffff',
+                  color: '#1a73e8',
+                  border: '1px solid #dadce0',
+                  fontSize: '0.74rem',
+                  fontWeight: 500,
                   textDecoration: 'none'
                 }}
               >
-                <Printer size={15} />
+                <Printer size={14} />
                 <span>Print Kitchen Guide (5p)</span>
               </a>
             </div>
@@ -653,17 +653,17 @@ export default function PatientDnaPortalClient({
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            padding: '11px 12px',
-            backgroundColor: '#16a34a',
-            color: '#ffffff',
-            borderRadius: '8px',
-            fontWeight: 800,
+            padding: '10px 12px',
+            backgroundColor: '#ffffff',
+            color: '#188038',
+            borderRadius: '4px',
+            border: '1px solid #dadce0',
+            fontWeight: 500,
             fontSize: '0.78rem',
-            border: 'none',
             cursor: 'pointer'
           }}
         >
-          <MessageSquare size={16} />
+          <MessageSquare size={15} />
           <span>WhatsApp to Chef</span>
         </button>
 
@@ -677,17 +677,17 @@ export default function PatientDnaPortalClient({
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            padding: '11px 12px',
-            backgroundColor: '#003666',
+            padding: '10px 12px',
+            backgroundColor: '#1a73e8',
             color: '#ffffff',
-            borderRadius: '8px',
-            fontWeight: 800,
+            borderRadius: '4px',
+            fontWeight: 500,
             fontSize: '0.78rem',
             textDecoration: 'none',
             textAlign: 'center'
           }}
         >
-          <Download size={16} />
+          <Download size={15} />
           <span>Download PDF (59p)</span>
         </a>
       </div>

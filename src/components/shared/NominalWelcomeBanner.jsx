@@ -104,7 +104,7 @@ export default function NominalWelcomeBanner({
         background: isDoc
           ? 'linear-gradient(90deg, #002244 0%, #003666 60%, #004b87 100%)'
           : isPatient
-          ? 'linear-gradient(90deg, #3b0764 0%, #581c87 60%, #6b21a8 100%)'
+          ? 'linear-gradient(90deg, #185abc 0%, #1a73e8 60%, #4285f4 100%)'
           : 'linear-gradient(90deg, #1c1917 0%, #292524 60%, #44403c 100%)',
         color: '#ffffff',
         padding: '7px 16px',
