@@ -265,7 +265,7 @@ export default function PeptideSpecsDrawer({
                   onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
                 >
                   <Plus size={12} />
-                  <span>+ 1 Vial</span>
+                  <span>1 Vial</span>
                 </button>
 
                 <button
@@ -290,7 +290,7 @@ export default function PeptideSpecsDrawer({
                   onMouseLeave={e => e.currentTarget.style.background = '#1a73e8'}
                 >
                   <Box size={12} />
-                  <span>+ Pack ×10</span>
+                  <span>Pack ×10</span>
                 </button>
               </div>
             </div>

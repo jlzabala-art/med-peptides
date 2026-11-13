@@ -413,7 +413,7 @@ export function getPeptidesColumns({
                 title={isEs ? 'Añadir pack de 10 viales con descuento por volumen' : 'Add manufacturer pack of 10 vials (-volume discount)'}
               >
                 <Box size={11} />
-                <span>+Pack ×10</span>
+                <span>Pack ×10</span>
               </button>
             )}
           </div>

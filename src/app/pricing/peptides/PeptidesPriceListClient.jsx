@@ -493,6 +493,7 @@ export default function PeptidesPriceListClient({
           .gcp-search-and-category-block { order: 1; width: 100%; min-width: 0; }
           .gcp-kpis-summary-block { order: 2; width: 100%; min-width: 0; }
           .mobile-only-filter-selectors { order: 3; display: none; width: 100%; min-width: 0; }
+          .mobile-only-secondary-toggle { display: none; }
           .gcp-table-block { order: 4; width: 100%; min-width: 0; }
           .mobile-only-category-selector, .mobile-nav-drawer-trigger, .mobile-only-category-strip, .mobile-only-header-actions { display: none; }
           @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
@@ -525,7 +526,10 @@ export default function PeptidesPriceListClient({
             .peptides-main-container { padding: 0.5rem 0.65rem 3.5rem 0.65rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
             .peptides-hero-title { font-size: 1.05rem !important; line-height: 1.2 !important; }
             .peptides-hero-subtitle { display: none !important; }
-            .mobile-only-filter-selectors { grid-template-columns: 1fr 1fr !important; gap: 6px !important; margin-top: 6px !important; display: grid !important; order: 3 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+            .mobile-only-secondary-toggle { display: block !important; width: 100% !important; margin-bottom: 6px !important; }
+            .peptides-secondary-filters-subbar.mobile-secondary-collapsed { display: none !important; }
+            .peptides-secondary-filters-subbar.mobile-secondary-expanded { display: flex !important; width: 100% !important; margin-bottom: 8px !important; }
+            .mobile-only-filter-selectors { display: block !important; margin-top: 4px !important; margin-bottom: 6px !important; order: 3 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
             .gcp-search-and-category-block { order: 1 !important; margin-bottom: 0.75rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .gcp-kpis-summary-block { order: 2 !important; padding: 0.5rem 0.65rem !important; margin-bottom: 0.5rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .mobile-kpi-summary-strip { display: flex !important; width: 100% !important; min-width: 0 !important; }
@@ -609,34 +613,12 @@ export default function PeptidesPriceListClient({
               isEs={isEs}
             />
 
-            {/* Dual Mobile Dropdown Selectors */}
+            {/* Single Mobile FDA Regulatory Filter Selector (Category is controlled by top chip strip) */}
             <div className="mobile-only-filter-selectors">
               <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px', boxShadow: '0 1px 2px rgba(60,64,67,0.05)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span>🧬 {isEs ? 'Categoría' : 'Category'}</span>
-                  </span>
-                  {selectedCategory !== 'all' && (
-                    <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedCategory('all'); }} style={{ border: 'none', background: '#f1f5f9', color: '#475569', fontSize: '0.66rem', fontWeight: 700, cursor: 'pointer', padding: '1px 6px', borderRadius: '4px' }}>
-                      {isEs ? 'Limpiar ×' : 'Clear ×'}
-                    </button>
-                  )}
-                </div>
-                <button type="button" onClick={() => setIsCategorySheetOpen(true)} style={{ width: '100%', padding: '7px 9px', borderRadius: '6px', border: selectedCategory !== 'all' ? '1.5px solid #1a73e8' : '1px solid #cbd5e1', background: selectedCategory !== 'all' ? '#f0f7ff' : '#ffffff', color: selectedCategory !== 'all' ? '#1a73e8' : '#1e293b', fontSize: '0.80rem', fontWeight: selectedCategory !== 'all' ? 750 : 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', textAlign: 'left' }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {selectedCategory === 'all'
-                      ? (isEs ? `🌐 Todas las Categorías (${processedProducts.length})` : `🌐 All Categories (${processedProducts.length})`)
-                      : `${CATEGORY_MAP[selectedCategory]?.icon || '🧬'} ${isEs ? CATEGORY_MAP[selectedCategory]?.labelEs : CATEGORY_MAP[selectedCategory]?.labelEn} (${processedProducts.filter(p => p.categoryKey === selectedCategory).length})`
-                    }
-                  </span>
-                  <ChevronDown size={14} color="#64748b" style={{ flexShrink: 0 }} />
-                </button>
-              </div>
-
-              <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px', boxShadow: '0 1px 2px rgba(60,64,67,0.05)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span>⚖️ {isEs ? 'Estatus FDA' : 'FDA Status'}</span>
+                    <span>⚖️ {isEs ? 'Estatus Regulatorio / FDA' : 'FDA Regulatory Status'}</span>
                   </span>
                   {selectedFdaStatus !== 'all' && (
                     <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedFdaStatus('all'); }} style={{ border: 'none', background: '#f1f5f9', color: '#475569', fontSize: '0.66rem', fontWeight: 700, cursor: 'pointer', padding: '1px 6px', borderRadius: '4px' }}>

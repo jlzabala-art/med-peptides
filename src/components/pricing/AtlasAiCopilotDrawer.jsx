@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
+import { getPeptideClinicalSummary } from '@/constants/peptidePharmacology';
 
 const SUGGESTED_INQUIRIES = [
   {
@@ -189,15 +190,34 @@ export default function AtlasAiCopilotDrawer({
     if (contextProduct) {
       const prodName = contextProduct.productName || 'Peptide';
       const prodDose = contextProduct.dosage || '';
+      const category = contextProduct.category || contextProduct.therapeuticClass || '';
+      const clinical = getPeptideClinicalSummary(prodName, category, isEs ? 'es' : 'en');
+
       const promptText = isEs
-        ? `📋 **Análisis Clínico y Posología: ${prodName} (${prodDose})**\n\nHe cargado los datos farmacotécnicos de este vial:\n• **Reconstitución sugerida:** Diluir con agua bacteriostática (BAC Water) para posología estéril y estable.\n• **Jeringa U-100:** Cada 10 UI permite titulación y micro-dosificación de alta precisión.\n• **Ahorro Pack ×10:** Disponible con descuento por volumen institucional.\n\n¿Deseas calcular una pauta de tratamiento específica o añadirlo a tu proforma?`
-        : `📋 **Clinical Posology & Reconstitution Analysis: ${prodName} (${prodDose})**\n\nI have loaded the pharmacokinetic and dispensing parameters for this vial:\n• **Reconstitution:** Standard sterile dilution with BAC Water for 28-day stability.\n• **Syringe Math (U-100):** Every 10 IU tick delivers precision clinical dosing.\n• **Pack ×10 Tier:** Volume pricing available with instant tier discounts.\n\nWould you like me to calculate a specific titration cycle or add it to your proforma?`;
+        ? `📋 **Guía Clínica y Posología Farmacotécnica: ${prodName} (${prodDose})**\n\n` +
+          `• **Pauta de Dosificación:** ${clinical.dose}\n` +
+          `• **Vía y Vida Media:** ${clinical.route} · ${clinical.halfLife}\n` +
+          `• **Protocolo de Reconstitución:** ${clinical.recon}\n` +
+          `• **Cálculo de Jeringa (U-100):** ${clinical.syringeCalc}\n` +
+          `• **Rendimiento por Vial:** ${clinical.vialYield}\n` +
+          `• **Estabilidad:** ${clinical.stability}\n` +
+          (clinical.stack ? `• **Sinergias Clínicas:** ${clinical.stack}\n\n` : '\n') +
+          `¿Deseas calcular una titulación específica, ajustar según peso del paciente o consultar protocolos combinados?`
+        : `📋 **Clinical Posology & Reconstitution Guide: ${prodName} (${prodDose})**\n\n` +
+          `• **Suggested Dosing Protocol:** ${clinical.dose}\n` +
+          `• **Route & Half-Life:** ${clinical.route} · ${clinical.halfLife}\n` +
+          `• **Reconstitution Protocol:** ${clinical.recon}\n` +
+          `• **Syringe Math (U-100):** ${clinical.syringeCalc}\n` +
+          `• **Vial Yield:** ${clinical.vialYield}\n` +
+          `• **Stability & Storage:** ${clinical.stability}\n` +
+          (clinical.stack ? `• **Clinical Synergies:** ${clinical.stack}\n\n` : '\n') +
+          `Would you like to calculate a customized titration schedule, patient-weight dose, or review combination stacks?`;
 
       setMessages([
         {
           role: 'assistant',
           text: promptText,
-          actionProducts: [contextProduct]
+          actionProducts: []
         }
       ]);
     } else if (messages.length === 1 && messages[0].role === 'assistant') {
@@ -831,7 +851,7 @@ export default function AtlasAiCopilotDrawer({
                                       }}
                                     >
                                       {is1xAdded ? <Check size={11} /> : <Plus size={11} />}
-                                      <span>{isEs ? '+1 Vial' : '+1 Vial'}</span>
+                                      <span>1 Vial</span>
                                     </button>
                                   )}
                                   {onAddToCart && (
@@ -855,7 +875,7 @@ export default function AtlasAiCopilotDrawer({
                                       }}
                                     >
                                       {is10xAdded ? <Check size={11} /> : <Plus size={11} />}
-                                      <span>{isEs ? '+Pack ×10' : '+Pack ×10'}</span>
+                                      <span>Pack ×10</span>
                                     </button>
                                   )}
                                   {onOpenSpecs && (

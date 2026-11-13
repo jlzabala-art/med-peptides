@@ -335,7 +335,7 @@ export default function PeptideMobileCard({
               }}
             >
               <Plus size={13} style={{ flexShrink: 0 }} />
-              <span>+ 1 Vial</span>
+              <span>1 Vial</span>
             </button>
           )}
         </div>
@@ -441,7 +441,7 @@ export default function PeptideMobileCard({
               }}
             >
               <Box size={13} style={{ flexShrink: 0 }} />
-              <span>+Pack ×10</span>
+              <span>Pack ×10</span>
             </button>
           )}
         </div>

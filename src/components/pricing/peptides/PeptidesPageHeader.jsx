@@ -99,23 +99,23 @@ export default function PeptidesPageHeader({
             }}
             style={{
               height: '34px',
-              padding: '0 12px',
+              padding: '0 14px',
               borderRadius: '6px',
-              border: '1px solid #dadce0',
-              background: '#ffffff',
-              color: '#3c4043',
+              border: '1px solid #1a73e8',
+              background: '#1a73e8',
+              color: '#ffffff',
               fontSize: '0.80rem',
-              fontWeight: 650,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+              boxShadow: '0 1px 3px rgba(26,115,232,0.25)',
               transition: 'background 0.15s ease'
             }}
             title={isEs ? 'Consultar información técnica o solicitud B2B' : 'Institutional Inquiry & Support'}
           >
-            <Mail size={14} color="#5f6368" />
+            <Mail size={14} color="#ffffff" />
             <span>{isEs ? 'Consultar' : 'Inquire'}</span>
           </button>
 

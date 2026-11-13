@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { SlidersHorizontal, Truck, Layers } from 'lucide-react';
+import React, { useState } from 'react';
+import { SlidersHorizontal, Truck, Layers, ChevronDown } from 'lucide-react';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import {
   CATEGORY_ORDER,
@@ -33,6 +33,7 @@ export default function PeptidesFilterToolbar({
   setGroupByCategory
 }) {
   const isEs = lang === 'es';
+  const [isMobileSecondaryOpen, setIsMobileSecondaryOpen] = useState(false);
 
   return (
     <div className="gcp-search-and-category-block" style={{ marginBottom: '0.85rem' }}>
@@ -144,8 +145,49 @@ export default function PeptidesFilterToolbar({
         })}
       </div>
 
+      {/* Mobile Progressive Disclosure Toggle for Shipping & Strength Sub-bar */}
+      <div className="mobile-only-secondary-toggle">
+        <button
+          type="button"
+          onClick={() => setIsMobileSecondaryOpen(prev => !prev)}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '7px 10px',
+            background: isMobileSecondaryOpen ? '#e8f0fe' : '#ffffff',
+            border: isMobileSecondaryOpen ? '1px solid #1a73e8' : '1px solid #dadce0',
+            borderRadius: '6px',
+            fontSize: '0.73rem',
+            fontWeight: 700,
+            color: isMobileSecondaryOpen ? '#1a73e8' : '#3c4043',
+            cursor: 'pointer',
+            boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
+            marginBottom: '6px'
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Truck size={13} color={isMobileSecondaryOpen ? '#1a73e8' : '#0284c7'} />
+            <span>{isEs ? 'Tarifas de Envío & Dosis' : 'Shipping Corridors & Dosage'}</span>
+            <span style={{ fontSize: '0.67rem', color: isMobileSecondaryOpen ? '#1a73e8' : '#64748b', fontWeight: 600 }}>
+              ({shippingDest} · {selectedStrength === 'all' ? (isEs ? 'Todas' : 'All') : selectedStrength})
+            </span>
+          </span>
+          <ChevronDown
+            size={14}
+            color={isMobileSecondaryOpen ? '#1a73e8' : '#64748b'}
+            style={{
+              transform: isMobileSecondaryOpen ? 'rotate(180deg)' : 'none',
+              transition: 'transform 0.2s ease'
+            }}
+          />
+        </button>
+      </div>
+
       {/* Sub-bar with Shipping Corridor, Dosage Strength Pills & Grouping View */}
       <div
+        className={`peptides-secondary-filters-subbar ${isMobileSecondaryOpen ? 'mobile-secondary-expanded' : 'mobile-secondary-collapsed'}`}
         style={{
           display: 'flex',
           flexDirection: 'column',
