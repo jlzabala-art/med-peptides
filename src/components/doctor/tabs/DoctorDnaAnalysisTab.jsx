@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import DataTable from '../../ui/DataTable';
 import CopyableId from '../../ui/CopyableId';
+import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
 
 /**
  * DoctorDnaAnalysisTab
@@ -594,6 +595,15 @@ export default function DoctorDnaAnalysisTab({
             const rxPdfUrl = row.pdfReportUrl || `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
             const mealPdfUrl = row.mealPlanPdfUrl || `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
 
+            const profile = evaluateNutrigenomicProfile({
+              sampleCode: row.sampleId || row.code,
+              patientName: row.patientName,
+              doctor: row.doctorName,
+              clinic: row.clinicName
+            });
+            const axes = profile.fiveClinicalAxes || [];
+            const ancestral = profile.ancestralMetabolicProfile || {};
+
             return (
               <div
                 style={{
@@ -641,7 +651,7 @@ export default function DoctorDnaAnalysisTab({
                   </div>
                 </div>
 
-                {/* 5 Clinical Axes Mini-Gauges (Replacing inappropriate blood micromolar range bar) */}
+                {/* 5 Clinical Axes Mini-Gauges (Dynamically Evaluated) */}
                 <div
                   style={{
                     display: 'grid',
@@ -649,92 +659,52 @@ export default function DoctorDnaAnalysisTab({
                     gap: '10px'
                   }}
                 >
-                  {/* Axis 1 */}
-                  <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderLeft: '3px solid #f29900', borderRadius: '4px', padding: '10px' }}>
-                    <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
-                      Axis 1 · Satiety Signal
+                  {axes.map((ax) => (
+                    <div
+                      key={ax.id}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #dadce0',
+                        borderLeft: `3px solid ${ax.badgeColor || '#1a73e8'}`,
+                        borderRadius: '4px',
+                        padding: '10px'
+                      }}
+                    >
+                      <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
+                        Axis {ax.number} · {ax.riskLevel}
+                      </div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: ax.badgeColor || '#202124', marginTop: '2px' }}>
+                        {ax.titleEn?.split('(')[0]?.trim()}
+                      </div>
+                      <div style={{ fontSize: '0.68rem', color: '#70757a', marginTop: '3px' }}>
+                        Genes: {ax.keyGenes}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>
-                      Moderate Delay (65/100)
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#70757a', marginTop: '3px' }}>
-                      Genes: MC4R (TC), FTO (AC)
-                    </div>
-                  </div>
-
-                  {/* Axis 2 */}
-                  <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderLeft: '3px solid #1e8e3e', borderRadius: '4px', padding: '10px' }}>
-                    <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
-                      Axis 2 · Methylation Capacity
-                    </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#137333', marginTop: '2px' }}>
-                      Normal Wild-Type (GG)
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#70757a', marginTop: '3px' }}>
-                      Genes: MTHFR C677T (GG wild-type)
-                    </div>
-                  </div>
-
-                  {/* Axis 3 */}
-                  <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderLeft: '3px solid #d93025', borderRadius: '4px', padding: '10px' }}>
-                    <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
-                      Axis 3 · Carb Sensitivity
-                    </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#c5221f', marginTop: '2px' }}>
-                      High Priority (85/100)
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#70757a', marginTop: '3px' }}>
-                      Genes: IRS1 (TC), TCF7L2, FTO
-                    </div>
-                  </div>
-
-                  {/* Axis 4 */}
-                  <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderLeft: '3px solid #1e8e3e', borderRadius: '4px', padding: '10px' }}>
-                    <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
-                      Axis 4 · Micronutrients
-                    </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#137333', marginTop: '2px' }}>
-                      Normal Bioavailability
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#70757a', marginTop: '3px' }}>
-                      Genes: VDR (CC), ZPR1 (CC)
-                    </div>
-                  </div>
-
-                  {/* Axis 5 */}
-                  <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderLeft: '3px solid #d93025', borderRadius: '4px', padding: '10px' }}>
-                    <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
-                      Axis 5 · Food Sensitivities
-                    </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#c5221f', marginTop: '2px' }}>
-                      Severe Lactose Intolerance
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#70757a', marginTop: '3px' }}>
-                      Genes: MCM6 (GG), ADORA2A (TT)
-                    </div>
-                  </div>
+                  ))}
                 </div>
 
                 {/* Ancestral Metabolic Heritage & Dietary Compatibility Insight */}
-                <div
-                  style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #dadce0',
-                    borderLeft: '4px solid #1a73e8',
-                    borderRadius: '4px',
-                    padding: '12px 14px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <Sparkles size={14} style={{ color: '#1a73e8' }} />
-                    <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                      Ancestral Metabolic Compatibility (Indus Valley & Dravidian Lineage)
-                    </span>
+                {ancestral.clinicalSynthesisEn && (
+                  <div
+                    style={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderLeft: '4px solid #1a73e8',
+                      borderRadius: '4px',
+                      padding: '12px 14px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <Sparkles size={14} style={{ color: '#1a73e8' }} />
+                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                        Ancestral Metabolic Compatibility ({ancestral.primaryRegion || 'South Asia'} · Haplogroup {ancestral.maternalHaplogroup})
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.76rem', color: '#3c4043', lineHeight: 1.55 }}>
+                      {ancestral.clinicalSynthesisEn}
+                    </p>
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#3c4043', lineHeight: 1.55 }}>
-                    Autosomal ancestry (80.6% Indian subcontinent, Haplogroup M2a&apos;b) demonstrates thousands of years of adaptation to ancestral millets (ragi, jowar), pulses, and antioxidant spices (turmeric, Ceylon cinnamon). The severe adult hypolactasia (MCM6 GG) aligns with non-pastoral ancestral genetics: pasteurized cow&apos;s milk triggers chronic micro-inflammation, whereas traditional probiotic shields, ghee, and goat/sheep fermentation are well-tolerated.
-                  </p>
-                </div>
+                )}
 
                 {/* Direct Action Dossier Links */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '4px' }}>

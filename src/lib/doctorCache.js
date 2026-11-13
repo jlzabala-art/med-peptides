@@ -3,6 +3,7 @@ import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
 import { classifyPrescriptionRegimen } from '@/utils/prescriptionRegimenTaxonomy';
 import { resolveDoctorSpecialtyIntelligence } from '@/services/specialtyBlueprintsEngine';
 import { sanitizePrescriptionCode } from '@/lib/prescriptionSanitizer';
+import { listGenomicReportsByDoctor } from '@/services/genomicsRepository';
 
 // ── In-Memory RAM Cache (Golden Rule #2) ─────────────────────────────────────
 // Layer 1: 0ms RAM cache with 10-minute TTL, shared via globalThis across Server Components & API routes
@@ -1340,42 +1341,50 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       }
     }
 
-    // 7.6 24Genetics / Nutrigenomics Assigned Patient Tests (Ms. Wafa Burud for Dr. Sajid Burud)
-    if (isDoctorSajid) {
-      labResults.unshift({
-        id: '24G-G000943568',
-        code: 'G000943568',
-        protocolNumber: '24G-G000943568',
-        testName: '24Genetics Nutrition 2.0 (CE-IVD Genomic Assay)',
-        testType: 'Nutrigenomics DNA Profile',
-        biomarker: 'Nutrigenomic Profile & 3-Capsule Magistral Regimen',
-        patientName: 'Ms. Wafa Burud',
-        patient: {
-          name: 'Ms. Wafa Burud',
-          specimenId: 'G000943568',
-          sampleCode: 'G000943568',
-          gender: 'Female',
-          age: 38
-        },
-        sampleId: 'G000943568',
-        sampleType: 'Saliva DNA Specimen',
-        analysisDate: '2026-11-13',
-        date: '2026-11-13',
-        status: 'ready',
-        zone: 'optimal',
-        zoneLabel: 'Optimal Methylation · Severe Hypolactasia Protocol',
-        category: 'Nutrigenomics',
-        value: 85,
-        unit: 'Clinical Score',
-        laboratory: {
-          name: '24Genetics / Illumina GSA-24'
-        },
-        method: 'Illumina Infinium GSA-24 BeadChip',
-        interpretation: 'Normal methylation capacity (MTHFR GG wild-type). Severe adult hypolactasia (MCM6 GG) requiring complete cow dairy exclusion and active probiotic shield. Elevated caffeine anxiety risk (ADORA2A TT) requiring morning caffeine cutoff. Carb sensitivity (FTO/IRS1) managed with 1-2-3 Plate Sequencing.',
-        reportUrl: '/patient/dna-report?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
-        pdfReportUrl: '/api/reports/24genomics-patient-pdf?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
-        mealPlanPdfUrl: '/api/reports/24genomics-mealplan-pdf?patient=Ms.+Wafa+Burud&sample=G000943568&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare&partner=Transcend+Clinical+Nutrition'
-      });
+    // 7.6 24Genetics / Nutrigenomics Assigned Patient Tests (Loaded dynamically from genomicsRepository)
+    try {
+      const docLookupKey = isDoctorSajid ? 'dr-sajid-burud' : (doctorDoc?.zohoContactId || opaqueCode || doctorId || '');
+      const genomicDocs = await listGenomicReportsByDoctor(docLookupKey);
+      const doctorDisplayName = doctorProfile.name || (cleanDoctorName ? `Dr. ${cleanDoctorName}` : 'Atlas Health Services');
+      const clinicDisplayName = doctorProfile.clinicName || resolvedClinicName || 'Transcend Healthcare';
+      for (const gr of genomicDocs) {
+        labResults.unshift({
+          id: `24G-${gr.sampleId || gr.sampleCode}`,
+          code: gr.sampleCode || gr.sampleId,
+          protocolNumber: `24G-${gr.sampleId || gr.sampleCode}`,
+          testName: gr.testType || '24Genetics Nutrition 2.0 (CE-IVD Genomic Assay)',
+          testType: 'Nutrigenomics DNA Profile',
+          biomarker: 'Nutrigenomic Profile & 3-Capsule Magistral Regimen',
+          patientName: gr.patientName || 'Patient',
+          patient: {
+            name: gr.patientName || 'Patient',
+            specimenId: gr.sampleId || gr.sampleCode,
+            sampleCode: gr.sampleCode || gr.sampleId,
+            gender: gr.gender || 'Female',
+            age: gr.age || 38
+          },
+          sampleId: gr.sampleId || gr.sampleCode,
+          sampleType: gr.specimen || 'Saliva CE-IVD (2.0 mL)',
+          analysisDate: gr.analysisDate || '2026-11-13',
+          date: gr.analysisDate || '2026-11-13',
+          status: 'ready',
+          zone: 'optimal',
+          zoneLabel: 'Optimal Methylation · Severe Hypolactasia Protocol',
+          category: 'Nutrigenomics',
+          value: 85,
+          unit: 'Clinical Score',
+          laboratory: {
+            name: '24Genetics / Illumina GSA-24'
+          },
+          method: gr.platform || 'Illumina Infinium GSA-24 BeadChip',
+          interpretation: 'Normal methylation capacity (MTHFR GG wild-type). Severe adult hypolactasia (MCM6 GG) requiring complete cow dairy exclusion and active probiotic shield. Elevated caffeine anxiety risk (ADORA2A TT) requiring morning caffeine cutoff. Carb sensitivity (FTO/IRS1) managed with 1-2-3 Plate Sequencing.',
+          reportUrl: `/patient/dna-report?patient=${encodeURIComponent(gr.patientName || 'Patient')}&sample=${encodeURIComponent(gr.sampleId || gr.sampleCode)}&doctor=${encodeURIComponent(doctorDisplayName)}&clinic=${encodeURIComponent(clinicDisplayName)}`,
+          pdfReportUrl: `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(gr.patientName || 'Patient')}&sample=${encodeURIComponent(gr.sampleId || gr.sampleCode)}&doctor=${encodeURIComponent(doctorDisplayName)}&clinic=${encodeURIComponent(clinicDisplayName)}`,
+          mealPlanPdfUrl: `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(gr.patientName || 'Patient')}&sample=${encodeURIComponent(gr.sampleId || gr.sampleCode)}&doctor=${encodeURIComponent(doctorDisplayName)}&clinic=${encodeURIComponent(clinicDisplayName)}&partner=${encodeURIComponent(clinicDisplayName)}`
+        });
+      }
+    } catch (gErr) {
+      console.warn('Could not load genomic_reports in doctorCache:', gErr);
     }
 
     // 8. Enrich each prescription with tailored Atlas Recommendations (Peptides & Colway)

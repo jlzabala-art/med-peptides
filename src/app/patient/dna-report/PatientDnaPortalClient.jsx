@@ -33,6 +33,7 @@ import {
 // Modular Subcomponents
 import DnaReportRoadmap from '@/components/patient/dna/DnaReportRoadmap';
 import DnaPrioritiesSection from '@/components/patient/dna/DnaPrioritiesSection';
+import DnaAncestryHeritageSection from '@/components/patient/dna/DnaAncestryHeritageSection';
 import DnaFoodMatrixSection from '@/components/patient/dna/DnaFoodMatrixSection';
 import DnaWeeklyMealPlan from '@/components/patient/dna/DnaWeeklyMealPlan';
 import DnaGroceryChecklist from '@/components/patient/dna/DnaGroceryChecklist';
@@ -42,11 +43,12 @@ import DnaDownloadsSection from '@/components/patient/dna/DnaDownloadsSection';
 
 const CHAPTERS = [
   { id: 'priorities', label: '1. DNA Priorities', icon: '🧬', subtitle: 'Metabolism & 5 Clinical Axes' },
-  { id: 'foods', label: '2. 17 Food Families', icon: '🥗', subtitle: '116 Foods Classified (🟢🟡🔴)' },
-  { id: 'mealplan', label: '3. 7-Day Meal Plan', icon: '📅', subtitle: 'Daily Menus & 24h Routine' },
-  { id: 'grocery', label: '4. Grocery Checklist', icon: '🛒', subtitle: 'Monoprix / Lulu Qatar Ready' },
-  { id: 'prescription', label: '5. Pharmacy Prescription', icon: '💊', subtitle: 'Compounded vs Local OTC' },
-  { id: 'downloads', label: '6. Official PDF Dossiers', icon: '📥', subtitle: '59-Page CE-IVD Documents' }
+  { id: 'ancestry', label: '2. Ancestral Origins', icon: '🌍', subtitle: 'Indus Valley & Haplogroup M2a\'b' },
+  { id: 'foods', label: '3. 17 Food Families', icon: '🥗', subtitle: '116 Foods Classified (🟢🟡🔴)' },
+  { id: 'mealplan', label: '4. 7-Day Meal Plan', icon: '📅', subtitle: 'Daily Menus & 24h Routine' },
+  { id: 'grocery', label: '5. Grocery Checklist', icon: '🛒', subtitle: 'Monoprix / Lulu Qatar Ready' },
+  { id: 'prescription', label: '6. Pharmacy Prescription', icon: '💊', subtitle: 'Compounded vs Local OTC' },
+  { id: 'downloads', label: '7. Official PDF Dossiers', icon: '📥', subtitle: '59-Page CE-IVD Documents' }
 ];
 
 export default function PatientDnaPortalClient({
@@ -540,7 +542,14 @@ export default function PatientDnaPortalClient({
               />
             )}
 
-            {/* Chapter 2: Complete Food List & 17-Family Matrix */}
+            {/* Chapter 2: Ancestral Origins & Metabolic Heritage */}
+            {activeChapter === 'ancestry' && (
+              <DnaAncestryHeritageSection
+                clinicalProfile={clinicalProfile}
+              />
+            )}
+
+            {/* Chapter 3: Complete Food List & 17-Family Matrix */}
             {activeChapter === 'foods' && (
               <DnaFoodMatrixSection
                 clinicalProfile={clinicalProfile}

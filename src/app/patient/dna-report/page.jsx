@@ -1,6 +1,7 @@
 import React from 'react';
 import PatientDnaPortalClient from './PatientDnaPortalClient';
 import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
+import { getGenomicReport } from '@/services/genomicsRepository';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -50,23 +51,33 @@ export default async function PatientDnaReportPage({ searchParams }) {
   const sampleCode = sp?.sample || '24G-QA-90421';
   const isWafa = sampleCode === 'G000943568';
   const patientName = sp?.patient || (isWafa ? 'Ms. Wafa Burud' : 'Hossam Ahmed');
-  const clinic = sp?.clinic || (isWafa ? 'Dr. Sajid Burud Medical Practice' : 'Ryhanh Medical Company · Doha');
+  const clinic = sp?.clinic || (isWafa ? 'Transcend Healthcare' : 'Ryhanh Medical Company · Doha');
   const doctor = sp?.doctor || (isWafa ? 'Dr. Sajid Burud' : 'Clinical Genomic Director');
+
+  // Layer 4 & Cache lookup: Retrieve canonical profile
+  const storedReport = await getGenomicReport(sampleCode);
+  const resolvedPatient = storedReport?.patientName || patientName;
+  const resolvedClinic = storedReport?.clinic || clinic;
+  const resolvedDoctor = storedReport?.doctor || doctor;
+  const resolvedSnps = storedReport?.snps;
+  const resolvedAncestry = storedReport?.ancestry;
 
   // Rule #21: Server-side evaluation of clinical nutrigenomics profile
   const initialProfile = evaluateNutrigenomicProfile({
-    patientName,
+    patientName: resolvedPatient,
     sampleCode,
-    clinic,
-    doctor
+    clinic: resolvedClinic,
+    doctor: resolvedDoctor,
+    genotypes: resolvedSnps,
+    ancestry: resolvedAncestry
   });
 
   return (
     <PatientDnaPortalClient
-      initialPatientName={patientName}
+      initialPatientName={resolvedPatient}
       initialSampleCode={sampleCode}
-      initialClinic={clinic}
-      initialDoctor={doctor}
+      initialClinic={resolvedClinic}
+      initialDoctor={resolvedDoctor}
       initialProfile={initialProfile}
     />
   );

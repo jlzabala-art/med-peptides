@@ -7,12 +7,12 @@ import {
   evaluateNutrigenomicProfile,
   DEFAULT_HOSSAM_GENOTYPES
 } from '@/data/genomics/clinicalNutrigenomicEngine';
+import { getGenomicReport } from '@/services/genomicsRepository';
 import {
   patchPdfDoc,
   getWrappedLines,
   drawWrappedBlock,
-  pdfColors,
-  sanitizePdfText
+  pdfColors
 } from '@/lib/pdf/clinicalPdfKit';
 
 export const dynamic = 'force-dynamic';
@@ -27,12 +27,22 @@ export async function GET(request) {
     const clinicName = searchParams.get('clinic') || (isWafa ? 'Dr. Sajid Burud Medical Practice' : 'Ryhanh Medical Wellness · Doha, Qatar');
     const mealPlanPartner = searchParams.get('partner') || (isWafa ? 'Dr. Sajid Burud Clinical Nutrition' : 'Ryhanh Healthy Meal Plan & Diet Delivery');
 
+    // Canonical repository lookup (Firestore & 4-tier cache cascade)
+    const storedReport = await getGenomicReport(sampleId);
+    const resolvedPatient = storedReport?.patientName || patientName;
+    const resolvedDoctor = storedReport?.doctor || doctorName;
+    const resolvedClinic = storedReport?.clinic || clinicName;
+    const resolvedSnps = storedReport?.snps;
+    const resolvedAncestry = storedReport?.ancestry;
+
     // Execute dynamic clinical nutrigenomics rules engine
     const plan = evaluateNutrigenomicProfile({
-      patientName,
+      patientName: resolvedPatient,
       sampleCode: sampleId,
-      clinic: clinicName,
-      doctor: doctorName
+      clinic: resolvedClinic,
+      doctor: resolvedDoctor,
+      genotypes: resolvedSnps,
+      ancestry: resolvedAncestry
     });
 
     const pdfDoc = await PDFDocument.create();
@@ -49,10 +59,10 @@ export async function GET(request) {
       mutedSlate,
       lightBg,
       cardBorder,
-      greenBorder,
-      greenBg,
-      greenText,
-      amberBorder,
+      greenBorder: _greenBorder,
+      greenBg: _greenBg,
+      greenText: _greenText,
+      amberBorder: _amberBorder,
       amberBg,
       amberText,
       redBorder,

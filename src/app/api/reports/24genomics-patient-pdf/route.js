@@ -13,10 +13,10 @@ import {
   PRESCRIPTION_COMPARISON,
   evaluateNutrigenomicProfile
 } from '@/data/genomics/clinicalNutrigenomicEngine';
+import { getGenomicReport } from '@/services/genomicsRepository';
 import {
   patchPdfDoc,
-  pdfColors,
-  sanitizePdfText
+  pdfColors
 } from '@/lib/pdf/clinicalPdfKit';
 
 export const dynamic = 'force-dynamic';
@@ -32,15 +32,30 @@ export async function GET(request) {
     const modalityParam = searchParams.get('modality') || 'modalityB';
     const isOptionA = modalityParam === 'optionA' || modalityParam === 'modalityA';
 
-    // Dynamic genotype-aware profile (auto-selects by sampleCode via PATIENT_GENOTYPE_PROFILES)
-    const gProfile = evaluateNutrigenomicProfile({ patient: patientName, sampleCode: sampleId, clinic: clinicName, doctor: doctorNameParam });
+    // Canonical repository lookup (Firestore & 4-tier cache cascade)
+    const storedReport = await getGenomicReport(sampleId);
+    const resolvedPatient = storedReport?.patientName || patientName;
+    const resolvedDoctor = storedReport?.doctor || doctorNameParam;
+    const resolvedClinic = storedReport?.clinic || clinicName;
+    const resolvedSnps = storedReport?.snps;
+    const resolvedAncestry = storedReport?.ancestry;
+
+    // Dynamic genotype & ancestry evaluation
+    const gProfile = evaluateNutrigenomicProfile({
+      patient: resolvedPatient,
+      sampleCode: sampleId,
+      clinic: resolvedClinic,
+      doctor: resolvedDoctor,
+      genotypes: resolvedSnps,
+      ancestry: resolvedAncestry
+    });
     const gEval = gProfile.genotypesEvaluated;
     const isMthfrRisk = gEval.MTHFR === 'TT' || gEval.MTHFR === 'CT';
     const isMthfrSevere = gEval.MTHFR === 'TT';
     const isVdrRisk = gEval.VDR === 'CT' || gEval.VDR === 'TT';
-    const isVitERisk = gEval.ZPR1 === 'CG' || gEval.ZPR1 === 'GG' || gEval.CYP4F2 === 'TC' || gEval.CYP4F2 === 'CC';
+    const _isVitERisk = gEval.ZPR1 === 'CG' || gEval.ZPR1 === 'GG' || gEval.CYP4F2 === 'TC' || gEval.CYP4F2 === 'CC';
     const isLactoseIntolerant = gEval.MCM6 === 'AG' || gEval.MCM6 === 'GG';
-    const doctorName = gProfile.patient.doctor || doctorNameParam || 'Clinical Genomic Director';
+    const doctorName = gProfile.patient.doctor || resolvedDoctor || 'Clinical Genomic Director';
 
     const pdfDoc = await PDFDocument.create();
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);

@@ -25,6 +25,7 @@ import {
   getFagron17SubfamilyMatrix,
   getPersonalizedGroceryAisles
 } from './masterFoodCatalog.js';
+import { evaluateAncestralMetabolicCompatibility } from './ancestralMetabolicEngine.js';
 
 export const GALENIC_COMPATIBILITY_ANALYSIS = {
   rationale: 'Galenic and pharmacokinetic analysis strictly contraindicates combining all 9 active ingredients into a single monolithic capsule due to physical volume overload, botanical antimicrobial antagonism against live probiotics, and conflicting absorption kinetics.',
@@ -1338,6 +1339,12 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
 
   const fagron17SubfamilyMatrix = getFagron17SubfamilyMatrix(riskFlags);
 
+  // Compute Ancestral Metabolic Compatibility (Indus Valley / Haplogroup M2a'b vs Modern Mismatch)
+  const ancestralMetabolicProfile = evaluateAncestralMetabolicCompatibility({
+    ancestry: inputData.ancestry || patientDefaults.ancestry || {},
+    snps: g
+  });
+
   return {
     patient: {
       name: patientName,
@@ -1348,6 +1355,7 @@ export function evaluateNutrigenomicProfile(inputData = {}) {
       analysisDate
     },
     genotypesEvaluated: g,
+    ancestralMetabolicProfile,
     fiveClinicalAxes,
     plateSequencing,
     foodTrafficLight,
