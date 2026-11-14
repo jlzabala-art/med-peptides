@@ -531,6 +531,8 @@ export default function CompoundingPage({
     return { totalMg: Math.round(totalMg * 10) / 10, capsPerDay, mgPerCap: Math.round(mgPerCap), size, fillPct, supplyDays, tooMany };
   }, [items, capsPerBottle]);
 
+  const totalMg = galenics?.totalMg || 0;
+
   const costEstimate = useMemo(() => {
     if (!items.length || !galenics) return null;
     try {
@@ -732,7 +734,7 @@ export default function CompoundingPage({
           capsuleDetails: {
             capsPerBottle,
             size: galenics?.size?.size || 'Size 0',
-            totalMgPerCap: totalMg,
+            totalMgPerCap: galenics?.mgPerCap || totalMg,
             capsPerDay: galenics?.capsPerDay || 2
           },
           nutrigenomics: activeGeneticProfile ? {
