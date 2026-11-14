@@ -32,6 +32,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import DataTable from '@/components/ui/DataTable';
+import CatalogMasterDetailPanel from '@/components/pricing/shared/CatalogMasterDetailPanel';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
@@ -226,43 +227,62 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         label: 'Genomic Test / Clinical Panel',
         width: (canViewCost && showCostBasis) ? '30%' : '36%',
         sortable: true,
-        render: (_, row) => (
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: '0.90rem', color: '#0f172a' }}>
-              {row.name}
+        render: (_, row) => {
+          const q = (searchQuery || '').trim().toLowerCase();
+          const matchedInDescription = Boolean(
+            q &&
+            !String(row.name || '').toLowerCase().includes(q) &&
+            String(row.subtitle || '').toLowerCase().includes(q)
+          );
+          return (
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 650, fontSize: '0.88rem', color: '#202124', lineHeight: 1.3 }}>
+                  {row.name}
+                </span>
+                {matchedInDescription && (
+                  <span style={{
+                    fontSize: '0.66rem',
+                    fontWeight: 600,
+                    color: '#1a73e8',
+                    background: '#e8f0fe',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                  }}>
+                    Match in description
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  color: '#5f6368',
+                  background: '#f8f9fa',
+                  border: '1px solid #dadce0',
+                  padding: '1px 6px',
+                  borderRadius: '4px'
+                }}>
+                  {row.sampleType}
+                </span>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  color: '#0f766e',
+                  background: '#f0fdfa',
+                  border: '1px solid #99f6e4',
+                  padding: '1px 6px',
+                  borderRadius: '4px'
+                }}>
+                  {row.snpsCount}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                  TAT: {row.turnaroundTime}
+                </span>
+              </div>
             </div>
-            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.3 }}>
-              {row.subtitle}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 650,
-                color: '#475569',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                padding: '1px 6px',
-                borderRadius: '4px'
-              }}>
-                {row.sampleType}
-              </span>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 650,
-                color: '#0d9488',
-                background: '#f0fdfa',
-                border: '1px solid #99f6e4',
-                padding: '1px 6px',
-                borderRadius: '4px'
-              }}>
-                {row.snpsCount}
-              </span>
-              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                TAT: {row.turnaroundTime}
-              </span>
-            </div>
-          </div>
-        )
+          );
+        }
       }
     ];
 
@@ -397,121 +417,115 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
     });
 
     return cols;
-  }, [formatPrice, isClinicOrDoctor, isWholesaler, canViewCost, showCostBasis]);
+  }, [formatPrice, isClinicOrDoctor, isWholesaler, canViewCost, showCostBasis, searchQuery]);
 
-  // Master-Detail Expandable View (Rule #4)
+  // Master-Detail Expandable View (Rule #4 — Google Cloud UX)
   const renderExpandedRow = useCallback((row) => (
-    <div style={{
-      padding: '1.25rem 1.5rem',
-      background: '#f8fafc',
-      borderTop: '1px solid #e2e8f0',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-      gap: '1.25rem'
-    }}>
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-          <Dna size={15} className="text-sky-600" />
-          <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#1e293b', textTransform: 'uppercase' }}>
-            Target Genes & Analytical SNPs
-          </span>
-        </div>
-        <p style={{ fontSize: '0.80rem', color: '#475569', lineHeight: 1.5, margin: 0, fontFamily: 'monospace', background: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-          {row.keyGenes}
-        </p>
-      </div>
-
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-          <FlaskConical size={15} className="text-teal-600" />
-          <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#1e293b', textTransform: 'uppercase' }}>
-            Compounding Studio & Protocol Synergy
-          </span>
-        </div>
-        <p style={{ fontSize: '0.80rem', color: '#475569', lineHeight: 1.4, margin: '0 0 8px 0' }}>
-          {row.compoundingSynergy}
-        </p>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <Link
-            href="/compounding"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '0.72rem',
-              fontWeight: 650,
-              color: '#0284c7',
-              background: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              textDecoration: 'none'
-            }}
-          >
-            <span>Open Compounding Studio</span>
-            <ExternalLink size={11} />
-          </Link>
-          {row.id === 'skin' && (
-            <Link
-              href="/pricing/colway-hair"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '0.72rem',
-                fontWeight: 650,
-                color: '#0d9488',
-                background: '#f0fdfa',
-                border: '1px solid #99f6e4',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                textDecoration: 'none'
-              }}
-            >
-              <span>Pair with Colway Trichology Protocol</span>
-              <ExternalLink size={11} />
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-          <Award size={15} className="text-amber-600" />
-          <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#1e293b', textTransform: 'uppercase' }}>
-            CE-IVD Lab Specifications
-          </span>
-        </div>
-        <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-          <div>• Laboratory: 24Genetics S.L. (Madrid, Spain · EU CE-IVD)</div>
-          <div>• Technology: Illumina Global Screening Array (GSA)</div>
-          <div>• Sample Collection: Non-invasive Buccal Swab / Saliva</div>
-          <div>• Direct Kit Order: Ready for institutional procurement</div>
-        </div>
-        <div style={{ marginTop: '8px' }}>
-          <button
-            onClick={() => handleAddToCart(row, '1x')}
-            style={{
-              padding: '5px 10px',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              background: '#0284c7',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <ShoppingCart size={12} />
-            <span>Add Kit to Proforma Request</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  ), []);
+    <CatalogMasterDetailPanel
+      description={row.subtitle}
+      descriptionLabel="Clinical Panel Description & Scope"
+      sections={[
+        {
+          key: 'genes',
+          icon: <Dna size={15} style={{ color: '#1a73e8' }} />,
+          title: 'Target Genes & Analytical SNPs',
+          content: (
+            <p style={{ fontSize: '0.78rem', color: '#3c4043', lineHeight: 1.5, margin: 0, fontFamily: 'monospace', background: '#f8f9fa', padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+              {row.keyGenes}
+            </p>
+          )
+        },
+        {
+          key: 'synergy',
+          icon: <FlaskConical size={15} style={{ color: '#0d9488' }} />,
+          title: 'Compounding Studio & Protocol Synergy',
+          content: (
+            <>
+              <p style={{ fontSize: '0.80rem', color: '#3c4043', lineHeight: 1.45, margin: '0 0 8px 0' }}>
+                {row.compoundingSynergy}
+              </p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <Link
+                  href="/compounding"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    color: '#1a73e8',
+                    background: '#e8f0fe',
+                    border: '1px solid #d2e3fc',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span>Open Compounding Studio</span>
+                  <ExternalLink size={11} />
+                </Link>
+                {row.id === 'skin' && (
+                  <Link
+                    href="/pricing/colway-hair"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: '#0f766e',
+                      background: '#f0fdfa',
+                      border: '1px solid #99f6e4',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <span>Pair with Colway Trichology Protocol</span>
+                    <ExternalLink size={11} />
+                  </Link>
+                )}
+              </div>
+            </>
+          )
+        },
+        {
+          key: 'specs',
+          icon: <Award size={15} style={{ color: '#d97706' }} />,
+          title: 'CE-IVD Lab Specifications',
+          content: (
+            <div style={{ fontSize: '0.78rem', color: '#5f6368', lineHeight: 1.55 }}>
+              <div>• Laboratory: 24Genetics S.L. (Madrid, Spain · EU CE-IVD)</div>
+              <div>• Technology: Illumina Global Screening Array (GSA)</div>
+              <div>• Sample Collection: Non-invasive Buccal Swab / Saliva</div>
+              <div>• Direct Kit Order: Ready for institutional procurement</div>
+            </div>
+          )
+        }
+      ]}
+      actions={
+        <button
+          onClick={() => handleAddToCart(row, '1x')}
+          style={{
+            padding: '7px 14px',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            background: '#1a73e8',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <ShoppingCart size={13} />
+          <span>Add Kit to Proforma Request</span>
+        </button>
+      }
+    />
+  ), [handleAddToCart]);
 
   return (
     <div className="colway-price-root">

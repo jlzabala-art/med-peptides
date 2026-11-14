@@ -17,6 +17,7 @@ import DiagnosticTestWidget from './widgets/DiagnosticTestWidget';
 import SolventReconWidget from './widgets/SolventReconWidget';
 import CorporateServiceWidget from './widgets/CorporateServiceWidget';
 import SupplementSidebarWidget from './widgets/SupplementSidebarWidget';
+import CollectionSiblingsWidget from './widgets/CollectionSiblingsWidget';
 import FdaApprovedPeptidesNetworkWidget from './FdaApprovedPeptidesNetworkWidget';
 import { isFdaApprovedPeptide } from '@/data/fdaPeptidesRegistry';
 import { QRCodeSVG } from 'qrcode.react';
@@ -52,7 +53,10 @@ export default function ProductDetailSidebar({
   isSupplementProduct = false,
   hideFloatingTrigger = true,
   activeSection = '',
-  onSelectSection = null
+  onSelectSection = null,
+  collectionSiblings = [],
+  collectionName = '',
+  collectionHref = ''
 }) {
   const isEs = lang === 'es';
   const [activeId, setActiveId] = useState(activeSection || sections[0]?.id || '');
@@ -575,6 +579,16 @@ export default function ProductDetailSidebar({
                 <FdaApprovedPeptidesNetworkWidget
                   currentSlug={slug}
                   currentProduct={product}
+                  lang={lang}
+                />
+              )}
+
+              {/* Compact Same-Collection Quick Switcher */}
+              {Array.isArray(collectionSiblings) && collectionSiblings.length > 1 && (
+                <CollectionSiblingsWidget
+                  items={collectionSiblings}
+                  collectionName={collectionName}
+                  collectionHref={collectionHref}
                   lang={lang}
                 />
               )}

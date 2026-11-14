@@ -2732,3 +2732,23 @@ export function isKnownInjectableSlug(slug) {
   const key = decodeURIComponent(String(slug)).toLowerCase().trim();
   return Boolean(INJECTABLE_MONOGRAPHS[key] || SIBLING_OVERRIDES[key] || INJECTABLE_ALIASES[key]);
 }
+
+/**
+ * Returns compact sibling products belonging to the same brand/collection
+ * for sidebar quick-switching without bloating vertical layout space.
+ */
+export function getInjectableCollectionSiblings(currentSlug = '', brandName = '') {
+  const normalizedCurrent = decodeURIComponent(String(currentSlug || '')).toLowerCase().trim();
+  const targetBrand = String(brandName || INJECTABLE_MONOGRAPHS[normalizedCurrent]?.brand || '').toLowerCase().trim();
+  if (!targetBrand) return [];
+
+  return Object.entries(INJECTABLE_MONOGRAPHS)
+    .filter(([, entry]) => String(entry.brand || '').toLowerCase().trim() === targetBrand)
+    .map(([slug, entry]) => ({
+      slug,
+      name: entry.canonicalName || slug,
+      shortMeta: entry.subcategory || entry.injectionDepth || '',
+      imageUrl: LOCAL_INJECTABLE_IMAGES[slug] || null,
+      isCurrent: slug === normalizedCurrent,
+    }));
+}

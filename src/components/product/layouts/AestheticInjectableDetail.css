@@ -6,6 +6,7 @@
   background-color: #f8fafc;
   color: #0f172a;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding-bottom: 84px;
 }
 
 /* ── Sticky Institutional Trust Bar ── */
@@ -250,6 +251,32 @@
   color: #003666;
   border-bottom-color: #003666;
   font-weight: 700;
+}
+
+/* ── 2-Column Google Cloud UX Monograph Workspace ── */
+.ai-monograph-layout {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.ai-monograph-sidebar {
+  position: sticky;
+  top: 124px;
+}
+
+.ai-monograph-content {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .ai-monograph-layout {
+    grid-template-columns: 1fr;
+  }
+  .ai-monograph-sidebar {
+    position: static;
+  }
 }
 
 /* ── Section Cards ── */

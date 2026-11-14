@@ -10,14 +10,17 @@ import {
 } from 'lucide-react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import ProductDetailSidebar from '@/components/product/ProductDetailSidebar';
 import CopyableId from '@/components/ui/CopyableId';
 import ImageModal from '@/snippets/ImageModal';
 import {
   getInjectableMonograph,
   getInjectableImageUrl,
+  getInjectableCollectionSiblings,
 } from '@/data/aestheticInjectablesEnrichment';
 import './AestheticInjectableDetail.css';
 
@@ -191,6 +194,39 @@ export default function AestheticInjectableDetail({
       specialties: product?.specialties || ['Aesthetic Medicine', 'Dermatology', 'Plastic Surgery'],
     };
   }, [monograph, product, effectiveSlug, isEs]);
+
+  const collectionSiblings = useMemo(
+    () => getInjectableCollectionSiblings(effectiveSlug, p.brand),
+    [effectiveSlug, p.brand]
+  );
+
+  const sidebarSections = useMemo(() => [
+    {
+      id: 'overview',
+      title: isEs ? 'Resumen y Reología' : 'Overview & Rheology',
+      icon: <Microscope size={15} />,
+    },
+    {
+      id: 'protocol',
+      title: isEs ? 'Indicaciones y Protocolo' : 'Indications & Protocol',
+      icon: <Syringe size={15} />,
+    },
+    {
+      id: 'safety',
+      title: isEs ? 'Seguridad y Contraindicaciones' : 'Safety & Contraindications',
+      icon: <HeartPulse size={15} />,
+    },
+    {
+      id: 'regulatory',
+      title: isEs ? 'Regulación y Trazabilidad' : 'Regulatory & Packaging',
+      icon: <FileText size={15} />,
+    },
+  ], [isEs]);
+
+  const activeSectionIndex = useMemo(
+    () => Math.max(0, sidebarSections.findIndex((s) => s.id === activeTab)),
+    [sidebarSections, activeTab]
+  );
 
   return (
     <div className="ai-page-container">
@@ -418,40 +454,27 @@ export default function AestheticInjectableDetail({
           </aside>
         </section>
 
-        {/* ── CLINICAL MONOGRAPH TABS ── */}
-        <nav className="ai-tabs-bar" aria-label="Product Monograph Sections">
-          <button
-            className={`ai-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            <Microscope size={15} />
-            <span>{isEs ? 'Resumen y Reología' : 'Overview & Rheology'}</span>
-          </button>
-          <button
-            className={`ai-tab-btn ${activeTab === 'protocol' ? 'active' : ''}`}
-            onClick={() => setActiveTab('protocol')}
-          >
-            <Syringe size={15} />
-            <span>{isEs ? 'Indicaciones y Protocolo' : 'Indications & Protocol'}</span>
-          </button>
-          <button
-            className={`ai-tab-btn ${activeTab === 'safety' ? 'active' : ''}`}
-            onClick={() => setActiveTab('safety')}
-          >
-            <HeartPulse size={15} />
-            <span>{isEs ? 'Seguridad y Contraindicaciones' : 'Safety & Contraindications'}</span>
-          </button>
-          <button
-            className={`ai-tab-btn ${activeTab === 'regulatory' ? 'active' : ''}`}
-            onClick={() => setActiveTab('regulatory')}
-          >
-            <FileText size={15} />
-            <span>{isEs ? 'Regulación y Trazabilidad' : 'Regulatory & Packaging'}</span>
-          </button>
-        </nav>
+        {/* ── CLINICAL MONOGRAPH 2-COLUMN WORKSPACE (SIDEBAR + CONTENT) ── */}
+        <div className="ai-monograph-layout">
+          <aside className="ai-monograph-sidebar">
+            <ProductDetailSidebar
+              sections={sidebarSections}
+              lang={lang}
+              product={{ ...product, ...p }}
+              slug={p.slug}
+              activeSection={activeTab}
+              onSelectSection={(id) => setActiveTab(id)}
+              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              hideFloatingTrigger={true}
+              collectionSiblings={collectionSiblings}
+              collectionName={p.brand}
+              collectionHref="/collection/aesthetic-injectables"
+            />
+          </aside>
 
-        {/* ── TAB 1: OVERVIEW & RHEOLOGY ── */}
-        {activeTab === 'overview' && (
+          <div className="ai-monograph-content">
+            {/* ── TAB 1: OVERVIEW & RHEOLOGY ── */}
+            {activeTab === 'overview' && (
           <div className="ai-section-grid">
             <div className="ai-card">
               <h2 className="ai-card-title">
@@ -648,9 +671,42 @@ export default function AestheticInjectableDetail({
             </div>
           </div>
         )}
+          </div>
+        </div>
       </main>
 
       {!isQuickView && <PublicUnifiedFooter />}
+
+      {!isQuickView && (
+        <PublicStickyActionBar
+          title={p.name}
+          subtitle={`${p.brand} · ${p.activeIngredient}`}
+          badge={p.regulatory.ceMark}
+          badgeType="verified"
+          inquireLabel={isEs ? 'Solicitar Cotización' : 'Request Quote'}
+          onInquire={() => setIsInquiryDrawerOpen(true)}
+          showClinicalAI={true}
+          onOpenClinicalAI={() => setIsAiDrawerOpen(true)}
+          mountAiDrawer={false}
+          aiCategory="aesthetic_injectable"
+          aiContextQuery={`Clinical consultation for ${p.name} (${p.brand}, ${p.activeIngredient}, ${p.platformTechnology}). Injection plane: ${p.injectionDepth}. Rheology G': ${p.rheology.elasticityGPrime}.`}
+          aiMeta={{
+            slug: p.slug,
+            brand: p.brand,
+            activeIngredient: p.activeIngredient,
+            platformTechnology: p.platformTechnology,
+            injectionDepth: p.injectionDepth,
+            needlesIncluded: p.needlesIncluded,
+            longevity: p.longevity,
+            ceMark: p.regulatory.ceMark,
+          }}
+          lang={lang}
+          showSections={true}
+          sectionsCount={sidebarSections.length}
+          activeSectionIndex={activeSectionIndex}
+          overflowMobile={true}
+        />
+      )}
 
       {/* ── DRAWERS & MODALS ── */}
       <PublicInstitutionalInquiryDrawer
