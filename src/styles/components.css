@@ -216,9 +216,15 @@
     gap: var(--space-8);
     border-bottom: 1px solid var(--border);
     margin-bottom: var(--space-24);
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
   }
 
   .responsive-tabs__tab {
+    flex-shrink: 0;
     padding: var(--space-12) var(--space-16);
     font-weight: var(--font-weight-semibold);
     font-variation-settings: var(--fvs-semibold);
