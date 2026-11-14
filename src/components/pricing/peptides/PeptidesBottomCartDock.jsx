@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingCart, ArrowRight } from 'lucide-react';
 
 /**
@@ -18,7 +18,19 @@ export default function PeptidesBottomCartDock({
   setCartItems,
   setIsOrderDrawerOpen
 }) {
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  useEffect(() => {
+    if (!confirmReset) return undefined;
+    const t = setTimeout(() => setConfirmReset(false), 4000);
+    return () => clearTimeout(t);
+  }, [confirmReset]);
+
   if (totalCartCount <= 0) return null;
+
+  const vialLabel = isEs
+    ? (totalCartCount === 1 ? 'Vial' : 'Viales')
+    : (totalCartCount === 1 ? 'Vial' : 'Vials');
 
   return (
     <aside
@@ -69,7 +81,7 @@ export default function PeptidesBottomCartDock({
           >
             <ShoppingCart size={13} />
             <span>
-              {totalCartCount} {isEs ? 'Viales' : 'Vials'}
+              {totalCartCount} {vialLabel}
             </span>
           </span>
           <div>
@@ -97,27 +109,61 @@ export default function PeptidesBottomCartDock({
 
         {/* Right: Reset & Review Proforma CTA */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm(isEs ? '¿Vaciar todos los viales de tu proforma?' : 'Reset all items in your proforma cart?')) {
-                setCartItems({});
-              }
-            }}
-            className="mobile-hide"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#5f6368',
-              fontSize: '0.74rem',
-              fontWeight: 600,
-              textDecoration: 'underline',
-              cursor: 'pointer'
-            }}
-            title={isEs ? 'Vaciar proforma' : 'Clear all cart items'}
-          >
-            {isEs ? 'Vaciar' : 'Reset'}
-          </button>
+          {confirmReset ? (
+            <div className="mobile-hide" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setCartItems({});
+                  setConfirmReset(false);
+                }}
+                style={{
+                  background: '#fce8e6',
+                  border: '1px solid #f6aea9',
+                  color: '#c5221f',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                {isEs ? 'Confirmar vaciar' : 'Confirm reset'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmReset(false)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#5f6368',
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                {isEs ? 'Cancelar' : 'Cancel'}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmReset(true)}
+              className="mobile-hide"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#5f6368',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                textDecoration: 'underline',
+                cursor: 'pointer'
+              }}
+              title={isEs ? 'Vaciar proforma' : 'Clear all cart items'}
+            >
+              {isEs ? 'Vaciar' : 'Reset'}
+            </button>
+          )}
 
           <button
             type="button"

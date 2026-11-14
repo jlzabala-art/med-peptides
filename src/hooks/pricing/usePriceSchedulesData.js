@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { doc, setDoc, collection, query, where, limit, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import {
   FlaskConical, Dna, Scissors, Package, Layers, TestTube,
   Activity, Microscope, Sparkles, Building2
@@ -382,4 +384,154 @@ export function usePriceSchedulesData() {
     refresh: () => loadData(true),
     invalidate: invalidatePriceSchedulesCache
   };
+}
+
+// ─── Per-Catalog 4-Layer Product Repository (Golden Rule #2) ──────────────────
+
+const memoryProductsCache = {};
+const PRODUCT_CACHE_PREFIX = 'atlas_schedule_products_v1_';
+
+export function invalidateGroupProductsCache(groupId) {
+  if (groupId) {
+    delete memoryProductsCache[groupId];
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(`${PRODUCT_CACHE_PREFIX}${groupId}`);
+      } catch (_) {}
+    }
+  } else {
+    Object.keys(memoryProductsCache).forEach((k) => delete memoryProductsCache[k]);
+  }
+}
+
+export async function fetchGroupProductsWithCache(groupId, fetchGroup, { forceRefresh = false, isAdmin = false } = {}) {
+  const now = Date.now();
+  const cacheKey = `${groupId}_${isAdmin ? 'admin' : 'public'}`;
+
+  // Layer 1: Memory RAM
+  if (!forceRefresh && memoryProductsCache[cacheKey] && (now - memoryProductsCache[cacheKey].ts < CACHE_TTL_MS)) {
+    return memoryProductsCache[cacheKey].data;
+  }
+
+  // Layer 2: localStorage
+  if (!forceRefresh && typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(`${PRODUCT_CACHE_PREFIX}${cacheKey}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.ts && (now - parsed.ts < CACHE_TTL_MS) && Array.isArray(parsed.data)) {
+          memoryProductsCache[cacheKey] = { data: parsed.data, ts: parsed.ts };
+          return parsed.data;
+        }
+      }
+    } catch (_) {}
+  }
+
+  let products = [];
+
+  // Layer 3/4: Firestore (SSOT) for Admin or Public API
+  try {
+    if (isAdmin && db && fetchGroup) {
+      const q = query(
+        collection(db, 'products'),
+        where('categoryId', '==', fetchGroup),
+        limit(100)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        products = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      }
+    }
+
+    if (products.length === 0 && fetchGroup) {
+      const res = await fetch(`/api/catalog/public?category=${encodeURIComponent(fetchGroup)}&limit=100`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.products) && data.products.length > 0) {
+          products = data.products;
+        }
+      }
+    }
+  } catch (_) {}
+
+  // Emergency Fallback (only if Firestore has no seeded docs for aesthetic-injectables)
+  if (products.length === 0 && groupId === 'aesthetic-injectables') {
+    try {
+      const mod = await import('@/data/aestheticInjectablesRegistry');
+      products = mod.getAestheticInjectablesCatalog() || [];
+    } catch (_) {
+      products = [];
+    }
+  }
+
+  memoryProductsCache[cacheKey] = { data: products, ts: now };
+  if (typeof window !== 'undefined' && products.length > 0) {
+    try {
+      localStorage.setItem(`${PRODUCT_CACHE_PREFIX}${cacheKey}`, JSON.stringify({ data: products, ts: now }));
+    } catch (_) {}
+  }
+
+  return products;
+}
+
+export async function updateScheduleProductCost(product, newCost, groupId) {
+  if (!db || !product?.id) throw new Error('Database or product ID unavailable');
+  const numericCost = Number(newCost);
+  if (Number.isNaN(numericCost) || numericCost <= 0) throw new Error('Invalid cost amount');
+
+  const mediluxePrice = +(numericCost * 1.15).toFixed(2);
+  const wholesalePrice = +(numericCost * 1.3225).toFixed(2);
+  const clinicPrice = +(numericCost * 1.45).toFixed(2);
+  const currency = product.currency || product.pricing?.currency || 'EUR';
+
+  const pricingPayload = {
+    ...(product.pricing || {}),
+    masterPrice: numericCost,
+    mediluxePrice,
+    wholesalePrice,
+    clinicPrice,
+    currency
+  };
+
+  await setDoc(doc(db, 'products', product.id), {
+    id: product.id,
+    name: product.name || product.canonicalName || product.id,
+    canonicalName: product.canonicalName || product.name || product.id,
+    categoryId: product.categoryId || (groupId === 'aesthetic-injectables' ? 'dermal-fillers' : groupId),
+    brand: product.brand || null,
+    manufacturer: product.manufacturer || null,
+    packSize: product.packSize || null,
+    subcategory: product.subcategory || null,
+    technology: product.technology || null,
+    indication: product.indication || null,
+    requiresColdChain: Boolean(product.requiresColdChain),
+    inStock: product.inStock ?? true,
+    status: product.status || 'published',
+    cost: numericCost,
+    wholesalePrice,
+    clinicPrice,
+    currency,
+    pricing: pricingPayload,
+    updatedAt: new Date().toISOString()
+  }, { merge: true });
+
+  invalidateGroupProductsCache(`${groupId}_admin`);
+  invalidateGroupProductsCache(`${groupId}_public`);
+  return { cost: numericCost, pricing: pricingPayload };
+}
+
+export async function updateScheduleProductStock(product, inStock, groupId) {
+  if (!db || !product?.id) throw new Error('Database or product ID unavailable');
+  await setDoc(doc(db, 'products', product.id), {
+    id: product.id,
+    name: product.name || product.canonicalName || product.id,
+    categoryId: product.categoryId || (groupId === 'aesthetic-injectables' ? 'dermal-fillers' : groupId),
+    inStock: Boolean(inStock),
+    status: inStock ? 'published' : 'draft',
+    updatedAt: new Date().toISOString()
+  }, { merge: true });
+
+  invalidateGroupProductsCache(`${groupId}_admin`);
+  invalidateGroupProductsCache(`${groupId}_public`);
+  return Boolean(inStock);
 }

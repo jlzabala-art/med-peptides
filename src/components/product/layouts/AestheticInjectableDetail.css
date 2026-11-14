@@ -1,0 +1,376 @@
+/* src/components/product/layouts/AestheticInjectableDetail.css */
+/* Institutional Clinical Monograph Design for Aesthetic Injectables */
+
+.ai-page-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Sticky Institutional Trust Bar ── */
+.ai-institutional-bar {
+  position: sticky;
+  top: 64px;
+  z-index: 40;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.ai-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.71rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.ai-badge-ce {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.ai-badge-device {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.ai-badge-pro {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* ── Main Content Container ── */
+.ai-content-wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 3.5rem;
+}
+
+/* ── Hero Panorama Card ── */
+.ai-hero-panorama {
+  display: grid;
+  grid-template-columns: 240px 1fr 300px;
+  gap: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+
+.ai-hero-image-box {
+  position: relative;
+  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1rem;
+  overflow: hidden;
+}
+
+.ai-hero-image-box img {
+  max-height: 175px;
+  max-width: 100%;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.ai-hero-image-box:hover img {
+  transform: scale(1.03);
+}
+
+.ai-code-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 5px;
+  letter-spacing: 0.05em;
+}
+
+.ai-reversible-pill {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+/* ── GCP Key-Value Specs Grid ── */
+.ai-kv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.ai-kv-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ai-kv-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.ai-kv-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+/* ── Right Action Card ── */
+.ai-action-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ai-btn-primary {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: #003666;
+  color: #ffffff;
+  border: none;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.ai-btn-primary:hover {
+  background: #00274d;
+}
+
+.ai-btn-secondary {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: background 0.15s ease;
+}
+
+.ai-btn-secondary:hover {
+  background: #f1f5f9;
+}
+
+/* ── Clinical Tabs Navigation ── */
+.ai-tabs-bar {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+
+.ai-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.75rem 1.15rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.ai-tab-btn:hover {
+  color: #003666;
+}
+
+.ai-tab-btn.active {
+  color: #003666;
+  border-bottom-color: #003666;
+  font-weight: 700;
+}
+
+/* ── Section Cards ── */
+.ai-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.ai-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.35rem;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+}
+
+.ai-card-full {
+  grid-column: 1 / -1;
+}
+
+.ai-card-title {
+  margin: 0 0 0.85rem 0;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #003666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-rheology-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ai-rheology-table tr {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ai-rheology-table tr:last-child {
+  border-bottom: none;
+}
+
+.ai-rheology-table th {
+  text-align: left;
+  padding: 0.65rem 0.5rem 0.65rem 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  width: 42%;
+}
+
+.ai-rheology-table td {
+  padding: 0.65rem 0;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.ai-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.ai-list li {
+  font-size: 0.86rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+/* ── Responsive Mobile-First ── */
+@media (max-width: 1024px) {
+  .ai-hero-panorama {
+    grid-template-columns: 200px 1fr;
+  }
+  .ai-action-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .ai-institutional-bar {
+    top: 56px;
+    padding: 0.6rem 1rem;
+  }
+  .ai-content-wrap {
+    padding: 1rem 1rem 2.5rem;
+  }
+  .ai-hero-panorama {
+    grid-template-columns: 1fr;
+    padding: 1.1rem;
+    gap: 1.1rem;
+  }
+  .ai-kv-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ai-section-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .ai-institutional-bar,
+  .ai-action-card,
+  .ai-tabs-bar,
+  header,
+  footer {
+    display: none !important;
+  }
+  .ai-page-container {
+    background: #ffffff;
+  }
+  .ai-hero-panorama {
+    grid-template-columns: 180px 1fr;
+    box-shadow: none;
+    border: 1px solid #cbd5e1;
+  }
+}

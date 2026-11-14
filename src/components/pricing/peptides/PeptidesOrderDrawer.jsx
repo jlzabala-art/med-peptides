@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   CheckCircle2,
@@ -51,11 +51,75 @@ export default function PeptidesOrderDrawer({
   handleEmailLookup,
   handleOrderViaWhatsApp
 }) {
+  const [confirmClear, setConfirmClear] = useState(false);
+  const drawerPanelRef = useRef(null);
+
+  useEffect(() => {
+    if (!confirmClear) return undefined;
+    const t = setTimeout(() => setConfirmClear(false), 4000);
+    return () => clearTimeout(t);
+  }, [confirmClear]);
+
+  useEffect(() => {
+    if (!isOrderDrawerOpen) return undefined;
+    const previousActive = document.activeElement;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Focus drawer on open so keyboard input never leaks to background search bar
+    const focusTimer = setTimeout(() => {
+      if (drawerPanelRef.current) {
+        drawerPanelRef.current.focus();
+      }
+    }, 10);
+
+    const handleKeyDown = e => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setIsOrderDrawerOpen(false);
+        return;
+      }
+      if (e.key === 'Tab' && drawerPanelRef.current) {
+        const focusable = drawerPanelRef.current.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => {
+      clearTimeout(focusTimer);
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown, true);
+      if (previousActive && typeof previousActive.focus === 'function') {
+        previousActive.focus();
+      }
+    };
+  }, [isOrderDrawerOpen, setIsOrderDrawerOpen]);
+
+  const vialUnitLabel = isEs
+    ? (totalCartCount === 1 ? 'Vial' : 'Viales')
+    : (totalCartCount === 1 ? 'Vial' : 'Vials');
+
   return (
     <>
       {/* ── Quick Order Request Drawer ── */}
       {isOrderDrawerOpen && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={isEs ? 'Solicitar Proforma B2B' : 'Request B2B Proforma'}
+          onClick={() => setIsOrderDrawerOpen(false)}
           style={{
             position: 'fixed',
             top: 0,
@@ -64,12 +128,15 @@ export default function PeptidesOrderDrawer({
             bottom: 0,
             background: 'rgba(15, 23, 42, 0.6)',
             backdropFilter: 'blur(4px)',
-            zIndex: 1000,
+            zIndex: 1200,
             display: 'flex',
             justifyContent: 'flex-end'
           }}
         >
           <div
+            ref={drawerPanelRef}
+            tabIndex={-1}
+            onClick={e => e.stopPropagation()}
             style={{
               width: '100%',
               maxWidth: '520px',
@@ -78,7 +145,8 @@ export default function PeptidesOrderDrawer({
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
-              animation: 'slideInRight 0.2s ease-out'
+              animation: 'slideInRight 0.2s ease-out',
+              outline: 'none'
             }}
           >
             {/* Drawer Header */}
@@ -104,12 +172,13 @@ export default function PeptidesOrderDrawer({
               <button
                 type="button"
                 onClick={() => setIsOrderDrawerOpen(false)}
+                aria-label={isEs ? 'Cerrar panel de proforma' : 'Close proforma drawer'}
                 style={{
                   background: 'transparent',
                   border: 'none',
                   color: '#64748b',
                   cursor: 'pointer',
-                  padding: '4px',
+                  padding: '6px',
                   borderRadius: '4px'
                 }}
               >
@@ -201,27 +270,63 @@ export default function PeptidesOrderDrawer({
                           letterSpacing: '0.04em'
                         }}
                       >
-                        Selected Formulations ({totalCartCount} Vials)
+                        {isEs
+                          ? `Formulaciones Seleccionadas (${totalCartCount} ${vialUnitLabel})`
+                          : `Selected Formulations (${totalCartCount} ${vialUnitLabel})`}
                       </h4>
                       {Object.keys(cartItems).length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (window.confirm(isEs ? '¿Vaciar todos los viales?' : 'Remove all items?')) {
-                              setCartItems({});
-                            }
-                          }}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#94a3b8',
-                            fontSize: '0.74rem',
-                            fontWeight: 650,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {isEs ? 'Vaciar' : 'Clear all'}
-                        </button>
+                        confirmClear ? (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCartItems({});
+                                setConfirmClear(false);
+                              }}
+                              style={{
+                                background: '#fef2f2',
+                                border: '1px solid #fecaca',
+                                borderRadius: '4px',
+                                padding: '3px 8px',
+                                color: '#dc2626',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {isEs ? 'Confirmar' : 'Confirm'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmClear(false)}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#64748b',
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {isEs ? 'Cancelar' : 'Cancel'}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmClear(true)}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              color: '#94a3b8',
+                              fontSize: '0.74rem',
+                              fontWeight: 650,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isEs ? 'Vaciar' : 'Clear all'}
+                          </button>
+                        )
                       )}
                     </div>
 
@@ -327,6 +432,7 @@ export default function PeptidesOrderDrawer({
                                   <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '4px', background: '#ffffff' }}>
                                     <button
                                       type="button"
+                                      aria-label={isEs ? `Reducir 1x ${p.productName}` : `Decrease 1x ${p.productName}`}
                                       onClick={() => updateItemQuantity(p.id, '1x', -1)}
                                       disabled={item.quantity1x <= 0}
                                       style={{
@@ -344,6 +450,7 @@ export default function PeptidesOrderDrawer({
                                     </span>
                                     <button
                                       type="button"
+                                      aria-label={isEs ? `Aumentar 1x ${p.productName}` : `Increase 1x ${p.productName}`}
                                       onClick={() => updateItemQuantity(p.id, '1x', 1)}
                                       style={{ border: 'none', background: 'transparent', padding: '3px 6px', cursor: 'pointer', color: '#334155' }}
                                     >
@@ -358,6 +465,7 @@ export default function PeptidesOrderDrawer({
                                   <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #a7f3d0', borderRadius: '4px', background: '#f0fdf4' }}>
                                     <button
                                       type="button"
+                                      aria-label={isEs ? `Reducir Pack 10 ${p.productName}` : `Decrease Pack 10 ${p.productName}`}
                                       onClick={() => updateItemQuantity(p.id, '10x', -1)}
                                       disabled={item.quantity10x <= 0}
                                       style={{
@@ -375,6 +483,7 @@ export default function PeptidesOrderDrawer({
                                     </span>
                                     <button
                                       type="button"
+                                      aria-label={isEs ? `Aumentar Pack 10 ${p.productName}` : `Increase Pack 10 ${p.productName}`}
                                       onClick={() => updateItemQuantity(p.id, '10x', 1)}
                                       style={{ border: 'none', background: 'transparent', padding: '3px 6px', cursor: 'pointer', color: '#047857' }}
                                     >
@@ -383,6 +492,73 @@ export default function PeptidesOrderDrawer({
                                   </div>
                                 </div>
                               </div>
+
+                              {/* Smart Pack x10 Savings Nudge when user has 5-9 single vials */}
+                              {item.quantity1x >= 5 && item.quantity1x < 10 && (() => {
+                                const pack10Cost = p.pack10Price || p.unitPrice * 8.5;
+                                const current1xCost = item.quantity1x * p.unitPrice;
+                                const extraCost = pack10Cost - current1xCost;
+                                const perVial10x = pack10Cost / 10;
+                                const savingsPct = Math.round((1 - perVial10x / p.unitPrice) * 100);
+                                if (savingsPct <= 0) return null;
+                                return (
+                                  <div
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      gap: '8px',
+                                      padding: '6px 8px',
+                                      borderRadius: '5px',
+                                      background: '#ecfdf5',
+                                      border: '1px solid #a7f3d0',
+                                      fontSize: '0.70rem',
+                                      color: '#065f46'
+                                    }}
+                                  >
+                                    <span>
+                                      {extraCost <= 0
+                                        ? (isEs
+                                            ? `💡 Un Pack ×10 sale más barato que ${item.quantity1x} viales sueltos (-${savingsPct}%/vial)`
+                                            : `💡 A Pack ×10 costs less than ${item.quantity1x} single vials (-${savingsPct}%/vial)`)
+                                        : (isEs
+                                            ? `💡 Por +${formatPrice(extraCost)} llévate Pack ×10 (-${savingsPct}%/vial)`
+                                            : `💡 Upgrade to Pack ×10 for +${formatPrice(extraCost)} (-${savingsPct}%/vial)`)}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setCartItems(prev => {
+                                          const existing = prev[p.id];
+                                          if (!existing) return prev;
+                                          return {
+                                            ...prev,
+                                            [p.id]: {
+                                              ...existing,
+                                              quantity1x: 0,
+                                              quantity10x: (existing.quantity10x || 0) + 1
+                                            }
+                                          };
+                                        });
+                                      }}
+                                      style={{
+                                        background: '#059669',
+                                        color: '#ffffff',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        padding: '3px 8px',
+                                        fontSize: '0.68rem',
+                                        fontWeight: 700,
+                                        cursor: 'pointer',
+                                        whiteSpace: 'nowrap',
+                                        flexShrink: 0
+                                      }}
+                                    >
+                                      {isEs ? 'Cambiar a ×10' : 'Switch to ×10'}
+                                    </button>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           );
                         })}

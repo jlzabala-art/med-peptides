@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Check, Layers } from 'lucide-react';
 import {
   CATEGORY_ORDER,
@@ -25,6 +25,23 @@ export default function PeptidesFilterSheets({
   processedProducts = [],
   isEs = false
 }) {
+  useEffect(() => {
+    if (!isCategorySheetOpen && !isFdaSheetOpen) return undefined;
+    const handleKeyDown = e => {
+      if (e.key === 'Escape') {
+        if (isCategorySheetOpen && setIsCategorySheetOpen) setIsCategorySheetOpen(false);
+        if (isFdaSheetOpen && setIsFdaSheetOpen) setIsFdaSheetOpen(false);
+      }
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isCategorySheetOpen, isFdaSheetOpen, setIsCategorySheetOpen, setIsFdaSheetOpen]);
+
   return (
     <>
       {/* Category Selection Sheet (Google Cloud Console Dense Flat List) */}
@@ -35,7 +52,7 @@ export default function PeptidesFilterSheets({
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 1100,
+            zIndex: 1250,
             background: 'rgba(15, 23, 42, 0.55)',
             backdropFilter: 'blur(3px)',
             display: 'flex',
@@ -229,7 +246,7 @@ export default function PeptidesFilterSheets({
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 1100,
+            zIndex: 1250,
             background: 'rgba(15, 23, 42, 0.55)',
             backdropFilter: 'blur(3px)',
             display: 'flex',

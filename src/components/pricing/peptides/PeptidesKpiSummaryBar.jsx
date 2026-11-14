@@ -96,7 +96,7 @@ export default function PeptidesKpiSummaryBar({
               }}
             >
               <CheckCircle2 size={11} />
-              <span>{totalCartCount} {isEs ? 'Viales' : 'Vials'} ({formatPrice(totalCartValueUsd)})</span>
+              <span>{totalCartCount} {isEs ? (totalCartCount === 1 ? 'Vial' : 'Viales') : (totalCartCount === 1 ? 'Vial' : 'Vials')} ({formatPrice(totalCartValueUsd)})</span>
             </span>
           )}
         </div>

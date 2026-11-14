@@ -54,6 +54,21 @@ export function usePeptidesFilters({
       const resolvedDest = (pDest === 'EU' || pDest === 'US' || pDest === 'AE') ? pDest : 'EU';
       setShippingDest(resolvedDest);
 
+      const pCat = url.searchParams.get('category');
+      if (pCat) setSelectedCategory(pCat);
+
+      const pStatus = url.searchParams.get('status');
+      if (pStatus) setSelectedFdaStatus(pStatus);
+
+      const pStrength = url.searchParams.get('strength');
+      if (pStrength) setSelectedStrength(pStrength);
+
+      const pQuery = url.searchParams.get('q');
+      if (pQuery) {
+        setSearchQuery(pQuery);
+        setDebouncedSearchQuery(pQuery);
+      }
+
       const trackCode = url.searchParams.get('tc') || url.searchParams.get('ref') || url.searchParams.get('code');
       if (trackCode && (trackCode.startsWith('CAT-') || trackCode.startsWith('RP-'))) {
         fetch(`/api/catalog/shares?code=${encodeURIComponent(trackCode)}`)
@@ -89,6 +104,33 @@ export function usePeptidesFilters({
       window.history.replaceState({}, '', url.toString());
     }
   }, [initialProducts]);
+
+  // Sync active filters to URL for shareable deep links
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (selectedCategory && selectedCategory !== 'all') {
+      url.searchParams.set('category', selectedCategory);
+    } else {
+      url.searchParams.delete('category');
+    }
+    if (selectedFdaStatus && selectedFdaStatus !== 'all') {
+      url.searchParams.set('status', selectedFdaStatus);
+    } else {
+      url.searchParams.delete('status');
+    }
+    if (selectedStrength && selectedStrength !== 'all') {
+      url.searchParams.set('strength', selectedStrength);
+    } else {
+      url.searchParams.delete('strength');
+    }
+    if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+      url.searchParams.set('q', debouncedSearchQuery.trim());
+    } else {
+      url.searchParams.delete('q');
+    }
+    window.history.replaceState({}, '', url.toString());
+  }, [selectedCategory, selectedFdaStatus, selectedStrength, debouncedSearchQuery]);
 
   const isEs = lang === 'es';
 

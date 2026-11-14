@@ -593,11 +593,19 @@ export default function PeptidesTopAppBar({
       {/* GCP Currency Bottom Sheet (mobile) */}
       {isCurrencySheetOpen && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={isEs ? 'Selecciona Divisa' : 'Select Currency'}
           onClick={() => setIsCurrencySheetOpen && setIsCurrencySheetOpen(false)}
+          onKeyDown={e => {
+            if (e.key === 'Escape' && setIsCurrencySheetOpen) {
+              setIsCurrencySheetOpen(false);
+            }
+          }}
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 300,
+            zIndex: 1150,
             background: 'rgba(0, 0, 0, 0.45)',
             display: 'flex',
             alignItems: 'flex-end'

@@ -65,7 +65,7 @@ export default function PeptidesFilterToolbar({
             <span>{isSidebarOpen ? (isEs ? 'Filtros (On)' : 'Filters (On)') : (isEs ? 'Filtros (Off)' : 'Filters (Off)')}</span>
           </button>
         )}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, position: 'relative', zIndex: 50 }}>
           <GlobalSearchBar
             value={searchQuery}
             onChange={setSearchQuery}

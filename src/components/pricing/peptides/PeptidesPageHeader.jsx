@@ -69,7 +69,9 @@ export default function PeptidesPageHeader({
             margin: 0,
             lineHeight: 1.22,
             textWrap: 'balance',
-            maxWidth: '820px'
+            maxWidth: '820px',
+            paddingRight: '4px',
+            wordBreak: 'break-word'
           }}>
             {isDistributor
               ? (isEs ? 'Viales Clínicos de Péptidos Certificados • Distribuidor B2B' : 'Certified Clinical Peptide Vials • Distributor B2B')

@@ -16,6 +16,7 @@ import { getTeletestProductBySlug } from '../../../data/teletestRegistry';
 import { getLotuslandPeptideBySlug } from '../../../data/lotuslandPeptidesRegistry';
 import { getMcgProductBySlug } from '../../../data/mcgInciRegistry';
 import { getNormaProductBySlug } from '../../../data/normaHellasRegistry';
+import { isKnownInjectableSlug } from '../../../data/aestheticInjectablesEnrichment';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
@@ -394,7 +395,7 @@ export async function generateMetadata({ params, searchParams }) {
 
   const cat = (product.category || product.type || '').toLowerCase();
   const isCosmetic = cat === 'cosmetic' || cat === 'cosmetics' || cat === 'topical' || cat === 'hair cosmetics' || cat === 'cosmeceutical' || product.is_cosmetic === true;
-  const isAesthetic = cat === 'aesthetic' || cat === 'aesthetic_injectable' || cat === 'injectable' || product.is_aesthetic === true;
+  const isAesthetic = cat === 'aesthetic' || cat === 'aesthetic_injectable' || cat === 'aesthetic injectables' || cat === 'dermal_filler' || cat === 'skin_booster' || cat === 'biostimulator' || cat === 'hybrid_biostimulator' || cat === 'polynucleotide' || cat === 'body_contouring' || cat === 'injectable' || (product.primaryType || '').toLowerCase() === 'aesthetic_injectable' || (product.category_taxonomy || '').toLowerCase() === 'aesthetic injectables' || product.is_aesthetic === true || product.is_aesthetic_injectable === true || isKnownInjectableSlug(slug);
   const isEterna = slug.toLowerCase().includes('eterna') || 
     (product.supplierId || '').toLowerCase().includes('eternadx') || 
     (product.canonicalKey || '').toLowerCase().includes('eterna') || 
@@ -667,7 +668,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
 
   const catLower = (safeProduct.category || '').toLowerCase();
   const typeLower = (safeProduct.type || safeProduct.productType || '').toLowerCase();
-  const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || safeProduct.is_aesthetic_injectable === true;
+  const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || catLower === 'dermal_filler' || catLower === 'skin_booster' || catLower === 'biostimulator' || catLower === 'hybrid_biostimulator' || catLower === 'polynucleotide' || catLower === 'body_contouring' || (safeProduct.category_taxonomy || '').toLowerCase() === 'aesthetic injectables' || (safeProduct.primaryType || '').toLowerCase() === 'aesthetic_injectable' || typeLower === 'aesthetic_injectable' || safeProduct.is_aesthetic_injectable === true || isKnownInjectableSlug(slug);
   const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || catLower === 'trichology_hair_care' || catLower === 'nutricosmetics' || safeProduct.is_cosmetic === true || slug.toLowerCase().startsWith('colway-') || slug.toLowerCase().startsWith('mcg-');
   const isRawApi = typeLower === 'raw_api' || typeLower === 'raw_material' || catLower === 'raw_material' || catLower === 'compounding_material' || safeProduct.is_raw_api === true;
   const isEterna = slug.toLowerCase().includes('eterna') || 
@@ -751,7 +752,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
           />
         )}
-        <AestheticInjectableDetail product={safeProduct} isQuickView={false} />
+        <AestheticInjectableDetail product={safeProduct} slug={slug} baseUrl={BASE_URL} isQuickView={false} />
       </>
     );
   }

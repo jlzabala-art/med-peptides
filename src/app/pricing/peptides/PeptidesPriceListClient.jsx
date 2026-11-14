@@ -502,6 +502,9 @@ export default function PeptidesPriceListClient({
           .desktop-only-utilities { display: inline-flex; align-items: center; gap: 6px; }
           .desktop-only-currency { display: inline-flex; align-items: center; gap: 8px; }
           .peptides-kpis-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
+          .gcp-search-and-category-block { position: relative; z-index: 40; }
+          .gcp-table-block table tbody tr:nth-child(even) { background-color: #fafbfc; }
+          .gcp-table-block table tbody tr:hover { background-color: #f0f7ff !important; }
           @media (max-width: 1024px) {
             .gcp-pricing-portal-layout { flex-direction: column; gap: 0.85rem; width: 100% !important; max-width: 100% !important; min-width: 0 !important; align-items: stretch !important; }
             .gcp-pricing-sidebar { display: none !important; }
@@ -522,8 +525,9 @@ export default function PeptidesPriceListClient({
             .peptides-b2b-portal .peptides-nav-container { padding: 6px 12px !important; gap: 8px !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: space-between !important; height: 48px !important; }
             .peptides-b2b-portal .peptides-nav-left { width: auto !important; flex: 0 1 auto !important; min-width: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; }
             .peptides-b2b-portal .peptides-nav-actions { width: auto !important; flex: 0 0 auto !important; display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: flex-end !important; gap: 6px !important; }
-            .peptides-main-container { padding: 0.5rem 0.65rem 3.5rem 0.65rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            .peptides-hero-title { font-size: 1.05rem !important; line-height: 1.2 !important; }
+            .peptides-main-container { padding: 0.5rem 0.75rem 6.5rem 0.75rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+            .peptides-page-header { margin-bottom: 0.6rem !important; }
+            .peptides-hero-title { font-size: 1.05rem !important; line-height: 1.24 !important; }
             .peptides-hero-subtitle { display: none !important; }
             .mobile-only-secondary-toggle { display: block !important; width: 100% !important; margin-bottom: 6px !important; }
             .peptides-secondary-filters-subbar.mobile-secondary-collapsed { display: none !important; }
@@ -638,7 +642,7 @@ export default function PeptidesPriceListClient({
             </div>
 
             {/* Peptide DataTable */}
-            <div className="gcp-table-block" style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+            <div className="gcp-table-block" style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', overflowX: 'clip', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
               {filteredProducts.length === 0 ? (
                 <div style={{ padding: '3rem 1.5rem' }}>
                   <EmptyState
@@ -651,6 +655,7 @@ export default function PeptidesPriceListClient({
                         setSearchQuery('');
                         setSelectedCategory('all');
                         setSelectedStrength('all');
+                        setSelectedFdaStatus('all');
                       }
                     }}
                   />
@@ -664,7 +669,7 @@ export default function PeptidesPriceListClient({
                   initialRowsPerPage={150}
                   showPagination={true}
                   sortable={true}
-                  stickyTopOffset={0}
+                  stickyTopOffset={64}
                   lang={lang}
                   groupByKey={groupByCategory ? 'categoryKey' : null}
                   renderGroupHeader={(catKey, firstRow, count) => {

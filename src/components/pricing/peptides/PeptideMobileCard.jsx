@@ -93,6 +93,7 @@ export default function PeptideMobileCard({
             )}
             <Link
               href={specsUrl}
+              prefetch={false}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => onOpenSpecs && onOpenSpecs(row)}
@@ -124,6 +125,7 @@ export default function PeptideMobileCard({
             {/* Specs ↗ Quick Link */}
             <Link
               href={specsUrl}
+              prefetch={false}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => onOpenSpecs && onOpenSpecs(row)}

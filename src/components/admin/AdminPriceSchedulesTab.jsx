@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   FileSpreadsheet,
@@ -185,6 +185,29 @@ export default function AdminPriceSchedulesTab() {
   const [copiedId, setCopiedId] = useState(null);
   const [editingAgreementSlug, setEditingAgreementSlug] = useState(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const view = url.searchParams.get('view');
+      if (view === 'contracts' || view === 'unified') {
+        setViewMode(view);
+      }
+    }
+  }, []);
+
+  const handleSwitchViewMode = (mode) => {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (mode === 'contracts') {
+        url.searchParams.set('view', 'contracts');
+      } else {
+        url.searchParams.delete('view');
+      }
+      window.history.replaceState(null, '', url.toString());
+    }
+  };
+
   const handleCopyLink = (schedule, tier = null) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
     const params = new URLSearchParams();
@@ -243,10 +266,10 @@ export default function AdminPriceSchedulesTab() {
       />
 
       {/* View Switcher: Unified Hub vs Agreements Editor */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
         <button
           type="button"
-          onClick={() => setViewMode('unified')}
+          onClick={() => handleSwitchViewMode('unified')}
           style={{
             padding: '7px 14px',
             borderRadius: '8px',
@@ -263,11 +286,11 @@ export default function AdminPriceSchedulesTab() {
           }}
         >
           <Layers size={14} />
-          <span>Unified Price Hub (12 Groups)</span>
+          <span>Unified Price Hub (13 Catalogs)</span>
         </button>
         <button
           type="button"
-          onClick={() => setViewMode('contracts')}
+          onClick={() => handleSwitchViewMode('contracts')}
           style={{
             padding: '7px 14px',
             borderRadius: '8px',

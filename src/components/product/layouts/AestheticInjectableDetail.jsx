@@ -1,327 +1,705 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
 import {
   Syringe, ShieldCheck, Sparkles, MapPin, Activity, Layers,
-  Package, AlertTriangle, CheckCircle2, Info, ChevronDown, ChevronRight,
-  ClipboardList, Microscope, ExternalLink, Star, Zap, Heart, BookOpen
+  Package, AlertTriangle, CheckCircle2, Info, ChevronRight,
+  Microscope, Download, Share2, Lock, FlaskConical,
+  Clock, Thermometer, ZoomIn, FileText, HeartPulse
 } from 'lucide-react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
-import PublicPageShell from '@/components/shared/public/PublicPageShell';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
-import toast from 'react-hot-toast';
+import CopyableId from '@/components/ui/CopyableId';
+import ImageModal from '@/snippets/ImageModal';
+import {
+  getInjectableMonograph,
+  getInjectableImageUrl,
+} from '@/data/aestheticInjectablesEnrichment';
+import './AestheticInjectableDetail.css';
 
-// ── Subcategory visual config ─────────────────────────────────────────────────
-const SUBCATEGORY_META = {
-  'Dermal Fillers': {
-    color: '#7c3aed', bg: '#faf5ff', border: '#c4b5fd',
-    icon: Sparkles, label: 'Dermal Filler',
-    desc: 'Restores volume, contour and smooths facial lines via precise tissue augmentation.'
-  },
-  'Skin Boosters': {
-    color: '#0284c7', bg: '#e0f2fe', border: '#7dd3fc',
-    icon: Zap, label: 'Skin Booster',
-    desc: 'Intensely hydrates and revitalises the skin matrix at the dermal level.'
-  },
-  'Biostimulators': {
-    color: '#0d9488', bg: '#f0fdfa', border: '#5eead4',
-    icon: Activity, label: 'Biostimulator',
-    desc: 'Triggers endogenous collagen and elastin production for long-lasting skin quality improvement.'
-  },
-  'Polynucleotides': {
-    color: '#2563eb', bg: '#eff6ff', border: '#93c5fd',
-    icon: Microscope, label: 'Polynucleotide (PN/PDRN)',
-    desc: 'DNA-derived fragments that activate cellular repair, hydration and tissue regeneration.'
-  },
-  'Fat-Dissolving Injectables': {
-    color: '#d97706', bg: '#fffbeb', border: '#fcd34d',
-    icon: Layers, label: 'Fat-Dissolving Injectable',
-    desc: 'Selectively disrupts adipocyte membranes to reduce localised fat deposits.'
-  },
+const CATEGORY_LABELS = {
+  dermal_filler: { en: 'Dermal Filler', es: 'Relleno Dérmico', color: '#6d28d9' },
+  skin_booster: { en: 'Skin Booster / Biorevitalizer', es: 'Skin Booster / Biorrevitalizante', color: '#0284c7' },
+  biostimulator: { en: 'Collagen Biostimulator', es: 'Bioestimulador de Colágeno', color: '#0d9488' },
+  hybrid_biostimulator: { en: 'Hybrid Biostimulator', es: 'Bioestimulador Híbrido', color: '#0f766e' },
+  polynucleotide: { en: 'Polynucleotide (PN-HPT™)', es: 'Polinucleótido (PN-HPT™)', color: '#2563eb' },
+  body_contouring: { en: 'Adipocytolytic / Contouring', es: 'Adipocitolítico / Contorno', color: '#d97706' },
 };
 
-function SubcategoryBadge({ subcategory }) {
-  const meta = SUBCATEGORY_META[subcategory] || {
-    color: '#64748b', bg: '#f1f5f9', border: '#cbd5e1', icon: Star, label: subcategory
-  };
-  const Icon = meta.icon;
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: '6px',
-      padding: '4px 12px', borderRadius: '999px',
-      background: meta.bg, color: meta.color,
-      border: `1.5px solid ${meta.border}`,
-      fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.02em',
-    }}>
-      <Icon size={11} />
-      {meta.label}
-    </span>
-  );
-}
-
-function InfoRow({ icon: Icon, label, value }) {
-  if (!value) return null;
-  return (
-    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '0.55rem 0', borderBottom: '1px solid #f1f5f9' }}>
-      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: '8px', background: '#f8fafc', flexShrink: 0, marginTop: '1px' }}>
-        <Icon size={13} color="#64748b" />
-      </span>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>{label}</div>
-        <div style={{ fontSize: '0.84rem', color: '#1e293b', fontWeight: 500 }}>
-          {Array.isArray(value) ? value.join(', ') : value}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TreatmentAreaChip({ area }) {
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: '4px',
-      padding: '3px 10px', borderRadius: '6px',
-      background: '#f0fdf4', color: '#16a34a',
-      border: '1px solid #bbf7d0',
-      fontSize: '0.73rem', fontWeight: 600,
-    }}>
-      <MapPin size={9} />
-      {area}
-    </span>
-  );
-}
-
-function ProfessionalWarningBanner() {
+function BrandedPackagingFallback({ brand, name, packSize, color = '#003666' }) {
   return (
     <div style={{
-      display: 'flex', gap: '10px', alignItems: 'flex-start',
-      padding: '12px 16px', borderRadius: '10px',
-      background: '#fef9c3', border: '1.5px solid #fde047',
-      marginBottom: '1.25rem',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      gap: '10px',
+      padding: '0.75rem',
+      width: '100%',
     }}>
-      <AlertTriangle size={16} color="#ca8a04" style={{ flexShrink: 0, marginTop: '1px' }} />
+      <div style={{
+        width: 64,
+        height: 64,
+        borderRadius: '16px',
+        background: `linear-gradient(135deg, ${color}18 0%, ${color}30 100%)`,
+        border: `1.5px solid ${color}40`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <Syringe size={30} color={color} />
+      </div>
       <div>
-        <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, color: '#854d0e' }}>
-          For Licensed Professionals Only
-        </p>
-        <p style={{ margin: '3px 0 0', fontSize: '0.73rem', color: '#92400e', lineHeight: 1.4 }}>
-          This product requires professional medical administration. Verify regulatory status and indications against current manufacturer documentation before clinical use.
-        </p>
+        <div style={{ fontSize: '0.68rem', fontWeight: 800, color, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          {brand || 'Aesthetic Medical Device'}
+        </div>
+        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', marginTop: '2px', lineHeight: 1.25 }}>
+          {name}
+        </div>
+        {packSize && (
+          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '4px' }}>
+            {packSize}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
+function SpecKeyValueList({ rows = [] }) {
+  return (
+    <dl style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
+      {rows.map((row, idx) => (
+        <div
+          key={idx}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: '1rem',
+            padding: '0.65rem 0',
+            borderBottom: idx < rows.length - 1 ? '1px solid #f1f5f9' : 'none',
+          }}
+        >
+          <dt style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', flex: '0 0 42%' }}>
+            {row.label}
+          </dt>
+          <dd style={{ margin: 0, fontSize: '0.83rem', fontWeight: 600, color: '#0f172a', textAlign: 'right', flex: 1 }}>
+            {row.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export default function AestheticInjectableDetail({
-  product,
-  region = 'US',
-  isProfessional = false,
-  isAdmin = false,
-  isMobile = false,
-  onClose,
+  product = {},
+  slug: propSlug,
+  baseUrl = 'https://www.atlashealth-services.com',
   isQuickView = false,
 }) {
+  const [lang, setLang] = useState('en');
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'protocol' | 'safety' | 'regulatory'
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
-  const [expanded, setExpanded] = useState({ regulatory: false, supplier: false });
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
-  const {
-    name, brand, subcategory, product_type,
-    active_ingredient, route, treatment_areas, specialties,
-    professional_use_only, packaging_note,
-    supplier_name, supplier_contact, supplier_email, supplier_phone,
-    cost_price_aed, cost_currency, selling_price,
-    prescription_status, verify_before_sale,
-    atlas_product_code, data_source, data_prepared,
-    market_reference, availability, status,
-  } = product || {};
+  const isEs = lang === 'es';
+  const effectiveSlug = propSlug || product?.slug || product?.id || 'juvederm-ultra-2';
 
-  const subMeta = SUBCATEGORY_META[subcategory] || {};
+  const monograph = useMemo(() => {
+    return getInjectableMonograph(effectiveSlug, product) || {};
+  }, [effectiveSlug, product]);
 
-  const gradients = {
-    'Dermal Fillers': 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a855f7 100%)',
-    'Skin Boosters': 'linear-gradient(135deg, #0c4a6e 0%, #0284c7 50%, #38bdf8 100%)',
-    'Biostimulators': 'linear-gradient(135deg, #134e4a 0%, #0d9488 50%, #14b8a6 100%)',
-    'Polynucleotides': 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #60a5fa 100%)',
-    'Fat-Dissolving Injectables': 'linear-gradient(135deg, #78350f 0%, #d97706 50%, #fbbf24 100%)',
-  };
-  const headerGradient = gradients[subcategory] || 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
+  const imageUrl = useMemo(() => {
+    return getInjectableImageUrl(effectiveSlug, product);
+  }, [effectiveSlug, product]);
+
+  // Merge authoritative monograph with Firestore product record
+  const p = useMemo(() => {
+    const name = monograph.canonicalName || product?.name || product?.canonicalName || effectiveSlug;
+    const brand = monograph.brand || product?.brand || 'Clinical Aesthetics';
+    const manufacturer = monograph.manufacturer || product?.manufacturer || brand;
+    const originCountry = monograph.originCountry || 'EU / International';
+    const categoryType = monograph.categoryType || product?.category || 'dermal_filler';
+    const catMeta = CATEGORY_LABELS[categoryType] || CATEGORY_LABELS.dermal_filler;
+
+    return {
+      id: product?.id || effectiveSlug,
+      slug: effectiveSlug,
+      name,
+      brand,
+      manufacturer,
+      originCountry,
+      categoryType,
+      catMeta,
+      subcategory: monograph.subcategory || product?.subcategory || catMeta.en,
+      atlasCode: product?.atlas_product_code || monograph.atlasCode || 'ATLAS-AI',
+      platformTechnology: monograph.platformTechnology || product?.technology || product?.product_type || 'Crosslinked Dermal Matrix',
+      activeIngredient: monograph.activeIngredient || product?.active_ingredient || product?.technology || 'Hyaluronic Acid Formulation',
+      crosslinkingAgent: monograph.crosslinkingAgent || 'Medical-Grade Crosslinked / Biocompatible Matrix',
+      lidocaine: monograph.lidocaine || 'Refer to manufacturer IFU',
+      packSize: monograph.packSize || product?.packSize || 'Standard Clinical Pack',
+      needlesIncluded: monograph.needlesIncluded || 'Sterile Single-Use Needles (see IFU)',
+      injectionDepth: monograph.injectionDepth || 'Mid-to-Deep Dermis / Subcutaneous',
+      injectionTechnique: monograph.injectionTechnique || 'Linear retrograde threading, fanning, or bolus',
+      longevity: monograph.longevity || '9 – 12 Months',
+      rheology: monograph.rheology || product?.rheology || {
+        elasticityGPrime: 'Balanced Viscoelasticity',
+        cohesivity: 'High Tissue Integration',
+        swellingFactor: 'Low-to-Moderate',
+        gelTexture: 'Smooth sterile injectable gel',
+      },
+      regulatory: monograph.regulatory || {
+        ceMark: 'CE Marked Medical Device',
+        classification: 'Class III Medical Device',
+        reversible: categoryType === 'dermal_filler' || categoryType === 'skin_booster' ? 'Yes — Hyaluronidase Reversible' : 'Biodegradable',
+        storage: '2°C – 25°C · Do not freeze · Protect from light',
+      },
+      clinicalOverview: (isEs ? monograph.clinicalOverview?.es : monograph.clinicalOverview?.en)
+        || product?.description
+        || `${name} by ${manufacturer} — professional ${catMeta.en.toLowerCase()} formulated for qualified aesthetic practitioners.`,
+      mechanismOfAction: (isEs ? monograph.mechanismOfAction?.es : monograph.mechanismOfAction?.en)
+        || product?.indication
+        || 'Restores extracellular dermal matrix architecture, hydration, and soft-tissue contour.',
+      indications: monograph.indications || (product?.indication ? [product.indication] : ['Facial soft-tissue augmentation and contour restoration']),
+      treatmentAreas: monograph.treatmentAreas || product?.treatment_areas || ['Facial Aesthetics'],
+      clinicalProtocol: monograph.clinicalProtocol || {
+        dosingGuidance: 'Titrate volume according to anatomical defect and tissue plane.',
+        touchUpInterval: 'Evaluate at 2–4 weeks; maintenance per clinical assessment.',
+        postCare: [
+          'Avoid touching or applying makeup to the treated zone for 12–24 hours',
+          'Avoid strenuous exercise, saunas, and intense heat for 48 hours',
+        ],
+      },
+      contraindications: monograph.contraindications || [
+        'Known hypersensitivity to any formulation component',
+        'Active skin infection or inflammation at the injection site',
+        'Pregnancy or lactation',
+      ],
+      expectedReactions: monograph.expectedReactions || [
+        'Transient erythema, mild localized edema, or tenderness (2–7 days)',
+        'Minor pinpoint bruising at injection entry points',
+      ],
+      specialties: product?.specialties || ['Aesthetic Medicine', 'Dermatology', 'Plastic Surgery'],
+    };
+  }, [monograph, product, effectiveSlug, isEs]);
 
   return (
-    <>
-      {!isQuickView && <PublicUnifiedHeader />}
+    <div className="ai-page-container">
+      {!isQuickView && <PublicUnifiedHeader currentApp="services" />}
 
-      <PublicPageShell maxWidth={900} style={{ paddingTop: isQuickView ? '0' : '80px' }}>
-
-        {/* Hero header */}
-        <div style={{ borderRadius: '16px', overflow: 'hidden', marginBottom: '1.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
-          <div style={{ background: headerGradient, padding: '2rem 2rem 1.5rem', position: 'relative' }}>
-            {atlas_product_code && (
-              <div style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.15)', color: '#fff', padding: '3px 10px', borderRadius: '999px', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', backdropFilter: 'blur(8px)' }}>
-                {atlas_product_code}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '0.75rem' }}>
-              <div style={{ width: 52, height: 52, borderRadius: '14px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', flexShrink: 0 }}>
-                <Syringe size={24} color="#fff" />
-              </div>
-              <div>
-                {brand && <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '2px' }}>{brand}</div>}
-                <h1 style={{ margin: 0, fontSize: isMobile ? '1.4rem' : '1.75rem', fontWeight: 800, color: '#fff', lineHeight: 1.1 }}>{name}</h1>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-              {subcategory && <SubcategoryBadge subcategory={subcategory} />}
-              {status === 'published' && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)', fontSize: '0.7rem', fontWeight: 600 }}>
-                  <CheckCircle2 size={10} /> Catalog Active
-                </span>
-              )}
-              {professional_use_only && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: 'rgba(239,68,68,0.25)', color: '#fecaca', fontSize: '0.7rem', fontWeight: 600, border: '1px solid rgba(239,68,68,0.4)' }}>
-                  <ShieldCheck size={10} /> Professionals Only
-                </span>
-              )}
-            </div>
-
-            {subMeta.desc && (
-              <p style={{ margin: '0.75rem 0 0', fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5 }}>{subMeta.desc}</p>
-            )}
-          </div>
-        </div>
-
-        <ProfessionalWarningBanner />
-
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: '1.25rem', alignItems: 'start' }}>
-
-          {/* Left column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
-            {treatment_areas?.length > 0 && (
-              <div style={{ background: '#fff', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #f1f5f9' }}>
-                <h2 style={{ margin: '0 0 0.75rem', fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MapPin size={13} /> Treatment Areas & Indications
-                </h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
-                  {treatment_areas.map((area, i) => <TreatmentAreaChip key={i} area={area} />)}
-                </div>
-              </div>
-            )}
-
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #f1f5f9' }}>
-              <h2 style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Microscope size={13} /> Clinical Profile
-              </h2>
-              <InfoRow icon={Sparkles} label="Active Ingredient / Platform" value={active_ingredient} />
-              <InfoRow icon={Activity} label="Product Type" value={product_type} />
-              <InfoRow icon={Syringe} label="Route of Administration" value={route ? route.charAt(0).toUpperCase() + route.slice(1) : null} />
-              <InfoRow icon={BookOpen} label="Clinical Specialties" value={specialties} />
-              <InfoRow icon={Heart} label="Market Reference" value={market_reference} />
-            </div>
-
-            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
-              <button
-                onClick={() => setExpanded(e => ({ ...e, regulatory: !e.regulatory }))}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', background: 'none', border: 'none', cursor: 'pointer', borderBottom: expanded.regulatory ? '1px solid #f1f5f9' : 'none' }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  <ShieldCheck size={13} /> Regulatory & Compliance
-                </span>
-                {expanded.regulatory ? <ChevronDown size={14} color="#94a3b8" /> : <ChevronRight size={14} color="#94a3b8" />}
-              </button>
-              {expanded.regulatory && (
-                <div style={{ padding: '0 1.25rem 1rem' }}>
-                  <InfoRow icon={ClipboardList} label="Prescription Status" value={prescription_status === 'professional_use' ? 'Professional Use Only' : prescription_status} />
-                  <InfoRow icon={ShieldCheck} label="Professional Administration" value="Required" />
-                  {verify_before_sale && (
-                    <div style={{ marginTop: '0.75rem', padding: '10px 12px', borderRadius: '8px', background: '#fef9c3', border: '1px solid #fde047', fontSize: '0.73rem', color: '#854d0e', lineHeight: 1.45 }}>
-                      ⚠️ Verify exact IFU, composition, indications and contraindications against current manufacturer documentation before clinical use or sale.
-                    </div>
-                  )}
-                  {packaging_note && (
-                    <div style={{ marginTop: '0.5rem', padding: '10px 12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.73rem', color: '#475569', lineHeight: 1.45 }}>
-                      <Info size={11} style={{ display: 'inline', marginRight: '5px' }} />
-                      {packaging_note}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {data_source && (
-              <div style={{ padding: '10px 14px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.7rem', color: '#94a3b8', display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <Info size={11} />
-                <span>Source: <em>{data_source}</em>{data_prepared ? ` · Prepared ${data_prepared}` : ''}</span>
-              </div>
-            )}
+      {/* ── INSTITUTIONAL TRUST & REGULATORY BAR ── */}
+      {!isQuickView && (
+        <div className="ai-institutional-bar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span className="ai-badge-pill ai-badge-ce">
+              <ShieldCheck size={13} />
+              <span>{p.regulatory.ceMark}</span>
+            </span>
+            <span className="ai-badge-pill ai-badge-device">
+              <FlaskConical size={12} />
+              <span>{p.regulatory.classification}</span>
+            </span>
+            <span className="ai-badge-pill ai-badge-pro">
+              <Lock size={12} />
+              <span>{isEs ? 'Uso Médico Profesional' : 'Licensed Practitioners Only'}</span>
+            </span>
+            <span style={{ fontSize: '0.73rem', color: '#64748b', fontWeight: 600 }}>
+              {p.manufacturer} · {p.originCountry}
+            </span>
           </div>
 
-          {/* Right column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', position: 'sticky', top: '90px' }}>
-
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Reference Price</div>
-              {cost_price_aed ? (
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b', marginBottom: '2px' }}>
-                  {cost_price_aed} <span style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 500 }}>{cost_currency || 'AED'}</span>
-                </div>
-              ) : (
-                <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#94a3b8' }}>Price on Request</div>
-              )}
-              <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginBottom: '1rem', lineHeight: 1.4 }}>Dubai/UAE reference · Unit/pack basis to confirm with supplier</div>
-
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '999px', marginBottom: '1rem', background: '#fef9c3', color: '#854d0e', border: '1px solid #fde047', fontSize: '0.72rem', fontWeight: 600 }}>
-                <Package size={10} /> Available on Request
-              </div>
-
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
               <button
-                onClick={() => {
-                  const subject = encodeURIComponent(`Product Inquiry: ${name} (${atlas_product_code || ''})`);
-                  const body = encodeURIComponent(`Hello Lorenzo,\n\nI'd like to inquire about the following product:\n\nProduct: ${name}\nCode: ${atlas_product_code || 'N/A'}\nBrand: ${brand}\nSubcategory: ${subcategory}\n\nPlease provide:\n- Pricing (AED & EUR)\n- Pack configuration\n- Lead time\n- Minimum order\n\nThank you.`);
-                  window.open(`mailto:${supplier_email || 'admin@pharmaspain.net'}?subject=${subject}&body=${body}`, '_blank');
-                  toast.success('Opening inquiry email…');
+                onClick={() => setLang('en')}
+                style={{
+                  padding: '4px 10px', fontSize: '0.72rem', fontWeight: 700, border: 'none', cursor: 'pointer',
+                  backgroundColor: lang === 'en' ? '#003666' : '#ffffff',
+                  color: lang === 'en' ? '#ffffff' : '#64748b',
                 }}
-                style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', background: 'linear-gradient(135deg, #1e293b, #334155)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(30,41,59,0.3)' }}
               >
-                <ExternalLink size={15} /> Request Quotation
+                EN
               </button>
-
               <button
-                onClick={() => setIsAiDrawerOpen(true)}
-                style={{ marginTop: '8px', width: '100%', padding: '0.65rem', borderRadius: '10px', background: 'none', border: '1.5px solid #e2e8f0', color: '#64748b', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}
+                onClick={() => setLang('es')}
+                style={{
+                  padding: '4px 10px', fontSize: '0.72rem', fontWeight: 700, border: 'none', cursor: 'pointer',
+                  backgroundColor: lang === 'es' ? '#003666' : '#ffffff',
+                  color: lang === 'es' ? '#ffffff' : '#64748b',
+                }}
               >
-                <Sparkles size={14} /> Ask Atlas AI
+                ES
               </button>
             </div>
 
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #f1f5f9' }}>
-              <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Package size={12} /> Supplier
-              </h3>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px' }}>{supplier_name}</div>
-              {supplier_contact && <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '2px' }}>Contact: <strong>{supplier_contact}</strong></div>}
-              {supplier_email && <a href={`mailto:${supplier_email}`} style={{ display: 'block', fontSize: '0.76rem', color: '#2563eb', textDecoration: 'none', marginBottom: '2px' }}>{supplier_email}</a>}
-              {supplier_phone && <div style={{ fontSize: '0.76rem', color: '#64748b' }}>{supplier_phone}</div>}
-            </div>
+            <button
+              onClick={() => setIsShareDrawerOpen(true)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                padding: '6px 12px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1',
+                borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#334155', cursor: 'pointer',
+              }}
+            >
+              <Share2 size={13} />
+              <span>{isEs ? 'Compartir Ficha' : 'Share Monograph'}</span>
+            </button>
 
-            <div style={{ padding: '12px', borderRadius: '10px', background: '#fafafa', border: '1px solid #f1f5f9', fontSize: '0.7rem', color: '#94a3b8', lineHeight: 1.5 }}>
-              <ShieldCheck size={11} style={{ display: 'inline', marginRight: '4px', color: '#16a34a' }} />
-              This product is intended for qualified healthcare professionals. Not for direct consumer sale. Atlas is a B2B clinical distribution platform.
-            </div>
+            <button
+              onClick={() => window.print()}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                padding: '6px 12px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1',
+                borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#334155', cursor: 'pointer',
+              }}
+            >
+              <Download size={13} />
+              <span>PDF</span>
+            </button>
           </div>
         </div>
-      </PublicPageShell>
+      )}
+
+      {/* ── MAIN CONTENT ── */}
+      <main className="ai-content-wrap">
+
+        {/* Breadcrumb */}
+        {!isQuickView && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b', marginBottom: '1rem', flexWrap: 'wrap' }}>
+            <Link href="/" style={{ color: '#64748b', textDecoration: 'none' }}>Home</Link>
+            <ChevronRight size={12} />
+            <Link href="/collection/aesthetic-injectables" style={{ color: '#64748b', textDecoration: 'none' }}>
+              {isEs ? 'Inyectables Estéticos' : 'Aesthetic Injectables'}
+            </Link>
+            <ChevronRight size={12} />
+            <span style={{ color: '#475569', fontWeight: 600 }}>{p.brand}</span>
+            <ChevronRight size={12} />
+            <span style={{ color: '#003666', fontWeight: 700 }}>{p.name}</span>
+          </div>
+        )}
+
+        {/* ── HERO PANORAMA CARD ── */}
+        <section className="ai-hero-panorama">
+          {/* 1. Product Visual */}
+          <div
+            className="ai-hero-image-box"
+            style={{ cursor: imageUrl ? 'zoom-in' : 'default' }}
+            onClick={() => { if (imageUrl) setIsImageModalOpen(true); }}
+          >
+            <span className="ai-code-badge">{p.atlasCode}</span>
+
+            {imageUrl ? (
+              <>
+                <img src={imageUrl} alt={p.name} />
+                <span style={{
+                  position: 'absolute', top: '10px', right: '10px',
+                  background: 'rgba(255,255,255,0.9)', border: '1px solid #cbd5e1',
+                  borderRadius: '6px', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: '4px',
+                  fontSize: '0.65rem', fontWeight: 600, color: '#475569'
+                }}>
+                  <ZoomIn size={11} /> Zoom
+                </span>
+              </>
+            ) : (
+              <BrandedPackagingFallback
+                brand={p.brand}
+                name={p.name}
+                packSize={p.packSize}
+                color={p.catMeta.color}
+              />
+            )}
+
+            <div className="ai-reversible-pill">
+              {p.regulatory.reversible}
+            </div>
+          </div>
+
+          {/* 2. Clinical Identity & GCP Key-Value Specs Grid */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: p.catMeta.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {p.manufacturer} • {isEs ? p.catMeta.es : p.catMeta.en}
+                </span>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>•</span>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>{p.subcategory}</span>
+              </div>
+
+              <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', margin: '0 0 8px 0', lineHeight: 1.2 }}>
+                {p.name}
+              </h1>
+
+              <p style={{ fontSize: '0.87rem', color: '#475569', lineHeight: 1.55, margin: 0 }}>
+                {p.clinicalOverview}
+              </p>
+            </div>
+
+            <div className="ai-kv-grid">
+              <div className="ai-kv-item">
+                <span className="ai-kv-label">{isEs ? 'Concentración Activa' : 'Active Formulation'}</span>
+                <span className="ai-kv-value" style={{ color: '#003666' }}>{p.activeIngredient}</span>
+              </div>
+              <div className="ai-kv-item">
+                <span className="ai-kv-label">{isEs ? 'Plataforma / Tecnología' : 'Platform Technology'}</span>
+                <span className="ai-kv-value">{p.platformTechnology}</span>
+              </div>
+              <div className="ai-kv-item">
+                <span className="ai-kv-label">{isEs ? 'Plano de Inyección' : 'Injection Plane'}</span>
+                <span className="ai-kv-value">{p.injectionDepth}</span>
+              </div>
+              <div className="ai-kv-item">
+                <span className="ai-kv-label">{isEs ? 'Aguja / Cánula' : 'Needle / Cannula'}</span>
+                <span className="ai-kv-value">{p.needlesIncluded}</span>
+              </div>
+              <div className="ai-kv-item">
+                <span className="ai-kv-label">{isEs ? 'Duración Clínica' : 'Clinical Longevity'}</span>
+                <span className="ai-kv-value">{p.longevity}</span>
+              </div>
+              <div className="ai-kv-item">
+                <span className="ai-kv-label">{isEs ? 'Presentación' : 'Pack Configuration'}</span>
+                <span className="ai-kv-value">{p.packSize}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. B2B Institutional Inquiry & Action Card */}
+          <aside className="ai-action-card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                {isEs ? 'Distribución Clínica B2B' : 'B2B Clinical Supply'}
+              </span>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                padding: '2px 8px', borderRadius: '999px',
+                background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0',
+                fontSize: '0.68rem', fontWeight: 700,
+              }}>
+                <CheckCircle2 size={11} /> {isEs ? 'Disponible' : 'Clinic Ready'}
+              </span>
+            </div>
+
+            <div style={{ padding: '0.65rem 0.75rem', borderRadius: '8px', background: '#ffffff', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>
+                {isEs ? 'Cotización Institucional para Clínicas' : 'Institutional Clinic & Pharmacy Pricing'}
+              </div>
+              <div style={{ fontSize: '0.71rem', color: '#64748b', lineHeight: 1.4 }}>
+                {isEs
+                  ? 'Suministro verificado por lotes con trazabilidad completa para médicos y clínicas autorizadas.'
+                  : 'Verified batch-traceable supply for licensed aesthetic clinics, physicians, and medical distributors.'}
+              </div>
+            </div>
+
+            <button className="ai-btn-primary" onClick={() => setIsInquiryDrawerOpen(true)}>
+              <Package size={15} />
+              <span>{isEs ? 'Solicitar Cotización B2B' : 'Request Institutional Quote'}</span>
+            </button>
+
+            <button className="ai-btn-secondary" onClick={() => setIsAiDrawerOpen(true)}>
+              <Sparkles size={14} color="#003666" />
+              <span>{isEs ? 'Consultar a Atlas AI' : 'Ask Atlas Clinical AI'}</span>
+            </button>
+
+            <div style={{ fontSize: '0.69rem', color: '#64748b', lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: '6px', marginTop: '2px' }}>
+              <ShieldCheck size={13} color="#047857" style={{ flexShrink: 0, marginTop: '1px' }} />
+              <span>
+                {isEs
+                  ? 'Venta exclusiva a profesionales sanitarios colegiados. No apto para venta directa al público.'
+                  : 'Restricted to qualified healthcare practitioners. Not for direct-to-consumer sale.'}
+              </span>
+            </div>
+          </aside>
+        </section>
+
+        {/* ── CLINICAL MONOGRAPH TABS ── */}
+        <nav className="ai-tabs-bar" aria-label="Product Monograph Sections">
+          <button
+            className={`ai-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overview')}
+          >
+            <Microscope size={15} />
+            <span>{isEs ? 'Resumen y Reología' : 'Overview & Rheology'}</span>
+          </button>
+          <button
+            className={`ai-tab-btn ${activeTab === 'protocol' ? 'active' : ''}`}
+            onClick={() => setActiveTab('protocol')}
+          >
+            <Syringe size={15} />
+            <span>{isEs ? 'Indicaciones y Protocolo' : 'Indications & Protocol'}</span>
+          </button>
+          <button
+            className={`ai-tab-btn ${activeTab === 'safety' ? 'active' : ''}`}
+            onClick={() => setActiveTab('safety')}
+          >
+            <HeartPulse size={15} />
+            <span>{isEs ? 'Seguridad y Contraindicaciones' : 'Safety & Contraindications'}</span>
+          </button>
+          <button
+            className={`ai-tab-btn ${activeTab === 'regulatory' ? 'active' : ''}`}
+            onClick={() => setActiveTab('regulatory')}
+          >
+            <FileText size={15} />
+            <span>{isEs ? 'Regulación y Trazabilidad' : 'Regulatory & Packaging'}</span>
+          </button>
+        </nav>
+
+        {/* ── TAB 1: OVERVIEW & RHEOLOGY ── */}
+        {activeTab === 'overview' && (
+          <div className="ai-section-grid">
+            <div className="ai-card">
+              <h2 className="ai-card-title">
+                <Activity size={15} />
+                <span>{isEs ? 'Mecanismo de Acción' : 'Mechanism of Action'}</span>
+              </h2>
+              <p style={{ fontSize: '0.87rem', color: '#334155', lineHeight: 1.6, margin: '0 0 1rem 0' }}>
+                {p.mechanismOfAction}
+              </p>
+
+              <h3 style={{ fontSize: '0.74rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 0.6rem 0' }}>
+                {isEs ? 'Zonas Anatómicas Principales' : 'Primary Treatment Zones'}
+              </h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+                {p.treatmentAreas.map((area, i) => (
+                  <span key={i} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '5px',
+                    padding: '4px 10px', borderRadius: '6px',
+                    background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0',
+                    fontSize: '0.75rem', fontWeight: 600,
+                  }}>
+                    <MapPin size={11} />
+                    {area}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="ai-card">
+              <h2 className="ai-card-title">
+                <Layers size={15} />
+                <span>{isEs ? 'Perfil Reológico y Fisicoquímico' : 'Rheological & Physicochemical Profile'}</span>
+              </h2>
+              <SpecKeyValueList
+                rows={[
+                  { label: isEs ? 'Módulo Elástico (G′)' : 'Elastic Modulus (G′)', value: p.rheology.elasticityGPrime },
+                  { label: isEs ? 'Cohesividad' : 'Cohesivity', value: p.rheology.cohesivity },
+                  { label: isEs ? 'Factor de Hinchazón' : 'Swelling / Water Uptake', value: p.rheology.swellingFactor },
+                  { label: isEs ? 'Textura del Gel / Matriz' : 'Gel / Matrix Architecture', value: p.rheology.gelTexture },
+                  { label: isEs ? 'Agente Reticulante' : 'Crosslinking / Carrier', value: p.crosslinkingAgent },
+                  { label: isEs ? 'Anestésico Local' : 'Lidocaine Content', value: p.lidocaine },
+                ]}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB 2: INDICATIONS & PROTOCOL ── */}
+        {activeTab === 'protocol' && (
+          <div className="ai-section-grid">
+            <div className="ai-card">
+              <h2 className="ai-card-title">
+                <CheckCircle2 size={15} />
+                <span>{isEs ? 'Indicaciones Clínicas Aprobadas' : 'Approved Clinical Indications'}</span>
+              </h2>
+              <ul className="ai-list">
+                {p.indications.map((ind, idx) => (
+                  <li key={idx}>{ind}</li>
+                ))}
+              </ul>
+
+              <div style={{ marginTop: '1.25rem', padding: '0.9rem', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                  {isEs ? 'Técnica y Plano Recomendado' : 'Recommended Plane & Technique'}
+                </div>
+                <div style={{ fontSize: '0.84rem', color: '#1e293b', lineHeight: 1.5 }}>
+                  <strong>{isEs ? 'Plano:' : 'Plane:'}</strong> {p.injectionDepth}<br />
+                  <strong>{isEs ? 'Técnica:' : 'Technique:'}</strong> {p.injectionTechnique}<br />
+                  <strong>{isEs ? 'Instrumental:' : 'Needle / Cannula:'}</strong> {p.needlesIncluded}
+                </div>
+              </div>
+            </div>
+
+            <div className="ai-card">
+              <h2 className="ai-card-title">
+                <Clock size={15} />
+                <span>{isEs ? 'Pauta de Dosificación y Post-Cuidados' : 'Dosing Protocol & Post-Care'}</span>
+              </h2>
+
+              {p.clinicalProtocol.preparation && (
+                <div style={{ marginBottom: '1rem', padding: '0.85rem', borderRadius: '8px', background: '#eff6ff', border: '1px solid #bfdbfe', fontSize: '0.82rem', color: '#1e3a8a', lineHeight: 1.5 }}>
+                  <strong>{isEs ? 'Preparación / Reconstitución:' : 'Preparation / Reconstitution:'}</strong> {p.clinicalProtocol.preparation}
+                </div>
+              )}
+
+              <div style={{ fontSize: '0.85rem', color: '#334155', lineHeight: 1.55, marginBottom: '1rem' }}>
+                <div style={{ marginBottom: '6px' }}>
+                  <strong>{isEs ? 'Guía de Volumen:' : 'Session Volume:'}</strong> {p.clinicalProtocol.dosingGuidance}
+                </div>
+                <div>
+                  <strong>{isEs ? 'Revisión / Mantenimiento:' : 'Follow-Up & Maintenance:'}</strong> {p.clinicalProtocol.touchUpInterval}
+                </div>
+              </div>
+
+              <h3 style={{ fontSize: '0.74rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 0.5rem 0' }}>
+                {isEs ? 'Instrucciones Post-Tratamiento' : 'Post-Procedure Patient Care'}
+              </h3>
+              <ul className="ai-list">
+                {(p.clinicalProtocol.postCare || []).map((step, idx) => (
+                  <li key={idx}>{step}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB 3: SAFETY & CONTRAINDICATIONS ── */}
+        {activeTab === 'safety' && (
+          <div className="ai-section-grid">
+            <div className="ai-card ai-card-full" style={{ background: '#fef9c3', borderColor: '#fde047' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <AlertTriangle size={20} color="#ca8a04" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <h2 style={{ margin: '0 0 4px 0', fontSize: '0.9rem', fontWeight: 800, color: '#854d0e' }}>
+                    {isEs ? 'Advertencia de Seguridad Vascular y Administración Profesional' : 'Vascular Safety & Professional Administration Notice'}
+                  </h2>
+                  <p style={{ margin: 0, fontSize: '0.83rem', color: '#92400e', lineHeight: 1.5 }}>
+                    {isEs
+                      ? 'La inyección intravascular accidental puede provocar isquemia tisular, necrosis o complicaciones oculares. Verifique siempre el plano anatómico, aspire cuando corresponda, inyecte lentamente con mínima presión y mantenga hialuronidasa disponible en clínica para rellenos de ácido hialurónico.'
+                      : 'Inadvertent intravascular injection may lead to vascular occlusion, tissue ischemia, necrosis, or visual compromise. Always verify anatomical depth, inject slowly under minimal pressure, and maintain an emergency hyaluronidase protocol on site for hyaluronic acid formulations.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="ai-card">
+              <h2 className="ai-card-title">
+                <AlertTriangle size={15} color="#dc2626" />
+                <span>{isEs ? 'Contraindicaciones Principales' : 'Contraindications'}</span>
+              </h2>
+              <ul className="ai-list">
+                {p.contraindications.map((c, idx) => (
+                  <li key={idx}>{c}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="ai-card">
+              <h2 className="ai-card-title">
+                <Info size={15} />
+                <span>{isEs ? 'Reacciones Esperadas y Reversibilidad' : 'Expected Reactions & Reversibility'}</span>
+              </h2>
+              <ul className="ai-list" style={{ marginBottom: '1rem' }}>
+                {p.expectedReactions.map((r, idx) => (
+                  <li key={idx}>{r}</li>
+                ))}
+              </ul>
+              <div style={{ padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#1e293b' }}>
+                <strong>{isEs ? 'Reversibilidad:' : 'Reversibility:'}</strong> {p.regulatory.reversible}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB 4: REGULATORY & PACKAGING ── */}
+        {activeTab === 'regulatory' && (
+          <div className="ai-section-grid">
+            <div className="ai-card">
+              <h2 className="ai-card-title">
+                <ShieldCheck size={15} />
+                <span>{isEs ? 'Clasificación Regulatoria y Conservación' : 'Regulatory Status & Storage'}</span>
+              </h2>
+              <SpecKeyValueList
+                rows={[
+                  { label: isEs ? 'Marcado / Aprobación' : 'Regulatory Mark', value: p.regulatory.ceMark },
+                  { label: isEs ? 'Clasificación' : 'Device Classification', value: p.regulatory.classification },
+                  { label: isEs ? 'Fabricante' : 'Manufacturer', value: `${p.manufacturer} (${p.originCountry})` },
+                  {
+                    label: isEs ? 'Conservación' : 'Storage Conditions',
+                    value: (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <Thermometer size={13} color="#0284c7" />
+                        {p.regulatory.storage}
+                      </span>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+
+            <div className="ai-card">
+              <h2 className="ai-card-title">
+                <Package size={15} />
+                <span>{isEs ? 'Contenido del Envase y Trazabilidad' : 'Packaging & Batch Traceability'}</span>
+              </h2>
+              <SpecKeyValueList
+                rows={[
+                  { label: isEs ? 'Presentación' : 'Pack Contents', value: p.packSize },
+                  { label: isEs ? 'Agujas Incluidas' : 'Needles / Delivery', value: p.needlesIncluded },
+                  { label: isEs ? 'Código Atlas' : 'Atlas SKU Code', value: <CopyableId value={p.atlasCode} /> },
+                  { label: isEs ? 'Identificador URL' : 'Catalog Slug', value: <CopyableId value={p.slug} /> },
+                ]}
+              />
+            </div>
+          </div>
+        )}
+      </main>
+
+      {!isQuickView && <PublicUnifiedFooter />}
+
+      {/* ── DRAWERS & MODALS ── */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => setIsInquiryDrawerOpen(false)}
+        contextType="product"
+        brandType="aesthetic_injectable"
+        lang={lang}
+        initialEntity={{
+          name: p.name,
+          slug: p.slug,
+          code: p.atlasCode,
+          strength: p.activeIngredient,
+          category: `Aesthetic Injectables · ${p.catMeta.en}`,
+          brand: p.brand,
+          supplier: p.manufacturer,
+          inquiryGoal: 'clinic_aesthetic_supply',
+        }}
+      />
+
+      <ShareProductMonographDrawer
+        isOpen={isShareDrawerOpen}
+        onClose={() => setIsShareDrawerOpen(false)}
+        product={{
+          id: p.id,
+          name: p.name,
+          brand: p.brand,
+          category: 'Aesthetic Injectables',
+        }}
+        shareUrl={`${baseUrl}/p/${p.slug}`}
+      />
 
       {isAiDrawerOpen && (
         <PublicAtlasAIDrawer
-          product={product}
+          product={{ ...product, ...p }}
           isOpen={isAiDrawerOpen}
           onClose={() => setIsAiDrawerOpen(false)}
           context="aesthetic_injectable"
         />
       )}
-    </>
+
+      {isImageModalOpen && imageUrl && (
+        <ImageModal
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          src={imageUrl}
+          alt={p.name}
+        />
+      )}
+    </div>
   );
 }

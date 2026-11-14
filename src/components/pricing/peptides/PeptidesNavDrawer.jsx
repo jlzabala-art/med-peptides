@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sparkles, X, Layers } from 'lucide-react';
 import {
   CATEGORY_ORDER,
@@ -29,6 +29,20 @@ export default function PeptidesNavDrawer({
   processedProducts = [],
   isEs = false
 }) {
+  useEffect(() => {
+    if (!isNavDrawerOpen) return undefined;
+    const handleKeyDown = e => {
+      if (e.key === 'Escape') setIsNavDrawerOpen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isNavDrawerOpen, setIsNavDrawerOpen]);
+
   if (!isNavDrawerOpen) return null;
 
   const hasActiveFilters =
@@ -41,10 +55,11 @@ export default function PeptidesNavDrawer({
     <div
       role="dialog"
       aria-modal="true"
+      aria-label={isEs ? 'Navegación y Filtros' : 'Navigation and Filters'}
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1200,
+        zIndex: 1300,
         background: 'rgba(15, 23, 42, 0.65)',
         backdropFilter: 'blur(3px)',
         display: 'flex',
@@ -86,6 +101,7 @@ export default function PeptidesNavDrawer({
           <button
             type="button"
             onClick={() => setIsNavDrawerOpen(false)}
+            aria-label={isEs ? 'Cerrar navegación y filtros' : 'Close navigation and filters'}
             style={{
               background: 'rgba(255,255,255,0.1)',
               border: 'none',
