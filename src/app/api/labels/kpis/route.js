@@ -51,7 +51,9 @@ export async function GET() {
             runCount: pCount,
             totalLabels: totalLabels,
             partPrintCounts: partCounts,
-            lastPrintedAt: data.lastPrintedA4At || null
+            lastPrintedAt: data.lastPrintedA4At || null,
+            lastPrintedBy: data.lastPrintedBy || null,
+            printHistory: Array.isArray(data.printHistory) ? data.printHistory.slice(-15) : []
           };
 
           const docId = String(doc.id).trim().toUpperCase();
@@ -123,7 +125,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { codes = [], items = [] } = body;
+    const { codes = [], items = [], printedBy = null, format = 'a4' } = body;
 
     // Normalize input into unified work list
     const workItems = [];
@@ -204,18 +206,36 @@ export async function POST(request) {
           };
         });
 
+        const existingHistory = Array.isArray(docData.printHistory) ? docData.printHistory : [];
+        const operatorName = item.printedBy || printedBy || 'Pharmacy Staff';
+        const printFormat = item.format || format || 'a4';
+        const nextHistory = [
+          ...existingHistory,
+          {
+            printedAt: now,
+            printedBy: operatorName,
+            format: printFormat,
+            trigger: item.trigger || 'batch',
+            partsCount: partsToInc
+          }
+        ].slice(-15);
+
         await targetDocRef.set({
           a4PrintCount: nextRunCount,
           totalLabelsPrinted: nextLabelsCount,
           partPrintCounts: updatedPartCounts,
-          lastPrintedA4At: now
+          lastPrintedA4At: now,
+          lastPrintedBy: operatorName,
+          printHistory: nextHistory
         }, { merge: true });
 
         const detail = {
           runCount: nextRunCount,
           totalLabels: nextLabelsCount,
           partPrintCounts: updatedPartCounts,
-          lastPrintedAt: now
+          lastPrintedAt: now,
+          lastPrintedBy: operatorName,
+          printHistory: nextHistory
         };
 
         const key = cleanCode.toUpperCase();

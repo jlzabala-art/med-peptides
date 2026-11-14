@@ -67,7 +67,7 @@ export async function GET(request) {
         try {
           const snap = await adminDb.collection('prescriptions')
             .orderBy('createdAt', 'desc')
-            .limit(12)
+            .limit(30)
             .get();
 
           snap.forEach(docSnap => {
@@ -91,6 +91,10 @@ export async function GET(request) {
                 title: cleanTitle(d.treatmentTitle || d.title || d.formulaName),
                 date: extractDate(d.createdAt || d.uploadedAt || d.importedAt || d.prescriptionDate || d.date),
                 a4PrintCount: d.a4PrintCount || d.printCount || 0,
+                lastPrintedA4At: extractDate(d.lastPrintedA4At),
+                status: d.status || d.state || 'approved',
+                isSigned: Boolean(d.isSigned),
+                labeledParts: d.labeledParts || {},
                 source: 'firestore_latest'
               });
             }

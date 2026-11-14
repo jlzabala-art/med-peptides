@@ -1,103 +1,96 @@
 /**
  * zplGenerator.js
- * Generates clean, native Zebra Programming Language (ZPL II) code
- * for direct thermal printing on Zebra printers (e.g., ZD420, ZD620, GK420d).
- * 
- * Target size: 75 mm × 45 mm (Standard European Dispensary Vial Label)
- * Default resolution: 300 DPI (12 dots/mm) -> 885 × 531 dots
- * Fallback resolution: 203 DPI (8 dots/mm) -> 600 × 360 dots
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Generates native ZPL II (^XA ... ^XZ) commands for Zebra thermal printers
+ * (ZD421, GK420d, ZT230, etc.) at 203 DPI (8 dots/mm) or 300 DPI (12 dots/mm).
  */
 
-export function generateLabelZpl(labelData = {}, dpi = 300) {
-  const dotsPerMm = dpi === 203 ? 8 : 12;
-  const widthDots = Math.round(75 * dotsPerMm); // 885 at 300 DPI
-  const heightDots = Math.round(45 * dotsPerMm); // 531 at 300 DPI
+function sanitizeZplText(raw) {
+  if (!raw) return '';
+  return String(raw)
+    .replace(/[\^~\\]/g, ' ')
+    .replace(/\r?\n+/g, ' ')
+    .trim();
+}
 
-  const patientName = String(labelData.patientName || 'PATIENT RECORD').toUpperCase().slice(0, 48);
-  const pharmacyName = String(labelData.pharmacyName || labelData.pharmacy || 'PHARMAPOLIS COMPOUNDING PHARMACY').toUpperCase().slice(0, 42);
-  const formulaTitle = String(labelData.productTitle || labelData.productName || 'Compounded Pharmaceutical Formulation').slice(0, 52);
-  const directions = String(labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.').slice(0, 220);
-  const batchCode = String(labelData.batchCode || 'PHARM-2026-B948').toUpperCase();
-  const prodDate = String(labelData.prodDate || '05-10-2026');
-  const expDate = String(labelData.expDate || '04-10-2027');
-  const doctorName = String(labelData.doctorName || 'Dr. Marina Cordeiro Fernandes');
-  const targetRxUrl = String(labelData.targetRxUrl || 'https://www.atlashealth-services.com');
-  const cautionText = String(labelData.warnings || labelData.warning || 'KEEP OUT OF REACH OF CHILDREN • FOR PATIENT USE ONLY').toUpperCase().slice(0, 75);
+export function generateLabelZpl(labelItem = {}, rx = {}, options = {}) {
+  const dpi = options.dpi === 300 ? 300 : 203;
+  const dotsPerMm = dpi === 300 ? 11.811 : 8;
+  const widthMm = Number(labelItem.widthMm || options.widthMm || 75);
+  const heightMm = Number(labelItem.heightMm || options.heightMm || 45);
 
-  // Extract raw APIs list
-  const apis = Array.isArray(labelData.apis) && labelData.apis.length > 0
-    ? labelData.apis.map(a => {
-        const name = a.drugName || a.name || a.activeIngredient || '';
-        const dose = a.dosage || a.dose || a.strength || '';
-        return `${name} ${dose}`.trim();
-      }).filter(Boolean)
-    : (labelData.formula ? [labelData.formula] : ['Active Compounded Formulation']);
+  const pw = Math.round(widthMm * dotsPerMm);
+  const ll = Math.round(heightMm * dotsPerMm);
+  const margin = Math.round(2.5 * dotsPerMm);
+  const contentWidth = Math.max(100, pw - margin * 2 - Math.round(18 * dotsPerMm));
 
-  const qrMagnification = dpi === 203 ? 4 : 5;
+  const rxCode = sanitizeZplText(rx?.fileNumber || rx?.code || labelItem.rxCode || 'RX');
+  const patientName = sanitizeZplText(labelItem.patientName || rx?.patient?.name || rx?.patientName || 'Patient');
+  const doctorName = sanitizeZplText(labelItem.doctorName || rx?.doctorName || 'Treating Physician');
+  const productName = sanitizeZplText(labelItem.productName || labelItem.title || labelItem.formulaName || 'Compounded Formula');
+  const composition = sanitizeZplText(
+    labelItem.composition ||
+    labelItem.activesSummary ||
+    (Array.isArray(labelItem.actives) ? labelItem.actives.map(a => `${a.name || a} ${a.concentration || ''}`).join(', ') : '')
+  );
+  const posology = sanitizeZplText(labelItem.posology || labelItem.dosage || labelItem.instructions || '');
+  const batchNumber = sanitizeZplText(labelItem.batchNumber || labelItem.lotNumber || 'LOT-PENDING');
+  const bud = sanitizeZplText(labelItem.expiryDate || labelItem.bud || 'BUD-30D');
+  const storage = sanitizeZplText(labelItem.storage || labelItem.storageConditions || 'Store 2-8 C / Refrigerated');
 
-  let zpl = `^XA\n`;
-  zpl += `^PW${widthDots}\n`;
-  zpl += `^LL${heightDots}\n`;
-  zpl += `^LH0,0\n`;
-  zpl += `^CI28\n`; // UTF-8 Encoding
+  const qrUrl = `https://www.atlashealth-services.com/rx/${encodeURIComponent(rxCode)}`;
 
-  // Outer border
-  zpl += `^FO${Math.round(2 * dotsPerMm)},${Math.round(2 * dotsPerMm)}^GB${widthDots - Math.round(4 * dotsPerMm)},${heightDots - Math.round(4 * dotsPerMm)},2^FS\n`;
+  const fTitle = Math.round(2.8 * dotsPerMm);
+  const fBody = Math.round(2.1 * dotsPerMm);
+  const fSmall = Math.round(1.7 * dotsPerMm);
 
-  // Header: Pharmacy & EU GMP Monograph
-  zpl += `^FO${Math.round(4 * dotsPerMm)},${Math.round(3.5 * dotsPerMm)}^A0N,${Math.round(2.6 * dotsPerMm)},${Math.round(2.6 * dotsPerMm)}^FD${pharmacyName}^FS\n`;
-  zpl += `^FO${widthDots - Math.round(35 * dotsPerMm)},${Math.round(3.5 * dotsPerMm)}^A0N,${Math.round(2.2 * dotsPerMm)},${Math.round(2.2 * dotsPerMm)}^FDEU GMP DISPENSARY^FS\n`;
+  const yHeader = margin;
+  const yPatient = yHeader + Math.round(4.5 * dotsPerMm);
+  const yProduct = yPatient + Math.round(4.2 * dotsPerMm);
+  const yComp = yProduct + Math.round(4.2 * dotsPerMm);
+  const yPos = yComp + Math.round(7.5 * dotsPerMm);
+  const yFooter = Math.max(yPos + Math.round(7 * dotsPerMm), ll - Math.round(6.5 * dotsPerMm));
 
-  // Patient Banner Box
-  zpl += `^FO${Math.round(4 * dotsPerMm)},${Math.round(6.8 * dotsPerMm)}^GB${widthDots - Math.round(8 * dotsPerMm)},${Math.round(6 * dotsPerMm)},2^FS\n`;
-  zpl += `^FO${Math.round(6 * dotsPerMm)},${Math.round(8.2 * dotsPerMm)}^A0N,${Math.round(3.8 * dotsPerMm)},${Math.round(3.8 * dotsPerMm)}^FDPATIENT: ${patientName}^FS\n`;
+  const qrX = pw - margin - Math.round(16 * dotsPerMm);
+  const qrY = yPatient;
+  const qrMag = dpi === 300 ? 4 : 3;
 
-  // Left Column: Native Zebra QR Code
-  // ^BQ,2,magnification (2=model 2, 7=standard error correction)
-  zpl += `^FO${Math.round(5 * dotsPerMm)},${Math.round(14.5 * dotsPerMm)}^BQN,2,${qrMagnification},M,7^FDQA,${targetRxUrl}^FS\n`;
-  zpl += `^FO${Math.round(5 * dotsPerMm)},${Math.round(31 * dotsPerMm)}^A0N,${Math.round(1.8 * dotsPerMm)},${Math.round(1.8 * dotsPerMm)}^FDSCAN FOR REFILL^FS\n`;
+  return [
+    '^XA',
+    '^CI28',
+    `^PW${pw}`,
+    `^LL${ll}`,
+    `^FO${margin},${yHeader}^A0N,${fSmall},${fSmall}^FDPHARMAPOLIS EU GMP COMPOUNDING  |  RX #${rxCode}^FS`,
+    `^FO${margin},${yHeader + Math.round(2.6 * dotsPerMm)}^GB${pw - margin * 2},1,1^FS`,
+    `^FO${margin},${yPatient}^A0N,${fTitle},${fTitle}^FB${contentWidth},1,0,L^FD${patientName}^FS`,
+    `^FO${margin},${yProduct}^A0N,${fBody},${fBody}^FB${contentWidth},1,0,L^FD${productName}^FS`,
+    composition ? `^FO${margin},${yComp}^A0N,${fSmall},${fSmall}^FB${contentWidth},3,2,L^FD${composition}^FS` : '',
+    posology ? `^FO${margin},${yPos}^A0N,${fSmall},${fSmall}^FB${contentWidth},3,2,L^FDUse: ${posology}^FS` : '',
+    `^FO${qrX},${qrY}^BQN,2,${qrMag}^FDQA,${qrUrl}^FS`,
+    `^FO${margin},${yFooter - Math.round(1.5 * dotsPerMm)}^GB${pw - margin * 2},1,1^FS`,
+    `^FO${margin},${yFooter}^A0N,${fSmall},${fSmall}^FDLOT: ${batchNumber}   BUD: ${bud}   Dr. ${doctorName}^FS`,
+    `^FO${margin},${yFooter + Math.round(2.5 * dotsPerMm)}^A0N,${fSmall},${fSmall}^FD${storage}^FS`,
+    '^XZ'
+  ].filter(Boolean).join('\n');
+}
 
-  // Left Column: Net Quantity
-  const vol = String(labelData.volume || '100 mL');
-  zpl += `^FO${Math.round(5 * dotsPerMm)},${Math.round(34 * dotsPerMm)}^A0N,${Math.round(2.0 * dotsPerMm)},${Math.round(2.0 * dotsPerMm)}^FDNET: ${vol}^FS\n`;
+export function generateBatchZpl(patientQueue = [], options = {}) {
+  const chunks = [];
+  for (const pItem of patientQueue) {
+    const labels = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels : [{}];
+    const selectedIdx = pItem.selectedPartIndex;
+    const indices = (selectedIdx != null && selectedIdx !== 'all' && labels[selectedIdx])
+      ? [Number(selectedIdx)]
+      : labels.map((_, i) => i);
 
-  // Right Column: Formula Title
-  const rightX = Math.round(26 * dotsPerMm);
-  zpl += `^FO${rightX},${Math.round(14.5 * dotsPerMm)}^A0N,${Math.round(3.0 * dotsPerMm)},${Math.round(3.0 * dotsPerMm)}^FD${formulaTitle}^FS\n`;
-  zpl += `^FO${rightX},${Math.round(17.8 * dotsPerMm)}^GB${widthDots - rightX - Math.round(5 * dotsPerMm)},1,1^FS\n`;
-
-  // Right Column: Active Ingredients (up to 4 lines)
-  let currY = Math.round(19 * dotsPerMm);
-  apis.slice(0, 4).forEach(api => {
-    zpl += `^FO${rightX},${currY}^A0N,${Math.round(2.2 * dotsPerMm)},${Math.round(2.2 * dotsPerMm)}^FD* ${api}^FS\n`;
-    currY += Math.round(2.8 * dotsPerMm);
-  });
-
-  // Directions for use box
-  const dirBoxY = Math.max(currY + Math.round(1 * dotsPerMm), Math.round(27 * dotsPerMm));
-  const dirBoxH = Math.round(8 * dotsPerMm);
-  zpl += `^FO${rightX},${dirBoxY}^GB${widthDots - rightX - Math.round(5 * dotsPerMm)},${dirBoxH},1^FS\n`;
-  zpl += `^FO${rightX + Math.round(2 * dotsPerMm)},${dirBoxY + Math.round(1.5 * dotsPerMm)}^A0N,${Math.round(2.2 * dotsPerMm)},${Math.round(2.2 * dotsPerMm)}^FDPOSOLOGY:^FS\n`;
-  // Wrap directions to 48 chars
-  const dirLine1 = directions.slice(0, 48);
-  const dirLine2 = directions.slice(48, 96);
-  zpl += `^FO${rightX + Math.round(2 * dotsPerMm)},${dirBoxY + Math.round(3.8 * dotsPerMm)}^A0N,${Math.round(2.0 * dotsPerMm)},${Math.round(2.0 * dotsPerMm)}^FD${dirLine1}^FS\n`;
-  if (dirLine2) {
-    zpl += `^FO${rightX + Math.round(2 * dotsPerMm)},${dirBoxY + Math.round(5.8 * dotsPerMm)}^A0N,${Math.round(2.0 * dotsPerMm)},${Math.round(2.0 * dotsPerMm)}^FD${dirLine2}^FS\n`;
+    for (const idx of indices) {
+      const lbl = {
+        ...(labels[idx] || {}),
+        widthMm: labels[idx]?.widthMm || pItem.widthMm || 75,
+        heightMm: labels[idx]?.heightMm || pItem.heightMm || 45
+      };
+      chunks.push(generateLabelZpl(lbl, pItem.rx || {}, options));
+    }
   }
-
-  // Knockout Caution Ribbon: Inverted black box with white text
-  const cautionY = Math.round(37.5 * dotsPerMm);
-  const cautionH = Math.round(3.2 * dotsPerMm);
-  zpl += `^FO${rightX},${cautionY}^GB${widthDots - rightX - Math.round(5 * dotsPerMm)},${cautionH},${cautionH}^FS\n`;
-  zpl += `^FO${rightX + Math.round(2 * dotsPerMm)},${cautionY + Math.round(0.8 * dotsPerMm)}^FR^A0N,${Math.round(2.0 * dotsPerMm)},${Math.round(2.0 * dotsPerMm)}^FD${cautionText}^FS\n`;
-
-  // Footer: Dates, Doctor, Batch
-  const footerY = Math.round(41.5 * dotsPerMm);
-  zpl += `^FO${Math.round(4 * dotsPerMm)},${footerY}^A0N,${Math.round(2.0 * dotsPerMm)},${Math.round(2.0 * dotsPerMm)}^FDMfg: ${prodDate}  Exp: ${expDate}^FS\n`;
-  zpl += `^FO${Math.round(32 * dotsPerMm)},${footerY}^A0N,${Math.round(2.0 * dotsPerMm)},${Math.round(2.0 * dotsPerMm)}^FDRx: ${doctorName.slice(0, 24)}^FS\n`;
-  zpl += `^FO${widthDots - Math.round(32 * dotsPerMm)},${footerY}^A0N,${Math.round(2.0 * dotsPerMm)},${Math.round(2.0 * dotsPerMm)}^FDBatch: ${batchCode}^FS\n`;
-
-  zpl += `^XZ\n`;
-  return zpl;
+  return chunks.join('\n\n');
 }

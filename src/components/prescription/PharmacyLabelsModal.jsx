@@ -241,6 +241,10 @@ export default function PharmacyLabelsModal({
   const [showCustomsTitleSuggestions, setShowCustomsTitleSuggestions] = useState(false);
 
   React.useEffect(() => {
+    setIsEditing(Boolean(initialEditMode));
+  }, [initialEditMode]);
+
+  React.useEffect(() => {
     if (initialTab) {
       setModalMainTab(initialTab);
       if (initialTab === 'edit') setIsEditing(true);

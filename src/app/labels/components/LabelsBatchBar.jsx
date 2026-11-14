@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Layers, X, CheckCircle, ShieldCheck } from '@/lib/icons';
+import BatchLotBudPopover from './BatchLotBudPopover';
 
 export default function LabelsBatchBar({
   patientQueue,
@@ -15,6 +16,7 @@ export default function LabelsBatchBar({
   isBatchApproving = false,
   totalLabeledCount = 0,
   isPatientFullyLabeled = null,
+  onBatchUpdateLotBud = null,
   isEs
 }) {
   const pendingApprovalCount = patientQueue.filter(p => {
@@ -45,6 +47,9 @@ export default function LabelsBatchBar({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto', flexWrap: 'nowrap' }}>
+          {typeof onBatchUpdateLotBud === 'function' && (
+            <BatchLotBudPopover onApplyBatchLotBud={onBatchUpdateLotBud} isEs={isEs} />
+          )}
 
           {/* 1-Click Batch Approval for all pending prescriptions in queue (Reimi / Kasia Studio) */}
           {pendingApprovalCount > 0 && onBatchApprove && (

@@ -13,50 +13,19 @@ export async function generateMetadata({ searchParams }) {
   const hasExplicitParam = Boolean(resolvedSearchParams?.rx || resolvedSearchParams?.code);
   const code = hasExplicitParam ? (resolvedSearchParams?.rx || resolvedSearchParams?.code || '').trim() : '';
 
-  let patientName = '';
   let rxCode = code;
 
-  // Try to load basic info for attractive metadata if code is present
-  if (code) {
-    try {
-      const rx = await getPrescriptionData(code);
-      if (rx) {
-        patientName = rx.patient?.name || rx.patientName || '';
-        rxCode = rx.fileNumber || rx.code || code;
-      } else {
-        const regMatch = PHARMAPOLIS_LABELS_REGISTRY.find(item => item.fileNumber === code);
-        if (regMatch) {
-          patientName = regMatch.patientName || '';
-          rxCode = regMatch.fileNumber || code;
-        }
-      }
-    } catch {
-      // fallback
-    }
-  }
-
-  const title = patientName 
-    ? `Compounding Label Studio • #${rxCode} (${patientName}) • Pharmapolis & Atlas Health`
+  const title = rxCode
+    ? `Compounding Label Studio • #${rxCode} • Pharmapolis & Atlas Health`
     : `Compounding Label Studio • Pharmapolis & Atlas Health`;
 
-  const description = `Professional EU GMP vector compounding label designer & pharmacy print studio. Search patients, customize formulas, and export high-resolution pharmaceutical labels (300 DPI, Vector PDF, A4 Sheets, Zebra thermal).`;
+  const description = `Internal EU GMP vector compounding label designer & pharmacy print studio. Search prescriptions, customize formulas, and export high-resolution pharmaceutical labels (300 DPI, Vector PDF, A4 Sheets, Zebra thermal).`;
 
   const canonicalUrl = `${BASE_URL}/labels${code ? `?rx=${encodeURIComponent(code)}` : ''}`;
 
   return {
     title,
     description,
-    keywords: [
-      'compounding pharmacy labels',
-      'EU GMP labels',
-      'pharma label studio',
-      'formulación magistral',
-      'vector label designer',
-      'Zebra thermal pharmacy label',
-      'A4 label sheet print',
-      'Pharmapolis',
-      'Atlas Health'
-    ],
     openGraph: {
       title,
       description,
@@ -65,7 +34,7 @@ export async function generateMetadata({ searchParams }) {
       type: 'website',
       images: [
         {
-          url: `${BASE_URL}/api/og-card?title=${encodeURIComponent('Compounding Label Studio')}&subtitle=${encodeURIComponent(patientName ? `#${rxCode} · ${patientName}` : 'EU GMP Vector Printing')}`,
+          url: `${BASE_URL}/api/og-card?title=${encodeURIComponent('Compounding Label Studio')}&subtitle=${encodeURIComponent(rxCode ? `Prescription #${rxCode}` : 'EU GMP Vector Printing')}`,
           width: 1200,
           height: 630,
           alt: 'Compounding Label Studio Preview'
@@ -82,8 +51,8 @@ export async function generateMetadata({ searchParams }) {
       canonical: canonicalUrl
     },
     robots: {
-      index: true,
-      follow: true
+      index: false,
+      follow: false
     }
   };
 }
@@ -101,8 +70,8 @@ export default async function PublicLabelsPage({ searchParams }) {
   const initialQueue = [];
 
   if (hasExplicitParam && codes.length > 0) {
-    for (const c of codes) {
-      try {
+    const settled = await Promise.allSettled(
+      codes.map(async (c) => {
         let itemRx = await getPrescriptionData(c);
         if (!itemRx) {
           const regMatch = PHARMAPOLIS_LABELS_REGISTRY.find(item => item.fileNumber === c);
@@ -120,18 +89,23 @@ export default async function PublicLabelsPage({ searchParams }) {
             };
           }
         }
-        if (itemRx) {
-          const itemLabels = getPharmapolisLabelsForPrescription(itemRx);
-          initialQueue.push({
-            code: c,
-            rx: itemRx,
-            labels: itemLabels || []
-          });
-        }
-      } catch (err) {
-        console.warn(`[PublicLabelsPage] Error loading rx code ${c}:`, err.message);
+        if (!itemRx) return null;
+        const itemLabels = getPharmapolisLabelsForPrescription(itemRx);
+        return {
+          code: c,
+          rx: itemRx,
+          labels: itemLabels || []
+        };
+      })
+    );
+
+    settled.forEach((res, idx) => {
+      if (res.status === 'fulfilled' && res.value) {
+        initialQueue.push(res.value);
+      } else if (res.status === 'rejected') {
+        console.warn(`[PublicLabelsPage] Error loading rx code ${codes[idx]}:`, res.reason?.message || res.reason);
       }
-    }
+    });
   }
 
   const primaryItem = initialQueue[0] || null;

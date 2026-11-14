@@ -7,6 +7,7 @@ import { Search, X, Printer, Upload, Share2, Check, ChevronDown, User, FileText,
 import { useAuth } from '@/context/AuthContext';
 import UserDropdown from '@/navigation/UserDropdown';
 import { MoreVertical } from 'lucide-react';
+import A4GridOffsetPicker from './A4GridOffsetPicker';
 
 export default function LabelsHeader({
   searchBoxRef,
@@ -196,35 +197,15 @@ export default function LabelsHeader({
               </span>
             </button>
 
-            {/* Start Offset selector for partially used A4 sheets */}
+            {/* Visual 2x5 A4 sheet grid start offset picker */}
             {patientQueue.length > 0 && typeof setStartOffset === 'function' && (
-              <select
-                value={startOffset}
-                onChange={(e) => setStartOffset(Number(e.target.value))}
-                className="pls-desktop-only-action"
-                style={{
-                  height: '32px',
-                  padding: '0 6px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  color: startOffset > 0 ? '#c2410c' : '#475569',
-                  cursor: 'pointer',
-                  outline: 'none'
-                }}
-                title={isEs ? 'Posición inicial en el pliego A4 (permite saltar huecos ya usados)' : 'Start slot on A4 sheet (skip stickers already used)'}
-              >
-                <option value={0}>{isEs ? 'Slot #1 (Nuevo)' : 'Slot #1 (Fresh)'}</option>
-                <option value={1}>Slot #2</option>
-                <option value={2}>Slot #3</option>
-                <option value={3}>Slot #4</option>
-                <option value={4}>Slot #5</option>
-                <option value={5}>Slot #6</option>
-                <option value={6}>Slot #7</option>
-                <option value={7}>Slot #8</option>
-              </select>
+              <div className="pls-desktop-only-action">
+                <A4GridOffsetPicker
+                  startOffset={startOffset}
+                  onChange={setStartOffset}
+                  isEs={isEs}
+                />
+              </div>
             )}
           </div>
 
