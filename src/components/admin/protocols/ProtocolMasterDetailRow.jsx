@@ -7,6 +7,7 @@ import {
 } from '@/lib/icons';
 import { getGoalLabel } from '../../../config/goals';
 import StatusBadge from '../../ui/StatusBadge';
+import DataTable from '../../ui/DataTable';
 import ClinicalGanttTimeline from '../../protocol/ClinicalGanttTimeline';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { useDrawer } from '../../../context/DrawerContext';
@@ -316,115 +317,129 @@ export default function ProtocolMasterDetailRow({
             )}
           </div>
 
-          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-                  <th style={{ padding: '6px 10px', fontWeight: 700, color: '#475569' }}>Active Compound</th>
-                  <th style={{ padding: '6px 10px', fontWeight: 700, color: '#475569' }}>Target Dosage</th>
-                  <th style={{ padding: '6px 10px', fontWeight: 700, color: '#475569' }}>Administration Frequency</th>
-                  <th style={{ padding: '6px 10px', fontWeight: 700, color: '#475569' }}>Treatment Duration</th>
-                </tr>
-              </thead>
-              <tbody>
-                {protocol.bom.map((item, idx) => {
+          <DataTable
+            data={protocol.bom.map((item, idx) => ({ id: item.productId || `bom-${idx}`, ...item }))}
+            columns={[
+              {
+                key: 'compound',
+                label: 'Active Compound',
+                width: '38%',
+                render: (item) => {
                   const compoundName = item.product_name || item.name || item.productId || 'Compound';
                   return (
-                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (openDrawer) {
-                                openDrawer('product', item.productId || compoundName, { name: compoundName, id: item.productId });
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (openDrawer) {
+                            openDrawer('product', item.productId || compoundName, { name: compoundName, id: item.productId });
+                          }
+                        }}
+                        title="Open interactive product datasheet & pricing"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          color: '#0284c7',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          textDecoration: 'underline',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <span>{compoundName}</span>
+                      </button>
+                      <div style={{ display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
+                        <Link
+                          href={`/admin/products?search=${encodeURIComponent(compoundName)}`}
+                          title="Search this compound in Catalog Table"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '2px',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '0.68rem',
+                            fontWeight: 600,
+                            color: '#64748b',
+                            background: '#f1f5f9',
+                            border: '1px solid #e2e8f0',
+                            textDecoration: 'none'
+                          }}
+                        >
+                          <span>Catalog</span>
+                          <ExternalLink size={10} />
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                              detail: {
+                                message: `Explain the clinical pharmacological role, optimal reconstitution, and dosing kinetics of ${compoundName} within the protocol "${protocol.name || protocol.title}".`,
+                                immediate: true
                               }
-                            }}
-                            title="Open interactive product datasheet & pricing"
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              padding: 0,
-                              color: '#0284c7',
-                              fontWeight: 700,
-                              fontSize: '0.82rem',
-                              cursor: 'pointer',
-                              textAlign: 'left',
-                              textDecoration: 'underline',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            <span>{compoundName}</span>
-                          </button>
-                          <div style={{ display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
-                            <Link
-                              href={`/admin/products?search=${encodeURIComponent(compoundName)}`}
-                              title="Search this compound in Catalog Table"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '2px',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                fontSize: '0.68rem',
-                                fontWeight: 600,
-                                color: '#64748b',
-                                background: '#f1f5f9',
-                                border: '1px solid #e2e8f0',
-                                textDecoration: 'none'
-                              }}
-                            >
-                              <span>Catalog</span>
-                              <ExternalLink size={10} />
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                window.dispatchEvent(new CustomEvent('open-clinical-ai', {
-                                  detail: {
-                                    message: `Explain the clinical pharmacological role, optimal reconstitution, and dosing kinetics of ${compoundName} within the protocol "${protocol.name || protocol.title}".`,
-                                    immediate: true
-                                  }
-                                }));
-                              }}
-                              title="Consult AI about this compound"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '2px',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                fontSize: '0.68rem',
-                                fontWeight: 600,
-                                color: '#7c3aed',
-                                background: 'rgba(124, 58, 237, 0.08)',
-                                border: '1px solid rgba(124, 58, 237, 0.2)',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <Sparkles size={10} />
-                              <span>Ask AI</span>
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '8px 10px', color: '#15803d', fontWeight: 600 }}>
-                        {item.dosage || 'Prescribed Clinical Concentration'}
-                      </td>
-                      <td style={{ padding: '8px 10px', color: '#334155' }}>
-                        {item.frequency || 'Once daily or as directed'}
-                      </td>
-                      <td style={{ padding: '8px 10px', color: '#64748b' }}>
-                        {item.duration || `${durationWeeks} Weeks`}
-                      </td>
-                    </tr>
+                            }));
+                          }}
+                          title="Consult AI about this compound"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '2px',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '0.68rem',
+                            fontWeight: 600,
+                            color: '#7c3aed',
+                            background: 'rgba(124, 58, 237, 0.08)',
+                            border: '1px solid rgba(124, 58, 237, 0.2)',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Sparkles size={10} />
+                          <span>Ask AI</span>
+                        </button>
+                      </div>
+                    </div>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                }
+              },
+              {
+                key: 'dosage',
+                label: 'Target Dosage',
+                width: '22%',
+                render: (item) => (
+                  <span style={{ color: '#15803d', fontWeight: 600 }}>
+                    {item.dosage || 'Prescribed Clinical Concentration'}
+                  </span>
+                )
+              },
+              {
+                key: 'frequency',
+                label: 'Administration Frequency',
+                width: '24%',
+                render: (item) => (
+                  <span style={{ color: '#334155' }}>
+                    {item.frequency || 'Once daily or as directed'}
+                  </span>
+                )
+              },
+              {
+                key: 'duration',
+                label: 'Treatment Duration',
+                width: '16%',
+                render: (item) => (
+                  <span style={{ color: '#64748b' }}>
+                    {item.duration || `${durationWeeks} Weeks`}
+                  </span>
+                )
+              }
+            ]}
+            pageSize={20}
+          />
         </div>
       )}
 

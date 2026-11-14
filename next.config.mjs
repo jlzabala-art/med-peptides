@@ -128,6 +128,11 @@ const nextConfig = {
         permanent: false,
       },
       {
+        source: '/auth/login',
+        destination: '/login',
+        permanent: false,
+      },
+      {
         source: '/workplace',
         destination: '/admin/catalog',
         permanent: false,
@@ -158,8 +163,53 @@ const nextConfig = {
         permanent: false,
       },
       {
+        source: '/catalog',
+        destination: '/c/CAT-MU9L9GBN',
+        permanent: false,
+      },
+      {
+        source: '/protocol/:slug',
+        destination: '/proto/:slug',
+        permanent: true,
+      },
+      {
+        source: '/intake',
+        destination: '/rx/intake',
+        permanent: true,
+      },
+      {
+        source: '/b2b/colway-prices',
+        destination: '/pricing/colway',
+        permanent: true,
+      },
+      {
+        source: '/pricing/24genomics',
+        destination: '/pricing/24genetics',
+        permanent: true,
+      },
+      {
+        source: '/medical',
+        destination: '/doctor',
+        permanent: false,
+      },
+      {
+        source: '/medical/patients',
+        destination: '/doctor/patients',
+        permanent: false,
+      },
+      {
         source: '/orders/history',
         destination: '/orders',
+        permanent: false,
+      },
+      {
+        source: '/nutri/:slug',
+        destination: '/nutritionist/:slug',
+        permanent: true,
+      },
+      {
+        source: '/pharmacy/labels',
+        destination: '/labels',
         permanent: false,
       },
     ];

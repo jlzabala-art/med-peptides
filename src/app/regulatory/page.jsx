@@ -1,51 +1,28 @@
 import React from 'react';
 import Link from 'next/link';
-import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
-import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import {
-  ShieldCheck,
-  CheckCircle2,
-  Award,
-  Microscope,
-  FileText,
-  Clock,
-  ArrowRight
-} from '@/lib/icons';
+import EditorialPageLayout from '@/components/shared/layouts/EditorialPageLayout';
+import { ShieldCheck, CheckCircle2, Award, Microscope, FileText, ArrowRight } from '@/lib/icons';
 import '@/app/legal.css';
 
 export const metadata = {
   title: 'Regulatory Standards & Compliance (CPNP / CE-IVDR) | Atlas Health Services',
-  description: 'European regulatory compliance matrix covering CPNP cosmetic notifications, CE-IVDR in-vitro diagnostics, and ISO 17025 certified purity.'
+  description: 'European regulatory compliance matrix covering CPNP cosmetic notifications, CE-IVDR in-vitro diagnostics, and ISO 17025 certified purity.',
 };
 
 export default function RegulatoryStandardsPage() {
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Regulatory Matrix', href: '/verify' },
-    { label: 'Regulatory Standards' }
-  ];
-
   return (
-    <div className="gcp-legal-wrapper">
-      <PublicUnifiedHeader track="regulatory" />
-
-      <main className="gcp-legal-container">
-        <Breadcrumb items={breadcrumbItems} />
-
-        <header className="gcp-legal-header">
-          <div className="gcp-legal-badge">
-            <Clock size={12} />
-            <span>Audited 2026 • EU Regulatory Matrix</span>
-          </div>
-          <h1 className="gcp-legal-title">Regulatory Standards & Compliance</h1>
-          <p className="gcp-legal-subtitle">
-            Atlas Health Services operates under European Union regulatory frameworks across topical dermo-cosmetics (CPNP),
-            clinical in-vitro diagnostic telemetry (CE-IVDR), and certified laboratory compounding.
-          </p>
-        </header>
-
-        {/* Standard 1: CPNP (Cosmetic Products Notification Portal) */}
+    <EditorialPageLayout
+      variant="legal"
+      badge="Audited 2026 • EU Regulatory Matrix"
+      title="Regulatory Standards & Compliance"
+      subtitle="Atlas Health Services operates under European Union regulatory frameworks across topical dermo-cosmetics (CPNP), clinical in-vitro diagnostic telemetry (CE-IVDR), and certified laboratory compounding."
+      breadcrumbs={[
+        { label: 'Home', href: '/' },
+        { label: 'Regulatory Matrix', href: '/verify' },
+        { label: 'Regulatory Standards' },
+      ]}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <section className="gcp-legal-card">
           <div className="gcp-legal-section-header">
             <Award size={18} className="gcp-legal-section-icon" />
@@ -62,7 +39,6 @@ export default function RegulatoryStandardsPage() {
           </ul>
         </section>
 
-        {/* Standard 2: CE-IVDR (In Vitro Diagnostic Regulation) */}
         <section className="gcp-legal-card">
           <div className="gcp-legal-section-header">
             <Microscope size={18} className="gcp-legal-section-icon" />
@@ -79,11 +55,10 @@ export default function RegulatoryStandardsPage() {
           </ul>
         </section>
 
-        {/* Standard 3: ISO/IEC 17025 Analytical Testing & COAs */}
         <section className="gcp-legal-card">
           <div className="gcp-legal-section-header">
             <CheckCircle2 size={18} className="gcp-legal-section-icon" />
-            <h2 className="gcp-legal-section-title">3. Analytical Quality & COA Verification (ISO 17025)</h2>
+            <h2 className="gcp-legal-section-title">3. Analytical Quality &amp; COA Verification (ISO 17025)</h2>
           </div>
           <p className="gcp-legal-p">
             Pharmaceutical compounding raw materials and peptide reference monographs are subject to rigorous analytical batch release:
@@ -95,11 +70,10 @@ export default function RegulatoryStandardsPage() {
           </ul>
         </section>
 
-        {/* Section 4: Lot Verification & Regulatory Inquiries */}
         <section className="gcp-legal-card">
           <div className="gcp-legal-section-header">
             <ShieldCheck size={18} className="gcp-legal-section-icon" />
-            <h2 className="gcp-legal-section-title">4. Lot Verification & Regulatory Inquiries</h2>
+            <h2 className="gcp-legal-section-title">4. Lot Verification &amp; Regulatory Inquiries</h2>
           </div>
           <p className="gcp-legal-p">
             Practitioners and regulatory auditors may inspect batch documentation and compliance certificates directly
@@ -121,10 +95,7 @@ export default function RegulatoryStandardsPage() {
             </div>
           </div>
         </section>
-
-      </main>
-
-      <PublicUnifiedFooter />
-    </div>
+      </div>
+    </EditorialPageLayout>
   );
 }

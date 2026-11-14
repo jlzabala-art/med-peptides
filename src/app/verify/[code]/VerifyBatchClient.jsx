@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import DataTable from '@/components/ui/DataTable';
 
 export default function VerifyBatchClient({ code, verification, baseUrl }) {
   const [copied, setCopied] = useState(false);
@@ -138,31 +139,35 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
             <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               🔬 Analytical Testing Specifications (CoA)
             </h3>
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
-              {/* eslint-disable-next-line no-restricted-syntax */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', textAlign: 'left' }}>
-                    <th style={{ padding: '0.6rem 0.85rem' }}>Test Item</th>
-                    <th style={{ padding: '0.6rem 0.85rem' }}>Result / Specification</th>
-                    <th style={{ padding: '0.6rem 0.85rem', textAlign: 'right' }}>Compliance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {verification.standards.map((std, idx) => (
-                    <tr key={idx} style={{ borderBottom: idx !== verification.standards.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                      <td style={{ padding: '0.65rem 0.85rem', fontWeight: 600, color: '#1e293b' }}>{std.name}</td>
-                      <td style={{ padding: '0.65rem 0.85rem', color: '#475569' }}>{std.value}</td>
-                      <td style={{ padding: '0.65rem 0.85rem', textAlign: 'right' }}>
-                        <span style={{ background: '#dcfce7', color: '#166534', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 700, fontSize: '0.75rem' }}>
-                          ✓ {std.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              data={verification.standards.map((std, idx) => ({ id: `coa-${idx}`, ...std }))}
+              columns={[
+                {
+                  key: 'name',
+                  label: 'Test Item',
+                  width: '35%',
+                  render: (row) => <span style={{ fontWeight: 600, color: '#1e293b' }}>{row.name}</span>
+                },
+                {
+                  key: 'value',
+                  label: 'Result / Specification',
+                  width: '45%',
+                  render: (row) => <span style={{ color: '#475569' }}>{row.value}</span>
+                },
+                {
+                  key: 'status',
+                  label: 'Compliance',
+                  width: '20%',
+                  align: 'right',
+                  render: (row) => (
+                    <span style={{ background: '#dcfce7', color: '#166534', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 700, fontSize: '0.75rem' }}>
+                      ✓ {row.status}
+                    </span>
+                  )
+                }
+              ]}
+              pageSize={20}
+            />
           </div>
 
           {/* Bottom QR & Links */}

@@ -54,6 +54,7 @@ import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { useAuth } from '@/context/AuthContext';
 import { useCommercialSchedule } from '@/hooks/useCommercialSchedule';
+import DataTable from '@/components/ui/DataTable';
 import {
   GALENIC_COMPATIBILITY_ANALYSIS,
   CLINICAL_PILLARS,
@@ -2924,29 +2925,36 @@ export default function QatarGenomicsPriceClient() {
                         </div>
 
                         {/* Active Ingredients Table */}
-                        <div style={{ overflowX: 'auto' }}>
-                          {/* eslint-disable-next-line no-restricted-syntax */}
-                          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
-                            <thead>
-                              <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
-                                <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Active Pharmacological Ingredient (Generic API)</th>
-                                <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Pharmacopeia Chemical Specification</th>
-                                <th style={{ padding: '8px 12px', fontWeight: 750, color: '#003666' }}>Target Dose</th>
-                                <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Targeted Clinical Purpose</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {capsule.ingredients.map((ing, idx) => (
-                                <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: idx % 2 === 1 ? '#fafafa' : '#ffffff' }}>
-                                  <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>{ing.apiEn}</td>
-                                  <td style={{ padding: '10px 12px', color: '#475569' }}>{ing.chemicalSpec}</td>
-                                  <td style={{ padding: '10px 12px', fontWeight: 800, color: '#0d9488' }}>{ing.dose}</td>
-                                  <td style={{ padding: '10px 12px', color: '#334155' }}>{ing.purposeEn}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                        <DataTable
+                          data={capsule.ingredients.map((ing, idx) => ({ id: `ing-${idx}`, ...ing }))}
+                          columns={[
+                            {
+                              key: 'apiEn',
+                              label: 'Active Pharmacological Ingredient (Generic API)',
+                              width: '28%',
+                              render: (ing) => <span style={{ fontWeight: 750, color: '#0f172a' }}>{ing.apiEn}</span>
+                            },
+                            {
+                              key: 'chemicalSpec',
+                              label: 'Pharmacopeia Chemical Specification',
+                              width: '26%',
+                              render: (ing) => <span style={{ color: '#475569' }}>{ing.chemicalSpec}</span>
+                            },
+                            {
+                              key: 'dose',
+                              label: 'Target Dose',
+                              width: '14%',
+                              render: (ing) => <span style={{ fontWeight: 800, color: '#0d9488' }}>{ing.dose}</span>
+                            },
+                            {
+                              key: 'purposeEn',
+                              label: 'Targeted Clinical Purpose',
+                              width: '32%',
+                              render: (ing) => <span style={{ color: '#334155' }}>{ing.purposeEn}</span>
+                            }
+                          ]}
+                          pageSize={20}
+                        />
                       </div>
                     ))}
                   </div>

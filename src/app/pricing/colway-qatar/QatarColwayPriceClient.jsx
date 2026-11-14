@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import DataTable from '@/components/ui/DataTable';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import { useCommercialSchedule } from '@/hooks/useCommercialSchedule';
@@ -556,12 +557,12 @@ export default function QatarColwayPriceClient() {
                 </div>
               </div>
 
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '1.25rem', backgroundColor: '#f0fdf4' }}>
+              <div style={{ border: '1px solid #bbf7d0', borderRadius: '10px', padding: '1.25rem', backgroundColor: '#f0fdf4' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>Distributor Gross Margin</span>
                   <Percent size={16} style={{ color: '#16a34a' }} />
                 </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#15803d' }}>{distributorGrossMarginPct}% (+75 QAR)</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#15803d' }}>40.1% (+75 QAR)</div>
                 <div style={{ fontSize: '0.72rem', color: '#15803d', marginTop: '4px', fontWeight: 600 }}>
                   +6,000.00 QAR gross profit on 80-unit batch
                 </div>
@@ -595,108 +596,151 @@ export default function QatarColwayPriceClient() {
                 </span>
               </div>
 
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                      <th style={{ padding: '10px 16px', fontWeight: 700, color: '#475569' }}>Cost & Commercial Element</th>
-                      <th style={{ padding: '10px 16px', fontWeight: 700, color: '#475569', textAlign: 'center' }}>Basis / Documentation</th>
-                      <th style={{ padding: '10px 16px', fontWeight: 700, color: '#475569', textAlign: 'right' }}>Per Unit (PLN)</th>
-                      <th style={{ padding: '10px 16px', fontWeight: 700, color: '#475569', textAlign: 'right' }}>Per Unit (USD)</th>
-                      <th style={{ padding: '10px 16px', fontWeight: 700, color: '#475569', textAlign: 'right' }}>Per Unit (QAR)</th>
-                      <th style={{ padding: '10px 16px', fontWeight: 700, color: '#003666', textAlign: 'right' }}>Total Batch (QAR)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* Row 1: Approved Product Price */}
-                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 650 }}>
-                        <div>Approved Colway Product Price (18% Discount)</div>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>40× Shampoo (250 mL) + 40× Conditioner (200 mL) at 102.00 PLN</div>
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'center', color: '#64748b' }}>Approved Factory Rate</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 650 }}>102.00 PLN</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>$26.00</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>93.94 QAR</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 700 }}>7,515.20 QAR</td>
-                    </tr>
-
-                    {/* Row 2: Shipping & Customs */}
-                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 650 }}>
-                        <div>International Air Freight & Customs Handling</div>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Direct air courier dispatch from Poland to Hamad Int. Airport (Doha)</div>
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'center', color: '#64748b' }}>Air Logistics Allocation</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 650 }}>19.73 PLN</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>$5.00</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>18.06 QAR</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 700 }}>1,444.80 QAR</td>
-                    </tr>
-
-                    {/* Row 3: Total Landed Price to Distributor */}
-                    <tr style={{ backgroundColor: '#003666', color: '#ffffff', fontWeight: 800 }}>
-                      <td style={{ padding: '14px 16px', fontSize: '0.92rem' }}>
-                        <div>TOTAL LANDED PRICE TO DISTRIBUTOR (RYHANH MEDICAL COMPANY)</div>
-                        <div style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 500 }}>Approved B2B price · 100% advance payment required prior to dispatch</div>
-                      </td>
-                      <td style={{ padding: '14px 16px', textAlign: 'center', color: '#93c5fd', fontSize: '0.78rem' }}>Agreed B2B Terms</td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right', fontSize: '1rem', color: '#38bdf8' }}>121.73 PLN</td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right', fontSize: '1rem' }}>$31.00</td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right', fontSize: '1.05rem', color: '#38bdf8' }}>112.00 QAR</td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right', fontSize: '1.15rem', color: '#38bdf8' }}>8,960.00 QAR</td>
-                    </tr>
-
-                    {/* Distributor Resale Horizon */}
-                    <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f0fdf4' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 650, color: '#15803d' }}>
-                        <div>Recommended Resale Price in Qatar (Clinics / Salons / Retail)</div>
-                        <div style={{ fontSize: '0.72rem', color: '#16a34a' }}>Target end-user & aesthetic clinic price point in Doha</div>
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'center', color: '#15803d' }}>Market MSRP</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: '#15803d' }}>—</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: '#15803d' }}>$50.82</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: '#15803d', fontWeight: 700 }}>187.00 QAR</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: '#15803d', fontWeight: 800 }}>14,960.00 QAR</td>
-                    </tr>
-
-                    <tr style={{ backgroundColor: '#dcfce7', color: '#166534', fontWeight: 800 }}>
-                      <td style={{ padding: '12px 16px' }}>
-                        <div>DISTRIBUTOR GROSS PROFIT FOR RYHANH MEDICAL COMPANY (40.1% MARGIN)</div>
-                        <div style={{ fontSize: '0.72rem', color: '#15803d', fontWeight: 500 }}>Gross margin before local distribution and collection costs</div>
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'center' }}>Gross Margin (40.1%)</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>—</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>+$19.82</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>+75.00 QAR</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontSize: '1.05rem' }}>+6,000.00 QAR</td>
-                    </tr>
-
-                    <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
-                      <td style={{ padding: '12px 16px', color: '#64748b' }}>
-                        <div>Local Operating Expenses & 90-Day Credit Risk Buffer (15%)</div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Allocated for salon delivery, finance, and 90-day delayed clinic payments</div>
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'center', color: '#94a3b8' }}>Risk Buffer</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: '#64748b' }}>—</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: '#64748b' }}>-$7.62</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: '#64748b' }}>-28.05 QAR</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: '#64748b' }}>-2,244.00 QAR</td>
-                    </tr>
-
-                    <tr style={{ backgroundColor: '#ecfdf5', color: '#065f46', fontWeight: 800 }}>
-                      <td style={{ padding: '12px 16px' }}>
-                        <div>DISTRIBUTOR NET PROFIT (23.93% NET PROFIT MARGIN)</div>
-                        <div style={{ fontSize: '0.72rem', color: '#047857', fontWeight: 500 }}>Clean net operating profit for distributor on 80-unit batch</div>
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'center' }}>Net Clean Margin</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>—</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>+$12.16</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>+44.74 QAR</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontSize: '1.05rem' }}>+3,579.25 QAR</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div style={{ padding: '0' }}>
+                <DataTable
+                  data={[
+                    {
+                      id: 'factory-rate',
+                      element: 'Approved Colway Product Price (18% Discount)',
+                      sublabel: '40× Shampoo (250 mL) + 40× Conditioner (200 mL) at 102.00 PLN',
+                      basis: 'Approved Factory Rate',
+                      pln: '102.00 PLN',
+                      usd: '$26.00',
+                      qar: '93.94 QAR',
+                      batchQar: '7,515.20 QAR',
+                      tone: 'default'
+                    },
+                    {
+                      id: 'air-freight',
+                      element: 'International Air Freight & Customs Handling',
+                      sublabel: 'Direct air courier dispatch from Poland to Hamad Int. Airport (Doha)',
+                      basis: 'Air Logistics Allocation',
+                      pln: '19.73 PLN',
+                      usd: '$5.00',
+                      qar: '18.06 QAR',
+                      batchQar: '1,444.80 QAR',
+                      tone: 'default'
+                    },
+                    {
+                      id: 'total-landed',
+                      element: 'TOTAL LANDED PRICE TO DISTRIBUTOR (RYHANH MEDICAL COMPANY)',
+                      sublabel: 'Approved B2B price · 100% advance payment required prior to dispatch',
+                      basis: 'Agreed B2B Terms',
+                      pln: '121.73 PLN',
+                      usd: '$31.00',
+                      qar: '112.00 QAR',
+                      batchQar: '8,960.00 QAR',
+                      tone: 'primary'
+                    },
+                    {
+                      id: 'msrp-qatar',
+                      element: 'Recommended Resale Price in Qatar (Clinics / Salons / Retail)',
+                      sublabel: 'Target end-user & aesthetic clinic price point in Doha',
+                      basis: 'Market MSRP',
+                      pln: '—',
+                      usd: '$50.82',
+                      qar: '187.00 QAR',
+                      batchQar: '14,960.00 QAR',
+                      tone: 'soft-green'
+                    },
+                    {
+                      id: 'gross-profit',
+                      element: 'DISTRIBUTOR GROSS PROFIT FOR RYHANH MEDICAL COMPANY (40.1% MARGIN)',
+                      sublabel: 'Gross margin before local distribution and collection costs',
+                      basis: 'Gross Margin (40.1%)',
+                      pln: '—',
+                      usd: '+$19.82',
+                      qar: '+75.00 QAR',
+                      batchQar: '+6,000.00 QAR',
+                      tone: 'green'
+                    },
+                    {
+                      id: 'opex-buffer',
+                      element: 'Local Operating Expenses & 90-Day Credit Risk Buffer (15%)',
+                      sublabel: 'Allocated for salon delivery, finance, and 90-day delayed clinic payments',
+                      basis: 'Risk Buffer',
+                      pln: '—',
+                      usd: '-$7.62',
+                      qar: '-28.05 QAR',
+                      batchQar: '-2,244.00 QAR',
+                      tone: 'muted'
+                    },
+                    {
+                      id: 'net-profit',
+                      element: 'DISTRIBUTOR NET PROFIT (23.93% NET PROFIT MARGIN)',
+                      sublabel: 'Clean net operating profit for distributor on 80-unit batch',
+                      basis: 'Net Clean Margin',
+                      pln: '—',
+                      usd: '+$12.16',
+                      qar: '+44.74 QAR',
+                      batchQar: '+3,579.25 QAR',
+                      tone: 'emerald'
+                    }
+                  ]}
+                  columns={[
+                    {
+                      key: 'element',
+                      label: 'Cost & Commercial Element',
+                      width: '34%',
+                      render: (row) => {
+                        const colorMap = {
+                          primary: '#003666',
+                          'soft-green': '#15803d',
+                          green: '#166534',
+                          muted: '#64748b',
+                          emerald: '#065f46',
+                          default: '#0f172a'
+                        };
+                        return (
+                          <div>
+                            <div style={{ fontWeight: row.tone === 'primary' || row.tone === 'green' || row.tone === 'emerald' ? 800 : 650, color: colorMap[row.tone] || '#0f172a', fontSize: '0.84rem' }}>
+                              {row.element}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: row.tone === 'emerald' ? '#047857' : '#64748b', marginTop: '2px' }}>
+                              {row.sublabel}
+                            </div>
+                          </div>
+                        );
+                      }
+                    },
+                    {
+                      key: 'basis',
+                      label: 'Basis / Documentation',
+                      width: '16%',
+                      align: 'center',
+                      render: (row) => <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{row.basis}</span>
+                    },
+                    {
+                      key: 'pln',
+                      label: 'Per Unit (PLN)',
+                      width: '12%',
+                      align: 'right',
+                      render: (row) => <span style={{ fontWeight: 650, color: row.tone === 'primary' ? '#003666' : '#334155' }}>{row.pln}</span>
+                    },
+                    {
+                      key: 'usd',
+                      label: 'Per Unit (USD)',
+                      width: '11%',
+                      align: 'right',
+                      render: (row) => <span style={{ fontWeight: row.tone === 'primary' ? 800 : 500, color: '#334155' }}>{row.usd}</span>
+                    },
+                    {
+                      key: 'qar',
+                      label: 'Per Unit (QAR)',
+                      width: '12%',
+                      align: 'right',
+                      render: (row) => <span style={{ fontWeight: row.tone === 'primary' || row.tone === 'soft-green' ? 750 : 500, color: row.tone === 'primary' ? '#003666' : '#334155' }}>{row.qar}</span>
+                    },
+                    {
+                      key: 'batchQar',
+                      label: 'Total Batch (QAR)',
+                      width: '15%',
+                      align: 'right',
+                      render: (row) => <span style={{ fontWeight: 800, color: row.tone === 'primary' ? '#003666' : row.tone === 'green' || row.tone === 'emerald' ? '#166534' : '#0f172a' }}>{row.batchQar}</span>
+                    }
+                  ]}
+                  pageSize={20}
+                />
               </div>
             </div>
 

@@ -2,32 +2,31 @@
 /**
  * ManagerInvitationsTab.jsx
  *
- * Gestión de invitaciones de clientes por un account manager.
- * Sin imports directos de firebase/firestore — usa useInvitationsQuery del repositorio.
+ * Gestión de invitaciones de clientes por un account manager (estandarizado con DataModule).
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useInvitationsQuery } from '@/hooks/data/useWholesalerQuery';
 import Spinner from '../ui/Spinner';
 import Card from '../ui/Card';
-import DataTable from '../ui/DataTable';
-import EmptyState from '../ui/EmptyState';
-import { StatusChip } from '../ui';
-import { UserPlus, Mail, LinkIcon } from '@/lib/icons';
+import DataModule from '../ui/DataModule';
+import MetricCard from '../ui/MetricCard';
+import StatusBadge from '../ui/StatusBadge';
+import { UserPlus, Mail, LinkIcon, CheckCircle2, Clock, Users, X } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 
 export default function ManagerInvitationsTab() {
   const { currentUser } = useAuth();
 
-  // Form state
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [inviteeName, setInviteeName] = useState('');
   const [inviteeEmail, setInviteeEmail] = useState('');
   const [inviteeRole, setInviteeRole] = useState('patient');
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // React Query hook — sin inline queryFn ni imports de Firestore
   const {
     invitations,
     isLoading,
@@ -46,15 +45,15 @@ export default function ManagerInvitationsTab() {
     setInviteeName('');
     setInviteeEmail('');
     setInviteeRole('patient');
+    setShowCreateForm(false);
   };
 
   const copyLink = (inviteId) => {
     const link = `${window.location.origin}/login?invite=${inviteId}`;
     navigator.clipboard.writeText(link);
-    toast('¡Enlace de invitación copiado!');
+    toast.success('Enlace de invitación copiado');
   };
 
-  // Columns definition
   const columns = [
     {
       header: 'Nombre / Rol',
@@ -89,7 +88,7 @@ export default function ManagerInvitationsTab() {
       header: 'Estado',
       key: 'status',
       width: '20%',
-      render: (row) => <StatusChip status={row.status} />,
+      render: (row) => <StatusBadge status={row.status || 'pending'} />,
     },
     {
       header: 'Acciones',
@@ -100,11 +99,25 @@ export default function ManagerInvitationsTab() {
         row.status === 'pending' ? (
           <div style={{ display: 'inline-flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
             <button
+              type="button"
               onClick={() => copyLink(row.id)}
               title="Copiar enlace de invitación"
-              style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', padding: '0.4rem', borderRadius: '4px', cursor: 'pointer', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center' }}
+              style={{
+                minHeight: '36px',
+                background: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                padding: '0.4rem 0.7rem',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                color: 'var(--color-text-secondary)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+              }}
             >
-              <LinkIcon size={15} />
+              <LinkIcon size={14} /> Copiar link
             </button>
           </div>
         ) : (
@@ -114,30 +127,45 @@ export default function ManagerInvitationsTab() {
     },
   ];
 
-  const filteredData = invitations.filter((i) => {
+  const filteredData = useMemo(() => {
     const term = searchTerm.toLowerCase();
-    return (i.name || '').toLowerCase().includes(term) || (i.email || '').toLowerCase().includes(term);
-  });
+    return invitations.filter((i) => {
+      if (statusFilter !== 'all' && (i.status || 'pending') !== statusFilter) return false;
+      if (!term) return true;
+      return (i.name || '').toLowerCase().includes(term) || (i.email || '').toLowerCase().includes(term);
+    });
+  }, [invitations, searchTerm, statusFilter]);
+
+  const kpiStats = useMemo(() => {
+    const total = invitations.length;
+    const pending = invitations.filter((i) => (i.status || 'pending') === 'pending').length;
+    const accepted = invitations.filter((i) => i.status === 'accepted' || i.status === 'active').length;
+    const doctors = invitations.filter((i) => i.role === 'doctor').length;
+    return { total, pending, accepted, doctors };
+  }, [invitations]);
+
+  const activeFilters = statusFilter !== 'all'
+    ? [{ id: 'status', label: `Estado: ${statusFilter}`, onRemove: () => setStatusFilter('all') }]
+    : [];
 
   return (
-    <div style={{ padding: '0 1rem' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.3rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          <UserPlus size={22} color="var(--color-primary)" /> Invitaciones de Usuario
-        </h2>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.88rem', marginTop: '0.4rem' }}>
-          Invita a médicos, pacientes y personal. Quedarán vinculados automáticamente a tu cuenta al registrarse.
-        </p>
-      </div>
-
-      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        {/* Formulario de creación */}
-        <Card style={{ flex: '1 1 280px' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <UserPlus size={18} color="var(--color-primary)" /> Nueva Invitación
-          </h3>
-          <form onSubmit={handleCreateInvite} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {showCreateForm && (
+        <Card style={{ padding: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <UserPlus size={18} color="var(--color-primary)" /> Nueva Invitación
+            </h3>
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(false)}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              aria-label="Cerrar formulario"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <form onSubmit={handleCreateInvite} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'end' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>
                 Rol del Usuario
@@ -145,7 +173,7 @@ export default function ManagerInvitationsTab() {
               <select
                 value={inviteeRole}
                 onChange={(e) => setInviteeRole(e.target.value)}
-                style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'var(--color-bg-app)', outline: 'none' }}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'var(--color-bg-app)', outline: 'none' }}
               >
                 <option value="patient">Paciente</option>
                 <option value="doctor">Médico</option>
@@ -162,7 +190,7 @@ export default function ManagerInvitationsTab() {
                 placeholder="Dr. Juan García"
                 value={inviteeName}
                 onChange={(e) => setInviteeName(e.target.value)}
-                style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid var(--border)', outline: 'none' }}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid var(--border)', outline: 'none' }}
               />
             </div>
             <div>
@@ -174,58 +202,88 @@ export default function ManagerInvitationsTab() {
                 placeholder="juan@clinica.com"
                 value={inviteeEmail}
                 onChange={(e) => setInviteeEmail(e.target.value)}
-                style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid var(--border)', outline: 'none' }}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid var(--border)', outline: 'none' }}
               />
-              <span style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)', marginTop: '0.2rem', display: 'block' }}>
-                Necesario para enviar el enlace automáticamente por email.
-              </span>
             </div>
             <button
               type="submit"
               disabled={isCreating}
               style={{
-                marginTop: '0.5rem',
+                minHeight: '42px',
                 backgroundColor: isCreating ? 'var(--border)' : 'var(--color-primary)',
                 color: 'white',
                 border: 'none',
-                padding: '0.75rem',
+                padding: '0.65rem 1rem',
                 borderRadius: '6px',
                 fontWeight: 700,
                 cursor: isCreating ? 'not-allowed' : 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
               }}
             >
-              {isCreating ? <><Spinner size={14} /> Generando...</> : 'Generar Enlace de Invitación'}
+              {isCreating ? <><Spinner size={14} /> Generando...</> : 'Generar Enlace'}
             </button>
           </form>
         </Card>
+      )}
 
-        {/* Tabla de historial */}
-        <div style={{ flex: '2 1 420px' }}>
-          <DataTable
-            data={filteredData}
-            columns={columns}
-            loading={isLoading}
-            globalSearch={true}
-            searchQuery={searchTerm}
-            onSearchChange={setSearchTerm}
-            searchPlaceholder="Buscar por nombre o email…"
-            selectedIds={selectedIds}
-            onSelectionChange={setSelectedIds}
-            emptyState={
-              <EmptyState
-                icon={Mail}
-                title="Sin invitaciones"
-                subtitle={searchTerm ? 'No hay resultados para esta búsqueda.' : 'Crea tu primera invitación usando el formulario de la izquierda.'}
-                action={searchTerm ? { label: 'Limpiar búsqueda', onClick: () => setSearchTerm('') } : undefined}
-              />
-            }
-          />
-        </div>
-      </div>
+      <DataModule
+        title="Invitaciones de Usuario"
+        subtitle="Invita a médicos, pacientes y personal vinculados automáticamente a tu cuenta."
+        icon={UserPlus}
+        panel="wholesaler"
+        namespace="manager_invitations"
+        primaryAction={{
+          label: showCreateForm ? 'Cerrar Formulario' : 'Nueva Invitación',
+          icon: showCreateForm ? X : UserPlus,
+          onClick: () => setShowCreateForm((v) => !v),
+        }}
+        searchPlaceholder="Buscar por nombre o email…"
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        resultCount={filteredData.length}
+        totalCount={invitations.length}
+        filterOptions={[
+          {
+            id: 'status',
+            label: 'Estado',
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: [
+              { value: 'all', label: 'Todos' },
+              { value: 'pending', label: 'Pendiente' },
+              { value: 'accepted', label: 'Aceptado' },
+            ],
+          },
+        ]}
+        filters={activeFilters}
+        onClearAllFilters={() => {
+          setSearchTerm('');
+          setStatusFilter('all');
+        }}
+        kpis={
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+            <MetricCard title="Total Invitations" value={kpiStats.total} subtitle="All generated links" icon={UserPlus} color="#2563eb" />
+            <MetricCard title="Pending" value={kpiStats.pending} subtitle="Awaiting registration" icon={Clock} color="#d97706" />
+            <MetricCard title="Accepted" value={kpiStats.accepted} subtitle="Linked accounts" icon={CheckCircle2} color="#16a34a" />
+            <MetricCard title="Physicians Invited" value={kpiStats.doctors} subtitle="Medical partners" icon={Users} color="#0f172a" />
+          </div>
+        }
+        data={filteredData}
+        columns={columns}
+        loading={isLoading}
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
+        emptyState={{
+          icon: Mail,
+          title: 'Sin invitaciones',
+          subtitle: searchTerm
+            ? 'No hay resultados para esta búsqueda.'
+            : 'Crea tu primera invitación usando el botón "Nueva Invitación".',
+        }}
+      />
     </div>
   );
 }

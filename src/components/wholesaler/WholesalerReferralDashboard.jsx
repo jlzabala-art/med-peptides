@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Share2, Copy, Check, ExternalLink, MessageCircle, Package, TrendingUp, Users, DollarSign } from '@/lib/icons';
-import DataTable from '../ui/DataTable';
+import DataModule from '../ui/DataModule';
 import StatusBadge from '../ui/StatusBadge';
 import CopyableId from '../ui/CopyableId';
-import EmptyState from '../ui/EmptyState';
 import { MetricCard } from '../ui';
 import { fetchWholesalerReferralStatsAction } from '@/actions/vialsCatalogActions';
 
@@ -20,6 +19,7 @@ const REFERRAL_COLLECTIONS = [
 export default function WholesalerReferralDashboard({ wholesalerId }) {
   const [selectedCollection, setSelectedCollection] = useState('vials');
   const [tableCollectionFilter, setTableCollectionFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({
     visitsCount: 0,
     ordersCount: 0,
@@ -33,7 +33,7 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
   const [copied, setCopied] = useState(false);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
-  const activeColConfig = REFERRAL_COLLECTIONS.find(c => c.id === selectedCollection) || REFERRAL_COLLECTIONS[0];
+  const activeColConfig = REFERRAL_COLLECTIONS.find((c) => c.id === selectedCollection) || REFERRAL_COLLECTIONS[0];
   const referralUrl = wholesalerId
     ? `${origin}${activeColConfig.path}${activeColConfig.path.includes('?') ? '&' : '?'}ref=${encodeURIComponent(wholesalerId)}`
     : `${origin}${activeColConfig.path}`;
@@ -73,13 +73,21 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
-  // Filtered orders for table
   const displayedOrders = useMemo(() => {
-    if (tableCollectionFilter === 'all') return stats.recentOrders;
-    return stats.recentOrders.filter(o => (o.collection || 'vials').toLowerCase() === tableCollectionFilter);
-  }, [stats.recentOrders, tableCollectionFilter]);
+    const q = searchTerm.trim().toLowerCase();
+    return stats.recentOrders.filter((o) => {
+      if (tableCollectionFilter !== 'all' && (o.collection || 'vials').toLowerCase() !== tableCollectionFilter) {
+        return false;
+      }
+      if (!q) return true;
+      return (
+        String(o.orderCode || '').toLowerCase().includes(q) ||
+        String(o.customerName || '').toLowerCase().includes(q) ||
+        String(o.customerEmail || '').toLowerCase().includes(q)
+      );
+    });
+  }, [stats.recentOrders, tableCollectionFilter, searchTerm]);
 
-  // DataTable column definitions (Golden Rule #30: explicit column widths)
   const columns = useMemo(() => [
     {
       header: 'Order Ref',
@@ -164,14 +172,17 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
     }
   ], []);
 
+  const activeFilters = tableCollectionFilter !== 'all'
+    ? [{ id: 'collection', label: `Collection: ${tableCollectionFilter}`, onRemove: () => setTableCollectionFilter('all') }]
+    : [];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      
-      {/* ── Multi-Collection Shareable Link Card ── */}
+      {/* ── Multi-Collection Shareable Link Generator ── */}
       <div style={{
         backgroundColor: '#ffffff',
         border: '1px solid #e2e8f0',
-        borderRadius: '12px',
+        borderRadius: '14px',
         padding: '20px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
       }}>
@@ -188,8 +199,9 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             <button
+              type="button"
               onClick={handleShareWhatsApp}
               style={{
                 display: 'inline-flex',
@@ -233,9 +245,8 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
           </div>
         </div>
 
-        {/* Collection Selector Tabs */}
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
-          {REFERRAL_COLLECTIONS.map(col => {
+          {REFERRAL_COLLECTIONS.map((col) => {
             const isSelected = selectedCollection === col.id;
             return (
               <button
@@ -254,7 +265,6 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
                   border: isSelected ? '1px solid #003666' : '1px solid #e2e8f0',
                   backgroundColor: isSelected ? '#003666' : '#ffffff',
                   color: isSelected ? '#ffffff' : '#475569',
-                  transition: 'all 0.15s ease'
                 }}
               >
                 <span>{col.icon}</span>
@@ -264,7 +274,6 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
           })}
         </div>
 
-        {/* Copyable Input Box */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -272,14 +281,15 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
           border: '1px solid #cbd5e1',
           borderRadius: '8px',
           padding: '6px 12px',
-          gap: '10px'
+          gap: '10px',
+          flexWrap: 'wrap',
         }}>
           <input
             type="text"
             readOnly
             value={referralUrl}
             style={{
-              flex: 1,
+              flex: '1 1 220px',
               background: 'none',
               border: 'none',
               outline: 'none',
@@ -290,6 +300,7 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
             }}
           />
           <button
+            type="button"
             onClick={handleCopyLink}
             style={{
               display: 'inline-flex',
@@ -303,7 +314,6 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
               fontWeight: 700,
               fontSize: '0.78rem',
               cursor: 'pointer',
-              transition: 'background-color 0.15s ease'
             }}
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -312,126 +322,87 @@ export default function WholesalerReferralDashboard({ wholesalerId }) {
         </div>
       </div>
 
-      {/* ── 4 KPIs by Default (Golden Rule #22) ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1rem'
-      }}>
-        <MetricCard
-          title="Link Visits"
-          value={loading ? '…' : stats.visitsCount}
-          subtitle="Unique visits tracked"
-          icon={Users}
-          color="#2563eb"
-        />
-        <MetricCard
-          title="Orders Generated"
-          value={loading ? '…' : stats.ordersCount}
-          subtitle={`${stats.totalUnits} total units requested`}
-          icon={Package}
-          color="#16a34a"
-          alert={stats.ordersCount > 0}
-        />
-        <MetricCard
-          title="Total Revenue"
-          value={loading ? '…' : `$${stats.totalRevenue.toFixed(2)}`}
-          subtitle="Gross order volume (USD)"
-          icon={DollarSign}
-          color="#003666"
-        />
-        <MetricCard
-          title="Conversion Rate"
-          value={loading ? '…' : stats.conversionRate}
-          subtitle="Visits converted into orders"
-          icon={TrendingUp}
-          color="#8b5cf6"
-        />
-      </div>
-
-      {/* ── Attributed Orders Table (Golden Rule #3: Always DataTable) ── */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '12px',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          padding: '16px 20px',
-          borderBottom: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px'
-        }}>
-          <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-              Referred Sales History
-            </h4>
-            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-              Orders placed across all clinical collections with 24-hour payment coordination
-            </span>
+      {/* ── Standardized DataModule for Attributed Orders & KPIs ── */}
+      <DataModule
+        title="Referred Sales History"
+        subtitle="Orders placed across all clinical collections with 24-hour payment coordination."
+        icon={TrendingUp}
+        panel="wholesaler"
+        namespace="wholesaler_referrals"
+        isSubModule={true}
+        searchPlaceholder="Search by order ref, client name or email..."
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        resultCount={displayedOrders.length}
+        totalCount={stats.recentOrders.length}
+        filterOptions={[
+          {
+            id: 'collection',
+            label: 'Collection',
+            value: tableCollectionFilter,
+            onChange: setTableCollectionFilter,
+            options: [
+              { value: 'all', label: 'All Collections' },
+              { value: 'vials', label: 'Peptides' },
+              { value: 'bloodo', label: 'Bloodo™' },
+              { value: 'colway', label: 'Colway®' },
+              { value: 'ultraman', label: 'UltraPerson' },
+              { value: 'teletest', label: 'TeleTest®' },
+            ],
+          },
+        ]}
+        filters={activeFilters}
+        onClearAllFilters={() => {
+          setSearchTerm('');
+          setTableCollectionFilter('all');
+        }}
+        kpis={
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.85rem' }}>
+            <MetricCard
+              title="Link Visits"
+              value={loading ? '…' : stats.visitsCount}
+              subtitle="Unique visits tracked"
+              icon={Users}
+              color="#2563eb"
+            />
+            <MetricCard
+              title="Orders Generated"
+              value={loading ? '…' : stats.ordersCount}
+              subtitle={`${stats.totalUnits} total units requested`}
+              icon={Package}
+              color="#16a34a"
+              alert={stats.ordersCount > 0}
+            />
+            <MetricCard
+              title="Total Revenue"
+              value={loading ? '…' : `$${stats.totalRevenue.toFixed(2)}`}
+              subtitle="Gross order volume (USD)"
+              icon={DollarSign}
+              color="#003666"
+            />
+            <MetricCard
+              title="Conversion Rate"
+              value={loading ? '…' : stats.conversionRate}
+              subtitle="Visits converted into orders"
+              icon={TrendingUp}
+              color="#8b5cf6"
+            />
           </div>
-
-          {/* Collection Filter Chips for Table */}
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {['all', 'vials', 'bloodo', 'colway', 'ultraman', 'teletest'].map(filterId => {
-              const isSelected = tableCollectionFilter === filterId;
-              const labels = {
-                all: 'All Collections',
-                vials: 'Peptides',
-                bloodo: 'Bloodo',
-                colway: 'Colway',
-                ultraman: 'UltraPerson',
-                teletest: 'TeleTest'
-              };
-              return (
-                <button
-                  key={filterId}
-                  type="button"
-                  onClick={() => setTableCollectionFilter(filterId)}
-                  style={{
-                    padding: '3px 10px',
-                    borderRadius: '9999px',
-                    fontSize: '0.72rem',
-                    fontWeight: isSelected ? 800 : 600,
-                    cursor: 'pointer',
-                    border: isSelected ? '1px solid #003666' : '1px solid #cbd5e1',
-                    backgroundColor: isSelected ? '#003666' : '#ffffff',
-                    color: isSelected ? '#ffffff' : '#475569'
-                  }}
-                >
-                  {labels[filterId]}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {displayedOrders.length === 0 && !loading ? (
-          <EmptyState
-            icon={Package}
-            title="No referral orders recorded for this collection"
-            subtitle="Share your link with clinics, physicians, or institutional buyers to begin capturing attributed orders."
-            action={{
-              label: 'Copy Referral Link',
-              onClick: handleCopyLink,
-              icon: Copy
-            }}
-          />
-        ) : (
-          <DataTable
-            columns={columns}
-            data={displayedOrders}
-            isLoading={loading}
-            keyField="id"
-            initialRowsPerPage={10}
-            statusText="Synchronized with live orders ledger"
-          />
-        )}
-      </div>
-
+        }
+        data={displayedOrders}
+        columns={columns}
+        loading={loading}
+        emptyState={{
+          icon: Package,
+          title: 'No referral orders recorded for this collection',
+          subtitle: 'Share your link with clinics, physicians, or institutional buyers to begin capturing attributed orders.',
+          action: {
+            label: 'Copy Referral Link',
+            onClick: handleCopyLink,
+            icon: Copy,
+          },
+        }}
+      />
     </div>
   );
 }

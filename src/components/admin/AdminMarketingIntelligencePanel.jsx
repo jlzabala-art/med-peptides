@@ -7,9 +7,12 @@ import {
   orderBy,
   limit,
   onSnapshot,
-  where,
 } from 'firebase/firestore';
+// eslint-disable-next-line no-restricted-imports
 import { db } from '../../firebase';
+import DataTable from '../ui/DataTable';
+import StatusBadge from '../ui/StatusBadge';
+import EmptyState from '../ui/EmptyState';
 import {
   TrendingUp,
   Share2,
@@ -531,65 +534,74 @@ export default function AdminMarketingIntelligencePanel() {
             {catalogLogs.filter(l => l.docType === 'info_request').length} received
           </span>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                {['Practitioner', 'Product / Compound', 'Status', 'Views', 'Date'].map((h, i) => (
-                  <th key={i} style={{
-                    padding: '8px 12px', textAlign: 'left', fontSize: '0.68rem',
-                    fontWeight: 800, color: '#64748b', textTransform: 'uppercase',
-                    letterSpacing: '0.04em', width: i === 4 ? '100px' : i === 3 ? '60px' : i === 2 ? '90px' : 'auto',
-                  }}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {catalogLogs.filter(l => l.docType === 'info_request').slice(0, 20).map(log => (
-                <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <td style={{ padding: '9px 12px' }}>
+        <div style={{ padding: '0' }}>
+          <DataTable
+            data={catalogLogs.filter(l => l.docType === 'info_request').slice(0, 20)}
+            columns={[
+              {
+                key: 'practitioner',
+                label: 'Practitioner',
+                width: '30%',
+                render: (log) => (
+                  <div>
                     <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
                       {log.recipient?.name || log.sharedWith || 'Anonymous'}
                     </div>
                     <div style={{ fontSize: '0.67rem', color: '#94a3b8' }}>
                       {log.recipient?.email || log.sharedEmail || ''}
                     </div>
-                  </td>
-                  <td style={{ padding: '9px 12px', fontSize: '0.76rem', color: '#334155', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  </div>
+                )
+              },
+              {
+                key: 'productName',
+                label: 'Product / Compound',
+                width: '32%',
+                render: (log) => (
+                  <span style={{ fontSize: '0.76rem', color: '#334155', fontWeight: 600 }}>
                     {log.productName || '—'}
-                  </td>
-                  <td style={{ padding: '9px 12px' }}>
-                    <span style={{
-                      fontSize: '0.66rem', fontWeight: 800, padding: '2px 7px', borderRadius: '5px',
-                      backgroundColor: log.status === 'viewed' ? '#f0fdf4' : '#fffbeb',
-                      color: log.status === 'viewed' ? '#16a34a' : '#d97706',
-                      border: `1px solid ${log.status === 'viewed' ? '#bbf7d0' : '#fde68a'}`,
-                    }}>
-                      {log.status === 'viewed' ? 'Viewed' : 'Sent'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '9px 12px', fontSize: '0.76rem', fontWeight: 800, color: '#475569', textAlign: 'center' }}>
+                  </span>
+                )
+              },
+              {
+                key: 'status',
+                label: 'Status',
+                width: '14%',
+                render: (log) => (
+                  <StatusBadge status={log.status === 'viewed' ? 'active' : 'pending'} label={log.status === 'viewed' ? 'Viewed' : 'Sent'} />
+                )
+              },
+              {
+                key: 'viewCount',
+                label: 'Views',
+                width: '10%',
+                align: 'center',
+                render: (log) => (
+                  <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#475569' }}>
                     {log.viewCount || 0}
-                  </td>
-                  <td style={{ padding: '9px 12px', fontSize: '0.7rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                  </span>
+                )
+              },
+              {
+                key: 'generatedAt',
+                label: 'Date',
+                width: '14%',
+                render: (log) => (
+                  <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
                     {log.generatedAt ? new Date(log.generatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }) : '—'}
-                  </td>
-                </tr>
-              ))}
-              {catalogLogs.filter(l => l.docType === 'info_request').length === 0 && (
-                <tr>
-                  <td colSpan={5} style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
-                    No info requests yet — they appear when practitioners use your shared web catalogs
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </span>
+                )
+              }
+            ]}
+            emptyState={
+              <EmptyState
+                icon={MessageSquare}
+                title="No info requests yet"
+                subtitle="They appear when practitioners use your shared web catalogs."
+              />
+            }
+            pageSize={20}
+          />
         </div>
       </div>
 

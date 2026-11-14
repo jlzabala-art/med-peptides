@@ -1,54 +1,32 @@
 import React from 'react';
 import Link from 'next/link';
-import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
-import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import {
-  ShieldCheck,
-  Lock,
-  FileText,
-  Building2,
-  Clock,
-  ArrowRight
-} from '@/lib/icons';
+import EditorialPageLayout from '@/components/shared/layouts/EditorialPageLayout';
+import { ShieldCheck, Lock, FileText, Building2, ArrowRight } from '@/lib/icons';
 import '@/app/legal.css';
 
 export const metadata = {
   title: 'Privacy Policy | Atlas Health Services',
-  description: 'Data protection standards, clinical telemetry confidentiality, and GDPR compliance governance at Atlas Health Services.'
+  description: 'Data protection standards, clinical telemetry confidentiality, and GDPR compliance governance at Atlas Health Services.',
 };
 
 export default function PrivacyPolicyPage() {
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Legal & Governance', href: '/terms' },
-    { label: 'Privacy Policy' }
-  ];
-
   return (
-    <div className="gcp-legal-wrapper">
-      <PublicUnifiedHeader track="privacy" />
-
-      <main className="gcp-legal-container">
-        <Breadcrumb items={breadcrumbItems} />
-
-        <header className="gcp-legal-header">
-          <div className="gcp-legal-badge">
-            <Clock size={12} />
-            <span>Effective: January 2026 • GDPR / RGPD Compliant</span>
-          </div>
-          <h1 className="gcp-legal-title">Privacy Policy & Data Protection</h1>
-          <p className="gcp-legal-subtitle">
-            Atlas Health Services enforces clinical-grade confidentiality, cryptographic security,
-            and strict European privacy principles for all practitioners, clinic partners, and diagnostic requisitions.
-          </p>
-        </header>
-
-        {/* Section 1: Scope & Institutional Governance */}
+    <EditorialPageLayout
+      variant="legal"
+      badge="Effective: January 2026 • GDPR / RGPD Compliant"
+      title="Privacy Policy & Data Protection"
+      subtitle="Atlas Health Services enforces clinical-grade confidentiality, cryptographic security, and strict European privacy principles for all practitioners, clinic partners, and diagnostic requisitions."
+      breadcrumbs={[
+        { label: 'Home', href: '/' },
+        { label: 'Legal & Governance', href: '/terms' },
+        { label: 'Privacy Policy' },
+      ]}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <section className="gcp-legal-card">
           <div className="gcp-legal-section-header">
             <Building2 size={18} className="gcp-legal-section-icon" />
-            <h2 className="gcp-legal-section-title">1. Scope & Governance</h2>
+            <h2 className="gcp-legal-section-title">1. Scope &amp; Governance</h2>
           </div>
           <p className="gcp-legal-p">
             This Policy outlines the institutional practices of Atlas Health Services regarding the collection,
@@ -61,11 +39,10 @@ export default function PrivacyPolicyPage() {
           </p>
         </section>
 
-        {/* Section 2: Clinical Data & Cryptographic Safeguards */}
         <section className="gcp-legal-card">
           <div className="gcp-legal-section-header">
             <Lock size={18} className="gcp-legal-section-icon" />
-            <h2 className="gcp-legal-section-title">2. Clinical Confidentiality & Security</h2>
+            <h2 className="gcp-legal-section-title">2. Clinical Confidentiality &amp; Security</h2>
           </div>
           <p className="gcp-legal-p">
             Patient health information, digital compounding prescriptions (E-Rx), and laboratory diagnostic telemetry
@@ -79,11 +56,10 @@ export default function PrivacyPolicyPage() {
           </ul>
         </section>
 
-        {/* Section 3: Data Subject Rights */}
         <section className="gcp-legal-card">
           <div className="gcp-legal-section-header">
             <FileText size={18} className="gcp-legal-section-icon" />
-            <h2 className="gcp-legal-section-title">3. Practitioner & Patient Rights</h2>
+            <h2 className="gcp-legal-section-title">3. Practitioner &amp; Patient Rights</h2>
           </div>
           <p className="gcp-legal-p">
             In compliance with European data protection regulations, verified users and accredited practitioners hold the following rights:
@@ -96,11 +72,10 @@ export default function PrivacyPolicyPage() {
           </ul>
         </section>
 
-        {/* Section 4: Inquiries & Verification */}
         <section className="gcp-legal-card">
           <div className="gcp-legal-section-header">
             <ShieldCheck size={18} className="gcp-legal-section-icon" />
-            <h2 className="gcp-legal-section-title">4. Privacy Requests & Inquiries</h2>
+            <h2 className="gcp-legal-section-title">4. Privacy Requests &amp; Inquiries</h2>
           </div>
           <p className="gcp-legal-p">
             All inquiries regarding data protection, access requests, or regulatory audits are routed securely
@@ -117,10 +92,7 @@ export default function PrivacyPolicyPage() {
             </Link>
           </div>
         </section>
-
-      </main>
-
-      <PublicUnifiedFooter />
-    </div>
+      </div>
+    </EditorialPageLayout>
   );
 }

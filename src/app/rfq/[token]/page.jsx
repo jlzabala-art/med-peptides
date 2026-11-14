@@ -23,6 +23,8 @@ import {
   Scale
 } from 'lucide-react';
 import StatusBadge from '../../../components/ui/StatusBadge';
+import DataTable from '../../../components/ui/DataTable';
+import FocusedCardLayout from '../../../components/shared/layouts/FocusedCardLayout';
 import { triggerHaptic } from '@/utils/haptics';
 
 export default function PublicSupplierRFQPage() {
@@ -191,35 +193,28 @@ export default function PublicSupplierRFQPage() {
   // Loading Screen
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <div style={{ display: 'inline-block', width: '36px', height: '36px', border: '3px solid #dadce0', borderTopColor: '#1a73e8', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-          <p style={{ marginTop: '16px', fontSize: '0.9rem', color: '#5f6368', fontWeight: 500 }}>
-            Loading Compounding RFQ Specifications…
-          </p>
-          <style dangerouslySetInnerHTML={{ __html: `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }` }} />
-        </div>
-      </div>
+      <FocusedCardLayout
+        tone="info"
+        whiteLabel={true}
+        title="Loading Compounding RFQ Specifications…"
+        subtitle="Retrieving required active ingredients and formulation parameters."
+      >
+        <div className="skeleton" style={{ height: 48, borderRadius: 10 }} />
+      </FocusedCardLayout>
     );
   }
 
   // Error Screen
   if (error || !rfq) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', padding: '24px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-        <div style={{ maxWidth: '480px', width: '100%', backgroundColor: '#fff', borderRadius: '12px', padding: '36px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #dadce0' }}>
-          <AlertTriangle size={44} style={{ color: '#d93025', margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#202124', marginBottom: '8px' }}>
-            Request for Quotation Unavailable
-          </h2>
-          <p style={{ fontSize: '0.88rem', color: '#5f6368', lineHeight: 1.5, marginBottom: '24px' }}>
-            {error || "This RFQ magic link is invalid or has expired. Please contact the clinical procurement department."}
-          </p>
-          <div style={{ fontSize: '0.8rem', color: '#70757a', borderTop: '1px solid #f1f3f4', paddingTop: '16px' }}>
-            Med-Peptides Clinical Procurement • Magenta Health LLC
-          </div>
-        </div>
-      </div>
+      <FocusedCardLayout
+        icon={AlertTriangle}
+        tone="danger"
+        whiteLabel={true}
+        title="Request for Quotation Unavailable"
+        subtitle={error || 'This RFQ magic link is invalid or has expired. Please contact the clinical procurement department.'}
+        footerNote="Med-Peptides Clinical Procurement • Magenta Health LLC"
+      />
     );
   }
 
@@ -628,86 +623,105 @@ export default function PublicSupplierRFQPage() {
                 Unit Prices for Compounds & Vehicles ({sym})
               </label>
 
-              <div style={{ border: '1px solid #dadce0', borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #dadce0', color: '#5f6368', textAlign: 'left' }}>
-                      <th style={{ padding: '10px 14px', fontWeight: 600 }}>Compound / Vehicle</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 600, width: '120px' }}>Strength / Spec</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 600, textAlign: 'center', width: '80px' }}>Req. Qty</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 600, textAlign: 'right', width: '140px' }}>Unit Price ({sym})</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 600, textAlign: 'right', width: '120px' }}>Line Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rawItems.map((item, idx) => {
-                      const itemId = item.itemId || idx;
+              <DataTable
+                data={rawItems.map((item, idx) => ({ ...item, _rowKey: item.itemId || String(idx), _rowIdx: idx }))}
+                keyField="_rowKey"
+                columns={[
+                  {
+                    key: 'name',
+                    header: 'Compound / Vehicle',
+                    width: '36%',
+                    render: (item) => (
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#202124' }}>{item.name}</div>
+                        {item.blockTitle && (
+                          <div style={{ fontSize: '0.74rem', color: '#1a73e8' }}>{item.blockTitle}</div>
+                        )}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '3px' }}>
+                          {item.referenceCost && (
+                            <span style={{ fontSize: '0.72rem', color: '#137333', fontWeight: 600, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px' }}>
+                              Historical Ref: ${item.referenceCost}/{item.unit || 'g'}
+                            </span>
+                          )}
+                          {item.targetUnitCost && (
+                            <span style={{ fontSize: '0.72rem', color: '#1a73e8', fontWeight: 600, backgroundColor: '#e8f0fe', padding: '1px 6px', borderRadius: '4px' }}>
+                              Target: {item.targetUnitCost}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'spec',
+                    header: 'Strength / Spec',
+                    width: '18%',
+                    render: (item) => (
+                      <span style={{ color: '#5f6368', fontFamily: 'monospace', fontSize: '0.78rem' }}>
+                        {item.packSize || item.concentration || (item.purity ? `Purity: ${item.purity}` : 'Bulk API')}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'qty',
+                    header: 'Req. Qty',
+                    width: '12%',
+                    align: 'center',
+                    render: (item) => {
+                      const qty = parseFloat(item.amount || item.quantity) || 1;
+                      return <span style={{ fontWeight: 600 }}>{qty} {item.unit || ''}</span>;
+                    },
+                  },
+                  {
+                    key: 'unitPrice',
+                    header: `Unit Price (${sym})`,
+                    width: '18%',
+                    align: 'right',
+                    render: (item) => {
+                      const itemId = item.itemId || item._rowIdx;
+                      const price = itemsPrices[itemId] !== undefined ? itemsPrices[itemId] : '';
+                      return isQuoted ? (
+                        <span style={{ fontWeight: 600 }}>{sym}{(parseFloat(price) || 0).toFixed(2)}</span>
+                      ) : (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ color: '#5f6368', fontSize: '0.8rem' }}>{sym}</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            value={price}
+                            onChange={(e) => handleItemPriceChange(itemId, e.target.value)}
+                            style={{
+                              width: '90px',
+                              padding: '6px 8px',
+                              borderRadius: '4px',
+                              border: '1px solid #dadce0',
+                              fontSize: '0.84rem',
+                              textAlign: 'right',
+                              fontWeight: 600,
+                              outline: 'none',
+                            }}
+                          />
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    key: 'lineTotal',
+                    header: 'Line Total',
+                    width: '16%',
+                    align: 'right',
+                    render: (item) => {
+                      const itemId = item.itemId || item._rowIdx;
                       const price = itemsPrices[itemId] !== undefined ? itemsPrices[itemId] : '';
                       const qty = parseFloat(item.amount || item.quantity) || 1;
                       const lineTotal = (parseFloat(price) || 0) * qty;
-
-                      return (
-                        <tr key={idx} style={{ borderBottom: idx < rawItems.length - 1 ? '1px solid #f1f3f4' : 'none' }}>
-                          <td style={{ padding: '12px 14px' }}>
-                            <div style={{ fontWeight: 600, color: '#202124' }}>{item.name}</div>
-                            {item.blockTitle && (
-                              <div style={{ fontSize: '0.74rem', color: '#1a73e8' }}>{item.blockTitle}</div>
-                            )}
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '3px' }}>
-                              {item.referenceCost && (
-                                <span style={{ fontSize: '0.72rem', color: '#137333', fontWeight: 600, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px' }}>
-                                  Historical Ref: ${item.referenceCost}/{item.unit || 'g'}
-                                </span>
-                              )}
-                              {item.targetUnitCost && (
-                                <span style={{ fontSize: '0.72rem', color: '#1a73e8', fontWeight: 600, backgroundColor: '#e8f0fe', padding: '1px 6px', borderRadius: '4px' }}>
-                                  Target: {item.targetUnitCost}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td style={{ padding: '12px 14px', color: '#5f6368', fontFamily: 'monospace', fontSize: '0.78rem' }}>
-                            {item.packSize || item.concentration || (item.purity ? `Purity: ${item.purity}` : 'Bulk API')}
-                          </td>
-                          <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>
-                            {qty} {item.unit || ''}
-                          </td>
-                          <td style={{ padding: '12px 14px', textAlign: 'right' }}>
-                            {isQuoted ? (
-                              <span style={{ fontWeight: 600 }}>{sym}{(parseFloat(price) || 0).toFixed(2)}</span>
-                            ) : (
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <span style={{ color: '#5f6368', fontSize: '0.8rem' }}>{sym}</span>
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  placeholder="0.00"
-                                  value={price}
-                                  onChange={(e) => handleItemPriceChange(itemId, e.target.value)}
-                                  style={{
-                                    width: '90px',
-                                    padding: '6px 8px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #dadce0',
-                                    fontSize: '0.84rem',
-                                    textAlign: 'right',
-                                    fontWeight: 600,
-                                    outline: 'none'
-                                  }}
-                                />
-                              </div>
-                            )}
-                          </td>
-                          <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 700, color: '#202124' }}>
-                            {sym}{lineTotal.toFixed(2)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      return <span style={{ fontWeight: 700, color: '#202124' }}>{sym}{lineTotal.toFixed(2)}</span>;
+                    },
+                  },
+                ]}
+              />
             </div>
 
             {/* Additional Cost & Logistics Inputs */}
