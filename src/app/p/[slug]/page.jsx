@@ -737,6 +737,44 @@ export default async function PublicProductRoute({ params, searchParams }) {
     );
   }
 
+  // Fetch compact sibling products in the same brand/category (Golden Rule #1: bounded limit)
+  let collectionSiblings = [];
+  const collectionName = safeProduct.brand || safeProduct.category || 'Collection';
+  const collectionHref = safeProduct.collectionSlug
+    ? `/collection/${encodeURIComponent(safeProduct.collectionSlug)}`
+    : (String(safeProduct.brand || '').toLowerCase().includes('colway') ? '/collection/colway' : '');
+
+  try {
+    const filterField = safeProduct.brand ? 'brand' : (safeProduct.category ? 'category' : null);
+    const filterValue = safeProduct.brand || safeProduct.category || null;
+    if (filterField && filterValue && !isAesthetic) {
+      const sibSnap = await adminDb
+        .collection('products')
+        .where(filterField, '==', filterValue)
+        .limit(12)
+        .get();
+
+      const currentSlugNorm = String(slug || safeProduct.slug || '').toLowerCase().trim();
+      const seenSlugs = new Set();
+      sibSnap.forEach((docSnap) => {
+        const d = docSnap.data();
+        const s = String(d.slug || docSnap.id || '').trim();
+        const sNorm = s.toLowerCase();
+        if (!s || seenSlugs.has(sNorm)) return;
+        seenSlugs.add(sNorm);
+        collectionSiblings.push({
+          slug: s,
+          name: d.name || d.title || s,
+          shortMeta: d.dosage || d.volume || d.packSize || d.subcategory || '',
+          imageUrl: d.imageUrl || d.image || null,
+          isCurrent: sNorm === currentSlugNorm || docSnap.id === safeProduct.id,
+        });
+      });
+    }
+  } catch {
+    collectionSiblings = [];
+  }
+
   if (isAesthetic) {
     return (
       <>
@@ -771,7 +809,12 @@ export default async function PublicProductRoute({ params, searchParams }) {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
           />
         )}
-        <CosmeticsDetail product={safeProduct} />
+        <CosmeticsDetail
+          product={safeProduct}
+          collectionSiblings={collectionSiblings}
+          collectionName={collectionName}
+          collectionHref={collectionHref}
+        />
       </>
     );
   }
@@ -825,6 +868,9 @@ export default async function PublicProductRoute({ params, searchParams }) {
         initialBatch={initialBatch}
         initialPhase={initialPhase}
         associatedProtocols={associatedProtocols}
+        collectionSiblings={collectionSiblings}
+        collectionName={collectionName}
+        collectionHref={collectionHref}
       />
     </>
   );

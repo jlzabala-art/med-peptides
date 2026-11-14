@@ -24,6 +24,7 @@ import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import HairProtocolsSidebarWidget from '@/components/product/HairProtocolsSidebarWidget';
 import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget';
+import CollectionSiblingsWidget from '@/components/product/widgets/CollectionSiblingsWidget';
 import ColwayProtocolInfogram from '@/components/product/ColwayProtocolInfogram';
 import ColwayTrichologyStemCellShowcase from '@/components/product/ColwayTrichologyStemCellShowcase';
 import McgTrichologyProcapilShowcase from '@/components/product/McgTrichologyProcapilShowcase';
@@ -780,7 +781,14 @@ function QrModal({ isOpen, onClose, url, productName }) {
   );
 }
 
-export default function CosmeticsDetail({ product, region = 'US', isProfessional = false }) {
+export default function CosmeticsDetail({
+  product,
+  region = 'US',
+  isProfessional = false,
+  collectionSiblings = [],
+  collectionName = '',
+  collectionHref = '',
+}) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
   const [lang] = useState('en');
   const [inciFilter, setInciFilter] = useState('all');
@@ -2255,6 +2263,18 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             {hairProtocols.length > 0 && isHairProduct && (
               <div style={{ marginTop: '0.85rem' }}>
                 <HairProtocolsSidebarWidget protocols={hairProtocols} lang={lang} />
+              </div>
+            )}
+
+            {/* COMPACT SAME-COLLECTION QUICK SWITCHER */}
+            {Array.isArray(collectionSiblings) && collectionSiblings.length > 1 && (
+              <div style={{ marginTop: '0.85rem' }}>
+                <CollectionSiblingsWidget
+                  items={collectionSiblings}
+                  collectionName={collectionName || product?.brand || 'Collection'}
+                  collectionHref={collectionHref}
+                  lang={lang}
+                />
               </div>
             )}
           </PublicDatasheetTableOfContents>

@@ -125,7 +125,10 @@ export default function PublicDatasheetView({
   initialLang = null,
   initialBatch = null,
   initialPhase = null,
-  associatedProtocols = []
+  associatedProtocols = [],
+  collectionSiblings = [],
+  collectionName = '',
+  collectionHref = ''
 }) {
   const [lang, setLang] = useState(() => {
     if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
@@ -3298,6 +3301,9 @@ export default function PublicDatasheetView({
               hideFloatingTrigger={true}
               activeSection={effectiveActiveSection}
               onSelectSection={handleSelectSection}
+              collectionSiblings={collectionSiblings}
+              collectionName={collectionName}
+              collectionHref={collectionHref}
             />
           </div>
         </PublicPageShell>
