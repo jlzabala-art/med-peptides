@@ -13,6 +13,7 @@ export default function DnaFoodMatrixSection({ clinicalProfile, initialViewMode 
   const [fagronSubfamilyFilter, setFagronSubfamilyFilter] = useState('ALL');
   const [foodTrafficFilter, setFoodTrafficFilter] = useState('all');
   const [foodSearchQuery, setFoodSearchQuery] = useState('');
+  const [onlyDairyFreeSafe, setOnlyDairyFreeSafe] = useState(false);
 
   if (!clinicalProfile) return null;
 
@@ -100,6 +101,108 @@ export default function DnaFoodMatrixSection({ clinicalProfile, initialViewMode 
             Top Clinical Highlights
           </button>
         </div>
+      </div>
+
+      {/* Universal Quick Action & Search Strip (Golden Rule #7 & #23) */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          marginBottom: '1.25rem',
+          padding: '10px 14px',
+          backgroundColor: '#f8fafc',
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0'
+        }}
+      >
+        <div style={{ flex: '1 1 240px', position: 'relative' }}>
+          <input
+            type="text"
+            value={foodSearchQuery}
+            onChange={(e) => {
+              setFoodSearchQuery(e.target.value);
+              if (e.target.value && foodViewMode !== 'master_catalog') {
+                setFoodViewMode('master_catalog');
+              }
+            }}
+            placeholder="Quick search any ingredient (e.g. avocado, salmon, oats, feta, ghee)..."
+            style={{
+              width: '100%',
+              padding: '7px 28px 7px 10px',
+              fontSize: '0.80rem',
+              borderRadius: '6px',
+              border: '1px solid #cbd5e1',
+              backgroundColor: '#ffffff',
+              color: '#0f172a'
+            }}
+          />
+          {foodSearchQuery && (
+            <button
+              type="button"
+              onClick={() => setFoodSearchQuery('')}
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                border: 'none',
+                background: 'transparent',
+                color: '#64748b',
+                cursor: 'pointer',
+                fontWeight: 700
+              }}
+            >
+              ×
+            </button>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            setOnlyDairyFreeSafe(prev => !prev);
+            setFoodViewMode('master_catalog');
+          }}
+          style={{
+            padding: '6px 12px',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            borderRadius: '6px',
+            border: '1px solid',
+            borderColor: onlyDairyFreeSafe ? '#0d9488' : '#cbd5e1',
+            backgroundColor: onlyDairyFreeSafe ? '#f0fdfa' : '#ffffff',
+            color: onlyDairyFreeSafe ? '#0f766e' : '#475569',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}
+        >
+          <span>🥛 {onlyDairyFreeSafe ? '✓ Dairy-Free Safe Only' : 'Dairy-Free Safe Only'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setFoodTrafficFilter(foodTrafficFilter === 'green' ? 'all' : 'green');
+            setFoodViewMode('master_catalog');
+          }}
+          style={{
+            padding: '6px 12px',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            borderRadius: '6px',
+            border: '1px solid',
+            borderColor: foodTrafficFilter === 'green' ? '#16a34a' : '#cbd5e1',
+            backgroundColor: foodTrafficFilter === 'green' ? '#f0fdf4' : '#ffffff',
+            color: foodTrafficFilter === 'green' ? '#15803d' : '#475569',
+            cursor: 'pointer'
+          }}
+        >
+          🟢 Eat Freely Only
+        </button>
       </div>
 
       {foodViewMode === 'fagron_matrix' ? (
@@ -515,6 +618,15 @@ export default function DnaFoodMatrixSection({ clinicalProfile, initialViewMode 
                 if (foodTrafficFilter === 'yellow') return f.trafficLight === 'AMBER';
                 if (foodTrafficFilter === 'red') return f.trafficLight === 'RED';
                 return true;
+              })
+              .filter(f => {
+                if (!onlyDairyFreeSafe) return true;
+                const isBovine = (
+                  f.fagronCode === '2.4' ||
+                  (f.fagronSubfamily && f.fagronSubfamily.toLowerCase().includes('dairy')) ||
+                  (f.nameEn && (f.nameEn.toLowerCase().includes('cow') || f.nameEn.toLowerCase().includes('cheese') || f.nameEn.toLowerCase().includes('butter') || f.nameEn.toLowerCase().includes('cream')))
+                );
+                return !isBovine;
               })
               .filter(f => {
                 if (!foodSearchQuery.trim()) return true;

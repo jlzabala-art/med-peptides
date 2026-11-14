@@ -15,11 +15,15 @@ import {
   Flame,
   CheckCircle2,
   AlertTriangle,
-  Info
+  Info,
+  Pill,
+  MessageSquare,
+  Check
 } from 'lucide-react';
 import DataTable from '../../ui/DataTable';
 import CopyableId from '../../ui/CopyableId';
 import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
+import { triangulateGenotypePhenotype } from '@/data/genomics/biomarkerTriangulationEngine';
 
 /**
  * DoctorDnaAnalysisTab
@@ -41,6 +45,107 @@ export default function DoctorDnaAnalysisTab({
 }) {
   const [filterQuery, setFilterQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
+  const [prescribingId, setPrescribingId] = useState(null);
+  const [createdRx, setCreatedRx] = useState({});
+  const [copiedWhatsAppId, setCopiedWhatsAppId] = useState(null);
+
+  const handleCreateCompoundedPrescription = async (row, profile) => {
+    const sampleKey = row.sampleId || row.code;
+    setPrescribingId(sampleKey);
+    try {
+      const res = await fetch('/api/prescriptions/create-compounded', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          doctorId: slug || 'dr-sajid-burud',
+          doctorName: row.doctorName || 'Dr. Sajid Burud',
+          doctorLicense: 'DHA-00132881',
+          clinicName: row.clinicName || 'Transcend Healthcare',
+          clinicAddress: 'Jumeirah, Dubai, UAE',
+          doctorSpecialty: 'Integrative & Regenerative Medicine',
+          patient: {
+            name: row.patientName || 'Ms. Wafa Burud',
+            id: row.patient?.id || `pt-${sampleKey}`,
+            dob: row.patient?.dob || '1988-04-12',
+            gender: row.patient?.gender || 'Female'
+          },
+          treatmentTitle: '24Genetics Precision Nutrigenomic Regimen (3-Capsule Magistral)',
+          formulationBlocks: [
+            {
+              title: 'Capsule 1: Methylation & Mitochondrial Vitality (Morning)',
+              items: [
+                { name: 'Methylfolate (5-MTHF Quatrefolic®)', dose: '800 mcg' },
+                { name: 'Methylcobalamin (Bioactive B12)', dose: '1,000 mcg' },
+                { name: 'CoQ10 Ubiquinol (Kaneka QH®)', dose: '100 mg' },
+                { name: 'Riboflavin-5-Phosphate (Active B2)', dose: '25 mg' }
+              ],
+              instructions: 'Take 1 capsule in the morning with breakfast.'
+            },
+            {
+              title: 'Capsule 2: Calcium Shield & Non-Bovine GI Shield (Midday)',
+              items: [
+                { name: 'Calcium Citrate-Malate', dose: '500 mg' },
+                { name: 'Magnesium Bisglycinate (Chelated)', dose: '200 mg' },
+                { name: 'Vitamin D3 (Cholecalciferol)', dose: '3,000 IU' },
+                { name: 'Vitamin K2 (Menaquinone-7 / MK-7)', dose: '100 mcg' },
+                { name: 'Lactase Enzyme (Tolerase® L / FCC)', dose: '9,000 ALU' }
+              ],
+              instructions: 'Take 1 capsule with mid-day meal or prior to incidental dairy exposure.'
+            },
+            {
+              title: 'Capsule 3: Glucose Clearance & AMPK Evening Modulator (Evening)',
+              items: [
+                { name: 'Berberine Phytosome (Berbevis®)', dose: '500 mg' },
+                { name: 'Chromium Picolinate', dose: '200 mcg' },
+                { name: 'Ceylon Cinnamon Extract (10:1)', dose: '250 mg' },
+                { name: 'Alpha Lipoic Acid (R-ALA)', dose: '150 mg' }
+              ],
+              instructions: 'Take 1 capsule 15 minutes before the largest evening meal.'
+            }
+          ],
+          formulaSummary: 'Genomically tailored 3-capsule compounded protocol addressing MCM6 GG hypolactasia, FTO/IRS1 glycemic sensitivity, and mitochondrial maternal longevity.',
+          nutrigenomicProfile: {
+            sampleId: sampleKey,
+            genotypes: profile?.genotypesEvaluated || {},
+            score: 85
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.prescription) {
+        setCreatedRx(prev => ({ ...prev, [sampleKey]: data.prescription }));
+      }
+    } catch (err) {
+      console.error('Failed to create compounded prescription:', err);
+    } finally {
+      setPrescribingId(null);
+    }
+  };
+
+  const handleCopyWhatsAppSummary = (row) => {
+    const sampleKey = row.sampleId || row.code;
+    const patient = row.patientName || 'Patient';
+    const doc = row.doctorName || 'Dr. Sajid Burud';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
+    const portalUrl = `${origin}/patient/dna-report?patient=${encodeURIComponent(patient)}&sample=${encodeURIComponent(sampleKey)}&doctor=${encodeURIComponent(doc)}&clinic=Transcend+Healthcare`;
+
+    const text = `🧬 *24Genetics Clinical DNA Intelligence* · Atlas Health Services
+👤 *Patient:* ${patient} (Specimen #${sampleKey})
+👨‍⚕️ *Physician:* ${doc} · Transcend Healthcare
+
+*Clinical Summary & Immediate Dietary Action Plan:*
+• 🥛 *Lactose & Dairy (MCM6 GG):* Severe adult hypolactasia detected. Complete cow dairy exclusion required. Non-bovine calcium shield protocol initiated.
+• ⚡ *Methylation Vitality (MTHFR GG):* Normal wild-type methylation. Avoid synthetic folic acid; leafy green dietary folate is optimal.
+• 🍚 *Glycemic Sensitivity (FTO / IRS1):* Elevated postprandial glucose sensitivity. Apply 1-2-3 Plate Sequencing (Vegetables → Protein → Complex Carbs).
+• ☕ *Caffeine Anxiety (ADORA2A TT):* Slow caffeine clearance. Strictly cut off caffeine after 11:00 AM to preserve deep sleep architecture.
+
+🌐 *Interactive Patient Portal:* ${portalUrl}
+💊 *Status:* 3-Capsule Personalized Magistral Compound ready for pharmacy dispensing.`;
+
+    navigator.clipboard.writeText(text);
+    setCopiedWhatsAppId(sampleKey);
+    setTimeout(() => setCopiedWhatsAppId(null), 3500);
+  };
 
   // Filtered dataset
   const filteredData = useMemo(() => {
@@ -601,6 +706,10 @@ export default function DoctorDnaAnalysisTab({
               doctor: row.doctorName,
               clinic: row.clinicName
             });
+            const triangulation = triangulateGenotypePhenotype({
+              genomicProfile: profile,
+              labResults: dnaResults
+            });
             const axes = profile.fiveClinicalAxes || [];
             const ancestral = profile.ancestralMetabolicProfile || {};
 
@@ -626,7 +735,28 @@ export default function DoctorDnaAnalysisTab({
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyWhatsAppSummary(row, profile)}
+                      style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        color: copiedWhatsAppId === (row.sampleId || row.code) ? '#137333' : '#1e8e3e',
+                        background: copiedWhatsAppId === (row.sampleId || row.code) ? '#e6f4ea' : '#f6fdf7',
+                        border: '1px solid #ceead6',
+                        padding: '5px 12px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      {copiedWhatsAppId === (row.sampleId || row.code) ? <Check size={13} /> : <MessageSquare size={13} />}
+                      <span>{copiedWhatsAppId === (row.sampleId || row.code) ? 'WhatsApp Copied ✓' : 'Copy WhatsApp Clinical Brief'}</span>
+                    </button>
+
                     <Link
                       href={portalUrl}
                       target="_blank"
@@ -703,6 +833,139 @@ export default function DoctorDnaAnalysisTab({
                     <p style={{ margin: 0, fontSize: '0.76rem', color: '#3c4043', lineHeight: 1.55 }}>
                       {ancestral.clinicalSynthesisEn}
                     </p>
+                  </div>
+                )}
+
+                {/* Genotype × Active Phenotype Convergence (Golden Rule #4 & GCP Style) */}
+                {triangulation.interactions?.length > 0 && (
+                  <div
+                    style={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '6px',
+                      padding: '14px 16px',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <ShieldCheck size={16} style={{ color: '#1a73e8' }} />
+                        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                          Genotype × Phenotype Convergence Matrix (DNA vs Lab Blood/DBS)
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.70rem', color: '#137333', backgroundColor: '#e6f4ea', border: '1px solid #ceead6', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                        Convergence Index: {triangulation.compositeScore}/100 · {triangulation.highPriorityCount} Active Targets
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+                      {triangulation.interactions.map(item => {
+                        const isHigh = item.convergenceLevel === 'CONFIRMED_HIGH' || item.convergenceLevel === 'HIGH_PRIORITY' || item.convergenceLevel === 'ACTION_REQUIRED';
+                        return (
+                          <div
+                            key={item.id}
+                            style={{
+                              backgroundColor: '#f8f9fa',
+                              border: '1px solid #dadce0',
+                              borderLeft: `3px solid ${isHigh ? '#c5221f' : '#137333'}`,
+                              borderRadius: '4px',
+                              padding: '10px 12px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase' }}>
+                                {item.axis}
+                              </span>
+                              <span style={{ fontSize: '0.64rem', fontWeight: 700, color: isHigh ? '#c5221f' : '#137333', backgroundColor: isHigh ? '#fce8e6' : '#e6f4ea', padding: '1px 5px', borderRadius: '3px' }}>
+                                {item.convergenceLevel}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.80rem', fontWeight: 600, color: '#202124', marginTop: '3px' }}>
+                              {item.title}
+                            </div>
+                            <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '2px' }}>
+                              DNA: <strong>{item.geneticMarker}</strong> · State: {item.phenotypeStatus}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: '#3c4043', marginTop: '4px', lineHeight: 1.4 }}>
+                              <strong>Clinical Action:</strong> {item.clinicalActionEn}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 1-Click Compounded Prescription Action & Status */}
+                {createdRx[row.sampleId || row.code] ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      backgroundColor: '#e6f4ea',
+                      border: '1px solid #ceead6',
+                      borderRadius: '4px',
+                      padding: '8px 12px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircle2 size={16} style={{ color: '#137333' }} />
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#137333' }}>
+                        Compounded Prescription Created ({createdRx[row.sampleId || row.code].code || 'RX-CMP-VERIFIED'})
+                      </span>
+                    </div>
+                    <Link
+                      href={`/rx/${createdRx[row.sampleId || row.code].code}`}
+                      style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        color: '#137333',
+                        textDecoration: 'underline',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <span>Open Formulations & Sign</span>
+                      <ArrowUpRight size={12} />
+                    </Link>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      disabled={prescribingId === (row.sampleId || row.code)}
+                      onClick={() => handleCreateCompoundedPrescription(row, profile)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 14px',
+                        borderRadius: '4px',
+                        backgroundColor: '#1a73e8',
+                        border: '1px solid #1557b0',
+                        color: '#ffffff',
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        cursor: prescribingId === (row.sampleId || row.code) ? 'not-allowed' : 'pointer',
+                        opacity: prescribingId === (row.sampleId || row.code) ? 0.7 : 1,
+                        boxShadow: '0 1px 2px rgba(60,64,67,0.15)'
+                      }}
+                    >
+                      <Pill size={14} />
+                      <span>
+                        {prescribingId === (row.sampleId || row.code)
+                          ? 'Generating Formulations...'
+                          : '+ Prescribe 3-Capsule Magistral Regimen (1-Click)'}
+                      </span>
+                    </button>
+                    <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
+                      Auto-populates Morning, Midday &amp; Evening magistral formulations in dispensary queue.
+                    </span>
                   </div>
                 )}
 

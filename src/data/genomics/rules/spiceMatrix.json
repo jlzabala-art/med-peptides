@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "name": "Pharmacological Spice Shield Matrix",
+  "category": "Ancestral AMPK & SIRT1 Activators",
+  "allies": [
+    {
+      "spice": "Turmeric + Black Pepper (Curcumin + Piperine)",
+      "target": "NF-kB & Systemic Anti-Inflammation",
+      "clinicalActionEn": "Downregulates pro-inflammatory cytokines (IL-6, TNF-a) and protects vascular endothelial integrity.",
+      "clinicalActionEs": "Frena citocinas inflamatorias (IL-6, TNF-a) y protege el endotelio vascular."
+    },
+    {
+      "spice": "Ceylon Cinnamon (True Cinnamon)",
+      "target": "Insulin Sensitivity & GLUT-4 Translocation",
+      "clinicalActionEn": "Mimics insulin signaling to facilitate cellular glucose uptake without triggering hyperinsulinemia.",
+      "clinicalActionEs": "Facilita la entrada de glucosa en la célula sin disparar picos excesivos de insulina."
+    },
+    {
+      "spice": "Fresh Ginger (Gingerols & Shogaols)",
+      "target": "Migrating Motor Complex (MMC) & Gastric Emptying",
+      "clinicalActionEn": "Stimulates digestive motility, prevents small intestinal bacterial overgrowth (SIBO), and enhances bile acid secretion.",
+      "clinicalActionEs": "Estimula el vaciado gástrico y previene el sobrecrecimiento bacteriano (SIBO)."
+    },
+    {
+      "spice": "Fenugreek & Cardamom",
+      "target": "Lipid Digestion & Microbiome Diversity",
+      "clinicalActionEn": "Improves digestive comfort and feeds beneficial Akkermansia muciniphila strains in the colonic mucosa.",
+      "clinicalActionEs": "Favorece la flora protectora Akkermansia muciniphila en el colon."
+    }
+  ]
+}

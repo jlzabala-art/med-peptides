@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "name": "24Genetics Precision 3-Capsule Magistral Formulary",
+  "capsules": [
+    {
+      "id": "capsule_1_morning",
+      "number": 1,
+      "time": "Morning with Breakfast",
+      "title": "Capsule 1: Methylation & Mitochondrial Vitality",
+      "instructions": "Take 1 capsule in the morning with breakfast.",
+      "items": [
+        { "name": "Methylfolate (5-MTHF Quatrefolic®)", "dose": "800 mcg", "target": "MTHFR Folate Pathway" },
+        { "name": "Methylcobalamin (Bioactive B12)", "dose": "1,000 mcg", "target": "MTR / MTRR Methylation" },
+        { "name": "CoQ10 Ubiquinol (Kaneka QH®)", "dose": "100 mg", "target": "Complex I & II Mitochondrial Electron Transport" },
+        { "name": "Riboflavin-5-Phosphate (Active B2)", "dose": "25 mg", "target": "FAD Cofactor for MTHFR" }
+      ]
+    },
+    {
+      "id": "capsule_2_midday",
+      "number": 2,
+      "time": "Midday with Lunch",
+      "title": "Capsule 2: Calcium Shield & Non-Bovine GI Shield",
+      "instructions": "Take 1 capsule with mid-day meal or prior to incidental dairy exposure.",
+      "items": [
+        { "name": "Calcium Citrate-Malate", "dose": "500 mg", "target": "Non-Dairy Calcium Bone Density Shield" },
+        { "name": "Magnesium Bisglycinate (Chelated)", "dose": "200 mg", "target": "Neuromuscular & Calcium Homeostasis" },
+        { "name": "Vitamin D3 (Cholecalciferol)", "dose": "3,000 IU", "target": "VDR Nuclear Receptor Activation" },
+        { "name": "Vitamin K2 (Menaquinone-7 / MK-7)", "dose": "100 mcg", "target": "Osteocalcin Carboxylation & Arterial Protection" },
+        { "name": "Lactase Enzyme (Tolerase® L / FCC)", "dose": "9,000 ALU", "target": "MCM6 Adult Hypolactasia Digestive Shield" }
+      ]
+    },
+    {
+      "id": "capsule_3_evening",
+      "number": 3,
+      "time": "Evening before Dinner",
+      "title": "Capsule 3: Glucose Clearance & AMPK Evening Modulator",
+      "instructions": "Take 1 capsule 15 minutes before the largest evening meal.",
+      "items": [
+        { "name": "Berberine Phytosome (Berbevis®)", "dose": "500 mg", "target": "AMPK Phosphorylation & GLUT-4 Translocation" },
+        { "name": "Chromium Picolinate", "dose": "200 mcg", "target": "IRS1 Insulin Receptor Potentiation" },
+        { "name": "Ceylon Cinnamon Extract (10:1)", "dose": "250 mg", "target": "Postprandial Glycemic Blunt" },
+        { "name": "Alpha Lipoic Acid (R-ALA)", "dose": "150 mg", "target": "Mitochondrial Glucose Oxidation & Redox" }
+      ]
+    }
+  ]
+}

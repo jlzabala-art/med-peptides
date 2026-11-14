@@ -8,6 +8,8 @@
  * "Evolutionary Mismatch" between ancient genome adaptations and modern industrial diets.
  */
 
+import spiceMatrixConfig from './rules/spiceMatrix.json';
+
 /**
  * Pure evaluation function: ancestry + SNPs -> Canonical Ancestral Profile
  */
@@ -98,38 +100,13 @@ export function evaluateAncestralMetabolicCompatibility({ ancestry = {}, snps = 
 
   // 3. Ancestral Pharmacological Spice Matrix & Phase II Detoxification
   const spiceMatrix = {
-    titleEn: 'Ancestral Pharmacological Spice Shield',
+    titleEn: spiceMatrixConfig.name || 'Ancestral Pharmacological Spice Shield',
     titleEs: 'Escudo Farmacológico de Especias Ancestrales',
     evolutionaryContextEn:
       'Indigenous Southern Asian and Harappan civilizations co-evolved with a distinct botanical pharmacopeia that protected metabolic health in warm climates.',
     evolutionaryContextEs:
       'Las civilizaciones autóctonas del sur de Asia e Indo coevolucionaron con una farmacopea botánica de especias que protegía la salud celular.',
-    keyAllies: [
-      {
-        spice: 'Turmeric + Black Pepper (Curcumin + Piperine)',
-        target: 'NF-kB & Systemic Anti-Inflammation',
-        clinicalActionEn: 'Downregulates pro-inflammatory cytokines (IL-6, TNF-a) and protects vascular endothelial integrity.',
-        clinicalActionEs: 'Frena citocinas inflamatorias (IL-6, TNF-a) y protege el endotelio vascular.'
-      },
-      {
-        spice: 'Ceylon Cinnamon (True Cinnamon)',
-        target: 'Insulin Sensitivity & GLUT-4 Translocation',
-        clinicalActionEn: 'Mimics insulin signaling to facilitate cellular glucose uptake without triggering hyperinsulinemia.',
-        clinicalActionEs: 'Facilita la entrada de glucosa en la célula sin disparar picos excesivos de insulina.'
-      },
-      {
-        spice: 'Fresh Ginger (Gingerols & Shogaols)',
-        target: 'Migrating Motor Complex (MMC) & Gastric Emptying',
-        clinicalActionEn: 'Stimulates digestive motility, prevents small intestinal bacterial overgrowth (SIBO), and enhances bile acid secretion.',
-        clinicalActionEs: 'Estimula el vaciado gástrico y previene el sobrecrecimiento bacteriano (SIBO).'
-      },
-      {
-        spice: 'Fenugreek & Cardamom',
-        target: 'Lipid Digestion & Microbiome Diversity',
-        clinicalActionEn: 'Improves digestive comfort and feeds beneficial Akkermansia muciniphila strains in the colonic mucosa.',
-        clinicalActionEs: 'Favorece la flora protectora Akkermansia muciniphila en el colon.'
-      }
-    ]
+    keyAllies: spiceMatrixConfig.allies || []
   };
 
   // 4. Maternal Lineage & Mitochondrial Longevity (Haplogroup M2a'b)

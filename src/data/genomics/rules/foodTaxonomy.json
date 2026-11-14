@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0",
+  "groups": [
+    {
+      "id": "CARBO+",
+      "number": 1,
+      "label": "🌾 Group 1: CARBO+ (Glucídico)",
+      "totalFamilies": 5,
+      "families": ["1.1", "1.2", "1.3", "1.4", "1.5"]
+    },
+    {
+      "id": "PROTEIN+",
+      "number": 2,
+      "label": "🥩 Group 2: PROTEIN+ (Proteico)",
+      "totalFamilies": 5,
+      "families": ["2.1", "2.2", "2.3", "2.4", "2.5"]
+    },
+    {
+      "id": "LIPID+",
+      "number": 3,
+      "label": "🫒 Group 3: LIPID+ (Grasas Saludables)",
+      "totalFamilies": 2,
+      "families": ["3.1", "3.2"]
+    },
+    {
+      "id": "EXTRAS",
+      "number": 4,
+      "label": "🍵 Group 4: EXTRAS (Estimulantes y Condimentos)",
+      "totalFamilies": 5,
+      "families": ["4.1", "4.2", "4.3", "4.4", "4.5"]
+    }
+  ]
+}
