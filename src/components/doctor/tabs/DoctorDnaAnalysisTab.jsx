@@ -22,8 +22,10 @@ import {
 } from 'lucide-react';
 import DataTable from '../../ui/DataTable';
 import CopyableId from '../../ui/CopyableId';
+import StatusBadge from '../../ui/StatusBadge';
 import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
-import { triangulateGenotypePhenotype } from '@/data/genomics/biomarkerTriangulationEngine';
+import { triangulateGenotypePhenotype, resolveTargetMagistralTemplate } from '@/data/genomics/biomarkerTriangulationEngine';
+import CompoundedRxCustomizerDrawer from '../dna/CompoundedRxCustomizerDrawer';
 
 /**
  * DoctorDnaAnalysisTab
@@ -48,11 +50,36 @@ export default function DoctorDnaAnalysisTab({
   const [prescribingId, setPrescribingId] = useState(null);
   const [createdRx, setCreatedRx] = useState({});
   const [copiedWhatsAppId, setCopiedWhatsAppId] = useState(null);
+  const [kpiScope, setKpiScope] = useState('active');
+  const [drawerData, setDrawerData] = useState({
+    isOpen: false,
+    row: null,
+    profile: null,
+    formulation: null
+  });
+
+  const handleOpenCustomizer = (row, profile) => {
+    const resolved = resolveTargetMagistralTemplate({
+      genomicProfile: profile,
+      labResults: row.labResults || []
+    });
+    setDrawerData({
+      isOpen: true,
+      row,
+      profile,
+      formulation: resolved
+    });
+  };
 
   const handleCreateCompoundedPrescription = async (row, profile) => {
     const sampleKey = row.sampleId || row.code;
     setPrescribingId(sampleKey);
     try {
+      const resolved = resolveTargetMagistralTemplate({
+        genomicProfile: profile,
+        labResults: row.labResults || []
+      });
+
       const res = await fetch('/api/prescriptions/create-compounded', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,51 +96,21 @@ export default function DoctorDnaAnalysisTab({
             dob: row.patient?.dob || '1988-04-12',
             gender: row.patient?.gender || 'Female'
           },
-          treatmentTitle: '24Genetics Precision Nutrigenomic Regimen (3-Capsule Magistral)',
-          formulationBlocks: [
-            {
-              title: 'Capsule 1: Methylation & Mitochondrial Vitality (Morning)',
-              items: [
-                { name: 'Methylfolate (5-MTHF Quatrefolic®)', dose: '800 mcg' },
-                { name: 'Methylcobalamin (Bioactive B12)', dose: '1,000 mcg' },
-                { name: 'CoQ10 Ubiquinol (Kaneka QH®)', dose: '100 mg' },
-                { name: 'Riboflavin-5-Phosphate (Active B2)', dose: '25 mg' }
-              ],
-              instructions: 'Take 1 capsule in the morning with breakfast.'
-            },
-            {
-              title: 'Capsule 2: Calcium Shield & Non-Bovine GI Shield (Midday)',
-              items: [
-                { name: 'Calcium Citrate-Malate', dose: '500 mg' },
-                { name: 'Magnesium Bisglycinate (Chelated)', dose: '200 mg' },
-                { name: 'Vitamin D3 (Cholecalciferol)', dose: '3,000 IU' },
-                { name: 'Vitamin K2 (Menaquinone-7 / MK-7)', dose: '100 mcg' },
-                { name: 'Lactase Enzyme (Tolerase® L / FCC)', dose: '9,000 ALU' }
-              ],
-              instructions: 'Take 1 capsule with mid-day meal or prior to incidental dairy exposure.'
-            },
-            {
-              title: 'Capsule 3: Glucose Clearance & AMPK Evening Modulator (Evening)',
-              items: [
-                { name: 'Berberine Phytosome (Berbevis®)', dose: '500 mg' },
-                { name: 'Chromium Picolinate', dose: '200 mcg' },
-                { name: 'Ceylon Cinnamon Extract (10:1)', dose: '250 mg' },
-                { name: 'Alpha Lipoic Acid (R-ALA)', dose: '150 mg' }
-              ],
-              instructions: 'Take 1 capsule 15 minutes before the largest evening meal.'
-            }
-          ],
-          formulaSummary: 'Genomically tailored 3-capsule compounded protocol addressing MCM6 GG hypolactasia, FTO/IRS1 glycemic sensitivity, and mitochondrial maternal longevity.',
+          treatmentTitle: resolved.title || 'Atlas Precision Nutrigenomic Regimen (3-Capsule Magistral)',
+          formulationBlocks: resolved.formulationBlocks,
+          formulaSummary: resolved.summaryRationale,
           nutrigenomicProfile: {
             sampleId: sampleKey,
             genotypes: profile?.genotypesEvaluated || {},
+            templateId: resolved.templateId,
             score: 85
           }
         })
       });
       const data = await res.json();
-      if (data.success && data.prescription) {
-        setCreatedRx(prev => ({ ...prev, [sampleKey]: data.prescription }));
+      if (data.success && (data.rxCode || data.prescription)) {
+        const code = data.rxCode || data.prescription?.code;
+        setCreatedRx(prev => ({ ...prev, [sampleKey]: { code, id: data.id } }));
       }
     } catch (err) {
       console.error('Failed to create compounded prescription:', err);
@@ -421,6 +418,75 @@ export default function DoctorDnaAnalysisTab({
         gap: '16px'
       }}
     >
+      {/* ── Scope Switcher & Filter Indicator (Golden Rule #22) ── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+          padding: '6px 12px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '6px',
+          border: '1px solid #e8eaed'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.74rem' }}>
+          <span style={{ color: '#5f6368', fontWeight: 600 }}>KPI Analytics Scope:</span>
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: '12px',
+              backgroundColor: kpiScope === 'active' ? '#e8f0fe' : '#e6f4ea',
+              color: kpiScope === 'active' ? '#1a73e8' : '#137333',
+              border: kpiScope === 'active' ? '1px solid #d2e3fc' : '1px solid #ceead6',
+              fontWeight: 700,
+              fontSize: '0.68rem'
+            }}
+          >
+            {kpiScope === 'active'
+              ? `Matching Active Filters (${filteredData.length} specimens)`
+              : `Entire Clinic Database (${dnaResults.length} unfilitered)`}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            type="button"
+            onClick={() => setKpiScope('active')}
+            style={{
+              padding: '3px 10px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              borderRadius: '4px',
+              border: kpiScope === 'active' ? '1px solid #1a73e8' : '1px solid #dadce0',
+              backgroundColor: kpiScope === 'active' ? '#e8f0fe' : '#ffffff',
+              color: kpiScope === 'active' ? '#1a73e8' : '#5f6368',
+              cursor: 'pointer'
+            }}
+          >
+            Filtered View ({filteredData.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setKpiScope('all')}
+            style={{
+              padding: '3px 10px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              borderRadius: '4px',
+              border: kpiScope === 'all' ? '1px solid #1a73e8' : '1px solid #dadce0',
+              backgroundColor: kpiScope === 'all' ? '#e8f0fe' : '#ffffff',
+              color: kpiScope === 'all' ? '#1a73e8' : '#5f6368',
+              cursor: 'pointer'
+            }}
+          >
+            Entire Practice ({dnaResults.length})
+          </button>
+        </div>
+      </div>
+
       {/* ── 4 Top Google Cloud Style KPI Cards (Golden Rule #22) ── */}
       <div
         style={{
@@ -444,7 +510,7 @@ export default function DoctorDnaAnalysisTab({
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
             <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#202124' }}>
-              {dnaResults.length}
+              {kpiScope === 'active' ? filteredData.length : dnaResults.length}
             </span>
             <span style={{ fontSize: '0.70rem', color: '#137333', fontWeight: 500, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px' }}>
               Active in Practice
@@ -938,8 +1004,7 @@ export default function DoctorDnaAnalysisTab({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <button
                       type="button"
-                      disabled={prescribingId === (row.sampleId || row.code)}
-                      onClick={() => handleCreateCompoundedPrescription(row, profile)}
+                      onClick={() => handleOpenCustomizer(row, profile)}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -951,20 +1016,42 @@ export default function DoctorDnaAnalysisTab({
                         color: '#ffffff',
                         fontSize: '0.76rem',
                         fontWeight: 600,
-                        cursor: prescribingId === (row.sampleId || row.code) ? 'not-allowed' : 'pointer',
-                        opacity: prescribingId === (row.sampleId || row.code) ? 0.7 : 1,
+                        cursor: 'pointer',
                         boxShadow: '0 1px 2px rgba(60,64,67,0.15)'
                       }}
                     >
-                      <Pill size={14} />
+                      <SlidersHorizontal size={14} />
+                      <span>Review &amp; Customize Magistral Formula</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={prescribingId === (row.sampleId || row.code)}
+                      onClick={() => handleCreateCompoundedPrescription(row, profile)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 12px',
+                        borderRadius: '4px',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #dadce0',
+                        color: '#3c4043',
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        cursor: prescribingId === (row.sampleId || row.code) ? 'not-allowed' : 'pointer',
+                        opacity: prescribingId === (row.sampleId || row.code) ? 0.7 : 1
+                      }}
+                    >
+                      <Pill size={14} color="#1a73e8" />
                       <span>
                         {prescribingId === (row.sampleId || row.code)
-                          ? 'Generating Formulations...'
-                          : '+ Prescribe 3-Capsule Magistral Regimen (1-Click)'}
+                          ? 'Generating...'
+                          : 'Quick 1-Click Issue'}
                       </span>
                     </button>
                     <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
-                      Auto-populates Morning, Midday &amp; Evening magistral formulations in dispensary queue.
+                      Auto-calibrates Morning, Midday &amp; Evening capsules for MCM6, FTO and active NAD+.
                     </span>
                   </div>
                 )}
@@ -1022,6 +1109,30 @@ export default function DoctorDnaAnalysisTab({
           }}
         />
       </div>
+
+      {/* Interactive Compounded Prescription Customizer Drawer (Rule #4 & #25) */}
+      <CompoundedRxCustomizerDrawer
+        isOpen={drawerData.isOpen}
+        onClose={() => setDrawerData(prev => ({ ...prev, isOpen: false }))}
+        patientData={{
+          name: drawerData.row?.patientName || 'Ms. Wafa Burud',
+          id: drawerData.row?.patient?.id || `pt-${drawerData.row?.sampleId || drawerData.row?.code}`,
+          sampleId: drawerData.row?.sampleId || drawerData.row?.code || 'G000943568',
+          dob: drawerData.row?.patient?.dob,
+          gender: drawerData.row?.patient?.gender
+        }}
+        doctorData={{
+          id: slug || 'dr-sajid-burud',
+          name: drawerData.row?.doctorName || 'Dr. Sajid Burud',
+          license: 'DHA-00132881',
+          clinic: drawerData.row?.clinicName || 'Transcend Healthcare'
+        }}
+        initialFormulation={drawerData.formulation}
+        onSuccess={(data) => {
+          const key = drawerData.row?.sampleId || drawerData.row?.code;
+          setCreatedRx(prev => ({ ...prev, [key]: { code: data.rxCode, id: data.id } }));
+        }}
+      />
     </section>
   );
 }

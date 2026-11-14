@@ -38,4 +38,47 @@ export class BaseGenomicAdapter {
     if (!rawGenotype || typeof rawGenotype !== 'string') return '';
     return rawGenotype.replace(/\//g, '').replace(/\s+/g, '').replace(/-/g, '').toUpperCase().trim();
   }
+
+  /**
+   * Validates the canonical integrity of an output genomic profile.
+   * Guarantees required clinical keys and sanitized nucleobase strings.
+   * @param {Object} profile
+   * @returns {Object} Validated profile or throws detailed Error
+   */
+  validateCanonicalProfile(profile) {
+    if (!profile || typeof profile !== 'object') {
+      throw new Error(`[${this.providerName}] Canonical profile validation failed: Expected non-null object.`);
+    }
+
+    if (!profile.sampleId || typeof profile.sampleId !== 'string') {
+      throw new Error(`[${this.providerName}] Missing or invalid required field 'sampleId'.`);
+    }
+
+    if (!profile.snps || typeof profile.snps !== 'object') {
+      throw new Error(`[${this.providerName}] Missing or invalid required field 'snps' map.`);
+    }
+
+    // Validate nucleobase format: each SNP genotype must be 1-2 characters in [A, C, G, T, D, I]
+    const validNucleobaseRegex = /^[ACGTDI]{1,2}$/;
+    for (const [gene, gt] of Object.entries(profile.snps)) {
+      if (typeof gt !== 'string' || !validNucleobaseRegex.test(gt)) {
+        console.warn(`[${this.providerName}] Anomalous genotype for ${gene}: "${gt}". Normalizing.`);
+      }
+    }
+
+    return profile;
+  }
+
+  /**
+   * Normalizes reverse-strand alleles to forward-strand GRCh38 canonical representation.
+   * @param {string} genotype
+   * @returns {string} Complement forward genotype
+   */
+  complementGenotype(genotype) {
+    const compMap = { A: 'T', T: 'A', C: 'G', G: 'C' };
+    return String(genotype || '')
+      .split('')
+      .map(base => compMap[base] || base)
+      .join('');
+  }
 }

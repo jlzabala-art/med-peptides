@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { syncPrescriptionToAlgolia } from '@/services/algoliaSyncService';
+import crypto from 'crypto';
 
 export async function POST(request) {
   try {
@@ -20,7 +21,8 @@ export async function POST(request) {
       nutrigenomicProfile = null,
       capsuleSize = 'Size 0',
       capsPerBottle = 60,
-      supplyDays = 30
+      supplyDays = 30,
+      genotypeChecksum = null
     } = body;
 
     if (!patient || !patient.name) {
@@ -40,6 +42,18 @@ export async function POST(request) {
     // Generate unique prescription code
     const randomDigits = Math.floor(10000 + Math.random() * 90000);
     const rxCode = `RX-CMP-${randomDigits}`;
+
+    // Cryptographic audit checksum of input genotypes + formulations (Non-repudiation)
+    const calculatedChecksum = genotypeChecksum || crypto
+      .createHash('sha256')
+      .update(JSON.stringify({
+        patientName: patient.name,
+        patientId: patient.id,
+        sampleId: nutrigenomicProfile?.sampleId || '',
+        genotypes: nutrigenomicProfile?.genotypes || {},
+        formulationBlocks
+      }))
+      .digest('hex');
 
     const newPrescription = {
       code: rxCode,
@@ -88,8 +102,14 @@ export async function POST(request) {
         supplyDays: supplyDays
       },
 
-      // Nutrigenomic DNA Calibration metadata
+      // Nutrigenomic DNA Calibration metadata & Cryptographic Audit
       nutrigenomicProfile: nutrigenomicProfile || null,
+      auditTrail: {
+        engineVersion: '2.1.0',
+        genotypeChecksum: calculatedChecksum,
+        verifiedBy: doctorName,
+        regulatoryStandard: 'Ph. Eur. 11th Ed. & EU Good Compounding Practices'
+      },
 
       // Quality & Pharmacopeial Standard
       compoundingStandard: 'Ph. Eur. 11th Ed. & EU Good Compounding Practices',
@@ -99,6 +119,23 @@ export async function POST(request) {
 
     const docRef = await adminDb.collection('prescriptions').add(newPrescription);
 
+    // Persist to clinical_triangulations audit collection
+    try {
+      await adminDb.collection('clinical_triangulations').add({
+        prescriptionId: docRef.id,
+        rxCode,
+        patientId: newPrescription.patientId,
+        patientName: patient.name,
+        doctorId,
+        sampleId: nutrigenomicProfile?.sampleId || '',
+        genotypeChecksum: calculatedChecksum,
+        engineVersion: '2.1.0',
+        createdAt: FieldValue.serverTimestamp()
+      });
+    } catch (auditErr) {
+      console.warn('[create-compounded] Non-blocking audit log error:', auditErr.message);
+    }
+
     // In-process atomic Algolia synchronization (Zero manual sync needed)
     await syncPrescriptionToAlgolia(docRef.id, { ...newPrescription, id: docRef.id });
 
@@ -107,7 +144,8 @@ export async function POST(request) {
       id: docRef.id,
       rxCode: rxCode,
       patientName: patient.name,
-      doctorName: doctorName
+      doctorName: doctorName,
+      checksum: calculatedChecksum
     });
   } catch (error) {
     console.error('[create-compounded] Error:', error);

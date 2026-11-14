@@ -13,11 +13,13 @@ import spiceMatrixConfig from './rules/spiceMatrix.json';
 /**
  * Pure evaluation function: ancestry + SNPs -> Canonical Ancestral Profile
  */
-export function evaluateAncestralMetabolicCompatibility({ ancestry = {}, snps = {} } = {}) {
+export function evaluateAncestralMetabolicCompatibility({ ancestry = {}, snps = {}, customSpiceMatrix = null } = {}) {
   const haplogroup = ancestry.maternalHaplogroup || "M2a'b";
   const primaryRegion = ancestry.primaryRegion || 'South Asia / Indian Subcontinent';
   const primaryPercent = ancestry.primaryRegionPercent || 80.61;
   const neanderthal = ancestry.neanderthalPercent || 1.5;
+
+  const activeSpiceConfig = customSpiceMatrix || spiceMatrixConfig;
 
   // 1. Dairy Evolution & Lactase Persistence (MCM6)
   const mcm6 = snps.MCM6_rs4988235 || snps.MCM6 || 'GG';
@@ -100,13 +102,13 @@ export function evaluateAncestralMetabolicCompatibility({ ancestry = {}, snps = 
 
   // 3. Ancestral Pharmacological Spice Matrix & Phase II Detoxification
   const spiceMatrix = {
-    titleEn: spiceMatrixConfig.name || 'Ancestral Pharmacological Spice Shield',
+    titleEn: activeSpiceConfig.name || 'Ancestral Pharmacological Spice Shield',
     titleEs: 'Escudo Farmacológico de Especias Ancestrales',
     evolutionaryContextEn:
       'Indigenous Southern Asian and Harappan civilizations co-evolved with a distinct botanical pharmacopeia that protected metabolic health in warm climates.',
     evolutionaryContextEs:
       'Las civilizaciones autóctonas del sur de Asia e Indo coevolucionaron con una farmacopea botánica de especias que protegía la salud celular.',
-    keyAllies: spiceMatrixConfig.allies || []
+    keyAllies: activeSpiceConfig.allies || []
   };
 
   // 4. Maternal Lineage & Mitochondrial Longevity (Haplogroup M2a'b)

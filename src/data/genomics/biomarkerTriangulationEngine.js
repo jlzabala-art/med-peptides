@@ -119,3 +119,157 @@ export function triangulateGenotypePhenotype({
     evaluatedAt: new Date().toISOString()
   };
 }
+
+/**
+ * Resolves the personalized compounding magistral formulation blocks dynamically,
+ * tailoring each capsule based on evaluated SNPs and active biomarker levels.
+ */
+export function resolveTargetMagistralTemplate({
+  genomicProfile = null,
+  labResults = []
+} = {}) {
+  const snps = genomicProfile?.genotypesEvaluated || {};
+  const isHypolactasic = snps.MCM6 === 'GG' || snps.MCM6 === 'AG';
+  const hasGlycemicRisk = snps.FTO === 'AC' || snps.FTO === 'AA' || snps.IRS1 === 'TC' || snps.IRS1 === 'CC';
+  const hasMthfrRisk = snps.MTHFR === 'CT' || snps.MTHFR === 'TT';
+
+  const nadLab = labResults.find(r => 
+    String(r.testName || r.biomarker || '').toLowerCase().includes('nad')
+  );
+  const nadVal = nadLab ? Number(nadLab.value || 85) : 85;
+  const isNadDepleted = nadVal < 21.7;
+
+  const formulationBlocks = [
+    {
+      id: 'block_morning',
+      enabled: true,
+      time: 'Morning with Breakfast',
+      title: 'Capsule 1: Methylation & Mitochondrial Vitality',
+      instructions: 'Take 1 capsule in the morning with breakfast and water.',
+      items: [
+        {
+          name: 'Methylfolate (5-MTHF Quatrefolic®)',
+          dose: hasMthfrRisk ? '1,000 mcg' : '800 mcg',
+          target: 'MTHFR One-Carbon Folate Pathway',
+          enabled: true
+        },
+        {
+          name: 'Methylcobalamin (Bioactive B12)',
+          dose: '1,000 mcg',
+          target: 'MTR / MTRR Methylation & Neuroprotection',
+          enabled: true
+        },
+        {
+          name: 'CoQ10 Ubiquinol (Kaneka QH®)',
+          dose: isNadDepleted ? '150 mg' : '100 mg',
+          target: 'Mitochondrial Electron Transport Complex I & II',
+          enabled: true
+        },
+        {
+          name: 'Riboflavin-5-Phosphate (Active B2)',
+          dose: '25 mg',
+          target: 'FAD Cofactor for MTHFR & Cellular Redox',
+          enabled: true
+        }
+      ]
+    },
+    {
+      id: 'block_midday',
+      enabled: true,
+      time: 'Midday with Lunch',
+      title: isHypolactasic
+        ? 'Capsule 2: Calcium Shield & Non-Bovine GI Shield'
+        : 'Capsule 2: Mineral Balance & Bone Homeostasis',
+      instructions: 'Take 1 capsule with midday meal.',
+      items: [
+        {
+          name: 'Calcium Citrate-Malate',
+          dose: isHypolactasic ? '500 mg' : '350 mg',
+          target: 'Non-Dairy Bioavailable Calcium Skeleton',
+          enabled: true
+        },
+        {
+          name: 'Magnesium Bisglycinate (Chelated)',
+          dose: '200 mg',
+          target: 'Neuromuscular & Calcium Equilibrium',
+          enabled: true
+        },
+        {
+          name: 'Vitamin D3 (Cholecalciferol)',
+          dose: '3,000 IU',
+          target: 'VDR Nuclear Receptor Activation',
+          enabled: true
+        },
+        {
+          name: 'Vitamin K2 (Menaquinone-7 / MK-7)',
+          dose: '100 mcg',
+          target: 'Osteocalcin Carboxylation & Arterial Elasticity',
+          enabled: true
+        },
+        ...(isHypolactasic ? [
+          {
+            name: 'Lactase Enzyme (Tolerase® L / FCC)',
+            dose: '9,000 ALU',
+            target: 'MCM6 Adult Hypolactasia Barrier Protection',
+            enabled: true
+          }
+        ] : [])
+      ]
+    },
+    {
+      id: 'block_evening',
+      enabled: true,
+      time: 'Evening before Dinner',
+      title: isNadDepleted
+        ? 'Capsule 3: Cellular NAD+ Repletion & AMPK Modulator'
+        : 'Capsule 3: Glucose Clearance & Evening AMPK Modulator',
+      instructions: 'Take 1 capsule 15 minutes before the largest evening meal.',
+      items: [
+        ...(isNadDepleted ? [
+          {
+            name: 'Liposomal NMN (Nicotinamide Mononucleotide)',
+            dose: '350 mg',
+            target: 'Direct NAD+ Precursor & Sirtuin Activation',
+            enabled: true
+          },
+          {
+            name: 'Quercetin Phytosome (Sophora japonica)',
+            dose: '250 mg',
+            target: 'CD38 Enzyme Inhibition & Senolytic Synergy',
+            enabled: true
+          }
+        ] : []),
+        {
+          name: 'Berberine Phytosome (Berbevis®)',
+          dose: hasGlycemicRisk ? '500 mg' : '300 mg',
+          target: 'AMPK Phosphorylation & Glucose Clearance',
+          enabled: true
+        },
+        {
+          name: 'Ceylon Cinnamon Extract (10:1)',
+          dose: '250 mg',
+          target: 'Postprandial Insulin Receptor Sensitivity',
+          enabled: true
+        },
+        {
+          name: 'Alpha Lipoic Acid (R-ALA)',
+          dose: '150 mg',
+          target: 'Mitochondrial Glucose Oxidation & Glutathione Synergy',
+          enabled: true
+        }
+      ]
+    }
+  ];
+
+  return {
+    templateId: isNadDepleted ? 'nad_sirtuin_methylation_triangulated' : 'three_capsule_precision_nutrigenomics',
+    title: isNadDepleted
+      ? 'Atlas NAD+ Precision Triangulated Magistral Formulary (3-Capsule)'
+      : 'Atlas 24Genetics Precision Nutrigenomic Regimen (3-Capsule)',
+    isNadDepleted,
+    isHypolactasic,
+    hasGlycemicRisk,
+    formulationBlocks,
+    summaryRationale: `Precision magistral compound addressing ${isHypolactasic ? 'MCM6 GG hypolactasia (dairy exclusion + lactase shield), ' : ''}${hasGlycemicRisk ? 'FTO/IRS1 glycemic sensitivity (Berbevis® + R-ALA), ' : ''}${isNadDepleted ? `and Cellular NAD+ depletion (${nadVal} score via Liposomal NMN + Quercetin CD38 inhibitor).` : 'and mitochondrial vitality.'}`
+  };
+}

@@ -14,6 +14,46 @@ export default function DnaFoodMatrixSection({ clinicalProfile, initialViewMode 
   const [foodTrafficFilter, setFoodTrafficFilter] = useState('all');
   const [foodSearchQuery, setFoodSearchQuery] = useState('');
   const [onlyDairyFreeSafe, setOnlyDairyFreeSafe] = useState(false);
+  const [checkedGroceryItems, setCheckedGroceryItems] = useState({});
+  const [copiedGroceryList, setCopiedGroceryList] = useState(false);
+
+  const toggleGroceryItem = (name) => {
+    setCheckedGroceryItems(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
+
+  const handleCopyGroceryList = () => {
+    const catalog = clinicalProfile?.masterFoodCatalog || [];
+    const safeFoods = catalog.filter(f => f.trafficLight === 'GREEN' || (f.trafficLight === 'YELLOW' && f.ruleEn?.includes('grass-fed')));
+    
+    let text = `🛒 *MY GENOMIC SAFE GROCERY LIST* · Atlas Precision Health\n`;
+    text += `👤 Genotype Calibrated: MCM6 GG (Dairy-Free) · FTO (Glycemic Safe)\n\n`;
+
+    const groups = {
+      '🥦 Fresh Produce & Greens': safeFoods.filter(f => f.fagronSubfamily?.toLowerCase().includes('veg') || f.fagronSubfamily?.toLowerCase().includes('green')),
+      '🥩 Seafood & Pastured Proteins': safeFoods.filter(f => f.fagronSubfamily?.toLowerCase().includes('fish') || f.fagronSubfamily?.toLowerCase().includes('meat') || f.fagronSubfamily?.toLowerCase().includes('poultry')),
+      '🧈 Healthy Fats & A2 Ferments': safeFoods.filter(f => f.fagronSubfamily?.toLowerCase().includes('oil') || f.nameEn?.toLowerCase().includes('ghee') || f.nameEn?.toLowerCase().includes('parmigiano')),
+      '🌿 Spices, Teas & Pantry': safeFoods.filter(f => f.fagronSubfamily?.toLowerCase().includes('spice') || f.fagronSubfamily?.toLowerCase().includes('tea') || f.fagronSubfamily?.toLowerCase().includes('seed'))
+    };
+
+    Object.entries(groups).forEach(([grpTitle, items]) => {
+      if (items.length > 0) {
+        text += `*${grpTitle}*\n`;
+        items.slice(0, 8).forEach(item => {
+          text += `  • [ ] ${item.nameEn} (${item.portionRuleEn || 'Eat freely'})\n`;
+        });
+        text += `\n`;
+      }
+    });
+
+    text += `⚠️ *STRICT AVOIDANCE AT SUPERMARKET:* Cow's milk, Processed soft cheeses, Soy lecithin, Refined seed oils.`;
+
+    navigator.clipboard.writeText(text);
+    setCopiedGroceryList(true);
+    setTimeout(() => setCopiedGroceryList(false), 3500);
+  };
 
   if (!clinicalProfile) return null;
 
@@ -99,6 +139,23 @@ export default function DnaFoodMatrixSection({ clinicalProfile, initialViewMode 
             }}
           >
             Top Clinical Highlights
+          </button>
+          <button
+            type="button"
+            onClick={() => setFoodViewMode('grocery_list')}
+            style={{
+              padding: '6px 14px',
+              fontSize: '0.75rem',
+              fontWeight: 750,
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: foodViewMode === 'grocery_list' ? '#0d9488' : 'transparent',
+              color: foodViewMode === 'grocery_list' ? '#ffffff' : '#64748b',
+              boxShadow: foodViewMode === 'grocery_list' ? '0 1px 3px rgba(0,0,0,0.12)' : 'none',
+              cursor: 'pointer'
+            }}
+          >
+            🛒 Grocery Shopping List
           </button>
         </div>
       </div>
@@ -460,6 +517,210 @@ export default function DnaFoodMatrixSection({ clinicalProfile, initialViewMode 
             )}
           </div>
         </>
+      ) : foodViewMode === 'grocery_list' ? (
+        /* 🛒 Supermarket Safe Shopping List Mode (Mobile-First Rule #23) */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Action & Info Banner */}
+          <div
+            style={{
+              padding: '14px 18px',
+              backgroundColor: '#f0fdfa',
+              border: '1px solid #ccfbf1',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.1rem' }}>🛒</span>
+                <strong style={{ fontSize: '0.94rem', color: '#0f766e', fontWeight: 800 }}>
+                  Genomically Safe Supermarket Shopping Guide
+                </strong>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, backgroundColor: '#ccfbf1', color: '#115e59', padding: '2px 8px', borderRadius: '12px' }}>
+                  Mobile-Optimized Checklist
+                </span>
+              </div>
+              <p style={{ margin: '3px 0 0 0', fontSize: '0.78rem', color: '#134e4a' }}>
+                Tap items to cross them off your basket while shopping. Zero commercial cow dairy, zero inflammatory seed oils.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={handleCopyGroceryList}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  backgroundColor: '#0d9488',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 3px rgba(13,148,136,0.25)'
+                }}
+              >
+                <span>{copiedGroceryList ? 'Copied to Clipboard ✓' : '📲 Copy to WhatsApp'}</span>
+              </button>
+
+              {Object.values(checkedGroceryItems).some(Boolean) && (
+                <button
+                  type="button"
+                  onClick={() => setCheckedGroceryItems({})}
+                  style={{
+                    padding: '7px 12px',
+                    backgroundColor: '#ffffff',
+                    color: '#64748b',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Clear Checks
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Supermarket Aisles Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+            {[
+              {
+                id: 'produce',
+                icon: '🥦',
+                title: 'Aisle 1: Fresh Produce & Organic Greens',
+                subtitle: 'High natural folate & antioxidant density',
+                filter: (f) => f.trafficLight === 'GREEN' && (f.fagronSubfamily?.toLowerCase().includes('veg') || f.fagronSubfamily?.toLowerCase().includes('green') || f.fagronSubfamily?.toLowerCase().includes('cruc') || f.fagronSubfamily?.toLowerCase().includes('allium'))
+              },
+              {
+                id: 'protein',
+                icon: '🥩',
+                title: 'Aisle 2: Wild Fish & Pastured Proteins',
+                subtitle: 'High omega-3 & complete amino acid profile',
+                filter: (f) => f.trafficLight === 'GREEN' && (f.fagronSubfamily?.toLowerCase().includes('fish') || f.fagronSubfamily?.toLowerCase().includes('meat') || f.fagronSubfamily?.toLowerCase().includes('poultry') || f.fagronSubfamily?.toLowerCase().includes('egg'))
+              },
+              {
+                id: 'fats',
+                icon: '🧈',
+                title: 'Aisle 3: Clarified Fats & A2 Fermented Dairy',
+                subtitle: 'Zero A1 beta-casein · 100% lactose-free Ghee',
+                filter: (f) => (f.trafficLight === 'GREEN' || f.trafficLight === 'YELLOW') && (f.fagronSubfamily?.toLowerCase().includes('oil') || f.nameEn?.toLowerCase().includes('ghee') || f.nameEn?.toLowerCase().includes('parmigiano') || f.nameEn?.toLowerCase().includes('kefir') || f.nameEn?.toLowerCase().includes('avocado'))
+              },
+              {
+                id: 'pantry',
+                icon: '🌿',
+                title: 'Aisle 4: Spices, Teas & Gluten-Free Seeds',
+                subtitle: 'AMPK modulators & gut barrier support',
+                filter: (f) => f.trafficLight === 'GREEN' && (f.fagronSubfamily?.toLowerCase().includes('spice') || f.fagronSubfamily?.toLowerCase().includes('tea') || f.fagronSubfamily?.toLowerCase().includes('seed') || f.fagronSubfamily?.toLowerCase().includes('grain'))
+              }
+            ].map(aisle => {
+              const aisleItems = (clinicalProfile.masterFoodCatalog || []).filter(aisle.filter);
+              return (
+                <div
+                  key={aisle.id}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '10px',
+                    padding: '14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                    <span style={{ fontSize: '1.2rem' }}>{aisle.icon}</span>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+                        {aisle.title}
+                      </h4>
+                      <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                        {aisle.subtitle} ({aisleItems.length} items)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {aisleItems.slice(0, 10).map((food, idx) => {
+                      const isChecked = !!checkedGroceryItems[food.nameEn];
+                      return (
+                        <label
+                          key={idx}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            padding: '8px 10px',
+                            borderRadius: '6px',
+                            backgroundColor: isChecked ? '#f1f5f9' : '#f8fafc',
+                            border: isChecked ? '1px solid #cbd5e1' : '1px solid #e2e8f0',
+                            cursor: 'pointer',
+                            minHeight: '44px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleGroceryItem(food.nameEn)}
+                            style={{
+                              width: '18px',
+                              height: '18px',
+                              cursor: 'pointer',
+                              accentColor: '#0d9488'
+                            }}
+                          />
+                          <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <div
+                                style={{
+                                  fontSize: '0.82rem',
+                                  fontWeight: 700,
+                                  color: isChecked ? '#94a3b8' : '#0f172a',
+                                  textDecoration: isChecked ? 'line-through' : 'none'
+                                }}
+                              >
+                                {food.nameEn}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: isChecked ? '#cbd5e1' : '#64748b' }}>
+                                {food.portionRuleEn || 'Eat freely in meals'}
+                              </div>
+                            </div>
+                            <span
+                              style={{
+                                fontSize: '0.64rem',
+                                fontWeight: 700,
+                                backgroundColor: isChecked ? '#e2e8f0' : '#f0fdf4',
+                                color: isChecked ? '#94a3b8' : '#166534',
+                                border: '1px solid',
+                                borderColor: isChecked ? '#cbd5e1' : '#bbf7d0',
+                                padding: '1px 6px',
+                                borderRadius: '4px'
+                              }}
+                            >
+                              Safe
+                            </span>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       ) : (
         /* Master Food Catalog Explorer (All 116 Foods) */
         <div>
