@@ -41,10 +41,10 @@ export const NAVIGATION_REGISTRY = [
     id: 'catalog',
     label: 'Catalog & Pricing',
     icon: Package,
-    roles: ['admin', 'pharmacist', 'medical_director', 'doctor', 'sales', 'operations'],
+    roles: ['admin', 'pharmacist', 'medical_director', 'doctor', 'sales', 'operations', 'wholesaler', 'wholeseller', 'distributor'],
     items: [
-      { id: 'catalog',         label: 'Product Catalog', icon: Search,          roles: ['admin', 'pharmacist', 'medical_director', 'sales', 'operations'] },
-      { id: 'price-schedules', label: 'Price Schedules', icon: FileSpreadsheet, roles: ['admin', 'pharmacist', 'medical_director', 'doctor', 'sales', 'operations'] },
+      { id: 'catalog',         label: 'Product Catalog', icon: Search,          roles: ['admin', 'pharmacist', 'medical_director', 'sales', 'operations', 'wholesaler', 'wholeseller', 'distributor'] },
+      { id: 'price-schedules', label: 'Price Schedules', icon: FileSpreadsheet, roles: ['admin', 'pharmacist', 'medical_director', 'doctor', 'sales', 'operations', 'wholesaler', 'wholeseller', 'distributor'] },
       { id: 'inventory',       label: 'Inventory',       icon: Database,        roles: ['admin', 'pharmacist', 'operations'] },
     ]
   },

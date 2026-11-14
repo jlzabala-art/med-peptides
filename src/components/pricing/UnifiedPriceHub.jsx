@@ -3,34 +3,33 @@
 /**
  * components/pricing/UnifiedPriceHub.jsx
  * ─────────────────────────────────────────────────────────────────────────────
- * Unified Price Hub — Single entry point for ALL product group price schedules.
+ * Unified Price Hub — Single consolidated entry point for ALL product group price schedules.
  *
  * Golden Rules compliance:
- *  #2  – Firestore-first; lazy per-tab fetch on tab activation
- *  #3  – All tabular data via DataTable
+ *  #2  – Firestore-first via /api/catalog/public
+ *  #3  – All tabular data via DataTable (DataTable.jsx)
  *  #7  – GlobalSearchBar always first
  *  #8  – StatusBadge for availability
- *  #11 – CopyableId for product codes
+ *  #11 – CopyableId for product codes / SKUs
  *  #22 – 4 KPIs + Scope Switcher
  *  #23 – Mobile-first (responsive columns)
  *  #30 – No horizontal scroll; explicit column widths
  *
  * Price Tier Rules:
- *  - Guest/anonymous → cost × 1.3225 (wholesaler public price)
+ *  - Guest/anonymous → cost × 1.3225 (wholesaler public price = cost × 1.15 × 1.15)
  *  - Registered user → their tier from usePriceTier hook
- *  - Mediluxe staff  → sees all columns
+ *  - Mediluxe staff  → sees cost, wholesale, clinic, and margin columns
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import React, { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  FlaskConical, Dna, Scissors, Package, Layers, TestTube, Wheat,
-  Activity, Microscope, ShieldCheck, Lock, LogIn, Eye, ChevronRight,
-  TrendingUp, Tag, DollarSign, List, RefreshCw, ExternalLink, Info,
-  Zap, Globe, Users, ArrowRight, Building2
+  FlaskConical, Dna, Scissors, Package, Layers, TestTube,
+  Activity, Microscope, ShieldCheck, Lock, Eye, ChevronRight,
+  Tag, DollarSign, List, ExternalLink, ArrowRight, Building2,
+  CheckCircle2, Sparkles, Filter, X
 } from 'lucide-react';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
 
 import PageHeader          from '@/components/ui/PageHeader';
 import GlobalSearchBar     from '@/components/ui/GlobalSearchBar';
@@ -46,7 +45,7 @@ import GcpUserBadge        from '@/components/shared/GcpUserBadge';
 
 import { usePriceTier, TIER_COLORS, TIER_LABELS } from '@/hooks/pricing/usePriceTier';
 
-// ─── Tab / Group Registry ─────────────────────────────────────────────────────
+// ─── 12 Aggregated Price Groups Registry ──────────────────────────────────────
 
 export const PRICE_GROUPS = [
   {
@@ -55,7 +54,7 @@ export const PRICE_GROUPS = [
     icon: FlaskConical,
     badge: '127 SKUs',
     supplier: 'NP Labs',
-    description: 'Lyophilized bioactive peptides · HPLC ≥99% · Sterile vials',
+    description: 'Lyophilized bioactive peptides · HPLC ≥99% · Sterile analytical vials',
     pricingNote: 'Cost + 15% Mediluxe + 15% Wholesaler',
     route: '/pricing/peptides',
     skuCount: 127,
@@ -83,7 +82,7 @@ export const PRICE_GROUPS = [
     icon: Package,
     badge: '8 Products',
     supplier: 'Colway International',
-    description: 'Biologically active native collagen — full portfolio',
+    description: 'Biologically active native collagen — complete dermatology portfolio',
     pricingNote: 'Cost + 20% Wholesale / 30% Clinic',
     route: '/pricing/colway',
     skuCount: 8,
@@ -97,7 +96,7 @@ export const PRICE_GROUPS = [
     icon: Scissors,
     badge: 'Trichology',
     supplier: 'Colway International',
-    description: 'Baicapil™ 2% shampoo + conditioner — anti-hair-loss protocol',
+    description: 'Baicapil™ 2% shampoo + conditioner — anti-hair-loss follicular protocol',
     pricingNote: 'Cost + 20% Wholesale / 30% Clinic',
     route: '/pricing/colway-hair',
     skuCount: 2,
@@ -108,11 +107,11 @@ export const PRICE_GROUPS = [
   {
     id: 'colway-qatar',
     label: 'Colway Qatar',
-    icon: Globe,
-    badge: 'AED / Distributor',
+    icon: Building2,
+    badge: 'AED / QAR',
     supplier: 'Colway International',
-    description: 'Qatar & GCC distributor pricing (AED)',
-    pricingNote: 'Distributor-tier with AED currency',
+    description: 'Qatar & GCC distributor pricing (AED/QAR)',
+    pricingNote: 'Exclusive landed-cost schedule (112 QAR / unit)',
     route: '/pricing/colway-qatar',
     skuCount: 2,
     currency: 'AED',
@@ -125,8 +124,8 @@ export const PRICE_GROUPS = [
     icon: Dna,
     badge: 'GCC / AED',
     supplier: '24Genetics S.L.',
-    description: 'Qatar & GCC genomics distributor pricing',
-    pricingNote: 'Distributor-tier with AED currency',
+    description: 'Qatar & GCC genomics distributor pricing (Nutrigen + All-in-One)',
+    pricingNote: 'Distributor-tier with GCC landing',
     route: '/pricing/24genomics-qatar',
     skuCount: 3,
     currency: 'AED',
@@ -139,7 +138,7 @@ export const PRICE_GROUPS = [
     icon: TestTube,
     badge: 'Diagnostics',
     supplier: 'Bloodo Lab',
-    description: 'Dry Blood Spot diagnostic kits — remote sampling',
+    description: 'Dried Blood Spot diagnostic kits — capillary remote sampling',
     pricingNote: 'Fixed lab price + Mediluxe margin',
     route: '/collection/bloodo',
     skuCount: 6,
@@ -150,7 +149,7 @@ export const PRICE_GROUPS = [
   {
     id: 'ultraperson',
     label: 'UltraPerson',
-    icon: Zap,
+    icon: Sparkles,
     badge: 'Supplements',
     supplier: 'UltraPerson / NP Labs',
     description: 'Precision nutraceutical supplements — clinical-grade',
@@ -163,11 +162,11 @@ export const PRICE_GROUPS = [
   },
   {
     id: 'weight-management',
-    label: 'Weight Management',
+    label: 'Weight Mgmt',
     icon: Activity,
-    badge: 'Incretins + GLP-1',
+    badge: 'Incretins + GLP',
     supplier: 'NP Labs / Compounding',
-    description: 'GLP-1 analogues, incretins, and metabolic compounds',
+    description: 'GLP-1 analogues, incretins, and metabolic weight optimization compounds',
     pricingNote: 'Cost + 15% Mediluxe + 15% Wholesaler',
     route: '/collection/weight-management',
     skuCount: 9,
@@ -177,11 +176,11 @@ export const PRICE_GROUPS = [
   },
   {
     id: 'hair-treatments',
-    label: 'Hair Treatments',
+    label: 'Hair Protocol',
     icon: Scissors,
     badge: 'Trichology Bundle',
     supplier: 'NP Labs + Colway',
-    description: 'GHK-Cu, tricho compounds, and Colway hair protocol bundle',
+    description: 'GHK-Cu, tricho compounds, and Colway hair protocol synergy',
     pricingNote: 'Mixed: peptide rate + Colway rate',
     route: '/collection/hair-treatments',
     skuCount: 7,
@@ -195,7 +194,7 @@ export const PRICE_GROUPS = [
     icon: Microscope,
     badge: 'HLA + HTMA',
     supplier: 'TeleTest Diagnostics',
-    description: 'HLA typing and Hair Tissue Mineral Analysis kits',
+    description: 'HLA celiac immunogenetics and Hair Tissue Mineral Analysis kits',
     pricingNote: 'Fixed laboratory rate',
     route: '/collection/teletest',
     skuCount: 2,
@@ -219,8 +218,7 @@ export const PRICE_GROUPS = [
   },
 ];
 
-const TOTAL_SKUS   = PRICE_GROUPS.reduce((s, g) => s + g.skuCount, 0);
-const TOTAL_GROUPS = PRICE_GROUPS.length;
+const TOTAL_SKUS = PRICE_GROUPS.reduce((s, g) => s + g.skuCount, 0);
 
 // ─── Tier Badge ───────────────────────────────────────────────────────────────
 
@@ -239,7 +237,7 @@ function TierBadge({ tier, tierLabel }) {
   );
 }
 
-// ─── Auth Banner ──────────────────────────────────────────────────────────────
+// ─── Auth Notice Banner ───────────────────────────────────────────────────────
 
 function AuthBanner({ tier, isAuthenticated }) {
   if (isAuthenticated && tier !== 'guest') return null;
@@ -253,179 +251,191 @@ function AuthBanner({ tier, isAuthenticated }) {
     }}>
       <Lock size={16} style={{ flexShrink: 0 }} />
       <span>
-        <strong>Viewing public wholesale prices</strong> — these are baseline distributor rates (cost × 1.3225).{' '}
-        <Link href="/auth/login" style={{ color: '#d97706', fontWeight: 600, textDecoration: 'underline' }}>
+        <strong>Viewing public wholesale prices</strong> — standard distributor rates (cost + 15% Mediluxe + 15% Wholesaler = cost × 1.3225).{' '}
+        <Link href="/auth/login" style={{ color: '#d97706', fontWeight: 700, textDecoration: 'underline' }}>
           Log in
         </Link>{' '}
-        to see your negotiated clinic or wholesaler pricing.
+        to unlock your clinic or contract-specific pricing tier.
       </span>
     </div>
   );
 }
 
-// ─── Group Card (overview grid) ───────────────────────────────────────────────
+// ─── Live SKU DataTable for Active Group ──────────────────────────────────────
 
-function GroupCard({ group, onSelect, isActive }) {
-  const Icon = group.icon;
-  return (
-    <button
-      onClick={() => onSelect(group.id)}
-      style={{
-        all: 'unset', cursor: 'pointer', display: 'block', width: '100%',
-        padding: '16px', borderRadius: 12, boxSizing: 'border-box',
-        border: `2px solid ${isActive ? 'var(--color-primary, #003666)' : 'var(--border, #e2e8f0)'}`,
-        background: isActive ? '#f0f4ff' : 'var(--surface, #fff)',
-        transition: 'all 0.15s ease',
-        textAlign: 'left',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-          background: isActive ? '#dbeafe' : '#f1f5f9',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Icon size={18} color={isActive ? '#1d4ed8' : '#64748b'} />
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary, #0f172a)', marginBottom: 2 }}>
-            {group.label}
+function GroupSkuTable({ group, tier, priceFor, formatPrice, isAdmin }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+
+    fetch(`/api/catalog/public?category=${encodeURIComponent(group.fetchGroup)}&limit=100`)
+      .then(res => (res.ok ? res.json() : { products: [] }))
+      .then(data => {
+        if (!isMounted) return;
+        setProducts(data.products || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setProducts([]);
+        setLoading(false);
+      });
+
+    return () => { isMounted = false; };
+  }, [group.id, group.fetchGroup]);
+
+  const filtered = useMemo(() => {
+    if (!search) return products;
+    const q = search.toLowerCase();
+    return products.filter(p =>
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.canonicalName || '').toLowerCase().includes(q) ||
+      (p.id || '').toLowerCase().includes(q) ||
+      (p.dosage || '').toLowerCase().includes(q)
+    );
+  }, [products, search]);
+
+  const columns = useMemo(() => {
+    const cols = [
+      {
+        key: 'id',
+        label: 'Code / SKU',
+        width: '18%',
+        render: (val, row) => <CopyableId value={row.id} />
+      },
+      {
+        key: 'name',
+        label: 'Product / Formulation',
+        width: isAdmin ? '32%' : '44%',
+        render: (val, row) => (
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 13, color: '#0f172a' }}>
+              {row.name || row.canonicalName || row.id}
+            </div>
+            {row.dosage && (
+              <div style={{ fontSize: 11, color: '#64748b', marginTop: 1 }}>
+                {row.dosage}
+              </div>
+            )}
           </div>
-          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>
-            {group.badge}
-          </div>
-        </div>
-      </div>
-      <div style={{ marginTop: 8, fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
-        {group.description}
-      </div>
-      <div style={{
-        marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontSize: 11, color: isActive ? '#1d4ed8' : '#64748b', fontWeight: 600,
-      }}>
-        <span>{group.pricingNote}</span>
-        <ChevronRight size={12} />
-      </div>
-    </button>
-  );
-}
+        )
+      },
+      {
+        key: 'status',
+        label: 'Availability',
+        width: '16%',
+        render: (val, row) => (
+          <StatusBadge status={row.inStock ? 'active' : 'draft'} />
+        )
+      },
+      {
+        key: 'price',
+        label: tier === 'guest' ? 'Wholesale (Cost × 1.3225)' : 'Your Tier Price',
+        width: isAdmin ? '18%' : '22%',
+        render: (val, row) => {
+          const resolved = priceFor(row);
+          const amount = resolved.price ?? row.price;
+          return (
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>
+                {formatPrice(amount, group.currency)}
+              </div>
+              <div style={{ fontSize: 10, color: '#0284c7', fontWeight: 600 }}>
+                {resolved.label || 'Wholesale'}
+              </div>
+            </div>
+          );
+        }
+      }
+    ];
 
-// ─── Group Detail Panel ───────────────────────────────────────────────────────
+    if (isAdmin) {
+      cols.push({
+        key: 'adminCost',
+        label: 'Cost & Margin',
+        width: '16%',
+        render: (val, row) => {
+          const resolved = priceFor(row);
+          const cost = resolved.costPrice ?? (row.price ? +(row.price / 1.3225).toFixed(2) : null);
+          return (
+            <div style={{ fontSize: 11 }}>
+              <div style={{ color: '#475569' }}>
+                Cost: <strong>{formatPrice(cost, group.currency)}</strong>
+              </div>
+              <div style={{ color: '#15803d', fontWeight: 600 }}>
+                +15% Mediluxe +15% WS
+              </div>
+            </div>
+          );
+        }
+      });
+    }
 
-function GroupDetailPanel({ group, tier, tierLabel, formatPrice }) {
-  const Icon = group.icon;
+    return cols;
+  }, [group.currency, priceFor, formatPrice, tier, isAdmin]);
 
   return (
-    <div style={{ padding: '0' }}>
-      {/* Group header */}
+    <div style={{ marginTop: 20 }}>
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
-        padding: '20px 0 16px 0', borderBottom: '1px solid var(--border, #e2e8f0)',
-        marginBottom: 20,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 12, marginBottom: 12,
+        paddingBottom: 8, borderBottom: '1px solid #f1f5f9'
       }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 10, flexShrink: 0,
-          background: '#dbeafe',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Icon size={22} color="#1d4ed8" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Live References ({filtered.length} SKUs)
+          </span>
+          <span style={{ fontSize: 11, color: '#64748b' }}>
+            · Currency: <strong>{group.currency}</strong>
+          </span>
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>
-            {group.label}
-            {' '}
-            <span style={{
-              fontSize: 11, fontWeight: 500, color: '#64748b',
-              background: '#f1f5f9', padding: '2px 8px', borderRadius: 20, marginLeft: 6,
+
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={`Search ${group.label} SKUs...`}
+          style={{
+            padding: '5px 10px', fontSize: 12, borderRadius: 6,
+            border: '1px solid #cbd5e1', width: 220, background: '#fff'
+          }}
+        />
+      </div>
+
+      {loading ? (
+        <TabSkeleton lines={6} />
+      ) : products.length === 0 ? (
+        <div style={{
+          padding: '32px 20px', textAlign: 'center', background: '#f8fafc',
+          borderRadius: 10, border: '1px dashed #cbd5e1', margin: '12px 0'
+        }}>
+          <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 14px 0' }}>
+            Real-time catalog synchronization for this specialized line is active in the dedicated workspace.
+          </p>
+          <Link href={group.route} style={{ textDecoration: 'none' }}>
+            <button style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 18px', borderRadius: 6, fontSize: 12, fontWeight: 700,
+              color: '#fff', background: 'var(--color-primary, #003666)', border: 'none', cursor: 'pointer'
             }}>
-              {group.badge}
-            </span>
-          </h3>
-          <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-            {group.description}
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-          <TierBadge tier={tier} tierLabel={tierLabel} />
-          <StatusBadge status={group.status} />
-          <Link
-            href={group.route}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-              color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe',
-              textDecoration: 'none',
-            }}
-          >
-            Full View <ExternalLink size={12} />
+              <span>Open Dedicated Price List</span>
+              <ExternalLink size={13} />
+            </button>
           </Link>
         </div>
-      </div>
-
-      {/* Pricing info */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 12, marginBottom: 20,
-      }}>
-        <InfoTile label="Supplier" value={group.supplier} icon={Building2} />
-        <InfoTile label="Pricing Formula" value={group.pricingNote} icon={Tag} />
-        <InfoTile label="SKU Count" value={group.skuCount} icon={List} />
-        <InfoTile label="Native Currency" value={group.currency} icon={DollarSign} />
-      </div>
-
-      {/* CTA */}
-      <div style={{
-        padding: '14px 16px',
-        background: '#f8faff',
-        borderRadius: 10,
-        border: '1px solid #e0e7ff',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
-      }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 13, color: '#1e40af', marginBottom: 2 }}>
-            Open full price schedule →
-          </div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>
-            Live pricing with filters, PDF export, currency switcher, and direct inquiry form.
-          </div>
-        </div>
-        <Link href={group.route} style={{ textDecoration: 'none' }}>
-          <button style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 700,
-            color: '#fff', background: 'var(--color-primary, #003666)',
-            border: 'none', cursor: 'pointer',
-          }}>
-            View Prices <ArrowRight size={14} />
-          </button>
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function InfoTile({ label, value, icon: Icon }) {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'flex-start', gap: 10,
-      padding: '10px 14px', borderRadius: 8,
-      background: 'var(--surface, #fff)', border: '1px solid var(--border, #e2e8f0)',
-    }}>
-      <div style={{
-        width: 28, height: 28, borderRadius: 6, flexShrink: 0,
-        background: '#f1f5f9',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <Icon size={13} color="#64748b" />
-      </div>
-      <div>
-        <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          {label}
-        </div>
-        <div style={{ fontSize: 13, color: '#0f172a', fontWeight: 600, marginTop: 1 }}>
-          {value}
-        </div>
-      </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filtered}
+          pagination={true}
+          pageSize={10}
+          globalSearch={false}
+        />
+      )}
     </div>
   );
 }
@@ -433,14 +443,12 @@ function InfoTile({ label, value, icon: Icon }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function UnifiedPriceHub({
-  /** If embedded inside Admin panel, show simplified header */
   embedded = false,
-  /** Initial active tab */
   defaultGroup = null,
 }) {
   const { tier, tierLabel, tierColor, isAuthenticated, isAdmin, priceFor, formatPrice } = usePriceTier();
 
-  const [activeGroup, setActiveGroup] = useState(defaultGroup ?? null);
+  const [activeGroupId, setActiveGroupId] = useState(defaultGroup || 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [scopeMode, setScopeMode] = useState('filtered');
 
@@ -449,18 +457,17 @@ export default function UnifiedPriceHub({
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       const tab = url.searchParams.get('tab') || url.searchParams.get('group');
-      if (tab && PRICE_GROUPS.some(g => g.id === tab)) {
-        setActiveGroup(tab);
+      if (tab && (tab === 'all' || PRICE_GROUPS.some(g => g.id === tab))) {
+        setActiveGroupId(tab);
       }
     }
   }, []);
 
-  // Update URL when tab changes
   const handleSelectGroup = useCallback((groupId) => {
-    setActiveGroup(prev => prev === groupId ? null : groupId);
+    setActiveGroupId(groupId);
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
-      if (groupId) {
+      if (groupId && groupId !== 'all') {
         url.searchParams.set('tab', groupId);
       } else {
         url.searchParams.delete('tab');
@@ -469,9 +476,12 @@ export default function UnifiedPriceHub({
     }
   }, []);
 
-  const selectedGroup = activeGroup ? PRICE_GROUPS.find(g => g.id === activeGroup) : null;
+  const selectedGroup = useMemo(() => {
+    if (activeGroupId === 'all') return null;
+    return PRICE_GROUPS.find(g => g.id === activeGroupId) || null;
+  }, [activeGroupId]);
 
-  // Filtered groups by search
+  // Filtered groups by global search
   const filteredGroups = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return PRICE_GROUPS;
@@ -483,14 +493,24 @@ export default function UnifiedPriceHub({
     );
   }, [searchQuery]);
 
+  // Tab definitions
+  const tabs = useMemo(() => [
+    { id: 'all', label: `All Price Lists (${PRICE_GROUPS.length})`, icon: Layers },
+    ...PRICE_GROUPS.map(g => ({
+      id: g.id,
+      label: g.label,
+      icon: g.icon
+    }))
+  ], []);
+
   // KPIs
   const kpis = useMemo(() => {
     const activeLists = PRICE_GROUPS.filter(g => g.status === 'active').length;
     return [
-      { title: 'Total SKUs', value: TOTAL_SKUS, subtitle: 'across all catalogs', icon: Package, color: '#0284c7' },
-      { title: 'Price Lists', value: TOTAL_GROUPS, subtitle: `${activeLists} active`, icon: List, color: '#0d9488' },
+      { title: 'Total SKUs', value: TOTAL_SKUS, subtitle: 'across 12 catalogs', icon: Package, color: '#0284c7' },
+      { title: 'Price Lists', value: PRICE_GROUPS.length, subtitle: `${activeLists} active schedules`, icon: List, color: '#0d9488' },
       { title: 'Your Tier', value: tierLabel.split(' ')[0], subtitle: tierLabel, icon: ShieldCheck, color: tierColor.text },
-      { title: 'Suppliers', value: 7, subtitle: 'direct contracts', icon: Building2, color: '#7c3aed' },
+      { title: 'Formula Base', value: 'Cost + 15% + 15%', subtitle: 'Wholesale = Cost × 1.3225', icon: Tag, color: '#7c3aed' },
     ];
   }, [tierLabel, tierColor]);
 
@@ -504,8 +524,8 @@ export default function UnifiedPriceHub({
       {/* ── Page Header ── */}
       {!embedded && (
         <PageHeader
-          title="Unified Price Hub"
-          subtitle="All product group price schedules — one authenticated view"
+          title="Unified B2B Price Hub"
+          subtitle="Single authoritative entry point for all 12 product groups with authenticated tier pricing."
           actions={<GcpUserBadge />}
         />
       )}
@@ -545,97 +565,221 @@ export default function UnifiedPriceHub({
       <GlobalSearchBar
         value={searchQuery}
         onChange={setSearchQuery}
-        placeholder="Search price lists, suppliers, or product categories…"
+        placeholder="Search product lines, formulations, suppliers or categories…"
         size="lg"
         resultCount={filteredGroups.length}
-        style={{ marginBottom: 20 }}
+        style={{ marginBottom: 16 }}
       />
 
-      {/* ── Main Layout: Grid + Detail Panel ── */}
-      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      {/* ── Horizontal Navigation Tabs (Responsive) ── */}
+      <div style={{ marginBottom: 20 }}>
+        <ResponsiveTabs
+          tabs={tabs}
+          activeTab={activeGroupId}
+          onTabChange={handleSelectGroup}
+        />
+      </div>
 
-        {/* Left: Group Grid */}
-        <div style={{ flex: '0 0 auto', width: '100%', maxWidth: 820 }}>
+      {/* ── VIEW MODE 1: Active Group Detail + Live SKU Table ── */}
+      {selectedGroup ? (
+        <div style={{
+          background: 'var(--surface, #fff)',
+          border: '1px solid var(--border, #e2e8f0)',
+          borderRadius: 12,
+          padding: '24px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+        }}>
+          {/* Header of Active Group */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexWrap: 'wrap', gap: 16, paddingBottom: 16,
+            borderBottom: '1px solid var(--border, #e2e8f0)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 10,
+                background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <selectedGroup.icon size={22} color="#1d4ed8" />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#0f172a' }}>
+                    {selectedGroup.label}
+                  </h2>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#0284c7', background: '#f0f9ff', padding: '2px 8px', borderRadius: 12, border: '1px solid #bae6fd' }}>
+                    {selectedGroup.badge}
+                  </span>
+                </div>
+                <div style={{ fontSize: 12, color: '#64748b', marginTop: 3 }}>
+                  {selectedGroup.description} · Supplier: <strong>{selectedGroup.supplier}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <TierBadge tier={tier} tierLabel={tierLabel} />
+              <Link
+                href={selectedGroup.route}
+                target="_blank"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 700,
+                  color: '#ffffff', background: 'var(--color-primary, #003666)',
+                  textDecoration: 'none'
+                }}
+              >
+                <span>Full Workspace</span>
+                <ExternalLink size={12} />
+              </Link>
+            </div>
+          </div>
+
+          {/* Pricing Formula Callout */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexWrap: 'wrap', gap: 12, margin: '14px 0', padding: '10px 14px',
+            background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#475569' }}>
+              <Tag size={14} className="text-sky-600" />
+              <span>Commercial Formula: <strong>{selectedGroup.pricingNote}</strong></span>
+            </div>
+            <div style={{ color: '#64748b' }}>
+              Native Currency: <strong>{selectedGroup.currency}</strong>
+            </div>
+          </div>
+
+          {/* Live SKU DataTable */}
+          <GroupSkuTable
+            group={selectedGroup}
+            tier={tier}
+            priceFor={priceFor}
+            formatPrice={formatPrice}
+            isAdmin={isAdmin}
+          />
+        </div>
+      ) : (
+        /* ── VIEW MODE 2: Overview Grid of all 12 Lists ── */
+        <div>
           {filteredGroups.length === 0 ? (
             <EmptyState
               icon={Package}
-              title="No price lists found"
-              subtitle="Try adjusting your search query to find the product group you're looking for."
+              title="No price schedules found"
+              subtitle="Try adjusting your search criteria."
               action={{ label: 'Clear Search', onClick: () => setSearchQuery('') }}
             />
           ) : (
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-              gap: 12,
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: 16,
             }}>
-              {filteredGroups.map(group => (
-                <GroupCard
-                  key={group.id}
-                  group={group}
-                  isActive={activeGroup === group.id}
-                  onSelect={handleSelectGroup}
-                />
-              ))}
+              {filteredGroups.map(group => {
+                const Icon = group.icon;
+                return (
+                  <div
+                    key={group.id}
+                    onClick={() => handleSelectGroup(group.id)}
+                    style={{
+                      background: 'var(--surface, #fff)',
+                      border: '1px solid var(--border, #e2e8f0)',
+                      borderRadius: 12,
+                      padding: '18px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--color-primary, #003666)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border, #e2e8f0)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <div style={{
+                          width: 40, height: 40, borderRadius: 8,
+                          background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                          <Icon size={20} color="#0f172a" />
+                        </div>
+                        <span style={{
+                          fontSize: 11, fontWeight: 700, color: '#0369a1',
+                          background: '#f0f9ff', border: '1px solid #bae6fd',
+                          padding: '2px 8px', borderRadius: 12
+                        }}>
+                          {group.badge}
+                        </span>
+                      </div>
+
+                      <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', margin: '0 0 4px 0' }}>
+                        {group.label}
+                      </h3>
+                      <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, margin: '0 0 12px 0' }}>
+                        {group.description}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div style={{
+                        fontSize: 11, color: '#475569', padding: '6px 10px',
+                        background: '#f8fafc', borderRadius: 6, marginBottom: 12
+                      }}>
+                        Formula: <strong>{group.pricingNote}</strong>
+                      </div>
+
+                      <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        fontSize: 12, fontWeight: 700, color: '#0284c7'
+                      }}>
+                        <span>Explore SKUs ({group.skuCount})</span>
+                        <ArrowRight size={14} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
+      )}
 
-        {/* Right: Detail Panel */}
-        {selectedGroup && (
-          <div style={{
-            flex: '1 1 320px', minWidth: 280,
-            background: 'var(--surface, #fff)',
-            border: '1px solid var(--border, #e2e8f0)',
-            borderRadius: 14,
-            padding: '20px',
-            position: 'sticky',
-            top: 72,
-          }}>
-            <GroupDetailPanel
-              group={selectedGroup}
-              tier={tier}
-              tierLabel={tierLabel}
-              formatPrice={formatPrice}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* ── Tier Legend ── */}
+      {/* ── Tier Rules Footnote ── */}
       <div style={{
         marginTop: 32, padding: '16px 20px',
         background: '#f8fafc', borderRadius: 12,
         border: '1px solid #e2e8f0', fontSize: 12,
       }}>
-        <div style={{ fontWeight: 700, color: '#475569', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: 10 }}>
-          Pricing Tier Legend
+        <div style={{ fontWeight: 700, color: '#475569', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: 10 }}>
+          Authenticated Pricing Governance
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
           {Object.entries(TIER_LABELS).map(([t, label]) => {
             const c = TIER_COLORS[t];
-            const isCurrentTier = t === tier;
+            const isCurrent = t === tier;
             return (
               <div key={t} style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '4px 10px', borderRadius: 20,
                 background: c.bg, border: `1px solid ${c.border}`,
-                color: c.text, fontWeight: isCurrentTier ? 700 : 500,
-                fontSize: 11, outline: isCurrentTier ? `2px solid ${c.text}` : 'none',
-                outlineOffset: 1,
+                color: c.text, fontWeight: isCurrent ? 700 : 500, fontSize: 11
               }}>
-                {isCurrentTier && '✓ '}
-                {t === 'guest' && <Lock size={9} />}
-                {t !== 'guest' && <ShieldCheck size={9} />}
+                {isCurrent && '✓ '}
                 {label}
               </div>
             );
           })}
         </div>
-        <div style={{ marginTop: 10, color: '#94a3b8', lineHeight: 1.5 }}>
-          <strong>Guest/Wholesale</strong>: cost × 1.3225 &nbsp;·&nbsp;
-          <strong>Clinic</strong>: negotiated per clinic contract &nbsp;·&nbsp;
-          <strong>Admin</strong>: cost + all margin columns visible
+        <div style={{ color: '#94a3b8', lineHeight: 1.5 }}>
+          <strong>Unregistered visitors:</strong> Wholesale price (Cost × 1.15 Mediluxe × 1.15 Wholesaler = Cost × 1.3225).
+          Raw laboratory supplier costs and margins remain strictly restricted.
         </div>
       </div>
     </div>
