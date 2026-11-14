@@ -59,8 +59,8 @@ export default function DnaAncestryHeritageSection({ clinicalProfile }) {
               Your Evolutionary Metabolic Blueprint
             </h3>
           </div>
-          <span style={{ fontSize: '0.72rem', color: '#5f6368', backgroundColor: '#f1f3f4', padding: '4px 10px', borderRadius: '4px', border: '1px solid #dadce0' }}>
-            Specimen: <strong style={{ color: '#202124' }}>{patient.sampleCode || 'G000943568'}</strong> · Lineage: <strong style={{ color: '#1a73e8' }}>Haplogroup {ancestry.maternalHaplogroup || "M2a'b"}</strong>
+          <span style={{ fontSize: '0.72rem', color: '#1a73e8', backgroundColor: '#e8f0fe', padding: '4px 10px', borderRadius: '4px', border: '1px solid #d2e3fc', fontWeight: 600 }}>
+            Lineage: <strong style={{ color: '#1a73e8' }}>Haplogroup {ancestry.maternalHaplogroup || "M2a'b"}</strong> · Indus Basin
           </span>
         </div>
 

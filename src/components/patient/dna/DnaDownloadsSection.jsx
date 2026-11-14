@@ -30,7 +30,7 @@ export default function DnaDownloadsSection({
             </h3>
           </div>
           <span style={{ fontSize: '0.74rem', color: '#166534', backgroundColor: '#f0fdf4', padding: '4px 10px', borderRadius: '6px', border: '1px solid #bbf7d0', fontWeight: 700 }}>
-            CE-IVD Certified Dossiers · Patient {patientName} (#{sampleCode})
+            CE-IVD Certified Dossiers · Vectorized Barcoded Archival
           </span>
         </div>
         <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>

@@ -32,8 +32,8 @@ export default function DnaPrioritiesSection({ clinicalProfile, patientName, sam
               The 5 Key Body Priorities
             </h3>
           </div>
-          <span style={{ fontSize: '0.72rem', color: '#5f6368', backgroundColor: '#f1f3f4', padding: '4px 10px', borderRadius: '4px', border: '1px solid #dadce0' }}>
-            Specimen: <strong style={{ color: '#202124' }}>{sampleCode}</strong> · Patient: <strong style={{ color: '#202124' }}>{patientName}</strong>
+          <span style={{ fontSize: '0.72rem', color: '#137333', backgroundColor: '#e6f4ea', padding: '4px 10px', borderRadius: '4px', border: '1px solid #ceead6', fontWeight: 600 }}>
+            5 Clinical Axes Evaluated · CE-IVD Methodology
           </span>
         </div>
 

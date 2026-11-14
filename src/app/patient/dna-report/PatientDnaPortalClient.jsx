@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Download,
   Share2,
   Check,
   ChevronRight,
+  ChevronDown,
   ShieldCheck,
   MessageSquare,
   Utensils,
@@ -18,9 +19,26 @@ import {
   ShoppingBag,
   HeartPulse,
   Activity,
-  ArrowRight
+  ArrowRight,
+  Search,
+  Globe,
+  HelpCircle,
+  User,
+  LogIn,
+  LogOut,
+  Lock,
+  Copy,
+  X,
+  FileText,
+  SlidersHorizontal,
+  Info,
+  Phone,
+  Mail,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
+import CopyableId from '@/components/ui/CopyableId';
 import {
   evaluateNutrigenomicProfile,
   THREE_CAPSULE_PROTOCOL,
@@ -65,6 +83,28 @@ export default function PatientDnaPortalClient({
   const [prescriptionModality, setPrescriptionModality] = useState('modalityB'); // 'modalityB' (Compounded) | 'modalityA' (Local)
   const [copiedLink, setCopiedLink] = useState(false);
 
+  // GCP Header Interaction States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isHelpDrawerOpen, setIsHelpDrawerOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [loginRole, setLoginRole] = useState('doctor'); // 'doctor' | 'patient'
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginPhone, setLoginPhone] = useState('');
+  const [loginOtp, setLoginOtp] = useState('');
+  const [loginFeedback, setLoginFeedback] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('en'); // 'en' | 'ar' | 'es'
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [showRoadmap, setShowRoadmap] = useState(true);
+
+  const searchContainerRef = useRef(null);
+  const exportMenuRef = useRef(null);
+  const userMenuRef = useRef(null);
+  const langMenuRef = useRef(null);
+
   // Dynamic Clinical Profile Inference (Fast RSC Handoff - Golden Rule #21)
   const clinicalProfile = useMemo(() => {
     if (
@@ -81,6 +121,96 @@ export default function PatientDnaPortalClient({
       doctor: initialDoctor
     });
   }, [patientName, sampleCode, clinic, initialProfile, initialDoctor]);
+
+  // Derive Patient Initials for Avatar
+  const patientInitials = useMemo(() => {
+    if (!patientName) return 'PT';
+    const clean = patientName.replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.)\s*/i, '').trim();
+    const parts = clean.split(' ').filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return clean.slice(0, 2).toUpperCase();
+  }, [patientName]);
+
+  // Omnibox Global Search Indexing (Genes, Foods, Priorities, Chapters)
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q || q.length < 2) return { chapters: [], axes: [], foods: [] };
+
+    const matchingChapters = CHAPTERS.filter(
+      (ch) => ch.label.toLowerCase().includes(q) || ch.subtitle.toLowerCase().includes(q)
+    );
+
+    const matchingAxes = (clinicalProfile.fiveClinicalAxes || []).filter(
+      (ax) =>
+        ax.title.toLowerCase().includes(q) ||
+        ax.genes.toLowerCase().includes(q) ||
+        ax.summary.toLowerCase().includes(q)
+    );
+
+    const allFoods = [];
+    (clinicalProfile.supermarketGroceryList || []).forEach((cat) => {
+      cat.items.forEach((item) => {
+        if (item.name.toLowerCase().includes(q)) {
+          allFoods.push({ name: item.name, category: cat.title, priority: item.priority });
+        }
+      });
+    });
+
+    return {
+      chapters: matchingChapters.slice(0, 3),
+      axes: matchingAxes.slice(0, 4),
+      foods: allFoods.slice(0, 5)
+    };
+  }, [searchQuery, clinicalProfile]);
+
+  const hasSearchResults =
+    searchResults.chapters.length > 0 || searchResults.axes.length > 0 || searchResults.foods.length > 0;
+
+  // Global Keyboard Shortcuts (⌘K for Omnibox, Esc for modals)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const input = document.getElementById('gcp-omnibox-search');
+        if (input) {
+          input.focus();
+          setIsSearchOpen(true);
+        }
+      }
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+        setIsExportMenuOpen(false);
+        setIsUserMenuOpen(false);
+        setIsLangMenuOpen(false);
+        setIsHelpDrawerOpen(false);
+        setIsLoginModalOpen(false);
+      }
+    };
+
+    const handleClickOutside = (e) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setIsSearchOpen(false);
+      }
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target)) {
+        setIsExportMenuOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setIsUserMenuOpen(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target)) {
+        setIsLangMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // LocalStorage-backed Grocery Checklist
   const groceryStorageKey = `atlas_grocery_${sampleCode || 'default'}`;
@@ -168,9 +298,23 @@ export default function PatientDnaPortalClient({
     }
   };
 
+  const handleLoginSubmit = (e) => {
+    e.preventDefault();
+    setLoginFeedback({
+      type: 'success',
+      text: loginRole === 'doctor'
+        ? 'Authenticated as Prescribing Physician. Full Clinical Edit privileges unlocked.'
+        : 'Patient OTP verified. Full Health Records access active.'
+    });
+    setTimeout(() => {
+      setIsLoginModalOpen(false);
+      setLoginFeedback(null);
+    }, 1800);
+  };
+
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* ── 1-Click Verified Nominal Welcome Header (Single Clean Clinical Header) ── */}
+      {/* ── 1-Click Verified Nominal Welcome Header (Streamlined) ── */}
       <NominalWelcomeBanner
         recipientName={patientName}
         role="patient"
@@ -178,38 +322,38 @@ export default function PatientDnaPortalClient({
         verifiedBy="Atlas Multidisciplinary Clinical Team"
         sessionDuration="90 days"
         storageKey={`atlas_patient_dna_${sampleCode}`}
-        lang="en"
+        lang={selectedLanguage}
       />
 
-      {/* ── Top Clinical Navigation Bar ── */}
+      {/* ── Unified Google Cloud Console-Style Top Navigation Bar ── */}
       <header
         style={{
           backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
+          borderBottom: '1px solid #dadce0',
           position: 'sticky',
           top: 0,
           zIndex: 40,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+          boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
         }}
       >
         <div
           style={{
-            maxWidth: '1360px',
+            maxWidth: '1440px',
             margin: '0 auto',
-            padding: '10px 1.5rem',
+            padding: '8px 1.25rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '1rem',
+            gap: '0.75rem',
             flexWrap: 'wrap'
           }}
         >
-          {/* Brand & Patient Identification */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Left: Brand & GCP-Style Resource Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 'fit-content' }}>
             <div
               style={{
-                width: '34px',
-                height: '34px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '6px',
                 backgroundColor: '#1a73e8',
                 color: '#ffffff',
@@ -217,110 +361,743 @@ export default function PatientDnaPortalClient({
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 700,
-                fontSize: '0.95rem'
+                fontSize: '0.92rem',
+                boxShadow: '0 1px 3px rgba(26,115,232,0.3)'
               }}
             >
               A
             </div>
-            <div>
-              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                ATLAS HEALTH SERVICES · PRECISION GENOMICS
+            <div className="dna-hide-mobile">
+              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                ATLAS HEALTH SERVICES
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '1px' }}>
-                <span style={{ fontSize: '0.92rem', fontWeight: 600, color: '#202124' }}>{patientName}</span>
-                <span style={{ fontSize: '0.68rem', color: '#5f6368', backgroundColor: '#f1f3f4', border: '1px solid #dadce0', padding: '1px 6px', borderRadius: '4px', fontWeight: 500 }}>
-                  #{sampleCode}
-                </span>
+              <div style={{ fontSize: '0.76rem', fontWeight: 600, color: '#202124' }}>
+                Precision Genomics
               </div>
+            </div>
+
+            {/* Vertical Divider */}
+            <div style={{ width: '1px', height: '22px', backgroundColor: '#dadce0', margin: '0 4px' }} className="dna-hide-mobile" />
+
+            {/* GCP Project / Resource Selector Pill */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #dadce0',
+                padding: '3px 8px',
+                borderRadius: '6px'
+              }}
+            >
+              <User size={13} color="#5f6368" />
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124' }}>{patientName}</span>
+              <CopyableId value={sampleCode} displayValue={`#${sampleCode}`} />
+              <span
+                style={{
+                  fontSize: '0.62rem',
+                  fontWeight: 600,
+                  backgroundColor: '#e6f4ea',
+                  color: '#137333',
+                  border: '1px solid #ceead6',
+                  padding: '1px 5px',
+                  borderRadius: '3px'
+                }}
+                className="dna-hide-mobile"
+              >
+                ✓ Verified
+              </span>
             </div>
           </div>
 
-          {/* Quick Header Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <button
-              onClick={handleShareClick}
-              type="button"
+          {/* Center: Google Cloud Omnibox Global Search Bar */}
+          <div
+            ref={searchContainerRef}
+            style={{
+              position: 'relative',
+              flex: '1 1 280px',
+              maxWidth: '460px',
+              minWidth: '200px'
+            }}
+          >
+            <div
               style={{
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 500,
-                backgroundColor: '#ffffff',
+                backgroundColor: '#f1f3f4',
+                borderRadius: '8px',
+                border: isSearchOpen ? '1px solid #1a73e8' : '1px solid transparent',
+                padding: '5px 12px',
+                gap: '8px',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Search size={15} color="#5f6368" />
+              <input
+                id="gcp-omnibox-search"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onFocus={() => setIsSearchOpen(true)}
+                placeholder="Search food, gene, meal or nutrient..."
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent',
+                  fontSize: '0.78rem',
+                  color: '#202124',
+                  width: '100%'
+                }}
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, color: '#5f6368' }}
+                >
+                  <X size={14} />
+                </button>
+              ) : (
+                <kbd
+                  style={{
+                    fontSize: '0.62rem',
+                    backgroundColor: '#ffffff',
+                    color: '#5f6368',
+                    border: '1px solid #dadce0',
+                    borderRadius: '4px',
+                    padding: '1px 5px',
+                    fontWeight: 600
+                  }}
+                  className="dna-hide-mobile"
+                >
+                  ⌘K
+                </kbd>
+              )}
+            </div>
+
+            {/* Omnibox Floating Search Results Dropdown */}
+            {isSearchOpen && searchQuery.trim().length >= 2 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 4px)',
+                  left: 0,
+                  right: 0,
+                  backgroundColor: '#ffffff',
+                  borderRadius: '8px',
+                  border: '1px solid #dadce0',
+                  boxShadow: '0 4px 16px rgba(60,64,67,0.18)',
+                  zIndex: 90,
+                  maxHeight: '380px',
+                  overflowY: 'auto',
+                  padding: '8px 0'
+                }}
+              >
+                {!hasSearchResults ? (
+                  <div style={{ padding: '12px 16px', fontSize: '0.76rem', color: '#5f6368', textAlign: 'center' }}>
+                    No genomic matches found for &quot;<strong>{searchQuery}</strong>&quot;
+                  </div>
+                ) : (
+                  <>
+                    {/* Chapter Matches */}
+                    {searchResults.chapters.length > 0 && (
+                      <div style={{ marginBottom: '6px' }}>
+                        <div style={{ padding: '4px 14px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Report Chapters
+                        </div>
+                        {searchResults.chapters.map((ch) => (
+                          <div
+                            key={ch.id}
+                            onClick={() => {
+                              setActiveChapter(ch.id);
+                              setIsSearchOpen(false);
+                              setSearchQuery('');
+                            }}
+                            style={{
+                              padding: '8px 14px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              fontSize: '0.78rem',
+                              color: '#202124'
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span>{ch.icon}</span>
+                              <span style={{ fontWeight: 600 }}>{ch.label}</span>
+                            </div>
+                            <span style={{ fontSize: '0.66rem', color: '#5f6368' }}>{ch.subtitle}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Genes & Clinical Priorities Matches */}
+                    {searchResults.axes.length > 0 && (
+                      <div style={{ marginBottom: '6px', borderTop: '1px solid #f1f3f4', paddingTop: '6px' }}>
+                        <div style={{ padding: '4px 14px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Genes &amp; 5 Priorities
+                        </div>
+                        {searchResults.axes.map((ax, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              setActiveChapter('priorities');
+                              setIsSearchOpen(false);
+                              setSearchQuery('');
+                            }}
+                            style={{
+                              padding: '8px 14px',
+                              cursor: 'pointer',
+                              fontSize: '0.78rem',
+                              color: '#202124'
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                          >
+                            <div style={{ fontWeight: 600, color: '#1a73e8' }}>{ax.title}</div>
+                            <div style={{ fontSize: '0.68rem', color: '#5f6368', marginTop: '2px' }}>{ax.genes}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Food Items Matches */}
+                    {searchResults.foods.length > 0 && (
+                      <div style={{ borderTop: '1px solid #f1f3f4', paddingTop: '6px' }}>
+                        <div style={{ padding: '4px 14px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Personalized Foods &amp; Supermarket
+                        </div>
+                        {searchResults.foods.map((food, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              setActiveChapter('foods');
+                              setIsSearchOpen(false);
+                              setSearchQuery('');
+                            }}
+                            style={{
+                              padding: '7px 14px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              fontSize: '0.78rem',
+                              color: '#202124'
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                          >
+                            <span>{food.name}</span>
+                            <span style={{ fontSize: '0.66rem', color: '#5f6368', backgroundColor: '#f1f3f4', padding: '1px 6px', borderRadius: '4px' }}>
+                              {food.category}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Right: Actions, Language, Export, Help & GCP Login/Profile */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 'fit-content' }}>
+            {/* Language Selector (EN / AR / ES) */}
+            <div ref={langMenuRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '5px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid #dadce0',
+                  backgroundColor: '#ffffff',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  color: '#3c4043',
+                  cursor: 'pointer'
+                }}
+                title="Select language"
+              >
+                <Globe size={14} color="#5f6368" />
+                <span>{selectedLanguage.toUpperCase()}</span>
+                <ChevronDown size={12} color="#5f6368" />
+              </button>
+
+              {isLangMenuOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    right: 0,
+                    backgroundColor: '#ffffff',
+                    borderRadius: '6px',
+                    border: '1px solid #dadce0',
+                    boxShadow: '0 4px 12px rgba(60,64,67,0.15)',
+                    zIndex: 90,
+                    width: '130px',
+                    padding: '4px 0'
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedLanguage('en'); setIsLangMenuOpen(false); }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '7px 12px',
+                      border: 'none',
+                      backgroundColor: selectedLanguage === 'en' ? '#f1f3f4' : 'transparent',
+                      fontSize: '0.74rem',
+                      fontWeight: selectedLanguage === 'en' ? 700 : 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    🇬🇧 English
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedLanguage('ar'); setIsLangMenuOpen(false); }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '7px 12px',
+                      border: 'none',
+                      backgroundColor: selectedLanguage === 'ar' ? '#f1f3f4' : 'transparent',
+                      fontSize: '0.74rem',
+                      fontWeight: selectedLanguage === 'ar' ? 700 : 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    🇦🇪 العربية (AR)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedLanguage('es'); setIsLangMenuOpen(false); }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '7px 12px',
+                      border: 'none',
+                      backgroundColor: selectedLanguage === 'es' ? '#f1f3f4' : 'transparent',
+                      fontSize: '0.74rem',
+                      fontWeight: selectedLanguage === 'es' ? 700 : 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    🇪🇸 Español
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Consolidated Export / PDF Dropdown (Replaces 2 sprawling buttons) */}
+            <div ref={exportMenuRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '5px 10px',
+                  borderRadius: '4px',
+                  backgroundColor: '#e8f0fe',
+                  border: '1px solid #d2e3fc',
+                  color: '#1a73e8',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <Download size={14} />
+                <span className="dna-hide-mobile">Export Dossier</span>
+                <ChevronDown size={12} />
+              </button>
+
+              {isExportMenuOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    right: 0,
+                    backgroundColor: '#ffffff',
+                    borderRadius: '8px',
+                    border: '1px solid #dadce0',
+                    boxShadow: '0 4px 16px rgba(60,64,67,0.18)',
+                    zIndex: 90,
+                    width: '260px',
+                    padding: '6px 0'
+                  }}
+                >
+                  <div style={{ padding: '6px 14px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Official PDF Archives
+                  </div>
+                  <a
+                    href={mealPlanPdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsExportMenuOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 14px',
+                      fontSize: '0.76rem',
+                      color: '#202124',
+                      textDecoration: 'none'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <Utensils size={14} color="#1a73e8" />
+                    <div>
+                      <div style={{ fontWeight: 600 }}>Meal Plan Dossier (59p)</div>
+                      <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Full 17-family kitchen guide</div>
+                    </div>
+                  </a>
+
+                  <a
+                    href={pdfDownloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsExportMenuOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 14px',
+                      fontSize: '0.76rem',
+                      color: '#202124',
+                      textDecoration: 'none'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <Pill size={14} color="#188038" />
+                    <div>
+                      <div style={{ fontWeight: 600 }}>Clinical Rx &amp; Compounding (59p)</div>
+                      <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Full CE-IVD certified dossier</div>
+                    </div>
+                  </a>
+
+                  <a
+                    href={mealPlanPdfUrlLight}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsExportMenuOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 14px',
+                      fontSize: '0.76rem',
+                      color: '#202124',
+                      textDecoration: 'none'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <Printer size={14} color="#5f6368" />
+                    <div>
+                      <div style={{ fontWeight: 600 }}>Print Kitchen Guide (5p)</div>
+                      <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Compact weekly dining sheet</div>
+                    </div>
+                  </a>
+
+                  <div style={{ borderTop: '1px solid #dadce0', margin: '4px 0' }} />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleShareClick();
+                      setIsExportMenuOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 14px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      fontSize: '0.76rem',
+                      color: '#202124',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <Share2 size={14} color="#5f6368" />
+                    <span>{copiedLink ? 'Link Copied!' : 'Copy Secure Link'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleWhatsAppShare(selectedLanguage);
+                      setIsExportMenuOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 14px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      fontSize: '0.76rem',
+                      color: '#188038',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <MessageSquare size={14} color="#188038" />
+                    <span>Share on WhatsApp</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Help / Clinical Concierge Trigger (GCP Question Mark) */}
+            <button
+              type="button"
+              onClick={() => setIsHelpDrawerOpen(true)}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
                 border: '1px solid #dadce0',
-                borderRadius: '4px',
-                color: copiedLink ? '#188038' : '#3c4043',
+                backgroundColor: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#5f6368',
                 cursor: 'pointer'
               }}
+              title="Clinical Support & FAQ"
             >
-              {copiedLink ? <Check size={14} /> : <Share2 size={14} />}
-              <span>{copiedLink ? 'Link Copied!' : 'Copy Link'}</span>
+              <HelpCircle size={16} />
             </button>
 
-            <button
-              onClick={() => handleWhatsAppShare('en')}
-              type="button"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 500,
-                backgroundColor: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '4px',
-                color: '#188038',
-                cursor: 'pointer'
-              }}
-            >
-              <MessageSquare size={14} />
-              <span>WhatsApp</span>
-            </button>
+            {/* GCP User Profile & Account Popover / Login */}
+            <div ref={userMenuRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '2px',
+                  borderRadius: '20px',
+                  border: '1px solid #dadce0',
+                  backgroundColor: '#ffffff',
+                  cursor: 'pointer'
+                }}
+              >
+                <div
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    backgroundColor: '#1a73e8',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: '0.78rem'
+                  }}
+                >
+                  {patientInitials}
+                </div>
+                <ChevronDown size={12} color="#5f6368" style={{ marginRight: '4px' }} />
+              </button>
 
-            <a
-              href={mealPlanPdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 500,
-                backgroundColor: '#e8f0fe',
-                border: '1px solid #d2e3fc',
-                color: '#1a73e8',
-                borderRadius: '4px',
-                textDecoration: 'none'
-              }}
-            >
-              <Utensils size={14} />
-              <span>Meal Plan (59p)</span>
-            </a>
+              {/* GCP Account Popover Menu */}
+              {isUserMenuOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    right: 0,
+                    backgroundColor: '#ffffff',
+                    borderRadius: '8px',
+                    border: '1px solid #dadce0',
+                    boxShadow: '0 4px 16px rgba(60,64,67,0.18)',
+                    zIndex: 90,
+                    width: '270px',
+                    padding: '12px'
+                  }}
+                >
+                  {/* Account Header */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        backgroundColor: '#1a73e8',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        fontSize: '0.90rem'
+                      }}
+                    >
+                      {patientInitials}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#202124' }}>
+                        {patientName}
+                      </div>
+                      <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                        ID: {sampleCode}
+                      </div>
+                    </div>
+                  </div>
 
-            <a
-              href={pdfDownloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 500,
-                backgroundColor: '#1a73e8',
-                color: '#ffffff',
-                borderRadius: '4px',
-                textDecoration: 'none'
-              }}
-            >
-              <Download size={14} />
-              <span>Clinical Rx (59p)</span>
-            </a>
+                  <div
+                    style={{
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '6px',
+                      border: '1px solid #e2e8f0',
+                      padding: '8px 10px',
+                      fontSize: '0.70rem',
+                      color: '#475569',
+                      marginBottom: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#137333', fontWeight: 600, marginBottom: '2px' }}>
+                      <ShieldCheck size={12} />
+                      <span>Verified Session (90 days)</span>
+                    </div>
+                    <div><strong>Clinic:</strong> {clinic}</div>
+                    {currentDoctor && <div><strong>Doctor:</strong> {currentDoctor}</div>}
+                  </div>
+
+                  <div style={{ borderTop: '1px solid #dadce0', margin: '8px 0' }} />
+
+                  {/* Login / Auth Action */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsLoginModalOpen(true);
+                      setLoginRole('doctor');
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '7px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      color: '#1a73e8',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e8f0fe')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <Lock size={14} />
+                    <span>Clinician / Doctor Sign In</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsLoginModalOpen(true);
+                      setLoginRole('patient');
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '7px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      fontSize: '0.74rem',
+                      fontWeight: 500,
+                      color: '#3c4043',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <LogIn size={14} />
+                    <span>Patient Account Portal</span>
+                  </button>
+
+                  <div style={{ borderTop: '1px solid #dadce0', margin: '6px 0' }} />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      if (typeof window !== 'undefined') {
+                        window.sessionStorage.clear();
+                        window.location.reload();
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '7px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      fontSize: '0.74rem',
+                      fontWeight: 500,
+                      color: '#d93025',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fce8e6')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <LogOut size={14} />
+                    <span>Lock Session / Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -361,7 +1138,7 @@ export default function PatientDnaPortalClient({
       {/* ── Main Master Layout (2-Column Grid on Laptop / 1-Column on Mobile) ── */}
       <div
         style={{
-          maxWidth: '1360px',
+          maxWidth: '1440px',
           margin: '0 auto',
           width: '100%',
           padding: '1.25rem 1.25rem 5rem 1.25rem',
@@ -391,8 +1168,9 @@ export default function PatientDnaPortalClient({
               <h3 style={{ margin: '0 0 2px 0', fontSize: '1.0rem', fontWeight: 600, color: '#202124' }}>
                 {patientName}
               </h3>
-              <div style={{ fontSize: '0.72rem', color: '#5f6368', marginBottom: '8px' }}>
-                Specimen ID: <code style={{ backgroundColor: '#f1f3f4', padding: '1px 5px', borderRadius: '3px', color: '#202124' }}>{sampleCode}</code>
+              <div style={{ fontSize: '0.72rem', color: '#5f6368', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>Specimen ID:</span>
+                <CopyableId value={sampleCode} displayValue={sampleCode} />
               </div>
               <div style={{ fontSize: '0.70rem', color: '#5f6368', borderTop: '1px solid #dadce0', paddingTop: '6px' }}>
                 <strong>Clinic:</strong> {clinic}
@@ -524,14 +1302,41 @@ export default function PatientDnaPortalClient({
 
           {/* ── Main Content Canvas (Renders Active Chapter) ── */}
           <main style={{ minWidth: 0 }}>
-            {/* Top 15-Second Executive Roadmap */}
-            <DnaReportRoadmap
-              onSelectSection={(sec) => {
-                if (sec === 'mealplan') setActiveChapter('priorities');
-                if (sec === 'prescription') setActiveChapter('prescription');
-              }}
-              onSetFoodViewMode={() => setActiveChapter('foods')}
-            />
+            {/* Executive Roadmap: Rendered ONLY in Chapter 1 to avoid cluttering Chapters 2–7 */}
+            {activeChapter === 'priorities' && showRoadmap && (
+              <div style={{ position: 'relative' }}>
+                <DnaReportRoadmap
+                  onSelectSection={(sec) => {
+                    if (sec === 'mealplan') setActiveChapter('mealplan');
+                    if (sec === 'prescription') setActiveChapter('prescription');
+                  }}
+                  onSetFoodViewMode={() => setActiveChapter('foods')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRoadmap(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    border: 'none',
+                    backgroundColor: '#f1f3f4',
+                    color: '#5f6368',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.66rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <X size={12} />
+                  <span>Dismiss</span>
+                </button>
+              </div>
+            )}
 
             {/* Chapter 1: DNA Priorities & Plate Sequencing */}
             {activeChapter === 'priorities' && (
@@ -557,7 +1362,7 @@ export default function PatientDnaPortalClient({
               />
             )}
 
-            {/* Chapter 3: 7-Day Precision Meal Plan & 24h Routine */}
+            {/* Chapter 4: 7-Day Precision Meal Plan & 24h Routine */}
             {activeChapter === 'mealplan' && (
               <DnaWeeklyMealPlan
                 clinicalProfile={clinicalProfile}
@@ -565,7 +1370,7 @@ export default function PatientDnaPortalClient({
               />
             )}
 
-            {/* Chapter 4: Supermarket Grocery Checklist */}
+            {/* Chapter 5: Supermarket Grocery Checklist */}
             {activeChapter === 'grocery' && (
               <DnaGroceryChecklist
                 supermarketGroceryList={clinicalProfile.supermarketGroceryList || []}
@@ -575,7 +1380,7 @@ export default function PatientDnaPortalClient({
               />
             )}
 
-            {/* Chapter 5: Pharmacy Prescription (Compounded vs Local OTC) */}
+            {/* Chapter 6: Pharmacy Prescription (Compounded vs Local OTC) */}
             {activeChapter === 'prescription' && (
               <div>
                 {/* Modality Selector Tabs */}
@@ -636,7 +1441,7 @@ export default function PatientDnaPortalClient({
               </div>
             )}
 
-            {/* Chapter 6: Official PDF Dossiers & Downloads */}
+            {/* Chapter 7: Official PDF Dossiers & Downloads */}
             {activeChapter === 'downloads' && (
               <DnaDownloadsSection
                 mealPlanPdfUrl={mealPlanPdfUrl}
@@ -650,6 +1455,375 @@ export default function PatientDnaPortalClient({
           </main>
         </div>
       </div>
+
+      {/* ── GCP Modal: Clinician & Patient Authentication (Login) ── */}
+      {isLoginModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(32,33,36,0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '1rem'
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '8px',
+              maxWidth: '440px',
+              width: '100%',
+              padding: '24px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+              border: '1px solid #dadce0'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: '#1a73e8',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  A
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 600, color: '#202124' }}>
+                    Atlas Identity &amp; Access Management
+                  </h3>
+                  <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                    Google Cloud Healthcare API Compliant
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLoginModalOpen(false);
+                  setLoginFeedback(null);
+                }}
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#5f6368' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Role Tabs */}
+            <div style={{ display: 'flex', borderBottom: '1px solid #dadce0', marginBottom: '16px' }}>
+              <button
+                type="button"
+                onClick={() => setLoginRole('doctor')}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  border: 'none',
+                  borderBottom: loginRole === 'doctor' ? '2px solid #1a73e8' : '2px solid transparent',
+                  backgroundColor: 'transparent',
+                  color: loginRole === 'doctor' ? '#1a73e8' : '#5f6368',
+                  fontWeight: loginRole === 'doctor' ? 600 : 500,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer'
+                }}
+              >
+                👨‍⚕️ Clinician / Doctor
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginRole('patient')}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  border: 'none',
+                  borderBottom: loginRole === 'patient' ? '2px solid #1a73e8' : '2px solid transparent',
+                  backgroundColor: 'transparent',
+                  color: loginRole === 'patient' ? '#1a73e8' : '#5f6368',
+                  fontWeight: loginRole === 'patient' ? 600 : 500,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer'
+                }}
+              >
+                👤 Patient Portal
+              </button>
+            </div>
+
+            {loginFeedback && (
+              <div
+                style={{
+                  backgroundColor: '#e6f4ea',
+                  color: '#137333',
+                  border: '1px solid #ceead6',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  fontSize: '0.74rem',
+                  marginBottom: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <CheckCircle2 size={14} />
+                <span>{loginFeedback.text}</span>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {loginRole === 'doctor' ? (
+                <>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 600, color: '#3c4043', marginBottom: '4px' }}>
+                      Clinical Email / GMC License
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="dr.burud@transcendhealth.me"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '4px',
+                        border: '1px solid #dadce0',
+                        fontSize: '0.80rem',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 600, color: '#3c4043', marginBottom: '4px' }}>
+                      Master Password / 2FA Passkey
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="••••••••••••"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '4px',
+                        border: '1px solid #dadce0',
+                        fontSize: '0.80rem',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 600, color: '#3c4043', marginBottom: '4px' }}>
+                      Verified Mobile Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={loginPhone}
+                      onChange={(e) => setLoginPhone(e.target.value)}
+                      placeholder="+971 50 123 4567"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '4px',
+                        border: '1px solid #dadce0',
+                        fontSize: '0.80rem',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 600, color: '#3c4043', marginBottom: '4px' }}>
+                      One-Time SMS Passcode (OTP)
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={loginOtp}
+                      onChange={(e) => setLoginOtp(e.target.value)}
+                      placeholder="6-digit code"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '4px',
+                        border: '1px solid #dadce0',
+                        fontSize: '0.80rem',
+                        outline: 'none',
+                        letterSpacing: '0.2em'
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsLoginModalOpen(false)}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '4px',
+                    border: '1px solid #dadce0',
+                    backgroundColor: '#ffffff',
+                    color: '#3c4043',
+                    fontSize: '0.76rem',
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    backgroundColor: '#1a73e8',
+                    color: '#ffffff',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {loginRole === 'doctor' ? 'Sign In as Prescriber' : 'Verify & Enter'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── GCP Slide-over Help & Clinical Concierge Drawer ── */}
+      {isHelpDrawerOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(32,33,36,0.4)',
+            zIndex: 100,
+            display: 'flex',
+            justifyContent: 'flex-end'
+          }}
+          onClick={() => setIsHelpDrawerOpen(false)}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '380px',
+              backgroundColor: '#ffffff',
+              height: '100%',
+              boxShadow: '-4px 0 16px rgba(0,0,0,0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '20px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <HelpCircle size={18} color="#1a73e8" />
+                <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 600, color: '#202124' }}>
+                  Atlas Clinical Concierge
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsHelpDrawerOpen(false)}
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#5f6368' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #e2e8f0', marginBottom: '14px' }}>
+                <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase' }}>
+                  Your Multidisciplinary Care Team
+                </div>
+                <div style={{ fontSize: '0.80rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>
+                  Transcend Healthcare · Dubai &amp; Doha
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px' }}>
+                  Doctor in charge: <strong>{currentDoctor || 'Dr. Sajid Burud'}</strong>
+                </div>
+              </div>
+
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '8px' }}>
+                Frequently Asked Questions
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ border: '1px solid #dadce0', borderRadius: '6px', padding: '10px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
+                    How do I read the 🟢🟡🔴 traffic lights?
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', lineHeight: 1.45 }}>
+                    🟢 <strong>Eat Freely:</strong> Genetically optimal. 🟡 <strong>Normal Portion:</strong> Consume 1-2x/week with plate sequencing. 🔴 <strong>Avoid:</strong> Triggers inflammatory or insulin spikes.
+                  </div>
+                </div>
+
+                <div style={{ border: '1px solid #dadce0', borderRadius: '6px', padding: '10px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
+                    What is the 1-2-3 Plate Order Rule?
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', lineHeight: 1.45 }}>
+                    Consume leafy fibers first, protein and healthy fats second, and complex carbs last to blunt postprandial glucose spikes by up to 45%.
+                  </div>
+                </div>
+
+                <div style={{ border: '1px solid #dadce0', borderRadius: '6px', padding: '10px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
+                    How do I order the 3-Capsule Compounding formula?
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', lineHeight: 1.45 }}>
+                    Jump to Chapter 6 and download your official compounding prescription or send it directly to our partner compounding pharmacy in UAE.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid #dadce0', paddingTop: '14px', marginTop: '10px' }}>
+              <button
+                type="button"
+                onClick={() => handleWhatsAppShare(selectedLanguage)}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: '#188038',
+                  color: '#ffffff',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                <MessageSquare size={16} />
+                <span>Chat with Clinical Genetics Concierge</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Mobile Sticky Bottom Action Bar (Fixed to thumb area on phones) ── */}
       <div className="dna-mobile-bottom-bar">
@@ -717,7 +1891,7 @@ export default function PatientDnaPortalClient({
           gap: 8px;
           padding: 10px 1rem;
           position: sticky;
-          top: 60px;
+          top: 50px;
           z-index: 35;
           background: #ffffff;
           border-bottom: 1px solid #e2e8f0;
@@ -737,6 +1911,12 @@ export default function PatientDnaPortalClient({
           z-index: 50;
         }
 
+        @media (max-width: 768px) {
+          .dna-hide-mobile {
+            display: none !important;
+          }
+        }
+
         @media (min-width: 1024px) {
           .dna-portal-grid {
             grid-template-columns: 280px minmax(0, 1fr);
@@ -747,8 +1927,8 @@ export default function PatientDnaPortalClient({
             display: flex;
             flex-direction: column;
             position: sticky;
-            top: 76px;
-            max-height: calc(100vh - 90px);
+            top: 68px;
+            max-height: calc(100vh - 84px);
             overflow-y: auto;
           }
           .dna-mobile-pill-bar {
