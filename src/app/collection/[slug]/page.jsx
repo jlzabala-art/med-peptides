@@ -135,11 +135,21 @@ const BRAND_METADATA = {
     image: `${BASE_URL}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`,
     section: 'Clinical Dermocosmetics & Skin Barrier',
     keywords: ['Dermal Aesthetics', 'Blue Diamond', 'Colway', 'GHK-Cu', 'Decorin', 'VEP Peptides', 'Tropocollagen']
+  },
+  'aesthetic-injectables': {
+    title: 'Aesthetic Injectables Clinical Portfolio | Dermal Fillers, Biostimulators & Polynucleotides | Atlas Collection',
+    description: 'Explore the complete 40-SKU aesthetic injectables collection: JUVÉDERM®, TEOXANE RHA®, Restylane®, Sculptra® PLLA, RADIESSE® CaHA, BELOTERO®, Neauvia® PEG-HA, PhilArt® Polynucleotides & AQUALYX®.',
+    image: `${BASE_URL}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`,
+    section: 'Aesthetic Injectables & Biostimulators',
+    keywords: ['Dermal Fillers', 'Juvederm', 'Teoxane', 'Restylane', 'Sculptra', 'Radiesse', 'Belotero', 'Neauvia', 'PhilArt', 'Aqualyx']
   }
 };
 
 // Aliases for seamless routing and brand discovery
 BRAND_METADATA.ultraman = BRAND_METADATA.ultraperson;
+BRAND_METADATA['injectables'] = BRAND_METADATA['aesthetic-injectables'];
+BRAND_METADATA['dermal-fillers'] = BRAND_METADATA['aesthetic-injectables'];
+BRAND_METADATA['fillers'] = BRAND_METADATA['aesthetic-injectables'];
 BRAND_METADATA['hair-treatment'] = BRAND_METADATA['hair-treatments'];
 BRAND_METADATA['trichology'] = BRAND_METADATA['hair-treatments'];
 BRAND_METADATA['hair'] = BRAND_METADATA['hair-treatments'];
@@ -569,6 +579,30 @@ async function fetchTargetedBrandProducts(brandSlug) {
     } catch (e) { }
   }
 
+  // Aesthetic Injectables: Juvéderm, Teoxane, Galderma, Merz, Neauvia, Aqualyx, Croma PhilArt (40 SKUs)
+  if (targetBrand === 'aesthetic-injectables' || targetBrand === 'injectables' || targetBrand === 'dermal-fillers' || targetBrand === 'fillers') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products')
+          .where('categoryId', '==', 'dermal-fillers')
+          .limit(100)
+          .get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          list.push({ id: d.id, ...data });
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Aesthetic Injectables Firestore error:', e.message);
+    }
+
+    const { getAestheticInjectablesCatalog } = await import('../../../data/aestheticInjectablesRegistry');
+    return getAestheticInjectablesCatalog();
+  }
+
   if (!adminDb) return [];
   try {
     const snap = await adminDb.collection('products').get();
@@ -628,7 +662,8 @@ export default async function NextCollectionPage({ params, searchParams }) {
     'tissue-repair', 'repair', 'recovery',
     'longevity-cellular', 'longevity',
     'neuro-performance', 'neuro', 'cognitive',
-    'dermal-aesthetics', 'dermal'
+    'dermal-aesthetics', 'dermal',
+    'aesthetic-injectables', 'injectables', 'dermal-fillers', 'fillers'
   ];
 
   let catalog;

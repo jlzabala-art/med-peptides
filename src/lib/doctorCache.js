@@ -998,6 +998,55 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
                         (doctorDoc?.zohoContactId === '7006116000001150188');
 
   if (isDoctorSajid) {
+    if (!patientMap.has('arshiya')) {
+      patientMap.set('arshiya', {
+        name: 'Arshiya',
+        patientName: 'Arshiya',
+        dob: 'N/A',
+        gender: 'Female',
+        age: 32,
+        prescriptionsCount: 1,
+        totalSpentAed: 0,
+        currency: 'AED',
+        lastPrescriptionDate: '2026-11-14',
+        latestRxCode: 'G001321423',
+        latestRxStatus: 'active',
+        hasSold: true,
+        hasUnaccepted: false,
+        isGenomicPatient: true,
+        sampleCode: 'G001321423',
+        testType: '24Genetics Nutrition 2.0 (CE-IVD)',
+        dnaPortalUrl: '/patient/dna-report?patient=Arshiya&sample=G001321423&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
+        prescriptionPdfUrl: '/api/reports/24genomics-patient-pdf?patient=Arshiya&sample=G001321423&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
+        mealPlanPdfUrl: '/api/reports/24genomics-mealplan-pdf?patient=Arshiya&sample=G001321423&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare&partner=Transcend+Clinical+Nutrition',
+        tags: ['🧬 24Genetics DNA', '🥛 MCM6 Hypolactasia', '🧂 Salt Hypertension', '☕ Caffeine Anxiety'],
+        prescriptions: [{
+          id: 'rx-dna-g001321423',
+          code: 'G001321423',
+          status: 'active',
+          treatmentTitle: '24Genetics Precision Nutrigenomic Regimen (Low-Fat & MUFA Protocol)',
+          date: '2026-11-14',
+          patientName: 'Arshiya'
+        }]
+      });
+    }
+
+    clinicalTasks.unshift({
+      id: 'task-genomics-arshiya',
+      rxId: 'rx-dna-g001321423',
+      code: 'G001321423',
+      patientName: 'Arshiya',
+      patient: { name: 'Arshiya', gender: 'Female' },
+      patientDob: 'N/A',
+      type: 'genomics_review',
+      priority: 'high',
+      title: 'Review 24Genetics Nutrigenomic Profile for Arshiya',
+      description: 'Review 24Genetics Nutrition 2.0 report for Arshiya (G001321423). Key action: MCM6 GG lactose intolerance, ADORA2A TT caffeine anxiety, AGT/AGTR1 salt hypertension, and favorable low-fat/MUFA response.',
+      dueDate: 'Action Required',
+      actionLabel: 'Open DNA Portal',
+      actionUrl: '/patient/dna-report?patient=Arshiya&sample=G001321423&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare'
+    });
+
     if (!patientMap.has('wafa burud')) {
       patientMap.set('wafa burud', {
         name: 'Ms. Wafa Burud',

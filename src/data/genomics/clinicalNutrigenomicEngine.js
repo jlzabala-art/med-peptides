@@ -675,15 +675,56 @@ export const WAFA_BURUD_GENOTYPES = {
 };
 
 /**
+ * 24Genetics Nutrition 2.0 Report: Arshiya (G001321423)
+ * Doctor: Dr. Sajid Burud (dr-sajid-burud)
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Key findings:
+ *  - MCM6 GG   → Severe hypolactasia (complete lactose intolerance)
+ *  - ADORA2A TT → Above-average caffeine-induced anxiety / restlessness
+ *  - IRS1 CC   → Favorable response to low-fat diet
+ *  - PPARG CC  → Favorable weight loss with monounsaturated fats (MUFA)
+ *  - AGT GG / AGTR1 AA → Salt-sensitive hypertension predisposition
+ *  - TAS2R38 AG → Predisposition to emotional eating
+ *  - MC4R TC / FTO TC → Predisposition to snacking between meals
+ *  - FTO AT    → Early-onset overweight in adults
+ *  - TAS1R2 GG → Above-average predisposition to cavities
+ *  - MTHFR GG  → Normal methylation capacity (wild-type)
+ */
+export const ARSHIYA_GENOTYPES = {
+  MC4R: { gene: 'MC4R', rsId: 'rs17782313', genotype: 'TC', effect: 'delayed_satiety', risk: 'high', label: 'Delayed Satiety Response & Snacking Predisposition' },
+  TAS2R38: { gene: 'TAS2R38', rsId: 'rs713598', genotype: 'AG', effect: 'emotional_eating', risk: 'high', label: 'Predisposition to Emotional Eating' },
+  FUT1: { gene: 'FUT1', rsId: 'rs601338', genotype: 'AG', effect: 'normal_sweet_craving', risk: 'low', label: 'Not Predisposed to Sweet Cravings' },
+  FTO: { gene: 'FTO', rsId: 'rs9939609', genotype: 'AT', effect: 'early_onset_weight', risk: 'high', label: 'Predisposition to Early-Onset Overweight in Adults' },
+  IRS1: { gene: 'IRS1', rsId: 'rs1801278', genotype: 'CC', effect: 'enhanced_low_fat_response', risk: 'low', label: 'Enhanced Weight Loss Response to Low-Fat Diet' },
+  CLOCK: { gene: 'CLOCK', rsId: 'rs1801260', genotype: 'GG', effect: 'normal_circadian_phase', risk: 'low', label: 'Standard Circadian Weight Regulation' },
+  MTHFR: { gene: 'MTHFR', rsId: 'rs1801133', genotype: 'GG', effect: 'normal_methylation', risk: 'low', label: 'Normal Methylation Capacity (Wild-Type)' },
+  ZPR1: { gene: 'ZPR1', rsId: 'rs964184', genotype: 'CG', effect: 'normal_vit_e_metabolism', risk: 'low', label: 'Normal Vitamin E & Lipid Balance' },
+  CYP4F2: { gene: 'CYP4F2', rsId: 'rs2108622', genotype: 'TT', effect: 'normal_tocopherol_clearance', risk: 'low', label: 'Normal Tocopherol Clearance' },
+  MCM6: { gene: 'MCM6', rsId: 'rs4988235', genotype: 'GG', effect: 'severe_hypolactasia', risk: 'high', label: 'Severe Adult Hypolactasia (Complete Lactose Malabsorption)' },
+  ADORA2A: { gene: 'ADORA2A', rsId: 'rs5751876', genotype: 'TT', effect: 'caffeine_induced_anxiety', risk: 'high', label: 'Adenosine Receptor Caffeine Anxiety (Homozygous Risk)' },
+  CYP1A2: { gene: 'CYP1A2', rsId: 'rs762551', genotype: 'AA', effect: 'normal_caffeine_clearance', risk: 'low', label: 'Normal Hepatic Caffeine Clearance' },
+  VDR: { gene: 'VDR', rsId: 'rs2228570', genotype: 'CC', effect: 'normal_vitamin_d_receptor', risk: 'low', label: 'Normal Vitamin D Utilization (GC TT)' },
+  PPARG: { gene: 'PPARG', rsId: 'rs1801282', genotype: 'CC', effect: 'mufa_weight_loss', risk: 'low', label: 'Favorable Weight Loss with Monounsaturated Fats (MUFA)' },
+  AGT: { gene: 'AGT', rsId: 'rs699', genotype: 'GG', effect: 'salt_sensitive_hypertension', risk: 'high', label: 'Hypertension Risk from Dietary Sodium / Salt' }
+};
+
+/**
  * Patient profile lookup by sample code.
  * Allows the engine to auto-select the correct genotypes for any registered patient.
  */
 const PATIENT_GENOTYPE_PROFILES = {
+  'G001321423': ARSHIYA_GENOTYPES,
   'G000943568': WAFA_BURUD_GENOTYPES,
   '24G-QA-90421': DEFAULT_HOSSAM_GENOTYPES
 };
 
 const PATIENT_DEFAULTS = {
+  'G001321423': {
+    patientName: 'Arshiya',
+    doctor: 'Dr. Sajid Burud',
+    clinic: 'Transcend Healthcare',
+    analysisDate: 'November 2026'
+  },
   'G000943568': {
     patientName: 'Wafa Burud',
     doctor: 'Dr. Sajid Burud',

@@ -216,6 +216,20 @@ export const PRICE_GROUPS = [
     fetchGroup: 'eterna',
     status: 'active',
   },
+  {
+    id: 'aesthetic-injectables',
+    label: 'Injectables',
+    icon: Sparkles,
+    badge: '40 SKUs · Dubai',
+    supplier: 'Dubai Aesthetics Direct (Allergan · Teoxane · Galderma · Merz · Neauvia · Croma)',
+    description: 'Dermal fillers, skin quality injectables, PLLA & CaHA biostimulators, polynucleotides & Aqualyx',
+    pricingNote: 'Cost + 15% Mediluxe + 15% Wholesaler (×1.3225)',
+    route: '/collection/aesthetic-injectables',
+    skuCount: 40,
+    currency: 'EUR',
+    fetchGroup: 'dermal-fillers',
+    status: 'active',
+  },
 ];
 
 const TOTAL_SKUS = PRICE_GROUPS.reduce((s, g) => s + g.skuCount, 0);
@@ -267,10 +281,26 @@ function GroupSkuTable({ group, tier, priceFor, formatPrice, isAdmin }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('all');
 
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
+    setSelectedBrand('all');
+
+    if (group.id === 'aesthetic-injectables') {
+      import('@/data/aestheticInjectablesRegistry')
+        .then(mod => {
+          if (!isMounted) return;
+          setProducts(mod.getAestheticInjectablesCatalog() || []);
+          setLoading(false);
+        })
+        .catch(() => {
+          if (!isMounted) return;
+          setLoading(false);
+        });
+      return () => { isMounted = false; };
+    }
 
     fetch(`/api/catalog/public?category=${encodeURIComponent(group.fetchGroup)}&limit=100`)
       .then(res => (res.ok ? res.json() : { products: [] }))
@@ -288,16 +318,33 @@ function GroupSkuTable({ group, tier, priceFor, formatPrice, isAdmin }) {
     return () => { isMounted = false; };
   }, [group.id, group.fetchGroup]);
 
+  // Brand categories available in the group
+  const availableBrands = useMemo(() => {
+    const set = new Set();
+    products.forEach(p => {
+      if (p.brand) set.add(p.brand);
+      else if (p.manufacturer) set.add(p.manufacturer.split(' ')[0]);
+    });
+    return Array.from(set);
+  }, [products]);
+
   const filtered = useMemo(() => {
-    if (!search) return products;
+    let list = products;
+    if (selectedBrand && selectedBrand !== 'all') {
+      list = list.filter(p => p.brand === selectedBrand || p.manufacturer?.toLowerCase().includes(selectedBrand.toLowerCase()));
+    }
+    if (!search) return list;
     const q = search.toLowerCase();
-    return products.filter(p =>
+    return list.filter(p =>
       (p.name || '').toLowerCase().includes(q) ||
       (p.canonicalName || '').toLowerCase().includes(q) ||
       (p.id || '').toLowerCase().includes(q) ||
+      (p.indication || '').toLowerCase().includes(q) ||
+      (p.technology || '').toLowerCase().includes(q) ||
+      (p.subcategory || '').toLowerCase().includes(q) ||
       (p.dosage || '').toLowerCase().includes(q)
     );
-  }, [products, search]);
+  }, [products, search, selectedBrand]);
 
   const columns = useMemo(() => {
     const cols = [
@@ -405,6 +452,40 @@ function GroupSkuTable({ group, tier, priceFor, formatPrice, isAdmin }) {
           }}
         />
       </div>
+
+      {/* Brand Filters if multiple brands in group */}
+      {availableBrands.length > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginRight: 4 }}>Brand:</span>
+          <button
+            type="button"
+            onClick={() => setSelectedBrand('all')}
+            style={{
+              padding: '3px 10px', borderRadius: 16, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+              border: selectedBrand === 'all' ? '1px solid var(--color-primary, #003666)' : '1px solid #cbd5e1',
+              background: selectedBrand === 'all' ? 'var(--color-primary, #003666)' : '#fff',
+              color: selectedBrand === 'all' ? '#fff' : '#475569'
+            }}
+          >
+            All Brands
+          </button>
+          {availableBrands.map(b => (
+            <button
+              key={b}
+              type="button"
+              onClick={() => setSelectedBrand(b)}
+              style={{
+                padding: '3px 10px', borderRadius: 16, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                border: selectedBrand === b ? '1px solid var(--color-primary, #003666)' : '1px solid #cbd5e1',
+                background: selectedBrand === b ? 'var(--color-primary, #003666)' : '#fff',
+                color: selectedBrand === b ? '#fff' : '#475569'
+              }}
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading ? (
         <TabSkeleton lines={6} />

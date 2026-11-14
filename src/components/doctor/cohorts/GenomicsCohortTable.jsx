@@ -53,6 +53,26 @@ export default function GenomicsCohortTable({ doctorId }) {
             .filter(item => isPrescriptionInDoctorScope(item, effectiveDocId));
 
           const isDoctorSajid = (effectiveDocId === 'dr-sajid-burud') || String(effectiveDocId).toLowerCase().includes('sajid') || String(effectiveDocId).toLowerCase().includes('sajith');
+          if (isDoctorSajid && !mapped.some(p => p.kitId === 'G001321423' || p.name?.toLowerCase().includes('arshiya'))) {
+            mapped.unshift({
+              id: '24G-G001321423',
+              name: 'Arshiya',
+              age: '32',
+              gender: 'Female',
+              testType: '24Genetics Nutrition 2.0 (CE-IVD)',
+              kitId: 'G001321423',
+              testStatus: 'Report Ready (Online & PDF)',
+              testState: 'ready',
+              snpProfile: ['MCM6 GG (Lactose)', 'ADORA2A TT (Caffeine)', 'AGT GG (Salt BP)'],
+              compoundedRx: 'Low-Fat & MUFA Protocol · Lactase & Calming Formulation',
+              bioAgeDelta: 'Score 88/100',
+              safetyIndex: 'Low-Fat Responders · Severe Hypolactasia & Salt Sensitive',
+              status: 'active',
+              reportUrl: '/patient/dna-report?patient=Arshiya&sample=G001321423&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
+              pdfUrl: '/api/reports/24genomics-patient-pdf?patient=Arshiya&sample=G001321423&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare',
+              mealPlanPdfUrl: '/api/reports/24genomics-mealplan-pdf?patient=Arshiya&sample=G001321423&doctor=Dr.+Sajid+Burud&clinic=Transcend+Healthcare&partner=Transcend+Clinical+Nutrition'
+            });
+          }
           if (isDoctorSajid && !mapped.some(p => p.kitId === 'G000943568' || p.name?.includes('Wafa'))) {
             mapped.unshift({
               id: '24G-G000943568',

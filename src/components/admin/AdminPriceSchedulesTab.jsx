@@ -155,6 +155,26 @@ const PRICE_SCHEDULES = [
     tierSupport: ['wholesale', 'clinic'],
     isFirestoreSsot: true,
     agreementSlug: '24genomics-qatar'
+  },
+  {
+    id: 'aesthetic-injectables',
+    title: 'Aesthetic Injectables Portfolio (Dubai B2B)',
+    subtitle: 'Official clinical portfolio: JUVÉDERM, TEOXANE RHA, Restylane, Sculptra PLLA, RADIESSE CaHA, BELOTERO, Neauvia & PhilArt',
+    badge: '40 Certified Injectables',
+    badgeColor: '#ec4899',
+    badgeBg: '#fdf2f8',
+    badgeBorder: '#fbcfe8',
+    route: '/collection/aesthetic-injectables',
+    referralCode: null,
+    partnerName: 'Dubai Aesthetics Direct (Allergan · Teoxane · Galderma · Merz · Neauvia · Croma)',
+    pricingFormula: 'Cost + 15% Mediluxe + 15% Wholeseller (×1.3225) · Clinic (+45%)',
+    volumeTier: 'Clinic & Distribution Batch Packs',
+    currencies: 'EUR (€) base · USD ($) · AED (Landed)',
+    supplierFamily: 'European Aesthetic Medicine Manufacturers',
+    whiteLabelStatus: 'Original Manufacturer Sealed Packaging with Authenticity Verification',
+    emailNotifications: 'Order and proforma alerts to jose@mediluxeme.com',
+    category: 'aesthetics',
+    tierSupport: ['wholesale', 'clinic']
   }
 ];
 
