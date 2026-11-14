@@ -1,5 +1,5 @@
 import React from 'react';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
 import ColwayPriceListClient from './ColwayPriceListClient';
 
 export const revalidate = 60;
@@ -171,60 +171,10 @@ const FALLBACK_COLWAY_PRODUCTS = [
 ];
 
 export default async function ColwayPricingPage() {
-  let products = [...FALLBACK_COLWAY_PRODUCTS];
-
-  if (adminDb) {
-    try {
-      const ids = FALLBACK_COLWAY_PRODUCTS.map(p => p.id);
-      const snaps = await Promise.all(ids.map(id => adminDb.collection('products').doc(id).get()));
-      
-      const firestoreProducts = snaps.map((docSnap, index) => {
-        const fallback = FALLBACK_COLWAY_PRODUCTS[index];
-        if (!docSnap.exists) return fallback;
-        const d = docSnap.data();
-        const pricingUae = d.pricing_uae || {};
-
-        return {
-          ...fallback,
-          name: d.name || d.title || fallback.name,
-          subtitle: d.subtitle || fallback.subtitle,
-          sku: d.variants?.[0]?.sku || d.sku || fallback.sku,
-          volume: d.volume || d.size || fallback.volume,
-          presentation: d.presentation || fallback.presentation,
-          category: d.category || fallback.category,
-          keyActives: d.key_actives_summary || d.keyActives || fallback.keyActives,
-          clinicalFocus: d.clinical_focus_dossier || d.clinicalFocus || fallback.clinicalFocus,
-          applicationTip: d.application_tip || d.applicationTip || fallback.applicationTip,
-          activeComplexes: d.active_complexes || fallback.activeComplexes || [],
-          heroStats: d.hero_stats || fallback.heroStats || [],
-          clinicalIndications: d.clinical_indications || fallback.clinicalIndications || [],
-          landedCostAed: Number(d.landedCostAed ?? pricingUae.landedCostAed ?? d.cost ?? fallback.landedCostAed),
-          wholesalePriceAed: Number(d.wholesalePriceAed ?? pricingUae.wholesalePriceAed ?? d.wholesale_price ?? fallback.wholesalePriceAed),
-          clinicPriceAed: Number(d.clinicPriceAed ?? pricingUae.clinicPriceAed ?? fallback.clinicPriceAed),
-          retailPriceAed: Number(d.retailPriceAed ?? pricingUae.retailPriceAed ?? d.price ?? fallback.retailPriceAed),
-          image: d.heroImage || d.imageUrl || d.image || fallback.image,
-          stockStatus: 'In Stock (Dubai Warehouse)'
-        };
-      });
-
-      if (firestoreProducts.length > 0) {
-        products = firestoreProducts;
-      }
-    } catch (e) {
-      console.warn('Colway pricing page: Firestore read error, using fallback seed:', e.message);
-    }
-  }
-
-  // Strictly filter out combos / rituals / sets per user directive (No combos)
-  const standaloneProducts = products.filter(p => {
-    const id = (p.id || '').toLowerCase();
-    const name = (p.name || '').toLowerCase();
-    const cat = (p.category || '').toLowerCase();
-    const isCombo = p.isCombo === true || p.isBundle === true ||
-      id.startsWith('bundle-') || id.includes('combo') ||
-      name.includes('ritual') || name.includes('bundle') || name.includes('combo') || name.includes('set ') ||
-      cat.includes('bundle') || cat.includes('combo');
-    return !isCombo;
+  const standaloneProducts = await fetchBrandPricingProductsAction({
+    brand: 'colway',
+    fallbackProducts: FALLBACK_COLWAY_PRODUCTS,
+    excludeCombos: true,
   });
 
   return <ColwayPriceListClient initialProducts={standaloneProducts} />;

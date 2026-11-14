@@ -1,5 +1,5 @@
 import React from 'react';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
 import ColwayPriceListClient from '../colway/ColwayPriceListClient';
 
 export const revalidate = 60;
@@ -171,45 +171,11 @@ const FALLBACK_COLWAY_HAIR_PRODUCTS = [
 ];
 
 export default async function ColwayHairPricingPage() {
-  let products = [...FALLBACK_COLWAY_HAIR_PRODUCTS];
-
-  if (adminDb) {
-    try {
-      const ids = FALLBACK_COLWAY_HAIR_PRODUCTS.map(p => p.id);
-      const snaps = await Promise.all(ids.map(id => adminDb.collection('products').doc(id).get()));
-
-      const firestoreProducts = snaps.map((docSnap, index) => {
-        const fallback = FALLBACK_COLWAY_HAIR_PRODUCTS[index];
-        if (!docSnap.exists) return fallback;
-        const d = docSnap.data();
-        const pricingUae = d.pricing_uae || {};
-
-        return {
-          ...fallback,
-          name: d.name || d.title || fallback.name,
-          subtitle: d.subtitle || fallback.subtitle,
-          sku: d.variants?.[0]?.sku || d.sku || fallback.sku,
-          volume: d.volume || d.size || fallback.volume,
-          presentation: d.presentation || fallback.presentation,
-          category: d.category || fallback.category,
-          keyActives: d.key_actives_summary || d.keyActives || fallback.keyActives,
-          clinicalFocus: d.clinical_focus_dossier || d.clinicalFocus || fallback.clinicalFocus,
-          landedCostAed: Number(d.landedCostAed ?? pricingUae.landedCostAed ?? d.cost ?? fallback.landedCostAed),
-          wholesalePriceAed: Number(d.wholesalePriceAed ?? pricingUae.wholesalePriceAed ?? d.wholesale_price ?? fallback.wholesalePriceAed),
-          clinicPriceAed: Number(d.clinicPriceAed ?? pricingUae.clinicPriceAed ?? fallback.clinicPriceAed),
-          retailPriceAed: Number(d.retailPriceAed ?? pricingUae.retailPriceAed ?? d.price ?? fallback.retailPriceAed),
-          image: d.heroImage || d.imageUrl || d.image || fallback.image,
-          stockStatus: 'In Stock (Dubai Warehouse)'
-        };
-      });
-
-      if (firestoreProducts.length > 0) {
-        products = firestoreProducts;
-      }
-    } catch (e) {
-      console.warn('Colway hair pricing page: Firestore read error, using fallback seed:', e.message);
-    }
-  }
+  const products = await fetchBrandPricingProductsAction({
+    brand: 'colway',
+    fallbackProducts: FALLBACK_COLWAY_HAIR_PRODUCTS,
+    excludeCombos: true,
+  });
 
   return (
     <ColwayPriceListClient
