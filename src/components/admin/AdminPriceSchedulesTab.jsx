@@ -222,7 +222,7 @@ export default function AdminPriceSchedulesTab() {
   }, [searchQuery, selectedFilter]);
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', paddingBottom: '3rem' }}>
+    <div style={{ width: '100%', maxWidth: '100%', minWidth: 0, margin: '0 auto', paddingBottom: '3rem', boxSizing: 'border-box' }}>
       <PageHeader
         title="Official B2B Price Schedules Directory"
         subtitle="Centralized management hub for official wholesale price schedules, partner referral links, and role-based pricing rules."

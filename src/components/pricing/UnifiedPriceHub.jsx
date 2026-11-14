@@ -27,9 +27,9 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   FlaskConical, Dna, Scissors, Package, Layers, TestTube,
   Activity, Microscope, ShieldCheck, Lock, Eye, ChevronRight,
-  ChevronDown, Tag, DollarSign, List, ExternalLink, ArrowRight, Building2,
+  ChevronDown, Tag, DollarSign, List, ExternalLink, ArrowRight, ArrowLeft, Building2,
   CheckCircle2, Sparkles, Filter, X, LayoutGrid, Table, Share2, Users,
-  Check, Copy, FileText, Printer, Download, MessageSquare, Calendar, Info
+  Check, Copy, FileText, FileDown, Printer, Download, MessageSquare, Calendar, Info
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -42,7 +42,6 @@ import DataTable           from '@/components/ui/DataTable';
 import StatusBadge         from '@/components/ui/StatusBadge';
 import CopyableId          from '@/components/ui/CopyableId';
 import EmptyState          from '@/components/ui/EmptyState';
-import ResponsiveTabs      from '@/components/ui/ResponsiveTabs';
 import TabSkeleton         from '@/components/ui/TabSkeleton';
 import GcpUserBadge        from '@/components/shared/GcpUserBadge';
 
@@ -58,7 +57,7 @@ export const PRICE_GROUPS = [
     badge: '127 SKUs',
     supplier: 'NP Labs',
     description: 'Lyophilized bioactive peptides · HPLC ≥99% · Sterile analytical vials',
-    pricingNote: 'Cost + 15% Mediluxe + 15% Wholesaler',
+    pricingNote: 'Cost + 15% Atlas + 15% Wholesaler',
     route: '/pricing/peptides',
     skuCount: 127,
     currency: 'USD',
@@ -179,7 +178,7 @@ export const PRICE_GROUPS = [
     badge: 'Diagnostics',
     supplier: 'Bloodo Lab',
     description: 'Dried Blood Spot diagnostic kits — capillary remote sampling',
-    pricingNote: 'Fixed lab price + Mediluxe margin',
+    pricingNote: 'Fixed lab price + Atlas margin',
     route: '/collection/bloodo',
     skuCount: 6,
     currency: 'EUR',
@@ -198,7 +197,7 @@ export const PRICE_GROUPS = [
     badge: 'Supplements',
     supplier: 'UltraPerson / NP Labs',
     description: 'Precision nutraceutical supplements — clinical-grade',
-    pricingNote: 'Cost + 15% Mediluxe + 15% Wholesaler',
+    pricingNote: 'Cost + 15% Atlas + 15% Wholesaler',
     route: '/collection/ultraperson',
     skuCount: 5,
     currency: 'EUR',
@@ -217,7 +216,7 @@ export const PRICE_GROUPS = [
     badge: 'Incretins + GLP',
     supplier: 'NP Labs / Compounding',
     description: 'GLP-1 analogues, incretins, and metabolic weight optimization compounds',
-    pricingNote: 'Cost + 15% Mediluxe + 15% Wholesaler',
+    pricingNote: 'Cost + 15% Atlas + 15% Wholesaler',
     route: '/collection/weight-management',
     skuCount: 9,
     currency: 'EUR',
@@ -294,7 +293,7 @@ export const PRICE_GROUPS = [
     badge: '40 SKUs · Dubai',
     supplier: 'Dubai Aesthetics Direct (Allergan · Teoxane · Galderma · Merz · Neauvia · Croma)',
     description: 'Dermal fillers, skin quality injectables, PLLA & CaHA biostimulators, polynucleotides & Aqualyx',
-    pricingNote: 'Cost + 15% Mediluxe + 15% Wholesaler (×1.3225)',
+    pricingNote: 'Cost + 15% Atlas + 15% Wholesaler (×1.3225)',
     route: '/collection/aesthetic-injectables',
     skuCount: 40,
     currency: 'EUR',
@@ -311,6 +310,15 @@ export const PRICE_GROUPS = [
 ];
 
 const TOTAL_SKUS = PRICE_GROUPS.reduce((s, g) => s + g.skuCount, 0);
+
+export const MACRO_CATEGORIES = [
+  { id: 'all', label: 'Todos (13)' },
+  { id: 'peptides', label: '🔬 Péptidos & Longevidad', groupIds: ['peptides', 'ultraperson', 'hair-treatments'] },
+  { id: 'genomics', label: '🧬 Genómica CE-IVD', groupIds: ['24genetics', 'genomics-qatar', 'teletest'] },
+  { id: 'cosmetics', label: '✨ Cosmética & Colágeno', groupIds: ['colway', 'colway-hair', 'colway-qatar', 'colway-prices'] },
+  { id: 'injectables', label: '💉 Inyectables Médicos', groupIds: ['injectables', 'eth-dubai'] },
+  { id: 'diagnostics', label: '🩸 Diagnósticos DBS', groupIds: ['bloodo-dbs'] },
+];
 
 // ─── Tier Badge ───────────────────────────────────────────────────────────────
 
@@ -343,7 +351,7 @@ function AuthBanner({ tier, isAuthenticated }) {
     }}>
       <Lock size={16} style={{ flexShrink: 0 }} />
       <span>
-        <strong>Viewing public wholesale prices</strong> — standard distributor rates (cost + 15% Mediluxe + 15% Wholesaler = cost × 1.3225).{' '}
+        <strong>Viewing public wholesale prices</strong> — standard distributor rates (cost + 15% Atlas + 15% Wholesaler = cost × 1.3225).{' '}
         <Link href="/auth/login" style={{ color: '#d97706', fontWeight: 700, textDecoration: 'underline' }}>
           Log in
         </Link>{' '}
@@ -588,7 +596,7 @@ function GroupSkuTable({ group, tier, priceFor, formatPrice, isAdmin }) {
                 Cost: <strong>{formatPrice(cost, group.currency)}</strong>
               </div>
               <div style={{ color: '#15803d', fontWeight: 600 }}>
-                +15% Mediluxe +15% WS
+                +15% Platform +15% WS
               </div>
             </div>
           );
@@ -710,8 +718,9 @@ export default function UnifiedPriceHub({
   const [activeGroupId, setActiveGroupId] = useState(defaultGroup || 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [scopeMode, setScopeMode] = useState('filtered');
-  const [overviewMode, setOverviewMode] = useState('cards'); // 'cards' | 'table'
+  const [overviewMode, setOverviewMode] = useState('table'); // Default to 'table' per Golden Rule #3
   const [selectedCurrencyFilter, setSelectedCurrencyFilter] = useState('all'); // 'all' | 'USD' | 'EUR' | 'AED'
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all'); // 'all' | 'peptides' | 'genomics' | ...
 
   // Shares Modal States
   const [selectedShareGroup, setSelectedShareGroup] = useState(null);
@@ -746,11 +755,17 @@ export default function UnifiedPriceHub({
     return PRICE_GROUPS.find(g => g.id === activeGroupId) || null;
   }, [activeGroupId]);
 
-  // Filtered groups by global search and currency
+  // Filtered groups by global search, currency, and macro-category
   const filteredGroups = useMemo(() => {
     let list = PRICE_GROUPS;
     if (selectedCurrencyFilter !== 'all') {
       list = list.filter(g => g.currency === selectedCurrencyFilter);
+    }
+    if (selectedCategoryFilter !== 'all') {
+      const cat = MACRO_CATEGORIES.find(c => c.id === selectedCategoryFilter);
+      if (cat && cat.groupIds) {
+        list = list.filter(g => cat.groupIds.includes(g.id));
+      }
     }
     const q = searchQuery.toLowerCase().trim();
     if (!q) return list;
@@ -758,19 +773,10 @@ export default function UnifiedPriceHub({
       g.label.toLowerCase().includes(q) ||
       g.description.toLowerCase().includes(q) ||
       g.supplier.toLowerCase().includes(q) ||
-      g.badge.toLowerCase().includes(q)
+      g.badge.toLowerCase().includes(q) ||
+      g.currency.toLowerCase().includes(q)
     );
-  }, [searchQuery, selectedCurrencyFilter]);
-
-  // Tab definitions
-  const tabs = useMemo(() => [
-    { id: 'all', label: `All Price Lists (${PRICE_GROUPS.length})`, icon: Layers },
-    ...PRICE_GROUPS.map(g => ({
-      id: g.id,
-      label: g.label,
-      icon: g.icon
-    }))
-  ], []);
+  }, [searchQuery, selectedCurrencyFilter, selectedCategoryFilter]);
 
   // KPIs
   const kpis = useMemo(() => {
@@ -827,7 +833,7 @@ export default function UnifiedPriceHub({
               backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0
             }}>
-              <Icon size={18} color="#0f172a" />
+              <Icon size={18} color="#003666" />
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>
@@ -844,22 +850,27 @@ export default function UnifiedPriceHub({
     {
       key: 'supplier',
       label: 'Laboratorio / Origen',
-      width: '18%',
+      width: '16%',
       render: (val, row) => (
-        <span style={{ fontSize: '12px', color: '#334155', fontWeight: 500 }}>
-          {row.supplier}
-        </span>
+        <div>
+          <div style={{ fontSize: '12px', color: '#334155', fontWeight: 600 }}>
+            {row.supplier}
+          </div>
+          <div style={{ fontSize: '10px', color: '#16a34a', fontWeight: 600, marginTop: '1px' }}>
+            ● Catálogo Activo
+          </div>
+        </div>
       )
     },
     {
       key: 'skuCount',
       label: 'Referencias',
-      width: '12%',
+      width: '10%',
       render: (val, row) => (
         <span style={{
           fontSize: '11px', fontWeight: 700, color: '#0369a1',
           backgroundColor: '#f0f9ff', border: '1px solid #bae6fd',
-          padding: '2px 8px', borderRadius: '12px'
+          padding: '2px 8px', borderRadius: '12px', display: 'inline-block'
         }}>
           {row.badge}
         </span>
@@ -868,57 +879,128 @@ export default function UnifiedPriceHub({
     {
       key: 'pricingNote',
       label: 'Fórmula Comercial & Margen',
-      width: '22%',
+      width: '18%',
       render: (val, row) => (
         <div style={{ fontSize: '11px', color: '#475569' }}>
-          <strong>{row.pricingNote}</strong>
+          <strong style={{ color: '#0f172a' }}>{row.pricingNote}</strong>
           <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
-            Moneda: <strong>{row.currency}</strong>
+            Moneda: <strong style={{ color: '#0284c7' }}>{row.currency}</strong>
           </div>
         </div>
       )
     },
     {
       key: 'shares',
-      label: 'Difusión & Destinatarios',
-      width: '20%',
+      label: 'Difusión',
+      width: '12%',
       render: (val, row) => {
         const count = row.sharesCount || (row.recipients?.length || 0);
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedShareGroup(row);
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                backgroundColor: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                color: '#166534',
-                fontSize: '11px',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-              title="Ver a quién se ha compartido esta lista"
-            >
-              <Users size={12} />
-              <span>{count} compartidos</span>
-              <ChevronDown size={11} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedShareGroup(row);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              color: '#166534',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+            title="Ver destinatarios que han recibido esta lista"
+          >
+            <Users size={12} />
+            <span>{count}</span>
+            <ChevronDown size={11} />
+          </button>
         );
       }
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      width: '16%',
+      render: (val, row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleGeneratePdf(row);
+            }}
+            style={{
+              padding: '4px 6px',
+              borderRadius: '4px',
+              border: '1px solid #cbd5e1',
+              backgroundColor: '#ffffff',
+              color: '#334155',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center'
+            }}
+            title="Generar PDF Oficial"
+          >
+            <FileDown size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShareWebModalGroup(row);
+            }}
+            style={{
+              padding: '4px 6px',
+              borderRadius: '4px',
+              border: '1px solid #bae6fd',
+              backgroundColor: '#f0f9ff',
+              color: '#0284c7',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center'
+            }}
+            title="Compartir enlace público"
+          >
+            <Share2 size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSelectGroup(row.id);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '3px',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              border: 'none',
+              backgroundColor: '#003666',
+              color: '#ffffff',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+            title={`Ver referencias de ${row.label}`}
+          >
+            <span>Ver SKUs</span>
+            <ArrowRight size={11} />
+          </button>
+        </div>
+      )
     }
-  ], []);
+  ], [handleGeneratePdf, handleSelectGroup]);
 
   return (
-    <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+    <div style={{ width: '100%', maxWidth: '100%', minWidth: 0, margin: '0 auto', boxSizing: 'border-box' }}>
       {/* ── Page Header ── */}
       {!embedded && (
         <PageHeader
@@ -969,13 +1051,184 @@ export default function UnifiedPriceHub({
         style={{ marginBottom: 16 }}
       />
 
-      {/* ── Horizontal Navigation Tabs (Responsive & Overflow Protected) ── */}
-      <div style={{ marginBottom: 20 }}>
-        <ResponsiveTabs
-          tabs={tabs}
-          activeTab={activeGroupId}
-          onTabChange={handleSelectGroup}
-        />
+      {/* ── UNIFIED FILTER & NAVIGATION CONTROLS (Mobile & Laptop Optimized) ── */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        marginBottom: '20px',
+        padding: '12px 16px',
+        background: '#ffffff',
+        borderRadius: '10px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+        width: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box'
+      }}>
+        {/* Row 1: Direct Catalog Selector + Currency Switcher */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+          width: '100%'
+        }}>
+          {/* Catalog Direct Select Picker */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: 1, minWidth: '240px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              <Layers size={15} color="#003666" />
+              <span>Catálogo:</span>
+            </div>
+            <select
+              value={activeGroupId}
+              onChange={(e) => handleSelectGroup(e.target.value)}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#0f172a',
+                cursor: 'pointer',
+                outline: 'none',
+                maxWidth: '340px',
+                width: '100%',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+              }}
+              title="Seleccionar catálogo o ver todos"
+            >
+              <option value="all">📂 Todos los Catálogos ({PRICE_GROUPS.length} Listas B2B)</option>
+              {PRICE_GROUPS.map(g => (
+                <option key={g.id} value={g.id}>
+                  {g.label} ({g.badge}) — {g.currency} · {g.supplier}
+                </option>
+              ))}
+            </select>
+
+            {activeGroupId !== 'all' && (
+              <button
+                type="button"
+                onClick={() => handleSelectGroup('all')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#f8fafc',
+                  color: '#003666',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                <ArrowLeft size={13} />
+                <span>Ver Todos los Catálogos</span>
+              </button>
+            )}
+          </div>
+
+          {/* Currency Switcher */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>Moneda:</span>
+            {[
+              { id: 'all', label: 'Todas' },
+              { id: 'USD', label: 'USD ($)' },
+              { id: 'EUR', label: 'EUR (€)' },
+              { id: 'AED', label: 'AED / QAR' }
+            ].map(f => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setSelectedCurrencyFilter(f.id)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '16px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  border: selectedCurrencyFilter === f.id ? '1px solid #003666' : '1px solid #cbd5e1',
+                  backgroundColor: selectedCurrencyFilter === f.id ? '#003666' : '#ffffff',
+                  color: selectedCurrencyFilter === f.id ? '#ffffff' : '#475569',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Row 2: Category Filter Pills (Wrap cleanly without scroll) */}
+        {activeGroupId === 'all' && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            flexWrap: 'wrap',
+            paddingTop: '8px',
+            borderTop: '1px solid #f1f5f9'
+          }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>
+              Filtro por Categoría:
+            </span>
+            {MACRO_CATEGORIES.map(cat => {
+              const isActive = selectedCategoryFilter === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategoryFilter(cat.id)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: isActive ? 700 : 500,
+                    cursor: 'pointer',
+                    border: isActive ? '1px solid #0284c7' : '1px solid #e2e8f0',
+                    backgroundColor: isActive ? '#f0f9ff' : '#ffffff',
+                    color: isActive ? '#0369a1' : '#475569',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
+
+            {(selectedCategoryFilter !== 'all' || selectedCurrencyFilter !== 'all' || searchQuery) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategoryFilter('all');
+                  setSelectedCurrencyFilter('all');
+                  setSearchQuery('');
+                }}
+                style={{
+                  marginLeft: 'auto',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  color: '#dc2626',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={12} />
+                <span>Limpiar Filtros</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── VIEW MODE 1: Active Group Detail + Live SKU Table ── */}
@@ -986,7 +1239,49 @@ export default function UnifiedPriceHub({
           borderRadius: 12,
           padding: '24px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+          width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box'
         }}>
+          {/* Back Navigation Bar */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '10px',
+            marginBottom: '16px',
+            padding: '8px 12px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px'
+          }}>
+            <button
+              type="button"
+              onClick={() => handleSelectGroup('all')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: '#003666',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+              }}
+            >
+              <ArrowLeft size={14} />
+              <span>← Volver a Todas las Listas de Precios ({PRICE_GROUPS.length})</span>
+            </button>
+
+            <div style={{ fontSize: '12px', color: '#64748b' }}>
+              Catálogo Seleccionado: <strong style={{ color: '#0f172a' }}>{selectedGroup.label}</strong> ({selectedGroup.badge}) · {selectedGroup.currency}
+            </div>
+          </div>
           {/* Header of Active Group with PDF & Public Share Actions */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -1130,116 +1425,23 @@ export default function UnifiedPriceHub({
           />
         </div>
       ) : (
-        /* ── VIEW MODE 2: Overview of all 12 Lists (Cards vs Table Mode) ── */
-        <div>
-          {/* Controls Bar: View Mode Switcher (Cards vs Table) & Currency Filters */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px',
-            marginBottom: '16px',
-            padding: '10px 14px',
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            border: '1px solid #e2e8f0'
-          }}>
-            {/* Currency Filter Pills */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>Moneda:</span>
-              {[
-                { id: 'all', label: 'Todas las Monedas' },
-                { id: 'USD', label: 'USD ($)' },
-                { id: 'EUR', label: 'EUR (€)' },
-                { id: 'AED', label: 'AED / QAR (GCC)' }
-              ].map(f => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setSelectedCurrencyFilter(f.id)}
-                  style={{
-                    padding: '3px 10px',
-                    borderRadius: '16px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    border: selectedCurrencyFilter === f.id ? '1px solid #003666' : '1px solid #cbd5e1',
-                    backgroundColor: selectedCurrencyFilter === f.id ? '#003666' : '#ffffff',
-                    color: selectedCurrencyFilter === f.id ? '#ffffff' : '#475569'
-                  }}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-
-            {/* View Mode Toggle: Cards vs Table */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                backgroundColor: '#f1f5f9',
-                padding: '2px',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <button
-                  type="button"
-                  onClick={() => setOverviewMode('cards')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '4px 10px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: overviewMode === 'cards' ? '#ffffff' : 'transparent',
-                    color: overviewMode === 'cards' ? '#0f172a' : '#64748b',
-                    fontWeight: overviewMode === 'cards' ? 700 : 500,
-                    fontSize: '11px',
-                    cursor: 'pointer',
-                    boxShadow: overviewMode === 'cards' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
-                  }}
-                >
-                  <LayoutGrid size={13} />
-                  <span>Tarjetas</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setOverviewMode('table')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '4px 10px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: overviewMode === 'table' ? '#ffffff' : 'transparent',
-                    color: overviewMode === 'table' ? '#0f172a' : '#64748b',
-                    fontWeight: overviewMode === 'table' ? 700 : 500,
-                    fontSize: '11px',
-                    cursor: 'pointer',
-                    boxShadow: overviewMode === 'table' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
-                  }}
-                >
-                  <Table size={13} />
-                  <span>Modo Tabla</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
+        /* ── VIEW MODE 2: Overview of All 13 Price Lists (DataTable Standard) ── */
+        <div style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
           {filteredGroups.length === 0 ? (
             <EmptyState
               icon={Package}
-              title="No price schedules found"
-              subtitle="Try adjusting your search criteria."
-              action={{ label: 'Clear Search', onClick: () => { setSearchQuery(''); setSelectedCurrencyFilter('all'); } }}
+              title="No se encontraron listas de precios"
+              subtitle="Prueba a ajustar los filtros de categoría, moneda o tu búsqueda."
+              action={{
+                label: 'Limpiar Filtros',
+                onClick: () => {
+                  setSearchQuery('');
+                  setSelectedCurrencyFilter('all');
+                  setSelectedCategoryFilter('all');
+                }
+              }}
             />
-          ) : overviewMode === 'table' ? (
-            /* ── TABLE VIEW (DataTable standard) ── */
+          ) : (
             <DataTable
               columns={priceListsTableColumns}
               data={filteredGroups}
@@ -1260,10 +1462,10 @@ export default function UnifiedPriceHub({
                         Detalles de Distribución · {row.label}
                       </div>
                       <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
-                        Fórmula: <strong>{row.pricingNote}</strong> · {row.skuCount} referencias activas · Proveedor: {row.supplier}
+                        Fórmula: <strong>{row.pricingNote}</strong> · {row.skuCount} referencias activas · Proveedor: {row.supplier} · Moneda: <strong>{row.currency}</strong>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <button
                         type="button"
                         onClick={() => handleGeneratePdf(row)}
@@ -1281,7 +1483,7 @@ export default function UnifiedPriceHub({
                         }}
                       >
                         <FileText size={12} color="#d97706" />
-                        <span>PDF</span>
+                        <span>Generar PDF</span>
                       </button>
 
                       <button
@@ -1302,7 +1504,28 @@ export default function UnifiedPriceHub({
                         }}
                       >
                         <Share2 size={12} />
-                        <span>Compartir</span>
+                        <span>Compartir Web</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleWhatsAppShare(row)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '5px 10px',
+                          borderRadius: '4px',
+                          border: '1px solid #bbf7d0',
+                          backgroundColor: '#f0fdf4',
+                          color: '#166534',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <MessageSquare size={12} />
+                        <span>WhatsApp</span>
                       </button>
 
                       <button
@@ -1330,164 +1553,6 @@ export default function UnifiedPriceHub({
                 </div>
               )}
             />
-          ) : (
-            /* ── CARDS VIEW (Enhanced with Shares & Quick Actions) ── */
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
-              gap: 16,
-            }}>
-              {filteredGroups.map(group => {
-                const Icon = group.icon;
-                const sharesCount = group.sharesCount || (group.recipients?.length || 0);
-
-                return (
-                  <div
-                    key={group.id}
-                    style={{
-                      background: 'var(--surface, #fff)',
-                      border: '1px solid var(--border, #e2e8f0)',
-                      borderRadius: 12,
-                      padding: '18px',
-                      transition: 'all 0.15s ease',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--color-primary, #003666)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--border, #e2e8f0)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
-                        <div style={{
-                          width: 40, height: 40, borderRadius: 8,
-                          background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>
-                          <Icon size={20} color="#0f172a" />
-                        </div>
-                        <span style={{
-                          fontSize: 11, fontWeight: 700, color: '#0369a1',
-                          background: '#f0f9ff', border: '1px solid #bae6fd',
-                          padding: '2px 8px', borderRadius: 12
-                        }}>
-                          {group.badge}
-                        </span>
-                      </div>
-
-                      <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', margin: '0 0 4px 0' }}>
-                        {group.label}
-                      </h3>
-                      <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, margin: '0 0 12px 0' }}>
-                        {group.description}
-                      </p>
-                    </div>
-
-                    <div>
-                      {/* Formula */}
-                      <div style={{
-                        fontSize: 11, color: '#475569', padding: '6px 10px',
-                        background: '#f8fafc', borderRadius: 6, marginBottom: 8
-                      }}>
-                        Formula: <strong>{group.pricingNote}</strong>
-                      </div>
-
-                      {/* Shares Tracking Pill with Popover Trigger */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedShareGroup(group);
-                          }}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            backgroundColor: '#f0fdf4',
-                            border: '1px solid #bbf7d0',
-                            color: '#166534',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            cursor: 'pointer'
-                          }}
-                          title="Ver a quién se le ha compartido esta lista"
-                        >
-                          <Users size={12} />
-                          <span>{sharesCount} compartidos</span>
-                          <ChevronDown size={11} />
-                        </button>
-
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleGeneratePdf(group);
-                            }}
-                            style={{
-                              padding: '3px 6px',
-                              borderRadius: '4px',
-                              border: '1px solid #cbd5e1',
-                              backgroundColor: '#ffffff',
-                              color: '#64748b',
-                              fontSize: '11px',
-                              cursor: 'pointer'
-                            }}
-                            title="Generar PDF"
-                          >
-                            <FileText size={12} color="#d97706" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShareWebModalGroup(group);
-                            }}
-                            style={{
-                              padding: '3px 6px',
-                              borderRadius: '4px',
-                              border: '1px solid #bae6fd',
-                              backgroundColor: '#f0f9ff',
-                              color: '#0284c7',
-                              fontSize: '11px',
-                              cursor: 'pointer'
-                            }}
-                            title="Compartir enlace de web pública"
-                          >
-                            <Share2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Explore SKUs Action */}
-                      <div
-                        onClick={() => handleSelectGroup(group.id)}
-                        style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          fontSize: 12, fontWeight: 700, color: '#0284c7',
-                          cursor: 'pointer',
-                          paddingTop: '6px',
-                          borderTop: '1px solid #f1f5f9'
-                        }}
-                      >
-                        <span>Explore SKUs ({group.skuCount})</span>
-                        <ArrowRight size={14} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           )}
         </div>
       )}
@@ -1823,7 +1888,7 @@ export default function UnifiedPriceHub({
           })}
         </div>
         <div style={{ color: '#94a3b8', lineHeight: 1.5 }}>
-          <strong>Unregistered visitors:</strong> Wholesale price (Cost × 1.15 Mediluxe × 1.15 Wholesaler = Cost × 1.3225).
+          <strong>Unregistered visitors:</strong> Wholesale price (Cost × 1.15 Atlas × 1.15 Wholesaler = Cost × 1.3225).
           Raw laboratory supplier costs and margins remain strictly restricted.
         </div>
       </div>
