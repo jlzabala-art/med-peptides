@@ -1054,7 +1054,9 @@ ${contextAnchor.mechanisms}
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#7dd3fc', marginTop: '2px', fontWeight: 600 }}>
-                  Verified Analytical Support • Monograph Specifications
+                  {contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog'
+                    ? 'Clinical Pathway Copilot • Protocol Registry SSOT'
+                    : 'Verified Analytical Support • Monograph Specifications'}
                 </div>
               </div>
 
@@ -1182,6 +1184,10 @@ ${contextAnchor.mechanisms}
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#475569', backgroundColor: '#f1f5f9', padding: '2px 7px', borderRadius: '4px', border: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>
                     CAS {contextAnchor.cas}
                   </span>
+                ) : contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog' ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0369a1', backgroundColor: '#eff6ff', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bfdbfe', whiteSpace: 'nowrap' }}>
+                    {contextAnchor?.totalProtocols ? `${contextAnchor.totalProtocols} Protocols` : 'Clinical SSOT'}
+                  </span>
                 ) : (
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0369a1', backgroundColor: '#eff6ff', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bfdbfe', whiteSpace: 'nowrap' }}>
                     {contextAnchor?.purity?.includes('≥') ? contextAnchor.purity.split(' ')[0] : 'RP-HPLC'}
@@ -1293,6 +1299,10 @@ ${contextAnchor.mechanisms}
                         ? 'Ask questions regarding INCI active mechanisms, penetration kinetics, clinical scalp/skin protocols, or dermocosmetic safety.'
                         : contextType === 'diagnostic_test'
                         ? 'Ask questions regarding capillary blood spot collection, sample transit stability, reference ranges, laboratory analytical methods, or clinical protocol matching.'
+                        : contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog'
+                        ? (lang === 'es'
+                            ? 'Consulta indicaciones clínicas, pautas de titulación, biomarcadores Bloodo™ requeridos, contraindicaciones o compara protocolos según el perfil de tu paciente.'
+                            : 'Ask about clinical indications, titration schedules, required Bloodo™ biomarkers, contraindications, or compare protocols for your patient profile.')
                         : contextType === 'protocol'
                         ? 'Ask questions regarding multi-phase titration schedules, companion compounds, safety precautions, or required laboratory monitoring.'
                         : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic')
@@ -1881,35 +1891,90 @@ ${contextAnchor.mechanisms}
             <div
               className="atlas-bottom-sheet-input-bar"
               style={{
-                padding: '14px 16px',
+                padding: '12px 16px',
                 borderTop: '1px solid #e2e8f0',
                 backgroundColor: '#ffffff',
               }}
             >
+              {(contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog') && !isBlocked && (
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '6px',
+                    overflowX: 'auto',
+                    paddingBottom: '8px',
+                    scrollbarWidth: 'none',
+                  }}
+                >
+                  {[
+                    { label: '+ GLP-1 / Metabolic', prompt: 'Recommend the best metabolic/GLP-1 protocol and required DEXA/lab monitoring for a patient with insulin resistance.' },
+                    { label: '+ Needle-Free (Nasal)', prompt: 'Which needle-free (intranasal or topical) protocols are available and what are their indications?' },
+                    { label: '+ No Oncology Risk', prompt: 'Which recovery or longevity protocols avoid angiogenic or growth-hormone axis precautions?' },
+                    ...(Array.isArray(contextAnchor?.comparingProtocols) && contextAnchor.comparingProtocols.length >= 2
+                      ? [{ label: `Compare (${contextAnchor.comparingProtocols.length})`, prompt: `Compare ${contextAnchor.comparingProtocols.map(p => p.name).join(' vs ')} for patient fit, titration, and lab monitoring.` }]
+                      : []),
+                  ].map((chip) => (
+                    <button
+                      key={chip.label}
+                      type="button"
+                      onClick={() => setMessage(chip.prompt)}
+                      style={{
+                        whiteSpace: 'nowrap',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        padding: '4px 9px',
+                        borderRadius: '9999px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#f8fafc',
+                        color: '#003666',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}
+                style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}
               >
-                <input
-                  type="text"
+                <textarea
+                  rows={2}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      if (message.trim() && !isLoading && !isBlocked) {
+                        handleSendMessage();
+                      }
+                    }
+                  }}
                   disabled={isLoading || isBlocked}
                   placeholder={
                     isBlocked
                       ? 'Inquiry quota reached (5/5). Please register.'
-                      : 'Ask technical question (English only)…'
+                      : (contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog')
+                        ? 'Describe patient goal, route preference, or labs…'
+                        : 'Ask technical question (English only)…'
                   }
                   style={{
                     flex: 1,
                     minHeight: '44px',
-                    padding: '10px 14px',
+                    maxHeight: '110px',
+                    padding: '9px 12px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
-                    fontSize: '0.85rem',
+                    fontSize: '0.84rem',
+                    lineHeight: 1.35,
+                    resize: 'none',
+                    fontFamily: 'inherit',
                     outline: 'none',
                     backgroundColor: isBlocked ? '#f1f5f9' : '#ffffff',
                     color: isBlocked ? '#94a3b8' : '#0f172a',
@@ -1920,13 +1985,15 @@ ${contextAnchor.mechanisms}
                   disabled={isLoading || isBlocked || !message.trim()}
                   className="atlas-touch-target-44"
                   style={{
+                    height: '44px',
                     backgroundColor: isBlocked || !message.trim() ? '#94a3b8' : '#003666',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '8px',
-                    padding: '0 18px',
+                    padding: '0 16px',
                     cursor: isBlocked || !message.trim() ? 'default' : 'pointer',
                     transition: 'all 0.15s ease',
+                    flexShrink: 0,
                   }}
                 >
                   <Send size={16} />

@@ -99,7 +99,7 @@ export const PROTOCOL_I18N = {
     // Catalog Directory translations (/proto)
     catalogHeroPill: 'Ecosystem Clinical Pathways • Single Source of Truth',
     catalogHeroTitle: 'Clinical Protocols & Peptides Directory',
-    catalogHeroSubtitle: 'Explore 77 standardized therapeutic protocols formulated with certified pharmaceutical grade compounds. Monotherapies and combined synergies with dosage schedules, titration phases, and laboratory surveillance.',
+    catalogHeroSubtitle: 'Explore {count} standardized therapeutic protocols formulated with certified pharmaceutical grade compounds. Monotherapies and combined synergies with dosage schedules, titration phases, and laboratory surveillance.',
     
     // 4 Directory KPIs (Rule #22)
     kpiActiveProtocolsTitle: 'ACTIVE PROTOCOLS',
@@ -233,7 +233,7 @@ export const PROTOCOL_I18N = {
     // Catalog Directory translations (/proto)
     catalogHeroPill: 'Vías Clínicas del Ecosistema • Single Source of Truth',
     catalogHeroTitle: 'Directorio de Protocolos Clínicos & Péptidos',
-    catalogHeroSubtitle: 'Explora los 77 protocolos terapéuticos formulados bajo estándares clínicos avanzados. Monoterapias y sinergias combinadas con calendarios de dosificación, fases de titulación y biomarcadores de seguridad.',
+    catalogHeroSubtitle: 'Explora los {count} protocolos terapéuticos formulados bajo estándares clínicos avanzados. Monoterapias y sinergias combinadas con calendarios de dosificación, fases de titulación y biomarcadores de seguridad.',
     
     // 4 Directory KPIs (Rule #22)
     kpiActiveProtocolsTitle: 'PROTOCOLOS ACTIVOS',

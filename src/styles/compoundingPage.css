@@ -900,3 +900,451 @@
   cursor: pointer;
 }
 
+/* ── Step Head Helpers & View Toggle ─────────────────────────────────────── */
+.cmp-step-head-text { flex: 1; min-width: 0; }
+.cmp-step-head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cmp-view-toggle-btn { font-size: 0.72rem; }
+.cmp-bp-count { font-size: 0.70rem; color: #64748b; white-space: nowrap; }
+.cmp-split-toggle.is-active { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+
+/* ── Search Category Chips & Popular Header ──────────────────────────────── */
+.cmp-cat-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  scrollbar-width: none;
+}
+.cmp-cat-chips::-webkit-scrollbar { display: none; }
+.cmp-cat-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+.cmp-cat-chip:hover { border-color: var(--cmp-accent); color: var(--cmp-accent); }
+.cmp-cat-chip.is-active {
+  background: var(--cmp-accent);
+  border-color: var(--cmp-accent);
+  color: #ffffff;
+}
+.cmp-search-pop-head {
+  padding: 6px 10px 4px;
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+/* ── Active Ingredient Card Enhancements ─────────────────────────────────── */
+.cmp-item-title-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.cmp-cap-share-pill {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 1px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.cmp-item-slider-wrap {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed #e2e8f0;
+}
+.cmp-dose-advice-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cmp-dose-advice-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.cmp-dose-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  font-size: 0.62rem;
+  font-weight: 750;
+}
+.cmp-dose-indication { font-size: 0.68rem; font-weight: 650; color: #334155; }
+.cmp-dose-apply-std {
+  background: none;
+  border: none;
+  color: #0d9488;
+  font-size: 0.64rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.cmp-dose-rationale { margin: 3px 0 0; font-size: 0.69rem; color: #64748b; line-height: 1.35; }
+.cmp-dose-yield { font-size: 0.64rem; color: #0369a1; font-weight: 600; margin-top: 2px; }
+
+/* ── Clinical Intelligence Warnings ──────────────────────────────────────── */
+.cmp-intel-warn {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.74rem;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cmp-intel-overlap {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 0.72rem;
+  color: #991b1b;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.35;
+}
+.cmp-intel-overlap svg { flex-shrink: 0; margin-top: 1px; }
+
+/* ── Summary Panel, DNA Card, Dual-Phase & Saved Formulas ────────────────── */
+.cmp-dna-card {
+  margin: 12px 0 16px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cmp-dna-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cmp-dna-title { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #166534; }
+.cmp-dna-remove {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.70rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.cmp-dna-desc { font-size: 0.72rem; color: #166534; line-height: 1.4; }
+
+.cmp-split-summary {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cmp-split-summary-title {
+  font-size: 0.70rem;
+  font-weight: 750;
+  color: #6d28d9;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.cmp-split-phase-box {
+  background: #ffffff;
+  border: 1px solid #ede9fe;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.cmp-split-phase-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.cmp-split-phase-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  color: #0f172a;
+}
+.cmp-split-phase-cap {
+  font-size: 0.68rem;
+  font-weight: 750;
+  color: #6d28d9;
+  background: #f5f3ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.cmp-split-phase-items { font-size: 0.70rem; color: #475569; line-height: 1.35; }
+.cmp-split-phase-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.66rem;
+  font-weight: 650;
+  color: #64748b;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.cmp-pricing-desc {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.cmp-pricing-sub { font-size: 0.72rem; color: #475569; margin-top: 2px; }
+.cmp-pricing-val-wrap { text-align: right; }
+.cmp-pricing-val { font-size: 1.30rem; font-weight: 800; color: #0f172a; }
+.cmp-pricing-vat { font-size: 0.66rem; color: #64748b; font-weight: 600; }
+.cmp-pricing-margin {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.70rem;
+  color: #16a34a;
+  font-weight: 650;
+}
+.cmp-pricing-margin span:first-child { display: inline-flex; align-items: center; gap: 4px; }
+
+.cmp-primary-btn.is-doctor {
+  background: #0d9488;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+}
+.cmp-primary-btn.is-doctor:hover:not(:disabled) { background: #0f766e; }
+.cmp-actions-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.cmp-ai-hint { cursor: pointer; }
+
+.cmp-saved-box {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+.cmp-saved-head {
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+.cmp-saved-list { display: flex; flex-direction: column; gap: 6px; }
+.cmp-saved-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.cmp-saved-info { display: flex; flex-direction: column; min-width: 0; }
+.cmp-saved-info strong { font-size: 0.75rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-saved-info small { font-size: 0.65rem; color: #64748b; }
+.cmp-saved-btns { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.cmp-saved-load {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #003666;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.cmp-saved-del {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.cmp-saved-del:hover { color: #dc2626; }
+
+/* ── Mobile Live Galenic Jump Bar (visible < 960px) ──────────────────────── */
+.cmp-mobile-galenic-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  border-radius: 10px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  font-size: 0.76rem;
+  color: #4c1d95;
+}
+.cmp-mobile-galenic-bar strong { font-weight: 800; }
+.cmp-mobile-galenic-jump {
+  border: none;
+  background: var(--cmp-accent);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media (min-width: 960px) {
+  .cmp-mobile-galenic-bar { display: none; }
+}
+
+/* ── Embedded Doctor Header ──────────────────────────────────────────────── */
+.cmp-doc-wrap { padding-top: 10px; }
+.cmp-doc-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 14px 0 16px;
+}
+.cmp-doc-kpi {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.cmp-doc-kpi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.70rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.cmp-doc-kpi-val { font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 4px; }
+.cmp-doc-kpi-val.is-genomic { color: #7c3aed; }
+.cmp-doc-kpi-sub { font-size: 0.70rem; color: #64748b; margin-top: 2px; }
+
+.cmp-doc-bar {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cmp-doc-bar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+.cmp-doc-prescriber { display: flex; align-items: center; gap: 8px; }
+.cmp-doc-emoji { font-size: 1.15rem; }
+.cmp-doc-prescriber strong { font-size: 0.88rem; font-weight: 750; color: #0f172a; }
+.cmp-doc-prescriber span { font-size: 0.74rem; color: #64748b; }
+.cmp-doc-verified {
+  font-size: 0.70rem;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.cmp-doc-patient-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.cmp-doc-field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.cmp-doc-field-patient { flex: 1 1 280px; }
+.cmp-doc-field-indication { flex: 1 1 260px; }
+.cmp-doc-field-indication input {
+  width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.84rem;
+}
+.cmp-doc-select-row { display: flex; gap: 8px; }
+.cmp-doc-select-row select {
+  flex: 1;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 0.85rem;
+  color: #0f172a;
+  outline: none;
+}
+.cmp-doc-new-btn {
+  padding: 0 12px;
+  height: 38px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: #334155;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cmp-doc-new-patient { display: flex; gap: 8px; flex-wrap: wrap; }
+.cmp-doc-new-patient input,
+.cmp-doc-new-patient select {
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  padding: 0 8px;
+  font-size: 0.82rem;
+}
+.cmp-doc-np-name { flex: 2 1 140px; }
+.cmp-doc-np-dob { flex: 1 1 110px; }
+.cmp-doc-np-gender { flex: 1 1 70px; }
+.cmp-doc-np-cancel {
+  padding: 0 8px;
+  height: 38px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  color: #64748b;
+  cursor: pointer;
+}
+
+

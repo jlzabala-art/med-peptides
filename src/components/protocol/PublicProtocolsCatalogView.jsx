@@ -1,38 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
-  Zap,
-  Heart,
-  Activity,
-  Brain,
-  Shield,
-  ShieldCheck,
-  ShieldAlert,
-  Sparkles,
-  Moon,
-  Clock,
-  Layers,
-  ArrowRight,
-  Filter,
-  Check,
-  Copy,
-  QrCode,
-  Share2,
-  X,
-  FileText,
   FlaskConical,
-  RotateCcw,
-  ExternalLink,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  List,
-  LayoutGrid,
-  ClipboardList,
-  Award
+  ShieldCheck,
+  GitCompare,
+  X,
 } from '@/lib/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import '../../styles/publicProtocolsCatalog.css';
@@ -44,207 +18,88 @@ import ProtocolQrModal from './ProtocolQrModal';
 import PublicUnifiedHeader from '../shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '../shared/PublicUnifiedFooter';
 import ProtocolsCatalogSidebar from './ProtocolsCatalogSidebar';
+import ProtocolCatalogKpiStrip from './ProtocolCatalogKpiStrip';
+import ProtocolCatalogSearchToolbar from './ProtocolCatalogSearchToolbar';
+import ProtocolListRow from './ProtocolListRow';
+import ProtocolCatalogCard from './ProtocolCatalogCard';
+import ProtocolCompareDrawer from './ProtocolCompareDrawer';
 import { Mail, Lock } from 'lucide-react';
-import { getProtocolTranslations, GOAL_TRANSLATIONS, SUPPORTED_LANGUAGES } from '../../utils/protocolTranslations';
-
-// ── Goal Taxonomy Buckets ───────────────────────────────────────────────────
-const GOAL_BUCKETS = [
-  { id: 'all', label: 'All Protocols', icon: FlaskConical, color: '#003666', bg: '#eff6ff' },
-  { id: 'reference_standards', label: '★ Reference Standards', icon: Award, color: '#b45309', bg: '#fffbeb', isReferenceChip: true },
-  { id: 'fat_loss', label: 'Metabolism & GLP-1 / GIP', icon: Zap, color: '#ea580c', bg: '#fff7ed' },
-  { id: 'longevity', label: 'Longevity & Anti-Aging', icon: Heart, color: '#0d9488', bg: '#f0fdfa' },
-  { id: 'recovery', label: 'Tissue & Joint Regeneration', icon: Activity, color: '#0284c7', bg: '#f0f9ff' },
-  { id: 'cognitive', label: 'Neuroplasticity & Cognition', icon: Brain, color: '#7c3aed', bg: '#faf5ff' },
-  { id: 'muscle_growth', label: 'Muscle Mass & Performance', icon: Shield, color: '#16a34a', bg: '#f0fdf4' },
-  { id: 'immune', label: 'Immunity & Cellular Defense', icon: ShieldAlert, color: '#0891b2', bg: '#ecfeff' },
-  { id: 'sexual_health', label: 'Hormonal & Sexual Health', icon: Sparkles, color: '#db2777', bg: '#fdf2f8' },
-  { id: 'sleep', label: 'Sleep & Circadian Rhythm', icon: Moon, color: '#4338ca', bg: '#eef2ff' },
-  { id: 'skin_hair', label: 'Skin, Hair & Aesthetics', icon: Sparkles, color: '#d97706', bg: '#fffbeb' },
-];
-
-const REFERENCE_TELEMETRY_PILLS = {
-  'bpc-157-tb-500-protocol': { en: 'Anatomical Geometry', es: 'Geometría Anatómica' },
-  'metabolic-retatrutide-motsc-12w': { en: 'Incretin / DEXA Safety', es: 'Seguridad Incretina / DEXA' },
-  'nad-cellular-restoration-protocol': { en: 'Bloodo™ Companion Test', es: 'Test Acompañante Bloodo™' },
-  'cjc-1295-ipamorelin-synergistic-hgh-optimization': { en: 'Somatotropic Axis', es: 'Eje Somatotrópico' },
-  'thymosin-alpha-1-immune-resilience': { en: 'Immune Lineage', es: 'Linaje Inmunitario' },
-};
-
-/**
- * Maps arbitrary Firestore goal tags to standard bucket IDs
- */
-function mapProtocolToGoals(p) {
-  const text = [
-    ...(Array.isArray(p.goals) ? p.goals : [p.goals]),
-    p.goal,
-    p.category,
-    p.therapeutic_category,
-    p.name,
-    p.protocol_name,
-    p.title,
-    p.description
-  ].filter(Boolean).join(' ').toLowerCase();
-
-  const matched = new Set(['all']);
-
-  if (text.match(/glp|gip|fat|weight|metabolic|tirzepatide|semaglutide|retatrutide|aod|5-amino|adipotide/i)) {
-    matched.add('fat_loss');
-  }
-  if (text.match(/longevity|aging|epithalon|nad|foxo4|telomere|mitochondr|ghk/i)) {
-    matched.add('longevity');
-  }
-  if (text.match(/recovery|tissue|joint|repair|bpc|tb-500|tb500|kpv|pentosan|collagen|cartilage/i)) {
-    matched.add('recovery');
-  }
-  if (text.match(/cognit|neuro|brain|semax|selank|dihexa|cerebro|memory|focus|anxiety/i)) {
-    matched.add('cognitive');
-  }
-  if (text.match(/muscle|lean|performance|growth|strength|cjc|ipamorelin|sermorelin|tesamorelin|ghrh|ghrp/i)) {
-    matched.add('muscle_growth');
-  }
-  if (text.match(/immune|thymosin|ll-37|ta-1|ta1|inflam|defense|antimicrobial/i)) {
-    matched.add('immune');
-  }
-  if (text.match(/sexual|libido|pt-141|kisspeptin|bremelanotide|hormon|fertility|testosterone/i)) {
-    matched.add('sexual_health');
-  }
-  if (text.match(/sleep|dsip|circadian|insomnia|rest|pineal/i)) {
-    matched.add('sleep');
-  }
-  if (text.match(/skin|hair|ghk-cu|copper|cosmetic|aesthetics|wrinkle|melanogen|density|snap-8|follicul|scalp/i)) {
-    matched.add('skin_hair');
-  }
-
-  return Array.from(matched);
-}
-
-/**
- * Resolves the most clinically accurate goal to display on the protocol card badge.
- * If the user filtered by a specific goal (e.g. skin_hair), that goal is prioritized.
- * Otherwise, domain-specific clinical targets take precedence over generic 'longevity'.
- */
-function resolveDisplayedGoal(proto, groupBucketId, selectedGoal) {
-  if (!proto) return 'longevity';
-  const mapped = Array.isArray(proto.mappedGoals) ? proto.mappedGoals : [];
-
-  // 1. If user explicitly filtered by a specific goal and the protocol belongs to it:
-  if (selectedGoal && selectedGoal !== 'all' && selectedGoal !== 'reference_standards') {
-    if (mapped.includes(selectedGoal)) {
-      return selectedGoal;
-    }
-  }
-
-  // 2. If inside a category group bucket:
-  if (groupBucketId && groupBucketId !== 'all' && groupBucketId !== 'reference_standards') {
-    if (mapped.includes(groupBucketId)) {
-      return groupBucketId;
-    }
-  }
-
-  // 3. Explicit properties on protocol data
-  const explicit = proto.goal || proto.primary_goal || proto.category || proto.therapeutic_category;
-  if (explicit && GOAL_BUCKETS.some(b => b.id === explicit)) {
-    return explicit;
-  }
-
-  // 4. Clinical specificity hierarchy (specific organ/tissue targets before general longevity)
-  const specificityHierarchy = [
-    'skin_hair',
-    'recovery',
-    'cognitive',
-    'fat_loss',
-    'muscle_growth',
-    'sexual_health',
-    'sleep',
-    'immune',
-    'longevity'
-  ];
-
-  for (const goalId of specificityHierarchy) {
-    if (mapped.includes(goalId)) {
-      return goalId;
-    }
-  }
-
-  return mapped.find(g => g !== 'all') || 'longevity';
-}
-
-function getGoalBadgeLabel(goalId, lang = 'en') {
-  const shortLabels = {
-    skin_hair: { en: 'Skin, Hair & Aesthetics', es: 'Piel, Cabello & Estética' },
-    recovery: { en: 'Tissue & Joint Repair', es: 'Regeneración Tisular' },
-    cognitive: { en: 'Neuroplasticity & Brain', es: 'Neuroplasticidad' },
-    fat_loss: { en: 'Metabolic & GLP-1', es: 'Metabolismo & GLP-1' },
-    muscle_growth: { en: 'Muscle & Performance', es: 'Masa Muscular' },
-    immune: { en: 'Immunity & Defense', es: 'Inmunidad & Defensa' },
-    sexual_health: { en: 'Hormonal & Vitality', es: 'Salud Hormonal' },
-    sleep: { en: 'Sleep & Circadian', es: 'Sueño & Circadiano' },
-    longevity: { en: 'Longevity & Cellular', es: 'Longevidad & Celular' },
-    reference_standards: { en: 'Reference Standard', es: 'Estándar Clínico' },
-    all: { en: 'Clinical Protocol', es: 'Protocolo Clínico' }
-  };
-  return shortLabels[goalId]?.[lang] || GOAL_TRANSLATIONS[goalId]?.[lang] || goalId;
-}
-
-/**
- * Extracts distinct active compounds for chip rendering
- */
-function extractCompounds(p) {
-  const list = [];
-  const seen = new Set();
-
-  const add = (name, slug) => {
-    if (!name) return;
-    const clean = String(name).trim();
-    const key = clean.toLowerCase();
-    if (!seen.has(key) && clean.length > 1) {
-      seen.add(key);
-      const autoSlug = slug || clean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      list.push({ name: clean, slug: autoSlug });
-    }
-  };
-
-  // 1. From BOM
-  if (Array.isArray(p.bom)) {
-    p.bom.forEach(b => add(b.name || b.compound || b.product_name, b.slug || b.productId));
-  }
-  // 2. From Peptides
-  if (Array.isArray(p.peptides)) {
-    p.peptides.forEach(c => add(c.name || c.compound, c.slug));
-  }
-  // 3. From Phases
-  if (Array.isArray(p.phases)) {
-    p.phases.forEach(ph => {
-      if (Array.isArray(ph.compounds)) {
-        ph.compounds.forEach(c => add(c.name || c.compound, c.slug));
-      }
-    });
-  }
-
-  return list;
-}
+import { getProtocolTranslations, GOAL_TRANSLATIONS } from '../../utils/protocolTranslations';
+import { GOAL_BUCKETS } from '../../utils/protocolCatalogTaxonomy';
+import { useProtocolCatalogFilters } from '../../hooks/useProtocolCatalogFilters';
 
 export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
-  const [lang, setLang] = useState('en');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGoal, setSelectedGoal] = useState('all');
-  const [durationFilter, setDurationFilter] = useState('all');
-  const [phasesFilter, setPhasesFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('relevance');
+  const {
+    lang,
+    handleLangChange,
+    searchQuery,
+    setSearchQuery,
+    selectedGoal,
+    setSelectedGoal,
+    durationFilter,
+    setDurationFilter,
+    phasesFilter,
+    setPhasesFilter,
+    routeFilter,
+    setRouteFilter,
+    evidenceFilter,
+    setEvidenceFilter,
+    safetyExclusions,
+    toggleSafetyExclusion,
+    onlyShortlisted,
+    setOnlyShortlisted,
+    sortBy,
+    setSortBy,
+    viewMode,
+    setViewMode,
+    kpiScope,
+    setKpiScope,
+    shortlistSlugs,
+    toggleShortlist,
+    compareSlugs,
+    compareProtocols,
+    toggleCompare,
+    clearCompare,
+    enrichedProtocols,
+    goalCounts,
+    filteredProtocols,
+    groupedProtocols,
+    hasActiveFilters,
+    kpiMetrics,
+    handleResetFilters,
+  } = useProtocolCatalogFilters(initialProtocols);
+
   const [copiedId, setCopiedId] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // Default: list view
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState(() => new Set());
   const [qrModalProtocol, setQrModalProtocol] = useState(null);
   const [copiedQrUrl, setCopiedQrUrl] = useState(false);
+  const [copiedDirectoryUrl, setCopiedDirectoryUrl] = useState(false);
 
-  const toggleExpanded = (id) => {
+  const t = getProtocolTranslations(lang);
+  const isEs = lang === 'es';
+
+  // Keyboard shortcut: ⌘K / Ctrl+K to focus search input
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const el = document.getElementById('protocol-global-search');
+        if (el) el.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const toggleExpanded = (slug) => {
     triggerHaptic('light');
-    setExpandedIds(prev => {
+    setExpandedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
       return next;
     });
   };
@@ -266,273 +121,15 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
     setTimeout(() => setCopiedQrUrl(false), 2000);
   };
 
-  // Synchronized language state across all public views
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlLang = urlParams.get('lang');
-      if (urlLang && ['en', 'es', 'fr', 'de', 'it'].includes(urlLang)) {
-        setLang(urlLang);
-        return;
-      }
-      // Strict default to English per user directive
-      setLang('en');
-      
-      const handleGlobalLang = (e) => {
-        if (e.detail && ['en', 'es', 'fr', 'de', 'it'].includes(e.detail)) {
-          setLang(e.detail);
-        }
-      };
-      window.addEventListener('atlas_lang_change', handleGlobalLang);
-      return () => window.removeEventListener('atlas_lang_change', handleGlobalLang);
-    }
-  }, []);
-
-  const handleLangChange = (nextLang) => {
-    setLang(nextLang);
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('atlas_portal_lang', nextLang);
-        localStorage.setItem('atlas_catalog_lang', nextLang);
-        window.dispatchEvent(new CustomEvent('atlas_lang_change', { detail: nextLang }));
-      } catch (_) {
-        /* storage unavailable */
-      }
-      const url = new URL(window.location.href);
-      url.searchParams.set('lang', nextLang);
-      window.history.replaceState({}, '', url.toString());
-    }
-  };
-
-  const t = getProtocolTranslations(lang);
-
-  // Keyboard shortcut: ⌘K / Ctrl+K to focus search input
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        const el = document.getElementById('protocol-global-search');
-        if (el) el.focus();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Pre-calculate mapped metadata
-  const enrichedProtocols = useMemo(() => {
-    return (initialProtocols || []).map(p => {
-      const durationWeeks = p.durationWeeks || p.duration_weeks || 
-        (typeof p.duration === 'string' ? parseInt(p.duration, 10) || 8 : 8);
-      const phasesCount = Array.isArray(p.phases) ? p.phases.length : 1;
-      const compounds = extractCompounds(p);
-      const mappedGoals = mapProtocolToGoals(p);
-      const cleanName = p.name || p.protocol_name || p.title || 'Clinical Protocol';
-      const cleanCode = p.sku || p.code || p.protocol_id || p.protocolCode || (p.id ? `PR-${p.id.slice(0, 6).toUpperCase()}` : 'PR-CLIN');
-      const cleanSlug = p.slug || p.protocol_slug || p.id;
-      const summary = p.overview_summary || p.description || p.executiveSummary || p.clinical_rationale || 
-        'Prescription protocol calibrated for cellular receptor adaptation and targeted biomarker outcomes.';
-
-      const isRef = Boolean(
-        p.is_reference_standard ||
-        cleanSlug === 'bpc-157-tb-500-protocol' ||
-        cleanSlug === 'metabolic-retatrutide-motsc-12w' ||
-        cleanSlug === 'nad-cellular-restoration-protocol' ||
-        cleanSlug === 'cjc-1295-ipamorelin-synergistic-hgh-optimization' ||
-        cleanSlug === 'thymosin-alpha-1-immune-resilience' ||
-        cleanCode === 'PR-REC-002' ||
-        cleanCode === 'PR-MET-011' ||
-        cleanCode === 'PR-LON-003' ||
-        p.id === 'HCFtYVhkbeEnHX4FJ7FR' ||
-        p.id === '1k0p4FgSekpmUyAJhbsT'
-      );
-
-      const refOrder = p.reference_order !== undefined ? p.reference_order : (
-        (cleanSlug === 'bpc-157-tb-500-protocol' || cleanCode === 'PR-REC-002') ? 1 :
-        (cleanSlug === 'metabolic-retatrutide-motsc-12w' || cleanCode === 'PR-MET-011') ? 2 :
-        (cleanSlug === 'nad-cellular-restoration-protocol' || cleanCode === 'PR-LON-003') ? 3 :
-        (cleanSlug === 'cjc-1295-ipamorelin-synergistic-hgh-optimization' || p.id === 'HCFtYVhkbeEnHX4FJ7FR') ? 4 :
-        (cleanSlug === 'thymosin-alpha-1-immune-resilience' || p.id === '1k0p4FgSekpmUyAJhbsT') ? 5 : 99
-      );
-
-      const referenceLabelEs = p.reference_label_es || 'Protocolo de Referencia Clínica';
-      const referenceLabelEn = p.reference_label_en || 'Primary Clinical Reference Standard';
-      const referenceTier = p.reference_standard_tier || 'gold';
-
-      const finalGoals = isRef 
-        ? [...mappedGoals.filter(g => g !== 'reference_standards'), 'reference_standards']
-        : mappedGoals;
-
-      return {
-        ...p,
-        cleanName,
-        cleanCode,
-        cleanSlug,
-        durationWeeks,
-        phasesCount,
-        compounds,
-        mappedGoals: finalGoals,
-        summary,
-        is_reference_standard: isRef,
-        reference_order: refOrder,
-        reference_label_es: referenceLabelEs,
-        reference_label_en: referenceLabelEn,
-        reference_standard_tier: referenceTier,
-      };
-    });
-  }, [initialProtocols]);
-
-  // Goal counts for badges
-  const goalCounts = useMemo(() => {
-    const counts = {};
-    GOAL_BUCKETS.forEach(g => {
-      counts[g.id] = 0;
-    });
-    enrichedProtocols.forEach(p => {
-      p.mappedGoals.forEach(gid => {
-        if (counts[gid] !== undefined) counts[gid]++;
-      });
-    });
-    return counts;
-  }, [enrichedProtocols]);
-
-  // Filtered and sorted protocols
-  const filteredProtocols = useMemo(() => {
-    const result = enrichedProtocols.filter(p => {
-      // 1. Goal filter
-      if (selectedGoal !== 'all' && !p.mappedGoals.includes(selectedGoal)) {
-        return false;
-      }
-
-      // 2. Duration filter
-      if (durationFilter === 'short' && p.durationWeeks > 8) return false;
-      if (durationFilter === 'medium' && (p.durationWeeks <= 8 || p.durationWeeks > 12)) return false;
-      if (durationFilter === 'long' && p.durationWeeks <= 12) return false;
-
-      // 3. Phases filter
-      if (phasesFilter === 'single' && p.phasesCount !== 1) return false;
-      if (phasesFilter === 'titration' && p.phasesCount < 2) return false;
-
-      // 4. Search Query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const nameMatch = p.cleanName.toLowerCase().includes(q);
-        const codeMatch = p.cleanCode.toLowerCase().includes(q);
-        const summaryMatch = p.summary.toLowerCase().includes(q);
-        const compoundMatch = p.compounds.some(c => c.name.toLowerCase().includes(q));
-        const goalMatch = p.mappedGoals.some(g => g.toLowerCase().includes(q));
-
-        if (!nameMatch && !codeMatch && !summaryMatch && !compoundMatch && !goalMatch) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    // Sorting
-    result.sort((a, b) => {
-      if (sortBy === 'duration-desc') return b.durationWeeks - a.durationWeeks;
-      if (sortBy === 'duration-asc') return a.durationWeeks - b.durationWeeks;
-      if (sortBy === 'name-asc') return a.cleanName.localeCompare(b.cleanName);
-      if (sortBy === 'phases-desc') return b.phasesCount - a.phasesCount;
-      // Default: relevance
-      // First, prioritize Clinical Reference Standards strictly by reference_order (1=BPC/TB-500, 2=Retatrutide/MOTS-c, 3=NAD+)
-      const aRefScore = a.is_reference_standard ? (1000 - (a.reference_order || 10) * 10) : 0;
-      const bRefScore = b.is_reference_standard ? (1000 - (b.reference_order || 10) * 10) : 0;
-      if (aRefScore !== bRefScore) {
-        return bRefScore - aRefScore;
-      }
-      return (b.compounds.length * 2 + b.phasesCount) - (a.compounds.length * 2 + a.phasesCount);
-    });
-
-    return result;
-  }, [enrichedProtocols, selectedGoal, durationFilter, phasesFilter, searchQuery, sortBy]);
-
-  // Group filtered protocols by therapeutic goal buckets
-  const groupedProtocols = useMemo(() => {
-    const groups = [];
-
-    // Pinned top section: Primary Clinical Reference Standards when viewing all and no drilldown active
-    if (selectedGoal === 'all' && !searchQuery.trim() && durationFilter === 'all' && phasesFilter === 'all') {
-      const referenceProtocols = filteredProtocols
-        .filter(p => p.is_reference_standard)
-        .sort((a, b) => (a.reference_order || 99) - (b.reference_order || 99));
-
-      if (referenceProtocols.length > 0) {
-        groups.push({
-          bucket: {
-            id: 'reference_standards',
-            label: lang === 'es' ? 'Protocolos de Referencia Clínica' : 'Primary Clinical Reference Standards',
-            sublabel: lang === 'es'
-              ? 'Monografías de máxima profundidad clínica: farmacocinética celular, técnica anatómica perilesional y algoritmos de titulación'
-              : 'Highest clinical depth monographs: cellular pharmacokinetics, peri-lesional geometry & titration algorithms',
-            icon: Award,
-            color: '#003666',
-            bg: '#eff6ff',
-            isReferenceGroup: true
-          },
-          protocols: referenceProtocols
-        });
-      }
-    }
-
-    const targetBuckets = selectedGoal === 'all'
-      ? GOAL_BUCKETS.filter(b => b.id !== 'all' && b.id !== 'reference_standards')
-      : GOAL_BUCKETS.filter(b => b.id === selectedGoal);
-
-    targetBuckets.forEach(bucket => {
-      const matching = filteredProtocols.filter(p => {
-        const primary = resolveDisplayedGoal(p, bucket.id, selectedGoal);
-        return primary === bucket.id || (selectedGoal !== 'all' && p.mappedGoals.includes(bucket.id));
-      });
-      if (matching.length > 0) {
-        // Keep reference standards at top of category if relevance sort
-        if (sortBy === 'relevance') {
-          matching.sort((a, b) => {
-            const aRefScore = a.is_reference_standard ? (1000 - (a.reference_order || 10) * 10) : 0;
-            const bRefScore = b.is_reference_standard ? (1000 - (b.reference_order || 10) * 10) : 0;
-            if (aRefScore !== bRefScore) return bRefScore - aRefScore;
-            return (b.compounds.length * 2 + b.phasesCount) - (a.compounds.length * 2 + a.phasesCount);
-          });
-        }
-        groups.push({
-          bucket,
-          protocols: matching
-        });
-      }
-    });
-
-    if (selectedGoal === 'all') {
-      const matchedSlugs = new Set(groups.flatMap(g => g.protocols.map(p => p.cleanSlug || p.id)));
-      const remainder = filteredProtocols.filter(p => !matchedSlugs.has(p.cleanSlug || p.id));
-      if (remainder.length > 0) {
-        groups.push({
-          bucket: {
-            id: 'other',
-            label: 'Specialized Protocols',
-            icon: FlaskConical,
-            color: '#003666',
-            bg: '#eff6ff'
-          },
-          protocols: remainder
-        });
-      }
-    }
-
-    return groups;
-  }, [filteredProtocols, selectedGoal, searchQuery, durationFilter, phasesFilter, sortBy, lang]);
-
   const handleCopyCode = (code, e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
     navigator.clipboard?.writeText(code);
     triggerHaptic('light');
     setCopiedId(code);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const [copiedDirectoryUrl, setCopiedDirectoryUrl] = useState(false);
   const handleCopyDirectoryUrl = async () => {
     try {
       if (typeof window !== 'undefined' && navigator.clipboard) {
@@ -546,16 +143,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
     }
   };
 
-  const handleResetFilters = () => {
-    triggerHaptic('tap');
-    setSearchQuery('');
-    setSelectedGoal('all');
-    setDurationFilter('all');
-    setPhasesFilter('all');
-    setSortBy('relevance');
-  };
-
-  const hasActiveFilters = searchQuery || selectedGoal !== 'all' || durationFilter !== 'all' || phasesFilter !== 'all';
+  const heroSubtitle = (t.catalogHeroSubtitle || '').replace('{count}', String(enrichedProtocols.length));
 
   return (
     <div className="proto-catalog-container">
@@ -563,750 +151,210 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
       <PublicUnifiedHeader
         track="protocols"
         lang={lang}
-        hideTier2={true}
         onLangChange={handleLangChange}
-        copyUrl="https://www.atlashealth-services.com/proto"
-        shortUrl="https://www.atlashealth-services.com/proto"
-        inquiryContextType="protocols_directory"
-        onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
-        loginRedirect="/proto"
-        filterTabs={[
-          {
-            id: 'all',
-            label: lang === 'es' ? 'Todos' : 'All Protocols',
-            count: enrichedProtocols.length,
-            isActive: selectedGoal === 'all',
-            onClick: () => setSelectedGoal('all')
-          },
-          ...GOAL_BUCKETS.slice(1, 6).map(g => ({
-            id: g.id,
-            label: GOAL_TRANSLATIONS[g.id]?.[lang] || g.label,
-            isActive: selectedGoal === g.id,
-            onClick: () => setSelectedGoal(g.id)
-          }))
-        ]}
-        callout={{
-          message: lang === 'es'
-            ? 'Clínicas y Médicos: Regístrate para duplicar pautas en fichas de pacientes'
-            : 'Healthcare Providers: Register to duplicate blueprints into patient charts',
-          ctaLabel: lang === 'es' ? 'Alta Profesional →' : 'Register as Provider →',
-          ctaHref: '/login?tab=register&role=doctor&redirect=/proto'
+        onOpenSearch={() => {
+          const el = document.getElementById('protocol-global-search');
+          if (el) el.focus();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        onCopyUrl={handleCopyDirectoryUrl}
+        copiedUrl={copiedDirectoryUrl}
       />
 
-      {/* ── 1. Hero Section ── */}
-      <header className="proto-catalog-hero">
+      {/* ── 1. Compact Executive Hero Section ── */}
+      <header className="proto-hero">
         <div className="proto-hero-pill">
           <FlaskConical size={14} />
-          <span>{lang === 'es' ? 'Ecosistema de Vías Clínicas • Fuente Única de Verdad' : 'Ecosystem Clinical Pathways • Single Source of Truth'}</span>
+          <span>{t.catalogHeroPill}</span>
         </div>
-        <h1 className="proto-catalog-title">
-          {t.catalogHeroTitle || t.catalogTitle || 'Clinical Protocols & Peptides Directory'}
-        </h1>
-        <p className="proto-catalog-subtitle">
-          {t.catalogHeroSubtitle || t.catalogSubtitle || 'Explore standardized therapeutic protocols formulated with certified pharmaceutical grade compounds. Monotherapies and combined synergies with dosage schedules, titration phases, and laboratory surveillance.'}
-        </p>
+        <h1 className="proto-hero-title">{t.catalogHeroTitle}</h1>
+        <p className="proto-hero-subtitle">{heroSubtitle}</p>
       </header>
 
-      {/* ── 2. KPI Metrics Strip with Scope Indicator (Regla #22) ── */}
-      <div className="proto-kpi-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', padding: '0 4px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: hasActiveFilters ? '#ea580c' : '#16a34a' }} />
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569' }}>
-              {hasActiveFilters
-                ? (lang === 'es' ? `Vista Filtrada: ${filteredProtocols.length} de ${enrichedProtocols.length} protocolos activos` : `Active Filters View: ${filteredProtocols.length} of ${enrichedProtocols.length} protocols matching`)
-                : (lang === 'es' ? `Base Global del Registro: ${enrichedProtocols.length} protocolos disponibles` : `Global Registry View: ${enrichedProtocols.length} standardized clinical protocols`)}
-            </span>
-          </div>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                color: '#003666',
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                borderRadius: '6px',
-                padding: '3px 9px',
-                cursor: 'pointer'
-              }}
-            >
-              {lang === 'es' ? 'Ver Base Completa (Limpiar Filtros)' : 'View Entire Database (Reset Filters)'}
-            </button>
-          )}
-        </div>
+      {/* ── 2. Dynamic KPI Strip with Scope Switcher (Rule #22, Mobile 2x2) ── */}
+      <ProtocolCatalogKpiStrip
+        kpiMetrics={kpiMetrics}
+        kpiScope={kpiScope}
+        onChangeScope={setKpiScope}
+        hasActiveFilters={hasActiveFilters}
+        onResetFilters={() => {
+          triggerHaptic('tap');
+          handleResetFilters();
+        }}
+        lang={lang}
+      />
 
-        <div className="proto-kpi-strip">
-          <div className="proto-kpi-card">
-            <div className="proto-kpi-icon" style={{ background: '#eff6ff', color: '#0284c7' }}>
-              <FlaskConical size={22} />
-            </div>
-            <div className="proto-kpi-body">
-              <div className="proto-kpi-title">{t.kpiActiveProtocolsTitle || 'ACTIVE PROTOCOLS'}</div>
-              <div className="proto-kpi-val">{hasActiveFilters ? filteredProtocols.length : enrichedProtocols.length}</div>
-              <div className="proto-kpi-subtitle">{t.kpiActiveProtocolsSub || 'Standardized pathways in registry'}</div>
-            </div>
-          </div>
-
-          <div className="proto-kpi-card">
-            <div className="proto-kpi-icon" style={{ background: '#f0fdfa', color: '#0d9488' }}>
-              <Sparkles size={22} />
-            </div>
-            <div className="proto-kpi-body">
-              <div className="proto-kpi-title">{t.kpiGoalsTitle || 'THERAPEUTIC GOALS'}</div>
-              <div className="proto-kpi-val">{GOAL_BUCKETS.length - 1}</div>
-              <div className="proto-kpi-subtitle">{t.kpiGoalsSub || 'Target biomarker categories'}</div>
-            </div>
-          </div>
-
-          <div className="proto-kpi-card">
-            <div className="proto-kpi-icon" style={{ background: '#faf5ff', color: '#7c3aed' }}>
-              <Layers size={22} />
-            </div>
-            <div className="proto-kpi-body">
-              <div className="proto-kpi-title">{t.kpiSsotTitle || 'DOSIMETRIC SSOT'}</div>
-              <div className="proto-kpi-val">100%</div>
-              <div className="proto-kpi-subtitle">{t.kpiSsotSub || 'Calibrated titration formulas'}</div>
-            </div>
-          </div>
-
-          <div className="proto-kpi-card">
-            <div className="proto-kpi-icon" style={{ background: '#fff7ed', color: '#ea580c' }}>
-              <Clock size={22} />
-            </div>
-            <div className="proto-kpi-body">
-              <div className="proto-kpi-title">{t.kpiCyclesTitle || 'CYCLE HORIZON'}</div>
-              <div className="proto-kpi-val">4–28 wks</div>
-              <div className="proto-kpi-subtitle">{t.kpiCyclesSub || 'Treatment duration spectrum'}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── 3. Google Cloud Console 2-Column Responsive Layout (Main Column + Sticky Sidebar) ── */}
+      {/* ── 3. Google Cloud Console 2-Column Responsive Layout ── */}
       <div className="proto-content-grid">
         <div className="proto-main-column">
-          {/* Prioritized Global Search Bar (Regla #7) & Active Filter Chips */}
-          <div className="proto-search-wrapper-clean" style={{ marginBottom: '1.25rem' }}>
-            <div className="proto-search-input-wrapper" style={{ marginBottom: hasActiveFilters ? '0.75rem' : '0' }}>
-              <Search size={20} className="proto-search-icon" />
-              <input
-                id="protocol-global-search"
-                type="text"
-                className="proto-search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t.searchPlaceholder || (lang === 'es' ? 'Buscar protocolos clínicos (ej. BPC-157, Retatrutide, Longevidad...)' : 'Search clinical protocols (e.g. BPC-157, Retatrutide, Longevity...)')}
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  className="proto-search-clear-btn"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setSearchQuery('');
-                  }}
-                  title="Clear search"
-                >
-                  <X size={18} />
-                </button>
-              )}
+          {/* Prioritized Search Bar + Mobile Quick Pills + Physician Triage Bar */}
+          <ProtocolCatalogSearchToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedGoal={selectedGoal}
+            onSelectGoal={setSelectedGoal}
+            goalBuckets={GOAL_BUCKETS}
+            goalCounts={goalCounts}
+            durationFilter={durationFilter}
+            onSelectDuration={setDurationFilter}
+            phasesFilter={phasesFilter}
+            onSelectPhases={setPhasesFilter}
+            routeFilter={routeFilter}
+            onSelectRoute={setRouteFilter}
+            evidenceFilter={evidenceFilter}
+            onSelectEvidence={setEvidenceFilter}
+            safetyExclusions={safetyExclusions}
+            onToggleSafetyExclusion={toggleSafetyExclusion}
+            onlyShortlisted={onlyShortlisted}
+            onToggleOnlyShortlisted={() => setOnlyShortlisted((prev) => !prev)}
+            shortlistCount={shortlistSlugs.size}
+            viewMode={viewMode}
+            onChangeViewMode={setViewMode}
+            hasActiveFilters={hasActiveFilters}
+            onResetFilters={() => {
+              triggerHaptic('tap');
+              handleResetFilters();
+            }}
+            onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
+            filteredCount={filteredProtocols.length}
+            totalCount={enrichedProtocols.length}
+            lang={lang}
+            t={t}
+          />
+
+          {/* ── 4. Protocol Groups by Therapeutic Goals ── */}
+          {groupedProtocols.length > 0 ? (
+            <div className="proto-goal-groups-container">
+              {groupedProtocols.map((group) => {
+                const bucket = group.bucket;
+                const BucketIcon = bucket.icon || FlaskConical;
+                const groupTitle = GOAL_TRANSLATIONS[bucket.id]?.[lang] || bucket.label;
+
+                return (
+                  <section key={bucket.id} className="proto-goal-section">
+                    <div className={`proto-goal-section-header ${bucket.isReferenceGroup ? 'is-reference-header' : ''}`}>
+                      <div className="proto-goal-section-left">
+                        <div className="proto-goal-section-icon" style={{ background: bucket.bg, color: bucket.color }}>
+                          <BucketIcon size={18} />
+                        </div>
+                        <div>
+                          <div className="proto-goal-section-title-row">
+                            <h2 className="proto-goal-section-title">{groupTitle}</h2>
+                            {bucket.isReferenceGroup && (
+                              <span className="proto-ref-section-badge">
+                                {isEs ? 'Telemetría Completa' : 'Full Clinical Telemetry'}
+                              </span>
+                            )}
+                          </div>
+                          <div className="proto-goal-section-sub">
+                            {bucket.sublabel ||
+                              `${group.protocols.length} ${isEs ? 'protocolos clínicos disponibles' : 'clinical protocols available'}`}
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        className="proto-goal-section-count"
+                        style={{ background: bucket.bg, color: bucket.color, border: `1px solid ${bucket.color}30` }}
+                      >
+                        {group.protocols.length}
+                      </span>
+                    </div>
+
+                    {viewMode === 'list' ? (
+                      <div className="proto-list-container">
+                        {group.protocols.map((proto) => (
+                          <ProtocolListRow
+                            key={proto.cleanSlug}
+                            proto={proto}
+                            groupBucketId={group.bucket?.id}
+                            selectedGoal={selectedGoal}
+                            isExpanded={expandedIds.has(proto.cleanSlug)}
+                            onToggleExpand={toggleExpanded}
+                            isCompared={compareSlugs.includes(proto.cleanSlug)}
+                            onToggleCompare={toggleCompare}
+                            isShortlisted={shortlistSlugs.has(proto.cleanSlug)}
+                            onToggleShortlist={toggleShortlist}
+                            onOpenQr={handleOpenQr}
+                            onCopyLink={handleCopyCode}
+                            copiedId={copiedId}
+                            lang={lang}
+                            t={t}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="proto-cards-grid">
+                        {group.protocols.map((proto) => (
+                          <ProtocolCatalogCard
+                            key={proto.id || proto.cleanSlug}
+                            proto={proto}
+                            groupBucketId={group.bucket?.id}
+                            selectedGoal={selectedGoal}
+                            isCompared={compareSlugs.includes(proto.cleanSlug)}
+                            onToggleCompare={toggleCompare}
+                            isShortlisted={shortlistSlugs.has(proto.cleanSlug)}
+                            onToggleShortlist={toggleShortlist}
+                            onOpenQr={handleOpenQr}
+                            onCopyLink={handleCopyCode}
+                            copiedId={copiedId}
+                            lang={lang}
+                            t={t}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
             </div>
-
-            {/* Active Filter Chips */}
-            {hasActiveFilters && (
-              <div className="proto-active-filters-strip" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700 }}>
-                  {lang === 'es' ? 'Filtros Activos:' : 'Active Filters:'}
-                </span>
-                {searchQuery && (
-                  <span className="proto-filter-badge">
-                    {lang === 'es' ? 'Búsqueda' : 'Search'}: "{searchQuery}"
-                    <span className="proto-filter-badge-remove" onClick={() => setSearchQuery('')}>×</span>
-                  </span>
-                )}
-                {selectedGoal !== 'all' && (
-                  <span className="proto-filter-badge">
-                    {lang === 'es' ? 'Objetivo' : 'Goal'}: {GOAL_TRANSLATIONS[selectedGoal]?.[lang] || selectedGoal}
-                    <span className="proto-filter-badge-remove" onClick={() => setSelectedGoal('all')}>×</span>
-                  </span>
-                )}
-                {durationFilter !== 'all' && (
-                  <span className="proto-filter-badge">
-                    {lang === 'es' ? 'Duración' : 'Duration'}: {durationFilter === 'short' ? '≤8w' : durationFilter === 'medium' ? '8–12w' : '>12w'}
-                    <span className="proto-filter-badge-remove" onClick={() => setDurationFilter('all')}>×</span>
-                  </span>
-                )}
-                {phasesFilter !== 'all' && (
-                  <span className="proto-filter-badge">
-                    {lang === 'es' ? 'Estructura' : 'Phases'}: {phasesFilter === 'single' ? (lang === 'es' ? 'Monofásico' : 'Continuous') : (lang === 'es' ? 'Titulación' : 'Titration')}
-                    <span className="proto-filter-badge-remove" onClick={() => setPhasesFilter('all')}>×</span>
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={handleResetFilters}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#003666',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    padding: '2px 6px'
-                  }}
-                >
-                  {lang === 'es' ? 'Limpiar todo' : 'Clear all'}
-                </button>
+          ) : (
+            <div className="proto-empty-state">
+              <div className="proto-empty-icon">
+                <Search size={28} />
               </div>
-            )}
-          </div>
-
-          {/* Scope Bar (Regla #22) & View Mode Controls */}
-          <div className="proto-scope-bar">
-            <div className="proto-scope-badge">
-              <Check size={16} />
-              <span>
-                {lang === 'es' ? 'Mostrando' : 'Showing'} <strong>{filteredProtocols.length}</strong> {lang === 'es' ? 'de' : 'of'} <strong>{enrichedProtocols.length}</strong> {lang === 'es' ? 'protocolos clínicos disponibles' : 'available clinical protocols'}
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {/* Dual View Mode Switcher */}
-              <div className="proto-view-switcher" role="radiogroup" aria-label="Visual view mode">
-                <button
-                  type="button"
-                  className={`proto-view-btn ${viewMode === 'list' ? 'is-active' : ''}`}
-                  onClick={() => { triggerHaptic('selection'); setViewMode('list'); }}
-                  title={lang === 'es' ? 'Vista Lista (Compacta)' : 'Compact List View'}
-                >
-                  <List size={14} />
-                  <span>{lang === 'es' ? 'Lista' : 'List'}</span>
-                </button>
-                <button
-                  type="button"
-                  className={`proto-view-btn ${viewMode === 'cards' ? 'is-active' : ''}`}
-                  onClick={() => { triggerHaptic('selection'); setViewMode('cards'); }}
-                  title={lang === 'es' ? 'Vista Tarjetas' : 'Cards Grid View'}
-                >
-                  <LayoutGrid size={14} />
-                  <span>{lang === 'es' ? 'Tarjetas' : 'Cards'}</span>
-                </button>
-              </div>
-
-              {/* Mobile Filter Button (< 1024px) */}
+              <h3 className="proto-empty-title">{t.noResultsTitle}</h3>
+              <p className="proto-empty-subtitle">{t.noResultsSubtitle}</p>
               <button
                 type="button"
-                className="proto-mobile-filter-floating"
+                className="proto-empty-btn"
                 onClick={() => {
                   triggerHaptic('tap');
-                  setIsMobileDrawerOpen(true);
+                  handleResetFilters();
                 }}
               >
-                <Filter size={13} />
-                <span>{lang === 'es' ? 'Filtros y QR' : 'Filters & QR'}</span>
-                {hasActiveFilters && (
-                  <span style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    background: '#5eead4'
-                  }} />
-                )}
+                {t.resetFilters}
+              </button>
+            </div>
+          )}
+
+          {/* Institutional Prudence & Medical Notice */}
+          <div className="proto-notice-banner">
+            <div className="proto-notice-icon">
+              <ShieldCheck size={22} />
+            </div>
+            <div className="proto-notice-body">
+              <div className="proto-notice-title">{t.medicalSupervisionTitle}</div>
+              <div className="proto-notice-desc">{t.medicalSupervisionDesc}</div>
+            </div>
+          </div>
+
+          <div className="public-regulatory-footer">
+            <p className="public-regulatory-text">
+              <Lock size={12} /> {t.regulatoryNotice}
+            </p>
+            <div className="public-regulatory-links">
+              <button
+                type="button"
+                className="public-regulatory-link"
+                onClick={() => setIsInquiryDrawerOpen(true)}
+              >
+                <Mail size={12} /> {t.inquireMedical}
               </button>
             </div>
           </div>
-
-      {/* ── 5. Protocol Groups by Therapeutic Goals ── */}
-      {groupedProtocols.length > 0 ? (
-        <div className="proto-goal-groups-container" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {groupedProtocols.map(group => {
-            const bucket = group.bucket;
-            const BucketIcon = bucket.icon || FlaskConical;
-            const groupTitle = GOAL_TRANSLATIONS[bucket.id]?.[lang] || bucket.label;
-
-            return (
-              <section key={bucket.id} className="proto-goal-section">
-                {/* Section Goal Header */}
-                <div className={`proto-goal-section-header ${bucket.isReferenceGroup ? 'is-reference-header' : ''}`}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div className="proto-goal-section-icon" style={{ background: bucket.bg, color: bucket.color }}>
-                      <BucketIcon size={18} />
-                    </div>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <h2 className="proto-goal-section-title">
-                          {groupTitle}
-                        </h2>
-                        {bucket.isReferenceGroup && (
-                          <span className="proto-ref-section-badge">
-                            {lang === 'es' ? 'Telemetría Completa' : 'Full Clinical Telemetry'}
-                          </span>
-                        )}
-                      </div>
-                      <div className="proto-goal-section-sub">
-                        {bucket.sublabel || `${group.protocols.length} ${lang === 'es' ? 'protocolos clínicos disponibles' : 'clinical protocols available'}`}
-                      </div>
-                    </div>
-                  </div>
-                  <span className="proto-goal-section-count" style={{ background: bucket.bg, color: bucket.color, border: `1px solid ${bucket.color}30` }}>
-                    {group.protocols.length}
-                  </span>
-                </div>
-
-                {/* Content: List Mode (Default) vs Cards Mode */}
-                {viewMode === 'list' ? (
-                  <div className="proto-list-container">
-                    {group.protocols.map(proto => {
-                      const isExpanded = expandedIds.has(proto.cleanSlug);
-                      const displayedGoalId = resolveDisplayedGoal(proto, group.bucket?.id, selectedGoal);
-                      const goalInfo = GOAL_BUCKETS.find(g => g.id === displayedGoalId) || GOAL_BUCKETS[0];
-                      const GoalIcon = goalInfo.icon || Sparkles;
-                      const localizedGoal = getGoalBadgeLabel(displayedGoalId, lang);
-
-                      return (
-                        <article key={proto.cleanSlug} className={`proto-list-item ${proto.is_reference_standard ? 'is-reference-standard' : ''} ${isExpanded ? 'is-expanded' : ''}`}>
-                          {/* Main Compact Row */}
-                          <div className="proto-list-row" onClick={() => toggleExpanded(proto.cleanSlug)}>
-                            {/* Left: Expand chevron + Code + Title + Reference Badge + Goal Pill */}
-                            <div className="proto-list-left">
-                              <button
-                                type="button"
-                                className="proto-list-expand-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleExpanded(proto.cleanSlug);
-                                }}
-                                aria-expanded={isExpanded}
-                                aria-label={isExpanded ? 'Collapse' : 'Expand'}
-                              >
-                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                              </button>
-
-                              <Link
-                                href={`/proto/${proto.cleanSlug}`}
-                                className="proto-list-title"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {proto.cleanName}
-                              </Link>
-
-                              {proto.is_reference_standard && (
-                                <>
-                                  <span
-                                    className="proto-list-badge-reference"
-                                    title={lang === 'es' ? 'Protocolo de Referencia Clínica con datos ampliados de farmacocinética y seguridad' : 'Primary Clinical Reference Standard with extended pharmacological and safety data'}
-                                  >
-                                    <Award size={11} />
-                                    <span>{lang === 'es' ? 'Referencia Clínica' : 'Reference Standard'}</span>
-                                  </span>
-                                  {REFERENCE_TELEMETRY_PILLS[proto.cleanSlug] && (
-                                    <span
-                                      className="proto-telemetry-badge"
-                                      title={lang === 'es' ? 'Módulo de telemetría clínica avanzada' : 'Advanced clinical telemetry module'}
-                                    >
-                                      {REFERENCE_TELEMETRY_PILLS[proto.cleanSlug][lang] || REFERENCE_TELEMETRY_PILLS[proto.cleanSlug].en}
-                                    </span>
-                                  )}
-                                </>
-                              )}
-
-                              <span
-                                className="proto-card-goal-pill"
-                                style={{
-                                  background: goalInfo.bg,
-                                  color: goalInfo.color,
-                                  border: `1px solid ${goalInfo.color}33`,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px'
-                                }}
-                              >
-                                <GoalIcon size={11} style={{ flexShrink: 0 }} />
-                                <span>{localizedGoal}</span>
-                              </span>
-                            </div>
-
-                            {/* Middle/Meta: Peptides count + Duration + Phases */}
-                            <div className="proto-list-meta">
-                              {proto.compounds.length > 0 && (
-                                <span className="proto-list-chip-compounds">
-                                  {proto.compounds.length} {lang === 'es' ? 'Péptidos' : 'Peptides'}
-                                </span>
-                              )}
-
-                              <span className="proto-list-chip-spec">
-                                <Clock size={12} style={{ color: '#0284c7' }} />
-                                <span>{proto.durationWeeks}w</span>
-                              </span>
-
-                              <span className="proto-list-chip-spec">
-                                <Layers size={12} style={{ color: '#0d9488' }} />
-                                <span>{proto.phasesCount}ph</span>
-                              </span>
-                            </div>
-
-                            {/* Right: Actions */}
-                            <div className="proto-list-actions" onClick={(e) => e.stopPropagation()}>
-                              <Link
-                                href={`/proto/${proto.cleanSlug}`}
-                                className="proto-card-btn-primary proto-list-btn-cta"
-                                onClick={() => triggerHaptic('selection')}
-                              >
-                                <span>{t.viewTimeline}</span>
-                                <ArrowRight size={13} />
-                              </Link>
-
-                              <button
-                                type="button"
-                                className="proto-card-btn-icon"
-                                onClick={(e) => handleOpenQr(proto, e)}
-                                title={lang === 'es' ? 'Ver Código QR del Protocolo' : 'View Protocol QR Code'}
-                                aria-label="View QR Code"
-                              >
-                                <QrCode size={15} style={{ color: '#003666' }} />
-                              </button>
-
-                              <button
-                                type="button"
-                                className="proto-card-btn-icon"
-                                onClick={(e) => handleCopyCode(`https://www.atlashealth-services.com/proto/${proto.cleanSlug}`, e)}
-                                title={t.copyProtocolLink}
-                              >
-                                {copiedId === `https://www.atlashealth-services.com/proto/${proto.cleanSlug}` ? (
-                                  <Check size={15} style={{ color: '#16a34a' }} />
-                                ) : (
-                                  <Copy size={15} />
-                                )}
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Expandable Master-Detail Panel (Google Cloud Console Standard) */}
-                          {isExpanded && (
-                            <div className="proto-list-expanded">
-                              <div className="proto-expanded-grid">
-                                {/* Left Column: Clinical Rationale & Compounds */}
-                                <div className="proto-expanded-left">
-                                  <div className="proto-expanded-section-label">
-                                    {lang === 'es' ? 'RESUMEN CLÍNICO & INDICACIÓN' : 'CLINICAL SUMMARY & INDICATION'}
-                                  </div>
-                                  <p className="proto-list-expanded-summary">
-                                    {proto.summary}
-                                  </p>
-
-                                  {proto.compounds.length > 0 && (
-                                    <div style={{ marginTop: '0.85rem' }}>
-                                      <div className="proto-card-peptides-label" style={{ marginBottom: '6px' }}>
-                                        {lang === 'es' ? 'Péptidos Activos Incluidos (Monografías):' : 'Included Active Peptides (Monographs):'}
-                                      </div>
-                                      <div className="proto-card-peptides-list" style={{ marginBottom: 0 }}>
-                                        {proto.compounds.map((c, cIdx) => (
-                                          <Link
-                                            key={cIdx}
-                                            href={`/p/${c.slug}`}
-                                            target="_blank"
-                                            className="proto-compound-chip"
-                                            title={`Inspect ${c.name} technical monograph`}
-                                          >
-                                            <span>{c.name}</span>
-                                            <ExternalLink size={10} />
-                                          </Link>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Right Column: Structured Administration Telemetry */}
-                                <div className="proto-expanded-right">
-                                  <div className="proto-expanded-section-label">
-                                    {lang === 'es' ? 'PARÁMETROS DE ADMINISTRACIÓN' : 'ADMINISTRATION PARAMETERS'}
-                                  </div>
-                                  <div className="proto-telemetry-specs">
-                                    <div className="proto-telemetry-item">
-                                      <span className="proto-telemetry-key">{lang === 'es' ? 'Vía:' : 'Route:'}</span>
-                                      <span className="proto-telemetry-val">Subcutaneous (SubQ)</span>
-                                    </div>
-                                    <div className="proto-telemetry-item">
-                                      <span className="proto-telemetry-key">{lang === 'es' ? 'Frecuencia:' : 'Schedule:'}</span>
-                                      <span className="proto-telemetry-val">{proto.phasesCount > 1 ? (lang === 'es' ? 'Titulación Progresiva' : 'Progressive Titration') : (lang === 'es' ? 'Monofásico Continuo' : 'Continuous Protocol')}</span>
-                                    </div>
-                                    <div className="proto-telemetry-item">
-                                      <span className="proto-telemetry-key">{lang === 'es' ? 'Estructura:' : 'Phases:'}</span>
-                                      <span className="proto-telemetry-val">{proto.phasesCount} {proto.phasesCount === 1 ? (lang === 'es' ? 'Fase' : 'Phase') : (lang === 'es' ? 'Fases' : 'Phases')} ({proto.durationWeeks}w {lang === 'es' ? 'total' : 'total'})</span>
-                                    </div>
-                                  </div>
-
-                                  <div style={{ marginTop: '12px' }}>
-                                    <Link
-                                      href={`/proto/${proto.cleanSlug}`}
-                                      className="proto-expanded-blueprint-btn"
-                                      onClick={() => triggerHaptic('selection')}
-                                    >
-                                      <span>{lang === 'es' ? 'Explorar Blueprint Completo (Gantt) ↗' : 'Explore Full Clinical Blueprint (Gantt) ↗'}</span>
-                                      <ExternalLink size={13} />
-                                    </Link>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </article>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  /* Cards Mode */
-                  <div className="proto-cards-grid">
-                    {group.protocols.map(proto => {
-                      const displayedGoalId = resolveDisplayedGoal(proto, group.bucket?.id, selectedGoal);
-                      const goalInfo = GOAL_BUCKETS.find(g => g.id === displayedGoalId) || GOAL_BUCKETS[0];
-                      const GoalIcon = goalInfo.icon || Sparkles;
-                      const localizedGoal = getGoalBadgeLabel(displayedGoalId, lang);
-
-                      return (
-                        <article key={proto.id || proto.cleanSlug} className={`proto-card ${proto.is_reference_standard ? 'is-reference-standard' : ''}`}>
-                          {/* Reference Standard Top Badge */}
-                          {proto.is_reference_standard && (
-                            <div className="proto-card-badge-reference">
-                              <div className="proto-ref-badge-main">
-                                <Award size={13} className="proto-ref-icon" />
-                                <span className="proto-ref-label">
-                                  {lang === 'es'
-                                    ? (proto.reference_label_es || 'Protocolo de Referencia Clínica')
-                                    : (proto.reference_label_en || 'Primary Clinical Reference Standard')}
-                                </span>
-                              </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                                {REFERENCE_TELEMETRY_PILLS[proto.cleanSlug] && (
-                                  <span className="proto-telemetry-badge">
-                                    {REFERENCE_TELEMETRY_PILLS[proto.cleanSlug][lang] || REFERENCE_TELEMETRY_PILLS[proto.cleanSlug].en}
-                                  </span>
-                                )}
-                                <span className="proto-ref-tier-pill">
-                                  {lang === 'es' ? 'Ficha Extensa' : 'Extended Monograph'}
-                                </span>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="proto-card-top">
-                            {/* Header: Category Goal Pill */}
-                            <div className="proto-card-header">
-                              <span
-                                className="proto-card-goal-pill"
-                                style={{
-                                  background: goalInfo.bg,
-                                  color: goalInfo.color,
-                                  border: `1px solid ${goalInfo.color}33`,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px'
-                                }}
-                              >
-                                <GoalIcon size={11} style={{ flexShrink: 0 }} />
-                                <span>{localizedGoal}</span>
-                              </span>
-                            </div>
-
-                            {/* Title linking to Public Protocol Page */}
-                            <Link href={`/proto/${proto.cleanSlug}`} className="proto-card-title">
-                              {proto.cleanName}
-                            </Link>
-
-                            {/* Summary */}
-                            <p className="proto-card-summary">
-                              {proto.summary}
-                            </p>
-
-                            {/* Included Active Peptides */}
-                            {proto.compounds.length > 0 && (
-                              <div>
-                                <div className="proto-card-peptides-label">
-                                  {lang === 'es' ? 'Péptidos Activos' : 'Active Peptides'} ({proto.compounds.length}):
-                                </div>
-                                <div className="proto-card-peptides-list">
-                                  {proto.compounds.map((c, cIdx) => (
-                                    <Link
-                                      key={cIdx}
-                                      href={`/p/${c.slug}`}
-                                      target="_blank"
-                                      className="proto-compound-chip"
-                                      title={`Inspect ${c.name} technical monograph`}
-                                    >
-                                      <span>{c.name}</span>
-                                      <ExternalLink size={10} />
-                                    </Link>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Google Cloud Style Phase Pipeline Stepper */}
-                            {Array.isArray(proto.phases) && proto.phases.length > 0 && (
-                              <div style={{
-                                margin: '8px 0 10px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                overflowX: 'auto',
-                                paddingBottom: '2px',
-                                scrollbarWidth: 'none'
-                              }}>
-                                {proto.phases.map((ph, phIdx) => (
-                                  <React.Fragment key={ph.id || phIdx}>
-                                    <div style={{
-                                      flex: '1 1 0',
-                                      minWidth: '60px',
-                                      padding: '4px 6px',
-                                      background: phIdx === 0 ? '#eff6ff' : (phIdx === proto.phases.length - 1 ? '#f0fdf4' : '#f0fdfa'),
-                                      border: `1px solid ${phIdx === 0 ? '#bfdbfe' : (phIdx === proto.phases.length - 1 ? '#bbf7d0' : '#99f6e4')}`,
-                                      borderRadius: '6px',
-                                      display: 'flex',
-                                      flexDirection: 'column',
-                                      gap: '1px'
-                                    }}>
-                                      <span style={{
-                                        fontSize: '0.62rem',
-                                        fontWeight: 800,
-                                        color: phIdx === 0 ? '#1e40af' : (phIdx === proto.phases.length - 1 ? '#166534' : '#0f766e'),
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis'
-                                      }}>
-                                        {ph.name || `Phase ${phIdx + 1}`}
-                                      </span>
-                                      <span style={{ fontSize: '0.58rem', color: '#64748b', fontWeight: 600 }}>
-                                        {ph.durationWeeks || 4}w · Wk {ph.startWeek || 1}–{ph.endWeek || (ph.durationWeeks || 4)}
-                                      </span>
-                                    </div>
-                                    {phIdx < proto.phases.length - 1 && (
-                                      <span style={{ color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, flexShrink: 0 }}>➔</span>
-                                    )}
-                                  </React.Fragment>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Timeline Specs Strip */}
-                            <div className="proto-card-specs">
-                              <div className="proto-card-spec-item">
-                                <Clock size={13} style={{ color: '#0284c7' }} />
-                                <span>{proto.durationWeeks} {lang === 'es' ? 'Semanas' : 'Weeks'}</span>
-                              </div>
-
-                              <div className="proto-card-spec-item">
-                                <Layers size={13} style={{ color: '#0d9488' }} />
-                                <span>{proto.phasesCount} {proto.phasesCount === 1 ? (lang === 'es' ? 'Fase Continua' : 'Continuous Phase') : (lang === 'es' ? 'Fases de Titulación' : 'Titration Phases')}</span>
-                              </div>
-
-                              <div className="proto-card-spec-item">
-                                <Shield size={13} style={{ color: '#16a34a' }} />
-                                <span>{lang === 'es' ? 'Clínico' : 'Clinical'}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Card Action Buttons */}
-                          <div className="proto-card-actions">
-                            <Link
-                              href={`/proto/${proto.cleanSlug}`}
-                              className="proto-card-btn-primary"
-                              onClick={() => triggerHaptic('selection')}
-                            >
-                              <span>{t.viewTimeline}</span>
-                              <ArrowRight size={14} />
-                            </Link>
-
-                            <button
-                              type="button"
-                              className="proto-card-btn-icon"
-                              onClick={(e) => handleOpenQr(proto, e)}
-                              title={lang === 'es' ? 'Ver Código QR del Protocolo' : 'View Protocol QR Code'}
-                              aria-label="View QR Code"
-                            >
-                              <QrCode size={16} style={{ color: '#003666' }} />
-                            </button>
-
-                            <button
-                              type="button"
-                              className="proto-card-btn-icon"
-                              onClick={(e) => handleCopyCode(`https://www.atlashealth-services.com/proto/${proto.cleanSlug}`, e)}
-                              title={t.copyProtocolLink}
-                            >
-                              {copiedId === `https://www.atlashealth-services.com/proto/${proto.cleanSlug}` ? (
-                                <Check size={16} style={{ color: '#16a34a' }} />
-                              ) : (
-                                <Copy size={16} />
-                              )}
-                            </button>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
-            );
-          })}
-        </div>
-      ) : (
-        /* Empty State */
-        <div className="proto-empty-state">
-          <div className="proto-empty-icon">
-            <Search size={28} />
-          </div>
-          <h3 className="proto-empty-title">
-            {t.noResultsTitle}
-          </h3>
-          <p className="proto-empty-subtitle">
-            {t.noResultsSubtitle}
-          </p>
-          <button
-            type="button"
-            className="proto-empty-btn"
-            onClick={handleResetFilters}
-          >
-            {t.resetFilters}
-          </button>
-        </div>
-      )}
-
-          {/* ── 6. Institutional Prudence & Medical Notice (Bottom of page per GCP Standards) ── */}
-          <div className="pds-notice-card" style={{ marginTop: '2.5rem', marginBottom: '1.25rem' }}>
-            <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
-            <div className="pds-notice-text">
-              <strong>{lang === 'es' ? 'Compendio Clínico de Acceso Profesional' : 'Professional Clinical Reference Directory'}</strong>
-              <span>
-                {lang === 'es' 
-                  ? 'Todos los protocolos clínicos presentados en este directorio están formulados bajo estándares de farmacocinética molecular y guías clínicas internacionales (SURMOUNT, STEP, TRIUMPH). La administración requiere prescripción médica y supervisión por un profesional de la salud debidamente cualificado.'
-                  : 'All clinical protocols presented in this directory are formulated under molecular pharmacokinetics standards and international clinical trials (SURMOUNT, STEP, TRIUMPH). Administration requires medical prescription and supervision by a certified healthcare professional.'}
-              </span>
-            </div>
-          </div>
-
-          {/* Standardized Institutional Regulatory Footer (PublicDatasheet Standard) */}
-          <footer className="pds-page-footer">
-            <div className="pds-footer-box">
-              <p className="pds-footer-text">
-                <strong>{lang === 'es' ? 'Gobernanza Clínica & Prescripción Facultativa:' : 'Clinical Governance & Prescriber Supervision:'}</strong>{' '}
-                {lang === 'es'
-                  ? 'Todos los protocolos clínicos de este directorio han sido estructurados conforme a estándares internacionales de farmacocinética molecular y guías clínicas basadas en evidencia (SURMOUNT, STEP, TRIUMPH). La dispensación, dosificación y ajuste de cada pauta requiere prescripción y supervisión directa por un profesional sanitario colegiado.'
-                  : 'All clinical protocols in this directory are structured according to molecular pharmacokinetics standards and international evidence-based guidelines (SURMOUNT, STEP, TRIUMPH). Dispensing and titration schedules require direct prescription and clinical oversight by a licensed medical practitioner.'}
-              </p>
-              <p className="pds-footer-meta">
-                Document Ref: DIR-PROTO-2026 • Rev 2026.4 • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {new Date().toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Technologies
-              </p>
-            </div>
-          </footer>
         </div>
 
-        {/* Persistent Google Cloud Console Sticky Sidebar */}
+        {/* Persistent Sticky Sidebar */}
         <ProtocolsCatalogSidebar
           selectedGoal={selectedGoal}
           onSelectGoal={setSelectedGoal}
@@ -1329,7 +377,46 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         />
       </div>
 
-      {/* ── Protocol QR Modal ── */}
+      {/* Floating Side-by-Side Compare Pill */}
+      {compareProtocols.length > 0 && (
+        <div className="proto-compare-floating-bar">
+          <button
+            type="button"
+            className="proto-compare-launch-btn"
+            onClick={() => setIsCompareOpen(true)}
+          >
+            <GitCompare size={15} />
+            <span>
+              {isEs
+                ? `Comparar (${compareProtocols.length}/3)`
+                : `Compare (${compareProtocols.length}/3)`}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="proto-compare-dismiss-btn"
+            onClick={clearCompare}
+            aria-label="Clear comparison"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Side-by-Side Comparison Drawer */}
+      <ProtocolCompareDrawer
+        isOpen={isCompareOpen}
+        onClose={() => setIsCompareOpen(false)}
+        protocols={compareProtocols}
+        onRemove={toggleCompare}
+        onClear={() => {
+          clearCompare();
+          setIsCompareOpen(false);
+        }}
+        lang={lang}
+      />
+
+      {/* Protocol QR Modal */}
       {qrModalProtocol && (
         <ProtocolQrModal
           isOpen={Boolean(qrModalProtocol)}
@@ -1343,52 +430,69 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         />
       )}
 
-      {/* ── Persistent Google Cloud Console Sticky Bottom Action Bar ── */}
+      {/* Persistent Bottom Action Bar */}
       <PublicStickyActionBar
         title={t.catalogHeroTitle || 'Clinical Protocols & Peptides Directory'}
-        subtitle={`${filteredProtocols.length} Clinical Protocols • 10 Goals • Titration SSOT`}
+        subtitle={`${filteredProtocols.length} Clinical Protocols • ${kpiMetrics.goalsCount} Goals • Titration SSOT`}
         badge="Clinical Pathways SSOT"
         badgeType="teal"
-        inquireLabel={lang === 'es' ? 'Consultar Directorio' : 'Inquire Directory'}
+        inquireLabel={isEs ? 'Consultar Directorio' : 'Inquire Directory'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
         aiCategory="Protocols Directory"
         aiContextQuery={
-          lang === 'es'
-            ? 'Busco un protocolo clínico en el compendio de Atlas para un paciente con objetivo de [escriba aquí objetivo, ej: longevidad, recuperación tisular o metabolismo]. ¿Cuáles son los más recomendados y con qué sinergias?'
-            : 'I am looking for an Atlas clinical protocol for a patient targeting [specify goal, e.g. longevity, tissue repair, or metabolic optimization]. What are the recommended pathways and synergies?'
+          compareProtocols.length >= 2
+            ? isEs
+              ? `Compara los protocolos seleccionados (${compareProtocols.map((p) => p.cleanName).join(' vs ')}) en cuanto a perfil de paciente, titulación, biomarcadores y contraindicaciones.`
+              : `Compare the selected protocols (${compareProtocols.map((p) => p.cleanName).join(' vs ')}) for patient fit, titration schedule, required biomarkers, and contraindications.`
+            : ''
         }
         showSections={true}
         sectionsCount={GOAL_BUCKETS.length}
-        sectionsLabel={lang === 'es' ? 'Objetivos & Filtros' : 'Goals & Filters'}
+        sectionsLabel={isEs ? 'Objetivos & Filtros' : 'Goals & Filters'}
         onOpenSections={() => setIsMobileDrawerOpen(true)}
         lang={lang}
       />
 
-      {/* ── Sandboxed Clinical Protocol AI Copilot (Integrated into Sticky Footer) ── */}
       <PublicAtlasAIDrawer
         contextType="protocols_directory"
         contextAnchor={{
           type: 'protocols_catalog',
           name: 'Clinical Protocols & Peptides Directory',
           totalProtocols: enrichedProtocols.length,
+          filteredCount: filteredProtocols.length,
           activeFilterGoal: selectedGoal,
+          activeRouteFilter: routeFilter,
+          activeEvidenceFilter: evidenceFilter,
+          activeSafetyExclusions: safetyExclusions,
           activeSearchQuery: searchQuery,
-          availableGoals: GOAL_BUCKETS.map(b => b.label),
-          protocols: filteredProtocols.slice(0, 30).map(p => ({
+          shortlistCount: shortlistSlugs.size,
+          comparingProtocols: compareProtocols.map((p) => ({
             name: p.cleanName,
             slug: p.cleanSlug,
+            route: p.route,
+            evidence: p.evidence_grade,
+            duration: `${p.durationWeeks}w`,
+            biomarkers: p.biomarkers,
+            contraindications: p.contraindications,
+          })),
+          availableGoals: GOAL_BUCKETS.map((b) => b.label),
+          protocols: enrichedProtocols.map((p) => ({
+            name: p.cleanName,
+            slug: p.cleanSlug,
+            goal: p.mappedGoals?.filter((g) => g !== 'all' && g !== 'reference_standards')[0] || 'longevity',
             duration: p.durationWeeks ? `${p.durationWeeks}w` : '8w',
             phases: p.phasesCount,
-            compounds: p.compounds.map(c => c.name)
-          }))
+            route: p.route,
+            evidence: p.evidence_grade,
+            compounds: p.compounds.map((c) => c.name),
+          })),
         }}
         storageKey="protocols_directory"
         hideFloatingTrigger={true}
         lang={lang}
       />
 
-      {/* Non-Intrusive Institutional Inquiry Drawer */}
       <PublicInstitutionalInquiryDrawer
         isOpen={isInquiryDrawerOpen}
         onClose={() => setIsInquiryDrawerOpen(false)}
@@ -1396,8 +500,12 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         lang={lang}
       />
 
-      {/* Institutional Unified Public Footer */}
-      <PublicUnifiedFooter lang={lang} />
+      <PublicUnifiedFooter
+        track="protocols"
+        lang={lang}
+        onLangChange={handleLangChange}
+        onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { adminDb } from '../../lib/firebaseAdmin';
 import { sanitizePublicProtocol } from '../../repositories/publicDataSanitizer';
+import { enrichProtocolForCatalog } from '../../utils/protocolCatalogTaxonomy';
 import PublicProtocolsCatalogView from '../../components/protocol/PublicProtocolsCatalogView';
 
 export const revalidate = 3600; // ⚡ Multi-Tier ISR (1 hour Edge Cache)
@@ -59,27 +60,29 @@ async function getAllProtocols() {
       });
     }
 
-    const protocols = docs.map(d => {
-      const data = d.data();
-      const sanitized = sanitizePublicProtocol(data);
-      return {
-        ...sanitized,
-        id: d.id,
-        name: sanitized.name || data.name || data.title || data.protocol_name,
-        slug: sanitized.slug || data.slug || data.protocol_slug || d.id,
-        duration: sanitized.duration || data.duration || `${data.durationWeeks || data.duration_weeks || 8} Weeks`,
-        durationWeeks: sanitized.durationWeeks || data.durationWeeks || data.duration_weeks || 8,
-        phases: sanitized.phases || data.phases || [],
-        bom: sanitized.bom || data.bom || [],
-        goals: sanitized.goals || data.goals || [data.goal || data.category || 'Healthy Aging'],
-        overview_summary: sanitized.overview_summary || data.overview_summary || data.description || '',
-        is_reference_standard: Boolean(sanitized.is_reference_standard ?? data.is_reference_standard),
-        reference_order: sanitized.reference_order ?? data.reference_order ?? 99,
-        reference_label_es: sanitized.reference_label_es || data.reference_label_es || 'Protocolo de Referencia Clínica',
-        reference_label_en: sanitized.reference_label_en || data.reference_label_en || 'Primary Clinical Reference Standard',
-        reference_standard_tier: sanitized.reference_standard_tier || data.reference_standard_tier || 'gold',
-      };
-    });
+    const protocols = docs
+      .map(d => {
+        const data = d.data();
+        const sanitized = sanitizePublicProtocol(data);
+        return enrichProtocolForCatalog({
+          ...sanitized,
+          id: d.id,
+          name: sanitized.name || data.name || data.title || data.protocol_name,
+          slug: sanitized.slug || data.slug || data.protocol_slug || d.id,
+          duration: sanitized.duration || data.duration || `${data.durationWeeks || data.duration_weeks || 8} Weeks`,
+          durationWeeks: sanitized.durationWeeks || data.durationWeeks || data.duration_weeks || 8,
+          phases: sanitized.phases || data.phases || [],
+          bom: sanitized.bom || data.bom || [],
+          goals: sanitized.goals || data.goals || [data.goal || data.category || 'Healthy Aging'],
+          overview_summary: sanitized.overview_summary || data.overview_summary || data.description || '',
+          is_reference_standard: Boolean(sanitized.is_reference_standard ?? data.is_reference_standard),
+          reference_order: sanitized.reference_order ?? data.reference_order ?? 99,
+          reference_label_es: sanitized.reference_label_es || data.reference_label_es || 'Protocolo de Referencia Clínica',
+          reference_label_en: sanitized.reference_label_en || data.reference_label_en || 'Primary Clinical Reference Standard',
+          reference_standard_tier: sanitized.reference_standard_tier || data.reference_standard_tier || 'gold',
+        });
+      })
+      .filter(Boolean);
 
     return protocols;
   } catch (err) {
