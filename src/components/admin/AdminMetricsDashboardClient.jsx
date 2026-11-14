@@ -1,930 +1,554 @@
 'use client';
-"use client";
-import Users from 'lucide-react/dist/esm/icons/users';
-import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
-import PackageSearch from 'lucide-react/dist/esm/icons/package-search';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
-import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
-import Server from 'lucide-react/dist/esm/icons/server';
-import Cpu from 'lucide-react/dist/esm/icons/cpu';
-import Database from 'lucide-react/dist/esm/icons/database';
-import Layers from 'lucide-react/dist/esm/icons/layers';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import Settings from 'lucide-react/dist/esm/icons/settings';
-import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import Eye from 'lucide-react/dist/esm/icons/eye';
-import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
-import Globe from 'lucide-react/dist/esm/icons/globe';
-import Building2 from 'lucide-react/dist/esm/icons/building-2';
-import Link2 from 'lucide-react/dist/esm/icons/link-2';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import X from 'lucide-react/dist/esm/icons/x';
-import Send from 'lucide-react/dist/esm/icons/send';
-import Sliders from 'lucide-react/dist/esm/icons/sliders';
-import Play from 'lucide-react/dist/esm/icons/play';
-import Check from 'lucide-react/dist/esm/icons/check';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import UserCheck from 'lucide-react/dist/esm/icons/user-check';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
-import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
-import Layers3 from 'lucide-react/dist/esm/icons/layers-3';
-import Calendar from 'lucide-react/dist/esm/icons/calendar';
-import Home from 'lucide-react/dist/esm/icons/home';
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
-import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
-import React, { useState, useEffect } from 'react';
-import { formatAEDtoDual } from '../../utils/currencies';
-import { fetchDashboardMetricsAction } from '../../actions/dashboardActions';
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  onSnapshot,
-} from 'firebase/firestore';
-import { db } from '../../firebase';
+
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
-import AdminPortalSwitcher from '../shared/AppHeader/AdminPortalSwitcher';
-import BaseCard from '../ui/BaseCard';
+import Activity from 'lucide-react/dist/esm/icons/activity';
+import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Building2 from 'lucide-react/dist/esm/icons/building-2';
+import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import Clock from 'lucide-react/dist/esm/icons/clock';
+import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
+import FileText from 'lucide-react/dist/esm/icons/file-text';
+import Package from 'lucide-react/dist/esm/icons/package';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+import Server from 'lucide-react/dist/esm/icons/server';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import UserCheck from 'lucide-react/dist/esm/icons/user-check';
+import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
+import Users from 'lucide-react/dist/esm/icons/users';
 import {
-  ExecutiveSummaryStrip,
-  TodayPrioritiesQueue,
-  BusinessHealthRadar,
-  FinanceTasksHub,
-  CashFlowForecast,
-  CrmPipelineFunnel,
-  WholesalersLeaderboard,
-  AiCommandConsole,
-} from './widgets/CommandCenterWidgets';
-import ClinicalCommandHub from './widgets/ClinicalCommandHub';
-import HealthMatrixWidget from './widgets/HealthMatrixWidget';
-import AdminExecutiveSummaryWidget from './AdminExecutiveSummaryWidget';
-import DoctorOverviewTab from '../doctor/DoctorOverviewTab';
-import DashboardEngine from '../../engine/DashboardEngine';
+  fetchDashboardMetricsAction,
+  refreshDashboardMetricsAction,
+} from '../../actions/dashboardActions';
+import { formatAEDtoDual } from '../../utils/currencies';
 import notifier from '../../services/NotificationService';
+import PageHeader from '../ui/PageHeader';
+import StatusBadge from '../ui/StatusBadge';
+import CopyableId from '../ui/CopyableId';
+import EmptyState from '../ui/EmptyState';
 import styles from './AdminMetricsDashboard.module.css';
 
-// Roles-based dashboard configurations preset layout (Real Data Only)
+const DATE_RANGES = [
+  { id: '7d', label: 'Last 7 days' },
+  { id: '30d', label: 'Last 30 days' },
+  { id: '90d', label: 'Last 90 days' },
+  { id: 'all', label: 'All time' },
+];
+
 const ROLE_PRESETS = {
   CEO: {
-    visibleKPIs: ['revenue', 'openOrders', 'pendingApprovals', 'openRFQs'],
-    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['revenue', 'openOrders', 'pendingApprovals', 'openRFQs'],
+    label: 'CEO Overview',
+    kpis: ['revenue', 'grossProfit', 'openOrders', 'pendingApprovals'],
   },
   Finance: {
-    visibleKPIs: ['revenue', 'grossProfit', 'cashPosition', 'openOrders'],
-    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['revenue', 'grossProfit', 'cashPosition', 'openOrders'],
-  },
-  Purchasing: {
-    visibleKPIs: ['openRFQs', 'supplierHealth', 'openOrders', 'revenue'],
-    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['openRFQs', 'supplierHealth', 'openOrders', 'revenue'],
-  },
-  Sales: {
-    visibleKPIs: ['pipelineValue', 'revenue', 'openOrders', 'openRFQs'],
-    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['pipelineValue', 'revenue', 'openOrders', 'openRFQs'],
-  },
-  Operations: {
-    visibleKPIs: ['systemUptime', 'openOrders', 'pendingApprovals', 'openRFQs'],
-    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['systemUptime', 'openOrders', 'pendingApprovals', 'openRFQs'],
+    label: 'Finance & Margin',
+    kpis: ['revenue', 'grossProfit', 'pipelineValue', 'openQuotations'],
   },
   Clinical: {
-    visibleKPIs: ['activePatients', 'activeProtocols', 'pendingPrescriptions', 'dueFollowUps'],
-    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['activePatients', 'activeProtocols', 'pendingPrescriptions', 'dueFollowUps'],
+    label: 'Clinical Ops',
+    kpis: ['activePatients', 'activeProtocols', 'pendingPrescriptions', 'dueFollowUps'],
+  },
+  Operations: {
+    label: 'Supply & Catalog',
+    kpis: ['openOrders', 'openRFQs', 'publishedProducts', 'activeSuppliers'],
   },
 };
 
-import { useRoleAccess } from '../../hooks/useRoleAccess';
+const KPI_DEFINITIONS = {
+  revenue: {
+    label: 'Recognized Revenue',
+    icon: DollarSign,
+    bg: '#eff6ff',
+    color: '#1d4ed8',
+    href: '/admin/orders',
+    timeScoped: true,
+    format: (m) => formatAEDtoDual(m.revenue || 0),
+    subtitle: (m) => `${m.openOrders || 0} open orders in queue`,
+  },
+  grossProfit: {
+    label: 'Gross Profit',
+    icon: TrendingUp,
+    bg: '#f0fdf4',
+    color: '#15803d',
+    href: '/admin/orders',
+    timeScoped: true,
+    format: (m) => formatAEDtoDual(m.grossProfit || 0),
+    subtitle: (m) => {
+      const rev = Number(m.revenue || 0);
+      const margin = rev > 0 ? Math.round((Number(m.grossProfit || 0) / rev) * 100) : 0;
+      return `${margin}% blended margin`;
+    },
+  },
+  pipelineValue: {
+    label: 'Quotation Pipeline',
+    icon: FileText,
+    bg: '#f5f3ff',
+    color: '#6d28d9',
+    href: '/admin/quotations',
+    timeScoped: true,
+    format: (m) => formatAEDtoDual(m.pipelineValue || 0),
+    subtitle: (m) => `${m.openQuotations || 0} active quotations`,
+  },
+  openQuotations: {
+    label: 'Open Quotations',
+    icon: FileText,
+    bg: '#fffbeb',
+    color: '#b45309',
+    href: '/admin/quotations',
+    timeScoped: true,
+    format: (m) => Number(m.openQuotations || 0).toLocaleString(),
+    subtitle: () => 'Awaiting client acceptance',
+  },
+  openOrders: {
+    label: 'Open Orders',
+    icon: ShoppingCart,
+    bg: '#eff6ff',
+    color: '#0369a1',
+    href: '/admin/orders',
+    timeScoped: true,
+    format: (m) => Number(m.openOrders || 0).toLocaleString(),
+    subtitle: () => 'Pending fulfillment or transit',
+  },
+  pendingApprovals: {
+    label: 'Pending User Approvals',
+    icon: UserCheck,
+    bg: '#fef2f2',
+    color: '#b91c1c',
+    href: '/admin/users',
+    timeScoped: false,
+    format: (m) => Number(m.pendingApprovals || 0).toLocaleString(),
+    subtitle: (m) => `${m.activeUsersCount || 0} active accounts total`,
+  },
+  openRFQs: {
+    label: 'Open Supplier RFQs',
+    icon: Package,
+    bg: '#fff7ed',
+    color: '#c2410c',
+    href: '/admin/rfq',
+    timeScoped: true,
+    format: (m) => Number(m.openRFQs || 0).toLocaleString(),
+    subtitle: () => 'Sourcing requests in progress',
+  },
+  activePatients: {
+    label: 'Active Patients',
+    icon: Users,
+    bg: '#f0fdfa',
+    color: '#0f766e',
+    href: '/admin/patients',
+    timeScoped: false,
+    format: (m) => Number(m.activePatients || 0).toLocaleString(),
+    subtitle: () => 'Approved patient accounts',
+  },
+  activeProtocols: {
+    label: 'Active Protocols',
+    icon: Activity,
+    bg: '#f0fdf4',
+    color: '#15803d',
+    href: '/admin/protocols',
+    timeScoped: false,
+    format: (m) => Number(m.activeProtocols || 0).toLocaleString(),
+    subtitle: () => 'Published clinical regimens',
+  },
+  pendingPrescriptions: {
+    label: 'Pending Prescriptions',
+    icon: FileText,
+    bg: '#fffbeb',
+    color: '#b45309',
+    href: '/admin/prescriptions',
+    timeScoped: true,
+    format: (m) => Number(m.pendingPrescriptions || 0).toLocaleString(),
+    subtitle: () => 'Awaiting clinical review',
+  },
+  dueFollowUps: {
+    label: 'Follow-Ups Due',
+    icon: Clock,
+    bg: '#fef2f2',
+    color: '#b91c1c',
+    href: '/admin/prescriptions',
+    timeScoped: false,
+    format: (m) => Number(m.dueFollowUps || 0).toLocaleString(),
+    subtitle: () => 'Scheduled next 7 days',
+  },
+  publishedProducts: {
+    label: 'Published Products',
+    icon: Package,
+    bg: '#f0fdf4',
+    color: '#15803d',
+    href: '/admin/catalog',
+    timeScoped: false,
+    format: (m) => Number(m.publishedProducts || 0).toLocaleString(),
+    subtitle: () => 'Active catalog SKUs',
+  },
+  activeSuppliers: {
+    label: 'Active Suppliers',
+    icon: Building2,
+    bg: '#eff6ff',
+    color: '#1d4ed8',
+    href: '/admin/suppliers',
+    timeScoped: false,
+    format: (m) => Number(m.activeSuppliers || 0).toLocaleString(),
+    subtitle: () => 'Verified sourcing partners',
+  },
+};
 
-export default function AdminMetricsDashboardClient({ wholesalerId = null, initialMetricsData = null }) {
+function formatSyncedTime(isoString) {
+  if (!isoString) return 'Just now';
+  try {
+    return new Date(isoString).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  } catch {
+    return 'Just now';
+  }
+}
+
+function formatRegistrationDate(val) {
+  if (!val) return 'Recent';
+  try {
+    return new Date(val).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return 'Recent';
+  }
+}
+
+export default function AdminMetricsDashboardClient({
+  wholesalerId = null,
+  initialMetricsData = null,
+}) {
   const router = useRouter();
-  const { userProfile } = useAuth();
-  const { is, effectiveRole } = useRoleAccess();
-  const isAdmin = is('admin') || userProfile?.roles?.includes('admin');
-
-  // Map user role to dashboard preset
-  const getInitialPreset = () => {
-    if (!effectiveRole) return 'CEO';
-    const r = effectiveRole.toLowerCase() || '';
-    if (r === 'admin') return 'CEO';
-    if (r === 'medical_director' || r === 'doctor' || r === 'physician' || r === 'medical') return 'Clinical';
-    if (r === 'finance' || r === 'accountant') return 'Finance';
-    if (r === 'sales') return 'Sales';
-    if (r === 'purchasing') return 'Purchasing';
-    if (r === 'operations') return 'Operations';
-    return 'CEO'; // Fallback
-  };
-
-  const isMedicalDirectorRole = effectiveRole === 'medical_director';
-  const isDoctorRole = effectiveRole === 'doctor' || effectiveRole === 'physician';
-  const isPatientRole = effectiveRole === 'patient';
-  const isSupplierRole = effectiveRole === 'supplier' || effectiveRole === 'wholesaler' || effectiveRole === 'wholeseller';
-  const initialPreset = getInitialPreset();
-
-  // Customizer State initialized to role presets
-  const [currentRolePreset, setCurrentRolePreset] = useState(initialPreset);
-  const [visibleKPIs, setVisibleKPIs] = useState(ROLE_PRESETS[initialPreset].visibleKPIs);
-  const [visibleWidgets, setVisibleWidgets] = useState(ROLE_PRESETS[initialPreset].visibleWidgets);
-  const [isCustomizing, setIsCustomizing] = useState(false);
-  const [isExecutiveMode, setIsExecutiveMode] = useState(true);
-
-  // Core Data Metrics (Initialized synchronously from Server Component prefetch)
-  const [loading, setLoading] = useState(!initialMetricsData?.metrics);
-  const [timeFilter, setTimeFilter] = useState('7d');
-  const [dbLatency, setDbLatency] = useState(initialMetricsData?.metrics ? '12ms' : '24ms');
-  const [aiConsumption, setAiConsumption] = useState(1.42);
-  const [activeUsersCount, setActiveUsersCount] = useState(initialMetricsData?.metrics?.activeUsersCount || 0);
-  const [recentRegistrations, setRecentRegistrations] = useState(initialMetricsData?.recentRegistrations || []);
-
-  // Metrics values initialized synchronously from Server Action
-  const [metrics, setMetrics] = useState(initialMetricsData?.metrics || {
-    revenue: 0,
-    openOrders: 0,
-    pendingApprovals: 0,
-    openRFQs: 0,
-    grossProfit: 0,
-    cashPosition: 0,
-    aiAlerts: 0,
-    activePatients: 0,
-    activeProtocols: 0,
-    pendingPrescriptions: 0,
-    dueFollowUps: 0,
-  });
-
-  // Priorities list built dynamically from real counts
-  const [priorities, setPriorities] = useState(initialMetricsData?.priorities || []);
-
-  // AI Command Console simulation helper
-  const handleAiAsk = async (queryText) => {
-    const queryLower = queryText.toLowerCase();
-    if (isMedicalDirectorRole || currentRolePreset === 'Clinical') {
-      return {
-        answer: `Clinical AI analysis finished for "${queryText}": ${metrics.activePatients || 162} active enrolled patients, ${metrics.pendingPrescriptions || 13} prescriptions awaiting review, and 0 dosage contraindications flagged network-wide.`,
-        actions: [],
-      };
+  const [activePreset, setActivePreset] = useState('CEO');
+  const [dateRange, setDateRange] = useState(
+    initialMetricsData?.meta?.dateRange || '30d'
+  );
+  const [dashboardData, setDashboardData] = useState(
+    initialMetricsData || {
+      metrics: {},
+      priorities: [],
+      recentRegistrations: [],
+      meta: { dateRange: '30d', syncedAt: null, serverLatencyMs: null },
     }
-    if (
-      queryLower.includes('attention') ||
-      queryLower.includes('priorities') ||
-      queryLower.includes('today')
-    ) {
-      return {
-        answer: `Here are the top issues that require your immediate attention today: We have ${metrics.openOrders} pending orders, ${metrics.openRFQs} open RFQs, and ${metrics.pendingApprovals} user accounts awaiting approval.`,
-        actions: [],
-      };
-    }
-    return {
-      answer: `AI processing finished for "${queryText}": Total active revenue is AED ${metrics.revenue.toLocaleString()}. All databases are synchronized.`,
-      actions: [],
-    };
-  };
+  );
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isChangingScope, setIsChangingScope] = useState(false);
 
-  // Active Tab for Widgets
-  const [aiWorkspaceTab, setAiWorkspaceTab] = useState('insights');
+  const metrics = dashboardData?.metrics || {};
+  const priorities = useMemo(
+    () => dashboardData?.priorities || [],
+    [dashboardData]
+  );
+  const recentRegistrations = useMemo(
+    () => dashboardData?.recentRegistrations || [],
+    [dashboardData]
+  );
+  const meta = dashboardData?.meta || {};
 
-  // Mobile Bottom Tab State
-  const [mobileTab, setMobileTab] = useState('home');
+  const activeScopeLabel =
+    DATE_RANGES.find((r) => r.id === dateRange)?.label || 'Last 30 days';
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDbLatency(`${Math.floor(Math.random() * 20) + 12}ms`);
-    }, 15000);
-    const safetyTimer = setTimeout(() => {
-      setLoading(false);
-    }, 1200);
-    return () => {
-      clearInterval(interval);
-      clearTimeout(safetyTimer);
-    };
-  }, []);
+  const visibleKpis = useMemo(() => {
+    const presetKeys = ROLE_PRESETS[activePreset]?.kpis || ROLE_PRESETS.CEO.kpis;
+    return presetKeys
+      .map((key) => ({ id: key, ...KPI_DEFINITIONS[key] }))
+      .filter((item) => Boolean(item.label));
+  }, [activePreset]);
 
-  // Fetch metrics dynamically from real Firestore collections
-  useEffect(() => {
-    if (initialMetricsData && initialMetricsData.metrics) {
-      setMetrics(initialMetricsData.metrics);
-      setPriorities(initialMetricsData.priorities || []);
-      setRecentRegistrations(initialMetricsData.recentRegistrations || []);
-      setActiveUsersCount(initialMetricsData.metrics.activeUsersCount || 0);
-      setLoading(false);
-      return;
-    }
-
-    const startDbTime = performance.now();
-    async function loadData() {
-      try {
-        const data = await fetchDashboardMetricsAction();
-        
-        if (data && data.metrics) {
-          setMetrics(data.metrics);
-          setPriorities(data.priorities || []);
-          setRecentRegistrations(data.recentRegistrations || []);
-          setActiveUsersCount(data.metrics.activeUsersCount || 0);
-        }
-        
-        const latency = Math.round(performance.now() - startDbTime);
-        setDbLatency(`${latency}ms`);
-        setLoading(false);
-      } catch (err) {
-        console.warn('Error fetching dashboard data via Server Action', err);
-        setLoading(false);
+  const handleDateRangeChange = async (nextRange) => {
+    if (nextRange === dateRange || isChangingScope) return;
+    setDateRange(nextRange);
+    setIsChangingScope(true);
+    try {
+      const nextData = await fetchDashboardMetricsAction(nextRange);
+      if (nextData) {
+        setDashboardData(nextData);
       }
+    } catch (err) {
+      notifier.error(`Failed to load ${nextRange} metrics: ${err.message}`);
+    } finally {
+      setIsChangingScope(false);
     }
-    loadData();
-  }, [initialMetricsData]);
-
-  const handleApplyPreset = (presetName) => {
-    setCurrentRolePreset(presetName);
-    setVisibleKPIs(ROLE_PRESETS[presetName].visibleKPIs);
-    setVisibleWidgets(ROLE_PRESETS[presetName].visibleWidgets);
   };
 
-  const toggleKPIVisibility = (kpi) => {
-    setVisibleKPIs((prev) => (prev.includes(kpi) ? prev.filter((k) => k !== kpi) : [...prev, kpi]));
+  const handleRefresh = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      const fresh = await refreshDashboardMetricsAction(dateRange);
+      if (fresh) {
+        setDashboardData(fresh);
+        notifier.success(`Dashboard synced (${activeScopeLabel})`);
+      }
+    } catch (err) {
+      notifier.error(`Refresh failed: ${err.message}`);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
-  const toggleWidgetVisibility = (widget) => {
-    setVisibleWidgets((prev) =>
-      prev.includes(widget) ? prev.filter((w) => w !== widget) : [...prev, widget]
-    );
+  const handleCardKeyDown = (e, href) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      router.push(href);
+    }
   };
-
-  const ROLE_CUSTOMIZATION_OPTIONS = {
-    doctor: {
-      title: 'Configure Physician Widgets & Metrics',
-      kpis: [
-        { id: 'activePatients', label: 'Active Enrolled Patients' },
-        { id: 'pendingPrescriptions', label: 'Prescriptions Pending Review' },
-        { id: 'activeProtocols', label: 'Active Clinical Protocols' },
-        { id: 'dueFollowUps', label: 'Patient Follow-Ups Due' },
-        { id: 'labTestsPending', label: 'Pending Lab Diagnostics' },
-      ],
-      widgets: [
-        { id: 'todayPriorities', label: 'Clinical Action Items' },
-        { id: 'clinicalAIBrief', label: 'Clinical AI Intelligence' },
-        { id: 'patientCases', label: 'Patient Case Monitoring' },
-        { id: 'labResultsHub', label: 'Lab & Diagnostics Stream' },
-      ],
-    },
-    medical_director: {
-      title: 'Configure Medical Oversight Widgets & Metrics',
-      kpis: [
-        { id: 'activePatients', label: 'Active Enrolled Patients' },
-        { id: 'pendingPrescriptions', label: 'Prescriptions Pending Review' },
-        { id: 'activeProtocols', label: 'Active Clinical Protocols' },
-        { id: 'dueFollowUps', label: 'Patient Follow-Ups Due' },
-        { id: 'labTestsPending', label: 'Pending Lab Diagnostics' },
-      ],
-      widgets: [
-        { id: 'todayPriorities', label: 'Clinical Action Items' },
-        { id: 'clinicalAIBrief', label: 'Clinical AI Intelligence' },
-        { id: 'patientCases', label: 'Patient Case Monitoring' },
-        { id: 'labResultsHub', label: 'Lab & Diagnostics Stream' },
-      ],
-    },
-    wholesaler: {
-      title: 'Configure B2B Supply Chain Widgets & Metrics',
-      kpis: [
-        { id: 'wholesaleSales', label: 'B2B Wholesale Volume' },
-        { id: 'pendingPOs', label: 'Pending Purchase Orders' },
-        { id: 'openRFQs', label: 'Active Purchase RFQs' },
-        { id: 'openOrders', label: 'Pending Order Processing' },
-      ],
-      widgets: [
-        { id: 'todayPriorities', label: 'Procurement Action Items' },
-        { id: 'rfqProcessing', label: 'RFQ Bidding & Quotation Hub' },
-        { id: 'inventoryAlerts', label: 'Warehouse & Stock Alerts' },
-        { id: 'aiWorkspace', label: 'Sourcing Intelligence Hub' },
-      ],
-    },
-    supplier: {
-      title: 'Configure Supplier Control Room Widgets & Metrics',
-      kpis: [
-        { id: 'wholesaleSales', label: 'B2B Wholesale Volume' },
-        { id: 'pendingPOs', label: 'Pending Purchase Orders' },
-        { id: 'openRFQs', label: 'Active Purchase RFQs' },
-        { id: 'openOrders', label: 'Pending Order Processing' },
-      ],
-      widgets: [
-        { id: 'todayPriorities', label: 'Procurement Action Items' },
-        { id: 'rfqProcessing', label: 'RFQ Bidding & Quotation Hub' },
-        { id: 'inventoryAlerts', label: 'Warehouse & Stock Alerts' },
-        { id: 'aiWorkspace', label: 'Sourcing Intelligence Hub' },
-      ],
-    },
-    patient: {
-      title: 'Configure Personal Health Widgets & Metrics',
-      kpis: [
-        { id: 'activeProtocols', label: 'My Active Protocols' },
-        { id: 'dueFollowUps', label: 'Upcoming Doses & Reminders' },
-        { id: 'pendingPrescriptions', label: 'My Prescriptions' },
-        { id: 'openOrders', label: 'My Orders' },
-      ],
-      widgets: [
-        { id: 'patientBrief', label: 'Personal Health AI Brief' },
-        { id: 'dailyTracker', label: 'Daily Check-in Tracker' },
-        { id: 'refillWidget', label: 'Prescription Refills' },
-      ],
-    },
-    admin: {
-      title: 'Configure Master Executive Widgets & Metrics',
-      kpis: [
-        { id: 'revenue', label: 'Real Revenue' },
-        { id: 'grossProfit', label: 'Gross Profit' },
-        { id: 'openOrders', label: 'Open Orders' },
-        { id: 'pendingApprovals', label: 'Pending Approvals' },
-        { id: 'openRFQs', label: 'Open RFQs' },
-        { id: 'aiAlerts', label: 'AI Risk Alerts' },
-        { id: 'cashPosition', label: 'Cash Position' },
-      ],
-      widgets: [
-        { id: 'todayPriorities', label: "Today's Priorities" },
-        { id: 'businessHealth', label: 'Business Health Lights' },
-        { id: 'financeTasks', label: 'Finance Workspace Tasks' },
-        { id: 'aiWorkspace', label: 'AI Sync & Insights Hub' },
-        { id: 'systemStatus', label: 'Infrastructure Specs' },
-      ],
-    },
-  };
-
-  const customizationConfig = ROLE_CUSTOMIZATION_OPTIONS[effectiveRole] || ROLE_CUSTOMIZATION_OPTIONS.admin;
 
   return (
-    <div className={styles.atlasCommandCenter}>
-      {/* Dynamic Embedded CSS Styles */}
+    <div className={styles.dashboardRoot}>
+      <PageHeader
+        panel="admin"
+        title={wholesalerId ? 'Wholesaler Command Center' : 'Executive Command Center'}
+        subtitle="Real-time Firestore aggregations across revenue, clinical operations & supply chain"
+        actions={
+          <button
+            type="button"
+            className={styles.primaryHeaderBtn}
+            onClick={handleRefresh}
+            disabled={isRefreshing || isChangingScope}
+          >
+            <RefreshCw
+              size={15}
+              className={isRefreshing ? styles.spinIcon : undefined}
+            />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+          </button>
+        }
+      />
 
-      {/* ── COMMAND CENTER HEADER & PRESET CUSTOMIZER ────────────────── */}
-      <div 
-        className="admin-command-center-banner"
-        style={{ 
-          position: 'sticky', 
-          top: 0, 
-          zIndex: 30, 
-          background: 'rgba(255, 255, 255, 0.92)', 
-          backdropFilter: 'blur(16px)', 
-          WebkitBackdropFilter: 'blur(16px)', 
-          border: '1px solid rgba(226, 232, 240, 0.8)', 
-          padding: '1.25rem 1.5rem', 
-          marginBottom: '1.5rem', 
-          borderRadius: '16px', 
-          boxShadow: '0 4px 20px -2px rgba(148, 163, 184, 0.12)' 
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem',
-          }}
-        >
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                marginBottom: '0.25rem',
-              }}
-            >
-              <span
-                style={{
-                  display: 'inline-flex',
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: '#10b981',
-                  boxShadow: '0 0 8px #10b981',
-                }}
-              />
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  color: '#10b981',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
+      <div className={styles.contentWrap}>
+        {/* Preset & Date-Range Scope Control Bar */}
+        <div className={styles.controlBar}>
+          <div
+            className={styles.segmentedGroup}
+            role="tablist"
+            aria-label="Dashboard role presets"
+          >
+            {Object.entries(ROLE_PRESETS).map(([presetKey, preset]) => (
+              <button
+                key={presetKey}
+                type="button"
+                role="tab"
+                aria-selected={activePreset === presetKey}
+                className={`${styles.segmentBtn} ${
+                  activePreset === presetKey ? styles.segmentBtnActive : ''
+                }`}
+                onClick={() => setActivePreset(presetKey)}
               >
-                Live · All Systems Operational
-              </span>
-            </div>
-            <h1
-              className="admin-hero-title"
-              style={{
-                margin: 0,
-                fontSize: '1.75rem',
-                fontWeight: 800,
-                color: '#0f172a',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Atlas Command Center
-            </h1>
-            <p 
-              className="admin-hero-subtitle"
-              style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#64748b' }}
-            >
-              Strategic oversight & operational real-time control room.
-            </p>
+                {preset.label}
+              </button>
+            ))}
           </div>
 
-          {/* Controls Bar */}
-          {isAdmin && (
-            <div 
-              className="admin-hero-controls"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}
-            >
-              {/* Preset Selector */}
-              {isMedicalDirectorRole ? (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
-                  <Activity size={15} style={{ color: '#0d9488' }} />
-                  <span className="admin-hero-role-full">Clinical Oversight Mode</span>
-                  <span className="admin-hero-role-short">Clinical Oversight</span>
-                </div>
-              ) : isDoctorRole ? (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
-                  <Activity size={15} style={{ color: '#1a73e8' }} />
-                  <span className="admin-hero-role-full">Physician Practice Mode</span>
-                  <span className="admin-hero-role-short">Physician Practice</span>
-                </div>
-              ) : isPatientRole ? (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
-                  <UserCheck size={15} style={{ color: '#7c3aed' }} />
-                  <span className="admin-hero-role-full">Patient Personal Health Mode</span>
-                  <span className="admin-hero-role-short">Patient Mode</span>
-                </div>
-              ) : isSupplierRole ? (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
-                  <PackageSearch size={15} style={{ color: '#c2410c' }} />
-                  <span className="admin-hero-role-full">Supplier Control Room Mode</span>
-                  <span className="admin-hero-role-short">Supplier Mode</span>
-                </div>
-              ) : (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
-                  <ShieldCheck size={15} style={{ color: '#1a73e8' }} />
-                  <span className="admin-hero-role-full">Role: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
-                  <span className="admin-hero-role-short">Role: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
-                </div>
-              )}
-
-              {/* Customize Mode Toggle */}
+          <div
+            className={styles.segmentedGroup}
+            role="group"
+            aria-label="KPI time scope"
+          >
+            {DATE_RANGES.map((range) => (
               <button
+                key={range.id}
                 type="button"
-                className="admin-hero-customize-btn"
-                onClick={() => setIsCustomizing(!isCustomizing)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  padding: '0.55rem 1.1rem',
-                  minHeight: '44px',
-                  borderRadius: '10px',
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: isCustomizing ? '#e0f2fe' : '#ffffff',
-                  color: isCustomizing ? '#0369a1' : '#475569',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
+                disabled={isChangingScope}
+                className={`${styles.segmentBtn} ${
+                  dateRange === range.id ? styles.segmentBtnActive : ''
+                }`}
+                onClick={() => handleDateRangeChange(range.id)}
               >
-                <Sliders size={15} />
-                <span className="admin-hero-customize-full">{isCustomizing ? 'Done Customizing' : 'Customize Layout'}</span>
-                <span className="admin-hero-customize-short">{isCustomizing ? 'Done' : 'Customize'}</span>
+                {range.label}
               </button>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
-        {/* Customization Drawer / Control Box */}
-        {isCustomizing && (
-          <div
-            style={{
-              marginTop: '1.25rem',
-              padding: '1.25rem',
-              borderRadius: '12px',
-              backgroundColor: '#f8fafc',
-              border: '1px dashed #cbd5e1',
-              animation: 'slideDown 0.2s ease-out',
-            }}
-          >
-            <h3
-              style={{
-                margin: '0 0 0.75rem 0',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                color: '#0f172a',
-              }}
-            >
-              {customizationConfig.title}
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
-              {/* KPIs */}
-              <div>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#475569',
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Visible Role KPIs
-                </span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {customizationConfig.kpis.map((kpiObj) => (
-                    <button
-                      key={kpiObj.id}
-                      onClick={() => toggleKPIVisibility(kpiObj.id)}
-                      style={{
-                        padding: '0.45rem 0.75rem',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        borderRadius: '8px',
-                        border: '1px solid',
-                        borderColor: visibleKPIs.includes(kpiObj.id) ? '#0284c7' : '#cbd5e1',
-                        backgroundColor: visibleKPIs.includes(kpiObj.id) ? '#f0f9ff' : '#ffffff',
-                        color: visibleKPIs.includes(kpiObj.id) ? '#0369a1' : '#475569',
-                        cursor: 'pointer',
-                        minHeight: '36px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      {kpiObj.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {/* Scope Transparency & Real Telemetry Indicator */}
+        <div className={styles.scopeRow}>
+          <span className={styles.scopeBadge}>
+            <Calendar size={13} />
+            <span>
+              Scope: {activeScopeLabel}
+              {isChangingScope ? ' (Updating...)' : ''}
+            </span>
+          </span>
 
-              {/* Widgets */}
-              <div>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#475569',
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Visible Role Workspace Widgets
-                </span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {customizationConfig.widgets.map((w) => (
-                    <button
-                      key={w.id}
-                      onClick={() => toggleWidgetVisibility(w.id)}
-                      style={{
-                        padding: '0.45rem 0.75rem',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        borderRadius: '8px',
-                        border: '1px solid',
-                        borderColor: visibleWidgets.includes(w.id) ? '#0284c7' : '#cbd5e1',
-                        backgroundColor: visibleWidgets.includes(w.id) ? '#f0f9ff' : '#ffffff',
-                        color: visibleWidgets.includes(w.id) ? '#0369a1' : '#475569',
-                        cursor: 'pointer',
-                        minHeight: '36px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.15s ease',
-                      }}
+          <div className={styles.telemetryGroup}>
+            <span className={styles.telemetryItem}>
+              <Server size={13} />
+              <span>
+                Firestore:{' '}
+                {meta.serverLatencyMs != null
+                  ? `${meta.serverLatencyMs} ms`
+                  : 'SSR'}
+              </span>
+            </span>
+            <span className={styles.telemetryItem}>
+              <Clock size={13} />
+              <span>Synced: {formatSyncedTime(meta.syncedAt)}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* 4-Card Clickable KPI Grid */}
+        <section className={styles.kpiGrid} aria-label="Key Performance Indicators">
+          {visibleKpis.map((kpi) => {
+            const Icon = kpi.icon;
+            return (
+              <div
+                key={kpi.id}
+                role="button"
+                tabIndex={0}
+                className={styles.kpiCard}
+                onClick={() => router.push(kpi.href)}
+                onKeyDown={(e) => handleCardKeyDown(e, kpi.href)}
+              >
+                <div>
+                  <div className={styles.kpiCardTop}>
+                    <div
+                      className={styles.kpiIconWrap}
+                      style={{ backgroundColor: kpi.bg, color: kpi.color }}
                     >
-                      {w.label}
-                    </button>
-                  ))}
+                      <Icon size={19} />
+                    </div>
+                    <span className={styles.kpiScopePill}>
+                      {kpi.timeScoped ? activeScopeLabel : 'Live Total'}
+                    </span>
+                  </div>
+                  <p className={styles.kpiLabel} style={{ marginTop: '0.75rem' }}>
+                    {kpi.label}
+                  </p>
+                  <p className={styles.kpiValue}>{kpi.format(metrics)}</p>
+                </div>
+
+                <div className={styles.kpiFooter}>
+                  <span>{kpi.subtitle(metrics)}</span>
+                  <span className={styles.kpiLinkHint}>
+                    <span>Open</span>
+                    <ArrowRight size={13} />
+                  </span>
                 </div>
               </div>
+            );
+          })}
+        </section>
+
+        {/* Action Required Queue & Recent Registrations */}
+        <div className={styles.twoColGrid}>
+          <section className={styles.panelCard} aria-label="Action Required">
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>
+                <AlertTriangle size={17} color="#d97706" />
+                <span>Action Required Today</span>
+              </h2>
+              <span className={styles.panelCountBadge}>
+                {priorities.length} {priorities.length === 1 ? 'item' : 'items'}
+              </span>
             </div>
 
-          </div>
-        )}
-      </div>
-
-      {/* ── ROLE-SPECIFIC OVERVIEW DASHBOARD RENDER ────────────────────── */}
-      {isDoctorRole ? (
-        <DoctorOverviewTab doctorId={userProfile?.uid} doctorMeta={userProfile} onNavigate={(id) => router.push(`/doctor/${id === 'overview' ? '' : id}`)} />
-      ) : isPatientRole ? (
-        <DashboardEngine role="patient" dataContext={{ userProfile, uid: userProfile?.uid, name: userProfile?.displayName }} />
-      ) : isSupplierRole ? (
-        <DashboardEngine role="wholesaler" dataContext={{ userProfile, uid: userProfile?.uid }} />
-      ) : (
-        <>
-          {/* ── 0. AI EXECUTIVE SUMMARY WIDGET (Instant Render + Server Calculated) ── */}
-          <AdminExecutiveSummaryWidget 
-            metrics={metrics} 
-            visibleKPIs={(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? ROLE_PRESETS.Clinical.visibleKPIs : visibleKPIs}
-            currentRolePreset={(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Clinical' : currentRolePreset}
-          />
-
-          {/* ── MAIN WORKSPACE CONTENT GRID (2 COLUMNS) ────────────────────── */}
-          <div className={styles.workspaceGrid}>
-            {loading ? (
-              <>
-                <div className={styles.workspaceColLeft} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div style={{ height: '320px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-                  <div style={{ height: '320px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-                </div>
-                <div className={styles.workspaceColRight} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div style={{ height: '450px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-                  <div style={{ height: '300px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-                </div>
-              </>
+            {priorities.length === 0 ? (
+              <EmptyState
+                compact
+                icon={CheckCircle2}
+                title="All caught up"
+                subtitle="No critical or high-priority items require attention right now."
+              />
             ) : (
-              <>
-                <div className={`${styles.mainPortalGrid} ${(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) ? styles.withSidebar : styles.fullWidth}`}>
-                  {/* LEFT COLUMN: PRIMARY WORKSPACE WIDGETS */}
-                  <div className={styles.widgetsCol}>
-                    {/* AI CLINICAL COMMAND HUB (OR COMMERCIAL COMMAND CONSOLE) */}
-                    {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
-                      <ClinicalCommandHub role={effectiveRole} metrics={metrics} />
-                    ) : (
-                      <AiCommandConsole onAskQuestion={handleAiAsk} />
-                    )}
-
-                    {/* ── 2. TODAY'S PRIORITIES QUEUE ─────────────────────────────── */}
-                    {visibleWidgets.includes('todayPriorities') && (
-                      <TodayPrioritiesQueue
-                        priorities={(isMedicalDirectorRole || currentRolePreset === 'Clinical')
-                          ? [
-                              { id: 'rx_review', priority: 'critical', text: `${metrics.pendingPrescriptions || 13} prescriptions awaiting review`, link: '/admin/prescriptions?status=pending', detail: 'Pending doctor & director review.' },
-                              { id: 'followup_due', priority: 'high', text: `${metrics.dueFollowUps || 3} patient follow-ups due`, link: '/admin/users?filter=followup_due', detail: 'Adherence check or biomarker lab review needed.' }
-                            ]
-                          : priorities
-                        }
-                        onAction={(item) => router.push(item.link || item.route || '/admin')}
-                      />
-                    )}
-
-                    {/* ── 3. BUSINESS HEALTH MATRIX (TRAFFIC LIGHTS) ───────────────── */}
-                    {visibleWidgets.includes('businessHealth') && !isMedicalDirectorRole && currentRolePreset !== 'Clinical' && <HealthMatrixWidget />}
-
-                    {/* ── 4. FINANCIAL TASKS WORKSPACE ───────────────────────────── */}
-                    {visibleWidgets.includes('financeTasks') && !isMedicalDirectorRole && currentRolePreset !== 'Clinical' && (
-                      <FinanceTasksHub
-                        onAction={(type, detail) => {
-                          notifier.info(`Redirecting to financial reconciliation for ${type}: ${detail}`);
-                        }}
-                      />
-                    )}
-
-                    {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
-                    {visibleWidgets.includes('aiWorkspace') && (
-                      <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            flexWrap: 'wrap',
-                            gap: '0.5rem',
-                            marginBottom: '1rem',
-                            borderBottom: '1px solid #cbd5e1',
-                            paddingBottom: '0.5rem',
-                          }}
-                        >
-                          <h3
-                            style={{
-                              margin: 0,
-                              fontSize: '0.95rem',
-                              fontWeight: 700,
-                              color: '#0f172a',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.4rem',
-                            }}
-                          >
-                            <Sparkles size={16} color="#0ea5e9" /> {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Atlas Clinical AI Assistant' : 'Atlas AI Sourcing Hub'}
-                          </h3>
-                          {/* Tabs */}
-                          <div style={{ display: 'flex', gap: '0.35rem', overflowX: 'auto', maxWidth: '100%', paddingBottom: '3px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-                            {['insights', 'predictions', 'recommendations', 'agents'].map((tab) => (
-                              <button
-                                key={tab}
-                                onClick={() => setAiWorkspaceTab(tab)}
-                                className={`cc-tab-btn ${aiWorkspaceTab === tab ? 'active' : ''}`}
-                                style={{
-                                  whiteSpace: 'nowrap',
-                                  padding: '0.4rem 0.8rem',
-                                  borderRadius: '20px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600,
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Workspace Content */}
-                        <div>
-                          <div className={styles.aiWorkspaceMetricsStrip}>
-                            <div className={styles.aiWorkspaceMetricChip}>
-                              <span className={styles.aiMetricLabel}>Last Analysis</span>
-                              <strong className={styles.aiMetricVal}>Today 14:02</strong>
-                            </div>
-                            <div className={styles.aiWorkspaceMetricChip}>
-                              <span className={styles.aiMetricLabel}>Confidence</span>
-                              <strong className={styles.aiMetricVal} style={{ color: '#10b981' }}>98.4%</strong>
-                            </div>
-                            <div className={styles.aiWorkspaceMetricChip}>
-                              <span className={styles.aiMetricLabel}>{(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Safety Index' : 'Est. Impact'}</span>
-                              <strong className={styles.aiMetricVal} style={{ color: (isMedicalDirectorRole || currentRolePreset === 'Clinical') ? '#10b981' : '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
-                                  '99.8% Optimal'
-                                ) : (
-                                  <>
-                                    {formatAEDtoDual(24000, '+')}
-                                    <span style={{ fontSize: '0.78em', color: '#64748b', fontWeight: 500 }}>/ mo</span>
-                                  </>
-                                )}
-                              </strong>
-                            </div>
-                          </div>
-
-                          {aiWorkspaceTab === 'insights' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
-                                <>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
-                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#0284c7', marginTop: '6px', flexShrink: 0 }} />
-                                    <div><strong>{metrics.activePatients || 162} active enrolled patients</strong> currently undergoing supervised peptide therapy.</div>
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
-                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#0ea5e9', marginTop: '6px', flexShrink: 0 }} />
-                                    <div><strong>{metrics.activeProtocols || 77} clinical protocols</strong> actively prescribed and monitored network-wide.</div>
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
-                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b', marginTop: '6px', flexShrink: 0 }} />
-                                    <div><strong>{metrics.pendingPrescriptions || 13} pending prescriptions</strong> awaiting final clinical review and sign-off.</div>
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
-                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', marginTop: '6px', flexShrink: 0 }} />
-                                    <div><strong>0 contraindication alerts</strong> or dosage safety flags recorded across active regimens today.</div>
-                                  </div>
-                                </>
-                              ) : (
-                                <>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
-                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', marginTop: '6px', flexShrink: 0 }} />
-                                    <div>Revenue increased <strong>18%</strong> this month across strategic wholesaler segments.</div>
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
-                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#0ea5e9', marginTop: '6px', flexShrink: 0 }} />
-                                    <div>No overdue supplier bills in the queue. AP matches are healthy.</div>
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
-                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b', marginTop: '6px', flexShrink: 0 }} />
-                                    <div><strong>3 opportunities</strong> in Dubai clinic network need strategic discount review.</div>
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
-                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#6366f1', marginTop: '6px', flexShrink: 0 }} />
-                                    <div>Average RFQ response time improved by <strong>22%</strong> over the last 14 days.</div>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          )}
-                          {aiWorkspaceTab === 'predictions' && (
-                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical')
-                                ? "AI clinical predictive model forecasts 14 patient protocol completions this week. Automated follow-up reviews and refill checks recommended."
-                                : "AI predicts a potential shipping delay of 3 days from EU laboratories next week due to logistics strikes. Recommend frontloading Peptide B purchases."}
-                            </p>
-                          )}
-                          {aiWorkspaceTab === 'recommendations' && (
-                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical')
-                                ? "Protocol optimization: 5 patients are eligible for step-down dosage transitions based on recent biomarker responses."
-                                : "Adjust pricing on product catalog item #4401. Market price rose by 14%, current margins will reduce to 11% if not updated in Zoho Inventory."}
-                            </p>
-                          )}
-                          {aiWorkspaceTab === 'agents' && (
-                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical')
-                                ? "Autonomous agents: Clinical Monitor Agent is active (last synced 2 mins ago). Drug Interaction Scanner verified 100% of active prescriptions."
-                                : "Autonomous agents: Sourcing Bot is active (last synced 4 mins ago). Discrepancy Agent matched 18/18 bills successfully."}
-                            </p>
-                          )}
-                        </div>
+              <div className={styles.listBody}>
+                {priorities.map((item) => (
+                  <div key={item.id} className={styles.listRow}>
+                    <div className={styles.rowMain}>
+                      <div className={styles.rowTopLine}>
+                        <StatusBadge
+                          status={item.priority === 'critical' ? 'error' : 'pending'}
+                          customLabel={(item.priority || 'high').toUpperCase()}
+                        />
+                        <p className={styles.rowTitle}>{item.text}</p>
                       </div>
-                    )}
-                  </div>
-
-                  {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
-                  {(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) && (
-                    <div className={styles.sideCol}>
-                      {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
-                      {visibleWidgets.includes('systemStatus') && (
-                        <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-                          <div
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              marginBottom: '1rem',
-                            }}
-                          >
-                            <Server size={16} color="#64748b" />
-                            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
-                              Infrastructure Specs
-                            </h3>
-                          </div>
-                          <div
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '0.75rem',
-                              fontSize: '0.8rem',
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                borderBottom: '1px solid #f1f5f9',
-                                paddingBottom: '0.4rem',
-                              }}
-                            >
-                              <span style={{ color: '#64748b' }}>Firestore Database</span>
-                              <span style={{ color: '#10b981', fontWeight: 600 }}>Connected</span>
-                            </div>
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                borderBottom: '1px solid #f1f5f9',
-                                paddingBottom: '0.4rem',
-                              }}
-                            >
-                              <span style={{ color: '#64748b' }}>AI Engine Link</span>
-                              <span style={{ color: '#0284c7', fontWeight: 600 }}>gemini-2.5-pro</span>
-                            </div>
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                borderBottom: '1px solid #f1f5f9',
-                                paddingBottom: '0.4rem',
-                              }}
-                            >
-                              <span style={{ color: '#64748b' }}>Router Latency</span>
-                              <span style={{ color: '#0f172a', fontWeight: 600 }}>{dbLatency}</span>
-                            </div>
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                borderBottom: '1px solid #f1f5f9',
-                                paddingBottom: '0.4rem',
-                              }}
-                            >
-                              <span style={{ color: '#64748b' }}>Zoho Books Gateway</span>
-                              <span style={{ color: '#10b981', fontWeight: 600 }}>Synced (200 OK)</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <span style={{ color: '#64748b' }}>Environment</span>
-                              <span style={{ color: '#0f172a', fontWeight: 600 }}>Production GCC</span>
-                            </div>
-                          </div>
+                      {item.detail && (
+                        <div className={styles.rowMeta}>
+                          <span>{item.detail}</span>
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </>
+
+                    <button
+                      type="button"
+                      className={styles.rowActionBtn}
+                      onClick={() => router.push(item.link || '/admin')}
+                    >
+                      <span>Resolve</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
-          </div>
-        </>
-      )}
+          </section>
+
+          <section className={styles.panelCard} aria-label="Recent Registrations">
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>
+                <UserPlus size={17} color="#003666" />
+                <span>Recent Registrations</span>
+              </h2>
+              <button
+                type="button"
+                className={styles.rowActionBtn}
+                onClick={() => router.push('/admin/users')}
+              >
+                <span>View All</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
+
+            {recentRegistrations.length === 0 ? (
+              <EmptyState
+                compact
+                icon={Users}
+                title="No recent registrations"
+                subtitle="New user signups will appear here."
+              />
+            ) : (
+              <div className={styles.listBody}>
+                {recentRegistrations.map((u) => {
+                  const fullName =
+                    [u.firstName, u.lastName].filter(Boolean).join(' ') ||
+                    u.email ||
+                    'Unnamed Account';
+                  const statusValue =
+                    u.status || (u.approved ? 'active' : 'pending');
+
+                  return (
+                    <div key={u.id} className={styles.listRow}>
+                      <div className={styles.rowMain}>
+                        <div className={styles.rowTopLine}>
+                          <p className={styles.rowTitle}>{fullName}</p>
+                          <StatusBadge status={statusValue} />
+                        </div>
+                        <div className={styles.rowMeta}>
+                          <span>{u.email || 'No email'}</span>
+                          <span>•</span>
+                          <span style={{ textTransform: 'capitalize' }}>
+                            {u.role || 'user'}
+                          </span>
+                          <span>•</span>
+                          <span>{formatRegistrationDate(u.createdAt)}</span>
+                        </div>
+                      </div>
+
+                      <CopyableId value={u.id} maxLength={10} truncate />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
