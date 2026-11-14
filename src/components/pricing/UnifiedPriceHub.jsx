@@ -19,7 +19,7 @@
  * Price Tier Rules:
  *  - Guest/anonymous → cost × 1.3225 (wholesaler public price = cost × 1.15 × 1.15)
  *  - Registered user → their tier from usePriceTier hook
- *  - Mediluxe staff  → sees cost, wholesale, clinic, and margin columns
+ *  - Atlas staff     → sees cost, wholesale, clinic, and margin columns
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -67,9 +67,9 @@ export const PRICE_GROUPS = [
     recipients: [
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '12 Nov 2026', views: 7, status: 'opened' },
       { name: 'Nikolaos Psathas', organization: 'NP Labs (Athens / EU)', role: 'wholesaler', channel: 'web', date: '04 Nov 2026', views: 14, status: 'opened' },
-      { name: 'Dr. Carlos Méndez', organization: 'Clínica Longevity Madrid', role: 'doctor', channel: 'whatsapp', date: '28 Oct 2026', views: 3, status: 'opened' },
+      { name: 'Dr. Carlos Mendez', organization: 'Longevity Clinic Madrid', role: 'doctor', channel: 'whatsapp', date: '28 Oct 2026', views: 3, status: 'opened' },
       { name: 'Hossam Ahmed', organization: 'Ryhanh Medical Company (Qatar)', role: 'wholesaler', channel: 'email', date: '22 Oct 2026', views: 9, status: 'opened' },
-      { name: 'Mediluxe Clinic Marbella', organization: 'Grupo Mediluxe S.L.', role: 'clinic', channel: 'web', date: '15 Oct 2026', views: 5, status: 'opened' }
+      { name: 'Atlas Partner Clinic Marbella', organization: 'Precision Medicine Group', role: 'clinic', channel: 'web', date: '15 Oct 2026', views: 5, status: 'opened' }
     ]
   },
   {
@@ -89,8 +89,8 @@ export const PRICE_GROUPS = [
     recipients: [
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '11 Nov 2026', views: 8, status: 'opened' },
       { name: 'Hossam Ahmed', organization: 'Ryhanh Medical Company (Doha)', role: 'wholesaler', channel: 'web', date: '05 Nov 2026', views: 12, status: 'opened' },
-      { name: 'Dra. Elena Ramos', organization: 'Mediluxe Clinic Marbella', role: 'doctor', channel: 'whatsapp', date: '30 Oct 2026', views: 4, status: 'opened' },
-      { name: 'Laboratorios Genómicos UAE', organization: 'Al Zahra Medical', role: 'clinic', channel: 'email', date: '18 Oct 2026', views: 5, status: 'opened' }
+      { name: 'Dr. Elena Ramos', organization: 'Atlas Partner Clinic Marbella', role: 'doctor', channel: 'whatsapp', date: '30 Oct 2026', views: 4, status: 'opened' },
+      { name: 'Genomic Laboratories UAE', organization: 'Al Zahra Medical', role: 'clinic', channel: 'email', date: '18 Oct 2026', views: 5, status: 'opened' }
     ]
   },
   {
@@ -109,7 +109,7 @@ export const PRICE_GROUPS = [
     sharesCount: 22,
     recipients: [
       { name: 'Hossam Ahmed', organization: 'Ryhanh Medical Company (Qatar)', role: 'wholesaler', channel: 'whatsapp', date: '10 Nov 2026', views: 6, status: 'opened' },
-      { name: 'Dra. Carmen Valls', organization: 'Instituto Dermatológico Barcelona', role: 'clinic', channel: 'web', date: '02 Nov 2026', views: 11, status: 'opened' },
+      { name: 'Dr. Carmen Valls', organization: 'Barcelona Dermatology Institute', role: 'clinic', channel: 'web', date: '02 Nov 2026', views: 11, status: 'opened' },
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare', role: 'clinic', channel: 'whatsapp', date: '25 Oct 2026', views: 5, status: 'opened' }
     ]
   },
@@ -129,7 +129,7 @@ export const PRICE_GROUPS = [
     sharesCount: 17,
     recipients: [
       { name: 'Hossam Ahmed', organization: 'Ryhanh Medical Company (Qatar)', role: 'wholesaler', channel: 'whatsapp', date: '08 Nov 2026', views: 9, status: 'opened' },
-      { name: 'Clínica Capilar Svenson', organization: 'Svenson Medical Madrid', role: 'clinic', channel: 'web', date: '01 Nov 2026', views: 4, status: 'opened' },
+      { name: 'Svenson Capillary Clinic', organization: 'Svenson Medical Madrid', role: 'clinic', channel: 'web', date: '01 Nov 2026', views: 4, status: 'opened' },
       { name: 'Dr. Alejandro Ruiz', organization: 'Trichology Center Valencia', role: 'doctor', channel: 'email', date: '20 Oct 2026', views: 4, status: 'opened' }
     ]
   },
@@ -186,7 +186,7 @@ export const PRICE_GROUPS = [
     status: 'active',
     sharesCount: 9,
     recipients: [
-      { name: 'Dr. Carlos Méndez', organization: 'Clínica Longevity Madrid', role: 'doctor', channel: 'whatsapp', date: '04 Nov 2026', views: 3, status: 'opened' },
+      { name: 'Dr. Carlos Mendez', organization: 'Longevity Clinic Madrid', role: 'doctor', channel: 'whatsapp', date: '04 Nov 2026', views: 3, status: 'opened' },
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare', role: 'clinic', channel: 'web', date: '26 Oct 2026', views: 6, status: 'opened' }
     ]
   },
@@ -225,8 +225,8 @@ export const PRICE_GROUPS = [
     sharesCount: 25,
     recipients: [
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '11 Nov 2026', views: 12, status: 'opened' },
-      { name: 'Dr. Carlos Méndez', organization: 'Clínica Longevity Madrid', role: 'doctor', channel: 'web', date: '03 Nov 2026', views: 8, status: 'opened' },
-      { name: 'Clínica Antiaging Barcelona', organization: 'Antiaging Medical Group', role: 'clinic', channel: 'email', date: '27 Oct 2026', views: 5, status: 'opened' }
+      { name: 'Dr. Carlos Mendez', organization: 'Longevity Clinic Madrid', role: 'doctor', channel: 'web', date: '03 Nov 2026', views: 8, status: 'opened' },
+      { name: 'Antiaging Barcelona Clinic', organization: 'Antiaging Medical Group', role: 'clinic', channel: 'email', date: '27 Oct 2026', views: 5, status: 'opened' }
     ]
   },
   {
@@ -244,7 +244,7 @@ export const PRICE_GROUPS = [
     status: 'active',
     sharesCount: 13,
     recipients: [
-      { name: 'Clínica Capilar Svenson', organization: 'Svenson Medical', role: 'clinic', channel: 'whatsapp', date: '05 Nov 2026', views: 6, status: 'opened' },
+      { name: 'Svenson Hair Clinic', organization: 'Svenson Medical', role: 'clinic', channel: 'whatsapp', date: '05 Nov 2026', views: 6, status: 'opened' },
       { name: 'Hossam Ahmed', organization: 'Ryhanh Medical Company', role: 'wholesaler', channel: 'web', date: '28 Oct 2026', views: 7, status: 'opened' }
     ]
   },
@@ -263,7 +263,7 @@ export const PRICE_GROUPS = [
     status: 'active',
     sharesCount: 8,
     recipients: [
-      { name: 'Dr. Carlos Méndez', organization: 'Clínica Longevity Madrid', role: 'doctor', channel: 'whatsapp', date: '02 Nov 2026', views: 3, status: 'opened' },
+      { name: 'Dr. Carlos Mendez', organization: 'Longevity Clinic Madrid', role: 'doctor', channel: 'whatsapp', date: '02 Nov 2026', views: 3, status: 'opened' },
       { name: 'Transcend Healthcare', organization: 'Transcend Healthcare', role: 'clinic', channel: 'web', date: '21 Oct 2026', views: 5, status: 'opened' }
     ]
   },
@@ -283,7 +283,7 @@ export const PRICE_GROUPS = [
     sharesCount: 7,
     recipients: [
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '09 Nov 2026', views: 4, status: 'opened' },
-      { name: 'Mediluxe Clinic Marbella', organization: 'Grupo Mediluxe S.L.', role: 'clinic', channel: 'web', date: '19 Oct 2026', views: 3, status: 'opened' }
+      { name: 'Atlas Partner Clinic Marbella', organization: 'Precision Medicine Group', role: 'clinic', channel: 'web', date: '19 Oct 2026', views: 3, status: 'opened' }
     ]
   },
   {
@@ -302,9 +302,9 @@ export const PRICE_GROUPS = [
     sharesCount: 31,
     recipients: [
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '12 Nov 2026', views: 11, status: 'opened' },
-      { name: 'Dra. Carmen Valls', organization: 'Clínica Estética Diagonal Barcelona', role: 'clinic', channel: 'web', date: '07 Nov 2026', views: 9, status: 'opened' },
-      { name: 'Dr. Carlos Méndez', organization: 'Clínica Longevity Madrid', role: 'doctor', channel: 'whatsapp', date: '31 Oct 2026', views: 6, status: 'opened' },
-      { name: 'Dra. Elena Ramos', organization: 'Mediluxe Clinic Marbella', role: 'doctor', channel: 'email', date: '24 Oct 2026', views: 5, status: 'opened' }
+      { name: 'Dr. Carmen Valls', organization: 'Diagonal Aesthetic Clinic Barcelona', role: 'clinic', channel: 'web', date: '07 Nov 2026', views: 9, status: 'opened' },
+      { name: 'Dr. Carlos Mendez', organization: 'Longevity Clinic Madrid', role: 'doctor', channel: 'whatsapp', date: '31 Oct 2026', views: 6, status: 'opened' },
+      { name: 'Dr. Elena Ramos', organization: 'Atlas Partner Clinic Marbella', role: 'doctor', channel: 'email', date: '24 Oct 2026', views: 5, status: 'opened' }
     ]
   }
 ];
@@ -312,12 +312,12 @@ export const PRICE_GROUPS = [
 const TOTAL_SKUS = PRICE_GROUPS.reduce((s, g) => s + g.skuCount, 0);
 
 export const MACRO_CATEGORIES = [
-  { id: 'all', label: 'Todos (13)' },
-  { id: 'peptides', label: '🔬 Péptidos & Longevidad', groupIds: ['peptides', 'ultraperson', 'hair-treatments'] },
-  { id: 'genomics', label: '🧬 Genómica CE-IVD', groupIds: ['24genetics', 'genomics-qatar', 'teletest'] },
-  { id: 'cosmetics', label: '✨ Cosmética & Colágeno', groupIds: ['colway', 'colway-hair', 'colway-qatar', 'colway-prices'] },
-  { id: 'injectables', label: '💉 Inyectables Médicos', groupIds: ['injectables', 'eth-dubai'] },
-  { id: 'diagnostics', label: '🩸 Diagnósticos DBS', groupIds: ['bloodo-dbs'] },
+  { id: 'all', label: 'All (13)' },
+  { id: 'peptides', label: '🔬 Peptides & Longevity', groupIds: ['peptides', 'ultraperson', 'weight-management', 'hair-treatments'] },
+  { id: 'genomics', label: '🧬 Genomics CE-IVD', groupIds: ['24genetics', '24genomics-qatar', 'teletest', 'eterna'] },
+  { id: 'cosmetics', label: '✨ Cosmetics & Collagen', groupIds: ['colway', 'colway-hair', 'colway-qatar'] },
+  { id: 'injectables', label: '💉 Medical Injectables', groupIds: ['aesthetic-injectables'] },
+  { id: 'diagnostics', label: '🩸 DBS Diagnostics', groupIds: ['bloodo', 'teletest'] },
 ];
 
 // ─── Tier Badge ───────────────────────────────────────────────────────────────
@@ -365,25 +365,25 @@ function AuthBanner({ tier, isAuthenticated }) {
 
 function renderProductDetail(row, group) {
   const brand = row.brand || row.manufacturer || group.supplier;
-  const purity = row.purity || row.technology || (group.id === 'peptides' ? 'HPLC ≥99.0%' : 'Certificado GMP / ISO');
-  const dosage = row.dosage || row.volume || row.fill_volume || 'Presentación Estándar';
-  const indication = row.indication || row.description || row.goal || row.clinicalSummary || 'Formulación biomédica oficial con trazabilidad analítica y control de calidad por lote.';
-  const storage = row.storage || (group.id === 'peptides' ? 'Almacenar a 2°C – 8°C (Refrigerado). Proteger de la luz.' : 'Conservar a temperatura ambiente controlada (15°C – 25°C).');
+  const purity = row.purity || row.technology || (group.id === 'peptides' ? 'HPLC ≥99.0%' : 'GMP / ISO Certified');
+  const dosage = row.dosage || row.volume || row.fill_volume || 'Standard Presentation';
+  const indication = row.indication || row.description || row.goal || row.clinicalSummary || 'Official biomedical formulation with analytical traceability and batch quality control.';
+  const storage = row.storage || (group.id === 'peptides' ? 'Store at 2°C – 8°C (Refrigerated). Protect from light.' : 'Store at controlled room temperature (15°C – 25°C).');
 
   return (
     <div style={{
       padding: '16px 20px',
       backgroundColor: '#f8fafc',
-      borderLeft: '4px solid #1a73e8',
+      borderLeft: '4px solid #003666',
       borderRadius: '6px',
       margin: '6px 0',
       boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.03)'
     }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-        {/* Col 1: Información Clínica */}
+        {/* Col 1: Therapeutic Profile */}
         <div>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Indicación &amp; Perfil Terapéutico
+          <div style={{ fontSize: '11px', fontWeight: 700, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Therapeutic Indication &amp; Profile
           </div>
           <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginTop: '3px' }}>
             {row.name || row.canonicalName || row.id}
@@ -393,20 +393,20 @@ function renderProductDetail(row, group) {
           </p>
         </div>
 
-        {/* Col 2: Especificaciones Farmacéuticas */}
+        {/* Col 2: Technical Specifications */}
         <div>
           <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Especificaciones Técnicas
+            Technical Specifications
           </div>
           <div style={{ fontSize: '12px', color: '#334155', marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div><strong>Concentración / Volumen:</strong> {dosage}</div>
-            <div><strong>Pureza / Grado:</strong> {purity}</div>
-            <div><strong>Laboratorio / Marca:</strong> {brand}</div>
-            <div><strong>Almacenamiento:</strong> {storage}</div>
+            <div><strong>Concentration / Volume:</strong> {dosage}</div>
+            <div><strong>Purity / Grade:</strong> {purity}</div>
+            <div><strong>Laboratory / Brand:</strong> {brand}</div>
+            <div><strong>Storage Conditions:</strong> {storage}</div>
           </div>
         </div>
 
-        {/* Col 3: Estado Regulatorio y Acción Directa a Ficha */}
+        {/* Col 3: Quality Compliance and Direct Dossier Link */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -417,14 +417,14 @@ function renderProductDetail(row, group) {
         }}>
           <div>
             <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-              Cumplimiento &amp; Calidad
+              Quality &amp; Compliance
             </div>
             <div style={{ marginTop: '5px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '11px', fontWeight: 600, color: '#137333', backgroundColor: '#e6f4ea', border: '1px solid #ceead6', padding: '2px 8px', borderRadius: '4px' }}>
-                ✓ CE-IVD / Grado Analítico
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#166534', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '4px' }}>
+                ✓ CE-IVD / Analytical Grade
               </span>
               <span style={{ fontSize: '11px', fontWeight: 600, color: '#0284c7', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
-                CoA Disponible
+                CoA Available
               </span>
             </div>
           </div>
@@ -437,18 +437,18 @@ function renderProductDetail(row, group) {
               alignItems: 'center',
               gap: '6px',
               padding: '8px 14px',
-              backgroundColor: '#1a73e8',
+              backgroundColor: '#003666',
               color: '#ffffff',
               borderRadius: '6px',
               fontSize: '12px',
               fontWeight: 600,
               textDecoration: 'none',
               marginTop: '12px',
-              boxShadow: '0 1px 3px rgba(26,115,232,0.3)',
+              boxShadow: '0 1px 3px rgba(0,54,102,0.2)',
               transition: 'background-color 0.15s ease'
             }}
           >
-            <span>Ver Ficha de Producto</span>
+            <span>View Product Dossier</span>
             <ExternalLink size={13} />
           </Link>
         </div>
@@ -795,7 +795,7 @@ export default function UnifiedPriceHub({
   };
 
   const handleGeneratePdf = (group) => {
-    toast.success(`Generando PDF oficial para ${group.label}...`);
+    toast.success(`Generating official PDF for ${group.label}...`);
     if (typeof window !== 'undefined') {
       window.print();
     }
@@ -805,25 +805,26 @@ export default function UnifiedPriceHub({
     if (typeof window !== 'undefined') {
       const url = `${window.location.origin}${group.route}`;
       navigator.clipboard.writeText(url);
-      toast.success(`Enlace público de ${group.label} copiado al portapapeles`);
+      toast.success(`Public link for ${group.label} copied to clipboard ✓`);
     }
   };
 
   const handleWhatsAppShare = (group) => {
     if (typeof window !== 'undefined') {
       const url = `${window.location.origin}${group.route}`;
-      const msg = `Hola, te adjunto la lista de precios oficial B2B de ${group.label} (${group.badge}):\n${url}\n\nEmitida por Atlas Health Services · Precision Medicine.`;
+      const msg = `Hello, please find the official B2B price schedule for ${group.label} (${group.badge}):\n${url}\n\nIssued by Atlas Health Services · Precision Medicine.`;
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
       window.open(waUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
-  // ─── Columns for Price Lists Table Mode ──────────────────────────────────────
+  // ─── Columns for Price Lists Table Mode (English / GCP UX) ──────────────────
   const priceListsTableColumns = useMemo(() => [
     {
       key: 'label',
-      label: 'Línea de Producto / Catálogo',
+      label: 'Product Line / Catalog',
       width: '28%',
+      align: 'left',
       render: (val, row) => {
         const Icon = row.icon;
         return (
@@ -849,23 +850,26 @@ export default function UnifiedPriceHub({
     },
     {
       key: 'supplier',
-      label: 'Laboratorio / Origen',
-      width: '16%',
+      label: 'Supplier / Origin',
+      width: '18%',
+      align: 'left',
       render: (val, row) => (
         <div>
-          <div style={{ fontSize: '12px', color: '#334155', fontWeight: 600 }}>
+          <div style={{ fontSize: '12px', color: '#1e293b', fontWeight: 600 }}>
             {row.supplier}
           </div>
-          <div style={{ fontSize: '10px', color: '#16a34a', fontWeight: 600, marginTop: '1px' }}>
-            ● Catálogo Activo
+          <div style={{ fontSize: '10px', color: '#16a34a', fontWeight: 600, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', backgroundColor: '#16a34a' }} />
+            Active Catalog
           </div>
         </div>
       )
     },
     {
       key: 'skuCount',
-      label: 'Referencias',
+      label: 'References',
       width: '10%',
+      align: 'left',
       render: (val, row) => (
         <span style={{
           fontSize: '11px', fontWeight: 700, color: '#0369a1',
@@ -878,21 +882,23 @@ export default function UnifiedPriceHub({
     },
     {
       key: 'pricingNote',
-      label: 'Fórmula Comercial & Margen',
+      label: 'Pricing Formula',
       width: '18%',
+      align: 'left',
       render: (val, row) => (
         <div style={{ fontSize: '11px', color: '#475569' }}>
           <strong style={{ color: '#0f172a' }}>{row.pricingNote}</strong>
           <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
-            Moneda: <strong style={{ color: '#0284c7' }}>{row.currency}</strong>
+            Currency: <strong style={{ color: '#0284c7' }}>{row.currency}</strong>
           </div>
         </div>
       )
     },
     {
       key: 'shares',
-      label: 'Difusión',
+      label: 'Shares',
       width: '12%',
+      align: 'center',
       render: (val, row) => {
         const count = row.sharesCount || (row.recipients?.length || 0);
         return (
@@ -915,10 +921,10 @@ export default function UnifiedPriceHub({
               fontWeight: 700,
               cursor: 'pointer'
             }}
-            title="Ver destinatarios que han recibido esta lista"
+            title="View recipient delivery history"
           >
             <Users size={12} />
-            <span>{count}</span>
+            <span>{count} shared</span>
             <ChevronDown size={11} />
           </button>
         );
@@ -926,10 +932,12 @@ export default function UnifiedPriceHub({
     },
     {
       key: 'actions',
-      label: 'Acciones',
-      width: '16%',
+      label: 'Actions',
+      width: '14%',
+      minWidth: '120px',
+      align: 'right',
       render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
           <button
             type="button"
             onClick={(e) => {
@@ -946,7 +954,7 @@ export default function UnifiedPriceHub({
               display: 'inline-flex',
               alignItems: 'center'
             }}
-            title="Generar PDF Oficial"
+            title="Download Official PDF"
           >
             <FileDown size={13} />
           </button>
@@ -966,7 +974,7 @@ export default function UnifiedPriceHub({
               display: 'inline-flex',
               alignItems: 'center'
             }}
-            title="Compartir enlace público"
+            title="Share Public Web Link"
           >
             <Share2 size={13} />
           </button>
@@ -989,9 +997,9 @@ export default function UnifiedPriceHub({
               fontWeight: 600,
               cursor: 'pointer'
             }}
-            title={`Ver referencias de ${row.label}`}
+            title={`View ${row.label} SKUs`}
           >
-            <span>Ver SKUs</span>
+            <span>View SKUs</span>
             <ArrowRight size={11} />
           </button>
         </div>
@@ -1079,7 +1087,7 @@ export default function UnifiedPriceHub({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: 1, minWidth: '240px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
               <Layers size={15} color="#003666" />
-              <span>Catálogo:</span>
+              <span>Catalog:</span>
             </div>
             <select
               value={activeGroupId}
@@ -1098,9 +1106,9 @@ export default function UnifiedPriceHub({
                 width: '100%',
                 boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
               }}
-              title="Seleccionar catálogo o ver todos"
+              title="Select specific catalog or view all"
             >
-              <option value="all">📂 Todos los Catálogos ({PRICE_GROUPS.length} Listas B2B)</option>
+              <option value="all">📂 All Catalogs ({PRICE_GROUPS.length} B2B Schedules)</option>
               {PRICE_GROUPS.map(g => (
                 <option key={g.id} value={g.id}>
                   {g.label} ({g.badge}) — {g.currency} · {g.supplier}
@@ -1127,16 +1135,16 @@ export default function UnifiedPriceHub({
                 }}
               >
                 <ArrowLeft size={13} />
-                <span>Ver Todos los Catálogos</span>
+                <span>View All Catalogs</span>
               </button>
             )}
           </div>
 
           {/* Currency Switcher */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>Moneda:</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>Currency:</span>
             {[
-              { id: 'all', label: 'Todas' },
+              { id: 'all', label: 'All' },
               { id: 'USD', label: 'USD ($)' },
               { id: 'EUR', label: 'EUR (€)' },
               { id: 'AED', label: 'AED / QAR' }
@@ -1174,7 +1182,7 @@ export default function UnifiedPriceHub({
             borderTop: '1px solid #f1f5f9'
           }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>
-              Filtro por Categoría:
+              Filter by Category:
             </span>
             {MACRO_CATEGORIES.map(cat => {
               const isActive = selectedCategoryFilter === cat.id;
@@ -1224,7 +1232,7 @@ export default function UnifiedPriceHub({
                 }}
               >
                 <X size={12} />
-                <span>Limpiar Filtros</span>
+                <span>Clear Filters</span>
               </button>
             )}
           </div>
@@ -1275,11 +1283,11 @@ export default function UnifiedPriceHub({
               }}
             >
               <ArrowLeft size={14} />
-              <span>← Volver a Todas las Listas de Precios ({PRICE_GROUPS.length})</span>
+              <span>← Return to All Price Schedules ({PRICE_GROUPS.length})</span>
             </button>
 
             <div style={{ fontSize: '12px', color: '#64748b' }}>
-              Catálogo Seleccionado: <strong style={{ color: '#0f172a' }}>{selectedGroup.label}</strong> ({selectedGroup.badge}) · {selectedGroup.currency}
+              Selected Catalog: <strong style={{ color: '#0f172a' }}>{selectedGroup.label}</strong> ({selectedGroup.badge}) · Currency: {selectedGroup.currency}
             </div>
           </div>
           {/* Header of Active Group with PDF & Public Share Actions */}
@@ -1331,10 +1339,10 @@ export default function UnifiedPriceHub({
                   fontWeight: 600,
                   cursor: 'pointer'
                 }}
-                title="Generar PDF imprimible para compartir con clientes"
+                title="Generate printable PDF dossier for clients"
               >
                 <FileText size={14} color="#d97706" />
-                <span>Generar PDF</span>
+                <span>Generate PDF</span>
               </button>
 
               {/* Share Public Web Button */}
@@ -1354,10 +1362,10 @@ export default function UnifiedPriceHub({
                   fontWeight: 600,
                   cursor: 'pointer'
                 }}
-                title="Compartir enlace de web pública con clientes"
+                title="Share public authenticated web link with clients"
               >
                 <Share2 size={14} />
-                <span>Compartir Web Pública</span>
+                <span>Share Public Link</span>
               </button>
 
               {/* View Share Recipients */}
@@ -1430,10 +1438,10 @@ export default function UnifiedPriceHub({
           {filteredGroups.length === 0 ? (
             <EmptyState
               icon={Package}
-              title="No se encontraron listas de precios"
-              subtitle="Prueba a ajustar los filtros de categoría, moneda o tu búsqueda."
+              title="No price schedules found"
+              subtitle="Try adjusting your category, currency, or search criteria."
               action={{
-                label: 'Limpiar Filtros',
+                label: 'Clear Filters',
                 onClick: () => {
                   setSearchQuery('');
                   setSelectedCurrencyFilter('all');
@@ -1459,10 +1467,10 @@ export default function UnifiedPriceHub({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
                     <div>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: '#003666', textTransform: 'uppercase' }}>
-                        Detalles de Distribución · {row.label}
+                        Distribution Details · {row.label}
                       </div>
                       <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
-                        Fórmula: <strong>{row.pricingNote}</strong> · {row.skuCount} referencias activas · Proveedor: {row.supplier} · Moneda: <strong>{row.currency}</strong>
+                        Formula: <strong>{row.pricingNote}</strong> · {row.skuCount} active references · Supplier: {row.supplier} · Currency: <strong>{row.currency}</strong>
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -1483,7 +1491,7 @@ export default function UnifiedPriceHub({
                         }}
                       >
                         <FileText size={12} color="#d97706" />
-                        <span>Generar PDF</span>
+                        <span>Generate PDF</span>
                       </button>
 
                       <button
@@ -1504,7 +1512,7 @@ export default function UnifiedPriceHub({
                         }}
                       >
                         <Share2 size={12} />
-                        <span>Compartir Web</span>
+                        <span>Share Web Link</span>
                       </button>
 
                       <button
@@ -1545,7 +1553,7 @@ export default function UnifiedPriceHub({
                           cursor: 'pointer'
                         }}
                       >
-                        <span>Explorar SKUs ({row.skuCount})</span>
+                        <span>Explore SKUs ({row.skuCount})</span>
                         <ArrowRight size={12} />
                       </button>
                     </div>
@@ -1557,7 +1565,7 @@ export default function UnifiedPriceHub({
         </div>
       )}
 
-      {/* ── MODAL 1: Share History & Recipients Breakdown ── */}
+      {/* ── MODAL 1: Share History & Recipients Breakdown (GCP UX Standard) ── */}
       {selectedShareGroup && (
         <div
           style={{
@@ -1575,38 +1583,44 @@ export default function UnifiedPriceHub({
           <div
             style={{
               backgroundColor: '#ffffff',
-              borderRadius: '10px',
+              borderRadius: '8px',
               maxWidth: '560px',
               width: '100%',
               padding: '24px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-              border: '1px solid #cbd5e1'
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Users size={18} color="#003666" />
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '8px',
+                  backgroundColor: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Users size={18} color="#16a34a" />
+                </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
-                    Historial de Difusión · {selectedShareGroup.label}
+                    Share Tracking & Recipients · {selectedShareGroup.label}
                   </h3>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>
-                    Compartido {selectedShareGroup.sharesCount || 0} veces con médicos, clínicas y distribuidores
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    Audited delivery records and interaction analytics across verified channels
                   </div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedShareGroup(null)}
-                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b', padding: '4px' }}
+                title="Close"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Recipient list */}
-            <div style={{ maxHeight: '320px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px', marginBottom: '16px' }}>
+            <div style={{ maxHeight: '320px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '16px' }}>
               {selectedShareGroup.recipients?.map((r, idx) => (
                 <div
                   key={idx}
@@ -1627,7 +1641,7 @@ export default function UnifiedPriceHub({
                       {r.organization}
                     </div>
                     <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '2px' }}>
-                      Enviado el {r.date} vía <strong>{r.channel.toUpperCase()}</strong>
+                      Sent on {r.date} via <strong>{r.channel.toUpperCase()}</strong>
                     </div>
                   </div>
 
@@ -1641,7 +1655,7 @@ export default function UnifiedPriceHub({
                       padding: '2px 8px',
                       borderRadius: '12px'
                     }}>
-                      ✓ Abierto ({r.views} vistas)
+                      ✓ Opened ({r.views} views)
                     </span>
                   </div>
                 </div>
@@ -1672,7 +1686,7 @@ export default function UnifiedPriceHub({
                 }}
               >
                 <Share2 size={13} />
-                <span>Compartir con Nuevo Cliente</span>
+                <span>Share with New Client</span>
               </button>
 
               <button
@@ -1689,14 +1703,14 @@ export default function UnifiedPriceHub({
                   cursor: 'pointer'
                 }}
               >
-                Cerrar
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── MODAL 2: Public Web & PDF Share Dialog ── */}
+      {/* ── MODAL 2: Public Web & PDF Share Dialog (GCP UX Standard) ── */}
       {shareWebModalGroup && (
         <div
           style={{
@@ -1714,31 +1728,37 @@ export default function UnifiedPriceHub({
           <div
             style={{
               backgroundColor: '#ffffff',
-              borderRadius: '10px',
-              maxWidth: '480px',
+              borderRadius: '8px',
+              maxWidth: '500px',
               width: '100%',
               padding: '24px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-              border: '1px solid #cbd5e1'
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Share2 size={18} color="#0284c7" />
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '8px',
+                  backgroundColor: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Share2 size={18} color="#0284c7" />
+                </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
-                    Compartir Tarifa · {shareWebModalGroup.label}
+                    Share Price Schedule · {shareWebModalGroup.label}
                   </h3>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>
-                    Acceso web público autorizado para médicos y mayoristas
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    Authorized public access link for clinics, doctors, and wholesale partners
                   </div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShareWebModalGroup(null)}
-                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b', padding: '4px' }}
+                title="Close"
               >
                 <X size={18} />
               </button>
@@ -1746,8 +1766,8 @@ export default function UnifiedPriceHub({
 
             {/* Public Link Box */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                Enlace Web Público (Tokenizado)
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                Public Access Link (Tokenized)
               </label>
               <div style={{ display: 'flex', gap: '6px' }}>
                 <input
@@ -1756,19 +1776,20 @@ export default function UnifiedPriceHub({
                   value={typeof window !== 'undefined' ? `${window.location.origin}${shareWebModalGroup.route}` : shareWebModalGroup.route}
                   style={{
                     flex: 1,
-                    padding: '8px 10px',
+                    padding: '8px 12px',
                     fontSize: '12px',
                     borderRadius: '6px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#f8fafc',
-                    color: '#334155'
+                    color: '#1e293b',
+                    outline: 'none'
                   }}
                 />
                 <button
                   type="button"
                   onClick={() => handleCopyPublicWebLink(shareWebModalGroup)}
                   style={{
-                    padding: '8px 12px',
+                    padding: '8px 14px',
                     backgroundColor: '#003666',
                     color: '#ffffff',
                     border: 'none',
@@ -1778,24 +1799,25 @@ export default function UnifiedPriceHub({
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    gap: '6px'
                   }}
+                  title="Copy link to clipboard"
                 >
                   <Copy size={13} />
-                  <span>Copiar</span>
+                  <span>Copy</span>
                 </button>
               </div>
             </div>
 
             {/* Direct Channel Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
               <button
                 type="button"
                 onClick={() => handleWhatsAppShare(shareWebModalGroup)}
                 style={{
                   width: '100%',
                   padding: '10px 14px',
-                  backgroundColor: '#188038',
+                  backgroundColor: '#16a34a',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '6px',
@@ -1809,7 +1831,7 @@ export default function UnifiedPriceHub({
                 }}
               >
                 <MessageSquare size={15} />
-                <span>Compartir por WhatsApp con Cliente</span>
+                <span>Share via WhatsApp</span>
               </button>
 
               <button
@@ -1835,16 +1857,16 @@ export default function UnifiedPriceHub({
                 }}
               >
                 <FileText size={15} color="#d97706" />
-                <span>Generar Documento PDF Oficial</span>
+                <span>Download Verified PDF Dossier</span>
               </button>
             </div>
 
-            <div style={{ textAlign: 'right' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => setShareWebModalGroup(null)}
                 style={{
-                  padding: '6px 14px',
+                  padding: '8px 16px',
                   borderRadius: '6px',
                   border: '1px solid #cbd5e1',
                   backgroundColor: '#ffffff',
@@ -1854,7 +1876,7 @@ export default function UnifiedPriceHub({
                   cursor: 'pointer'
                 }}
               >
-                Cerrar
+                Done
               </button>
             </div>
           </div>
