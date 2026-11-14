@@ -14,6 +14,7 @@ import {
 } from '@/lib/icons';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
+import DataTable from '@/components/ui/DataTable';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
@@ -39,9 +40,9 @@ export default function QualityTraceabilitySection({
     const hasTrichoKeywords = /tricho|minoxidil|finasteride|dutasteride|scalp|follicular|acnetest|telotest/i.test(rxStr);
     const hasPeptideKeywords = /peptide|vial|injectable|subq|bpc-157|tb-500|epithalon|cjc-1295|ipamorelin|semaglutide|tirzepatide|retatrutide|glp-3|glp3|glp-1|glp1|pen|pre-filled|prefilled|cagrilintide|mazdutide|survodutide|kisspeptin|ghk-cu|mots-c/i.test(rxStr);
 
-    let tricho = hasTrichoKeywords && !hasPeptideKeywords;
-    let peptide = hasPeptideKeywords;
-    let nutra = !tricho && !peptide;
+    const tricho = hasTrichoKeywords && !hasPeptideKeywords;
+    const peptide = hasPeptideKeywords;
+    const nutra = !tricho && !peptide;
 
     const names = items.map(i => i.title || i.name || i.productName || '').filter(Boolean);
 
@@ -372,40 +373,42 @@ export default function QualityTraceabilitySection({
             </span>
           </div>
 
-          <div style={{
-            overflowX: 'auto',
-            border: '1px solid #dadce0',
-            borderRadius: '8px',
-            background: '#ffffff'
-          }}>
-            {/* eslint-disable-next-line no-restricted-syntax */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.80rem', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #dadce0' }}>
-                  <th style={{ padding: '10px 14px', fontWeight: 600, color: '#3c4043' }}>{isEs ? 'Parámetro Analítico' : 'Test Parameter'}</th>
-                  <th style={{ padding: '10px 14px', fontWeight: 600, color: '#3c4043' }}>{isEs ? 'Método Oficial' : 'Official Method'}</th>
-                  <th style={{ padding: '10px 14px', fontWeight: 600, color: '#3c4043' }}>{isEs ? 'Especificación Farmacopea' : 'Specification'}</th>
-                  <th style={{ padding: '10px 14px', fontWeight: 600, color: '#3c4043' }}>{isEs ? 'Resultado del Lote' : 'Batch Result'}</th>
-                  <th style={{ padding: '10px 14px', fontWeight: 600, color: '#3c4043' }}>{isEs ? 'Dictamen' : 'Status'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {profile.assays.map((assay, aIdx) => (
-                  <tr key={aIdx} style={{ borderBottom: aIdx === profile.assays.length - 1 ? 'none' : '1px solid #f1f3f4' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 600, color: '#202124' }}>
-                      {assay.name}
-                    </td>
-                    <td style={{ padding: '10px 14px', color: '#5f6368' }}>{assay.method}</td>
-                    <td style={{ padding: '10px 14px', color: '#3c4043' }}>{assay.spec}</td>
-                    <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>{assay.result}</td>
-                    <td style={{ padding: '10px 14px' }}>
-                      <StatusBadge status={assay.status} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={profile.assays.map((assay, aIdx) => ({ id: `assay-${aIdx}`, ...assay }))}
+            columns={[
+              {
+                key: 'name',
+                label: isEs ? 'Parámetro Analítico' : 'Test Parameter',
+                width: '26%',
+                render: (assay) => <span style={{ fontWeight: 600, color: '#202124' }}>{assay.name}</span>
+              },
+              {
+                key: 'method',
+                label: isEs ? 'Método Oficial' : 'Official Method',
+                width: '22%',
+                render: (assay) => <span style={{ color: '#5f6368' }}>{assay.method}</span>
+              },
+              {
+                key: 'spec',
+                label: isEs ? 'Especificación Farmacopea' : 'Specification',
+                width: '22%',
+                render: (assay) => <span style={{ color: '#3c4043' }}>{assay.spec}</span>
+              },
+              {
+                key: 'result',
+                label: isEs ? 'Resultado del Lote' : 'Batch Result',
+                width: '18%',
+                render: (assay) => <span style={{ fontWeight: 600, color: '#137333' }}>{assay.result}</span>
+              },
+              {
+                key: 'status',
+                label: isEs ? 'Dictamen' : 'Status',
+                width: '12%',
+                render: (assay) => <StatusBadge status={assay.status} />
+              }
+            ]}
+            pageSize={20}
+          />
         </div>
 
         {/* Cold Chain & Qualified Person Certification Callout */}

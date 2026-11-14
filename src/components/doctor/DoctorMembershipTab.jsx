@@ -22,6 +22,7 @@ import { toast } from 'react-hot-toast';
 import { DoctorContext } from '../../templates/DoctorDashboard';
 import notifier from '../../services/NotificationService';
 import { DOCTOR_CAPABILITIES_MATRIX } from '@/data/doctorMembershipTiers';
+import DataTable from '@/components/ui/DataTable';
 
 export default function DoctorMembershipTab() {
   const context = useContext(DoctorContext) || {};
@@ -237,63 +238,51 @@ export default function DoctorMembershipTab() {
         </div>
 
         {/* 💻 DESKTOP TABLE VIEW (> 768px) */}
-        <div className="matrix-desktop-table" style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                <th style={{ padding: '1.25rem 1.5rem', width: '38%', fontWeight: 800, color: '#334155' }}>
-                  Clinical Capability
-                </th>
-                <th style={{ padding: '1.25rem 1rem', width: '28%', textAlign: 'center', color: '#475569' }}>
-                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#334155' }}>🟢 Basic Plan</div>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500, marginTop: '2px' }}>
-                    Free • Starter Access
-                  </div>
-                </th>
-                <th style={{ padding: '1.25rem 1.25rem', width: '34%', textAlign: 'center', background: 'rgba(13, 148, 136, 0.07)', borderLeft: '2px solid #99f6e4', borderRight: '2px solid #99f6e4' }}>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <Sparkles size={18} /> 💎 Advanced Pro
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#0d9488', fontWeight: 700, marginTop: '2px' }}>
-                    Monthly Clinical Subscription
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON_ROWS.map((row, idx) => (
-                <tr
-                  key={idx}
-                  style={{
-                    borderBottom: '1px solid #f1f5f9',
-                    backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa',
-                  }}
-                >
-                  <td style={{ padding: '1.1rem 1.5rem', verticalAlign: 'top' }}>
+        <div className="matrix-desktop-table">
+          <DataTable
+            data={COMPARISON_ROWS.map((row, idx) => ({ id: `tier-row-${idx}`, ...row }))}
+            columns={[
+              {
+                key: 'feature',
+                label: 'Clinical Capability',
+                width: '38%',
+                render: (row) => (
+                  <div>
                     <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>
                       {row.feature}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', lineHeight: 1.4 }}>
                       {row.description}
                     </div>
-                  </td>
-
-                  <td style={{ padding: '1.1rem 1rem', textAlign: 'center', verticalAlign: 'middle', color: '#64748b', fontSize: '0.84rem' }}>
-                    <div style={{ display: 'inline-block', padding: '4px 10px', background: '#f1f5f9', borderRadius: '8px', color: '#475569' }}>
-                      {row.basic}
-                    </div>
-                  </td>
-
-                  <td style={{ padding: '1.1rem 1.25rem', textAlign: 'center', verticalAlign: 'middle', background: 'rgba(13, 148, 136, 0.04)', borderLeft: '2px solid #ccfbf1', borderRight: '2px solid #ccfbf1' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', color: '#0f766e', fontWeight: 700, fontSize: '0.84rem' }}>
-                      <Check size={16} color="#0d9488" strokeWidth={3} />
-                      <span>{row.pro}</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                )
+              },
+              {
+                key: 'basic',
+                label: '🟢 Basic Plan (Free)',
+                width: '28%',
+                align: 'center',
+                render: (row) => (
+                  <div style={{ display: 'inline-block', padding: '4px 10px', background: '#f1f5f9', borderRadius: '8px', color: '#475569', fontSize: '0.84rem' }}>
+                    {row.basic}
+                  </div>
+                )
+              },
+              {
+                key: 'pro',
+                label: '💎 Advanced Pro (Monthly)',
+                width: '34%',
+                align: 'center',
+                render: (row) => (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '10px', color: '#0f766e', fontWeight: 700, fontSize: '0.84rem' }}>
+                    <Check size={16} color="#0d9488" strokeWidth={3} />
+                    <span>{row.pro}</span>
+                  </div>
+                )
+              }
+            ]}
+            pageSize={25}
+          />
         </div>
 
         {/* 📱 MOBILE NATIVE COMPARISON CARDS (<= 768px) */}

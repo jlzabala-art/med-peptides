@@ -17,6 +17,7 @@ import {
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
+import DataTable from '@/components/ui/DataTable';
 
 export default function DoctorUpgradePlanModal({ 
   isOpen, 
@@ -261,47 +262,37 @@ export default function DoctorUpgradePlanModal({
         <div className="modal-body-container" style={{ padding: '1.5rem 2rem', overflowY: 'auto', flex: 1 }}>
           {/* Desktop Matrix View */}
           <div className="modal-matrix-desktop" style={{ border: '1px solid #e2e8f0', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                  <th style={{ padding: '1rem', width: '38%', fontWeight: 700, color: '#475569' }}>Clinical Capability</th>
-                  <th style={{ padding: '1rem', width: '28%', fontWeight: 700, color: '#64748b', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.9rem', color: '#334155' }}>🟢 Basic Plan</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>Free • Essential Access</div>
-                  </th>
-                  <th style={{ padding: '1rem', width: '34%', fontWeight: 800, color: '#0d9488', textAlign: 'center', background: 'rgba(13, 148, 136, 0.06)' }}>
-                    <div style={{ fontSize: '0.95rem', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                      <Sparkles size={16} /> 💎 Advanced Pro
+            <DataTable
+              data={COMPARISON_FEATURES.map((row, idx) => ({ id: `upgrade-row-${idx}`, ...row }))}
+              columns={[
+                {
+                  key: 'feature',
+                  label: 'Clinical Capability',
+                  width: '38%',
+                  render: (row) => <span style={{ fontWeight: 600, color: '#1e293b' }}>{row.feature}</span>
+                },
+                {
+                  key: 'basic',
+                  label: '🟢 Basic Plan (Free)',
+                  width: '28%',
+                  align: 'center',
+                  render: (row) => <span style={{ color: '#64748b' }}>{row.basic}</span>
+                },
+                {
+                  key: 'pro',
+                  label: '💎 Advanced Pro',
+                  width: '34%',
+                  align: 'center',
+                  render: (row) => (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600, color: '#0f766e' }}>
+                      <Check size={16} color="#0d9488" />
+                      <span>{row.pro}</span>
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#0d9488', fontWeight: 600 }}>Monthly Clinical Subscription</div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON_FEATURES.map((row, idx) => (
-                  <tr 
-                    key={idx} 
-                    style={{ 
-                      borderBottom: '1px solid #f1f5f9',
-                      backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa'
-                    }}
-                  >
-                    <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: '#1e293b' }}>
-                      {row.feature}
-                    </td>
-                    <td style={{ padding: '0.85rem 1rem', textAlign: 'center', color: '#64748b' }}>
-                      {row.basic}
-                    </td>
-                    <td style={{ padding: '0.85rem 1rem', textAlign: 'center', fontWeight: 600, color: '#0f766e', background: 'rgba(13, 148, 136, 0.04)' }}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <Check size={16} color="#0d9488" />
-                        <span>{row.pro}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  )
+                }
+              ]}
+              pageSize={25}
+            />
           </div>
 
           {/* Mobile Native Feature Cards (<= 768px) */}
