@@ -69,6 +69,10 @@ export default function PublicLabelsAppClient({
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [copiedShareType, setCopiedShareType] = useState(null);
+  const [worklistPage, setWorklistPage] = useState(1);
+  const [worklistPageSize, setWorklistPageSize] = useState(10);
+  const [worklistDateRange, setWorklistDateRange] = useState('30d');
+  const [mountTimestamp] = useState(() => Date.now());
 
   const searchBoxRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -409,16 +413,60 @@ export default function PublicLabelsAppClient({
     return (searchResults.length > 0 && !searchQuery.trim()) ? searchResults : FEATURED_PATIENTS;
   }, [searchResults, searchQuery]);
 
-  const filterWorklistItem = (item) => {
+  const matchesDateRange = useMemo(() => {
+    const maxAgeMs = worklistDateRange === '7d' ? 7 * 86400000 : worklistDateRange === '30d' ? 30 * 86400000 : null;
+    return (item) => {
+      if (!maxAgeMs) return true;
+      const raw = item.date || item.createdAt || item.uploadedAt;
+      if (!raw) return true;
+      const ts = typeof raw === 'number' ? raw : raw?.seconds ? raw.seconds * 1000 : Date.parse(raw);
+      if (Number.isNaN(ts)) return true;
+      return (mountTimestamp - ts) <= maxAgeMs;
+    };
+  }, [worklistDateRange, mountTimestamp]);
+
+  const filterWorklistItem = (item, tabOverride = null) => {
+    const activeTab = tabOverride || worklistTab;
     const pCode = sanitizeRecentCode(item.code).toUpperCase();
     const count = printCountsMap[pCode] ?? printCountsMap[String(item.code).toUpperCase()] ?? item.a4PrintCount ?? 0;
     const isPendingApproval = (item.status && item.status !== 'approved' && !item.isSigned);
-    if (worklistTab === 'unprinted') return count === 0;
-    if (worklistTab === 'pending_approval') return isPendingApproval;
-    if (worklistTab === 'printed') return count === 1;
-    if (worklistTab === 'reprint') return count > 1;
+    if (activeTab === 'unprinted') return count === 0;
+    if (activeTab === 'pending_approval') return isPendingApproval;
+    if (activeTab === 'printed') return count === 1;
+    if (activeTab === 'reprint') return count > 1;
     return true;
   };
+
+  const baseWorklistItems = useMemo(() => {
+    return worklistSource
+      .filter(p => !recentPrescriptions.some(r => String(r.code).toUpperCase() === String(p.code).toUpperCase()))
+      .filter(matchesDateRange);
+  }, [worklistSource, recentPrescriptions, matchesDateRange]);
+
+  const worklistTabCounts = useMemo(() => {
+    const counts = { unprinted: 0, pending_approval: 0, printed: 0, reprint: 0, all: baseWorklistItems.length };
+    for (const item of baseWorklistItems) {
+      const pCode = sanitizeRecentCode(item.code).toUpperCase();
+      const count = printCountsMap[pCode] ?? printCountsMap[String(item.code).toUpperCase()] ?? item.a4PrintCount ?? 0;
+      const isPendingApproval = (item.status && item.status !== 'approved' && !item.isSigned);
+      if (count === 0) counts.unprinted++;
+      if (isPendingApproval) counts.pending_approval++;
+      if (count === 1) counts.printed++;
+      if (count > 1) counts.reprint++;
+    }
+    return counts;
+  }, [baseWorklistItems, printCountsMap]);
+
+  const filteredWorklistItems = useMemo(() => {
+    return baseWorklistItems.filter((item) => filterWorklistItem(item));
+  }, [baseWorklistItems, worklistTab, printCountsMap]);
+
+  const totalWorklistPages = Math.max(1, Math.ceil(filteredWorklistItems.length / worklistPageSize));
+  const safeWorklistPage = Math.min(worklistPage, totalWorklistPages);
+  const paginatedWorklistItems = useMemo(() => {
+    const startIdx = (safeWorklistPage - 1) * worklistPageSize;
+    return filteredWorklistItems.slice(startIdx, startIdx + worklistPageSize);
+  }, [filteredWorklistItems, safeWorklistPage, worklistPageSize]);
 
   const unprintedCodes = useMemo(() => {
     return worklistSource
@@ -680,44 +728,87 @@ export default function PublicLabelsAppClient({
                   </div>
                 </div>
 
-                {/* Worklist Filter Tabs */}
+                {/* Worklist Filter Tabs + Date Range */}
                 <div style={{
                   padding: '10px 20px',
                   background: '#f8fafc',
                   borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'space-between',
                   gap: '8px',
                   flexWrap: 'wrap'
                 }}>
-                  {[
-                    { id: 'unprinted', labelEs: '○ Pendientes de imprimir', labelEn: '○ Unprinted' },
-                    { id: 'pending_approval', labelEs: '⏳ Por aprobar', labelEn: '⏳ Pending Approval' },
-                    { id: 'printed', labelEs: '🖨️ Impresas (1×)', labelEn: '🖨️ Printed (1×)' },
-                    { id: 'reprint', labelEs: '🔁 Reimpresiones', labelEn: '🔁 Reprints' },
-                    { id: 'all', labelEs: 'Todas', labelEn: 'All' }
-                  ].map((tab) => {
-                    const isTabActive = worklistTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setWorklistTab(tab.id)}
-                        style={{
-                          border: isTabActive ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
-                          background: isTabActive ? '#e8f0fe' : '#ffffff',
-                          color: isTabActive ? '#1a73e8' : '#475569',
-                          fontSize: '0.72rem',
-                          fontWeight: isTabActive ? 750 : 600,
-                          padding: '3px 10px',
-                          borderRadius: '16px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {isEs ? tab.labelEs : tab.labelEn}
-                      </button>
-                    );
-                  })}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {[
+                      { id: 'unprinted', labelEs: '○ Pendientes de imprimir', labelEn: '○ Unprinted' },
+                      { id: 'pending_approval', labelEs: '⏳ Por aprobar', labelEn: '⏳ Pending Approval' },
+                      { id: 'printed', labelEs: '🖨️ Impresas (1×)', labelEn: '🖨️ Printed (1×)' },
+                      { id: 'reprint', labelEs: '🔁 Reimpresiones', labelEn: '🔁 Reprints' },
+                      { id: 'all', labelEs: 'Todas', labelEn: 'All' }
+                    ].map((tab) => {
+                      const isTabActive = worklistTab === tab.id;
+                      const tabCount = worklistTabCounts[tab.id] ?? 0;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => {
+                            setWorklistTab(tab.id);
+                            setWorklistPage(1);
+                          }}
+                          style={{
+                            border: isTabActive ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                            background: isTabActive ? '#e8f0fe' : '#ffffff',
+                            color: isTabActive ? '#1a73e8' : '#475569',
+                            fontSize: '0.72rem',
+                            fontWeight: isTabActive ? 750 : 600,
+                            padding: '3px 10px',
+                            borderRadius: '16px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <span>{isEs ? tab.labelEs : tab.labelEn}</span>
+                          <span style={{
+                            fontSize: '0.66rem',
+                            fontWeight: 700,
+                            padding: '0 5px',
+                            borderRadius: '999px',
+                            background: isTabActive ? '#1a73e8' : '#e2e8f0',
+                            color: isTabActive ? '#ffffff' : '#475569'
+                          }}>
+                            {tabCount}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <select
+                    aria-label={isEs ? 'Rango temporal' : 'Date range'}
+                    value={worklistDateRange}
+                    onChange={(e) => {
+                      setWorklistDateRange(e.target.value);
+                      setWorklistPage(1);
+                    }}
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: '#334155',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      padding: '4px 8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="7d">{isEs ? 'Últimos 7 días' : 'Last 7 days'}</option>
+                    <option value="30d">{isEs ? 'Últimos 30 días' : 'Last 30 days'}</option>
+                    <option value="all">{isEs ? 'Todo el historial' : 'All time'}</option>
+                  </select>
                 </div>
 
                 {/* Recently Opened */}
@@ -787,10 +878,36 @@ export default function PublicLabelsAppClient({
                     {isEs ? 'Recetas en Base de Datos' : 'Prescriptions Worklist'}
                   </div>
 
-                  {worklistSource
-                    .filter(p => !recentPrescriptions.some(r => String(r.code).toUpperCase() === String(p.code).toUpperCase()))
-                    .filter(filterWorklistItem)
-                    .map((p) => {
+                  {paginatedWorklistItems.length === 0 ? (
+                    <div style={{ padding: '2rem 1.5rem', textAlign: 'center', color: '#64748b' }}>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        {isEs ? 'No hay recetas que coincidan con los filtros activos' : 'No prescriptions match the active filters'}
+                      </div>
+                      <div style={{ fontSize: '0.76rem', marginBottom: '12px' }}>
+                        {isEs ? 'Prueba cambiando la pestaña de estado o ampliando el rango temporal.' : 'Try switching the status tab or expanding the date range.'}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWorklistTab('all');
+                          setWorklistDateRange('all');
+                          setWorklistPage(1);
+                        }}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '6px',
+                          border: '1px solid #1a73e8',
+                          background: '#e8f0fe',
+                          color: '#1a73e8',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {isEs ? 'Limpiar filtros' : 'Reset filters'}
+                      </button>
+                    </div>
+                  ) : paginatedWorklistItems.map((p) => {
                       const dateStr = formatResultDate(p.date || p.createdAt || p.uploadedAt);
                       return (
                         <div
@@ -830,6 +947,96 @@ export default function PublicLabelsAppClient({
                         </div>
                       );
                     })}
+
+                  {/* Google Cloud Console Pagination Footer */}
+                  {filteredWorklistItems.length > 0 && (
+                    <div style={{
+                      padding: '10px 20px',
+                      background: '#f8fafc',
+                      borderTop: '1px solid #e2e8f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      flexWrap: 'wrap',
+                      fontSize: '0.74rem',
+                      color: '#5f6368'
+                    }}>
+                      <span>
+                        {isEs
+                          ? `Mostrando ${(safeWorklistPage - 1) * worklistPageSize + 1}–${Math.min(safeWorklistPage * worklistPageSize, filteredWorklistItems.length)} de ${filteredWorklistItems.length} recetas`
+                          : `Showing ${(safeWorklistPage - 1) * worklistPageSize + 1}–${Math.min(safeWorklistPage * worklistPageSize, filteredWorklistItems.length)} of ${filteredWorklistItems.length} prescriptions`}
+                      </span>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
+                          <span>{isEs ? 'Filas:' : 'Rows per page:'}</span>
+                          <select
+                            value={worklistPageSize}
+                            onChange={(e) => {
+                              setWorklistPageSize(Number(e.target.value));
+                              setWorklistPage(1);
+                            }}
+                            style={{
+                              padding: '3px 6px',
+                              borderRadius: '5px',
+                              border: '1px solid #cbd5e1',
+                              background: '#ffffff',
+                              color: '#1e293b',
+                              fontSize: '0.73rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                          </select>
+                        </label>
+
+                        <span style={{ fontWeight: 600, color: '#334155' }}>
+                          {isEs ? `Pág. ${safeWorklistPage} / ${totalWorklistPages}` : `Page ${safeWorklistPage} of ${totalWorklistPages}`}
+                        </span>
+
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <button
+                            type="button"
+                            disabled={safeWorklistPage <= 1}
+                            onClick={() => setWorklistPage((prev) => Math.max(1, prev - 1))}
+                            style={{
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              background: safeWorklistPage <= 1 ? '#f1f5f9' : '#ffffff',
+                              color: safeWorklistPage <= 1 ? '#94a3b8' : '#1a73e8',
+                              fontSize: '0.73rem',
+                              fontWeight: 700,
+                              cursor: safeWorklistPage <= 1 ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            ‹ {isEs ? 'Ant.' : 'Prev'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={safeWorklistPage >= totalWorklistPages}
+                            onClick={() => setWorklistPage((prev) => Math.min(totalWorklistPages, prev + 1))}
+                            style={{
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              background: safeWorklistPage >= totalWorklistPages ? '#f1f5f9' : '#ffffff',
+                              color: safeWorklistPage >= totalWorklistPages ? '#94a3b8' : '#1a73e8',
+                              fontSize: '0.73rem',
+                              fontWeight: 700,
+                              cursor: safeWorklistPage >= totalWorklistPages ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {isEs ? 'Sig.' : 'Next'} ›
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </section>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { doc, setDoc, collection, query, where, limit, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/firebase';
 import {
   FlaskConical, Dna, Scissors, Package, Layers, TestTube,
   Activity, Microscope, Sparkles, Building2
