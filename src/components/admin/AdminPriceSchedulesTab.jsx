@@ -31,6 +31,7 @@ import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import MetricCard from '@/components/ui/MetricCard';
 import KpiScopeBar from '@/components/ui/KpiScopeBar';
 import AdminAgreementModal from './AdminAgreementModal';
+import UnifiedPriceHub from '@/components/pricing/UnifiedPriceHub';
 
 const PRICE_SCHEDULES = [
   {
@@ -158,6 +159,7 @@ const PRICE_SCHEDULES = [
 ];
 
 export default function AdminPriceSchedulesTab() {
+  const [viewMode, setViewMode] = useState('unified'); // 'unified' | 'contracts'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [copiedId, setCopiedId] = useState(null);
@@ -220,7 +222,57 @@ export default function AdminPriceSchedulesTab() {
         }
       />
 
-      {/* 4 KPIs at top (Golden Rule #22) */}
+      {/* View Switcher: Unified Hub vs Agreements Editor */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+        <button
+          type="button"
+          onClick={() => setViewMode('unified')}
+          style={{
+            padding: '7px 14px',
+            borderRadius: '8px',
+            border: '1px solid',
+            borderColor: viewMode === 'unified' ? 'var(--color-primary, #003666)' : '#cbd5e1',
+            background: viewMode === 'unified' ? 'var(--color-primary, #003666)' : '#ffffff',
+            color: viewMode === 'unified' ? '#ffffff' : '#475569',
+            fontWeight: 700,
+            fontSize: '0.82rem',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <Layers size={14} />
+          <span>Unified Price Hub (12 Groups)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewMode('contracts')}
+          style={{
+            padding: '7px 14px',
+            borderRadius: '8px',
+            border: '1px solid',
+            borderColor: viewMode === 'contracts' ? 'var(--color-primary, #003666)' : '#cbd5e1',
+            background: viewMode === 'contracts' ? 'var(--color-primary, #003666)' : '#ffffff',
+            color: viewMode === 'contracts' ? '#ffffff' : '#475569',
+            fontWeight: 700,
+            fontSize: '0.82rem',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <FileText size={14} />
+          <span>Partner Agreements & Referral Attribution</span>
+        </button>
+      </div>
+
+      {viewMode === 'unified' ? (
+        <UnifiedPriceHub embedded />
+      ) : (
+        <>
+          {/* 4 KPIs at top (Golden Rule #22) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
         <MetricCard
           title="Active Schedules"
@@ -524,6 +576,8 @@ export default function AdminPriceSchedulesTab() {
           );
         })}
       </div>
+      </>
+      )}
 
       {/* Firestore SSOT Agreement Modal */}
       {editingAgreementSlug && (
