@@ -577,12 +577,12 @@ export default function UserMobileCard({
                     <span>Catálogos B2B & Tracking</span>
                   </button>
 
-                  {(u.role === 'wholesaler' || u.role === 'supplier' || u.roles?.includes('wholesaler') || u.payablesToken || (u.companyName || '').toLowerCase().includes('health source')) && (
+                  {Boolean(u.payablesToken || u.payablesSlug || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source'))) && (
                     <button
                       type="button"
                       onClick={() => {
                         setMenuOpen(false);
-                        const token = u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : (u.payablesSlug || u.id));
+                        const token = u.payablesToken || (u.email === 'jia9156@gmail.com' || (u.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : u.payablesSlug);
                         const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
                         const userEmail = (u.email || u.contactEmail || '').toLowerCase().trim();
                         const url = `${origin}/b2b/payables/${token}${userEmail ? `?email=${encodeURIComponent(userEmail)}&quicklink=verified` : ''}`;

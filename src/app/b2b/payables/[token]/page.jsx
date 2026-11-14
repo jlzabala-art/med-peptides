@@ -570,19 +570,48 @@ export default function PayablesStatementPage() {
   if (error || !data) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', padding: '2rem', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>
-        <AlertCircle size={44} color="#dc2626" style={{ marginBottom: '1rem' }} />
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>
-          {lang === 'es' ? 'Extracto no disponible o enlace expirado' : 'Statement unavailable or link expired'}
+        <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+          <AlertCircle size={26} color="#dc2626" />
+        </div>
+        <h2 style={{ fontSize: '1.20rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>
+          {lang === 'es' ? 'Extracto de Liquidación No Disponible' : 'Statement Not Configured or Unavailable'}
         </h2>
-        <p style={{ fontSize: '0.88rem', color: '#64748b', maxWidth: '420px', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
-          {error || (lang === 'es' ? 'No se ha encontrado el extracto solicitado. Contacte con administración.' : 'The requested statement was not found. Please contact administration.')}
+        <p style={{ fontSize: '0.86rem', color: '#64748b', maxWidth: '460px', marginTop: '0.25rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+          {lang === 'es'
+            ? 'Esta cuenta no tiene configurado un extracto de facturas de proveedor activo. Los enlaces de liquidación B2B se emiten exclusivamente para proveedores autorizados.'
+            : 'No active vendor payables statement is configured for this account. B2B settlement links are issued exclusively to authorized suppliers and billing partners.'}
         </p>
-        <button
-          onClick={() => fetchStatement()}
-          style={{ padding: '8px 18px', backgroundColor: '#003666', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
-        >
-          {lang === 'es' ? 'Reintentar' : 'Retry'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Link
+            href="/catalog"
+            style={{
+              padding: '8px 18px',
+              backgroundColor: '#003666',
+              color: '#ffffff',
+              borderRadius: '6px',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              textDecoration: 'none'
+            }}
+          >
+            {lang === 'es' ? 'Volver al Catálogo' : 'Go to Catalog'}
+          </Link>
+          <a
+            href="mailto:orders@atlas-solutions.com"
+            style={{
+              padding: '8px 18px',
+              backgroundColor: '#ffffff',
+              color: '#475569',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              fontSize: '0.84rem',
+              fontWeight: 500,
+              textDecoration: 'none'
+            }}
+          >
+            {lang === 'es' ? 'Contactar Soporte' : 'Contact Support'}
+          </a>
+        </div>
       </div>
     );
   }

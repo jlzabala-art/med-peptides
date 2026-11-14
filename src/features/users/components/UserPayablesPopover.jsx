@@ -11,10 +11,11 @@ import { triggerHaptic } from '../../../utils/haptics';
  * or copies the quicklink without blocking table data.
  */
 export default function UserPayablesPopover({ user }) {
-  const token = user?.payablesToken || (user?.email === 'jia9156@gmail.com' || (user?.companyName || '').includes('Health Source') ? 'HSC-PAY-ZN1TU5Q6' : (user?.payablesSlug || user?.id));
-  const isWholesalerOrSupplier = user?.role === 'wholesaler' || user?.role === 'supplier' || user?.roles?.includes('wholesaler') || user?.roles?.includes('supplier') || user?.zohoBooksVendorNumber || user?.payablesToken;
+  // Only resolve token if an actual payables token or slug is explicitly configured for this vendor
+  const token = user?.payablesToken || (user?.email === 'jia9156@gmail.com' || (user?.companyName || '').toLowerCase().includes('health source') ? 'HSC-PAY-ZN1TU5Q6' : user?.payablesSlug);
 
-  if (!isWholesalerOrSupplier) return null;
+  // If no payables statement is actually available for this user, do not render link
+  if (!token) return null;
 
   const handleClick = (e) => {
     e.stopPropagation();
