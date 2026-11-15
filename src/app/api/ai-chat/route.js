@@ -60,15 +60,17 @@ export async function POST(req) {
   const isPublicSandbox = (body?.scope === 'public_sandbox') && !isAuthenticated;
 
   // Extract query early for cache evaluation (Cached queries consume 0 quota)
-  const { message: rawMessage, context = {}, history = [] } = body;
+  const { message: rawMessage, context = {}, history = [], mode: requestedMode } = body;
   const message = sanitizeText(rawMessage, 2000);
   if (!message) {
     return NextResponse.json({ error: 'Valid message text is required (max 2000 chars)' }, { status: 400 });
   }
 
   const { contextAnchor } = context;
-  const entityIdentifier = contextAnchor?.slug || contextAnchor?.name || contextAnchor?.code || 'global';
-  const queryCacheKey = `${entityIdentifier}:${message.trim().toLowerCase()}`;
+  const effectiveMode = requestedMode || body?.scope || context?.mode || 'general';
+  const effectiveRole = currentUser?.role || (isAuthenticated ? 'authenticated' : 'guest');
+  const entityIdentifier = contextAnchor?.slug || contextAnchor?.name || contextAnchor?.code || contextAnchor?.sectionTitle || 'global';
+  const queryCacheKey = `${effectiveMode}:${effectiveRole}:${entityIdentifier}:${message.trim().toLowerCase()}`;
 
   // 1. Quota-free cache lookup: If answered previously for this resource, return 0-latency reply without consuming quota
   const cachedHit = getCachedQuery(queryCacheKey);

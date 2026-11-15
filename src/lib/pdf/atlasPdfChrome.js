@@ -228,3 +228,61 @@ export function applyAtlasRunningFooter(doc, { disclaimer = '' } = {}) {
     doc.text(`Page ${i} of ${totalPages}`, pageWidth - 14, pageHeight - 9, { align: 'right' });
   }
 }
+
+/**
+ * Preview-first output helper (Golden Rule #67):
+ * Always opens the global DocumentPreviewModal before downloading when running
+ * in the browser, falling back to doc.save(filename) only in non-mounted contexts.
+ */
+export function previewOrSavePdf(
+  doc,
+  filename = 'atlas-document.pdf',
+  { title = 'Atlas Health Services — Document Preview', subtitle = '' } = {}
+) {
+  if (typeof window !== 'undefined' && window.__atlasPdfPreviewAvailable) {
+    const pdfBlob = doc.output('blob');
+    window.dispatchEvent(
+      new CustomEvent('atlas-open-pdf-preview', {
+        detail: {
+          title,
+          subtitle,
+          downloadName: filename,
+          pdfBlob,
+          printable: true,
+        },
+      })
+    );
+    return pdfBlob;
+  }
+  doc.save(filename);
+  return null;
+}
+
+/**
+ * Opens a server-generated PDF endpoint (/api/.../pdf) inside DocumentPreviewModal
+ * instead of triggering a blind download or popup tab.
+ */
+export function previewRemotePdf(
+  fileUrl,
+  { title = 'Atlas Health Services — Document Preview', subtitle = '', downloadName = 'atlas-document.pdf' } = {}
+) {
+  if (typeof window !== 'undefined' && window.__atlasPdfPreviewAvailable) {
+    window.dispatchEvent(
+      new CustomEvent('atlas-open-pdf-preview', {
+        detail: {
+          title,
+          subtitle,
+          downloadName,
+          fileUrl,
+          printable: true,
+        },
+      })
+    );
+    return true;
+  }
+  if (typeof window !== 'undefined') {
+    window.open(fileUrl, '_blank', 'noopener,noreferrer');
+  }
+  return false;
+}
+

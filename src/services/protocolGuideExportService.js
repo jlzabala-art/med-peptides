@@ -361,8 +361,12 @@ export async function generateProtocolGuidePdf(protocol, options = {}) {
     doc.text(`Page ${i} of ${totalPages}`, PAGE_W - MARGIN, PAGE_H - 8, { align: 'right' });
   }
 
+  const { previewOrSavePdf } = await import('../lib/pdf/atlasPdfChrome');
   const safeFilename = `${protocolName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_clinical_guide.pdf`;
-  doc.save(safeFilename);
+  previewOrSavePdf(doc, safeFilename, {
+    title: `${protocolName} — Clinical Guide`,
+    subtitle: 'Atlas Health Services — Clinical Protocol Guide',
+  });
   return safeFilename;
 }
 

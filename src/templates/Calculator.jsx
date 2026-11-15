@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 import { useResponsive } from '../hooks/useResponsive';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { applyAtlasRunningFooter, previewOrSavePdf } from '../lib/pdf/atlasPdfChrome';
 import SyringeVisualizer from '../components/SyringeVisualizer';
 import VialVisualizer from '../components/VialVisualizer';
 import { jsPDF } from 'jspdf';
@@ -115,22 +116,13 @@ function exportPDF({ mg, ml, dose, units }) {
     14, y, { maxWidth: 182 }
   );
 
-  const FOOTER_Y = 282;
-  doc.setFillColor(0, 43, 77);
-  doc.rect(0, FOOTER_Y, 210, 15, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text('Atlas Health — Research Report  |  atlashealth-services.com', 14, FOOTER_Y + 5.5);
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(7);
-  doc.setTextColor(180, 205, 230);
-  doc.text(
-    'For research purposes only. Verify calculations before use.',
-    105, FOOTER_Y + 11, { align: 'center' }
-  );
-
-  doc.save(`Atlas Health_Reconstitution_${Date.now()}.pdf`);
+  applyAtlasRunningFooter(doc, {
+    disclaimer: 'Atlas Health Services · Reconstitution Report · For research purposes only.',
+  });
+  previewOrSavePdf(doc, `Atlas Health_Reconstitution_${Date.now()}.pdf`, {
+    title: 'Reconstitution & Dosing Report',
+    subtitle: 'Atlas Health Services — Peptide Calculator',
+  });
 }
 
 /* ─── Shared style tokens (must live before the component for minifier safety) ── */

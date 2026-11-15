@@ -276,8 +276,15 @@ export default function CompoundingPage({
       doc.text(doc.splitTextToSize(lang === 'es' ? COMPOUNDING_I18N.es.disclaimer : COMPOUNDING_I18N.en.disclaimer, 182), 14, y);
       doc.text(doc.splitTextToSize(`Formula link: ${window.location.href}`, 182), 14, 285);
 
-      doc.save(`atlas-formula-${Date.now()}.pdf`);
-      toast.success(lang === 'es' ? `Ficha "${displayName}" descargada ✓` : `"${displayName}" sheet downloaded ✓`);
+      const { applyAtlasRunningFooter, previewOrSavePdf } = await import('@/lib/pdf/atlasPdfChrome');
+      applyAtlasRunningFooter(doc, {
+        disclaimer: 'ATLAS HEALTH SERVICES · CUSTOM COMPOUNDING SPECIFICATION · FOR LICENSED PRACTITIONERS',
+      });
+      previewOrSavePdf(doc, `atlas-formula-${Date.now()}.pdf`, {
+        title: `${displayName} — Compounding Specification`,
+        subtitle: 'Atlas Health Services — Precision Compounding',
+      });
+      toast.success(lang === 'es' ? `Ficha "${displayName}" lista en vista previa ✓` : `"${displayName}" sheet ready in preview ✓`);
     } catch (err) {
       console.error('[CompoundingPage] PDF export failed', err);
       toast.error(lang === 'es' ? 'No se pudo generar el PDF' : 'Could not generate the PDF');

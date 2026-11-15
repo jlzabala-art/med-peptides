@@ -666,3 +666,13 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - Todo PDF de tarifa o catálogo generado en la plataforma (`src/lib/pdf/schedulePdfBuilder.js`, `src/utils/exportPriceSchedulePdf.js`) DEBE utilizar el sistema visual unificado `src/lib/pdf/atlasPdfChrome.js` (`drawAtlasInstitutionalHeader`, `drawAtlasKpiStrip`, `getAtlasAutoTableDefaults`, `drawAtlasGuestCtaBanner`, `applyAtlasRunningFooter`).
   - Los PDFs para invitados (`isGuest === true`) incluyen únicamente los precios públicos autorizados (`Wholeseller`) y un banner institucional de llamada a la acción para iniciar sesión; los PDFs autenticados incluyen las columnas autorizadas del rol y la atribución de cuenta/tier en la cabecera.
 
+## 67. Previsualización Obligatoria de PDFs, Chrome Único y Atlas AI Contextual (Golden Rule)
+- **Previsualización obligatoria antes de descargar (`PdfPreviewProvider`)**:
+  - Ninguna acción de usuario en navegador debe disparar un `doc.save(...)` ciego o descarga directa sin mostrar primero el documento en [`DocumentPreviewModal.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/ui/DocumentPreviewModal.jsx).
+  - Todo generador `jsPDF` en cliente debe finalizar con `previewOrSavePdf(doc, filename, meta)` y todo PDF remoto debe abrirse vía `previewRemotePdf(url, meta)` (servidos por [`PdfPreviewContext.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/context/PdfPreviewContext.jsx) en `GlobalClientWrapper.jsx`).
+- **Cabecera y Footer únicos en todos los PDFs**:
+  - Todos los PDFs deben usar las utilidades de `src/lib/pdf/atlasPdfChrome.js` (`drawAtlasInstitutionalHeader`, `applyAtlasRunningFooter`) para garantizar identidad visual homogénea (Navy `#003666` + Teal `#0d9488`, márgenes `14mm`, paginación `Page X of Y`).
+- **Atlas AI único, parametrizable y contextual**:
+  - Todas las pantallas deben registrar su contexto vivo (ruta, entidad, SKUs visibles, divisa, rol/sesión) mediante `useRegisterAtlasContext(...)` de [`AtlasContextProvider.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/context/AtlasContextProvider.jsx) sin filtrar datos restringidos en sesiones `guest`, consumiendo el motor unificado `/api/ai-chat` parametrizado por `mode` y `role`.
+
+

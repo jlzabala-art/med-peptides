@@ -136,11 +136,14 @@ export const generateInvoicePDF = async (options) => {
     });
   }
 
-  const footY = doc.internal.pageSize.getHeight()-15;
-  doc.setDrawColor(226,232,240); doc.line(15, footY-4, W-15, footY-4);
-  doc.setFontSize(8); doc.setTextColor(148,163,184);
-  doc.text('Atlas Health — Advanced Research Solutions | info@atlashealth-services.com', W/2, footY, { align: 'center' });
-  doc.save(`Atlas Health-Order-${targetOrderId}.pdf`);
+  const { applyAtlasRunningFooter, previewOrSavePdf } = await import('@/lib/pdf/atlasPdfChrome');
+  applyAtlasRunningFooter(doc, {
+    disclaimer: 'Atlas Health Services — Advanced Research Solutions | info@atlashealth-services.com',
+  });
+  previewOrSavePdf(doc, `Atlas Health-Order-${targetOrderId}.pdf`, {
+    title: `Order Invoice #${targetOrderId}`,
+    subtitle: 'Atlas Health Services — Official Order Summary',
+  });
 };
 
 export const getReceiptHTML = (options) => {

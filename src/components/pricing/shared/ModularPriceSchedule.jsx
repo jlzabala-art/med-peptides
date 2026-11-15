@@ -21,6 +21,7 @@ import PricingDataTable from './PricingDataTable';
 import PricingExportModal from './PricingExportModal';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 
 export default function ModularPriceSchedule({
   initialProducts = [],
@@ -114,6 +115,34 @@ export default function ModularPriceSchedule({
       }
     },
     [handleUpdateProductPrice, isAdmin, persistInlineEdits]
+  );
+
+  useRegisterAtlasContext(
+    {
+      mode: 'pricing_schedule',
+      contextType: 'catalog',
+      storageKey: `pricing-${documentRef || loginRedirect}`,
+      contextAnchor: {
+        sectionTitle: `${brandLeft} — ${brandRight}`,
+        code: documentRef,
+        currency,
+        isGuest,
+        selectedCategory,
+        keyActives: documentSubtitle,
+        mechanisms: isGuest
+          ? `Public Wholeseller B2B Price Schedule in ${currency} (${filteredProducts.length} SKUs).`
+          : `Authorized Price Schedule in ${currency} (${filteredProducts.length} SKUs).`,
+      },
+      catalogInventory: filteredProducts.slice(0, 40).map((p) => ({
+        sku: p.sku,
+        name: p.name,
+        category: p.category,
+        volume: p.volume,
+        wholesellerPrice: formatPrice(p.calculatedWholesale),
+        ...(isGuest ? {} : { clinicPrice: formatPrice(p.recommendedClinic), retailMsrp: formatPrice(p.recommendedRetail) }),
+      })),
+    },
+    [brandLeft, brandRight, documentRef, loginRedirect, currency, isGuest, selectedCategory, documentSubtitle, filteredProducts, formatPrice]
   );
 
   const handlePrint = () => {

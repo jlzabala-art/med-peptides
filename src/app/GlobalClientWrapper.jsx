@@ -8,6 +8,8 @@ import BackToTop from '../layout/BackToTop';
 import BottomTabBar from '../layout/BottomTabBar';
 import { useAuth } from '../context/AuthContext';
 import { PublicWorkspaceProvider } from '../context/PublicWorkspaceContext';
+import { PdfPreviewProvider } from '../context/PdfPreviewContext';
+import { AtlasContextProvider } from '../context/AtlasContextProvider';
 import { useUIStore } from '../stores/uiStore';
 import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
@@ -199,22 +201,30 @@ export default function GlobalClientWrapper({ children }) {
   if (isPortalRoute) {
     return (
       <PublicWorkspaceProvider>
-        <AppErrorBoundary>
-          <Toaster containerStyle={{ zIndex: 99999 }} />
-          {children}
-          {!isPrivatePortalRoute && <GlobalPublicAtlasDrawer />}
-          {isSuperUser && <GCPCommandPalette />}
-          <PWAInstallPrompt />
-        </AppErrorBoundary>
+        <AtlasContextProvider>
+          <PdfPreviewProvider>
+            <AppErrorBoundary>
+              <Toaster containerStyle={{ zIndex: 99999 }} />
+              {children}
+              {!isPrivatePortalRoute && <GlobalPublicAtlasDrawer />}
+              {isSuperUser && <GCPCommandPalette />}
+              <PWAInstallPrompt />
+            </AppErrorBoundary>
+          </PdfPreviewProvider>
+        </AtlasContextProvider>
       </PublicWorkspaceProvider>
     );
   }
 
   return (
     <PublicWorkspaceProvider>
-      <StorefrontShell>{children}</StorefrontShell>
-      {isSuperUser && <GCPImpersonationDock />}
-      {isSuperUser && <GCPCommandPalette />}
+      <AtlasContextProvider>
+        <PdfPreviewProvider>
+          <StorefrontShell>{children}</StorefrontShell>
+          {isSuperUser && <GCPImpersonationDock />}
+          {isSuperUser && <GCPCommandPalette />}
+        </PdfPreviewProvider>
+      </AtlasContextProvider>
     </PublicWorkspaceProvider>
   );
 }

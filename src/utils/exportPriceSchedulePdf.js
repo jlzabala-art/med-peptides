@@ -6,6 +6,7 @@ import {
   getAtlasAutoTableDefaults,
   drawAtlasGuestCtaBanner,
   applyAtlasRunningFooter,
+  previewOrSavePdf,
 } from '../lib/pdf/atlasPdfChrome';
 
 /**
@@ -150,5 +151,9 @@ export function exportPriceSchedulePdf({
   if (returnBlob) {
     return doc.output('blob');
   }
-  doc.save(`${safeId}_${isGuest ? 'wholeseller' : tier}_${dateStr}.pdf`);
+  const filename = `${safeId}_${isGuest ? 'wholeseller' : tier}_${dateStr}.pdf`;
+  return previewOrSavePdf(doc, filename, {
+    title: `${group?.label || 'Price Schedule'} — Official PDF`,
+    subtitle: `${products.length} SKUs · ${currency}`,
+  });
 }

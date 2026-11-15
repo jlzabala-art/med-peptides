@@ -261,10 +261,16 @@ export default function IncomingOrderAcknowledgmentModal() {
       doc.text('Grand Total:', 124, finalY + 22);
       doc.text(`$${Number(order.grandTotal ?? order.total ?? 0).toFixed(2)} USD`, 192, finalY + 22, { align: 'right' });
 
-      doc.save(`ProForma_${order.orderCode || order.id}.pdf`);
+      const { applyAtlasRunningFooter, previewOrSavePdf } = await import('@/lib/pdf/atlasPdfChrome');
+      applyAtlasRunningFooter(doc, {
+        disclaimer: 'ATLAS HEALTH SERVICES · OFFICIAL PRO-FORMA INVOICE',
+      });
+      previewOrSavePdf(doc, `ProForma_${order.orderCode || order.id}.pdf`, {
+        title: `Pro-Forma ${order.orderCode || order.id}`,
+        subtitle: 'Atlas Health Services — Order Acknowledgment',
+      });
     } catch (err) {
       console.error('Failed to generate Pro-Forma PDF:', err);
-      alert('Failed to generate Pro-Forma PDF.');
     } finally {
       setIsGeneratingPdf(false);
     }

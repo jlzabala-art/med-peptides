@@ -110,13 +110,15 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
       doc.text("• Automated payout anomaly detection is ACTIVE and monitoring Stripe webhooks.", 14, finalY + 30);
       doc.text("• Regulatory compliance on vendor invoices stands at 100%.", 14, finalY + 37);
 
-      // Footer
-      doc.setFontSize(8);
-      doc.setTextColor(148, 163, 184);
-      doc.text("CONFIDENTIAL - Do not distribute without permission. Internal CFO Hub Use Only.", 14, 285);
-
-      // Download
-      doc.save(`CFO_Hub_Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      // Unified Institutional Footer & Preview-First Output
+      const { applyAtlasRunningFooter, previewOrSavePdf } = await import('@/lib/pdf/atlasPdfChrome');
+      applyAtlasRunningFooter(doc, {
+        disclaimer: 'CONFIDENTIAL — INTERNAL CFO HUB USE ONLY · ATLAS HEALTH SERVICES',
+      });
+      previewOrSavePdf(doc, `CFO_Hub_Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`, {
+        title: 'CFO Hub Financial Report',
+        subtitle: 'Atlas Health Services — Executive Financial Summary',
+      });
       setReportReady(true);
     } catch (error) {
       console.error("PDF Generation failed", error);

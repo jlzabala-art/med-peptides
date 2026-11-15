@@ -211,19 +211,19 @@ export async function generatePriceListPdf(products = [], options = {}) {
     alternateRowStyles: {
       fillColor: COLORS.lightBg
     },
-    margin: { left: MARGIN, right: MARGIN, bottom: 14 },
-    didDrawPage: (data) => {
-      // Footer on every page
-      const pageNumber = doc.internal.getNumberOfPages();
-      doc.setFontSize(6.5);
-      doc.setTextColor(...COLORS.muted);
-      doc.text('Atlas Health Intelligence Platform · Confidential Pricing · Not for Public Distribution', MARGIN, PAGE_H - 6);
-      doc.text(`Page ${pageNumber} · Total Items: ${rows.length}`, PAGE_W - MARGIN, PAGE_H - 6, { align: 'right' });
-    }
+    margin: { left: MARGIN, right: MARGIN, bottom: 20 },
+  });
+
+  const { applyAtlasRunningFooter, previewOrSavePdf } = await import('../lib/pdf/atlasPdfChrome');
+  applyAtlasRunningFooter(doc, {
+    disclaimer: 'Atlas Health Intelligence Platform · Confidential Pricing · Not for Public Distribution',
   });
 
   const filename = `Atlas_Price_Catalog_${role}_${new Date().toISOString().slice(0, 10)}.pdf`;
-  doc.save(filename);
+  previewOrSavePdf(doc, filename, {
+    title: 'Atlas Health — Price Catalog',
+    subtitle: `Role: ${role} · ${rows.length} items`,
+  });
   return { success: true, filename, totalItems: rows.length };
 }
 

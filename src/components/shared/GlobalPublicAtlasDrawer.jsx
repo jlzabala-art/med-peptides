@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import PublicAtlasAIDrawer from './PublicAtlasAIDrawer';
+import { useAtlasContext } from '@/context/AtlasContextProvider';
 
 /**
  * GlobalPublicAtlasDrawer
@@ -17,6 +18,7 @@ import PublicAtlasAIDrawer from './PublicAtlasAIDrawer';
 export default function GlobalPublicAtlasDrawer() {
   const pathname = usePathname() || '/';
   const [hasPageDrawer, setHasPageDrawer] = useState(false);
+  const { screenContext } = useAtlasContext();
   const [customContext, setCustomContext] = useState(null);
 
   useEffect(() => {
@@ -43,7 +45,8 @@ export default function GlobalPublicAtlasDrawer() {
   }, []);
 
   const routeContext = useMemo(() => {
-    if (customContext) return customContext;
+    const activeCtx = screenContext || customContext;
+    if (activeCtx) return activeCtx;
 
     if (pathname.startsWith('/pricing/peptides')) {
       return {
@@ -111,7 +114,7 @@ export default function GlobalPublicAtlasDrawer() {
       storageKey: `public-${pathname.replace(/[^a-z0-9]/gi, '_').slice(0, 40) || 'home'}`,
       contextAnchor: null,
     };
-  }, [pathname, customContext]);
+  }, [pathname, customContext, screenContext]);
 
   const hasSpecializedCopilot =
     pathname.startsWith('/pricing/peptides') ||

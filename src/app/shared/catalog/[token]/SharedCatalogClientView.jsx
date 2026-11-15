@@ -748,14 +748,14 @@ export default function SharedCatalogClientView({
       doc.text('Grand Total:', 125, finalY + 28);
       doc.text(`${currencySymbol}${grandTotal.toFixed(2)} ${currentCurrency}`, 190, finalY + 28, { align: 'right' });
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text('CONFIDENTIAL CLINICAL QUOTATION', 14, 280);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Quotation valid for 30 calendar days from issue date. Analytical purity and clinical specifications verified.', 14, 285);
-
-      doc.save(`Atlas_Health_ProForma_${quoteId}_${new Date().toISOString().split('T')[0]}.pdf`);
+      const { applyAtlasRunningFooter, previewOrSavePdf } = await import('@/lib/pdf/atlasPdfChrome');
+      applyAtlasRunningFooter(doc, {
+        disclaimer: 'CONFIDENTIAL CLINICAL QUOTATION · VALID 30 CALENDAR DAYS · ATLAS HEALTH SERVICES',
+      });
+      previewOrSavePdf(doc, `Atlas_Health_ProForma_${quoteId}_${new Date().toISOString().split('T')[0]}.pdf`, {
+        title: `Pro-Forma Quotation #${quoteId}`,
+        subtitle: 'Atlas Health Services — Clinical Quotation',
+      });
     } catch (err) {
       console.error('Error generating pro-forma PDF:', err);
     } finally {

@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { previewOrSavePdf } from '../lib/pdf/atlasPdfChrome';
 /**
  * doctorPdfGenerator.js
  *
@@ -1202,10 +1203,13 @@ export function generateDoctorPdf(protocol) {
     drawFooter(doc, i, totalPages, protocolId);
   }
 
-  // ── Filename & download ─────────────────────────────────────────────────
+  // ── Filename & preview-first output ─────────────────────────────────────
   const slug = protocol.protocol_slug || protocol.protocol_id || 'protocol';
   const filename = `atlas-health-${slug}-doctor-review.pdf`;
-  doc.save(filename);
+  previewOrSavePdf(doc, filename, {
+    title: `${protocol.title || slug} — Clinical Dossier`,
+    subtitle: 'Atlas Health Services — Doctor Review Protocol',
+  });
 }
 
 // ─── Named exports for use by future phases ───────────────────────────────────

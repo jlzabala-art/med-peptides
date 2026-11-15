@@ -275,13 +275,14 @@ export async function generateProductDatasheetPdf(product, options = {}) {
 
   // ── Footer ────────────────────────────────────────────────────────────────
   const footerY = PAGE_H - 10;
-  doc.setFontSize(7);
-  doc.setTextColor(...COLORS.muted);
-  doc.text('Atlas Health Clinical Research Group · For Licensed Research & Clinical Administration Only.', MARGIN, footerY);
-  doc.text(`Page 1 of 1 · Generated ${new Date().toISOString().slice(0, 10)}`, PAGE_W - MARGIN, footerY, { align: 'right' });
-
-  // Save / Trigger Download
+  const { applyAtlasRunningFooter, previewOrSavePdf } = await import('../lib/pdf/atlasPdfChrome');
+  applyAtlasRunningFooter(doc, {
+    disclaimer: 'Atlas Health Clinical Research Group · For Licensed Research & Clinical Administration Only.',
+  });
   const filename = `Datasheet_${productName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-  doc.save(filename);
+  previewOrSavePdf(doc, filename, {
+    title: `${productName} — Clinical Datasheet`,
+    subtitle: 'Atlas Health Clinical Research Group',
+  });
   return { success: true, filename };
 }

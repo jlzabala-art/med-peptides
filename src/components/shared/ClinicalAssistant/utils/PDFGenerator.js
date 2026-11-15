@@ -126,6 +126,12 @@ export async function generateClinicalBriefPDF(messages = []) {
     y += 12; // Space between messages
   });
 
-  addFooter();
-  doc.save(`Atlas_Clinical_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+  const { applyAtlasRunningFooter, previewOrSavePdf } = await import('@/lib/pdf/atlasPdfChrome');
+  applyAtlasRunningFooter(doc, {
+    disclaimer: 'ATLAS HEALTH SERVICES · CLINICAL AI BRIEF · FOR AUTHORIZED MEDICAL USE',
+  });
+  previewOrSavePdf(doc, `Atlas_Clinical_Report_${new Date().toISOString().slice(0, 10)}.pdf`, {
+    title: 'Atlas Clinical AI Brief',
+    subtitle: 'Clinical Consultation Summary',
+  });
 }
