@@ -8,8 +8,8 @@ import {
   Check,
   Copy,
   Download,
+  FileText,
   MessageCircle,
-  Printer,
 } from 'lucide-react';
 
 export default function PricingTopBar({
@@ -96,10 +96,10 @@ export default function PricingTopBar({
             type="button"
             onClick={onPrint}
             className="action-btn action-primary"
-            title="Print this Price Sheet"
+            title="Preview & Download Official PDF"
           >
-            <Printer size={16} />
-            <span>Print</span>
+            <FileText size={16} />
+            <span>Preview PDF</span>
           </button>
 
           <GcpUserBadge variant="dark" loginRedirect={loginRedirect} />

@@ -32,67 +32,9 @@ export default function PricingDataTable({
   const columns = useMemo(() => {
     const cols = [
       {
-        key: 'itemNumber',
-        label: '#',
-        width: '54px',
-        minWidth: '50px',
-        nowrap: true,
-        sortable: true,
-        render: (val, row) => (
-          <span
-            style={{
-              fontFamily: 'monospace',
-              fontSize: '0.80rem',
-              color: '#64748b',
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {val ?? row?.itemNumber}
-          </span>
-        ),
-      },
-      {
-        key: 'sku',
-        label: 'SKU',
-        width: '13%',
-        sortable: true,
-        render: (val, row) => {
-          const rawSku = val ?? row?.sku ?? '';
-          const simpleSku = rawSku.replace(skuPrefixPattern, '');
-          return (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '3px',
-                alignItems: 'flex-start',
-              }}
-            >
-              <CopyableId value={simpleSku} />
-              <span
-                style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 650,
-                  color: '#0d9488',
-                  background: '#f0fdfa',
-                  border: '1px solid #a7f3d0',
-                  padding: '1px 6px',
-                  borderRadius: '4px',
-                  letterSpacing: '0.02em',
-                  textTransform: 'lowercase',
-                }}
-              >
-                {row?.category}
-              </span>
-            </div>
-          );
-        },
-      },
-      {
         key: 'name',
         label: 'Product',
-        width: canViewLanded && showLandedCost ? '26%' : '32%',
+        width: isAdmin ? '32%' : '46%',
         sortable: true,
         render: (_, row) => {
           const detailUrl = `/p/${row.slug || row.id}`;
@@ -132,9 +74,9 @@ export default function PricingDataTable({
                 <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
                   {row.name}
                 </div>
-                {row.volume && (
-                  <div style={{ fontSize: '0.73rem', color: '#64748b' }}>
-                    {row.volume}
+                {(row.volume || row.category) && (
+                  <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '2px' }}>
+                    {[row.volume, row.category].filter(Boolean).join(' · ')}
                   </div>
                 )}
               </div>
@@ -145,12 +87,11 @@ export default function PricingDataTable({
       {
         key: 'stockStatus',
         label: 'Status',
-        width: '12%',
+        width: isAdmin ? '11%' : '14%',
         sortable: true,
         render: (val) => (
           <StatusBadge
             status={String(val || '').toLowerCase().includes('out') ? 'error' : 'active'}
-            customLabel={val || 'In Stock'}
           />
         ),
       },
@@ -185,7 +126,7 @@ export default function PricingDataTable({
     cols.push({
       key: 'calculatedWholesale',
       label: `Wholeseller (${currency})`,
-      width: '13%',
+      width: isAdmin ? '12%' : '14%',
       align: 'right',
       sortable: true,
       render: (val, row) => {
@@ -218,7 +159,7 @@ export default function PricingDataTable({
       cols.push({
         key: 'calculatedDistributor',
         label: `Distributor (${currency})`,
-        width: '12%',
+        width: '11%',
         align: 'right',
         sortable: true,
         render: (val) => (
@@ -232,7 +173,7 @@ export default function PricingDataTable({
     cols.push({
       key: 'recommendedClinic',
       label: `Clinic (${currency})`,
-      width: '12%',
+      width: isAdmin ? '11%' : '13%',
       align: 'right',
       sortable: true,
       render: (val, row) => {
@@ -262,7 +203,7 @@ export default function PricingDataTable({
     cols.push({
       key: 'recommendedRetail',
       label: `Retail MSRP (${currency})`,
-      width: '12%',
+      width: isAdmin ? '12%' : '13%',
       align: 'right',
       sortable: true,
       render: (val, row) => {
@@ -298,62 +239,76 @@ export default function PricingDataTable({
     skuPrefixPattern,
   ]);
 
-  const renderExpandedDetail = (row) => (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1rem',
-        padding: '1rem 1.25rem',
-        background: '#f8fafc',
-        borderTop: '1px solid #e2e8f0',
-      }}
-    >
-      <div>
-        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-          Key Bioactive Compounds
-        </div>
-        <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.45 }}>
-          {row.keyActives || 'Clinical bioactive formulation'}
-        </p>
-      </div>
-      <div>
-        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-          Clinical Indication &amp; Role
-        </div>
-        <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.45 }}>
-          {row.clinicalFocus || row.subtitle || 'Professional clinic & homecare protocol'}
-        </p>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.6rem' }}>
+  const renderExpandedDetail = (row) => {
+    const simpleSku = (row.sku || row.id || '').replace(skuPrefixPattern, '');
+    return (
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '1rem',
+          padding: '1rem 1.25rem',
+          background: '#f8fafc',
+          borderTop: '1px solid #e2e8f0',
+        }}
+      >
         <div>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-            Presentation &amp; Margin
+            SKU / Reference
           </div>
-          <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#334155' }}>
-            {row.presentation || row.volume || 'Standard Clinical Pack'} · Spread: {row.calculatedRetailMarginPct}% MSRP
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.3rem', marginBottom: '0.6rem' }}>
+            <CopyableId value={simpleSku} />
+            {row.itemNumber && (
+              <span style={{ fontSize: '0.72rem', color: '#64748b', fontFamily: 'monospace' }}>
+                #{row.itemNumber}
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+            Key Bioactive Compounds
+          </div>
+          <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.45 }}>
+            {row.keyActives || 'Clinical bioactive formulation'}
           </p>
         </div>
         <div>
-          <Link
-            href={`/p/${row.slug || row.id}`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: '#003666',
-              textDecoration: 'none',
-            }}
-          >
-            <span>Open Full Product Dossier</span>
-            <ArrowRight size={14} />
-          </Link>
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+            Clinical Indication &amp; Role
+          </div>
+          <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.45 }}>
+            {row.clinicalFocus || row.subtitle || 'Professional clinic & homecare protocol'}
+          </p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.6rem' }}>
+          <div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+              Presentation &amp; Margin
+            </div>
+            <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#334155' }}>
+              {row.presentation || row.volume || 'Standard Clinical Pack'} · Spread: {row.calculatedRetailMarginPct}% MSRP
+            </p>
+          </div>
+          <div>
+            <Link
+              href={`/p/${row.slug || row.id}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#003666',
+                textDecoration: 'none',
+              }}
+            >
+              <span>Open Full Product Dossier</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (products.length === 0) {
     return (

@@ -4,11 +4,8 @@ import React, { useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import {
   Download,
-  Eye,
-  EyeOff,
   FileText,
   Layers,
-  Printer,
   RotateCcw,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -41,7 +38,7 @@ export default function ModularPriceSchedule({
     documentRef = 'DOC-UAE-COL-2026-V1',
     defaultCurrency = 'AED',
     availableCurrencies = ['AED', 'USD', 'EUR'],
-    defaultMarkupPct = 15,
+    defaultMarkupPct = 32.25,
     skuPrefixPattern = /^SKU-COLWAY-/i,
     searchPlaceholder = 'Search formulations by product name, SKU, or active ingredient...',
     storageNamespace = 'colway_uae_pricing',
@@ -71,7 +68,7 @@ export default function ModularPriceSchedule({
   const [copied, setCopied] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
-  const [showLandedCost, setShowLandedCost] = useState(true);
+  const showLandedCost = true;
 
   const { currency, setCurrency, fxRate, formatPrice } = useCurrencyConverter({
     defaultCurrency,
@@ -278,30 +275,6 @@ export default function ModularPriceSchedule({
           </div>
 
           <div className="controls-right">
-            {canViewLanded && (
-              <button
-                type="button"
-                onClick={() => setShowLandedCost((prev) => !prev)}
-                className={`action-btn ${showLandedCost ? 'action-active' : 'action-ghost'}`}
-                style={{
-                  fontSize: '0.74rem',
-                  padding: '6px 12px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  borderRadius: '6px',
-                  border: showLandedCost ? '1px solid #0d9488' : '1px solid #e2e8f0',
-                  background: showLandedCost ? '#f0fdfa' : '#ffffff',
-                  color: showLandedCost ? '#0d9488' : '#64748b',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
-                {showLandedCost ? <EyeOff size={14} /> : <Eye size={14} />}
-                <span>{showLandedCost ? 'Hide Landed CIF' : 'Show Landed CIF'}</span>
-              </button>
-            )}
-
             {hasCustomOverrides && (
               <button
                 type="button"
@@ -421,8 +394,8 @@ export default function ModularPriceSchedule({
               onClick={handlePrint}
               className="mobile-btn mobile-btn-primary"
             >
-              <Printer size={14} />
-              <span>Print</span>
+              <FileText size={14} />
+              <span>Preview PDF</span>
             </button>
           </div>
         </div>

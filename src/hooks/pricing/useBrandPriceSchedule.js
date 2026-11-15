@@ -6,7 +6,7 @@ import { ATLAS_MARGIN_RATES } from '@/lib/pricing/pricingCore';
 export function useBrandPriceSchedule({
   initialProducts = [],
   initialCategory = 'all',
-  defaultMarkupPct = 15,
+  defaultMarkupPct = 32.25,
   fxRate = 1,
 } = {}) {
   const [markupPct, setMarkupPct] = useState(defaultMarkupPct);
@@ -96,15 +96,11 @@ export function useBrandPriceSchedule({
 
       const distributor =
         ov.distributorPrice ??
-        (p.distributorPriceAed != null
-          ? Number(p.distributorPriceAed)
-          : Number((landed * (1 + ATLAS_MARGIN_RATES.DISTRIBUTOR_MARKUP)).toFixed(2)));
+        Number((landed * (1 + ATLAS_MARGIN_RATES.DISTRIBUTOR_MARKUP)).toFixed(2));
 
       const wholesale =
         ov.wholesalePrice ??
-        (p.wholesalePriceAed != null
-          ? Number(p.wholesalePriceAed)
-          : Number((landed * ATLAS_MARGIN_RATES.WHOLESELLER_COMPOUND).toFixed(2)));
+        Number((landed * ATLAS_MARGIN_RATES.WHOLESELLER_COMPOUND).toFixed(2));
 
       const marginAed = Number((wholesale - landed).toFixed(2));
       const marginPct =

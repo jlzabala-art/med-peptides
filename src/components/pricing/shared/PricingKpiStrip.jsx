@@ -268,7 +268,7 @@ export default function PricingKpiStrip({
               label="Formula Overrides"
               value={hasCustomOverrides ? 'Custom Rates Active' : 'Standard Formula'}
               valueClass="text-amber-600"
-              sub={`+${markupPct}% base wholesale markup`}
+              sub={hasCustomOverrides ? 'Custom inline overrides' : '+32.25% (15%+15%) Wholesale · +15% Distributor'}
             />
           </>
         )}
