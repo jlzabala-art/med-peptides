@@ -652,3 +652,8 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   3. `<FloatingActionDock />`: dock inferior único estilo Apple Glassmorphism con altura mínima táctil `44px`.
   4. `<MetadataStrip />`: grilla estándar de mini-cajas clave-valor (CAS, Pureza, Lote, Fecha, Moneda).
   5. `<TemplateSkeleton />`: skeletons acoplados al template (`catalog` | `detail` | `document`); prohibido usar spinners genéricos centrados.
+
+## 65. Estado Global Compartido, App Switcher y Design Tokens (Golden Rule)
+- **Estado persistente compartido (`PublicWorkspaceContext`)**: Toda preferencia transversal (`currency`, `lang`, borrador `rfqItems`) DEBE leerse/sincronizarse con `usePublicWorkspace()` (`src/context/PublicWorkspaceContext.jsx`) para que el usuario no pierda su divisa, idioma o selección al navegar entre `/vials`, `/pricing/*`, `/collection/*` y `/proto`.
+- **Navegación cruzada (App Switcher)**: `PublicUnifiedHeader` provee el menú App Switcher (icono de 9 puntos) en todas las páginas públicas no white-label para navegar en 1 clic entre los módulos principales de Atlas.
+- **Design Tokens únicos**: Todos los nuevos componentes y templates deben consumir las variables de `src/styles/design-tokens.css` (`--atlas-radius-card`, `--atlas-border-subtle`, `--atlas-shadow-card`, `--atlas-ink-primary`, `--atlas-brand-navy`, `--atlas-brand-blue`) en lugar de hardcodear radios o sombras distintas por ruta.

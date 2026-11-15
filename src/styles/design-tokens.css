@@ -1,0 +1,34 @@
+/* ==========================================================================
+   Atlas Platform Design Tokens (SSOT across all 5 Template Families)
+   ========================================================================== */
+:root {
+  /* Radii */
+  --atlas-radius-sm: 8px;
+  --atlas-radius-md: 10px;
+  --atlas-radius-card: 14px;
+  --atlas-radius-hero: 16px;
+  --atlas-radius-pill: 9999px;
+
+  /* Surfaces & Borders */
+  --atlas-surface-page: #f8fafc;
+  --atlas-surface-card: #ffffff;
+  --atlas-surface-muted: #f1f5f9;
+  --atlas-border-subtle: #e2e8f0;
+  --atlas-border-control: #dadce0;
+
+  /* Typography & Ink */
+  --atlas-ink-primary: #0f172a;
+  --atlas-ink-secondary: #475569;
+  --atlas-ink-muted: #64748b;
+  --atlas-ink-control: #5f6368;
+
+  /* Brand & Semantic Accents */
+  --atlas-brand-navy: #003666;
+  --atlas-brand-blue: #1a73e8;
+  --atlas-brand-blue-hover: #1557b0;
+
+  /* Elevation & Layout */
+  --atlas-page-max-width: 1320px;
+  --atlas-shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --atlas-shadow-dock: 0 16px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05);
+}

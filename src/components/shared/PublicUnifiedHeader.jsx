@@ -14,10 +14,11 @@ import {
   FileText,
   Search
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut, FileInput, LayoutList, Home, Sliders, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, LayoutGrid, User, LogOut, FileInput, LayoutList, Home, Sliders, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
+import { usePublicWorkspace } from '../../context/PublicWorkspaceContext';
 import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer';
 import PublicProviderCTA from './public/PublicProviderCTA';
 import BrandLogo from '../common/BrandLogo';
@@ -134,8 +135,11 @@ export default function PublicUnifiedHeader({
   const [copied, setCopied] = useState(false);
   const [activeAnchor, setActiveAnchor] = useState(controlledActiveAnchorId || anchorTabs[0]?.id || '');
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
+  const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
   const tabsContainerRef = useRef(null);
   const authDropdownRef = useRef(null);
+  const appSwitcherRef = useRef(null);
+  const workspace = usePublicWorkspace();
 
   // Global ⌘K / Ctrl+K keyboard shortcut for instant datasheet search
   useEffect(() => {
@@ -157,11 +161,14 @@ export default function PublicUnifiedHeader({
     }
   }, [controlledActiveAnchorId]);
 
-  // Close auth dropdown on outside click
+  // Close auth & app switcher dropdowns on outside click
   useEffect(() => {
     const handler = (e) => {
       if (authDropdownRef.current && !authDropdownRef.current.contains(e.target)) {
         setAuthDropdownOpen(false);
+      }
+      if (appSwitcherRef.current && !appSwitcherRef.current.contains(e.target)) {
+        setAppSwitcherOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -217,6 +224,7 @@ export default function PublicUnifiedHeader({
       url.searchParams.set('lang', nextLang);
       window.history.replaceState({}, '', url.toString());
     }
+    workspace.setLang(nextLang);
     if (onLangChange) {
       onLangChange(nextLang);
     }
@@ -254,6 +262,7 @@ export default function PublicUnifiedHeader({
       window.history.replaceState({}, '', url.toString());
       window.dispatchEvent(new CustomEvent('atlas-currency-changed', { detail: nextCurrency }));
     }
+    workspace.setCurrency(nextCurrency);
     if (onCurrencyChange) {
       onCurrencyChange(nextCurrency);
     }
@@ -392,8 +401,90 @@ export default function PublicUnifiedHeader({
         {/* ── Executive TopBar (Google Cloud Console Standard) ── */}
         <div className="puh-brand-row">
           <div className="puh-brand-row-inner">
-            {/* Left: Brand Logo / Title or White-Label Clinic Logo */}
+            {/* Left: App Switcher + Brand Logo / Title or White-Label Clinic Logo */}
             <div className="puh-brand-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {!whiteLabel && (
+                <div ref={appSwitcherRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setAppSwitcherOpen((prev) => !prev);
+                    }}
+                    title={isSpanish ? 'Cambiar de módulo Atlas' : 'Atlas App Switcher'}
+                    aria-label={isSpanish ? 'Cambiar de módulo Atlas' : 'Atlas App Switcher'}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.16)',
+                      background: appSwitcherOpen ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.06)',
+                      color: '#e2e8f0',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <LayoutGrid size={16} />
+                  </button>
+
+                  {appSwitcherOpen && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '40px',
+                        left: 0,
+                        width: '260px',
+                        background: '#ffffff',
+                        border: '1px solid var(--atlas-border-subtle, #e2e8f0)',
+                        borderRadius: '12px',
+                        boxShadow: '0 14px 32px rgba(15, 23, 42, 0.16)',
+                        padding: '8px',
+                        zIndex: 9999,
+                        display: 'grid',
+                        gridTemplateColumns: '1fr',
+                        gap: '4px',
+                      }}
+                    >
+                      <div style={{ padding: '4px 8px 6px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                        {isSpanish ? 'Plataforma Atlas' : 'Atlas Platform'}
+                      </div>
+                      {[
+                        { label: isSpanish ? 'Catálogo Clínico' : 'Clinical Catalog', href: '/c/CAT-MU9L9GBN' },
+                        { label: isSpanish ? 'Hub de Precios B2B' : 'B2B Price Hub', href: '/pricing' },
+                        { label: isSpanish ? 'Lista de Péptidos' : 'Peptides Schedule', href: '/pricing/peptides' },
+                        { label: isSpanish ? 'Protocolos Clínicos' : 'Clinical Protocols', href: '/proto' },
+                        { label: isSpanish ? 'Directorio de Viales' : 'Peptide Vials', href: '/vials' },
+                        { label: isSpanish ? 'Calculadora de Dosis' : 'Dosing Calculator', href: '/calculator' },
+                        { label: isSpanish ? 'Mi Portal' : 'My Portal', href: getDashboardHref() },
+                      ].map((app) => (
+                        <Link
+                          key={app.href}
+                          href={app.href}
+                          onClick={() => setAppSwitcherOpen(false)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            fontSize: '0.82rem',
+                            fontWeight: 600,
+                            color: pathname === app.href ? '#1a73e8' : '#0f172a',
+                            background: pathname === app.href ? '#eff6ff' : 'transparent',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          <span>{app.label}</span>
+                          <ChevronRight size={13} color="#94a3b8" />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {clinicLogo ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <img

@@ -7,6 +7,7 @@ import Footer from '../layout/Footer';
 import BackToTop from '../layout/BackToTop';
 import BottomTabBar from '../layout/BottomTabBar';
 import { useAuth } from '../context/AuthContext';
+import { PublicWorkspaceProvider } from '../context/PublicWorkspaceContext';
 import { useUIStore } from '../stores/uiStore';
 import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
@@ -197,22 +198,24 @@ export default function GlobalClientWrapper({ children }) {
   // Portal routes have their own layout — just render children without loading B2C data
   if (isPortalRoute) {
     return (
-      <AppErrorBoundary>
-        <Toaster containerStyle={{ zIndex: 99999 }} />
-        {children}
-        {!isPrivatePortalRoute && <GlobalPublicAtlasDrawer />}
-        {isSuperUser && <GCPCommandPalette />}
-        <PWAInstallPrompt />
-      </AppErrorBoundary>
+      <PublicWorkspaceProvider>
+        <AppErrorBoundary>
+          <Toaster containerStyle={{ zIndex: 99999 }} />
+          {children}
+          {!isPrivatePortalRoute && <GlobalPublicAtlasDrawer />}
+          {isSuperUser && <GCPCommandPalette />}
+          <PWAInstallPrompt />
+        </AppErrorBoundary>
+      </PublicWorkspaceProvider>
     );
   }
 
   return (
-    <>
+    <PublicWorkspaceProvider>
       <StorefrontShell>{children}</StorefrontShell>
       {isSuperUser && <GCPImpersonationDock />}
       {isSuperUser && <GCPCommandPalette />}
-    </>
+    </PublicWorkspaceProvider>
   );
 }
 

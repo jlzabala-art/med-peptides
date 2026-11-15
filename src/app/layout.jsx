@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components -- Next.js App Router: metadata exports must live in page/layout files */
 import '../index.css';
+import '../styles/design-tokens.css';
 import NextProviders from './NextProviders';
 import { cookies } from 'next/headers';
 import { getTokens } from 'next-firebase-auth-edge';

@@ -1,16 +1,10 @@
-"use client";
-
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import PortalProviders from '../../components/shared/PortalProviders';
-import ExitProfessionalMode from '../../components/auth/ExitProfessionalMode';
+import SessionEndedClient from './SessionEndedClient';
+
+export const metadata = {
+  title: 'Session Ended • Atlas Health Services',
+};
 
 export default function SessionEndedPortalPage() {
-  const router = useRouter();
-  
-  return (
-    <PortalProviders >
-      <ExitProfessionalMode onBack={() => router.push('/')} onLogin={() => router.push('/login')} />
-    </PortalProviders>
-  );
+  return <SessionEndedClient />;
 }
