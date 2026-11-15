@@ -12,7 +12,7 @@
   color: var(--cmp-text);
 }
 
-.cmp-container { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
+.cmp-container { width: 100%; max-width: var(--atlas-page-max-width, 1360px); margin: 0 auto; padding: 0 24px; box-sizing: border-box; }
 
 /* Embedded Doctor Portal Mode */
 .cmp-page.is-embedded {

@@ -451,7 +451,7 @@ export default function PeptidesPriceListClient({
   }, [lang, setSearchQuery]);
 
   return (
-    <div className="colway-price-root peptides-b2b-portal">
+    <div className="colway-price-root atlas-page-bg peptides-b2b-portal">
       {/* ── Screen Navigation Bar ── */}
       <PeptidesTopAppBar
         setIsNavDrawerOpen={setIsNavDrawerOpen}
@@ -479,7 +479,7 @@ export default function PeptidesPriceListClient({
         setIsInquiryDrawerOpen={setIsInquiryDrawerOpen}
       />
 
-      <main className="peptides-main-container" style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem 1.25rem 4rem 1.25rem' }}>
+      <main className="atlas-page-shell peptides-main-container">
         {/* Page Header (Consolidated Hero & Action Toolbar) */}
         <PeptidesPageHeader
           isDistributor={isDistributor}

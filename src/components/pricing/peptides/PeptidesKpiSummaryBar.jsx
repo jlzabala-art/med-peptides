@@ -41,14 +41,10 @@ export default function PeptidesKpiSummaryBar({
 
   return (
     <div
-      className="gcp-kpis-summary-block"
+      className="gcp-kpis-summary-block atlas-card"
       style={{
-        background: '#ffffff',
-        borderRadius: '8px',
-        border: '1px solid #e2e8f0',
         padding: '10px 14px',
         marginBottom: '0.85rem',
-        boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
       }}
     >
       {/* Scope Indicator & Switcher (Google Cloud Standard - Golden Rule #22) */}

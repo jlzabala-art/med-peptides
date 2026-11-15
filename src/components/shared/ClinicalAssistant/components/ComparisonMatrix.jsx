@@ -5,6 +5,7 @@ import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
+import DataTable from '@/components/ui/DataTable';
 
 
 
@@ -42,56 +43,35 @@ export default function ComparisonMatrix({
         <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>Comparison Matrix</span>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
-          <thead>
-            <tr>
-              <th style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', background: 'var(--color-bg-surface)', width: '30%' }}></th>
-              {compounds.map((c, i) => (
-                <th key={i} style={{
-                  padding: '1rem',
-                  borderBottom: '2px solid var(--primary)',
-                  backgroundColor: 'white',
-                  textAlign: 'center',
-                  fontSize: '0.78rem',
-                  fontWeight: 900,
-                  color: 'var(--primary)',
-                  textTransform: 'uppercase'
-                }}>
-                  {c}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, ri) => (
-              <tr key={ri} style={{ backgroundColor: ri % 2 === 0 ? 'transparent' : '#fcfdfe' }}>
-                <td style={{
-                  padding: '0.85rem 1rem',
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  color: 'var(--color-text-secondary)',
-                  borderBottom: '1px solid #f1f5f9'
-                }}>
-                  {row.label}
-                </td>
-                {compounds.map((c, ci) => (
-                  <td key={ci} style={{
-                    padding: '0.85rem 1rem',
-                    fontSize: '0.75rem',
-                    color: 'var(--color-text-primary)',
-                    textAlign: 'center',
-                    borderBottom: '1px solid #f1f5f9',
-                    borderLeft: '1px solid #f1f5f9'
-                  }}>
-                    {data[c]?.[row.key] || '—'}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={[
+          {
+            key: 'label',
+            header: 'Parameter',
+            width: '30%',
+            render: (val) => (
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-text-secondary)' }}>
+                {val}
+              </span>
+            ),
+          },
+          ...compounds.map((c, idx) => ({
+            key: `cmp_${idx}`,
+            header: c,
+            align: 'center',
+            render: (val) => val || '—',
+          })),
+        ]}
+        data={rows.map((row, ri) => {
+          const item = { id: row.key || `row-${ri}`, label: row.label };
+          compounds.forEach((c, ci) => {
+            item[`cmp_${ci}`] = data[c]?.[row.key] || '—';
+          });
+          return item;
+        })}
+        pagination={false}
+        enableAskAtlas={false}
+      />
       <div style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg-surface)', fontSize: '0.62rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
         * Based on current clinical research data and comparative analysis.
       </div>

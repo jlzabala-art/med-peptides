@@ -5226,8 +5226,8 @@ export default function DoctorPublicPortalClient({
         .gcp-portal-main {
           flex: 1;
           min-width: 0;
-          max-width: 1320px;
-          padding: 24px 28px 100px 28px;
+          max-width: var(--atlas-page-max-width, 1360px);
+          padding: 24px 24px 100px 24px;
           margin: 0 auto;
         }
         @media (max-width: 768px) {

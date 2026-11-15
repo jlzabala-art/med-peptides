@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronUp, ChevronDown, Layers, LayoutTemplate, Plus, Download, BookOpen, Box, Check } from '@/lib/icons';
 import CatalogTableView from '../../admin/catalog/views/CatalogTableView';
+import DataTable from '@/components/ui/DataTable';
 
 export default function CenterPanel({
   catalogCart,
@@ -480,201 +481,85 @@ export default function CenterPanel({
                       No historical catalogs found.
                     </p>
                   ) : (
-                    <div
-                      style={{
-                        background: '#fff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr
-                            style={{
-                              background: '#f8fafc',
-                              borderBottom: '1px solid #e2e8f0',
-                              textAlign: 'left',
-                            }}
-                          >
-                            <th
+                    <DataTable
+                      columns={[
+                        {
+                          key: 'title',
+                          header: 'Title',
+                          width: '26%',
+                          render: (val) => <span style={{ fontWeight: 500, color: '#0f172a' }}>{val}</span>,
+                        },
+                        {
+                          key: 'date',
+                          header: 'Date',
+                          width: '14%',
+                          render: (val) => <span style={{ color: '#475569' }}>{val || '-'}</span>,
+                        },
+                        {
+                          key: 'targetAudience',
+                          header: 'Audience',
+                          width: '14%',
+                          render: (val) => (
+                            <span style={{ color: '#475569', textTransform: 'capitalize' }}>
+                              {val || 'General'}
+                            </span>
+                          ),
+                        },
+                        {
+                          key: 'items',
+                          header: 'Items',
+                          align: 'right',
+                          width: '10%',
+                          render: (_, pc) => (
+                            <span className="atlas-num" style={{ color: '#475569' }}>
+                              {pc.selectedProducts?.length || 0}
+                            </span>
+                          ),
+                        },
+                        {
+                          key: 'formats',
+                          header: 'Available Formats',
+                          width: '20%',
+                          render: () => (
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <span style={{ fontSize: '0.75rem', background: '#e0e7ff', color: '#4f46e5', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>PDF</span>
+                              <span style={{ fontSize: '0.75rem', background: '#dcfce7', color: '#16a34a', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Web</span>
+                              <span style={{ fontSize: '0.75rem', background: '#fef3c7', color: '#d97706', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Excel</span>
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'actions',
+                          header: 'Actions',
+                          align: 'right',
+                          width: '16%',
+                          render: (_, pc) => (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                loadPastCatalog(pc);
+                              }}
                               style={{
-                                padding: '12px 16px',
+                                padding: '6px 12px',
+                                background: '#f1f5f9',
+                                color: '#3b82f6',
+                                border: 'none',
+                                borderRadius: '4px',
                                 fontSize: '0.8rem',
                                 fontWeight: 600,
-                                color: '#64748b',
-                                textTransform: 'uppercase',
+                                cursor: 'pointer',
                               }}
                             >
-                              Title
-                            </th>
-                            <th
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                color: '#64748b',
-                                textTransform: 'uppercase',
-                              }}
-                            >
-                              Date
-                            </th>
-                            <th
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                color: '#64748b',
-                                textTransform: 'uppercase',
-                              }}
-                            >
-                              Audience
-                            </th>
-                            <th
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                color: '#64748b',
-                                textTransform: 'uppercase',
-                              }}
-                            >
-                              Items
-                            </th>
-                            <th
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                color: '#64748b',
-                                textTransform: 'uppercase',
-                              }}
-                            >
-                              Available Formats
-                            </th>
-                            <th
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                color: '#64748b',
-                                textTransform: 'uppercase',
-                              }}
-                            >
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {pastCatalogs.map((pc) => (
-                            <tr key={pc.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                              <td
-                                style={{
-                                  padding: '12px 16px',
-                                  fontSize: '0.9rem',
-                                  color: '#0f172a',
-                                  fontWeight: 500,
-                                }}
-                              >
-                                {pc.title}
-                              </td>
-                              <td
-                                style={{
-                                  padding: '12px 16px',
-                                  fontSize: '0.9rem',
-                                  color: '#475569',
-                                }}
-                              >
-                                {pc.date || '-'}
-                              </td>
-                              <td
-                                style={{
-                                  padding: '12px 16px',
-                                  fontSize: '0.9rem',
-                                  color: '#475569',
-                                  textTransform: 'capitalize',
-                                }}
-                              >
-                                {pc.targetAudience || 'General'}
-                              </td>
-                              <td
-                                style={{
-                                  padding: '12px 16px',
-                                  fontSize: '0.9rem',
-                                  color: '#475569',
-                                }}
-                              >
-                                {pc.selectedProducts?.length || 0}
-                              </td>
-                              <td style={{ padding: '12px 16px' }}>
-                                <div style={{ display: 'flex', gap: '6px' }}>
-                                  <span
-                                    style={{
-                                      fontSize: '0.75rem',
-                                      background: '#e0e7ff',
-                                      color: '#4f46e5',
-                                      padding: '2px 6px',
-                                      borderRadius: '4px',
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    PDF
-                                  </span>
-                                  <span
-                                    style={{
-                                      fontSize: '0.75rem',
-                                      background: '#dcfce7',
-                                      color: '#16a34a',
-                                      padding: '2px 6px',
-                                      borderRadius: '4px',
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    Web
-                                  </span>
-                                  <span
-                                    style={{
-                                      fontSize: '0.75rem',
-                                      background: '#fef3c7',
-                                      color: '#d97706',
-                                      padding: '2px 6px',
-                                      borderRadius: '4px',
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    Excel
-                                  </span>
-                                </div>
-                              </td>
-                              <td style={{ padding: '12px 16px' }}>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    loadPastCatalog(pc);
-                                  }}
-                                  style={{
-                                    padding: '6px 12px',
-                                    background: '#f1f5f9',
-                                    color: '#3b82f6',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                  }}
-                                >
-                                  <Download
-                                    size={12}
-                                    style={{ display: 'inline', marginRight: '4px' }}
-                                  />{' '}
-                                  Load Data
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                              <Download size={12} style={{ display: 'inline', marginRight: '4px' }} /> Load Data
+                            </button>
+                          ),
+                        },
+                      ]}
+                      data={pastCatalogs}
+                      pagination={false}
+                      enableAskAtlas={false}
+                    />
                   )}
                 </div>
               </motion.div>

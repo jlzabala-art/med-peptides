@@ -2,16 +2,16 @@
 
 import React from 'react';
 import {
-  CheckCircle2,
   Mail,
   Eye,
   Check,
   Share2
 } from 'lucide-react';
+import PageHeroCard from '@/components/ui/PageHeroCard';
 
 /**
  * PeptidesPageHeader
- * Google Cloud-inspired Page Header with HPLC purity status strip, hero title,
+ * Canonical PageHeroCard wrapper with HPLC purity badges, hero title,
  * subtitle, and verified B2B action toolbar (Inquire, PDF Schedule, Share).
  */
 export default function PeptidesPageHeader({
@@ -23,75 +23,31 @@ export default function PeptidesPageHeader({
   setIsPdfPreviewOpen,
   handleShareSchedule
 }) {
+  const title = isDistributor
+    ? (isEs ? 'Viales Clínicos de Péptidos Certificados • Distribuidor B2B' : 'Certified Clinical Peptide Vials • Distributor B2B')
+    : (isEs ? 'Viales Clínicos de Péptidos Certificados • Mayoristas y Clínicas' : 'Certified Clinical Peptide Vials • Wholesaler & Clinic');
+
+  const subtitle = isDistributor
+    ? (isEs
+        ? 'Lista oficial B2B para distribuidores de viales liofilizados certificados (Borosilicato 10R) con pureza verificada y ahorro por volumen.'
+        : 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate) with verified analytical purity and volume tiers.')
+    : (isEs
+        ? 'Tarifa oficial institucional y mayorista para péptidos bioactivos liofilizados estériles con ahorro por volumen en packs de 10 viales.'
+        : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides with manufacturer 10-pack volume savings.');
+
   return (
-    <div className="peptides-page-header" style={{ marginBottom: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div>
-          {/* Consolidated GCP Status Strip */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: '0.68rem',
-              fontWeight: 750,
-              color: isDistributor ? '#137333' : '#1a73e8',
-              background: isDistributor ? '#e6f4ea' : '#e8f0fe',
-              border: isDistributor ? '1px solid #ceead6' : '1px solid #c2e7ff',
-              padding: '2px 8px',
-              borderRadius: '6px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isDistributor ? '#137333' : '#1a73e8', display: 'inline-block' }} />
-              <span>{isDistributor ? (isEs ? 'Tarifa Oficial Distribuidor' : 'Official Distributor Schedule') : (isEs ? 'Tarifa Mayorista' : 'Wholesale Schedule')}</span>
-            </span>
-            <span style={{
-              fontSize: '0.68rem',
-              fontWeight: 650,
-              color: '#137333',
-              background: '#e6f4ea',
-              border: '1px solid #ceead6',
-              padding: '2px 8px',
-              borderRadius: '6px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}>
-              <CheckCircle2 size={11} />
-              <span>≥99.0% HPLC</span>
-            </span>
-          </div>
-
-          <h1 className="peptides-hero-title" style={{
-            fontSize: 'clamp(1.12rem, 3vw, 1.60rem)',
-            fontWeight: 800,
-            color: '#202124',
-            letterSpacing: '-0.02em',
-            margin: 0,
-            lineHeight: 1.22,
-            textWrap: 'balance',
-            maxWidth: '820px',
-            paddingRight: '4px',
-            wordBreak: 'break-word'
-          }}>
-            {isDistributor
-              ? (isEs ? 'Viales Clínicos de Péptidos Certificados • Distribuidor B2B' : 'Certified Clinical Peptide Vials • Distributor B2B')
-              : (isEs ? 'Viales Clínicos de Péptidos Certificados • Mayoristas y Clínicas' : 'Certified Clinical Peptide Vials • Wholesaler & Clinic')
-            }
-          </h1>
-
-          <p className="peptides-hero-subtitle" style={{ fontSize: '0.84rem', color: '#5f6368', marginTop: '3px', marginBottom: 0, maxWidth: '850px', lineHeight: 1.4 }}>
-            {isDistributor
-              ? (isEs
-                  ? 'Lista oficial B2B para distribuidores de viales liofilizados certificados (Borosilicato 10R) con pureza verificada y ahorro por volumen.'
-                  : 'Official B2B distributor price list for certified lyophilized peptide vials (10R Borosilicate) with verified analytical purity and volume tiers.')
-              : (isEs
-                  ? 'Tarifa oficial institucional y mayorista para péptidos bioactivos liofilizados estériles con ahorro por volumen en packs de 10 viales.'
-                  : 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptides with manufacturer 10-pack volume savings.')
-            }
-          </p>
-        </div>
-
-        {/* Right-Aligned Page Header Actions */}
+    <PageHeroCard
+      className="peptides-page-header"
+      brandLeft="ATLAS HEALTH"
+      brandRight={isDistributor ? (isEs ? 'DISTRIBUIDOR B2B' : 'DISTRIBUTOR B2B') : (isEs ? 'TARIFA MAYORISTA' : 'WHOLESALE SCHEDULE')}
+      badges={['≥99.0% HPLC', '10R BOROSILICATE']}
+      title={title}
+      subtitle={subtitle}
+      metaItems={[
+        { label: 'DOCUMENT REF:', value: 'DOC-PEP-B2B-2026', mono: true },
+        { label: 'PURITY STD:', value: '≥99.0% HPLC', mono: true },
+      ]}
+      actions={
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <button
             type="button"
@@ -99,6 +55,7 @@ export default function PeptidesPageHeader({
               if (setInquiryProductContext) setInquiryProductContext(null);
               if (setIsInquiryDrawerOpen) setIsInquiryDrawerOpen(true);
             }}
+            className="gcp-btn-primary"
             style={{
               height: '34px',
               padding: '0 14px',
@@ -112,8 +69,6 @@ export default function PeptidesPageHeader({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 1px 3px rgba(26,115,232,0.25)',
-              transition: 'background 0.15s ease'
             }}
             title={isEs ? 'Consultar información técnica o solicitud B2B' : 'Institutional Inquiry & Support'}
           >
@@ -124,6 +79,7 @@ export default function PeptidesPageHeader({
           <button
             type="button"
             onClick={() => setIsPdfPreviewOpen && setIsPdfPreviewOpen(true)}
+            className="gcp-btn-secondary"
             style={{
               height: '34px',
               padding: '0 12px',
@@ -137,8 +93,6 @@ export default function PeptidesPageHeader({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-              transition: 'background 0.15s ease'
             }}
             title={isEs ? 'Previsualizar y exportar tarifa oficial PDF' : 'Preview and export official PDF price schedule'}
           >
@@ -149,6 +103,7 @@ export default function PeptidesPageHeader({
           <button
             type="button"
             onClick={handleShareSchedule}
+            className="gcp-btn-secondary"
             style={{
               height: '34px',
               padding: '0 12px',
@@ -162,8 +117,6 @@ export default function PeptidesPageHeader({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-              transition: 'all 0.15s ease'
             }}
             title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
           >
@@ -171,7 +124,7 @@ export default function PeptidesPageHeader({
             <span>{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
           </button>
         </div>
-      </div>
-    </div>
+      }
+    />
   );
 }

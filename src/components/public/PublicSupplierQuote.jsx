@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchPurchaseRFQById, updatePurchaseRFQ } from '../../services/quotationRepository';
 import { Card } from '../ui';
+import DataTable from '@/components/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 import { Loader2, Send, ShieldCheck, CheckCircle, Truck, FileCheck } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
@@ -179,28 +180,30 @@ export default function PublicSupplierQuote() {
               </div>
 
               <h3 style={{ fontSize: '1.1rem', color: '#1e293b', marginBottom: '1rem' }}>{t('supplierQuote.productCoas', "Product COAs")}</h3>
-              <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'left', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.product', "Product")}</th>
-                    <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.action', "Action")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0', background: 'white' }}>
-                      <td style={{ padding: '1rem' }}>
-                        <strong style={{ color: '#334155' }}>{item.itemName || item.peptide_name}</strong>
-                      </td>
-                      <td style={{ textAlign: 'right', padding: '1rem' }}>
-                        <button style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #3b82f6', borderRadius: '4px', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}>
-                          {t('supplierQuote.uploadCoa', "Upload COA (PDF)")}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataTable
+                columns={[
+                  {
+                    key: 'itemName',
+                    header: t('supplierQuote.product', 'Product'),
+                    width: '65%',
+                    render: (_, item) => <strong style={{ color: '#334155' }}>{item.itemName || item.peptide_name}</strong>,
+                  },
+                  {
+                    key: 'action',
+                    header: t('supplierQuote.action', 'Action'),
+                    align: 'right',
+                    width: '35%',
+                    render: () => (
+                      <button type="button" style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #3b82f6', borderRadius: '4px', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}>
+                        {t('supplierQuote.uploadCoa', 'Upload COA (PDF)')}
+                      </button>
+                    ),
+                  },
+                ]}
+                data={items.map((item, idx) => ({ ...item, id: item.id || `coa-item-${idx}` }))}
+                pagination={false}
+                enableAskAtlas={false}
+              />
             </div>
 
             <div style={{ padding: '1.5rem 2rem', background: 'white', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0' }}>
@@ -233,55 +236,67 @@ export default function PublicSupplierQuote() {
           </div>
 
           <div style={{ padding: '2rem', background: '#fafafa' }}>
-            <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: 'left', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.productDesc', "Product Description")}</th>
-                  <th style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.reqQty', "Required Qty")}</th>
-                  <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.unitCost', "Your Unit Cost (USD)")}</th>
-                  <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('supplierQuote.itemDiscount', "Item Discount (USD)")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => {
-                  const cost = parseFloat(item.supplierUnitCost) || 0;
-                  const discount = parseFloat(item.itemDiscount) || 0;
-                  const netCost = cost - discount;
-                  return (
-                  <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0', background: 'white' }}>
-                    <td style={{ padding: '1rem' }}>
+            <DataTable
+              columns={[
+                {
+                  key: 'itemName',
+                  header: t('supplierQuote.productDesc', 'Product Description'),
+                  width: '40%',
+                  render: (_, item) => (
+                    <div>
                       <strong style={{ color: '#334155' }}>{item.itemName || item.peptide_name}</strong>
                       {item.dosage && <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>{item.dosage}</div>}
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '1rem', fontWeight: 600 }}>{item.quantity} {item.unit || ''}</td>
-                    <td style={{ textAlign: 'right', padding: '1rem' }}>
-                      <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>$</span>
-                        <input 
-                          type="number" min="0" step="0.01"
-                          value={item.supplierUnitCost || ''}
-                          onChange={(e) => handleCostChange(idx, e.target.value)}
-                          placeholder="0.00"
-                          style={{ width: '120px', padding: '0.5rem 0.5rem 0.5rem 1.5rem', textAlign: 'right', border: '2px solid #cbd5e1', borderRadius: '6px', fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}
-                        />
-                      </div>
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '1rem' }}>
-                      <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>-$</span>
-                        <input 
-                          type="number" min="0" step="0.01"
-                          value={item.itemDiscount || ''}
-                          onChange={(e) => handleDiscountChange(idx, e.target.value)}
-                          placeholder="0.00"
-                          style={{ width: '100px', padding: '0.5rem 0.5rem 0.5rem 1.8rem', textAlign: 'right', border: '2px dashed #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', color: '#0f172a' }}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                )})}
-              </tbody>
-            </table>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'quantity',
+                  header: t('supplierQuote.reqQty', 'Required Qty'),
+                  align: 'center',
+                  width: '18%',
+                  render: (_, item) => <span className="atlas-num" style={{ fontWeight: 600 }}>{item.quantity} {item.unit || ''}</span>,
+                },
+                {
+                  key: 'supplierUnitCost',
+                  header: t('supplierQuote.unitCost', 'Your Unit Cost (USD)'),
+                  align: 'right',
+                  width: '22%',
+                  render: (_, item, idx) => (
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                      <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>$</span>
+                      <input
+                        type="number" min="0" step="0.01"
+                        value={item.supplierUnitCost || ''}
+                        onChange={(e) => handleCostChange(idx, e.target.value)}
+                        placeholder="0.00"
+                        style={{ width: '120px', padding: '0.5rem 0.5rem 0.5rem 1.5rem', textAlign: 'right', border: '2px solid #cbd5e1', borderRadius: '6px', fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}
+                      />
+                    </div>
+                  ),
+                },
+                {
+                  key: 'itemDiscount',
+                  header: t('supplierQuote.itemDiscount', 'Item Discount (USD)'),
+                  align: 'right',
+                  width: '20%',
+                  render: (_, item, idx) => (
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                      <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>-$</span>
+                      <input
+                        type="number" min="0" step="0.01"
+                        value={item.itemDiscount || ''}
+                        onChange={(e) => handleDiscountChange(idx, e.target.value)}
+                        placeholder="0.00"
+                        style={{ width: '100px', padding: '0.5rem 0.5rem 0.5rem 1.8rem', textAlign: 'right', border: '2px dashed #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', color: '#0f172a' }}
+                      />
+                    </div>
+                  ),
+                },
+              ]}
+              data={items.map((item, idx) => ({ ...item, id: item.id || `sup-item-${idx}` }))}
+              pagination={false}
+              enableAskAtlas={false}
+            />
           </div>
 
           <div style={{ padding: '1.5rem 2rem', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e2e8f0' }}>

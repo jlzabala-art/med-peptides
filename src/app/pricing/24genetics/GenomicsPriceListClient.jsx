@@ -39,6 +39,7 @@ import CatalogMasterDetailPanel from '@/components/pricing/shared/CatalogMasterD
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import PageHeroCard from '@/components/ui/PageHeroCard';
 import EmptyState from '@/components/ui/EmptyState';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import GcpUserBadge from '@/components/shared/GcpUserBadge';
@@ -533,7 +534,7 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
   ), [handleAddToCart]);
 
   return (
-    <div className="colway-price-root">
+    <div className="colway-price-root atlas-page-bg">
       <PublicUnifiedHeader
         brandHref="/"
         loginRedirect="/pricing/24genetics"
@@ -575,54 +576,32 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         }
       />
 
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem 1.5rem 4rem 1.5rem' }}>
-        {/* Breadcrumbs & Header */}
-        <div style={{ marginBottom: '1.5rem' }}>
+      <main className="atlas-page-shell">
+        <div style={{ marginBottom: '1rem' }}>
           <Breadcrumb items={[
             { label: 'B2B Portal', href: '/' },
             { label: 'Official Price Schedules', href: '/pricing/24genetics' },
             { label: '24Genetics DNA Panels' }
           ]} />
+        </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.75rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 750,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  background: '#0d9488',
-                  color: '#ffffff',
-                  padding: '2px 8px',
-                  borderRadius: '4px'
-                }}>
-                  Official Clinical Genomics Schedule
-                </span>
-                <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 650,
-                  color: '#0369a1',
-                  background: '#f0f9ff',
-                  border: '1px solid #bae6fd',
-                  padding: '2px 8px',
-                  borderRadius: '4px'
-                }}>
-                  CE-IVD Certified European Laboratory
-                </span>
-              </div>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', margin: 0 }}>
-                24Genetics Clinical DNA Panels & AI Connect
-              </h1>
-              <p style={{ fontSize: '0.88rem', color: '#64748b', marginTop: '4px', maxWidth: '750px' }}>
-                Official wholesale schedule for saliva-based DNA test kits. Direct integration with our Nutrigenomic Compounding Laboratory to formulate patient-specific therapies based on individual genetic predispositions.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <PageHeroCard
+          brandLeft="ATLAS HEALTH"
+          brandRight="24GENETICS GENOMICS"
+          badges={['CE-IVD EUROPEAN LAB', 'SALIVA DNA PANELS']}
+          title="24Genetics Clinical DNA Panels & AI Connect"
+          subtitle="Official wholesale schedule for saliva-based DNA test kits. Direct integration with our Nutrigenomic Compounding Laboratory to formulate patient-specific therapies based on individual genetic predispositions."
+          metaItems={[
+            { label: 'DOCUMENT REF:', value: 'DOC-24G-B2B-2026', mono: true },
+            { label: 'CURRENCY:', value: currency, mono: true },
+          ]}
+          actions={
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {canViewCost && (
                 <button
+                  type="button"
                   onClick={() => setShowCostBasis(prev => !prev)}
+                  className="gcp-btn-secondary"
                   style={{
                     padding: '8px 12px',
                     fontSize: '0.78rem',
@@ -639,7 +618,9 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
                 </button>
               )}
               <button
+                type="button"
                 onClick={() => setIsPdfPreviewOpen(true)}
+                className="gcp-btn-secondary"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -658,8 +639,8 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
                 <span>Export PDF / Print</span>
               </button>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* ── Role Banner (Informed Login UX) ── */}
         <div style={{
@@ -717,13 +698,9 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         </div>
 
         {/* ── 4 KPIs with Scope Switcher (Golden Rule #22) ── */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '10px',
-          border: '1px solid #e2e8f0',
+        <div className="atlas-card" style={{
           padding: '1.25rem',
           marginBottom: '1.5rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
         }}>
           <div style={{
             display: 'flex',

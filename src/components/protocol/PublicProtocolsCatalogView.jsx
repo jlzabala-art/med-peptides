@@ -16,6 +16,7 @@ import PublicInstitutionalInquiryDrawer from '../shared/PublicInstitutionalInqui
 import PublicStickyActionBar from '../shared/PublicStickyActionBar';
 import ProtocolQrModal from './ProtocolQrModal';
 import PublicUnifiedHeader from '../shared/PublicUnifiedHeader';
+import PageHeroCard from '../ui/PageHeroCard';
 import PublicUnifiedFooter from '../shared/PublicUnifiedFooter';
 import ProtocolsCatalogSidebar from './ProtocolsCatalogSidebar';
 import ProtocolCatalogKpiStrip from './ProtocolCatalogKpiStrip';
@@ -146,7 +147,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
   const heroSubtitle = (t.catalogHeroSubtitle || '').replace('{count}', String(enrichedProtocols.length));
 
   return (
-    <div className="proto-catalog-container">
+    <div className="proto-catalog-container atlas-page-bg">
       {/* ── Fixed Sticky Executive Navigation ── */}
       <PublicUnifiedHeader
         track="protocols"
@@ -161,15 +162,19 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         copiedUrl={copiedDirectoryUrl}
       />
 
-      {/* ── 1. Compact Executive Hero Section ── */}
-      <header className="proto-hero">
-        <div className="proto-hero-pill">
-          <FlaskConical size={14} />
-          <span>{t.catalogHeroPill}</span>
-        </div>
-        <h1 className="proto-hero-title">{t.catalogHeroTitle}</h1>
-        <p className="proto-hero-subtitle">{heroSubtitle}</p>
-      </header>
+      <main className="atlas-page-shell">
+        {/* ── 1. Compact Executive Hero Section ── */}
+        <PageHeroCard
+          brandLeft="ATLAS HEALTH"
+          brandRight="CLINICAL PROTOCOLS"
+          badges={[t.catalogHeroPill]}
+          title={t.catalogHeroTitle}
+          subtitle={heroSubtitle}
+          metaItems={[
+            { label: 'DIRECTORY:', value: `${enrichedProtocols.length} PROTOCOLS`, mono: true },
+            { label: 'STANDARD:', value: 'EVIDENCE-BASED', mono: true },
+          ]}
+        />
 
       {/* ── 2. Dynamic KPI Strip with Scope Switcher (Rule #22, Mobile 2x2) ── */}
       <ProtocolCatalogKpiStrip
@@ -415,6 +420,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         }}
         lang={lang}
       />
+      </main>
 
       {/* Protocol QR Modal */}
       {qrModalProtocol && (

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Activity, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import StatusChip from '../ui/StatusChip';
+import DataTable from '@/components/ui/DataTable';
 
 function AtlasKpiCard({ label, value, description, color = '#0f172a' }) {
   return (
@@ -91,26 +92,17 @@ export default function GenUIRenderer({ text }) {
               return <StatusChip key={i} {...props} />;
             case 'Table':
               return (
-                <div key={i} style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px', background: '#fff' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                    <thead style={{ background: '#f8fafc' }}>
-                      <tr>
-                        {props.columns?.map(c => (
-                          <th key={c} style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontWeight: 600 }}>{c}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {props.rows?.map((row, rIdx) => (
-                        <tr key={rIdx}>
-                          {props.columns?.map(c => (
-                            <td key={c} style={{ padding: '8px 12px', borderBottom: '1px solid #e2e8f0', color: '#0f172a' }}>{row[c]}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  key={i}
+                  columns={(props.columns || []).map((c) => ({
+                    key: c,
+                    header: c,
+                    render: (val) => val ?? '—',
+                  }))}
+                  data={(props.rows || []).map((r, rIdx) => ({ ...r, id: r.id || `genui-row-${rIdx}` }))}
+                  pagination={false}
+                  enableAskAtlas={false}
+                />
               );
             default:
               return <div key={i} style={{ padding: '8px', background: '#fee2e2', color: '#991b1b', fontSize: '12px', borderRadius: '4px' }}>Unknown component: {component}</div>;

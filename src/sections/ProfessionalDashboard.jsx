@@ -11,6 +11,8 @@ import { User } from '@/lib/icons';
 import { Bell } from '@/lib/icons';
 import { CheckCircle2 } from '@/lib/icons';
 import React, { useState, useEffect } from 'react';
+import DataTable from '@/components/ui/DataTable';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 
 
@@ -211,60 +213,68 @@ export default function ProfessionalDashboard({
                   </button>
                 </div>
               ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                        <th style={thStyle}>Protocol Name</th>
-                        <th style={thStyle}>Category</th>
-                        <th style={thStyle}>Status</th>
-                        <th style={thStyle}>Last Update</th>
-                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {protocols.map((p, idx) => (
-                        <tr key={idx} style={{ borderBottom: idx === protocols.length - 1 ? 'none' : '1px solid #f1f5f9' }}>
-                          <td style={tdStyle}>
-                            <div style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                              {p.metadata?.scientificName || p.protocol_name}
-                            </div>
-                            {p.metadata?.scientificName && (
-                              <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>{p.protocol_name}</div>
-                            )}
-                            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>v{p.version_number || 1.0}</div>
-                          </td>
-                          <td style={tdStyle}>
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{p.therapeutic_category}</span>
-                          </td>
-                          <td style={tdStyle}>
-                            <span style={{
-                              padding: '4px 10px', borderRadius: '20px',
-                              fontSize: '0.7rem', fontWeight: 800,
-                              backgroundColor: p.status === 'approved' ? '#dcfce7' : '#fef9c3',
-                              color: p.status === 'approved' ? '#166534' : '#854d0e',
-                            }}>
-                              {(p.status || 'draft').toUpperCase()}
-                            </span>
-                          </td>
-                          <td style={tdStyle}>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                              {p.updated_at?.toDate ? new Date(p.updated_at.toDate()).toLocaleDateString() : 'Active Now'}
-                            </div>
-                          </td>
-                          <td style={{ ...tdStyle, textAlign: 'right' }}>
-                            <button
-                              onClick={() => router.push('/protocol-finder?id=' + p.id)}
-                              style={{ padding: '6px 12px', border: '1px solid #e2e8f0', background: 'white', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-                            >
-                              Open Workfile
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  columns={[
+                    {
+                      key: 'protocol_name',
+                      header: 'Protocol Name',
+                      width: '32%',
+                      render: (_, p) => (
+                        <div>
+                          <div style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                            {p.metadata?.scientificName || p.protocol_name}
+                          </div>
+                          {p.metadata?.scientificName && (
+                            <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>{p.protocol_name}</div>
+                          )}
+                          <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>v{p.version_number || 1.0}</div>
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'therapeutic_category',
+                      header: 'Category',
+                      width: '20%',
+                      render: (val) => (
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{val}</span>
+                      ),
+                    },
+                    {
+                      key: 'status',
+                      header: 'Status',
+                      width: '16%',
+                      render: (val) => <StatusBadge status={val || 'draft'} />,
+                    },
+                    {
+                      key: 'updated_at',
+                      header: 'Last Update',
+                      width: '16%',
+                      render: (val) => (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                          {val?.toDate ? new Date(val.toDate()).toLocaleDateString() : 'Active Now'}
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'actions',
+                      header: 'Actions',
+                      align: 'right',
+                      width: '16%',
+                      render: (_, p) => (
+                        <button
+                          type="button"
+                          onClick={() => router.push('/protocol-finder?id=' + p.id)}
+                          style={{ padding: '6px 12px', border: '1px solid #e2e8f0', background: 'white', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Open Workfile
+                        </button>
+                      ),
+                    },
+                  ]}
+                  data={protocols.map((p, idx) => ({ ...p, id: p.id || `proto-${idx}` }))}
+                  pagination={false}
+                  enableAskAtlas={false}
+                />
               )}
             </div>
           </section>

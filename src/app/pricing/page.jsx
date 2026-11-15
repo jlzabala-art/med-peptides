@@ -22,7 +22,7 @@ export async function generateMetadata() {
 
 export default function PricingDirectoryPage() {
   return (
-    <div className="colway-price-root">
+    <div className="colway-price-root atlas-page-bg">
       <PublicUnifiedHeader
         brandHref="/"
         loginRedirect="/pricing"
@@ -34,7 +34,7 @@ export default function PricingDirectoryPage() {
         ]}
       />
 
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem 1.5rem 4rem 1.5rem' }}>
+      <main className="atlas-page-shell">
         <Breadcrumb items={[
           { label: 'B2B Portal', href: '/' },
           { label: 'Unified Price Hub' }

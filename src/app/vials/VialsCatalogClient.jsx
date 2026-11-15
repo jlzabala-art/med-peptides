@@ -8,6 +8,7 @@ import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 import { usePricing } from '@/hooks/usePricing';
 import PriceDisplay from '@/components/pricing/PriceDisplay';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PageHeroCard from '@/components/ui/PageHeroCard';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 
 const COLLECTIONS_LIST = [
@@ -328,7 +329,18 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
       />
 
       {/* ── Main Catalog Workspace ── */}
-      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 100px 20px' }}>
+      <main className="atlas-page-shell">
+        <PageHeroCard
+          brandLeft="ATLAS HEALTH"
+          brandRight={SUPPORTED_COLLECTIONS[activeCollection]?.title?.toUpperCase() || 'CLINICAL FORMULATIONS'}
+          badges={['≥99.0% HPLC', 'DIRECT SUPPLY']}
+          title={SUPPORTED_COLLECTIONS[activeCollection]?.title || 'Clinical Formulations Directory'}
+          subtitle={SUPPORTED_COLLECTIONS[activeCollection]?.description || 'Institutional sterile lyophilized peptides, clinical supplements, and regenerative formulations.'}
+          metaItems={[
+            { label: 'COLLECTION:', value: activeCollection.toUpperCase(), mono: true },
+            { label: 'PRODUCTS:', value: `${products.length} SKUs`, mono: true },
+          ]}
+        />
         
         {/* ── Multi-Collection Switcher (Golden Rule #7 & GCP Tabs) ── */}
         <div style={{ marginBottom: '20px' }}>

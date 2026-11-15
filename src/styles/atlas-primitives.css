@@ -1,0 +1,195 @@
+/* ==========================================================================
+   Atlas Platform Shared Primitives (SSOT Layout, Cards, Hero & Tabular Numbers)
+   ========================================================================== */
+
+.atlas-page-bg {
+  min-height: 100vh;
+  background-color: var(--atlas-surface-page, #f8fafc);
+  color: var(--atlas-ink-primary, #0f172a);
+}
+
+.atlas-page-shell {
+  width: 100%;
+  max-width: var(--atlas-page-max-width, 1360px);
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 6rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.atlas-card {
+  background-color: var(--atlas-surface-card, #ffffff);
+  border: 1px solid var(--atlas-border-subtle, #e2e8f0);
+  border-radius: var(--atlas-radius-card, 12px);
+  box-shadow: var(--atlas-shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.atlas-num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.atlas-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.atlas-section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Canonical PageHeroCard (derived from /pricing/colway clean institutional card) */
+.atlas-hero-card {
+  background-color: var(--atlas-surface-card, #ffffff);
+  border: 1px solid var(--atlas-border-subtle, #e2e8f0);
+  border-radius: var(--atlas-radius-card, 12px);
+  box-shadow: var(--atlas-shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.atlas-hero-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.atlas-hero-identity {
+  flex: 1 1 540px;
+  min-width: 0;
+}
+
+.atlas-hero-eyebrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.atlas-hero-pill-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: var(--atlas-brand-navy, #003666);
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+}
+
+.atlas-hero-pill-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+}
+
+.atlas-hero-cross {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.atlas-hero-title {
+  margin: 0;
+  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--atlas-ink-primary, #0f172a);
+}
+
+.atlas-hero-subtitle {
+  margin: 0.45rem 0 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--atlas-ink-secondary, #475569);
+  max-width: 78ch;
+}
+
+.atlas-hero-stamp-box {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background-color: var(--atlas-surface-page, #f8fafc);
+  border: 1px solid var(--atlas-border-subtle, #e2e8f0);
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  min-width: 220px;
+}
+
+.atlas-hero-stamp-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.75rem;
+}
+
+.atlas-hero-stamp-label {
+  color: var(--atlas-ink-muted, #64748b);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.atlas-hero-stamp-value {
+  color: var(--atlas-ink-primary, #0f172a);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas-hero-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--atlas-border-subtle, #e2e8f0);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+@media (max-width: 1024px) {
+  .atlas-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .atlas-page-shell {
+    padding: 1rem 1rem 5.5rem 1rem;
+  }
+
+  .atlas-hero-card {
+    padding: 1.15rem 1.15rem;
+  }
+
+  .atlas-hero-stamp-box {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .atlas-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

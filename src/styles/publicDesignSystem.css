@@ -47,18 +47,18 @@
   --pds-space-16: 64px;
 
   /* ── Radius & Shadows ──────────────────────────────────────────── */
-  --pds-radius-card: 16px;
-  --pds-radius-subcard: 12px;
-  --pds-radius-btn: 8px;
+  --pds-radius-card: var(--atlas-radius-card, 12px);
+  --pds-radius-subcard: var(--atlas-radius-card, 12px);
+  --pds-radius-btn: var(--atlas-radius-sm, 8px);
   --pds-radius-pill: 9999px;
   
-  --pds-shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --pds-shadow-card: 0 4px 20px -4px rgba(0, 54, 102, 0.08);
-  --pds-shadow-hover: 0 6px 24px -4px rgba(0, 54, 102, 0.12);
-  --pds-shadow-navy: 0 8px 24px -4px rgba(0, 54, 102, 0.4);
+  --pds-shadow-subtle: var(--atlas-shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  --pds-shadow-card: var(--atlas-shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  --pds-shadow-hover: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --pds-shadow-navy: 0 8px 24px -4px rgba(0, 54, 102, 0.25);
 
-  /* ── Layout Max-Widths (Google Cloud Console Full-Width Standard) ── */
-  --pds-max-width: 1680px;
+  /* ── Layout Max-Widths (Unified 1360px Atlas Standard) ── */
+  --pds-max-width: var(--atlas-page-max-width, 1360px);
 }
 
 /* ── Universal Public Page Shell Container ─────────────────────── */

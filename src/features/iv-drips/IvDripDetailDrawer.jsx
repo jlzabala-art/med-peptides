@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { X, FlaskConical, Package, DollarSign, AlertTriangle, CheckCircle, Copy } from '@/lib/icons';
+import DataTable from '@/components/ui/DataTable';
 
 function copyToClipboard(text) {
   navigator.clipboard?.writeText(text);
@@ -71,33 +72,46 @@ export default function IvDripDetailDrawer({ vial, ingredientMap = {}, onClose }
           {/* Ingredients */}
           <section>
             <h3 style={sectionTitle}>Ingredientes ({vial.ingredients?.length || 0})</h3>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-              <thead>
-                <tr style={{ background: '#f1f5f9' }}>
-                  <th style={th}>Ingrediente</th>
-                  <th style={{ ...th, textAlign: 'right' }}>Cantidad</th>
-                  <th style={{ ...th, textAlign: 'right' }}>Unidad</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(vial.ingredients || []).map((ing, i) => {
-                  const master = ingredientMap[ing.ingredient_id];
-                  return (
-                    <tr key={ing.ingredient_id} style={{ borderBottom: '1px solid #f1f5f9', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
-                      <td style={{ ...td }}>
+            <DataTable
+              columns={[
+                {
+                  key: 'ingredient_id',
+                  header: 'Ingrediente',
+                  width: '55%',
+                  render: (_, ing) => {
+                    const master = ingredientMap[ing.ingredient_id];
+                    return (
+                      <div>
                         <div style={{ fontWeight: 500, color: '#0f172a' }}>{master?.name || ing.ingredient_id}</div>
                         {master?.common_name && <div style={{ fontSize: 11, color: '#94a3b8' }}>{master.common_name}</div>}
                         {ing.requires_review && <div style={{ fontSize: 10, color: '#d97706' }}>⚠️ Requiere revisión</div>}
-                      </td>
-                      <td style={{ ...td, textAlign: 'right', fontFamily: 'monospace', color: '#475569' }}>
-                        {ing.quantity ?? '—'}
-                      </td>
-                      <td style={{ ...td, textAlign: 'right', color: '#64748b' }}>{ing.unit || '—'}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      </div>
+                    );
+                  },
+                },
+                {
+                  key: 'quantity',
+                  header: 'Cantidad',
+                  align: 'right',
+                  width: '25%',
+                  render: (val) => (
+                    <span className="atlas-num" style={{ fontFamily: 'monospace', color: '#475569' }}>
+                      {val ?? '—'}
+                    </span>
+                  ),
+                },
+                {
+                  key: 'unit',
+                  header: 'Unidad',
+                  align: 'right',
+                  width: '20%',
+                  render: (val) => <span style={{ color: '#64748b' }}>{val || '—'}</span>,
+                },
+              ]}
+              data={(vial.ingredients || []).map((ing, i) => ({ ...ing, id: ing.ingredient_id || `ing-${i}` }))}
+              pagination={false}
+              enableAskAtlas={false}
+            />
           </section>
 
           {/* Optional Add-ons */}

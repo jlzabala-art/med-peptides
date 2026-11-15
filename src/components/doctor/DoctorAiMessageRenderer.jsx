@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Check, Copy, ExternalLink, Sparkles, TrendingDown, FileText } from 'lucide-react';
+import DataTable from '@/components/ui/DataTable';
 
 /**
  * CopyableCodePill

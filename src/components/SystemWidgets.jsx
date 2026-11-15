@@ -1,4 +1,5 @@
 import React from 'react';
+import DataTable from '@/components/ui/DataTable';
 
 /**
  * SystemWidgets component
@@ -95,26 +96,25 @@ const SystemWidgets = ({
 
       {doctorPayments.length > 0 && (
         <Section title="Physician Settlements">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left', borderBottom: '2px solid #ccc' }}>Physician</th>
-                <th style={{ textAlign: 'left', borderBottom: '2px solid #ccc' }}>Period</th>
-                <th style={{ textAlign: 'right', borderBottom: '2px solid #ccc' }}>Amount</th>
-                <th style={{ textAlign: 'left', borderBottom: '2px solid #ccc' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {doctorPayments.map((d, i) => (
-                <tr key={`pay-${i}`} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                  <td>{d.doctorName}</td>
-                  <td>{d.period}</td>
-                  <td style={{ textAlign: 'right' }}>${d.amount.toFixed(2)}</td>
-                  <td>{d.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTable
+            columns={[
+              { key: 'doctorName', header: 'Physician', width: '35%' },
+              { key: 'period', header: 'Period', width: '25%' },
+              {
+                key: 'amount',
+                header: 'Amount',
+                align: 'right',
+                width: '20%',
+                render: (val) => (
+                  <span className="atlas-num">${Number(val || 0).toFixed(2)}</span>
+                ),
+              },
+              { key: 'status', header: 'Status', width: '20%' },
+            ]}
+            data={doctorPayments.map((d, idx) => ({ ...d, id: d.id || `pay-${idx}` }))}
+            pagination={false}
+            enableAskAtlas={false}
+          />
         </Section>
       )}
     </div>

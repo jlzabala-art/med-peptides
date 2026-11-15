@@ -8,6 +8,7 @@ import { getProtocolById } from '../../services/protocolStorage';
 import { generatePrescriptionLines } from '../../engine/protocolMath';
 import DosingCalendar from './DosingCalendar';
 import UniversalUserSelector from '../../components/shared/UniversalUserSelector';
+import DataTable from '@/components/ui/DataTable';
 
 const PrescriptionDetail = () => {
   const { id } = useParams();
@@ -182,28 +183,38 @@ const PrescriptionDetail = () => {
               </button>
             </div>
             {prescription.prescriptionLines && prescription.prescriptionLines.length > 0 ? (
-              <table className="w-full text-left border-collapse border border-gray-200 rounded-lg overflow-hidden">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 border-b border-gray-200 text-sm font-medium text-gray-500">Product</th>
-                    <th className="px-4 py-2 border-b border-gray-200 text-sm font-medium text-gray-500">Dosage</th>
-                    <th className="px-4 py-2 border-b border-gray-200 text-sm font-medium text-gray-500">Frequency</th>
-                    <th className="px-4 py-2 border-b border-gray-200 text-sm font-medium text-gray-500">Duration</th>
-                    <th className="px-4 py-2 border-b border-gray-200 text-sm font-medium text-gray-500">Qty (Vials)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {prescription.prescriptionLines.map((line, i) => (
-                    <tr key={i}>
-                      <td className="px-4 py-3">{line.product_name || line.itemName}</td>
-                      <td className="px-4 py-3">{line.dosage || `${line.dose} ${line.doseUnit}`}</td>
-                      <td className="px-4 py-3">{line.frequency}</td>
-                      <td className="px-4 py-3">{line.duration}</td>
-                      <td className="px-4 py-3 font-semibold text-blue-600">{line.quantity}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataTable
+                columns={[
+                  {
+                    key: 'product_name',
+                    header: 'Product',
+                    width: '32%',
+                    render: (_, line) => line.product_name || line.itemName || '—',
+                  },
+                  {
+                    key: 'dosage',
+                    header: 'Dosage',
+                    width: '20%',
+                    render: (_, line) => line.dosage || `${line.dose} ${line.doseUnit}`,
+                  },
+                  { key: 'frequency', header: 'Frequency', width: '18%' },
+                  { key: 'duration', header: 'Duration', width: '15%' },
+                  {
+                    key: 'quantity',
+                    header: 'Qty (Vials)',
+                    align: 'right',
+                    width: '15%',
+                    render: (val) => (
+                      <span className="atlas-num" style={{ fontWeight: 600, color: '#2563eb' }}>
+                        {val}
+                      </span>
+                    ),
+                  },
+                ]}
+                data={prescription.prescriptionLines.map((line, i) => ({ ...line, id: line.id || `line-${i}` }))}
+                pagination={false}
+                enableAskAtlas={false}
+              />
             ) : (
               <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                 <p className="text-gray-500">No lines added yet.</p>

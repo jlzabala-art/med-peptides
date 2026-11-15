@@ -18,6 +18,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
+import PageHeroCard from '../components/ui/PageHeroCard';
+import MetricCard from '../components/ui/MetricCard';
 import PublicStickyActionBar from '../components/shared/PublicStickyActionBar';
 import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitutionalInquiryDrawer';
 import { CAPSULE_BOTTLE_SIZES } from '../services/pharmapolisCostEngine';
@@ -309,35 +311,37 @@ export default function CompoundingPage({
   }, [items, isSplitProtocol, activePhaseTab, splitData]);
 
   return (
-    <div className={`cmp-page ${embedded ? 'is-embedded' : ''}`}>
+    <div className={`cmp-page atlas-page-bg ${embedded ? 'is-embedded' : ''}`}>
       {!embedded && (
         <PublicUnifiedHeader track="compounds" lang={lang} onLangChange={handleLangChange} copyUrl={shareUrl} />
       )}
 
       {!embedded && (
-        <header className="cmp-hero">
-          <div className="cmp-container">
-            <div className="cmp-hero-badges">
-              <span className="cmp-badge"><FlaskConical size={13} /> {t.badge}</span>
-              <span className="cmp-badge is-regulatory"><ShieldCheck size={13} /> {t.regulatoryBadge}</span>
-            </div>
-            <h1 className="cmp-title">{t.title}</h1>
-            <p className="cmp-subtitle">{t.subtitle}</p>
+        <div className="atlas-page-shell" style={{ paddingBottom: '1.5rem' }}>
+          <PageHeroCard
+            brandLeft="ATLAS HEALTH"
+            brandRight="CUSTOM COMPOUNDING LAB"
+            badges={[t.badge, t.regulatoryBadge]}
+            title={t.title}
+            subtitle={t.subtitle}
+            metaItems={[
+              { label: 'DOCUMENT REF:', value: 'DOC-CMP-LAB-2026', mono: true },
+              { label: 'STANDARD:', value: 'EU GMP · HPMC', mono: true },
+            ]}
+          />
 
-            <div className="cmp-kpis">
-              {[ShieldCheck, Pill, FlaskConical, Zap].map((Icon, idx) => (
-                <div key={idx} className="cmp-kpi">
-                  <div className="cmp-kpi-head">
-                    <span>{t.kpis[idx].label}</span>
-                    <Icon size={15} />
-                  </div>
-                  <div className="cmp-kpi-value">{t.kpis[idx].value}</div>
-                  <div className="cmp-kpi-sub">{t.kpis[idx].sub}</div>
-                </div>
-              ))}
-            </div>
+          <div className="atlas-kpi-grid" style={{ marginBottom: 0 }}>
+            {[ShieldCheck, Pill, FlaskConical, Zap].map((Icon, idx) => (
+              <MetricCard
+                key={idx}
+                title={t.kpis[idx].label}
+                value={t.kpis[idx].value}
+                subtitle={t.kpis[idx].sub}
+                icon={Icon}
+              />
+            ))}
           </div>
-        </header>
+        </div>
       )}
 
       {embedded && (

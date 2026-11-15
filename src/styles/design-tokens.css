@@ -5,8 +5,8 @@
   /* Radii */
   --atlas-radius-sm: 8px;
   --atlas-radius-md: 10px;
-  --atlas-radius-card: 14px;
-  --atlas-radius-hero: 16px;
+  --atlas-radius-card: 12px;
+  --atlas-radius-hero: 12px;
   --atlas-radius-pill: 9999px;
 
   /* Surfaces & Borders */
@@ -28,7 +28,7 @@
   --atlas-brand-blue-hover: #1557b0;
 
   /* Elevation & Layout */
-  --atlas-page-max-width: 1320px;
-  --atlas-shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --atlas-page-max-width: 1360px;
+  --atlas-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
   --atlas-shadow-dock: 0 16px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05);
 }

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchAgencyRFQById, updateAgencyRFQStatus } from '../../services/quotationRepository';
 import { Card } from '../ui';
+import DataTable from '@/components/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 import { Loader2, CheckCircle, ShieldCheck, XCircle, Truck } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
@@ -78,29 +79,49 @@ export default function PublicClientQuote() {
           </div>
 
           <div style={{ padding: '2rem', background: '#fafafa' }}>
-            <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: 'left', padding: '1rem', background: '#f8fafc' }}>{t('quote.tableItem', "Item")}</th>
-                  <th style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc' }}>{t('quote.tableQty', "Qty")}</th>
-                  <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('quote.tableUnitPrice', "Unit Price")}</th>
-                  <th style={{ textAlign: 'right', padding: '1rem', background: '#f8fafc' }}>{t('quote.tableTotal', "Total")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rfq.items?.map((item, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0', background: 'white' }}>
-                    <td style={{ padding: '1rem' }}>
+            <DataTable
+              columns={[
+                {
+                  key: 'peptide_name',
+                  header: t('quote.tableItem', 'Item'),
+                  width: '45%',
+                  render: (_, item) => (
+                    <div>
                       <strong style={{ color: '#334155' }}>{item.peptide_name}</strong>
                       {item.dosage && <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>{item.dosage}</div>}
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '1rem', fontWeight: 600 }}>{item.quantity}</td>
-                    <td style={{ textAlign: 'right', padding: '1rem' }}>${item.clientUnitPrice?.toFixed(2)}</td>
-                    <td style={{ textAlign: 'right', padding: '1rem', fontWeight: 700 }}>${((item.clientUnitPrice || 0) * item.quantity).toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'quantity',
+                  header: t('quote.tableQty', 'Qty'),
+                  align: 'center',
+                  width: '15%',
+                  render: (val) => <span className="atlas-num" style={{ fontWeight: 600 }}>{val}</span>,
+                },
+                {
+                  key: 'clientUnitPrice',
+                  header: t('quote.tableUnitPrice', 'Unit Price'),
+                  align: 'right',
+                  width: '20%',
+                  render: (val) => <span className="atlas-num">${Number(val || 0).toFixed(2)}</span>,
+                },
+                {
+                  key: 'total',
+                  header: t('quote.tableTotal', 'Total'),
+                  align: 'right',
+                  width: '20%',
+                  render: (_, item) => (
+                    <span className="atlas-num" style={{ fontWeight: 700 }}>
+                      ${((item.clientUnitPrice || 0) * item.quantity).toFixed(2)}
+                    </span>
+                  ),
+                },
+              ]}
+              data={(rfq.items || []).map((item, idx) => ({ ...item, id: item.id || `rfq-item-${idx}` }))}
+              pagination={false}
+              enableAskAtlas={false}
+            />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
               <div style={{ background: 'white', padding: '1rem 2rem', borderRadius: '8px', border: '1px solid #e2e8f0', width: '300px' }}>

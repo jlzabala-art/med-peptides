@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { FlaskConical, CheckCircle, AlertTriangle, ArrowRight, ChevronDown, ChevronUp, Microscope, Clipboard, Activity, Star, ShieldAlert, Info, ExternalLink, Hash, Stethoscope, Beaker, BookOpen, Zap } from '@/lib/icons';
+import DataTable from '@/components/ui/DataTable';
 
 
 
@@ -158,33 +159,26 @@ function PrescriptionTable({ section, onNavigate }) {
         <CheckCircle size={13} color={T.success} />
         <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{section.title}</span>
       </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
-          <thead>
-            <tr style={{ backgroundColor: T.bg }}>
-              {(section.columns || []).map((col, i) => (
-                <th key={i} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700, color: 'var(--color-text-secondary)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: `1px solid ${T.border}` }}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {(section.rows || []).map((row, i) => (
-              <tr key={i} onClick={() => row.link && onNavigate?.(row.link)}
-                style={{ borderBottom: `1px solid ${T.border}`, cursor: row.link ? 'pointer' : 'default', transition: 'background 0.15s' }}
-                onMouseEnter={e => { if (row.link) e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'; }}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'white'}
-              >
-                <td style={{ padding: '0.55rem 0.75rem', fontWeight: 600, color: T.primary }}>{row.name}</td>
-                <td style={{ padding: '0.55rem 0.75rem', color: 'var(--color-text-secondary)' }}>{row.strength}</td>
-                <td style={{ padding: '0.55rem 0.75rem', color: 'var(--color-text-secondary)' }}>{row.quantity}</td>
-                <td style={{ padding: '0.55rem 0.75rem' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 600, color: row.category?.includes('A') ? T.success : T.warning, backgroundColor: row.category?.includes('A') ? 'rgba(16,185,129,0.08)' : 'rgba(245,158,11,0.08)', padding: '0.2rem 0.45rem', borderRadius: '5px' }}>{row.category}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={[
+          { key: 'name', header: section.columns?.[0] || 'Product', render: (val) => <span style={{ fontWeight: 600, color: T.primary }}>{val}</span> },
+          { key: 'strength', header: section.columns?.[1] || 'Strength' },
+          { key: 'quantity', header: section.columns?.[2] || 'Quantity' },
+          {
+            key: 'category',
+            header: section.columns?.[3] || 'Category',
+            render: (val) => (
+              <span style={{ fontSize: '0.62rem', fontWeight: 600, color: val?.includes('A') ? T.success : T.warning, backgroundColor: val?.includes('A') ? 'rgba(16,185,129,0.08)' : 'rgba(245,158,11,0.08)', padding: '0.2rem 0.45rem', borderRadius: '5px' }}>
+                {val}
+              </span>
+            ),
+          },
+        ]}
+        data={(section.rows || []).map((r, i) => ({ ...r, id: r.id || `rx-row-${i}` }))}
+        onRowClick={(row) => row.link && onNavigate?.(row.link)}
+        pagination={false}
+        enableAskAtlas={false}
+      />
     </motion.div>
   );
 }
@@ -289,28 +283,18 @@ function ProtocolPhase({ section, phaseIndex = 0 }) {
         <span style={{ fontSize: '0.72rem', fontWeight: 800, color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{section.phase}</span>
         {section.weeks && <span style={{ fontSize: '0.65rem', color: T.neutral, marginLeft: 'auto' }}>⏱ {section.weeks}</span>}
       </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem' }}>
-          <thead>
-            <tr style={{ backgroundColor: T.bg }}>
-              {['Compound', 'Research Range', 'Frequency', 'Route', 'Notes'].map((h, i) => (
-                <th key={i} style={{ padding: '0.45rem 0.75rem', textAlign: 'left', fontWeight: 700, color: T.neutral, fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: `1px solid ${T.border}`, whiteSpace: 'nowrap' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {(section.compounds || []).map((c, i) => (
-              <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
-                <td style={{ padding: '0.5rem 0.75rem', fontWeight: 700, color: T.primary, whiteSpace: 'nowrap' }}>{c.name}</td>
-                <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-primary)' }}>{c.range}</td>
-                <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-primary)' }}>{c.frequency}</td>
-                <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-primary)' }}>{c.route}</td>
-                <td style={{ padding: '0.5rem 0.75rem', color: T.neutral, fontStyle: c.notes ? 'italic' : 'normal' }}>{c.notes || '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={[
+          { key: 'name', header: 'Compound', render: (val) => <span style={{ fontWeight: 700, color: T.primary }}>{val}</span> },
+          { key: 'range', header: 'Research Range' },
+          { key: 'frequency', header: 'Frequency' },
+          { key: 'route', header: 'Route' },
+          { key: 'notes', header: 'Notes', render: (val) => <span style={{ color: T.neutral, fontStyle: val ? 'italic' : 'normal' }}>{val || '—'}</span> },
+        ]}
+        data={(section.compounds || []).map((c, i) => ({ ...c, id: c.id || `phase-cmp-${i}` }))}
+        pagination={false}
+        enableAskAtlas={false}
+      />
     </motion.div>
   );
 }

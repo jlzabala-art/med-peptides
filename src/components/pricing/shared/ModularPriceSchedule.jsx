@@ -14,6 +14,7 @@ import { useCurrencyConverter } from '@/hooks/pricing/useCurrencyConverter';
 import { useBrandPriceSchedule } from '@/hooks/pricing/useBrandPriceSchedule';
 import { updateProductSchedulePriceAction } from '@/actions/pricingActions';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
+import PageHeroCard from '@/components/ui/PageHeroCard';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PricingTopBar from './PricingTopBar';
 import PricingKpiStrip from './PricingKpiStrip';
@@ -261,7 +262,7 @@ export default function ModularPriceSchedule({
   };
 
   return (
-    <div className="colway-price-root">
+    <div className="colway-price-root atlas-page-bg">
       <PricingTopBar
         sectionLabel={sectionLabel}
         currentLabel={navCurrentLabel}
@@ -276,31 +277,17 @@ export default function ModularPriceSchedule({
         onPrint={handlePrint}
       />
 
-      <main className="price-sheet-container">
-        <header className="document-header">
-          <div className="header-meta-row">
-            <div className="institutional-identity">
-              <div className="brand-pairing">
-                <div className="brand-pill-atlas">{brandLeft}</div>
-                <span className="partner-cross">×</span>
-                <div className="brand-pill-colway">{brandRight}</div>
-              </div>
-              <h1 className="document-title">{documentTitle}</h1>
-              <p className="document-subtitle">{documentSubtitle}</p>
-            </div>
-
-            <div className="document-stamp-box">
-              <div className="stamp-item">
-                <span className="stamp-label">DOCUMENT REF:</span>
-                <span className="stamp-value font-mono">{documentRef}</span>
-              </div>
-              <div className="stamp-item">
-                <span className="stamp-label">CURRENCY:</span>
-                <span className="stamp-value font-mono">{currency}</span>
-              </div>
-            </div>
-          </div>
-        </header>
+      <main className="atlas-page-shell">
+        <PageHeroCard
+          brandLeft={brandLeft}
+          brandRight={brandRight}
+          title={documentTitle}
+          subtitle={documentSubtitle}
+          metaItems={[
+            { label: 'DOCUMENT REF:', value: documentRef, mono: true },
+            { label: 'CURRENCY:', value: currency, mono: true },
+          ]}
+        />
 
         <PricingKpiStrip
           isGuest={isGuest}

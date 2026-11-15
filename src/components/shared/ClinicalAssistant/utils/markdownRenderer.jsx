@@ -2,6 +2,7 @@
 import React from 'react';
 import { AI_SECTION_MAP, CLINICAL_GLOSSARY } from '../constants';
 import GlossaryTooltip from '../components/GlossaryTooltip';
+import DataTable from '@/components/ui/DataTable';
 
 export function getInternalPath(url) {
   if (!url) return null;
@@ -118,52 +119,26 @@ function renderMarkdownTable(lines, key) {
   if (!nonSep.length) return null;
   const headers = parseRow(nonSep[0]);
   const dataRows = nonSep.slice(1).map(parseRow);
+  const columns = headers.map((h, i) => ({
+    key: `col_${i}`,
+    header: h,
+    render: (val) => inlineFormat(val ?? ''),
+  }));
+  const rows = dataRows.map((row, ri) => {
+    const obj = { id: `md-row-${key}-${ri}` };
+    row.forEach((cell, ci) => {
+      obj[`col_${ci}`] = cell;
+    });
+    return obj;
+  });
   return (
-    <div key={key} style={{
-      overflowX: 'auto',
-      margin: '0.85rem 0',
-      borderRadius: '12px',
-      border: '1px solid rgba(226, 234, 245, 0.8)',
-      boxShadow: '0 4px 12px rgba(0, 75, 135, 0.02)'
-    }}>
-      {/* eslint-disable-next-line no-restricted-syntax */}
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif' }}>
-        {headers.length > 0 && (
-          <thead>
-            <tr style={{ background: 'linear-gradient(135deg, rgba(0, 75, 135, 0.05) 0%, rgba(0, 75, 135, 0.02) 100%)', borderBottom: '2px solid rgba(226, 234, 245, 0.9)' }}>
-              {headers.map((h, i) => (
-                <th key={i} style={{
-                  padding: '0.75rem 0.9rem',
-                  textAlign: 'left',
-                  color: 'var(--primary)',
-                  fontWeight: 750,
-                  fontSize: '0.76rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em'
-                }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-        )}
-        <tbody>
-          {dataRows.map((row, ri) => (
-            <tr key={ri} style={{
-              borderBottom: ri === dataRows.length - 1 ? 'none' : '1px solid #f1f5f9',
-              backgroundColor: ri % 2 === 0 ? 'white' : 'var(--color-bg-app)',
-              transition: 'background 0.2s'
-            }}>
-              {row.map((cell, ci) => (
-                <td key={ci} style={{
-                  padding: '0.65rem 0.9rem',
-                  color: 'var(--color-text-primary)',
-                  lineHeight: '1.5',
-                  fontWeight: 500
-                }}>{inlineFormat(cell)}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div key={key} style={{ margin: '0.85rem 0' }}>
+      <DataTable
+        columns={columns}
+        data={rows}
+        pagination={false}
+        enableAskAtlas={false}
+      />
     </div>
   );
 }
