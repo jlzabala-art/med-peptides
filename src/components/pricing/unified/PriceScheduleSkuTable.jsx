@@ -14,7 +14,6 @@ import toast from 'react-hot-toast';
 
 import DataTable from '@/components/ui/DataTable';
 import StatusBadge from '@/components/ui/StatusBadge';
-import CopyableId from '@/components/ui/CopyableId';
 import TabSkeleton from '@/components/ui/TabSkeleton';
 import InlineEditableCell from '@/components/ui/InlineEditableCell';
 import EmptyState from '@/components/ui/EmptyState';
@@ -308,40 +307,11 @@ export default function PriceScheduleSkuTable({
   const columns = useMemo(() => {
     const cols = [
       {
-        key: 'id',
-        label: 'Code / SKU',
-        width: showAdminWaterfall ? '15%' : '18%',
-        render: (val, row) => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <CopyableId value={row.id} />
-            {row.requiresColdChain && (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 3,
-                  width: 'fit-content',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: '#0369a1',
-                  background: '#e0f2fe',
-                  border: '1px solid #bae6fd',
-                  padding: '1px 6px',
-                  borderRadius: 10,
-                }}
-                title="Cold Chain 2°C – 8°C Required"
-              >
-                <Snowflake size={10} />
-                <span>2–8°C</span>
-              </span>
-            )}
-          </div>
-        ),
-      },
-      {
         key: 'name',
         label: 'Product & Presentation',
-        width: showAdminWaterfall ? '27%' : '44%',
+        width: showAdminWaterfall ? '38%' : '58%',
+        sortable: true,
+        sortValue: (row) => (row.name || row.canonicalName || row.id || '').toLowerCase(),
         render: (val, row) => (
           <div>
             <div style={{ fontWeight: 600, fontSize: 13, color: '#0f172a', lineHeight: 1.3 }}>
@@ -352,9 +322,33 @@ export default function PriceScheduleSkuTable({
                 {row.packSize || row.dosage}
               </div>
             )}
-            {(row.brand || row.subcategory) && (
-              <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
-                {[row.brand, row.subcategory].filter(Boolean).join(' · ')}
+            {(row.brand || row.subcategory || row.requiresColdChain) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                {(row.brand || row.subcategory) && (
+                  <span style={{ fontSize: 10, color: '#64748b' }}>
+                    {[row.brand, row.subcategory].filter(Boolean).join(' · ')}
+                  </span>
+                )}
+                {row.requiresColdChain && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 3,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: '#0369a1',
+                      background: '#e0f2fe',
+                      border: '1px solid #bae6fd',
+                      padding: '0px 6px',
+                      borderRadius: 10,
+                    }}
+                    title="Cold Chain 2°C – 8°C Required"
+                  >
+                    <Snowflake size={10} />
+                    <span>2–8°C</span>
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -363,7 +357,9 @@ export default function PriceScheduleSkuTable({
       {
         key: 'status',
         label: 'Availability',
-        width: showAdminWaterfall ? '11%' : '16%',
+        width: showAdminWaterfall ? '12%' : '16%',
+        sortable: true,
+        sortValue: (row) => (row.inStock ? 1 : 0),
         render: (val, row) =>
           showAdminWaterfall ? (
             <button
@@ -388,7 +384,12 @@ export default function PriceScheduleSkuTable({
         {
           key: 'adminCost',
           label: 'Cost (Base)',
-          width: '15%',
+          width: '16%',
+          sortable: true,
+          sortValue: (row) => {
+            const resolved = priceFor(row);
+            return Number(resolved.costPrice ?? (row.price ? +(row.price / 1.3225).toFixed(2) : 0)) || 0;
+          },
           render: (val, row) => {
             const resolved = priceFor(row);
             const cost = resolved.costPrice ?? (row.price ? +(row.price / 1.3225).toFixed(2) : null);
@@ -412,7 +413,17 @@ export default function PriceScheduleSkuTable({
         {
           key: 'wholesalePrice',
           label: 'Wholeseller (15%+15%)',
-          width: '16%',
+          width: '17%',
+          sortable: true,
+          sortValue: (row) => {
+            const resolved = priceFor(row);
+            return Number(
+              resolved.wholesalePrice ??
+              row.pricing?.wholesalePrice ??
+              (resolved.costPrice ? +(resolved.costPrice * 1.3225).toFixed(2) : row.price) ??
+              0
+            ) || 0;
+          },
           render: (val, row) => {
             const resolved = priceFor(row);
             const wholesale =
@@ -432,7 +443,18 @@ export default function PriceScheduleSkuTable({
         {
           key: 'distributorPrice',
           label: 'Distributor (+15%)',
-          width: '16%',
+          width: '17%',
+          sortable: true,
+          sortValue: (row) => {
+            const resolved = priceFor(row);
+            const cost = resolved.costPrice ?? (row.price ? +(row.price / 1.3225).toFixed(2) : null);
+            return Number(
+              resolved.distributorPrice ??
+              resolved.mediluxePrice ??
+              row.pricing?.distributorPrice ??
+              (cost ? +(cost * 1.15).toFixed(2) : 0)
+            ) || 0;
+          },
           render: (val, row) => {
             const resolved = priceFor(row);
             const cost = resolved.costPrice ?? (row.price ? +(row.price / 1.3225).toFixed(2) : null);
@@ -459,7 +481,16 @@ export default function PriceScheduleSkuTable({
           effectiveTier === 'clinic'
             ? 'Clinic / Doctor Price (+45%)'
             : 'Wholesale Price (Cost × 1.3225)',
-        width: '22%',
+        width: '26%',
+        sortable: true,
+        sortValue: (row) => {
+          const resolved = priceFor(row);
+          return Number(
+            effectiveTier === 'clinic'
+              ? (resolved.clinicPrice ?? row.pricing?.clinicPrice ?? resolved.price ?? row.price)
+              : (resolved.wholesalePrice ?? row.pricing?.wholesalePrice ?? resolved.price ?? row.price)
+          ) || 0;
+        },
         render: (val, row) => {
           const resolved = priceFor(row);
           const amount =
@@ -510,17 +541,6 @@ export default function PriceScheduleSkuTable({
           </span>
           <span style={{ fontSize: 11, color: '#64748b' }}>
             · Currency: <strong>{group.currency}</strong>
-          </span>
-          <span style={{
-            fontSize: 11,
-            color: 'var(--color-primary, #003666)',
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #bae6fd',
-            padding: '1px 8px',
-            borderRadius: 12,
-            fontWeight: 600,
-          }}>
-            Click any row for specs
           </span>
         </div>
 
