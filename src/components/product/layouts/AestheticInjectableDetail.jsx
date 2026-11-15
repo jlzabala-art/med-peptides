@@ -203,23 +203,23 @@ export default function AestheticInjectableDetail({
   const sidebarSections = useMemo(() => [
     {
       id: 'overview',
-      title: isEs ? 'Resumen y Reología' : 'Overview & Rheology',
-      icon: <Microscope size={15} />,
+      label: isEs ? 'Resumen y Reología' : 'Overview & Rheology',
+      icon: Microscope,
     },
     {
       id: 'protocol',
-      title: isEs ? 'Indicaciones y Protocolo' : 'Indications & Protocol',
-      icon: <Syringe size={15} />,
+      label: isEs ? 'Indicaciones y Protocolo' : 'Indications & Protocol',
+      icon: Syringe,
     },
     {
       id: 'safety',
-      title: isEs ? 'Seguridad y Contraindicaciones' : 'Safety & Contraindications',
-      icon: <HeartPulse size={15} />,
+      label: isEs ? 'Seguridad y Contraindicaciones' : 'Safety & Contraindications',
+      icon: HeartPulse,
     },
     {
       id: 'regulatory',
-      title: isEs ? 'Regulación y Trazabilidad' : 'Regulatory & Packaging',
-      icon: <FileText size={15} />,
+      label: isEs ? 'Regulación y Trazabilidad' : 'Regulatory & Packaging',
+      icon: FileText,
     },
   ], [isEs]);
 

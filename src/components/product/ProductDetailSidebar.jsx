@@ -352,6 +352,7 @@ export default function ProductDetailSidebar({
             {displayedSections.map((sec, idx) => {
               const isActive = currentActiveId === sec.id;
               const IconComponent = sec.icon;
+              const sectionLabel = sec.label || sec.title || sec.id;
 
               return (
                 <li key={sec.id} className="pds-toc-item">
@@ -359,13 +360,15 @@ export default function ProductDetailSidebar({
                     href={`#${sec.id}`}
                     className={`pds-toc-link ${isActive ? 'is-active' : ''}`}
                     onClick={(e) => scrollToSection(e, sec.id)}
-                    title={sec.label}
+                    title={sectionLabel}
                   >
                     <span className="pds-toc-step-number">{idx + 1}</span>
-                    {IconComponent && (
+                    {React.isValidElement(IconComponent) ? (
+                      <span className="pds-toc-item-icon">{IconComponent}</span>
+                    ) : IconComponent ? (
                       <IconComponent size={14} className="pds-toc-item-icon" />
-                    )}
-                    <span className="pds-toc-item-text">{sec.label}</span>
+                    ) : null}
+                    <span className="pds-toc-item-text">{sectionLabel}</span>
                     {isActive && <ChevronRight size={13} className="pds-toc-active-arrow" />}
                   </a>
                 </li>
