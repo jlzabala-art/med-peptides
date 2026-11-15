@@ -28,6 +28,8 @@ import {
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import CoaModal from '@/components/product/CoaModal';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import './B2BShowcase.css';
@@ -73,72 +75,50 @@ export default function B2BShowcaseClientView({ showcase }) {
 
   return (
     <div className="b2b-showcase-root">
-      {/* ── 1. Institutional Top Bar ── */}
-      <header className="b2b-top-nav">
-        <div className="b2b-nav-inner">
-          <div className="b2b-brand-cluster">
-            <div className="b2b-logo-mark">
-              <FlaskConical size={18} color="#38bdf8" />
-            </div>
-            <div>
-              <div className="b2b-brand-name">ATLAS BIOPHARMA</div>
-              <div className="b2b-brand-sub">INSTITUTIONAL CLINICAL PORTFOLIO</div>
-            </div>
-          </div>
-
-          <div className="b2b-partner-tag">
-            <span className="b2b-partner-label">Prepared for</span>
-            <strong className="b2b-partner-name">{clientName}</strong>
-          </div>
-
-          <div className="b2b-nav-actions">
+      <PublicUnifiedHeader
+        brandHref="/"
+        loginRedirect={`/b2b/${id}`}
+        hideCurrencySelector={true}
+        hideAccountManager={true}
+        onOpenInquiry={() => setIsInquiryOpen(true)}
+        breadcrumb={[
+          { label: 'B2B Clinical Portfolio', href: '/pricing' },
+          { label: clientName },
+        ]}
+        extraActions={
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <button
               type="button"
               onClick={handleWhatsAppShare}
-              className="b2b-nav-btn b2b-nav-btn--wa"
+              className="puh-btn"
+              style={{
+                background: '#16a34a',
+                border: '1px solid #15803d',
+                color: '#ffffff',
+                fontWeight: 600,
+              }}
               title="Share via WhatsApp"
             >
-              <MessageCircle size={15} /> <span>WhatsApp</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              className="b2b-nav-btn"
-              title="Copy shareable portfolio link"
-            >
-              {copied ? <Check size={15} color="#16a34a" /> : <Copy size={15} />}
-              <span>{copied ? 'Copied' : 'Copy Link'}</span>
+              <MessageCircle size={14} />
+              <span className="puh-btn-label">Share</span>
             </button>
             <button
               type="button"
               onClick={() => setIsInquiryOpen(true)}
-              className="b2b-nav-btn b2b-nav-btn--primary"
+              className="puh-btn"
+              style={{
+                background: '#2563eb',
+                border: '1px solid #1d4ed8',
+                color: '#ffffff',
+                fontWeight: 600,
+              }}
             >
-              <Building2 size={15} /> <span>Request Allocation</span>
+              <Building2 size={14} />
+              <span className="puh-btn-label">Request Allocation</span>
             </button>
-
-            {user ? (
-              <Link
-                href={isAdmin ? '/admin' : isProfessional ? '/doctor' : '/dashboard'}
-                className="b2b-nav-btn"
-                style={{ background: 'rgba(56, 189, 248, 0.15)', borderColor: '#38bdf8', color: '#38bdf8' }}
-                title={isAdmin ? 'Admin Console' : 'Workspace Portal'}
-              >
-                <User size={15} /> <span>{isAdmin ? 'Admin' : 'Portal'}</span>
-              </Link>
-            ) : (
-              <Link
-                href={`/login?redirect=/b2b/${id}`}
-                className="b2b-nav-btn"
-                style={{ background: '#0284c7', borderColor: '#0284c7', color: '#ffffff' }}
-                title="Sign in to your clinical or wholesale account"
-              >
-                <LogIn size={15} /> <span>Login</span>
-              </Link>
-            )}
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* ── 2. Hero Section ── */}
       <section className="b2b-hero-section">
@@ -384,6 +364,8 @@ export default function B2BShowcaseClientView({ showcase }) {
           category: targetSpecialty
         }}
       />
+
+      <PublicUnifiedFooter />
 
       {/* ── Extracted CSS loaded via ./B2BShowcase.css to prevent SSR FOUC ── */}
     </div>

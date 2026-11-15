@@ -85,6 +85,9 @@ export default function PublicUnifiedHeader({
   hideAccountManager = false,
   // Hide Atlas AI copilot button in Tier 1 (e.g. when present in floating bottom dock)
   hideAiButton = false,
+  onOpenAi = null,
+  // Optional extra action buttons rendered consistently before Contact / User Badge
+  extraActions = null,
   // Collection-aware search parameters
   collectionScope = null,
   collectionProducts = null,
@@ -98,6 +101,8 @@ export default function PublicUnifiedHeader({
   onSwitchRx = null,
   rxSwitcherCount = 0,
   // White-Label Practice Branding
+  whiteLabel = false,
+  partnerName = '',
   clinicLogo = null,
   clinicName = null,
   // Sticky sub-banner (e.g. Doctor View / Patient View Mode indicator)
@@ -398,10 +403,18 @@ export default function PublicUnifiedHeader({
                     <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#ffffff' }}>
                       {clinicName || doctorName}
                     </span>
-                    <span style={{ fontSize: '0.62rem', color: 'rgba(255, 255, 255, 0.7)', letterSpacing: '0.02em' }}>
-                      Powered by Atlas Health Platform
-                    </span>
+                    {!whiteLabel && (
+                      <span style={{ fontSize: '0.62rem', color: 'rgba(255, 255, 255, 0.7)', letterSpacing: '0.02em' }}>
+                        Powered by Atlas Health Platform
+                      </span>
+                    )}
                   </div>
+                </div>
+              ) : whiteLabel && partnerName ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.01em' }}>
+                    {partnerName}
+                  </span>
                 </div>
               ) : (
                 <Link href={brandHref || "/c/CAT-MU9L9GBN"} className="puh-brand-link" title={brandTitle || "Atlas Health Services Clinical & Healthcare Intelligence"}>
@@ -608,6 +621,30 @@ export default function PublicUnifiedHeader({
                       lineHeight: 1
                     }}>{rxSwitcherCount > 9 ? '9+' : rxSwitcherCount}</span>
                   )}
+                </button>
+              )}
+
+              {/* Extra page-specific actions (e.g. Share, Export, Print) */}
+              {extraActions}
+
+              {/* Unified Atlas AI Copilot Trigger */}
+              {!hideAiButton && (
+                <button
+                  type="button"
+                  className="puh-btn puh-btn-ai"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    if (onOpenAi) {
+                      onOpenAi();
+                    } else if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+                      window.dispatchEvent(new CustomEvent('open-atlas-ai'));
+                    }
+                  }}
+                  title={isSpanish ? 'Preguntar a Atlas AI' : 'Ask Atlas AI'}
+                >
+                  <Sparkles size={14} />
+                  <span className="puh-btn-label">Atlas AI</span>
                 </button>
               )}
 

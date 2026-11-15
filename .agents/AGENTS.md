@@ -626,3 +626,23 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Cada nuevo paciente importado** debe registrarse en `PATIENT_GENOTYPE_PROFILES` y `PATIENT_DEFAULTS` dentro de `clinicalNutrigenomicEngine.js`, identificado por su `sampleCode` (ej. `G000943568`).
 - **El motor DEBE generar textos clínicos condicionales** — nunca texto estático. Los hallazgos, alertas y recomendaciones deben variar según los genotipos reales del paciente (ej. MTHFR GG = "Methylation Normal" vs TT = "Severe Impairment").
 - **Nunca reutilices los datos de un paciente para otro.** Cada informe es personalizado con los genotipos REALES extraídos del PDF de ese paciente concreto.
+
+## 51. Unificación de Shell Público, ContextualSidebar y Atlas AI Global (Golden Rule)
+- **Toda página pública o enlace compartido** (`/pricing/*`, `/collection/*`, `/p/*`, `/proto/*`, `/dr/*`, `/rx/*`, `/lab/*`, `/verify/*`, `/b2b/*`, `/c/*`, `/shared/*`, `/quotation/*`) DEBE usar `<PublicUnifiedHeader>` (directamente o vía los layouts canónicos en `src/components/shared/layouts/`) y `<PublicUnifiedFooter>`. **Prohibido** crear etiquetas `<header>` ad-hoc con botones propios.
+- **Acciones en cabecera en orden fijo**: las acciones específicas de página se inyectan mediante `extraActions` en `PublicUnifiedHeader` manteniendo siempre la secuencia consistente: `Search ⌘K → Currency/Lang → extraActions (Share / Export / Preview PDF) → Copy Link → Atlas AI → Contact → GcpUserBadge`.
+- **Atlas AI unificado**: [GlobalPublicAtlasDrawer.jsx](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/shared/GlobalPublicAtlasDrawer.jsx) se monta automáticamente en todas las rutas públicas desde `GlobalClientWrapper.jsx`, y `PublicUnifiedHeader` expone siempre el disparador `Atlas AI` (`!hideAiButton`). Las páginas nuevas no deben crear drawers paralelos de Atlas AI; para enriquecer el contexto, basta emitir `window.dispatchEvent(new CustomEvent('set-public-atlas-context', { detail: ... }))`.
+- **Sidebar único**: cualquier vista pública con navegación lateral o filtros laterales debe usar `<ContextualSidebar>` (`src/components/shared/public/ContextualSidebar.jsx`) en lugar de crear nuevos `*CollectionSidebar` ad-hoc.
+
+## 52. Taxonomía de 5 Familias de Templates y 5 Bloques Comunes (Golden Rule)
+- **Toda pantalla nueva o refactorizada** DEBE adscribirse a una de las **5 Familias Canónicas** de `src/components/shared/layouts/`:
+  1. **Catálogos y Listas de Precios** → `UnifiedCatalogLayout` (`/pricing/*`, `/collection/*`, `/c/[id]`, `/vials`, `/proto`, `/shared/catalog/[token]`, `/b2b/lotusland`)
+  2. **Fichas de Entidad / Monografías** → `EntityDetailLayout` (`/p/[slug]`, `/raw/[slug]`, `/proto/[slug]`, `/dr/[slug]`, `/nutritionist/[slug]`, `/shared/protocol/[id]`)
+  3. **Documentos Transaccionales y Verificación** → `DocumentViewLayout` (`/quotation/[token]`, `/shared/quote/[token]`, `/rfq/[token]`, `/b2b/payables/[token]`, `/rx/[code]`, `/lab/[code]`, `/verify/[code]`)
+  4. **Herramientas e Intake** → `ToolWorkspaceLayout` / `SplitScreenIntakeLayout` (`/calculator`, `/protocol-finder`, `/tools`, `/rx/intake`, `/checkout`, `/account-manager`)
+  5. **Contenido Editorial y Legal** → `EditorialPageLayout` (`/about`, `/company`, `/compounding`, `/what-are-peptides`, `/faq/[[...topic]]`, `/blog/*`, `/privacy`, `/terms`, `/regulatory`)
+- **Uso obligatorio de los 5 Bloques Comunes** (`src/components/shared/public/index.js`):
+  1. `<ActionBar />`: máximo **1 CTA primario sólido**, orden fijo `[Share] → [Export] → [Copy Link] → [Atlas AI] → [Primary CTA] → [Destructive]`.
+  2. `<EntitySummaryCard />`: tarjeta única para vistas Grid/Móvil (incluye `CopyableId` + `StatusBadge` + máx. 2 metadatos + precio/acción).
+  3. `<FloatingActionDock />`: dock inferior único estilo Apple Glassmorphism con altura mínima táctil `44px`.
+  4. `<MetadataStrip />`: grilla estándar de mini-cajas clave-valor (CAS, Pureza, Lote, Fecha, Moneda).
+  5. `<TemplateSkeleton />`: skeletons acoplados al template (`catalog` | `detail` | `document`); prohibido usar spinners genéricos centrados.

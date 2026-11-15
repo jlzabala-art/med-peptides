@@ -31,6 +31,7 @@ import { exportLotuslandProcurementXlsx } from '@/utils/exportLotuslandProcureme
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
 import AtlasAiLotuslandDrawer from '@/components/pricing/AtlasAiLotuslandDrawer';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import toast from 'react-hot-toast';
 
 /**
@@ -926,86 +927,43 @@ export default function LotuslandPublicPortalClient() {
 
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', color: '#202124' }}>
-      {/* Google Cloud Style Header Top Bar */}
-      <header style={{
-        backgroundColor: '#0b192c',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-        padding: '0.75rem 1.5rem',
-        color: '#ffffff',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '0.75rem',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '6px',
-            backgroundColor: '#00a3e0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: '0.85rem'
-          }}>
-            A
+      <PublicUnifiedHeader
+        brandHref="/"
+        loginRedirect="/b2b/lotusland"
+        hideCurrencySelector={true}
+        hideAccountManager={true}
+        onOpenAi={() => setIsAtlasAiOpen(true)}
+        breadcrumb={[
+          { label: 'B2B Partner Portal', href: '/pricing' },
+          { label: 'Lotusland Sourcing Audit' },
+        ]}
+        extraActions={
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="puh-btn"
+              style={{
+                backgroundColor: '#16a34a',
+                border: '1px solid #15803d',
+                color: '#ffffff',
+                fontWeight: 600,
+              }}
+            >
+              <Download size={14} />
+              <span className="puh-btn-label">Download Audit (.xlsx)</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleShare}
+              className="puh-btn puh-btn-ghost"
+            >
+              <Share2 size={14} />
+              <span className="puh-btn-label">Share</span>
+            </button>
           </div>
-          <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.02em' }}>
-              ATLAS HEALTH SERVICES
-            </div>
-            <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
-              Global Sourcing Network · Public Partner Portal
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            type="button"
-            onClick={handleExport}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#16a34a',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '6px 12px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-          >
-            <Download size={14} /> Download Audit (.xlsx)
-          </button>
-          <button
-            type="button"
-            onClick={handleShare}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              color: '#ffffff',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '6px',
-              padding: '6px 12px',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            <Share2 size={14} /> Share
-          </button>
-        </div>
-      </header>
+        }
+      />
 
       {/* Main Content Container */}
       <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem 1rem 4rem 1rem' }}>

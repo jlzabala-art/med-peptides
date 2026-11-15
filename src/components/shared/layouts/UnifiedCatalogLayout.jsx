@@ -10,6 +10,7 @@ import FilterRow from '@/components/ui/FilterRow';
 import ActiveFiltersBar from '@/components/ui/ActiveFiltersBar';
 import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
+import TemplateSkeleton from '@/components/shared/public/TemplateSkeleton';
 import { LayoutGrid, Table as TableIcon, Package } from '@/lib/icons';
 
 /**
@@ -387,6 +388,8 @@ export default function UnifiedCatalogLayout({
         {/* 5. Cuerpo de Ítems (Grid o DataTable) */}
         {children ? (
           children
+        ) : loading && items.length === 0 ? (
+          <TemplateSkeleton variant="catalog" />
         ) : effectiveView === 'table' && canShowTable ? (
           <DataTable
             data={items}

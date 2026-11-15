@@ -92,6 +92,7 @@ export default function PublicAtlasAIDrawer({
   onCloseControlled = null,
   isOpen: isOpenProp = null,
   onClose: onCloseProp = null,
+  isGlobalFallback = false,
 }) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const isOpen = isOpenControlled !== null 
@@ -180,6 +181,17 @@ export default function PublicAtlasAIDrawer({
       setIsUnlockingBonus(false);
     }
   };
+
+  // Track page-level PublicAtlasAIDrawer mounts so GlobalPublicAtlasDrawer avoids duplicate FABs
+  useEffect(() => {
+    if (isGlobalFallback || typeof window === 'undefined') return;
+    window.__publicAtlasPageMounted = (window.__publicAtlasPageMounted || 0) + 1;
+    window.dispatchEvent(new CustomEvent('public-atlas-mount-change'));
+    return () => {
+      window.__publicAtlasPageMounted = Math.max(0, (window.__publicAtlasPageMounted || 1) - 1);
+      window.dispatchEvent(new CustomEvent('public-atlas-mount-change'));
+    };
+  }, [isGlobalFallback]);
 
   // Global event listener to open drawer with pre-filled inquiry from publication cards
   useEffect(() => {

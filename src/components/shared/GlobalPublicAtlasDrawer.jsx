@@ -1,0 +1,132 @@
+'use client';
+
+import React, { useEffect, useState, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
+import PublicAtlasAIDrawer from './PublicAtlasAIDrawer';
+
+/**
+ * GlobalPublicAtlasDrawer
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Provides a single, consistent Atlas AI research assistant across all public
+ * routes without requiring each page to manually mount <PublicAtlasAIDrawer />.
+ *
+ * Automatically derives route-aware context from the URL and listens to
+ * `set-public-atlas-context` for richer page-specific metadata.
+ * Suppresses itself when a page-level PublicAtlasAIDrawer is already mounted.
+ */
+export default function GlobalPublicAtlasDrawer() {
+  const pathname = usePathname() || '/';
+  const [hasPageDrawer, setHasPageDrawer] = useState(false);
+  const [customContext, setCustomContext] = useState(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const syncMountState = () => {
+      setHasPageDrawer(Boolean(window.__publicAtlasPageMounted > 0));
+    };
+    syncMountState();
+    window.addEventListener('public-atlas-mount-change', syncMountState);
+    return () => window.removeEventListener('public-atlas-mount-change', syncMountState);
+  }, []);
+
+  useEffect(() => {
+    setCustomContext(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleContext = (e) => {
+      if (e?.detail) setCustomContext(e.detail);
+    };
+    window.addEventListener('set-public-atlas-context', handleContext);
+    return () => window.removeEventListener('set-public-atlas-context', handleContext);
+  }, []);
+
+  const routeContext = useMemo(() => {
+    if (customContext) return customContext;
+
+    if (pathname.startsWith('/pricing/peptides')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'pricing-peptides',
+        contextAnchor: {
+          sectionTitle: 'Atlas Peptides Price Schedule & Clinical Formulations',
+          keyActives: 'Research & clinical peptides, bacteriostatic water, sterile compounding supplies',
+          mechanisms: 'Pricing tiers, wholesale vs clinic rates, and clinical formulation specifications.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/pricing/colway')) {
+      return {
+        contextType: 'catalog',
+        storageKey: `pricing-${pathname.split('/').pop() || 'colway'}`,
+        contextAnchor: {
+          sectionTitle: 'Colway Clinical Cellular & Trichology Portfolio',
+          keyActives: 'Bioactive native collagen, tropocollagen, trichology actives',
+          mechanisms: 'Wholesale, Clinic, and Retail MSRP schedules, SKU formats, and application protocols.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/pricing')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'pricing-directory',
+        contextAnchor: {
+          sectionTitle: 'Institutional Price Schedules & Commercial Agreements',
+          keyActives: 'Multi-brand clinical portfolios, genomics, peptides, and derma-cellular lines',
+          mechanisms: 'Commercial pricing structure, currency conversion, and B2B wholesale terms.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/collection/') || pathname.startsWith('/c/')) {
+      const slug = pathname.split('/').pop() || 'collection';
+      return {
+        contextType: 'catalog',
+        storageKey: `collection-${slug}`,
+        contextAnchor: {
+          sectionTitle: `Collection: ${slug.replace(/-/g, ' ').toUpperCase()}`,
+          keyActives: 'Curated clinical formulations and protocol-ready SKUs',
+          mechanisms: 'Product comparison, dosing formats, and clinical indications.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/dr/') || pathname.startsWith('/nutritionist/')) {
+      return {
+        contextType: 'catalog',
+        storageKey: `practitioner-${pathname.split('/').pop() || 'portal'}`,
+        contextAnchor: {
+          sectionTitle: 'Practitioner Clinical Portal',
+          keyActives: 'Authorized physician protocols, diagnostic panels, and patient care pathways',
+          mechanisms: 'Clinical guidance, protocol selection, and patient onboarding.',
+        },
+      };
+    }
+
+    return {
+      contextType: 'catalog',
+      storageKey: `public-${pathname.replace(/[^a-z0-9]/gi, '_').slice(0, 40) || 'home'}`,
+      contextAnchor: null,
+    };
+  }, [pathname, customContext]);
+
+  const hasSpecializedCopilot =
+    pathname.startsWith('/pricing/peptides') ||
+    pathname.startsWith('/b2b/lotusland') ||
+    pathname.startsWith('/dr/');
+
+  if (hasPageDrawer || hasSpecializedCopilot) return null;
+
+  return (
+    <PublicAtlasAIDrawer
+      isGlobalFallback={true}
+      contextType={routeContext.contextType || 'catalog'}
+      contextAnchor={routeContext.contextAnchor || null}
+      catalogInventory={routeContext.catalogInventory || []}
+      storageKey={routeContext.storageKey || 'public-global'}
+    />
+  );
+}

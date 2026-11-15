@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import DataTable from '@/components/ui/DataTable';
 
 export default function VerifyBatchClient({ code, verification, baseUrl }) {
@@ -25,11 +27,29 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
       minHeight: '100vh',
       backgroundColor: '#f1f5f9',
       fontFamily: 'Inter, -apple-system, sans-serif',
-      padding: '2.5rem 1rem',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
     }}>
+      <div className="verify-no-print">
+        <PublicUnifiedHeader
+          brandHref="/"
+          copyUrl={verifyUrl}
+          hideCurrencySelector={true}
+          hideAccountManager={true}
+          breadcrumb={[
+            { label: 'Batch Verification', href: '/' },
+            { label: code },
+          ]}
+        />
+      </div>
+
+      <div style={{
+        flex: 1,
+        padding: '2.5rem 1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}>
       <style>{`
         @media print {
           .verify-no-print { display: none !important; }
@@ -275,6 +295,11 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
           hideFloatingTrigger={true}
           lang="en"
         />
+      </div>
+      </div>
+
+      <div className="verify-no-print">
+        <PublicUnifiedFooter />
       </div>
     </div>
   );

@@ -5453,6 +5453,7 @@ export default function DoctorPublicPortalClient({
         track="protocols"
         lang={lang}
         onLangChange={setLang}
+        onOpenAi={() => setIsAtlasAiOpen(true)}
         clinicLogo={doctor?.clinicLogo || doctor?.logoUrl}
         clinicName={doctor?.clinic}
         copyUrl={`https://www.atlashealth-services.com/dr/${doctor?.opaqueCode || slug}`}

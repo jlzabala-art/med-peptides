@@ -18,6 +18,7 @@ import { useFirestoreData } from '../hooks/useFirestoreData';
 const Cart = dynamic(() => import('../snippets/Cart'), { ssr: false });
 const UniversalSearchModal = dynamic(() => import('../components/shared/DatasheetQuickSearchModal'), { ssr: false });
 const AtlasAIDrawer = dynamic(() => import('../components/shared/AtlasAIDrawer'), { ssr: false });
+const GlobalPublicAtlasDrawer = dynamic(() => import('../components/shared/GlobalPublicAtlasDrawer'), { ssr: false });
 const GCPImpersonationDock = dynamic(() => import('../components/navigation/GCPImpersonationDock'), { ssr: false });
 const GCPCommandPalette = dynamic(() => import('../components/navigation/GCPCommandPalette'), { ssr: false });
 
@@ -180,12 +181,26 @@ export default function GlobalClientWrapper({ children }) {
     pathname === prefix || pathname?.startsWith(`${prefix}/`)
   );
 
+  const isPrivatePortalRoute = [
+    '/admin',
+    '/doctor',
+    '/patient',
+    '/clinic',
+    '/supplier',
+    '/wholesaler',
+    '/pharmacy',
+    '/login',
+    '/auth',
+    '/session-ended',
+  ].some((prefix) => pathname === prefix || pathname?.startsWith(`${prefix}/`));
+
   // Portal routes have their own layout — just render children without loading B2C data
   if (isPortalRoute) {
     return (
       <AppErrorBoundary>
         <Toaster containerStyle={{ zIndex: 99999 }} />
         {children}
+        {!isPrivatePortalRoute && <GlobalPublicAtlasDrawer />}
         {isSuperUser && <GCPCommandPalette />}
         <PWAInstallPrompt />
       </AppErrorBoundary>
