@@ -480,6 +480,67 @@ export default function PublicUnifiedHeader({
                           <ChevronRight size={13} color="#94a3b8" />
                         </Link>
                       ))}
+
+                      {(workspace?.rfqItems?.length > 0) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAppSwitcherOpen(false);
+                            workspace?.setIsQuoteDrawerOpen?.(true);
+                          }}
+                          style={{
+                            marginTop: '4px',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid #bfdbfe',
+                            background: '#eff6ff',
+                            color: '#003666',
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            cursor: 'pointer',
+                            width: '100%',
+                          }}
+                        >
+                          <span>{isSpanish ? 'Cotización Activa' : 'Active Quote Cart'}</span>
+                          <span style={{ background: '#003666', color: '#ffffff', borderRadius: '999px', padding: '1px 7px', fontSize: '0.72rem' }}>
+                            {workspace.rfqItems.length}
+                          </span>
+                        </button>
+                      )}
+
+                      {(workspace?.recentItems?.length > 0) && (
+                        <>
+                          <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '4px', padding: '6px 8px 2px', fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                            {isSpanish ? 'Vistos recientemente' : 'Recently Viewed'}
+                          </div>
+                          {workspace.recentItems.slice(0, 4).map((recent) => (
+                            <Link
+                              key={recent.href}
+                              href={recent.href}
+                              onClick={() => setAppSwitcherOpen(false)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                fontSize: '0.76rem',
+                                fontWeight: 500,
+                                color: '#334155',
+                                textDecoration: 'none',
+                              }}
+                            >
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '175px' }}>
+                                {recent.label}
+                              </span>
+                              <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{recent.category}</span>
+                            </Link>
+                          ))}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

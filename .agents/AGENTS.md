@@ -675,4 +675,10 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Atlas AI único, parametrizable y contextual**:
   - Todas las pantallas deben registrar su contexto vivo (ruta, entidad, SKUs visibles, divisa, rol/sesión) mediante `useRegisterAtlasContext(...)` de [`AtlasContextProvider.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/context/AtlasContextProvider.jsx) sin filtrar datos restringidos en sesiones `guest`, consumiendo el motor unificado `/api/ai-chat` parametrizado por `mode` y `role`.
 
+## 68. Continuidad Cross-Screen, Skeletons Instantáneos y Recientes (Golden Rule)
+- **Transiciones instantáneas (`loading.jsx` + `<TemplateSkeleton />`)**: Toda ruta dinámica principal (`/pricing/*`, `/proto`, `/vials`, `/raw/*`, `/c/*`, `/shared/*`, `/b2b/*`, `/lab/*`) DEBE definir su `loading.jsx` usando `<TemplateSkeleton variant="catalog|detail|document" />` para eliminar esperas en blanco durante fetches SSR.
+- **Workspace Cross-Catalog (`PublicWorkspaceContext`)**: La divisa, el idioma (`t(en, es)`), el historial de páginas visitadas (`recentItems`) y el carrito de cotización (`rfqItems` + `<GlobalQuoteCartDrawer />`) persisten globalmente en toda la app y son accesibles desde el App Switcher de `PublicUnifiedHeader`.
+- **Sincronización URL para filtros**: Las nuevas vistas tabulares y listas con filtros deben usar [`useSyncedTableParams`](file:///Users/joseluiszabala/regenpept-web.nosync/src/hooks/useSyncedTableParams.js) para conservar filtros, búsqueda y vista al usar el botón Atrás o compartir enlaces.
+
+
 
