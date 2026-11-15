@@ -23,6 +23,7 @@ import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
 import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import { MAGENTA_OFFICIAL_QUOTATION_202611 } from '@/services/lotuslandProcurementService';
 
@@ -167,93 +168,44 @@ export default function MagentaQuotationClient() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
-      {/* ── Top Bar (Google Cloud Console Fixed UX) ── */}
-      <header style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 30,
-        backgroundColor: '#003666',
-        color: '#ffffff',
-        padding: '0.75rem 1.5rem',
-        borderBottom: '1px solid #002244',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Link href="/lotusland" style={{ color: '#ffffff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 750, fontSize: '0.92rem' }}>
-              <ShieldCheck size={18} color="#38bdf8" />
-              <span>ATLAS HEALTH B2B</span>
-            </Link>
-            <span style={{ color: '#94a3b8' }}>/</span>
-            <span style={{ color: '#e2e8f0', fontSize: '0.82rem', fontWeight: 600 }}>Quotation</span>
-            <span style={{ color: '#94a3b8' }}>/</span>
-            <span style={{ color: '#38bdf8', fontSize: '0.82rem', fontWeight: 700 }}>{quote.quoteId}</span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* Audit Toggle Switch */}
+      <PublicUnifiedHeader
+        brandHref="/lotusland"
+        loginRedirect="/b2b/quotes/magenta"
+        hideCurrencySelector={true}
+        hideAccountManager={true}
+        breadcrumb={[
+          { label: 'B2B Quotations', href: '/lotusland' },
+          { label: quote.quoteId },
+        ]}
+        extraActions={
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <button
               type="button"
               onClick={() => setShowInternalAudit(!showInternalAudit)}
-              style={{
-                background: showInternalAudit ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                color: showInternalAudit ? '#38bdf8' : '#cbd5e1',
-                padding: '5px 10px',
-                borderRadius: '6px',
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
+              className="puh-btn puh-btn-ghost"
               title="Toggle internal Mediluxe 6% margin audit column"
             >
-              {showInternalAudit ? 'Internal Margin View (ON)' : 'Client View (Margin Hidden)'}
+              <span className="puh-btn-label">
+                {showInternalAudit ? 'Internal Margin (ON)' : 'Client View'}
+              </span>
             </button>
-
             <button
               type="button"
               onClick={handlePrint}
+              className="puh-btn"
               style={{
-                background: '#ffffff',
-                color: '#003666',
-                border: 'none',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                fontSize: '0.76rem',
-                fontWeight: 750,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <Printer size={13} />
-              <span>Print / Save PDF</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              style={{
-                background: 'rgba(255, 255, 255, 0.15)',
+                background: '#2563eb',
+                border: '1px solid #1d4ed8',
                 color: '#ffffff',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                fontSize: '0.76rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
+                fontWeight: 600,
               }}
             >
-              {copied ? <Check size={13} color="#4ade80" /> : <Share2 size={13} />}
-              <span>{copied ? 'Copied' : 'Share'}</span>
+              <Printer size={14} />
+              <span className="puh-btn-label">Print / Save PDF</span>
             </button>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* ── Main Container ── */}
       <main style={{ maxWidth: '1440px', width: '100%', margin: '0 auto', padding: '1.25rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

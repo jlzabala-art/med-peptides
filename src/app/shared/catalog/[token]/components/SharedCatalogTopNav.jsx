@@ -79,7 +79,7 @@ export default function SharedCatalogTopNav({
   const userShortName = user?.displayName ? user.displayName.split(' ')[0] : (isSpanish ? 'Mi Consola' : 'Console');
 
   return (
-    <header className="institutional-topbar">
+    <nav className="institutional-topbar" aria-label="Shared Catalog Navigation">
       <div className="topbar-inner">
         {/* Brand Logo & Badges */}
         <div className="topbar-brand">
@@ -229,6 +229,6 @@ export default function SharedCatalogTopNav({
 
         </div>
       </div>
-    </header>
+    </nav>
   );
 }

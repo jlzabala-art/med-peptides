@@ -14,6 +14,7 @@ import StandardDrawer from '../../../components/ui/StandardDrawer';
 import AlgoliaProductPicker from '../../../components/admin/protocols/tabs/AlgoliaProductPicker';
 import ShareIntakeWhatsAppModal from '../../../components/shared/ShareIntakeWhatsAppModal';
 import toast from 'react-hot-toast';
+import notifier from '../../../services/NotificationService';
 import { useDrawer } from '../../../context/DrawerContext';
 import {
   extractPrescriptionFromDocument,
@@ -153,22 +154,31 @@ export default function PrescriptionIntakeWorkspace({
 
   const handleSafeClose = useCallback(() => {
     if (hasUnsavedChanges) {
-      const confirmExit = window.confirm('You have unsaved prescription details. Are you sure you want to close without saving?');
-      if (!confirmExit) return;
+      notifier.confirmCritical(
+        'You have unsaved prescription details. Are you sure you want to close without saving?',
+        () => onClose()
+      );
+      return;
     }
     onClose();
   }, [hasUnsavedChanges, onClose]);
 
   const handleSafeChangeFile = useCallback(() => {
+    const resetIntake = () => {
+      setFile(null);
+      setFilePreview(null);
+      setNormalizedRxList([]);
+      setRawAiData(null);
+      setError(null);
+    };
     if (hasUnsavedChanges) {
-      const confirmChange = window.confirm('Replacing this file will discard current extracted details. Continue?');
-      if (!confirmChange) return;
+      notifier.confirmCritical(
+        'Replacing this file will discard current extracted details. Continue?',
+        resetIntake
+      );
+      return;
     }
-    setFile(null);
-    setFilePreview(null);
-    setNormalizedRxList([]);
-    setRawAiData(null);
-    setError(null);
+    resetIntake();
   }, [hasUnsavedChanges]);
 
   const handleProcessFile = useCallback(async (droppedFile) => {

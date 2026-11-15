@@ -7,6 +7,8 @@ import { trackReferralVisitAction, fetchCollectionProductsAction } from '@/actio
 import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 import { usePricing } from '@/hooks/usePricing';
 import PriceDisplay from '@/components/pricing/PriceDisplay';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 
 const COLLECTIONS_LIST = [
   { id: 'vials', label: 'Peptides (Vials)', icon: '🧪' },
@@ -295,104 +297,35 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-      
-      {/* ── Top Institutional Header ── */}
-      <header style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid #e2e8f0',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{
-          maxWidth: '1240px',
-          margin: '0 auto',
-          padding: '14px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              backgroundColor: '#003666',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', display: 'flex', flexDirection: 'column' }}>
+      <PublicUnifiedHeader
+        brandHref="/"
+        loginRedirect="/vials"
+        hideCurrencySelector={true}
+        hideAccountManager={true}
+        breadcrumb={[
+          { label: 'Catalog', href: '/pricing' },
+          { label: 'Clinical Formulations Directory' },
+        ]}
+        extraActions={
+          <button
+            type="button"
+            onClick={() => setIsCartModalOpen(true)}
+            className="puh-btn"
+            style={{
+              background: '#2563eb',
+              border: '1px solid #1d4ed8',
               color: '#ffffff',
-              fontWeight: 800,
-              fontSize: '1rem',
-              letterSpacing: '-0.5px'
-            }}>
-              CP
-            </div>
-            <div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.2px' }}>
-                Clinical Formulations Directory
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
-                Lyophilized Peptide Vials • Direct Analytical Supply
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              backgroundColor: '#f1f5f9',
-              borderRadius: '9999px',
-              fontSize: '0.78rem',
               fontWeight: 600,
-              color: '#475569'
-            }}>
-              <Globe size={13} />
-              <span>{activeCurrency} ({activeCurrencySymbol})</span>
-            </div>
-
-            <button
-              onClick={() => setIsCartModalOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                backgroundColor: totalUnits > 0 ? '#16a34a' : '#ffffff',
-                color: totalUnits > 0 ? '#ffffff' : '#003666',
-                border: totalUnits > 0 ? 'none' : '1px solid #cbd5e1',
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                boxShadow: totalUnits > 0 ? '0 2px 8px rgba(22, 163, 74, 0.25)' : 'none'
-              }}
-            >
-              <ShoppingCart size={16} />
-              <span>Order Request</span>
-              {totalUnits > 0 && (
-                <span style={{
-                  backgroundColor: '#ffffff',
-                  color: '#16a34a',
-                  borderRadius: '9999px',
-                  padding: '1px 7px',
-                  fontSize: '0.75rem',
-                  fontWeight: 800
-                }}>
-                  {totalUnits}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
+            }}
+          >
+            <ShoppingCart size={14} />
+            <span className="puh-btn-label">
+              Order Request{totalUnits > 0 ? ` (${totalUnits})` : ''}
+            </span>
+          </button>
+        }
+      />
 
       {/* ── Main Catalog Workspace ── */}
       <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 100px 20px' }}>

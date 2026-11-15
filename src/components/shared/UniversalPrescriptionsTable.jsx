@@ -707,14 +707,9 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
             return;
           }
 
-          const patientNames = Array.from(new Set(selectedRows.map(r => (r.patient?.name || r.patientName || '').toLowerCase().trim()).filter(Boolean)));
-          if (patientNames.length > 1) {
-            const confirmed = window.confirm(`The selected prescriptions belong to different patient names (${patientNames.join(', ')}). Are you sure you want to merge them into one?`);
-            if (!confirmed) return;
-          }
-
-          const toastId = toast.loading(`Merging ${selectedRows.length} prescriptions...`);
-          try {
+          const performMerge = async () => {
+            const toastId = toast.loading(`Merging ${selectedRows.length} prescriptions...`);
+            try {
             const sorted = [...selectedRows].sort((a, b) => {
               const ta = a.createdAt?.seconds || (a.createdAt ? new Date(a.createdAt).getTime() / 1000 : 0);
               const tb = b.createdAt?.seconds || (b.createdAt ? new Date(b.createdAt).getTime() / 1000 : 0);
@@ -771,6 +766,18 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
             console.error('Merge prescriptions error:', err);
             toast.error('Failed to merge prescriptions: ' + err.message, { id: toastId });
           }
+          };
+
+          const patientNames = Array.from(new Set(selectedRows.map(r => (r.patient?.name || r.patientName || '').toLowerCase().trim()).filter(Boolean)));
+          if (patientNames.length > 1) {
+            notifier.confirmCritical(
+              `The selected prescriptions belong to different patient names (${patientNames.join(', ')}). Are you sure you want to merge them into one?`,
+              performMerge
+            );
+            return;
+          }
+
+          await performMerge();
         }
       },
       {

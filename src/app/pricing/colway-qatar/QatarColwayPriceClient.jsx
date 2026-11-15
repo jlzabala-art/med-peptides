@@ -231,7 +231,7 @@ export default function QatarColwayPriceClient() {
         )}
 
         {/* ── Institutional Document Header (Exact Standard as /pricing/colway) ── */}
-        <header className="document-header" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+        <section className="document-header" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
           <div className="header-meta-row">
             <div className="institutional-identity">
               <div className="brand-pairing">
@@ -383,7 +383,7 @@ export default function QatarColwayPriceClient() {
               </button>
             </div>
           </div>
-        </header>
+        </section>
 
         {/* ── Approved Colway Commercial Terms & Key Conditions Announcement ── */}
         <div style={{ backgroundColor: '#ffffff', border: '2px solid #0284c7', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.75rem', boxShadow: '0 4px 16px rgba(2, 132, 199, 0.12)' }}>

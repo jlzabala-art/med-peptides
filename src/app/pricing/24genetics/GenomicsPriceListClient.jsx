@@ -32,6 +32,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import DataTable from '@/components/ui/DataTable';
 import CatalogMasterDetailPanel from '@/components/pricing/shared/CatalogMasterDetailPanel';
@@ -545,95 +546,46 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
 
   return (
     <div className="colway-price-root">
-      {/* ── Screen Navigation Bar ── */}
-      <header className="screen-nav-bar">
-        <div className="nav-container">
-          <div className="nav-left">
-            <Link href="/" className="nav-brand" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
-              <BrandLogo variant="light" size="compact" />
-            </Link>
-            <span className="nav-divider">/</span>
-            <span className="nav-section">Price Schedules</span>
-            <span className="nav-divider">/</span>
-            <span className="nav-current">24Genetics Clinical Panels</span>
-          </div>
-
-          <div className="nav-actions">
-            <div className="currency-selector">
-              <span>Display FX:</span>
-              <div className="pill-group">
-                {['EUR', 'USD', 'AED'].map((curr) => (
-                  <button
-                    key={curr}
-                    onClick={() => setCurrency(curr)}
-                    className={`pill-btn ${currency === curr ? 'active' : ''}`}
-                  >
-                    {curr}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Cart Trigger */}
+      <PublicUnifiedHeader
+        brandHref="/"
+        loginRedirect="/pricing/24genetics"
+        currency={currency}
+        onCurrencyChange={setCurrency}
+        hideAccountManager={true}
+        breadcrumb={[
+          { label: 'Price Schedules', href: '/pricing' },
+          { label: '24Genetics Clinical Panels' },
+        ]}
+        extraActions={
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <button
+              type="button"
+              onClick={handleShareSchedule}
+              className="puh-btn puh-btn-ghost"
+              title="Share schedule"
+            >
+              {copied ? <Check size={14} /> : <Share2 size={14} />}
+              <span className="puh-btn-label">{copied ? 'Copied' : 'Share'}</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setIsOrderDrawerOpen(true)}
+              className="puh-btn"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: totalCartCount > 0 ? '#0284c7' : 'rgba(255,255,255,0.1)',
+                background: '#2563eb',
+                border: '1px solid #1d4ed8',
                 color: '#ffffff',
-                border: '1px solid rgba(255,255,255,0.2)',
-                padding: '5px 12px',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                fontWeight: 650,
-                cursor: 'pointer'
+                fontWeight: 600,
               }}
             >
               <ShoppingCart size={14} />
-              <span>Request Proforma</span>
-              {totalCartCount > 0 && (
-                <span style={{
-                  background: '#ffffff',
-                  color: '#0284c7',
-                  borderRadius: '10px',
-                  padding: '1px 6px',
-                  fontSize: '0.70rem',
-                  fontWeight: 800
-                }}>
-                  {totalCartCount}
-                </span>
-              )}
+              <span className="puh-btn-label">
+                Request Proforma{totalCartCount > 0 ? ` (${totalCartCount})` : ''}
+              </span>
             </button>
-
-            <button
-              onClick={handleShareSchedule}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                color: '#cbd5e1',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '5px 10px',
-                borderRadius: '6px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              {copied ? <Check size={13} className="text-emerald-400" /> : <Share2 size={13} />}
-              <span>{copied ? 'Copied' : 'Share'}</span>
-            </button>
-
-            <GcpUserBadge
-              variant="dark"
-              loginRedirect="/pricing/24genetics"
-            />
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem 1.5rem 4rem 1.5rem' }}>
         {/* Breadcrumbs & Header */}

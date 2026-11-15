@@ -605,7 +605,7 @@ export default function UltramanCrossBorderStudyPage() {
       `}</style>
 
       {/* ── Top Header Navigation (Google Cloud UX: 48px sticky single-row, Midnight Navy) ── */}
-      <header style={{ background: '#002b4d', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 30, height: 48 }}>
+      <nav aria-label="Ultraman Study Top Navigation" style={{ background: '#002b4d', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 30, height: 48 }}>
         <div className="ultraman-header-inner" style={{ maxWidth: 1280, margin: '0 auto', height: 48, padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
           {/* Left Zone: Brand + Breadcrumbs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
@@ -845,7 +845,7 @@ export default function UltramanCrossBorderStudyPage() {
             </div>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* ── Hero Banner: Executive Pitch ─────────────────────────────────── */}
       <section className="ultraman-hero-section" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)', borderBottom: '1px solid #e2e8f0', padding: '40px 20px' }}>

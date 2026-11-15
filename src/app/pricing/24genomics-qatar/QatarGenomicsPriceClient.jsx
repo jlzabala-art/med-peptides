@@ -704,7 +704,7 @@ export default function QatarGenomicsPriceClient() {
         ]} />
 
         {/* ── Institutional Document Header (Google Cloud Console UX) ── */}
-        <header className="document-header" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+        <section className="document-header" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
           {/* Top Row: Title & Action Toolbar */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1.25rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
             <div style={{ flex: '1 1 500px', minWidth: '280px' }}>
@@ -1054,7 +1054,7 @@ export default function QatarGenomicsPriceClient() {
             </div>
           </div>
 
-        </header>
+        </section>
 
         {/* ── Responsive Styling for Qatar Schedule Workspace ── */}
         <style dangerouslySetInnerHTML={{

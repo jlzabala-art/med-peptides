@@ -37,7 +37,7 @@ export default function RxLabelsStandaloneClient({
       flexDirection: 'column'
     }}>
       {/* Google Cloud Shell Top Bar */}
-      <header className="gcp-shell-topbar">
+      <nav className="gcp-shell-topbar" aria-label="Label Print Controls">
         <style>{`
           .gcp-shell-topbar {
             background: #ffffff;
@@ -180,7 +180,7 @@ export default function RxLabelsStandaloneClient({
             <span>Atlas Sync</span>
           </span>
         </div>
-      </header>
+      </nav>
 
       {/* Main Container */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>

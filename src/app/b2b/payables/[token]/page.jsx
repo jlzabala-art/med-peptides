@@ -619,7 +619,7 @@ export default function PayablesStatementPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       {/* ── TOP INSTITUTIONAL BAR (Google Cloud Header Style — Sticky) ── */}
-      <header style={{
+      <nav aria-label="Payables Top Navigation" style={{
         position: 'sticky',
         top: 0,
         zIndex: 50,
@@ -722,7 +722,7 @@ export default function PayablesStatementPage() {
             }}
           />
         </div>
-      </header>
+      </nav>
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem' }}>
