@@ -14,6 +14,7 @@ export default function PricingExportModal({
   fxRate = 1,
   markupPct = 15,
   canViewMaster = false,
+  isGuest = false,
   onPrint,
 }) {
   const [exportTier, setExportTier] = useState(canViewMaster ? 'master' : 'clinic');
@@ -22,9 +23,9 @@ export default function PricingExportModal({
 
   const handleExportCSV = (tier) => {
     onClose();
-    const isMaster = tier === 'master' && canViewMaster;
+    const isMaster = !isGuest && tier === 'master' && canViewMaster;
 
-    const headers = isMaster
+    const headers = isGuest
       ? [
           '#',
           'SKU Code',
@@ -32,30 +33,43 @@ export default function PricingExportModal({
           'Subtitle',
           'Category',
           'Presentation',
-          `Landed Cost CIF Dubai (${currency})`,
-          `Wholesale B2B (+${markupPct}%) (${currency})`,
-          `Wholesaler Margin (${currency})`,
-          'Wholesaler Margin (%)',
-          `Recommended Clinic Price (${currency})`,
-          `Recommended Retail MSRP (${currency})`,
+          `Wholeseller B2B Price (${currency})`,
           'Key Bioactive Compounds',
           'Clinical Indication & Protocol',
           'Stock Status',
         ]
-      : [
-          '#',
-          'SKU Code',
-          'Product Name',
-          'Subtitle',
-          'Category',
-          'Presentation',
-          `Wholesale B2B Price (${currency})`,
-          `Recommended Clinic Price (${currency})`,
-          `Recommended Retail MSRP (${currency})`,
-          'Key Bioactive Compounds',
-          'Clinical Indication & Protocol',
-          'Stock Status',
-        ];
+      : isMaster
+        ? [
+            '#',
+            'SKU Code',
+            'Product Name',
+            'Subtitle',
+            'Category',
+            'Presentation',
+            `Landed Cost CIF Dubai (${currency})`,
+            `Wholesale B2B (+${markupPct}%) (${currency})`,
+            `Wholesaler Margin (${currency})`,
+            'Wholesaler Margin (%)',
+            `Recommended Clinic Price (${currency})`,
+            `Recommended Retail MSRP (${currency})`,
+            'Key Bioactive Compounds',
+            'Clinical Indication & Protocol',
+            'Stock Status',
+          ]
+        : [
+            '#',
+            'SKU Code',
+            'Product Name',
+            'Subtitle',
+            'Category',
+            'Presentation',
+            `Wholesale B2B Price (${currency})`,
+            `Recommended Clinic Price (${currency})`,
+            `Recommended Retail MSRP (${currency})`,
+            'Key Bioactive Compounds',
+            'Clinical Indication & Protocol',
+            'Stock Status',
+          ];
 
     const esc = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
 
@@ -65,6 +79,21 @@ export default function PricingExportModal({
       const margin = (p.calculatedMarginAed * fxRate).toFixed(2);
       const clinic = ((p.recommendedClinic ?? p.clinicPriceAed ?? 0) * fxRate).toFixed(2);
       const retail = ((p.recommendedRetail ?? p.retailPriceAed ?? 0) * fxRate).toFixed(2);
+
+      if (isGuest) {
+        return [
+          p.itemNumber,
+          p.sku,
+          esc(p.name),
+          esc(p.subtitle),
+          esc(p.category),
+          esc(p.volume),
+          wholesale,
+          esc(p.keyActives),
+          esc(p.clinicalFocus),
+          esc(p.stockStatus || 'In Stock (Dubai)'),
+        ];
+      }
 
       if (isMaster) {
         return [
@@ -107,7 +136,8 @@ export default function PricingExportModal({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     const dateStr = new Date().toISOString().slice(0, 10);
-    const filename = `${filePrefix}_${isMaster ? 'Master_B2B' : 'Clinic_Catalog'}_${currency}_${markupPct}pct_${dateStr}.csv`;
+    const tierSuffix = isGuest ? 'Wholeseller_Public' : isMaster ? 'Master_B2B' : 'Clinic_Catalog';
+    const filename = `${filePrefix}_${tierSuffix}_${currency}_${markupPct}pct_${dateStr}.csv`;
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
     document.body.appendChild(link);
@@ -173,7 +203,7 @@ export default function PricingExportModal({
               </p>
 
               <div className="export-tier-selector">
-                {canViewMaster && (
+                {!isGuest && canViewMaster && (
                   <label className="tier-radio-option">
                     <input
                       type="radio"
@@ -192,11 +222,19 @@ export default function PricingExportModal({
                     type="radio"
                     name="exportTier"
                     value="clinic"
-                    checked={exportTier === 'clinic'}
+                    checked={isGuest || exportTier === 'clinic'}
                     onChange={() => setExportTier('clinic')}
                   />
                   <span>
-                    <strong>Clinic Catalog:</strong> Wholesale, Clinic & MSRP (Confidential landed costs hidden)
+                    {isGuest ? (
+                      <>
+                        <strong>Wholeseller B2B Catalog:</strong> Official Wholeseller pricing in {currency} (Sign in for Clinic &amp; MSRP tiers)
+                      </>
+                    ) : (
+                      <>
+                        <strong>Clinic Catalog:</strong> Wholesale, Clinic &amp; MSRP (Confidential landed costs hidden)
+                      </>
+                    )}
                   </span>
                 </label>
               </div>

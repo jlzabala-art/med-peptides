@@ -1,9 +1,17 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  drawAtlasInstitutionalHeader,
+  drawAtlasKpiStrip,
+  getAtlasAutoTableDefaults,
+  drawAtlasGuestCtaBanner,
+  applyAtlasRunningFooter,
+} from '../lib/pdf/atlasPdfChrome';
 
 /**
  * Generates and downloads an official B2B Price Schedule PDF for the given
  * catalog, filtered/selected rows, and active pricing tier.
+ * Uses the unified Atlas institutional PDF chrome (Golden Rules #60, #61, #66).
  */
 export function exportPriceSchedulePdf({
   group,
@@ -13,50 +21,49 @@ export function exportPriceSchedulePdf({
   formatPrice,
   brandFilter = 'all',
   isSelection = false,
+  isGuest = false,
+  accountLabel = null,
   returnBlob = false,
 }) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const currency = group?.currency || 'EUR';
-  const showAdminColumns = tier === 'admin';
+  const showAdminColumns = !isGuest && tier === 'admin';
   const dateStr = new Date().toISOString().slice(0, 10);
 
-  // Header band
-  doc.setFillColor(0, 54, 102); // #003666
-  doc.rect(0, 0, 210, 28, 'F');
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(15);
-  doc.setFont('helvetica', 'bold');
-  doc.text(`ATLAS HEALTH SERVICES — ${group?.label || 'Price Schedule'}`, 14, 12);
-
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  const subtitleParts = [
-    group?.description || 'Official B2B Clinical Price Schedule',
-    `Currency: ${currency}`,
-    `Issued: ${dateStr}`,
-  ];
-  doc.text(subtitleParts.join('  ·  ').slice(0, 105), 14, 19);
-
-  // Metadata strip
-  doc.setTextColor(51, 65, 85);
-  doc.setFontSize(8.5);
-  const tierDisplay =
-    tier === 'admin'
+  const tierDisplay = isGuest
+    ? 'Public Wholeseller Schedule'
+    : tier === 'admin'
       ? 'Internal Admin (Full Waterfall)'
       : tier === 'clinic'
         ? 'Clinic / Doctor Tier (+45%)'
         : 'Wholesale / Distributor Tier (×1.3225)';
+
   const scopeNote = isSelection
     ? `Selected Quote (${products.length} SKUs)`
-    : `${products.length} SKUs${brandFilter !== 'all' ? ` · Brand: ${brandFilter}` : ''}`;
+    : `${products.length} SKUs${brandFilter !== 'all' ? ` · ${brandFilter}` : ''}`;
 
-  doc.text(`Tier: ${tierDisplay}   |   Scope: ${scopeNote}`, 14, 35);
-  doc.text(`Supplier: ${group?.supplier || 'Atlas Verified Network'}`, 14, 40);
+  let nextY = drawAtlasInstitutionalHeader(doc, {
+    title: `ATLAS HEALTH SERVICES — ${group?.label || 'Price Schedule'}`,
+    subtitle: group?.description || 'Official B2B Clinical Price Schedule',
+    documentRef: group?.documentRef || (group?.id ? String(group.id).toUpperCase() : ''),
+    issuedDate: dateStr,
+    tierLabel: tierDisplay,
+  });
+
+  const kpiItems = [
+    { label: 'Currency', value: currency },
+    { label: 'Catalog Scope', value: scopeNote },
+    { label: 'Supplier', value: group?.supplier || 'Atlas Verified Network' },
+  ];
+  if (!isGuest && accountLabel) {
+    kpiItems.push({ label: 'Prepared For', value: accountLabel });
+  }
+
+  nextY = drawAtlasKpiStrip(doc, { startY: nextY, items: kpiItems });
 
   const head = showAdminColumns
     ? [['SKU', 'Product & Presentation', 'Brand', 'Status', 'Cost', 'Mediluxe', 'Wholesale', 'Clinic']]
-    : [['SKU', 'Product & Presentation', 'Brand', 'Availability', `Price (${currency})`]];
+    : [['SKU', 'Product & Presentation', 'Brand', 'Availability', isGuest ? `Wholeseller (${currency})` : `Price (${currency})`]];
 
   const body = products.map((p) => {
     const resolved = priceFor ? priceFor(p) : { price: p.price };
@@ -82,8 +89,9 @@ export function exportPriceSchedulePdf({
       ];
     }
 
-    const tierAmount =
-      tier === 'clinic'
+    const tierAmount = isGuest
+      ? (resolved.wholesalePrice ?? p.pricing?.wholesalePrice ?? resolved.price ?? p.price)
+      : tier === 'clinic'
         ? (resolved.clinicPrice ?? p.pricing?.clinicPrice ?? resolved.price ?? p.price)
         : (resolved.wholesalePrice ?? p.pricing?.wholesalePrice ?? resolved.price ?? p.price);
 
@@ -96,46 +104,51 @@ export function exportPriceSchedulePdf({
     ];
   });
 
+  const columnStyles = showAdminColumns
+    ? {
+        0: { cellWidth: 26 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 16 },
+        4: { halign: 'right', cellWidth: 17 },
+        5: { halign: 'right', cellWidth: 17 },
+        6: { halign: 'right', cellWidth: 17 },
+        7: { halign: 'right', cellWidth: 17 },
+      }
+    : {
+        0: { cellWidth: 32 },
+        1: { cellWidth: 74 },
+        2: { cellWidth: 28 },
+        3: { cellWidth: 22 },
+        4: { halign: 'right', cellWidth: 26, fontStyle: 'bold' },
+      };
+
+  const defaults = getAtlasAutoTableDefaults({
+    rightAlignCols: showAdminColumns ? [4, 5, 6, 7] : [4],
+    columnStyles,
+  });
+
   autoTable(doc, {
-    startY: 45,
+    ...defaults,
+    startY: nextY,
     head,
     body,
-    styles: { fontSize: 7.5, cellPadding: 2.2, valign: 'middle' },
-    headStyles: { fillColor: [0, 54, 102], textColor: [255, 255, 255], fontStyle: 'bold' },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-    columnStyles: showAdminColumns
-      ? {
-          0: { cellWidth: 26 },
-          1: { cellWidth: 52 },
-          2: { cellWidth: 22 },
-          3: { cellWidth: 16 },
-          4: { halign: 'right', cellWidth: 17 },
-          5: { halign: 'right', cellWidth: 18 },
-          6: { halign: 'right', cellWidth: 18 },
-          7: { halign: 'right', cellWidth: 17 },
-        }
-      : {
-          0: { cellWidth: 32 },
-          1: { cellWidth: 78 },
-          2: { cellWidth: 28 },
-          3: { cellWidth: 22 },
-          4: { halign: 'right', cellWidth: 26, fontStyle: 'bold' },
-        },
-    didDrawPage: (data) => {
-      const pageCount = doc.internal.getNumberOfPages();
-      doc.setFontSize(7.5);
-      doc.setTextColor(148, 163, 184);
-      doc.text(
-        `Atlas Health Services · Precision Medicine · Confidential B2B Schedule · Page ${data.pageNumber} of ${pageCount}`,
-        14,
-        290
-      );
-    },
+    styles: { ...defaults.styles, fontSize: 7.5, cellPadding: 2.2 },
+  });
+
+  if (isGuest) {
+    drawAtlasGuestCtaBanner(doc);
+  }
+
+  applyAtlasRunningFooter(doc, {
+    disclaimer: isGuest
+      ? 'ATLAS HEALTH SERVICES · PUBLIC WHOLESELLER SCHEDULE · SIGN IN FOR CLINIC & RETAIL TIERS'
+      : 'ATLAS HEALTH SERVICES · PRECISION MEDICINE · CONFIDENTIAL B2B SCHEDULE',
   });
 
   const safeId = (group?.id || 'schedule').replace(/[^a-z0-9-_]/gi, '_');
   if (returnBlob) {
     return doc.output('blob');
   }
-  doc.save(`${safeId}_${tier}_${dateStr}.pdf`);
+  doc.save(`${safeId}_${isGuest ? 'wholeseller' : tier}_${dateStr}.pdf`);
 }

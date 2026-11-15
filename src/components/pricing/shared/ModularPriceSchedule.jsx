@@ -121,9 +121,16 @@ export default function ModularPriceSchedule({
   };
 
   const getSchedulePdfBlob = useCallback(() => {
+    const showClinic = !isGuest && isClinicOrDoctor;
+    const showRetail = !isGuest;
+
     const head = isAdmin
-      ? ['#', 'SKU', 'Product', `Cost (${currency})`, `Wholeseller (${currency})`, `Distributor (${currency})`]
-      : ['#', 'SKU', 'Product', `Wholeseller (${currency})`];
+      ? ['#', 'SKU', 'Product', `Cost (${currency})`, `Wholeseller (${currency})`, `Distributor (${currency})`, `Clinic (${currency})`, `Retail MSRP (${currency})`]
+      : isGuest
+        ? ['#', 'SKU', 'Product', `Wholeseller (${currency})`]
+        : showClinic
+          ? ['#', 'SKU', 'Product', `Wholeseller (${currency})`, `Clinic (${currency})`, `Retail MSRP (${currency})`]
+          : ['#', 'SKU', 'Product', `Wholeseller (${currency})`, `Retail MSRP (${currency})`];
 
     const body = filteredProducts.map((p) => {
       const sku = String(p.sku || '').replace(skuPrefixPattern, '');
@@ -134,19 +141,55 @@ export default function ModularPriceSchedule({
           formatPrice(p.calculatedLanded),
           formatPrice(p.calculatedWholesale),
           formatPrice(p.calculatedDistributor),
+          formatPrice(p.recommendedClinic),
+          formatPrice(p.recommendedRetail),
         ];
       }
-      return [...base, formatPrice(p.calculatedWholesale)];
+      if (isGuest) {
+        return [...base, formatPrice(p.calculatedWholesale)];
+      }
+      if (showClinic) {
+        return [
+          ...base,
+          formatPrice(p.calculatedWholesale),
+          formatPrice(p.recommendedClinic),
+          formatPrice(p.recommendedRetail),
+        ];
+      }
+      return [
+        ...base,
+        formatPrice(p.calculatedWholesale),
+        formatPrice(p.recommendedRetail),
+      ];
     });
+
+    const rightAlignCols = [];
+    for (let i = 3; i < head.length; i += 1) {
+      rightAlignCols.push(i);
+    }
+
+    const tierLabel = isAdmin
+      ? 'Admin Master Schedule'
+      : isGuest
+        ? 'Public Wholeseller Schedule'
+        : showClinic
+          ? 'Authenticated Clinic & Partner Schedule'
+          : 'Authenticated Partner Schedule';
 
     return buildSchedulePdfBlob({
       title: `${brandLeft} — ${brandRight}`,
       subtitle: documentSubtitle,
       metaLine: `Ref: ${documentRef}  |  Currency: ${currency}  |  Items: ${filteredProducts.length}`,
+      documentRef,
+      currency,
+      tierLabel,
+      isGuest,
+      accountLabel: user?.email || user?.displayName || null,
+      rightAlignCols,
       head,
       body,
     });
-  }, [isAdmin, currency, filteredProducts, skuPrefixPattern, formatPrice, brandLeft, brandRight, documentSubtitle, documentRef]);
+  }, [isAdmin, isGuest, isClinicOrDoctor, currency, filteredProducts, skuPrefixPattern, formatPrice, brandLeft, brandRight, documentSubtitle, documentRef, user]);
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined' && navigator.clipboard) {
@@ -333,6 +376,7 @@ export default function ModularPriceSchedule({
           isAdmin={isAdmin}
           isWholesaler={isWholesaler}
           isClinicOrDoctor={isClinicOrDoctor}
+          isGuest={isGuest}
           canViewLanded={canViewLanded}
           showLandedCost={showLandedCost}
           totals={totals}
@@ -354,6 +398,7 @@ export default function ModularPriceSchedule({
         fxRate={fxRate}
         markupPct={markupPct}
         canViewMaster={isWholesaler}
+        isGuest={isGuest}
         onPrint={handlePrint}
       />
 

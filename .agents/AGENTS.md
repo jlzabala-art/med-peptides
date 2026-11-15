@@ -657,3 +657,12 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Estado persistente compartido (`PublicWorkspaceContext`)**: Toda preferencia transversal (`currency`, `lang`, borrador `rfqItems`) DEBE leerse/sincronizarse con `usePublicWorkspace()` (`src/context/PublicWorkspaceContext.jsx`) para que el usuario no pierda su divisa, idioma o selección al navegar entre `/vials`, `/pricing/*`, `/collection/*` y `/proto`.
 - **Navegación cruzada (App Switcher)**: `PublicUnifiedHeader` provee el menú App Switcher (icono de 9 puntos) en todas las páginas públicas no white-label para navegar en 1 clic entre los módulos principales de Atlas.
 - **Design Tokens únicos**: Todos los nuevos componentes y templates deben consumir las variables de `src/styles/design-tokens.css` (`--atlas-radius-card`, `--atlas-border-subtle`, `--atlas-shadow-card`, `--atlas-ink-primary`, `--atlas-brand-navy`, `--atlas-brand-blue`) en lugar de hardcodear radios o sombras distintas por ruta.
+
+## 66. Tablas Dinámicas por Rol sin Columnas Vacías y Estándar Único de PDFs (Golden Rule)
+- **Cero columnas vacías o bloqueadas en tablas públicas (Dynamic Columns by Session/Role)**:
+  - Cuando el usuario está desconectado (`isGuest === true`), las listas de precios públicas solo deben mostrar las columnas autorizadas para invitado (ej. en tarifas B2B modulares como `/pricing/colway`, únicamente `Wholeseller (<CURRENCY>)`, omitiendo por completo `Clinic`, `Retail MSRP` y `Cost`).
+  - **Prohibido** renderizar columnas con candados `[Sign In]`, placeholders `"Clinic Only"` o celdas vacías en Tabla, Tarjetas (`Cards`), Vista de Impresión (`print-only-table-wrap`), Exportación CSV/Excel o PDF. El número de columnas y sus anchos (`width` / `gridTemplateColumns`) deben recalcularse dinámicamente según el rol/sesión.
+- **PDFs diferenciados por sesión/rol con diseño institucional único**:
+  - Todo PDF de tarifa o catálogo generado en la plataforma (`src/lib/pdf/schedulePdfBuilder.js`, `src/utils/exportPriceSchedulePdf.js`) DEBE utilizar el sistema visual unificado `src/lib/pdf/atlasPdfChrome.js` (`drawAtlasInstitutionalHeader`, `drawAtlasKpiStrip`, `getAtlasAutoTableDefaults`, `drawAtlasGuestCtaBanner`, `applyAtlasRunningFooter`).
+  - Los PDFs para invitados (`isGuest === true`) incluyen únicamente los precios públicos autorizados (`Wholeseller`) y un banner institucional de llamada a la acción para iniciar sesión; los PDFs autenticados incluyen las columnas autorizadas del rol y la atribución de cuenta/tier en la cabecera.
+

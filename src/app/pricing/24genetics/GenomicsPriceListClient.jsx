@@ -374,26 +374,14 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
       });
     }
 
-    // Clinic / Practitioner Price (Locked for Guests; Unlocked for Clinics, Wholesalers & Admins)
-    cols.push({
-      key: 'clinicPriceEur',
-      label: 'Clinic / Doctor',
-      width: (canViewCost && showCostBasis) ? '16%' : '18%',
-      sortable: true,
-      render: (val, row) => {
-        if (!isClinicOrDoctor) {
-          return (
-            <Link
-              href="/login?redirect=/pricing/24genetics&tier=clinic"
-              className="b2b-lock-pill"
-              title="Sign in with verified medical practitioner credentials to view clinic pricing"
-            >
-              <Lock size={12} className="text-slate-400" />
-              <span>Clinic Rate Protected</span>
-            </Link>
-          );
-        }
-        return (
+    // Clinic / Practitioner Price (Only rendered for authenticated Clinics, Wholesalers & Admins — Rule #66)
+    if (isClinicOrDoctor) {
+      cols.push({
+        key: 'clinicPriceEur',
+        label: 'Clinic / Doctor',
+        width: (canViewCost && showCostBasis) ? '16%' : '18%',
+        sortable: true,
+        render: (val, row) => (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontFamily: 'monospace', fontWeight: 750, color: '#1d4ed8', fontSize: '0.92rem' }}>
               {formatPrice(val ?? row.clinicPriceEur)}
@@ -411,9 +399,9 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
               Professional Rate
             </span>
           </div>
-        );
-      }
-    });
+        ),
+      });
+    }
 
     // Retail MSRP (Always visible to everyone)
     cols.push({
@@ -1161,6 +1149,11 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
             title: 'ATLAS HEALTH — 24GENETICS CLINICAL PANELS',
             subtitle: `CE-IVD Genomics Price Schedule · ${currency}`,
             metaLine: `Panels: ${filteredProducts.length}  |  Currency: ${currency}`,
+            documentRef: 'DOC-24GEN-2026-V1',
+            currency,
+            tierLabel: isAdmin ? 'Admin Master Schedule' : isGuest ? 'Public Wholeseller Schedule' : 'Authenticated Partner Schedule',
+            isGuest,
+            accountLabel: user?.email || user?.displayName || null,
             head,
             body,
           });

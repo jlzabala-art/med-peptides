@@ -21,6 +21,7 @@ export default function PricingDataTable({
   isAdmin = false,
   isWholesaler = false,
   isClinicOrDoctor = false,
+  isGuest = false,
   canViewLanded = false,
   showLandedCost = false,
   totals,
@@ -34,7 +35,7 @@ export default function PricingDataTable({
       {
         key: 'name',
         label: 'Product',
-        width: isAdmin ? '32%' : '46%',
+        width: isGuest ? '64%' : isAdmin ? '30%' : isClinicOrDoctor ? '42%' : '52%',
         sortable: true,
         render: (_, row) => {
           const detailUrl = `/p/${row.slug || row.id}`;
@@ -87,7 +88,7 @@ export default function PricingDataTable({
       {
         key: 'stockStatus',
         label: 'Status',
-        width: isAdmin ? '11%' : '14%',
+        width: isGuest ? '16%' : isAdmin ? '10%' : '13%',
         sortable: true,
         render: (val) => (
           <StatusBadge
@@ -97,7 +98,7 @@ export default function PricingDataTable({
       },
     ];
 
-    if (canViewLanded && showLandedCost) {
+    if (!isGuest && canViewLanded && showLandedCost) {
       cols.push({
         key: 'calculatedLanded',
         label: `Cost (${currency})`,
@@ -126,7 +127,7 @@ export default function PricingDataTable({
     cols.push({
       key: 'calculatedWholesale',
       label: `Wholeseller (${currency})`,
-      width: isAdmin ? '12%' : '14%',
+      width: isGuest ? '20%' : isAdmin ? '11%' : '15%',
       align: 'right',
       sortable: true,
       render: (val, row) => {
@@ -154,8 +155,8 @@ export default function PricingDataTable({
       },
     });
 
-    // Distributor (+15%): Visible to Admin and Distributors
-    if (isAdmin) {
+    // Distributor (+15%): Visible to Admin only
+    if (!isGuest && isAdmin) {
       cols.push({
         key: 'calculatedDistributor',
         label: `Distributor (${currency})`,
@@ -170,58 +171,55 @@ export default function PricingDataTable({
       });
     }
 
-    cols.push({
-      key: 'recommendedClinic',
-      label: `Clinic (${currency})`,
-      width: isAdmin ? '11%' : '13%',
-      align: 'right',
-      sortable: true,
-      render: (val, row) => {
-        if (!isClinicOrDoctor) {
+    if (!isGuest && isClinicOrDoctor) {
+      cols.push({
+        key: 'recommendedClinic',
+        label: `Clinic (${currency})`,
+        width: isAdmin ? '11%' : '15%',
+        align: 'right',
+        sortable: true,
+        render: (val, row) => {
+          const displayVal = Number((Number(val || 0) * fxRate).toFixed(2));
+          if (!isAdmin) {
+            return <span className="font-mono">{formatPrice(val)}</span>;
+          }
           return (
-            <Link href={`/login?redirect=${loginRedirect}&tier=clinic`} className="b2b-lock-pill">
-              <Lock size={11} /> <span>Sign In</span>
-            </Link>
+            <InlineEditableCell
+              value={displayVal}
+              type="number"
+              align="right"
+              format={() => formatPrice(val)}
+              onSave={(newVal) => onSaveInlinePrice?.(row.id, 'clinic', newVal)}
+            />
           );
-        }
-        const displayVal = Number((Number(val || 0) * fxRate).toFixed(2));
-        if (!isAdmin) {
-          return <span className="font-mono">{formatPrice(val)}</span>;
-        }
-        return (
-          <InlineEditableCell
-            value={displayVal}
-            type="number"
-            align="right"
-            format={() => formatPrice(val)}
-            onSave={(newVal) => onSaveInlinePrice?.(row.id, 'clinic', newVal)}
-          />
-        );
-      },
-    });
+        },
+      });
+    }
 
-    cols.push({
-      key: 'recommendedRetail',
-      label: `Retail MSRP (${currency})`,
-      width: isAdmin ? '12%' : '13%',
-      align: 'right',
-      sortable: true,
-      render: (val, row) => {
-        const displayVal = Number((Number(val || 0) * fxRate).toFixed(2));
-        if (!isAdmin) {
-          return <span className="font-mono font-bold">{formatPrice(val)}</span>;
-        }
-        return (
-          <InlineEditableCell
-            value={displayVal}
-            type="number"
-            align="right"
-            format={() => <span className="font-mono font-bold">{formatPrice(val)}</span>}
-            onSave={(newVal) => onSaveInlinePrice?.(row.id, 'retail', newVal)}
-          />
-        );
-      },
-    });
+    if (!isGuest) {
+      cols.push({
+        key: 'recommendedRetail',
+        label: `Retail MSRP (${currency})`,
+        width: isAdmin ? '12%' : '15%',
+        align: 'right',
+        sortable: true,
+        render: (val, row) => {
+          const displayVal = Number((Number(val || 0) * fxRate).toFixed(2));
+          if (!isAdmin) {
+            return <span className="font-mono font-bold">{formatPrice(val)}</span>;
+          }
+          return (
+            <InlineEditableCell
+              value={displayVal}
+              type="number"
+              align="right"
+              format={() => <span className="font-mono font-bold">{formatPrice(val)}</span>}
+              onSave={(newVal) => onSaveInlinePrice?.(row.id, 'retail', newVal)}
+            />
+          );
+        },
+      });
+    }
 
     return cols;
   }, [
@@ -231,6 +229,7 @@ export default function PricingDataTable({
     fxRate,
     isAdmin,
     isClinicOrDoctor,
+    isGuest,
     isWholesaler,
     loginRedirect,
     onSaveInlinePrice,
@@ -385,44 +384,30 @@ export default function PricingDataTable({
                 </div>
 
                 <div className="card-pricing-strip">
-                  {isWholesaler ? (
-                    <div className="price-item highlight">
-                      <span className="price-item-label">Wholesaler</span>
-                      <span className="price-item-val font-mono text-emerald-700 font-bold">
-                        {formatPrice(p.calculatedWholesale)}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="price-item">
-                      <span className="price-item-label">Wholesale Rate</span>
-                      <Link href={`/login?redirect=${loginRedirect}&tier=wholesale`} className="b2b-lock-pill">
-                        <Lock size={11} /> <span>Sign In</span>
-                      </Link>
-                    </div>
-                  )}
+                  <div className="price-item highlight">
+                    <span className="price-item-label">Wholeseller ({currency})</span>
+                    <span className="price-item-val font-mono text-emerald-700 font-bold">
+                      {formatPrice(p.calculatedWholesale)}
+                    </span>
+                  </div>
 
-                  {isClinicOrDoctor ? (
+                  {!isGuest && isClinicOrDoctor && (
                     <div className="price-item">
                       <span className="price-item-label">Recommended Clinic</span>
                       <span className="price-item-val font-mono">
                         {formatPrice(p.recommendedClinic)}
                       </span>
                     </div>
-                  ) : (
-                    <div className="price-item">
-                      <span className="price-item-label">Clinic Rate</span>
-                      <Link href={`/login?redirect=${loginRedirect}&tier=clinic`} className="b2b-lock-pill">
-                        <Lock size={11} /> <span>Sign In</span>
-                      </Link>
-                    </div>
                   )}
 
-                  <div className="price-item">
-                    <span className="price-item-label">Retail MSRP</span>
-                    <span className="price-item-val font-mono font-bold text-slate-800">
-                      {formatPrice(p.recommendedRetail)}
-                    </span>
-                  </div>
+                  {!isGuest && (
+                    <div className="price-item">
+                      <span className="price-item-label">Retail MSRP</span>
+                      <span className="price-item-val font-mono font-bold text-slate-800">
+                        {formatPrice(p.recommendedRetail)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -432,53 +417,70 @@ export default function PricingDataTable({
 
       {/* Print-Only CSS Grid Schedule (No raw HTML <table> tags per Golden Rule #3) */}
       <div className="print-only-table-wrap" style={{ marginTop: '1rem' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '40px 130px 1fr 90px 110px 110px 110px',
-            gap: '8px',
-            padding: '8px 10px',
-            borderBottom: '2px solid #0f172a',
-            fontWeight: 700,
-            fontSize: '0.75rem',
-          }}
-        >
-          <div>#</div>
-          <div>SKU</div>
-          <div>Product Formulation</div>
-          <div>Volume</div>
-          <div style={{ textAlign: 'right' }}>Wholesale</div>
-          <div style={{ textAlign: 'right' }}>Clinic</div>
-          <div style={{ textAlign: 'right' }}>MSRP</div>
-        </div>
-        {products.map((p) => (
-          <div
-            key={p.id}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '40px 130px 1fr 90px 110px 110px 110px',
-              gap: '8px',
-              padding: '7px 10px',
-              borderBottom: '1px solid #e2e8f0',
-              fontSize: '0.76rem',
-              alignItems: 'center',
-            }}
-          >
-            <div className="font-mono">{p.itemNumber}</div>
-            <div className="font-mono">{(p.sku || '').replace(skuPrefixPattern, '')}</div>
-            <div style={{ fontWeight: 600 }}>{p.name}</div>
-            <div>{p.volume}</div>
-            <div className="font-mono" style={{ textAlign: 'right', fontWeight: 700 }}>
-              {isWholesaler ? formatPrice(p.calculatedWholesale) : 'B2B Only'}
-            </div>
-            <div className="font-mono" style={{ textAlign: 'right' }}>
-              {isClinicOrDoctor ? formatPrice(p.recommendedClinic) : 'Clinic Only'}
-            </div>
-            <div className="font-mono" style={{ textAlign: 'right', fontWeight: 700 }}>
-              {formatPrice(p.recommendedRetail)}
-            </div>
-          </div>
-        ))}
+        {(() => {
+          const showClinicCol = !isGuest && isClinicOrDoctor;
+          const showRetailCol = !isGuest;
+          const printGridColumns = isGuest
+            ? '40px 130px 1fr 110px 140px'
+            : showClinicCol
+              ? '40px 130px 1fr 90px 110px 110px 110px'
+              : '40px 130px 1fr 100px 120px 120px';
+          return (
+            <>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: printGridColumns,
+                  gap: '8px',
+                  padding: '8px 10px',
+                  borderBottom: '2px solid #0f172a',
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                }}
+              >
+                <div>#</div>
+                <div>SKU</div>
+                <div>Product Formulation</div>
+                <div>Volume</div>
+                <div style={{ textAlign: 'right' }}>Wholeseller ({currency})</div>
+                {showClinicCol && <div style={{ textAlign: 'right' }}>Clinic</div>}
+                {showRetailCol && <div style={{ textAlign: 'right' }}>MSRP</div>}
+              </div>
+              {products.map((p) => (
+                <div
+                  key={p.id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: printGridColumns,
+                    gap: '8px',
+                    padding: '7px 10px',
+                    borderBottom: '1px solid #e2e8f0',
+                    fontSize: '0.76rem',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div className="font-mono">{p.itemNumber}</div>
+                  <div className="font-mono">{(p.sku || '').replace(skuPrefixPattern, '')}</div>
+                  <div style={{ fontWeight: 600 }}>{p.name}</div>
+                  <div>{p.volume}</div>
+                  <div className="font-mono" style={{ textAlign: 'right', fontWeight: 700 }}>
+                    {formatPrice(p.calculatedWholesale)}
+                  </div>
+                  {showClinicCol && (
+                    <div className="font-mono" style={{ textAlign: 'right' }}>
+                      {formatPrice(p.recommendedClinic)}
+                    </div>
+                  )}
+                  {showRetailCol && (
+                    <div className="font-mono" style={{ textAlign: 'right', fontWeight: 700 }}>
+                      {formatPrice(p.recommendedRetail)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </>
+          );
+        })()}
         {isWholesaler && totals && (
           <div
             style={{
