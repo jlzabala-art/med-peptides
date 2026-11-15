@@ -32,6 +32,7 @@ import { getPeptidesColumns, renderPeptideClinicalDetail } from '@/components/pr
 // Extracted Business Logic Hooks
 import { usePeptidesFilters } from '@/hooks/pricing/usePeptidesFilters';
 import { usePeptidesCart } from '@/hooks/pricing/usePeptidesCart';
+import { usePricing } from '@/hooks/usePricing';
 
 import '../colway/ColwayPriceList.css';
 
@@ -414,6 +415,8 @@ export default function PeptidesPriceListClient({
     }
   };
 
+  const { isAdmin, pricingRole, resolve: resolveProduct } = usePricing();
+
   const columns = useMemo(() => {
     return getPeptidesColumns({
       cartItems,
@@ -421,9 +424,12 @@ export default function PeptidesPriceListClient({
       updateItemQuantity,
       formatPrice,
       currency,
-      isEs
+      isEs,
+      isAdmin,
+      pricingRole,
+      resolveProduct
     });
-  }, [formatPrice, handleAddToCart, updateItemQuantity, currency, cartItems, isEs]);
+  }, [formatPrice, handleAddToCart, updateItemQuantity, currency, cartItems, isEs, isAdmin, pricingRole, resolveProduct]);
 
   const handleRenderExpandable = useCallback((row) => {
     return renderPeptideClinicalDetail(row, {

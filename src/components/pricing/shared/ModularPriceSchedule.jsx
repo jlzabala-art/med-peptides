@@ -22,6 +22,8 @@ import PricingTopBar from './PricingTopBar';
 import PricingKpiStrip from './PricingKpiStrip';
 import PricingDataTable from './PricingDataTable';
 import PricingExportModal from './PricingExportModal';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
+import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 
 export default function ModularPriceSchedule({
   initialProducts = [],
@@ -52,21 +54,24 @@ export default function ModularPriceSchedule({
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
 
-  const isAdmin = is('admin');
-  const isWholesaler = is('wholesaler') || isAdmin;
+  const isAdmin = is('admin') || is('medical_director');
+  const isDistributor = is('distributor');
+  const isWholesaler = is('wholesaler') || is('wholeseller') || isAdmin;
   const isClinicOrDoctor =
     is('doctor') ||
     is('clinic') ||
     is('fagron_clinic') ||
     is('medical_director') ||
-    isWholesaler;
+    isWholesaler ||
+    isDistributor;
   const isGuest = !user || effectiveRole === 'guest';
   const canViewLanded = Boolean(isAdmin);
 
   const [viewMode, setViewMode] = useState('table');
   const [copied, setCopied] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [showLandedCost, setShowLandedCost] = useState(false);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+  const [showLandedCost, setShowLandedCost] = useState(true);
 
   const { currency, setCurrency, fxRate, formatPrice } = useCurrencyConverter({
     defaultCurrency,
@@ -115,8 +120,36 @@ export default function ModularPriceSchedule({
   );
 
   const handlePrint = () => {
-    if (typeof window !== 'undefined') window.print();
+    setIsPdfPreviewOpen(true);
   };
+
+  const getSchedulePdfBlob = useCallback(() => {
+    const head = isAdmin
+      ? ['#', 'SKU', 'Product', `Cost (${currency})`, `Wholeseller (${currency})`, `Distributor (${currency})`]
+      : ['#', 'SKU', 'Product', `Wholeseller (${currency})`];
+
+    const body = filteredProducts.map((p) => {
+      const sku = String(p.sku || '').replace(skuPrefixPattern, '');
+      const base = [p.itemNumber, sku, p.name];
+      if (isAdmin) {
+        return [
+          ...base,
+          formatPrice(p.calculatedLanded),
+          formatPrice(p.calculatedWholesale),
+          formatPrice(p.calculatedDistributor),
+        ];
+      }
+      return [...base, formatPrice(p.calculatedWholesale)];
+    });
+
+    return buildSchedulePdfBlob({
+      title: `${brandLeft} — ${brandRight}`,
+      subtitle: documentSubtitle,
+      metaLine: `Ref: ${documentRef}  |  Currency: ${currency}  |  Items: ${filteredProducts.length}`,
+      head,
+      body,
+    });
+  }, [isAdmin, currency, filteredProducts, skuPrefixPattern, formatPrice, brandLeft, brandRight, documentSubtitle, documentRef]);
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined' && navigator.clipboard) {
@@ -394,6 +427,15 @@ export default function ModularPriceSchedule({
           </div>
         </div>
       </div>
+
+      <DocumentPreviewModal
+        isOpen={isPdfPreviewOpen}
+        onClose={() => setIsPdfPreviewOpen(false)}
+        getPdfBlob={getSchedulePdfBlob}
+        downloadName={`${exportFilePrefix}_${currency}.pdf`}
+        title={documentTitle}
+        subtitle={`${filteredProducts.length} SKUs · ${currency}`}
+      />
 
       <PublicUnifiedFooter lang="en" />
     </div>

@@ -18,6 +18,7 @@ import CopyableId from '@/components/ui/CopyableId';
 import TabSkeleton from '@/components/ui/TabSkeleton';
 import InlineEditableCell from '@/components/ui/InlineEditableCell';
 import EmptyState from '@/components/ui/EmptyState';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import ProductDetailInline from './ProductDetailInline';
 
 import {
@@ -53,6 +54,7 @@ export default function PriceScheduleSkuTable({
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [pdfPreviewState, setPdfPreviewState] = useState({ open: false, blob: null, name: '' });
 
   const loadProducts = useCallback(async (forceRefresh = false) => {
     setLoading(true);
@@ -252,13 +254,13 @@ export default function PriceScheduleSkuTable({
     }
   }, [filtered, selectedIds, effectiveTier, group.currency, group.id, priceFor]);
 
-  // Export PDF
+  // Export PDF (Preview first, then print/download)
   const handleExportPdf = useCallback((onlySelected = false) => {
     const targetRows = onlySelected && selectedIds.length
       ? filtered.filter((p) => selectedIds.includes(p.id))
       : filtered;
 
-    exportPriceSchedulePdf({
+    const blob = exportPriceSchedulePdf({
       group,
       products: targetRows,
       tier: effectiveTier,
@@ -266,8 +268,15 @@ export default function PriceScheduleSkuTable({
       formatPrice,
       brandFilter: selectedBrand,
       isSelection: onlySelected && selectedIds.length > 0,
+      returnBlob: true,
     });
-    toast.success(`Downloaded PDF for ${targetRows.length} SKUs ✓`);
+    const safeId = (group?.id || 'schedule').replace(/[^a-z0-9-_]/gi, '_');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    setPdfPreviewState({
+      open: true,
+      blob,
+      name: `${safeId}_${effectiveTier}_${dateStr}.pdf`,
+    });
   }, [filtered, selectedIds, group, effectiveTier, priceFor, formatPrice, selectedBrand]);
 
   // Copy Quick Quote for WhatsApp / Email
@@ -378,35 +387,32 @@ export default function PriceScheduleSkuTable({
       cols.push(
         {
           key: 'adminCost',
-          label: 'Cost / Mediluxe (+15%)',
-          width: '17%',
+          label: 'Cost (Base)',
+          width: '15%',
           render: (val, row) => {
             const resolved = priceFor(row);
             const cost = resolved.costPrice ?? (row.price ? +(row.price / 1.3225).toFixed(2) : null);
-            const mediluxe = resolved.mediluxePrice ?? (cost ? +(cost * 1.15).toFixed(2) : null);
             return (
-              <div style={{ fontSize: 11 }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ fontSize: 12 }} onClick={(e) => e.stopPropagation()}>
                 <InlineEditableCell
                   value={cost ?? ''}
                   type="number"
                   format={(v) => (
-                    <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                    <span style={{ fontWeight: 700, color: '#475569', fontFamily: 'monospace' }}>
                       {formatPrice(Number(v), group.currency)}
                     </span>
                   )}
                   onSave={(newVal) => handleSaveCost(row, newVal)}
                 />
-                <div style={{ color: '#15803d', fontWeight: 600, marginTop: 2 }}>
-                  Mediluxe: {formatPrice(mediluxe, group.currency)}
-                </div>
+                <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>Landed Cost</div>
               </div>
             );
           },
         },
         {
           key: 'wholesalePrice',
-          label: 'Wholesale (×1.3225)',
-          width: '15%',
+          label: 'Wholeseller (15%+15%)',
+          width: '16%',
           render: (val, row) => {
             const resolved = priceFor(row);
             const wholesale =
@@ -415,30 +421,32 @@ export default function PriceScheduleSkuTable({
               (resolved.costPrice ? +(resolved.costPrice * 1.3225).toFixed(2) : row.price);
             return (
               <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#0369a1' }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: '#c2410c', fontFamily: 'monospace' }}>
                   {formatPrice(wholesale, group.currency)}
                 </div>
-                <div style={{ fontSize: 10, color: '#64748b' }}>Public / WS</div>
+                <div style={{ fontSize: 10, color: '#64748b' }}>Public / WS (×1.3225)</div>
               </div>
             );
           },
         },
         {
-          key: 'clinicPrice',
-          label: 'Clinic (+45%)',
-          width: '15%',
+          key: 'distributorPrice',
+          label: 'Distributor (+15%)',
+          width: '16%',
           render: (val, row) => {
             const resolved = priceFor(row);
-            const clinic =
-              resolved.clinicPrice ??
-              row.pricing?.clinicPrice ??
-              (resolved.costPrice ? +(resolved.costPrice * 1.45).toFixed(2) : null);
+            const cost = resolved.costPrice ?? (row.price ? +(row.price / 1.3225).toFixed(2) : null);
+            const distributor =
+              resolved.distributorPrice ??
+              resolved.mediluxePrice ??
+              row.pricing?.distributorPrice ??
+              (cost ? +(cost * 1.15).toFixed(2) : null);
             return (
               <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#0d9488' }}>
-                  {formatPrice(clinic, group.currency)}
+                <div style={{ fontWeight: 700, fontSize: 13, color: '#1d4ed8', fontFamily: 'monospace' }}>
+                  {formatPrice(distributor, group.currency)}
                 </div>
-                <div style={{ fontSize: 10, color: '#64748b' }}>Medical Practice</div>
+                <div style={{ fontSize: 10, color: '#64748b' }}>Distributor (+15%)</div>
               </div>
             );
           },
@@ -736,6 +744,14 @@ export default function PriceScheduleSkuTable({
           )}
         />
       )}
+      <DocumentPreviewModal
+        isOpen={pdfPreviewState.open}
+        onClose={() => setPdfPreviewState({ open: false, blob: null, name: '' })}
+        pdfBlob={pdfPreviewState.blob}
+        downloadName={pdfPreviewState.name}
+        title={`${group?.label || 'Price Schedule'} — Official PDF`}
+        subtitle="Preview before printing or downloading"
+      />
     </div>
   );
 }

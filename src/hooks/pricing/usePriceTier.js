@@ -120,11 +120,12 @@ export function resolvePriceForTier(product, tier) {
   // Admin sees all — return cost (most privileged view)
   if (tier === 'admin') {
     const cost = extractCost(product);
-    const mediluxe = p.mediluxePrice ?? (isNaN(cost) ? null : +(cost * 1.15).toFixed(2));
+    const mediluxe = p.mediluxePrice ?? p.distributorPrice ?? (isNaN(cost) ? null : +(cost * 1.15).toFixed(2));
     return {
       price: mediluxe ?? cost,
       costPrice: isNaN(cost) ? null : +cost.toFixed(2),
       mediluxePrice: mediluxe,
+      distributorPrice: mediluxe,
       wholesalePrice: p.wholesalePrice ?? (isNaN(cost) ? null : +(cost * 1.3225).toFixed(2)),
       clinicPrice: p.clinicPrice ?? null,
       tierUsed: 'admin',

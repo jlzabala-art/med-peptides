@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { X, Printer, Sparkles, Layers, List, Smartphone, FileText } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
+import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 
 /**
  * Parses multi-component peptide blends (like GLOW, KLOW, CJC-1295 + Ipamorelin)
@@ -120,6 +122,7 @@ export default function PeptidePricePdfPreviewModal({
 }) {
   const [pdfLang, setPdfLang] = useState(lang || 'en');
   const [groupByCategory, setGroupByCategory] = useState(true);
+  const [isRealPdfOpen, setIsRealPdfOpen] = useState(false);
   // Mobile view mode: 'mobile' (3-column adaptive reader without collisions) or 'a4' (scaled A4 paper sheet viewer)
   const [mobileViewMode, setMobileViewMode] = useState('mobile');
   const [a4ZoomScale, setA4ZoomScale] = useState(0.45);
@@ -490,7 +493,7 @@ export default function PeptidePricePdfPreviewModal({
 
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => setIsRealPdfOpen(true)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -652,7 +655,7 @@ export default function PeptidePricePdfPreviewModal({
 
           <button
             type="button"
-            onClick={() => window.print()}
+            onClick={() => setIsRealPdfOpen(true)}
             className="pdf-desktop-only"
             style={{
               alignItems: 'center',
@@ -1236,6 +1239,39 @@ export default function PeptidePricePdfPreviewModal({
           </div>
         </div>
       </div>
+      <DocumentPreviewModal
+        isOpen={isRealPdfOpen}
+        onClose={() => setIsRealPdfOpen(false)}
+        getPdfBlob={() => {
+          const head = [
+            '#',
+            isEs ? 'Formulación' : 'Formulation',
+            isEs ? 'Dosis' : 'Dosage',
+            `1× Vial (${currency})`,
+            `Pack ×10 (${currency})`,
+          ];
+          const body = products.map((p, idx) => {
+            const p10 = p.pack10Price || (Number(p.unitPrice || 0) * 10 * 0.85);
+            return [
+              idx + 1,
+              p.productName || p.name || '',
+              p.dosage || '—',
+              typeof formatPrice === 'function' ? formatPrice(p.unitPrice) : `${currencySymbol}${Number(p.unitPrice || 0).toFixed(2)}`,
+              typeof formatPrice === 'function' ? formatPrice(p10) : `${currencySymbol}${Number(p10 || 0).toFixed(2)}`,
+            ];
+          });
+          return buildSchedulePdfBlob({
+            title: isEs ? 'ATLAS HEALTH — TARIFA OFICIAL DE PÉPTIDOS' : 'ATLAS HEALTH — LYOPHILIZED PEPTIDES SCHEDULE',
+            subtitle: `${products.length} SKUs · ${currency}`,
+            metaLine: `Currency: ${currency}  |  Lang: ${pdfLang.toUpperCase()}`,
+            head,
+            body,
+          });
+        }}
+        downloadName={`Atlas_Peptides_Schedule_${currency}.pdf`}
+        title={isEs ? 'Tarifa Oficial de Péptidos (PDF)' : 'Official Peptides Schedule (PDF)'}
+        subtitle={`${products.length} SKUs · ${currency}`}
+      />
     </div>
   );
 }

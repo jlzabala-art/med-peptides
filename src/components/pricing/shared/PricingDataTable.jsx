@@ -159,8 +159,8 @@ export default function PricingDataTable({
     if (canViewLanded && showLandedCost) {
       cols.push({
         key: 'calculatedLanded',
-        label: `Landed CIF (${currency})`,
-        width: '12%',
+        label: `Cost (${currency})`,
+        width: '11%',
         align: 'right',
         sortable: true,
         render: (val, row) => {
@@ -181,20 +181,14 @@ export default function PricingDataTable({
       });
     }
 
+    // Wholeseller (15% + 15%): Public default for guests, Wholesalers, and Admin
     cols.push({
       key: 'calculatedWholesale',
-      label: `Wholesale (${currency})`,
+      label: `Wholeseller (${currency})`,
       width: '13%',
       align: 'right',
       sortable: true,
       render: (val, row) => {
-        if (!isWholesaler) {
-          return (
-            <Link href={`/login?redirect=${loginRedirect}&tier=wholesale`} className="b2b-lock-pill">
-              <Lock size={11} /> <span>Sign In</span>
-            </Link>
-          );
-        }
         const displayVal = Number((Number(val || 0) * fxRate).toFixed(2));
         if (!isAdmin) {
           return (
@@ -218,6 +212,22 @@ export default function PricingDataTable({
         );
       },
     });
+
+    // Distributor (+15%): Visible to Admin and Distributors
+    if (isAdmin) {
+      cols.push({
+        key: 'calculatedDistributor',
+        label: `Distributor (${currency})`,
+        width: '12%',
+        align: 'right',
+        sortable: true,
+        render: (val) => (
+          <span className="font-mono font-bold text-blue-700">
+            {formatPrice(val)}
+          </span>
+        ),
+      });
+    }
 
     cols.push({
       key: 'recommendedClinic',

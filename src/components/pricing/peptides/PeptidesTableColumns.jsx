@@ -15,6 +15,7 @@ import {
 import { parsePeptideBlendDisplay } from '@/components/pricing/PeptidePricePdfPreviewModal';
 import { getPeptideClinicalSummary } from '@/constants/peptidePharmacology';
 import CopyableId from '@/components/ui/CopyableId';
+import PriceDisplay from '@/components/pricing/PriceDisplay';
 
 /**
  * Factory function returning the DataTable columns array.
@@ -26,7 +27,10 @@ export function getPeptidesColumns({
   updateItemQuantity,
   formatPrice,
   currency = 'USD',
-  isEs = false
+  isEs = false,
+  isAdmin = false,
+  pricingRole = 'guest',
+  resolveProduct = null
 }) {
   return [
     {
@@ -228,18 +232,40 @@ export function getPeptidesColumns({
     },
     {
       key: 'unitPrice',
-      label: isEs ? `Vial Individual (1x) · ${currency}` : `Single Vial (1x) · ${currency}`,
-      width: '14%',
+      label: isAdmin
+        ? (isEs ? `Coste / Whole / Dist · ${currency}` : `Cost / Whole / Dist · ${currency}`)
+        : (isEs ? `Vial Individual (1x) · ${currency}` : `Single Vial (1x) · ${currency}`),
+      width: isAdmin ? '18%' : '14%',
       align: 'right',
       sortable: true,
-      render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'right', alignItems: 'flex-end' }}>
-          <span style={{ fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#202124', fontSize: '0.92rem' }}>
-            {formatPrice(val ?? row.unitPrice)}
-          </span>
-          <span style={{ fontSize: '0.66rem', color: '#5f6368' }}>{isEs ? 'por vial estéril' : 'per sterile vial'}</span>
-        </div>
-      )
+      render: (val, row) => {
+        const resolved = typeof resolveProduct === 'function' ? resolveProduct(row) : null;
+        if (isAdmin && resolved?.showTriple) {
+          return (
+            <PriceDisplay
+              resolved={resolved}
+              wholeseller={resolved.wholeseller ?? val ?? row.unitPrice}
+              formatPrice={formatPrice}
+              isAdmin
+              isEs={isEs}
+              variant="compact"
+            />
+          );
+        }
+        const effectiveUnit = resolved?.primaryPrice ?? val ?? row.unitPrice;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'right', alignItems: 'flex-end' }}>
+            <span style={{ fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#202124', fontSize: '0.92rem' }}>
+              {formatPrice(effectiveUnit)}
+            </span>
+            <span style={{ fontSize: '0.64rem', color: '#5f6368' }}>
+              {pricingRole === 'guest'
+                ? (isEs ? 'Wholeseller (15%+15%)' : 'Wholeseller (15%+15%)')
+                : (resolved?.primaryLabel || (isEs ? 'por vial estéril' : 'per sterile vial'))}
+            </span>
+          </div>
+        );
+      }
     },
     {
       key: 'pack10Price',

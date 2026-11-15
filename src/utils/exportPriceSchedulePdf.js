@@ -13,6 +13,7 @@ export function exportPriceSchedulePdf({
   formatPrice,
   brandFilter = 'all',
   isSelection = false,
+  returnBlob = false,
 }) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const currency = group?.currency || 'EUR';
@@ -133,5 +134,8 @@ export function exportPriceSchedulePdf({
   });
 
   const safeId = (group?.id || 'schedule').replace(/[^a-z0-9-_]/gi, '_');
+  if (returnBlob) {
+    return doc.output('blob');
+  }
   doc.save(`${safeId}_${tier}_${dateStr}.pdf`);
 }

@@ -53,6 +53,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { useAuth } from '@/context/AuthContext';
+import { usePricing } from '@/hooks/usePricing';
 import { useCommercialSchedule } from '@/hooks/useCommercialSchedule';
 import DataTable from '@/components/ui/DataTable';
 import {
@@ -272,6 +273,7 @@ const SCHEDULE_SECTIONS = [
 
 export default function QatarGenomicsPriceClient() {
   const { user } = useAuth();
+  const { isAdmin } = usePricing();
   const [previewUnlocked, setPreviewUnlocked] = useState(false);
 
   // Firestore SSOT Commercial Schedule hook
@@ -313,7 +315,8 @@ export default function QatarGenomicsPriceClient() {
     return DEFAULT_VOLUME_TIERS;
   }, [agreement]);
 
-  const isPricingUnlocked = Boolean(user || previewUnlocked || isHossamMode);
+  // Public visitors see Wholeseller (15%+15%); registered users see role pricing; Admins see all 3 tiers
+  const isPricingUnlocked = true;
 
   const [activeTab, setActiveTab] = useState('commercial');
   const [selectedProduct, setSelectedProduct] = useState('nutrigenetics');
@@ -1437,6 +1440,28 @@ export default function QatarGenomicsPriceClient() {
         ════════════════════════════════════════════════════════════════════ */}
             {activeTab === 'commercial' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {isAdmin && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', padding: '12px 16px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px' }}>
+                    <div>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Admin · Coste Base (1 Kit)</div>
+                      <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', fontFamily: 'monospace' }}>
+                        {formatPrice(currentTier?.costAed ? currentTier.costAed / (CURRENCY_CONFIG.AED?.rate || 1) : 655.6)}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase' }}>Admin · Wholeseller (15%+15%)</div>
+                      <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#c2410c', fontFamily: 'monospace' }}>
+                        {formatPrice((currentTier?.costAed ? currentTier.costAed / (CURRENCY_CONFIG.AED?.rate || 1) : 655.6) * 1.3225)}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1d4ed8', textTransform: 'uppercase' }}>Admin · Distribuitor (+15%)</div>
+                      <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1d4ed8', fontFamily: 'monospace' }}>
+                        {formatPrice((currentTier?.costAed ? currentTier.costAed / (CURRENCY_CONFIG.AED?.rate || 1) : 655.6) * 1.15)}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* B2B Authentication Required Banner if !isPricingUnlocked */}
                 {!isPricingUnlocked && (

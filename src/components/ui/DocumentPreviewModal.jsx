@@ -23,6 +23,8 @@ export default function DocumentPreviewModal({
   isOpen,
   onClose,
   fileUrl,
+  pdfBlob = null,
+  getPdfBlob = null,
   downloadUrl,
   downloadName,
   title = 'Document Preview',
@@ -33,33 +35,39 @@ export default function DocumentPreviewModal({
   const [blobUrl, setBlobUrl] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | loading | ready | error
 
-  // Fetch the PDF as a blob (same-origin → printable from the iframe)
+  // Fetch or generate the PDF as a blob (same-origin → printable from the iframe)
   useEffect(() => {
-    if (!isOpen || !fileUrl) return undefined;
+    if (!isOpen || (!fileUrl && !pdfBlob && !getPdfBlob)) return undefined;
     let cancelled = false;
     let createdUrl = null;
     setStatus('loading');
     setBlobUrl(null);
 
-    fetch(fileUrl)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.blob();
-      })
+    const loadBlob = async () => {
+      if (pdfBlob instanceof Blob) return pdfBlob;
+      if (typeof getPdfBlob === 'function') return await getPdfBlob();
+      const res = await fetch(fileUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.blob();
+    };
+
+    loadBlob()
       .then((blob) => {
         if (cancelled) return;
-        const pdfBlob = blob.type === 'application/pdf' ? blob : new Blob([blob], { type: 'application/pdf' });
-        createdUrl = URL.createObjectURL(pdfBlob);
+        const typedBlob = blob.type === 'application/pdf' ? blob : new Blob([blob], { type: 'application/pdf' });
+        createdUrl = URL.createObjectURL(typedBlob);
         setBlobUrl(createdUrl);
         setStatus('ready');
       })
-      .catch(() => { if (!cancelled) setStatus('fallback'); });
+      .catch(() => {
+        if (!cancelled) setStatus(fileUrl ? 'fallback' : 'error');
+      });
 
     return () => {
       cancelled = true;
       if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
-  }, [isOpen, fileUrl]);
+  }, [isOpen, fileUrl, pdfBlob, getPdfBlob]);
 
   // Escape to close + lock background scroll
   useEffect(() => {
@@ -112,19 +120,19 @@ export default function DocumentPreviewModal({
                 <span>Print</span>
               </button>
             )}
-            {fileUrl && (
+            {(fileUrl || blobUrl) && (
               <a
                 id="dpm-download-btn"
                 className="dpm-btn"
                 href={effectiveDownloadUrl}
-                download={downloadName || true}
+                download={downloadName || 'document.pdf'}
                 target="_blank"
                 rel="noreferrer"
               >
                 <Download size={16} /> <span className="dpm-btn-label">Download</span>
               </a>
             )}
-            {fileUrl && (
+            {(fileUrl || blobUrl) && (
               <a id="dpm-open-btn" className="dpm-btn dpm-btn--ghost" href={blobUrl || fileUrl} target="_blank" rel="noreferrer" title="Open in new tab">
                 <ExternalLink size={16} />
               </a>
@@ -152,8 +160,8 @@ export default function DocumentPreviewModal({
               </a>
             </div>
           )}
-          {!fileUrl && (
-            <div className="dpm-state"><span>No document URL provided.</span></div>
+          {!fileUrl && !pdfBlob && !getPdfBlob && (
+            <div className="dpm-state"><span>No document source provided.</span></div>
           )}
           {status === 'ready' && blobUrl && (
             <iframe ref={iframeRef} src={blobUrl} className="dpm-frame" title={title} />

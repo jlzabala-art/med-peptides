@@ -31,6 +31,8 @@ import {
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
+import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import DataTable from '@/components/ui/DataTable';
 import CatalogMasterDetailPanel from '@/components/pricing/shared/CatalogMasterDetailPanel';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
@@ -47,9 +49,10 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
   const { is, effectiveRole } = useRoleAccess();
 
   // Role Access Hierarchy
-  const isAdmin = is('admin');
-  const isWholesaler = is('wholesaler') || is('distributor') || isAdmin;
-  const isClinicOrDoctor = is('doctor') || is('clinic') || is('fagron_clinic') || is('medical_director') || isWholesaler;
+  const isAdmin = is('admin') || is('medical_director');
+  const isDistributor = is('distributor');
+  const isWholesaler = is('wholesaler') || is('wholeseller') || isAdmin;
+  const isClinicOrDoctor = is('doctor') || is('clinic') || is('fagron_clinic') || is('medical_director') || isWholesaler || isDistributor;
   const isGuest = !user || effectiveRole === 'guest';
   const canViewCost = Boolean(isAdmin);
 
@@ -58,7 +61,8 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [scopeMode] = useState('filtered');
   const [copied, setCopied] = useState(false);
-  const [showCostBasis, setShowCostBasis] = useState(false);
+  const [showCostBasis, setShowCostBasis] = useState(true);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
 
   // Quick Order Drawer State
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
@@ -314,31 +318,20 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
       });
     }
 
-    // Wholesale B2B Tier (Locked for Guests and Clinics; Unlocked for Wholesalers & Admins)
+    // Wholeseller B2B Tier (15% + 15%: Public default for guests, Wholesalers & Admin)
     cols.push({
       key: 'wholesalePriceEur',
-      label: 'Wholesale B2B (1 Kit)',
-      width: (canViewCost && showCostBasis) ? '16%' : '18%',
+      label: 'Wholeseller (15%+15%)',
+      width: (canViewCost && showCostBasis) ? '15%' : '18%',
       sortable: true,
       render: (val, row) => {
-        if (!isWholesaler) {
-          return (
-            <Link
-              href="/login?redirect=/pricing/24genetics&tier=wholesale"
-              className="b2b-lock-pill"
-              title="Sign in with verified wholesale credentials to view volume B2B distributor pricing"
-            >
-              <Lock size={12} className="text-slate-400" />
-              <span>B2B Rate Protected</span>
-            </Link>
-          );
-        }
+        const wsPrice = val ?? row.wholesalePriceEur ?? (row.costPriceEur ? Number((row.costPriceEur * 1.3225).toFixed(2)) : null);
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontFamily: 'monospace', fontWeight: 750, color: '#0f766e', fontSize: '0.90rem' }}>
-              {formatPrice(val ?? row.wholesalePriceEur)}
+              {formatPrice(wsPrice)}
             </span>
-            {row.costPack10Eur && (
+            {row.costPack10Eur && wsPrice && (
               <span style={{
                 fontSize: '0.65rem',
                 fontWeight: 650,
@@ -349,13 +342,36 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
                 borderRadius: '4px',
                 width: 'fit-content'
               }}>
-                Pack ×10: {formatPrice((val ?? row.wholesalePriceEur) * 0.85)} / kit
+                Pack ×10: {formatPrice(wsPrice * 0.85)} / kit
               </span>
             )}
           </div>
         );
       }
     });
+
+    // Distributor Price (+15%): Always visible to Admin & Distributors
+    if (isAdmin || isDistributor) {
+      cols.push({
+        key: 'distributorPriceEur',
+        label: 'Distributor (+15%)',
+        width: '14%',
+        sortable: true,
+        render: (val, row) => {
+          const distPrice = val ?? row.distributorPriceEur ?? (row.costPriceEur ? Number((row.costPriceEur * 1.15).toFixed(2)) : null);
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span style={{ fontFamily: 'monospace', fontWeight: 750, color: '#1d4ed8', fontSize: '0.90rem' }}>
+                {formatPrice(distPrice)}
+              </span>
+              <span style={{ fontSize: '0.62rem', color: '#64748b' }}>
+                Cost + 15%
+              </span>
+            </div>
+          );
+        }
+      });
+    }
 
     // Clinic / Practitioner Price (Locked for Guests; Unlocked for Clinics, Wholesalers & Admins)
     cols.push({
@@ -683,7 +699,7 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
                 </button>
               )}
               <button
-                onClick={() => window.print()}
+                onClick={() => setIsPdfPreviewOpen(true)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1174,6 +1190,33 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
           </div>
         </div>
       )}
+
+      <DocumentPreviewModal
+        isOpen={isPdfPreviewOpen}
+        onClose={() => setIsPdfPreviewOpen(false)}
+        getPdfBlob={() => {
+          const head = isAdmin
+            ? ['SKU', 'Genomic Panel', `Cost (${currency})`, `Wholeseller (${currency})`, `Distributor (${currency})`]
+            : ['SKU', 'Genomic Panel', `Wholeseller (${currency})`];
+          const body = filteredProducts.map((r) => {
+            const ws = r.wholesalePriceEur ?? (r.costPriceEur ? Number((r.costPriceEur * 1.3225).toFixed(2)) : null);
+            const dist = r.distributorPriceEur ?? (r.costPriceEur ? Number((r.costPriceEur * 1.15).toFixed(2)) : null);
+            return isAdmin
+              ? [r.sku || r.id, r.name, formatPrice(r.costPriceEur), formatPrice(ws), formatPrice(dist)]
+              : [r.sku || r.id, r.name, formatPrice(ws)];
+          });
+          return buildSchedulePdfBlob({
+            title: 'ATLAS HEALTH — 24GENETICS CLINICAL PANELS',
+            subtitle: `CE-IVD Genomics Price Schedule · ${currency}`,
+            metaLine: `Panels: ${filteredProducts.length}  |  Currency: ${currency}`,
+            head,
+            body,
+          });
+        }}
+        downloadName={`24Genetics_Price_Schedule_${currency}.pdf`}
+        title="24Genetics Clinical Panels — Official PDF"
+        subtitle={`${filteredProducts.length} panels · ${currency}`}
+      />
 
       <PublicUnifiedFooter />
     </div>

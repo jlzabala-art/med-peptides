@@ -25,10 +25,10 @@ import { PRICING_TIER, PRICING_TIER_LABELS } from '../constants/productEnums';
 // ── Role → Tier mapping ────────────────────────────────────────────────────────
 // Keys are lowercase role strings as stored in Firestore users/{uid}.role
 const ROLE_TO_TIER = Object.freeze({
-  // Unauthenticated / basic
-  guest:            PRICING_TIER.RETAIL,
-  researcher:       PRICING_TIER.RETAIL,
-  sales_agent:      PRICING_TIER.RETAIL,
+  // Unauthenticated / basic -> public default is Wholeseller (15% + 15%)
+  guest:            PRICING_TIER.WHOLESALE,
+  researcher:       PRICING_TIER.WHOLESALE,
+  sales_agent:      PRICING_TIER.WHOLESALE,
   patient:          PRICING_TIER.RETAIL,
 
   // Verified professional → wholesale discount
@@ -64,8 +64,8 @@ function resolveTierFromRole(role) {
   const matchedKey = Object.keys(ROLE_TO_TIER).find((k) => normalised.includes(k));
   if (matchedKey) return ROLE_TO_TIER[matchedKey];
 
-  // Default: public retail
-  return PRICING_TIER.RETAIL;
+  // Default: public wholesale (15% + 15%)
+  return PRICING_TIER.WHOLESALE;
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -83,13 +83,13 @@ export function usePricingTier() {
   const { user, activeRole, loading } = useAuth();
 
   const { tier, role } = useMemo(() => {
-    // While auth is loading, default to retail to avoid flash of wrong price
+    // While auth is loading or guest, default to wholesale (15% + 15%)
     if (loading) {
-      return { tier: PRICING_TIER.RETAIL, role: 'guest' };
+      return { tier: PRICING_TIER.WHOLESALE, role: 'guest' };
     }
 
     if (!user) {
-      return { tier: PRICING_TIER.RETAIL, role: 'guest' };
+      return { tier: PRICING_TIER.WHOLESALE, role: 'guest' };
     }
 
     const resolvedTier = resolveTierFromRole(activeRole);

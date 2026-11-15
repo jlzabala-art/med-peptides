@@ -442,7 +442,8 @@ export default function TieredPriceShield({
   // Determine user authorization & role hierarchy
   const isAdmin = is('admin') || is('medical_director') || (localPreview?.role === 'admin');
   const authChannelTier = normalizeRoleTierKey(user?.pricingChannel || user?.priceTier || user?.role);
-  const isWholesaler = authChannelTier === 'wholesaler' || is('wholesaler') || is('supplier') || is('distributor');
+  const isDistributor = authChannelTier === 'distributor' || is('distributor');
+  const isWholesaler = authChannelTier === 'wholesaler' || is('wholesaler') || is('supplier');
   const isDoctor = authChannelTier === 'clinic' || is('doctor') || is('clinic') || is('fagron_clinic') || is('compounding_pharmacy');
   const isPatient = authChannelTier === 'retail' || is('patient');
 
@@ -459,7 +460,8 @@ export default function TieredPriceShield({
   } else if (liveSyncedContext?.tier) {
     activeTierKey = liveSyncedContext.tier;
   } else if (user) {
-    if (isWholesaler && !isAdmin) activeTierKey = 'wholesaler';
+    if (isDistributor && !isAdmin) activeTierKey = 'distributor';
+    else if (isWholesaler && !isAdmin) activeTierKey = 'wholesaler';
     else if (isDoctor && !isAdmin) activeTierKey = 'clinic';
     else if (isPatient && !isAdmin) activeTierKey = 'retail';
     else if (isAdmin) activeTierKey = 'wholesaler';
@@ -500,6 +502,10 @@ export default function TieredPriceShield({
     return null;
   }
 
+  const effectiveCost = tiers.cost || (tiers.wholesaler ? Math.round((tiers.wholesaler / 1.3225) * 100) / 100 : 0);
+  const effectiveWholesaler = tiers.wholesaler || (effectiveCost ? Math.round(effectiveCost * 1.3225 * 100) / 100 : 0);
+  const effectiveDistributor = tiers.distributor || product?.distributorPrice || product?.mediluxePrice || (effectiveCost ? Math.round(effectiveCost * 1.15 * 100) / 100 : 0);
+
   const tierMeta = {
     cost: {
       label: isEs ? 'COSTE DE ORIGEN (EXW)' : 'LANDED COST (EXW)',
@@ -508,16 +514,25 @@ export default function TieredPriceShield({
       badgeColor: '#dc2626',
       badgeBorder: '#fee2e2',
       incoterm: 'EXW',
-      amount: Math.round((tiers.cost || 0) * markupFactor * 100) / 100
+      amount: Math.round(effectiveCost * markupFactor * 100) / 100
+    },
+    distributor: {
+      label: isEs ? 'TARIFA DISTRIBUITOR (+15%)' : 'DISTRIBUTOR TIER (+15%)',
+      badge: isEs ? 'Distribuitor (+15%)' : 'Distributor (+15%)',
+      badgeBg: '#eff6ff',
+      badgeColor: '#1d4ed8',
+      badgeBorder: '#bfdbfe',
+      incoterm: 'Distributor',
+      amount: Math.round(effectiveDistributor * markupFactor * 100) / 100
     },
     wholesaler: {
-      label: isEs ? 'TARIFA MAYORISTA B2B (EXW)' : 'WHOLESALE B2B TIER (EXW)',
-      badge: isAdmin ? (isEs ? 'Mayorista (+15%+15%)' : 'Wholesaler (+15%+15%)') : (isEs ? 'Mayorista B2B' : 'Wholesale B2B'),
+      label: isEs ? 'TARIFA WHOLESELLER (+15%+15%)' : 'WHOLESELLER TIER (+15%+15%)',
+      badge: isEs ? 'Wholeseller (+15%+15%)' : 'Wholeseller (+15%+15%)',
       badgeBg: '#fff7ed',
       badgeColor: '#c2410c',
       badgeBorder: '#ffedd5',
-      incoterm: 'Wholesale EXW',
-      amount: Math.round((tiers.wholesaler || 0) * markupFactor * 100) / 100
+      incoterm: 'Wholeseller',
+      amount: Math.round(effectiveWholesaler * markupFactor * 100) / 100
     },
     clinic: {
       label: isEs ? 'TARIFA CLÍNICA / MÉDICO' : 'CLINICAL / PRACTITIONER TIER',
@@ -544,6 +559,15 @@ export default function TieredPriceShield({
 
   // ── CASE 1: COMPACT LIST VIEW ──
   if (compact) {
+    if (isAdmin && !adminSimulationTier) {
+      return (
+        <div style={{ textAlign: 'right', marginRight: '6px', display: 'flex', flexDirection: 'column', gap: '1px', fontSize: '0.72rem' }}>
+          <span style={{ color: '#475569' }}>Cost: <strong>{formatTierPrice(tierMeta.cost.amount, effectiveCurrency)}</strong></span>
+          <span style={{ color: '#c2410c' }}>Whole: <strong>{formatTierPrice(tierMeta.wholesaler.amount, effectiveCurrency)}</strong></span>
+          <span style={{ color: '#1d4ed8' }}>Dist: <strong>{formatTierPrice(tierMeta.distributor.amount, effectiveCurrency)}</strong></span>
+        </div>
+      );
+    }
     return (
       <div style={{ textAlign: 'right', marginRight: '6px' }}>
         <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 700, display: 'block' }}>
@@ -552,6 +576,69 @@ export default function TieredPriceShield({
         <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>
           {formattedPrice}
         </strong>
+      </div>
+    );
+  }
+
+  // ── CASE 1B: ADMIN TRIPLE-PRICE VIEW (Coste + Wholeseller + Distribuitor) ──
+  if (isAdmin && !adminSimulationTier) {
+    const adminTiers = [
+      { key: 'cost', title: isEs ? 'Coste' : 'Cost', amount: tierMeta.cost.amount, color: '#475569', bg: '#f8fafc', border: '#cbd5e1' },
+      { key: 'wholesaler', title: 'Wholeseller', amount: tierMeta.wholesaler.amount, color: '#c2410c', bg: '#fff7ed', border: '#fed7aa' },
+      { key: 'distributor', title: isEs ? 'Distribuitor' : 'Distributor', amount: tierMeta.distributor.amount, color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe' },
+    ];
+    return (
+      <div style={{
+        marginBottom: embedded ? '6px' : '0.65rem',
+        padding: embedded ? '8px 10px' : '8px 12px',
+        borderRadius: '8px',
+        background: embedded ? '#ffffff' : '#f8fafc',
+        border: '1px solid #cbd5e1',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
+          <span style={{ fontSize: '0.66rem', color: '#003666', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <ShieldCheck size={13} color="#003666" />
+            {isEs ? 'ADMIN · 3 NIVELES DE PRECIO' : 'ADMIN · 3-TIER PRICING'}
+          </span>
+          {onSelectAdminSimulationTier && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', background: '#ffffff', padding: '2px', borderRadius: '5px', border: '1px solid #cbd5e1' }} onClick={(e) => e.stopPropagation()}>
+              {['cost', 'wholesaler', 'distributor', 'clinic'].map((tierKey) => (
+                <button
+                  key={tierKey}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    onSelectAdminSimulationTier(tierKey);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    color: '#64748b',
+                    border: 'none',
+                    borderRadius: '3px',
+                    padding: '2px 5px',
+                    fontSize: '0.60rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {tierKey === 'cost' ? 'Cost' : tierKey === 'wholesaler' ? 'Whole' : tierKey === 'distributor' ? 'Dist' : 'Clinic'}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '6px' }}>
+          {adminTiers.map((t) => (
+            <div key={t.key} style={{ padding: '6px 8px', borderRadius: '6px', background: t.bg, border: `1px solid ${t.border}` }}>
+              <div style={{ fontSize: '0.64rem', fontWeight: 700, color: t.color, textTransform: 'uppercase' }}>{t.title}</div>
+              <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a', fontVariantNumeric: 'tabular-nums', marginTop: '2px' }}>
+                {formatTierPrice(t.amount, effectiveCurrency)}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

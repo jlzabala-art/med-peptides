@@ -5,6 +5,8 @@ import { Search, ShoppingCart, Package, Check, CheckCircle2, ShieldCheck, ArrowR
 import CopyableId from '@/components/ui/CopyableId';
 import { trackReferralVisitAction, fetchCollectionProductsAction } from '@/actions/vialsCatalogActions';
 import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
+import { usePricing } from '@/hooks/usePricing';
+import PriceDisplay from '@/components/pricing/PriceDisplay';
 
 const COLLECTIONS_LIST = [
   { id: 'vials', label: 'Peptides (Vials)', icon: '🧪' },
@@ -31,6 +33,7 @@ const SHIPPING_OPTIONS = [
 ];
 
 export default function VialsCatalogClient({ initialVials = [], initialCollection = 'vials', referralInfo = null }) {
+  const { isAdmin, pricingRole, resolve: resolveProduct } = usePricing();
   const [activeCollection, setActiveCollection] = useState(initialCollection || 'vials');
   const [vials, setVials] = useState(initialVials);
   const [isLoadingCollection, setIsLoadingCollection] = useState(false);
@@ -668,17 +671,41 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                     
                     {/* Price block */}
                     <div style={{ marginBottom: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#003666' }}>
-                          {vial.currencySymbol || activeCurrencySymbol}{vial.unitPrice.toFixed(2)}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                          / {(vial.unitNoun || 'vial').toLowerCase()}
-                        </span>
-                      </div>
+                      {(() => {
+                        const resolved = resolveProduct(vial);
+                        const sym = vial.currencySymbol || activeCurrencySymbol;
+                        const fmtVial = (n) => `${sym}${Number(n).toFixed(2)}`;
+                        if (isAdmin && resolved?.showTriple) {
+                          return (
+                            <PriceDisplay
+                              resolved={resolved}
+                              wholeseller={resolved.wholeseller ?? vial.unitPrice}
+                              formatPrice={fmtVial}
+                              isAdmin
+                              variant="compact"
+                            />
+                          );
+                        }
+                        const displayPrice = resolved?.primaryPrice ?? vial.unitPrice;
+                        return (
+                          <>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#003666' }}>
+                                {sym}{Number(displayPrice || 0).toFixed(2)}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                / {(vial.unitNoun || 'vial').toLowerCase()}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '0.68rem', color: '#64748b', display: 'block', marginTop: '2px' }}>
+                              {pricingRole === 'guest' ? 'Wholeseller (15%+15%)' : (resolved?.primaryLabel || 'Wholeseller')}
+                            </span>
+                          </>
+                        );
+                      })()}
 
                       <div style={{
-                        marginTop: '4px',
+                        marginTop: '6px',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px',

@@ -16,6 +16,7 @@ import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/Shar
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import ProductDetailSidebar from '@/components/product/ProductDetailSidebar';
 import CopyableId from '@/components/ui/CopyableId';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import ImageModal from '@/snippets/ImageModal';
 import {
   getInjectableMonograph,
@@ -113,6 +114,7 @@ export default function AestheticInjectableDetail({
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   const isEs = lang === 'es';
   const effectiveSlug = propSlug || product?.slug || product?.id || 'juvederm-ultra-2';
@@ -290,7 +292,7 @@ export default function AestheticInjectableDetail({
             </button>
 
             <button
-              onClick={() => window.print()}
+              onClick={() => setIsPdfModalOpen(true)}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
                 padding: '6px 12px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1',
@@ -756,6 +758,15 @@ export default function AestheticInjectableDetail({
           alt={p.name}
         />
       )}
+
+      <DocumentPreviewModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        fileUrl={`/api/product-sheet/${encodeURIComponent(p.id || p.slug)}?format=all`}
+        downloadName={`${p.slug || p.id || 'monograph'}.pdf`}
+        title={p.name}
+        subtitle={isEs ? 'Monografía Clínica Oficial (PDF)' : 'Official Clinical Monograph (PDF)'}
+      />
     </div>
   );
 }
