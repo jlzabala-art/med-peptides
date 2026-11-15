@@ -202,22 +202,8 @@ export default function ContextualSidebar({
                 primaryAction.onClick?.();
                 setMobileOpen(false);
               }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                width: '100%',
-                minHeight: '40px',
-                padding: '0.55rem 0.9rem',
-                borderRadius: '10px',
-                border: 'none',
-                background: 'var(--color-primary, #003666)',
-                color: '#ffffff',
-                fontWeight: 600,
-                fontSize: '0.84rem',
-                cursor: 'pointer',
-              }}
+              className="gcp-btn-primary"
+              style={{ width: '100%', minHeight: '40px', borderRadius: '10px', fontSize: '0.84rem' }}
             >
               {primaryAction.icon}
               <span>{primaryAction.label}</span>
@@ -231,22 +217,8 @@ export default function ContextualSidebar({
                 secondaryAction.onClick?.();
                 setMobileOpen(false);
               }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                width: '100%',
-                minHeight: '38px',
-                padding: '0.5rem 0.9rem',
-                borderRadius: '10px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#0f172a',
-                fontWeight: 600,
-                fontSize: '0.82rem',
-                cursor: 'pointer',
-              }}
+              className="gcp-btn-secondary"
+              style={{ width: '100%', minHeight: '38px', borderRadius: '10px', fontSize: '0.82rem', color: '#5f6368', background: '#ffffff' }}
             >
               {secondaryAction.icon}
               <span>{secondaryAction.label}</span>
@@ -257,22 +229,8 @@ export default function ContextualSidebar({
             <button
               type="button"
               onClick={handleOpenAi}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                width: '100%',
-                minHeight: '38px',
-                padding: '0.5rem 0.9rem',
-                borderRadius: '10px',
-                border: '1px solid #c7d2fe',
-                background: '#eef2ff',
-                color: '#3730a3',
-                fontWeight: 600,
-                fontSize: '0.82rem',
-                cursor: 'pointer',
-              }}
+              className="gcp-btn-secondary"
+              style={{ width: '100%', minHeight: '38px', borderRadius: '10px', fontSize: '0.82rem', color: '#5f6368', background: '#ffffff' }}
             >
               <Sparkles size={14} />
               <span>{atlasAiLabel}</span>

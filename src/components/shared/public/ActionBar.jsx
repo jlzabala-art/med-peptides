@@ -6,10 +6,11 @@ import { Check, Copy, Download, MessageCircle, Sparkles } from 'lucide-react';
 /**
  * ActionBar
  * ─────────────────────────────────────────────────────────────────────────────
- * Enforces the canonical button hierarchy & order across all public/portal views:
+ * Enforces Golden Rules #40, #57 & #64:
  *   [Share] → [Export] → [Copy Link] → [Ask Atlas AI] → [Primary CTA] → [Destructive]
  *
- * Guarantees at most ONE solid primary CTA and consistent 44px-friendly touch targets.
+ * Uses `gcp-btn-primary`, `gcp-btn-secondary`, and `gcp-btn-danger` with
+ * monochromatic idle state (#5f6368) and semantic hover accents only.
  */
 export default function ActionBar({
   onShare = null,
@@ -49,42 +50,15 @@ export default function ActionBar({
     }
   };
 
-  const btnBase = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '6px',
-    minHeight: compact ? '34px' : '38px',
-    padding: compact ? '0.35rem 0.7rem' : '0.45rem 0.85rem',
-    borderRadius: '8px',
-    fontSize: compact ? '0.78rem' : '0.82rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-    transition: 'all 0.15s ease',
-  };
-
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '0.5rem',
-      }}
-    >
+    <div className={`atlas-action-bar ${compact ? 'is-compact' : ''}`}>
       {secondaryActions.map((act, idx) => (
         <button
           key={act.label || idx}
           type="button"
           onClick={act.onClick}
           title={act.title || act.label}
-          style={{
-            ...btnBase,
-            background: '#ffffff',
-            border: '1px solid #cbd5e1',
-            color: '#334155',
-          }}
+          className="gcp-btn-secondary atlas-ab-btn"
         >
           {act.icon}
           <span>{act.label}</span>
@@ -95,12 +69,7 @@ export default function ActionBar({
         <button
           type="button"
           onClick={onShare}
-          style={{
-            ...btnBase,
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            color: '#15803d',
-          }}
+          className="gcp-btn-secondary atlas-ab-btn atlas-ab-share"
         >
           <MessageCircle size={14} />
           <span>{shareLabel}</span>
@@ -111,12 +80,7 @@ export default function ActionBar({
         <button
           type="button"
           onClick={onExport}
-          style={{
-            ...btnBase,
-            background: '#ffffff',
-            border: '1px solid #cbd5e1',
-            color: '#0f172a',
-          }}
+          className="gcp-btn-secondary atlas-ab-btn"
         >
           <Download size={14} />
           <span>{exportLabel}</span>
@@ -127,12 +91,7 @@ export default function ActionBar({
         <button
           type="button"
           onClick={handleCopy}
-          style={{
-            ...btnBase,
-            background: '#ffffff',
-            border: '1px solid #cbd5e1',
-            color: copied ? '#15803d' : '#334155',
-          }}
+          className="gcp-btn-secondary atlas-ab-btn"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
           <span>{copied ? 'Copied' : copyLabel}</span>
@@ -143,12 +102,7 @@ export default function ActionBar({
         <button
           type="button"
           onClick={handleAi}
-          style={{
-            ...btnBase,
-            background: '#eef2ff',
-            border: '1px solid #c7d2fe',
-            color: '#3730a3',
-          }}
+          className="gcp-btn-secondary atlas-ab-btn atlas-ab-ai"
         >
           <Sparkles size={14} />
           <span>{atlasAiLabel}</span>
@@ -160,13 +114,7 @@ export default function ActionBar({
           type="button"
           disabled={primaryAction.disabled || primaryAction.loading}
           onClick={primaryAction.onClick}
-          style={{
-            ...btnBase,
-            background: 'var(--color-primary, #003666)',
-            border: '1px solid var(--color-primary, #003666)',
-            color: '#ffffff',
-            opacity: primaryAction.disabled || primaryAction.loading ? 0.65 : 1,
-          }}
+          className="gcp-btn-primary atlas-ab-btn"
         >
           {primaryAction.icon}
           <span>{primaryAction.loading ? 'Working...' : primaryAction.label}</span>
@@ -177,18 +125,53 @@ export default function ActionBar({
         <button
           type="button"
           onClick={destructiveAction.onClick}
-          style={{
-            ...btnBase,
-            background: '#fef2f2',
-            border: '1px solid #fecaca',
-            color: '#dc2626',
-            marginLeft: 'auto',
-          }}
+          className="gcp-btn-danger atlas-ab-btn"
+          style={{ marginLeft: 'auto' }}
         >
           {destructiveAction.icon}
           <span>{destructiveAction.label}</span>
         </button>
       )}
+
+      <style jsx>{`
+        .atlas-action-bar {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+        .atlas-ab-btn {
+          min-height: 38px;
+          padding: 0.45rem 0.85rem;
+          font-size: 0.82rem;
+          font-weight: 600;
+        }
+        .atlas-action-bar.is-compact .atlas-ab-btn {
+          min-height: 34px;
+          padding: 0.35rem 0.7rem;
+          font-size: 0.78rem;
+        }
+        .atlas-action-bar :global(.gcp-btn-secondary) {
+          background-color: #ffffff;
+          border-color: #dadce0;
+          color: #5f6368;
+        }
+        .atlas-action-bar :global(.gcp-btn-secondary:hover:not(:disabled)) {
+          background-color: #f8fafc;
+          color: #0f172a;
+          border-color: #cbd5e1;
+        }
+        .atlas-action-bar :global(.atlas-ab-share:hover:not(:disabled)) {
+          color: #15803d;
+          border-color: #86efac;
+          background-color: #f0fdf4;
+        }
+        .atlas-action-bar :global(.atlas-ab-ai:hover:not(:disabled)) {
+          color: #4f46e5;
+          border-color: #c7d2fe;
+          background-color: #eef2ff;
+        }
+      `}</style>
     </div>
   );
 }

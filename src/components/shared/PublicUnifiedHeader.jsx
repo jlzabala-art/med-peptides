@@ -121,6 +121,13 @@ export default function PublicUnifiedHeader({
     pathname?.startsWith('/compounding');
   const effectiveHideAccountManager = hideAccountManager || isPublicProductOrCatalogPage;
 
+  // Rule #59 + #63: Avoid duplicating Atlas AI in top header when page renders Floating Monograph Footer
+  const hasFloatingMonographFooter =
+    pathname?.startsWith('/p/') ||
+    pathname?.startsWith('/raw/') ||
+    pathname?.startsWith('/c/');
+  const effectiveHideAiButton = hideAiButton || hasFloatingMonographFooter;
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [internalInquiryOpen, setInternalInquiryOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -628,7 +635,7 @@ export default function PublicUnifiedHeader({
               {extraActions}
 
               {/* Unified Atlas AI Copilot Trigger */}
-              {!hideAiButton && (
+              {!effectiveHideAiButton && (
                 <button
                   type="button"
                   className="puh-btn puh-btn-ai"

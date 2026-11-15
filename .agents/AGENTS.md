@@ -1,5 +1,11 @@
 # Architecture Rules & Best Practices
 
+> **Matriz de Precedencia y Compatibilidad (Resolución de Solapes)**
+> 1. **Atlas AI sin duplicados (Reglas #59 + #63)**: En páginas de monografía/colección con dock inferior fijo (`/p/*`, `/raw/*`, `/c/*`), `PublicUnifiedHeader` oculta automáticamente su botón superior de Atlas AI para que viva únicamente en el dock inferior (Regla #59). En el resto de páginas públicas, `PublicUnifiedHeader` muestra `Atlas AI` y `GlobalPublicAtlasDrawer` lo atiende globalmente (Regla #63).
+> 2. **Botones Monocromáticos + Clases Estándar (Reglas #40 + #57)**: Toda barra de herramientas usa `gcp-btn-primary` (único CTA sólido por vista) y `gcp-btn-secondary` / `.puh-btn-ghost` (reposo neutro `#5f6368` / borde sutil); el color semántico (verde WhatsApp, violeta IA, rojo peligro) solo aparece en `:hover` y en `<StatusBadge />`.
+> 3. **IDs Técnicos vs. Códigos de Negocio (Reglas #11 + #38)**: Los UIDs internos de Firestore usan `<CopyableId value={row.id} displayValue="ID" />` (Regla #38); los códigos operativos visibles (`SKU`, `PO-XXXXXX`, `RX-XXXX`) muestran su código completo con `<CopyableId />` (Regla #11).
+> 4. **RSC vs. Caché Cliente (Reglas #2 + #21)**: Solo las vistas de lectura pura se promueven a Server Components; las vistas con filtros/caché local mantienen el Server Component como contenedor que pasa datos iniciales al Client Component.
+
 ## 1. Paginación y Carga Lenta Obligatoria (Golden Rule)
 - **Nunca traigas todos los documentos de golpe desde Firestore.**
 - Elementos como Productos, Protocolos, Prescripciones, Cotizaciones, Proveedores, Médicos, etc., DEBEN usar siempre limit() (por ejemplo, `limit(50)` o `limit(100)`) y, preferiblemente, paginación real.
@@ -280,28 +286,28 @@
 - **Iconos con Texto Explícito (Evitar Ambigüedad)**: Nunca se debe renderizar un icono seguido únicamente de un número (ej. "🧪 2"), ya que esto es ambiguo para los nuevos usuarios. Siempre se debe acompañar del texto explícito en plural o singular dinámico (ej. "🧪 2 Phases" o "🧪 1 Phase").
 - **Evitar el "Wrapping" Indeseado**: Utiliza `white-space: nowrap` en contenedores flexibles pequeños (como los de Icono + Texto) para evitar que el número y la palabra se rompan en múltiples líneas dentro de una celda de la tabla.
 
-## 34. Unified Primary Action Dropdown (Golden Rule)
+## 37. Unified Primary Action Dropdown (Golden Rule)
 - **Las acciones principales de un módulo en la cabecera (Header Actions) no deben estar desperdigadas.**
 - Si existen múltiples opciones para crear o importar algo (ej. "Nueva Prescripción" y "Importar Escaneada"), deben agruparse en un **único botón desplegable (Split Button)** en lugar de tener múltiples botones de colores distintos o botones separados compitiendo por la atención visual.
 - **Color Estándar**: Todos los botones de acción principal (incluyendo FABs en móvil) deben usar siempre el color primario de la plataforma (`var(--color-primary)`), eliminando la paleta de colores variados (rojos, naranjas, verdes) para mantener una interfaz limpia y profesional.
 - **Implementación**: Usar el componente `PrimarySplitButton` pasándolo a la prop `actions` de `DataModule`, o bien usar el soporte nativo de `PageHeader`. Si un módulo renderiza `actions` explícitas, el `PageHeader` ignorará el FAB global de escritorio para evitar duplicaciones.
 
-## 35. IDs en Tablas (Consolidación Visual)
+## 38. IDs en Tablas (Consolidación Visual)
 - **Nunca crear una columna dedicada exclusivamente para el ID** si la tabla ya tiene muchas columnas o si hay una columna principal (como Nombre del Paciente, Nombre del Protocolo, etc.) donde se pueda integrar visualmente.
 - **Implementación (Golden Rule)**: El ID debe ocultarse y renderizarse ÚNICAMENTE como una capacidad de copiado utilizando la propiedad `displayValue` del componente. Usar el formato `<CopyableId value={row.id} displayValue="ID" />`. No se debe mostrar el valor largo del hash del ID, sino solo la palabra "ID" junto al icono de copiado, lo cual ahorra muchísimo espacio.
 
-## 36. Acciones Rápidas (Quick Actions) y Tooltips en Tablas
+## 39. Acciones Rápidas (Quick Actions) y Tooltips en Tablas
 - **Toda tabla debe incluir una columna final de Acciones Rápidas** que contenga botones de icono para las operaciones más frecuentes de cada fila (ej. Editar, Descargar, Duplicar, Eliminar), evitando que el usuario tenga que abrir una vista detallada para tareas simples.
 - **Tooltips Obligatorios (Thumbtools)**: Cada uno de estos botones de acción debe incluir el atributo `title="..."` (o su equivalente en el componente que provea un tooltip nativo) explicando claramente qué hace esa acción (ej. `title="Descargar PDF"`).
 
-## 37. Estilo Unificado de Botones (Golden Rule)
+## 40. Estilo Unificado de Botones (Golden Rule)
 - **Todos los botones de la aplicación deben utilizar exclusivamente las clases estándar del sistema de diseño.**
 - Se prohíbe el uso de estilos en línea (`style={{ background: "...", color: "..." }}`) o colores arbitrarios para definir la apariencia de un botón.
 - **Primarios**: Usar `className="gcp-btn-primary"` para la acción principal de una vista o formulario.
 - **Secundarios**: Usar `className="gcp-btn-secondary"` para acciones secundarias, exportaciones, cancelaciones o flujos alternativos.
 - Esto aplica de manera retrospectiva a componentes antiguos y es mandatorio para todo el código nuevo.
 
-## 38. Presentación Visual de KPIs (Golden Rule - Dashboard Cards)
+## 41. Presentación Visual de KPIs (Golden Rule - Dashboard Cards)
 - **Todos los cards (MetricCards) de todas las pantallas deben tener la misma presentación visual que los del Dashboard (Atlas Command Center).**
 - El estilo obligatorio es:
   - Diseño horizontal.
@@ -312,18 +318,18 @@
     - El título de la métrica (`title`) en texto menor describiendo el valor (ej. `Real Revenue Generated`).
 - **Implementación**: Usar SIEMPRE el componente `src/components/ui/MetricCard.jsx`, el cual ha sido actualizado para forzar esta estructura de diseño internamente. No crear tarjetas de métricas personalizadas con `div` o `BaseCard` que no sigan este patrón.
 
-## 39. Estilo Homogéneo en Botones de Acción Masiva (Bulk Actions) (Golden Rule)
+## 42. Estilo Homogéneo en Botones de Acción Masiva (Bulk Actions) (Golden Rule)
 - **Todos los botones de acciones masivas (Bulk Actions) deben utilizar el mismo estilo base (`gcp-btn-secondary`)**, sin aplicar colores personalizados en los bordes, fondos o textos.
 - Esto mantiene la consistencia visual y evita un "efecto arcoíris" en las barras de herramientas.
 - La única excepción permitida es para acciones explícitamente destructivas (como "Archive" o "Delete"), que pueden utilizar una variante de peligro (`color: var(--color-danger)` o `gcp-btn-danger`), pero siempre respetando la forma y espaciado estándar del resto de los botones.
 
-## 40. Estandarización de Botones de Acción en Tablas (AppActionGroup) (Golden Rule)
+## 43. Estandarización de Botones de Acción en Tablas (AppActionGroup) (Golden Rule)
 - **Prohibido crear botones de acción ad-hoc (`<button>`) en las columnas de cualquier tabla.**
 - Toda tabla que requiera acciones a nivel de fila (ver, editar, eliminar, asignar, etc.) DEBE importar y usar exclusivamente el componente `<AppActionGroup actions={actions} maxVisible={2} />`.
 - Esto garantiza que todas las tablas compartan el mismo aspecto visual (botones cuadrados compactos con bordes sutiles) y el mismo comportamiento responsivo (agrupación en menú de 3 puntos en móvil).
 - Si necesitas un nuevo tipo de acción o icono, añádelo al diccionario `ACTION_CONFIG` dentro de `src/components/ui/AppActionGroup.jsx` en lugar de crear un botón personalizado en el componente de la tabla.
 
-## 41. Botones de Acción en PageHeader — Homogeneidad Visual Obligatoria (Golden Rule)
+## 44. Botones de Acción en PageHeader — Homogeneidad Visual Obligatoria (Golden Rule)
 - **Todos los botones de acción de la cabecera (`PageHeader`) de cualquier pantalla DEBEN usar las clases `gcp-btn-primary` o `gcp-btn-secondary` del sistema de diseño.** Nunca se crearán botones con estilos `inline` propios (padding, background, border, color) en el header.
 - **Posicionamiento**: Los botones de acción primaria y secundaria siempre estarán en la cabecera fija (`PageHeader`), a la derecha. Ningún botón de acción principal (crear, exportar, librerías) puede vivir dentro de la tabla o debajo del buscador.
 - **Jerarquía de variantes**:
@@ -333,7 +339,7 @@
 - **Tamaño y espaciado estándar**: `padding: 0.5rem 1rem`, `fontSize: 0.875rem`, `fontWeight: 500` (primario) / `600` (secundario que da contexto de navegación), `borderRadius: 6px`. Nunca usar padding mayor a `1.25rem` horizontal ni `0.75rem` vertical en headers.
 - **Regla de comunicación entre PageHeader y módulos internos**: Si un botón del PageHeader necesita controlar el estado de un módulo hijo (p.ej., abrir un drawer en `MasterCatalogTable`), se DEBE usar un `CustomEvent` dispatched en `window` y escuchado con `addEventListener` en el módulo hijo. No se levantará el estado al padre ni se usarán callbacks de props complejas.
 
-## 42. Layout de PageHeader y Responsividad del Subtítulo (Golden Rule)
+## 45. Layout de PageHeader y Responsividad del Subtítulo (Golden Rule)
 - **El subtítulo NUNCA debe compartir la misma fila/columna compitiendo por espacio con los botones de acción.** Cuando hay varios botones a la derecha, comprimen la columna izquierda y provocan que el subtítulo se aplaste y rompa en múltiples líneas.
 - **Implementación obligatoria:** La estructura del `PageHeader` debe asegurar que:
   1. El Ícono y Título ocupan la zona superior izquierda.
@@ -345,7 +351,7 @@
   2. Subtítulo (en medio, reiniciando su offset izquierdo a `0` para usar todo el ancho).
   3. Botones de Acción (abajo, estirándose para ocupar todo el ancho, `width: 100%` con los botones haciendo *wrap* o adaptándose).
 
-## 43. Taxonomía y Esquema de Variantes (Golden Rule)
+## 46. Taxonomía y Esquema de Variantes (Golden Rule)
 Toda variante dentro del arreglo `variants` de un producto (Aplicable ÚNICAMENTE a la categoría "Peptides") debe pertenecer a un 'Péptido Canónico' (con un `canonicalId` único transversal a todos los proveedores) y debe cumplir estrictamente con el siguiente esquema:
 1. `supplierId` y `supplier`: Identificación clara del proveedor.
 2. `strength` / `dosage`: Dosis del producto (ej. 2mg, 5mg, 50mg).
@@ -353,12 +359,12 @@ Toda variante dentro del arreglo `variants` de un producto (Aplicable ÚNICAMENT
 4. `unit_price`: Precio unitario base.
 5. `cost_tiers`: Un objeto con exactamente 4 niveles de precios de coste por volumen: `cost_10`, `cost_20`, `cost_50`, `cost_100`.
 
-## 44. Cabeceras de Tabla Dinámicas en Una Sola Línea (Golden Rule)
+## 47. Cabeceras de Tabla Dinámicas en Una Sola Línea (Golden Rule)
 - **El texto de las cabeceras (headers) de cualquier tabla NO debe romperse nunca en múltiples líneas.** 
 - **Implementación obligatoria**: Toda cabecera de tabla debe utilizar la propiedad CSS `white-space: nowrap` junto con `text-overflow: ellipsis` y `overflow: hidden`. Para evitar que el texto desaparezca rápidamente en pantallas estrechas, se debe utilizar `font-size: clamp(...)` (por ejemplo, `clamp(0.6rem, 0.8vw, 0.75rem)`) para escalar el tamaño de la fuente dinámicamente antes de truncarse.
 - **Componente**: Esto aplica para `DataTable` u otras tablas en la plataforma.
 
-## 45. Arquitectura de Filtros en Mobile — Two-Level Bottom Sheet (Golden Rule)
+## 48. Arquitectura de Filtros en Mobile — Two-Level Bottom Sheet (Golden Rule)
 
 **Aplica a TODAS las pantallas del admin, doctor, patient y wholesaler panels que tengan filtros en mobile.**
 
@@ -424,7 +430,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - `Clear all` disponible al final de los chips activos.
 - Eliminar un chip individual aplica inmediatamente sin abrir el sheet.
 
-## 33. Máximo 3 Acciones Visibles por Fila en Desktop/Laptop (Golden Rule — Regla de los Tres Puntos ⋯)
+## 49. Máximo 3 Acciones Visibles por Fila en Desktop/Laptop (Golden Rule — Regla de los Tres Puntos ⋯)
 - **En cualquier tabla o componente tabular en escritorio/laptop, la columna de acciones DEBE limitar las acciones directas visibles a un máximo de 3.**
 - Se debe utilizar siempre `<AppActionGroup maxVisible={3} actions={[...]} />`.
 - **Comportamiento forzado**:
@@ -432,7 +438,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - Todas las acciones adicionales (partiendo de la 4ª acción en adelante) **DEBEN agruparse automáticamente en un menú desplegable de tres puntos (`⋯` / `MoreHorizontal`)**.
 - **Beneficios UX**: Evita el desbordamiento horizontal de celdas en portátiles, mantiene el ancho de la columna de acciones compacto (≤130px), y garantiza una interfaz ultra limpia y corporativa sin importar cuántas acciones secundarias tenga un registro.
 
-## 46. Arquitectura de Tarjetas Móviles (Mobile-First Card Architecture — Golden Rule)
+## 50. Arquitectura de Tarjetas Móviles (Mobile-First Card Architecture — Golden Rule)
 - **Toda tarjeta móvil en la plataforma DEBE seguir una estructura equilibrada y ergonómica de 5 zonas**, evitando estrictamente el amontonamiento asimétrico a la izquierda (*left-clumping*) y el vacío en la botonera de acciones.
 - **Anatomía Estándar de la Tarjeta Móvil**:
   1. **Contenedor Elevado e Independiente**:
@@ -460,14 +466,14 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - `src/components/admin/catalog/components/MobileGenomicsCard.jsx` (Matriz Genómica)
   - `src/components/ui/MobileRecordCard.jsx` (Renderizador universal de `DataTable`)
 
-## 39. Auto-Commit y Auto-Push Obligatorio (Zero-Manual-Deploy Rule)
+## 51. Auto-Commit y Auto-Push Obligatorio (Zero-Manual-Deploy Rule)
 - **Siempre que el asistente concluya un bloque de trabajo, corrección o funcionalidad aprobada por el usuario**, DEBE realizar de forma proactiva y automática el ciclo de sincronización en Git:
   1. `git add -A`
   2. `git commit -m "feat/fix(...): descripción precisa"`
   3. `git push origin main`
 - **Propósito**: Dispara instantáneamente el pipeline optimizado de GitHub Actions en segundo plano sin que el usuario tenga que solicitarlo o recordarlo. Nunca dejes cambios aprobados pendientes de push en local.
 
-## 40. Ingesta Clínica de Prescripciones y Validación de Etiquetas (EU GMP Integrity Rule)
+## 52. Ingesta Clínica de Prescripciones y Validación de Etiquetas (EU GMP Integrity Rule)
 - **Cero Contaminación Cruzada en Recetas Multifase**: Cuando una prescripción contenga múltiples frascos, fases o momentos de administración (ej. Mañana vs Noche, o Fase 1 vs Fase 2), cada fase DEBE tener su propio bloque completamente aislado de posología, lote, duración y excipientes. Prohibido arrastrar las instrucciones de la Fase 1 a la Fase 2.
 - **Extracción Universal de Principios Activos (`apis` / `items` / `activeIngredients` — Invariante de Contenido)**:
   - Está terminantemente prohibido que una etiqueta farmacéutica se imprima con textos placeholder como `• Personalized Compounded Active Formula` o `Active Compounded Formulation` cuando la prescripción tiene ingredientes en cualquiera de sus estructuras (`formulationBlocks[].items`, `phases[].apis`, `parts[].ingredients`, `rx.items`, `rx.activeIngredients`, `rx.compounds` o `rx.prescriptionLines`).
@@ -490,7 +496,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - **Sin Clínica por Defecto en Etiquetas Impresas (`showClinicOnLabel: false` por defecto)**: En todas las etiquetas farmacéuticas generadas por el sistema, **por defecto NUNCA se incluye el nombre de la clínica**, mostrándose únicamente el nombre del médico prescriptor y su licencia (`Rx: Dr. ... • (License: ...)`). El campo de clínica en la etiqueta es 100% opcional y solo se imprime si el operador lo añade explícitamente en el estudio de etiquetas (`showClinicOnLabel: true`).
   - **Aislamiento de Ediciones de Clínica en Label Studio**: Si en la pantalla de etiquetas (`PharmacyLabelsModal` / `labelsRepository`) se edita o se borra el nombre de la clínica, dicho cambio se aplica exclusivamente al objeto de la etiqueta (`pharmacyLabels[]`) y **NUNCA debe sobrescribir ni alterar la clínica asociada al médico o a la prescripción en Firebase** (`users`, `clinics`, `treatingClinic`, `treatingDoctor`).
 
-## 41. Integridad Tipográfica y Prohibición de Solapes en Etiquetas Farmacéuticas (Zero-Overlap Label Invariant — Golden Rule)
+## 53. Integridad Tipográfica y Prohibición de Solapes en Etiquetas Farmacéuticas (Zero-Overlap Label Invariant — Golden Rule)
 - **Prohibición Total de Solapes Verticales (Zero-Overlap Invariant)**:
   - En ninguna etiqueta farmacéutica (SVG o PDF, Delivery o Standard) se permite que un bloque de texto colisione o solape con otro bloque, línea divisoria o pie de página regulatorio.
   - En la **Columna Izquierda (bajo el QR)**, está prohibido apilar bloques redundantes que provoquen cortes contra la barra azul inferior: solo se muestran `NET CONTENT` y `STORAGE CONDITIONS` (el lote `Batch` ya figura en el pie de página).
@@ -511,7 +517,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Márgenes de Seguridad para Guillotina (Bleed Safety)**:
   - El pie de página con fechas (`Mfg`, `Exp`, `Batch`) DEBE mantener siempre un margen de guarda mínimo de 4–5 mm respecto a la línea de corte inferior para evitar amputaciones por tolerancia de cuchilla.
 
-## 42. Regla Canónica de Ingesta de Catálogo y Separación de Páginas para APIs (Golden Rule)
+## 54. Regla Canónica de Ingesta de Catálogo y Separación de Páginas para APIs (Golden Rule)
 - **Unicidad Canónica de Producto (Single Entity Golden Rule)**:
   - Jamás fragmentar un producto en la base de datos por dosis, volumen o presentación (ej. NO crear `retatrutide-5mg`, `retatrutide-10mg`, `pt-141-standard`, etc.).
   - Cada péptido o molécula activa DEBE ser un único documento canónico en Firestore (`products/{slug}`), diferenciado exclusivamente a través de su matriz de variantes (`variants[]`).
@@ -526,7 +532,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
     - Especificaciones analíticas de CoA: Pureza HPLC (≥98.5% / ≥99%), Espectrometría de Masas (MS), Rotación Óptica $[\alpha]_D^{20}$, Disolventes Residuales (TFA/Acetonitrilo), Contenido de Agua Karl Fischer (<5%) y Endotoxinas bacterianas (<5 EU/mg).
     - Guía de Solubilización y Compatibilidad galénica (tampones de pH, compatibilidad con filtros PES 0.22 µm).
 
-## 43. Formato Universal de Fechas en Tablas (GCP Two-Line Standard — Golden Rule)
+## 55. Formato Universal de Fechas en Tablas (GCP Two-Line Standard — Golden Rule)
 - **Prohibición de Truncamiento**: Bajo ninguna circunstancia una fecha en una tabla puede aparecer cortada como `Oct 12, 20...` o `08/10/2...`.
 - **Estructura Estándar de 2 Líneas (Google Cloud Style)**:
   - Línea 1 (Fecha): Día Mes Año en texto destacado (ej. `12 Oct 2026`), peso semi-bold (`fontWeight: 600`), color `#1e293b`.
@@ -534,7 +540,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Cero Ruido de Iconos en Celdas de Fecha**: Está terminantemente prohibido incluir `<Calendar size={12} />` en cada fila de una tabla. El encabezado de la columna ya indica "Date". El icono solo consume 18–20px de ancho horizontal útil que provoca que el texto se trunque.
 - **Ancho Mínimo de Columna**: Toda columna de fecha en definiciones de `columns` de `DataTable` DEBE tener un ancho mínimo asignado de entre `14%` y `16%` (o mínimo `110px` fijos) con `white-space: nowrap`.
 
-## 44. Botón e Ícono Universal para Navegación a Páginas Públicas de Detalle (Universal ExternalLink — Golden Rule)
+## 56. Botón e Ícono Universal para Navegación a Páginas Públicas de Detalle (Universal ExternalLink — Golden Rule)
 - **Consistencia Visual Absoluta**: Para navegar a la página pública o dossier de detalle de cualquier entidad (paciente `/lab/[code]`, prescripción `/rx/[code]`, protocolo `/proto/[slug]`, producto `/p/[slug]`), se DEBE utilizar siempre el **mismo componente e icono estándar**:
   - **Ícono**: `ExternalLink` (`size={12}` o `size={13}`).
   - **Etiqueta**: `Dossier` (para expedientes médicos/prescripciones) o `View ↗` / `Detail` (para protocolos/productos).
@@ -542,7 +548,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Presencia Incondicional en Todas las Filas**: Este botón de enlace de detalle DEBE existir en **todas las filas de la tabla**, independientemente de si el registro está en estado `Draft`, `Pending`, `Approved` o `Completed`.
 - **Cero Sustitución de Botones**: Si una fila requiere una acción contextual transitoria (como firmar `Sign` o compartir `Share WhatsApp`), dicha acción se sitúa *al lado* del botón de detalle, pero NUNCA debe reemplazarlo ni ocultarlo. El operador siempre debe tener acceso en 1 clic a la vista pública.
 
-## 45. Iconografía Monocromática Estándar en Quick Actions y Toolbars (GCP Enterprise UX — Golden Rule)
+## 57. Iconografía Monocromática Estándar en Quick Actions y Toolbars (GCP Enterprise UX — Golden Rule)
 - **Reposo Monocromático (Idle / Default State)**:
   - En barras de herramientas fijas, docks inferiores y menús de acciones rápidas, **TODOS los iconos secundarios deben renderizarse en gris corporativo neutro (`#5f6368` / `#475569`)** sobre botones de fondo blanco `#ffffff` y borde `#dadce0`.
   - **Prohibido el efecto arcoíris**: Queda prohibido hardcodear iconos verdes, morados o amarillos en reposo en la barra de acciones rápidas (ej. no poner `ShieldCheck color="#16a34a"` o fondos de color permanente en botones secundarios).
@@ -553,7 +559,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
     1. Al pasar el cursor (`:hover`), donde el borde y el icono se iluminan sutilmente con el color de la acción.
     2. En badges de estado (`<StatusBadge />`), los cuales representan estado del sistema, no acciones.
 
-## 46. Estándar Apple Glassmorphism para Docks y Stickers Flotantes Inferiores (Golden Rule)
+## 58. Estándar Apple Glassmorphism para Docks y Stickers Flotantes Inferiores (Golden Rule)
 - **Efecto Cristal Translúcido Apple (macOS / iOS Liquid Glass Standard)**:
   - Todas las barras y docks de acción flotantes inferiores (ej. pie fijo de `/rx/[code]`, dock de `/dr/[slug]`, barra flotante de Account Manager) DEBEN renderizarse con la firma visual de cristal esmerilado de Apple:
     - **Fondo translúcido**: `background: rgba(255, 255, 255, 0.78);` en modo claro (o `rgba(15, 23, 42, 0.82)` en modo oscuro).
@@ -571,7 +577,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Adaptabilidad Móvil (< 768px)**:
   - En smartphones el dock no flota con márgenes laterales: se ancla a la base con `border-radius: 20px 20px 0 0;`, `border-top: 1px solid rgba(255, 255, 255, 0.9);`, fondo `rgba(255, 255, 255, 0.86);` y padding que respeta `env(safe-area-inset-bottom, 0px)`.
 
-## 47. Floating Sticky Monograph Footer — Golden UX Standard for Public Detail & Collection Pages
+## 59. Floating Sticky Monograph Footer — Golden UX Standard for Public Detail & Collection Pages
 - **Homogeneización Absoluta de la Barra Flotante Inferior**:
   - Toda página pública de monografía de producto (`/p/[slug]`), monografía de materia prima API (`/raw/[slug]`) y páginas de colecciones de marca o categorías (`/brand/[slug]`, `/c/[slug]`) DEBE implementar la misma barra inferior adhesiva y ergonómica (Sticky Floating Footer).
 - **Estructura Estándar de la Barra (Pattern Z — Izquierda a Derecha)**:
@@ -587,7 +593,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 
 
 
-## 48. Máximo Aprovechamiento y Distribución Vertical en PDFs (Golden Rule)
+## 60. Máximo Aprovechamiento y Distribución Vertical en PDFs (Golden Rule)
 - **Nunca comprimas la información en la mitad superior de una página dejando grandes espacios en blanco abajo.**
 - Todo documento PDF generado en la plataforma (prescripciones clínicas, guías de nutrición y meal plan, monografías, consentimientos, albaranes, catálogos) DEBE distribuir proporcionalmente sus bloques y tarjetas a lo largo de toda la altura imprimible de la hoja A4 (842 pt).
 - **Proporción y Legibilidad Ejecutiva**:
@@ -596,7 +602,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Codificación y Compatibilidad WinAnsi**:
   - En `pdf-lib`, usar siempre caracteres compatibles con el estándar WinAnsi (evitando emojis o caracteres de 4 bytes que disparan errores 500 al renderizar; usar en su lugar identificadores claros como `[GREEN]`, `[STEP 1]` o flechas ASCII `->`).
 
-## 49. Zero-Overlap PDF Architecture & Safe Coordinate Math (Golden Rule)
+## 61. Zero-Overlap PDF Architecture & Safe Coordinate Math (Golden Rule)
 - **Prohibido colocar dos textos dinámicos o largos en la misma coordenada Y sin partición acotada (`maxWidth`).**
   - Si dos elementos comparten la misma línea horizontal (por ejemplo, una etiqueta a la izquierda y un badge o valor numérico a la derecha):
     1. El elemento de la derecha debe calcular su posición fija: `xRight = totalWidth - rightMargin - textWidth`.
@@ -610,7 +616,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Banners de Notificación estilo Google Cloud**:
   - Todo aviso o callout al paciente/médico debe implementarse con formato Google Cloud Console: banda de acento vertical izquierda (3-4 pt), fondo sutil tintado (`#e8f0fe`), titular en negrita y cuerpo de texto descriptivo con altura suficiente (`height: 26-28 pt`), evitando títulos infinitos en una sola línea que se cortan en el margen derecho.
 
-## 50. Importación Automática de Informes 24Genetics → Motor Clínico Atlas (Golden Rule)
+## 62. Importación Automática de Informes 24Genetics → Motor Clínico Atlas (Golden Rule)
 - **Regla general**: Cada vez que se importe un informe de Nutrigen de 24Genetics (PDF de Nutrition 2.0 o similares), Atlas DEBE:
   1. **Extraer TODOS los genotipos** presentes en ese informe específico (cada sección "GenotypeGene" → gen + genotipo).
   2. **Mapear los genotipos extraídos** al formato de entrada del motor clínico (`clinicalNutrigenomicEngine.js` → `evaluateNutrigenomicProfile({ genotypes: {...} })`).
@@ -627,13 +633,13 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **El motor DEBE generar textos clínicos condicionales** — nunca texto estático. Los hallazgos, alertas y recomendaciones deben variar según los genotipos reales del paciente (ej. MTHFR GG = "Methylation Normal" vs TT = "Severe Impairment").
 - **Nunca reutilices los datos de un paciente para otro.** Cada informe es personalizado con los genotipos REALES extraídos del PDF de ese paciente concreto.
 
-## 51. Unificación de Shell Público, ContextualSidebar y Atlas AI Global (Golden Rule)
+## 63. Unificación de Shell Público, ContextualSidebar y Atlas AI Global (Golden Rule)
 - **Toda página pública o enlace compartido** (`/pricing/*`, `/collection/*`, `/p/*`, `/proto/*`, `/dr/*`, `/rx/*`, `/lab/*`, `/verify/*`, `/b2b/*`, `/c/*`, `/shared/*`, `/quotation/*`) DEBE usar `<PublicUnifiedHeader>` (directamente o vía los layouts canónicos en `src/components/shared/layouts/`) y `<PublicUnifiedFooter>`. **Prohibido** crear etiquetas `<header>` ad-hoc con botones propios.
 - **Acciones en cabecera en orden fijo**: las acciones específicas de página se inyectan mediante `extraActions` en `PublicUnifiedHeader` manteniendo siempre la secuencia consistente: `Search ⌘K → Currency/Lang → extraActions (Share / Export / Preview PDF) → Copy Link → Atlas AI → Contact → GcpUserBadge`.
 - **Atlas AI unificado**: [GlobalPublicAtlasDrawer.jsx](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/shared/GlobalPublicAtlasDrawer.jsx) se monta automáticamente en todas las rutas públicas desde `GlobalClientWrapper.jsx`, y `PublicUnifiedHeader` expone siempre el disparador `Atlas AI` (`!hideAiButton`). Las páginas nuevas no deben crear drawers paralelos de Atlas AI; para enriquecer el contexto, basta emitir `window.dispatchEvent(new CustomEvent('set-public-atlas-context', { detail: ... }))`.
 - **Sidebar único**: cualquier vista pública con navegación lateral o filtros laterales debe usar `<ContextualSidebar>` (`src/components/shared/public/ContextualSidebar.jsx`) en lugar de crear nuevos `*CollectionSidebar` ad-hoc.
 
-## 52. Taxonomía de 5 Familias de Templates y 5 Bloques Comunes (Golden Rule)
+## 64. Taxonomía de 5 Familias de Templates y 5 Bloques Comunes (Golden Rule)
 - **Toda pantalla nueva o refactorizada** DEBE adscribirse a una de las **5 Familias Canónicas** de `src/components/shared/layouts/`:
   1. **Catálogos y Listas de Precios** → `UnifiedCatalogLayout` (`/pricing/*`, `/collection/*`, `/c/[id]`, `/vials`, `/proto`, `/shared/catalog/[token]`, `/b2b/lotusland`)
   2. **Fichas de Entidad / Monografías** → `EntityDetailLayout` (`/p/[slug]`, `/raw/[slug]`, `/proto/[slug]`, `/dr/[slug]`, `/nutritionist/[slug]`, `/shared/protocol/[id]`)

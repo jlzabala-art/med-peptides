@@ -90,13 +90,7 @@ export default function B2BShowcaseClientView({ showcase }) {
             <button
               type="button"
               onClick={handleWhatsAppShare}
-              className="puh-btn"
-              style={{
-                background: '#16a34a',
-                border: '1px solid #15803d',
-                color: '#ffffff',
-                fontWeight: 600,
-              }}
+              className="puh-btn puh-btn-ghost"
               title="Share via WhatsApp"
             >
               <MessageCircle size={14} />

@@ -50,13 +50,7 @@ export default function PeptidesTopAppBar({
         <button
           type="button"
           onClick={handleShareSchedule}
-          className="puh-btn"
-          style={{
-            background: '#16a34a',
-            border: '1px solid #15803d',
-            color: '#ffffff',
-            fontWeight: 600,
-          }}
+          className="puh-btn puh-btn-ghost"
           title={isEs ? 'Compartir lista' : 'Share schedule'}
         >
           {copied ? <Check size={14} /> : <Share2 size={14} />}

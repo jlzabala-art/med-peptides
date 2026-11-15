@@ -33,13 +33,7 @@ export default function PricingTopBar({
         <button
           type="button"
           onClick={onWhatsAppShare}
-          className="puh-btn"
-          style={{
-            background: '#16a34a',
-            border: '1px solid #15803d',
-            color: '#ffffff',
-            fontWeight: 600,
-          }}
+          className="puh-btn puh-btn-ghost"
           title="Share via WhatsApp"
         >
           <MessageCircle size={14} />
