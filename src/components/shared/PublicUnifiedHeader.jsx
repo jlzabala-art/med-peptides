@@ -122,12 +122,8 @@ export default function PublicUnifiedHeader({
     pathname?.startsWith('/compounding');
   const effectiveHideAccountManager = hideAccountManager || isPublicProductOrCatalogPage;
 
-  // Rule #59 + #63: Avoid duplicating Atlas AI in top header when page renders Floating Monograph Footer
-  const hasFloatingMonographFooter =
-    pathname?.startsWith('/p/') ||
-    pathname?.startsWith('/raw/') ||
-    pathname?.startsWith('/c/');
-  const effectiveHideAiButton = hideAiButton || hasFloatingMonographFooter;
+  // Rule #69: Atlas AI lives in ONE place (the universal Bottom Sticky Bar), never duplicated in the top header.
+  const effectiveHideAiButton = true;
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [internalInquiryOpen, setInternalInquiryOpen] = useState(false);

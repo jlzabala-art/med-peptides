@@ -126,6 +126,7 @@ export default function GlobalPublicAtlasDrawer() {
   return (
     <PublicAtlasAIDrawer
       isGlobalFallback={true}
+      hideFloatingTrigger={true}
       contextType={routeContext.contextType || 'catalog'}
       contextAnchor={routeContext.contextAnchor || null}
       catalogInventory={routeContext.catalogInventory || []}

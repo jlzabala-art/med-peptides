@@ -141,6 +141,19 @@ export default function ModularPriceSchedule({
         wholesellerPrice: formatPrice(p.calculatedWholesale),
         ...(isGuest ? {} : { clinicPrice: formatPrice(p.recommendedClinic), retailMsrp: formatPrice(p.recommendedRetail) }),
       })),
+      bottomBar: {
+        summaryTitle: `${brandRight} · ${filteredProducts.length} SKUs`,
+        summarySubtitle: `${currency} · ${isGuest ? 'Public Wholeseller Schedule' : 'Authorized Partner Schedule'}`,
+        atlasAiLabel: 'Ask Atlas AI',
+        secondaryAction: {
+          label: 'Export CSV',
+          onClick: () => setIsExportModalOpen(true),
+        },
+        primaryAction: {
+          label: 'Preview PDF',
+          onClick: () => setIsPdfPreviewOpen(true),
+        },
+      },
     },
     [brandLeft, brandRight, documentRef, loginRedirect, currency, isGuest, selectedCategory, documentSubtitle, filteredProducts, formatPrice]
   );

@@ -22,6 +22,7 @@ const Cart = dynamic(() => import('../snippets/Cart'), { ssr: false });
 const UniversalSearchModal = dynamic(() => import('../components/shared/DatasheetQuickSearchModal'), { ssr: false });
 const AtlasAIDrawer = dynamic(() => import('../components/shared/AtlasAIDrawer'), { ssr: false });
 const GlobalPublicAtlasDrawer = dynamic(() => import('../components/shared/GlobalPublicAtlasDrawer'), { ssr: false });
+const GlobalBottomStickyBar = dynamic(() => import('../components/shared/GlobalBottomStickyBar'), { ssr: false });
 const GlobalQuoteCartDrawer = dynamic(() => import('../components/shared/GlobalQuoteCartDrawer'), { ssr: false });
 const GCPImpersonationDock = dynamic(() => import('../components/navigation/GCPImpersonationDock'), { ssr: false });
 const GCPCommandPalette = dynamic(() => import('../components/navigation/GCPCommandPalette'), { ssr: false });
@@ -207,6 +208,7 @@ export default function GlobalClientWrapper({ children }) {
             <AppErrorBoundary>
               <Toaster containerStyle={{ zIndex: 99999 }} />
               {children}
+              {!isPrivatePortalRoute && <GlobalBottomStickyBar />}
               {!isPrivatePortalRoute && <GlobalPublicAtlasDrawer />}
               <GlobalQuoteCartDrawer />
               {isSuperUser && <GCPCommandPalette />}
@@ -223,6 +225,7 @@ export default function GlobalClientWrapper({ children }) {
       <AtlasContextProvider>
         <PdfPreviewProvider>
           <StorefrontShell>{children}</StorefrontShell>
+          <GlobalBottomStickyBar />
           <GlobalQuoteCartDrawer />
           {isSuperUser && <GCPImpersonationDock />}
           {isSuperUser && <GCPCommandPalette />}

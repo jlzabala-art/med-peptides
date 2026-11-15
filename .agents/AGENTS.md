@@ -680,5 +680,14 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Workspace Cross-Catalog (`PublicWorkspaceContext`)**: La divisa, el idioma (`t(en, es)`), el historial de páginas visitadas (`recentItems`) y el carrito de cotización (`rfqItems` + `<GlobalQuoteCartDrawer />`) persisten globalmente en toda la app y son accesibles desde el App Switcher de `PublicUnifiedHeader`.
 - **Sincronización URL para filtros**: Las nuevas vistas tabulares y listas con filtros deben usar [`useSyncedTableParams`](file:///Users/joseluiszabala/regenpept-web.nosync/src/hooks/useSyncedTableParams.js) para conservar filtros, búsqueda y vista al usar el botón Atrás o compartir enlaces.
 
+## 69. Botón Único de Atlas AI y Bottom Sticky Bar Universal Contextual (Golden Rule)
+- **Un único botón de Atlas AI en toda la plataforma**:
+  - **Prohibido** duplicar el disparador de Atlas AI en la cabecera superior y en un botón flotante simultáneamente. `PublicUnifiedHeader` oculta el botón superior de Atlas AI y `PublicAtlasAIDrawer` mantiene `hideFloatingTrigger = true` por defecto.
+  - Atlas AI vive exclusivamente en la barra inferior fija universal ([`GlobalBottomStickyBar.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/shared/GlobalBottomStickyBar.jsx)).
+- **Bottom Sticky Bar personalizada en cada pantalla**:
+  - Montada globalmente desde [`GlobalClientWrapper.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/app/GlobalClientWrapper.jsx) usando [`FloatingActionDock.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/shared/public/FloatingActionDock.jsx).
+  - Toda pantalla personaliza su resumen contextual, acción secundaria, etiqueta de Atlas AI y CTA primario registrando `bottomBar` en `useRegisterAtlasContext(...)` (o mediante los defaults automáticos por ruta).
+
+
 
 

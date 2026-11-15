@@ -86,7 +86,7 @@ export default function PublicAtlasAIDrawer({
   catalogInventory = [],    // [{ name, category, purity, format }]
   storageKey = 'default',
   onOpenRegisterModal = null,
-  hideFloatingTrigger = false,
+  hideFloatingTrigger = true,
   lang = 'en',
   isOpenControlled = null,
   onCloseControlled = null,
