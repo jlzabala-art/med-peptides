@@ -155,7 +155,25 @@ Net Platform & Wholesale Margin: ${currencySymbol}${calculations.netGrossProfit.
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
               Base Laboratory Cost ({currencySymbol})
             </label>
-            <div style={{ position: 'relative' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              backgroundColor: '#ffffff',
+              overflow: 'hidden',
+            }}>
+              <span style={{
+                padding: '10px 10px 10px 12px',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: '#64748b',
+                backgroundColor: '#f8fafc',
+                borderRight: '1px solid #e2e8f0',
+                flexShrink: 0,
+              }}>
+                {currencySymbol}
+              </span>
               <input
                 type="number"
                 min="0"
@@ -164,18 +182,16 @@ Net Platform & Wholesale Margin: ${currencySymbol}${calculations.netGrossProfit.
                 onChange={(e) => setBaseCost(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px 12px 10px 28px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  padding: '10px 12px',
+                  border: 'none',
+                  outline: 'none',
                   fontSize: '14px',
                   fontWeight: 600,
                   color: '#0f172a',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  minWidth: 0,
                 }}
               />
-              <span style={{ position: 'absolute', left: 10, top: 11, fontSize: '13px', fontWeight: 700, color: '#64748b' }}>
-                {currencySymbol}
-              </span>
             </div>
           </div>
 

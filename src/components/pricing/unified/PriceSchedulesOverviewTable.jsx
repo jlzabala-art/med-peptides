@@ -3,12 +3,11 @@
 import React, { useMemo } from 'react';
 import {
   FileText, Share2, Users, ChevronDown, FileDown, ArrowRight,
-  Calculator, MessageSquare, ExternalLink
+  Calculator, MessageSquare, ExternalLink, Package
 } from 'lucide-react';
 
 import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
-import { Package } from 'lucide-react';
 
 /**
  * PriceSchedulesOverviewTable
@@ -30,24 +29,26 @@ export default function PriceSchedulesOverviewTable({
     {
       key: 'label',
       label: 'Product Line / Catalog',
-      width: '28%',
+      width: '25%',
       align: 'left',
+      sortable: true,
+      sortValue: (row) => (row.label || '').toLowerCase(),
       render: (val, row) => {
         const Icon = row.icon;
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
             <div style={{
-              width: '36px', height: '36px', borderRadius: '8px',
+              width: '34px', height: '34px', borderRadius: '8px',
               backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0
             }}>
-              <Icon size={18} color="#003666" />
+              <Icon size={17} color="#003666" />
             </div>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>
                 {row.label}
               </div>
-              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '1px' }}>
+              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '1px', lineHeight: 1.3 }}>
                 {row.description}
               </div>
             </div>
@@ -58,8 +59,10 @@ export default function PriceSchedulesOverviewTable({
     {
       key: 'supplier',
       label: 'Supplier / Origin',
-      width: '18%',
+      width: '15%',
       align: 'left',
+      sortable: true,
+      sortValue: (row) => (row.supplier || '').toLowerCase(),
       render: (val, row) => (
         <div>
           <div style={{ fontSize: '12px', color: '#1e293b', fontWeight: 600 }}>
@@ -75,8 +78,10 @@ export default function PriceSchedulesOverviewTable({
     {
       key: 'skuCount',
       label: 'References',
-      width: '10%',
+      width: '11%',
       align: 'left',
+      sortable: true,
+      sortValue: (row) => Number(row.skuCount) || 0,
       render: (val, row) => (
         <span style={{
           fontSize: '11px', fontWeight: 700, color: '#0369a1',
@@ -90,8 +95,10 @@ export default function PriceSchedulesOverviewTable({
     {
       key: 'pricingNote',
       label: 'Pricing Formula',
-      width: '18%',
+      width: '19%',
       align: 'left',
+      sortable: true,
+      sortValue: (row) => (row.pricingNote || '').toLowerCase(),
       render: (val, row) => (
         <div style={{ fontSize: '11px', color: '#475569' }}>
           <strong style={{ color: '#0f172a' }}>{row.pricingNote}</strong>
@@ -106,8 +113,10 @@ export default function PriceSchedulesOverviewTable({
       label: 'Shares',
       width: '12%',
       align: 'center',
+      sortable: true,
+      sortValue: (row) => Number(row.sharesCount ?? row.recipients?.length ?? 0) || 0,
       render: (val, row) => {
-        const count = row.sharesCount || (row.recipients?.length || 0);
+        const count = row.sharesCount ?? (row.recipients?.length || 0);
         return (
           <button
             type="button"
@@ -121,9 +130,9 @@ export default function PriceSchedulesOverviewTable({
               gap: '4px',
               padding: '4px 8px',
               borderRadius: '6px',
-              backgroundColor: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              color: '#166534',
+              backgroundColor: count > 0 ? '#f0fdf4' : '#f8fafc',
+              border: count > 0 ? '1px solid #bbf7d0' : '1px solid #e2e8f0',
+              color: count > 0 ? '#166534' : '#64748b',
               fontSize: '11px',
               fontWeight: 700,
               cursor: 'pointer'
@@ -140,11 +149,11 @@ export default function PriceSchedulesOverviewTable({
     {
       key: 'actions',
       label: 'Actions',
-      width: '14%',
-      minWidth: '130px',
+      width: '18%',
       align: 'right',
+      sortable: false,
       render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '3px', flexWrap: 'nowrap' }}>
           {/* Simulator Drawer Trigger */}
           <button
             type="button"
@@ -153,7 +162,7 @@ export default function PriceSchedulesOverviewTable({
               onOpenSimulator(row);
             }}
             style={{
-              padding: '4px 6px',
+              padding: '4px 5px',
               borderRadius: '4px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
@@ -175,7 +184,7 @@ export default function PriceSchedulesOverviewTable({
               onGeneratePdf(row);
             }}
             style={{
-              padding: '4px 6px',
+              padding: '4px 5px',
               borderRadius: '4px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
@@ -197,7 +206,7 @@ export default function PriceSchedulesOverviewTable({
               onOpenShareModal(row);
             }}
             style={{
-              padding: '4px 6px',
+              padding: '4px 5px',
               borderRadius: '4px',
               border: '1px solid #bae6fd',
               backgroundColor: '#f0f9ff',
@@ -222,14 +231,15 @@ export default function PriceSchedulesOverviewTable({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '3px',
-              padding: '4px 8px',
+              padding: '4px 7px',
               borderRadius: '4px',
               border: 'none',
               backgroundColor: '#003666',
               color: '#ffffff',
               fontSize: '11px',
               fontWeight: 600,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}
             title={`View ${row.label} SKUs`}
           >

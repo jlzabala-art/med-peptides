@@ -287,7 +287,15 @@ export const MACRO_CATEGORIES = [
 let memoryCacheSchedules = null;
 let memoryCacheTimestamp = 0;
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
-const LOCAL_STORAGE_KEY = 'atlas_price_schedules_cache_v2';
+const LOCAL_STORAGE_KEY = 'atlas_price_schedules_cache_v3';
+
+function getCleanBaselineSchedules() {
+  return BASELINE_PRICE_SCHEDULES.map((item) => ({
+    ...item,
+    sharesCount: 0,
+    recipients: [],
+  }));
+}
 
 export function invalidatePriceSchedulesCache() {
   memoryCacheSchedules = null;
@@ -300,7 +308,7 @@ export function invalidatePriceSchedulesCache() {
 }
 
 export function usePriceSchedulesData() {
-  const [schedules, setSchedules] = useState(BASELINE_PRICE_SCHEDULES);
+  const [schedules, setSchedules] = useState(getCleanBaselineSchedules);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async (forceRefresh = false) => {
@@ -338,24 +346,48 @@ export function usePriceSchedulesData() {
     // Layer 3 / 4: Live Firestore SSOT Sync
     try {
       setLoading(true);
-      // Fetch dynamic share counts or catalog facets from API if available
-      const res = await fetch('/api/catalog/summary', { cache: 'no-store' }).catch(() => null);
-      let updatedSchedules = BASELINE_PRICE_SCHEDULES;
+      const [summaryRes, sharesRes] = await Promise.all([
+        fetch('/api/catalog/summary', { cache: 'no-store' }).catch(() => null),
+        fetch('/api/shares?limit=150', { cache: 'no-store' }).catch(() => null),
+      ]);
 
-      if (res && res.ok) {
-        const data = await res.json().catch(() => null);
-        if (data && data.catalogs) {
-          updatedSchedules = BASELINE_PRICE_SCHEDULES.map(base => {
-            const remote = data.catalogs.find(c => c.id === base.id);
-            if (!remote) return base;
-            return {
-              ...base,
-              skuCount: remote.skuCount || base.skuCount,
-              sharesCount: remote.sharesCount || base.sharesCount
-            };
-          });
-        }
-      }
+      const summaryData = summaryRes && summaryRes.ok ? await summaryRes.json().catch(() => null) : null;
+      const sharesData = sharesRes && sharesRes.ok ? await sharesRes.json().catch(() => null) : null;
+      const shareItems = Array.isArray(sharesData?.items) ? sharesData.items : [];
+
+      const updatedSchedules = getCleanBaselineSchedules().map((base) => {
+        const remote = summaryData?.catalogs?.find((c) => c.id === base.id);
+        const labelLower = (base.label || '').toLowerCase();
+        const matchingShares = shareItems.filter((item) => {
+          const assetId = (item.assetId || item.catalogId || '').toLowerCase();
+          const title = (item.assetTitle || '').toLowerCase();
+          const url = (item.shareUrl || item.targetUrl || '').toLowerCase();
+          return (
+            assetId === base.id ||
+            (base.route && url.includes(base.route.toLowerCase())) ||
+            (labelLower && title.includes(labelLower))
+          );
+        });
+
+        const recipients = matchingShares.map((item) => ({
+          name: item.recipient?.name || item.recipient?.email || 'External Recipient',
+          organization: item.recipient?.organization || item.recipient?.company || 'Partner',
+          role: item.recipient?.type || 'wholesaler',
+          channel: item.channel || 'web',
+          date: item.createdAt
+            ? new Date(item.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+            : 'Recent',
+          views: Number(item.viewCount) || 0,
+          status: item.status === 'viewed' || (Number(item.viewCount) || 0) > 0 ? 'opened' : 'sent',
+        }));
+
+        return {
+          ...base,
+          skuCount: remote?.skuCount || base.skuCount,
+          sharesCount: matchingShares.length,
+          recipients,
+        };
+      });
 
       memoryCacheSchedules = updatedSchedules;
       memoryCacheTimestamp = now;
@@ -368,7 +400,7 @@ export function usePriceSchedulesData() {
 
       setSchedules(updatedSchedules);
     } catch (_) {
-      setSchedules(BASELINE_PRICE_SCHEDULES);
+      setSchedules(getCleanBaselineSchedules());
     } finally {
       setLoading(false);
     }
