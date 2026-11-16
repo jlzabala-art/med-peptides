@@ -338,8 +338,27 @@ export default function PricingDataTable({
         </div>
       )}
 
-      {viewMode === 'cards' && (
-        <div className="product-cards-grid no-print">
+      {viewMode === 'cards' && (() => {
+        const count = products.length;
+        const desktopCols = count <= 1
+          ? 1
+          : count === 2
+            ? 2
+            : count % 4 === 0
+              ? 4
+              : count % 3 === 0
+                ? 3
+                : count >= 5
+                  ? 4
+                  : 3;
+        const remainder = desktopCols > 1 ? count % desktopCols : 0;
+        const fillerSpan = remainder > 0 ? desktopCols - remainder : 0;
+
+        return (
+        <div
+          className={`product-cards-grid product-cards-grid--cols-${desktopCols} no-print`}
+          style={{ '--grid-filler-span': fillerSpan }}
+        >
           {products.map((p) => (
             <div key={p.id} className="product-card">
               <div className="card-image-wrap">
@@ -412,8 +431,72 @@ export default function PricingDataTable({
               </div>
             </div>
           ))}
+
+          {fillerSpan > 0 && (
+            <div
+              className="product-card product-card--summary-filler"
+              style={{
+                background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+                border: '1px dashed #93c5fd',
+                justifyContent: 'space-between',
+                padding: '1.25rem',
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: '#1d4ed8',
+                    background: '#dbeafe',
+                    padding: '3px 8px',
+                    borderRadius: '9999px',
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  Portfolio Concierge
+                </span>
+                <h3 className="card-title" style={{ marginBottom: '0.5rem', color: '#0f172a' }}>
+                  Custom Clinic &amp; Wholesale Allocation
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                  Showing {count} {count === 1 ? 'formulation' : 'formulations'}. Combine mixed SKUs or request a tailored B2B cold-chain quotation directly with Atlas AI.
+                </p>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '1rem' }}>
+                {onResetFilters && (
+                  <button
+                    type="button"
+                    className="gcp-btn-secondary"
+                    onClick={onResetFilters}
+                    style={{ fontSize: '0.76rem', padding: '6px 12px', minHeight: '36px' }}
+                  >
+                    Show All Formulations
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="gcp-btn-primary"
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+                    }
+                  }}
+                  style={{ fontSize: '0.76rem', padding: '6px 12px', minHeight: '36px' }}
+                >
+                  Ask Atlas AI
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+        );
+      })()}
 
       {/* Print-Only CSS Grid Schedule (No raw HTML <table> tags per Golden Rule #3) */}
       <div className="print-only-table-wrap" style={{ marginTop: '1rem' }}>
@@ -498,6 +581,17 @@ export default function PricingDataTable({
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .print-only-table-wrap {
+          display: none;
+        }
+        @media print {
+          .print-only-table-wrap {
+            display: block !important;
+          }
+        }
+      `}</style>
     </>
   );
 }

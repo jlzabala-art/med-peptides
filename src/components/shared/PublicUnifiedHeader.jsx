@@ -14,13 +14,15 @@ import {
   FileText,
   Search
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, LayoutGrid, User, LogOut, FileInput, LayoutList, Home, Sliders, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, LayoutGrid, User, LogOut, FileInput, LayoutList, Home, Sliders, ArrowLeft, HelpCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
 import { usePublicWorkspace } from '../../context/PublicWorkspaceContext';
+import { useAtlasContext } from '../../context/AtlasContextProvider';
 import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer';
 import PublicProviderCTA from './public/PublicProviderCTA';
+import AtlasAppSwitcher from './public/AtlasAppSwitcher';
 import BrandLogo from '../common/BrandLogo';
 import DatasheetQuickSearchModal from './DatasheetQuickSearchModal';
 import GcpUserBadge from './GcpUserBadge';
@@ -136,6 +138,71 @@ export default function PublicUnifiedHeader({
   const authDropdownRef = useRef(null);
   const appSwitcherRef = useRef(null);
   const workspace = usePublicWorkspace();
+  const { screenContext } = useAtlasContext();
+  const { user, activeRole } = useAuth();
+  const isSpanish = lang === 'es';
+
+  // Future-proof context guards (prevent duplicate or irrelevant header actions)
+  const isPricingOrCatalogRoute =
+    pathname?.startsWith('/pricing') ||
+    pathname?.startsWith('/shared/catalog') ||
+    pathname?.startsWith('/quotation') ||
+    pathname?.startsWith('/c/') ||
+    pathname?.startsWith('/collection') ||
+    pathname?.startsWith('/vials') ||
+    pathname?.startsWith('/b2b');
+  const effectiveHideCurrencySelector = hideCurrencySelector || (!onCurrencyChange && !isPricingOrCatalogRoute);
+  const effectiveHideCopyButton = Boolean(pathname?.startsWith('/rx/intake'));
+  const effectiveHideContactButton = hideContactButton || Boolean(screenContext?.bottomBar?.primaryAction);
+  const isAuthorizedDoctorRole = ['doctor', 'medical_director', 'admin'].includes(activeRole);
+  const isClinicalNonQuoteRoute = Boolean(pathname?.startsWith('/rx') || pathname?.startsWith('/verify'));
+
+  // Auto-derived fallback Breadcrumb when page doesn't pass explicit breadcrumb or anchorTabs
+  const effectiveBreadcrumb = (() => {
+    if (breadcrumb && breadcrumb.length > 0) return breadcrumb;
+    if (anchorTabs && anchorTabs.length > 0) return null;
+    if (!pathname || pathname === '/') return null;
+
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length === 0) return null;
+
+    const sectionLabels = {
+      p: isSpanish ? 'Catálogo' : 'Catalog',
+      raw: isSpanish ? 'APIs Farmacéuticos' : 'Raw APIs',
+      proto: isSpanish ? 'Protocolos' : 'Protocols',
+      c: isSpanish ? 'Colecciones' : 'Collections',
+      collection: isSpanish ? 'Colecciones' : 'Collections',
+      lab: isSpanish ? 'Resultados Lab' : 'Lab Dossier',
+      rx: isSpanish ? 'Prescripción' : 'E-Rx',
+      dr: isSpanish ? 'Médicos' : 'Physicians',
+      verify: isSpanish ? 'Verificación' : 'Batch Verify',
+      pricing: isSpanish ? 'Tarifas B2B' : 'Price Schedules',
+      calculator: isSpanish ? 'Calculadora' : 'Calculator',
+      compounding: isSpanish ? 'Formulación' : 'Compounding',
+    };
+
+    const rootHrefMap = {
+      p: '/collection/peptides',
+      raw: '/collection/apis',
+      proto: '/proto',
+      c: '/collection/peptides',
+      collection: '/collection/peptides',
+      pricing: '/pricing',
+    };
+
+    const first = segments[0];
+    const items = [{ label: isSpanish ? 'Inicio' : 'Home', href: '/' }];
+    const sectionLabel = sectionLabels[first] || first.charAt(0).toUpperCase() + first.slice(1);
+    if (segments.length === 1) {
+      items.push({ label: sectionLabel });
+    } else {
+      items.push({ label: sectionLabel, href: rootHrefMap[first] || undefined });
+      const rawLast = decodeURIComponent(segments[segments.length - 1]);
+      const formattedLast = screenContext?.contextAnchor?.name || rawLast.replace(/-/g, ' ');
+      items.push({ label: formattedLast });
+    }
+    return items;
+  })();
 
   // Global ⌘K / Ctrl+K keyboard shortcut for instant datasheet search
   useEffect(() => {
@@ -377,9 +444,7 @@ export default function PublicUnifiedHeader({
     }
   };
 
-  const { user, activeRole } = useAuth();
   const resolvedRedirect = loginRedirect || pathname || '/c/CAT-MU9L9GBN';
-  const isSpanish = lang === 'es';
 
   const getDashboardPath = () => {
     if (activeRole === 'admin') return '/admin';
@@ -400,146 +465,42 @@ export default function PublicUnifiedHeader({
             {/* Left: App Switcher + Brand Logo / Title or White-Label Clinic Logo */}
             <div className="puh-brand-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {!whiteLabel && (
-                <div ref={appSwitcherRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      setAppSwitcherOpen((prev) => !prev);
-                    }}
-                    title={isSpanish ? 'Cambiar de módulo Atlas' : 'Atlas App Switcher'}
-                    aria-label={isSpanish ? 'Cambiar de módulo Atlas' : 'Atlas App Switcher'}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255,255,255,0.16)',
-                      background: appSwitcherOpen ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.06)',
-                      color: '#e2e8f0',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <LayoutGrid size={16} />
-                  </button>
-
-                  {appSwitcherOpen && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '40px',
-                        left: 0,
-                        width: '260px',
-                        background: '#ffffff',
-                        border: '1px solid var(--atlas-border-subtle, #e2e8f0)',
-                        borderRadius: '12px',
-                        boxShadow: '0 14px 32px rgba(15, 23, 42, 0.16)',
-                        padding: '8px',
-                        zIndex: 9999,
-                        display: 'grid',
-                        gridTemplateColumns: '1fr',
-                        gap: '4px',
-                      }}
-                    >
-                      <div style={{ padding: '4px 8px 6px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                        {isSpanish ? 'Plataforma Atlas' : 'Atlas Platform'}
-                      </div>
-                      {[
-                        { label: isSpanish ? 'Catálogo Clínico' : 'Clinical Catalog', href: '/c/CAT-MU9L9GBN' },
-                        { label: isSpanish ? 'Hub de Precios B2B' : 'B2B Price Hub', href: '/pricing' },
-                        { label: isSpanish ? 'Lista de Péptidos' : 'Peptides Schedule', href: '/pricing/peptides' },
-                        { label: isSpanish ? 'Protocolos Clínicos' : 'Clinical Protocols', href: '/proto' },
-                        { label: isSpanish ? 'Directorio de Viales' : 'Peptide Vials', href: '/vials' },
-                        { label: isSpanish ? 'Calculadora de Dosis' : 'Dosing Calculator', href: '/calculator' },
-                        { label: isSpanish ? 'Mi Portal' : 'My Portal', href: getDashboardHref() },
-                      ].map((app) => (
-                        <Link
-                          key={app.href}
-                          href={app.href}
-                          onClick={() => setAppSwitcherOpen(false)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '8px 10px',
-                            borderRadius: '8px',
-                            fontSize: '0.82rem',
-                            fontWeight: 600,
-                            color: pathname === app.href ? '#1a73e8' : '#0f172a',
-                            background: pathname === app.href ? '#eff6ff' : 'transparent',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          <span>{app.label}</span>
-                          <ChevronRight size={13} color="#94a3b8" />
-                        </Link>
-                      ))}
-
-                      {(workspace?.rfqItems?.length > 0) && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAppSwitcherOpen(false);
-                            workspace?.setIsQuoteDrawerOpen?.(true);
-                          }}
-                          style={{
-                            marginTop: '4px',
-                            padding: '8px 10px',
-                            borderRadius: '8px',
-                            border: '1px solid #bfdbfe',
-                            background: '#eff6ff',
-                            color: '#003666',
-                            fontSize: '0.8rem',
-                            fontWeight: 700,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            cursor: 'pointer',
-                            width: '100%',
-                          }}
-                        >
-                          <span>{isSpanish ? 'Cotización Activa' : 'Active Quote Cart'}</span>
-                          <span style={{ background: '#003666', color: '#ffffff', borderRadius: '999px', padding: '1px 7px', fontSize: '0.72rem' }}>
-                            {workspace.rfqItems.length}
-                          </span>
-                        </button>
-                      )}
-
-                      {(workspace?.recentItems?.length > 0) && (
-                        <>
-                          <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '4px', padding: '6px 8px 2px', fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                            {isSpanish ? 'Vistos recientemente' : 'Recently Viewed'}
-                          </div>
-                          {workspace.recentItems.slice(0, 4).map((recent) => (
-                            <Link
-                              key={recent.href}
-                              href={recent.href}
-                              onClick={() => setAppSwitcherOpen(false)}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                padding: '6px 10px',
-                                borderRadius: '8px',
-                                fontSize: '0.76rem',
-                                fontWeight: 500,
-                                color: '#334155',
-                                textDecoration: 'none',
-                              }}
-                            >
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '175px' }}>
-                                {recent.label}
-                              </span>
-                              <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{recent.category}</span>
-                            </Link>
-                          ))}
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <AtlasAppSwitcher
+                  isSpanish={isSpanish}
+                  portalHref={getDashboardPath()}
+                  variant="dark"
+                  extraFooter={(closeMenu) =>
+                    (!isClinicalNonQuoteRoute && workspace?.rfqItems?.length > 0) ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          closeMenu();
+                          workspace?.setIsQuoteDrawerOpen?.(true);
+                        }}
+                        style={{
+                          marginTop: '4px',
+                          padding: '8px 10px',
+                          borderRadius: '8px',
+                          border: '1px solid #bfdbfe',
+                          background: '#eff6ff',
+                          color: '#003666',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          width: '100%',
+                        }}
+                      >
+                        <span>{isSpanish ? 'Cotización Activa' : 'Active Quote Cart'}</span>
+                        <span style={{ background: '#003666', color: '#ffffff', borderRadius: '999px', padding: '1px 7px', fontSize: '0.72rem' }}>
+                          {workspace.rfqItems.length}
+                        </span>
+                      </button>
+                    ) : null
+                  }
+                />
               )}
 
               {clinicLogo ? (
@@ -628,7 +589,7 @@ export default function PublicUnifiedHeader({
 
 
               {/* Currency Selector (Segmented Pills Google Cloud UX Standard: EUR / USD / AED) */}
-              {!hideCurrencySelector && (
+              {!effectiveHideCurrencySelector && (
                 <div
                   className="puh-currency-pills"
                   style={{
@@ -700,6 +661,7 @@ export default function PublicUnifiedHeader({
               </div>
 
               {/* Copy Canonical Link */}
+              {!effectiveHideCopyButton && (
               <button
                 type="button"
                 className="puh-btn puh-btn-ghost hide-on-extra-narrow"
@@ -713,9 +675,10 @@ export default function PublicUnifiedHeader({
                     : (isSpanish ? 'Copiar' : 'Copy')}
                 </span>
               </button>
+              )}
 
-              {/* Doctor-only: Import Prescription button (hidden on /rx/intake itself or if hideImportRx is true) */}
-              {isDoctorView && pathname !== '/rx/intake' && !hideImportRx && (
+              {/* Doctor-only: Import Prescription button (role-guarded & hidden on /rx/intake) */}
+              {isDoctorView && isAuthorizedDoctorRole && pathname !== '/rx/intake' && !hideImportRx && (
                 <button
                   type="button"
                   className="puh-btn puh-btn-import-rx hide-on-extra-narrow"
@@ -738,7 +701,7 @@ export default function PublicUnifiedHeader({
               )}
 
               {/* Doctor-only: My Prescriptions Switcher / Back button */}
-              {isDoctorView && !hideSwitchRx && (
+              {isDoctorView && isAuthorizedDoctorRole && !hideSwitchRx && (
                 <button
                   type="button"
                   className="puh-btn puh-btn-rx-switcher"
@@ -803,8 +766,8 @@ export default function PublicUnifiedHeader({
                 </button>
               )}
 
-              {/* Institutional Inquiry Drawer Trigger (if enabled) */}
-              {!hideContactButton && (
+              {/* Institutional Inquiry Drawer Trigger (auto-hidden when bottom dock already has a primary CTA) */}
+              {!effectiveHideContactButton && (
                 <button
                   type="button"
                   className="puh-btn puh-btn-contact hide-on-extra-narrow"
@@ -815,6 +778,21 @@ export default function PublicUnifiedHeader({
                   <span className="puh-btn-label">{isSpanish ? 'Contacto' : 'Contact'}</span>
                 </button>
               )}
+
+              <button
+                type="button"
+                className="puh-btn puh-btn-ghost"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('open-atlas-help-drawer'));
+                  }
+                }}
+                title={isSpanish ? 'Ayuda inteligente Atlas AI (?)' : 'Atlas AI Contextual Help (?)'}
+                aria-label={isSpanish ? 'Ayuda' : 'Help'}
+                style={{ padding: '0 8px', minWidth: '32px' }}
+              >
+                <HelpCircle size={15} />
+              </button>
 
               {/* Google Cloud Console UX Standard User Badge & Quick Logout */}
               <GcpUserBadge
@@ -837,9 +815,9 @@ export default function PublicUnifiedHeader({
                   {/* Left Side: Breadcrumb, In-Page Anchor Tabs, or Filter Tabs */}
                   <div className="puh-tier2-left" ref={tabsContainerRef}>
                     {/* Breadcrumbs */}
-                    {breadcrumb && breadcrumb.length > 0 && (
+                    {effectiveBreadcrumb && effectiveBreadcrumb.length > 0 && (
                       <div className="puh-breadcrumb" aria-label="Breadcrumb">
-                        {breadcrumb.map((crumb, idx) => (
+                        {effectiveBreadcrumb.map((crumb, idx) => (
                           <React.Fragment key={idx}>
                             {idx > 0 && <span className="puh-breadcrumb-sep">/</span>}
                             {crumb.href ? (

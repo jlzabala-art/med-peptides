@@ -11,16 +11,31 @@ import { usePathname } from 'next/navigation';
  * entity/catalog/role/currency metadata via `useRegisterAtlasContext(ctx)` or
  * the `set-public-atlas-context` / `atlas-register-context` events.
  */
+const RECENT_ITEMS_KEY = 'atlas_recent_items_v1';
+const MAX_RECENT_ITEMS = 8;
+
 const AtlasContext = createContext({
   screenContext: null,
+  recentItems: [],
   registerContext: () => {},
   clearContext: () => {},
+  clearRecentItems: () => {},
   openAtlasAi: () => {},
 });
 
 export function AtlasContextProvider({ children }) {
   const pathname = usePathname() || '/';
   const [screenContext, setScreenContext] = useState(null);
+  const [recentItems, setRecentItems] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem(RECENT_ITEMS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Reset route-bound context when navigating to a new page
   useEffect(() => {
@@ -34,10 +49,39 @@ export function AtlasContextProvider({ children }) {
       ...ctx,
       updatedAt: Date.now(),
     }));
-  }, []);
+
+    const itemTitle = ctx.title || ctx.contextAnchor?.sectionTitle;
+    if (itemTitle && pathname && pathname !== '/') {
+      setRecentItems((prev) => {
+        const entry = {
+          path: pathname,
+          title: String(itemTitle).slice(0, 80),
+          subtitle: ctx.subtitle ? String(ctx.subtitle).slice(0, 80) : '',
+          type: ctx.type || 'page',
+          visitedAt: Date.now(),
+        };
+        const next = [entry, ...prev.filter((item) => item.path !== pathname)].slice(0, MAX_RECENT_ITEMS);
+        try {
+          localStorage.setItem(RECENT_ITEMS_KEY, JSON.stringify(next));
+        } catch {
+          // ignore storage quota errors
+        }
+        return next;
+      });
+    }
+  }, [pathname]);
 
   const clearContext = useCallback(() => {
     setScreenContext(null);
+  }, []);
+
+  const clearRecentItems = useCallback(() => {
+    setRecentItems([]);
+    try {
+      localStorage.removeItem(RECENT_ITEMS_KEY);
+    } catch {
+      // ignore
+    }
   }, []);
 
   const openAtlasAi = useCallback((overrideCtx = null) => {
@@ -68,7 +112,7 @@ export function AtlasContextProvider({ children }) {
   }, [registerContext]);
 
   return (
-    <AtlasContext.Provider value={{ screenContext, registerContext, clearContext, openAtlasAi }}>
+    <AtlasContext.Provider value={{ screenContext, recentItems, registerContext, clearContext, clearRecentItems, openAtlasAi }}>
       {children}
     </AtlasContext.Provider>
   );

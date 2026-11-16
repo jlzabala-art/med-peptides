@@ -67,8 +67,8 @@ export default function PrescriptionMasterHeader({
       {
         id: 'treatment',
         label: isPatientView
-          ? (isEs ? 'Mi Tratamiento y Posología' : 'My Treatment & Posology')
-          : (isEs ? 'Fórmulas y Posología' : 'Formulations & Posology'),
+          ? (isEs ? 'Tratamiento' : 'Treatment')
+          : (isEs ? 'Fórmulas' : 'Formulations'),
         icon: FlaskConical,
         badge: compoundedFormulations?.length > 0 ? String(compoundedFormulations.length) : null
       }
@@ -77,24 +77,20 @@ export default function PrescriptionMasterHeader({
     if (genomicsData) {
       tabs.push({
         id: 'genomics',
-        label: isEs ? 'Guía Genómica' : 'Genomics Guidance',
+        label: isEs ? 'Genómica' : 'Genomics',
         icon: Dna
       });
     }
 
     tabs.push({
       id: 'roadmap',
-      label: isPatientView
-        ? (isEs ? 'Plan 90 Días' : '90-Day Plan')
-        : (isEs ? 'Roadmap 90 Días' : '90-Day Roadmap'),
+      label: isEs ? 'Plan 90 Días' : '90-Day Plan',
       icon: Calendar
     });
 
     tabs.push({
       id: 'traceability',
-      label: isPatientView
-        ? (isEs ? 'Garantía EU GMP' : 'EU GMP Quality')
-        : (isEs ? 'Calidad EU GMP' : 'EU GMP Quality'),
+      label: isEs ? 'Calidad GMP' : 'EU GMP Quality',
       icon: ShieldCheck
     });
 
@@ -103,7 +99,7 @@ export default function PrescriptionMasterHeader({
     if (hasRecommendations && !isPatientView) {
       tabs.push({
         id: 'recommendations',
-        label: isEs ? 'Sinergias Clínicas (Médico)' : 'Clinical Synergies (Doctor)',
+        label: isEs ? 'Sinergias' : 'Synergies',
         icon: Sparkles
       });
     }

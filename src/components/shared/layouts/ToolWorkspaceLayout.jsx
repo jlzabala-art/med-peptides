@@ -2,6 +2,7 @@
 
 import React from 'react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PageHeroCard from '@/components/ui/PageHeroCard';
 import SectionErrorBoundary from '@/components/ui/SectionErrorBoundary';
 
@@ -20,6 +21,7 @@ export default function ToolWorkspaceLayout({
   inspector = null, // Panel lateral derecho opcional (propiedades / preview / resumen)
   inspectorWidth = '340px',
   showPublicHeader = true,
+  showPublicFooter = true,
   whiteLabel = false,
   children,
 }) {
@@ -81,6 +83,12 @@ export default function ToolWorkspaceLayout({
           )}
         </div>
       </div>
+
+      {showPublicFooter && (
+        <div style={{ paddingBottom: '76px' }}>
+          <PublicUnifiedFooter />
+        </div>
+      )}
     </div>
   );
 }

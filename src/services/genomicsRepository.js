@@ -308,13 +308,26 @@ export async function getGenomicReport(sampleId, { forceRefresh = false } = {}) 
     }
   }
 
-  // 3. Layer 4: Firestore Database
+  // 3. Layer 4: Firestore Database (genomic_reports + genomic_profiles fusion)
   let reportData = null;
   if (adminDb) {
     try {
-      const snap = await adminDb.collection('genomic_reports').doc(cleanId).get();
+      const [snap, profileSnap] = await Promise.all([
+        adminDb.collection('genomic_reports').doc(cleanId).get(),
+        adminDb.collection('genomic_profiles').doc(cleanId).get(),
+      ]);
       if (snap.exists) {
         reportData = { id: snap.id, ...snap.data() };
+      }
+      if (profileSnap.exists) {
+        const pData = profileSnap.data();
+        reportData = {
+          ...(reportData || { id: profileSnap.id }),
+          patientName: reportData?.patientName || pData.patientName,
+          doctor: reportData?.doctor || pData.doctor,
+          clinic: reportData?.clinic || pData.clinic,
+          ancestry: reportData?.ancestry || pData.reports?.ancestry?.data || pData.ancestralMetabolicProfile,
+        };
       }
     } catch (err) {
       logger.warn(`[genomicsRepository] Firestore lookup failed for ${cleanId}: ${err.message}`);

@@ -20,7 +20,22 @@ export function useCurrencyConverter({
   defaultCurrency = 'AED',
   currencies = ['AED', 'USD', 'EUR'],
 } = {}) {
-  const [currency, setCurrency] = useState(defaultCurrency);
+  const [currency, setCurrencyState] = useState(defaultCurrency);
+
+  const setCurrency = useCallback((nextCurrency) => {
+    const normalized = String(nextCurrency || '').toUpperCase();
+    if (!currencies.includes(normalized)) return;
+    setCurrencyState(normalized);
+    if (typeof window !== 'undefined' && window.history?.replaceState) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('cur', normalized);
+        window.history.replaceState(null, '', url.toString());
+      } catch {
+        // ignore history error
+      }
+    }
+  }, [currencies]);
 
   const fxRate = useMemo(() => {
     return DEFAULT_RATES_FROM_AED[currency] ?? 1;

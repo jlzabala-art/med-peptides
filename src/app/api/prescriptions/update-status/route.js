@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { invalidateRxCache } from '@/app/rx/[code]/page';
 import { invalidateDoctorCache } from '@/lib/doctorCache';
+import { canEnterProduction, resolvePrescriptionAxes } from '@/utils/prescriptions/statusWorkflow';
 
 export const PRE_DISPENSED_STATUSES = [
   'draft',
@@ -17,7 +18,9 @@ export const DISPENSED_STATUSES = [
   'dispensed',
   'delivered',
   'completed',
-  'active'
+  'active',
+  'en tránsito',
+  'cancelled'
 ];
 
 export const ALL_VALID_STATUSES = [
@@ -34,7 +37,8 @@ export const ALL_VALID_STATUSES = [
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { prescriptionId, prescriptionNumber, status, newStatus, reason, updatedBy } = body;
+    const { prescriptionId, prescriptionNumber, code, status, newStatus, reason, updatedBy } = body;
+    const resolvedPrescriptionNumber = prescriptionNumber || code;
 
     const isToleranceAction = Boolean(body.toleranceCheckCompleted || body.toleranceChecked || body.taskType === 'tolerance_check');
     const targetStatusRaw = newStatus || status || (isToleranceAction ? 'current' : null);
@@ -57,7 +61,7 @@ export async function POST(request) {
       );
     }
 
-    if (!prescriptionId && !prescriptionNumber) {
+    if (!prescriptionId && !resolvedPrescriptionNumber) {
       return NextResponse.json(
         { error: 'prescriptionId or prescriptionNumber is required' },
         { status: 400 }
@@ -68,7 +72,7 @@ export async function POST(request) {
     let docRef = null;
     let docSnap = null;
 
-    const rawId = prescriptionId || prescriptionNumber;
+    const rawId = prescriptionId || resolvedPrescriptionNumber;
     const cleanId = String(rawId || '').replace(/^#/, '').trim();
     const noRxId = cleanId.replace(/^RX-/i, '').trim();
     const withRxId = noRxId.startsWith('RX-') ? noRxId : `RX-${noRxId}`;
@@ -86,7 +90,7 @@ export async function POST(request) {
 
     // 2. Query lookups across prescriptionNumber, code, and fileNumber
     if (!docSnap || !docSnap.exists) {
-      const queryValues = [cleanId, noRxId, withRxId, prescriptionNumber, prescriptionId].filter(Boolean);
+      const queryValues = [cleanId, noRxId, withRxId, resolvedPrescriptionNumber, prescriptionId].filter(Boolean);
       for (const val of queryValues) {
         // Match prescriptionNumber
         let qSnap = await adminDb.collection('prescriptions')
@@ -131,13 +135,39 @@ export async function POST(request) {
     }
 
     const existingData = docSnap.data() || {};
+    const prevAxes = resolvePrescriptionAxes(existingData);
+    const incomingAxes = body.axes && typeof body.axes === 'object' ? body.axes : {};
+
+    const nextAxes = {
+      clinicalStatus: incomingAxes.clinicalStatus || prevAxes.clinicalStatus,
+      paymentStatus: incomingAxes.paymentStatus || prevAxes.paymentStatus,
+      productionStatus: incomingAxes.productionStatus || prevAxes.productionStatus,
+      labelStatus: incomingAxes.labelStatus || prevAxes.labelStatus,
+      logisticsStatus: incomingAxes.logisticsStatus || prevAxes.logisticsStatus,
+    };
+
     const previousStatus = existingData.status || existingData.state || 'draft';
     const finalStatus = (normalizedStatus && normalizedStatus !== 'current') ? normalizedStatus : previousStatus;
-    const isNowDispensed = DISPENSED_STATUSES.includes(finalStatus);
+
+    // Server-side business rule: nothing enters production without clinical approval + payment clearance
+    const wantsProduction =
+      ['queued', 'processing', 'qc_passed'].includes(String(nextAxes.productionStatus || '').toLowerCase()) ||
+      finalStatus === 'processing';
+    if (wantsProduction && !canEnterProduction({ clinicalStatus: nextAxes.clinicalStatus, paymentStatus: nextAxes.paymentStatus })) {
+      return NextResponse.json(
+        {
+          error: 'Production blocked: prescription must be clinically approved and paid (or authorized B2B) before compounding.',
+        },
+        { status: 400 }
+      );
+    }
+
+    const isNowDispensed = DISPENSED_STATUSES.includes(finalStatus) || nextAxes.logisticsStatus === 'delivered';
 
     const historyEntry = {
       from: previousStatus,
       to: finalStatus,
+      axes: nextAxes,
       timestamp: new Date().toISOString(),
       reason: reason || (isToleranceAction ? 'Clinical tolerance check-in verified & completed' : 'Manual clinical status quick-action update'),
       updatedBy: updatedBy || 'Treating Physician / Clinic Administrator'
@@ -148,6 +178,11 @@ export async function POST(request) {
       state: finalStatus,
       orderStatus: finalStatus,
       fagronStatus: finalStatus,
+      clinicalStatus: nextAxes.clinicalStatus,
+      paymentStatus: nextAxes.paymentStatus,
+      productionStatus: nextAxes.productionStatus,
+      labelStatus: nextAxes.labelStatus,
+      logisticsStatus: nextAxes.logisticsStatus,
       isDispensed: isNowDispensed,
       updatedAt: new Date().toISOString(),
       statusHistory: FieldValue.arrayUnion(historyEntry)

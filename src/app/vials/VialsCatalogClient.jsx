@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, ShoppingCart, Package, Check, CheckCircle2, ShieldCheck, ArrowRight, X, Plus, Minus, Globe } from '@/lib/icons';
+import Link from 'next/link';
+import { Search, ShoppingCart, Package, Check, CheckCircle2, ShieldCheck, ArrowRight, X, Plus, Minus, Globe, QrCode } from '@/lib/icons';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import CopyableId from '@/components/ui/CopyableId';
 import { trackReferralVisitAction, fetchCollectionProductsAction } from '@/actions/vialsCatalogActions';
 import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
@@ -35,7 +37,7 @@ const SHIPPING_OPTIONS = [
   { code: 'ROW', label: 'International / Worldwide (DHL Express)', cost: 55 }
 ];
 
-export default function VialsCatalogClient({ initialVials = [], initialCollection = 'vials', referralInfo = null }) {
+export default function VialsCatalogClient({ initialVials = [], initialCollection = 'vials', referralInfo = null, isPatientView = false }) {
   const { isAdmin, pricingRole, resolve: resolveProduct } = usePricing();
   const [activeCollection, setActiveCollection] = useState(initialCollection || 'vials');
   const [vials, setVials] = useState(initialVials);
@@ -206,6 +208,33 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   const activeCurrencySymbol = '$';
   const grandTotal = Math.round((subtotal + (totalUnits > 0 ? selectedShipping.cost : 0)) * 100) / 100;
 
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'vials_directory',
+        collection: activeCollection,
+        view: isPatientView ? 'patient' : 'doctor',
+        name: isPatientView ? 'Patient Peptide Guides' : (SUPPORTED_COLLECTIONS[activeCollection]?.title || 'Clinical Formulations'),
+      },
+      bottomBar: isPatientView
+        ? {
+            summaryTitle: 'Patient Peptide Guides',
+            summarySubtitle: 'Reconstitution & Administration Reference',
+            atlasAiLabel: 'Ask Atlas AI',
+          }
+        : {
+            summaryTitle: SUPPORTED_COLLECTIONS[activeCollection]?.title || 'Clinical Formulations',
+            summarySubtitle: `${vials.length} SKUs · Physician & Clinic Supply`,
+            atlasAiLabel: 'Ask Atlas AI',
+            primaryAction: {
+              label: `Order Request${totalUnits > 0 ? ` (${totalUnits})` : ''}`,
+              onClick: () => setIsCartModalOpen(true),
+            },
+          },
+    },
+    [activeCollection, isPatientView, vials.length, totalUnits]
+  );
+
   // Checkout submission
   const validateForm = () => {
     const errors = {};
@@ -300,45 +329,79 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', display: 'flex', flexDirection: 'column' }}>
       <PublicUnifiedHeader
-        brandHref="/"
-        loginRedirect="/vials"
+        brandHref={isPatientView ? '/vials?view=patient' : '/'}
+        loginRedirect={isPatientView ? '/vials?view=patient' : '/vials'}
         hideCurrencySelector={true}
         hideAccountManager={true}
-        breadcrumb={[
-          { label: 'Catalog', href: '/pricing' },
-          { label: 'Clinical Formulations Directory' },
-        ]}
-        extraActions={
-          <button
-            type="button"
-            onClick={() => setIsCartModalOpen(true)}
-            className="puh-btn"
-            style={{
-              background: '#2563eb',
-              border: '1px solid #1d4ed8',
-              color: '#ffffff',
-              fontWeight: 600,
-            }}
-          >
-            <ShoppingCart size={14} />
-            <span className="puh-btn-label">
-              Order Request{totalUnits > 0 ? ` (${totalUnits})` : ''}
-            </span>
-          </button>
-        }
+        breadcrumb={isPatientView
+          ? [{ label: 'Patient Peptide Guides' }]
+          : [
+              { label: 'Catalog', href: '/pricing' },
+              { label: 'Clinical Formulations Directory' },
+            ]}
+        extraActions={!isPatientView ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('open-global-qr-modal', {
+                    detail: {
+                      url: `${window.location.origin}/vials?collection=${encodeURIComponent(activeCollection)}&view=patient`,
+                      title: 'Patient Directory QR Code',
+                      subtitle: 'Shareable patient-only peptide & reconstitution guides (no B2B pricing)',
+                    },
+                  }));
+                }
+              }}
+              className="puh-btn puh-btn-ghost"
+              title="Share Patient Directory QR"
+            >
+              <QrCode size={14} />
+              <span className="puh-btn-label">Patient QR</span>
+            </button>
+            <Link
+              href={`/vials?collection=${encodeURIComponent(activeCollection)}&view=patient`}
+              className="puh-btn puh-btn-ghost"
+              style={{ textDecoration: 'none' }}
+            >
+              <span className="puh-btn-label">Patient View</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIsCartModalOpen(true)}
+              className="puh-btn"
+              style={{
+                background: '#2563eb',
+                border: '1px solid #1d4ed8',
+                color: '#ffffff',
+                fontWeight: 600,
+              }}
+            >
+              <ShoppingCart size={14} />
+              <span className="puh-btn-label">
+                Order Request{totalUnits > 0 ? ` (${totalUnits})` : ''}
+              </span>
+            </button>
+          </div>
+        ) : null}
       />
 
       {/* ── Main Catalog Workspace ── */}
       <main className="atlas-page-shell">
         <PageHeroCard
-          brandLeft="ATLAS HEALTH"
-          brandRight={SUPPORTED_COLLECTIONS[activeCollection]?.title?.toUpperCase() || 'CLINICAL FORMULATIONS'}
-          badges={['≥99.0% HPLC', 'DIRECT SUPPLY']}
-          title={SUPPORTED_COLLECTIONS[activeCollection]?.title || 'Clinical Formulations Directory'}
-          subtitle={SUPPORTED_COLLECTIONS[activeCollection]?.description || 'Institutional sterile lyophilized peptides, clinical supplements, and regenerative formulations.'}
+          brandLeft={isPatientView ? 'PATIENT GUIDE' : 'ATLAS HEALTH'}
+          brandRight={isPatientView ? 'RECONSTITUTION & CARE' : (SUPPORTED_COLLECTIONS[activeCollection]?.title?.toUpperCase() || 'CLINICAL FORMULATIONS')}
+          badges={isPatientView ? ['PATIENT EDUCATION', 'RECONSTITUTION GUIDES'] : ['≥99.0% HPLC', 'DIRECT SUPPLY']}
+          title={isPatientView
+            ? 'Patient Peptide & Reconstitution Guide Directory'
+            : (SUPPORTED_COLLECTIONS[activeCollection]?.title || 'Clinical Formulations Directory')}
+          subtitle={isPatientView
+            ? 'Select your prescribed peptide below to open step-by-step reconstitution, storage, and administration guidance.'
+            : (SUPPORTED_COLLECTIONS[activeCollection]?.description || 'Institutional sterile lyophilized peptides, clinical supplements, and regenerative formulations.')}
           metaItems={[
-            { label: 'COLLECTION:', value: activeCollection.toUpperCase(), mono: true },
-            { label: 'PRODUCTS:', value: `${products.length} SKUs`, mono: true },
+            { label: 'AUDIENCE:', value: isPatientView ? 'PATIENT GUIDE' : 'PHYSICIAN / CLINIC', mono: true },
+            { label: 'PRODUCTS:', value: `${vials.length} SKUs`, mono: true },
           ]}
         />
         
@@ -611,9 +674,31 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                     </p>
                   </div>
 
-                  {/* Pricing and Action Section */}
+                  {/* Pricing and Action Section (Physician) vs Patient Guide CTA */}
                   <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px' }}>
-                    
+                    {isPatientView ? (
+                      <Link
+                        href={`/p/${encodeURIComponent(vial.slug || vial.id)}?view=patient`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          width: '100%',
+                          padding: '10px 14px',
+                          borderRadius: '8px',
+                          backgroundColor: '#0d9488',
+                          color: '#ffffff',
+                          fontSize: '0.84rem',
+                          fontWeight: 700,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        <span>Open Patient & Reconstitution Guide</span>
+                        <ArrowRight size={14} />
+                      </Link>
+                    ) : (
+                      <>
                     {/* Price block */}
                     <div style={{ marginBottom: '12px' }}>
                       {(() => {
@@ -643,7 +728,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                               </span>
                             </div>
                             <span style={{ fontSize: '0.68rem', color: '#64748b', display: 'block', marginTop: '2px' }}>
-                              {pricingRole === 'guest' ? 'Wholeseller (15%+15%)' : (resolved?.primaryLabel || 'Wholeseller')}
+                              {pricingRole === 'guest' ? 'Wholeseller' : (resolved?.primaryLabel || 'Wholeseller')}
                             </span>
                           </>
                         );
@@ -775,6 +860,8 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                         <Check size={12} />
                         <span>{inCartQty} vial{inCartQty === 1 ? '' : 's'} in your order request</span>
                       </div>
+                    )}
+                      </>
                     )}
                   </div>
                 </div>

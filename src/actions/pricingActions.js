@@ -23,6 +23,10 @@ function isComboProduct(p) {
 
 function normalizeProductDoc(id, d, fallback = {}) {
   const pricingUae = d.pricing_uae || {};
+  const derivedAedFromEur = d.costPriceEur ? Number((Number(d.costPriceEur) * 3.98).toFixed(4)) : 0;
+  const landedCostAed = Number(
+    d.landedCostAed ?? pricingUae.landedCostAed ?? d.cost ?? (derivedAedFromEur || fallback.landedCostAed || 0)
+  );
   return {
     ...fallback,
     id,
@@ -33,27 +37,27 @@ function normalizeProductDoc(id, d, fallback = {}) {
     volume: d.volume || d.size || fallback.volume || '',
     presentation: d.presentation || fallback.presentation || '',
     category: d.category || fallback.category || 'Dermocosmetics',
+    subTrack: d.subTrack || fallback.subTrack || '',
     keyActives: d.key_actives_summary || d.keyActives || fallback.keyActives || '',
     clinicalFocus: d.clinical_focus_dossier || d.clinicalFocus || fallback.clinicalFocus || '',
     applicationTip: d.application_tip || d.applicationTip || fallback.applicationTip || '',
-    landedCostAed: Number(
-      d.landedCostAed ?? pricingUae.landedCostAed ?? d.cost ?? fallback.landedCostAed ?? 0
-    ),
+    landedCostAed,
     wholesalePriceAed: Number(
       d.wholesalePriceAed ??
         pricingUae.wholesalePriceAed ??
         d.wholesale_price ??
         fallback.wholesalePriceAed ??
-        0
+        Number((landedCostAed * 1.15).toFixed(2))
     ),
     clinicPriceAed: Number(
-      d.clinicPriceAed ?? pricingUae.clinicPriceAed ?? fallback.clinicPriceAed ?? 0
+      d.clinicPriceAed ?? pricingUae.clinicPriceAed ?? fallback.clinicPriceAed ?? Number((landedCostAed * 1.3225).toFixed(2))
     ),
     retailPriceAed: Number(
-      d.retailPriceAed ?? pricingUae.retailPriceAed ?? d.price ?? fallback.retailPriceAed ?? 0
+      d.retailPriceAed ?? pricingUae.retailPriceAed ?? d.price ?? fallback.retailPriceAed ?? Number((landedCostAed * 1.55).toFixed(2))
     ),
+    variants: Array.isArray(d.variants) ? d.variants : fallback.variants || [],
     image: d.heroImage || d.imageUrl || d.image || fallback.image || '',
-    stockStatus: d.stockStatus || fallback.stockStatus || 'In Stock (Dubai Warehouse)',
+    stockStatus: d.stockStatus || fallback.stockStatus || 'In Stock (EU / International)',
   };
 }
 
@@ -61,9 +65,11 @@ export async function fetchBrandPricingProductsAction({
   brand = 'colway',
   fallbackProducts = [],
   excludeCombos = true,
+  limitCount = 100,
 } = {}) {
   const fallbackMap = new Map(fallbackProducts.map((p) => [p.id, p]));
   let products = [...fallbackProducts];
+  const safeLimit = Math.min(Math.max(Number(limitCount) || 100, 1), 500);
 
   if (adminDb) {
     try {
@@ -72,7 +78,7 @@ export async function fetchBrandPricingProductsAction({
         adminDb
           .collection('products')
           .where('brand', '==', brandLower)
-          .limit(100)
+          .limit(safeLimit)
           .get(),
         fallbackProducts.length > 0
           ? Promise.all(

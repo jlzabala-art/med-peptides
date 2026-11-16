@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import DataTable from '@/components/ui/DataTable';
 import { 
   ShoppingCart, 
   ShieldCheck, 
@@ -474,127 +475,134 @@ export default function ProtocolCycleVialProcurementMatrix({
         </div>
 
         <div className="pcvp-table-wrap">
-          <table className="pcvp-table">
-            <thead>
-              <tr>
-                <th style={{ width: '22%' }}>Protocol Phase</th>
-                <th style={{ width: '13%' }}>Target Dose</th>
-                <th style={{ width: '18%' }}>Duration (Adjustable)</th>
-                <th style={{ width: '17%' }}>Recommended Strength</th>
-                <th style={{ width: '14%' }}>Vials to Buy</th>
-                <th style={{ width: '16%', textAlign: 'right' }}>Simulator</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activePhasesToDisplay.map((ph, idx) => {
-                return (
-                  <tr key={ph.phaseId || idx} className={ph.isCurrentActive ? 'row-active' : ''}>
-                    {/* Column 1: Phase Name & Status */}
-                    <td>
-                      <div className="pcvp-phase-name">
-                        <span>{ph.name}</span>
-                        {ph.isCurrentActive && (
-                          <span className="pcvp-active-badge">Active Step</span>
-                        )}
-                      </div>
-                      <div className="pcvp-phase-subtext font-mono">
-                        {ph.totalDoses} doses · {ph.totalApiMg} mg API
-                      </div>
-                    </td>
-
-                    {/* Column 2: Target Dose */}
-                    <td>
-                      <span className="pcvp-dose-badge font-mono">
-                        {ph.targetDose}
-                      </span>
-                    </td>
-
-                    {/* Column 3: Adjustable Weeks (Stepper) */}
-                    <td>
-                      <div className="pcvp-weeks-stepper">
-                        <button
-                          type="button"
-                          onClick={() => handleAdjustWeeks(ph.phaseId, -1, ph.minW, ph.maxW)}
-                          disabled={ph.weeks <= ph.minW}
-                          className="pcvp-wstep-btn"
-                          title={`Decrease duration (min ${ph.minW} weeks)`}
-                        >
-                          −
-                        </button>
-                        <span className="pcvp-wstep-display font-mono">
-                          {ph.weeks} wks
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleAdjustWeeks(ph.phaseId, 1, ph.minW, ph.maxW)}
-                          disabled={ph.weeks >= ph.maxW}
-                          className="pcvp-wstep-btn"
-                          title={`Increase duration (max ${ph.maxW} weeks)`}
-                        >
-                          +
-                        </button>
-                      </div>
-                      {ph.weeks !== 4 && (
-                        <span className="pcvp-custom-flag">
-                          {ph.weeks < 4 ? 'Accelerated' : 'Extended'}
-                        </span>
+          <DataTable
+            pagination={false}
+            enableAskAtlas={false}
+            columns={[
+              {
+                key: 'name',
+                label: 'Protocol Phase',
+                render: (val, ph) => (
+                  <div>
+                    <div className="pcvp-phase-name">
+                      <span>{val}</span>
+                      {ph.isCurrentActive && (
+                        <span className="pcvp-active-badge">Active Step</span>
                       )}
-                    </td>
-
-                    {/* Column 4: Recommended Vial Strength (Calibrated to 50 UI / 0.5 mL) */}
-                    <td>
-                      <div className="pcvp-vial-strength font-mono">
-                        {ph.recommendedVial}
-                      </div>
-                      <div className="pcvp-vial-dilution font-mono" style={{ color: '#0369a1', fontWeight: 600 }}>
-                        {ph.recommendedBacMl || 2.0} mL BAC → 50 UI (0.5 mL)
-                      </div>
-                    </td>
-
-                    {/* Column 5: Number of Vials Needed */}
-                    <td>
-                      <div className="pcvp-vial-qty-cell">
-                        <span className="pcvp-qty-badge font-mono">
-                          {ph.vialsNeeded}× {ph.vMg} mg
-                        </span>
-                        {ph.isUspSterilitySplit && (
-                          <span className="pcvp-usp-tag" title="USP <797> requires vial replacement at 28 days">
-                            Renewed @ Wk 4
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Column 6: Action Button (Simulator / Active in Syringe) */}
-                    <td style={{ textAlign: 'right' }}>
+                    </div>
+                    <div className="pcvp-phase-subtext font-mono">
+                      {ph.totalDoses} doses · {ph.totalApiMg} mg API
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: 'targetDose',
+                label: 'Target Dose',
+                render: (val) => (
+                  <span className="pcvp-dose-badge font-mono">
+                    {val}
+                  </span>
+                ),
+              },
+              {
+                key: 'weeks',
+                label: 'Duration (Adjustable)',
+                render: (_, ph) => (
+                  <div>
+                    <div className="pcvp-weeks-stepper">
                       <button
                         type="button"
-                        onClick={() => {
-                          if (onCalibratePhase) {
-                            onCalibratePhase(ph);
-                          }
-                        }}
-                        className={`pcvp-calib-btn ${ph.isCurrentActive ? 'btn-current' : ''}`}
-                        title={ph.isCurrentActive ? 'Currently active in syringe simulator below' : `Load ${ph.name} into syringe simulator`}
+                        onClick={() => handleAdjustWeeks(ph.phaseId, -1, ph.minW, ph.maxW)}
+                        disabled={ph.weeks <= ph.minW}
+                        className="pcvp-wstep-btn"
+                        title={`Decrease duration (min ${ph.minW} weeks)`}
                       >
-                        {ph.isCurrentActive ? (
-                          <>
-                            <Check size={12} />
-                            <span>Active in Syringe</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Simulate</span>
-                            <ArrowRight size={12} />
-                          </>
-                        )}
+                        −
                       </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      <span className="pcvp-wstep-display font-mono">
+                        {ph.weeks} wks
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleAdjustWeeks(ph.phaseId, 1, ph.minW, ph.maxW)}
+                        disabled={ph.weeks >= ph.maxW}
+                        className="pcvp-wstep-btn"
+                        title={`Increase duration (max ${ph.maxW} weeks)`}
+                      >
+                        +
+                      </button>
+                    </div>
+                    {ph.weeks !== 4 && (
+                      <span className="pcvp-custom-flag">
+                        {ph.weeks < 4 ? 'Accelerated' : 'Extended'}
+                      </span>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: 'recommendedVial',
+                label: 'Recommended Strength',
+                render: (val, ph) => (
+                  <div>
+                    <div className="pcvp-vial-strength font-mono">
+                      {val}
+                    </div>
+                    <div className="pcvp-vial-dilution font-mono" style={{ color: '#0369a1', fontWeight: 600 }}>
+                      {ph.recommendedBacMl || 2.0} mL BAC → 50 UI (0.5 mL)
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: 'vialsNeeded',
+                label: 'Vials to Buy',
+                render: (val, ph) => (
+                  <div className="pcvp-vial-qty-cell">
+                    <span className="pcvp-qty-badge font-mono">
+                      {val}× {ph.vMg} mg
+                    </span>
+                    {ph.isUspSterilitySplit && (
+                      <span className="pcvp-usp-tag" title="USP <797> requires vial replacement at 28 days">
+                        Renewed @ Wk 4
+                      </span>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: 'simulator',
+                label: 'Simulator',
+                align: 'right',
+                render: (_, ph) => (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onCalibratePhase) {
+                        onCalibratePhase(ph);
+                      }
+                    }}
+                    className={`pcvp-calib-btn ${ph.isCurrentActive ? 'btn-current' : ''}`}
+                    title={ph.isCurrentActive ? 'Currently active in syringe simulator below' : `Load ${ph.name} into syringe simulator`}
+                  >
+                    {ph.isCurrentActive ? (
+                      <>
+                        <Check size={12} />
+                        <span>Active in Syringe</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Simulate</span>
+                        <ArrowRight size={12} />
+                      </>
+                    )}
+                  </button>
+                ),
+              },
+            ]}
+            data={activePhasesToDisplay.map((ph, idx) => ({ id: ph.phaseId || String(idx), ...ph }))}
+          />
         </div>
       </div>
 

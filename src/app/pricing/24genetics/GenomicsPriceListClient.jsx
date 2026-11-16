@@ -3,6 +3,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import BrandLogo from '@/components/common/BrandLogo';
+import GenomicsExplainerVideoCard from '@/components/genomics/GenomicsExplainerVideoCard';
+import { resolveAssistantKeyForPanel, getGenomicsAssistantByKey } from '@/data/genomics/twentyFourGenomicsAssistants';
 import { useRouter } from 'next/navigation';
 import {
   Dna,
@@ -65,6 +67,7 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
   const [copied, setCopied] = useState(false);
   const [showCostBasis, setShowCostBasis] = useState(true);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+  const [selectedAssistantKey, setSelectedAssistantKey] = useState('skin-and-hair');
 
   // Quick Order Drawer State
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
@@ -323,7 +326,7 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
     // Wholeseller B2B Tier (15% + 15%: Public default for guests, Wholesalers & Admin)
     cols.push({
       key: 'wholesalePriceEur',
-      label: 'Wholeseller (15%+15%)',
+      label: 'Wholeseller',
       width: (canViewCost && showCostBasis) ? '15%' : '18%',
       sortable: true,
       render: (val, row) => {
@@ -470,6 +473,37 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
                   <span>Open Compounding Studio</span>
                   <ExternalLink size={11} />
                 </Link>
+                {(() => {
+                  const aKey = resolveAssistantKeyForPanel(row);
+                  if (!aKey) return null;
+                  const aInfo = getGenomicsAssistantByKey(aKey);
+                  return (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedAssistantKey(aKey);
+                        document.getElementById('genomics-ai-assistants')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: '#0f766e',
+                        background: '#f0fdfa',
+                        border: '1px solid #99f6e4',
+                        padding: '4px 9px',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Sparkles size={11} />
+                      <span>Watch {aInfo.assistantName} AI Video</span>
+                    </button>
+                  );
+                })()}
                 {row.id === 'skin' && (
                   <Link
                     href="/pricing/colway-hair"
@@ -851,6 +885,16 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
               expandableRender={renderExpandedRow}
             />
           )}
+        </div>
+
+        {/* ── 24Genomics AI Assistants Video & Clinical Documentation ── */}
+        <div id="genomics-ai-assistants" style={{ marginTop: '1.5rem' }}>
+          <GenomicsExplainerVideoCard
+            assistantKey="skin-and-hair"
+            activeKey={selectedAssistantKey}
+            onSelectKey={setSelectedAssistantKey}
+            lang="en"
+          />
         </div>
       </main>
 

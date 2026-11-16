@@ -4,8 +4,7 @@ import React, { useState, useEffect, useTransition, useMemo, useRef, useCallback
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import ClinicalGanttTimeline from '../../../components/protocol/ClinicalGanttTimeline';
-import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicClinicalJsonLd from '@/components/shared/PublicClinicalJsonLd';
 import { 
   generateDynamicReconData, 
@@ -788,6 +787,38 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
     }
   }, []);
 
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'protocol',
+        name: displayName,
+        slug: protocol?.slug || protocol?.protocol_slug || slug,
+        duration: displayDuration,
+      },
+      bottomBar: {
+        summaryTitle: displayName,
+        summarySubtitle: `${displayDuration} • ${phases.length || 3} ${lang === 'es' ? 'Fases' : 'Phases'}`,
+        badge: lang === 'es' ? 'Protocolo Clínico' : 'Clinical Protocol',
+        atlasAiLabel: 'Ask Atlas AI',
+        showSections: true,
+        sectionsLabel: lang === 'es' ? 'Secciones' : 'Sections',
+        sectionsCount: tocSections.length,
+        activeSectionIndex: Math.max(1, tocSections.findIndex(s => s.id === effectiveActiveSection) + 1),
+        secondaryAction: {
+          label: lang === 'es' ? 'Consultar' : 'Inquire',
+          onClick: () => setIsInquiryDrawerOpen(true),
+        },
+        primaryAction: {
+          label: lang === 'es' ? 'Prescribir / Subir Receta ➔' : 'Prescribe / E-Rx Intake ➔',
+          onClick: () => {
+            window.location.href = `/rx/intake?refProtocol=${encodeURIComponent(slug)}`;
+          },
+        },
+      },
+    },
+    [displayName, protocol?.slug, protocol?.protocol_slug, slug, displayDuration, phases.length, lang, tocSections, effectiveActiveSection]
+  );
+
   return (
     <div className="public-datasheet-root">
       {/* ── Schema.org Clinical Structured Data (Rich Snippets) ── */}
@@ -1465,96 +1496,6 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
 
       {/* Standardized Institutional GCP Footer */}
       <PublicUnifiedFooter lang={lang || 'en'} minimal={false} />
-
-      {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
-      <PublicStickyActionBar
-        title={displayName}
-        subtitle={`${displayDuration} • ${phases.length || 3} ${lang === 'es' ? 'Fases' : 'Phases'}`}
-        badge={lang === 'es' ? 'Protocolo Clínico' : 'Clinical Protocol'}
-        badgeType="protocol"
-        inquireLabel={lang === 'es' ? 'Prescribir / Subir Receta ➔' : 'Prescribe / E-Rx Intake ➔'}
-        onInquire={() => {
-          window.location.href = `/rx/intake?refProtocol=${encodeURIComponent(slug)}`;
-        }}
-        extraActions={
-          <button
-            type="button"
-            onClick={() => setIsInquiryDrawerOpen(true)}
-            style={{
-              padding: '7px 12px',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#334155',
-              fontSize: '0.78rem',
-              fontWeight: 650,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {lang === 'es' ? 'Consultar' : 'Inquire'}
-          </button>
-        }
-        showClinicalAI={true}
-        aiCategory="Clinical Protocol"
-        aiContextQuery={
-          lang === 'es'
-            ? `¿Cuál es el fundamento clínico, cronobiología por fases, compuestos y biomarcadores de seguimiento del protocolo ${displayName}?`
-            : `What is the clinical rationale, phased chronobiology, compounded formulations, and monitoring biomarkers for ${displayName}?`
-        }
-        showSections={true}
-        sectionsCount={tocSections.length}
-        activeSectionIndex={tocSections.findIndex(s => s.id === effectiveActiveSection) + 1}
-        onOpenSections={() => {
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
-          }
-        }}
-        lang={lang}
-      />
-
-      {/* ── Single Public Atlas AI Research Copilot ── */}
-      <PublicAtlasAIDrawer
-        hideFloatingTrigger={true}
-        contextType="protocol"
-        contextAnchor={{
-          name: displayName,
-          slug: protocol?.slug || protocol?.protocol_slug || slug,
-          code: protocolCode,
-          duration: displayDuration,
-          category: category,
-          targetSystem: protocol?.therapeutic_category || 'Regenerative Pathway',
-          description: displayDescription,
-          phasesCount: phases.length,
-          phases: phases.map(p => ({
-            name: p.name || p.phase_name || `Phase ${p.phase || 1}`,
-            durationWeeks: p.duration_weeks || p.durationWeeks || 4,
-            description: p.description || p.clinical_intent,
-            administrationSchedule: p.administrationSchedule || p.schedule,
-          })),
-          includedCompounds: items.map(i => i.name || i.title).join(', '),
-          totalVials: `${supplySummary.totalVials} Vials (${vialBreakdownText})`,
-          totalInjections: `${supplySummary.totalInjections} Micro-doses`,
-          topicalAdjuncts: (protocol?.topical_adjuncts?.length > 0 ? protocol.topical_adjuncts : (isHairProtocol ? [
-            {
-              name: 'Colway Strengthening Hair Shampoo',
-              slug: 'colway-strengthening-shampoo',
-              step: 'Step 1 — Scalp Prep (Pre-treatment)',
-              role: 'Removes DHT-laden sebum and normalizes scalp pH to 4.5–5.5 to enhance peptide penetration.'
-            },
-            {
-              name: 'Colway Strengthening Conditioner',
-              slug: 'colway-strengthening-conditioner',
-              step: 'Step 2 — Cortex Repair (Cuticle Seal)',
-              role: 'Fills cortical micro-fractures with native fish tropocollagen and hydrolyzed keratin to reinforce fragile anagen fibers.'
-            }
-          ] : []))
-        }}
-        storageKey={`protocol_${protocol?.slug || slug}`}
-        onOpenRegisterModal={() => {
-          window.open('/auth/login?register=true', '_blank');
-        }}
-      />
 
       {/* Non-Intrusive Institutional Inquiry Drawer */}
       <PublicInstitutionalInquiryDrawer

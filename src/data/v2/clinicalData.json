@@ -16,12 +16,17 @@
     "mechanisms": ["Selective beta-3 adrenergic receptor stimulation in adipocytes", "Lipolytic activity without IGF-1 axis activation", "Prevention of diet-induced insulin resistance", "Stimulation of fat oxidation via fatty acid mobilization"]
   },
   "ARA-290": {
-    "scientificName": "Cibinetide; ARA-290",
+    "scientificName": "Cibinetide; ARA-290 (11-amino-acid EPO helix-B derived peptide)",
     "molecular_weight": 948.07,
     "molecular_formula": "C39H60N10O14",
     "pharmacokinetics": { "half_life": "~2–3h", "bioavailability": "SC preferred", "route": ["subcutaneous"], "metabolism": "Proteolytic" },
     "storage_conditions": { "temperature": "-20°C", "light": "Protect from UV", "shelf_life": "24 months" },
-    "mechanisms": ["Non-hematopoietic erythropoietin receptor (EPOR/βcR) agonism", "Peripheral neuroprotection via JAK2/STAT3 signaling", "Anti-inflammatory cytokine modulation (TNF-α, IL-6 suppression)", "Promotion of small fiber nerve regeneration"]
+    "mechanisms": [
+      "Designed to interact with the proposed Innate Repair Receptor (IRR / EPOR-βcR) non-hematopoietic tissue-protective system",
+      "Inflammatory signalling: modulates chemical messengers coordinating inflammatory responses without stimulating erythropoiesis",
+      "Cellular protection: investigated in experimental models for how cells respond to stress, injury, and tissue damage",
+      "Nerve-related signalling: studied for biological pathways associated with small nerve fibres and sensory function (precise receptor mechanism remains under investigation)"
+    ]
   },
   "BPC-157": {
     "scientificName": "Body Protection Compound-157; PL 14736",

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Eye,
   Edit3,
@@ -9,9 +9,11 @@ import {
   Printer,
   FileSpreadsheet,
   Keyboard,
-  Sparkles
+  Sparkles,
+  ChevronDown
 } from 'lucide-react';
 import { detectLabelOverflow } from '@/utils/labels/labelOverflowDetector';
+import { useLabelsExport } from '../hooks/useLabelsExport';
 
 const CONTAINER_QUICK_PRESETS = [
   { id: 'vial10', labelEs: 'Vial 10 mL', labelEn: '10 mL Vial', widthMm: 50, heightMm: 25, variant: 'backQr', storage: '2–8 °C' },
@@ -40,8 +42,25 @@ export default function LabelsPreflightBar({
   onAutoFitOverflow,
   onDownloadZplBatch,
   onDownloadPackingListPdf,
-  onOpenShortcuts
+  onDownloadA4BatchPdf = null,
+  onOpenShortcuts,
+  strictGmpGate = false,
+  onToggleStrictGmpGate = null
 }) {
+  const [exportOpen, setExportOpen] = useState(false);
+  const exportRef = useRef(null);
+  const { markPrintedInFirestore } = useLabelsExport({ currentRx, activeQueueItem });
+
+  useEffect(() => {
+    if (!exportOpen) return undefined;
+    const onOutside = (e) => {
+      if (exportRef.current && !exportRef.current.contains(e.target)) {
+        setExportOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, [exportOpen]);
   const widthMm = activeLabel?.widthMm || activeQueueItem?.widthMm || 75;
   const heightMm = activeLabel?.heightMm || activeQueueItem?.heightMm || 45;
   const overflow = detectLabelOverflow(activeLabel, widthMm, heightMm);
@@ -58,6 +77,7 @@ export default function LabelsPreflightBar({
     (activeLabel?.expiryDate || activeLabel?.bud)
   );
   const isApproved = currentRx?.status === 'approved' || Boolean(currentRx?.isSigned);
+  const gmpBlocked = Boolean(strictGmpGate && (!hasFormula || !hasLotBud || !isApproved || overflow.hasOverflow));
 
   return (
     <div
@@ -235,53 +255,160 @@ export default function LabelsPreflightBar({
               <Sparkles size={10} />
             </button>
           )}
+          {onToggleStrictGmpGate && (
+            <button
+              type="button"
+              onClick={() => onToggleStrictGmpGate(!strictGmpGate)}
+              title={isEs ? 'Bloqueo estricto GMP: impide exportar si falta Lote/BUD, Aprobación o hay desbordamiento' : 'Strict GMP Gate: blocks export if Lot/BUD, Approval, or text fit fails'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                border: strictGmpGate ? '1.5px solid #0f766e' : '1px solid #cbd5e1',
+                background: strictGmpGate ? '#f0fdfa' : '#ffffff',
+                color: strictGmpGate ? '#0f766e' : '#64748b',
+                fontSize: '0.68rem',
+                fontWeight: 750,
+                cursor: 'pointer'
+              }}
+            >
+              <span>{strictGmpGate ? '🔒 GMP Strict' : '🔓 GMP'}</span>
+            </button>
+          )}
         </div>
 
         <span style={{ color: '#cbd5e1' }}>|</span>
 
-        <button
-          type="button"
-          onClick={onDownloadZplBatch}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '4px 9px',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-            background: '#ffffff',
-            color: '#0f172a',
-            fontSize: '0.71rem',
-            fontWeight: 650,
-            cursor: 'pointer'
-          }}
-          title={isEs ? 'Exportar ZPL nativo para impresora térmica Zebra' : 'Export native ZPL for Zebra thermal printer'}
-        >
-          <Printer size={12} color="#0d9488" />
-          <span>ZPL</span>
-        </button>
+        {/* Unified Print / Export Dropdown (GCP Action Menu) */}
+        <div ref={exportRef} style={{ position: 'relative' }}>
+          <button
+            type="button"
+            onClick={() => setExportOpen((v) => !v)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '5px 11px',
+              borderRadius: '6px',
+              border: 'none',
+              background: gmpBlocked ? '#94a3b8' : '#1a73e8',
+              color: '#ffffff',
+              fontSize: '0.73rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+            title={isEs ? 'Opciones de impresión y exportación GMP' : 'GMP Print & Export options'}
+          >
+            <Printer size={13} />
+            <span>{isEs ? 'Imprimir / Exportar' : 'Print / Export'}</span>
+            <ChevronDown size={13} />
+          </button>
 
-        <button
-          type="button"
-          onClick={onDownloadPackingListPdf}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '4px 9px',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-            background: '#ffffff',
-            color: '#0f172a',
-            fontSize: '0.71rem',
-            fontWeight: 650,
-            cursor: 'pointer'
-          }}
-          title={isEs ? 'Descargar hoja de picking y verificación del lote' : 'Download Batch Picking & Packing List PDF'}
-        >
-          <FileSpreadsheet size={12} color="#1a73e8" />
-          <span>{isEs ? 'Packing List' : 'Packing List'}</span>
-        </button>
+          {exportOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '6px',
+                zIndex: 70,
+                width: '230px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '10px',
+                boxShadow: '0 12px 30px rgba(15, 23, 42, 0.16)',
+                padding: '6px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '3px',
+              }}
+            >
+              {onDownloadA4BatchPdf && (
+                <button
+                  type="button"
+                  disabled={gmpBlocked}
+                  onClick={() => {
+                    setExportOpen(false);
+                    markPrintedInFirestore();
+                    onDownloadA4BatchPdf();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '7px 10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: gmpBlocked ? '#94a3b8' : '#0f172a',
+                    fontSize: '0.76rem',
+                    fontWeight: 650,
+                    cursor: gmpBlocked ? 'not-allowed' : 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <Printer size={14} color="#1a73e8" />
+                  <span>{isEs ? 'Pliego A4 (PDF)' : 'A4 Sheet (PDF)'}</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                disabled={gmpBlocked}
+                onClick={() => {
+                  setExportOpen(false);
+                  markPrintedInFirestore();
+                  onDownloadZplBatch?.();
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '7px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: gmpBlocked ? '#94a3b8' : '#0f172a',
+                  fontSize: '0.76rem',
+                  fontWeight: 650,
+                  cursor: gmpBlocked ? 'not-allowed' : 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <Printer size={14} color="#0d9488" />
+                <span>{isEs ? 'Térmica Zebra (ZPL)' : 'Zebra Thermal (ZPL)'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setExportOpen(false);
+                  onDownloadPackingListPdf?.();
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '7px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#0f172a',
+                  fontSize: '0.76rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <FileSpreadsheet size={14} color="#4f46e5" />
+                <span>{isEs ? 'Packing List (PDF)' : 'Batch Packing List (PDF)'}</span>
+              </button>
+            </div>
+          )}
+        </div>
 
         <button
           type="button"

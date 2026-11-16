@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { FileText, ShoppingBag, Calculator, FlaskConical, Compass } from 'lucide-react';
 import FloatingActionDock from './public/FloatingActionDock';
@@ -12,7 +12,7 @@ import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
  * ─────────────────────────────────────────────────────────────────────────────
  * Universal Apple-Glassmorphism bottom sticky bar across all public & catalog
  * screens (Golden Rule #69).
- * - Hosts the SINGLE Atlas AI trigger on the platform (never duplicated in header/FAB).
+ * - Hosts the SINGLE Atlas AI trigger and Sections outline trigger (desktop & mobile).
  * - Automatically personalizes its summary and actions from `AtlasContextProvider`
  *   or route-aware defaults.
  */
@@ -21,6 +21,32 @@ export default function GlobalBottomStickyBar() {
   const router = useRouter();
   const { screenContext, openAtlasAi } = useAtlasContext();
   const { currency, isSpanish, rfqItems, setIsQuoteDrawerOpen } = usePublicWorkspace();
+  const [tocProgress, setTocProgress] = useState({
+    currentProgress: 1,
+    totalSections: 0,
+    hasToc: false,
+  });
+
+  // Reset TOC progress on route change
+  useEffect(() => {
+    setTocProgress({ currentProgress: 1, totalSections: 0, hasToc: false });
+  }, [pathname]);
+
+  // Listen to live TOC section progress dispatched by sidebars / outlines
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const handleTocUpdate = (e) => {
+      if (e?.detail) {
+        setTocProgress({
+          currentProgress: e.detail.currentProgress || 1,
+          totalSections: e.detail.totalSections || 0,
+          hasToc: true,
+        });
+      }
+    };
+    window.addEventListener('datasheet-toc-progress', handleTocUpdate);
+    return () => window.removeEventListener('datasheet-toc-progress', handleTocUpdate);
+  }, []);
 
   const resolvedConfig = useMemo(() => {
     // 1. Live page-registered bottomBar takes top priority
@@ -28,8 +54,9 @@ export default function GlobalBottomStickyBar() {
       return screenContext.bottomBar;
     }
 
+    const isClinicalNonQuoteRoute = pathname.startsWith('/rx') || pathname.startsWith('/verify');
     const quoteAction =
-      rfqItems.length > 0
+      !isClinicalNonQuoteRoute && rfqItems.length > 0
         ? {
             label: isSpanish ? `Cotización (${rfqItems.length})` : `Quote (${rfqItems.length})`,
             icon: <ShoppingBag size={14} />,
@@ -79,17 +106,39 @@ export default function GlobalBottomStickyBar() {
       };
     }
 
+    if (pathname.startsWith('/vials')) {
+      return {
+        summaryTitle: isSpanish ? 'Portafolio de Péptidos en Vial' : 'Lyophilized Peptide Vials',
+        summarySubtitle: isSpanish ? 'Pureza HPLC ≥99% · Catálogo Clínico' : 'HPLC ≥99% Purity · Clinical Portfolio',
+        atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        secondaryAction: quoteAction,
+        primaryAction: {
+          label: isSpanish ? 'Calculadora' : 'Dosing Calculator',
+          icon: <Calculator size={14} />,
+          onClick: () => router.push('/calculator'),
+        },
+      };
+    }
+
     if (pathname.startsWith('/p/') || pathname.startsWith('/raw/')) {
-      const title = screenContext?.contextAnchor?.name || screenContext?.contextAnchor?.sectionTitle || 'Clinical Monograph';
+      const isCosmeceutical =
+        pathname.toLowerCase().includes('colway') ||
+        screenContext?.contextAnchor?.type === 'cosmeceutical';
+      const title =
+        screenContext?.contextAnchor?.name ||
+        screenContext?.contextAnchor?.sectionTitle ||
+        (isCosmeceutical ? (isSpanish ? 'Ficha Cosmecéutica' : 'Cosmeceutical Dossier') : 'Clinical Monograph');
       return {
         summaryTitle: title,
-        summarySubtitle: isSpanish ? 'Monografía Técnica & Especificaciones' : 'Clinical Monograph & Specifications',
-        atlasAiLabel: isSpanish ? 'Consultar Monografía AI' : 'Ask Atlas AI',
+        summarySubtitle: isCosmeceutical
+          ? (isSpanish ? 'Línea Celular & Dermatológica' : 'Cellular & Dermatological Line')
+          : (isSpanish ? 'Monografía Técnica & Especificaciones' : 'Clinical Monograph & Specifications'),
+        atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
         secondaryAction: quoteAction,
         primaryAction: {
           label: isSpanish ? 'Tarifas B2B' : 'Price Schedules',
           icon: <FileText size={14} />,
-          onClick: () => router.push('/pricing'),
+          onClick: () => router.push(isCosmeceutical ? '/pricing/colway' : '/pricing'),
         },
       };
     }
@@ -135,6 +184,42 @@ export default function GlobalBottomStickyBar() {
     };
   }, [screenContext, pathname, currency, isSpanish, rfqItems.length, setIsQuoteDrawerOpen, router]);
 
+  if (resolvedConfig?.hidden) {
+    return null;
+  }
+
+  const hasSectionsOutline = Boolean(
+    resolvedConfig?.showSections || resolvedConfig?.onOpenSections || tocProgress.hasToc
+  );
+  const totalSections = resolvedConfig?.sectionsCount ?? tocProgress.totalSections;
+  const activeSection = resolvedConfig?.activeSectionIndex ?? tocProgress.currentProgress;
+
+  const sectionsAction = hasSectionsOutline
+    ? {
+        label: resolvedConfig?.sectionsLabel || (isSpanish ? 'Secciones' : 'Sections'),
+        countLabel: totalSections > 0 ? `${activeSection || 1}/${totalSections}` : null,
+        onClick: () => {
+          if (resolvedConfig?.onOpenSections) {
+            resolvedConfig.onOpenSections();
+          } else if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
+          }
+        },
+      }
+    : null;
+
+  const handleOpenAi = () => {
+    if (resolvedConfig?.onOpenAtlasAi) {
+      resolvedConfig.onOpenAtlasAi();
+    } else {
+      openAtlasAi();
+    }
+  };
+
+  if (pathname?.startsWith('/labels')) {
+    return null;
+  }
+
   return (
     <div
       className="no-print"
@@ -150,9 +235,13 @@ export default function GlobalBottomStickyBar() {
         <FloatingActionDock
           summaryTitle={resolvedConfig.summaryTitle}
           summarySubtitle={resolvedConfig.summarySubtitle}
-          showAtlasAi={true}
+          badge={resolvedConfig.badge || null}
+          showAtlasAi={resolvedConfig.showAtlasAi !== false}
           atlasAiLabel={resolvedConfig.atlasAiLabel || 'Ask Atlas AI'}
-          onOpenAtlasAi={() => openAtlasAi()}
+          onOpenAtlasAi={handleOpenAi}
+          showQr={resolvedConfig.showQr !== false}
+          qrLabel={resolvedConfig.qrLabel || (isSpanish ? 'Código QR' : 'QR Code')}
+          sectionsAction={sectionsAction}
           secondaryAction={resolvedConfig.secondaryAction || null}
           primaryAction={resolvedConfig.primaryAction || null}
         />

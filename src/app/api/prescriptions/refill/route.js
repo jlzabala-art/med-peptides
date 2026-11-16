@@ -2,8 +2,173 @@ import { NextResponse } from 'next/server';
 import { adminDb, admin } from '@/lib/firebaseAdmin';
 import { syncPrescriptionToAlgolia } from '@/services/algoliaSyncService';
 import { invalidateRxCache } from '@/lib/rxCache';
+import { resolvePrescriptionDocAdmin } from '@/lib/labels/resolvePrescriptionAdmin';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * GET /api/prescriptions/refill?prescriptionId=...
+ * Returns the current prescription's refill schedule + all related cycles
+ * (Original, -R2, -R3, etc.) for direct management inside /labels.
+ */
+export async function GET(request) {
+  if (!adminDb) {
+    return NextResponse.json({ success: false, error: 'Database connection unavailable' }, { status: 503 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const prescriptionId = searchParams.get('prescriptionId') || searchParams.get('code');
+    if (!prescriptionId) {
+      return NextResponse.json({ success: false, error: 'prescriptionId is required' }, { status: 400 });
+    }
+
+    const { data: currentData, id: currentId } = await resolvePrescriptionDocAdmin(prescriptionId);
+    const rawCode = String(currentData.code || currentData.prescriptionCode || currentData.fileNumber || currentId).replace(/^#/, '');
+    const cleanBaseCode = rawCode.replace(/-R\d+$/i, '');
+
+    const cyclesMap = new Map();
+    const addCycleDoc = (docSnap) => {
+      if (!docSnap?.exists) return;
+      const d = docSnap.data() || {};
+      const code = String(d.code || d.prescriptionCode || d.fileNumber || docSnap.id).replace(/^#/, '');
+      cyclesMap.set(docSnap.id, {
+        id: docSnap.id,
+        code,
+        refillCycle: Number(d.refillCycle || 1),
+        status: d.status || 'active',
+        refillAlertStatus: d.refillAlertStatus || 'scheduled',
+        refillAlertDate: d.refillAlertDate || d.nextRefillDate || '',
+        exhaustionDate: d.exhaustionDate || '',
+        courseDurationDays: Number(d.courseDurationDays || 60),
+        partsCount: Array.isArray(d.pharmacyLabels) && d.pharmacyLabels.length > 0
+          ? d.pharmacyLabels.length
+          : (Array.isArray(d.parts) ? d.parts.length : 1),
+        createdAt: d.refillCreatedAt || d.createdAt || '',
+      });
+    };
+
+    // Add current, root, and child refill cycles
+    cyclesMap.set(currentId, {
+      id: currentId,
+      code: rawCode,
+      refillCycle: Number(currentData.refillCycle || 1),
+      status: currentData.status || 'active',
+      refillAlertStatus: currentData.refillAlertStatus || 'scheduled',
+      refillAlertDate: currentData.refillAlertDate || currentData.nextRefillDate || '',
+      exhaustionDate: currentData.exhaustionDate || '',
+      courseDurationDays: Number(currentData.courseDurationDays || 60),
+      partsCount: Array.isArray(currentData.pharmacyLabels) && currentData.pharmacyLabels.length > 0
+        ? currentData.pharmacyLabels.length
+        : (Array.isArray(currentData.parts) ? currentData.parts.length : 1),
+      createdAt: currentData.refillCreatedAt || currentData.createdAt || '',
+    });
+
+    const queries = [
+      adminDb.collection('prescriptions').where('code', '==', cleanBaseCode).limit(5).get(),
+      adminDb.collection('prescriptions').where('refillOfCode', '==', cleanBaseCode).limit(15).get(),
+      adminDb.collection('prescriptions').where('refillOf', '==', currentData.refillOf || currentId).limit(15).get(),
+    ];
+
+    const snaps = await Promise.allSettled(queries);
+    snaps.forEach((res) => {
+      if (res.status === 'fulfilled') {
+        res.value.docs.forEach(addCycleDoc);
+      }
+    });
+
+    const cycles = Array.from(cyclesMap.values()).sort((a, b) => a.refillCycle - b.refillCycle);
+
+    return NextResponse.json({
+      success: true,
+      baseCode: cleanBaseCode,
+      currentId,
+      cycles,
+    });
+  } catch (error) {
+    console.error('[/api/prescriptions/refill] GET Error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * PATCH /api/prescriptions/refill
+ * Updates refill schedule/status (refillAlertDate, refillAlertStatus, courseDurationDays)
+ * on an existing prescription without cloning a new cycle.
+ */
+export async function PATCH(request) {
+  if (!adminDb) {
+    return NextResponse.json({ success: false, error: 'Database connection unavailable' }, { status: 503 });
+  }
+
+  try {
+    const body = await request.json();
+    const {
+      prescriptionId,
+      refillAlertDate,
+      refillAlertStatus,
+      courseDurationDays,
+      operatorNotes,
+    } = body || {};
+
+    if (!prescriptionId) {
+      return NextResponse.json({ success: false, error: 'prescriptionId is required' }, { status: 400 });
+    }
+
+    const { ref: docRef, data: existingData, id: resolvedId } = await resolvePrescriptionDocAdmin(prescriptionId);
+
+    const allowedStatuses = ['scheduled', 'completed', 'paused', 'cancelled'];
+    const updatePayload = {
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    if (refillAlertDate !== undefined) {
+      updatePayload.refillAlertDate = String(refillAlertDate || '');
+      updatePayload.nextRefillDate = String(refillAlertDate || '');
+    }
+    if (refillAlertStatus && allowedStatuses.includes(String(refillAlertStatus).toLowerCase())) {
+      updatePayload.refillAlertStatus = String(refillAlertStatus).toLowerCase();
+    }
+    if (courseDurationDays !== undefined && !Number.isNaN(Number(courseDurationDays))) {
+      const days = Math.max(1, Number(courseDurationDays));
+      updatePayload.courseDurationDays = days;
+      const exDate = new Date();
+      exDate.setDate(exDate.getDate() + days);
+      updatePayload.exhaustionDate = exDate.toISOString().split('T')[0];
+    }
+    if (operatorNotes !== undefined) {
+      updatePayload.refillOperatorNotes = String(operatorNotes || '');
+    }
+
+    await docRef.update(updatePayload);
+
+    try {
+      invalidateRxCache(resolvedId);
+      if (prescriptionId !== resolvedId) invalidateRxCache(prescriptionId);
+    } catch {
+      // non-fatal
+    }
+
+    syncPrescriptionToAlgolia(resolvedId, {
+      ...existingData,
+      ...updatePayload,
+      id: resolvedId,
+    }).catch((err) => {
+      console.warn('[API Refill PATCH] Algolia sync warning:', err.message);
+    });
+
+    return NextResponse.json({
+      success: true,
+      id: resolvedId,
+      refillAlertDate: updatePayload.refillAlertDate ?? existingData.refillAlertDate ?? '',
+      refillAlertStatus: updatePayload.refillAlertStatus ?? existingData.refillAlertStatus ?? 'scheduled',
+      courseDurationDays: updatePayload.courseDurationDays ?? existingData.courseDurationDays ?? 60,
+    });
+  } catch (error) {
+    console.error('[/api/prescriptions/refill] PATCH Error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
 
 /**
  * POST /api/prescriptions/refill

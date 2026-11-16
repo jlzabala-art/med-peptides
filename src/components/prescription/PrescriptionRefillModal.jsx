@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import StatusBadge from '@/components/ui/StatusBadge';
 import {
   X,
   Repeat,
@@ -16,14 +17,15 @@ import {
   Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { normalizeLabelsArray, getLabelDisplayTitle } from '@/utils/labels/labelContract';
 
 /**
  * Intelligent helper to parse treatment course duration in days from parts or instructions.
  */
 function estimateCourseDurationDays(parts = [], labels = []) {
   const combinedText = [
-    ...parts.map(p => `${p.title || ''} ${p.volume || ''} ${p.directions || ''} ${p.posology || ''}`),
-    ...labels.map(l => `${l.productTitle || ''} ${l.volume || ''} ${l.directions || ''}`)
+    ...normalizeLabelsArray(parts).map(p => `${p.title || ''} ${p.volume || ''} ${p.directions || ''} ${p.posology || ''}`),
+    ...normalizeLabelsArray(labels).map((l, idx) => `${getLabelDisplayTitle(l, idx)} ${l.volume || ''} ${l.directions || ''}`)
   ].join(' ').toLowerCase();
 
   if (combinedText.includes('3 months') || combinedText.includes('90 days') || combinedText.includes('90 días')) return 90;
@@ -51,23 +53,25 @@ export default function PrescriptionRefillModal({
   docName = '',
   isEs = false,
   presetPartIndex = null,
-  onRefillCreated
+  onRefillCreated,
+  onRefillUpdated,
+  onSelectCycleCode,
 }) {
-  if (!isOpen) return null;
+  const rawParts = useMemo(() => (
+    Array.isArray(currentRx?.parts) && currentRx.parts.length > 0
+      ? currentRx.parts
+      : (Array.isArray(labels) && labels.length > 0
+          ? normalizeLabelsArray(labels).map((l, i) => ({
+              title: getLabelDisplayTitle(l, i),
+              volume: l.volume || '',
+              directions: l.directions || '',
+              apis: l.apis || []
+            }))
+          : [{ title: currentRx?.productTitle || 'Formula 1', volume: currentRx?.volume || '', directions: '' }]
+        )
+  ), [currentRx, labels]);
 
-  const rawParts = Array.isArray(currentRx?.parts) && currentRx.parts.length > 0
-    ? currentRx.parts
-    : (Array.isArray(labels) && labels.length > 0
-        ? labels.map((l, i) => ({
-            title: l.productTitle || `Part ${i + 1}`,
-            volume: l.volume || '',
-            directions: l.directions || '',
-            apis: l.apis || []
-          }))
-        : [{ title: currentRx.productTitle || 'Formula 1', volume: currentRx.volume || '', directions: '' }]
-      );
-
-  // Default selection: if presetPartIndex is provided, select that part, else select all
+  const [activeTab, setActiveTab] = useState('issue'); // 'issue' | 'manage'
   const [selectedIndices, setSelectedIndices] = useState(() => {
     if (typeof presetPartIndex === 'number' && presetPartIndex >= 0 && presetPartIndex < rawParts.length) {
       return [presetPartIndex];
@@ -77,7 +81,7 @@ export default function PrescriptionRefillModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Refill cycle calculation
-  const currentCycle = Number(currentRx.refillCycle || 1);
+  const currentCycle = Number(currentRx?.refillCycle || 1);
   const nextCycle = currentCycle + 1;
   const newCodePreview = `${cleanRxCode.replace(/-R\d+$/i, '')}-R${nextCycle}`;
 
@@ -94,6 +98,49 @@ export default function PrescriptionRefillModal({
   const [refillDate, setRefillDate] = useState(defaultAlertDate);
   const [operatorNotes, setOperatorNotes] = useState('');
 
+  // Manage existing schedule & cycle history state
+  const [cycles, setCycles] = useState([]);
+  const [loadingCycles, setLoadingCycles] = useState(false);
+  const [manageAlertDate, setManageAlertDate] = useState('');
+  const [manageAlertStatus, setManageAlertStatus] = useState('scheduled');
+  const [manageDurationDays, setManageDurationDays] = useState(60);
+  const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+
+  // Resynchronize selection and fetch cycle history whenever modal opens or prescription/part changes
+  useEffect(() => {
+    if (!isOpen) return;
+    if (typeof presetPartIndex === 'number' && presetPartIndex >= 0 && presetPartIndex < rawParts.length) {
+      setSelectedIndices([presetPartIndex]);
+    } else {
+      setSelectedIndices(rawParts.map((_, i) => i));
+    }
+    setDurationDays(estimatedDays);
+    setManageAlertDate(currentRx?.refillAlertDate || currentRx?.nextRefillDate || defaultAlertDate);
+    setManageAlertStatus(currentRx?.refillAlertStatus || 'scheduled');
+    setManageDurationDays(Number(currentRx?.courseDurationDays || estimatedDays || 60));
+
+    const rxId = currentRx?.id || cleanRxCode;
+    if (!rxId) return;
+    let cancelled = false;
+    setLoadingCycles(true);
+    fetch(`/api/prescriptions/refill?prescriptionId=${encodeURIComponent(rxId)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled && data?.success && Array.isArray(data.cycles)) {
+          setCycles(data.cycles);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingCycles(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, currentRx?.id, cleanRxCode, presetPartIndex, rawParts.length, estimatedDays, defaultAlertDate]);
+
+  if (!isOpen) return null;
+
   const togglePart = (idx) => {
     setSelectedIndices(prev => {
       if (prev.includes(idx)) {
@@ -105,6 +152,34 @@ export default function PrescriptionRefillModal({
       }
       return [...prev, idx].sort((a, b) => a - b);
     });
+  };
+
+  const handleSaveSchedule = async () => {
+    const rxId = currentRx?.id || cleanRxCode;
+    if (!rxId) return;
+    setIsSavingSchedule(true);
+    try {
+      const res = await fetch('/api/prescriptions/refill', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptionId: rxId,
+          refillAlertDate: manageAlertDate,
+          refillAlertStatus: manageAlertStatus,
+          courseDurationDays: Number(manageDurationDays),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update schedule');
+      toast.success(isEs ? 'Programación de refill actualizada' : 'Refill schedule updated');
+      if (typeof onRefillUpdated === 'function') {
+        onRefillUpdated(data);
+      }
+    } catch (err) {
+      toast.error(err.message || 'Error updating refill schedule');
+    } finally {
+      setIsSavingSchedule(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -120,7 +195,7 @@ export default function PrescriptionRefillModal({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sourcePrescriptionId: currentRx.id || cleanRxCode,
+          sourcePrescriptionId: currentRx?.id || cleanRxCode,
           selectedPartIndices: selectedIndices,
           refillCycle: nextCycle,
           courseDurationDays: Number(durationDays),
@@ -228,7 +303,197 @@ export default function PrescriptionRefillModal({
           </button>
         </div>
 
-        {/* ── FORM CONTENT ── */}
+        {/* ── TABS: Issue New Cycle vs Manage Schedule & History ── */}
+        <div style={{
+          display: 'flex',
+          gap: '4px',
+          padding: '8px 1.4rem',
+          background: '#f8fafc',
+          borderBottom: '1px solid #e2e8f0'
+        }}>
+          <button
+            type="button"
+            onClick={() => setActiveTab('issue')}
+            style={{
+              flex: 1,
+              padding: '7px 10px',
+              borderRadius: '6px',
+              border: activeTab === 'issue' ? '1px solid #10b981' : '1px solid transparent',
+              background: activeTab === 'issue' ? '#ecfdf5' : 'transparent',
+              color: activeTab === 'issue' ? '#065f46' : '#64748b',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            {isEs ? '1. Renovar / Nuevo Ciclo' : '1. Issue New Cycle'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('manage')}
+            style={{
+              flex: 1,
+              padding: '7px 10px',
+              borderRadius: '6px',
+              border: activeTab === 'manage' ? '1px solid #0284c7' : '1px solid transparent',
+              background: activeTab === 'manage' ? '#eff6ff' : 'transparent',
+              color: activeTab === 'manage' ? '#1e40af' : '#64748b',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            {isEs ? `2. Alertas e Historial (${cycles.length || 1})` : `2. Schedule & History (${cycles.length || 1})`}
+          </button>
+        </div>
+
+        {activeTab === 'manage' ? (
+          <div style={{ overflowY: 'auto', padding: '1.25rem 1.4rem', flex: 1 }}>
+            <div style={{
+              padding: '12px 14px',
+              borderRadius: '8px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              marginBottom: '1rem'
+            }}>
+              <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: '10px' }}>
+                {isEs ? 'Programación actual de este ciclo' : 'Current Cycle Refill Schedule'}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    {isEs ? 'Estado de alerta' : 'Alert Status'}
+                  </label>
+                  <select
+                    value={manageAlertStatus}
+                    onChange={(e) => setManageAlertStatus(e.target.value)}
+                    style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', background: '#fff' }}
+                  >
+                    <option value="scheduled">{isEs ? 'Programado' : 'Scheduled'}</option>
+                    <option value="completed">{isEs ? 'Completado' : 'Completed'}</option>
+                    <option value="paused">{isEs ? 'Pausado' : 'Paused'}</option>
+                    <option value="cancelled">{isEs ? 'Cancelado' : 'Cancelled'}</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    {isEs ? 'Próxima fecha de refill' : 'Next Refill Alert Date'}
+                  </label>
+                  <input
+                    type="date"
+                    value={manageAlertDate}
+                    onChange={(e) => setManageAlertDate(e.target.value)}
+                    style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', background: '#fff' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    {isEs ? 'Duración (días)' : 'Duration (days)'}
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={365}
+                    value={manageDurationDays}
+                    onChange={(e) => setManageDurationDays(e.target.value)}
+                    style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', background: '#fff' }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  disabled={isSavingSchedule}
+                  onClick={handleSaveSchedule}
+                  style={{
+                    padding: '7px 14px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: '#1a73e8',
+                    color: '#fff',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: isSavingSchedule ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {isSavingSchedule ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar Programación' : 'Save Schedule')}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: '8px' }}>
+                {isEs ? 'Cadena de Ciclos (Refill Lineage)' : 'Refill Cycle Lineage'}
+              </div>
+              {loadingCycles ? (
+                <div style={{ fontSize: '0.8rem', color: '#64748b', padding: '12px 0' }}>
+                  {isEs ? 'Cargando historial de ciclos...' : 'Loading cycle history...'}
+                </div>
+              ) : cycles.length === 0 ? (
+                <div style={{ fontSize: '0.8rem', color: '#64748b', padding: '12px 0' }}>
+                  {isEs ? 'Sin ciclos previos registrados.' : 'No prior cycles recorded.'}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {cycles.map((c) => {
+                    const isCurrent = c.code === cleanRxCode || c.id === currentRx?.id;
+                    return (
+                      <div
+                        key={c.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px',
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          border: isCurrent ? '1.5px solid #1a73e8' : '1px solid #e2e8f0',
+                          background: isCurrent ? '#eff6ff' : '#ffffff'
+                        }}
+                      >
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>#{c.code}</strong>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
+                              {isEs ? `Ciclo ${c.refillCycle}` : `Cycle ${c.refillCycle}`}
+                            </span>
+                            <StatusBadge status={c.refillAlertStatus || c.status} />
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
+                            {c.partsCount} {isEs ? 'partes' : 'parts'} · {c.refillAlertDate ? `${isEs ? 'Próx. alerta' : 'Next alert'}: ${c.refillAlertDate}` : (isEs ? 'Sin alerta' : 'No alert date')}
+                          </div>
+                        </div>
+                        {!isCurrent && typeof onSelectCycleCode === 'function' && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onSelectCycleCode(c.code);
+                              onClose();
+                            }}
+                            style={{
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              background: '#fff',
+                              color: '#1a73e8',
+                              fontSize: '0.74rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              flexShrink: 0
+                            }}
+                          >
+                            {isEs ? 'Abrir en Estudio' : 'Open in Studio'}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+        /* ── FORM CONTENT ── */
         <form onSubmit={handleSubmit} style={{ overflowY: 'auto', padding: '1.25rem 1.4rem', flex: 1 }}>
           {/* New Cycle Banner */}
           <div style={{
@@ -521,6 +786,7 @@ export default function PrescriptionRefillModal({
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

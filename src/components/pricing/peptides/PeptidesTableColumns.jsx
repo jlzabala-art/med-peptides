@@ -146,26 +146,6 @@ export function getPeptidesColumns({
                 <span>{isEs ? 'Ficha ↗' : 'Specs ↗'}</span>
               </a>
 
-              {/* Category Badge Pill */}
-              <span style={{
-                fontSize: '0.64rem',
-                fontWeight: 650,
-                color: row?.categoryMeta?.color || '#0284c7',
-                background: row?.categoryMeta?.bg || '#f0f9ff',
-                border: `1px solid ${row?.categoryMeta?.border || '#bae6fd'}`,
-                padding: '1px 6px',
-                borderRadius: '4px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.03em',
-                whiteSpace: 'nowrap',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px'
-              }}>
-                <span>{row?.categoryMeta?.icon || '•'}</span>
-                <span>{row?.categoryMeta?.label}</span>
-              </span>
-
               {/* FDA Regulatory Status Badge */}
               {row.fdaStatus && (
                 <span style={{
@@ -260,7 +240,7 @@ export function getPeptidesColumns({
             </span>
             <span style={{ fontSize: '0.64rem', color: '#5f6368' }}>
               {pricingRole === 'guest'
-                ? (isEs ? 'Wholeseller (15%+15%)' : 'Wholeseller (15%+15%)')
+                ? 'Wholeseller'
                 : (resolved?.primaryLabel || (isEs ? 'por vial estéril' : 'per sterile vial'))}
             </span>
           </div>

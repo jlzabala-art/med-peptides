@@ -165,16 +165,23 @@ BRAND_METADATA['neuro'] = BRAND_METADATA['neuro-performance'];
 BRAND_METADATA['cognitive'] = BRAND_METADATA['neuro-performance'];
 BRAND_METADATA['dermal'] = BRAND_METADATA['dermal-aesthetics'];
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
+  const lang = String(resolvedSearch?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const isEs = lang === 'es';
   const rawSlug = (resolvedParams?.slug || '').toLowerCase();
   const slug = rawSlug === 'ultraman' ? 'ultraperson' : rawSlug;
 
   const meta = BRAND_METADATA[slug] || {
-    title: `${slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : 'Catalog'} | Atlas Collection`,
-    description: `Explore our specialized ${slug} catalog and clinical formulations at Atlas Health.`,
+    title: isEs
+      ? `${slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : 'Catálogo'} | Colección Atlas`
+      : `${slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : 'Catalog'} | Atlas Collection`,
+    description: isEs
+      ? `Explora nuestro catálogo especializado de ${slug} y formulaciones clínicas en Atlas Health.`
+      : `Explore our specialized ${slug} catalog and clinical formulations at Atlas Health.`,
     image: `${BASE_URL}/images/og-peptides.png`,
-    section: 'Clinical Catalog'
+    section: isEs ? 'Catálogo Clínico' : 'Clinical Catalog'
   };
 
   const canonicalUrl = `${BASE_URL}/collection/${slug}`;
@@ -202,7 +209,7 @@ export async function generateMetadata({ params }) {
         },
       ],
       type: 'website',
-      locale: 'es_ES',
+      locale: isEs ? 'es_ES' : 'en_US',
     },
     twitter: {
       card: 'summary_large_image',

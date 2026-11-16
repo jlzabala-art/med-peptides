@@ -7,7 +7,8 @@ import Breadcrumbs from '../components/common/Breadcrumbs';
 import { usePageMeta } from '../hooks/usePageMeta';
 import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
-import PublicStickyActionBar from '../components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import UnifiedMobileSidebarDrawer from '@/components/shared/public/UnifiedMobileSidebarDrawer';
 import DiagnosticReportVisualPreview from '../components/diagnostic/DiagnosticReportVisualPreview';
 import BloodoCollectionSidebar from '../components/diagnostic/BloodoCollectionSidebar';
 import EternaCollectionSidebar from '../components/diagnostic/EternaCollectionSidebar';
@@ -1213,6 +1214,42 @@ export default function BrandCollectionPage({
       handleProductClick(product);
     }
   };
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'brand_collection',
+        name: config.name || (isEs ? 'Colección de Péptidos Clínicos' : 'Clinical Peptide Portfolio'),
+        brandSlug,
+      },
+      bottomBar: {
+        summaryTitle: config.name || (isEs ? 'Colección de Péptidos Clínicos' : 'Clinical Peptide Portfolio'),
+        summarySubtitle: (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
+          ? `${filteredProducts.length} ${isEs ? 'Formulaciones Clínicas' : 'Targeted Formulations'} • Vegan HPMC · EU GMP`
+          : brandSlug === 'colway'
+          ? `${filteredProducts.length} ${isEs ? 'Formulaciones de Tropocolágeno' : 'Tropocollagen Formulations'} • EU CPNP · ISO 22716`
+          : (brandSlug === 'bloodo' || brandSlug === 'eterna' || brandSlug === 'teletest')
+          ? `${filteredProducts.length} ${isEs ? 'Paneles Diagnósticos y Biomarcadores' : 'Diagnostic Biomarker Panels'} • ISO 15189 / CE-IVDR`
+          : `${filteredProducts.length} ${isEs ? 'Monografías y Referencias Certificadas' : 'Reference Peptides & Monographs'}`,
+        badge: (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
+          ? 'Nutraceuticals'
+          : brandSlug === 'peptides'
+          ? 'HPLC ≥99.0%'
+          : (config.badge || 'Clinical Portfolio'),
+        atlasAiLabel: 'Ask Atlas AI',
+        onOpenAtlasAi: () => setIsAtlasAiOpen(true),
+        showSections: true,
+        sectionsLabel: isEs ? 'Categorías' : 'Categories',
+        sectionsCount: brandCategories?.length || 0,
+        onOpenSections: () => setIsMobileSidebarOpen(true),
+        primaryAction: {
+          label: isEs ? 'Consultar Catálogo' : 'Inquire Catalog',
+          onClick: () => setIsInquiryDrawerOpen(true),
+        },
+      },
+    },
+    [config.name, config.badge, brandSlug, filteredProducts.length, isEs]
+  );
 
   return (
     <div
@@ -2895,75 +2932,14 @@ export default function BrandCollectionPage({
         </div>
       </section>
 
-      {/* ── MOBILE SIDEBAR DRAWER (Golden Rule #23) ── */}
-      {isMobileSidebarOpen && brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'flex-start'
-        }}
-        onClick={() => setIsMobileSidebarOpen(false)}
-        >
-          <div
-            style={{
-              width: '85%',
-              maxWidth: '360px',
-              height: '100%',
-              background: '#ffffff',
-              boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflowY: 'auto'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Drawer Header */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '1rem 1.25rem',
-              borderBottom: '1px solid #e2e8f0',
-              position: 'sticky',
-              top: 0,
-              background: '#ffffff',
-              zIndex: 10
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <SlidersHorizontal size={16} color={config.accentColor} />
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  {isEs ? 'Departamentos & Filtros' : 'Departments & Filters'}
-                </h4>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsMobileSidebarOpen(false)}
-                style={{
-                  background: '#f1f5f9',
-                  border: 'none',
-                  borderRadius: '6px',
-                  width: '32px',
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#64748b',
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Drawer Body: Sidebar per brand */}
-            <div style={{ padding: '1rem' }}>
+      {/* ── MOBILE SIDEBAR DRAWER (Golden Rule #23 · Unified Shell) ── */}
+      <UnifiedMobileSidebarDrawer
+        isOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
+        title={isEs ? 'Departamentos & Filtros' : 'Departments & Filters'}
+        icon={<SlidersHorizontal size={16} color={config.accentColor} />}
+        accentColor={config.accentColor}
+      >
               {brandSlug === 'bloodo' ? (
                 <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
               ) : brandSlug === 'eterna' ? (
@@ -3022,10 +2998,7 @@ export default function BrandCollectionPage({
                   onUnlockRequest={() => { setIsMobileSidebarOpen(false); setIsUnlockModalOpen(true); }}
                 />
               )}
-            </div>
-          </div>
-        </div>
-      )}
+      </UnifiedMobileSidebarDrawer>
 
       {/* ── Friction-Free Professional Access Modal ── */}
       {isAuthModalOpen && (
@@ -3223,44 +3196,6 @@ export default function BrandCollectionPage({
 
       {/* ── Institutional Unified Public Footer ── */}
       <PublicUnifiedFooter lang={lang} />
-
-      {/* ── Persistent Google Cloud Console Sticky Bottom Action Bar ── */}
-      <PublicStickyActionBar
-        title={config.name || (isEs ? 'Colección de Péptidos Clínicos' : 'Clinical Peptide Portfolio')}
-        subtitle={
-          (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
-            ? `${filteredProducts.length} ${isEs ? 'Formulaciones Clínicas' : 'Targeted Formulations'} • Vegan HPMC · EU GMP`
-            : brandSlug === 'colway'
-            ? `${filteredProducts.length} ${isEs ? 'Formulaciones de Tropocolágeno' : 'Tropocollagen Formulations'} • EU CPNP · ISO 22716`
-            : (brandSlug === 'bloodo' || brandSlug === 'eterna' || brandSlug === 'teletest')
-            ? `${filteredProducts.length} ${isEs ? 'Paneles Diagnósticos y Biomarcadores' : 'Diagnostic Biomarker Panels'} • ISO 15189 / CE-IVDR`
-            : `${filteredProducts.length} ${isEs ? 'Monografías y Referencias Certificadas' : 'Reference Peptides & Monographs'}`
-        }
-        badge={
-          (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
-            ? 'Nutraceuticals'
-            : brandSlug === 'peptides'
-            ? 'HPLC ≥99.0%'
-            : (config.badge || 'Clinical Portfolio')
-        }
-        badgeType={
-          (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
-            ? 'protocol'
-            : brandSlug === 'peptides'
-            ? 'teal'
-            : 'default'
-        }
-        inquireLabel={isEs ? 'Consultar Catálogo' : 'Inquire Catalog'}
-        onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={true}
-        onOpenClinicalAI={() => setIsAtlasAiOpen(true)}
-        compactMobile={true}
-        showSections={false}
-        sectionsCount={brandCategories?.length || 0}
-        sectionsLabel={isEs ? 'Categorías' : 'Categories'}
-        onOpenSections={() => setIsMobileSidebarOpen(true)}
-        lang={lang}
-      />
 
       {/* ── Unified B2B Order Drawer (Single SSOT across all collections) ── */}
       <UnifiedOrderDrawer lang={lang} />

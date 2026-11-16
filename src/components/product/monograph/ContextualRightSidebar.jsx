@@ -14,7 +14,7 @@ import {
   CheckCircle2,
   Syringe
 } from '@/lib/icons';
-import { QRCodeSVG } from 'qrcode.react';
+import UniversalQrCard from '@/components/ui/UniversalQrCard';
 import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
 
 /**
@@ -293,44 +293,12 @@ export default function ContextualRightSidebar({
       </div>
 
       {/* ── Compact Digital Monograph QR Code ── */}
-      <div style={{
-        background: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        padding: '12px 14px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '8px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', alignSelf: 'flex-start' }}>
-          <QrCode size={13} color="#003666" />
-          <span style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.06em', color: '#64748b', textTransform: 'uppercase' }}>
-            Digital Monograph QR
-          </span>
-        </div>
-
-        <a
-          href={pageUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Direct digital lookup"
-          style={{ display: 'block', lineHeight: 0, padding: '4px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px' }}
-        >
-          <QRCodeSVG
-            value={pageUrl}
-            size={110}
-            bgColor="#ffffff"
-            fgColor="#003666"
-            level="M"
-          />
-        </a>
-
-        <div style={{ fontSize: '0.64rem', color: '#94a3b8', textAlign: 'center', fontFamily: 'monospace' }}>
-          atlashealth-services.com/p/{slug}
-        </div>
-      </div>
+      <UniversalQrCard
+        value={pageUrl}
+        title="Digital Monograph QR"
+        subtitle={`atlashealth-services.com/p/${slug}`}
+        size={110}
+      />
     </aside>
   );
 }

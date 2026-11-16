@@ -6,7 +6,6 @@ import {
   FlaskConical,
   Microscope,
   Briefcase,
-  Globe
 } from '@/lib/icons';
 import BrandLogo from '../common/BrandLogo';
 import './PublicUnifiedFooter.css';
@@ -245,29 +244,6 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
             <span className="public-footer-legal-link" style={textStyle}>
               {isEs ? 'Estándares Regulatorios (CPNP / CE-IVDR)' : 'Regulatory (CPNP / CE-IVDR)'}
             </span>
-          </div>
-
-          <div className="public-footer-lang-switcher" aria-label="Language selector" style={{ pointerEvents: 'auto' }}>
-            <Globe size={13} style={{ color: '#5f6368', flexShrink: 0 }} />
-            <button
-              type="button"
-              onClick={() => handleLanguageChange('en')}
-              className={`public-footer-lang-btn ${!isEs ? 'active' : ''}`}
-              title="Switch to English"
-              style={{ cursor: 'pointer', pointerEvents: 'auto' }}
-            >
-              EN
-            </button>
-            <span className="public-footer-lang-divider">|</span>
-            <button
-              type="button"
-              onClick={() => handleLanguageChange('es')}
-              className={`public-footer-lang-btn ${isEs ? 'active' : ''}`}
-              title="Cambiar a Español"
-              style={{ cursor: 'pointer', pointerEvents: 'auto' }}
-            >
-              ES
-            </button>
           </div>
         </div>
 

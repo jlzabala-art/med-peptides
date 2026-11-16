@@ -53,7 +53,6 @@ import EmptyState from '@/components/ui/EmptyState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import { triggerHaptic } from '@/utils/haptics';
 import { CLINICAL_PILLARS, GALENIC_COMPATIBILITY_ANALYSIS } from '@/data/genomics/clinicalNutrigenomicEngine';
 import '@/styles/publicDesignSystem.css';

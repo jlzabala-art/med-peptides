@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generateMealplanPdf } from '@/lib/pdf/generators/generateMealplanPdf';
+import { computeNutritionistToken } from '@/utils/genomics/nutritionistAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,9 @@ export async function GET(request) {
     const doctorName = searchParams.get('doctor') || (isWafa ? 'Dr. Sajid Burud' : 'Dr. Ryhanh Medical');
     const clinicName = searchParams.get('clinic') || (isWafa ? 'Dr. Sajid Burud Medical Practice' : 'Ryhanh Medical Wellness · Doha, Qatar');
     const mealPlanPartner = searchParams.get('partner') || (isWafa ? 'Dr. Sajid Burud Clinical Nutrition' : 'Ryhanh Healthy Meal Plan & Diet Delivery');
-    const includeOriginal = searchParams.get('full') !== 'false' && searchParams.get('includeOriginal') !== 'false';
+    const audience = searchParams.get('audience') === 'nutritionist' ? 'nutritionist' : 'patient';
+    const includeOriginal = audience === 'nutritionist' && searchParams.get('full') !== 'false' && searchParams.get('includeOriginal') !== 'false';
+    const nutritionistToken = audience === 'nutritionist' ? computeNutritionistToken(sampleId) : null;
 
     const pdfBytes = await generateMealplanPdf({
       sampleId,
@@ -20,14 +23,17 @@ export async function GET(request) {
       doctorName,
       clinicName,
       mealPlanPartner,
-      includeOriginal
+      includeOriginal,
+      audience,
+      nutritionistToken
     });
 
+    const filePrefix = audience === 'nutritionist' ? 'Atlas-Nutritionist-MealPlan-Merged' : 'Atlas-Patient-MealPlan-Simple';
     return new NextResponse(pdfBytes, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="Atlas-MealPlan-Guide-${sampleId}.pdf"`,
+        'Content-Disposition': `inline; filename="${filePrefix}-${sampleId}.pdf"`,
         'Content-Length': pdfBytes.length.toString(),
         'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0'
       }

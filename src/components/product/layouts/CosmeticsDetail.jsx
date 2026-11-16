@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import PublicDatasheetTableOfContents from '@/components/product/PublicDatasheetTableOfContents';
 import ProductSectionFooterNav from '@/components/product/ProductSectionFooterNav';
@@ -1164,6 +1164,37 @@ export default function CosmeticsDetail({
     ];
   }, [product, colwayData, isHairProduct, isLip, isWashGel, isNutricosmetic, isVege, isPeeling]);
 
+  const volumeText = selectedVariant?.volume
+    || product?.volume
+    || product?.size
+    || technicalSpecs?.volume
+    || '250 mL';
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'cosmeceutical',
+        name,
+        slug,
+      },
+      bottomBar: {
+        summaryTitle: name,
+        summarySubtitle: `${volumeText} • ${isMcg ? 'MCG Kapigen Trichology System' : isHairProduct ? 'Colway Hair Strengthening System' : isNutricosmetic ? 'Colway Oral Nutricosmetics' : (slug.includes('vege') || slug.includes('wash-gel')) ? 'Colway Native Dermal Collagen Line' : 'Colway Blue Diamond Cellular Line'}`,
+        badge: lang === 'es' ? 'COSMECÉUTICO' : 'COSMECEUTICAL',
+        atlasAiLabel: 'Atlas AI',
+        onOpenAtlasAi: () => setIsAIDrawerOpen(true),
+        showSections: true,
+        sectionsLabel: lang === 'es' ? 'Secciones' : 'Sections',
+        sectionsCount: tocSections.length,
+        primaryAction: {
+          label: lang === 'es' ? 'Consultar Producto' : 'Inquire Product',
+          onClick: () => setIsInquiryDrawerOpen(true),
+        },
+      },
+    },
+    [name, slug, volumeText, isMcg, isHairProduct, isNutricosmetic, lang, tocSections.length]
+  );
+
   if (!product) return null;
 
   // Cosmetics KPIs — derived from product data, no hardcoded peptide/vial concepts
@@ -1174,12 +1205,6 @@ export default function CosmeticsDetail({
       : applicationProtocol?.leave_on === true
         ? 'Leave-on'
         : 'Topical Use';
-
-  const volumeText = selectedVariant?.volume
-    || product?.volume
-    || product?.size
-    || technicalSpecs?.volume
-    || '250 mL';
 
   const kpis = [
     {
@@ -1218,7 +1243,7 @@ export default function CosmeticsDetail({
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '5rem' }}>
-      <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideTier2={true} hideAiButton={true} hideContactButton={true}
+      <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideAiButton={true} hideContactButton={true}
         breadcrumb={[
           { label: 'Catalog', href: '/catalog' }, 
           { 
@@ -2359,33 +2384,6 @@ export default function CosmeticsDetail({
         }}
         storageKey={`cosmetic_${slug}`}
         onOpenRegisterModal={() => window.open('/auth/login?register=true', '_blank')}
-      />
-
-      {/* PERSISTENT GOOGLE CLOUD STICKY BOTTOM ACTION BAR */}
-      <PublicStickyActionBar
-        title={name}
-        subtitle={`${volumeText} • ${isMcg ? 'MCG Kapigen Trichology System' : isHairProduct ? 'Colway Hair Strengthening System' : isNutricosmetic ? 'Colway Oral Nutricosmetics' : (slug.includes('vege') || slug.includes('wash-gel')) ? 'Colway Native Dermal Collagen Line' : 'Colway Blue Diamond Cellular Line'} • ${isNutricosmetic ? 'EU Reg. 1169/2011' : 'EU Reg. 1223/2009'}`}
-        badge={lang === 'es' ? 'COSMECÉUTICO' : 'COSMECEUTICAL'}
-        badgeType="default"
-        inquireLabel={lang === 'es' ? 'Consultar Producto' : 'Inquire Product'}
-        onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={true}
-        aiCategory={lang === 'es' ? 'Cosmecéutica Avanzada' : 'Advanced Cosmeceuticals'}
-        aiContextQuery={
-          lang === 'es'
-            ? `¿Qué sinergias biológicas, modo de aplicación dérmica y beneficios celulares tiene ${name}?`
-            : `What are the biological synergies, dermal application routine, and cellular benefits of ${name}?`
-        }
-        onOpenClinicalAI={() => setIsAIDrawerOpen(true)}
-        showSections={true}
-        sectionsCount={tocSections.length}
-        sectionsLabel={lang === 'es' ? 'Secciones' : 'Sections'}
-        onOpenSections={() => {
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
-          }
-        }}
-        lang={lang}
       />
 
       {/* Lightbox Image Zoom Modal */}

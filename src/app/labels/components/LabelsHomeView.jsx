@@ -1,0 +1,622 @@
+'use client';
+
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import {
+  Search,
+  Upload,
+  Plus,
+  ChevronRight,
+  Layers,
+  Database,
+  Printer,
+  ShieldCheck,
+  Clock,
+  ExternalLink,
+  Repeat,
+  FilePlus2,
+} from 'lucide-react';
+import CopyableId from '@/components/ui/CopyableId';
+import StatusBadge from '@/components/ui/StatusBadge';
+import DataTable from '@/components/ui/DataTable';
+import LabelsRowQuickPreview from './LabelsRowQuickPreview';
+import PrescriptionStatusPopover from '@/components/prescription/PrescriptionStatusPopover';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { sanitizeRecentCode } from '../utils/labelHelpers';
+
+export default function LabelsHomeView({
+  isEs,
+  labelsKpis,
+  unprintedCodes,
+  handleAddMultipleToQueue,
+  worklistTab,
+  setWorklistTab,
+  worklistTabCounts,
+  worklistDateRange,
+  setWorklistDateRange,
+  setWorklistPage,
+  recentPrescriptions,
+  filterWorklistItem,
+  handleClearRecent,
+  handleSelectOrAddPatient,
+  formatResultDate,
+  renderPrintStatusBadge,
+  paginatedWorklistItems,
+  filteredWorklistItems,
+  safeWorklistPage,
+  worklistPageSize,
+  setWorklistPageSize,
+  totalWorklistPages,
+  onOpenImport,
+  onOpenManualRx,
+}) {
+  const { role } = useRoleAccess();
+  const [statusOverrides, setStatusOverrides] = useState({});
+
+  const renderRefillTag = (item) => {
+    const codeStr = String(item.code || '');
+    const isRefill = Number(item.refillCycle || 1) > 1 || /-R\d+$/i.test(codeStr) || Boolean(item.refillOf);
+    if (!isRefill && !item.refillAlertDate) return null;
+    return (
+      <span
+        style={{
+          fontSize: '0.66rem',
+          fontWeight: 700,
+          color: '#047857',
+          background: '#ecfdf5',
+          border: '1px solid #a7f3d0',
+          padding: '1px 6px',
+          borderRadius: '4px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '3px',
+        }}
+      >
+        <Repeat size={10} />
+        <span>
+          {isRefill ? `R${item.refillCycle || 2}` : ''}
+          {item.refillAlertDate ? `${isRefill ? ' · ' : ''}${item.refillAlertDate}` : ''}
+        </span>
+      </span>
+    );
+  };
+
+  return (
+    <div className="pls-gcp-home">
+      {/* 4 Clinical & Print Audit KPI Metric Cards */}
+      <div className="pls-gcp-kpis">
+        <div className="pls-gcp-kpi-card">
+          <div className="pls-gcp-kpi-top">
+            <span>{isEs ? 'Prescripciones Disponibles' : 'Available Prescriptions'}</span>
+            <Database size={15} color="#1a73e8" />
+          </div>
+          <div className="pls-gcp-kpi-val">
+            {labelsKpis.totalPrescriptions || 339} {isEs ? 'Recetas' : 'Dossiers'}
+          </div>
+          <div className="pls-gcp-kpi-sub">
+            {isEs ? 'Base de datos clínica centralizada' : 'Centralized clinical database'}
+          </div>
+        </div>
+
+        <div className="pls-gcp-kpi-card">
+          <div className="pls-gcp-kpi-top">
+            <span>{isEs ? 'Pendientes de Imprimir' : 'Pending Print Queue'}</span>
+            <Printer size={15} color="#0d9488" />
+          </div>
+          <div className="pls-gcp-kpi-val">
+            {unprintedCodes.length} {isEs ? 'Listas' : 'Ready'}
+          </div>
+          <div className="pls-gcp-kpi-sub">
+            {isEs ? 'Recetas recientes sin imprimir' : 'Recent unprinted prescriptions'}
+          </div>
+        </div>
+
+        <div className="pls-gcp-kpi-card">
+          <div className="pls-gcp-kpi-top">
+            <span>{isEs ? 'Etiquetas A4 Impresas' : 'A4 Labels Printed'}</span>
+            <ShieldCheck size={15} color="#16a34a" />
+          </div>
+          <div className="pls-gcp-kpi-val">
+            {labelsKpis.totalPrintedA4Count ?? 0} {isEs ? 'Impresas' : 'Printed'}
+          </div>
+          <div className="pls-gcp-kpi-sub">
+            {isEs ? 'Trazabilidad de impresión por lote' : 'Cumulative A4 batch audit trail'}
+          </div>
+        </div>
+
+        <div className="pls-gcp-kpi-card">
+          <div className="pls-gcp-kpi-top">
+            <span>{isEs ? 'Cargas Recientes (7 Días)' : 'Ingested (Last 7 Days)'}</span>
+            <Clock size={15} color="#7c3aed" />
+          </div>
+          <div className="pls-gcp-kpi-val">
+            {labelsKpis.uploadedThisWeek ?? 0} {isEs ? 'Nuevas' : 'New RXs'}
+          </div>
+          <div className="pls-gcp-kpi-sub">
+            {isEs ? 'Prescripciones sincronizadas esta semana' : 'Prescriptions ingested this week'}
+          </div>
+        </div>
+      </div>
+
+      {/* Full-Width Prescriptions Worklist (Balanced Single-Column GCP Layout) */}
+      <div style={{ width: '100%' }}>
+        <section className="pls-gcp-card" style={{ width: '100%' }}>
+          <div className="pls-gcp-card-header">
+            <div>
+              <h2 className="pls-gcp-card-title">
+                <Search size={17} color="#1a73e8" />
+                <span>
+                  {isEs
+                    ? 'Centro de Prescripciones y Etiquetado'
+                    : 'Prescriptions & Dispensing Worklist'}
+                </span>
+              </h2>
+              <p className="pls-gcp-card-subtitle">
+                {isEs
+                  ? 'Gestiona recetas, revisa refills, abre su ficha clínica o carga el lote pendiente en 1 clic.'
+                  : 'Manage prescriptions, review refills, open clinical dossiers, or queue unprinted labels in 1 click.'}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {onOpenManualRx && (
+                <button
+                  type="button"
+                  onClick={onOpenManualRx}
+                  style={{
+                    padding: '7px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#334155',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <FilePlus2 size={14} color="#1a73e8" />
+                  <span>{isEs ? 'Rx Manual' : 'Manual Rx'}</span>
+                </button>
+              )}
+              {unprintedCodes.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleAddMultipleToQueue(unprintedCodes)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '6px 11px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: '#1a73e8',
+                    color: '#ffffff',
+                    fontSize: '0.73rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Layers size={13} />
+                  <span>
+                    {isEs ? `Cargar ${unprintedCodes.length} pendientes` : `Queue ${unprintedCodes.length} Unprinted`}
+                  </span>
+                </button>
+              )}
+
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '5px 9px',
+                  fontSize: '0.72rem',
+                  fontWeight: 650,
+                  color: '#5f6368',
+                  background: '#f1f5f9',
+                  borderRadius: '6px',
+                }}
+              >
+                <kbd
+                  style={{
+                    padding: '1px 5px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                  }}
+                >
+                  ⌘K
+                </kbd>
+              </div>
+            </div>
+          </div>
+
+          {/* Worklist Filter Tabs + Date Range */}
+          <div
+            style={{
+              padding: '10px 20px',
+              background: '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'unprinted', labelEs: '○ Pendientes', labelEn: '○ Unprinted' },
+                { id: 'pending_approval', labelEs: '⏳ Por aprobar', labelEn: '⏳ Pending Approval' },
+                { id: 'refills', labelEs: '🔄 Refills', labelEn: '🔄 Refills' },
+                { id: 'printed', labelEs: '🖨️ Impresas (1×)', labelEn: '🖨️ Printed (1×)' },
+                { id: 'reprint', labelEs: '🔁 Reimpresiones', labelEn: '🔁 Reprints' },
+                { id: 'all', labelEs: 'Todas', labelEn: 'All' },
+              ].map((tab) => {
+                const isTabActive = worklistTab === tab.id;
+                const tabCount = worklistTabCounts[tab.id] ?? 0;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setWorklistTab(tab.id);
+                      setWorklistPage(1);
+                    }}
+                    style={{
+                      border: isTabActive ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                      background: isTabActive ? '#e8f0fe' : '#ffffff',
+                      color: isTabActive ? '#1a73e8' : '#475569',
+                      fontSize: '0.72rem',
+                      fontWeight: isTabActive ? 750 : 600,
+                      padding: '3px 10px',
+                      borderRadius: '16px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                    }}
+                  >
+                    <span>{isEs ? tab.labelEs : tab.labelEn}</span>
+                    <span
+                      style={{
+                        fontSize: '0.66rem',
+                        fontWeight: 700,
+                        padding: '0 5px',
+                        borderRadius: '999px',
+                        background: isTabActive ? '#1a73e8' : '#e2e8f0',
+                        color: isTabActive ? '#ffffff' : '#475569',
+                      }}
+                    >
+                      {tabCount}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <select
+              aria-label={isEs ? 'Rango temporal' : 'Date range'}
+              value={worklistDateRange}
+              onChange={(e) => {
+                setWorklistDateRange(e.target.value);
+                setWorklistPage(1);
+              }}
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                color: '#334155',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="7d">{isEs ? 'Últimos 7 días' : 'Last 7 days'}</option>
+              <option value="30d">{isEs ? 'Últimos 30 días' : 'Last 30 days'}</option>
+              <option value="all">{isEs ? 'Todo el historial' : 'All time'}</option>
+            </select>
+          </div>
+
+          {/* Unified Single Worklist Table */}
+          <div>
+            <div
+              style={{
+                padding: '10px 20px',
+                background: '#f8fafc',
+                borderBottom: '1px solid #e2e8f0',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: '#334155',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+              }}
+            >
+              {isEs ? 'Recetas en Base de Datos' : 'Prescriptions Worklist'}
+            </div>
+
+            {paginatedWorklistItems.length === 0 ? (
+              <div style={{ padding: '2rem 1.5rem', textAlign: 'center', color: '#64748b' }}>
+                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                  {isEs ? 'No hay recetas que coincidan con los filtros activos' : 'No prescriptions match the active filters'}
+                </div>
+                <div style={{ fontSize: '0.76rem', marginBottom: '12px' }}>
+                  {isEs ? 'Prueba cambiando la pestaña de estado o ampliando el rango temporal.' : 'Try switching the status tab or expanding the date range.'}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWorklistTab('all');
+                    setWorklistDateRange('all');
+                    setWorklistPage(1);
+                  }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid #1a73e8',
+                    background: '#e8f0fe',
+                    color: '#1a73e8',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {isEs ? 'Limpiar filtros' : 'Reset filters'}
+                </button>
+              </div>
+            ) : (
+              <DataTable
+                columns={[
+                  {
+                    key: 'patient',
+                    label: isEs ? 'Paciente / Código' : 'Patient / Code',
+                    align: 'left',
+                    render: (_val, p) => {
+                      const cleanCode = sanitizeRecentCode(p.code);
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
+                            {p.name || p.patientName || 'Patient'}
+                          </span>
+                          <span onClick={(e) => e.stopPropagation()}>
+                            <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
+                          </span>
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    key: 'title',
+                    label: isEs ? 'Fórmula / Protocolo' : 'Formula / Protocol',
+                    align: 'left',
+                    render: (_val, p) => (
+                      <span style={{ fontSize: '0.78rem', color: '#475569' }}>
+                        {p.title || p.treatmentTitle || 'Prescription protocol'}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'status',
+                    label: isEs ? 'Estado' : 'Status',
+                    align: 'left',
+                    render: (_val, p) => {
+                      const cleanCode = sanitizeRecentCode(p.code);
+                      const mergedRx = statusOverrides[p.code]
+                        ? { ...p, ...statusOverrides[p.code] }
+                        : p;
+                      return (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          <PrescriptionStatusPopover
+                            prescription={mergedRx}
+                            cleanCode={cleanCode}
+                            role={role || 'admin'}
+                            isEs={isEs}
+                            onUpdated={(_code, nextPrimary, nextAxes) => {
+                              setStatusOverrides((prev) => ({
+                                ...prev,
+                                [p.code]: { status: nextPrimary, ...nextAxes },
+                              }));
+                            }}
+                          />
+                          {renderRefillTag(p)}
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    key: 'printStatus',
+                    label: isEs ? 'Impresión / Fecha' : 'Print / Date',
+                    align: 'left',
+                    render: (_val, p) => {
+                      const dateStr = formatResultDate(p.date || p.createdAt || p.uploadedAt);
+                      return (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          {renderPrintStatusBadge(p.code, p.a4PrintCount)}
+                          {dateStr && <span style={{ fontSize: '0.70rem', color: '#64748b' }}>📅 {dateStr}</span>}
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    key: 'actions',
+                    label: isEs ? 'Acciones' : 'Actions',
+                    align: 'right',
+                    render: (_val, p) => {
+                      const cleanCode = sanitizeRecentCode(p.code);
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
+                          <a
+                            href={`/rx/${encodeURIComponent(cleanCode)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            title={isEs ? `Ver prescripción #${p.code}` : `Open prescription #${p.code}`}
+                            style={{
+                              padding: '5px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              background: '#ffffff',
+                              color: '#1a73e8',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                            }}
+                          >
+                            <span>{isEs ? 'Ver Rx' : 'Rx'}</span>
+                            <ExternalLink size={11} />
+                          </a>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectOrAddPatient(p.code, false);
+                              toast.success(isEs ? `#${p.code} añadido a la cola` : `#${p.code} queued`);
+                            }}
+                            title={isEs ? 'Añadir al lote sin salir de la lista' : 'Add to batch queue'}
+                            style={{
+                              padding: '5px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              background: '#ffffff',
+                              color: '#475569',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Plus size={13} />
+                          </button>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              background: '#e8f0fe',
+                              color: '#1a73e8',
+                              fontSize: '0.73rem',
+                              fontWeight: 700,
+                            }}
+                          >
+                            <span>{isEs ? 'Abrir' : 'Open'}</span>
+                            <ChevronRight size={13} />
+                          </span>
+                        </div>
+                      );
+                    },
+                  },
+                ]}
+                data={paginatedWorklistItems}
+                keyField="code"
+                globalSearch={false}
+                hidePagination={true}
+                expandableRender={(row) => (
+                  <LabelsRowQuickPreview
+                    row={row}
+                    cleanCode={sanitizeRecentCode(row.code)}
+                    isEs={isEs}
+                    onOpenStudio={(code) => handleSelectOrAddPatient(code, true)}
+                  />
+                )}
+                onRowClick={(row) => handleSelectOrAddPatient(row.code, true)}
+              />
+            )}
+
+            {/* Pagination Footer */}
+            {filteredWorklistItems.length > 0 && (
+              <div
+                style={{
+                  padding: '10px 20px',
+                  background: '#f8fafc',
+                  borderTop: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '10px',
+                  flexWrap: 'wrap',
+                  fontSize: '0.74rem',
+                  color: '#5f6368',
+                }}
+              >
+                <span>
+                  {isEs
+                    ? `Mostrando ${(safeWorklistPage - 1) * worklistPageSize + 1}–${Math.min(safeWorklistPage * worklistPageSize, filteredWorklistItems.length)} de ${filteredWorklistItems.length} recetas`
+                    : `Showing ${(safeWorklistPage - 1) * worklistPageSize + 1}–${Math.min(safeWorklistPage * worklistPageSize, filteredWorklistItems.length)} of ${filteredWorklistItems.length} prescriptions`}
+                </span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
+                    <span>{isEs ? 'Filas:' : 'Rows per page:'}</span>
+                    <select
+                      value={worklistPageSize}
+                      onChange={(e) => {
+                        setWorklistPageSize(Number(e.target.value));
+                        setWorklistPage(1);
+                      }}
+                      style={{
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '5px',
+                        padding: '3px 6px',
+                        background: '#ffffff',
+                        fontSize: '0.73rem',
+                      }}
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </label>
+
+                  <button
+                    type="button"
+                    disabled={safeWorklistPage <= 1}
+                    onClick={() => setWorklistPage((p) => Math.max(1, p - 1))}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '5px',
+                      border: '1px solid #cbd5e1',
+                      background: safeWorklistPage <= 1 ? '#f1f5f9' : '#ffffff',
+                      color: safeWorklistPage <= 1 ? '#94a3b8' : '#334155',
+                      fontWeight: 600,
+                      cursor: safeWorklistPage <= 1 ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {isEs ? 'Anterior' : 'Previous'}
+                  </button>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {safeWorklistPage} / {totalWorklistPages}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={safeWorklistPage >= totalWorklistPages}
+                    onClick={() => setWorklistPage((p) => Math.min(totalWorklistPages, p + 1))}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '5px',
+                      border: '1px solid #cbd5e1',
+                      background: safeWorklistPage >= totalWorklistPages ? '#f1f5f9' : '#ffffff',
+                      color: safeWorklistPage >= totalWorklistPages ? '#94a3b8' : '#334155',
+                      fontWeight: 600,
+                      cursor: safeWorklistPage >= totalWorklistPages ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {isEs ? 'Siguiente' : 'Next'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

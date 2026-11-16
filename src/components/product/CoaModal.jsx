@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { generateCoaData } from '@/services/coaGeneratorService';
 import { ShieldCheck, FileText, Printer, X, CheckCircle2 } from '@/lib/icons';
+import DataTable from '@/components/ui/DataTable';
 
 /**
  * CoaModal
@@ -259,32 +260,27 @@ export default function CoaModal({ product, variant, isOpen, onClose }) {
               <span>Release Test Results & Specifications</span>
             </h2>
 
-            <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 800, textTransform: 'uppercase' }}>
-                    <th style={{ padding: '8px 12px' }}>Test Parameter</th>
-                    <th style={{ padding: '8px 12px' }}>Release Specification</th>
-                    <th style={{ padding: '8px 12px' }}>Observed Result</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'right' }}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {coa.tests.map((t, idx) => (
-                    <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '8px 12px', fontWeight: 700, color: '#0f172a' }}>{t.parameter}</td>
-                      <td style={{ padding: '8px 12px', color: '#475569', fontFamily: 'monospace', fontSize: '10px' }}>{t.specification}</td>
-                      <td style={{ padding: '8px 12px', fontWeight: 800, fontFamily: 'monospace', color: '#0f172a' }}>{t.result}</td>
-                      <td style={{ padding: '8px 12px', textAlign: 'right' }}>
-                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '9px', fontWeight: 900, backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #86efac' }}>
-                          {t.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              columns={[
+                { key: 'parameter', header: 'Test Parameter', width: '28%', render: (val) => <strong style={{ color: '#0f172a' }}>{val}</strong> },
+                { key: 'specification', header: 'Release Specification', width: '28%', render: (val) => <span style={{ color: '#475569', fontFamily: 'monospace', fontSize: '10px' }}>{val}</span> },
+                { key: 'result', header: 'Observed Result', width: '26%', render: (val) => <strong style={{ fontFamily: 'monospace', color: '#0f172a' }}>{val}</strong> },
+                {
+                  key: 'status',
+                  header: 'Status',
+                  align: 'right',
+                  width: '18%',
+                  render: (val) => (
+                    <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '9px', fontWeight: 900, backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #86efac' }}>
+                      {val}
+                    </span>
+                  ),
+                },
+              ]}
+              data={coa.tests.map((t, idx) => ({ ...t, id: `coa-${idx}` }))}
+              pagination={false}
+              enableAskAtlas={false}
+            />
           </div>
 
           {/* Conclusion & Quality Seal */}

@@ -12,14 +12,21 @@ export async function generateMetadata({ searchParams }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const hasExplicitParam = Boolean(resolvedSearchParams?.rx || resolvedSearchParams?.code);
   const code = hasExplicitParam ? (resolvedSearchParams?.rx || resolvedSearchParams?.code || '').trim() : '';
+  const isEs = String(resolvedSearchParams?.lang || '').toLowerCase() === 'es';
 
-  let rxCode = code;
+  const rxCode = code;
 
-  const title = rxCode
-    ? `Compounding Label Studio • #${rxCode} • Pharmapolis & Atlas Health`
-    : `Compounding Label Studio • Pharmapolis & Atlas Health`;
+  const title = isEs
+    ? (rxCode
+        ? `Prescripciones y Estudio de Etiquetas • #${rxCode} • Atlas Health`
+        : `Prescripciones y Estudio de Etiquetas • Atlas Health`)
+    : (rxCode
+        ? `Prescriptions & Label Studio • #${rxCode} • Atlas Health`
+        : `Prescriptions & Label Studio • Atlas Health`);
 
-  const description = `Internal EU GMP vector compounding label designer & pharmacy print studio. Search prescriptions, customize formulas, and export high-resolution pharmaceutical labels (300 DPI, Vector PDF, A4 Sheets, Zebra thermal).`;
+  const description = isEs
+    ? `Estación clínica de prescripciones magistrales, gestión de refills y diseño de etiquetas farmacéuticas EU GMP (PDF vectorial, pliegos A4 y ZPL térmico).`
+    : `Clinical compounding prescriptions hub, refill management, and EU GMP vector pharmaceutical label studio (Vector PDF, A4 Sheets, Zebra thermal).`;
 
   const canonicalUrl = `${BASE_URL}/labels${code ? `?rx=${encodeURIComponent(code)}` : ''}`;
 
@@ -30,7 +37,8 @@ export async function generateMetadata({ searchParams }) {
       title,
       description,
       url: canonicalUrl,
-      siteName: 'Pharmapolis Compounding Pharmacy • Atlas Health',
+      siteName: 'Atlas Health · Prescriptions & Label Studio',
+      locale: isEs ? 'es_ES' : 'en_US',
       type: 'website',
       images: [
         {

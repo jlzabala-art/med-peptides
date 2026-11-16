@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import DataTable from '@/components/ui/DataTable';
 import { 
   ShieldCheck, 
   Clock, 
@@ -238,45 +239,33 @@ export default function SupplementTechnicalSpecs({
           </span>
         </div>
 
-        <div style={{ padding: '0' }}>
-          {/* eslint-disable-next-line no-restricted-syntax */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.78rem' }}>
-            <thead>
-              <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ padding: '10px 18px', fontWeight: 700, color: '#475569' }}>
-                  {isEs ? 'Principio Activo Compounded' : 'Active Compounded Ingredient'}
-                </th>
-                <th style={{ padding: '10px 18px', fontWeight: 700, color: '#475569', width: '130px' }}>
-                  {isEs ? 'Concentración' : 'Strength / Dose'}
-                </th>
-                <th style={{ padding: '10px 18px', fontWeight: 700, color: '#475569' }}>
-                  {isEs ? 'Mecanismo Farmacológico & Diana' : 'Pharmacological Mechanism & Cellular Target'}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {actives.map((act, idx) => (
-                <tr key={idx} style={{
-                  borderBottom: idx < actives.length - 1 ? '1px solid #f1f5f9' : 'none',
-                  background: idx % 2 === 0 ? '#ffffff' : '#fafafa'
-                }}>
-                  <td style={{ padding: '12px 18px', fontWeight: 700, color: '#0f172a' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#c2410c', flexShrink: 0 }} />
-                      <span>{act.name}</span>
-                    </div>
-                  </td>
-                  <td style={{ padding: '12px 18px', fontFamily: 'monospace', fontWeight: 800, color: '#003666' }}>
-                    {act.dose}
-                  </td>
-                  <td style={{ padding: '12px 18px', color: '#334155', lineHeight: 1.45 }}>
-                    {act.target}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          pagination={false}
+          enableAskAtlas={false}
+          columns={[
+            {
+              key: 'name',
+              label: isEs ? 'Principio Activo Compounded' : 'Active Compounded Ingredient',
+              render: (val) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#0f172a' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#c2410c', flexShrink: 0 }} />
+                  <span>{val}</span>
+                </div>
+              ),
+            },
+            {
+              key: 'dose',
+              label: isEs ? 'Concentración' : 'Strength / Dose',
+              render: (val) => <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#003666' }}>{val}</span>,
+            },
+            {
+              key: 'target',
+              label: isEs ? 'Mecanismo Farmacológico & Diana' : 'Pharmacological Mechanism & Cellular Target',
+              render: (val) => <span style={{ color: '#334155', lineHeight: 1.45 }}>{val}</span>,
+            },
+          ]}
+          data={actives.map((act, idx) => ({ id: act.name || String(idx), ...act }))}
+        />
       </div>
 
       {/* ── 4. PHARMACOKINETICS & GASTRO-RESISTANT HPMC TECHNOLOGY ── */}

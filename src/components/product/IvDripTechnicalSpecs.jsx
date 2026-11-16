@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import DataTable from '@/components/ui/DataTable';
 import { 
   Droplets, 
   ShieldCheck, 
@@ -228,54 +229,45 @@ export default function IvDripTechnicalSpecs({
         )}
 
         {/* Ingredients Grid / Table */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                <th style={{ padding: '10px 16px', fontWeight: 700 }}>{isEs ? 'Principio Activo' : 'Active Compound'}</th>
-                <th style={{ padding: '10px 16px', fontWeight: 700, textAlign: 'right', width: '140px' }}>{isEs ? 'Dosis (50 mL)' : 'Dose (50 mL)'}</th>
-                <th style={{ padding: '10px 16px', fontWeight: 700, width: '160px' }}>{isEs ? 'Categoría' : 'Pharmacological Class'}</th>
-                <th style={{ padding: '10px 16px', fontWeight: 700 }}>{isEs ? 'Función Terapéutica' : 'Biological Function'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredIngredients.map((item, idx) => (
-                <tr 
-                  key={idx}
-                  style={{
-                    borderBottom: '1px solid #f1f5f9',
-                    backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa',
-                    transition: 'background-color 0.15s ease'
-                  }}
-                >
-                  <td style={{ padding: '10px 16px', fontWeight: 750, color: '#0f172a' }}>
-                    {item.name}
-                  </td>
-                  <td style={{ padding: '10px 16px', textAlign: 'right', fontWeight: 850, color: '#065f46', fontSize: '0.88rem' }}>
-                    {Number(item.amount).toLocaleString()} {item.unit || 'mg'}
-                  </td>
-                  <td style={{ padding: '10px 16px', color: '#64748b' }}>
-                    <span style={{
-                      display: 'inline-block',
-                      backgroundColor: '#f1f5f9',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '4px',
-                      padding: '1px 6px',
-                      fontSize: '0.70rem',
-                      fontWeight: 600,
-                      color: '#475569'
-                    }}>
-                      {item.category || 'Active'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '10px 16px', color: '#475569', fontSize: '0.78rem', lineHeight: 1.4 }}>
-                    {item.role || '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={[
+            { key: 'name', header: isEs ? 'Principio Activo' : 'Active Compound', width: '28%', render: (val) => <strong style={{ color: '#0f172a' }}>{val}</strong> },
+            {
+              key: 'amount',
+              header: isEs ? 'Dosis (50 mL)' : 'Dose (50 mL)',
+              align: 'right',
+              width: '18%',
+              render: (_, item) => (
+                <strong className="atlas-num" style={{ color: '#065f46', fontSize: '0.88rem' }}>
+                  {Number(item.amount).toLocaleString()} {item.unit || 'mg'}
+                </strong>
+              ),
+            },
+            {
+              key: 'category',
+              header: isEs ? 'Categoría' : 'Pharmacological Class',
+              width: '20%',
+              render: (val) => (
+                <span style={{
+                  display: 'inline-block',
+                  backgroundColor: '#f1f5f9',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '4px',
+                  padding: '1px 6px',
+                  fontSize: '0.70rem',
+                  fontWeight: 600,
+                  color: '#475569',
+                }}>
+                  {val || 'Active'}
+                </span>
+              ),
+            },
+            { key: 'role', header: isEs ? 'Función Terapéutica' : 'Biological Function', width: '34%', render: (val) => <span style={{ color: '#475569', fontSize: '0.78rem' }}>{val || '—'}</span> },
+          ]}
+          data={filteredIngredients.map((item, idx) => ({ ...item, id: `iv-ing-${idx}` }))}
+          pagination={false}
+          enableAskAtlas={false}
+        />
       </div>
 
       {/* ── 4. Clinical Administration & Carrier Protocol (3-Step Guide) ── */}

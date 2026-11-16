@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import DataTable from '@/components/ui/DataTable';
 import {
   Moon,
   ShieldCheck,
@@ -211,37 +212,59 @@ export default function ProtocolSomatotropicAxisCard({ protocol, lang = 'en' }) 
           </div>
 
           <div className="psac-comparison-table-wrapper">
-            <table className="psac-comparison-table">
-              <thead>
-                <tr>
-                  <th>{isEs ? 'Parámetro Farmacológico' : 'Pharmacological Parameter'}</th>
-                  <th className="th-highlight">Ipamorelin (3rd Gen)</th>
-                  <th>GHRP-6 / GHRP-2 (Legacy)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="td-param">{isEs ? 'Potencia Secretora de GH' : 'GH Secretion Potency'}</td>
-                  <td className="td-highlight">{isEs ? comparison[0]?.gh_potency_es : comparison[0]?.gh_potency}</td>
-                  <td>{isEs ? comparison[1]?.gh_potency_es : comparison[1]?.gh_potency}</td>
-                </tr>
-                <tr>
-                  <td className="td-param">{isEs ? 'Elevación de Prolactina' : 'Prolactin Elevation'}</td>
-                  <td className="td-highlight td-safe">✓ {isEs ? comparison[0]?.prolactin_stimulation_es : comparison[0]?.prolactin_stimulation}</td>
-                  <td className="td-risk">⚠️ {isEs ? comparison[1]?.prolactin_stimulation_es : comparison[1]?.prolactin_stimulation}</td>
-                </tr>
-                <tr>
-                  <td className="td-param">{isEs ? 'Estimulación de Cortisol y ACTH' : 'Cortisol & ACTH Stimulation'}</td>
-                  <td className="td-highlight td-safe">✓ {isEs ? comparison[0]?.cortisol_acth_stimulation_es : comparison[0]?.cortisol_acth_stimulation}</td>
-                  <td className="td-risk">⚠️ {isEs ? comparison[1]?.cortisol_acth_stimulation_es : comparison[1]?.cortisol_acth_stimulation}</td>
-                </tr>
-                <tr>
-                  <td className="td-param">{isEs ? 'Apetito e Hiperfagia' : 'Appetite & Hyperphagia'}</td>
-                  <td className="td-highlight td-safe">✓ {isEs ? comparison[0]?.appetite_hyperphagia_es : comparison[0]?.appetite_hyperphagia}</td>
-                  <td className="td-warn">⚠️ {isEs ? comparison[1]?.appetite_hyperphagia_es : comparison[1]?.appetite_hyperphagia}</td>
-                </tr>
-              </tbody>
-            </table>
+            <DataTable
+              pagination={false}
+              enableAskAtlas={false}
+              columns={[
+                {
+                  key: 'param',
+                  label: isEs ? 'Parámetro Farmacológico' : 'Pharmacological Parameter',
+                  render: (val) => <span className="td-param">{val}</span>,
+                },
+                {
+                  key: 'ipamorelin',
+                  label: 'Ipamorelin (3rd Gen)',
+                  render: (val, row) => <span className={`td-highlight ${row.safe ? 'td-safe' : ''}`}>{val}</span>,
+                },
+                {
+                  key: 'legacy',
+                  label: 'GHRP-6 / GHRP-2 (Legacy)',
+                  render: (val, row) => <span className={row.legacyClass || ''}>{val}</span>,
+                },
+              ]}
+              data={[
+                {
+                  id: 'gh',
+                  param: isEs ? 'Potencia Secretora de GH' : 'GH Secretion Potency',
+                  ipamorelin: isEs ? comparison[0]?.gh_potency_es : comparison[0]?.gh_potency,
+                  legacy: isEs ? comparison[1]?.gh_potency_es : comparison[1]?.gh_potency,
+                },
+                {
+                  id: 'prolactin',
+                  param: isEs ? 'Elevación de Prolactina' : 'Prolactin Elevation',
+                  ipamorelin: `✓ ${isEs ? comparison[0]?.prolactin_stimulation_es : comparison[0]?.prolactin_stimulation}`,
+                  legacy: `⚠️ ${isEs ? comparison[1]?.prolactin_stimulation_es : comparison[1]?.prolactin_stimulation}`,
+                  safe: true,
+                  legacyClass: 'td-risk',
+                },
+                {
+                  id: 'cortisol',
+                  param: isEs ? 'Estimulación de Cortisol y ACTH' : 'Cortisol & ACTH Stimulation',
+                  ipamorelin: `✓ ${isEs ? comparison[0]?.cortisol_acth_stimulation_es : comparison[0]?.cortisol_acth_stimulation}`,
+                  legacy: `⚠️ ${isEs ? comparison[1]?.cortisol_acth_stimulation_es : comparison[1]?.cortisol_acth_stimulation}`,
+                  safe: true,
+                  legacyClass: 'td-risk',
+                },
+                {
+                  id: 'appetite',
+                  param: isEs ? 'Apetito e Hiperfagia' : 'Appetite & Hyperphagia',
+                  ipamorelin: `✓ ${isEs ? comparison[0]?.appetite_hyperphagia_es : comparison[0]?.appetite_hyperphagia}`,
+                  legacy: `⚠️ ${isEs ? comparison[1]?.appetite_hyperphagia_es : comparison[1]?.appetite_hyperphagia}`,
+                  safe: true,
+                  legacyClass: 'td-warn',
+                },
+              ]}
+            />
           </div>
         </div>
       )}

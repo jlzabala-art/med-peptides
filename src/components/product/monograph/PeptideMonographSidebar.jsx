@@ -15,7 +15,7 @@ import {
   ExternalLink,
   Sparkles
 } from '@/lib/icons';
-import { QRCodeSVG } from 'qrcode.react';
+import UniversalQrCard from '@/components/ui/UniversalQrCard';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
 import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
@@ -503,74 +503,12 @@ export default function PeptideMonographSidebar({
       </div>
 
       {/* ── CARD 4: Traceability QR Code (Canonical Monograph Lookup) ── */}
-      <div style={{
-        background: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        padding: '10px 12px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '6px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <QrCode size={13} color="#003666" />
-            <span style={{ fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.06em', color: '#64748b', textTransform: 'uppercase' }}>
-              Digital Verification QR
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={handleCopyUrl}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-              fontSize: '0.64rem',
-              color: '#0284c7',
-              fontWeight: 700,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '3px'
-            }}
-            title="Copy link"
-          >
-            {copiedUrl ? <Check size={11} /> : <Copy size={11} />}
-            <span>{copiedUrl ? 'Copied' : 'Copy link'}</span>
-          </button>
-        </div>
-
-        <a
-          href={pageUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Direct digital verification link"
-          style={{
-            display: 'block',
-            lineHeight: 0,
-            padding: '5px',
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-          }}
-        >
-          <QRCodeSVG
-            value={pageUrl}
-            size={105}
-            bgColor="#ffffff"
-            fgColor="#003666"
-            level="M"
-          />
-        </a>
-
-        <div style={{ fontSize: '0.62rem', color: '#94a3b8', textAlign: 'center', fontFamily: 'monospace', lineHeight: 1.2 }}>
-          Scan in clinic to verify batch authenticity & posology
-        </div>
-      </div>
+      <UniversalQrCard
+        value={pageUrl}
+        title="Digital Verification QR"
+        subtitle="Scan in clinic to verify batch authenticity & posology"
+        size={105}
+      />
     </aside>
   );
 }

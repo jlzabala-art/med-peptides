@@ -18,6 +18,7 @@ import {
   FileText
 } from '@/lib/icons';
 import { getProductTechnicalDetails } from '@/data/productClinicalSpecsRegistry';
+import DataTable from '@/components/ui/DataTable';
 
 export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs = false, datasheet = null, onViewProduct = null }) {
   const specs = getProductTechnicalDetails(product, brandSlug);
@@ -129,60 +130,65 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
                   transition: 'max-height 0.3s ease'
                 }}
               >
-                {/* eslint-disable-next-line no-restricted-syntax */}
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.74rem' }}>
-                  <thead>
-                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.68rem', textTransform: 'uppercase' }}>
-                      <th style={{ padding: '6px 12px', width: '32%' }}>INCI Standard Name</th>
-                      <th style={{ padding: '6px 12px', width: '28%' }}>Functional Role</th>
-                      <th style={{ padding: '6px 12px', width: '22%' }}>Classification</th>
-                      <th style={{ padding: '6px 12px', width: '18%' }}>Origin</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {specs.ingredients.map((ing, idx) => {
-                      const isFunctionalActive = ing.inci_group === 'functional_active' || ing.inci_group === 'active';
-                      return (
-                        <tr
-                          key={idx}
-                          style={{
-                            borderBottom: '1px solid #f1f5f9',
-                            background: isFunctionalActive ? 'rgba(13, 148, 136, 0.03)' : '#ffffff'
-                          }}
-                        >
-                          <td style={{ padding: '6px 12px', fontWeight: isFunctionalActive ? 750 : 600, color: isFunctionalActive ? '#0d9488' : '#0f172a' }}>
+                <DataTable
+                  columns={[
+                    {
+                      key: 'inci_name',
+                      header: 'INCI Standard Name',
+                      width: '32%',
+                      render: (_, ing) => {
+                        const isFunctionalActive = ing.inci_group === 'functional_active' || ing.inci_group === 'active';
+                        return (
+                          <div style={{ fontWeight: isFunctionalActive ? 750 : 600, color: isFunctionalActive ? '#0d9488' : '#0f172a' }}>
                             {ing.inci_name}
                             {ing.common_name && (
-                              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 450 }}>
-                                {ing.common_name}
-                              </div>
+                              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 450 }}>{ing.common_name}</div>
                             )}
-                          </td>
-                          <td style={{ padding: '6px 12px', color: '#475569' }}>
-                            {Array.isArray(ing.function) ? ing.function.join(', ') : (ing.role || ing.function || '—')}
-                          </td>
-                          <td style={{ padding: '6px 12px' }}>
-                            <span
-                              style={{
-                                fontSize: '0.64rem',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                fontWeight: 700,
-                                background: isFunctionalActive ? '#ccfbf1' : '#f1f5f9',
-                                color: isFunctionalActive ? '#0f766e' : '#475569'
-                              }}
-                            >
-                              {ing.inci_group || 'Excipient'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '6px 12px', color: '#64748b', fontSize: '0.68rem' }}>
-                            {ing.origin || 'Pharma Grade'}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                          </div>
+                        );
+                      },
+                    },
+                    {
+                      key: 'function',
+                      header: 'Functional Role',
+                      width: '28%',
+                      render: (_, ing) => (
+                        <span style={{ color: '#475569' }}>
+                          {Array.isArray(ing.function) ? ing.function.join(', ') : (ing.role || ing.function || '—')}
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'inci_group',
+                      header: 'Classification',
+                      width: '22%',
+                      render: (_, ing) => {
+                        const isFunctionalActive = ing.inci_group === 'functional_active' || ing.inci_group === 'active';
+                        return (
+                          <span style={{
+                            fontSize: '0.64rem',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontWeight: 700,
+                            background: isFunctionalActive ? '#ccfbf1' : '#f1f5f9',
+                            color: isFunctionalActive ? '#0f766e' : '#475569',
+                          }}>
+                            {ing.inci_group || 'Excipient'}
+                          </span>
+                        );
+                      },
+                    },
+                    {
+                      key: 'origin',
+                      header: 'Origin',
+                      width: '18%',
+                      render: (val) => <span style={{ color: '#64748b', fontSize: '0.68rem' }}>{val || 'Pharma Grade'}</span>,
+                    },
+                  ]}
+                  data={specs.ingredients.map((ing, idx) => ({ ...ing, id: ing.inci_name || `tech-ing-${idx}` }))}
+                  pagination={false}
+                  enableAskAtlas={false}
+                />
               </div>
 
               {specs.ingredients.length > 5 && (
@@ -233,31 +239,16 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
               </span>
             </div>
 
-            {/* eslint-disable-next-line no-restricted-syntax */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.74rem' }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  <th style={{ padding: '8px 14px', width: '38%', fontWeight: 700 }}>{isEs ? 'Principio Activo Estandarizado' : 'Standardized Bioactive Compound'}</th>
-                  <th style={{ padding: '8px 14px', width: '22%', fontWeight: 700 }}>{isEs ? 'Cantidad Clínica' : 'Clinical Amount'}</th>
-                  <th style={{ padding: '8px 14px', width: '40%', fontWeight: 700 }}>{isEs ? 'Mecanismo y Diana Biológica' : 'Biological Action & Target'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {specs.actives.map((act, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', background: idx % 2 === 0 ? '#ffffff' : '#fafafa' }}>
-                    <td style={{ padding: '9px 14px', fontWeight: 750, color: '#0f172a' }}>
-                      {act.name}
-                    </td>
-                    <td style={{ padding: '9px 14px', fontWeight: 800, color: '#0284c7', fontVariantNumeric: 'tabular-nums' }}>
-                      {act.amount}
-                    </td>
-                    <td style={{ padding: '9px 14px', color: '#475569', lineHeight: 1.4 }}>
-                      {act.role}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTable
+              columns={[
+                { key: 'name', header: isEs ? 'Principio Activo Estandarizado' : 'Standardized Bioactive Compound', width: '38%', render: (val) => <strong style={{ color: '#0f172a' }}>{val}</strong> },
+                { key: 'amount', header: isEs ? 'Cantidad Clínica' : 'Clinical Amount', width: '22%', render: (val) => <strong className="atlas-num" style={{ color: '#0284c7' }}>{val}</strong> },
+                { key: 'role', header: isEs ? 'Mecanismo y Diana Biológica' : 'Biological Action & Target', width: '40%', render: (val) => <span style={{ color: '#475569' }}>{val}</span> },
+              ]}
+              data={specs.actives.map((act, idx) => ({ ...act, id: `tech-act-${idx}` }))}
+              pagination={false}
+              enableAskAtlas={false}
+            />
           </div>
 
           {/* Delivery & Purity Highlights (Clean GCP Cards) */}
@@ -302,35 +293,17 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
                 </span>
               </div>
 
-              {/* eslint-disable-next-line no-restricted-syntax */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.74rem' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.68rem', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '8px 12px', width: '42%' }}>Clinical Biomarker Panel</th>
-                    <th style={{ padding: '8px 12px', width: '18%' }}>Reporting Unit</th>
-                    <th style={{ padding: '8px 12px', width: '22%' }}>Target Clinical Range</th>
-                    <th style={{ padding: '8px 12px', width: '18%' }}>Precision CV%</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {specs.biomarkers.map((bm, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>
-                        {bm.name}
-                      </td>
-                      <td style={{ padding: '8px 12px', color: '#64748b' }}>
-                        {bm.unit}
-                      </td>
-                      <td style={{ padding: '8px 12px', fontWeight: 750, color: '#16a34a' }}>
-                        {bm.target}
-                      </td>
-                      <td style={{ padding: '8px 12px', color: '#dc2626', fontWeight: 700 }}>
-                        {bm.cv}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataTable
+                columns={[
+                  { key: 'name', header: 'Clinical Biomarker Panel', width: '42%', render: (val) => <strong style={{ color: '#0f172a' }}>{val}</strong> },
+                  { key: 'unit', header: 'Reporting Unit', width: '18%', render: (val) => <span style={{ color: '#64748b' }}>{val}</span> },
+                  { key: 'target', header: 'Target Clinical Range', width: '22%', render: (val) => <strong style={{ color: '#16a34a' }}>{val}</strong> },
+                  { key: 'cv', header: 'Precision CV%', align: 'right', width: '18%', render: (val) => <strong className="atlas-num" style={{ color: '#dc2626' }}>{val}</strong> },
+                ]}
+                data={specs.biomarkers.map((bm, idx) => ({ ...bm, id: `tech-bm-${idx}` }))}
+                pagination={false}
+                enableAskAtlas={false}
+              />
             </div>
           )}
 

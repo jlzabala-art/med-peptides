@@ -21,8 +21,11 @@ import {
 import { getAuthoritativeClinicalData } from '@/data/pharmapolisLabelsMap';
 export { invalidateRxCache };
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
+  const lang = String(resolvedSearch?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const isEs = lang === 'es';
   const rawCode = resolvedParams?.code || '';
   const cleanCode = sanitizePrescriptionCode(rawCode);
   const rx = await getPrescriptionData(cleanCode || rawCode);
@@ -54,20 +57,24 @@ export async function generateMetadata({ params }) {
   const posologySummary = typeof rawPos === 'object' ? (rawPos.regimen || rawPos.summary || rawPos.timing || rawPos.notes || '') : String(rawPos || '');
   const packSummary = rx?.structuredPosology?.packLabel || '';
 
-  let description = 'Verified clinical formulation monograph and pharmaceutical posology protocol. Authorized medical verification • Atlas Health Services.';
+  let description = isEs
+    ? 'Monografía verificada de formulación clínica y protocolo de posología farmacéutica. Verificación médica autorizada • Atlas Health Services.'
+    : 'Verified clinical formulation monograph and pharmaceutical posology protocol. Authorized medical verification • Atlas Health Services.';
   if (formulaSummary) {
-    description = `Formula: ${formulaSummary}${packSummary ? ` (${packSummary})` : ''}. `;
+    description = `${isEs ? 'Fórmula' : 'Formula'}: ${formulaSummary}${packSummary ? ` (${packSummary})` : ''}. `;
     if (posologySummary) {
-      description += `Posology: ${posologySummary}. `;
+      description += `${isEs ? 'Posología' : 'Posology'}: ${posologySummary}. `;
     }
-    description += 'Atlas Health Services · Medical Practice Care.';
+    description += isEs ? 'Atlas Health Services · Atención Médica Clínica.' : 'Atlas Health Services · Medical Practice Care.';
   }
 
   if (description.length > 200) {
     description = description.slice(0, 197).trim() + '...';
   }
 
-  const title = `Clinical Prescription Dossier #${cleanCode} • Atlas Health Services`;
+  const title = isEs
+    ? `Expediente de Prescripción Clínica #${cleanCode} • Atlas Health Services`
+    : `Clinical Prescription Dossier #${cleanCode} • Atlas Health Services`;
   const ogLogoUrl = `${BASE_URL}/atlas-health-logo-wa.png`;
 
   return {
@@ -77,7 +84,8 @@ export async function generateMetadata({ params }) {
       title,
       description,
       url: `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}`,
-      siteName: 'Atlas Health Services · Clinical Formulary',
+      siteName: isEs ? 'Atlas Health Services · Formulario Clínico' : 'Atlas Health Services · Clinical Formulary',
+      locale: isEs ? 'es_ES' : 'en_US',
       type: 'article',
       images: [
         {

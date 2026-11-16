@@ -85,7 +85,7 @@ function AuthBanner({ tier, isAuthenticated }) {
     }}>
       <Lock size={16} style={{ flexShrink: 0 }} />
       <span>
-        <strong>Viewing public wholesale prices</strong> — standard distributor rates (cost + 15% Atlas + 15% Wholesaler = cost × 1.3225).{' '}
+        <strong>Viewing public wholesale prices</strong> — standard B2B distributor rates.{' '}
         <Link href="/auth/login" style={{ color: '#d97706', fontWeight: 700, textDecoration: 'underline' }}>
           Log in
         </Link>{' '}
@@ -283,7 +283,7 @@ export default function UnifiedPriceHub({
       { title: 'Total SKUs', value: displaySkus, subtitle: `across ${displayLists} catalogs`, icon: Package, color: '#0284c7' },
       { title: 'Price Lists', value: displayLists, subtitle: `${activeLists} active schedules`, icon: List, color: '#0d9488' },
       { title: 'Your Tier', value: tierLabel.split(' ')[0], subtitle: tierLabel, icon: ShieldCheck, color: tierColor.text },
-      { title: 'Formula Base', value: 'Cost + 15% + 15%', subtitle: 'Wholesale = Cost × 1.3225', icon: Tag, color: '#7c3aed' },
+      { title: 'Schedule Tier', value: effectiveTier === 'admin' ? 'Cost + 15% + 15%' : 'Wholeseller B2B', subtitle: effectiveTier === 'admin' ? 'Wholesale = Cost × 1.3225' : 'Authorized distributor tariff', icon: Tag, color: '#7c3aed' },
     ];
   }, [
     selectedGroup,

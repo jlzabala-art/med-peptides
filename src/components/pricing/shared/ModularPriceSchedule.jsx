@@ -3,9 +3,6 @@
 import React, { useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import {
-  Download,
-  FileText,
-  Layers,
   RotateCcw,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -66,7 +63,6 @@ export default function ModularPriceSchedule({
   const isGuest = !user || effectiveRole === 'guest';
   const canViewLanded = Boolean(isAdmin);
 
-  const [viewMode, setViewMode] = useState('table');
   const [copied, setCopied] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
@@ -373,30 +369,12 @@ export default function ModularPriceSchedule({
               </button>
             )}
 
-            <div className="view-switcher">
-              <button
-                type="button"
-                onClick={() => setViewMode('table')}
-                className={`view-btn ${viewMode === 'table' ? 'active' : ''}`}
-              >
-                <FileText size={14} />
-                <span>Table</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('cards')}
-                className={`view-btn ${viewMode === 'cards' ? 'active' : ''}`}
-              >
-                <Layers size={14} />
-                <span>Cards</span>
-              </button>
-            </div>
           </div>
         </div>
 
         <PricingDataTable
           products={filteredProducts}
-          viewMode={viewMode}
+          viewMode="cards"
           skuPrefixPattern={skuPrefixPattern}
           loginRedirect={loginRedirect}
           currency={currency}
@@ -430,50 +408,6 @@ export default function ModularPriceSchedule({
         isGuest={isGuest}
         onPrint={handlePrint}
       />
-
-      <div className="mobile-floating-bar no-print">
-        <div className="mobile-floating-inner">
-          <div className="mobile-currency-pills">
-            {availableCurrencies.map((cur) => (
-              <button
-                key={cur}
-                type="button"
-                onClick={() => setCurrency(cur)}
-                className={`mobile-pill ${currency === cur ? 'active' : ''}`}
-              >
-                {cur}
-              </button>
-            ))}
-          </div>
-
-          <div className="mobile-action-buttons">
-            <button
-              type="button"
-              onClick={() => setViewMode((prev) => (prev === 'table' ? 'cards' : 'table'))}
-              className="mobile-btn mobile-btn-ghost"
-            >
-              {viewMode === 'table' ? <Layers size={14} /> : <FileText size={14} />}
-              <span>{viewMode === 'table' ? 'Cards' : 'Table'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsExportModalOpen(true)}
-              className="mobile-btn mobile-btn-accent"
-            >
-              <Download size={14} />
-              <span>Export</span>
-            </button>
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="mobile-btn mobile-btn-primary"
-            >
-              <FileText size={14} />
-              <span>Preview PDF</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       <DocumentPreviewModal
         isOpen={isPdfPreviewOpen}

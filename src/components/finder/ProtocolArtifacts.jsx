@@ -17,6 +17,7 @@ import Eye from "lucide-react/dist/esm/icons/eye";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 /* eslint-disable no-unused-vars */
 import React from 'react';
+import DataTable from '@/components/ui/DataTable';
 
 
 
@@ -113,30 +114,27 @@ export const PatientAdministrationGuide = ({ data }) => {
         <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Calendar size={20} /> Weekly Administration
         </h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-          <thead>
-            <tr style={{ background: 'var(--color-bg-app)', textAlign: 'left' }}>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 900, color: 'var(--color-text-secondary)' }}>WEEK</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 900, color: 'var(--color-text-secondary)' }}>MEDICATION</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 900, color: 'var(--color-text-secondary)' }}>DOSE</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 900, color: 'var(--color-text-secondary)' }}>DAY</th>
-            </tr>
-          </thead>
-          <tbody>
-            {timeline.slice(0, 12).map((w, i) => {
-              const weekNum = w?.week || i + 1;
-              const meds = w?.medications || (w?.events ? w.events.filter(e => e.type === 'medication') : []);
-              return meds.map((c, j) => (
-                <tr key={`${i}-${j}`} style={{ borderTop: j === 0 ? '1px solid #e2e8f0' : 'none' }}>
-                  <td style={{ padding: '1rem', fontSize: '0.85rem', fontWeight: 700 }}>{j === 0 ? `Week ${weekNum}` : ''}</td>
-                  <td style={{ padding: '1rem', fontSize: '0.85rem', fontWeight: 800 }}>{c.name}</td>
-                  <td style={{ padding: '1rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>{c.dosage}</td>
-                  <td style={{ padding: '1rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-text-secondary)' }}>{(c.days || []).join(', ') || c.frequency}</td>
-                </tr>
-              ));
-            })}
-          </tbody>
-        </table>
+        <DataTable
+          columns={[
+            { key: 'weekLabel', header: 'WEEK', width: '16%', render: (val) => <span style={{ fontWeight: 700 }}>{val}</span> },
+            { key: 'name', header: 'MEDICATION', width: '34%', render: (val) => <span style={{ fontWeight: 800 }}>{val}</span> },
+            { key: 'dosage', header: 'DOSE', width: '25%', render: (val) => <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{val}</span> },
+            { key: 'daysLabel', header: 'DAY', width: '25%', render: (val) => <span style={{ fontWeight: 800, color: 'var(--color-text-secondary)' }}>{val}</span> },
+          ]}
+          data={timeline.slice(0, 12).flatMap((w, i) => {
+            const weekNum = w?.week || i + 1;
+            const meds = w?.medications || (w?.events ? w.events.filter(e => e.type === 'medication') : []);
+            return meds.map((c, j) => ({
+              id: `wk-${i}-${j}`,
+              weekLabel: j === 0 ? `Week ${weekNum}` : '',
+              name: c.name,
+              dosage: c.dosage,
+              daysLabel: (c.days || []).join(', ') || c.frequency || '—',
+            }));
+          })}
+          pagination={false}
+          enableAskAtlas={false}
+        />
       </section>
 
       <section style={{ marginBottom: '3rem' }}>
@@ -226,38 +224,29 @@ export const PhysicianMonitoringChecklist = ({ data }) => {
         <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Stethoscope size={20} /> Monitoring Schedule
         </h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-          <thead>
-            <tr style={{ background: 'var(--color-bg-app)', textAlign: 'left' }}>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 900, color: 'var(--color-text-secondary)' }}>WEEK</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 900, color: 'var(--color-text-secondary)' }}>CHECK TYPE</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 900, color: 'var(--color-text-secondary)' }}>PARAMETERS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {monitoring.length > 0 ? (
-              monitoring.map((m, i) => (
-                <tr key={i} style={{ borderTop: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 700 }}>{m.week === 0 ? 'Baseline' : `Week ${m.week}`}</td>
-                  <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 800 }}>Follow-up Check</td>
-                  <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{(m.labs || []).join(', ')}</td>
-                </tr>
-              ))
-            ) : (
-              [
-                { week: 'Week 4', type: 'Hematology', params: 'CBC, Liver Panel, Renal Function' },
-                { week: 'Week 8', type: 'Metabolic', params: 'HBA1C, Fasting Glucose, Lipid Profile' },
-                { week: 'Week 12', type: 'Final Systemic', params: 'Comprehensive Panel, Recovery Audit' }
-              ].map((m, i) => (
-                <tr key={i} style={{ borderTop: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 700 }}>{m.week}</td>
-                  <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 800 }}>{m.type}</td>
-                  <td style={{ padding: '1.25rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{m.params}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <DataTable
+          columns={[
+            { key: 'week', header: 'WEEK', width: '20%', render: (val) => <span style={{ fontWeight: 700 }}>{val}</span> },
+            { key: 'type', header: 'CHECK TYPE', width: '25%', render: (val) => <span style={{ fontWeight: 800 }}>{val}</span> },
+            { key: 'params', header: 'PARAMETERS', width: '55%', render: (val) => <span style={{ fontWeight: 600, color: 'var(--color-text-secondary)' }}>{val}</span> },
+          ]}
+          data={
+            monitoring.length > 0
+              ? monitoring.map((m, i) => ({
+                  id: `mon-${i}`,
+                  week: m.week === 0 ? 'Baseline' : `Week ${m.week}`,
+                  type: 'Follow-up Check',
+                  params: (m.labs || []).join(', '),
+                }))
+              : [
+                  { id: 'mon-def-1', week: 'Week 4', type: 'Hematology', params: 'CBC, Liver Panel, Renal Function' },
+                  { id: 'mon-def-2', week: 'Week 8', type: 'Metabolic', params: 'HBA1C, Fasting Glucose, Lipid Profile' },
+                  { id: 'mon-def-3', week: 'Week 12', type: 'Final Systemic', params: 'Comprehensive Panel, Recovery Audit' },
+                ]
+          }
+          pagination={false}
+          enableAskAtlas={false}
+        />
       </section>
 
       <section style={{ marginBottom: '3rem' }}>

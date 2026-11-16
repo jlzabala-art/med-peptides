@@ -153,6 +153,7 @@ export default function PharmacyLabelsModal({
   const [fulfillmentMode, setFulfillmentMode] = useState(() => {
     return sourceRx?.fulfillmentMode || (sourceRx?.supplierFulfillment ? 'external_supplier' : 'internal');
   });
+  const [showPrintSettings, setShowPrintSettings] = useState(false);
 
   // Track print count and reprint index in real-time
   const [modalPrintCount, setModalPrintCount] = useState(() => {
@@ -2244,6 +2245,7 @@ export default function PharmacyLabelsModal({
                   </span>
 
                   {labels.map((lbl, idx) => {
+                    if (!lbl || typeof lbl !== 'object') return null;
                     const isSelected = idx === selectedProductIdx;
                     const phaseNum = lbl.phaseNumber || (idx + 1);
                     const title = lbl.productTitle || lbl.productName || `Formula ${idx + 1}`;
@@ -2405,41 +2407,68 @@ export default function PharmacyLabelsModal({
                     {isEs ? 'Modalidad de Despacho & Refill:' : 'Fulfillment & Refill Mode:'}
                   </span>
                 </div>
-                <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '2px', borderRadius: '6px', border: '1px solid #dadce0', gap: '2px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setFulfillmentMode('internal')}
-                    style={{
-                      padding: '5px 12px',
-                      borderRadius: '4px',
-                      border: fulfillmentMode === 'internal' ? '1px solid #1a73e8' : '1px solid transparent',
-                      background: fulfillmentMode === 'internal' ? '#e8f0fe' : 'transparent',
-                      color: fulfillmentMode === 'internal' ? '#1a73e8' : '#475569',
-                      fontSize: '0.74rem',
-                      fontWeight: fulfillmentMode === 'internal' ? 750 : 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    🏷️ {isEs ? 'Mi Entrega (Etiqueta Adhesiva)' : 'Atlas Dispensing (Label)'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFulfillmentMode('external_supplier')}
-                    style={{
-                      padding: '5px 12px',
-                      borderRadius: '4px',
-                      border: fulfillmentMode === 'external_supplier' ? '1px solid #1a73e8' : '1px solid transparent',
-                      background: fulfillmentMode === 'external_supplier' ? '#e8f0fe' : 'transparent',
-                      color: fulfillmentMode === 'external_supplier' ? '#1a73e8' : '#475569',
-                      fontSize: '0.74rem',
-                      fontWeight: fulfillmentMode === 'external_supplier' ? 750 : 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    📦 {isEs ? 'Envío Proveedor Externo (Tarjeta Refill)' : 'External Supplier (Refill Card)'}
-                  </button>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '2px', borderRadius: '6px', border: '1px solid #dadce0', gap: '2px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setFulfillmentMode('internal')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        border: fulfillmentMode === 'internal' ? '1px solid #1a73e8' : '1px solid transparent',
+                        background: fulfillmentMode === 'internal' ? '#e8f0fe' : 'transparent',
+                        color: fulfillmentMode === 'internal' ? '#1a73e8' : '#475569',
+                        fontSize: '0.72rem',
+                        fontWeight: fulfillmentMode === 'internal' ? 750 : 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      🏷️ {isEs ? 'Etiqueta Atlas' : 'Atlas Label'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFulfillmentMode('external_supplier')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        border: fulfillmentMode === 'external_supplier' ? '1px solid #1a73e8' : '1px solid transparent',
+                        background: fulfillmentMode === 'external_supplier' ? '#e8f0fe' : 'transparent',
+                        color: fulfillmentMode === 'external_supplier' ? '#1a73e8' : '#475569',
+                        fontSize: '0.72rem',
+                        fontWeight: fulfillmentMode === 'external_supplier' ? 750 : 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      📦 {isEs ? 'Tarjeta Refill' : 'Refill Card'}
+                    </button>
+                  </div>
+
+                  {fulfillmentMode !== 'external_supplier' && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPrintSettings((prev) => !prev)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: showPrintSettings ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                        background: showPrintSettings ? '#e8f0fe' : '#ffffff',
+                        color: showPrintSettings ? '#1a73e8' : '#475569',
+                        fontSize: '0.72rem',
+                        fontWeight: 650,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <span>⚙ {isEs ? 'Ajustes Impresión' : 'Print Settings'}</span>
+                      <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
+                        ({dimensions.widthMm}×{dimensions.heightMm} · {dpi} DPI)
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -2452,78 +2481,8 @@ export default function PharmacyLabelsModal({
                 />
               ) : (
                 <>
-          {/* Workspace Mode Switcher: [ Preview ] | [ Edit Fields ] (Google Cloud UX) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-            padding: '6px 12px',
-            background: '#f8fafc',
-            border: '1px solid #dadce0',
-            borderRadius: '6px',
-            marginBottom: '8px',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'Modo de Trabajo:' : 'Workspace Mode:'}
-              </span>
-              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                {isEditing 
-                  ? (isEs ? '• Editando textos y posología' : '• Editing formula texts & instructions') 
-                  : (isEs ? '• Renderizado listo para imprimir' : '• Ready to print / export')}
-              </span>
-            </div>
-            <div style={{ display: 'inline-flex', background: '#e2e8f0', borderRadius: '5px', padding: '2px', gap: '2px' }}>
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                style={{
-                  padding: '4px 12px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  background: !isEditing ? '#ffffff' : 'transparent',
-                  color: !isEditing ? '#1a73e8' : '#64748b',
-                  fontWeight: !isEditing ? 800 : 600,
-                  fontSize: '0.74rem',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  boxShadow: !isEditing ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <span>👁️</span>
-                <span>{isEs ? 'Vista Previa' : 'Preview'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsEditing(true)}
-                style={{
-                  padding: '4px 12px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  background: isEditing ? '#ffffff' : 'transparent',
-                  color: isEditing ? '#1a73e8' : '#64748b',
-                  fontWeight: isEditing ? 800 : 600,
-                  fontSize: '0.74rem',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  boxShadow: isEditing ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Edit3 size={12} color={isEditing ? '#1a73e8' : '#64748b'} />
-                <span>{isEs ? 'Editar Campos' : 'Edit Fields'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Google Cloud Compact Controls Toolbar (Structured Layout) */}
+          {/* Progressive Disclosure: Google Cloud Compact Controls Toolbar */}
+          {showPrintSettings && (
           <div className="gcp-controls-toolbar">
             {/* Top Row: Configuration Selectors + Active Output Resolution Badge */}
             <div className="gcp-toolbar-row-top">
@@ -2768,6 +2727,7 @@ export default function PharmacyLabelsModal({
               </div>
             </div>
           </div>
+          )}
 
           {/* Online Label Editor & Markdown Sync Panel */}
           {isEditing && (

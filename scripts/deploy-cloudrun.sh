@@ -17,13 +17,40 @@ echo "🚀 [Cloud Run Standalone] Building and deploying standalone container...
 # 1. Compile with Turbopack (fast Rust compilation)
 npm run build
 
-# 2. Build container via Cloud Build (no local Docker daemon required)
-echo "📦 [Cloud Run Standalone] Submitting build to Google Cloud Build..."
-gcloud builds submit --project="${PROJECT_ID}" --tag="${IMAGE_TAG}" .
+# 2. Stage ONLY minimal runtime artifacts (excludes heavy static media served by Firebase Hosting CDN)
+STAGE_DIR=$(mktemp -d /tmp/cloudrun-ctx-XXXXXX)
+cleanup() {
+  rm -rf "${STAGE_DIR}"
+}
+trap cleanup EXIT
+
+cp Dockerfile "${STAGE_DIR}/Dockerfile"
+mkdir -p "${STAGE_DIR}/.next"
+cp -R .next/standalone "${STAGE_DIR}/.next/standalone"
+rm -rf "${STAGE_DIR}/.next/standalone/public"
+cp -R .next/static "${STAGE_DIR}/.next/static"
+mkdir -p "${STAGE_DIR}/public"
+rsync -a \
+  --exclude='videos/' \
+  --exclude='reports/' \
+  --exclude='images/' \
+  --exclude='labels/' \
+  --exclude='docs/' \
+  --exclude='assets/' \
+  --exclude='documents/' \
+  --exclude='prescriptions/' \
+  --exclude='eterna/' \
+  --exclude='test-screenshots/' \
+  public/ "${STAGE_DIR}/public/"
+
+echo "📦 [Cloud Run Standalone] Staging context size: $(du -sh "${STAGE_DIR}" | cut -f1)"
+echo "📦 [Cloud Run Standalone] Submitting slim build to Google Cloud Build..."
+gcloud builds submit --quiet --project="${PROJECT_ID}" --tag="${IMAGE_TAG}" "${STAGE_DIR}"
 
 # 3. Deploy new revision to Cloud Run
 echo "⚡ [Cloud Run Standalone] Deploying revision to Cloud Run..."
 gcloud run deploy "${SERVICE_NAME}" \
+  --quiet \
   --project="${PROJECT_ID}" \
   --region="${REGION}" \
   --image="${IMAGE_TAG}" \

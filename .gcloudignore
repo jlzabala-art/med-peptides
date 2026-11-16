@@ -1,9 +1,18 @@
 .gcloudignore
 .git
 .gitignore
-node_modules/
+/node_modules/
 .next/cache/
 .next/dev/
+.next/server/
+.next/build/
+.next/diagnostics/
+.next/types/
+.next/standalone/public/
+.firebase/
+AI Prompts/
+src/
+scripts/
 *.log
 *.md
 .firebase/*/functions/.next/cache/

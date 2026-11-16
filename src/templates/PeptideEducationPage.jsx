@@ -3,7 +3,7 @@
  
 import React, { useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 
 /**
  * PeptideEducationPage
@@ -96,6 +96,29 @@ export default function PeptideEducationPage() {
     path: '/what-are-peptides',
     structuredData
   });
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'education',
+        name: 'What Are Peptides? • Scientific Primer',
+        category: 'Academic Education',
+      },
+      bottomBar: {
+        summaryTitle: 'What Are Peptides? • Scientific Primer',
+        summarySubtitle: 'Cellular Signaling, Biological Chains & Reconstitution Fundamentals',
+        badge: 'Academic Guide',
+        atlasAiLabel: 'Ask Atlas AI',
+        primaryAction: {
+          label: 'Explore Clinical Catalog ➔',
+          onClick: () => {
+            if (typeof window !== 'undefined') window.location.href = '/collection/peptides';
+          },
+        },
+      },
+    },
+    []
+  );
 
   return (
     <div className="page-fade-in" style={{ background: 'var(--background)', color: 'var(--text-main)' }}>
@@ -247,29 +270,6 @@ export default function PeptideEducationPage() {
           }
         }
       `}</style>
-
-      {/* ── Persistent Floating Sticky Action Bar (GCP Standard) ── */}
-      <PublicStickyActionBar
-        title="What Are Peptides? • Scientific Primer"
-        subtitle="Cellular Signaling, Biological Chains & Reconstitution Fundamentals"
-        badge="Academic Guide"
-        badgeType="protocol"
-        inquireLabel="Explore Clinical Catalog ➔"
-        onInquire={() => {
-          if (typeof window !== 'undefined') window.location.href = '/collection/peptides';
-        }}
-        showClinicalAI={true}
-        aiPreset="education"
-        drawerProps={{
-          contextType: 'catalog',
-          contextAnchor: {
-            name: 'What Are Peptides? • Scientific Primer',
-            category: 'Academic Education'
-          },
-          hideFloatingTrigger: true
-        }}
-        lang="en"
-      />
     </div>
   );
 }

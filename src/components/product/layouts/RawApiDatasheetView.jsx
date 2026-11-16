@@ -29,7 +29,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import { CURATED_CAS_REGISTRY } from '@/utils/casResolver';
@@ -43,38 +43,69 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('identification'); // 'identification' | 'compounding' | 'safety'
 
-  if (!product) return null;
-
-  const rawSlug = (slug || product.slug || product.id || '').toLowerCase().trim();
-  const canonicalIdent = deriveCanonicalIdentity({ id: product.id || rawSlug, name: product.name || rawSlug });
+  const rawSlug = (slug || product?.slug || product?.id || '').toLowerCase().trim();
+  const canonicalIdent = deriveCanonicalIdentity({ id: product?.id || rawSlug, name: product?.name || rawSlug });
   const cleanKey = canonicalIdent.canonicalKey || rawSlug.replace(/^api-/, '').replace(/-bulk$/, '');
   const peptideData = KNOWN_PEPTIDE_DATA[cleanKey] || null;
 
-  const prodType = (product.type || product.productType || '').toLowerCase();
-  const prodCat = (product.category || product.therapeutic_category || '').toLowerCase();
+  const prodType = (product?.type || product?.productType || '').toLowerCase();
+  const prodCat = (product?.category || product?.therapeutic_category || '').toLowerCase();
   const isPeptide = Boolean(
     peptideData ||
-    product.is_peptide === true ||
+    product?.is_peptide === true ||
     prodType === 'peptide' ||
     prodCat.includes('peptide') ||
-    product.sequence
+    product?.sequence
   );
 
-  const productName = product.canonicalName || peptideData?.targetSystem || product.name || 'Chemical API';
-  const displayName = product.displayName || `${productName} (${selectedPack} Bulk API)`;
+  const productName = product?.canonicalName || peptideData?.targetSystem || product?.name || 'Chemical API';
+  const displayName = product?.displayName || `${productName} (${selectedPack} Bulk API)`;
   
-  const casNumber = product.casNumber || product.cas_number || product.cas || CURATED_CAS_REGISTRY[cleanKey] || peptideData?.casNumber || (isPeptide ? '2381089-83-2' : '10102-18-8');
-  const molecularFormula = product.molecularFormula || product.molecular_formula || peptideData?.molecularFormula || (isPeptide ? 'C221H342N46O68' : 'Na2SeO3');
-  const molecularWeight = product.molecularWeight || product.molecular_weight || (peptideData?.molecularWeight ? `${peptideData.molecularWeight} g/mol` : null) || (isPeptide ? '4731.33 g/mol' : '172.94 g/mol');
-  const purity = product.purity || (isPeptide ? '≥98.5% (RP-HPLC)' : '≥98.0% (Assay)');
-  const grade = product.grade || (isPeptide ? 'cGMP / Compounding Reference Grade' : 'USP / Ph. Eur. Pharmacopeia Grade');
-  const format = product.format || (isPeptide ? 'Lyophilized Solid Powder' : 'Fine White Crystalline Powder');
-  const hsnCode = product.hsnCode || (isPeptide ? '29371900' : '28429090');
-  const storageCondition = product.storageCondition || (isPeptide ? 'Store desiccated at -20°C in an airtight container protected from light. Stable 24 months.' : 'Store in airtight containers at 15–25°C, protected from light and moisture.');
-  const supplierName = product.supplier || (isPeptide ? 'Licensed Peptide Synthesis Laboratory (cGMP)' : 'Licensed Pharmaceutical Synthesis Laboratory');
+  const casNumber = product?.casNumber || product?.cas_number || product?.cas || CURATED_CAS_REGISTRY[cleanKey] || peptideData?.casNumber || (isPeptide ? '2381089-83-2' : '10102-18-8');
+  const molecularFormula = product?.molecularFormula || product?.molecular_formula || peptideData?.molecularFormula || (isPeptide ? 'C221H342N46O68' : 'Na2SeO3');
+  const molecularWeight = product?.molecularWeight || product?.molecular_weight || (peptideData?.molecularWeight ? `${peptideData.molecularWeight} g/mol` : null) || (isPeptide ? '4731.33 g/mol' : '172.94 g/mol');
+  const purity = product?.purity || (isPeptide ? '≥98.5% (RP-HPLC)' : '≥98.0% (Assay)');
+  const grade = product?.grade || (isPeptide ? 'cGMP / Compounding Reference Grade' : 'USP / Ph. Eur. Pharmacopeia Grade');
+  const format = product?.format || (isPeptide ? 'Lyophilized Solid Powder' : 'Fine White Crystalline Powder');
+  const hsnCode = product?.hsnCode || (isPeptide ? '29371900' : '28429090');
+  const storageCondition = product?.storageCondition || (isPeptide ? 'Store desiccated at -20°C in an airtight container protected from light. Stable 24 months.' : 'Store in airtight containers at 15–25°C, protected from light and moisture.');
+  const supplierName = product?.supplier || (isPeptide ? 'Licensed Peptide Synthesis Laboratory (cGMP)' : 'Licensed Pharmaceutical Synthesis Laboratory');
   
   const targetUrl = `${baseUrl}/raw/${cleanKey}`;
   const finishedProductUrl = `/p/${cleanKey}`;
+
+  useRegisterAtlasContext(
+    !product
+      ? null
+      : {
+          contextAnchor: {
+            type: 'raw_api',
+            name: productName,
+            casNumber,
+          },
+          bottomBar: {
+            summaryTitle: productName,
+            summarySubtitle: `CAS: ${casNumber} • ${selectedPack} • Grade: ${grade}`,
+            badge: 'Bulk Raw API',
+            atlasAiLabel: 'Ask Atlas AI',
+            showSections: true,
+            sectionsLabel: 'Sections',
+            sectionsCount: 3,
+            activeSectionIndex: activeTab === 'identification' ? 1 : activeTab === 'compounding' ? 2 : 3,
+            onOpenSections: () => {
+              const el = document.getElementById('raw-api-tabs');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            },
+            primaryAction: {
+              label: 'Inquire Raw API',
+              onClick: () => setIsInquiryOpen(true),
+            },
+          },
+        },
+    [product, productName, casNumber, selectedPack, grade, activeTab]
+  );
+
+  if (!product) return null;
 
   const handleCopyCas = () => {
     if (!casNumber) return;
@@ -625,27 +656,6 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
           grade,
           format
         }}
-      />
-
-      {/* ── Persistent Floating Sticky Monograph Footer (Golden Rule #47) ── */}
-      <PublicStickyActionBar
-        title={productName}
-        subtitle={`CAS: ${casNumber} • ${selectedPack} • Grade: ${grade}`}
-        badge="Bulk Raw API"
-        inquireLabel="Inquire Raw API"
-        onInquire={() => setIsInquiryOpen(true)}
-        showClinicalAI={true}
-        aiCategory="Raw API Compounding"
-        aiContextQuery={`What are the formulation guidelines, solubility, compatible excipients, and quality standards for bulk API ${productName} (CAS: ${casNumber})?`}
-        showSections={true}
-        sectionsCount={3}
-        sectionsLabel="Sections"
-        activeSectionIndex={activeTab === 'identification' ? 1 : activeTab === 'compounding' ? 2 : 3}
-        onOpenSections={() => {
-          const el = document.getElementById('raw-api-tabs');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }}
-        lang="en"
       />
 
       {/* ── Institutional Unified Public Footer ── */}

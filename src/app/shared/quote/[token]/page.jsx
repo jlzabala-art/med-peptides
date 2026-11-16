@@ -6,24 +6,35 @@ import FocusedCardLayout from '@/components/shared/layouts/FocusedCardLayout';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
+  const lang = String(resolvedSearch?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const isEs = lang === 'es';
   const token = resolvedParams?.token;
   const verification = verifySignedQuoteToken(token);
   const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
-  let title = 'Official Medical Quotation • Institutional Reference';
-  let description = 'Official verified quotation with locked channel pricing, pharmaceutical packaging, and certificate of analysis verification.';
+  let title = isEs
+    ? 'Cotización Médica Oficial • Referencia Institucional'
+    : 'Official Medical Quotation • Institutional Reference';
+  let description = isEs
+    ? 'Cotización oficial verificada con precios de canal bloqueados, acondicionamiento farmacéutico y verificación de certificado de análisis.'
+    : 'Official verified quotation with locked channel pricing, pharmaceutical packaging, and certificate of analysis verification.';
 
   if (verification?.valid && verification.payload) {
     const payload = verification.payload;
     const clientName = payload.recipientName || payload.clientName || payload.companyName;
     if (clientName) {
-      title = `Official Medical Quotation • ${clientName}`;
+      title = isEs
+        ? `Cotización Médica Oficial • ${clientName}`
+        : `Official Medical Quotation • ${clientName}`;
     }
     const count = payload.items?.length || 0;
     const currency = payload.currency || 'USD';
-    description = `Verified institutional quotation${count > 0 ? ` (${count} items)` : ''} in ${currency}. Priority medical delivery terms, batch traceability, and analytical assays.`;
+    description = isEs
+      ? `Cotización institucional verificada${count > 0 ? ` (${count} artículos)` : ''} en ${currency}. Condiciones médicas prioritarias, trazabilidad de lote y ensayos analíticos.`
+      : `Verified institutional quotation${count > 0 ? ` (${count} items)` : ''} in ${currency}. Priority medical delivery terms, batch traceability, and analytical assays.`;
   }
 
   const previewImage = `${BASE_URL}/og-catalog.png`;
@@ -35,7 +46,8 @@ export async function generateMetadata({ params }) {
       title,
       description,
       type: 'website',
-      siteName: 'Clinical Reference Library',
+      locale: isEs ? 'es_ES' : 'en_US',
+      siteName: isEs ? 'Biblioteca de Referencia Clínica' : 'Clinical Reference Library',
       url: `${BASE_URL}/shared/quote/${token}`,
       images: [
         {

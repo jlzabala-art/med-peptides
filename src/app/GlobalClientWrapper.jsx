@@ -24,6 +24,9 @@ const AtlasAIDrawer = dynamic(() => import('../components/shared/AtlasAIDrawer')
 const GlobalPublicAtlasDrawer = dynamic(() => import('../components/shared/GlobalPublicAtlasDrawer'), { ssr: false });
 const GlobalBottomStickyBar = dynamic(() => import('../components/shared/GlobalBottomStickyBar'), { ssr: false });
 const GlobalQuoteCartDrawer = dynamic(() => import('../components/shared/GlobalQuoteCartDrawer'), { ssr: false });
+const GlobalQrModal = dynamic(() => import('../components/shared/GlobalQrModal'), { ssr: false });
+const GlobalPublicCommandPalette = dynamic(() => import('../components/shared/GlobalPublicCommandPalette'), { ssr: false });
+const GlobalHelpDrawer = dynamic(() => import('../components/ui/HelpDrawer'), { ssr: false });
 const GCPImpersonationDock = dynamic(() => import('../components/navigation/GCPImpersonationDock'), { ssr: false });
 const GCPCommandPalette = dynamic(() => import('../components/navigation/GCPCommandPalette'), { ssr: false });
 
@@ -63,7 +66,9 @@ const PORTAL_PREFIXES = [
   '/rfq',
   '/medical',
   '/pricing',
-  '/compounding'
+  '/compounding',
+  '/calculator',
+  '/vials'
 ];
 
 function StorefrontShell({ children }) {
@@ -210,6 +215,9 @@ export default function GlobalClientWrapper({ children }) {
               {children}
               {!isPrivatePortalRoute && <GlobalBottomStickyBar />}
               {!isPrivatePortalRoute && <GlobalPublicAtlasDrawer />}
+              {!isPrivatePortalRoute && <GlobalQrModal />}
+              {!isPrivatePortalRoute && <GlobalPublicCommandPalette />}
+              {!isPrivatePortalRoute && <GlobalHelpDrawer />}
               <GlobalQuoteCartDrawer />
               {isSuperUser && <GCPCommandPalette />}
               <PWAInstallPrompt />
@@ -226,6 +234,10 @@ export default function GlobalClientWrapper({ children }) {
         <PdfPreviewProvider>
           <StorefrontShell>{children}</StorefrontShell>
           <GlobalBottomStickyBar />
+          <GlobalPublicAtlasDrawer />
+          <GlobalQrModal />
+          <GlobalPublicCommandPalette />
+          <GlobalHelpDrawer />
           <GlobalQuoteCartDrawer />
           {isSuperUser && <GCPImpersonationDock />}
           {isSuperUser && <GCPCommandPalette />}

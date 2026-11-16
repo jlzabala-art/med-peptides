@@ -589,71 +589,37 @@ export default function DoctorAiMessageRenderer({ content }) {
           if (cleanRows.length === 0) return null;
 
           const [header, ...body] = cleanRows;
+          const cols = (header || []).map((th, thIdx) => ({
+            key: `col_${thIdx}`,
+            header: renderInlineText(th, `th-${bIdx}-${thIdx}`),
+            align: thIdx >= 2 ? 'right' : 'left',
+            render: (val) => (
+              <span
+                style={{
+                  fontFamily: thIdx >= 2 ? 'ui-monospace, SFMono-Regular, monospace' : 'inherit',
+                  whiteSpace: thIdx === 0 || thIdx >= 2 ? 'nowrap' : 'normal',
+                }}
+              >
+                {renderInlineText(val ?? '', `td-${bIdx}-${thIdx}`)}
+              </span>
+            ),
+          }));
+          const rows = body.map((row, rIdx) => {
+            const obj = { id: `ai-tbl-${bIdx}-${rIdx}` };
+            (row || []).forEach((cell, cIdx) => {
+              obj[`col_${cIdx}`] = cell;
+            });
+            return obj;
+          });
 
           return (
-            <div
-              key={bIdx}
-              style={{
-                overflowX: 'auto',
-                margin: '4px 0',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
-              }}
-            >
-              {/* eslint-disable-next-line no-restricted-syntax */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.74rem' }}>
-                {header && (
-                  <thead>
-                    <tr style={{ background: '#f1f5f9', borderBottom: '1.5px solid #cbd5e1' }}>
-                      {header.map((th, thIdx) => (
-                        <th
-                          key={thIdx}
-                          style={{
-                            padding: '7px 10px',
-                            textAlign: thIdx >= 2 ? 'right' : 'left',
-                            fontWeight: 800,
-                            fontSize: '0.68rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.03em',
-                            color: '#334155',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {renderInlineText(th, `th-${bIdx}-${thIdx}`)}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                )}
-                <tbody>
-                  {body.map((row, rIdx) => (
-                    <tr
-                      key={rIdx}
-                      style={{
-                        background: rIdx % 2 === 0 ? '#ffffff' : '#f8fafc',
-                        borderBottom: rIdx === body.length - 1 ? 'none' : '1px solid #e2e8f0'
-                      }}
-                    >
-                      {row.map((cell, cIdx) => (
-                        <td
-                          key={cIdx}
-                          style={{
-                            padding: '7px 10px',
-                            color: '#1e293b',
-                            textAlign: cIdx >= 2 ? 'right' : 'left',
-                            fontFamily: cIdx >= 2 ? 'ui-monospace, SFMono-Regular, monospace' : 'inherit',
-                            whiteSpace: cIdx === 0 || cIdx >= 2 ? 'nowrap' : 'normal'
-                          }}
-                        >
-                          {renderInlineText(cell, `td-${bIdx}-${rIdx}-${cIdx}`)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div key={bIdx} style={{ margin: '4px 0' }}>
+              <DataTable
+                columns={cols}
+                data={rows}
+                pagination={false}
+                enableAskAtlas={false}
+              />
             </div>
           );
         }

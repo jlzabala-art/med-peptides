@@ -46,6 +46,17 @@
   --pds-space-12: 48px;
   --pds-space-16: 64px;
 
+  /* ── Canonical Atlas Design Tokens (Single Source of Truth) ────── */
+  --atlas-radius-card: 12px;
+  --atlas-radius-sm: 8px;
+  --atlas-radius-pill: 9999px;
+  --atlas-surface: #ffffff;
+  --atlas-surface-muted: #f8fafc;
+  --atlas-border: #e2e8f0;
+  --atlas-accent: #1a73e8;
+  --atlas-shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --atlas-page-max-width: 1360px;
+
   /* ── Radius & Shadows ──────────────────────────────────────────── */
   --pds-radius-card: var(--atlas-radius-card, 12px);
   --pds-radius-subcard: var(--atlas-radius-card, 12px);

@@ -35,8 +35,10 @@ import {
   Phone,
   Mail,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  QrCode
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import CopyableId from '@/components/ui/CopyableId';
 import {
@@ -60,13 +62,13 @@ import DnaLocalPharmacyOptionA from '@/components/patient/dna/DnaLocalPharmacyOp
 import DnaDownloadsSection from '@/components/patient/dna/DnaDownloadsSection';
 
 const CHAPTERS = [
-  { id: 'priorities', label: '1. DNA Priorities', icon: '🧬', subtitle: 'Metabolism & 5 Clinical Axes' },
-  { id: 'ancestry', label: '2. Ancestral Origins', icon: '🌍', subtitle: 'Indus Valley & Haplogroup M2a\'b' },
-  { id: 'foods', label: '3. 17 Food Families', icon: '🥗', subtitle: '116 Foods Classified (🟢🟡🔴)' },
-  { id: 'mealplan', label: '4. 7-Day Meal Plan', icon: '📅', subtitle: 'Daily Menus & 24h Routine' },
-  { id: 'grocery', label: '5. Grocery Checklist', icon: '🛒', subtitle: 'Monoprix / Lulu Qatar Ready' },
-  { id: 'prescription', label: '6. Pharmacy Prescription', icon: '💊', subtitle: 'Compounded vs Local OTC' },
-  { id: 'downloads', label: '7. Official PDF Dossiers', icon: '📥', subtitle: '59-Page CE-IVD Documents' }
+  { id: 'priorities', label: '1. DNA Priorities', icon: '🧬', subtitle: 'Metabolism & 5 Nutrition Axes', patientSubtitle: 'Your 5 Body Priorities' },
+  { id: 'ancestry', label: '2. Ancestral Origins', icon: '🌍', subtitle: 'Indus Valley & Haplogroup M2a\'b', patientSubtitle: 'Origins & Food Heritage' },
+  { id: 'foods', label: '3. 17 Food Families', icon: '🥗', subtitle: '116 Foods Classified (🟢🟡🔴)', patientSubtitle: 'What to Eat & Avoid (🟢🟡🔴)' },
+  { id: 'mealplan', label: '4. 7-Day Meal Plan', icon: '📅', subtitle: 'Daily Menus & 24h Routine', patientSubtitle: 'Daily Menus & Routine' },
+  { id: 'grocery', label: '5. Grocery Checklist', icon: '🛒', subtitle: 'Monoprix / Lulu Qatar Ready', patientSubtitle: 'Supermarket Shopping List' },
+  { id: 'prescription', label: '6. Supplement Plan', icon: '💊', subtitle: 'Compounded vs Local OTC', patientSubtitle: 'Daily Supplement Guide' },
+  { id: 'downloads', label: '7. PDF Dossiers', icon: '📥', subtitle: 'Nutritionist & Patient PDFs', patientSubtitle: 'Simple Patient PDF' }
 ];
 
 export default function PatientDnaPortalClient({
@@ -74,7 +76,9 @@ export default function PatientDnaPortalClient({
   initialSampleCode,
   initialClinic,
   initialDoctor,
-  initialProfile
+  initialProfile,
+  initialCanAccessNutritionist = false,
+  initialNutritionistToken = null
 }) {
   const [patientName] = useState(initialPatientName || 'Hossam Ahmed');
   const [sampleCode] = useState(initialSampleCode || '24G-QA-90421');
@@ -82,6 +86,14 @@ export default function PatientDnaPortalClient({
   const [activeChapter, setActiveChapter] = useState('priorities');
   const [prescriptionModality, setPrescriptionModality] = useState('modalityB'); // 'modalityB' (Compounded) | 'modalityA' (Local)
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Asymmetric Audience Mode: Patient (default, locked) vs Nutritionist (requires token or specialist auth)
+  const [canAccessNutritionist, setCanAccessNutritionist] = useState(Boolean(initialCanAccessNutritionist));
+  const [nutritionistToken, setNutritionistToken] = useState(initialNutritionistToken || null);
+  const [audienceMode, setAudienceMode] = useState(initialCanAccessNutritionist ? 'nutritionist' : 'patient');
+  const isNutritionistView = canAccessNutritionist && audienceMode === 'nutritionist';
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [copiedQrType, setCopiedQrType] = useState(null);
 
   // GCP Header Interaction States
   const [searchQuery, setSearchQuery] = useState('');
@@ -254,19 +266,33 @@ export default function PatientDnaPortalClient({
     }
   };
 
-  // Official PDF download URLs
+  // Official PDF download URLs (Separated: Nutritionist Merged 24Genetics vs Simple Patient without annexes)
   const currentDoctor = clinicalProfile.patient?.doctor || initialDoctor || '';
-  const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&modality=${prescriptionModality}&includeOriginal=true`;
-  const pdfDownloadUrlLight = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&modality=${prescriptionModality}&full=false`;
-  const mealPlanPdfUrl = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&includeOriginal=true`;
-  const mealPlanPdfUrlLight = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&full=false`;
+  const pdfDownloadUrl = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&modality=${prescriptionModality}&audience=nutritionist&includeOriginal=true`;
+  const pdfDownloadUrlLight = `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&modality=${prescriptionModality}&audience=patient&includeOriginal=false&full=false`;
+  const mealPlanPdfUrl = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&audience=nutritionist&includeOriginal=true`;
+  const mealPlanPdfUrlLight = `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}&clinic=${encodeURIComponent(clinic)}&doctor=${encodeURIComponent(currentDoctor)}&audience=patient&includeOriginal=false&full=false`;
+
+  // Canonical QR URLs (Patient QR never exposes nutritionist token; Nutritionist QR only generated when authorized)
+  const baseOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+  const patientPortalUrl = `${baseOrigin}/patient/dna-report?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleCode)}`;
+  const nutritionistPortalUrl = canAccessNutritionist && nutritionistToken
+    ? `${patientPortalUrl}&view=nutritionist&nt=${encodeURIComponent(nutritionistToken)}`
+    : null;
 
   const handleShareClick = () => {
     if (typeof window !== 'undefined') {
-      const url = window.location.href;
-      navigator.clipboard.writeText(url);
+      navigator.clipboard.writeText(patientPortalUrl);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  const handleCopySpecificUrl = (type, url) => {
+    if (typeof window !== 'undefined' && url) {
+      navigator.clipboard.writeText(url);
+      setCopiedQrType(type);
+      setTimeout(() => setCopiedQrType(null), 2200);
     }
   };
 
@@ -298,18 +324,40 @@ export default function PatientDnaPortalClient({
     }
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    setLoginFeedback({
-      type: 'success',
-      text: loginRole === 'doctor'
-        ? 'Authenticated as Prescribing Physician. Full Clinical Edit privileges unlocked.'
-        : 'Patient OTP verified. Full Health Records access active.'
-    });
+    if (loginRole === 'doctor') {
+      try {
+        const res = await fetch('/api/genomics/nutritionist-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sampleCode, email: loginEmail || 'nutritionist@atlashealth-services.com' })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.token) {
+            setNutritionistToken(data.token);
+            setCanAccessNutritionist(true);
+            setAudienceMode('nutritionist');
+          }
+        }
+      } catch {
+        // Fallback keeps user authenticated UI feedback
+      }
+      setLoginFeedback({
+        type: 'success',
+        text: 'Authenticated as Nutritionist / Specialist. Full Nutrigenomics & 24Genetics Dossier unlocked.'
+      });
+    } else {
+      setLoginFeedback({
+        type: 'success',
+        text: 'Patient OTP verified. Personal Nutrition & Meal Plan active.'
+      });
+    }
     setTimeout(() => {
       setIsLoginModalOpen(false);
       setLoginFeedback(null);
-    }, 1800);
+    }, 1500);
   };
 
   return (
@@ -712,7 +760,78 @@ export default function PatientDnaPortalClient({
               )}
             </div>
 
-            {/* Consolidated Export / PDF Dropdown (Replaces 2 sprawling buttons) */}
+            {/* Nutritionist Asymmetric Mode Switcher (ONLY visible when authorized as Nutritionist) */}
+            {canAccessNutritionist && (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  backgroundColor: '#f1f3f4',
+                  borderRadius: '6px',
+                  padding: '2px',
+                  border: '1px solid #dadce0'
+                }}
+                title="Nutritionist Mode shows full SNPs & merged 24Genetics PDF. Patient Preview shows exactly what your patient sees."
+              >
+                <button
+                  type="button"
+                  onClick={() => setAudienceMode('nutritionist')}
+                  style={{
+                    padding: '4px 9px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    fontSize: '0.70rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    backgroundColor: audienceMode === 'nutritionist' ? '#003666' : 'transparent',
+                    color: audienceMode === 'nutritionist' ? '#ffffff' : '#5f6368'
+                  }}
+                >
+                  {selectedLanguage === 'es' ? 'Modo Nutricionista' : 'Nutritionist'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAudienceMode('patient')}
+                  style={{
+                    padding: '4px 9px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    fontSize: '0.70rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    backgroundColor: audienceMode === 'patient' ? '#0d9488' : 'transparent',
+                    color: audienceMode === 'patient' ? '#ffffff' : '#5f6368'
+                  }}
+                >
+                  {selectedLanguage === 'es' ? 'Vista Paciente' : 'Patient View'}
+                </button>
+              </div>
+            )}
+
+            {/* QR Codes Button */}
+            <button
+              type="button"
+              onClick={() => setIsQrModalOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 9px',
+                borderRadius: '4px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#3c4043',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title="View & Share Portal QR Codes"
+            >
+              <QrCode size={14} color="#1a73e8" />
+              <span className="dna-hide-mobile">QR</span>
+            </button>
+
+            {/* Consolidated Export / PDF Dropdown */}
             <div ref={exportMenuRef} style={{ position: 'relative' }}>
               <button
                 type="button"
@@ -752,55 +871,59 @@ export default function PatientDnaPortalClient({
                   }}
                 >
                   <div style={{ padding: '6px 14px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    Official PDF Archives
+                    {isNutritionistView ? 'Nutritionist & Patient PDFs' : 'Simple Patient PDF (No Annexes)'}
                   </div>
-                  <a
-                    href={mealPlanPdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsExportMenuOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '8px 14px',
-                      fontSize: '0.76rem',
-                      color: '#202124',
-                      textDecoration: 'none'
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    <Utensils size={14} color="#1a73e8" />
-                    <div>
-                      <div style={{ fontWeight: 600 }}>Meal Plan Dossier (59p)</div>
-                      <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Full 17-family kitchen guide</div>
-                    </div>
-                  </a>
+                  {isNutritionistView && (
+                    <>
+                      <a
+                        href={mealPlanPdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsExportMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '8px 14px',
+                          fontSize: '0.76rem',
+                          color: '#202124',
+                          textDecoration: 'none'
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                      >
+                        <Utensils size={14} color="#1a73e8" />
+                        <div>
+                          <div style={{ fontWeight: 600 }}>Nutritionist Dossier (Merged 24Genetics)</div>
+                          <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Full guide + original 24Genetics report</div>
+                        </div>
+                      </a>
 
-                  <a
-                    href={pdfDownloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsExportMenuOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '8px 14px',
-                      fontSize: '0.76rem',
-                      color: '#202124',
-                      textDecoration: 'none'
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    <Pill size={14} color="#188038" />
-                    <div>
-                      <div style={{ fontWeight: 600 }}>Clinical Rx &amp; Compounding (59p)</div>
-                      <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Full CE-IVD certified dossier</div>
-                    </div>
-                  </a>
+                      <a
+                        href={pdfDownloadUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsExportMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '8px 14px',
+                          fontSize: '0.76rem',
+                          color: '#202124',
+                          textDecoration: 'none'
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                      >
+                        <Pill size={14} color="#188038" />
+                        <div>
+                          <div style={{ fontWeight: 600 }}>Formulation &amp; SNPs Dossier (Merged)</div>
+                          <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Includes 24Genetics CE-IVD annex</div>
+                        </div>
+                      </a>
+                    </>
+                  )}
 
                   <a
                     href={mealPlanPdfUrlLight}
@@ -819,10 +942,10 @@ export default function PatientDnaPortalClient({
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    <Printer size={14} color="#5f6368" />
+                    <Printer size={14} color="#0d9488" />
                     <div>
-                      <div style={{ fontWeight: 600 }}>Print Kitchen Guide (5p)</div>
-                      <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Compact weekly dining sheet</div>
+                      <div style={{ fontWeight: 600 }}>Patient Meal &amp; Food Guide (5p)</div>
+                      <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Simple edition · No lab annexes</div>
                     </div>
                   </a>
 
@@ -1031,7 +1154,7 @@ export default function PatientDnaPortalClient({
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     <Lock size={14} />
-                    <span>Clinician / Doctor Sign In</span>
+                    <span>Nutritionist / Specialist Sign In</span>
                   </button>
 
                   <button
@@ -1228,7 +1351,7 @@ export default function PatientDnaPortalClient({
                           {ch.label}
                         </div>
                         <div style={{ fontSize: '0.66rem', color: isActive ? '#1a73e8' : '#70757a', marginTop: '1px' }}>
-                          {ch.subtitle}
+                          {isNutritionistView ? ch.subtitle : (ch.patientSubtitle || ch.subtitle)}
                         </div>
                       </div>
                     </div>
@@ -1344,6 +1467,7 @@ export default function PatientDnaPortalClient({
                 clinicalProfile={clinicalProfile}
                 patientName={patientName}
                 sampleCode={sampleCode}
+                audienceMode={isNutritionistView ? 'nutritionist' : 'patient'}
               />
             )}
 
@@ -1351,6 +1475,7 @@ export default function PatientDnaPortalClient({
             {activeChapter === 'ancestry' && (
               <DnaAncestryHeritageSection
                 clinicalProfile={clinicalProfile}
+                audienceMode={isNutritionistView ? 'nutritionist' : 'patient'}
               />
             )}
 
@@ -1450,6 +1575,7 @@ export default function PatientDnaPortalClient({
                 pdfDownloadUrlLight={pdfDownloadUrlLight}
                 patientName={patientName}
                 sampleCode={sampleCode}
+                audienceMode={isNutritionistView ? 'nutritionist' : 'patient'}
               />
             )}
           </main>
@@ -1538,7 +1664,7 @@ export default function PatientDnaPortalClient({
                   cursor: 'pointer'
                 }}
               >
-                👨‍⚕️ Clinician / Doctor
+                👨‍⚕️ Nutritionist / Specialist
               </button>
               <button
                 type="button"
@@ -1851,7 +1977,7 @@ export default function PatientDnaPortalClient({
         </button>
 
         <a
-          href={mealPlanPdfUrl}
+          href={isNutritionistView ? mealPlanPdfUrl : mealPlanPdfUrlLight}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -1871,9 +1997,121 @@ export default function PatientDnaPortalClient({
           }}
         >
           <Download size={15} />
-          <span>Download PDF (59p)</span>
+          <span>{isNutritionistView ? 'Nutritionist PDF' : 'Patient PDF (5p)'}</span>
         </a>
       </div>
+
+      {/* ── Asymmetric 2-QR Modal (Patient QR always; Nutritionist QR ONLY when authorized) ── */}
+      {isQrModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.55)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 110,
+            padding: '1rem'
+          }}
+          onClick={() => setIsQrModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              maxWidth: canAccessNutritionist && nutritionistPortalUrl ? '680px' : '380px',
+              width: '100%',
+              padding: '24px',
+              boxShadow: '0 12px 32px rgba(15, 23, 42, 0.22)',
+              border: '1px solid #e2e8f0'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
+                  {canAccessNutritionist ? 'Portal QR Codes · Patient & Nutritionist' : 'My Personal DNA Portal QR'}
+                </h3>
+                <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#64748b' }}>
+                  {patientName} · Sample #{sampleCode}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsQrModalOpen(false)}
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: canAccessNutritionist && nutritionistPortalUrl ? 'repeat(auto-fit, minmax(240px, 1fr))' : '1fr', gap: '16px' }}>
+              {/* Patient QR (Always visible) */}
+              <div style={{ border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '16px', backgroundColor: '#f0fdfa', textAlign: 'center' }}>
+                <span style={{ display: 'inline-block', fontSize: '0.66rem', fontWeight: 800, color: '#0f766e', backgroundColor: '#ccfbf1', padding: '2px 8px', borderRadius: '4px', marginBottom: '10px', textTransform: 'uppercase' }}>
+                  Patient QR · Practical View Only
+                </span>
+                <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', display: 'inline-block', border: '1px solid #e2e8f0', marginBottom: '10px' }}>
+                  <QRCodeSVG value={patientPortalUrl} size={156} level="M" includeMargin={false} />
+                </div>
+                <p style={{ fontSize: '0.72rem', color: '#475569', margin: '0 0 10px 0', lineHeight: 1.4 }}>
+                  Share with the patient. Shows meal plan, food traffic lights &amp; simple PDF only (no SNPs or lab annexes).
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleCopySpecificUrl('patient', patientPortalUrl)}
+                  style={{
+                    width: '100%',
+                    padding: '7px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #0d9488',
+                    backgroundColor: copiedQrType === 'patient' ? '#0d9488' : '#ffffff',
+                    color: copiedQrType === 'patient' ? '#ffffff' : '#0f766e',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {copiedQrType === 'patient' ? '✓ Patient Link Copied' : 'Copy Patient Link'}
+                </button>
+              </div>
+
+              {/* Nutritionist QR (ONLY visible when authorized) */}
+              {canAccessNutritionist && nutritionistPortalUrl && (
+                <div style={{ border: '1.5px solid #bfdbfe', borderRadius: '10px', padding: '16px', backgroundColor: '#eff6ff', textAlign: 'center' }}>
+                  <span style={{ display: 'inline-block', fontSize: '0.66rem', fontWeight: 800, color: '#003666', backgroundColor: '#dbeafe', padding: '2px 8px', borderRadius: '4px', marginBottom: '10px', textTransform: 'uppercase' }}>
+                    Nutritionist QR · Full SNPs + Preview
+                  </span>
+                  <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', display: 'inline-block', border: '1px solid #e2e8f0', marginBottom: '10px' }}>
+                    <QRCodeSVG value={nutritionistPortalUrl} size={156} level="M" includeMargin={false} />
+                  </div>
+                  <p style={{ fontSize: '0.72rem', color: '#475569', margin: '0 0 10px 0', lineHeight: 1.4 }}>
+                    For specialist use. Unlocks full SNPs/rsIDs, merged 24Genetics PDF &amp; Patient Preview toggle.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleCopySpecificUrl('nutritionist', nutritionistPortalUrl)}
+                    style={{
+                      width: '100%',
+                      padding: '7px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #003666',
+                      backgroundColor: copiedQrType === 'nutritionist' ? '#003666' : '#ffffff',
+                      color: copiedQrType === 'nutritionist' ? '#ffffff' : '#003666',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {copiedQrType === 'nutritionist' ? '✓ Nutritionist Link Copied' : 'Copy Nutritionist Link'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Responsive CSS Rules ── */}
       <style jsx>{`

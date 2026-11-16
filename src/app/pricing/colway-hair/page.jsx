@@ -1,32 +1,31 @@
 import React from 'react';
 import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
 import ColwayPriceListClient from '../colway/ColwayPriceListClient';
+import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export async function generateMetadata() {
+export async function generateMetadata({ searchParams }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
-  const title = 'Colway Clinical Hair & Trichology Line • Official UAE Wholesale Price Schedule';
-  const description = 'Official UAE B2B price schedule for Colway Trichology strengthening shampoo and conditioner. Baicapil™ 2%, native biologically active fish tropocollagen, and micronized diosmin for follicular anchoring.';
+  const resolvedSearch = await searchParams;
+  const lang = normalizeMetaLang(resolvedSearch);
   const ogImageUrl = `${appUrl}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`;
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      url: `${appUrl}/pricing/colway-hair`,
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }]
+  return buildBilingualMetadata({
+    lang,
+    path: '/pricing/colway-hair',
+    siteName: 'Atlas Health Services',
+    images: [{ url: ogImageUrl, width: 1200, height: 630, alt: 'Colway Clinical Hair & Trichology Line' }],
+    en: {
+      title: 'Colway Clinical Hair & Trichology Line • Official UAE Wholesale Price Schedule',
+      description: 'Official UAE B2B price schedule for Colway Trichology strengthening shampoo and conditioner. Baicapil™ 2%, native biologically active fish tropocollagen, and micronized diosmin for follicular anchoring.',
     },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [ogImageUrl]
-    }
-  };
+    es: {
+      title: 'Colway Línea Capilar Clínica y Tricología • Tarifa Oficial Mayorista EAU',
+      description: 'Tarifa oficial B2B para champú y acondicionador fortalecedor Colway Trichology con Baicapil™ 2%, tropocolágeno nativo marino y diosmina micronizada.',
+    },
+  });
 }
 
 const FALLBACK_COLWAY_HAIR_PRODUCTS = [

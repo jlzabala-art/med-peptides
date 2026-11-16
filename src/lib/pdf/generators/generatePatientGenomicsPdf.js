@@ -24,8 +24,12 @@ export async function generatePatientGenomicsPdf({
   doctorNameParam,
   clinicName,
   isOptionA,
-  includeOriginal = true
+  includeOriginal = false,
+  audience = 'patient',
+  nutritionistToken = null
 }) {
+    const isNutritionist = audience === 'nutritionist';
+    const effectiveIncludeOriginal = isNutritionist && includeOriginal;
     // Canonical repository lookup (Firestore & 4-tier cache cascade)
     const storedReport = await getGenomicReport(sampleId);
     const resolvedPatient = storedReport?.patientName || patientName;
@@ -723,9 +727,12 @@ export async function generatePatientGenomicsPdf({
       maxWidth: p1Width - 96
     });
 
-    // QR Code for Digital Interactive Portal
-    const portalBaseUrl = 'https://med-peptides-app-27a3a.web.app/patient/dna-report';
-    const portalUrl = `${portalBaseUrl}?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleId)}`;
+    // QR Code for Digital Interactive Portal (Asymmetric: Nutritionist QR vs Patient QR)
+    const portalBaseUrl = 'https://www.atlashealth-services.com/patient/dna-report';
+    const patientPortalUrl = `${portalBaseUrl}?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleId)}`;
+    const portalUrl = (isNutritionist && nutritionistToken)
+      ? `${patientPortalUrl}&view=nutritionist&nt=${encodeURIComponent(nutritionistToken)}`
+      : patientPortalUrl;
     let qrImage = null;
     try {
       const qrBuffer = await QRCode.toBuffer(portalUrl, {
@@ -1713,7 +1720,7 @@ export async function generatePatientGenomicsPdf({
     });
 
     // Page 3 Footer
-    page3.drawText('Page 3 of 3 · Official Magistral Compounding Prescription · Dispensing subject to authorized medical prescription', {
+    page3.drawText('Page 3 of 4 · Official Magistral Compounding Prescription · Dispensing subject to authorized medical prescription', {
       x: 36,
       y: 18,
       size: 7,
@@ -1722,9 +1729,92 @@ export async function generatePatientGenomicsPdf({
     });
 
     // =========================================================================
+    // PAGE 4: ANCESTRAL & EVOLUTIONARY METABOLIC COMPATIBILITY (NUTRITION + ANCESTRY FUSION)
+    // =========================================================================
+    const anc = gProfile?.ancestralMetabolicProfile;
+    if (anc) {
+      const ancPage = pdfDoc.addPage([595.28, 841.89]);
+      const { width: aW, height: aH } = ancPage.getSize();
+      ancPage.drawRectangle({ x: 0, y: aH - 8, width: aW, height: 8, color: navyPrimary });
+      ancPage.drawRectangle({ x: 0, y: aH - 12, width: aW, height: 4, color: tealAccent });
+
+      ancPage.drawText('SECTION I-B · EVOLUTIONARY & ANCESTRAL METABOLIC FUSION', {
+        x: 36,
+        y: aH - 36,
+        size: 8.5,
+        font: helveticaBold,
+        color: tealAccent,
+      });
+      ancPage.drawText(`${patientName} — Nutrition × Ancestry Clinical Synthesis`, {
+        x: 36,
+        y: aH - 56,
+        size: 14,
+        font: helveticaBold,
+        color: navyPrimary,
+      });
+
+      const metaRows = [
+        ['Primary Biogeographic Origin', `${anc.primaryRegion || 'N/A'} (${anc.primaryPercent ?? 0}%)`],
+        ['Maternal mtDNA / Paternal Y-DNA', `${anc.maternalHaplogroup || 'N/A'}${anc.paternalHaplogroup ? ` / ${anc.paternalHaplogroup}` : ''}`],
+        ['Neanderthal Introgression', `${anc.neanderthalPercent ?? 0}% — ${anc.neanderthalRule?.status || ''}`],
+        ['Dairy Evolution (MCM6)', anc.dairyAdaptation?.status || ''],
+        ['Carbohydrate Metabolism', anc.carbohydrateAdaptation?.status || ''],
+        ['Botanical / Spice Shield', anc.spiceMatrix?.titleEn || ''],
+      ];
+
+      let ay = aH - 96;
+      for (const [label, val] of metaRows) {
+        ancPage.drawRectangle({
+          x: 36,
+          y: ay - 8,
+          width: aW - 72,
+          height: 28,
+          color: lightBg,
+          borderColor: cardBorder,
+          borderWidth: 0.8,
+        });
+        ancPage.drawText(label, { x: 46, y: ay + 2, size: 8.5, font: helveticaBold, color: navyPrimary });
+        ancPage.drawText(String(val).slice(0, 68), { x: 230, y: ay + 2, size: 8.5, font: helvetica, color: darkSlate });
+        ay -= 34;
+      }
+
+      ay -= 14;
+      ancPage.drawText('Clinical Synthesis & Evolutionary Alignment:', {
+        x: 36,
+        y: ay,
+        size: 10,
+        font: helveticaBold,
+        color: navyPrimary,
+      });
+      ay -= 16;
+      const synthWords = String(anc.clinicalSynthesisEn || '').split(/\s+/);
+      let synthLine = '';
+      for (const w of synthWords) {
+        if ((synthLine + ' ' + w).length > 92) {
+          ancPage.drawText(synthLine.trim(), { x: 36, y: ay, size: 8.8, font: helvetica, color: darkSlate });
+          ay -= 13;
+          synthLine = w;
+        } else {
+          synthLine += ' ' + w;
+        }
+      }
+      if (synthLine.trim()) {
+        ancPage.drawText(synthLine.trim(), { x: 36, y: ay, size: 8.8, font: helvetica, color: darkSlate });
+      }
+
+      ancPage.drawText('Page 4 of 4 · Evolutionary Nutrigenomics & Ancestry Fusion Engine', {
+        x: 36,
+        y: 18,
+        size: 7,
+        font: helvetica,
+        color: mutedSlate,
+      });
+    }
+
+    // =========================================================================
     // SECTION II: MERGE ORIGINAL 24GENETICS LABORATORY REPORT (IF REQUESTED)
     // =========================================================================
-    if (includeOriginal) {
+    if (effectiveIncludeOriginal) {
       let originalBytes = null;
       const originalPdfPath = path.join(process.cwd(), 'public/reports/24genetics/G000943554_Nutrition.pdf');
       if (fs.existsSync(originalPdfPath)) {
@@ -2008,10 +2098,38 @@ export async function generatePatientGenomicsPdf({
           color: mutedSlate
         });
 
-        // Append 55 Original Pages
+        // Append 55 Original Nutrition Pages
         const originalPdf = await PDFDocument.load(originalBytes);
         const copiedPages = await pdfDoc.copyPages(originalPdf, originalPdf.getPageIndices());
         copiedPages.forEach((page) => pdfDoc.addPage(page));
+
+        // Append Ancestry PDF Pages if sample is Hossam (G000943554 / 24G-QA-90421)
+        if (sampleId === 'G000943554' || sampleId === '24G-QA-90421') {
+          let ancestryBytes = null;
+          const ancestryPdfPath = path.join(process.cwd(), 'public/reports/24genetics/G000943554_Ancestry.pdf');
+          if (fs.existsSync(ancestryPdfPath)) {
+            try { ancestryBytes = fs.readFileSync(ancestryPdfPath); } catch { /* fallback CDN */ }
+          }
+          if (!ancestryBytes) {
+            for (const cdnUrl of [
+              'https://www.atlashealth-services.com/reports/24genetics/G000943554_Ancestry.pdf',
+              'https://med-peptides-app-27a3a.web.app/reports/24genetics/G000943554_Ancestry.pdf',
+            ]) {
+              try {
+                const ancRes = await fetch(cdnUrl, { cache: 'force-cache' });
+                if (ancRes.ok) {
+                  ancestryBytes = Buffer.from(await ancRes.arrayBuffer());
+                  break;
+                }
+              } catch { /* ignore */ }
+            }
+          }
+          if (ancestryBytes) {
+            const ancPdf = await PDFDocument.load(ancestryBytes);
+            const ancPages = await pdfDoc.copyPages(ancPdf, ancPdf.getPageIndices());
+            ancPages.forEach((p) => pdfDoc.addPage(p));
+          }
+        }
       }
     }
 

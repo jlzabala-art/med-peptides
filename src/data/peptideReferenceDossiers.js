@@ -427,6 +427,53 @@ export const PEPTIDE_REFERENCE_DOSSIERS = {
       'Pregnancy and breastfeeding.'
     ],
     adverseReactions: 'Generally well tolerated in clinical wound-healing studies. Transient mild injection-site redness.'
+  },
+  'ara-290': {
+    canonicalName: 'ARA-290 (Cibinetide)',
+    casNumber: '1208770-96-6',
+    pubChemCid: '56841691',
+    pubChemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/56841691',
+    regulatory: {
+      brand: 'Cibinetide (ARA-290) Investigational Standard',
+      brandUrl: 'https://clinicaltrials.gov/search?term=ARA-290',
+      appNumber: 'FDA Orphan Drug / Phase 2 Investigational',
+      approvalDate: 'Phase 2 Clinical Research',
+      holder: 'Araim Pharmaceuticals (Clinical Reference)',
+      guidance: 'Synthetic 11-amino-acid peptide developed from erythropoietin (EPO) research to target cellular protection, inflammation, and small-fibre nerve signalling without erythropoietic activity.',
+      officialLinks: [
+        { label: '2012 Sarcoidosis Neuropathy Trial (Full Study)', url: 'https://bpu.soundestlink.com/ce/c/6875783a95ff170416e9c051/6af73b8f5800de78b938e77b/6af93fd7cb233e2f46368f88?signature=e9b526735c02070930bbb3624235078129b2839dbef0fde8ee476dc4e4885b41', type: 'pubmed' },
+        { label: 'PubMed: Heij et al. 2012 (PMID: 23073784)', url: 'https://pubmed.ncbi.nlm.nih.gov/23073784/', type: 'pubmed' },
+        { label: 'ClinicalTrials.gov: ARA-290 / Cibinetide', url: 'https://clinicaltrials.gov/search?term=ARA-290', type: 'clinicaltrials' }
+      ]
+    },
+    pharmacology: {
+      title: 'Innate Repair Receptor (IRR) & Neuro-Protective Signalling',
+      affinities: [
+        { name: 'Peptide Architecture:', desc: '11-amino-acid synthetic peptide derived from the helix-B domain of erythropoietin (EPO), without red blood cell stimulation.' },
+        { name: 'Inflammatory & Cellular Signalling:', desc: 'Designed to interact with the proposed Innate Repair Receptor (IRR) system involved in cellular stress, inflammation, and tissue protection (precise mechanism remains under scientific investigation).' },
+        { name: 'Nerve-Related Signalling:', desc: 'Studied for biological pathways associated with small nerve fibres and sensory function.' }
+      ],
+      moa: 'Selective non-hematopoietic tissue-protective peptide targeting inflammatory signalling, cellular stress resilience, and small nerve fibre pathways via the proposed Innate Repair Receptor (IRR).'
+    },
+    literature: [
+      {
+        id: 'ara290-heij-2012',
+        title: 'Safety and efficacy of ARA 290 in sarcoidosis patients with symptoms of small fiber neuropathy: a randomized, double-blind pilot study',
+        authors: 'Heij L, Niesters M, Swartjes M, Hoitsma E, Drent M, Dunne A, et al.',
+        journal: 'Molecular Medicine',
+        year: 2012,
+        volume: '18(1): 1430–1436',
+        pmid: '23073784',
+        url: 'https://bpu.soundestlink.com/ce/c/6875783a95ff170416e9c051/6af73b8f5800de78b938e77b/6af93fd7cb233e2f46368f88?signature=e9b526735c02070930bbb3624235078129b2839dbef0fde8ee476dc4e4885b41',
+        summary: '4-week exploratory RCT in 22 sarcoidosis patients with small-fibre neuropathy (12 ARA-290 vs. 10 placebo). 42% of the ARA-290 group achieved ≥15-point improvement on the neuropathy symptom questionnaire vs. 0% placebo; pain intensity and fatigue improved in both groups without significant between-group difference. Small exploratory trial; does not establish long-term effectiveness or generalizability.'
+      }
+    ],
+    contraindications: [
+      'Known hypersensitivity to cibinetide/ARA-290 sequence or excipients.',
+      'Pregnancy or active lactation.',
+      'Not evaluated for long-term unsupervised administration outside controlled clinical protocols.'
+    ],
+    adverseReactions: 'Well tolerated in the 2012 4-week exploratory trial with no serious drug-related adverse events reported.'
   }
 };
 

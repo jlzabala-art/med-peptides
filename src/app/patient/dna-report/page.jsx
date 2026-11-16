@@ -2,6 +2,7 @@ import React from 'react';
 import PatientDnaPortalClient from './PatientDnaPortalClient';
 import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
 import { getGenomicReport } from '@/services/genomicsRepository';
+import { computeNutritionistToken, verifyNutritionistToken } from '@/utils/genomics/nutritionistAccess';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -53,6 +54,9 @@ export default async function PatientDnaReportPage({ searchParams }) {
   const patientName = sp?.patient || (isWafa ? 'Ms. Wafa Burud' : 'Hossam Ahmed');
   const clinic = sp?.clinic || (isWafa ? 'Transcend Healthcare' : 'Ryhanh Medical Company · Doha');
   const doctor = sp?.doctor || (isWafa ? 'Dr. Sajid Burud' : 'Clinical Genomic Director');
+  const requestedView = sp?.view === 'nutritionist' ? 'nutritionist' : 'patient';
+  const canAccessNutritionist = requestedView === 'nutritionist' && verifyNutritionistToken(sampleCode, sp?.nt);
+  const nutritionistToken = canAccessNutritionist ? computeNutritionistToken(sampleCode) : null;
 
   // Layer 4 & Cache lookup: Retrieve canonical profile
   const storedReport = await getGenomicReport(sampleCode);
@@ -79,6 +83,8 @@ export default async function PatientDnaReportPage({ searchParams }) {
       initialClinic={resolvedClinic}
       initialDoctor={resolvedDoctor}
       initialProfile={initialProfile}
+      initialCanAccessNutritionist={canAccessNutritionist}
+      initialNutritionistToken={nutritionistToken}
     />
   );
 }

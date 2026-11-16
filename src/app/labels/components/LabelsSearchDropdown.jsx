@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Check, Plus, X, Upload } from '@/lib/icons';
+import { Search, Check, Plus, X, Upload, ExternalLink } from '@/lib/icons';
 
 export default function LabelsSearchDropdown({
   searchQuery,
@@ -17,6 +17,8 @@ export default function LabelsSearchDropdown({
   isEs,
   highlightedIndex = -1
 }) {
+  const [refillsOnly, setRefillsOnly] = React.useState(false);
+
   const rawItems = searchQuery.trim()
     ? searchResults
     : (searchResults && searchResults.length > 0 ? searchResults : (recentPrescriptions.length > 0 ? recentPrescriptions : featuredPatients));
@@ -25,6 +27,11 @@ export default function LabelsSearchDropdown({
   const itemsToRender = React.useMemo(() => {
     const seen = new Set();
     return (rawItems || []).filter(item => {
+      if (refillsOnly) {
+        const codeStr = String(item.code || '');
+        const isRefill = Number(item.refillCycle || 1) > 1 || /-R\d+$/i.test(codeStr) || Boolean(item.refillOf);
+        if (!isRefill) return false;
+      }
       const codeKey = String(item.code || item.id || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
       const nameKey = String(item.patientName || item.name || '').trim().toLowerCase();
       const compositeKey = `${codeKey}::${nameKey}`;
@@ -34,7 +41,7 @@ export default function LabelsSearchDropdown({
       seen.add(compositeKey);
       return true;
     });
-  }, [rawItems]);
+  }, [rawItems, refillsOnly]);
 
   return (
     <div className="pls-search-dropdown" role="listbox" id="pls-search-results-listbox">
@@ -57,6 +64,22 @@ export default function LabelsSearchDropdown({
                     ? (isEs ? '🕒 Últimos 5 consultados' : '🕒 Recently Consulted (Last 5)')
                     : (isEs ? 'Prescripciones Destacadas' : 'Featured Prescriptions')))}
         </span>
+        <button
+          type="button"
+          onClick={() => setRefillsOnly((v) => !v)}
+          style={{
+            padding: '2px 8px',
+            borderRadius: '9999px',
+            border: refillsOnly ? '1px solid #10b981' : '1px solid #cbd5e1',
+            background: refillsOnly ? '#ecfdf5' : '#ffffff',
+            color: refillsOnly ? '#047857' : '#64748b',
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          {isEs ? 'Solo Refills (-R)' : 'Refills Only (-R)'}
+        </button>
         {searchQuery ? (
           isSearching ? (
             <span style={{ fontSize: '0.68rem', color: '#1a73e8' }}>Searching...</span>
@@ -179,7 +202,31 @@ export default function LabelsSearchDropdown({
                   #{item.code} • {item.title || item.treatmentTitle || 'Compounded Pharmaceutical Protocol'}
                 </div>
               </div>
-              <div className="pls-search-item-action-wrap">
+              <div className="pls-search-item-action-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <a
+                  href={`/rx/${encodeURIComponent(item.code || item.id)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  title={isEs ? `Abrir ficha de prescripción #${item.code}` : `Open prescription dossier #${item.code}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    padding: '4px 8px',
+                    borderRadius: '5px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    color: '#1a73e8',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <span>{isEs ? 'Ver Rx' : 'Open Rx'}</span>
+                  <ExternalLink size={10} />
+                </a>
                 <button
                   type="button"
                   className={`pls-search-btn-add-batch ${isInBatch ? 'in-batch' : ''}`}

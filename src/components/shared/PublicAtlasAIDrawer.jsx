@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { trackSearchClick } from '@/services/algoliaInsights';
 import {
   Sparkles,
   Send,
@@ -402,6 +404,7 @@ ${contextAnchor.mechanisms}
           sender: 'bot',
           text: botReply,
           cached: Boolean(data.cached),
+          matchedEntities: Array.isArray(data.matchedEntities) ? data.matchedEntities : [],
           timestamp: new Date().toISOString(),
         },
       ]);
@@ -1456,6 +1459,43 @@ ${contextAnchor.mechanisms}
 
                           {/* ── Main Analytical Body with High-Fidelity Highlights ── */}
                           {renderSafeBotText(cleanText)}
+
+                          {/* ── Algolia RAG Grounded Action Cards ── */}
+                          {Array.isArray(m.matchedEntities) && m.matchedEntities.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px', paddingTop: '8px', borderTop: '1px dashed #e2e8f0' }}>
+                              {m.matchedEntities.slice(0, 3).map((ent, entIdx) => (
+                                <Link
+                                  key={`${ent.type}-${ent.objectID}-${entIdx}`}
+                                  href={ent.href}
+                                  onClick={() => {
+                                    trackSearchClick({
+                                      indexName: ent.type === 'protocol' ? 'protocols' : 'products',
+                                      objectID: ent.objectID,
+                                      position: entIdx + 1,
+                                      eventName: 'Public Atlas AI Grounded Card Clicked',
+                                    });
+                                    onClose?.();
+                                  }}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '5px 10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #bfdbfe',
+                                    background: '#eff6ff',
+                                    color: '#1d4ed8',
+                                    fontSize: '0.73rem',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                  }}
+                                >
+                                  <span>{ent.title}</span>
+                                  <ArrowRight size={11} />
+                                </Link>
+                              ))}
+                            </div>
+                          )}
 
                           {/* ── Action Strip: Copy Summary & Quick Links ── */}
                           <div

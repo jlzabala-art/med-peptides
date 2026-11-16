@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import DataTable from '@/components/ui/DataTable';
 import { 
   ShieldCheck, 
   Award, 
@@ -370,157 +371,142 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
         </h4>
 
         <div className="ptc-coa-wrapper">
-          {/* eslint-disable-next-line no-restricted-syntax -- Static Certificate of Analysis laboratory specification table */}
-          <table className="ptc-coa-table">
-            <thead>
-              <tr>
-                <th>{t.paramCol}</th>
-                <th>{t.methodCol}</th>
-                <th>{t.resultCol}</th>
-                <th>{t.statusCol}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isDiagnosticKit ? (
-                <>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Matriz Biológica y Toma de Muestra' : 'Biological Matrix & Specimen'}</td>
-                    <td data-label={t.methodCol}>Capillary Dried Blood Spot (DBS Card)</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? '3 gotas en papel filtro calibrado · Estabilidad ambiental 15–25°C' : '3 spots on calibrated collection card · Ambient stability 15–25°C'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'VALIDADO' : 'VALIDATED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Metodología Cuantitativa' : 'Quantitative Assay Methodology'}</td>
-                    <td data-label={t.methodCol}>{diagnosticMetric.method}</td>
-                    <td data-label={t.resultCol}>{diagnosticMetric.range}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : 'CONFORMS'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Control de Calidad Interno (IQC)' : 'Internal Quality Control (IQC)'}</td>
-                    <td data-label={t.methodCol}>3-Level Calibrators per Analytical Run</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? 'Dentro de 2 Desviaciones Estándar (Westgard Multi-rules)' : 'Within 2 Standard Deviations (Westgard Multi-rules)'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : 'PASSED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Acreditación y Cumplimiento de Laboratorio' : 'Laboratory Accreditation & Compliance'}</td>
-                    <td data-label={t.methodCol}>LifeLab1 (Vilkpėdės str. 22, Vilnius)</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? 'Conforme ISO 15189 / Marca CE Directiva IVDR (UE 2017/746)' : 'ISO 15189 Compliant / CE-marked IVDR (EU 2017/746)'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'ACREDITADO' : 'ACCREDITED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Emisión de Informe Digital y TAT' : 'Digital Laboratory Report & TAT'}</td>
-                    <td data-label={t.methodCol}>Encrypted HL7 / FHIR Clinical Portal & PDF</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? 'Entrega en 3 a 5 días hábiles desde recepción en laboratorio' : '3 to 5 business days from receipt at testing facility'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'GARANTIZADO' : 'GUARANTEED'}</span>
-                    </td>
-                  </tr>
-                </>
-              ) : isSupplementProduct ? (
-                <>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Forma Farmacéutica & Aspecto' : 'Dosage Form & Visual Appearance'}</td>
-                    <td data-label={t.methodCol}>Ph. Eur. 2.9.1 / Organoleptic Inspection</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? 'Cápsula vegetal HPMC gastrorresistente transparente con polvo bioactivo uniforme' : 'Clear acid-resistant vegan HPMC capsules with uniform bioactive powder fill'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : 'CONFORMS'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Identificación de Matriz Bioactiva' : 'Active Matrix Compound Identification'}</td>
-                    <td data-label={t.methodCol}>HPLC / UV-Vis Spectrophotometry</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? 'Coenzima Q10, PQQ, Ginseng, ALA y Piperina conformes con especificación' : 'Coenzyme Q10, PQQ, Ginseng, ALA, and Piperine concordant with release criteria'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFIRMADO' : 'CONFIRMED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Gastrorresistencia & Desintegración' : 'Enteric Resistance & Disintegration'}</td>
-                    <td data-label={t.methodCol}>USP &lt;701&gt; / Ph. Eur. 2.9.1 (Simulated Gastric / Intestinal Fluid)</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? '&gt; 120 min intacto a pH 1.2; Disolución duodenal completa &lt; 30 min a pH 6.8' : '&gt; 120 min intact at pH 1.2; complete duodenal release &lt; 30 min at pH 6.8'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : 'PASSED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Metales Pesados & Pureza Elemental' : 'Heavy Metals & Elemental Impurities'}</td>
-                    <td data-label={t.methodCol}>ICP-MS (Ph. Eur. 2.4.20)</td>
-                    <td data-label={t.resultCol}>Pb &lt; 0.1 ppm, As &lt; 0.1 ppm, Cd &lt; 0.05 ppm, Hg &lt; 0.01 ppm</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : 'PASSED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Límites de Seguridad Microbiológica' : 'Microbiological Safety Limits'}</td>
-                    <td data-label={t.methodCol}>Ph. Eur. 5.1.4 / USP &lt;61&gt;</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? 'Recuento total aerobios &lt; 10³ UFC/g; Ausencia de Salmonella / E. coli' : 'TAMC &lt; 10³ CFU/g; Absence of Salmonella & E. coli in 10g'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : 'PASSED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Estándar Regulatorio & Almacenamiento' : 'Regulatory Standard & Storage'}</td>
-                    <td data-label={t.methodCol}>EU Directive 2002/46/EC &amp; cGMP</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? '15°C–25°C · Lugar fresco y seco lejos de luz solar directa' : '15°C–25°C · Store in cool, dry place away from direct sunlight'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'CERTIFICADO' : 'CERTIFIED'}</span>
-                    </td>
-                  </tr>
-                </>
-              ) : (
-                <>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Aspecto Visual' : lang === 'fr' ? 'Aspect Visuel' : lang === 'de' ? 'Visuelles Erscheinungsbild' : 'Visual Appearance'}</td>
-                    <td data-label={t.methodCol}>Ph. Eur. 2.9.1 / Visual</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? 'Polvo / liofilizado estéril blanco' : lang === 'fr' ? 'Poudre / lyophilisat stérile blanc' : lang === 'de' ? 'Weißes lyophilisiertes steriles Pulver' : 'White lyophilized sterile cake / powder'}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : lang === 'fr' ? 'CONFORME' : lang === 'de' ? 'KONFORM' : 'CONFORMS'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Identidad Molecular' : lang === 'fr' ? 'Identité Moléculaire' : lang === 'de' ? 'Molekulare Identität' : 'Molecular Identity'}</td>
-                    <td data-label={t.methodCol}>ESI-Q-TOF Mass Spectrometry</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? `Teórico: ${mw || '4731.3 Da'} · Observado: Coincide` : lang === 'fr' ? `Théorique : ${mw || '4731.3 Da'} · Observé : Conforme` : `Theoretical: ${mw || '4731.3 Da'} · Observed: Match`}</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFIRMADO' : lang === 'fr' ? 'CONFIRMÉ' : lang === 'de' ? 'BESTÄTIGT' : 'CONFIRMED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Endotoxinas Bacterianas' : lang === 'fr' ? 'Endotoxines Bactériennes' : lang === 'de' ? 'Bakterielle Endotoxine' : 'Bacterial Endotoxins'}</td>
-                    <td data-label={t.methodCol}>LAL Gel Clot Test (USP &lt;85&gt;)</td>
-                    <td data-label={t.resultCol}>&lt; 0.05 EU/mg ({lang === 'es' ? 'Grado Clínico Estricto' : 'Strict Clinical Grade'})</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : lang === 'fr' ? 'RÉUSSI' : lang === 'de' ? 'BESTANDEN' : 'PASSED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Garantía de Esterilidad (SAL)' : lang === 'fr' ? 'Assurance de Stérilité (SAL)' : 'Sterility Assurance Level'}</td>
-                    <td data-label={t.methodCol}>Membrane Filtration (USP &lt;71&gt;)</td>
-                    <td data-label={t.resultCol}>SAL 10⁻⁶ ({lang === 'es' ? 'Cero crecimiento a 14 días' : 'Zero growth at 14 days'})</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : lang === 'fr' ? 'RÉUSSI' : lang === 'de' ? 'BESTANDEN' : 'PASSED'}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Condiciones de Almacenamiento' : lang === 'fr' ? 'Conditions de Stockage' : 'Storage Conditions'}</td>
-                    <td data-label={t.methodCol}>Validated Stability Protocol</td>
-                    <td data-label={t.resultCol}>-20°C ({lang === 'es' ? 'Liofilizado' : 'Lyophilized'}) · 2°C–8°C ({lang === 'es' ? 'Líquido' : 'Liquid'})</td>
-                    <td data-label={t.statusCol}>
-                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : lang === 'fr' ? 'CONFORME' : lang === 'de' ? 'KONFORM' : 'COMPLIANT'}</span>
-                    </td>
-                  </tr>
-                </>
-              )}
-            </tbody>
-          </table>
+          <DataTable
+            pagination={false}
+            enableAskAtlas={false}
+            columns={[
+              { key: 'param', label: t.paramCol },
+              { key: 'method', label: t.methodCol },
+              { key: 'result', label: t.resultCol },
+              {
+                key: 'status',
+                label: t.statusCol,
+                render: (val) => <span className="ptc-status-badge">{val}</span>,
+              },
+            ]}
+            data={
+              isDiagnosticKit
+                ? [
+                    {
+                      id: 'matrix',
+                      param: lang === 'es' ? 'Matriz Biológica y Toma de Muestra' : 'Biological Matrix & Specimen',
+                      method: 'Capillary Dried Blood Spot (DBS Card)',
+                      result: lang === 'es' ? '3 gotas en papel filtro calibrado · Estabilidad ambiental 15–25°C' : '3 spots on calibrated collection card · Ambient stability 15–25°C',
+                      status: lang === 'es' ? 'VALIDADO' : 'VALIDATED',
+                    },
+                    {
+                      id: 'assay',
+                      param: lang === 'es' ? 'Metodología Cuantitativa' : 'Quantitative Assay Methodology',
+                      method: diagnosticMetric.method,
+                      result: diagnosticMetric.range,
+                      status: lang === 'es' ? 'CONFORME' : 'CONFORMS',
+                    },
+                    {
+                      id: 'iqc',
+                      param: lang === 'es' ? 'Control de Calidad Interno (IQC)' : 'Internal Quality Control (IQC)',
+                      method: '3-Level Calibrators per Analytical Run',
+                      result: lang === 'es' ? 'Dentro de 2 Desviaciones Estándar (Westgard Multi-rules)' : 'Within 2 Standard Deviations (Westgard Multi-rules)',
+                      status: lang === 'es' ? 'APROBADO' : 'PASSED',
+                    },
+                    {
+                      id: 'accred',
+                      param: lang === 'es' ? 'Acreditación y Cumplimiento de Laboratorio' : 'Laboratory Accreditation & Compliance',
+                      method: 'LifeLab1 (Vilkpėdės str. 22, Vilnius)',
+                      result: lang === 'es' ? 'Conforme ISO 15189 / Marca CE Directiva IVDR (UE 2017/746)' : 'ISO 15189 Compliant / CE-marked IVDR (EU 2017/746)',
+                      status: lang === 'es' ? 'ACREDITADO' : 'ACCREDITED',
+                    },
+                    {
+                      id: 'tat',
+                      param: lang === 'es' ? 'Emisión de Informe Digital y TAT' : 'Digital Laboratory Report & TAT',
+                      method: 'Encrypted HL7 / FHIR Clinical Portal & PDF',
+                      result: lang === 'es' ? 'Entrega en 3 a 5 días hábiles desde recepción en laboratorio' : '3 to 5 business days from receipt at testing facility',
+                      status: lang === 'es' ? 'GARANTIZADO' : 'GUARANTEED',
+                    },
+                  ]
+                : isSupplementProduct
+                ? [
+                    {
+                      id: 'dosage',
+                      param: lang === 'es' ? 'Forma Farmacéutica & Aspecto' : 'Dosage Form & Visual Appearance',
+                      method: 'Ph. Eur. 2.9.1 / Organoleptic Inspection',
+                      result: lang === 'es' ? 'Cápsula vegetal HPMC gastrorresistente transparente con polvo bioactivo uniforme' : 'Clear acid-resistant vegan HPMC capsules with uniform bioactive powder fill',
+                      status: lang === 'es' ? 'CONFORME' : 'CONFORMS',
+                    },
+                    {
+                      id: 'id',
+                      param: lang === 'es' ? 'Identificación de Matriz Bioactiva' : 'Active Matrix Compound Identification',
+                      method: 'HPLC / UV-Vis Spectrophotometry',
+                      result: lang === 'es' ? 'Coenzima Q10, PQQ, Ginseng, ALA y Piperina conformes con especificación' : 'Coenzyme Q10, PQQ, Ginseng, ALA, and Piperine concordant with release criteria',
+                      status: lang === 'es' ? 'CONFIRMADO' : 'CONFIRMED',
+                    },
+                    {
+                      id: 'enteric',
+                      param: lang === 'es' ? 'Gastrorresistencia & Desintegración' : 'Enteric Resistance & Disintegration',
+                      method: 'USP <701> / Ph. Eur. 2.9.1 (Simulated Gastric / Intestinal Fluid)',
+                      result: lang === 'es' ? '> 120 min intacto a pH 1.2; Disolución duodenal completa < 30 min a pH 6.8' : '> 120 min intact at pH 1.2; complete duodenal release < 30 min at pH 6.8',
+                      status: lang === 'es' ? 'APROBADO' : 'PASSED',
+                    },
+                    {
+                      id: 'metals',
+                      param: lang === 'es' ? 'Metales Pesados & Pureza Elemental' : 'Heavy Metals & Elemental Impurities',
+                      method: 'ICP-MS (Ph. Eur. 2.4.20)',
+                      result: 'Pb < 0.1 ppm, As < 0.1 ppm, Cd < 0.05 ppm, Hg < 0.01 ppm',
+                      status: lang === 'es' ? 'APROBADO' : 'PASSED',
+                    },
+                    {
+                      id: 'micro',
+                      param: lang === 'es' ? 'Límites de Seguridad Microbiológica' : 'Microbiological Safety Limits',
+                      method: 'Ph. Eur. 5.1.4 / USP <61>',
+                      result: lang === 'es' ? 'Recuento total aerobios < 10³ UFC/g; Ausencia de Salmonella / E. coli' : 'TAMC < 10³ CFU/g; Absence of Salmonella & E. coli in 10g',
+                      status: lang === 'es' ? 'APROBADO' : 'PASSED',
+                    },
+                    {
+                      id: 'reg',
+                      param: lang === 'es' ? 'Estándar Regulatorio & Almacenamiento' : 'Regulatory Standard & Storage',
+                      method: 'EU Directive 2002/46/EC & cGMP',
+                      result: lang === 'es' ? '15°C–25°C · Lugar fresco y seco lejos de luz solar directa' : '15°C–25°C · Store in cool, dry place away from direct sunlight',
+                      status: lang === 'es' ? 'CERTIFICADO' : 'CERTIFIED',
+                    },
+                  ]
+                : [
+                    {
+                      id: 'visual',
+                      param: lang === 'es' ? 'Aspecto Visual' : lang === 'fr' ? 'Aspect Visuel' : lang === 'de' ? 'Visuelles Erscheinungsbild' : 'Visual Appearance',
+                      method: 'Ph. Eur. 2.9.1 / Visual',
+                      result: lang === 'es' ? 'Polvo / liofilizado estéril blanco' : lang === 'fr' ? 'Poudre / lyophilisat stérile blanc' : lang === 'de' ? 'Weißes lyophilisiertes steriles Pulver' : 'White lyophilized sterile cake / powder',
+                      status: lang === 'es' ? 'CONFORME' : lang === 'fr' ? 'CONFORME' : lang === 'de' ? 'KONFORM' : 'CONFORMS',
+                    },
+                    {
+                      id: 'identity',
+                      param: lang === 'es' ? 'Identidad Molecular' : lang === 'fr' ? 'Identité Moléculaire' : lang === 'de' ? 'Molekulare Identität' : 'Molecular Identity',
+                      method: 'ESI-Q-TOF Mass Spectrometry',
+                      result: lang === 'es' ? `Teórico: ${mw || '4731.3 Da'} · Observado: Coincide` : lang === 'fr' ? `Théorique : ${mw || '4731.3 Da'} · Observé : Conforme` : `Theoretical: ${mw || '4731.3 Da'} · Observed: Match`,
+                      status: lang === 'es' ? 'CONFIRMADO' : lang === 'fr' ? 'CONFIRMÉ' : lang === 'de' ? 'BESTÄTIGT' : 'CONFIRMED',
+                    },
+                    {
+                      id: 'endotoxin',
+                      param: lang === 'es' ? 'Endotoxinas Bacterianas' : lang === 'fr' ? 'Endotoxines Bactériennes' : lang === 'de' ? 'Bakterielle Endotoxine' : 'Bacterial Endotoxins',
+                      method: 'LAL Gel Clot Test (USP <85>)',
+                      result: `< 0.05 EU/mg (${lang === 'es' ? 'Grado Clínico Estricto' : 'Strict Clinical Grade'})`,
+                      status: lang === 'es' ? 'APROBADO' : lang === 'fr' ? 'RÉUSSI' : lang === 'de' ? 'BESTANDEN' : 'PASSED',
+                    },
+                    {
+                      id: 'sal',
+                      param: lang === 'es' ? 'Garantía de Esterilidad (SAL)' : lang === 'fr' ? 'Assurance de Stérilité (SAL)' : 'Sterility Assurance Level',
+                      method: 'Membrane Filtration (USP <71>)',
+                      result: `SAL 10⁻⁶ (${lang === 'es' ? 'Cero crecimiento a 14 días' : 'Zero growth at 14 days'})`,
+                      status: lang === 'es' ? 'APROBADO' : lang === 'fr' ? 'RÉUSSI' : lang === 'de' ? 'BESTANDEN' : 'PASSED',
+                    },
+                    {
+                      id: 'storage',
+                      param: lang === 'es' ? 'Condiciones de Almacenamiento' : lang === 'fr' ? 'Conditions de Stockage' : 'Storage Conditions',
+                      method: 'Validated Stability Protocol',
+                      result: `-20°C (${lang === 'es' ? 'Liofilizado' : 'Lyophilized'}) · 2°C–8°C (${lang === 'es' ? 'Líquido' : 'Liquid'})`,
+                      status: lang === 'es' ? 'CONFORME' : lang === 'fr' ? 'CONFORME' : lang === 'de' ? 'KONFORM' : 'COMPLIANT',
+                    },
+                  ]
+            }
+          />
         </div>
       </div>
 

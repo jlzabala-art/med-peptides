@@ -4,6 +4,8 @@
  * Pharmapolis compounding bottle labels with front, back QR, and front+micro-QR variants.
  */
 
+import { normalizeLabelsArray } from '@/utils/labels/labelContract';
+
 export const PHARMAPOLIS_LABELS_REGISTRY = [
   // ── 51857: Amna Sultan Mohamed Ahmed Alotaiba ──
   {
@@ -1975,7 +1977,7 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
   if (Array.isArray(rx.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
     const fallbackUrl = `https://www.atlashealth-services.com/rx/${encodeURIComponent(rx.prescriptionNumber || rx.code || rx.id || 'RX')}`;
 
-    return rx.pharmacyLabels.map((lbl, idx) => {
+    return normalizeLabelsArray(rx.pharmacyLabels).map((lbl, idx) => {
       const derived = derivedLabels[idx] || derivedLabels[0] || {};
       const phaseNum = lbl.phaseNumber || derived.phaseNumber || (idx + 1);
 

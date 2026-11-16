@@ -11,9 +11,8 @@ import {
 import { triggerHaptic } from '../../utils/haptics';
 import '../../styles/publicProtocolsCatalog.css';
 import '../../components/product/PublicDatasheetView.css';
-import PublicAtlasAIDrawer from '../shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '../shared/PublicInstitutionalInquiryDrawer';
-import PublicStickyActionBar from '../shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import ProtocolQrModal from './ProtocolQrModal';
 import PublicUnifiedHeader from '../shared/PublicUnifiedHeader';
 import PageHeroCard from '../ui/PageHeroCard';
@@ -145,6 +144,33 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
   };
 
   const heroSubtitle = (t.catalogHeroSubtitle || '').replace('{count}', String(enrichedProtocols.length));
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'protocols_catalog',
+        name: t.catalogHeroTitle || 'Clinical Protocols & Peptides Directory',
+        totalProtocols: enrichedProtocols.length,
+        filteredCount: filteredProtocols.length,
+        activeFilterGoal: selectedGoal,
+      },
+      bottomBar: {
+        summaryTitle: t.catalogHeroTitle || 'Clinical Protocols & Peptides Directory',
+        summarySubtitle: `${filteredProtocols.length} Clinical Protocols • ${kpiMetrics.goalsCount} Goals • Titration SSOT`,
+        badge: 'Clinical Pathways SSOT',
+        atlasAiLabel: 'Ask Atlas AI',
+        showSections: true,
+        sectionsLabel: isEs ? 'Objetivos & Filtros' : 'Goals & Filters',
+        sectionsCount: GOAL_BUCKETS.length,
+        onOpenSections: () => setIsMobileDrawerOpen(true),
+        primaryAction: {
+          label: isEs ? 'Consultar Directorio' : 'Inquire Directory',
+          onClick: () => setIsInquiryDrawerOpen(true),
+        },
+      },
+    },
+    [t.catalogHeroTitle, enrichedProtocols.length, filteredProtocols.length, selectedGoal, kpiMetrics.goalsCount, isEs]
+  );
 
   return (
     <div className="proto-catalog-container atlas-page-bg">
@@ -435,69 +461,6 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           onCopyUrl={handleCopyQrUrl}
         />
       )}
-
-      {/* Persistent Bottom Action Bar */}
-      <PublicStickyActionBar
-        title={t.catalogHeroTitle || 'Clinical Protocols & Peptides Directory'}
-        subtitle={`${filteredProtocols.length} Clinical Protocols • ${kpiMetrics.goalsCount} Goals • Titration SSOT`}
-        badge="Clinical Pathways SSOT"
-        badgeType="teal"
-        inquireLabel={isEs ? 'Consultar Directorio' : 'Inquire Directory'}
-        onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={true}
-        aiCategory="Protocols Directory"
-        aiContextQuery={
-          compareProtocols.length >= 2
-            ? isEs
-              ? `Compara los protocolos seleccionados (${compareProtocols.map((p) => p.cleanName).join(' vs ')}) en cuanto a perfil de paciente, titulación, biomarcadores y contraindicaciones.`
-              : `Compare the selected protocols (${compareProtocols.map((p) => p.cleanName).join(' vs ')}) for patient fit, titration schedule, required biomarkers, and contraindications.`
-            : ''
-        }
-        showSections={true}
-        sectionsCount={GOAL_BUCKETS.length}
-        sectionsLabel={isEs ? 'Objetivos & Filtros' : 'Goals & Filters'}
-        onOpenSections={() => setIsMobileDrawerOpen(true)}
-        lang={lang}
-      />
-
-      <PublicAtlasAIDrawer
-        contextType="protocols_directory"
-        contextAnchor={{
-          type: 'protocols_catalog',
-          name: 'Clinical Protocols & Peptides Directory',
-          totalProtocols: enrichedProtocols.length,
-          filteredCount: filteredProtocols.length,
-          activeFilterGoal: selectedGoal,
-          activeRouteFilter: routeFilter,
-          activeEvidenceFilter: evidenceFilter,
-          activeSafetyExclusions: safetyExclusions,
-          activeSearchQuery: searchQuery,
-          shortlistCount: shortlistSlugs.size,
-          comparingProtocols: compareProtocols.map((p) => ({
-            name: p.cleanName,
-            slug: p.cleanSlug,
-            route: p.route,
-            evidence: p.evidence_grade,
-            duration: `${p.durationWeeks}w`,
-            biomarkers: p.biomarkers,
-            contraindications: p.contraindications,
-          })),
-          availableGoals: GOAL_BUCKETS.map((b) => b.label),
-          protocols: enrichedProtocols.map((p) => ({
-            name: p.cleanName,
-            slug: p.cleanSlug,
-            goal: p.mappedGoals?.filter((g) => g !== 'all' && g !== 'reference_standards')[0] || 'longevity',
-            duration: p.durationWeeks ? `${p.durationWeeks}w` : '8w',
-            phases: p.phasesCount,
-            route: p.route,
-            evidence: p.evidence_grade,
-            compounds: p.compounds.map((c) => c.name),
-          })),
-        }}
-        storageKey="protocols_directory"
-        hideFloatingTrigger={true}
-        lang={lang}
-      />
 
       <PublicInstitutionalInquiryDrawer
         isOpen={isInquiryDrawerOpen}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import DataTable from '@/components/ui/DataTable';
 import './MonographPreviewModal.css';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Download, Eye, FileText, Check, ShieldCheck, Tag, Box, Copy, Printer, Info, AlertTriangle, Activity, Syringe, Clock } from '@/lib/icons';
@@ -67,11 +68,8 @@ export default function MonographPreviewModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Hard safety guard: Never render vial reconstitution or 38x90mm vial labels for diagnostic test kits
-  if (!isOpen || !product || isDiagnostic) return null;
-
   // Computed values needed by the second useEffect — must be derived before any hooks
-  const _monographPdfUrl = isOpen && product
+  const _monographPdfUrl = isOpen && product && !isDiagnostic
     ? `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=all`
     : null;
 
@@ -82,7 +80,8 @@ export default function MonographPreviewModal({
     }
   }, [isOpen, _monographPdfUrl]);
 
-  if (!isOpen || !product) return null;
+  // Hard safety guard: Never render vial reconstitution or 38x90mm vial labels for diagnostic test kits
+  if (!isOpen || !product || isDiagnostic) return null;
 
   const docVersion = version || (product.version ? (String(product.version).startsWith('v') ? product.version : `v${product.version}`) : 'v2.4');
   const docUpdatedDate = updatedAtDate || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -411,28 +410,37 @@ export default function MonographPreviewModal({
                     <div style={{ margin: '0.75rem 0' }}>
                       <div className="mpm-section-heading">1. Molecular &amp; Chemical Specifications</div>
                       <div className="mpm-specs-table-wrap">
-                        <table className="mpm-table">
-                          <tbody>
-                            <tr>
-                              <td style={{ width: '25%', fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>CAS Registry:</td>
-                              <td style={{ width: '25%', fontFamily: 'monospace', fontWeight: 700 }}>{cas}</td>
-                              <td style={{ width: '25%', fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Molecular Weight:</td>
-                              <td style={{ width: '25%', fontFamily: 'monospace', fontWeight: 700 }}>{mw} Da</td>
-                            </tr>
-                            <tr>
-                              <td style={{ fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Formula:</td>
-                              <td style={{ fontFamily: 'monospace' }}>{formula}</td>
-                              <td style={{ fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Compound Identity:</td>
-                              <td>Synthetic Cyclic Agonist</td>
-                            </tr>
-                            <tr>
-                              <td style={{ fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Terminal Half-Life:</td>
-                              <td style={{ fontFamily: 'monospace' }}>{halfLife}</td>
-                              <td style={{ fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Analytical Standard:</td>
-                              <td>Dual RP-HPLC &amp; LC-MS Standard</td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        <DataTable
+                          pagination={false}
+                          enableAskAtlas={false}
+                          columns={[
+                            {
+                              key: 'labelLeft',
+                              label: 'Parameter',
+                              render: (val) => <span style={{ fontWeight: 700, color: '#64748b' }}>{val}</span>,
+                            },
+                            {
+                              key: 'valueLeft',
+                              label: 'Specification',
+                              render: (val) => <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{val}</span>,
+                            },
+                            {
+                              key: 'labelRight',
+                              label: 'Parameter',
+                              render: (val) => <span style={{ fontWeight: 700, color: '#64748b' }}>{val}</span>,
+                            },
+                            {
+                              key: 'valueRight',
+                              label: 'Specification',
+                              render: (val, row) => <span style={{ fontFamily: row.monoRight ? 'monospace' : 'inherit', fontWeight: row.boldRight ? 700 : 400 }}>{val}</span>,
+                            },
+                          ]}
+                          data={[
+                            { id: 'cas', labelLeft: 'CAS Registry:', valueLeft: cas, labelRight: 'Molecular Weight:', valueRight: `${mw} Da`, monoRight: true, boldRight: true },
+                            { id: 'formula', labelLeft: 'Formula:', valueLeft: formula, labelRight: 'Compound Identity:', valueRight: 'Synthetic Cyclic Agonist' },
+                            { id: 'halflife', labelLeft: 'Terminal Half-Life:', valueLeft: halfLife, labelRight: 'Analytical Standard:', valueRight: 'Dual RP-HPLC & LC-MS Standard' },
+                          ]}
+                        />
                       </div>
                     </div>
                   )}
@@ -472,32 +480,40 @@ export default function MonographPreviewModal({
                       </div>
 
                       <div className="mpm-specs-table-wrap">
-                        <table className="mpm-table">
-                          <thead>
-                            <tr>
-                              <th>Strength</th>
-                              <th>Format</th>
-                              <th>Diluent / Vehicle</th>
-                              <th>Resulting Conc.</th>
-                              <th>Route</th>
-                              <th style={{ textAlign: 'right' }}>Purity</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {presentationsList.map((row) => (
-                              <tr key={row.id} className={row.isActive ? 'active-row' : ''}>
-                                <td style={{ fontWeight: 700 }}>
-                                  {row.name} {row.isActive && <span style={{ color: '#15803d', marginLeft: '3px' }}>●</span>}
-                                </td>
-                                <td>{row.format}</td>
-                                <td style={{ fontFamily: 'monospace', color: '#475569' }}>{row.diluent}</td>
-                                <td style={{ fontFamily: 'monospace', fontWeight: 700 }}>{row.conc}</td>
-                                <td>{row.route}</td>
-                                <td style={{ textAlign: 'right', fontWeight: 700, color: '#15803d' }}>{row.purity}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                        <DataTable
+                          pagination={false}
+                          enableAskAtlas={false}
+                          columns={[
+                            {
+                              key: 'name',
+                              label: 'Strength',
+                              render: (val, row) => (
+                                <span style={{ fontWeight: 700 }}>
+                                  {val} {row.isActive && <span style={{ color: '#15803d', marginLeft: '3px' }}>●</span>}
+                                </span>
+                              ),
+                            },
+                            { key: 'format', label: 'Format' },
+                            {
+                              key: 'diluent',
+                              label: 'Diluent / Vehicle',
+                              render: (val) => <span style={{ fontFamily: 'monospace', color: '#475569' }}>{val}</span>,
+                            },
+                            {
+                              key: 'conc',
+                              label: 'Resulting Conc.',
+                              render: (val) => <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{val}</span>,
+                            },
+                            { key: 'route', label: 'Route' },
+                            {
+                              key: 'purity',
+                              label: 'Purity',
+                              align: 'right',
+                              render: (val) => <span style={{ fontWeight: 700, color: '#15803d' }}>{val}</span>,
+                            },
+                          ]}
+                          data={presentationsList}
+                        />
                       </div>
                     </div>
                   )}

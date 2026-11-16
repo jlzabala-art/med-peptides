@@ -7,12 +7,62 @@ import { Target, Zap, ShieldCheck } from 'lucide-react';
  * Chapter 1: Your DNA in Plain Language (5 Key Body Priorities)
  * Luxury MedTech UI with calm clinical cards, distinct priority badges, and the 3-step biochemical eating order.
  */
-export default function DnaPrioritiesSection({ clinicalProfile, patientName, sampleCode }) {
+export default function DnaPrioritiesSection({ clinicalProfile, patientName, sampleCode, audienceMode = 'patient' }) {
   if (!clinicalProfile) return null;
+  const isNutritionist = audienceMode === 'nutritionist';
+  const ancestry = clinicalProfile.ancestralMetabolicProfile || {};
+  const topAxes = (clinicalProfile.fiveClinicalAxes || []).slice(0, 3);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      {/* 5 Clinical Genomic Axes Cards */}
+      {/* Executive 60-Second Ancestry × Nutrition Bridge */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #003666 0%, #0f4c81 60%, #0d9488 100%)',
+          borderRadius: '10px',
+          padding: '20px',
+          color: '#ffffff',
+          boxShadow: '0 4px 14px rgba(0, 54, 102, 0.14)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+          <div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#99f6e4', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              ANCESTRY × NUTRITION BRIDGE · 60-SECOND SUMMARY
+            </span>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: '2px 0 0 0', color: '#ffffff' }}>
+              {patientName ? `${patientName}'s Combined DNA Story` : 'Your Combined DNA Story'}
+            </h3>
+          </div>
+          <span style={{ fontSize: '0.70rem', fontWeight: 700, backgroundColor: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.28)', padding: '4px 10px', borderRadius: '999px' }}>
+            {isNutritionist ? 'Nutritionist Mode · Full Biomarkers' : 'Patient Mode · Practical Actions'}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+          <div style={{ backgroundColor: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', padding: '12px' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#99f6e4', textTransform: 'uppercase', marginBottom: '4px' }}>
+              1. Ancestral Origin → Adaptation
+            </div>
+            <div style={{ fontSize: '0.78rem', lineHeight: 1.45, color: '#f8fafc' }}>
+              {ancestry.clinicalSynthesisEn || 'Combines your ancestral metabolic heritage with your active nutritional traits to personalize carbs, fats, and micronutrients.'}
+            </div>
+          </div>
+
+          {topAxes.slice(0, 2).map((ax, idx) => (
+            <div key={ax.id || idx} style={{ backgroundColor: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#fde68a', textTransform: 'uppercase', marginBottom: '4px' }}>
+                {idx + 2}. Priority: {ax.titleEn}
+              </div>
+              <div style={{ fontSize: '0.78rem', lineHeight: 1.45, color: '#f8fafc' }}>
+                {ax.proteinTargetEn || ax.clinicalFindingEn}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 5 Genomic Axes Cards */}
       <div
         id="dna-axes-section"
         style={{
@@ -26,14 +76,14 @@ export default function DnaPrioritiesSection({ clinicalProfile, patientName, sam
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              CHAPTER 1 · CLINICAL INTELLIGENCE
+              {isNutritionist ? 'CHAPTER 1 · NUTRITIONIST INTELLIGENCE' : 'CHAPTER 1 · YOUR PERSONALIZED PRIORITIES'}
             </span>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#202124', margin: '2px 0 0 0' }}>
               The 5 Key Body Priorities
             </h3>
           </div>
           <span style={{ fontSize: '0.72rem', color: '#137333', backgroundColor: '#e6f4ea', padding: '4px 10px', borderRadius: '4px', border: '1px solid #ceead6', fontWeight: 600 }}>
-            5 Clinical Axes Evaluated · CE-IVD Methodology
+            {isNutritionist ? '5 Nutritionist Axes · CE-IVD SNPs' : '5 Daily Priorities · Plain English'}
           </span>
         </div>
 
@@ -82,9 +132,11 @@ export default function DnaPrioritiesSection({ clinicalProfile, patientName, sam
                       {axis.riskLevel} ({axis.score}/100)
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.70rem', color: '#5f6368', fontFamily: 'monospace', marginBottom: '8px' }}>
-                    Genes: {axis.keyGenes}
-                  </div>
+                  {isNutritionist && (
+                    <div style={{ fontSize: '0.70rem', color: '#5f6368', fontFamily: 'monospace', marginBottom: '8px' }}>
+                      Genes / SNPs: {axis.keyGenes}
+                    </div>
+                  )}
                   <p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', color: '#3c4043', lineHeight: 1.5 }}>
                     {axis.clinicalFindingEn}
                   </p>

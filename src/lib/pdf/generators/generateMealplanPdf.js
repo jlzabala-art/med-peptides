@@ -20,8 +20,12 @@ export async function generateMealplanPdf({
   doctorName,
   clinicName,
   mealPlanPartner,
-  includeOriginal = true
+  includeOriginal = false,
+  audience = 'patient',
+  nutritionistToken = null
 }) {
+    const isNutritionist = audience === 'nutritionist';
+    const effectiveIncludeOriginal = isNutritionist && includeOriginal;
     // Canonical repository lookup (Firestore & 4-tier cache cascade)
     const storedReport = await getGenomicReport(sampleId);
     const resolvedPatient = storedReport?.patientName || patientName;
@@ -442,8 +446,11 @@ export async function generateMealplanPdf({
       color: googleBlue
     });
 
-    // Generate QR Code for Cover
-    const coverPortalUrl = `https://atlashealth-services.com/patient/dna-report?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleId)}`;
+    // Generate QR Code for Cover (Asymmetric: Nutritionist QR vs Patient QR)
+    const baseCoverUrl = `https://www.atlashealth-services.com/patient/dna-report?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleId)}`;
+    const coverPortalUrl = (isNutritionist && nutritionistToken)
+      ? `${baseCoverUrl}&view=nutritionist&nt=${encodeURIComponent(nutritionistToken)}`
+      : baseCoverUrl;
     try {
       const coverQrBuffer = await QRCode.toBuffer(coverPortalUrl, {
         type: 'png',
@@ -1052,8 +1059,8 @@ export async function generateMealplanPdf({
       lineHeight: 11.0
     });
 
-    // QR Code for Digital Interactive Portal
-    const portalBaseUrl = 'https://med-peptides-app-27a3a.web.app/patient/dna-report';
+    // QR Code for Digital Interactive Portal (Always Patient QR on Page 2)
+    const portalBaseUrl = 'https://www.atlashealth-services.com/patient/dna-report';
     const portalUrl = `${portalBaseUrl}?patient=${encodeURIComponent(patientName)}&sample=${encodeURIComponent(sampleId)}`;
     let qrImage = null;
     try {
@@ -2248,7 +2255,7 @@ export async function generateMealplanPdf({
     // =========================================================================
     // SECTION II: MERGE ORIGINAL 24GENETICS LABORATORY REPORT (IF REQUESTED)
     // =========================================================================
-    if (includeOriginal) {
+    if (effectiveIncludeOriginal) {
       const originalPdfPath = path.join(process.cwd(), 'public/reports/24genetics/G000943554_Nutrition.pdf');
       if (fs.existsSync(originalPdfPath)) {
         // Divider Page (Section II Cover)

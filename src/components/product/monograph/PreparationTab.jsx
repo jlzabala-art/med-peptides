@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import DataTable from '@/components/ui/DataTable';
 import { 
   Droplet, 
   Droplets,
@@ -1787,65 +1788,74 @@ export default function PreparationTab({
                   Microbiological & Chromatographic Specification
                 </span>
               </div>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.72rem',
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px'
-              }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
-                    <th style={{ padding: '8px 10px', fontWeight: 700, color: '#334155', width: '28%' }}>Product State</th>
-                    <th style={{ padding: '8px 10px', fontWeight: 700, color: '#334155', width: '20%' }}>Recommended Temp</th>
-                    <th style={{ padding: '8px 10px', fontWeight: 700, color: '#334155', width: '20%' }}>Max Stability Period</th>
-                    <th style={{ padding: '8px 10px', fontWeight: 700, color: '#334155', width: '32%' }}>Key Handling Instruction</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>Lyophilized (unopened) — Long-term</td>
-                    <td style={{ padding: '8px 10px' }}>
-                      <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
-                        −20°C (freezer)
+              <DataTable
+                pagination={false}
+                enableAskAtlas={false}
+                columns={[
+                  {
+                    key: 'state',
+                    label: 'Product State',
+                    render: (val) => <span style={{ fontWeight: 600, color: '#0f172a' }}>{val}</span>,
+                  },
+                  {
+                    key: 'temp',
+                    label: 'Recommended Temp',
+                    render: (val, row) => (
+                      <span style={{ background: row.bg, color: row.color, padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
+                        {val}
                       </span>
-                    </td>
-                    <td style={{ padding: '8px 10px', color: '#334155', fontWeight: 500 }}>Up to 24 months*</td>
-                    <td style={{ padding: '8px 10px', color: '#64748b' }}>Keep sealed with desiccant; protect from direct light</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>Lyophilized (unopened) — Transit</td>
-                    <td style={{ padding: '8px 10px' }}>
-                      <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
-                        20°C–25°C (ambient)
-                      </span>
-                    </td>
-                    <td style={{ padding: '8px 10px', color: '#334155', fontWeight: 500 }}>Up to 30 days*</td>
-                    <td style={{ padding: '8px 10px', color: '#64748b' }}>Avoid prolonged heat exposure (&gt;30°C); thermal buffering</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>Reconstituted (bacteriostatic water)</td>
-                    <td style={{ padding: '8px 10px' }}>
-                      <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
-                        2°C–8°C (refrigerated)
-                      </span>
-                    </td>
-                    <td style={{ padding: '8px 10px', color: '#334155', fontWeight: 500 }}>Up to 28 days*</td>
-                    <td style={{ padding: '8px 10px', color: '#64748b' }}>Do not freeze; minimize mechanical agitation</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>Reconstituted (sterile water)</td>
-                    <td style={{ padding: '8px 10px' }}>
-                      <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
-                        2°C–8°C (refrigerated)
-                      </span>
-                    </td>
-                    <td style={{ padding: '8px 10px', color: '#334155', fontWeight: 500 }}>Single-use / 24–48 h*</td>
-                    <td style={{ padding: '8px 10px', color: '#64748b' }}>Administer immediately; discard unused remaining portion</td>
-                  </tr>
-                </tbody>
-              </table>
+                    ),
+                  },
+                  {
+                    key: 'period',
+                    label: 'Max Stability Period',
+                    render: (val) => <span style={{ color: '#334155', fontWeight: 500 }}>{val}</span>,
+                  },
+                  {
+                    key: 'instruction',
+                    label: 'Key Handling Instruction',
+                    render: (val) => <span style={{ color: '#64748b' }}>{val}</span>,
+                  },
+                ]}
+                data={[
+                  {
+                    id: 'lyo-long',
+                    state: 'Lyophilized (unopened) — Long-term',
+                    temp: '−20°C (freezer)',
+                    bg: '#e0f2fe',
+                    color: '#0284c7',
+                    period: 'Up to 24 months*',
+                    instruction: 'Keep sealed with desiccant; protect from direct light',
+                  },
+                  {
+                    id: 'lyo-transit',
+                    state: 'Lyophilized (unopened) — Transit',
+                    temp: '20°C–25°C (ambient)',
+                    bg: '#fef3c7',
+                    color: '#b45309',
+                    period: 'Up to 30 days*',
+                    instruction: 'Avoid prolonged heat exposure (>30°C); thermal buffering',
+                  },
+                  {
+                    id: 'recon-bac',
+                    state: 'Reconstituted (bacteriostatic water)',
+                    temp: '2°C–8°C (refrigerated)',
+                    bg: '#dcfce7',
+                    color: '#15803d',
+                    period: 'Up to 28 days*',
+                    instruction: 'Do not freeze; minimize mechanical agitation',
+                  },
+                  {
+                    id: 'recon-sterile',
+                    state: 'Reconstituted (sterile water)',
+                    temp: '2°C–8°C (refrigerated)',
+                    bg: '#dcfce7',
+                    color: '#15803d',
+                    period: 'Single-use / 24–48 h*',
+                    instruction: 'Administer immediately; discard unused remaining portion',
+                  },
+                ]}
+              />
               <div style={{ fontSize: '0.66rem', color: '#94a3b8', marginTop: '6px', fontStyle: 'italic' }}>
                 *Subject to peptide-specific degradation kinetics and analytical release specifications.
               </div>

@@ -15,17 +15,47 @@ export async function generateMetadata({ searchParams }) {
   const rawCollection = String(resolvedSearch?.collection || resolvedSearch?.c || 'vials').toLowerCase();
   const collectionKey = rawCollection === 'ultraperson' ? 'ultraman' : (SUPPORTED_COLLECTIONS[rawCollection] ? rawCollection : 'vials');
   const colMeta = SUPPORTED_COLLECTIONS[collectionKey] || SUPPORTED_COLLECTIONS.vials;
+  const isPatientView = String(resolvedSearch?.view || '').toLowerCase() === 'patient';
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
+  if (isPatientView) {
+    return {
+      title: `${colMeta.name || 'Peptide'} Patient Guide Directory • Reconstitution & Care`,
+      description: 'Patient-friendly peptide reconstitution, storage, and administration reference guides.',
+      openGraph: {
+        title: `${colMeta.name || 'Peptide'} Patient Guide Directory`,
+        description: 'Patient-friendly peptide reconstitution, storage, and administration reference guides.',
+        type: 'website',
+        siteName: 'Patient Peptide Guide',
+        url: `${appUrl}/vials?collection=${collectionKey}&view=patient`,
+        locale: 'en_US',
+        images: [
+          {
+            url: `${appUrl}/og-catalog.png`,
+            width: 1200,
+            height: 630,
+            alt: `${colMeta.name} Patient Guide`,
+            type: 'image/png',
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${colMeta.name || 'Peptide'} Patient Guide Directory`,
+        description: 'Patient-friendly peptide reconstitution, storage, and administration reference guides.',
+      },
+    };
+  }
+
   return {
-    title: `${colMeta.title} • Direct Supply`,
+    title: `${colMeta.title} • Physician & Clinic Direct Supply`,
     description: `${colMeta.description} Direct institutional terms, verified batch quality & expedited dispatch.`,
     openGraph: {
-      title: `${colMeta.title} • Direct Supply`,
+      title: `${colMeta.title} • Physician & Clinic Direct Supply`,
       description: `${colMeta.description} Direct institutional terms, verified batch quality & expedited dispatch.`,
       type: 'website',
-      siteName: 'Clinical Formulations Directory',
+      siteName: 'Atlas Physician Clinical Formulations',
       url: `${appUrl}/vials?collection=${collectionKey}`,
       locale: 'en_US',
       images: [
@@ -40,7 +70,7 @@ export async function generateMetadata({ searchParams }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${colMeta.title} • Direct Supply`,
+      title: `${colMeta.title} • Physician & Clinic Direct Supply`,
       description: colMeta.description
     }
   };
@@ -54,6 +84,7 @@ export default async function VialsPublicPage({ searchParams }) {
   const resolvedSearch = await searchParams;
   const rawCollection = String(resolvedSearch?.collection || resolvedSearch?.c || 'vials').toLowerCase();
   const collection = rawCollection === 'ultraperson' ? 'ultraman' : (SUPPORTED_COLLECTIONS[rawCollection] ? rawCollection : 'vials');
+  const isPatientView = String(resolvedSearch?.view || '').toLowerCase() === 'patient';
   
   const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || null;
   const isPartnerAlias = !rawRef || ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas', 'partner-7482'].includes(String(rawRef).toLowerCase());
@@ -82,6 +113,7 @@ export default async function VialsPublicPage({ searchParams }) {
       initialVials={initialProducts}
       initialCollection={collection}
       referralInfo={referralInfo}
+      isPatientView={isPatientView}
     />
   );
 }

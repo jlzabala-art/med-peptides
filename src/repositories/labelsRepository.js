@@ -25,6 +25,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getCustomsFriendlySuggestions } from '../utils/labels/customsNaming';
+import { normalizeLabelsArray } from '../utils/labels/labelContract';
 import { prescriptionRepository } from './prescriptionRepository';
 import { logger } from '../utils/logger';
 
@@ -308,7 +309,7 @@ export const labelsRepository = {
     const updatePayload = {
       updatedAt: serverTimestamp(),
       lastModifiedBy: actorId || 'pharmacy_label_editor',
-      pharmacyLabels: currentLabelsSnapshot,
+      pharmacyLabels: normalizeLabelsArray(currentLabelsSnapshot),
       labelsMeta: {
         lastVariant: activeVariant,
         shippingTitle: shippingTitleResolved,

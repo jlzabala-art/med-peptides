@@ -25,7 +25,19 @@ export default function PWAInstallPrompt() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
-      if (path.startsWith('/shared/') || path.startsWith('/p/') || path.startsWith('/rx/') || path.startsWith('/proto') || path.startsWith('/admin')) {
+      if (
+        path.startsWith('/shared/') ||
+        path.startsWith('/p/') ||
+        path.startsWith('/raw/') ||
+        path.startsWith('/rx/') ||
+        path.startsWith('/proto') ||
+        path.startsWith('/pricing') ||
+        path.startsWith('/calculator') ||
+        path.startsWith('/vials') ||
+        path.startsWith('/labels') ||
+        path.startsWith('/c/') ||
+        path.startsWith('/admin')
+      ) {
         return;
       }
     }

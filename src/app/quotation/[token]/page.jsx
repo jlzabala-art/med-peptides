@@ -16,10 +16,10 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
-import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import DocumentViewLayout from '@/components/shared/layouts/DocumentViewLayout';
 import FocusedCardLayout from '@/components/shared/layouts/FocusedCardLayout';
+import PageSkeleton from '@/components/ui/PageSkeleton';
 
 export default function PublicQuotationPage() {
   const params = useParams();
@@ -28,6 +28,39 @@ export default function PublicQuotationPage() {
   const [loading, setLoading] = useState(true);
   const [quotation, setQuotation] = useState(null);
   const [error, setError] = useState(null);
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'quotation',
+        name: quotation?.quotationNumber ? `Quotation ${quotation.quotationNumber}` : `Quotation #${String(token).slice(0, 8)}`,
+        token,
+      },
+      bottomBar: !quotation
+        ? { hidden: true }
+        : {
+            summaryTitle: quotation?.quotationNumber ? `Quotation ${quotation.quotationNumber}` : `Quotation #${String(token).slice(0, 8)}`,
+            summarySubtitle: `${quotation?.clientName || 'Institutional Client'} • Total: ${quotation?.currency || '$'}${Number(quotation?.total || quotation?.grandTotal || 0).toFixed(2)}`,
+            badge: quotation?.status ? quotation.status.toUpperCase() : 'OFFICIAL QUOTE',
+            atlasAiLabel: 'Ask Atlas AI',
+            secondaryAction: {
+              label: 'PDF',
+              icon: <Download size={14} />,
+              onClick: () => {
+                if (typeof window !== 'undefined') window.print();
+              },
+            },
+            primaryAction: {
+              label: quotation?.status === 'approved' ? 'Order Confirmed ✓' : 'Approve & Confirm ➔',
+              onClick: () => {
+                const el = document.getElementById('approval-section') || document.querySelector('form');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              },
+            },
+          },
+    },
+    [quotation, token]
+  );
 
   // Approval state
   const [approverName, setApproverName] = useState('');
@@ -128,15 +161,7 @@ export default function PublicQuotationPage() {
   };
 
   if (loading) {
-    return (
-      <FocusedCardLayout
-        tone="info"
-        title="Loading Official Quotation..."
-        subtitle="Verifying quotation token and locked compounding rates."
-      >
-        <div className="skeleton" style={{ height: 48, borderRadius: 10 }} />
-      </FocusedCardLayout>
-    );
+    return <PageSkeleton variant="table" message="Loading Official Quotation..." />;
   }
 
   if (error || !quotation) {
@@ -411,48 +436,6 @@ export default function PublicQuotationPage() {
               )}
             </div>
           </div>
-        }
-        stickyActionBar={
-          <>
-            <PublicStickyActionBar
-              title={quotation?.quotationNumber ? `Quotation ${quotation.quotationNumber}` : `Quotation #${String(token).slice(0, 8)}`}
-              subtitle={`${quotation?.clientName || 'Institutional Client'} • Total: ${quotation?.currency || '$'}${Number(quotation?.total || quotation?.grandTotal || 0).toFixed(2)} • Priority Logistics Included`}
-              badge={quotation?.status ? quotation.status.toUpperCase() : 'OFFICIAL QUOTE'}
-              badgeType="protocol"
-              inquireLabel={isApproved ? 'Order Confirmed ✓' : 'Approve & Confirm ➔'}
-              onInquire={() => {
-                const el = document.getElementById('approval-section') || document.querySelector('form');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              showClinicalAI={true}
-              aiCategory="Commercial Quotation"
-              aiContextQuery={`What shipping logistics, batch analytical CoA documentation, and delivery lead times apply to quotation ${quotation?.quotationNumber || token}?`}
-              extraActions={
-                <button
-                  type="button"
-                  onClick={handleDownloadPdf}
-                  className="public-sticky-action-bar__sections-btn"
-                  title="Download Official PDF"
-                >
-                  <Download size={14} />
-                  <span>PDF</span>
-                </button>
-              }
-              lang="en"
-            />
-
-            <PublicAtlasAIDrawer
-              contextType="catalog"
-              contextAnchor={{
-                name: `Quotation ${quotation?.quotationNumber || token}`,
-                client: quotation?.clientName,
-                total: quotation?.total || quotation?.grandTotal,
-                itemsCount: quotation?.items?.length || 0,
-              }}
-              hideFloatingTrigger={true}
-              lang="en"
-            />
-          </>
         }
       />
     </>

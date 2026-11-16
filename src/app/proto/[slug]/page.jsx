@@ -310,49 +310,54 @@ async function getSimilarProtocols(goal, excludeSlug) {
   }
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
+  const lang = String(resolvedSearch?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const isEs = lang === 'es';
   const slug = resolvedParams?.slug;
   const protocol = await getPublicProtocol(slug);
 
   if (!protocol) {
     return {
-      title: 'Clinical Protocol Not Found | Atlas App',
-      description: 'The requested clinical protocol does not exist or is unavailable.',
+      title: isEs ? 'Protocolo Clínico No Encontrado | Atlas App' : 'Clinical Protocol Not Found | Atlas App',
+      description: isEs ? 'El protocolo clínico solicitado no existe o no está disponible.' : 'The requested clinical protocol does not exist or is unavailable.',
     };
   }
 
-  const name = protocol.name || 'Clinical Protocol';
-  const category = protocol.categoryId || 'Clinical Protocol';
-  const desc = (protocol.overview_summary || protocol.description || protocol.clinical_rationale || 'Detailed clinical protocol schedule and administration guidance.').substring(0, 160);
+  const name = protocol.name || (isEs ? 'Protocolo Clínico' : 'Clinical Protocol');
+  const category = protocol.categoryId || (isEs ? 'Protocolo Clínico' : 'Clinical Protocol');
+  const desc = (protocol.overview_summary || protocol.description || protocol.clinical_rationale || (isEs ? 'Guía clínica detallada de protocolo, dosificación y administración.' : 'Detailed clinical protocol schedule and administration guidance.')).substring(0, 160);
 
   // 🎨 Dynamic OpenGraph preview card
-  const ogImageUrl = `${BASE_URL}/api/og-card?type=protocol&title=${encodeURIComponent(name)}&badge=${encodeURIComponent(category)}&subtitle=${encodeURIComponent(`${protocol.duration_weeks || 8} Weeks · Clinical Protocol Guide`)}`;
+  const ogImageUrl = `${BASE_URL}/api/og-card?type=protocol&title=${encodeURIComponent(name)}&badge=${encodeURIComponent(category)}&subtitle=${encodeURIComponent(`${protocol.duration_weeks || 8} ${isEs ? 'Semanas · Guía de Protocolo Clínico' : 'Weeks · Clinical Protocol Guide'}`)}`;
+  const pageTitle = isEs ? `${name} — Guía de Protocolo | Atlas App` : `${name} — Protocol Guide | Atlas App`;
 
   return {
-    title: `${name} — Protocol Guide | Atlas App`,
+    title: pageTitle,
     description: desc,
     alternates: {
       canonical: `${BASE_URL}/proto/${slug}`,
     },
     openGraph: {
-      title: `${name} — Protocol Guide | Atlas App`,
+      title: pageTitle,
       description: desc,
       url: `${BASE_URL}/proto/${slug}`,
       siteName: 'Atlas Health Clinical',
+      locale: isEs ? 'es_ES' : 'en_US',
       images: [
         {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: `${name} Clinical Protocol Guide`,
+          alt: isEs ? `${name} Guía de Protocolo Clínico` : `${name} Clinical Protocol Guide`,
         }
       ],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${name} — Protocol Guide`,
+      title: isEs ? `${name} — Guía de Protocolo` : `${name} — Protocol Guide`,
       description: desc,
       images: [ogImageUrl],
     },

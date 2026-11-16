@@ -146,7 +146,7 @@ export default function ReconstitutionRouterSection({
 
             <div className="pds-section-header-right" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <Link
-                href={`/calculator?mg=${encodeURIComponent(selectedStrength?.numericValue || selectedStrength?.value || 5)}&name=${encodeURIComponent(product?.name || product?.canonicalName || '')}&slug=${encodeURIComponent(product?.slug || product?.id || '')}`}
+                href={`/calculator?peptide=${encodeURIComponent(product?.slug || product?.id || 'bpc-157')}&format=${encodeURIComponent(activeFormatId || 'vial')}&dose=${encodeURIComponent((selectedStrength?.name || `${selectedStrength?.numericValue || selectedStrength?.value || 5}mg`).replace(/\s+/g, ''))}${lang === 'es' ? '&lang=es' : ''}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 title={lang === 'es' ? 'Abrir en Calculadora Completa con visualizador de jeringa' : 'Open in Full Standalone Calculator with syringe visualizer'}

@@ -214,13 +214,11 @@
 .rx-gcp-tabs-bar {
   display: flex;
   align-items: center;
-  gap: 2px;
+  flex-wrap: wrap;
+  gap: 4px;
   border-top: 1px solid #f1f3f4;
   margin: 0 -18px;
-  padding: 0 14px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  padding: 2px 14px 0;
 }
 
 .rx-gcp-tabs-bar::-webkit-scrollbar {
@@ -239,7 +237,8 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  flex-shrink: 0;
   white-space: nowrap;
   transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
   border-radius: 6px 6px 0 0;

@@ -59,9 +59,31 @@ export default function DnaAncestryHeritageSection({ clinicalProfile }) {
               Your Evolutionary Metabolic Blueprint
             </h3>
           </div>
-          <span style={{ fontSize: '0.72rem', color: '#1a73e8', backgroundColor: '#e8f0fe', padding: '4px 10px', borderRadius: '4px', border: '1px solid #d2e3fc', fontWeight: 600 }}>
-            Lineage: <strong style={{ color: '#1a73e8' }}>Haplogroup {ancestry.maternalHaplogroup || "M2a'b"}</strong> · Indus Basin
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.72rem', color: '#1a73e8', backgroundColor: '#e8f0fe', padding: '4px 10px', borderRadius: '4px', border: '1px solid #d2e3fc', fontWeight: 600 }}>
+              mtDNA: <strong style={{ color: '#1a73e8' }}>{ancestry.maternalHaplogroup || "M2a'b"}</strong>
+              {ancestry.paternalHaplogroup ? <> · Y-DNA: <strong>{ancestry.paternalHaplogroup}</strong></> : null}
+              {' '}· {ancestry.primaryRegion || 'Ancestral Region'}
+            </span>
+            {ancestry.sampleCode === 'G000943554' && (
+              <a
+                href="/reports/24genetics/G000943554_Complete_Nutrition_Ancestry.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  backgroundColor: '#003666',
+                  padding: '5px 10px',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                }}
+              >
+                Download Merged Nutrition + Ancestry PDF
+              </a>
+            )}
+          </div>
         </div>
 
         <p style={{ margin: 0, fontSize: '0.82rem', color: '#3c4043', lineHeight: 1.6 }}>
@@ -310,6 +332,84 @@ export default function DnaAncestryHeritageSection({ clinicalProfile }) {
           <p style={{ margin: 0, fontSize: '0.80rem', color: '#3c4043', lineHeight: 1.55 }}>
             {mito.clinicalRelevanceEn}
           </p>
+        </div>
+      )}
+
+      {/* ── Historical Archaeological Affinities Timeline ── */}
+      {Array.isArray(ancestry.archaeologicalAffinities) && ancestry.archaeologicalAffinities.length > 0 && (
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #dadce0',
+            padding: '20px',
+            boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <Clock size={16} style={{ color: '#1a73e8' }} />
+            <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 600, color: '#202124' }}>
+              Historical Archaeological Affinities (Paleolithic → Classical Antiquity)
+            </h4>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {ancestry.archaeologicalAffinities.map((era, idx) => (
+              <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', fontWeight: 600, color: '#202124' }}>
+                  <span>{era.era} · <span style={{ color: '#1a73e8' }}>{era.culture}</span></span>
+                  <span>{Number(era.percent || 0).toFixed(1)}%</span>
+                </div>
+                <div style={{ height: '7px', borderRadius: '999px', background: '#f1f5f9', overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.min(100, Number(era.percent || 0))}%`, height: '100%', background: 'linear-gradient(90deg, #1a73e8, #0d9488)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Genotype -> Peptide & Clinical Formulation Synergy Bridge ── */}
+      {Array.isArray(ancestry.peptideSynergyMatches) && ancestry.peptideSynergyMatches.length > 0 && (
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #dadce0',
+            padding: '20px',
+            boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <HeartPulse size={16} style={{ color: '#0d9488' }} />
+            <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 600, color: '#202124' }}>
+              Genotype → Clinical Peptide &amp; Regenerative Synergy
+            </h4>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+            {ancestry.peptideSynergyMatches.map((m, idx) => (
+              <a
+                key={idx}
+                href={`/p/${encodeURIComponent(m.slug)}?view=patient`}
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  textDecoration: 'none',
+                  color: '#0f172a',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                }}
+              >
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>{m.name}</span>
+                  <ArrowRight size={13} />
+                </div>
+                <div style={{ fontSize: '0.73rem', color: '#475569', lineHeight: 1.4 }}>{m.rationale}</div>
+              </a>
+            ))}
+          </div>
         </div>
       )}
     </div>

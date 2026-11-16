@@ -715,7 +715,39 @@ export const ARSHIYA_GENOTYPES = {
 const PATIENT_GENOTYPE_PROFILES = {
   'G001321423': ARSHIYA_GENOTYPES,
   'G000943568': WAFA_BURUD_GENOTYPES,
+  'G000943554': DEFAULT_HOSSAM_GENOTYPES,
   '24G-QA-90421': DEFAULT_HOSSAM_GENOTYPES
+};
+
+const HOSSAM_ANCESTRY_PROFILE = {
+  sampleCode: 'G000943554',
+  primaryRegion: 'Egypt & Nile Valley / MENA',
+  primaryRegionPercent: 76.63,
+  maternalHaplogroup: 'H13a',
+  maternalHaplogroupRoot: 'Haplogroup H (West Asia / Mediterranean ~12,846 BP → HV → R0 → R → N → L3 → Eve)',
+  paternalHaplogroup: 'R-M479',
+  neanderthalPercent: 0,
+  regionalBreakdown: [
+    { country: 'Egypt', region: 'Mansoura / Cairo / Nile Valley', percent: 76.63 },
+    { country: 'Yemen', region: 'Arabian Peninsula', percent: 10.77 },
+    { country: 'Israel', region: 'Yemenite Jewish / Negev / Carmel', percent: 4.27 },
+    { country: 'Tunisia', region: 'Tunisia / Sened', percent: 1.83 },
+    { country: 'Jordan', region: 'Amman', percent: 1.63 },
+    { country: 'Libya', region: 'North Africa', percent: 1.22 },
+  ],
+  ethnicBreakdown: [
+    { group: 'Amazigh', percent: 49.80 },
+    { group: 'Egyptian', percent: 27.03 },
+    { group: 'Peoples from Arabian Peninsula', percent: 10.77 },
+    { group: 'Yemenite Jewish', percent: 3.46 },
+    { group: 'Canaan Peoples', percent: 2.85 },
+    { group: 'Maghrebi Arab-Amazigh', percent: 2.44 },
+  ],
+  archaeologicalAffinities: [
+    { era: 'Upper Paleolithic (>10,000 BC)', culture: 'Natufian culture 10000BC Israel', percent: 74.20 },
+    { era: 'Bronze Age (3000–1300 BC)', culture: 'Israeli Late Bronze Age', percent: 75.00 },
+    { era: 'Classical Antiquity (500 BC–500 AD)', culture: 'Lebanon Iron Age', percent: 75.80 },
+  ],
 };
 
 const PATIENT_DEFAULTS = {
@@ -729,13 +761,28 @@ const PATIENT_DEFAULTS = {
     patientName: 'Wafa Burud',
     doctor: 'Dr. Sajid Burud',
     clinic: 'Dr. Sajid Burud Medical Practice',
-    analysisDate: 'November 2026'
+    analysisDate: 'November 2026',
+    ancestry: {
+      sampleCode: 'G000943568',
+      primaryRegion: 'South Asia / Indian Subcontinent',
+      primaryRegionPercent: 80.61,
+      maternalHaplogroup: "M2a'b",
+      neanderthalPercent: 1.5,
+    },
+  },
+  'G000943554': {
+    patientName: 'Hossam Ahmed',
+    doctor: 'Dr. Ryhanh Medical',
+    clinic: 'Atlas Health Services · Doha, Qatar',
+    analysisDate: 'November 2026',
+    ancestry: HOSSAM_ANCESTRY_PROFILE,
   },
   '24G-QA-90421': {
     patientName: 'Hossam Ahmed',
     doctor: 'Dr. Ryhanh Medical',
     clinic: 'Atlas Health Services · Doha, Qatar',
-    analysisDate: 'November 2026'
+    analysisDate: 'November 2026',
+    ancestry: HOSSAM_ANCESTRY_PROFILE,
   }
 };
 

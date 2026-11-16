@@ -1,7 +1,7 @@
 .public-label-studio-root {
   min-height: 100vh;
   min-height: 100dvh;
-  background: #f8fafc;
+  background: var(--atlas-surface-muted, #f8fafc);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   display: flex;
   flex-direction: column;
@@ -10,8 +10,8 @@
 
 /* Top Google Cloud Header */
 .pls-header {
-  background: #ffffff;
-  border-bottom: 1px solid #dadce0;
+  background: var(--atlas-surface, #ffffff);
+  border-bottom: 1px solid var(--atlas-border, #e2e8f0);
   padding: 8px 16px;
   display: flex;
   align-items: center;
@@ -20,7 +20,7 @@
   position: sticky;
   top: 0;
   z-index: 60;
-  box-shadow: 0 1px 2px rgba(60,64,67,0.06);
+  box-shadow: var(--atlas-shadow-card, 0 1px 2px rgba(60,64,67,0.06));
 }
 
 .pls-brand-link {

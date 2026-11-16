@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import DataTable from '@/components/ui/DataTable';
 import './InteractiveReconstitutionGuide.css';
 import { 
   FlaskConical, 
@@ -2216,8 +2217,8 @@ export default function InteractiveReconstitutionGuide({
                     <div className="irg-ap-step-num">② {lang === 'es' ? 'Carga Jeringa U-100' : 'U-100 Syringe Draw'}</div>
                     <div className="irg-ap-step-desc">
                       {lang === 'es'
-                        ? <>Cargar exactamente <strong>{activePhase.syringeUnits} UI</strong> (={activePhase.volumeMl} mL) en jeringa U-100.</>
-                        : <>Draw exactly <strong>{activePhase.syringeUnits} UI</strong> (={activePhase.volumeMl} mL) in U-100 syringe.</>}
+                        ? <>Cargar exactamente <strong>{activePhase.syringeUnits} UI</strong> (={(Number(activePhase.volumeMl) || (Number(activePhase.syringeUnits || 0) * 0.01)).toFixed(2)} mL) en jeringa U-100.</>
+                        : <>Draw exactly <strong>{activePhase.syringeUnits} UI</strong> (={(Number(activePhase.volumeMl) || (Number(activePhase.syringeUnits || 0) * 0.01)).toFixed(2)} mL) in U-100 syringe.</>}
                     </div>
                   </div>
 
@@ -2626,68 +2627,88 @@ export default function InteractiveReconstitutionGuide({
                   <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{fullStrategy.indication}</span>
                 </div>
 
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.72rem' }}>
-                    <thead>
-                      <tr style={{ background: '#f1f5f9', color: '#475569' }}>
-                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? 'Fase del Tratamiento' : 'Phase'}</th>
-                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? 'Dosis' : 'Dose'}</th>
-                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? '✅ Vial Recomendado a Comprar' : '✅ Buy Vial'}</th>
-                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? '❌ Desaconsejado' : '❌ Avoid'}</th>
-                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? 'Dilución & UI' : 'Dilution & UI'}</th>
-                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>{lang === 'es' ? 'Acción' : 'Action'}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {fullStrategy.phases.map((ph, pIdx) => {
+                <DataTable
+                  pagination={false}
+                  enableAskAtlas={false}
+                  columns={[
+                    {
+                      key: 'name',
+                      label: lang === 'es' ? 'Fase del Tratamiento' : 'Phase',
+                      render: (val, ph) => {
                         const isCurrent = Math.abs(ph.doseMg - doseMg) <= 0.05;
                         return (
-                          <tr key={pIdx} style={{ background: isCurrent ? '#eff6ff' : '#ffffff', borderBottom: '1px solid #f1f5f9' }}>
-                            <td style={{ padding: '6px 8px', fontWeight: isCurrent ? 800 : 600, color: isCurrent ? '#1e40af' : '#0f172a' }}>
-                              {ph.name}
-                              {isCurrent && <span style={{ marginLeft: '4px', fontSize: '0.65rem', background: '#dbeafe', color: '#1e40af', padding: '1px 5px', borderRadius: '3px' }}>Activa</span>}
-                            </td>
-                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', fontWeight: 700 }}>{ph.targetDose}</td>
-                            <td style={{ padding: '6px 8px', color: '#15803d', fontWeight: 700 }}>{ph.recommendedVial}</td>
-                            <td style={{ padding: '6px 8px', color: '#b91c1c' }}>{ph.avoidVials}</td>
-                            <td style={{ padding: '6px 8px', color: '#475569' }}>{ph.recommendedBacMl} mL BAC → <strong>{ph.resultUnits} UI</strong> ({ph.volumeMl} mL)</td>
-                            <td style={{ padding: '6px 8px', textAlign: 'right' }}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  triggerHaptic('selection');
-                                  // Always guard 2 re-renders to cover both vialMg + bacWaterMl useEffect triggers
-                                  isCalibratingRef.current = 2;
-                                  setDoseValue(ph.doseMg);
-                                  setDoseUnit('mg');
-                                  if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
-                                  if (ph.recommendedBacMl) setBacWaterMl(ph.recommendedBacMl);
-                                  if (ph.phaseId) {
-                                    setSelectedPhaseId(ph.phaseId);
-                                    updateUrlParams(ph.phaseId, ph.doseMg, 'mg');
-                                  }
-                                  notifier.info(`Fase seleccionada: ${ph.name} — Vial ${ph.recommendedVialMg || 10} mg`);
-                                }}
-                                style={{
-                                  background: isCurrent ? '#0284c7' : '#e2e8f0',
-                                  color: isCurrent ? '#ffffff' : '#334155',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  padding: '2px 8px',
-                                  fontSize: '0.68rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                {isCurrent ? (lang === 'es' ? 'Calibrado' : 'Active') : (lang === 'es' ? 'Seleccionar' : 'Select')}
-                              </button>
-                            </td>
-                          </tr>
+                          <span style={{ fontWeight: isCurrent ? 800 : 600, color: isCurrent ? '#1e40af' : '#0f172a' }}>
+                            {val}
+                            {isCurrent && <span style={{ marginLeft: '4px', fontSize: '0.65rem', background: '#dbeafe', color: '#1e40af', padding: '1px 5px', borderRadius: '3px' }}>Activa</span>}
+                          </span>
                         );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                      },
+                    },
+                    {
+                      key: 'targetDose',
+                      label: lang === 'es' ? 'Dosis' : 'Dose',
+                      render: (val) => <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{val}</span>,
+                    },
+                    {
+                      key: 'recommendedVial',
+                      label: lang === 'es' ? '✅ Vial Recomendado a Comprar' : '✅ Buy Vial',
+                      render: (val) => <span style={{ color: '#15803d', fontWeight: 700 }}>{val}</span>,
+                    },
+                    {
+                      key: 'avoidVials',
+                      label: lang === 'es' ? '❌ Desaconsejado' : '❌ Avoid',
+                      render: (val) => <span style={{ color: '#b91c1c' }}>{val}</span>,
+                    },
+                    {
+                      key: 'recommendedBacMl',
+                      label: lang === 'es' ? 'Dilución & UI' : 'Dilution & UI',
+                      render: (_, ph) => (
+                        <span style={{ color: '#475569' }}>
+                          {ph.recommendedBacMl} mL BAC → <strong>{ph.resultUnits} UI</strong> ({ph.volumeMl} mL)
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'action',
+                      label: lang === 'es' ? 'Acción' : 'Action',
+                      align: 'right',
+                      render: (_, ph) => {
+                        const isCurrent = Math.abs(ph.doseMg - doseMg) <= 0.05;
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              triggerHaptic('selection');
+                              isCalibratingRef.current = 2;
+                              setDoseValue(ph.doseMg);
+                              setDoseUnit('mg');
+                              if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
+                              if (ph.recommendedBacMl) setBacWaterMl(ph.recommendedBacMl);
+                              if (ph.phaseId) {
+                                setSelectedPhaseId(ph.phaseId);
+                                updateUrlParams(ph.phaseId, ph.doseMg, 'mg');
+                              }
+                              notifier.info(`Fase seleccionada: ${ph.name} — Vial ${ph.recommendedVialMg || 10} mg`);
+                            }}
+                            style={{
+                              background: isCurrent ? '#0284c7' : '#e2e8f0',
+                              color: isCurrent ? '#ffffff' : '#334155',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '2px 8px',
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isCurrent ? (lang === 'es' ? 'Calibrado' : 'Active') : (lang === 'es' ? 'Seleccionar' : 'Select')}
+                          </button>
+                        );
+                      },
+                    },
+                  ]}
+                  data={fullStrategy.phases.map((ph, pIdx) => ({ id: ph.phaseId || String(pIdx), ...ph }))}
+                />
               </div>
             )}
             {/* Clinical Reconstitution Specifications & Hardware Card */}

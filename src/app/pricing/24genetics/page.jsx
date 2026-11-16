@@ -1,38 +1,30 @@
 import React from 'react';
 import { adminDb } from '@/lib/firebaseAdmin';
 import GenomicsPriceListClient from './GenomicsPriceListClient';
+import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
 
-export async function generateMetadata() {
+export async function generateMetadata({ searchParams }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
-  const title = '24Genetics Clinical DNA Panels • Official B2B & Clinic Price Schedule';
-  const description = 'Official wholesale and clinical price schedule for 24Genetics CE-IVD saliva genomic panels: All-in-One, Pharmacogenetics, Nutrigenetics, Health, Skin, Sport, Microbiome, and AI Connect.';
+  const resolvedSearch = await searchParams;
+  const lang = normalizeMetaLang(resolvedSearch);
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      url: `${appUrl}/pricing/24genetics`,
-      images: [
-        {
-          url: `${appUrl}/og-genomics.png`,
-          width: 1200,
-          height: 630,
-          alt: '24Genetics DNA Panels Price Schedule'
-        }
-      ]
+  return buildBilingualMetadata({
+    lang,
+    path: '/pricing/24genetics',
+    siteName: 'Atlas Health Services',
+    images: [{ url: `${appUrl}/og-genomics.png`, width: 1200, height: 630, alt: '24Genetics DNA Panels Price Schedule' }],
+    en: {
+      title: '24Genetics Clinical DNA Panels • Official B2B & Clinic Price Schedule',
+      description: 'Official wholesale and clinical price schedule for 24Genetics CE-IVD saliva genomic panels: All-in-One, Pharmacogenetics, Nutrigenetics, Health, Skin, Sport, Microbiome, and AI Connect.',
     },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description
-    }
-  };
+    es: {
+      title: 'Paneles Genómicos Clínicos 24Genetics • Tarifa Oficial B2B y Clínicas',
+      description: 'Tarifa oficial clínica y mayorista para paneles genómicos en saliva 24Genetics CE-IVD: All-in-One, Farmacogenética, Nutrigenética, Salud, Piel, Deporte y Microbioma.',
+    },
+  });
 }
 
 const FALLBACK_24GENETICS_PRODUCTS = [

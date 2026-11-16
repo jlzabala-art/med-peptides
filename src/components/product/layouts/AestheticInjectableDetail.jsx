@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Syringe, ShieldCheck, Sparkles, MapPin, Activity, Layers,
@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import AlgoliaRelatedStrip from '@/components/shared/AlgoliaRelatedStrip';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -110,6 +111,32 @@ export default function AestheticInjectableDetail({
 }) {
   const [lang, setLang] = useState('en');
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'protocol' | 'safety' | 'regulatory'
+
+  // Sync URL #hash (#overview, #protocol, #safety, #regulatory, #clinical-synergy) with active tab & scroll
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const applyHash = () => {
+      const h = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+      if (['overview', 'protocol', 'safety', 'regulatory'].includes(h)) {
+        setActiveTab(h);
+      } else if (h === 'clinical-synergy') {
+        const el = document.getElementById('clinical-synergy');
+        if (el) {
+          setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+        }
+      }
+    };
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+    return () => window.removeEventListener('hashchange', applyHash);
+  }, []);
+
+  const handleSelectTab = (tabId) => {
+    setActiveTab(tabId);
+    if (typeof window !== 'undefined' && window.history?.replaceState) {
+      window.history.replaceState(null, '', `#${tabId}`);
+    }
+  };
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
@@ -228,6 +255,35 @@ export default function AestheticInjectableDetail({
   const activeSectionIndex = useMemo(
     () => Math.max(0, sidebarSections.findIndex((s) => s.id === activeTab)),
     [sidebarSections, activeTab]
+  );
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'aesthetic_injectable',
+        name: p.name,
+        brand: p.brand,
+        slug: p.slug,
+      },
+      bottomBar: isQuickView
+        ? { hidden: true }
+        : {
+            summaryTitle: p.name,
+            summarySubtitle: `${p.brand} · ${p.activeIngredient}`,
+            badge: p.regulatory?.ceMark || null,
+            atlasAiLabel: 'Atlas AI',
+            onOpenAtlasAi: () => setIsAiDrawerOpen(true),
+            showSections: true,
+            sectionsLabel: isEs ? 'Secciones' : 'Sections',
+            sectionsCount: sidebarSections.length,
+            activeSectionIndex: activeSectionIndex + 1,
+            primaryAction: {
+              label: isEs ? 'Solicitar Cotización' : 'Request Quote',
+              onClick: () => setIsInquiryDrawerOpen(true),
+            },
+          },
+    },
+    [isQuickView, p.name, p.brand, p.slug, p.activeIngredient, p.regulatory?.ceMark, isEs, sidebarSections.length, activeSectionIndex]
   );
 
   return (
@@ -456,6 +512,44 @@ export default function AestheticInjectableDetail({
           </aside>
         </section>
 
+        {/* ── 4-KPI CLINICAL OVERVIEW STRIP (Rule #22) ── */}
+        {!isQuickView && (
+          <section
+            aria-label="Clinical Key Metrics"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+              gap: '0.75rem',
+              marginBottom: '1.25rem',
+            }}
+          >
+            {[
+              { label: isEs ? 'Módulo Elástico (G′)' : 'Elastic Modulus (G′)', value: p.rheology?.elasticityGPrime || 'Balanced' },
+              { label: isEs ? 'Cohesividad' : 'Cohesivity', value: p.rheology?.cohesivity || 'CPM Matrix' },
+              { label: isEs ? 'Plano Anatómico' : 'Injection Plane', value: p.injectionDepth || 'Superficial–Mid Dermis' },
+              { label: isEs ? 'Duración Clínica' : 'Clinical Longevity', value: p.duration || '6–12 Months' },
+            ].map((kpi) => (
+              <div
+                key={kpi.label}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '0.85rem 1rem',
+                  boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)',
+                }}
+              >
+                <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', marginBottom: '4px' }}>
+                  {kpi.label}
+                </div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>
+                  {kpi.value}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
         {/* ── CLINICAL MONOGRAPH 2-COLUMN WORKSPACE (SIDEBAR + CONTENT) ── */}
         <div className="ai-monograph-layout">
           <aside className="ai-monograph-sidebar">
@@ -465,7 +559,7 @@ export default function AestheticInjectableDetail({
               product={{ ...product, ...p }}
               slug={p.slug}
               activeSection={activeTab}
-              onSelectSection={(id) => setActiveTab(id)}
+              onSelectSection={handleSelectTab}
               onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
               hideFloatingTrigger={true}
               collectionSiblings={collectionSiblings}
@@ -675,40 +769,20 @@ export default function AestheticInjectableDetail({
         )}
           </div>
         </div>
+
+        {!isQuickView && (
+          <div id="clinical-synergy">
+            <AlgoliaRelatedStrip
+              objectID={p.id || p.slug}
+              category={p.category || 'aesthetic_injectable'}
+              title={isEs ? 'Sinergia Clínica y Formulaciones Relacionadas' : 'Clinical Synergy & Related Formulations'}
+              lang={lang}
+            />
+          </div>
+        )}
       </main>
 
       {!isQuickView && <PublicUnifiedFooter />}
-
-      {!isQuickView && (
-        <PublicStickyActionBar
-          title={p.name}
-          subtitle={`${p.brand} · ${p.activeIngredient}`}
-          badge={p.regulatory.ceMark}
-          badgeType="verified"
-          inquireLabel={isEs ? 'Solicitar Cotización' : 'Request Quote'}
-          onInquire={() => setIsInquiryDrawerOpen(true)}
-          showClinicalAI={true}
-          onOpenClinicalAI={() => setIsAiDrawerOpen(true)}
-          mountAiDrawer={false}
-          aiCategory="aesthetic_injectable"
-          aiContextQuery={`Clinical consultation for ${p.name} (${p.brand}, ${p.activeIngredient}, ${p.platformTechnology}). Injection plane: ${p.injectionDepth}. Rheology G': ${p.rheology.elasticityGPrime}.`}
-          aiMeta={{
-            slug: p.slug,
-            brand: p.brand,
-            activeIngredient: p.activeIngredient,
-            platformTechnology: p.platformTechnology,
-            injectionDepth: p.injectionDepth,
-            needlesIncluded: p.needlesIncluded,
-            longevity: p.longevity,
-            ceMark: p.regulatory.ceMark,
-          }}
-          lang={lang}
-          showSections={true}
-          sectionsCount={sidebarSections.length}
-          activeSectionIndex={activeSectionIndex}
-          overflowMobile={true}
-        />
-      )}
 
       {/* ── DRAWERS & MODALS ── */}
       <PublicInstitutionalInquiryDrawer

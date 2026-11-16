@@ -306,6 +306,7 @@ export default function GcpUserBadge({
 
         {/* Two-Line User Info */}
         <div
+          className="gcp-user-badge-info"
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -618,6 +619,15 @@ export default function GcpUserBadge({
           to {
             opacity: 1;
             transform: translateY(0) scale(1);
+          }
+        }
+        @media (max-width: 640px) {
+          .gcp-user-badge-info {
+            display: none !important;
+          }
+          :global(.gcp-user-badge-pill) {
+            padding: 2px 4px 2px 2px !important;
+            gap: 3px !important;
           }
         }
       `}</style>

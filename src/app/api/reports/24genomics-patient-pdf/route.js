@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generatePatientGenomicsPdf } from '@/lib/pdf/generators/generatePatientGenomicsPdf';
+import { computeNutritionistToken } from '@/utils/genomics/nutritionistAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,9 @@ export async function GET(request) {
     const clinicName = searchParams.get('clinic') || (isWafa ? 'Dr. Sajid Burud Medical Practice' : 'Ryhanh Medical Wellness · Doha, Qatar');
     const modalityParam = searchParams.get('modality') || 'modalityB';
     const isOptionA = modalityParam === 'optionA' || modalityParam === 'modalityA';
-    const includeOriginal = searchParams.get('full') !== 'false' && searchParams.get('includeOriginal') !== 'false';
+    const audience = searchParams.get('audience') === 'nutritionist' ? 'nutritionist' : 'patient';
+    const includeOriginal = audience === 'nutritionist' && searchParams.get('full') !== 'false' && searchParams.get('includeOriginal') !== 'false';
+    const nutritionistToken = audience === 'nutritionist' ? computeNutritionistToken(sampleId) : null;
 
     const pdfBytes = await generatePatientGenomicsPdf({
       sampleId,
@@ -21,14 +24,17 @@ export async function GET(request) {
       doctorNameParam,
       clinicName,
       isOptionA,
-      includeOriginal
+      includeOriginal,
+      audience,
+      nutritionistToken
     });
 
+    const filePrefix = audience === 'nutritionist' ? 'Atlas-Nutritionist-Dossier' : 'Atlas-Patient-Guide';
     return new NextResponse(pdfBytes, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="Atlas-Genomic-Prescription-${sampleId}.pdf"`,
+        'Content-Disposition': `inline; filename="${filePrefix}-${sampleId}.pdf"`,
         'Content-Length': pdfBytes.length.toString(),
         'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0'
       }

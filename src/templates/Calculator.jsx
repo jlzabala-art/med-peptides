@@ -13,21 +13,21 @@ import { jsPDF } from 'jspdf';
 import { motion } from 'framer-motion';
 import { trackToolUsage } from '../hooks/useAnalytics';
 import { FlaskConical, Download, BookOpen, ChevronRight, AlertCircle } from '@/lib/icons';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import { computeReconstitutionMetrics } from '@/hooks/useReconstitution';
 
 
 
 
 
 
-/* ─── Math engine ─────────────────────────────────────────────────────────── */
+/* ─── Math engine (delegates to unified useReconstitution engine) ─────────── */
 function calcUnits(mg, ml, dose) {
   const m = parseFloat(mg);
   const l = parseFloat(ml);
   const d = parseFloat(dose);
-  const totalMcg = m * 1000;
-  if (!totalMcg || !l || !d || isNaN(m) || isNaN(l) || isNaN(d)) return '—';
-  return ((d / totalMcg) * l * 100).toFixed(1);
+  if (!m || !l || !d || isNaN(m) || isNaN(l) || isNaN(d)) return '—';
+  return computeReconstitutionMetrics({ vialMg: m, bacWaterMl: l, desiredDoseMcg: d }).unitsToInject.toFixed(1);
 }
 
 /* ─── PDF export (unchanged logic) ───────────────────────────────────────── */
@@ -258,6 +258,32 @@ export default function Calculator() {
       });
     }
   }, [units, vialDosageMg, bacWater, desiredDosageMcg]);
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'calculator',
+        name: 'Precision Peptide Calculator',
+        mg: vialDosageMg,
+        ml: bacWater,
+        doseMcg: desiredDosageMcg,
+        calculatedUnits: units,
+      },
+      bottomBar: {
+        summaryTitle: units !== '—' ? `Result: ${units} Units (U-100 Syringe)` : 'Precision Peptide Calculator',
+        summarySubtitle: vialDosageMg && bacWater && desiredDosageMcg
+          ? `Vial: ${vialDosageMg}mg • Water: ${bacWater}ml • Desired: ${desiredDosageMcg}mcg`
+          : 'Interactive Syringe & Reconstitution Volume Engine',
+        badge: 'Dosing Engine',
+        atlasAiLabel: 'Ask Atlas AI',
+        primaryAction: {
+          label: 'Export PDF Report',
+          onClick: handleExport,
+        },
+      },
+    },
+    [units, vialDosageMg, bacWater, desiredDosageMcg]
+  );
 
   return (
     <div className="calc-page">
@@ -531,40 +557,6 @@ export default function Calculator() {
         </div>
 
       </div>
-
-      {/* ── Persistent Floating Sticky Action Bar (GCP Standard) ── */}
-      <PublicStickyActionBar
-        title={units !== '—' ? `Result: ${units} Units (U-100 Syringe)` : 'Precision Peptide Calculator'}
-        subtitle={
-          vialDosageMg && bacWater && desiredDosageMcg
-            ? `Vial: ${vialDosageMg}mg • Water: ${bacWater}ml • Desired: ${desiredDosageMcg}mcg`
-            : 'Interactive Syringe & Reconstitution Volume Engine'
-        }
-        badge="Dosing Engine"
-        badgeType="protocol"
-        inquireLabel="Export PDF Report"
-        onInquire={handleExport}
-        showClinicalAI={true}
-        aiPreset="calculator"
-        aiCategory="Peptide Reconstitution"
-        aiContextQuery={
-          vialDosageMg && bacWater && desiredDosageMcg
-            ? `I have a ${vialDosageMg} mg vial of peptide and I am reconstituting it with ${bacWater} ml of bacteriostatic water. For a target dose of ${desiredDosageMcg} mcg (${units} units on a U-100 syringe), what is the correct administration technique, syringe graduation, and cold-chain storage guidance?`
-            : undefined
-        }
-        drawerProps={{
-          contextType: 'catalog',
-          contextAnchor: {
-            name: 'Precision Peptide Calculator',
-            mg: vialDosageMg,
-            ml: bacWater,
-            doseMcg: desiredDosageMcg,
-            calculatedUnits: units
-          },
-          hideFloatingTrigger: true
-        }}
-        lang="en"
-      />
     </div>
   );
 }

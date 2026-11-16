@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Pill, Activity, FlaskConical, Dna, Info, Calendar, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import DataTable from '@/components/ui/DataTable';
 
 /**
  * Default fallback API items parser if the prescription object only has raw clinicalNotes or unstructured items.
@@ -285,142 +286,127 @@ export default function StructuredApiCompositionView({
       {/* Body: Structured Table of APIs */}
       {expanded && (
         <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* APIs Table */}
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'separate',
-              borderSpacing: 0,
-              fontSize: '0.78rem',
-              textAlign: 'left'
-            }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f1f5f9', color: '#475569' }}>
-                  <th style={{ padding: '7px 10px', borderRadius: '6px 0 0 6px', fontWeight: 700, fontSize: '0.70rem', textTransform: 'uppercase' }}>
-                    Active Substance (API)
-                  </th>
-                  <th style={{ padding: '7px 10px', fontWeight: 700, fontSize: '0.70rem', textTransform: 'uppercase' }}>
-                    Pharmacological Role / Target
-                  </th>
-                  <th style={{ padding: '7px 10px', fontWeight: 700, fontSize: '0.70rem', textTransform: 'uppercase', textAlign: 'center' }}>
-                    Potency (%)
-                  </th>
-                  <th style={{ padding: '7px 10px', fontWeight: 700, fontSize: '0.70rem', textTransform: 'uppercase', textAlign: 'right' }}>
-                    Dose / Bottle
-                  </th>
-                  <th style={{ padding: '7px 10px', borderRadius: '0 6px 6px 0', fontWeight: 700, fontSize: '0.70rem', textTransform: 'uppercase', textAlign: 'right', color: '#003666' }}>
-                    Course Total Consumed
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {apis.map((api, idx) => {
+          <DataTable
+            columns={[
+              {
+                key: 'name',
+                header: 'Active Substance (API)',
+                width: '32%',
+                render: (_, api) => {
                   const badge = getCategoryBadge(api.category);
                   const Icon = badge.icon;
                   const isClickable = Boolean(onQueryApi);
-
                   return (
-                    <tr
-                      key={api.apiId || idx}
-                      style={{
-                        borderBottom: idx === apis.length - 1 ? 'none' : '1px solid #f1f5f9',
-                        transition: 'background-color 0.15s'
-                      }}
-                    >
-                      {/* Column 1: API Name, Identifier & Category */}
-                      <td style={{ padding: '9px 10px', verticalAlign: 'top' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                          <span
-                            onClick={() => onQueryApi && onQueryApi(api.genericName || api.name)}
-                            title={isClickable ? `Click to query all prescriptions with ${api.name}` : undefined}
-                            style={{
-                              fontWeight: 800,
-                              color: '#0f172a',
-                              cursor: isClickable ? 'pointer' : 'default',
-                              textDecoration: isClickable ? 'underline dotted' : 'none'
-                            }}
-                          >
-                            {api.name}
-                          </span>
-                          {api.casNumber && (
-                            <code style={{ fontSize: '0.66rem', color: '#64748b', backgroundColor: '#f1f5f9', padding: '1px 5px', borderRadius: '4px' }}>
-                              CAS: {api.casNumber}
-                            </code>
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
-                          <span style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '3px',
-                            backgroundColor: badge.bg,
-                            color: badge.color,
-                            border: `1px solid ${badge.border}`,
-                            padding: '1px 6px',
-                            borderRadius: '99px',
-                            fontSize: '0.64rem',
-                            fontWeight: 700
-                          }}>
-                            <Icon size={10} />
-                            <span>{badge.label}</span>
-                          </span>
-                          {api.supplier && (
-                            <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
-                              • {api.supplier} ({api.qualityGrade || 'Ph.Eur'})
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Column 2: Pharmacological Role */}
-                      <td style={{ padding: '9px 10px', verticalAlign: 'middle', color: '#475569', fontSize: '0.74rem' }}>
-                        {api.role}
-                      </td>
-
-                      {/* Column 3: Concentration */}
-                      <td style={{ padding: '9px 10px', verticalAlign: 'middle', textAlign: 'center' }}>
-                        <span style={{
-                          backgroundColor: '#f8fafc',
-                          border: '1px solid #cbd5e1',
-                          color: '#003666',
-                          fontWeight: 800,
-                          padding: '2px 8px',
-                          borderRadius: '6px',
-                          fontSize: '0.74rem'
-                        }}>
-                          {api.concentration}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span
+                          onClick={() => onQueryApi && onQueryApi(api.genericName || api.name)}
+                          title={isClickable ? `Click to query all prescriptions with ${api.name}` : undefined}
+                          style={{
+                            fontWeight: 800,
+                            color: '#0f172a',
+                            cursor: isClickable ? 'pointer' : 'default',
+                            textDecoration: isClickable ? 'underline dotted' : 'none',
+                          }}
+                        >
+                          {api.name}
                         </span>
-                      </td>
-
-                      {/* Column 4: Dose per unit */}
-                      <td style={{ padding: '9px 10px', verticalAlign: 'middle', textAlign: 'right', color: '#334155', fontWeight: 600 }}>
-                        {api.unitMassMg ? `${api.unitMassMg} mg` : api.unitMassMl ? `${api.unitMassMl} ml` : '—'}
-                      </td>
-
-                      {/* Column 5: Total Course Consumption */}
-                      <td style={{ padding: '9px 10px', verticalAlign: 'middle', textAlign: 'right' }}>
+                        {api.casNumber && (
+                          <code style={{ fontSize: '0.66rem', color: '#64748b', backgroundColor: '#f1f5f9', padding: '1px 5px', borderRadius: '4px' }}>
+                            CAS: {api.casNumber}
+                          </code>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
                         <span style={{
-                          fontWeight: 800,
-                          color: '#003666',
-                          backgroundColor: '#f0fdf4',
-                          border: '1px solid #bbf7d0',
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontSize: '0.74rem'
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          backgroundColor: badge.bg,
+                          color: badge.color,
+                          border: `1px solid ${badge.border}`,
+                          padding: '1px 6px',
+                          borderRadius: '99px',
+                          fontSize: '0.64rem',
+                          fontWeight: 700,
                         }}>
-                          {api.totalCourseConsumptionMg
-                            ? `${api.totalCourseConsumptionMg} mg total`
-                            : api.totalCourseConsumptionMl
-                            ? `${api.totalCourseConsumptionMl} ml total`
-                            : 'Standard N3'}
+                          <Icon size={10} />
+                          <span>{badge.label}</span>
                         </span>
-                      </td>
-                    </tr>
+                        {api.supplier && (
+                          <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
+                            • {api.supplier} ({api.qualityGrade || 'Ph.Eur'})
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                },
+              },
+              {
+                key: 'role',
+                header: 'Pharmacological Role / Target',
+                width: '28%',
+                render: (val) => <span style={{ color: '#475569', fontSize: '0.74rem' }}>{val}</span>,
+              },
+              {
+                key: 'concentration',
+                header: 'Potency (%)',
+                align: 'center',
+                width: '12%',
+                render: (val) => (
+                  <span style={{
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    color: '#003666',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '6px',
+                    fontSize: '0.74rem',
+                  }}>
+                    {val}
+                  </span>
+                ),
+              },
+              {
+                key: 'unitMassMg',
+                header: 'Dose / Bottle',
+                align: 'right',
+                width: '14%',
+                render: (_, api) => (
+                  <span className="atlas-num" style={{ color: '#334155', fontWeight: 600 }}>
+                    {api.unitMassMg ? `${api.unitMassMg} mg` : api.unitMassMl ? `${api.unitMassMl} ml` : '—'}
+                  </span>
+                ),
+              },
+              {
+                key: 'totalCourseConsumptionMg',
+                header: 'Course Total Consumed',
+                align: 'right',
+                width: '14%',
+                render: (_, api) => (
+                  <span className="atlas-num" style={{
+                    fontWeight: 800,
+                    color: '#003666',
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    fontSize: '0.74rem',
+                  }}>
+                    {api.totalCourseConsumptionMg
+                      ? `${api.totalCourseConsumptionMg} mg total`
+                      : api.totalCourseConsumptionMl
+                      ? `${api.totalCourseConsumptionMl} ml total`
+                      : 'Standard N3'}
+                  </span>
+                ),
+              },
+            ]}
+            data={apis.map((api, idx) => ({ ...api, id: api.apiId || `api-${idx}` }))}
+            pagination={false}
+            enableAskAtlas={false}
+          />
 
           {/* Consumption & Posology Summary Card */}
           {showConsumptionCard && (

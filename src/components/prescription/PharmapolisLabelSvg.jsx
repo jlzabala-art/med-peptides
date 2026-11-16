@@ -60,7 +60,8 @@ function wrapDirections(text, firstLineMaxChars = 44, otherLinesMaxChars = 56) {
 /**
  * Computes the default clinical header badge text (e.g. "PART 1 OF 2 · 🌙 NIGHT / BEDTIME" or "PART 2 OF 2 · 1-2×/WK · PRE-WASH").
  */
-export function computeDefaultHeaderBadge(labelData = {}, fallbackPartIndex = 0, fallbackTotalParts = 1) {
+export function computeDefaultHeaderBadge(rawLabelData = {}, fallbackPartIndex = 0, fallbackTotalParts = 1) {
+  const labelData = rawLabelData || {};
   const effectiveTotalParts = labelData.totalParts || fallbackTotalParts || 1;
   const effectivePartIdx = labelData.partIndex ?? labelData.phaseIndex ?? fallbackPartIndex ?? 0;
   const rawPart = labelData.partLabel || labelData.partTag || (effectiveTotalParts > 1 ? `Part ${Number(effectivePartIdx) + 1} of ${effectiveTotalParts}` : '');
@@ -223,7 +224,7 @@ function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a'
  *  - Professional Crop Marks & Scissor Cut Lines (✂) for effortless physical cutting
  */
 export default function PharmapolisLabelSvg({
-  labelData = {},
+  labelData: rawLabelData = {},
   variant = 'backQr', // 'backQr' | 'front' | 'frontWithQr'
   widthMm = 75,
   heightMm = 45,
@@ -232,6 +233,7 @@ export default function PharmapolisLabelSvg({
   svgRef = null,
   boldPosology = true
 }) {
+  const labelData = rawLabelData || {};
   const isMono = colorMode === 'monochrome';
   const isBoldPosology = (labelData.boldPosology !== undefined) ? Boolean(labelData.boldPosology) : Boolean(boldPosology);
   const posFontWeight = isBoldPosology ? '800' : '500';

@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicKpiGrid, { PublicKpiCard } from '@/components/shared/public/PublicKpiGrid';
 import PublicPrescriptionClient from '../[code]/PublicPrescriptionClient';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
@@ -1277,6 +1277,53 @@ export default function PublicPrescriptionIntakeClient() {
 
   const isPhysicianValid = physicianForm.name.trim().length > 0 && physicianForm.email.includes('@');
 
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'prescription_intake',
+        name: currentPhase === 1
+          ? (isEs ? 'Digitalización de Recetas' : 'Prescription Intake')
+          : currentPhase === 2
+          ? (activeDraftRx?.patientName || (isEs ? 'Revisión y Validación' : 'Review & Verification'))
+          : (officialCode ? `Rx #${officialCode}` : (isEs ? 'Prescripción Digitalizada' : 'Digital Prescription Ready')),
+      },
+      bottomBar: {
+        summaryTitle: currentPhase === 1
+          ? (isEs ? 'Digitalización de Recetas' : 'Prescription Intake')
+          : currentPhase === 2
+          ? (activeDraftRx?.patientName || (isEs ? 'Revisión y Validación' : 'Review & Verification'))
+          : (officialCode ? `Rx #${officialCode}` : (isEs ? 'Prescripción Digitalizada' : 'Digital Prescription Ready')),
+        summarySubtitle: currentPhase === 1
+          ? (stagedFiles.length > 0
+              ? (isEs ? `${stagedFiles.length} documento(s) listo(s) para análisis` : `${stagedFiles.length} document(s) staged for AI extraction`)
+              : (isEs ? 'Sube o escanea tu receta médica' : 'Upload or scan prescription document'))
+          : currentPhase === 2
+          ? `${activeDraftRx?.compounds?.length || 0} ${isEs ? 'fórmulas' : 'compounds'} • ${physicianForm?.name || (isEs ? 'Médico verificado' : 'Verified Doctor')}`
+          : (isEs ? 'Lista para dispensación farmacéutica' : 'Ready for clinical dispensation'),
+        badge: currentPhase === 1
+          ? (refDoctor ? (physicianForm?.name || 'Doctor') : (isEs ? 'Fase 1 · Escaneo' : 'Phase 1 · Scan'))
+          : currentPhase === 2
+          ? (isEs ? 'Fase 2 · Validación' : 'Phase 2 · Review')
+          : (isEs ? 'Fase 3 · Completado ✓' : 'Phase 3 · Done ✓'),
+        atlasAiLabel: 'Ask Atlas AI',
+        primaryAction: {
+          label: currentPhase === 1
+            ? (isProcessing ? (isEs ? 'Analizando con IA...' : 'Analyzing with AI...') : (isEs ? 'Analizar con IA ➔' : 'Analyze with AI ➔'))
+            : currentPhase === 2
+            ? (isSavingPhysician ? (isEs ? 'Guardando...' : 'Publishing...') : (isEs ? 'Aprobar y Emitir ➔' : 'Approve & Issue ➔'))
+            : (isEs ? 'Ver Receta Oficial ➔' : 'View Official Rx ➔'),
+          disabled: (currentPhase === 1 && (stagedFiles.length === 0 || isProcessing)) || (currentPhase === 2 && isSavingPhysician),
+          onClick: currentPhase === 1
+            ? (stagedFiles.length > 0 && !isProcessing ? handleProcessAllStagedFiles : undefined)
+            : currentPhase === 2
+            ? (!isSavingPhysician ? handleValidateAndPublish : undefined)
+            : () => { if (officialCode) window.location.href = `/rx/${officialCode}`; },
+        },
+      },
+    },
+    [currentPhase, isEs, activeDraftRx?.patientName, activeDraftRx?.compounds?.length, officialCode, stagedFiles.length, physicianForm?.name, refDoctor, isProcessing, isSavingPhysician]
+  );
+
   return (
     <div className="pds-page-shell" style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a' }}>
       <style dangerouslySetInnerHTML={{ __html: PUBLIC_INTAKE_STYLES }} />
@@ -2381,62 +2428,6 @@ export default function PublicPrescriptionIntakeClient() {
 
       {/* ── Standardized Institutional GCP Footer ── */}
       <PublicUnifiedFooter lang={lang || 'es'} minimal={false} />
-
-      {/* ── Persistent Bottom Action Bar (GCP UX Standard - Frictionless on Mobile & Desktop) ── */}
-      <PublicStickyActionBar
-        title={
-          currentPhase === 1
-            ? (isEs ? 'Digitalización de Recetas' : 'Prescription Intake')
-            : currentPhase === 2
-            ? (activeDraftRx?.patientName || (isEs ? 'Revisión y Validación' : 'Review & Verification'))
-            : (officialCode ? `Rx #${officialCode}` : (isEs ? 'Prescripción Digitalizada' : 'Digital Prescription Ready'))
-        }
-        subtitle={
-          currentPhase === 1
-            ? (stagedFiles.length > 0 
-                ? (isEs ? `${stagedFiles.length} documento(s) listo(s) para análisis` : `${stagedFiles.length} document(s) staged for AI extraction`)
-                : (isEs ? 'Sube o escanea tu receta médica' : 'Upload or scan prescription document'))
-            : currentPhase === 2
-            ? `${activeDraftRx?.compounds?.length || 0} ${isEs ? 'fórmulas' : 'compounds'} • ${physicianForm?.name || (isEs ? 'Médico verificado' : 'Verified Doctor')}`
-            : (isEs ? 'Lista para dispensación farmacéutica' : 'Ready for clinical dispensation')
-        }
-        badge={
-          currentPhase === 1
-            ? (refDoctor ? (physicianForm?.name || 'Doctor') : (isEs ? 'Fase 1 · Escaneo' : 'Phase 1 · Scan'))
-            : currentPhase === 2
-            ? (isEs ? 'Fase 2 · Validación' : 'Phase 2 · Review')
-            : (isEs ? 'Fase 3 · Completado ✓' : 'Phase 3 · Done ✓')
-        }
-        badgeType={currentPhase === 3 ? 'protocol' : 'default'}
-        inquireLabel={
-          currentPhase === 1
-            ? (isProcessing 
-                ? (isEs ? 'Analizando con IA...' : 'Analyzing with AI...') 
-                : (isEs ? 'Analizar con IA ➔' : 'Analyze with AI ➔'))
-            : currentPhase === 2
-            ? (isSavingPhysician 
-                ? (isEs ? 'Guardando...' : 'Publishing...') 
-                : (isEs ? 'Aprobar y Emitir ➔' : 'Approve & Issue ➔'))
-            : (isEs ? 'Ver Receta Oficial ➔' : 'View Official Rx ➔')
-        }
-        onInquire={
-          currentPhase === 1
-            ? (stagedFiles.length > 0 && !isProcessing ? handleProcessAllStagedFiles : null)
-            : currentPhase === 2
-            ? (!isSavingPhysician ? handleValidateAndPublish : null)
-            : () => {
-                if (officialCode) window.location.href = `/rx/${officialCode}`;
-              }
-        }
-        showClinicalAI={true}
-        aiCategory="Prescription Digitalization"
-        aiContextQuery={
-          isEs
-            ? '¿Cómo interpreta el digitalizador multimodal de Atlas las recetas manuscritas o analíticas y qué pautas de seguridad farmacológica verifica?'
-            : 'How does the Atlas multimodal AI digitize handwritten prescriptions and lab reports, and what safety checks does it perform?'
-        }
-        lang={lang}
-      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { ATLAS_MARGIN_RATES } from '@/lib/pricing/pricingCore';
+import { useSyncedTableParams } from '@/hooks/useSyncedTableParams';
 
 export function useBrandPriceSchedule({
   initialProducts = [],
@@ -10,8 +11,12 @@ export function useBrandPriceSchedule({
   fxRate = 1,
 } = {}) {
   const [markupPct, setMarkupPct] = useState(defaultMarkupPct);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const {
+    searchQuery,
+    setSearchQuery,
+    selectedCategory,
+    setSelectedCategory,
+  } = useSyncedTableParams({ defaultCategory: initialCategory });
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered'
   const [itemOverrides, setItemOverrides] = useState({});
 

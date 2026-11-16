@@ -72,6 +72,7 @@ import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
 import ComplementaryHairMineralCard from '@/components/prescription/ComplementaryHairMineralCard';
@@ -167,7 +168,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     return currentRx?.atlasRecommendations || getPrescriptionAtlasRecommendations(currentRx);
   }, [currentRx]);
   const [, setSelectedPhase] = useState('all'); // 'all' | 'formulation-0' | 'formulation-1' | 'formulation-2'
-  const [expandedPhases, setExpandedPhases] = useState({});
+  const [expandedPhases, setExpandedPhases] = useState({ 0: true });
   const [showLabelsModal, setShowLabelsModal] = useState(false);
   const [selectedLabelIndex, setSelectedLabelIndex] = useState(0);
   const [showAtlasQuotationModal, setShowAtlasQuotationModal] = useState(false);
@@ -565,6 +566,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     }
   };
 
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'prescription',
+        rxId,
+        patientName,
+      },
+      bottomBar: { hidden: true },
+    },
+    [rxId, patientName]
+  );
 
   return (
     <div className="rx-dossier-main-wrapper">

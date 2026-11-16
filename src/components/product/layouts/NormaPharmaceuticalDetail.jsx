@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import DataTable from '@/components/ui/DataTable';
 import {
   ShieldCheck,
   Award,
@@ -37,7 +38,7 @@ import {
 } from '@/lib/icons';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
 import PublicDatasheetTableOfContents from '@/components/product/PublicDatasheetTableOfContents';
@@ -80,6 +81,29 @@ export default function NormaPharmaceuticalDetail({
   const galenic = p.galenicSpecs || {};
   const pharma = p.pharmaDetails || {};
   const monitoring = p.clinicalMonitoring || {};
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'hormone',
+        name: 'Testosterone Enanthate/Norma® 250 mg/ml',
+        brand: 'Norma Hellas S.A.',
+      },
+      bottomBar: {
+        summaryTitle: 'Testosterone Enanthate/Norma® 250 mg/ml',
+        summarySubtitle: '1 mL Amber Ampoule · Castor Oil Depot · EOF #45945/03-10-2008',
+        badge: 'EU GMP Certified',
+        atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        showSections: true,
+        sectionsLabel: isEs ? 'Secciones' : 'Sections',
+        primaryAction: {
+          label: isEs ? 'Solicitar Asignación Clínica' : 'Request Allocation',
+          onClick: () => setIsInquiryDrawerOpen(true),
+        },
+      },
+    },
+    [isEs]
+  );
 
   return (
     <div className="norma-page-container">
@@ -664,44 +688,52 @@ export default function NormaPharmaceuticalDetail({
                       </div>
                     </div>
 
-                    <div style={{ overflowX: 'auto' }}>
-                      <table className="norma-coa-table">
-                        <thead>
-                          <tr>
-                            <th>Analytical Parameter</th>
-                            <th>Method</th>
-                            <th>Release Specification</th>
-                            <th>Batch Result</th>
-                            <th>Compliance</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(coa.tests || [
-                            { parameter: 'Assay (Testosterone Enanthate)', method: 'HPLC 012473', specification: '95.0 – 105.0 %', result: '102.5 %', status: 'PASSED' },
-                            { parameter: 'Visual Appearance', method: 'COM 004105', specification: 'Clear yellowish oily solution', result: 'Conforms', status: 'PASSED' },
-                            { parameter: 'Sterility Testing', method: 'EP 2.6.1', specification: 'Sterile (no microbial growth)', result: 'Conforms', status: 'PASSED' },
-                            { parameter: 'Bacterial Endotoxins', method: 'EP 2.6.14', specification: '≤ 300 I.U./ml', result: '< 150 I.U./ml', status: 'PASSED' },
-                            { parameter: 'Testosterone Caproate Impurity', method: 'HPLC 012473', specification: '≤ 1.0 %', result: '0.1 %', status: 'PASSED' },
-                            { parameter: 'Free Testosterone Impurity', method: 'HPLC 012473', specification: '≤ 0.4 %', result: '< 0.1 %', status: 'PASSED' },
-                            { parameter: 'Total Impurities', method: 'HPLC 012473', specification: '≤ 2.0 %', result: '0.3 %', status: 'PASSED' },
-                            { parameter: 'Extractable Volume', method: 'COM 003680', specification: '≥ 1.00 ml', result: '1.08 ml', status: 'PASSED' },
-                            { parameter: 'Density (20°C)', method: 'COM 003723', specification: '1.0246 – 1.0446 g/ml', result: '1.0320 g/ml', status: 'PASSED' }
-                          ]).map((t, idx) => (
-                            <tr key={idx}>
-                              <td style={{ fontWeight: 600, color: '#0f172a' }}>{t.parameter}</td>
-                              <td style={{ color: '#64748b' }}>{t.method}</td>
-                              <td style={{ color: '#475569' }}>{t.specification}</td>
-                              <td style={{ fontWeight: 700, color: '#003666' }}>{t.result}</td>
-                              <td>
-                                <span className="norma-coa-status-pass">
-                                  <Check size={11} /> {t.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <DataTable
+                      pagination={false}
+                      enableAskAtlas={false}
+                      columns={[
+                        {
+                          key: 'parameter',
+                          label: 'Analytical Parameter',
+                          render: (val) => <span style={{ fontWeight: 600, color: '#0f172a' }}>{val}</span>,
+                        },
+                        {
+                          key: 'method',
+                          label: 'Method',
+                          render: (val) => <span style={{ color: '#64748b' }}>{val}</span>,
+                        },
+                        {
+                          key: 'specification',
+                          label: 'Release Specification',
+                          render: (val) => <span style={{ color: '#475569' }}>{val}</span>,
+                        },
+                        {
+                          key: 'result',
+                          label: 'Batch Result',
+                          render: (val) => <span style={{ fontWeight: 700, color: '#003666' }}>{val}</span>,
+                        },
+                        {
+                          key: 'status',
+                          label: 'Compliance',
+                          render: (val) => (
+                            <span className="norma-coa-status-pass">
+                              <Check size={11} /> {val}
+                            </span>
+                          ),
+                        },
+                      ]}
+                      data={(coa.tests || [
+                        { parameter: 'Assay (Testosterone Enanthate)', method: 'HPLC 012473', specification: '95.0 – 105.0 %', result: '102.5 %', status: 'PASSED' },
+                        { parameter: 'Visual Appearance', method: 'COM 004105', specification: 'Clear yellowish oily solution', result: 'Conforms', status: 'PASSED' },
+                        { parameter: 'Sterility Testing', method: 'EP 2.6.1', specification: 'Sterile (no microbial growth)', result: 'Conforms', status: 'PASSED' },
+                        { parameter: 'Bacterial Endotoxins', method: 'EP 2.6.14', specification: '≤ 300 I.U./ml', result: '< 150 I.U./ml', status: 'PASSED' },
+                        { parameter: 'Testosterone Caproate Impurity', method: 'HPLC 012473', specification: '≤ 1.0 %', result: '0.1 %', status: 'PASSED' },
+                        { parameter: 'Free Testosterone Impurity', method: 'HPLC 012473', specification: '≤ 0.4 %', result: '< 0.1 %', status: 'PASSED' },
+                        { parameter: 'Total Impurities', method: 'HPLC 012473', specification: '≤ 2.0 %', result: '0.3 %', status: 'PASSED' },
+                        { parameter: 'Extractable Volume', method: 'COM 003680', specification: '≥ 1.00 ml', result: '1.08 ml', status: 'PASSED' },
+                        { parameter: 'Density (20°C)', method: 'COM 003723', specification: '1.0246 – 1.0446 g/ml', result: '1.0320 g/ml', status: 'PASSED' }
+                      ]).map((t, idx) => ({ id: t.parameter || String(idx), ...t }))}
+                    />
 
                     <div style={{ marginTop: '14px', padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.74rem', color: '#475569' }}>
                       <strong>Qualified Person (QP) Certification:</strong> EVER Pharma Jena GmbH (Germany) certifies that all manufacturing stages of finished batch #12473 have been carried out in full compliance with European GMP requirements and Marketing Authorisation EOF # 45945/03-10-2008. The product has been officially released for clinical distribution.
@@ -998,28 +1030,6 @@ export default function NormaPharmaceuticalDetail({
           category: 'hormone'
         }}
         shareUrl={`${baseUrl}/p/testosterone-enanthate-norma-250mg`}
-      />
-
-      {/* ── STICKY GCP BOTTOM ACTION BAR WITH CLINICAL ATLAS AI ── */}
-      <PublicStickyActionBar
-        title="Testosterone Enanthate/Norma® 250 mg/ml"
-        subtitle="1 mL Amber Ampoule · Castor Oil Depot · EOF #45945/03-10-2008"
-        badge="EU GMP Certified"
-        badgeType="success"
-        inquireLabel={isEs ? 'Solicitar Asignación Clínica' : 'Request Allocation'}
-        onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={true}
-        aiPreset="peptide"
-        aiCategory="hormone"
-        aiContextQuery="Testosterone Enanthate Norma 250mg ampoule pharmacology, pharmacokinetics, injection protocol, castor oil depot, physician lab monitoring, and B2B hospital supply"
-        aiMeta={{
-          productName: 'Testosterone Enanthate/Norma® 250 mg/ml',
-          brand: 'Norma Hellas S.A.',
-          activeDose: '250 mg/mL (180 mg free base equivalent)',
-          galenicForm: 'Type I Amber Glass Ampoule (Oleum Ricini depot)',
-          regulatory: 'EOF Greece MA # 45945/03-10-2008 · POM'
-        }}
-        lang={lang}
       />
 
       {/* ── UNIFIED PUBLIC FOOTER ── */}

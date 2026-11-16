@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import DataTable from '@/components/ui/DataTable';
 import { 
   Dna, 
   ShieldCheck, 
@@ -343,40 +344,27 @@ export default function EternaGeneticTechnicalSpecs({ product, lang = 'en' }) {
           </div>
 
           <div className="eterna-metrics-table-wrap">
-            <table className="eterna-metrics-table">
-              <thead>
-                <tr>
-                  <th>{isEs ? 'Gen & Variante (SNP)' : 'Gene & Variant (SNP)'}</th>
-                  <th>{isEs ? 'Marcador Funcional' : 'Functional Trait'}</th>
-                  <th>{isEs ? 'Hallazgo Genético Observado' : 'Genomic Phenotype'}</th>
-                  <th>{isEs ? 'Estado' : 'Status'}</th>
-                  <th>{isEs ? 'Intervención Clínica / Acción' : 'Clinical Optimization Strategy'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentDetails.metrics.map((m, idx) => (
-                  <tr key={idx}>
-                    <td className="eterna-font-mono font-bold" data-label={isEs ? 'Gen' : 'Gene'}>
-                      {m.gene}
-                    </td>
-                    <td data-label={isEs ? 'Marcador' : 'Trait'}>
-                      {m.name}
-                    </td>
-                    <td data-label={isEs ? 'Hallazgo' : 'Phenotype'}>
-                      {m.finding}
-                    </td>
-                    <td data-label={isEs ? 'Estado' : 'Status'}>
-                      <span className={`eterna-status-chip ${m.status.toLowerCase().replace(/\s+/g, '-')}`}>
-                        {m.status}
-                      </span>
-                    </td>
-                    <td data-label={isEs ? 'Acción' : 'Strategy'} className="eterna-action-cell">
-                      {m.action}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTable
+              columns={[
+                { key: 'gene', header: isEs ? 'Gen & Variante (SNP)' : 'Gene & Variant (SNP)', width: '18%', render: (val) => <span className="eterna-font-mono font-bold">{val}</span> },
+                { key: 'name', header: isEs ? 'Marcador Funcional' : 'Functional Trait', width: '22%' },
+                { key: 'finding', header: isEs ? 'Hallazgo Genético Observado' : 'Genomic Phenotype', width: '20%' },
+                {
+                  key: 'status',
+                  header: isEs ? 'Estado' : 'Status',
+                  width: '14%',
+                  render: (val) => (
+                    <span className={`eterna-status-chip ${String(val || '').toLowerCase().replace(/\s+/g, '-')}`}>
+                      {val}
+                    </span>
+                  ),
+                },
+                { key: 'action', header: isEs ? 'Intervención Clínica / Acción' : 'Clinical Optimization Strategy', width: '26%' },
+              ]}
+              data={currentDetails.metrics.map((m, idx) => ({ ...m, id: `eterna-${idx}` }))}
+              pagination={false}
+              enableAskAtlas={false}
+            />
           </div>
         </div>
       </div>

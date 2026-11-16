@@ -8,6 +8,7 @@ export default function ColwayPriceListClient({
   initialProducts = [],
   initialCategory = 'all',
   isHairLineFocus = false,
+  initialCurrency = null,
 }) {
   const config = isHairLineFocus
     ? {
@@ -61,7 +62,12 @@ export default function ColwayPriceListClient({
     <ModularPriceSchedule
       initialProducts={initialProducts}
       initialCategory={initialCategory}
-      config={config}
+      config={{
+        ...config,
+        defaultCurrency: initialCurrency && config.availableCurrencies.includes(initialCurrency)
+          ? initialCurrency
+          : config.defaultCurrency,
+      }}
     />
   );
 }

@@ -8,7 +8,8 @@ const DEFAULT_PREFS = {
   preferredFormat: 'a4', // 'a4' | 'zpl'
   preferredEditMode: false,
   startOffset: 0,
-  zplDpi: 203
+  zplDpi: 203,
+  strictGmpGate: false
 };
 
 /**

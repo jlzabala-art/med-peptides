@@ -4,6 +4,7 @@ import { sanitizeText } from '@/utils/apiValidator';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getPublicPlatformKnowledgeContext } from '@/services/publicKnowledgeService';
 import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
+import { searchAlgoliaFederated } from '@/services/algoliaSearch';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 
   process.env.NEXT_PUBLIC_GEMINI_API_KEY || 
@@ -198,8 +199,54 @@ export async function POST(req) {
           ).join('\n') + '\n'
         : '';
 
-      // 2. Fetch platform public knowledge graph (protocols, products, tools)
-      const publicPlatformKnowledge = await getPublicPlatformKnowledgeContext();
+      // 2. Fetch platform public knowledge graph (protocols, products, tools) + live Algolia RAG hits
+      const [publicPlatformKnowledge, algoliaRagResult] = await Promise.all([
+        getPublicPlatformKnowledgeContext(),
+        Promise.race([
+          searchAlgoliaFederated(message, ['products', 'protocols'], 4),
+          new Promise((resolve) => setTimeout(() => resolve({ products: [], protocols: [] }), 1500)),
+        ]).catch(() => ({ products: [], protocols: [] })),
+      ]);
+
+      const isPatientRagScope = contextAnchor?.view === 'patient' || String(pathname || '').includes('view=patient');
+      const matchedEntities = [];
+      const ragLines = [];
+
+      (algoliaRagResult?.products || []).slice(0, 3).forEach((p) => {
+        const slug = p.slug || p.objectID || p.id;
+        if (!slug) return;
+        const title = p.canonicalName || p.name || p.title || slug;
+        const href = isPatientRagScope ? `/p/${encodeURIComponent(slug)}?view=patient` : `/p/${encodeURIComponent(slug)}`;
+        matchedEntities.push({
+          type: 'product',
+          objectID: String(p.objectID || slug),
+          title,
+          subtitle: p.subtitle || p.category || 'Clinical Formulation',
+          category: p.category || 'Product',
+          href,
+        });
+        ragLines.push(`- [Product] ${title} (${p.category || 'Formulation'}) → ${href}${p.subtitle ? ` — ${p.subtitle}` : ''}`);
+      });
+
+      (algoliaRagResult?.protocols || []).slice(0, 2).forEach((pr) => {
+        const slug = pr.slug || pr.objectID || pr.id;
+        if (!slug) return;
+        const title = pr.title || pr.name || slug;
+        const href = `/proto/${encodeURIComponent(slug)}`;
+        matchedEntities.push({
+          type: 'protocol',
+          objectID: String(pr.objectID || slug),
+          title,
+          subtitle: pr.goal || 'Clinical Protocol',
+          category: 'Protocol',
+          href,
+        });
+        ragLines.push(`- [Protocol] ${title} (${pr.goal || 'Clinical Protocol'}) → ${href}`);
+      });
+
+      const algoliaRagContext = ragLines.length > 0
+        ? `\nLIVE ALGOLIA CATALOG & PROTOCOL MATCHES FOR THIS QUERY (cite these exact links when relevant):\n${ragLines.join('\n')}\n`
+        : '';
 
       let activeEntityContext = '';
       const isGenomics = screenScope === '24genomics' ||
@@ -783,7 +830,7 @@ CRITICAL OPERATING RULES:
     [/PREDICTED_NEXT_STEPS]
 
 ${activeEntityContext}
-
+${algoliaRagContext}
 ${publicPlatformKnowledge}`;
       }
     } else {
@@ -862,6 +909,7 @@ GUIDELINES:
           setCachedQuery(queryCacheKey, {
             reply: replyText,
             sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
+            matchedEntities: matchedEntities.length > 0 ? matchedEntities : undefined,
           });
 
           const res = NextResponse.json({
@@ -872,6 +920,7 @@ GUIDELINES:
             remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
             limit: isPublicSandbox ? SANDBOX_QUERY_LIMIT : undefined,
             sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
+            matchedEntities: matchedEntities.length > 0 ? matchedEntities : undefined,
           });
           return applyRateLimitHeaders(res, rateInfo);
         }

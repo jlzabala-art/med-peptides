@@ -247,7 +247,7 @@ export function resolvePriceForSession(
       role: 'admin',
       primaryTier: 'wholeseller',
       primaryPrice: tiers.wholeseller ?? tiers.distributor ?? tiers.cost,
-      primaryLabel: 'Wholeseller (15%+15%)',
+      primaryLabel: 'Wholeseller',
       ...tiers,
     };
   }
@@ -259,7 +259,7 @@ export function resolvePriceForSession(
       role: 'guest',
       primaryTier: 'wholeseller',
       primaryPrice: tiers.wholeseller,
-      primaryLabel: 'Wholeseller (15%+15%)',
+      primaryLabel: 'Wholeseller',
       wholeseller: tiers.wholeseller,
       currency: tiers.currency,
     };
@@ -286,7 +286,7 @@ export function resolvePriceForSession(
 
   const tierMap = {
     distributor: { price: tiers.distributor, label: 'Distributor (+15%)' },
-    wholeseller: { price: tiers.wholeseller, label: 'Wholeseller (15%+15%)' },
+    wholeseller: { price: tiers.wholeseller, label: 'Wholeseller' },
     clinic: { price: tiers.clinic ?? tiers.wholeseller, label: 'Clinic / Doctor Rate' },
     retail: { price: tiers.retail ?? tiers.clinic ?? tiers.wholeseller, label: 'Patient / Retail Rate' },
   };

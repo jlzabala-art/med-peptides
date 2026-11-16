@@ -3,10 +3,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import BrandLogo from '@/components/common/BrandLogo';
+import AtlasAppSwitcher from '@/components/shared/public/AtlasAppSwitcher';
 import { Search, X, Printer, Upload, Share2, Check, ChevronDown, User, FileText, Layers, ExternalLink } from '@/lib/icons';
 import { useAuth } from '@/context/AuthContext';
 import UserDropdown from '@/navigation/UserDropdown';
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, HelpCircle, ArrowLeft } from 'lucide-react';
 import A4GridOffsetPicker from './A4GridOffsetPicker';
 
 export default function LabelsHeader({
@@ -34,6 +35,7 @@ export default function LabelsHeader({
   patientName,
   onKeyDownSearch,
   embedded = false,
+  onBackToWorklist = null,
   children
 }) {
   const { user, userProfile, activeRole, logout, isProfessional, isAdmin } = useAuth();
@@ -125,48 +127,109 @@ export default function LabelsHeader({
       >
         {/* Brand (Standalone Mode) or B2B Logistics Badge (Embedded Portal Mode) */}
         {!embedded ? (
-          <Link href="/labels" className="pls-brand-link" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
-            <BrandLogo variant="dark" size="compact" />
-          </Link>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <AtlasAppSwitcher isSpanish={isEs} variant="light" portalHref="/admin" />
+            <Link href="/labels" className="pls-brand-link" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
+              <BrandLogo variant="dark" size="compact" />
+            </Link>
+          </div>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <BrandLogo variant="dark" size="compact" />
           </div>
         )}
 
-        {/* Instant Search Container */}
-        <div className="pls-search-container" ref={searchBoxRef}>
-          <div className="pls-search-input-wrap">
-            <Search size={15} color="#5f6368" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              className="pls-search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchOpen(true)}
-              onKeyDown={onKeyDownSearch}
-              aria-autocomplete="list"
-              aria-expanded={searchOpen}
-              aria-controls="pls-search-results-listbox"
-              placeholder={isEs
-                ? "Buscar paciente, receta o nº historia..."
-                : "Search patient, prescription or file #..."}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="pls-search-clear-query"
-                aria-label="Clear search"
-              >
-                <X size={14} />
-              </button>
-            )}
-            <span className="pls-search-badge" title={isEs ? "Selección múltiple disponible" : "Multi-selection enabled"}>
-              ⌘K • {isEs ? 'Múltiple' : 'Multi'}
-            </span>
-          </div>
+        {/* Contextual Breadcrumb (Workspace Mode) OR Single Trigger (Worklist Mode to avoid duplicate search bars) */}
+        <div className="pls-search-container" ref={searchBoxRef} style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {patientQueue.length > 0 && onBackToWorklist && (
+            <button
+              type="button"
+              onClick={onBackToWorklist}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#f8fafc',
+                color: '#0f172a',
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+              title={isEs ? 'Volver al Worklist' : 'Back to Worklist'}
+            >
+              <ArrowLeft size={14} />
+              <span>{isEs ? 'Worklist' : 'Worklist'}</span>
+              {activeCode && (
+                <span style={{ color: '#1d4ed8', fontWeight: 800 }}>
+                  / #{activeCode}
+                </span>
+              )}
+            </button>
+          )}
+
+          {patientQueue.length === 0 && !searchOpen ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchOpen(true);
+                setTimeout(() => searchInputRef?.current?.focus(), 40);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '7px 14px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#f8fafc',
+                color: '#475569',
+                fontSize: '0.80rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+              title={isEs ? 'Búsqueda rápida de paciente o receta (⌘K)' : 'Quick search patient or prescription (⌘K)'}
+            >
+              <Search size={14} color="#5f6368" />
+              <span>{isEs ? 'Cambio rápido' : 'Quick Switch'}</span>
+              <span className="pls-search-badge">⌘K</span>
+            </button>
+          ) : (
+            <div className="pls-search-input-wrap" style={{ flex: 1, minWidth: '200px' }}>
+              <Search size={15} color="#5f6368" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                className="pls-search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchOpen(true)}
+                onKeyDown={onKeyDownSearch}
+                aria-autocomplete="list"
+                aria-expanded={searchOpen}
+                aria-controls="pls-search-results-listbox"
+                placeholder={isEs
+                  ? "Buscar paciente, receta o nº historia..."
+                  : "Search patient, prescription or file #..."}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="pls-search-clear-query"
+                  aria-label="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
+              <span className="pls-search-badge" title={isEs ? "Selección múltiple disponible" : "Multi-selection enabled"}>
+                ⌘K • {isEs ? 'Múltiple' : 'Multi'}
+              </span>
+            </div>
+          )}
 
           {/* Search Dropdown Slot */}
           {searchOpen && children}
@@ -209,17 +272,17 @@ export default function LabelsHeader({
             )}
           </div>
 
-          {/* Import Data (Rx & Lab Results) */}
+          {/* Import Patient (Rx & Lab Results) */}
           <button
             type="button"
             id="pls-import-rx-btn"
             className="pls-btn-import pls-desktop-only-action"
             onClick={onOpenImport}
-            title={isEs ? 'Importar datos (Rx y Analíticas Lab)' : 'Import Data (Rx & Lab Results)'}
-            aria-label={isEs ? 'Importar datos' : 'Import Data'}
+            title={isEs ? 'Importar paciente (Rx y Analíticas Lab)' : 'Import Patient (Rx & Lab Results)'}
+            aria-label={isEs ? 'Importar paciente' : 'Import Patient'}
           >
             <Upload size={14} />
-            <span className="pls-btn-label">{isEs ? 'Importar Datos' : 'Import Data'}</span>
+            <span className="pls-btn-label">{isEs ? 'Importar Paciente' : 'Import Patient'}</span>
           </button>
 
           {/* Unified Share Dropdown Button (Google Cloud UX Standards) */}
@@ -377,6 +440,22 @@ export default function LabelsHeader({
               </div>
             )}
           </div>
+
+          {/* Atlas AI Contextual Help (?) */}
+          <button
+            type="button"
+            className="gcp-btn-secondary pls-desktop-only-action"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('open-atlas-help-drawer'));
+              }
+            }}
+            title={isEs ? 'Ayuda inteligente Atlas AI' : 'Atlas AI Contextual Help'}
+            aria-label={isEs ? 'Ayuda Atlas AI' : 'Atlas AI Help'}
+            style={{ width: '32px', height: '32px', padding: 0, justifyContent: 'center' }}
+          >
+            <HelpCircle size={15} color="#475569" />
+          </button>
 
           {/* Language Switcher */}
           <div className="pls-lang-toggle pls-desktop-only-action" role="group" aria-label="Language selection">
@@ -570,7 +649,7 @@ export default function LabelsHeader({
                   }}
                 >
                   <Upload size={14} color="#0284c7" />
-                  <span>{isEs ? 'Importar Datos (Rx)' : 'Import Data (Rx)'}</span>
+                  <span>{isEs ? 'Importar Paciente (Rx)' : 'Import Patient (Rx)'}</span>
                 </button>
 
                 {/* Share */}

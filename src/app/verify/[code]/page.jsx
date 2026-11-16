@@ -129,35 +129,47 @@ async function getBatchVerificationData(code) {
   return result;
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
+  const lang = String(resolvedSearch?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const isEs = lang === 'es';
   const code = resolvedParams?.code || '';
   
   // 🎨 Dynamic OpenGraph preview card
-  const ogImageUrl = `${BASE_URL}/api/og-card?type=verify&title=${encodeURIComponent(`Batch #${code}`)}&badge=${encodeURIComponent('VERIFIED AUTHENTIC')}&subtitle=${encodeURIComponent('Official Certificate of Analysis & HPLC Assay')}`;
+  const ogImageUrl = `${BASE_URL}/api/og-card?type=verify&title=${encodeURIComponent(`${isEs ? 'Lote' : 'Batch'} #${code}`)}&badge=${encodeURIComponent(isEs ? 'AUTENTICIDAD VERIFICADA' : 'VERIFIED AUTHENTIC')}&subtitle=${encodeURIComponent(isEs ? 'Certificado Oficial de Análisis y Ensayo HPLC' : 'Official Certificate of Analysis & HPLC Assay')}`;
 
   return {
-    title: `Batch Verification #${code} | Atlas Health Quality & Authenticity`,
-    description: `Official certificate of analysis and authenticity verification for batch #${code}.`,
+    title: isEs
+      ? `Verificación de Lote #${code} | Calidad y Autenticidad Atlas Health`
+      : `Batch Verification #${code} | Atlas Health Quality & Authenticity`,
+    description: isEs
+      ? `Certificado oficial de análisis y verificación de autenticidad para el lote #${code}.`
+      : `Official certificate of analysis and authenticity verification for batch #${code}.`,
     openGraph: {
-      title: `Batch #${code} Authenticity Verified | Atlas App`,
-      description: `Official analytical CoA and authenticity release standards.`,
+      title: isEs
+        ? `Lote #${code} Autenticidad Verificada | Atlas App`
+        : `Batch #${code} Authenticity Verified | Atlas App`,
+      description: isEs
+        ? `Estándares oficiales de liberación analítica y certificado CoA.`
+        : `Official analytical CoA and authenticity release standards.`,
       url: `${BASE_URL}/verify/${code}`,
-      siteName: 'Atlas Health Quality Assurance',
+      siteName: isEs ? 'Atlas Health Garantía de Calidad' : 'Atlas Health Quality Assurance',
+      locale: isEs ? 'es_ES' : 'en_US',
       images: [
         {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: `Batch #${code} Certificate of Analysis`,
+          alt: isEs ? `Lote #${code} Certificado de Análisis` : `Batch #${code} Certificate of Analysis`,
         }
       ],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Batch #${code} Verified`,
-      description: `Official analytical CoA and purity standards.`,
+      title: isEs ? `Lote #${code} Verificado` : `Batch #${code} Verified`,
+      description: isEs ? `Certificado analítico oficial CoA y estándares de pureza.` : `Official analytical CoA and purity standards.`,
       images: [ogImageUrl],
     },
     robots: { index: false, follow: true },

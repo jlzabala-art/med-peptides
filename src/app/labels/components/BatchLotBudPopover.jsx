@@ -130,7 +130,7 @@ export default function BatchLotBudPopover({ onApplyBatchLotBud, isEs = false })
           </label>
 
           <div style={{ display: 'flex', gap: '4px' }}>
-            {[30, 90, 180].map((d) => (
+            {[30, 60, 90, 180].map((d) => (
               <button
                 key={d}
                 type="button"

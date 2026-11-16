@@ -93,6 +93,31 @@ export default function LabResultDetailSidebar({
     }
   }, [activeSection]);
 
+  // Support external trigger from GlobalBottomStickyBar ("Sections" button)
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const handleExternalOpen = () => {
+      triggerHaptic('selection');
+      setIsMobileDrawerOpen(true);
+    };
+    window.addEventListener('open-datasheet-toc', handleExternalOpen);
+    return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
+  }, []);
+
+  // Broadcast section progress to GlobalBottomStickyBar
+  useEffect(() => {
+    if (typeof window === 'undefined' || !availableSections?.length) return;
+    const idx = availableSections.findIndex((s) => s.id === currentActiveId);
+    window.dispatchEvent(
+      new CustomEvent('datasheet-toc-progress', {
+        detail: {
+          currentProgress: idx >= 0 ? idx + 1 : 1,
+          totalSections: availableSections.length,
+        },
+      })
+    );
+  }, [currentActiveId, availableSections]);
+
   // Real-time ScrollSpy via IntersectionObserver (disabled when controlled via onSelectSection)
   useEffect(() => {
     if (typeof window === 'undefined' || onSelectSection) return;

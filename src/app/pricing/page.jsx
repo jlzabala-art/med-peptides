@@ -3,21 +3,28 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import UnifiedPriceHub from '@/components/pricing/UnifiedPriceHub';
+import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import './colway/ColwayPriceList.css';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
-  return {
-    title: 'Unified B2B Price Hub • Atlas Health Services',
-    description: 'Centralized directory and real-time price hub for clinical peptides, 24Genetics genomic panels, Colway collagen, diagnostics, and wellness lines with role-based pricing.',
-    openGraph: {
-      title: 'Unified B2B Price Hub',
-      description: 'Verified clinical and wholesale price lists.',
-      url: `${appUrl}/pricing`
-    }
-  };
+export async function generateMetadata({ searchParams }) {
+  const resolvedSearch = await searchParams;
+  const lang = normalizeMetaLang(resolvedSearch);
+
+  return buildBilingualMetadata({
+    lang,
+    path: '/pricing',
+    siteName: 'Atlas Health Services',
+    en: {
+      title: 'Unified B2B Price Hub • Atlas Health Services',
+      description: 'Centralized directory and real-time price hub for clinical peptides, 24Genetics genomic panels, Colway collagen, diagnostics, and wellness lines with role-based pricing.',
+    },
+    es: {
+      title: 'Centro Unificado de Tarifas B2B • Atlas Health Services',
+      description: 'Directorio centralizado y tarifas en tiempo real para péptidos clínicos, paneles genómicos 24Genetics, colágeno Colway, diagnósticos y líneas clínicas.',
+    },
+  });
 }
 
 export default function PricingDirectoryPage() {

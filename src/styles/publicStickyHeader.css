@@ -276,8 +276,19 @@
 .puh-actions-group {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  flex-shrink: 0;
+  gap: 0.45rem;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+@media (max-width: 1360px) {
+  .puh-actions-group .puh-btn {
+    padding: 0 0.55rem;
+    font-size: 0.72rem;
+  }
+  .puh-actions-group .puh-kbd-hint {
+    display: none;
+  }
 }
 
 .puh-lang-select {
@@ -790,11 +801,41 @@
   }
 }
 
+@media (max-width: 768px) {
+  .puh-brand-row-inner {
+    padding: 0.45rem 0.85rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .puh-brand-group {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .puh-account-group {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .puh-account-group::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .puh-brand-row-inner {
     padding: 0.45rem 0.85rem;
     justify-content: space-between;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.45rem;
   }
 
   .puh-actions-row-inner {

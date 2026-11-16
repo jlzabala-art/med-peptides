@@ -81,6 +81,8 @@ import MobileActionSheet from '@/components/ui/MobileActionSheet';
 import EmptyState from '@/components/ui/EmptyState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import DoctorTodayFocusBar from './components/DoctorTodayFocusBar';
+import GenomicsExplainerVideoCard from '@/components/genomics/GenomicsExplainerVideoCard';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligenceBanner';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
@@ -92,7 +94,8 @@ import { COUNTRIES } from '@/data/countries';
 import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolidator';
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import PageSkeleton from '@/components/ui/PageSkeleton';
 import '@/styles/publicDesignSystem.css';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
@@ -777,6 +780,7 @@ export default function DoctorPublicPortalClient({
   const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
   const [activeBlueprintDossier, setActiveBlueprintDossier] = useState(null);
   const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
+  const [clinicDeskMode, setClinicDeskMode] = useState(false);
   const notifMenuRef = useRef(null);
 
   useEffect(() => {
@@ -3009,6 +3013,34 @@ export default function DoctorPublicPortalClient({
             >
               <ExternalLink size={14} />
             </button>
+
+            {/* QUICK ACTION 1B: Open directly in Prescriptions & Label Studio (/labels?rx=...) */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const cleanCode = sanitizePrescriptionCode(rx.code || rx.prescriptionNumber || rx.id, rx.patientName);
+                window.open(`/labels?rx=${encodeURIComponent(cleanCode)}`, '_blank', 'noopener,noreferrer');
+              }}
+              style={{
+                height: '28px',
+                width: '28px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#7c3aed',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                transition: 'all 0.12s ease'
+              }}
+              title={isEs ? 'Abrir en Prescriptions & Label Studio (Etiquetas / Refill)' : 'Open in Prescriptions & Label Studio (Labels / Refill)'}
+              aria-label="Open in Label Studio"
+            >
+              <Tag size={13} />
+            </button>
           </div>
         );
       }
@@ -3045,7 +3077,7 @@ export default function DoctorPublicPortalClient({
         return (
           <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              {!isAuthorizedViewer ? (
+              {(!isAuthorizedViewer || clinicDeskMode) ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                   <span
                     style={{
@@ -3456,6 +3488,34 @@ export default function DoctorPublicPortalClient({
               aria-label="View public prescription page"
             >
               <ExternalLink size={14} />
+            </button>
+
+            {/* QUICK ACTION 1B: Open directly in Prescriptions & Label Studio (/labels?rx=...) */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const cleanCode = sanitizePrescriptionCode(rx.code || rx.prescriptionNumber || rx.id, rx.patientName);
+                window.open(`/labels?rx=${encodeURIComponent(cleanCode)}`, '_blank', 'noopener,noreferrer');
+              }}
+              style={{
+                height: '28px',
+                width: '28px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#7c3aed',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                transition: 'all 0.12s ease'
+              }}
+              title={isEs ? 'Abrir en Prescriptions & Label Studio (Etiquetas / Refill)' : 'Open in Prescriptions & Label Studio (Labels / Refill)'}
+              aria-label="Open in Label Studio"
+            >
+              <Tag size={13} />
             </button>
 
             {/* QUICK ACTION 2: Contextual Primary Clinical Action (Sign if pending, Share Offer if proposal, or Patient Posology Handout if active/approved) */}
@@ -5170,14 +5230,42 @@ export default function DoctorPublicPortalClient({
     }
   ];
 
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'doctor_portal',
+        name: doctor?.name || `Doctor ${opaqueCode}`,
+        clinic: doctor?.clinic,
+        specialty: doctor?.specialty,
+      },
+      bottomBar: (loading || error || !data?.success || isAuthorizedViewer)
+        ? { hidden: true }
+        : {
+            summaryTitle: doctor?.name || `Doctor ${opaqueCode}`,
+            summarySubtitle: `${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${doctor?.specialty || (lang === 'es' ? 'Medicina Regenerativa y Longevidad' : 'Regenerative & Precision Medicine')}`,
+            badge: lang === 'es' ? 'MÉDICO VERIFICADO' : 'VERIFIED PHYSICIAN',
+            atlasAiLabel: 'Ask Atlas AI',
+            onOpenAtlasAi: () => {
+              triggerHaptic('selection');
+              setIsAtlasAiOpen(true);
+            },
+            showSections: true,
+            sectionsLabel: lang === 'es' ? 'Secciones' : 'Sections',
+            sectionsCount: sidebarNavGroups?.length || 0,
+            onOpenSections: () => setIsMobileSidebarOpen(true),
+            primaryAction: {
+              label: lang === 'es' ? 'Enviar Receta a este Doctor ➔' : 'Submit Rx to this Doctor ➔',
+              onClick: () => {
+                window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
+              },
+            },
+          },
+    },
+    [loading, error, data?.success, isAuthorizedViewer, doctor?.name, doctor?.clinic, doctor?.specialty, doctor?.opaqueCode, opaqueCode, slug, lang]
+  );
+
   if (loading) {
-    return (
-      <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-        <div style={{ width: '36px', height: '36px', border: '3px solid #e2e8f0', borderTopColor: '#003666', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>Loading Clinical Physician Portal...</p>
-        <style jsx>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
+    return <PageSkeleton variant="portal" message="Loading Clinical Physician Portal..." />;
   }
 
   if (error || !data?.success) {
@@ -6082,6 +6170,32 @@ export default function DoctorPublicPortalClient({
 
             {/* Consolidated Header Actions (Clean Physician Command Center - Right Aligned GCP Standard) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginLeft: 'auto', justifyContent: 'flex-end' }}>
+              {/* Clinic Desk Privacy Mode Toggle (Masks patient names during in-room screen sharing) */}
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setClinicDeskMode((v) => !v);
+                }}
+                style={{
+                  height: '34px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
+                  border: clinicDeskMode ? '1.5px solid #0d9488' : '1px solid #dadce0',
+                  background: clinicDeskMode ? '#f0fdfa' : '#ffffff',
+                  color: clinicDeskMode ? '#0f766e' : '#475569',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                }}
+                title={isEs ? 'Oculta nombres de pacientes al compartir pantalla en consulta' : 'Masks patient names while sharing screen in consultation'}
+              >
+                <Lock size={13} />
+                <span>{clinicDeskMode ? (isEs ? 'Modo Consulta ON' : 'Desk Privacy ON') : (isEs ? 'Modo Consulta' : 'Desk Privacy')}</span>
+              </button>
               {/* Notifications Icon & Flyout Dropdown (Pending Clinical Actions) */}
               <div style={{ position: 'relative' }} ref={notifMenuRef}>
                 <button
@@ -6379,6 +6493,16 @@ export default function DoctorPublicPortalClient({
           {/* ── View 1: Practice Overview (Adaptive for Zero-Rx vs Active Prescribers) ─ */}
           {activeAnchor === 'overview' && (
             <div id="overview" style={{ marginBottom: '24px' }}>
+              <DoctorTodayFocusBar
+                isEs={isEs}
+                doctorName={isAuthorizedViewer ? (doctor?.name || '') : ''}
+                pendingCount={filteredTasks.length}
+                refillsDueCount={allPrescriptions.filter((r) => Boolean(r.refillAlertDate || Number(r.refillCycle || 1) > 1)).length}
+                activeCount={allPrescriptions.length}
+                onOpenPending={() => handleSidebarNavigate(filteredTasks.length > 0 ? 'tasks' : 'prescriptions')}
+                onOpenPrescriptions={() => handleSidebarNavigate('prescriptions')}
+                onNewPrescription={handleOpenNewPrescriptionIntake}
+              />
               {/* 1. Prominent Global Search Bar First (Golden Rule #7) */}
               <div style={{ marginBottom: '16px' }}>
                 <GlobalSearchBar
@@ -7864,12 +7988,15 @@ export default function DoctorPublicPortalClient({
 
           {/* ── View 3.4: DNA & Genomic Analysis (CE-IVD Microarrays & qPCR) ── */}
           {activeAnchor === 'dna_analysis' && (
-            <DoctorDnaAnalysisTab
-              dnaResults={dnaResults}
-              slug={slug}
-              handleRefresh={handleRefresh}
-              isSwitchingDoctor={isSwitchingDoctor}
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <DoctorDnaAnalysisTab
+                dnaResults={dnaResults}
+                slug={slug}
+                handleRefresh={handleRefresh}
+                isSwitchingDoctor={isSwitchingDoctor}
+              />
+              <GenomicsExplainerVideoCard showAllTabs={true} lang={lang} />
+            </div>
           )}
 
           {/* ── View 3.5: Blood & Capillary DBS Diagnostic Lab Results ── */}
@@ -7974,40 +8101,6 @@ export default function DoctorPublicPortalClient({
         </main>
       </div>
 
-      {/* ── Universal Public Sticky Action Bar (Only visible for unauthenticated public visitors; hidden when doctor is logged in) ── */}
-      {!isAuthorizedViewer && (
-        <PublicStickyActionBar
-          compactMobile={true}
-          overflowMobile={true}
-          title={doctor?.name || `Doctor ${opaqueCode}`}
-          subtitle={
-            `${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${doctor?.specialty || (lang === 'es' ? 'Medicina Regenerativa y Longevidad' : 'Regenerative & Precision Medicine')}`
-          }
-          badge={
-            lang === 'es' ? 'MÉDICO VERIFICADO' : 'VERIFIED PHYSICIAN'
-          }
-          badgeType="protocol"
-          inquireLabel={
-            lang === 'es' ? 'Enviar Receta a este Doctor ➔' : 'Submit Rx to this Doctor ➔'
-          }
-          onInquire={() => {
-            window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
-          }}
-          showClinicalAI={true}
-          aiCategory="Doctor Practice"
-          aiContextQuery={
-            lang === 'es'
-              ? `¿Qué áreas de especialidad, tratamientos y protocolos médicos ofrece la consulta del Dr/a. ${doctor?.name || 'este especialista'}?`
-              : `What medical specialties, treatments, and clinical protocols does ${doctor?.name || 'this specialist'} provide?`
-          }
-          onOpenClinicalAI={() => {
-            triggerHaptic('selection');
-            setIsAtlasAiOpen(true);
-          }}
-          lang={lang}
-        />
-      )}
-
       {/* ── Google Cloud Console Standard Unified Footer (100% Full-Width) ── */}
       <PublicUnifiedFooter lang={lang || 'en'} minimal={isAuthorizedViewer} />
 
@@ -8104,6 +8197,16 @@ export default function DoctorPublicPortalClient({
               const target = mobileActionRx;
               setMobileActionRx(null);
               handleReprescribeFormula(target);
+            }
+          },
+          {
+            label: isEs ? 'Etiquetas / Refill (/labels)' : 'Label Studio / Refill (/labels)',
+            icon: Tag,
+            onClick: () => {
+              const raw = mobileActionRx.code || mobileActionRx.prescriptionNumber || mobileActionRx.id;
+              const code = sanitizePrescriptionCode(raw, mobileActionRx.patientName);
+              window.open(`/labels?rx=${encodeURIComponent(code)}`, '_blank', 'noopener,noreferrer');
+              setMobileActionRx(null);
             }
           },
           ...((isAdmin || activeRole === 'admin') ? [{

@@ -785,8 +785,8 @@ export default function PrescriptionDetailSidebar({
             flexDirection: 'column',
             gap: '8px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
                 <div style={{
                   width: 24,
                   height: 24,
@@ -800,7 +800,7 @@ export default function PrescriptionDetailSidebar({
                 }}>
                   <FileText size={13} />
                 </div>
-                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#202124' }}>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#202124', whiteSpace: 'nowrap' }}>
                   {isEs ? 'Cotización Magistral' : 'Compounding Quote'}
                 </div>
               </div>
@@ -811,11 +811,35 @@ export default function PrescriptionDetailSidebar({
                 borderRadius: '10px',
                 background: '#eff6ff',
                 color: '#1d4ed8',
-                border: '1px solid #bfdbfe'
+                border: '1px solid #bfdbfe',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}>
                 {isEs ? 'Bajo Demanda' : 'On-Demand'}
               </span>
             </div>
+
+            <Link
+              href={`/labels?rx=${encodeURIComponent(prescriptionCode)}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '5px',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#1d4ed8',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                textDecoration: 'none'
+              }}
+              title={isEs ? 'Abrir en Prescriptions & Label Studio (Etiquetas / Refill)' : 'Open in Prescriptions & Label Studio (Labels / Refill)'}
+            >
+              <span>{isEs ? 'Abrir en Label Studio' : 'Open Label Studio'}</span>
+              <ExternalLink size={11} />
+            </Link>
 
             <div style={{ fontSize: '0.70rem', color: '#5f6368', lineHeight: 1.35 }}>
               {isEs 

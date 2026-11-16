@@ -1,32 +1,31 @@
 import React from 'react';
 import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
 import ColwayPriceListClient from './ColwayPriceListClient';
+import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export async function generateMetadata() {
+export async function generateMetadata({ searchParams }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
-  const title = 'Colway Medical & Cellular Derma • Official UAE Wholesale Price Schedule';
-  const description = 'Official UAE B2B price list and landed cost breakdown for Colway native biologically active collagen, trichology hair strengthening systems, and cellular cosmeceuticals.';
+  const resolvedSearch = await searchParams;
+  const lang = normalizeMetaLang(resolvedSearch);
   const ogImageUrl = `${appUrl}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`;
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      url: `${appUrl}/pricing/colway`,
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }]
+  return buildBilingualMetadata({
+    lang,
+    path: '/pricing/colway',
+    siteName: 'Atlas Health Services',
+    images: [{ url: ogImageUrl, width: 1200, height: 630, alt: 'Colway Medical & Cellular Derma' }],
+    en: {
+      title: 'Colway Medical & Cellular Derma • Official UAE Wholesale Price Schedule',
+      description: 'Official UAE B2B price list and landed cost breakdown for Colway native biologically active collagen, trichology hair strengthening systems, and cellular cosmeceuticals.',
     },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [ogImageUrl]
-    }
-  };
+    es: {
+      title: 'Colway Medical & Cellular Derma • Tarifa Oficial Mayorista EAU',
+      description: 'Tarifa oficial B2B y desglose de costes para colágeno nativo bioactivo Colway, sistemas capilares de tricología y cosmecéuticos celulares.',
+    },
+  });
 }
 
 const FALLBACK_COLWAY_PRODUCTS = [
@@ -170,12 +169,16 @@ const FALLBACK_COLWAY_PRODUCTS = [
   }
 ];
 
-export default async function ColwayPricingPage() {
+export default async function ColwayPricingPage({ searchParams }) {
+  const resolvedSearch = searchParams ? await searchParams : {};
+  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || '').toUpperCase();
+  const initialCurrency = ['AED', 'USD', 'EUR'].includes(rawCur) ? rawCur : 'AED';
+
   const standaloneProducts = await fetchBrandPricingProductsAction({
     brand: 'colway',
     fallbackProducts: FALLBACK_COLWAY_PRODUCTS,
     excludeCombos: true,
   });
 
-  return <ColwayPriceListClient initialProducts={standaloneProducts} />;
+  return <ColwayPriceListClient initialProducts={standaloneProducts} initialCurrency={initialCurrency} />;
 }

@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
-import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import DataTable from '@/components/ui/DataTable';
@@ -21,6 +20,27 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
   };
 
   const handlePrint = () => window.print();
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'batch_verification',
+        name: verification?.productName || `Batch ${code}`,
+        batchNumber: verification?.batchNumber || code,
+      },
+      bottomBar: {
+        summaryTitle: verification?.productName || `Batch ${code}`,
+        summarySubtitle: `Lot: ${verification?.batchNumber || code} • Purity: ${verification?.purity || '≥99.0%'} • EU GMP Verified`,
+        badge: 'Batch Authenticity',
+        atlasAiLabel: 'Ask Atlas AI',
+        primaryAction: {
+          label: 'Print Official CoA',
+          onClick: handlePrint,
+        },
+      },
+    },
+    [code, verification?.productName, verification?.batchNumber, verification?.purity]
+  );
 
   return (
     <div style={{
@@ -258,43 +278,6 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Persistent Bottom Action Bar (GCP Standard) */}
-      <div className="verify-no-print" style={{ width: '100%' }}>
-        <PublicStickyActionBar
-          title={verification?.productName || `Batch ${code}`}
-          subtitle={`Lot: ${verification?.batchNumber || code} • Purity: ${verification?.purity || '≥99.0%'} • EU GMP Verified`}
-          badge="Batch Authenticity"
-          badgeType="protocol"
-          inquireLabel="Print Official CoA"
-          onInquire={handlePrint}
-          showClinicalAI={true}
-          aiCategory="Batch CoA Verification"
-          aiContextQuery={`Explain the analytical Certificate of Analysis (CoA), HPLC chromatography purity (${verification?.purity || '≥99%'}), and endotoxin test standards for ${verification?.productName || 'this lot'} (Lot: ${verification?.batchNumber || code}).`}
-          extraActions={
-            verification?.productSlug ? (
-              <Link
-                href={`/p/${verification.productSlug}`}
-                className="public-sticky-action-bar__sections-btn"
-                style={{ textDecoration: 'none' }}
-              >
-                <span>View Product</span>
-              </Link>
-            ) : null
-          }
-          lang="en"
-        />
-        <PublicAtlasAIDrawer
-          contextType="product"
-          contextAnchor={{
-            name: verification?.productName || code,
-            batch: verification?.batchNumber || code,
-            purity: verification?.purity
-          }}
-          hideFloatingTrigger={true}
-          lang="en"
-        />
       </div>
       </div>
 

@@ -2,6 +2,7 @@
 
 /* eslint-disable no-undef, no-unused-vars */
 import React, { useMemo, useState, useCallback } from 'react';
+import DataTable from '@/components/ui/DataTable';
 
 
 
@@ -1477,63 +1478,73 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
             </div>
 
             <div className={`pse-procurement-body${procurementOpen ? ' pse-procurement-body--open' : ''}`}>
-              <table className="gcp-table">
-                <thead>
-                  <tr>
-                    <th>Compound</th>
-                    <th>Vials</th>
-                    <th>BAC Water</th>
-                    <th>Unit $</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {manifest.compounds.map((c) => (
-                    <tr key={c.key}>
-                      <td>
-                        <div className="pse-pt-name">{c.label}</div>
+              <DataTable
+                pagination={false}
+                enableAskAtlas={false}
+                columns={[
+                  {
+                    key: 'label',
+                    label: 'Compound',
+                    render: (val, c) => (
+                      <div>
+                        <div className="pse-pt-name">{val}</div>
                         {c.vialSizeMg > 0 && (
                           <div className="pse-pt-meta">{c.vialSizeMg} mg/vial · {c.dosingUnit}</div>
                         )}
-                      </td>
-                      <td className="pse-pt-vials">
-                        {c.totalVials}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'totalVials',
+                    label: 'Vials',
+                    render: (val, c) => (
+                      <div className="pse-pt-vials">
+                        {val}
                         <VialExplainer compound={{
                           ...c,
                           vialSize: c.vialSizeMg,
                           unit: c.dosingUnit,
-                          vialsNeeded: c.totalVials,
-                          // Placeholder average weekly dose if not present in manifest
-                          // In manifest we don't have per-week detail, but we can pass it
-                          // if we enrich the manifest. For now we use what's there.
+                          vialsNeeded: val,
                           totalWeeks: enrichedPhases.reduce((sum, p) => sum + p.durationWeeks, 0)
                         }} />
-                      </td>
-                      <td>
-                        {c.totalBacWaterMl > 0 ? (
-                          <span className="pse-pt-water">{c.totalBacWaterMl} mL</span>
-                        ) : (
-                          <span className="pse-pt-water pse-pt-water--none">—</span>
-                        )}
-                      </td>
-                      <td>
-                        {c.unitPrice > 0 ? (
-                          <span className="pse-pt-unit">${c.unitPrice.toFixed(2)}</span>
-                        ) : (
-                          <span className="pse-pt-total pse-pt-total--none">—</span>
-                        )}
-                      </td>
-                      <td>
-                        {c.lineTotal > 0 ? (
-                          <span className="pse-pt-total">${c.lineTotal.toFixed(0)}</span>
-                        ) : (
-                          <span className="pse-pt-total pse-pt-total--none">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'totalBacWaterMl',
+                    label: 'BAC Water',
+                    render: (val) =>
+                      val > 0 ? (
+                        <span className="pse-pt-water">{val} mL</span>
+                      ) : (
+                        <span className="pse-pt-water pse-pt-water--none">—</span>
+                      ),
+                  },
+                  {
+                    key: 'unitPrice',
+                    label: 'Unit $',
+                    align: 'right',
+                    render: (val) =>
+                      val > 0 ? (
+                        <span className="pse-pt-unit atlas-num">${val.toFixed(2)}</span>
+                      ) : (
+                        <span className="pse-pt-total pse-pt-total--none">—</span>
+                      ),
+                  },
+                  {
+                    key: 'lineTotal',
+                    label: 'Total',
+                    align: 'right',
+                    render: (val) =>
+                      val > 0 ? (
+                        <span className="pse-pt-total atlas-num">${val.toFixed(0)}</span>
+                      ) : (
+                        <span className="pse-pt-total pse-pt-total--none">—</span>
+                      ),
+                  },
+                ]}
+                data={manifest.compounds.map((c) => ({ id: c.key, ...c }))}
+              />
 
               {/* Footer: 3-column clinical receipt */}
               <div className="pse-procurement-footer-receipt">
@@ -1602,20 +1613,16 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
 
               {/* Accordion body */}
               <div className={`pse-phase-body${isOpen ? ' pse-phase-body--open' : ''}`}>
-                <table className="gcp-table">
-                  <thead>
-                    <tr>
-                      <th>Compound</th>
-                      <th style={{ textAlign: 'center' }}>Vials</th>
-                      <th style={{ textAlign: 'right' }}>Unit Price</th>
-                      <th style={{ textAlign: 'right' }}>Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ph.compounds.map((item) => (
-                      <tr key={item.key}>
-                        <td>
-                          <div className="pse-compound-name">{item.label}</div>
+                <DataTable
+                  pagination={false}
+                  enableAskAtlas={false}
+                  columns={[
+                    {
+                      key: 'label',
+                      label: 'Compound',
+                      render: (val, item) => (
+                        <div>
+                          <div className="pse-compound-name">{val}</div>
                           <div className="pse-compound-meta">
                             {item.doseAmount > 0 ? (
                               <>
@@ -1627,27 +1634,42 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
                             ) : item.intensity ? (
                               <>{item.intensity.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</>
                             ) : null}
-                            {/* Frequency — always visible */}
                             {item.doseAmount > 0 || item.intensity ? ' · ' : ''}
                             <span style={{ whiteSpace: 'nowrap' }}>{item.dosingPerWeek}×/wk</span>
                           </div>
-                        </td>
-                        <td className="pse-vial-count">
-                          {item.vialsNeeded}
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'vialsNeeded',
+                      label: 'Vials',
+                      align: 'center',
+                      render: (val, item) => (
+                        <div className="pse-vial-count">
+                          {val}
                           <VialExplainer compound={item} />
-                        </td>
-                        <td className="pse-unit-price">
-                          {item.unitPrice > 0 ? `$${item.unitPrice.toFixed(2)}` : <span className="pse-price-dash">—</span>}
-                        </td>
-                        <td className="pse-subtotal">
-                          {item.unitPrice > 0
-                            ? `$${item.lineTotal.toFixed(0)}`
-                            : <span className="pse-price-dash">—</span>}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'unitPrice',
+                      label: 'Unit Price',
+                      align: 'right',
+                      render: (val) =>
+                        val > 0 ? <span className="pse-unit-price atlas-num">${val.toFixed(2)}</span> : <span className="pse-price-dash">—</span>,
+                    },
+                    {
+                      key: 'lineTotal',
+                      label: 'Subtotal',
+                      align: 'right',
+                      render: (val, item) =>
+                        item.unitPrice > 0
+                          ? <span className="pse-subtotal atlas-num">${val.toFixed(0)}</span>
+                          : <span className="pse-price-dash">—</span>,
+                    },
+                  ]}
+                  data={ph.compounds.map((item) => ({ id: item.key, ...item }))}
+                />
 
                 {ph.phaseTotal > 0 && (
                   <div className="pse-phase-subtotal">

@@ -13,8 +13,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-ser
  * Metadata must NOT expose doctor name, clinic name, or any medical PII to public crawlers.
  * Strictly blocks search engine indexing with noindex, nofollow, noarchive.
  */
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const { slug } = await params;
+  const resolvedSearch = await searchParams;
+  const lang = String(resolvedSearch?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const isEs = lang === 'es';
   const cleanSlug = decodeURIComponent(slug || '').trim().toLowerCase();
 
   let canonicalSlug = cleanSlug;
@@ -28,8 +31,12 @@ export async function generateMetadata({ params }) {
     console.warn('Doctor metadata fetch error', e);
   }
 
-  const shareTitle = 'Clinical Practice Portal | Atlas Health Services';
-  const shareDesc = 'Secure, authenticated clinical dispensary & medical prescription management portal. Authorized medical practitioners can sign in to view dossiers.';
+  const shareTitle = isEs
+    ? 'Portal Clínico Médico | Atlas Health Services'
+    : 'Clinical Practice Portal | Atlas Health Services';
+  const shareDesc = isEs
+    ? 'Portal clínico seguro y autenticado de dispensación y gestión de prescripciones médicas. Los facultativos autorizados pueden iniciar sesión para consultar expedientes.'
+    : 'Secure, authenticated clinical dispensary & medical prescription management portal. Authorized medical practitioners can sign in to view dossiers.';
   const pageUrl = `${BASE_URL}/dr/${canonicalSlug}`;
 
   return {
@@ -55,8 +62,8 @@ export async function generateMetadata({ params }) {
       title: shareTitle,
       description: shareDesc,
       url: pageUrl,
-      siteName: 'Atlas Health Services · Clinical Practice Portal',
-      locale: 'en_US',
+      siteName: isEs ? 'Atlas Health Services · Portal Clínico Médico' : 'Atlas Health Services · Clinical Practice Portal',
+      locale: isEs ? 'es_ES' : 'en_US',
       type: 'website',
       images: [
         {

@@ -119,21 +119,28 @@ async function getRawApiProduct(slug) {
   return safe;
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
+  const lang = String(resolvedSearch?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const isEs = lang === 'es';
   const slug = resolvedParams?.slug;
   const product = await getRawApiProduct(slug);
 
   if (!product) {
     return {
-      title: 'Active Pharmaceutical Ingredients (API) | Atlas Health B2B',
+      title: isEs ? 'Principios Activos Farmacéuticos (API) | Atlas Health B2B' : 'Active Pharmaceutical Ingredients (API) | Atlas Health B2B',
       robots: { index: false, follow: true }
     };
   }
 
-  const cleanName = product.canonicalName || product.name || 'Raw Active Ingredient';
-  const pageTitle = `${cleanName} (Bulk API & Raw Material) | Atlas Health Solutions`;
-  const pageDesc = `Pharmaceutical-grade ${cleanName} active raw material (API) for licensed compounding pharmacies and CDMO manufacturing. High-purity bulk powder with verified CoA.`;
+  const cleanName = product.canonicalName || product.name || (isEs ? 'Materia Prima Activa' : 'Raw Active Ingredient');
+  const pageTitle = isEs
+    ? `${cleanName} (API a Granel y Materia Prima) | Atlas Health Solutions`
+    : `${cleanName} (Bulk API & Raw Material) | Atlas Health Solutions`;
+  const pageDesc = isEs
+    ? `Materia prima activa de grado farmacéutico ${cleanName} (API) para farmacias magistrales autorizadas y fabricación CDMO. Polvo a granel de alta pureza con CoA verificado.`
+    : `Pharmaceutical-grade ${cleanName} active raw material (API) for licensed compounding pharmacies and CDMO manufacturing. High-purity bulk powder with verified CoA.`;
   const canonicalUrl = `${BASE_URL}/raw/${product.canonicalKey || slug}`;
 
   return {
@@ -146,7 +153,8 @@ export async function generateMetadata({ params }) {
       title: pageTitle,
       description: pageDesc,
       url: canonicalUrl,
-      siteName: 'Atlas Health Solutions — Active Pharmaceutical Ingredients',
+      siteName: isEs ? 'Atlas Health Solutions — Principios Activos Farmacéuticos' : 'Atlas Health Solutions — Active Pharmaceutical Ingredients',
+      locale: isEs ? 'es_ES' : 'en_US',
       type: 'article',
     },
     twitter: {

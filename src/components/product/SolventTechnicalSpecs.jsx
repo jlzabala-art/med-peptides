@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import DataTable from '@/components/ui/DataTable';
 import { 
   Droplets, ShieldCheck, Clock, AlertTriangle, 
   FlaskConical, CheckCircle2, Info, Thermometer,
@@ -345,35 +346,43 @@ export default function SolventTechnicalSpecs({ product, lang = 'en' }) {
           {isEs ? 'Tabla Rápida de Diluciones Habituales para el Compendio Clínico' : 'Standard Reconstitution Dilution Ratios for Clinical Compendium'}
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.80rem' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
-                <th style={{ padding: '0.6rem 1rem' }}>{isEs ? 'Vial de Péptido' : 'Peptide Vial API'}</th>
-                <th style={{ padding: '0.6rem 1rem' }}>{isEs ? 'Volumen BAC' : 'BAC Diluent'}</th>
-                <th style={{ padding: '0.6rem 1rem' }}>{isEs ? 'Concentración' : 'Concentration'}</th>
-                <th style={{ padding: '0.6rem 1rem' }}>{isEs ? 'Factor Jeringa U-100' : 'U-100 Draw Rate'}</th>
-                <th style={{ padding: '0.6rem 1rem' }}>{isEs ? 'Ejemplos en el Compendio' : 'Compendium Examples'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { vial: '5 mg', bac: '2.0 mL', conc: '2.5 mg/mL', rate: '25 mcg / UI', ex: 'BPC-157, TB-500, Epithalon' },
-                { vial: '10 mg', bac: '2.0 mL', conc: '5.0 mg/mL', rate: '50 mcg / UI', ex: 'Retatrutide, MOTS-c, GHK-Cu' },
-                { vial: '15 mg', bac: '3.0 mL', conc: '5.0 mg/mL', rate: '50 mcg / UI', ex: 'Tirzepatide High-Dose, GLP-1' },
-                { vial: '30 mg', bac: '3.0 mL', conc: '10.0 mg/mL', rate: '100 mcg / UI', ex: 'Semaglutide Multi-Week, Ipamorelin' }
-              ].map((row, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '0.6rem 1rem', fontWeight: 800, color: '#0f172a' }}>{row.vial}</td>
-                  <td style={{ padding: '0.6rem 1rem', color: '#0284c7', fontWeight: 700 }}>{row.bac}</td>
-                  <td style={{ padding: '0.6rem 1rem', fontWeight: 700, color: '#0d9488' }}>{row.conc}</td>
-                  <td style={{ padding: '0.6rem 1rem', color: '#475569' }}>{row.rate}</td>
-                  <td style={{ padding: '0.6rem 1rem', color: '#64748b', fontStyle: 'italic' }}>{row.ex}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          pagination={false}
+          enableAskAtlas={false}
+          columns={[
+            {
+              key: 'vial',
+              label: isEs ? 'Vial de Péptido' : 'Peptide Vial API',
+              render: (val) => <span style={{ fontWeight: 800, color: '#0f172a' }}>{val}</span>,
+            },
+            {
+              key: 'bac',
+              label: isEs ? 'Volumen BAC' : 'BAC Diluent',
+              render: (val) => <span style={{ color: '#0284c7', fontWeight: 700 }}>{val}</span>,
+            },
+            {
+              key: 'conc',
+              label: isEs ? 'Concentración' : 'Concentration',
+              render: (val) => <span style={{ fontWeight: 700, color: '#0d9488' }}>{val}</span>,
+            },
+            {
+              key: 'rate',
+              label: isEs ? 'Factor Jeringa U-100' : 'U-100 Draw Rate',
+              render: (val) => <span style={{ color: '#475569' }}>{val}</span>,
+            },
+            {
+              key: 'ex',
+              label: isEs ? 'Ejemplos en el Compendio' : 'Compendium Examples',
+              render: (val) => <span style={{ color: '#64748b', fontStyle: 'italic' }}>{val}</span>,
+            },
+          ]}
+          data={[
+            { id: '5mg', vial: '5 mg', bac: '2.0 mL', conc: '2.5 mg/mL', rate: '25 mcg / UI', ex: 'BPC-157, TB-500, Epithalon' },
+            { id: '10mg', vial: '10 mg', bac: '2.0 mL', conc: '5.0 mg/mL', rate: '50 mcg / UI', ex: 'Retatrutide, MOTS-c, GHK-Cu' },
+            { id: '15mg', vial: '15 mg', bac: '3.0 mL', conc: '5.0 mg/mL', rate: '50 mcg / UI', ex: 'Tirzepatide High-Dose, GLP-1' },
+            { id: '30mg', vial: '30 mg', bac: '3.0 mL', conc: '10.0 mg/mL', rate: '100 mcg / UI', ex: 'Semaglutide Multi-Week, Ipamorelin' }
+          ]}
+        />
       </div>
     </div>
   );

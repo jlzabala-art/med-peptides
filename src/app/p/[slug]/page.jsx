@@ -364,6 +364,9 @@ export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
   const slug = resolvedParams?.slug;
+  const lang = String(resolvedSearchParams?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const isEs = lang === 'es';
+  const viewMode = String(resolvedSearchParams?.view || '').toLowerCase() === 'patient' ? 'patient' : 'doctor';
   const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null;
   const formatParam = resolvedSearchParams?.format || null;
   const doseParam = resolvedSearchParams?.dose || resolvedSearchParams?.strength || null;
@@ -371,8 +374,8 @@ export async function generateMetadata({ params, searchParams }) {
 
   if (!product) {
     return {
-      title: 'Pharmaceutical Monograph | Atlas Services',
-      description: 'Clinical and pharmaceutical peptide monographs.',
+      title: isEs ? 'Monografía Farmacéutica | Atlas Services' : 'Pharmaceutical Monograph | Atlas Services',
+      description: isEs ? 'Monografías clínicas y farmacéuticas de péptidos.' : 'Clinical and pharmaceutical peptide monographs.',
     };
   }
 
@@ -425,19 +428,27 @@ export async function generateMetadata({ params, searchParams }) {
     slug.toLowerCase() === 'testosterone-enanthate-norma-250mg' ||
     slug.toLowerCase() === 'testosterone-enanthate';
 
-  const pageTitle = isNorma
+  const pageTitle = viewMode === 'patient'
+    ? (isEs ? `${name} — Guía del Paciente y Reconstitución | Atlas Health` : `${name} — Patient Guide & Reconstitution | Atlas Health`)
+    : isNorma
     ? `${name} | Norma Hellas S.A. • EU GMP Human Pharmaceuticals & TRT`
     : isTeletest
     ? `${name} | TeleTest Analytika® ISO 17025 Clinical Diagnostics`
     : isEterna
     ? 'ETERNA® DNA & Epigenetic Longevity Test | ETERNA DX · Fagron Genomics'
     : (resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — ${typeSuffix}`);
-  const pageDesc = isNorma
+  const pageDesc = viewMode === 'patient'
+    ? (isEs
+      ? `Guía clara para el paciente sobre ${name}: qué es, pasos de reconstitución, conservación y preguntas frecuentes.`
+      : `Clear patient guide for ${name}: overview, step-by-step reconstitution instructions, storage, and safety FAQ.`)
+    : isNorma
     ? 'Testosterone Enanthate/Norma® 250 mg/ml oily solution for injection (1 mL ampoule). EOF Greece MA # 45945/03-10-2008. Batch release by EVER Pharma Jena GmbH. Authoritative SmPC and clinical monograph.'
     : isTeletest
     ? (product.shortDescription || product.description || 'TeleTest Analytika® accredited clinical diagnostics: High-resolution HLA immunogenetics, heavy metal toxicology, and cellular fatty acid profiling. Generalitat de Catalunya E08750211 & ISO 17025 accredited.')
     : isEterna
-    ? 'Prueba genética y epigenética de alta resolución a partir de saliva (+700.000 SNPs). Mide edad biológica, 5 pilares de salud y sincronización con wearables (Apple, Garmin, Oura).'
+    ? (isEs
+      ? 'Prueba genética y epigenética de alta resolución a partir de saliva (+700.000 SNPs). Mide edad biológica, 5 pilares de salud y sincronización con wearables (Apple, Garmin, Oura).'
+      : 'High-resolution genetic & epigenetic longevity test from saliva (+700,000 SNPs). Measures biological age, 5 health pillars, and wearable sync (Apple, Garmin, Oura).')
     : resolvedSocial.description;
   const rawExplicitImage = product.image || product.image_url || product.imageUrl || product.photo_url || null;
   const explicitProductImage = rawExplicitImage
@@ -452,9 +463,11 @@ export async function generateMetadata({ params, searchParams }) {
       : resolveSocialImage(product, formatParam));
   const isPng = previewImageUrl.toLowerCase().endsWith('.png');
   const imageType = isPng ? 'image/png' : 'image/jpeg';
-  const canonicalUrl = isCosmetic || isAesthetic || isEterna || isTeletest || product.isSingleSupplierLocked
-    ? `${BASE_URL}/p/${slug}`
-    : `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`;
+  const canonicalUrl = viewMode === 'patient'
+    ? `${BASE_URL}/p/${slug}?view=patient${isEs ? '&lang=es' : ''}`
+    : (isCosmetic || isAesthetic || isEterna || isTeletest || product.isSingleSupplierLocked
+        ? `${BASE_URL}/p/${slug}${isEs ? '?lang=es' : ''}`
+        : `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`);
 
   return {
     title: pageTitle,
@@ -466,13 +479,15 @@ export async function generateMetadata({ params, searchParams }) {
       title: pageTitle,
       description: pageDesc,
       url: canonicalUrl,
-      siteName: isTeletest
+      siteName: viewMode === 'patient'
+        ? 'Atlas Health · Patient Education'
+        : isTeletest
         ? 'TeleTest Analytika® · ISO 17025 Clinical Reference Lab'
         : isEterna
         ? 'ETERNA Diagnostics · Fagron Genomics'
         : isCosmetic
         ? ((product.brand || '').toLowerCase().includes('mcg') ? 'MCG Cosmetics' : 'Colway Clinical Care')
-        : 'Atlas Health Services',
+        : 'Atlas Health Services · Clinical Reference',
       images: [
         {
           url: previewImageUrl,
@@ -482,6 +497,7 @@ export async function generateMetadata({ params, searchParams }) {
           alt: pageTitle,
         },
       ],
+      locale: isEs ? 'es_ES' : 'en_US',
       type: 'article',
     },
     twitter: {
@@ -653,7 +669,8 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null;
   const initialFormat = resolvedSearchParams?.format || resolvedSearchParams?.presentation || null;
   const initialStrength = resolvedSearchParams?.dose || resolvedSearchParams?.strength || null;
-  const initialLang = resolvedSearchParams?.lang || null;
+  const initialLang = String(resolvedSearchParams?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const initialViewMode = String(resolvedSearchParams?.view || '').toLowerCase() === 'patient' ? 'patient' : 'doctor';
   const initialBatch = resolvedSearchParams?.batch || resolvedSearchParams?.vialCode || null;
   const initialPhase = resolvedSearchParams?.phase || null;
   const product = await getPublicProduct(slug, supplierFilter);
@@ -865,6 +882,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
         initialFormat={initialFormat}
         initialStrength={initialStrength}
         initialLang={initialLang}
+        initialViewMode={initialViewMode}
         initialBatch={initialBatch}
         initialPhase={initialPhase}
         associatedProtocols={associatedProtocols}

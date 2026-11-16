@@ -785,45 +785,45 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
                             &nbsp;Weekly Administration Pattern
                           </summary>
                           <div style={{ padding: '0.6rem 1.25rem 0.9rem', background: '#fafbff' }}>
-                            <div style={{ overflowX: 'auto' }}>
-                              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem', minWidth: 440 }}>
-                                <thead>
-                                  <tr>
-                                    <th style={{ padding: '0.35rem 0.65rem', textAlign: 'left', color: 'var(--color-text-tertiary)', fontWeight: 700, fontSize: '0.62rem', borderBottom: '1px solid #e2e8f0' }}>Compound</th>
-                                    {DAYS.map(d => (
-                                      <th key={d} style={{ padding: '0.35rem 0.4rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontWeight: 700, fontSize: '0.62rem', borderBottom: '1px solid #e2e8f0', minWidth: 36 }}>{d}</th>
-                                    ))}
-                                    <th style={{ padding: '0.35rem 0.65rem', textAlign: 'left', color: 'var(--color-text-tertiary)', fontWeight: 700, fontSize: '0.62rem', borderBottom: '1px solid #e2e8f0' }}>Timing</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {drugs.map((d, di) => {
-                                    const dl2   = d.dose_logic || {};
-                                    const freq2 = dl2.administration_frequency || d.frequency || d.frequency_of_use || 'weekly';
-                                    const active = freqToDays(freq2, dl2);
-                                    const timing = dl2.timing_hint ? dl2.timing_hint.replace(/_/g, ' ') : (d.timing || '—');
-                                    return (
-                                      <tr key={di} style={{ background: di % 2 === 0 ? 'var(--color-bg-surface)' : 'var(--color-bg-app)' }}>
-                                        <td style={{ padding: '0.4rem 0.65rem', fontWeight: 700, color: 'var(--color-primary)', whiteSpace: 'nowrap' }}>{d.product_title || d.name || 'Compound'}</td>
-                                        {DAYS.map((_, dayIdx) => {
-                                          const isOn = active.includes(dayIdx);
-                                          return (
-                                            <td key={dayIdx} style={{ padding: '0.4rem 0.4rem', textAlign: 'center' }}>
-                                              {isOn ? (
-                                                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: '#4f46e5', color: 'var(--color-bg-surface)', fontSize: '0.55rem', fontWeight: 800 }}>✓</span>
-                                              ) : (
-                                                <span style={{ display: 'inline-block', width: 20, height: 20, borderRadius: '50%', background: '#f1f5f9', border: '1px solid #e2e8f0' }} />
-                                              )}
-                                            </td>
-                                          );
-                                        })}
-                                        <td style={{ padding: '0.4rem 0.65rem', color: 'var(--color-text-secondary)', fontSize: '0.67rem', textTransform: 'capitalize' }}>{timing}</td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
+                            <DataTable
+                              pagination={false}
+                              enableAskAtlas={false}
+                              columns={[
+                                {
+                                  key: 'compound',
+                                  label: 'Compound',
+                                  render: (val) => <span style={{ fontWeight: 700, color: 'var(--color-primary)', whiteSpace: 'nowrap' }}>{val}</span>,
+                                },
+                                ...DAYS.map((dayLabel, dayIdx) => ({
+                                  key: `day_${dayIdx}`,
+                                  label: dayLabel,
+                                  align: 'center',
+                                  render: (_, row) =>
+                                    row.active.includes(dayIdx) ? (
+                                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: '#4f46e5', color: 'var(--color-bg-surface)', fontSize: '0.55rem', fontWeight: 800 }}>✓</span>
+                                    ) : (
+                                      <span style={{ display: 'inline-block', width: 20, height: 20, borderRadius: '50%', background: '#f1f5f9', border: '1px solid #e2e8f0' }} />
+                                    ),
+                                })),
+                                {
+                                  key: 'timing',
+                                  label: 'Timing',
+                                  render: (val) => <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.67rem', textTransform: 'capitalize' }}>{val}</span>,
+                                },
+                              ]}
+                              data={drugs.map((d, di) => {
+                                const dl2 = d.dose_logic || {};
+                                const freq2 = dl2.administration_frequency || d.frequency || d.frequency_of_use || 'weekly';
+                                const active = freqToDays(freq2, dl2);
+                                const timing = dl2.timing_hint ? dl2.timing_hint.replace(/_/g, ' ') : (d.timing || '—');
+                                return {
+                                  id: d.id || String(di),
+                                  compound: d.product_title || d.name || 'Compound',
+                                  active,
+                                  timing,
+                                };
+                              })}
+                            />
                           </div>
                         </details>
                       );

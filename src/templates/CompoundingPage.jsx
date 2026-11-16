@@ -20,7 +20,7 @@ import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
 import PageHeroCard from '../components/ui/PageHeroCard';
 import MetricCard from '../components/ui/MetricCard';
-import PublicStickyActionBar from '../components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitutionalInquiryDrawer';
 import { CAPSULE_BOTTLE_SIZES } from '../services/pharmapolisCostEngine';
 import CompoundingGoalWizard from '../components/compounding/CompoundingGoalWizard';
@@ -309,6 +309,31 @@ export default function CompoundingPage({
       return true;
     });
   }, [items, isSplitProtocol, activePhaseTab, splitData]);
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'compounding',
+        name: displayName,
+        activesCount: items.length,
+      },
+      bottomBar: embedded
+        ? { hidden: true }
+        : {
+            summaryTitle: displayName,
+            summarySubtitle: items.length
+              ? `${items.length} ${t.actives}${galenics ? ` · ${galenics.size.size} (${galenics.fillPct}%) · ${galenics.capsPerDay} ${t.capsDay}` : ''}`
+              : t.title,
+            badge: 'Compounding',
+            atlasAiLabel: 'Ask Atlas AI',
+            primaryAction: {
+              label: t.request,
+              onClick: handleRequest,
+            },
+          },
+    },
+    [embedded, displayName, items.length, t.actives, t.title, t.capsDay, t.request, galenics]
+  );
 
   return (
     <div className={`cmp-page atlas-page-bg ${embedded ? 'is-embedded' : ''}`}>
@@ -653,23 +678,6 @@ export default function CompoundingPage({
       />
 
       {!embedded && <PublicUnifiedFooter lang={lang} />}
-
-      {!embedded && (
-        <PublicStickyActionBar
-          title={displayName}
-          subtitle={items.length
-            ? `${items.length} ${t.actives}${galenics ? ` · ${galenics.size.size} (${galenics.fillPct}%) · ${galenics.capsPerDay} ${t.capsDay}` : ''}`
-            : t.title}
-          badge="Compounding"
-          badgeType="protocol"
-          inquireLabel={t.request}
-          onInquire={handleRequest}
-          showClinicalAI={true}
-          aiContextQuery={aiContextQuery}
-          aiCategory="compounding"
-          lang={lang}
-        />
-      )}
     </div>
   );
 }

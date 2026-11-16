@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { FileText, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
@@ -68,6 +69,35 @@ export default function PeptidesPriceListClient({
   const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
   const [isCurrencySheetOpen, setIsCurrencySheetOpen] = useState(false);
   const [isMobileKpiExpanded, setIsMobileKpiExpanded] = useState(false);
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'peptides_pricing',
+        name: initialLang === 'es' ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
+      },
+      bottomBar: {
+        summaryTitle: initialLang === 'es' ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
+        summarySubtitle: 'Atlas Health Services',
+        atlasAiLabel: initialLang === 'es' ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        onOpenAtlasAi: () => setIsAtlasAiOpen(true),
+        showSections: true,
+        sectionsLabel: initialLang === 'es' ? 'Categorías' : 'Categories',
+        onOpenSections: () => {
+          if (typeof window !== 'undefined' && window.innerWidth <= 900) {
+            setIsCategorySheetOpen(true);
+          } else {
+            setIsSidebarOpen((prev) => !prev);
+          }
+        },
+        primaryAction: {
+          label: initialLang === 'es' ? 'Vista PDF' : 'Preview PDF',
+          onClick: () => setIsPdfPreviewOpen(true),
+        },
+      },
+    },
+    [initialLang]
+  );
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
   const [groupByCategory, setGroupByCategory] = useState(true);
 

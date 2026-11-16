@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
   Upload, X, CheckCircle2, Activity, AlertCircle, ArrowLeft, Check,
   Stethoscope, Building2, Calendar, User, Pill, FlaskConical, Dna, FileText,
-  Trash2, Plus, Eye, Edit3, ChevronDown, ChevronUp, Layers, Sparkles
+  Trash2, Plus, Eye, Edit3, ChevronDown, ChevronUp, Layers, Sparkles, Search, RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { collection, doc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -13,12 +13,148 @@ import { db } from '../../../firebase';
 import { prescriptionSchema } from '../../../schemas/prescriptionSchema';
 import { resolveIngredients } from '../../../services/apiIngredientMatcher';
 import { syncPrescriptionToAlgolia, syncPatientToAlgolia } from '../../../services/algoliaSyncService';
+import { searchAlgoliaFederated } from '../../../services/algoliaSearch';
 import AIContextBadge from '../../../components/ui/AIContextBadge';
 import { processPrescriptionZohoOnImport } from '../../../actions/zohoAutoIngestMatcher';
 import ClinicPicker from '../../../components/admin/patients/ClinicPicker';
 import PhysicianPicker from '../../../components/admin/patients/PhysicianPicker';
 import PharmapolisLabelSvg from '../../../components/prescription/PharmapolisLabelSvg';
 import AlgoliaIngredientSearchInput from './AlgoliaIngredientSearchInput';
+
+function detectTestKind(obj = {}, fallbackTestType = '') {
+  const corpus = [
+    obj?.protocolNumber,
+    obj?.boxId,
+    obj?.code,
+    obj?.fileNumber,
+    obj?.sourceContext,
+    obj?.treatmentType,
+    obj?.title,
+    obj?.testType,
+    fallbackTestType,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toUpperCase();
+
+  if (/AATRI|TRICHO/.test(corpus)) return 'TrichoTest';
+  if (/AATEL|TELO/.test(corpus)) return 'TeloTest';
+  if (/AAACN|ACNE/.test(corpus)) return 'AcneTest';
+  if (/24GEN|NUTRIGEN/.test(corpus)) return 'NutriGenomics';
+  if (/BLOODO|NAD/.test(corpus)) return 'Biomarker Lab';
+  return 'Compounded Rx';
+}
+
+function estimatePass1Preflight(file) {
+  const name = String(file?.name || '').toLowerCase();
+  const sizeKb = Math.max(1, Math.round((file?.size || 0) / 1024));
+  let testType = 'Compounded Prescription';
+  let estimatedSeconds = 8;
+
+  if (/tricho|aatri/.test(name)) {
+    testType = 'Fagron TrichoTest';
+    estimatedSeconds = 14;
+  } else if (/telo|aatel/.test(name)) {
+    testType = 'Fagron TeloTest';
+    estimatedSeconds = 14;
+  } else if (/acne|aaacn/.test(name)) {
+    testType = 'Fagron AcneTest';
+    estimatedSeconds = 14;
+  } else if (/24gen|dna|nutri/.test(name)) {
+    testType = '24Genomics Report';
+    estimatedSeconds = 18;
+  } else if (sizeKb > 1500) {
+    testType = 'Multi-Page Clinical Dossier';
+    estimatedSeconds = 15;
+  }
+
+  return { testType, estimatedSeconds, sizeKb };
+}
+
+function formatShortDate(raw) {
+  if (!raw) return '—';
+  if (typeof raw === 'object') {
+    const sec = raw.seconds ?? raw._seconds;
+    if (typeof sec === 'number') {
+      return new Date(sec * 1000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+  }
+  if (typeof raw === 'number') {
+    const ms = raw < 1e12 ? raw * 1000 : raw;
+    return new Date(ms).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return String(raw).slice(0, 10);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function classifyDuplicateMatch(existingRx, currentData, fallbackTestType = '') {
+  if (!existingRx || !currentData) return 'none';
+  const existingCode = String(existingRx.code || existingRx.protocolNumber || existingRx.fileNumber || existingRx.id || '').trim().toUpperCase();
+  const currentCode = String(currentData.protocolNumber || currentData.boxId || currentData.fileNumber || '').trim().toUpperCase();
+  const existingKind = detectTestKind(existingRx);
+  const currentKind = detectTestKind(currentData, fallbackTestType);
+
+  const sameCode = Boolean(existingCode && currentCode && existingCode === currentCode);
+  const sameKind = existingKind === currentKind;
+
+  const existingDateRaw = existingRx.mfgDate || existingRx.manufacturingDate || existingRx.reportDate || existingRx.date || existingRx.createdAt;
+  const currentDateRaw = currentData.mfgDate || currentData.manufacturingDate || currentData.reportDate || currentData.date;
+  const t1 = existingDateRaw ? new Date(existingDateRaw).getTime() : NaN;
+  const t2 = currentDateRaw ? new Date(currentDateRaw).getTime() : NaN;
+  const daysApart = !Number.isNaN(t1) && !Number.isNaN(t2) ? Math.abs(t2 - t1) / (1000 * 60 * 60 * 24) : null;
+
+  if (sameCode && sameKind) {
+    if (daysApart === null || daysApart <= 7) return 'exact_duplicate';
+    return 'refill_candidate';
+  }
+  if (sameKind) {
+    if (daysApart !== null && daysApart <= 7) return 'exact_duplicate';
+    return 'refill_candidate';
+  }
+  return 'different_test';
+}
+
+function validateCompoundingReadiness(data) {
+  if (!data) return { isComplete: true, missingItems: [] };
+  const missing = [];
+  if (!String(data.patientName || '').trim()) {
+    missing.push({ key: 'patient', label: 'Patient Name' });
+  }
+  if (!String(data.doctorName || '').trim()) {
+    missing.push({ key: 'doctor', label: 'Prescribing Physician' });
+  }
+  if (!String(data.mfgDate || data.date || '').trim()) {
+    missing.push({ key: 'date', label: 'Issue / Report Date' });
+  }
+  const blocks = Array.isArray(data.blocks) ? data.blocks : [];
+  if (blocks.length === 0) {
+    missing.push({ key: 'formulas', label: 'At least 1 Formula' });
+  } else {
+    blocks.forEach((blk, idx) => {
+      const fNum = idx + 1;
+      if (!String(blk?.dosageForm || '').trim()) {
+        missing.push({ key: `form-${idx}`, label: `Formula ${fNum}: Dosage Form` });
+      }
+      if (!String(blk?.volume || '').trim()) {
+        missing.push({ key: `vol-${idx}`, label: `Formula ${fNum}: Total Volume / Qty` });
+      }
+      if (!String(blk?.directions || blk?.posology || '').trim()) {
+        missing.push({ key: `dir-${idx}`, label: `Formula ${fNum}: Posology / Directions` });
+      }
+      const apis = Array.isArray(blk?.apis) ? blk.apis : [];
+      if (apis.length === 0) {
+        missing.push({ key: `apis-${idx}`, label: `Formula ${fNum}: Active Ingredients` });
+      } else {
+        const missingConc = apis.some((a) => !String(a?.name || '').trim() || !String(a?.dose || a?.strength || a?.concentration || '').trim());
+        if (missingConc) {
+          missing.push({ key: `conc-${idx}`, label: `Formula ${fNum}: API Name & Concentration` });
+        }
+      }
+    });
+  }
+  return { isComplete: missing.length === 0, missingItems: missing };
+}
 
 /**
  * ImportPrescriptionModal
@@ -49,19 +185,127 @@ export default function ImportPrescriptionModal({
   note = null
 }) {
   const [uploading, setUploading] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState(0);
+  const [preflightEstimate, setPreflightEstimate] = useState({ testType: 'Clinical Document', estimatedSeconds: 12, sizeKb: 0 });
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [reviewData, setReviewData] = useState(null);
   const [activeTab, setActiveTab] = useState('editor'); // 'editor' | 'preview'
   const [previewBlockIdx, setPreviewBlockIdx] = useState(0);
   const [expandedBlocks, setExpandedBlocks] = useState({ 0: true });
+  const [algoliaMatches, setAlgoliaMatches] = useState({ prescriptions: [], patients: [], checked: false, classification: 'none' });
+  const [importMode, setImportMode] = useState('new'); // 'new' | 'refill'
+  const [refillTargetRx, setRefillTargetRx] = useState(null);
+  const [linkedPatientId, setLinkedPatientId] = useState(null);
+  const [originalFileUrl, setOriginalFileUrl] = useState(null);
+  const [originalFileType, setOriginalFileType] = useState('');
+  const [showOriginalSplit, setShowOriginalSplit] = useState(false);
+
+  useEffect(() => {
+    if (!uploading) {
+      setLoadingPhase(0);
+      setElapsedSeconds(0);
+      return undefined;
+    }
+    const startMs = Date.now();
+    const timer = setInterval(() => {
+      const sec = Math.floor((Date.now() - startMs) / 1000);
+      setElapsedSeconds(sec);
+      if (sec < 2) setLoadingPhase(0);
+      else if (sec < Math.max(6, Math.round(preflightEstimate.estimatedSeconds * 0.6))) setLoadingPhase(1);
+      else if (sec < Math.max(9, Math.round(preflightEstimate.estimatedSeconds * 0.85))) setLoadingPhase(2);
+      else setLoadingPhase(3);
+    }, 500);
+    return () => clearInterval(timer);
+  }, [uploading, preflightEstimate.estimatedSeconds]);
+
+  // Pre-check Algolia + Firestore (read-only) when reviewData is loaded to prevent duplicate patients & detect refills
+  useEffect(() => {
+    const currentCodeRaw = String(reviewData?.protocolNumber || reviewData?.boxId || reviewData?.fileNumber || '').trim();
+    const queryStr = [reviewData?.patientName, currentCodeRaw].filter(Boolean).join(' ').trim();
+    if (!reviewData || queryStr.length < 2) {
+      setAlgoliaMatches({ prescriptions: [], patients: [], checked: false, classification: 'none' });
+      return undefined;
+    }
+    let active = true;
+    Promise.all([
+      searchAlgoliaFederated(queryStr, ['prescriptions', 'atlas_patients'], 8).catch(() => null),
+      currentCodeRaw
+        ? fetch(`/api/labels/load?code=${encodeURIComponent(currentCodeRaw)}`)
+            .then((r) => (r.ok ? r.json() : null))
+            .catch(() => null)
+        : Promise.resolve(null),
+    ])
+      .then(([res, exactLoadRes]) => {
+        if (!active) return;
+        const rxs = (res?.prescriptions || []).slice().sort((a, b) => {
+          const da = String(a.mfgDate || a.manufacturingDate || a.reportDate || a.date || a.createdAt || '9999');
+          const dbDate = String(b.mfgDate || b.manufacturingDate || b.reportDate || b.date || b.createdAt || '9999');
+          return da.localeCompare(dbDate);
+        });
+        const patients = res?.patients || [];
+        const currentKind = detectTestKind(reviewData, preflightEstimate.testType);
+        const currentCode = currentCodeRaw.toUpperCase();
+
+        // Merge exact Firestore read-only record if /api/labels/load found it
+        const firestoreRx = exactLoadRes?.rx || exactLoadRes?.prescription || null;
+        let preferredTarget =
+          firestoreRx ||
+          rxs.find((r) => String(r.code || r.protocolNumber || r.id || '').trim().toUpperCase() === currentCode) ||
+          rxs.find((r) => detectTestKind(r) === currentKind) ||
+          rxs[0] ||
+          null;
+
+        if (firestoreRx && rxs.length > 0) {
+          const algoliaMatch = rxs.find((r) => String(r.code || r.id || '').trim().toUpperCase() === currentCode) || {};
+          preferredTarget = { ...algoliaMatch, ...firestoreRx };
+        }
+
+        const classification = preferredTarget
+          ? classifyDuplicateMatch(preferredTarget, reviewData, preflightEstimate.testType)
+          : 'none';
+        setAlgoliaMatches({ prescriptions: firestoreRx ? [preferredTarget, ...rxs] : rxs, patients, checked: true, classification });
+        if (patients[0]?.objectID || patients[0]?.id) {
+          setLinkedPatientId(patients[0].objectID || patients[0].id);
+        }
+        if (preferredTarget) {
+          setRefillTargetRx(preferredTarget);
+          if (classification === 'refill_candidate') {
+            setImportMode('refill');
+          }
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [reviewData, preflightEstimate.testType]);
 
   const resetState = () => {
     setUploading(false);
+    setLoadingPhase(0);
     setIsSaving(false);
     setReviewData(null);
     setActiveTab('editor');
     setPreviewBlockIdx(0);
     setExpandedBlocks({ 0: true });
+    setAlgoliaMatches({ prescriptions: [], patients: [], checked: false });
+    setImportMode('new');
+    setRefillTargetRx(null);
+    setLinkedPatientId(null);
+    if (originalFileUrl) {
+      URL.revokeObjectURL(originalFileUrl);
+    }
+    setOriginalFileUrl(null);
+    setOriginalFileType('');
+    setShowOriginalSplit(false);
+  };
+
+  const handleRemoveBlock = (blockIdx) => {
+    setReviewData((prev) => {
+      if (!prev || !Array.isArray(prev.blocks) || prev.blocks.length <= 1) return prev;
+      const nextBlocks = prev.blocks.filter((_, idx) => idx !== blockIdx);
+      return { ...prev, blocks: nextBlocks };
+    });
+    setPreviewBlockIdx((prevIdx) => Math.max(0, prevIdx > blockIdx ? prevIdx - 1 : prevIdx));
   };
 
   const handleClose = () => {
@@ -81,8 +325,13 @@ export default function ImportPrescriptionModal({
     const file = acceptedFiles[0];
     
     try {
+      // Preserve local object URL for side-by-side original Rx verification (especially handwritten Rx)
+      if (originalFileUrl) URL.revokeObjectURL(originalFileUrl);
+      setOriginalFileUrl(URL.createObjectURL(file));
+      setOriginalFileType(file.type || '');
+      // Pass 1: Fast local preflight to detect document type & estimate duration
+      setPreflightEstimate(estimatePass1Preflight(file));
       setUploading(true);
-      toast.loading('Analyzing document with Atlas AI...', { id: 'upload-toast' });
 
       const formData = new FormData();
       formData.append('file', file);
@@ -778,6 +1027,249 @@ export default function ImportPrescriptionModal({
                 </div>
               ) : (
                 /* Top GCP Tab Strip for Prescriptions: Editor vs. Label Preview */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {(algoliaMatches.prescriptions.length > 0 || algoliaMatches.patients.length > 0) && (() => {
+                    const cls = algoliaMatches.classification || 'different_test';
+                    const isDup = cls === 'exact_duplicate';
+                    const isRefill = cls === 'refill_candidate';
+                    const isDiffTest = cls === 'different_test';
+                    const existingKind = refillTargetRx ? detectTestKind(refillTargetRx) : '—';
+                    const currentKind = detectTestKind(reviewData, preflightEstimate.testType);
+                    const existingCodeDisplay = refillTargetRx?.code || refillTargetRx?.protocolNumber || refillTargetRx?.fileNumber || refillTargetRx?.id || '—';
+                    const currentCodeDisplay = reviewData?.protocolNumber || reviewData?.boxId || reviewData?.fileNumber || 'Auto-Code';
+                    const existingUploaded = formatShortDate(refillTargetRx?.createdAt || refillTargetRx?.uploadedAt || refillTargetRx?.updatedAt);
+                    const existingReport = formatShortDate(refillTargetRx?.mfgDate || refillTargetRx?.manufacturingDate || refillTargetRx?.reportDate || refillTargetRx?.date);
+                    const currentReport = formatShortDate(reviewData?.mfgDate || reviewData?.manufacturingDate || reviewData?.reportDate || reviewData?.date);
+
+                    return (
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '10px',
+                        border: isDup ? '1px solid #fca5a5' : isRefill ? '1px solid #fde68a' : '1px solid #bfdbfe',
+                        background: isDup ? '#fef2f2' : isRefill ? '#fffbeb' : '#eff6ff',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '7px',
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                            color: isDup ? '#b91c1c' : isRefill ? '#92400e' : '#1e40af',
+                          }}
+                        >
+                          <Search size={14} />
+                          <span>
+                            {isDup
+                              ? `Possible Duplicate Upload Detected (#${refillTargetRx?.code || refillTargetRx?.id})`
+                              : isRefill
+                                ? `Prior ${existingKind} Found — Refill Candidate (#${refillTargetRx?.code || refillTargetRx?.id})`
+                                : `Patient Record Linked (${existingKind} already on file — this ${currentKind} is a different test)`}
+                          </span>
+                        </div>
+                        {algoliaMatches.prescriptions.length > 0 && !isDiffTest && (
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => setImportMode('refill')}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                border: importMode === 'refill' ? '1px solid #d97706' : '1px solid #cbd5e1',
+                                background: importMode === 'refill' ? '#d97706' : '#ffffff',
+                                color: importMode === 'refill' ? '#ffffff' : '#334155',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <RefreshCw size={12} />
+                              <span>Mark as Refill</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setImportMode('new')}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                border: importMode === 'new' ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                                background: importMode === 'new' ? '#1a73e8' : '#ffffff',
+                                color: importMode === 'new' ? '#ffffff' : '#334155',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              New Prescription
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Simple Side-by-Side Date & Test Comparison */}
+                      {refillTargetRx && (
+                        <div
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                            gap: '8px',
+                            background: 'rgba(255,255,255,0.85)',
+                            border: '1px solid rgba(148,163,184,0.3)',
+                            borderRadius: '8px',
+                            padding: '8px 10px',
+                            fontSize: '0.73rem',
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontWeight: 800, color: '#475569', textTransform: 'uppercase', fontSize: '0.66rem', marginBottom: '3px' }}>
+                              Existing on File
+                            </div>
+                            <div style={{ color: '#0f172a', fontWeight: 700 }}>
+                              #{existingCodeDisplay} · {existingKind}
+                            </div>
+                            <div style={{ color: '#64748b' }}>
+                              Uploaded: <strong>{existingUploaded}</strong> · Report Date: <strong>{existingReport}</strong>
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', fontSize: '0.66rem', marginBottom: '3px' }}>
+                              Current Upload (Not Saved Yet)
+                            </div>
+                            <div style={{ color: '#0f172a', fontWeight: 700 }}>
+                              #{currentCodeDisplay} · {currentKind}
+                            </div>
+                            <div style={{ color: '#64748b' }}>
+                              Status: <strong>Pending confirmation</strong> · Report Date: <strong>{currentReport}</strong>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    );
+                  })()}
+
+                  {/* Compounding Readiness Gate (EU GMP / USP <795> Minimum Requirements) */}
+                  {(() => {
+                    const readiness = validateCompoundingReadiness(reviewData);
+                    return (
+                      <div
+                        style={{
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          border: readiness.isComplete ? '1px solid #bbf7d0' : '1px solid #fcd34d',
+                          background: readiness.isComplete ? '#f0fdf4' : '#fffbeb',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '6px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: readiness.isComplete ? '#166534' : '#92400e' }}>
+                            {readiness.isComplete ? <CheckCircle2 size={15} color="#16a34a" /> : <AlertCircle size={15} color="#d97706" />}
+                            <span>
+                              {readiness.isComplete
+                                ? 'Compounding Readiness: 100% Complete — Ready for Pharmacy Preparation'
+                                : `Missing ${readiness.missingItems.length} Required Field${readiness.missingItems.length > 1 ? 's' : ''} for Pharmacy Compounding`}
+                            </span>
+                          </div>
+                          {originalFileUrl && (
+                            <button
+                              type="button"
+                              onClick={() => setShowOriginalSplit((v) => !v)}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                border: showOriginalSplit ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                                background: showOriginalSplit ? '#1a73e8' : '#ffffff',
+                                color: showOriginalSplit ? '#ffffff' : '#0f172a',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                              }}
+                            >
+                              <Eye size={13} />
+                              <span>{showOriginalSplit ? 'Hide Original Rx' : 'View Original Rx'}</span>
+                            </button>
+                          )}
+                        </div>
+                        {!readiness.isComplete && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.72rem', color: '#78350f' }}>
+                              Complete below (or check Original Rx for handwritten values):
+                            </span>
+                            {readiness.missingItems.map((m) => (
+                              <span
+                                key={m.key}
+                                style={{
+                                  fontSize: '0.70rem',
+                                  fontWeight: 700,
+                                  color: '#b45309',
+                                  background: '#fef3c7',
+                                  border: '1px solid #fde68a',
+                                  padding: '2px 8px',
+                                  borderRadius: '9999px',
+                                }}
+                              >
+                                {m.label}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Optional Inline Original Document Viewer (Handwritten Rx Side-by-Side Check) */}
+                  {showOriginalSplit && originalFileUrl && (
+                    <div
+                      style={{
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '10px',
+                        background: '#f8fafc',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div style={{ padding: '8px 12px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', fontWeight: 700, color: '#334155' }}>
+                        <span>Original Uploaded Document (Handwritten / Source Check)</span>
+                        <a
+                          href={originalFileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#1d4ed8', textDecoration: 'underline', fontSize: '0.72rem' }}
+                        >
+                          Open in New Tab ↗
+                        </a>
+                      </div>
+                      {originalFileType.includes('pdf') ? (
+                        <iframe
+                          src={originalFileUrl}
+                          title="Original Prescription PDF"
+                          style={{ width: '100%', height: '320px', border: 'none', background: '#ffffff' }}
+                        />
+                      ) : (
+                        <div style={{ maxHeight: '320px', overflow: 'auto', display: 'flex', justifyContent: 'center', padding: '10px', background: '#0f172a' }}>
+                          <img
+                            src={originalFileUrl}
+                            alt="Original Uploaded Prescription"
+                            style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '6px' }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -859,6 +1351,7 @@ export default function ImportPrescriptionModal({
                       {reviewData.extractedData.confidenceScore}% OCR Accuracy
                     </span>
                   )}
+                </div>
                 </div>
               )}
 
@@ -1064,6 +1557,32 @@ export default function ImportPrescriptionModal({
                                 <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>
                                   {(block.items || []).length} active{(block.items || []).length === 1 ? '' : 's'}
                                 </span>
+                                {reviewData.blocks.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveBlock(bIdx);
+                                    }}
+                                    title="Remove this entire formula"
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
+                                      padding: '3px 8px',
+                                      borderRadius: '6px',
+                                      border: '1px solid #fecaca',
+                                      background: '#fef2f2',
+                                      color: '#dc2626',
+                                      fontSize: '0.7rem',
+                                      fontWeight: 700,
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    <Trash2 size={12} />
+                                    <span>Remove</span>
+                                  </button>
+                                )}
                                 {isExpanded ? <ChevronUp size={16} color="#64748b" /> : <ChevronDown size={16} color="#64748b" />}
                               </div>
                             </div>
@@ -1317,96 +1836,6 @@ export default function ImportPrescriptionModal({
                 </div>
               )}
 
-              {/* Bottom Actions Bar */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '12px',
-                marginTop: '10px',
-                paddingTop: '12px',
-                borderTop: '1px solid #e2e8f0',
-                flexWrap: 'wrap'
-              }}>
-                <button
-                  type="button"
-                  onClick={() => setReviewData(null)}
-                  disabled={isSaving}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#475569',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <ArrowLeft size={14} />
-                  <span>Upload Another Document</span>
-                </button>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {activeTab === 'editor' && !reviewData.isLabResult && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('preview')}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '8px 14px',
-                        borderRadius: '6px',
-                        border: '1px solid #0284c7',
-                        background: '#e0f2fe',
-                        color: '#0369a1',
-                        fontSize: '0.82rem',
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Eye size={14} />
-                      <span>Preview Label</span>
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleConfirmImport}
-                    disabled={isSaving || !reviewData.patientName.trim()}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 22px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      background: isSaving ? '#94a3b8' : (reviewData.isLabResult ? '#2563eb' : '#1a73e8'),
-                      color: '#ffffff',
-                      fontSize: '0.86rem',
-                      fontWeight: 700,
-                      cursor: isSaving ? 'not-allowed' : 'pointer',
-                      boxShadow: reviewData.isLabResult ? '0 1px 3px rgba(37,99,235,0.3)' : '0 1px 3px rgba(26,115,232,0.3)'
-                    }}
-                  >
-                    {isSaving ? (
-                      <>
-                        <Activity size={14} className="spin" />
-                        <span>Saving to Records...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Check size={16} />
-                        <span>{reviewData.isLabResult ? 'Confirm & Import Lab Result' : 'Confirm & Import Prescription'}</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
             </div>
           ) : (
             /* ── Step 1: Upload Dropzone ── */
@@ -1428,15 +1857,100 @@ export default function ImportPrescriptionModal({
                 }}>
                 <input {...getInputProps()} />
                 
-                {uploading ? (
-                  <>
-                    <Activity size={48} color="#0ea5e9" style={{ marginBottom: '16px', animation: 'pulse 2s infinite' }} />
-                    <h3 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1rem' }}>Processing Document...</h3>
-                    <p style={{ margin: 0, color: '#64748b', textAlign: 'center', fontSize: '0.85rem' }}>
-                      Please wait while Clinical AI extracts formulations and patient records.
-                    </p>
-                  </>
-                ) : (
+                {uploading ? (() => {
+                  const estSec = Math.max(6, preflightEstimate.estimatedSeconds || 12);
+                  const pct = Math.min(94, Math.max(12, Math.round((elapsedSeconds / estSec) * 90) + 12));
+                  const steps = [
+                    '1. Document Type',
+                    '2. Deep Formula Scan',
+                    '3. Duplicate & Dates',
+                    '4. Ready for Review',
+                  ];
+                  return (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%', maxWidth: '460px' }}>
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: '#0369a1',
+                        background: '#e0f2fe',
+                        border: '1px solid #bae6fd',
+                        padding: '3px 10px',
+                        borderRadius: '9999px',
+                      }}
+                    >
+                      Pass 1 Detected: {preflightEstimate.testType} · Est. ~{estSec}s
+                    </span>
+
+                    <div
+                      style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdfa 100%)',
+                        border: '2px solid #bae6fd',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        animation: 'atlasIconMorph 1.1s ease-in-out infinite',
+                      }}
+                    >
+                      {loadingPhase === 0 && <Activity size={30} color="#0ea5e9" />}
+                      {loadingPhase === 1 && <Dna size={30} color="#0d9488" />}
+                      {loadingPhase >= 2 && <Sparkles size={30} color="#2563eb" />}
+                    </div>
+
+                    <h3 style={{ margin: 0, color: '#0f172a', fontSize: '1rem', fontWeight: 700, textAlign: 'center' }}>
+                      {loadingPhase === 0 && 'Pass 1: Identifying Document & Format...'}
+                      {loadingPhase === 1 && 'Pass 2: Extracting Formulations & Active Ingredients...'}
+                      {loadingPhase === 2 && 'Checking Algolia History & Upload Dates...'}
+                      {loadingPhase >= 3 && 'Finalizing Clinical Review & Label Preview...'}
+                    </h3>
+
+                    {/* Relative Progress Bar */}
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <div style={{ width: '100%', height: '8px', borderRadius: '9999px', background: '#e2e8f0', overflow: 'hidden' }}>
+                        <div
+                          style={{
+                            width: `${pct}%`,
+                            height: '100%',
+                            borderRadius: '9999px',
+                            background: 'linear-gradient(90deg, #0284c7 0%, #2563eb 100%)',
+                            transition: 'width 0.5s ease',
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>
+                        <span>{pct}% complete</span>
+                        <span>Elapsed: {elapsedSeconds}s / ~{estSec}s</span>
+                      </div>
+                    </div>
+
+                    {/* 4-Phase Stepper */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px', width: '100%', marginTop: '2px' }}>
+                      {steps.map((lbl, idx) => {
+                        const isDone = idx < loadingPhase;
+                        const isCurr = idx === loadingPhase;
+                        return (
+                          <div
+                            key={lbl}
+                            style={{
+                              fontSize: '0.66rem',
+                              fontWeight: isCurr || isDone ? 700 : 500,
+                              color: isDone ? '#16a34a' : isCurr ? '#1d4ed8' : '#94a3b8',
+                              textAlign: 'center',
+                              padding: '4px 2px',
+                              borderTop: `2px solid ${isDone ? '#16a34a' : isCurr ? '#1d4ed8' : '#e2e8f0'}`,
+                            }}
+                          >
+                            {lbl}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  );
+                })() : (
                   <>
                     <Upload size={48} color={isDragActive ? '#0ea5e9' : '#94a3b8'} style={{ marginBottom: '16px' }} />
                     <h3 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1rem' }}>Drag &amp; Drop or Click to Upload</h3>
@@ -1510,11 +2024,128 @@ export default function ImportPrescriptionModal({
             </>
           )}
         </div>
+
+        {/* ── Pinned GCP Modal Footer (Always Visible on Scroll) ── */}
+        {reviewData && (
+          <div
+            style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+              padding: '0.9rem 1.5rem',
+              borderTop: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              boxShadow: '0 -4px 12px rgba(15, 23, 42, 0.04)',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setReviewData(null)}
+                disabled={isSaving}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  minHeight: '40px',
+                  padding: '8px 14px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                <ArrowLeft size={14} />
+                <span>Upload Another Document</span>
+              </button>
+              {!reviewData.isLabResult && (
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+                  {(reviewData.blocks || []).length} formula{(reviewData.blocks || []).length === 1 ? '' : 's'} ready
+                </span>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {activeTab === 'editor' && !reviewData.isLabResult && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('preview')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    minHeight: '40px',
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid #0284c7',
+                    background: '#e0f2fe',
+                    color: '#0369a1',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Eye size={14} />
+                  <span>Preview Label</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleConfirmImport}
+                disabled={isSaving || !reviewData.patientName.trim()}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  minHeight: '40px',
+                  padding: '8px 22px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: isSaving ? '#94a3b8' : (reviewData.isLabResult ? '#2563eb' : '#1a73e8'),
+                  color: '#ffffff',
+                  fontSize: '0.86rem',
+                  fontWeight: 700,
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  boxShadow: reviewData.isLabResult ? '0 1px 3px rgba(37,99,235,0.3)' : '0 1px 3px rgba(26,115,232,0.3)',
+                }}
+              >
+                {isSaving ? (
+                  <>
+                    <Activity size={14} className="spin" />
+                    <span>Saving to Records...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check size={16} />
+                    <span>
+                      {importMode === 'refill' && refillTargetRx
+                        ? `Confirm Refill (#${refillTargetRx.code || refillTargetRx.id})`
+                        : reviewData.isLabResult
+                          ? 'Confirm & Import Lab Result'
+                          : 'Confirm & Import Prescription'}
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(20px) scale(0.95); }
           to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes atlasIconMorph {
+          0%, 100% { transform: scale(1) rotate(0deg); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.25); }
+          50% { transform: scale(1.08) rotate(4deg); box-shadow: 0 0 0 10px rgba(14, 165, 233, 0); }
         }
       `}} />
     </div>

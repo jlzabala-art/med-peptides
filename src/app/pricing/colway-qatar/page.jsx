@@ -1,23 +1,26 @@
 import React from 'react';
 import QatarColwayPriceClient from './QatarColwayPriceClient';
+import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export const revalidate = 60;
 
-export async function generateMetadata() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
-  const title = 'Colway Trichology Hair Care • Official Qatar Distributor Price Schedule (Ryhanh Medical Company)';
-  const description = 'Exclusive B2B commercial schedule and landed cost breakdown for Colway Hair Strengthening Shampoo & Conditioner in Qatar. Authorized Distributor: Ryhanh Medical Company (Ryhanh Group, Doha, Qatar). Contact: Hossam Ahmed.';
+export async function generateMetadata({ searchParams }) {
+  const resolvedSearch = await searchParams;
+  const lang = normalizeMetaLang(resolvedSearch);
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      url: `${appUrl}/pricing/colway-qatar`
-    }
-  };
+  return buildBilingualMetadata({
+    lang,
+    path: '/pricing/colway-qatar',
+    siteName: 'Atlas Health Services',
+    en: {
+      title: 'Colway Trichology Hair Care • Official Qatar Distributor Price Schedule',
+      description: 'Exclusive B2B commercial schedule and landed cost breakdown for Colway Hair Strengthening Shampoo & Conditioner in Qatar.',
+    },
+    es: {
+      title: 'Colway Trichology Cuidado Capilar • Tarifa Oficial de Distribución en Qatar',
+      description: 'Tarifa comercial exclusiva B2B y desglose de costes para champú y acondicionador fortalecedor Colway en Qatar.',
+    },
+  });
 }
 
 export default function QatarColwayPricingPage() {

@@ -5,6 +5,7 @@ import './InteractiveReconstitutionGuide.css';
 import './PeptideAnalyticalSpecsCard.css';
 import React, { useState, useEffect, useTransition, useRef, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   FileText,
   Download,
@@ -42,7 +43,7 @@ import {
   Dna,
   Calendar
 } from '@/lib/icons';
-import ImageModal from '@/snippets/ImageModal';
+const ImageModal = dynamic(() => import('@/snippets/ImageModal'), { ssr: false });
 import {
   SUPPORTED_LANGUAGES,
   getTranslations,
@@ -54,36 +55,37 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
-import SolventTechnicalSpecs from './SolventTechnicalSpecs';
-import CosmeticTechnicalSpecs from './CosmeticTechnicalSpecs';
-import SupplementTechnicalSpecs from './SupplementTechnicalSpecs';
-import HairProtocolsSidebarWidget from './HairProtocolsSidebarWidget';
-import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
-import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
-import BloodoNadFaqCard from './BloodoNadFaqCard';
+import PatientPeptideGuideView from './PatientPeptideGuideView';
+const SolventTechnicalSpecs = dynamic(() => import('./SolventTechnicalSpecs'));
+const CosmeticTechnicalSpecs = dynamic(() => import('./CosmeticTechnicalSpecs'));
+const SupplementTechnicalSpecs = dynamic(() => import('./SupplementTechnicalSpecs'));
+const HairProtocolsSidebarWidget = dynamic(() => import('./HairProtocolsSidebarWidget'));
+const DiagnosticTestTechnicalSpecs = dynamic(() => import('./DiagnosticTestTechnicalSpecs'));
+const BloodoRelatedPeptidesSection = dynamic(() => import('./BloodoRelatedPeptidesSection'));
+const BloodoNadFaqCard = dynamic(() => import('./BloodoNadFaqCard'));
 import BloodoSuiteNav, { isBloodoProduct } from './BloodoSuiteNav';
-import BloodoClinicalAdvantageCard from './BloodoClinicalAdvantageCard';
-import BloodoDiagnosticOverviewCard from './BloodoDiagnosticOverviewCard';
-import BloodoWhenToTestSection from './BloodoWhenToTestSection';
-import BloodoLabStandardsDownloadsSection from './BloodoLabStandardsDownloadsSection';
-import BloodoSectionStepBar from './BloodoSectionStepBar';
-import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
-import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
+const BloodoClinicalAdvantageCard = dynamic(() => import('./BloodoClinicalAdvantageCard'));
+const BloodoDiagnosticOverviewCard = dynamic(() => import('./BloodoDiagnosticOverviewCard'));
+const BloodoWhenToTestSection = dynamic(() => import('./BloodoWhenToTestSection'));
+const BloodoLabStandardsDownloadsSection = dynamic(() => import('./BloodoLabStandardsDownloadsSection'));
+const BloodoSectionStepBar = dynamic(() => import('./BloodoSectionStepBar'));
+const EternaGeneticTechnicalSpecs = dynamic(() => import('./EternaGeneticTechnicalSpecs'));
+const IvDripTechnicalSpecs = dynamic(() => import('./IvDripTechnicalSpecs'));
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
 import { FDA_APPROVED_PEPTIDES_NETWORK } from '@/data/fdaPeptidesRegistry';
 import PeptidePublicationsSection from './PeptidePublicationsSection';
 import PeptideContraindicationsSection from './PeptideContraindicationsSection';
-import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
-import SpainCompanyResidencyTechnicalSpecs from './SpainCompanyResidencyTechnicalSpecs';
-import CompoundingServicesTechnicalSpecs from './CompoundingServicesTechnicalSpecs';
-import PeptideSupplyManagementTechnicalSpecs from './PeptideSupplyManagementTechnicalSpecs';
+const UaeCompanySetupTechnicalSpecs = dynamic(() => import('./UaeCompanySetupTechnicalSpecs'));
+const SpainCompanyResidencyTechnicalSpecs = dynamic(() => import('./SpainCompanyResidencyTechnicalSpecs'));
+const CompoundingServicesTechnicalSpecs = dynamic(() => import('./CompoundingServicesTechnicalSpecs'));
+const PeptideSupplyManagementTechnicalSpecs = dynamic(() => import('./PeptideSupplyManagementTechnicalSpecs'));
 import PeptideAnalyticalSpecsCard from './PeptideAnalyticalSpecsCard';
 import ProductRegulatoryWarningsSection from './ProductRegulatoryWarningsSection';
-import CoaModal from './CoaModal';
-import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
-import MonographPreviewModal from './MonographPreviewModal';
+const CoaModal = dynamic(() => import('./CoaModal'), { ssr: false });
+const ShareProductMonographDrawer = dynamic(() => import('../admin/catalog/drawers/ShareProductMonographDrawer'), { ssr: false });
+const MonographPreviewModal = dynamic(() => import('./MonographPreviewModal'), { ssr: false });
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
-import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicClinicalJsonLd from '@/components/shared/PublicClinicalJsonLd';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CorporateResidencyInquiryDrawer from '@/components/portal/CorporateResidencyInquiryDrawer';
@@ -97,6 +99,7 @@ import SupplementPublicOverviewShowcase from './SupplementPublicOverviewShowcase
 import ClinicalSynergySection from './ClinicalSynergySection';
 import DiagnosticReportVisualPreview from '../diagnostic/DiagnosticReportVisualPreview';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import AlgoliaRelatedStrip from '@/components/shared/AlgoliaRelatedStrip';
 import ProductSectionFooterNav from './ProductSectionFooterNav';
 import PresentationsMatrixSection from './datasheet/sections/PresentationsMatrixSection';
 import ReconstitutionRouterSection from './datasheet/sections/ReconstitutionRouterSection';
@@ -123,6 +126,7 @@ export default function PublicDatasheetView({
   initialFormat = null,
   initialStrength = null,
   initialLang = null,
+  initialViewMode = 'doctor',
   initialBatch = null,
   initialPhase = null,
   associatedProtocols = [],
@@ -150,7 +154,9 @@ export default function PublicDatasheetView({
         if (['EUR', 'USD', 'AED'].includes(urlCur)) return urlCur;
         const storedCur = (localStorage.getItem('atlas_portal_currency') || '').toUpperCase();
         if (['EUR', 'USD', 'AED'].includes(storedCur)) return storedCur;
-      } catch (_e) {}
+      } catch {
+        // ignore storage access errors
+      }
     }
     return 'EUR';
   });
@@ -1504,6 +1510,67 @@ export default function PublicDatasheetView({
     return exists ? activeSection : 'overview';
   }, [activeSection, tocSections]);
 
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: isDiagnosticKit ? 'diagnostic_test' : isPeptideCompound ? 'peptide_monograph' : 'product_datasheet',
+        name: product?.canonicalName || product?.name || slug,
+        slug,
+      },
+      bottomBar: {
+        summaryTitle: isSpainResidency
+          ? (lang === 'es' ? 'Programa de Residencia y Adquisición Corporativa (Ley 14/2013)' : 'Spanish Corporate Acquisition & Law 14/2013 Residence Program')
+          : isCompoundingService
+            ? (lang === 'es' ? 'Servicio de Compounding Farmacéutico Europeo' : 'European Pharmaceutical Compounding Service')
+            : isPeptideSupplyService
+              ? (lang === 'es' ? 'Suministro de Péptidos B2B y Gestión de Inventario' : 'B2B Dedicated Peptide Supply Chain')
+              : (product?.canonicalName || product?.name || slug),
+        summarySubtitle: isDiagnosticKit
+          ? (lang === 'es' ? 'Sangre Capilar (DBS) • Certificado CE-IVDR • LifeLab1' : 'Capillary Blood (DBS) • CE-IVDR Certified • LifeLab1')
+          : isSpainResidency
+            ? (lang === 'es' ? 'Programa Legal Ley 14/2013 • Resolución en 20 Días' : 'Law 14/2013 Statutory Program • 20-Day Fast Track')
+            : isCompoundingService
+              ? (lang === 'es' ? 'Formulaciones Personalizadas EU GMP & Ph. Eur.' : 'EU GMP & Ph. Eur. Certified Compounding Formulation')
+              : isPeptideSupplyService
+                ? (lang === 'es' ? 'Stock HPLC ≥99% Certificado • Envío 24-48h' : 'HPLC ≥99% Certified Inventory • 24-48h Dispatch')
+                : `${selectedStrength?.name || ''}${product?.format ? ` · ${getHumanFormatName(product.format, lang)}` : ''} • ${lang === 'es' ? 'Pureza' : 'Purity'} ${product?.purity || '≥99%'}`.trim(),
+        badge: isDiagnosticKit
+          ? (lang === 'es' ? 'Kit de Biomarcador' : 'Biomarker Kit')
+          : isSpainResidency
+            ? (lang === 'es' ? 'Programa Legal' : 'Residency Program')
+            : isCompoundingService
+              ? 'Compounding'
+              : isPeptideSupplyService
+                ? (lang === 'es' ? 'Suministro B2B' : 'B2B Supply')
+                : (lang === 'es' ? 'Monografía' : 'Peptide Monograph'),
+        atlasAiLabel: 'Atlas AI',
+        showSections: true,
+        sectionsLabel: lang === 'es' ? 'Secciones' : 'Sections',
+        sectionsCount: isPeptideCompound ? 5 : tocSections.length,
+        onOpenSections: () => {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(
+              new CustomEvent(isPeptideCompound ? 'open-monograph-tabs-navigator' : 'open-datasheet-toc')
+            );
+          }
+        },
+        primaryAction: {
+          label: isDiagnosticKit
+            ? (lang === 'es' ? 'Consultar Test' : 'Inquire Test')
+            : isSpainResidency
+              ? (lang === 'es' ? 'Consultar Programa' : 'Inquire Program')
+              : isCompoundingService
+                ? (lang === 'es' ? 'Consultar Formulación' : 'Inquire Formulation')
+                : isPeptideSupplyService
+                  ? (lang === 'es' ? 'Consultar Suministro' : 'Inquire Supply')
+                  : (lang === 'es' ? 'Consultar Producto' : 'Inquire Product'),
+          onClick: handleOpenInquiry,
+        },
+      },
+    },
+    [slug, product?.canonicalName, product?.name, product?.format, product?.purity, selectedStrength?.name, isDiagnosticKit, isSpainResidency, isCompoundingService, isPeptideSupplyService, isPeptideCompound, tocSections.length, lang]
+  );
+
   // Reactive Dynamic Share URL respecting active state — Guaranteed https://www.atlashealth-services.com
   const dynamicPublicUrl = useMemo(() => {
     const params = new URLSearchParams();
@@ -2062,6 +2129,20 @@ export default function PublicDatasheetView({
     };
   }, [lang, isSpainResidency, isCompoundingService, isPeptideSupplyService, isAnyDiagnostic, isCosmeticProduct, isBloodoDiagnostic, isSolventProduct, product, slug, associatedProtocols, targetSystem, description, displaySupplierName, matrixRows]);
 
+  if (initialViewMode === 'patient') {
+    return (
+      <PatientPeptideGuideView
+        product={product}
+        slug={slug}
+        baseUrl={baseUrl}
+        initialLang={lang}
+        initialStrength={initialStrength}
+      />
+    );
+  }
+
+  const patientGuideUrl = `${baseUrl || 'https://www.atlashealth-services.com'}/p/${encodeURIComponent(slug)}?view=patient`;
+
   return (
     <div className="public-datasheet-root">
       {/* ── Schema.org Clinical Structured Data (Rich Snippets) ── */}
@@ -2104,6 +2185,78 @@ export default function PublicDatasheetView({
           ...(brandCollection ? [{ label: brandCollection.title, href: brandCollection.href }] : []),
           { label: product?.canonicalName || product?.name || name || (isDiagnosticKit ? 'Diagnostic Test' : 'Peptide Monograph') }
         ]}
+        banner={
+          <div
+            className="no-print"
+            style={{
+              background: '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              padding: '6px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '8px',
+              fontSize: '0.76rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155', fontWeight: 600 }}>
+              <ShieldCheck size={14} color="#003666" />
+              <span>
+                {lang === 'es'
+                  ? 'Vista Clínica para Médicos · Comparte la guía educativa y de reconstitución con tu paciente:'
+                  : 'Clinician Monograph View · Share the simplified patient & reconstitution guide:'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(patientGuideUrl);
+                    toast.success(lang === 'es' ? 'Enlace de Guía del Paciente copiado' : 'Patient Guide link copied');
+                  } catch {
+                    toast.error('Copy failed');
+                  }
+                }}
+                style={{ fontSize: '0.72rem', padding: '5px 10px', whiteSpace: 'nowrap', width: 'auto' }}
+              >
+                <Copy size={12} color="#1a73e8" style={{ flexShrink: 0 }} />
+                <span>{lang === 'es' ? 'Copiar Guía Paciente' : 'Copy Patient Guide'}</span>
+              </button>
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('open-global-qr-modal', {
+                      detail: {
+                        url: patientGuideUrl,
+                        title: lang === 'es' ? `${name} — QR Guía Paciente` : `${name} — Patient Guide QR`,
+                        subtitle: lang === 'es' ? 'Escanea para abrir la guía educativa del paciente' : 'Scan to open locked Patient Education & Reconstitution Guide',
+                      },
+                    }));
+                  }
+                }}
+                style={{ fontSize: '0.72rem', padding: '5px 10px', whiteSpace: 'nowrap', width: 'auto' }}
+              >
+                <QrCode size={12} color="#003666" style={{ flexShrink: 0 }} />
+                <span>{lang === 'es' ? 'QR Paciente' : 'Patient QR'}</span>
+              </button>
+              <a
+                href={`/p/${encodeURIComponent(slug)}?view=patient`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gcp-btn-primary"
+                style={{ fontSize: '0.72rem', padding: '5px 10px', textDecoration: 'none', whiteSpace: 'nowrap', width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+              >
+                <span>{lang === 'es' ? 'Ver Guía Paciente' : 'Open Patient Guide'}</span>
+                <ExternalLink size={11} style={{ flexShrink: 0 }} />
+              </a>
+            </div>
+          </div>
+        }
       />
 
       {/* ── Standardized Clinical Page Shell / Peptide Monograph Workspace ── */}
@@ -3390,79 +3543,6 @@ export default function PublicDatasheetView({
         brandName={product?.brand || 'Atlas Health'}
       />
 
-      {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
-      <PublicStickyActionBar
-        drawerProps={atlasAiDrawerProps}
-        title={
-          isSpainResidency
-            ? (lang === 'es' ? 'Programa de Residencia y Adquisición Corporativa (Ley 14/2013)' : 'Spanish Corporate Acquisition & Law 14/2013 Residence Program')
-            : isCompoundingService
-              ? (lang === 'es' ? 'Servicio de Compounding Farmacéutico Europeo' : 'European Pharmaceutical Compounding Service')
-              : isPeptideSupplyService
-                ? (lang === 'es' ? 'Suministro de Péptidos B2B y Gestión de Inventario' : 'B2B Dedicated Peptide Supply Chain')
-                : (product?.canonicalName || product?.name || slug)
-        }
-        subtitle={
-          isDiagnosticKit
-            ? (lang === 'es' ? 'Sangre Capilar (DBS) • Certificado CE-IVDR • LifeLab1' : 'Capillary Blood (DBS) • CE-IVDR Certified • LifeLab1')
-            : isSpainResidency
-              ? (lang === 'es' ? 'Programa Legal Ley 14/2013 • Resolución en 20 Días' : 'Law 14/2013 Statutory Program • 20-Day Fast Track')
-              : isCompoundingService
-                ? (lang === 'es' ? 'Formulaciones Personalizadas EU GMP & Ph. Eur.' : 'EU GMP & Ph. Eur. Certified Compounding Formulation')
-                : isPeptideSupplyService
-                  ? (lang === 'es' ? 'Stock HPLC ≥99% Certificado • Envío 24-48h' : 'HPLC ≥99% Certified Inventory • 24-48h Dispatch')
-                  : `${selectedStrength?.name || ''}${product?.format ? ` · ${getHumanFormatName(product.format, lang)}` : ''} • ${lang === 'es' ? 'Pureza' : 'Purity'} ${product?.purity || '≥99%'}`.trim()
-        }
-        badge={
-          isDiagnosticKit
-            ? (lang === 'es' ? 'Kit de Biomarcador' : 'Biomarker Kit')
-            : isSpainResidency
-              ? (lang === 'es' ? 'Programa Legal' : 'Residency Program')
-              : isCompoundingService
-                ? 'Compounding'
-                : isPeptideSupplyService
-                  ? (lang === 'es' ? 'Suministro B2B' : 'B2B Supply')
-                  : (lang === 'es' ? 'Monografía' : 'Peptide Monograph')
-        }
-        badgeType={isDiagnosticKit ? 'diagnostic' : 'default'}
-        inquireLabel={
-          isDiagnosticKit
-            ? (lang === 'es' ? 'Consultar Test' : 'Inquire Test')
-            : isSpainResidency
-              ? (lang === 'es' ? 'Consultar Programa' : 'Inquire Program')
-              : isCompoundingService
-                ? (lang === 'es' ? 'Consultar Formulación' : 'Inquire Formulation')
-                : isPeptideSupplyService
-                  ? (lang === 'es' ? 'Consultar Suministro' : 'Inquire Supply')
-                  : (lang === 'es' ? 'Consultar Producto' : 'Inquire Product')
-        }
-        onInquire={handleOpenInquiry}
-        showClinicalAI={true}
-        aiCategory={isDiagnosticKit ? 'Diagnostic Test' : (isPeptideCompound ? 'Peptide Monograph' : 'Product Datasheet')}
-        aiContextQuery={
-          isDiagnosticKit
-            ? (lang === 'es'
-              ? `¿Qué biomarcadores mide el test ${product?.name || slug}, cómo se realiza la toma capilar y qué relevancia clínica tiene?`
-              : `What biomarkers does ${product?.name || slug} measure, how is capillary sampling done, and what is its clinical utility?`)
-            : (lang === 'es'
-              ? `¿Cuáles son las aplicaciones clínicas, dianas biológicas, pureza HPLC y posología documentada de ${product?.canonicalName || product?.name || slug}?`
-              : `What are the clinical applications, biological targets, HPLC purity, and documented posology for ${product?.canonicalName || product?.name || slug}?`)
-        }
-        showSections={true}
-        sectionsCount={isPeptideCompound ? 5 : tocSections.length}
-        sectionsLabel={lang === 'es' ? 'Secciones' : 'Sections'}
-        onOpenSections={() => {
-          if (typeof window !== 'undefined') {
-            if (isPeptideCompound) {
-              window.dispatchEvent(new CustomEvent('open-monograph-tabs-navigator'));
-            } else {
-              window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
-            }
-          }
-        }}
-        lang={lang}
-      />
-
       {/* Full-Screen Visual Kit Image Modal */}
       {diagnosticHeroImage && (
         <ImageModal
@@ -3472,6 +3552,14 @@ export default function PublicDatasheetView({
           altText={name}
         />
       )}
+
+      <div style={{ maxWidth: '1220px', margin: '0 auto 2rem', padding: '0 1rem' }}>
+        <AlgoliaRelatedStrip
+          objectID={product?.id || slug}
+          category={product?.category || 'peptide'}
+          lang={lang}
+        />
+      </div>
 
       {/* Institutional Unified Public Footer */}
       <PublicUnifiedFooter lang={lang} />

@@ -14,7 +14,7 @@ import BrandCollectionPage from './BrandCollectionPage';
 import ClinicalPortfolioSuiteSwitcher from '../components/navigation/ClinicalPortfolioSuiteSwitcher';
 import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
-import PublicStickyActionBar from '../components/shared/PublicStickyActionBar';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import UnifiedOrderDrawer from '../components/orders/UnifiedOrderDrawer';
 
 
@@ -81,6 +81,41 @@ export default function CollectionTemplate({
   };
 
   const s = (slug || '').toLowerCase();
+  const resolvedCategoryName = SLUG_TO_CATEGORY[slug] || (s === 'supplements' ? 'Clinical Supplements & Longevity Formulations' : `${slug} Reference Catalog`);
+
+  useRegisterAtlasContext(
+    (s === 'peptides' || s === 'protocols' || s === 'protocol')
+      ? null
+      : {
+          contextAnchor: {
+            type: 'collection',
+            name: resolvedCategoryName,
+            slug,
+          },
+          bottomBar: s === 'supplements'
+            ? {
+                summaryTitle: 'Clinical Supplements & Longevity Formulations',
+                summarySubtitle: 'Therapeutic Cofactors, Mitochondrial Actives & Precursors',
+                badge: 'Nutraceuticals',
+                atlasAiLabel: 'Ask Atlas AI',
+                primaryAction: {
+                  label: 'Inquire Catalog',
+                  onClick: () => { if (typeof window !== 'undefined') window.location.href = '/contact'; },
+                },
+              }
+            : {
+                summaryTitle: `${resolvedCategoryName} Reference Catalog`,
+                summarySubtitle: 'Verified Clinical Monograph Standards • HPLC ≥99.0%',
+                badge: 'Peptide Portfolio',
+                atlasAiLabel: 'Ask Atlas AI',
+                primaryAction: {
+                  label: 'Inquire Catalog',
+                  onClick: () => { if (typeof window !== 'undefined') window.location.href = '/contact'; },
+                },
+              },
+        },
+    [s, slug, resolvedCategoryName]
+  );
 
   // /collection/peptides → Google Cloud UX BrandCollectionPage (Clinical Peptides Collection)
   if (s === 'peptides') {
@@ -128,17 +163,6 @@ export default function CollectionTemplate({
           toggleCompare={toggleCompare}
         />
         <PublicUnifiedFooter lang="en" />
-        <PublicStickyActionBar
-          title="Clinical Supplements & Longevity Formulations"
-          subtitle="Therapeutic Cofactors, Mitochondrial Actives & Precursors"
-          badge="Nutraceuticals"
-          inquireLabel="Inquire Catalog"
-          onInquire={() => { if (typeof window !== 'undefined') window.location.href = '/contact'; }}
-          showClinicalAI={true}
-          aiCategory="Supplements & Longevity"
-          aiContextQuery="What are the clinical synergies, recommended daily doses, and cofactor combinations across this longevity supplements portfolio?"
-          lang="en"
-        />
         <UnifiedOrderDrawer lang="en" />
       </RestrictedCatalogRoute>
     );
@@ -271,17 +295,6 @@ export default function CollectionTemplate({
         allFaqs={allFaqs}
       />
       <PublicUnifiedFooter lang="en" />
-      <PublicStickyActionBar
-        title={`${categoryName} Reference Catalog`}
-        subtitle="Verified Clinical Monograph Standards • HPLC ≥99.0%"
-        badge="Peptide Portfolio"
-        inquireLabel="Inquire Catalog"
-        onInquire={() => { if (typeof window !== 'undefined') window.location.href = '/contact'; }}
-        showClinicalAI={true}
-        aiCategory="Peptide Portfolio"
-        aiContextQuery={`Which bioactive formulations in the ${categoryName} catalog are most recommended for clinical integration and batch synthesis?`}
-        lang="en"
-      />
       <UnifiedOrderDrawer lang="en" />
     </div>
   );

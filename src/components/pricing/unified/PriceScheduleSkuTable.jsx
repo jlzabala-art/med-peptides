@@ -412,7 +412,7 @@ export default function PriceScheduleSkuTable({
         },
         {
           key: 'wholesalePrice',
-          label: 'Wholeseller (15%+15%)',
+          label: 'Wholeseller',
           width: '17%',
           sortable: true,
           sortValue: (row) => {

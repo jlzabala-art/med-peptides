@@ -526,8 +526,8 @@ export default function TieredPriceShield({
       amount: Math.round(effectiveDistributor * markupFactor * 100) / 100
     },
     wholesaler: {
-      label: isEs ? 'TARIFA WHOLESELLER (+15%+15%)' : 'WHOLESELLER TIER (+15%+15%)',
-      badge: isEs ? 'Wholeseller (+15%+15%)' : 'Wholeseller (+15%+15%)',
+      label: isEs ? 'TARIFA WHOLESELLER' : 'WHOLESELLER TIER',
+      badge: 'Wholeseller',
       badgeBg: '#fff7ed',
       badgeColor: '#c2410c',
       badgeBorder: '#ffedd5',

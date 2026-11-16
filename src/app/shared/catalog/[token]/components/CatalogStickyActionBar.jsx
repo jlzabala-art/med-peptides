@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, Filter, ShoppingBag, X, Trash2 } from 'lucide-react';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import '@/components/shared/PublicStickyActionBar.css';
 
 /**
@@ -37,6 +38,8 @@ export default function CatalogStickyActionBar({
   t = (k) => k
 }) {
   const [quota, setQuota] = useState({ remaining: 5, limit: 5 });
+
+  useRegisterAtlasContext({ bottomBar: { hidden: true } }, []);
 
   // 1. Initial IP-based quota lookup
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import DataTable from '@/components/ui/DataTable';
 import { 
   Layers, 
   CheckCircle2, 
@@ -836,134 +837,119 @@ export default function PresentationsMatrixSection({
             `}</style>
 
             <div className="pds-table-container">
-              <table className="pds-matrix-table" aria-label="Available Presentations and Analytical Specs">
-                <thead>
-                  {isSupplementProduct ? (
-                    <tr>
-                      <th scope="col">{lang === 'es' ? 'Presentación y Pauta' : 'Presentation & Supply'}</th>
-                      <th scope="col">{lang === 'es' ? 'Formato y Envase' : 'Delivery Format'}</th>
-                      <th scope="col">{lang === 'es' ? 'Pauta y Vía' : 'Administration'}</th>
-                      <th scope="col">{lang === 'es' ? 'Calidad y Certificación' : 'Quality Standard'}</th>
-                      <th scope="col">{lang === 'es' ? 'Laboratorio' : 'Verified Source'}</th>
-                    </tr>
-                  ) : (
-                    <tr>
-                      <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Formato de Kit' : 'Kit Format') : (t?.activePresentationDose || 'Strength / Dose')}</th>
-                      <th scope="col">{t?.deliveryDevice || 'Format'}</th>
-                      <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Toma de Muestra' : 'Sample Collection') : (t?.reconstitutionSolvent || 'Reconstitution')}</th>
-                      <th scope="col" className="pds-conc-col">{isDiagnosticKit ? (lang === 'es' ? 'Rango Analítico' : 'Linear Range') : (t?.reconConcentration || 'Concentration')}</th>
-                      <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Metodología' : 'Methodology') : (t?.primaryAdministrationRoute || 'Administration')}</th>
-                      <th scope="col" className="pds-purity-col">{isDiagnosticKit ? (lang === 'es' ? 'Acreditación' : 'Accreditation') : (t?.analyticalGrade || 'Analytical Grade')}</th>
-                      <th scope="col">{t?.manufacturingSource || 'Verified Source'}</th>
-                    </tr>
-                  )}
-                </thead>
-                <tbody>
-                  {matrixRows.map(row => {
-                    return (
-                      <tr
-                        key={row.id}
-                        className={row.isCurrentlyActive ? "pds-matrix-row-selected" : ""}
-                        onClick={() => {
-                          if (row.formatId && row.formatId !== activeFormatId) {
-                            setActiveFormatId(row.formatId);
-                          }
-                          if (row.strengthId && row.strengthId !== selectedStrengthId) {
-                            setSelectedStrengthId(row.strengthId);
-                          }
-                          triggerHaptic('light');
-                        }}
-                        style={{ cursor: 'pointer' }}
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            if (row.formatId && row.formatId !== activeFormatId) {
-                              setActiveFormatId(row.formatId);
-                            }
-                            if (row.strengthId && row.strengthId !== selectedStrengthId) {
-                              setSelectedStrengthId(row.strengthId);
-                            }
-                            triggerHaptic('light');
-                          }
-                        }}
-                      >
-                        {isSupplementProduct ? (
-                          <>
-                            <td data-label="Presentation & Supply">
-                              <div className="pds-strength-cell">
-                                <span
-                                  className={row.isCurrentlyActive ? "pds-active-dot" : "pds-inactive-dot"}
-                                  aria-label={row.isCurrentlyActive ? "Active Presentation" : "Select Presentation"}
-                                />
-                                <span className="pds-strength-name">{row.strengthName}</span>
-                                {row.isCurrentlyActive && (
-                                  <span className="pds-selected-badge">
-                                    {lang === 'es' ? 'Activa ✓' : 'Selected ✓'}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td data-label="Delivery Format">
-                              <span className="pds-format-pill">
-                                {row.formatName}
-                              </span>
-                            </td>
-                            <td data-label="Administration">{row.adminText}</td>
-                            <td data-label="Quality Standard">
-                              <span className="pds-gcp-compliance-badge">
-                                {row.purity}
-                              </span>
-                            </td>
-                            <td data-label="Verified Source">
-                              <span className="pds-source-name">{row.supplierName}</span>
-                            </td>
-                          </>
-                        ) : (
-                          <>
-                            <td data-label="Strength / Dose">
-                              <div className="pds-strength-cell">
-                                <span
-                                  className={row.isCurrentlyActive ? "pds-active-dot" : "pds-inactive-dot"}
-                                  aria-label={row.isCurrentlyActive ? "Active Presentation" : "Select Presentation"}
-                                />
-                                <span className="pds-strength-name">{row.strengthName}</span>
-                                {row.isCurrentlyActive && (
-                                  <span className="pds-selected-badge">
-                                    {lang === 'es' ? 'Activa ✓' : 'Selected ✓'}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td data-label="Presentation Format">
-                              <span className={`pds-format-pill pds-format-${row.formatId}`}>
-                                {row.formatName}
-                              </span>
-                            </td>
-                            <td data-label="Reconstitution Diluent">{row.diluentText}</td>
-                            <td data-label="Solution Concentration (mg/mL)" className="pds-conc-cell">
-                              {row.recon.volume > 0 && !row.isPenOrCart && !row.isOral && !row.isSpray && !isSolventProduct ? (
-                                <span className="pds-conc-badge font-mono">
-                                  {row.concText}
+              <DataTable
+                pagination={false}
+                enableAskAtlas={false}
+                onRowClick={(row) => {
+                  if (row.formatId && row.formatId !== activeFormatId) {
+                    setActiveFormatId(row.formatId);
+                  }
+                  if (row.strengthId && row.strengthId !== selectedStrengthId) {
+                    setSelectedStrengthId(row.strengthId);
+                  }
+                  triggerHaptic('light');
+                }}
+                getRowProps={(row) => ({
+                  className: row.isCurrentlyActive ? 'pds-matrix-row-selected' : '',
+                  style: { cursor: 'pointer' },
+                })}
+                columns={
+                  isSupplementProduct
+                    ? [
+                        {
+                          key: 'strengthName',
+                          label: lang === 'es' ? 'Presentación y Pauta' : 'Presentation & Supply',
+                          render: (val, row) => (
+                            <div className="pds-strength-cell">
+                              <span
+                                className={row.isCurrentlyActive ? 'pds-active-dot' : 'pds-inactive-dot'}
+                                aria-label={row.isCurrentlyActive ? 'Active Presentation' : 'Select Presentation'}
+                              />
+                              <span className="pds-strength-name">{val}</span>
+                              {row.isCurrentlyActive && (
+                                <span className="pds-selected-badge">
+                                  {lang === 'es' ? 'Activa ✓' : 'Selected ✓'}
                                 </span>
-                              ) : (
-                                row.concText
                               )}
-                            </td>
-                            <td data-label="Administration">{row.adminText}</td>
-                            <td data-label="Analytical Grade" className="pds-purity-cell">
-                              <span className="pds-gcp-compliance-badge">{row.purity}</span>
-                            </td>
-                            <td data-label="Laboratory Verification">
-                              <span className="pds-source-name">{row.supplierName}</span>
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'formatName',
+                          label: lang === 'es' ? 'Formato y Envase' : 'Delivery Format',
+                          render: (val) => <span className="pds-format-pill">{val}</span>,
+                        },
+                        {
+                          key: 'adminText',
+                          label: lang === 'es' ? 'Pauta y Vía' : 'Administration',
+                        },
+                        {
+                          key: 'purity',
+                          label: lang === 'es' ? 'Calidad y Certificación' : 'Quality Standard',
+                          render: (val) => <span className="pds-gcp-compliance-badge">{val}</span>,
+                        },
+                        {
+                          key: 'supplierName',
+                          label: lang === 'es' ? 'Laboratorio' : 'Verified Source',
+                          render: (val) => <span className="pds-source-name">{val}</span>,
+                        },
+                      ]
+                    : [
+                        {
+                          key: 'strengthName',
+                          label: isDiagnosticKit ? (lang === 'es' ? 'Formato de Kit' : 'Kit Format') : (t?.activePresentationDose || 'Strength / Dose'),
+                          render: (val, row) => (
+                            <div className="pds-strength-cell">
+                              <span
+                                className={row.isCurrentlyActive ? 'pds-active-dot' : 'pds-inactive-dot'}
+                                aria-label={row.isCurrentlyActive ? 'Active Presentation' : 'Select Presentation'}
+                              />
+                              <span className="pds-strength-name">{val}</span>
+                              {row.isCurrentlyActive && (
+                                <span className="pds-selected-badge">
+                                  {lang === 'es' ? 'Activa ✓' : 'Selected ✓'}
+                                </span>
+                              )}
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'formatName',
+                          label: t?.deliveryDevice || 'Format',
+                          render: (val, row) => <span className={`pds-format-pill pds-format-${row.formatId}`}>{val}</span>,
+                        },
+                        {
+                          key: 'diluentText',
+                          label: isDiagnosticKit ? (lang === 'es' ? 'Toma de Muestra' : 'Sample Collection') : (t?.reconstitutionSolvent || 'Reconstitution'),
+                        },
+                        {
+                          key: 'concText',
+                          label: isDiagnosticKit ? (lang === 'es' ? 'Rango Analítico' : 'Linear Range') : (t?.reconConcentration || 'Concentration'),
+                          render: (val, row) =>
+                            row.recon?.volume > 0 && !row.isPenOrCart && !row.isOral && !row.isSpray && !isSolventProduct ? (
+                              <span className="pds-conc-badge font-mono">{val}</span>
+                            ) : (
+                              val
+                            ),
+                        },
+                        {
+                          key: 'adminText',
+                          label: isDiagnosticKit ? (lang === 'es' ? 'Metodología' : 'Methodology') : (t?.primaryAdministrationRoute || 'Administration'),
+                        },
+                        {
+                          key: 'purity',
+                          label: isDiagnosticKit ? (lang === 'es' ? 'Acreditación' : 'Accreditation') : (t?.analyticalGrade || 'Analytical Grade'),
+                          render: (val) => <span className="pds-gcp-compliance-badge">{val}</span>,
+                        },
+                        {
+                          key: 'supplierName',
+                          label: t?.manufacturingSource || 'Verified Source',
+                          render: (val) => <span className="pds-source-name">{val}</span>,
+                        },
+                      ]
+                }
+                data={matrixRows}
+              />
             </div>
           </div>
         </div>
