@@ -118,7 +118,6 @@ export default function PublicLabelsAppClient({
     activeQueueIndex,
     setActiveQueueIndex,
     currentRx,
-    setCurrentRx,
     labels,
     setLabels,
     activeCode,
