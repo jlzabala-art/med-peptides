@@ -442,7 +442,7 @@ export default function PublicLabelsAppClient({
     const maxAgeMs = worklistDateRange === '7d' ? 7 * 86400000 : worklistDateRange === '30d' ? 30 * 86400000 : null;
     return (item) => {
       if (!maxAgeMs) return true;
-      const raw = item.date || item.createdAt || item.uploadedAt;
+      const raw = item.importedAt || item.createdAt || item.uploadedAt || item.date;
       if (!raw) return true;
       const ts = typeof raw === 'number' ? raw : raw?.seconds ? raw.seconds * 1000 : Date.parse(raw);
       if (Number.isNaN(ts)) return true;

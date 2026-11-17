@@ -1871,9 +1871,12 @@
   to { transform: rotate(360deg); }
 }
 
-/* Adjust root padding so content never gets obscured by fixed bottom dock */
+/* Root layout for full-page Label Studio with PublicUnifiedFooter */
 .public-label-studio-root {
-  padding-bottom: 56px;
+  padding-bottom: 0;
+}
+.pls-home-shell {
+  flex: 1;
 }
 
 

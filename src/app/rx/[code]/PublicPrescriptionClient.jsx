@@ -68,6 +68,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -648,6 +649,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             />
           }
         />
+      )}
+      {!embedded && !isPatientView && isAuthorizedViewer && (
+        <PharmacyOpsWorkspaceBar lang={lang} />
       )}
 
       {/* ── Unauthenticated Patient Holding Gate for Draft / Unvalidated Prescriptions ── */}

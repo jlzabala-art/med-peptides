@@ -59,7 +59,30 @@ export async function GET(request) {
         d.parts?.[0]?.formulaName ||
         d.formulationBlocks?.[0]?.treatmentType ||
         '';
-      return cleanTitle(candidate);
+      const baseTitle = cleanTitle(candidate);
+      const codeCorpus = String(d.prescriptionNumber || d.code || d.rxCode || d.fileNumber || '').toUpperCase();
+
+      if (codeCorpus.includes('AATEL') && !/telo/i.test(baseTitle)) {
+        return baseTitle && baseTitle !== 'Compounded Prescription'
+          ? `Fagron TeloTest · ${baseTitle}`
+          : 'Fagron TeloTest';
+      }
+      if (codeCorpus.includes('AATRI') && !/tricho/i.test(baseTitle)) {
+        return baseTitle && baseTitle !== 'Compounded Prescription'
+          ? `Fagron TrichoTest · ${baseTitle}`
+          : 'Fagron TrichoTest';
+      }
+      if (codeCorpus.includes('AAACN') && !/acne/i.test(baseTitle)) {
+        return baseTitle && baseTitle !== 'Compounded Prescription'
+          ? `Fagron AcneTest · ${baseTitle}`
+          : 'Fagron AcneTest';
+      }
+      if (codeCorpus.includes('AANUT') && !/nutri/i.test(baseTitle)) {
+        return baseTitle && baseTitle !== 'Compounded Prescription'
+          ? `Fagron NutriGen · ${baseTitle}`
+          : 'Fagron NutriGen';
+      }
+      return baseTitle;
     };
 
     const resolvePartsCount = (d = {}) => {
@@ -74,13 +97,44 @@ export async function GET(request) {
       return Math.max(1, Number(rawCount || 1) - removedLen);
     };
 
-    // Helper to format/extract date cleanly
+    // Helper to extract epoch milliseconds from Firestore Timestamp, Admin Timestamp, ISO string, or number
+    const extractTimestampMs = (raw) => {
+      if (!raw) return 0;
+      if (typeof raw?.toDate === 'function') {
+        try {
+          return raw.toDate().getTime() || 0;
+        } catch {
+          return 0;
+        }
+      }
+      if (typeof raw === 'object') {
+        const sec = raw._seconds ?? raw.seconds;
+        if (typeof sec === 'number') return sec * 1000;
+        return 0;
+      }
+      if (typeof raw === 'number') {
+        return raw < 1e12 ? raw * 1000 : raw;
+      }
+      if (typeof raw === 'string') {
+        const s = raw.trim();
+        const dmy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+        if (dmy) {
+          const parsedDmy = new Date(`${dmy[3]}-${dmy[2]}-${dmy[1]}T00:00:00Z`).getTime();
+          return Number.isNaN(parsedDmy) ? 0 : parsedDmy;
+        }
+        const parsed = new Date(s).getTime();
+        return Number.isNaN(parsed) ? 0 : parsed;
+      }
+      return 0;
+    };
+
+    // Helper to format/extract date cleanly (YYYY-MM-DD) with native Firestore metadata support
     const extractDate = (raw) => {
       if (!raw) return null;
-      if (typeof raw === 'object' && raw.seconds) {
+      const ms = extractTimestampMs(raw);
+      if (ms > 0) {
         try {
-          const d = new Date(raw.seconds * 1000);
-          return d.toISOString().slice(0, 10);
+          return new Date(ms).toISOString().slice(0, 10);
         } catch {
           return null;
         }
@@ -89,18 +143,43 @@ export async function GET(request) {
       return null;
     };
 
-    // ── 1. If query is empty, return latest ingested prescriptions from Firestore ordered by date ──
+    // ── 1. If query is empty, return latest ingested prescriptions from Firestore ordered by importedAt / createTime ──
     if (!query) {
       if (adminDb) {
         try {
-          const snap = await adminDb.collection('prescriptions')
-            .orderBy('createdAt', 'desc')
-            .limit(60)
-            .get();
+          let snap;
+          try {
+            snap = await adminDb.collection('prescriptions')
+              .orderBy('importedAt', 'desc')
+              .limit(120)
+              .get();
+          } catch {
+            snap = await adminDb.collection('prescriptions')
+              .limit(400)
+              .get();
+          }
+
+          const sortedDocs = [...snap.docs].sort((a, b) => {
+            const da = a.data();
+            const dbData = b.data();
+            const ta =
+              extractTimestampMs(da.importedAt) ||
+              extractTimestampMs(da.createdAt) ||
+              extractTimestampMs(da.uploadedAt) ||
+              extractTimestampMs(a.createTime) ||
+              extractTimestampMs(da.prescriptionDate || da.date);
+            const tb =
+              extractTimestampMs(dbData.importedAt) ||
+              extractTimestampMs(dbData.createdAt) ||
+              extractTimestampMs(dbData.uploadedAt) ||
+              extractTimestampMs(b.createTime) ||
+              extractTimestampMs(dbData.prescriptionDate || dbData.date);
+            return tb - ta;
+          });
 
           const seenPatientSignature = new Map();
 
-          snap.forEach(docSnap => {
+          sortedDocs.forEach(docSnap => {
             const d = docSnap.data();
             const rawCode = d.prescriptionNumber || d.code || d.fileNumber || docSnap.id;
             const code = cleanCodeStr(rawCode);
@@ -108,9 +187,23 @@ export async function GET(request) {
             const patName = d.patientName || d.patient?.name || 'Patient';
             const patKey = `${patName.toLowerCase().trim()}::${normCode}`;
             const resolvedTitle = resolveRxTitle(d);
-            const dateVal = extractDate(d.createdAt || d.uploadedAt || d.importedAt || d.prescriptionDate || d.date);
+            const importedDateVal = extractDate(
+              d.importedAt || d.createdAt || d.uploadedAt || docSnap.createTime || d.updatedAt
+            );
+            const dateVal = extractDate(
+              d.prescriptionDate || d.date || d.createdAt || d.importedAt || docSnap.createTime
+            );
             const partsCount = resolvePartsCount(d);
-            const sigKey = `${patName.toLowerCase().trim()}::${resolvedTitle.toLowerCase()}::${dateVal || ''}`;
+            const testTag = /AATEL/i.test(code)
+              ? 'AATEL'
+              : /AATRI/i.test(code)
+                ? 'AATRI'
+                : /AAACN/i.test(code)
+                  ? 'AAACN'
+                  : /AANUT/i.test(code)
+                    ? 'AANUT'
+                    : '';
+            const sigKey = `${patName.toLowerCase().trim()}::${testTag || resolvedTitle.toLowerCase()}::${dateVal || ''}`;
 
             if (normCode && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
               if (seenPatientSignature.has(sigKey)) {
@@ -143,7 +236,7 @@ export async function GET(request) {
                 title: resolvedTitle,
                 partsCount,
                 date: dateVal,
-                importedAt: extractDate(d.importedAt || d.createdAt || d.uploadedAt || d.updatedAt),
+                importedAt: importedDateVal,
                 a4PrintCount: d.a4PrintCount || d.printCount || 0,
                 lastPrintedA4At: extractDate(d.lastPrintedA4At),
                 status: d.status || d.state || 'approved',
@@ -252,6 +345,8 @@ export async function GET(request) {
             title: resolveRxTitle(hit),
             partsCount: resolvePartsCount(hit),
             date: extractDate(hit.prescriptionDate || hit.date || hit.dispensedDate || hit.createdAt || hit.created_at),
+            importedAt: extractDate(hit.importedAt || hit.createdAt || hit.created_at || hit.uploadedAt),
+            status: hit.status || hit.state || 'approved',
             source: 'algolia'
           });
         }
@@ -266,7 +361,7 @@ export async function GET(request) {
         let snap;
         try {
           snap = await adminDb.collection('prescriptions')
-            .orderBy('createdAt', 'desc')
+            .orderBy('importedAt', 'desc')
             .limit(400)
             .get();
         } catch {
@@ -296,6 +391,12 @@ export async function GET(request) {
               title: resolveRxTitle(d),
               partsCount: resolvePartsCount(d),
               date: extractDate(d.prescriptionDate || d.date || d.dispensedDate || d.createdAt || d.created_at),
+              importedAt: extractDate(d.importedAt || d.createdAt || d.uploadedAt || docSnap.createTime || d.updatedAt),
+              a4PrintCount: d.a4PrintCount || d.printCount || 0,
+              lastPrintedA4At: extractDate(d.lastPrintedA4At),
+              status: d.status || d.state || 'approved',
+              isSigned: Boolean(d.isSigned),
+              labeledParts: d.labeledParts || {},
               source: 'firestore'
             });
           }

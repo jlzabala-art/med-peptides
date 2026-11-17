@@ -158,17 +158,7 @@ export default function GlobalBottomStickyBar() {
     }
 
     if (pathname.startsWith('/calculator')) {
-      return {
-        summaryTitle: isSpanish ? 'Calculadora de Reconstitución' : 'Reconstitution & Dosing Calculator',
-        summarySubtitle: isSpanish ? 'Cálculo de precisión para viales' : 'Precision vial dosing & syringe units',
-        atlasAiLabel: isSpanish ? 'Verificar con Atlas AI' : 'Verify with Atlas AI',
-        secondaryAction: quoteAction,
-        primaryAction: {
-          label: isSpanish ? 'Ver Protocolos' : 'Protocols',
-          icon: <Compass size={14} />,
-          onClick: () => router.push('/proto'),
-        },
-      };
+      return { hidden: true };
     }
 
     return {

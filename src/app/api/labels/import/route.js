@@ -50,6 +50,7 @@ export async function POST(request) {
     }
 
     const now = admin.firestore.FieldValue.serverTimestamp();
+    const nowIso = new Date().toISOString();
     const batch = adminDb.batch();
     const created = [];
 
@@ -67,10 +68,11 @@ export async function POST(request) {
         atlasValidation: 'skipped',
         importChannel: 'public_labels_account_manager',
         code,
+        importedAt: nowIso,
         createdAt: now,
         updatedAt: now,
       });
-      created.push({ id: ref.id, code, patientName });
+      created.push({ id: ref.id, code, patientName, importedAt: nowIso });
     }
 
     await batch.commit();

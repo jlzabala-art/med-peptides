@@ -26,9 +26,12 @@ function detectTestKind(obj = {}, fallbackTestType = '') {
     obj?.protocolNumber,
     obj?.boxId,
     obj?.code,
+    obj?.rxCode,
+    obj?.prescriptionNumber,
     obj?.fileNumber,
     obj?.sourceContext,
     obj?.treatmentType,
+    obj?.treatmentTitle,
     obj?.title,
     obj?.testType,
     fallbackTestType,
@@ -40,7 +43,7 @@ function detectTestKind(obj = {}, fallbackTestType = '') {
   if (/AATRI|TRICHO/.test(corpus)) return 'TrichoTest';
   if (/AATEL|TELO/.test(corpus)) return 'TeloTest';
   if (/AAACN|ACNE/.test(corpus)) return 'AcneTest';
-  if (/24GEN|NUTRIGEN/.test(corpus)) return 'NutriGenomics';
+  if (/AANUT|24GEN|NUTRIGEN/.test(corpus)) return 'NutriGenomics';
   if (/BLOODO|NAD/.test(corpus)) return 'Biomarker Lab';
   return 'Compounded Rx';
 }
@@ -108,8 +111,11 @@ function classifyDuplicateMatch(existingRx, currentData, fallbackTestType = '') 
     if (daysApart === null || daysApart <= 7) return 'exact_duplicate';
     return 'refill_candidate';
   }
+  if (existingCode && currentCode && existingCode !== currentCode) {
+    return sameKind ? 'refill_candidate' : 'different_test';
+  }
   if (sameKind) {
-    if (daysApart !== null && daysApart <= 7) return 'exact_duplicate';
+    if (!currentCode && daysApart !== null && daysApart <= 7) return 'exact_duplicate';
     return 'refill_candidate';
   }
   return 'different_test';
@@ -275,7 +281,12 @@ export default function ImportPrescriptionModal({
             setImportMode('existing');
           } else if (classification === 'refill_candidate') {
             setImportMode('refill');
+          } else {
+            setImportMode('new');
           }
+        } else {
+          setRefillTargetRx(null);
+          setImportMode('new');
         }
       })
       .catch(() => {});
@@ -823,6 +834,7 @@ export default function ImportPrescriptionModal({
         isMultiPart: parts.length > 1,
         items: allMappedItems,
         prescriptionLines: allMappedItems,
+        importedAt: new Date().toISOString(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };

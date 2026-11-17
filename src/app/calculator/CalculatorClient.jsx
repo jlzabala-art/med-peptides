@@ -496,35 +496,25 @@ export default function CalculatorClient() {
             }}
           />
 
-          {/* Available Dosages + Delivery Format Selector */}
+          {/* Delivery Format Selector + Quick Active Strength Badge */}
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginRight: '4px' }}>
-                {isEs ? 'Dosis Disponibles:' : 'Available Dosages:'}
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                {isEs ? 'Vial Activo:' : 'Active Vial:'}
               </span>
-              {availableStrengths.map((s) => {
-                const isActive = selectedStrength.name === s.name;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setSelectedStrengthStr(s.name)}
-                    style={{
-                      minHeight: '34px',
-                      padding: '4px 11px',
-                      borderRadius: '8px',
-                      border: isActive ? '1.5px solid #003666' : '1px solid #cbd5e1',
-                      background: isActive ? '#003666' : '#ffffff',
-                      color: isActive ? '#ffffff' : '#334155',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {s.name}
-                  </button>
-                );
-              })}
+              <span
+                style={{
+                  padding: '3px 10px',
+                  borderRadius: '6px',
+                  background: '#e8f0fe',
+                  border: '1px solid #d2e3fc',
+                  color: '#1967d2',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                }}
+              >
+                {selectedProduct.name} · {selectedStrength.name}
+              </span>
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
@@ -567,6 +557,7 @@ export default function CalculatorClient() {
           activeFormat={activeFormat}
           availableFormats={FORMAT_OPTIONS}
           onFormatChange={setFormatId}
+          onStrengthChange={setSelectedStrengthStr}
           lang={lang}
         />
       </div>

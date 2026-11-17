@@ -42,6 +42,10 @@ export default function ProtocolCycleVialProcurementMatrix({
   product = null,
   currentDoseMg = 2.5,
   currentVialMg = 10,
+  currentBacMl = 1.0,
+  clinicalPhases = [],
+  availableVialOptions = [],
+  isDaily = false,
   onCalibratePhase = null,
   lang = 'en'
 }) {
@@ -50,24 +54,118 @@ export default function ProtocolCycleVialProcurementMatrix({
   const { user } = useAuth();
   const isAuthenticated = !!user;
 
+  const validVialMgs = useMemo(() => {
+    const nums = (availableVialOptions || [])
+      .map((o) => Number(typeof o === 'object' ? o.mg : o))
+      .filter((n) => Number.isFinite(n) && n > 0)
+      .sort((a, b) => a - b);
+    return nums.length > 0 ? nums : [currentVialMg || 10];
+  }, [availableVialOptions, currentVialMg]);
+
+  const pickCatalogVialMg = (targetPhaseApiMg, fallbackMg) => {
+    // Pick the smallest real catalog vial that can comfortably cover the phase or current selected vial
+    const match = validVialMgs.find((m) => m >= targetPhaseApiMg) || validVialMgs[validVialMgs.length - 1] || fallbackMg || 10;
+    return match;
+  };
+
+  // If no predefined strategy, construct an accurate 3-phase strategy from clinicalPhases & real catalog vials
+  const effectiveStrategy = useMemo(() => {
+    if (strategy && strategy.phases && strategy.phases.length > 0) {
+      return strategy;
+    }
+    const pName = product?.name || 'Peptide';
+    const cadenceSuffix = isDaily ? 'day' : 'week';
+    const dosesPerWeek = isDaily ? 7 : 1;
+    const bacMl = currentBacMl > 0 ? currentBacMl : 1.0;
+
+    if (Array.isArray(clinicalPhases) && clinicalPhases.length > 0) {
+      return {
+        name: pName,
+        indication: isDaily ? 'Daily Subcutaneous Reconstitution Protocol' : 'Weekly Clinical Titration Protocol',
+        phases: clinicalPhases.map((cp, idx) => {
+          const dMg = cp.unit === 'mcg' ? (Number(cp.dose) || 250) / 1000 : (Number(cp.dose) || 0.25);
+          const fourWeekApiMg = +(dMg * dosesPerWeek * 4).toFixed(2);
+          // For Phase 1, respect the user's selected vial if it matches catalog; for higher phases, pick best catalog vial
+          const recVialMg = idx === 0 && validVialMgs.includes(Number(currentVialMg))
+            ? Number(currentVialMg)
+            : pickCatalogVialMg(Math.min(fourWeekApiMg, validVialMgs[validVialMgs.length - 1] || 10), currentVialMg);
+          const concMgMl = recVialMg / bacMl;
+          const volMl = concMgMl > 0 ? dMg / concMgMl : 0;
+          const rawUnits = volMl * 100;
+          const fmtUnits = Number.isInteger(Math.round(rawUnits * 10) / 10)
+            ? Math.round(rawUnits)
+            : Number((Math.round(rawUnits * 10) / 10).toFixed(1));
+          const displayDose = cp.unit === 'mcg' ? `${cp.dose} mcg / ${cadenceSuffix}` : `${cp.dose} mg / ${cadenceSuffix}`;
+
+          return {
+            phaseId: cp.id || `phase_${idx + 1}`,
+            name: cp.title || `Phase ${idx + 1}: ${cp.name || 'Titration'}`,
+            targetDose: displayDose,
+            doseMg: dMg,
+            doseRaw: cp.dose,
+            doseUnit: cp.unit || 'mg',
+            dosesPerWeek,
+            recommendedVial: `${recVialMg} mg Vial`,
+            recommendedVialMg: recVialMg,
+            recommendedBacMl: bacMl,
+            resultUnits: fmtUnits,
+            volumeMl: +volMl.toFixed(3),
+            rationale: isDaily
+              ? `Daily subcutaneous micro-dosing (${displayDose}) using verified ${recVialMg} mg catalog presentation.`
+              : `Weekly subcutaneous dosing (${displayDose}) using verified ${recVialMg} mg catalog presentation.`
+          };
+        })
+      };
+    }
+
+    const baseDoseMg = currentDoseMg || 0.25;
+    return {
+      name: pName,
+      indication: 'Standard Clinical Titration Protocol',
+      phases: [1, 2, 3].map((step) => {
+        const dMg = +(baseDoseMg * step).toFixed(2);
+        const recVialMg = pickCatalogVialMg(dMg * dosesPerWeek * 4, currentVialMg);
+        const concMgMl = recVialMg / bacMl;
+        const volMl = concMgMl > 0 ? dMg / concMgMl : 0;
+        const rawUnits = volMl * 100;
+        const fmtUnits = Number.isInteger(Math.round(rawUnits * 10) / 10)
+          ? Math.round(rawUnits)
+          : Number((Math.round(rawUnits * 10) / 10).toFixed(1));
+        return {
+          phaseId: step === 1 ? 'initiation' : step === 2 ? 'escalation' : 'maintenance',
+          name: step === 1 ? 'Phase 1: Initiation' : step === 2 ? 'Phase 2: Escalation' : 'Phase 3: Maintenance',
+          targetDose: `${dMg} mg / ${cadenceSuffix}`,
+          doseMg: dMg,
+          dosesPerWeek,
+          recommendedVial: `${recVialMg} mg Vial`,
+          recommendedVialMg: recVialMg,
+          recommendedBacMl: bacMl,
+          resultUnits: fmtUnits,
+          volumeMl: +volMl.toFixed(3),
+          rationale: 'Clinical titration step.'
+        };
+      })
+    };
+  }, [strategy, product, currentDoseMg, currentVialMg, currentBacMl, clinicalPhases, isDaily, validVialMgs]);
+
   // Initialize phase weeks state (defaults to 4 weeks per phase)
   const defaultWeeksMap = useMemo(() => {
     const map = {};
-    if (strategy?.phases) {
-      strategy.phases.forEach(ph => {
+    if (effectiveStrategy?.phases) {
+      effectiveStrategy.phases.forEach(ph => {
         map[ph.phaseId] = 4;
       });
     }
     return map;
-  }, [strategy]);
+  }, [effectiveStrategy]);
 
   const [phaseWeeks, setPhaseWeeks] = useState(defaultWeeksMap);
 
   // Reset weeks if strategy changes
   const isModified = useMemo(() => {
-    if (!strategy?.phases) return false;
-    return strategy.phases.some(ph => (phaseWeeks[ph.phaseId] || 4) !== 4);
-  }, [strategy, phaseWeeks]);
+    if (!effectiveStrategy?.phases) return false;
+    return effectiveStrategy.phases.some(ph => (phaseWeeks[ph.phaseId] || 4) !== 4);
+  }, [effectiveStrategy, phaseWeeks]);
 
   const handleResetWeeks = () => {
     triggerHaptic('light');
@@ -84,68 +182,18 @@ export default function ProtocolCycleVialProcurementMatrix({
     });
   };
 
-  // If no predefined strategy, construct a generic 3-phase fallback from product
-  const effectiveStrategy = useMemo(() => {
-    if (strategy && strategy.phases && strategy.phases.length > 0) {
-      return strategy;
-    }
-    const pName = product?.name || 'Peptide';
-    return {
-      name: pName,
-      indication: 'Standard Clinical Titration Protocol',
-      phases: [
-        {
-          phaseId: 'initiation',
-          name: 'Phase 1: Initiation',
-          targetDose: `${currentDoseMg || 2.5} mg / week`,
-          doseMg: currentDoseMg || 2.5,
-          recommendedVial: `${currentVialMg || 10} mg Vial`,
-          recommendedVialMg: currentVialMg || 10,
-          recommendedBacMl: 2.0,
-          resultUnits: 50,
-          volumeMl: 0.5,
-          rationale: 'Initial titration to establish tolerability and pharmacodynamic response.'
-        },
-        {
-          phaseId: 'escalation',
-          name: 'Phase 2: Escalation',
-          targetDose: `${(currentDoseMg || 2.5) * 2} mg / week`,
-          doseMg: (currentDoseMg || 2.5) * 2,
-          recommendedVial: `${(currentVialMg || 10) * 2} mg Vial`,
-          recommendedVialMg: (currentVialMg || 10) * 2,
-          recommendedBacMl: 2.0,
-          resultUnits: 50,
-          volumeMl: 0.5,
-          rationale: 'Dose escalation for therapeutic acceleration.'
-        },
-        {
-          phaseId: 'maintenance',
-          name: 'Phase 3: Therapeutic Maintenance',
-          targetDose: `${(currentDoseMg || 2.5) * 3} mg / week`,
-          doseMg: (currentDoseMg || 2.5) * 3,
-          recommendedVial: `${(currentVialMg || 10) * 2} mg Vial`,
-          recommendedVialMg: (currentVialMg || 10) * 2,
-          recommendedBacMl: 2.0,
-          resultUnits: 50,
-          volumeMl: 0.5,
-          rationale: 'Steady-state maintenance regimen.'
-        }
-      ]
-    };
-  }, [strategy, product, currentDoseMg, currentVialMg]);
-
   // Calculations for each phase
   const calculatedPhases = useMemo(() => {
     return effectiveStrategy.phases.map(ph => {
-      const isMaintenance = ph.phaseId.includes('maintenance');
+      const isMaintenance = String(ph.phaseId || '').includes('maintenance') || String(ph.phaseId || '').includes('opt');
       const minW = 2;
       const maxW = isMaintenance ? 12 : 6;
       const weeks = phaseWeeks[ph.phaseId] ?? 4;
-      const dosesPerWeek = 1;
+      const dosesPerWeek = ph.dosesPerWeek || (isDaily ? 7 : 1);
       const totalDoses = weeks * dosesPerWeek;
       const totalApiMg = +(totalDoses * ph.doseMg).toFixed(2);
       
-      const vMg = ph.recommendedVialMg || 10;
+      const vMg = ph.recommendedVialMg || currentVialMg || 10;
       
       // USP <797> Sterility rule: A punctured multi-dose vial expires at 28 days (4 weeks)
       const vialsForSterilityTime = Math.ceil(weeks / 4);
@@ -155,7 +203,7 @@ export default function ProtocolCycleVialProcurementMatrix({
       const totalVialCapacityMg = +(vialsNeeded * vMg).toFixed(2);
       const unusedApiMg = Math.max(0, +(totalVialCapacityMg - totalApiMg).toFixed(2));
       const isUspSterilitySplit = weeks > 4 && vialsNeeded > 1;
-      const isCurrentActive = Math.abs(ph.doseMg - currentDoseMg) <= 0.05;
+      const isCurrentActive = Math.abs(ph.doseMg - currentDoseMg) <= 0.01;
 
       return {
         ...ph,
@@ -172,7 +220,7 @@ export default function ProtocolCycleVialProcurementMatrix({
         isCurrentActive
       };
     });
-  }, [effectiveStrategy, phaseWeeks, currentDoseMg]);
+  }, [effectiveStrategy, phaseWeeks, currentDoseMg, currentVialMg, isDaily]);
 
   // Filtered phases based on Scope
   const activePhasesToDisplay = useMemo(() => {
@@ -316,10 +364,10 @@ export default function ProtocolCycleVialProcurementMatrix({
       `Protocol Duration: ${basketSummary.totalWeeks} Weeks`,
       ``,
       `💉 *CURRENT TITRATION STEP (${activePh.name}):*`,
-      `• Target Weekly Dose: *${activePh.targetDose}*`,
+      `• Target Dose: *${activePh.targetDose}*`,
       `• Recommended Vial: ${activePh.recommendedVial}`,
-      `• Reconstitution Diluent: *${activePh.recommendedBacMl || 2.0} mL Bacteriostatic Water*`,
-      `• Volume to Draw: *50 Units (0.50 mL)* — Half of a U-100 syringe 🎯`,
+      `• Reconstitution Diluent: *${activePh.recommendedBacMl || currentBacMl || 1.0} mL Bacteriostatic Water*`,
+      `• Volume to Draw: *${activePh.resultUnits || 50} Units (${Number(activePh.volumeMl || 0.5).toFixed(2)} mL)* on U-100 syringe 🎯`,
       ``,
       `❄️ *COLD-CHAIN & STERILITY RULES:*`,
       `• Store reconstituted vial in refrigerator at 2°C – 8°C. Protect from light.`,
@@ -550,7 +598,7 @@ export default function ProtocolCycleVialProcurementMatrix({
                       {val}
                     </div>
                     <div className="pcvp-vial-dilution font-mono" style={{ color: '#0369a1', fontWeight: 600 }}>
-                      {ph.recommendedBacMl || 2.0} mL BAC → 50 UI (0.5 mL)
+                      {ph.recommendedBacMl || currentBacMl || 1.0} mL BAC → {ph.resultUnits || 50} UI ({Number(ph.volumeMl || 0.5).toFixed(2)} mL)
                     </div>
                   </div>
                 ),

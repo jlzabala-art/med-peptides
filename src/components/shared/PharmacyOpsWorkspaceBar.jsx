@@ -82,9 +82,8 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
         background: '#ffffff',
         borderBottom: '1px solid #dadce0',
         padding: '0 16px',
-        position: 'sticky',
-        top: '48px',
-        zIndex: 45,
+        position: 'relative',
+        zIndex: 35,
       }}
     >
       <div

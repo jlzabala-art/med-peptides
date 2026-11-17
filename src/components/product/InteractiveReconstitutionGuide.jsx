@@ -87,6 +87,7 @@ export default function InteractiveReconstitutionGuide({
   activeFormat = null,
   availableFormats = [],
   onFormatChange = null,
+  onStrengthChange = null,
   supplierName = '',
   lang = 'en',
   primaryProtocol = null,
@@ -354,7 +355,10 @@ export default function InteractiveReconstitutionGuide({
     const createPhase = (id, dose, unit, pLabel, name, title, badge, timing = '', phaseNum = 1) => {
       const dMg = unit === 'mcg' ? dose / 1000 : dose;
       const vol = conc > 0 ? dMg / conc : 0;
-      const units = Math.round(vol * 100);
+      const rawUnits = vol * 100;
+      const units = Number.isInteger(Math.round(rawUnits * 10) / 10)
+        ? Math.round(rawUnits)
+        : Number((Math.round(rawUnits * 10) / 10).toFixed(1));
       const doses = dMg > 0 ? Math.floor((vMg / dMg) * 10) / 10 : 0;
       return {
         id,
@@ -367,8 +371,10 @@ export default function InteractiveReconstitutionGuide({
         badge,
         timing,
         volMl: vol.toFixed(2),
+        volumeMl: vol,
         syringeUnits: units,
         dosesPerVial: doses,
+        injectionsPerVial: doses,
         subtitle: `${units} UI (${vol.toFixed(2)} mL) · ~${doses} ${lang === 'es' ? 'dosis' : 'doses'}`
       };
     };
@@ -1625,6 +1631,9 @@ export default function InteractiveReconstitutionGuide({
                   onClick={() => {
                     triggerHaptic('light');
                     setVialMg(opt.mg);
+                    if (typeof onStrengthChange === 'function') {
+                      onStrengthChange(opt.label || `${opt.mg} mg`);
+                    }
                   }}
                   className={`irg-pill-btn ${safeVialMg === opt.mg ? 'active' : ''}`}
                 >
@@ -2144,7 +2153,7 @@ export default function InteractiveReconstitutionGuide({
                     <div className="irg-pc-quick-reconstitution">
                       <span>💉 <strong>{phase.syringeUnits} UI</strong></span>
                       <span style={{ opacity: 0.5 }}>•</span>
-                      <span>{phase.injectionsPerVial} {lang === 'es' ? 'dosis' : 'doses'}</span>
+                      <span>{phase.injectionsPerVial ?? phase.dosesPerVial} {lang === 'es' ? 'dosis' : 'doses'}</span>
                     </div>
                     <div className="irg-pc-status">
                       {isActive ? (
@@ -2173,6 +2182,11 @@ export default function InteractiveReconstitutionGuide({
                   <span className="irg-pc-num font-mono">{doseValue}</span>
                   <span className="irg-pc-unit">{doseUnit}</span>
                 </div>
+                <div className="irg-pc-quick-reconstitution">
+                  <span>💉 <strong>{Number.isInteger(Math.round(syringeUnits * 10) / 10) ? Math.round(syringeUnits) : syringeUnits.toFixed(1)} UI</strong></span>
+                  <span style={{ opacity: 0.5 }}>•</span>
+                  <span>{totalDosesInVial} {lang === 'es' ? 'dosis' : 'doses'}</span>
+                </div>
                 <div className="irg-pc-status">
                   {activePhaseId === 'custom' ? (
                     <span className="irg-pc-status-active">✓ {lang === 'es' ? 'Dosis Activa' : 'Active Dose'}</span>
@@ -2182,57 +2196,6 @@ export default function InteractiveReconstitutionGuide({
                 </div>
               </button>
             </div>
-
-            {/* 📋 Reconstitution & Syringe Protocol Box for Active Phase */}
-            {activePhase && activePhaseId !== 'custom' && (
-              <div className="irg-active-phase-reconstitution-box">
-                <div className="irg-ap-recon-header">
-                  <div className="irg-ap-recon-title-wrap">
-                    <span className="irg-ap-num-tag">
-                      {lang === 'es' ? `FASE ${activePhase.phaseNum || 1}` : `PHASE ${activePhase.phaseNum || 1}`}
-                    </span>
-                    <h4 className="irg-ap-name">
-                      {activePhase.name} — {activePhase.dose} {activePhase.unit}
-                    </h4>
-                    {activePhase.timing && (
-                      <span className="irg-ap-timing">({activePhase.timing})</span>
-                    )}
-                  </div>
-                  <div className="irg-ap-recon-badge">
-                    <span>{lang === 'es' ? 'Concentración' : 'Concentration'}: <strong>{concentrationMgMl.toFixed(2)} mg/mL</strong></span>
-                  </div>
-                </div>
-
-                <div className="irg-ap-recon-steps-grid">
-                  <div className="irg-ap-step-card">
-                    <div className="irg-ap-step-num">① {lang === 'es' ? 'Reconstitución' : 'Reconstitution'}</div>
-                    <div className="irg-ap-step-desc">
-                      {lang === 'es'
-                        ? <>Disolver vial de <strong>{safeVialMg} mg</strong> con <strong>{safeBacMl.toFixed(1)} mL</strong> de agua bacteriostática (BAC).</>
-                        : <>Dissolve <strong>{safeVialMg} mg</strong> vial with <strong>{safeBacMl.toFixed(1)} mL</strong> bacteriostatic water (BAC).</>}
-                    </div>
-                  </div>
-
-                  <div className="irg-ap-step-card highlight">
-                    <div className="irg-ap-step-num">② {lang === 'es' ? 'Carga Jeringa U-100' : 'U-100 Syringe Draw'}</div>
-                    <div className="irg-ap-step-desc">
-                      {lang === 'es'
-                        ? <>Cargar exactamente <strong>{activePhase.syringeUnits} UI</strong> (={(Number(activePhase.volumeMl) || (Number(activePhase.syringeUnits || 0) * 0.01)).toFixed(2)} mL) en jeringa U-100.</>
-                        : <>Draw exactly <strong>{activePhase.syringeUnits} UI</strong> (={(Number(activePhase.volumeMl) || (Number(activePhase.syringeUnits || 0) * 0.01)).toFixed(2)} mL) in U-100 syringe.</>}
-                    </div>
-                  </div>
-
-                  <div className="irg-ap-step-card">
-                    <div className="irg-ap-step-num">③ {lang === 'es' ? 'Rendimiento Clínico' : 'Clinical Yield'}</div>
-                    <div className="irg-ap-step-desc">
-                      {lang === 'es'
-                        ? <>Rinde para <strong>{activePhase.injectionsPerVial || Math.floor(safeVialMg / (activePhase.unit === 'mcg' ? activePhase.dose / 1000 : activePhase.dose))} dosis</strong> ({activePhase.timing || `${activePhase.injectionsPerVial || 4} semanas`} de tratamiento).</>
-                        : <>Yields <strong>{activePhase.injectionsPerVial || Math.floor(safeVialMg / (activePhase.unit === 'mcg' ? activePhase.dose / 1000 : activePhase.dose))} doses</strong> ({activePhase.timing || `${activePhase.injectionsPerVial || 4} weeks`} treatment).</>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* 📱 Mobile: Segmented Pill Bar + Active Detail Summary Card */}
             <div className="irg-mobile-phase-container">
@@ -2711,25 +2674,25 @@ export default function InteractiveReconstitutionGuide({
                 />
               </div>
             )}
-            {/* Clinical Reconstitution Specifications & Hardware Card */}
+            {/* Clinical Reconstitution Specifications & Hardware Card (Compact, Zero Text Duplication) */}
             <div className="irg-reconstitution-specs-card">
               <div className="irg-specs-header">
                 <div className="irg-specs-title">
                   <Droplets size={15} color="#0284c7" />
-                  <span>{lang === 'es' ? 'Parámetros de Reconstitución & Hardware Aceptado' : 'Reconstitution Parameters & Aseptic Hardware'}</span>
+                  <span>{lang === 'es' ? 'Especificaciones Asépticas & Hardware' : 'Aseptic Hardware & Storage Specifications'}</span>
                 </div>
                 <span className="irg-specs-badge">USP &lt;797&gt; Compounding</span>
               </div>
 
               <div className="irg-specs-grid">
                 <div className="irg-spec-item">
-                  <div className="irg-spec-label">{lang === 'es' ? 'Solvente Recomendado' : 'Recommended Solvent'}</div>
+                  <div className="irg-spec-label">{lang === 'es' ? 'Diluyente Estéril' : 'Sterile Diluent'}</div>
                   <div className="irg-spec-content">
                     <div className="irg-spec-val">
-                      {dynamicSolventText || (lang === 'es' ? 'Agua Bacteriostática (BAC 0.9%)' : 'Bacteriostatic Water (BAC 0.9%)')}
+                      {lang === 'es' ? `${safeBacMl.toFixed(1)} mL Agua Bacteriostática (0.9% BA)` : `${safeBacMl.toFixed(1)} mL Bacteriostatic Water (0.9% BA)`}
                     </div>
                     <div className="irg-spec-desc font-mono">
-                      {safeBacMl.toFixed(1)} mL → {concentrationMgMl.toFixed(2)} mg/mL ({Math.round(concentrationMcgMl).toLocaleString()} mcg/mL)
+                      {concentrationMgMl.toFixed(2)} mg/mL ({Math.round(concentrationMcgMl).toLocaleString()} mcg/mL)
                     </div>
                   </div>
                 </div>
@@ -2739,7 +2702,7 @@ export default function InteractiveReconstitutionGuide({
                   <div className="irg-spec-content">
                     <div className="irg-spec-val">21G – 23G × 1.5" (38 mm)</div>
                     <div className="irg-spec-desc">
-                      {lang === 'es' ? 'Previene daño al tapón (coring) y alivia el vacío del vial' : 'Prevents stopper coring & normalizes vacuum pressure'}
+                      {lang === 'es' ? 'Previene daño al tapón y alivia el vacío' : 'Prevents stopper coring & normalizes vacuum'}
                     </div>
                   </div>
                 </div>
@@ -2749,7 +2712,7 @@ export default function InteractiveReconstitutionGuide({
                   <div className="irg-spec-content">
                     <div className="irg-spec-val">31G × 5/16" (8 mm) Ultra-Fine</div>
                     <div className="irg-spec-desc">
-                      {lang === 'es' ? 'Inyección subcutánea prácticamente indolora' : 'Virtually painless subcutaneous administration'}
+                      {lang === 'es' ? 'Inyección subcutánea indolora' : 'Virtually painless subcutaneous draw'}
                     </div>
                   </div>
                 </div>
@@ -2759,14 +2722,10 @@ export default function InteractiveReconstitutionGuide({
                   <div className="irg-spec-content">
                     <div className="irg-spec-val font-mono">❄️ 2°C – 8°C · 28 {lang === 'es' ? 'Días' : 'Days'}</div>
                     <div className="irg-spec-desc">
-                      {lang === 'es' ? 'Refrigerar protegido de la luz. No congelar post-disolución' : 'Keep refrigerated & dark. Do not freeze post-reconstitution'}
+                      {lang === 'es' ? 'Refrigerar en vertical. No congelar ni agitar' : 'Keep refrigerated upright. Do not freeze or shake'}
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="irg-specs-technique-tip">
-                💡 <strong>Reconstitution Technique:</strong> Direct the diluent stream gently along the interior glass wall, never directly onto the lyophilized powder cake. Roll slowly between palms without shaking vigorously to preserve tertiary peptide chains intact.
               </div>
             </div>
 
@@ -2824,7 +2783,7 @@ export default function InteractiveReconstitutionGuide({
                 color: isOverSyringe ? '#d97706' : '#003666',
                 fontFamily: 'monospace'
               }}>
-                {syringeUnits.toFixed(1)} <small style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7' }}>Units</small>
+                {Number.isInteger(Math.round(syringeUnits * 10) / 10) ? Math.round(syringeUnits) : syringeUnits.toFixed(1)} <small style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7' }}>Units</small>
               </span>
               <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>
                 ({liquidVolumeMl.toFixed(2)} mL)
@@ -2878,41 +2837,43 @@ export default function InteractiveReconstitutionGuide({
                 })}
               </div>
 
-              {/* Sweet Spot 50 UI / 0.5 mL Golden Standard Guideline */}
-              <div 
-                className="irg-sweet-spot-guide"
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: 0,
-                  bottom: 0,
-                  width: '2px',
-                  background: 'repeating-linear-gradient(to bottom, #0284c7, #0284c7 4px, transparent 4px, transparent 8px)',
-                  zIndex: 4,
-                  pointerEvents: 'none'
-                }}
-              >
-                <div style={{
-                  position: 'absolute',
-                  top: '-22px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: '#e0f2fe',
-                  border: '1px solid #7dd3fc',
-                  color: '#0369a1',
-                  fontSize: '0.62rem',
-                  fontWeight: 800,
-                  padding: '1px 6px',
-                  borderRadius: '4px',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px'
-                }}>
-                  🎯 50 UI Sweet Spot (0.5 mL)
+              {/* Sweet Spot 50 UI / 0.5 mL Golden Standard Guideline (shown when near 50 UI or using 50-UI strategy) */}
+              {(Math.abs(syringeUnits - 50) <= 5 || Boolean(fullStrategy?.phases?.length)) && (
+                <div 
+                  className="irg-sweet-spot-guide"
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: 0,
+                    bottom: 0,
+                    width: '2px',
+                    background: 'repeating-linear-gradient(to bottom, #0284c7, #0284c7 4px, transparent 4px, transparent 8px)',
+                    zIndex: 4,
+                    pointerEvents: 'none'
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: '-22px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: '#e0f2fe',
+                    border: '1px solid #7dd3fc',
+                    color: '#0369a1',
+                    fontSize: '0.62rem',
+                    fontWeight: 800,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px'
+                  }}>
+                    🎯 50 UI Sweet Spot (0.5 mL)
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Active Alignment Callout Arrow with dynamic safe clamping */}
               {syringeUnits > 0 && (
@@ -2928,7 +2889,7 @@ export default function InteractiveReconstitutionGuide({
                       <span>▲ 100 U max ({liquidVolumeMl.toFixed(2)} mL total)</span>
                     ) : (
                       <span>
-                        ▲ {syringeUnits.toFixed(1)} U ({liquidVolumeMl.toFixed(2)} mL)
+                        ▲ {Number.isInteger(Math.round(syringeUnits * 10) / 10) ? Math.round(syringeUnits) : syringeUnits.toFixed(1)} U ({liquidVolumeMl.toFixed(2)} mL)
                         {Math.abs(syringeUnits - 50) <= 2 && ' 🎯 Optimal'}
                       </span>
                     )}
@@ -2949,7 +2910,7 @@ export default function InteractiveReconstitutionGuide({
               <span>{t.syringeModelSpec || 'U-100 Insulin Syringe (1.0 mL = 100 Units · 1 Unit = 0.01 mL)'}</span>
             </div>
             <div style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: 600 }}>
-              🎯 Calibrated to 50 UI (0.50 mL — half syringe) for optimal patient comfort and zero tissue distension
+              🎯 Active Draw: {Number.isInteger(Math.round(syringeUnits * 10) / 10) ? Math.round(syringeUnits) : syringeUnits.toFixed(1)} UI ({liquidVolumeMl.toFixed(2)} mL) · {concentrationMgMl.toFixed(2)} mg/mL ({Math.round(concentrationMcgMl).toLocaleString()} mcg/mL)
             </div>
           </div>
         </div>
@@ -3029,7 +2990,7 @@ export default function InteractiveReconstitutionGuide({
                 {doseValue} {doseUnit}
               </div>
               <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>
-                {syringeUnits.toFixed(1)} Units · {liquidVolumeMl.toFixed(2)} mL
+                {Number.isInteger(Math.round(syringeUnits * 10) / 10) ? Math.round(syringeUnits) : syringeUnits.toFixed(1)} Units · {liquidVolumeMl.toFixed(2)} mL
               </span>
             </div>
 
@@ -3081,6 +3042,10 @@ export default function InteractiveReconstitutionGuide({
             product={product}
             currentDoseMg={doseMg}
             currentVialMg={safeVialMg}
+            currentBacMl={safeBacMl}
+            clinicalPhases={clinicalPhases}
+            availableVialOptions={productVialOptions}
+            isDaily={_isDaily}
             onCalibratePhase={(ph) => {
               triggerHaptic('selection');
               const targetVial = ph.recommendedVialMg || safeVialMg;
@@ -3089,16 +3054,24 @@ export default function InteractiveReconstitutionGuide({
               isCalibratingRef.current = 2;
               setVialMg(targetVial);
               setBacWaterMl(targetBac);
-              setDoseUnit('mg');
-              setDoseValue(ph.doseMg);
+              if (typeof onStrengthChange === 'function') {
+                onStrengthChange(`${targetVial} mg`);
+              }
+              if (ph.doseUnit === 'mcg' && ph.doseRaw) {
+                setDoseUnit('mcg');
+                setDoseValue(ph.doseRaw);
+              } else {
+                setDoseUnit('mg');
+                setDoseValue(ph.doseMg);
+              }
               if (ph.phaseId) {
                 setSelectedPhaseId(ph.phaseId);
-                updateUrlParams(ph.phaseId, ph.doseMg, 'mg');
+                updateUrlParams(ph.phaseId, ph.doseUnit === 'mcg' && ph.doseRaw ? ph.doseRaw : ph.doseMg, ph.doseUnit || 'mg');
               }
               notifier.info(
                 lang === 'es'
-                  ? `⚡ Calibrado a ${ph.name}: ${ph.doseMg} mg en vial de ${targetVial} mg (${ph.resultUnits || 50} UI)`
-                  : `⚡ Calibrated to ${ph.name}: ${ph.doseMg} mg · ${targetVial} mg vial (${ph.resultUnits || 50} UI)`
+                  ? `⚡ Calibrado a ${ph.name}: ${ph.targetDose || `${ph.doseMg} mg`} en vial de ${targetVial} mg (${ph.resultUnits || 50} UI)`
+                  : `⚡ Calibrated to ${ph.name}: ${ph.targetDose || `${ph.doseMg} mg`} · ${targetVial} mg vial (${ph.resultUnits || 50} UI)`
               );
               const syringeEl = document.getElementById('irg-syringe-section');
               if (syringeEl) {
@@ -3111,13 +3084,49 @@ export default function InteractiveReconstitutionGuide({
 
       </div>
 
-      {/* ── Visual Step-by-Step Clinical Handling Protocol Stepper (Low Text, Highly Graphical) ── */}
-      <ClinicalHandlingProtocolStepper
-        product={product}
-        activeFormatId={activeFormatId}
-        lang={lang}
-        dynamicSolventText={dynamicSolventText}
-      />
+      {/* ── Collapsible Step-by-Step Aseptic Handling Protocol (Progressive Disclosure · Rule #26) ── */}
+      <details
+        style={{
+          marginTop: '12px',
+          background: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '10px',
+          overflow: 'hidden',
+        }}
+      >
+        <summary
+          style={{
+            padding: '12px 16px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontWeight: 700,
+            fontSize: '0.84rem',
+            color: '#1a73e8',
+            background: '#f8fafc',
+            listStyle: 'none',
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Sparkles size={15} color="#1a73e8" />
+            <span>
+              {lang === 'es'
+                ? 'Ver Guía Paso a Paso de Reconstitución Aséptica y Administración (4 Pasos)'
+                : 'View Step-by-Step Aseptic Reconstitution & Administration Guide (4 Steps)'}
+            </span>
+          </span>
+          <ChevronDown size={16} color="#5f6368" />
+        </summary>
+        <div style={{ padding: '8px 12px 14px', borderTop: '1px solid #e2e8f0' }}>
+          <ClinicalHandlingProtocolStepper
+            product={product}
+            activeFormatId={activeFormatId}
+            lang={lang}
+            dynamicSolventText={dynamicSolventText}
+          />
+        </div>
+      </details>
 
       {/* ── Prescriber Directive & Clinical Governance Notice (Pharma English) ── */}
       <div className="irg-prescriber-notice">

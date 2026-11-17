@@ -337,14 +337,24 @@ export default function PricingDataTable({
         {hasStrengthVariants && (
           <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
             <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.5rem' }}>
-              All Standardized Strengths ({row.variants.length}) · Pack: {row.packSize || row.volume} · Prices incl. VAT (EUR)
+              All Standardized Strengths ({row.variants.length}) · Pack: {row.packSize || row.volume} · Prices incl. VAT (EUR) — Click any strength to copy Rx line
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {row.variants.map((v) => {
                 const isRef = v.tierRole === 'lowest' || v.tierRole === 'middle' || v.tierRole === 'highest';
+                const eurPrice = Number(v.costPriceEur || v.price_eur || 0).toFixed(2);
+                const rxLine = `${row.name} — ${v.strength} (${row.packSize || row.volume || 'Pack'}) · €${eurPrice}`;
                 return (
-                  <div
+                  <button
                     key={v.id || v.strength}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText(rxLine);
+                      }
+                    }}
+                    title={`Click to copy: ${rxLine}`}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -354,18 +364,19 @@ export default function PricingDataTable({
                       background: isRef ? '#eff6ff' : '#ffffff',
                       border: isRef ? '1px solid #93c5fd' : '1px solid #cbd5e1',
                       fontSize: '0.74rem',
+                      cursor: 'pointer',
                     }}
                   >
                     <span style={{ fontWeight: 700, color: '#0f172a' }}>{v.strength}</span>
                     <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#047857' }}>
-                      €{Number(v.costPriceEur || v.price_eur || 0).toFixed(2)}
+                      €{eurPrice}
                     </span>
                     {isRef && (
                       <span style={{ fontSize: '0.60rem', fontWeight: 800, textTransform: 'uppercase', color: '#1d4ed8', background: '#dbeafe', padding: '0 4px', borderRadius: '3px' }}>
                         {v.tierRole}
                       </span>
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>
