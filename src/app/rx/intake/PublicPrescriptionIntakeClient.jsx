@@ -238,7 +238,7 @@ export default function PublicPrescriptionIntakeClient() {
         />
       </main>
 
-      <PublicUnifiedFooter lang={lang} minimal={true} />
+      <PublicUnifiedFooter lang={lang} />
     </div>
   );
 }

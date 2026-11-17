@@ -23,6 +23,7 @@ import { useLabelsPrescriptionActions } from './hooks/useLabelsPrescriptionActio
 import { LabelsWorkspaceProvider } from './context/LabelsWorkspaceContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import {
@@ -656,7 +657,8 @@ export default function PublicLabelsAppClient({
           ]}
         />
       )}
-      {!embedded && <PharmacyOpsWorkspaceBar lang={lang} />}
+      <PharmacyOpsWorkspaceBar lang={lang} />
+      {(patientQueue.length > 0 || embedded) && (
       <LabelsHeader
         hideTopChrome={!embedded}
         searchBoxRef={searchBoxRef}
@@ -707,6 +709,7 @@ export default function PublicLabelsAppClient({
           highlightedIndex={highlightedIndex}
         />
       </LabelsHeader>
+      )}
 
       {/* Show Batch Bar when multi-patient batch is active or approvals are pending */}
       {showBatchBar && (
@@ -964,6 +967,8 @@ export default function PublicLabelsAppClient({
         onClose={() => setShowShortcutsModal(false)}
         isEs={isEs}
       />
+
+      {!embedded && <PublicUnifiedFooter lang={lang} />}
     </div>
     </LabelsWorkspaceProvider>
   );

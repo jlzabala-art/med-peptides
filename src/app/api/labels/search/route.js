@@ -40,10 +40,38 @@ export async function GET(request) {
         .replace(/[^a-z0-9]/g, '');
     };
 
-    // Clean clinical title to remove extraction artifacts
+    // Clean clinical title to remove extraction artifacts and surface real medication/formula name
     const cleanTitle = (raw) => {
       if (!raw) return 'Compounded Prescription';
       return String(raw).replace(/\s*\(Sample Code.*?\)/gi, '').trim() || 'Compounded Prescription';
+    };
+
+    const resolveRxTitle = (d = {}) => {
+      const candidate =
+        d.medication ||
+        d.productName ||
+        d.treatmentTitle ||
+        d.title ||
+        d.formulaName ||
+        d.treatmentType ||
+        d.items?.[0]?.name ||
+        d.items?.[0]?.productName ||
+        d.parts?.[0]?.formulaName ||
+        d.formulationBlocks?.[0]?.treatmentType ||
+        '';
+      return cleanTitle(candidate);
+    };
+
+    const resolvePartsCount = (d = {}) => {
+      const rawCount =
+        (Array.isArray(d.parts) && d.parts.length > 0 && d.parts.length) ||
+        (Array.isArray(d.formulationBlocks) && d.formulationBlocks.length > 0 && d.formulationBlocks.length) ||
+        (Array.isArray(d.phases) && d.phases.length > 0 && d.phases.length) ||
+        (Array.isArray(d.pharmacyLabels) && d.pharmacyLabels.length > 0 && d.pharmacyLabels.length) ||
+        (Array.isArray(d.items) && d.items.length > 0 && d.items.length) ||
+        Number(d.partsCount || d.itemsCount || 1);
+      const removedLen = Array.isArray(d.removedParts) ? d.removedParts.length : 0;
+      return Math.max(1, Number(rawCount || 1) - removedLen);
     };
 
     // Helper to format/extract date cleanly
@@ -70,6 +98,8 @@ export async function GET(request) {
             .limit(60)
             .get();
 
+          const seenPatientSignature = new Map();
+
           snap.forEach(docSnap => {
             const d = docSnap.data();
             const rawCode = d.prescriptionNumber || d.code || d.fileNumber || docSnap.id;
@@ -77,10 +107,32 @@ export async function GET(request) {
             const normCode = normalizeCode(code);
             const patName = d.patientName || d.patient?.name || 'Patient';
             const patKey = `${patName.toLowerCase().trim()}::${normCode}`;
+            const resolvedTitle = resolveRxTitle(d);
+            const dateVal = extractDate(d.createdAt || d.uploadedAt || d.importedAt || d.prescriptionDate || d.date);
+            const partsCount = resolvePartsCount(d);
+            const sigKey = `${patName.toLowerCase().trim()}::${resolvedTitle.toLowerCase()}::${dateVal || ''}`;
 
             if (normCode && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
+              if (seenPatientSignature.has(sigKey)) {
+                const existingIdx = seenPatientSignature.get(sigKey);
+                const existingItem = results[existingIdx];
+                // Prefer the more descriptive nominal code (e.g. RX-UAE-NAWAL-GLP3-30MG over RX-UAE-GLP3-30MG)
+                if (existingItem && String(code).length > String(existingItem.code).length) {
+                  results[existingIdx] = {
+                    ...existingItem,
+                    id: docSnap.id,
+                    code: String(code),
+                    fileNumber: d.fileNumber || String(code),
+                  };
+                }
+                seenCodes.add(normCode);
+                seenPatientCodes.add(patKey);
+                return;
+              }
+
               seenCodes.add(normCode);
               seenPatientCodes.add(patKey);
+              seenPatientSignature.set(sigKey, results.length);
               results.push({
                 id: docSnap.id,
                 code: String(code),
@@ -88,8 +140,9 @@ export async function GET(request) {
                 patientName: patName,
                 doctorName: d.doctorName || d.treatingDoctor?.name || 'Treating Physician',
                 clinicName: d.clinicName || d.clinic || '',
-                title: cleanTitle(d.treatmentTitle || d.title || d.formulaName),
-                date: extractDate(d.createdAt || d.uploadedAt || d.importedAt || d.prescriptionDate || d.date),
+                title: resolvedTitle,
+                partsCount,
+                date: dateVal,
                 importedAt: extractDate(d.importedAt || d.createdAt || d.uploadedAt || d.updatedAt),
                 a4PrintCount: d.a4PrintCount || d.printCount || 0,
                 lastPrintedA4At: extractDate(d.lastPrintedA4At),
@@ -196,7 +249,8 @@ export async function GET(request) {
             patientName: patName,
             doctorName: hit.doctorName || hit.treatingDoctor?.name || 'Treating Physician',
             clinicName: hit.clinicName || hit.clinic || '',
-            title: cleanTitle(hit.treatmentTitle || hit.title || hit.formulaName),
+            title: resolveRxTitle(hit),
+            partsCount: resolvePartsCount(hit),
             date: extractDate(hit.prescriptionDate || hit.date || hit.dispensedDate || hit.createdAt || hit.created_at),
             source: 'algolia'
           });
@@ -239,7 +293,8 @@ export async function GET(request) {
               patientName: pName || 'Patient',
               doctorName: d.doctorName || d.treatingDoctor?.name || 'Treating Physician',
               clinicName: d.clinicName || d.clinic || '',
-              title: cleanTitle(d.treatmentTitle || d.title || d.formulaName),
+              title: resolveRxTitle(d),
+              partsCount: resolvePartsCount(d),
               date: extractDate(d.prescriptionDate || d.date || d.dispensedDate || d.createdAt || d.created_at),
               source: 'firestore'
             });

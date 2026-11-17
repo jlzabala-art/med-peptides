@@ -159,6 +159,28 @@ export default function LabelsHomeView({
             </div>
 
             <div className="pls-worklist-tabs-scroll" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {onOpenImport && (
+                <button
+                  type="button"
+                  onClick={onOpenImport}
+                  style={{
+                    padding: '7px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#1a73e8',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <Upload size={14} color="#1a73e8" />
+                  <span>{isEs ? 'Importar Receta' : 'Import Rx'}</span>
+                </button>
+              )}
               {onOpenManualRx && (
                 <button
                   type="button"
@@ -392,6 +414,66 @@ export default function LabelsHomeView({
                           <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
                             {p.title || p.treatmentTitle || 'Prescription protocol'}
                           </span>
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    key: 'parts',
+                    label: isEs ? 'Partes' : 'Parts',
+                    align: 'left',
+                    render: (_val, p) => {
+                      const totalParts = Math.max(
+                        1,
+                        Number(
+                          p.partsCount ||
+                            (Array.isArray(p.parts) ? p.parts.length : 0) ||
+                            (Array.isArray(p.formulationBlocks) ? p.formulationBlocks.length : 0) ||
+                            (Array.isArray(p.items) ? p.items.length : 0) ||
+                            1
+                        )
+                      );
+                      const labeledCount = p.labeledParts && typeof p.labeledParts === 'object'
+                        ? Object.values(p.labeledParts).filter(Boolean).length
+                        : 0;
+                      const isMulti = totalParts > 1;
+                      return (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '3px 8px',
+                              borderRadius: '999px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              background: isMulti ? '#e8f0fe' : '#f1f5f9',
+                              color: isMulti ? '#1a73e8' : '#475569',
+                              border: isMulti ? '1px solid #bfdbfe' : '1px solid #cbd5e1',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            <Layers size={11} />
+                            <span>
+                              {totalParts} {totalParts === 1 ? (isEs ? 'Parte' : 'Part') : (isEs ? 'Partes' : 'Parts')}
+                            </span>
+                          </span>
+                          {labeledCount > 0 && (
+                            <span
+                              style={{
+                                fontSize: '0.66rem',
+                                fontWeight: 700,
+                                color: '#166534',
+                                background: '#dcfce7',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {labeledCount}/{totalParts} ✓
+                            </span>
+                          )}
                         </div>
                       );
                     },
