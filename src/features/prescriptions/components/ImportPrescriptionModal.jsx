@@ -133,20 +133,20 @@ function validateCompoundingReadiness(data) {
   } else {
     blocks.forEach((blk, idx) => {
       const fNum = idx + 1;
-      if (!String(blk?.dosageForm || '').trim()) {
+      if (!String(blk?.dispensingForm || blk?.treatmentType || blk?.dosageForm || '').trim()) {
         missing.push({ key: `form-${idx}`, label: `Formula ${fNum}: Dosage Form` });
       }
       if (!String(blk?.volume || '').trim()) {
         missing.push({ key: `vol-${idx}`, label: `Formula ${fNum}: Total Volume / Qty` });
       }
-      if (!String(blk?.directions || blk?.posology || '').trim()) {
+      if (!String(blk?.posology || blk?.directions || '').trim()) {
         missing.push({ key: `dir-${idx}`, label: `Formula ${fNum}: Posology / Directions` });
       }
-      const apis = Array.isArray(blk?.apis) ? blk.apis : [];
+      const apis = Array.isArray(blk?.items) ? blk.items : (Array.isArray(blk?.apis) ? blk.apis : []);
       if (apis.length === 0) {
         missing.push({ key: `apis-${idx}`, label: `Formula ${fNum}: Active Ingredients` });
       } else {
-        const missingConc = apis.some((a) => !String(a?.name || '').trim() || !String(a?.dose || a?.strength || a?.concentration || '').trim());
+        const missingConc = apis.some((a) => !String(a?.name || a?.ingredient || '').trim() || !String(a?.dose || a?.strength || a?.concentration || a?.quantity || '').trim());
         if (missingConc) {
           missing.push({ key: `conc-${idx}`, label: `Formula ${fNum}: API Name & Concentration` });
         }
@@ -270,7 +270,9 @@ export default function ImportPrescriptionModal({
         }
         if (preferredTarget) {
           setRefillTargetRx(preferredTarget);
-          if (classification === 'refill_candidate') {
+          if (classification === 'exact_duplicate') {
+            setImportMode('existing');
+          } else if (classification === 'refill_candidate') {
             setImportMode('refill');
           }
         }
@@ -532,6 +534,25 @@ export default function ImportPrescriptionModal({
   // Confirm and persist import
   const handleConfirmImport = async () => {
     if (!reviewData) return;
+
+    // 3rd Option: Use Existing (recently uploaded / duplicate) without creating a duplicate or refill
+    if (importMode === 'existing' && refillTargetRx) {
+      const existingCode = refillTargetRx.code || refillTargetRx.id;
+      toast.success(`Loaded existing prescription #${existingCode} ✓`);
+      if (onImported) {
+        onImported([{
+          ...refillTargetRx,
+          id: refillTargetRx.id || existingCode,
+          code: existingCode,
+          patientName: refillTargetRx.patientName || reviewData.patientName,
+          reusedExisting: true
+        }]);
+      }
+      resetState();
+      if (onClose) onClose();
+      return;
+    }
+
     try {
       setIsSaving(true);
 
@@ -1074,7 +1095,27 @@ export default function ImportPrescriptionModal({
                           </span>
                         </div>
                         {algoliaMatches.prescriptions.length > 0 && !isDiffTest && (
-                          <div style={{ display: 'flex', gap: '6px' }}>
+                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => setImportMode('existing')}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                border: importMode === 'existing' ? '1px solid #0d9488' : '1px solid #cbd5e1',
+                                background: importMode === 'existing' ? '#0d9488' : '#ffffff',
+                                color: importMode === 'existing' ? '#ffffff' : '#334155',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              <Check size={12} />
+                              <span>Use Existing (#{refillTargetRx?.code || refillTargetRx?.id})</span>
+                            </button>
                             <button
                               type="button"
                               onClick={() => setImportMode('refill')}
@@ -2125,11 +2166,13 @@ export default function ImportPrescriptionModal({
                   <>
                     <Check size={16} />
                     <span>
-                      {importMode === 'refill' && refillTargetRx
-                        ? `Confirm Refill (#${refillTargetRx.code || refillTargetRx.id})`
-                        : reviewData.isLabResult
-                          ? 'Confirm & Import Lab Result'
-                          : 'Confirm & Import Prescription'}
+                      {importMode === 'existing' && refillTargetRx
+                        ? `Use Existing (#${refillTargetRx.code || refillTargetRx.id})`
+                        : importMode === 'refill' && refillTargetRx
+                          ? `Confirm Refill (#${refillTargetRx.code || refillTargetRx.id})`
+                          : reviewData.isLabResult
+                            ? 'Confirm & Import Lab Result'
+                            : 'Confirm & Import Prescription'}
                     </span>
                   </>
                 )}

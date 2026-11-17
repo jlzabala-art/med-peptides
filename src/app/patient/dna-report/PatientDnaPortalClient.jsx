@@ -1400,7 +1400,7 @@ export default function PatientDnaPortalClient({
               </button>
 
               <a
-                href={mealPlanPdfUrlLight}
+                href={isNutritionistView ? mealPlanPdfUrl : mealPlanPdfUrlLight}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -1418,8 +1418,30 @@ export default function PatientDnaPortalClient({
                 }}
               >
                 <Printer size={14} />
-                <span>Print Kitchen Guide (5p)</span>
+                <span>{isNutritionistView ? 'Nutritionist Dossier PDF' : 'Print Kitchen Guide (5p)'}</span>
               </a>
+
+              {isNutritionistView && (
+                <a
+                  href={`/rx/intake?patient=${encodeURIComponent(patientName)}&dna=${encodeURIComponent(sampleCode)}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    borderRadius: '4px',
+                    backgroundColor: '#003666',
+                    color: '#ffffff',
+                    border: '1px solid #003666',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <Pill size={14} />
+                  <span>{selectedLanguage === 'es' ? 'Crear Prescripción / Plan' : 'Create Rx / Supplement Plan'}</span>
+                </a>
+              )}
             </div>
           </aside>
 

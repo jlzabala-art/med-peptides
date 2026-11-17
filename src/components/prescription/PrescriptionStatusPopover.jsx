@@ -41,6 +41,7 @@ export default function PrescriptionStatusPopover({
   } = usePrescriptionStatus(prescription, { cleanCode, role, isEs, onUpdated });
 
   const [isOpen, setIsOpen] = useState(false);
+  const [activeStep, setActiveStep] = useState('paymentStatus');
   const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0 });
   const containerRef = useRef(null);
   const triggerRef = useRef(null);
@@ -50,8 +51,8 @@ export default function PrescriptionStatusPopover({
       const rect = triggerRef.current.getBoundingClientRect();
       const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
       const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-      const left = Math.min(Math.max(12, rect.left), vw - 326);
-      const top = rect.bottom + 360 > vh ? Math.max(12, rect.top - 360) : rect.bottom + 6;
+      const left = Math.min(Math.max(12, rect.left), vw - 356);
+      const top = rect.bottom + 240 > vh ? Math.max(12, rect.top - 240) : rect.bottom + 6;
       setPopoverPos({ top, left });
     }
     resetDraft();
@@ -131,21 +132,21 @@ export default function PrescriptionStatusPopover({
             top: `${popoverPos.top}px`,
             left: `${popoverPos.left}px`,
             zIndex: 1200,
-            width: 'min(310px, calc(100vw - 32px))',
-            maxWidth: '92vw',
+            width: 'min(344px, calc(100vw - 24px))',
+            maxWidth: '94vw',
             background: '#ffffff',
             border: '1px solid #cbd5e1',
-            borderRadius: '12px',
-            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.18)',
+            borderRadius: '10px',
+            boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
             padding: '12px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '9px',
+            gap: '10px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'Ciclo de Vida Multi-Rol' : 'Multi-Role Lifecycle'}
+            <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? 'Ciclo de Vida · 1 Clic' : 'Lifecycle Stepper · 1-Click'}
             </span>
             <button
               type="button"
@@ -156,92 +157,94 @@ export default function PrescriptionStatusPopover({
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569' }}>
-              1. Clinical Review (Doctor)
-            </label>
-            <select
-              disabled={!editableAxes.includes('clinicalStatus') || isSaving}
-              value={draft.clinicalStatus}
-              onChange={(e) => updateDraftAxis('clinicalStatus', e.target.value)}
-              style={{ fontSize: '0.76rem', padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc' }}
-            >
-              {CLINICAL_STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
+          {/* 5-Step GCP Horizontal Stepper */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '4px' }}>
+            {[
+              { key: 'clinicalStatus', short: '1. Clinical', done: draft.clinicalStatus === 'approved' },
+              { key: 'paymentStatus', short: '2. Pay', done: draft.paymentStatus === 'paid' || draft.paymentStatus === 'invoiced_b2b' },
+              { key: 'productionStatus', short: '3. Lab', done: draft.productionStatus === 'qc_passed' || draft.productionStatus === 'dispensed', locked: !productionUnlocked },
+              { key: 'labelStatus', short: '4. Label', done: draft.labelStatus === 'printed' || draft.labelStatus === 'labeled' },
+              { key: 'logisticsStatus', short: '5. Ship', done: draft.logisticsStatus === 'delivered' || draft.logisticsStatus === 'in_transit_hub' },
+            ].map((step) => {
+              const isSelected = activeStep === step.key;
+              return (
+                <button
+                  key={step.key}
+                  type="button"
+                  onClick={() => setActiveStep(step.key)}
+                  style={{
+                    padding: '5px 3px',
+                    borderRadius: '6px',
+                    border: isSelected ? '1.5px solid #1a73e8' : '1px solid #e2e8f0',
+                    background: isSelected ? '#e8f0fe' : step.done ? '#f0fdf4' : '#f8fafc',
+                    color: isSelected ? '#1a73e8' : step.done ? '#15803d' : '#64748b',
+                    fontSize: '0.64rem',
+                    fontWeight: 750,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {step.locked ? '🔒 ' : step.done ? '✓ ' : ''}{step.short}
+                </button>
+              );
+            })}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569' }}>
-              2. Payment / Billing Gate
-            </label>
-            <select
-              disabled={!editableAxes.includes('paymentStatus') || isSaving}
-              value={draft.paymentStatus}
-              onChange={(e) => updateDraftAxis('paymentStatus', e.target.value)}
-              style={{ fontSize: '0.76rem', padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc' }}
-            >
-              {PAYMENT_STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
-          </div>
+          {/* Active Step 1-Click Segmented Pills (No native <select>) */}
+          {(() => {
+            const stepMap = {
+              clinicalStatus: { label: '1. Clinical Review (Doctor)', options: CLINICAL_STATUSES },
+              paymentStatus: { label: '2. Payment / Billing Gate', options: PAYMENT_STATUSES },
+              productionStatus: { label: '3. Production (Supplier / Lab)', options: PRODUCTION_STATUSES, locked: !productionUnlocked },
+              labelStatus: { label: '4. Label & GMP Print', options: LABEL_STATUSES },
+              logisticsStatus: { label: '5. Logistics & Customs', options: LOGISTICS_STATUSES },
+            };
+            const current = stepMap[activeStep] || stepMap.paymentStatus;
+            const canEditStep = editableAxes.includes(activeStep) && !isSaving;
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <label style={{ fontSize: '0.68rem', fontWeight: 700, color: productionUnlocked ? '#475569' : '#b45309', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {!productionUnlocked && <Lock size={11} />}
-              <span>3. Production (Supplier / Lab)</span>
-            </label>
-            {!productionUnlocked ? (
-              <div style={{ fontSize: '0.71rem', color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '5px 8px' }}>
-                Locked: requires Clinical Approval + Payment before compounding.
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#334155' }}>
+                  {current.label}
+                </div>
+                {current.locked ? (
+                  <div style={{ fontSize: '0.71rem', color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '6px 8px' }}>
+                    🔒 Locked: requires Clinical Approval + Payment before compounding.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                    {current.options.map((opt) => {
+                      const isActive = draft[activeStep] === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          disabled={!canEditStep}
+                          onClick={() => updateDraftAxis(activeStep, opt.value)}
+                          style={{
+                            padding: '4px 9px',
+                            borderRadius: '6px',
+                            border: isActive ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                            background: isActive ? '#1a73e8' : '#ffffff',
+                            color: isActive ? '#ffffff' : '#334155',
+                            fontSize: '0.71rem',
+                            fontWeight: isActive ? 700 : 600,
+                            cursor: canEditStep ? 'pointer' : 'not-allowed',
+                            opacity: canEditStep ? 1 : 0.6,
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            ) : (
-              <select
-                disabled={!editableAxes.includes('productionStatus') || isSaving}
-                value={draft.productionStatus}
-                onChange={(e) => updateDraftAxis('productionStatus', e.target.value)}
-                style={{ fontSize: '0.76rem', padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc' }}
-              >
-                {PRODUCTION_STATUSES.map((s) => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569' }}>
-              4. Label &amp; GMP Print
-            </label>
-            <select
-              disabled={!editableAxes.includes('labelStatus') || isSaving}
-              value={draft.labelStatus}
-              onChange={(e) => updateDraftAxis('labelStatus', e.target.value)}
-              style={{ fontSize: '0.76rem', padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc' }}
-            >
-              {LABEL_STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569' }}>
-              5. Logistics &amp; Customs
-            </label>
-            <select
-              disabled={!editableAxes.includes('logisticsStatus') || isSaving}
-              value={draft.logisticsStatus}
-              onChange={(e) => updateDraftAxis('logisticsStatus', e.target.value)}
-              style={{ fontSize: '0.76rem', padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc' }}
-            >
-              {LOGISTICS_STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
-          </div>
+            );
+          })()}
 
           {cascadeNote && (
             <div style={{ fontSize: '0.70rem', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '4px 8px', fontWeight: 600 }}>

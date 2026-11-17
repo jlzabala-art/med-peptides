@@ -367,42 +367,7 @@ export default function ProtocolsCatalogSidebar({
       </div>
 
 
-      {/* ── CARD 3: Quick Jump to Primary Reference Standards ── */}
-      <div className="proto-sidebar-card">
-        <div className="proto-sidebar-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Award size={15} style={{ color: '#b45309' }} />
-            <h3 className="proto-sidebar-title">
-              {isEs ? 'ESTÁNDARES DE REFERENCIA' : 'REFERENCE STANDARDS'}
-            </h3>
-          </div>
-          <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', padding: '1px 6px', borderRadius: '4px' }}>
-            TOP 5
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
-          {QUICK_REFERENCE_STANDARDS.map(ref => (
-            <Link
-              key={ref.slug}
-              href={`/proto/${ref.slug}`}
-              className="proto-sidebar-ref-item"
-            >
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {ref.name}
-                </div>
-                <div style={{ fontSize: '0.66rem', color: ref.color, fontWeight: 600 }}>
-                  {ref.tag}
-                </div>
-              </div>
-              <ChevronRight size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* ── CARD 4: Healthcare Provider & Clinic Onboarding ── */}
+      {/* ── CARD 3: Healthcare Provider & Clinic Onboarding ── */}
       <div className="proto-sidebar-card" style={{ background: 'linear-gradient(135deg, #003666 0%, #0f172a 100%)', color: '#ffffff', border: 'none' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
           <Building2 size={16} color="#38bdf8" />

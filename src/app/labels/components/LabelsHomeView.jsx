@@ -158,7 +158,7 @@ export default function LabelsHomeView({
               </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="pls-worklist-tabs-scroll" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {onOpenManualRx && (
                 <button
                   type="button"
@@ -207,6 +207,7 @@ export default function LabelsHomeView({
               )}
 
               <div
+                className="pls-desktop-only"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -248,7 +249,7 @@ export default function LabelsHomeView({
               flexWrap: 'wrap',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="pls-worklist-tabs-scroll" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {[
                 { id: 'unprinted', labelEs: '○ Pendientes', labelEn: '○ Unprinted' },
                 { id: 'pending_approval', labelEs: '⏳ Por aprobar', labelEn: '⏳ Pending Approval' },
@@ -374,31 +375,26 @@ export default function LabelsHomeView({
                 columns={[
                   {
                     key: 'patient',
-                    label: isEs ? 'Paciente / Código' : 'Patient / Code',
+                    label: isEs ? 'Paciente / Código / Fórmula' : 'Patient / Code / Formula',
                     align: 'left',
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
                       return (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
-                            {p.name || p.patientName || 'Patient'}
-                          </span>
-                          <span onClick={(e) => e.stopPropagation()}>
-                            <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
+                              {p.name || p.patientName || 'Patient'}
+                            </span>
+                            <span onClick={(e) => e.stopPropagation()}>
+                              <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                            {p.title || p.treatmentTitle || 'Prescription protocol'}
                           </span>
                         </div>
                       );
                     },
-                  },
-                  {
-                    key: 'title',
-                    label: isEs ? 'Fórmula / Protocolo' : 'Formula / Protocol',
-                    align: 'left',
-                    render: (_val, p) => (
-                      <span style={{ fontSize: '0.78rem', color: '#475569' }}>
-                        {p.title || p.treatmentTitle || 'Prescription protocol'}
-                      </span>
-                    ),
                   },
                   {
                     key: 'status',
@@ -430,14 +426,38 @@ export default function LabelsHomeView({
                   },
                   {
                     key: 'printStatus',
-                    label: isEs ? 'Impresión / Fecha' : 'Print / Date',
+                    label: isEs ? 'Impresión / Importado' : 'Print / Imported',
                     align: 'left',
                     render: (_val, p) => {
-                      const dateStr = formatResultDate(p.date || p.createdAt || p.uploadedAt);
+                      const rawDate = p.importedAt || p.createdAt || p.uploadedAt || p.updatedAt || p.date;
+                      const ms = (() => {
+                        if (!rawDate) return 0;
+                        if (typeof rawDate === 'number') return rawDate;
+                        if (typeof rawDate?.toDate === 'function') return rawDate.toDate().getTime();
+                        if (typeof rawDate?._seconds === 'number') return rawDate._seconds * 1000;
+                        if (typeof rawDate?.seconds === 'number') return rawDate.seconds * 1000;
+                        const t = Date.parse(String(rawDate));
+                        return Number.isNaN(t) ? 0 : t;
+                      })();
+                      const dateStr = formatResultDate(rawDate) || (ms > 0
+                        ? new Date(ms).toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                        : '');
+                      const isRecentImport = ms > 0 && (Date.now() - ms) < 24 * 60 * 60 * 1000;
                       return (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                          {renderPrintStatusBadge(p.code, p.a4PrintCount)}
-                          {dateStr && <span style={{ fontSize: '0.70rem', color: '#64748b' }}>📅 {dateStr}</span>}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                            {renderPrintStatusBadge(p.code, p.a4PrintCount)}
+                            {isRecentImport && (
+                              <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#0f766e', background: '#ccfbf1', padding: '1px 5px', borderRadius: '4px' }}>
+                                NEW
+                              </span>
+                            )}
+                          </div>
+                          {dateStr && (
+                            <span style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                              {isEs ? 'Importado:' : 'Imported:'} {dateStr}
+                            </span>
+                          )}
                         </div>
                       );
                     },
@@ -553,7 +573,7 @@ export default function LabelsHomeView({
                     : `Showing ${(safeWorklistPage - 1) * worklistPageSize + 1}–${Math.min(safeWorklistPage * worklistPageSize, filteredWorklistItems.length)} of ${filteredWorklistItems.length} prescriptions`}
                 </span>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div className="pls-worklist-tabs-scroll" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
                     <span>{isEs ? 'Filas:' : 'Rows per page:'}</span>
                     <select

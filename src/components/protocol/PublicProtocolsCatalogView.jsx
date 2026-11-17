@@ -23,6 +23,9 @@ import ProtocolCatalogSearchToolbar from './ProtocolCatalogSearchToolbar';
 import ProtocolListRow from './ProtocolListRow';
 import ProtocolCatalogCard from './ProtocolCatalogCard';
 import ProtocolCompareDrawer from './ProtocolCompareDrawer';
+import DataTable from '../ui/DataTable';
+import EmptyState from '../ui/EmptyState';
+import Link from 'next/link';
 import { Mail, Lock } from 'lucide-react';
 import { getProtocolTranslations, GOAL_TRANSLATIONS } from '../../utils/protocolTranslations';
 import { GOAL_BUCKETS } from '../../utils/protocolCatalogTaxonomy';
@@ -81,18 +84,21 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
   const t = getProtocolTranslations(lang);
   const isEs = lang === 'es';
 
-  // Keyboard shortcut: ⌘K / Ctrl+K to focus search input
+  // Active Atlas AI Bridge: allows Atlas AI to apply protocol filters or open comparison directly
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        const el = document.getElementById('protocol-global-search');
-        if (el) el.focus();
-      }
+    const handleAtlasFilter = (e) => {
+      const detail = e?.detail || {};
+      if (detail.goal !== undefined) setSelectedGoal(detail.goal);
+      if (detail.route !== undefined) setRouteFilter(detail.route);
+      if (detail.duration !== undefined) setDurationFilter(detail.duration);
+      if (detail.evidence !== undefined) setEvidenceFilter(detail.evidence);
+      if (detail.query !== undefined) setSearchQuery(detail.query);
+      if (detail.openCompare) setIsCompareOpen(true);
+      if (detail.reset) handleResetFilters();
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    window.addEventListener('atlas-apply-protocol-filters', handleAtlasFilter);
+    return () => window.removeEventListener('atlas-apply-protocol-filters', handleAtlasFilter);
+  }, [setSelectedGoal, setRouteFilter, setDurationFilter, setEvidenceFilter, setSearchQuery, handleResetFilters]);
 
   const toggleExpanded = (slug) => {
     triggerHaptic('light');
@@ -152,7 +158,32 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         name: t.catalogHeroTitle || 'Clinical Protocols & Peptides Directory',
         totalProtocols: enrichedProtocols.length,
         filteredCount: filteredProtocols.length,
-        activeFilterGoal: selectedGoal,
+        activeFilters: {
+          goal: selectedGoal,
+          route: routeFilter,
+          duration: durationFilter,
+          evidence: evidenceFilter,
+          safetyExclusions,
+          searchQuery,
+        },
+        topMatchingProtocols: filteredProtocols.slice(0, 6).map((p) => ({
+          slug: p.cleanSlug,
+          name: p.cleanName,
+          route: p.route,
+          durationWeeks: p.durationWeeks,
+          evidence: p.evidence_grade,
+        })),
+        suggestedPrompts: isEs
+          ? [
+              'Compara los 2 mejores protocolos de regeneración articular',
+              '¿Qué protocolos SubQ de 8–12 semanas no tienen riesgo oncológico?',
+              '¿Qué analíticas requieren los protocolos metabólicos GLP-1?',
+            ]
+          : [
+              'Compare the top 2 tissue regeneration protocols',
+              'Which 8-12 week SubQ protocols exclude oncology/angiogenic risk?',
+              'What baseline labs are required for GLP-1 metabolic protocols?',
+            ],
       },
       bottomBar: {
         summaryTitle: t.catalogHeroTitle || 'Clinical Protocols & Peptides Directory',
@@ -292,27 +323,157 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                     </div>
 
                     {viewMode === 'list' ? (
-                      <div className="proto-list-container">
-                        {group.protocols.map((proto) => (
-                          <ProtocolListRow
-                            key={proto.cleanSlug}
-                            proto={proto}
-                            groupBucketId={group.bucket?.id}
-                            selectedGoal={selectedGoal}
-                            isExpanded={expandedIds.has(proto.cleanSlug)}
-                            onToggleExpand={toggleExpanded}
-                            isCompared={compareSlugs.includes(proto.cleanSlug)}
-                            onToggleCompare={toggleCompare}
-                            isShortlisted={shortlistSlugs.has(proto.cleanSlug)}
-                            onToggleShortlist={toggleShortlist}
-                            onOpenQr={handleOpenQr}
-                            onCopyLink={handleCopyCode}
-                            copiedId={copiedId}
-                            lang={lang}
-                            t={t}
-                          />
-                        ))}
-                      </div>
+                      <DataTable
+                        data={group.protocols}
+                        keyField="cleanSlug"
+                        globalSearch={false}
+                        hidePagination={true}
+                        columns={[
+                          {
+                            key: 'cleanName',
+                            label: isEs ? 'Protocolo / Objetivo' : 'Protocol / Goal',
+                            align: 'left',
+                            render: (_val, proto) => (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                  <Link
+                                    href={`/proto/${proto.cleanSlug}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', textDecoration: 'none' }}
+                                  >
+                                    {proto.cleanName}
+                                  </Link>
+                                  {proto.is_reference_standard && (
+                                    <span style={{ fontSize: '0.62rem', fontWeight: 750, padding: '1px 6px', borderRadius: '4px', background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a' }}>
+                                      Reference
+                                    </span>
+                                  )}
+                                </div>
+                                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                  {proto.compounds?.map((c) => c.name).filter(Boolean).slice(0, 3).join(' · ') || proto.cleanCode}
+                                </span>
+                              </div>
+                            ),
+                          },
+                          {
+                            key: 'route',
+                            label: isEs ? 'Vía y Duración' : 'Route & Cycle',
+                            align: 'left',
+                            render: (_val, proto) => (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.76rem', color: '#334155' }}>
+                                <span style={{ fontWeight: 650 }}>{proto.route || 'SubQ'}</span>
+                                <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                                  {proto.durationWeeks ? `${proto.durationWeeks}w` : '—'} · {proto.phasesCount || 1} {isEs ? 'fases' : 'ph'}
+                                </span>
+                              </div>
+                            ),
+                          },
+                          {
+                            key: 'evidence_grade',
+                            label: isEs ? 'Evidencia' : 'Evidence',
+                            align: 'left',
+                            render: (_val, proto) => {
+                              const ev = String(proto.evidence_grade || 'Emerging');
+                              const isHigh = ev.toLowerCase().includes('high');
+                              const isMod = ev.toLowerCase().includes('moderate');
+                              return (
+                                <span style={{
+                                  fontSize: '0.70rem',
+                                  fontWeight: 700,
+                                  padding: '2px 8px',
+                                  borderRadius: '999px',
+                                  background: isHigh ? '#dcfce7' : isMod ? '#e0f2fe' : '#fef3c7',
+                                  color: isHigh ? '#166534' : isMod ? '#0369a1' : '#92400e',
+                                  whiteSpace: 'nowrap',
+                                }}>
+                                  {ev}
+                                </span>
+                              );
+                            },
+                          },
+                          {
+                            key: 'actions',
+                            label: '',
+                            align: 'right',
+                            render: (_val, proto) => (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleCompare(proto.cleanSlug)}
+                                  title={isEs ? 'Comparar protocolo' : 'Compare protocol'}
+                                  style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    border: compareSlugs.includes(proto.cleanSlug) ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                                    background: compareSlugs.includes(proto.cleanSlug) ? '#e8f0fe' : '#ffffff',
+                                    color: compareSlugs.includes(proto.cleanSlug) ? '#1a73e8' : '#475569',
+                                    fontSize: '0.70rem',
+                                    fontWeight: 650,
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  {compareSlugs.includes(proto.cleanSlug) ? '✓ Compare' : 'Compare'}
+                                </button>
+                                <Link
+                                  href={`/rx/intake?proto=${encodeURIComponent(proto.cleanSlug)}`}
+                                  style={{
+                                    padding: '4px 9px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #0d9488',
+                                    background: '#f0fdfa',
+                                    color: '#0f766e',
+                                    fontSize: '0.70rem',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {isEs ? 'Prescribir' : 'Prescribe'}
+                                </Link>
+                                <Link
+                                  href={`/proto/${proto.cleanSlug}`}
+                                  style={{
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    background: '#003666',
+                                    color: '#ffffff',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {isEs ? 'Abrir →' : 'Blueprint →'}
+                                </Link>
+                              </div>
+                            ),
+                          },
+                        ]}
+                        expandableRender={(proto) => (
+                          <div style={{ padding: '12px 16px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                            <div>
+                              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                                {isEs ? 'Resumen Clínico' : 'Clinical Summary'}
+                              </div>
+                              <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
+                                {proto.summary || (isEs ? 'Protocolo clínico estandarizado.' : 'Standardized clinical protocol.')}
+                              </p>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              {Array.isArray(proto.biomarkers) && proto.biomarkers.length > 0 && (
+                                <div style={{ fontSize: '0.74rem', color: '#0f172a' }}>
+                                  <strong>{isEs ? 'Analíticas:' : 'Labs:'}</strong> {proto.biomarkers.join(', ')}
+                                </div>
+                              )}
+                              {Array.isArray(proto.contraindications) && proto.contraindications.length > 0 && (
+                                <div style={{ fontSize: '0.72rem', color: '#b91c1c', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '6px 8px' }}>
+                                  <strong>{isEs ? 'Contraindicaciones:' : 'Contraindications:'}</strong> {proto.contraindications.join(' · ')}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      />
                     ) : (
                       <div className="proto-cards-grid">
                         {group.protocols.map((proto) => (

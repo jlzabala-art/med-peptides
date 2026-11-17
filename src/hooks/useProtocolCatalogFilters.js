@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Award, FlaskConical } from '@/lib/icons';
+import { searchAlgolia } from '@/services/algoliaSearch';
+import { algoliaConfig } from '@/services/algolia/config';
 import {
   GOAL_BUCKETS,
   enrichProtocolForCatalog,
@@ -213,6 +215,46 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
     return counts;
   }, [enrichedProtocols]);
 
+  const [algoliaMatchIds, setAlgoliaMatchIds] = useState(null);
+  const [isSearchingAlgolia, setIsSearchingAlgolia] = useState(false);
+
+  // Algolia typo-tolerant search across `protocols` index with local fallback
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed || trimmed.length < 2) {
+      setAlgoliaMatchIds(null);
+      setIsSearchingAlgolia(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsSearchingAlgolia(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchAlgolia(trimmed, algoliaConfig.indices.protocols, { hitsPerPage: 50 });
+        if (cancelled) return;
+        const hits = Array.isArray(res?.hits) ? res.hits : (Array.isArray(res) ? res : []);
+        const idSet = new Set();
+        hits.forEach((h) => {
+          if (h.objectID) idSet.add(String(h.objectID).toLowerCase());
+          if (h.id) idSet.add(String(h.id).toLowerCase());
+          if (h.slug) idSet.add(String(h.slug).toLowerCase());
+          if (h.code) idSet.add(String(h.code).toLowerCase());
+        });
+        setAlgoliaMatchIds(idSet);
+      } catch {
+        if (!cancelled) setAlgoliaMatchIds(null);
+      } finally {
+        if (!cancelled) setIsSearchingAlgolia(false);
+      }
+    }, 160);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [searchQuery]);
+
   const filteredProtocols = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
 
@@ -247,8 +289,13 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
         const goalMatch = p.mappedGoals.some((g) => g.toLowerCase().includes(q));
         const biomarkerMatch = (p.biomarkers || []).some((b) => String(b).toLowerCase().includes(q));
         const routeMatch = String(p.route || '').toLowerCase().includes(q);
+        const algoliaMatch = algoliaMatchIds && (
+          algoliaMatchIds.has(String(p.id || '').toLowerCase()) ||
+          algoliaMatchIds.has(p.cleanSlug.toLowerCase()) ||
+          algoliaMatchIds.has(p.cleanCode.toLowerCase())
+        );
 
-        if (!nameMatch && !codeMatch && !summaryMatch && !compoundMatch && !goalMatch && !biomarkerMatch && !routeMatch) {
+        if (!algoliaMatch && !nameMatch && !codeMatch && !summaryMatch && !compoundMatch && !goalMatch && !biomarkerMatch && !routeMatch) {
           return false;
         }
       }
@@ -281,6 +328,7 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
     shortlistSlugs,
     searchQuery,
     sortBy,
+    algoliaMatchIds,
   ]);
 
   const hasActiveFilters = Boolean(
@@ -460,6 +508,7 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
     groupedProtocols,
     hasActiveFilters,
     kpiMetrics,
+    isSearchingAlgolia,
     handleResetFilters,
   };
 }

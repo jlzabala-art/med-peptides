@@ -14,10 +14,10 @@ import { useUIStore } from '../stores/uiStore';
 import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
 import AppErrorBoundary from '../components/AppErrorBoundary';
-import PWAInstallPrompt from '../components/mobile/PWAInstallPrompt';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 
 // ⚡ Dynamic Client-Only Lazy Imports for Zero TBT & Optimal LCP
+const PWAInstallPrompt = dynamic(() => import('../components/mobile/PWAInstallPrompt'), { ssr: false });
 const Cart = dynamic(() => import('../snippets/Cart'), { ssr: false });
 const UniversalSearchModal = dynamic(() => import('../components/shared/DatasheetQuickSearchModal'), { ssr: false });
 const AtlasAIDrawer = dynamic(() => import('../components/shared/AtlasAIDrawer'), { ssr: false });

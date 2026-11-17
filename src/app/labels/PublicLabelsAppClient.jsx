@@ -22,6 +22,8 @@ import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { useLabelsPrescriptionActions } from './hooks/useLabelsPrescriptionActions';
 import { LabelsWorkspaceProvider } from './context/LabelsWorkspaceContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import {
   Search,
   Database,
@@ -460,10 +462,8 @@ export default function PublicLabelsAppClient({
   };
 
   const baseWorklistItems = useMemo(() => {
-    return worklistSource
-      .filter(p => !recentPrescriptions.some(r => String(r.code).toUpperCase() === String(p.code).toUpperCase()))
-      .filter(matchesDateRange);
-  }, [worklistSource, recentPrescriptions, matchesDateRange]);
+    return worklistSource.filter(matchesDateRange);
+  }, [worklistSource, matchesDateRange]);
 
   const worklistTabCounts = useMemo(() => {
     const counts = { unprinted: 0, pending_approval: 0, refills: 0, printed: 0, reprint: 0, all: baseWorklistItems.length };
@@ -481,9 +481,22 @@ export default function PublicLabelsAppClient({
     return counts;
   }, [baseWorklistItems, printCountsMap]);
 
+  const getImportTimestampMs = useCallback((item) => {
+    const raw = item?.importedAt || item?.createdAt || item?.uploadedAt || item?.updatedAt || item?.date;
+    if (!raw) return 0;
+    if (typeof raw === 'number') return raw;
+    if (typeof raw?.toDate === 'function') return raw.toDate().getTime();
+    if (typeof raw?._seconds === 'number') return raw._seconds * 1000;
+    if (typeof raw?.seconds === 'number') return raw.seconds * 1000;
+    const parsed = Date.parse(String(raw));
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }, []);
+
   const filteredWorklistItems = useMemo(() => {
-    return baseWorklistItems.filter((item) => filterWorklistItem(item));
-  }, [baseWorklistItems, worklistTab, printCountsMap]);
+    return baseWorklistItems
+      .filter((item) => filterWorklistItem(item))
+      .sort((a, b) => getImportTimestampMs(b) - getImportTimestampMs(a));
+  }, [baseWorklistItems, worklistTab, printCountsMap, getImportTimestampMs]);
 
   const totalWorklistPages = Math.max(1, Math.ceil(filteredWorklistItems.length / worklistPageSize));
   const safeWorklistPage = Math.min(worklistPage, totalWorklistPages);
@@ -562,6 +575,33 @@ export default function PublicLabelsAppClient({
   );
   const showBatchBar = patientQueue.length >= 2;
 
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'labels_studio',
+        name: activeCode ? `Label Studio · #${activeCode}` : 'Prescriptions & Dispensing Worklist',
+        activeCode: activeCode || null,
+        patientName: patientName || null,
+        queueCount: patientQueue.length,
+      },
+      bottomBar: !embedded
+        ? {
+            summaryTitle: activeCode ? `#${activeCode} · ${patientName || 'Prescription'}` : (isEs ? 'Estudio de Etiquetas y Recetas' : 'Prescriptions & Label Studio'),
+            summarySubtitle: patientQueue.length > 0
+              ? `${patientQueue.length} ${isEs ? 'paciente(s) en cola' : 'patient(s) in queue'} · ${totalBatchLabelsCount} ${isEs ? 'etiquetas' : 'labels'}`
+              : (isEs ? 'Worklist GMP · Impresión Zebra & A4' : 'GMP Worklist · Zebra & A4 Print'),
+            badge: 'EU GMP Label Studio',
+            atlasAiLabel: 'Ask Atlas AI',
+            primaryAction: {
+              label: isEs ? `Imprimir Lote A4 (${totalBatchLabelsCount})` : `Print Batch A4 (${totalBatchLabelsCount})`,
+              onClick: handleDownloadA4BatchPdf,
+            },
+          }
+        : undefined,
+    },
+    [activeCode, patientName, patientQueue.length, totalBatchLabelsCount, embedded, isEs, handleDownloadA4BatchPdf]
+  );
+
   const workspaceContextValue = {
     lang,
     isEs,
@@ -599,7 +639,23 @@ export default function PublicLabelsAppClient({
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
       } : undefined}
     >
+      {!embedded && (
+        <PublicUnifiedHeader
+          track="protocols"
+          lang={lang}
+          onLangChange={(nextLang) => setLang(nextLang)}
+          hideCurrencySelector={true}
+          breadcrumbs={[
+            { label: isEs ? 'Inicio' : 'Home', href: '/' },
+            { label: isEs ? 'Prescripciones y Etiquetas' : 'Prescriptions & Labels', href: '/labels' },
+            ...(activeCode
+              ? [{ label: `#${activeCode}`, href: `/rx/${encodeURIComponent(cleanRxCode || activeCode)}` }]
+              : []),
+          ]}
+        />
+      )}
       <LabelsHeader
+        hideTopChrome={!embedded}
         searchBoxRef={searchBoxRef}
         searchInputRef={searchInputRef}
         searchQuery={searchQuery}
@@ -905,19 +961,6 @@ export default function PublicLabelsAppClient({
         onClose={() => setShowShortcutsModal(false)}
         isEs={isEs}
       />
-
-      {!embedded && (
-        <LabelsAtlasDock
-          isEs={isEs}
-          patientQueue={patientQueue}
-          activeRx={currentRx}
-          onOpenSearch={() => {
-            setSearchOpen(true);
-            searchInputRef.current?.focus();
-          }}
-          onAddFeaturedPatient={(code) => handleSelectOrAddPatient(code, true)}
-        />
-      )}
     </div>
     </LabelsWorkspaceProvider>
   );

@@ -13,6 +13,7 @@ import {
 } from '@/lib/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import { GOAL_TRANSLATIONS } from '../../utils/protocolTranslations';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 
 const ROUTE_OPTIONS = [
   { id: 'all', en: 'All Routes', es: 'Todas las Vías' },
@@ -56,46 +57,20 @@ export default function ProtocolCatalogSearchToolbar({
 
   return (
     <div className="proto-search-wrapper-clean">
-      {/* 1. Primary Global Search Input (Rule #7) */}
-      <div className="proto-search-input-wrapper">
-        <Search size={19} className="proto-search-icon" />
-        <input
-          id="protocol-global-search"
-          type="text"
-          className="proto-search-input"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape' && searchQuery) {
-              onSearchChange('');
-            }
-          }}
-          placeholder={
-            t.searchPlaceholder ||
-            (isEs
-              ? 'Buscar por protocolo, péptido, biomarcador (HbA1c, IGF-1) o vía...'
-              : 'Search by protocol, peptide, biomarker (HbA1c, IGF-1), or route...')
-          }
-          aria-label={isEs ? 'Buscar protocolos clínicos' : 'Search clinical protocols'}
-        />
-
-        {searchQuery ? (
-          <button
-            type="button"
-            className="proto-search-clear-btn"
-            onClick={() => {
-              triggerHaptic('light');
-              onSearchChange('');
-            }}
-            title={isEs ? 'Limpiar búsqueda' : 'Clear search'}
-            aria-label="Clear search"
-          >
-            <X size={17} />
-          </button>
-        ) : (
-          <kbd className="proto-search-kbd" aria-hidden="true">⌘K</kbd>
-        )}
-      </div>
+      {/* 1. Standard Atlas GlobalSearchBar (Golden Rule #7 + Algolia) */}
+      <GlobalSearchBar
+        value={searchQuery}
+        onChange={onSearchChange}
+        size="lg"
+        namespace="protocols"
+        resultCount={filteredCount}
+        placeholder={
+          t.searchPlaceholder ||
+          (isEs
+            ? 'Buscar por protocolo, péptido, biomarcador (HbA1c, IGF-1) o vía...'
+            : 'Search by protocol, peptide, biomarker (HbA1c, IGF-1), or route...')
+        }
+      />
 
       {/* 2. Mobile Horizontal Goal Pills (< 1024px) for 1-tap category switching */}
       <div className="proto-mobile-goal-strip" role="navigation" aria-label="Therapeutic goals">

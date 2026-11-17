@@ -67,7 +67,7 @@ export async function GET(request) {
         try {
           const snap = await adminDb.collection('prescriptions')
             .orderBy('createdAt', 'desc')
-            .limit(30)
+            .limit(60)
             .get();
 
           snap.forEach(docSnap => {
@@ -90,6 +90,7 @@ export async function GET(request) {
                 clinicName: d.clinicName || d.clinic || '',
                 title: cleanTitle(d.treatmentTitle || d.title || d.formulaName),
                 date: extractDate(d.createdAt || d.uploadedAt || d.importedAt || d.prescriptionDate || d.date),
+                importedAt: extractDate(d.importedAt || d.createdAt || d.uploadedAt || d.updatedAt),
                 a4PrintCount: d.a4PrintCount || d.printCount || 0,
                 lastPrintedA4At: extractDate(d.lastPrintedA4At),
                 status: d.status || d.state || 'approved',

@@ -30,7 +30,9 @@ const QUICK_MODULES = [
 export default function GlobalPublicCommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [searchScope, setSearchScope] = useState('all'); // 'rx' | 'protocols' | 'products' | 'all'
   const [rxMatches, setRxMatches] = useState([]);
+  const [recentRxList, setRecentRxList] = useState([]);
   const [loadingRx, setLoadingRx] = useState(false);
   const [algoliaProducts, setAlgoliaProducts] = useState([]);
   const [algoliaProtocols, setAlgoliaProtocols] = useState([]);
@@ -41,19 +43,31 @@ export default function GlobalPublicCommandPalette() {
   const { recentItems } = useAtlasContext();
   const isEs = typeof document !== 'undefined' && document.documentElement?.lang === 'es';
 
+  const resolveDefaultScope = (path) => {
+    if (path.startsWith('/labels') || path.startsWith('/rx')) return 'rx';
+    if (path.startsWith('/proto')) return 'protocols';
+    if (path.startsWith('/p/') || path.startsWith('/raw/') || path.startsWith('/pricing') || path.startsWith('/vials') || path.startsWith('/calculator')) return 'products';
+    return 'all';
+  };
+
   useEffect(() => {
-    const handleOpen = () => setIsOpen(true);
+    const handleOpen = () => {
+      setSearchScope(resolveDefaultScope(pathname));
+      setIsOpen(true);
+    };
     window.addEventListener('open-atlas-command-palette', handleOpen);
     return () => window.removeEventListener('open-atlas-command-palette', handleOpen);
-  }, []);
+  }, [pathname]);
 
-  // Listen for ⌘K / Ctrl+K on routes that don't have their own dedicated ⌘K input
+  // Listen for ⌘K / Ctrl+K globally across all screens
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        if (pathname.startsWith('/labels')) return; // LabelsHeader handles its own ⌘K search input
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        setIsOpen((prev) => {
+          if (!prev) setSearchScope(resolveDefaultScope(pathname));
+          return !prev;
+        });
       } else if (e.key === 'Escape' && isOpen) {
         setIsOpen(false);
       }
@@ -61,6 +75,25 @@ export default function GlobalPublicCommandPalette() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [pathname, isOpen]);
+
+  // Load recent patients/prescriptions when opened in 'rx' scope with empty query
+  useEffect(() => {
+    if (!isOpen || searchScope !== 'rx' || query.trim().length >= 2 || recentRxList.length > 0) return;
+    let active = true;
+    setLoadingRx(true);
+    fetch('/api/labels/search?q=')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (active && Array.isArray(data?.results)) {
+          setRecentRxList(data.results.slice(0, 8));
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoadingRx(false);
+      });
+    return () => { active = false; };
+  }, [isOpen, searchScope, query, recentRxList.length]);
 
   // Live federated Algolia + prescription quick search when query >= 2 chars
   useEffect(() => {
@@ -178,7 +211,15 @@ export default function GlobalPublicCommandPalette() {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={isEs ? 'Ir a módulo, prescripción o visto recientemente...' : 'Jump to module, prescription, or recently viewed...'}
+            placeholder={
+              searchScope === 'rx'
+                ? (isEs ? 'Buscar paciente, #RX, médico o fórmula...' : 'Search patient, #RX code, doctor, or formula...')
+                : searchScope === 'protocols'
+                  ? (isEs ? 'Buscar protocolo, péptido o biomarcador...' : 'Search protocol, peptide, or biomarker...')
+                  : searchScope === 'products'
+                    ? (isEs ? 'Buscar péptido, API o monografía...' : 'Search peptide, API, or monograph...')
+                    : (isEs ? 'Buscar paciente, protocolo, péptido o módulo...' : 'Search patient, protocol, peptide, or module...')
+            }
             style={{
               flex: 1,
               border: 'none',
@@ -197,7 +238,89 @@ export default function GlobalPublicCommandPalette() {
           </button>
         </div>
 
+        {/* Context-Aware Scope Switcher Pills */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc', flexWrap: 'wrap' }}>
+          {[
+            { id: 'rx', label: isEs ? 'Pacientes y Recetas' : 'Patients & Rx' },
+            { id: 'protocols', label: isEs ? 'Protocolos' : 'Protocols' },
+            { id: 'products', label: isEs ? 'Péptidos y Catálogo' : 'Peptides & Catalog' },
+            { id: 'all', label: isEs ? 'Todo Atlas' : 'All Atlas' },
+          ].map((tab) => {
+            const active = searchScope === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setSearchScope(tab.id)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '999px',
+                  border: active ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                  background: active ? '#e8f0fe' : '#ffffff',
+                  color: active ? '#1a73e8' : '#475569',
+                  fontSize: '0.72rem',
+                  fontWeight: active ? 700 : 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div style={{ maxHeight: '62vh', overflowY: 'auto', padding: '8px' }}>
+          {/* Empty-state Recent Patients / Prescriptions when in 'rx' scope */}
+          {searchScope === 'rx' && query.trim().length < 2 && (
+            <div style={{ marginBottom: '8px' }}>
+              <div style={{ padding: '4px 10px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <FileText size={11} />
+                <span>{isEs ? 'Pacientes y Recetas Recientes' : 'Recent Patients & Prescriptions'}</span>
+              </div>
+              {loadingRx ? (
+                <div style={{ padding: '8px 10px', fontSize: '0.78rem', color: '#64748b' }}>
+                  {isEs ? 'Cargando pacientes...' : 'Loading patients...'}
+                </div>
+              ) : (
+                recentRxList.map((rx) => {
+                  const code = rx.code || rx.id;
+                  const isRawUid = /^[A-Za-z0-9]{18,}$/.test(String(code || '')) && !String(code).includes('-');
+                  const displayCode = isRawUid ? `ID-${String(code).slice(0, 6).toUpperCase()}` : code;
+                  const targetPath = pathname.startsWith('/labels')
+                    ? `/labels?rx=${encodeURIComponent(code)}`
+                    : `/rx/${encodeURIComponent(code)}`;
+                  return (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => navigateTo(targetPath)}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#0f172a',
+                        fontSize: '0.82rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <div style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {rx.patientName || rx.name || 'Patient'} · <span style={{ color: '#1a73e8', fontFamily: 'monospace' }}>#{displayCode}</span>
+                      </div>
+                      <ChevronRight size={14} color="#94a3b8" style={{ flexShrink: 0 }} />
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          )}
           {filteredRecent.length > 0 && (
             <div style={{ marginBottom: '8px' }}>
               <div style={{ padding: '4px 10px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>

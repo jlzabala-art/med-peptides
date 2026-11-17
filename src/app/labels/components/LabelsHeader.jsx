@@ -35,6 +35,7 @@ export default function LabelsHeader({
   patientName,
   onKeyDownSearch,
   embedded = false,
+  hideTopChrome = false,
   onBackToWorklist = null,
   children
 }) {
@@ -126,7 +127,7 @@ export default function LabelsHeader({
         } : undefined}
       >
         {/* Brand (Standalone Mode) or B2B Logistics Badge (Embedded Portal Mode) */}
-        {!embedded ? (
+        {!hideTopChrome && (!embedded ? (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <AtlasAppSwitcher isSpanish={isEs} variant="light" portalHref="/admin" />
             <Link href="/labels" className="pls-brand-link" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Atlas Health Services">
@@ -137,7 +138,7 @@ export default function LabelsHeader({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <BrandLogo variant="dark" size="compact" />
           </div>
-        )}
+        ))}
 
         {/* Contextual Breadcrumb (Workspace Mode) OR Single Trigger (Worklist Mode to avoid duplicate search bars) */}
         <div className="pls-search-container" ref={searchBoxRef} style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -171,7 +172,13 @@ export default function LabelsHeader({
             </button>
           )}
 
-          {patientQueue.length === 0 && !searchOpen ? (
+          {hideTopChrome ? (
+            patientQueue.length === 0 ? (
+              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <span>{isEs ? 'Estudio de Etiquetas y Recetas' : 'Prescriptions & Label Studio'}</span>
+              </div>
+            ) : null
+          ) : patientQueue.length === 0 && !searchOpen ? (
             <button
               type="button"
               onClick={() => {
@@ -441,39 +448,43 @@ export default function LabelsHeader({
             )}
           </div>
 
-          {/* Atlas AI Contextual Help (?) */}
-          <button
-            type="button"
-            className="gcp-btn-secondary pls-desktop-only-action"
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('open-atlas-help-drawer'));
-              }
-            }}
-            title={isEs ? 'Ayuda inteligente Atlas AI' : 'Atlas AI Contextual Help'}
-            aria-label={isEs ? 'Ayuda Atlas AI' : 'Atlas AI Help'}
-            style={{ width: '32px', height: '32px', padding: 0, justifyContent: 'center' }}
-          >
-            <HelpCircle size={15} color="#475569" />
-          </button>
+          {!hideTopChrome && (
+            <>
+              {/* Atlas AI Contextual Help (?) */}
+              <button
+                type="button"
+                className="gcp-btn-secondary pls-desktop-only-action"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('open-atlas-help-drawer'));
+                  }
+                }}
+                title={isEs ? 'Ayuda inteligente Atlas AI' : 'Atlas AI Contextual Help'}
+                aria-label={isEs ? 'Ayuda Atlas AI' : 'Atlas AI Help'}
+                style={{ width: '32px', height: '32px', padding: 0, justifyContent: 'center' }}
+              >
+                <HelpCircle size={15} color="#475569" />
+              </button>
 
-          {/* Language Switcher */}
-          <div className="pls-lang-toggle pls-desktop-only-action" role="group" aria-label="Language selection">
-            <button
-              type="button"
-              onClick={() => setLang('en')}
-              className={`pls-lang-btn ${!isEs ? 'active' : 'inactive'}`}
-            >
-              EN
-            </button>
-            <button
-              type="button"
-              onClick={() => setLang('es')}
-              className={`pls-lang-btn ${isEs ? 'active' : 'inactive'}`}
-            >
-              ES
-            </button>
-          </div>
+              {/* Language Switcher */}
+              <div className="pls-lang-toggle pls-desktop-only-action" role="group" aria-label="Language selection">
+                <button
+                  type="button"
+                  onClick={() => setLang('en')}
+                  className={`pls-lang-btn ${!isEs ? 'active' : 'inactive'}`}
+                >
+                  EN
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang('es')}
+                  className={`pls-lang-btn ${isEs ? 'active' : 'inactive'}`}
+                >
+                  ES
+                </button>
+              </div>
+            </>
+          )}
 
           {/* Authenticated Operator Profile (Standalone Kiosk Mode) or Standalone Kiosk Launcher (Embedded B2B Portal Mode) */}
           {embedded ? (
@@ -500,7 +511,7 @@ export default function LabelsHeader({
               <ExternalLink size={13} />
               <span>{isEs ? 'Modo Quiosco' : 'Kiosk View'}</span>
             </Link>
-          ) : (
+          ) : !hideTopChrome ? (
             <div className="pls-user-profile-wrap pls-desktop-only-action" style={{ position: 'relative' }}>
               {user ? (
                 <button
@@ -585,7 +596,7 @@ export default function LabelsHeader({
                 />
               )}
             </div>
-          )}
+          ) : null}
                   {/* Google Cloud Style Mobile More Actions Menu Trigger (⋮) */}
           <div className="pls-mobile-more-wrap" style={{ position: 'relative' }}>
             <button

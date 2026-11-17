@@ -153,36 +153,6 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(medicalOrgSchema) }}
         />
-        <style>{`
-          :root {
-            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-          }
-          body {
-            font-family: var(--font-sans);
-          }
-          .global-spinner {
-            width: 36px;
-            height: 36px;
-            border: 3px solid #e2e8f0;
-            border-top-color: #003666;
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 0.8s linear infinite;
-          }
-          @keyframes rotation {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          .spinner-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            width: 100%;
-            background-color: #f8fafc;
-          }
-        `}</style>
       </head>
       <body suppressHydrationWarning>
         <div id="root">
