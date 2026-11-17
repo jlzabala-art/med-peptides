@@ -58,21 +58,94 @@ export async function POST(request) {
       if (!rx || typeof rx !== 'object') continue;
       // Strip any client-supplied identity / privileged fields
       const { id: _id, createdAt: _c, updatedAt: _u, approvedAt: _a, approvedBy: _b, ...safe } = rx;
-      const ref = adminDb.collection('prescriptions').doc();
-      const patientName = safe.patientName || safe.patient?.name || 'Unknown Patient';
-      const code = String(safe.code || safe.rxCode || safe.fileNumber || ref.id).replace(/^#/, '').trim();
+      const patientName = String(safe.patientName || safe.patient?.name || 'Unknown Patient').trim();
+      const rawCode = String(safe.code || safe.rxCode || safe.fileNumber || '').replace(/^#/, '').trim();
+      const testType = String(
+        safe.testType ||
+        (/AATRI/i.test(rawCode) ? 'trichotest' :
+         /AATEL/i.test(rawCode) ? 'telotest' :
+         /AAACN/i.test(rawCode) ? 'acnetest' :
+         /AANUT/i.test(rawCode) ? 'nutrigen' : 'compounding')
+      ).toLowerCase();
 
-      batch.set(ref, {
-        ...safe,
-        status: 'draft',
-        atlasValidation: 'skipped',
-        importChannel: 'public_labels_account_manager',
-        code,
-        importedAt: nowIso,
-        createdAt: now,
-        updatedAt: now,
-      });
-      created.push({ id: ref.id, code, patientName, importedAt: nowIso });
+      // Check if an identical prescription (same non-generic code + same testType + same patient) already exists
+      let ref = null;
+      if (rawCode && rawCode.length >= 4 && rawCode.toUpperCase() !== 'RX') {
+        try {
+          const existingSnap = await adminDb
+            .collection('prescriptions')
+            .where('code', '==', rawCode)
+            .limit(5)
+            .get();
+          const exactDoc = existingSnap.docs.find((d) => {
+            const dData = d.data() || {};
+            const dPat = String(dData.patientName || dData.patient?.name || '').trim().toLowerCase();
+            const dTest = String(
+              dData.testType ||
+              (/AATRI/i.test(dData.code || '') ? 'trichotest' :
+               /AATEL/i.test(dData.code || '') ? 'telotest' :
+               /AAACN/i.test(dData.code || '') ? 'acnetest' :
+               /AANUT/i.test(dData.code || '') ? 'nutrigen' : 'compounding')
+            ).toLowerCase();
+            return dPat === patientName.toLowerCase() && dTest === testType;
+          });
+          if (exactDoc) {
+            ref = exactDoc.ref;
+          }
+        } catch {
+          // fallback to new doc
+        }
+      }
+
+      if (!ref) {
+        ref = adminDb.collection('prescriptions').doc();
+      }
+      const code = rawCode || ref.id;
+      const patientSlug = `patient-${patientName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+
+      batch.set(
+        ref,
+        {
+          ...safe,
+          patientId: safe.patientId || patientSlug,
+          testType,
+          status: 'draft',
+          atlasValidation: 'skipped',
+          importChannel: 'public_labels_account_manager',
+          code,
+          importedAt: nowIso,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { merge: true }
+      );
+
+      // Link this test/prescription to the single unified patient record (supports multiple tests on the same day without duplicating the patient)
+      if (patientName && patientName !== 'Unknown Patient') {
+        const patientRef = adminDb.collection('patients').doc(patientSlug);
+        batch.set(
+          patientRef,
+          {
+            id: patientSlug,
+            name: patientName,
+            fullName: patientName,
+            gender: safe.patient?.gender || 'Unknown',
+            dob: safe.patient?.dob || null,
+            doctorName: safe.doctorName || safe.doctor?.name || 'Treating Physician',
+            doctorId: safe.doctorId || safe.doctor?.id || null,
+            clinicName: safe.clinicName || safe.clinic || null,
+            clinicId: safe.clinicId || null,
+            prescriptions: admin.firestore.FieldValue.arrayUnion(ref.id),
+            activePrescriptions: admin.firestore.FieldValue.arrayUnion(code),
+            sampleCodes: admin.firestore.FieldValue.arrayUnion(code),
+            status: 'active',
+            updatedAt: nowIso,
+          },
+          { merge: true }
+        );
+      }
+
+      created.push({ id: ref.id, code, patientName, testType, importedAt: nowIso });
     }
 
     await batch.commit();

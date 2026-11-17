@@ -194,16 +194,23 @@ export async function GET(request) {
               d.prescriptionDate || d.date || d.createdAt || d.importedAt || docSnap.createTime
             );
             const partsCount = resolvePartsCount(d);
-            const testTag = /AATEL/i.test(code)
-              ? 'AATEL'
-              : /AATRI/i.test(code)
-                ? 'AATRI'
-                : /AAACN/i.test(code)
-                  ? 'AAACN'
-                  : /AANUT/i.test(code)
-                    ? 'AANUT'
-                    : '';
-            const sigKey = `${patName.toLowerCase().trim()}::${testTag || resolvedTitle.toLowerCase()}::${dateVal || ''}`;
+            const testTag =
+              d.testType ||
+              (/AATEL/i.test(code)
+                ? 'AATEL'
+                : /AATRI/i.test(code)
+                  ? 'AATRI'
+                  : /AAACN/i.test(code)
+                    ? 'AAACN'
+                    : /AANUT/i.test(code)
+                      ? 'AANUT'
+                      : '');
+            const itemFp = (Array.isArray(d.items) ? d.items : [])
+              .slice(0, 4)
+              .map((it) => String(it?.productName || it?.name || it?.activeIngredient || '').toLowerCase().trim())
+              .filter(Boolean)
+              .join('|');
+            const sigKey = `${patName.toLowerCase().trim()}::${testTag || resolvedTitle.toLowerCase()}::${partsCount}::${itemFp}::${dateVal || ''}`;
 
             if (normCode && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
               if (seenPatientSignature.has(sigKey)) {

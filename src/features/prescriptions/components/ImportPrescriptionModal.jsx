@@ -21,7 +21,48 @@ import PhysicianPicker from '../../../components/admin/patients/PhysicianPicker'
 import PharmapolisLabelSvg from '../../../components/prescription/PharmapolisLabelSvg';
 import AlgoliaIngredientSearchInput from './AlgoliaIngredientSearchInput';
 
+function extractIngredientTokens(obj = {}) {
+  const names = [];
+  const pushName = (val) => {
+    if (!val) return;
+    const clean = String(val)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+    if (clean && !names.includes(clean)) names.push(clean);
+  };
+
+  if (Array.isArray(obj?.searchableItems)) {
+    obj.searchableItems.forEach(pushName);
+  }
+  if (Array.isArray(obj?.items)) {
+    obj.items.forEach((it) => pushName(it?.name || it?.productName || it?.activeIngredient));
+  }
+  const blockList = obj?.blocks || obj?.parts || obj?.formulationBlocks || [];
+  if (Array.isArray(blockList)) {
+    blockList.forEach((b) => {
+      pushName(b?.dispensingForm || b?.treatmentType || b?.title);
+      const bItems = b?.items || b?.ingredients || [];
+      if (Array.isArray(bItems)) {
+        bItems.forEach((it) => pushName(it?.name || it?.productName || it?.activeIngredient));
+      }
+    });
+  }
+  return names;
+}
+
+function extractFormulaFingerprint(obj = {}) {
+  const blockList = obj?.blocks || obj?.parts || obj?.formulationBlocks || [];
+  const partsCount =
+    (Array.isArray(blockList) && blockList.length > 0 && blockList.length) ||
+    Number(obj?.partsCount || obj?.totalParts || 1);
+  const tokens = extractIngredientTokens(obj).slice(0, 8).sort();
+  if (tokens.length === 0) return '';
+  return `${partsCount}::${tokens.join('|')}`;
+}
+
 function detectTestKind(obj = {}, fallbackTestType = '') {
+  const ingJoined = extractIngredientTokens(obj).join(' ').toUpperCase();
   const corpus = [
     obj?.protocolNumber,
     obj?.boxId,
@@ -29,11 +70,14 @@ function detectTestKind(obj = {}, fallbackTestType = '') {
     obj?.rxCode,
     obj?.prescriptionNumber,
     obj?.fileNumber,
+    obj?.testType,
+    obj?.testName,
+    obj?.extractedData?.fagronDetails?.testName,
+    obj?.extractedData?.fagronDetails?.boxId,
     obj?.sourceContext,
     obj?.treatmentType,
     obj?.treatmentTitle,
     obj?.title,
-    obj?.testType,
     fallbackTestType,
   ]
     .filter(Boolean)
@@ -45,6 +89,12 @@ function detectTestKind(obj = {}, fallbackTestType = '') {
   if (/AAACN|ACNE/.test(corpus)) return 'AcneTest';
   if (/AANUT|24GEN|NUTRIGEN/.test(corpus)) return 'NutriGenomics';
   if (/BLOODO|NAD/.test(corpus)) return 'Biomarker Lab';
+
+  // Ingredient-level signature detection when PDF filename or extracted title is generic
+  if (/TRICHOSOL|TRICHOOIL|TRICHOWASH|LATANOPROST|DUTASTERIDE/.test(ingJoined)) return 'TrichoTest';
+  if (/GREENSELECT|TELOMER/.test(ingJoined) || (/GINKGO/.test(ingJoined) && /ASTAXANTHIN/.test(ingJoined))) return 'TeloTest';
+  if (/ESPUMIL|NOURIVAN|CLINDAMYCIN|AZELAIC/.test(ingJoined)) return 'AcneTest';
+
   return 'Compounded Rx';
 }
 
@@ -93,26 +143,42 @@ function formatShortDate(raw) {
 
 function classifyDuplicateMatch(existingRx, currentData, fallbackTestType = '') {
   if (!existingRx || !currentData) return 'none';
-  const existingCode = String(existingRx.code || existingRx.protocolNumber || existingRx.fileNumber || existingRx.id || '').trim().toUpperCase();
+  const existingCode = String(existingRx.code || existingRx.rxCode || existingRx.protocolNumber || existingRx.fileNumber || existingRx.id || '').trim().toUpperCase();
   const currentCode = String(currentData.protocolNumber || currentData.boxId || currentData.fileNumber || '').trim().toUpperCase();
   const existingKind = detectTestKind(existingRx);
   const currentKind = detectTestKind(currentData, fallbackTestType);
 
   const sameCode = Boolean(existingCode && currentCode && existingCode === currentCode);
   const sameKind = existingKind === currentKind;
+  const existingFp = extractFormulaFingerprint(existingRx);
+  const currentFp = extractFormulaFingerprint(currentData);
+  const differentFormula = Boolean(existingFp && currentFp && existingFp !== currentFp);
 
-  const existingDateRaw = existingRx.mfgDate || existingRx.manufacturingDate || existingRx.reportDate || existingRx.date || existingRx.createdAt;
-  const currentDateRaw = currentData.mfgDate || currentData.manufacturingDate || currentData.reportDate || currentData.date;
+  const existingDateRaw = existingRx.mfgDate || existingRx.manufacturingDate || existingRx.reportDate || existingRx.prescriptionDate || existingRx.date || existingRx.createdAt;
+  const currentDateRaw = currentData.mfgDate || currentData.manufacturingDate || currentData.reportDate || currentData.prescriptionDate || currentData.date;
   const t1 = existingDateRaw ? new Date(existingDateRaw).getTime() : NaN;
   const t2 = currentDateRaw ? new Date(currentDateRaw).getTime() : NaN;
   const daysApart = !Number.isNaN(t1) && !Number.isNaN(t2) ? Math.abs(t2 - t1) / (1000 * 60 * 60 * 24) : null;
 
+  // 1. Different test kind (e.g. TeloTest vs TrichoTest vs AcneTest vs NutriGen) -> ALWAYS a separate test, even on the same day
+  if (!sameKind) {
+    return 'different_test';
+  }
+  // 2. Exact same code & same test kind
   if (sameCode && sameKind) {
     if (daysApart === null || daysApart <= 7) return 'exact_duplicate';
     return 'refill_candidate';
   }
+  // 3. Different codes on the same day or with different formula composition -> separate prescription/test
   if (existingCode && currentCode && existingCode !== currentCode) {
-    return sameKind ? 'refill_candidate' : 'different_test';
+    if (differentFormula || (daysApart !== null && daysApart <= 7)) {
+      return 'different_test';
+    }
+    return 'refill_candidate';
+  }
+  // 4. Same test kind without distinct codes: check formula fingerprint
+  if (differentFormula) {
+    return 'different_test';
   }
   if (sameKind) {
     if (!currentCode && daysApart !== null && daysApart <= 7) return 'exact_duplicate';
@@ -788,6 +854,19 @@ export default function ImportPrescriptionModal({
       }
 
       // 4. Construct ONE single prescription document containing all parts
+      const resolvedKind = detectTestKind({ ...reviewData, code: cleanCode, parts, items: allMappedItems }, preflightEstimate.testType);
+      const baseTreatmentLabel = parts.length > 1
+        ? `${parts.length}-Part Multi-Formula Regimen (${parts.map(p => p.treatmentType).join(', ')})`
+        : (parts[0]?.treatmentType || 'Compounding Formula');
+      const testPrefix =
+        resolvedKind === 'TrichoTest' ? 'Fagron TrichoTest · ' :
+        resolvedKind === 'TeloTest' ? 'Fagron TeloTest · ' :
+        resolvedKind === 'AcneTest' ? 'Fagron AcneTest · ' :
+        resolvedKind === 'NutriGenomics' ? 'Fagron NutriGen · ' : '';
+      const finalTreatmentTitle = testPrefix && !baseTreatmentLabel.toLowerCase().includes(resolvedKind.toLowerCase().slice(0, 5))
+        ? `${testPrefix}${baseTreatmentLabel}`
+        : baseTreatmentLabel;
+
       const newRx = {
         ...prescriptionSchema,
         ...context,
@@ -818,11 +897,13 @@ export default function ImportPrescriptionModal({
         clinicId: finalClinicId,
         sourceType: 'fagron_genomics',
         source: 'fagron',
+        testType: resolvedKind.toLowerCase().replace(/\s+/g, '_'),
+        testName: resolvedKind,
         status: 'draft',
         validationStatus: allMappedItems.some(i => i._needsProductMapping) ? 'Needs Review' : 'Ready',
         treatmentProgram: parts[0]?.treatmentProgram || 'Compounding',
-        treatmentType: parts.length > 1 ? `${parts.length}-Part Multi-Formula Regimen` : (parts[0]?.treatmentType || 'Compounding Formula'),
-        treatmentTitle: parts.length > 1 ? `${parts.length}-Part Multi-Formula Regimen` : (parts[0]?.treatmentType || 'Compounding Formula'),
+        treatmentType: baseTreatmentLabel,
+        treatmentTitle: finalTreatmentTitle,
         importSource: 'fagron_genomics',
         posology: parts[0]?.posology || '',
         volume: parts[0]?.volume || '100 mL',

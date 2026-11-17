@@ -76,11 +76,19 @@ function formatPrescriptionRecord(id, record = {}) {
   }
 
   const code = record.prescriptionCode || record.prescriptionNumber || record.code || record.fileNumber || `RX-${targetId.slice(0, 6).toUpperCase()}`;
+  const resolvedPartsCount = Number(
+    record.partsCount ||
+    (Array.isArray(record.parts) && record.parts.length) ||
+    (Array.isArray(record.formulationBlocks) && record.formulationBlocks.length) ||
+    record.totalParts ||
+    1
+  );
 
   return {
     objectID: targetId,
     id: targetId,
     code,
+    rxCode: record.rxCode || code,
     prescriptionCode: code,
     prescriptionNumber: record.prescriptionNumber || code,
     fileNumber: record.fileNumber || code,
@@ -90,21 +98,27 @@ function formatPrescriptionRecord(id, record = {}) {
     doctorId: record.doctorId || record.doctor?.id || '',
     clinicName: record.clinicName || record.clinic?.name || record.clinic || '',
     status: (record.status || 'pending').toLowerCase(),
-    date: record.date || rawDate || formattedDate,
+    date: record.prescriptionDate || record.date || rawDate || formattedDate,
+    prescriptionDate: record.prescriptionDate || record.date || rawDate || '',
+    importedAt: record.importedAt || (typeof record.createdAt === 'string' ? record.createdAt : new Date().toISOString()),
     dateIssued: record.dateIssued || rawDate || '',
     dateFormatted: formattedDate,
     rxGroupId: record.rxGroupId || record.sessionId || '',
     sessionId: record.sessionId || record.rxGroupId || '',
     partNumber: record.partNumber || null,
-    totalParts: record.totalParts || null,
+    totalParts: record.totalParts || resolvedPartsCount,
+    partsCount: resolvedPartsCount,
     items: slimItems,
     searchableItems: productNames.slice(0, 30),
     itemCount: rawLines.length,
+    testType: record.testType || '',
+    testName: record.testName || record.fagronDetails?.testName || '',
     treatmentProgram: record.treatmentProgram || record.program || '',
     treatmentType: record.treatmentType || record.type || '',
+    treatmentTitle: record.treatmentTitle || record.title || record.treatmentType || '',
     total: Number(record.total || record.amount || 0),
     source: record.source || 'portal',
-    createdAt_ts: getTimestamp(record.createdAt || record.dateIssued)
+    createdAt_ts: getTimestamp(record.createdAt || record.importedAt || record.dateIssued)
   };
 }
 
