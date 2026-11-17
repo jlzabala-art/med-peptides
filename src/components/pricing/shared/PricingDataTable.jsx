@@ -80,6 +80,25 @@ export default function PricingDataTable({
                     {[row.volume, row.category].filter(Boolean).join(' · ')}
                   </div>
                 )}
+                {row.strengthTiers && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                    {row.strengthTiers.lowest && (
+                      <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '1px 6px', borderRadius: '4px' }}>
+                        Low ({row.strengthTiers.lowest.strength}): €{Number(row.strengthTiers.lowest.priceEur).toFixed(2)}
+                      </span>
+                    )}
+                    {row.strengthTiers.middle && (
+                      <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px' }}>
+                        Mid ({row.strengthTiers.middle.strength}): €{Number(row.strengthTiers.middle.priceEur).toFixed(2)}
+                      </span>
+                    )}
+                    {row.strengthTiers.highest && (
+                      <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', padding: '1px 6px', borderRadius: '4px' }}>
+                        High ({row.strengthTiers.highest.strength}): €{Number(row.strengthTiers.highest.priceEur).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -240,71 +259,118 @@ export default function PricingDataTable({
 
   const renderExpandedDetail = (row) => {
     const simpleSku = (row.sku || row.id || '').replace(skuPrefixPattern, '');
+    const hasStrengthVariants = Array.isArray(row.variants) && row.variants.some((v) => v.strength);
     return (
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          display: 'flex',
+          flexDirection: 'column',
           gap: '1rem',
           padding: '1rem 1.25rem',
           background: '#f8fafc',
           borderTop: '1px solid #e2e8f0',
         }}
       >
-        <div>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-            SKU / Reference
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.3rem', marginBottom: '0.6rem' }}>
-            <CopyableId value={simpleSku} />
-            {row.itemNumber && (
-              <span style={{ fontSize: '0.72rem', color: '#64748b', fontFamily: 'monospace' }}>
-                #{row.itemNumber}
-              </span>
-            )}
-          </div>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-            Key Bioactive Compounds
-          </div>
-          <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.45 }}>
-            {row.keyActives || 'Clinical bioactive formulation'}
-          </p>
-        </div>
-        <div>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-            Clinical Indication &amp; Role
-          </div>
-          <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.45 }}>
-            {row.clinicalFocus || row.subtitle || 'Professional clinic & homecare protocol'}
-          </p>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.6rem' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '1rem',
+          }}
+        >
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-              Presentation &amp; Margin
+              SKU / Reference
             </div>
-            <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#334155' }}>
-              {row.presentation || row.volume || 'Standard Clinical Pack'} · Spread: {row.calculatedRetailMarginPct}% MSRP
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.3rem', marginBottom: '0.6rem' }}>
+              <CopyableId value={simpleSku} />
+              {row.itemNumber && (
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontFamily: 'monospace' }}>
+                  #{row.itemNumber}
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+              Key Bioactive Compounds
+            </div>
+            <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.45 }}>
+              {row.keyActives || 'Clinical bioactive formulation'}
             </p>
           </div>
           <div>
-            <Link
-              href={`/p/${row.slug || row.id}`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#003666',
-                textDecoration: 'none',
-              }}
-            >
-              <span>Open Full Product Dossier</span>
-              <ArrowRight size={14} />
-            </Link>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+              Formulation &amp; Scope
+            </div>
+            <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#0f172a', lineHeight: 1.45 }}>
+              {row.clinicalFocus || row.subtitle || 'Professional clinic & homecare protocol'}
+            </p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.6rem' }}>
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                Presentation &amp; Margin
+              </div>
+              <p style={{ margin: '0.3rem 0 0', fontSize: '0.83rem', color: '#334155' }}>
+                {row.presentation || row.volume || 'Standard Pack'} · Spread: {row.calculatedRetailMarginPct}% MSRP
+              </p>
+            </div>
+            <div>
+              <Link
+                href={`/p/${row.slug || row.id}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: '#003666',
+                  textDecoration: 'none',
+                }}
+              >
+                <span>Open Full Product Dossier</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
         </div>
+
+        {hasStrengthVariants && (
+          <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
+            <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.5rem' }}>
+              All Standardized Strengths ({row.variants.length}) · Pack: {row.packSize || row.volume} · Prices incl. VAT (EUR)
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {row.variants.map((v) => {
+                const isRef = v.tierRole === 'lowest' || v.tierRole === 'middle' || v.tierRole === 'highest';
+                return (
+                  <div
+                    key={v.id || v.strength}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '4px 9px',
+                      borderRadius: '6px',
+                      background: isRef ? '#eff6ff' : '#ffffff',
+                      border: isRef ? '1px solid #93c5fd' : '1px solid #cbd5e1',
+                      fontSize: '0.74rem',
+                    }}
+                  >
+                    <span style={{ fontWeight: 700, color: '#0f172a' }}>{v.strength}</span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#047857' }}>
+                      €{Number(v.costPriceEur || v.price_eur || 0).toFixed(2)}
+                    </span>
+                    {isRef && (
+                      <span style={{ fontSize: '0.60rem', fontWeight: 800, textTransform: 'uppercase', color: '#1d4ed8', background: '#dbeafe', padding: '0 4px', borderRadius: '3px' }}>
+                        {v.tierRole}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     );
   };

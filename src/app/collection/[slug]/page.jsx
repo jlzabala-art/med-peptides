@@ -610,6 +610,34 @@ async function fetchTargetedBrandProducts(brandSlug) {
     return getAestheticInjectablesCatalog();
   }
 
+  // Hormones, BHRT, Pellets & TRT (Pharmapolis Bulgaria 43 Master Preparations + Norma / NP LABS)
+  if (targetBrand === 'hormones' || targetBrand === 'bhrt' || targetBrand === 'trt' || targetBrand === 'norma' || targetBrand === 'pharmapolis') {
+    const { getPharmapolisHormonesCatalog } = await import('../../../data/pharmapolisHormonesRegistry');
+    const pharmapolisList = getPharmapolisHormonesCatalog();
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products')
+          .where('track', '==', 'hormones')
+          .limit(120)
+          .get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          if (d.id.startsWith('pharmapolis-hormone-') || data.brand === 'pharmapolis' || d.id.includes('norma')) {
+            list.push({ id: d.id, ...data });
+          }
+        });
+        if (list.length > 0) {
+          return list.sort((a, b) => (a.itemNumber || 999) - (b.itemNumber || 999));
+        }
+      }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Hormones Firestore error, using Pharmapolis registry:', e.message);
+    }
+    return pharmapolisList;
+  }
+
   if (!adminDb) return [];
   try {
     const snap = await adminDb.collection('products').get();
@@ -670,7 +698,8 @@ export default async function NextCollectionPage({ params, searchParams }) {
     'longevity-cellular', 'longevity',
     'neuro-performance', 'neuro', 'cognitive',
     'dermal-aesthetics', 'dermal',
-    'aesthetic-injectables', 'injectables', 'dermal-fillers', 'fillers'
+    'aesthetic-injectables', 'injectables', 'dermal-fillers', 'fillers',
+    'hormones', 'bhrt', 'trt', 'norma', 'pharmapolis'
   ];
 
   let catalog;
