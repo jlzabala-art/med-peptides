@@ -367,7 +367,7 @@ export default function PatientDnaPortalClient({
         recipientName={patientName}
         role="patient"
         clinicName={clinic}
-        verifiedBy="Atlas Multidisciplinary Clinical Team"
+        verifiedBy="Atlas Nutrition & Wellness Team"
         sessionDuration="90 days"
         storageKey={`atlas_patient_dna_${sampleCode}`}
         lang={selectedLanguage}
@@ -1022,7 +1022,7 @@ export default function PatientDnaPortalClient({
                 color: '#5f6368',
                 cursor: 'pointer'
               }}
-              title="Clinical Support & FAQ"
+              title="Nutrition Support & FAQ"
             >
               <HelpCircle size={16} />
             </button>
@@ -1733,7 +1733,7 @@ export default function PatientDnaPortalClient({
                 <>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 600, color: '#3c4043', marginBottom: '4px' }}>
-                      Clinical Email / GMC License
+                      Nutritionist Email / Specialist ID
                     </label>
                     <input
                       type="email"
@@ -1886,7 +1886,7 @@ export default function PatientDnaPortalClient({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <HelpCircle size={18} color="#1a73e8" />
                 <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 600, color: '#202124' }}>
-                  Atlas Clinical Concierge
+                  Atlas Nutrition Concierge
                 </h3>
               </div>
               <button
@@ -1966,7 +1966,7 @@ export default function PatientDnaPortalClient({
                 }}
               >
                 <MessageSquare size={16} />
-                <span>Chat with Clinical Genetics Concierge</span>
+                <span>Chat with Nutrition Genetics Concierge</span>
               </button>
             </div>
           </div>

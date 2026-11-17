@@ -382,7 +382,7 @@ export default function DnaAncestryHeritageSection({ clinicalProfile }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
             <HeartPulse size={16} style={{ color: '#0d9488' }} />
             <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 600, color: '#202124' }}>
-              Genotype → Clinical Peptide &amp; Regenerative Synergy
+              Genotype → Personalized Nutrition &amp; Wellness Synergy
             </h4>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>

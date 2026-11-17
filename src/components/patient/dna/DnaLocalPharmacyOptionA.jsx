@@ -53,7 +53,7 @@ export default function DnaLocalPharmacyOptionA({ onSwitchToOptionB }) {
       <div style={{ backgroundColor: '#fef2f2', border: '1.5px solid #fecaca', borderRadius: '12px', padding: '1.15rem 1.25rem' }}>
         <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#b91c1c', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <AlertCircle size={15} />
-          <span>CRITICAL CLINICAL DIRECTIVE: MUTUALLY EXCLUSIVE PATHWAYS (CHOOSE ONE ONLY)</span>
+          <span>IMPORTANT NUTRITION DIRECTIVE: MUTUALLY EXCLUSIVE PATHWAYS (CHOOSE ONE ONLY)</span>
         </div>
         <p style={{ margin: 0, fontSize: '0.80rem', color: '#7f1d1d', lineHeight: 1.5 }}>
           <strong>Do NOT combine Option A and Option B concurrently.</strong> They are alternative clinical tracks designed to resolve the same genetic targets. If taking the local commercial OTC supplements below, do not take compounded formulations to prevent micronutrient excess.
@@ -100,7 +100,7 @@ export default function DnaLocalPharmacyOptionA({ onSwitchToOptionB }) {
           <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0 0 10px 0' }}>
             {PRESCRIPTION_COMPARISON.pathwayB.subtitle}
           </p>
-          <div style={{ fontSize: '0.76rem', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>Clinical Benefits:</div>
+          <div style={{ fontSize: '0.76rem', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>Key Wellness Benefits:</div>
           <ul style={{ margin: '0 0 10px 0', paddingLeft: '18px', fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
             {PRESCRIPTION_COMPARISON.pathwayB.pros.map((pro, i) => (
               <li key={i}>{pro}</li>

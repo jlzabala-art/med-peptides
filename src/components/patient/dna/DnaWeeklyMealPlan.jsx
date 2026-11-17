@@ -39,6 +39,14 @@ export default function DnaWeeklyMealPlan({ clinicalProfile, onShareChefWhatsApp
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
               Gastronomic recipes tailored to Doha / GCC ingredients, optimized for insulin stabilization, methylation, and satiety.
             </p>
+            {clinicalProfile.ancestralMetabolicProfile?.primaryRegion && (
+              <div style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '6px', padding: '4px 10px', fontSize: '0.74rem', color: '#0f766e', fontWeight: 650 }}>
+                <span>🌍 Ancestry × 🧬 Nutrition:</span>
+                <span>
+                  Culturally &amp; genetically aligned with {clinicalProfile.ancestralMetabolicProfile.primaryRegion} ({clinicalProfile.ancestralMetabolicProfile.primaryPercent ?? 80.6}%) — EVOO, A2 fermented dairy &amp; ancient grains.
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Chef WhatsApp Share + Day selector */}

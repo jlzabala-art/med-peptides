@@ -39,6 +39,29 @@ export default function DnaPrioritiesSection({ clinicalProfile, patientName, sam
           </span>
         </div>
 
+        {/* 2-Step Methodology Explainer (Why Ancestry First -> Then Nutrition) */}
+        <div
+          style={{
+            backgroundColor: 'rgba(0, 20, 45, 0.28)',
+            border: '1px solid rgba(153, 246, 228, 0.30)',
+            borderRadius: '8px',
+            padding: '10px 14px',
+            marginBottom: '12px',
+            fontSize: '0.76rem',
+            lineHeight: 1.5,
+            color: '#e2e8f0'
+          }}
+        >
+          <strong style={{ color: '#99f6e4' }}>
+            {isNutritionist
+              ? '2-Step Methodology (Ancestry → Nutrition): '
+              : 'Why we test Ancestry first, then Nutrition: '}
+          </strong>
+          {isNutritionist
+            ? 'Step 1 (Ancestry & Haplogroups) sets the evolutionary dietary baseline (A2 dairy tolerance, solar Vitamin D demand, oxidative heritage). Step 2 (Nutrition DNA) calibrates individual SNPs on top of that baseline for precision meal and supplement planning.'
+            : 'Your genes remember where your ancestors thrived. Testing Ancestry first shows the foods your body evolved to digest best; testing Nutrition second fine-tunes your exact daily vitamins, carbs, and fats so your plan fits both your biology and your food culture.'}
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
           <div style={{ backgroundColor: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', padding: '12px' }}>
             <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#99f6e4', textTransform: 'uppercase', marginBottom: '4px' }}>
@@ -140,6 +163,19 @@ export default function DnaPrioritiesSection({ clinicalProfile, patientName, sam
                   <p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', color: '#3c4043', lineHeight: 1.5 }}>
                     {axis.clinicalFindingEn}
                   </p>
+                  {/* Visual Score Bar */}
+                  <div style={{ marginBottom: '10px' }}>
+                    <div style={{ height: '6px', width: '100%', backgroundColor: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${Math.min(100, Math.max(15, Number(axis.score || 60)))}%`,
+                          backgroundColor: gcpAccent,
+                          borderRadius: '999px',
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div style={{ borderTop: '1px solid #f1f3f4', paddingTop: '10px', marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '6px' }}>

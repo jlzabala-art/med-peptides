@@ -138,7 +138,7 @@ export default function DnaFoodMatrixSection({ clinicalProfile, initialViewMode 
               cursor: 'pointer'
             }}
           >
-            Top Clinical Highlights
+            Top Nutrition Highlights
           </button>
           <button
             type="button"

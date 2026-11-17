@@ -53,7 +53,7 @@ export async function generatePatientGenomicsPdf({
     const isVdrRisk = gEval.VDR === 'CT' || gEval.VDR === 'TT';
     const _isVitERisk = gEval.ZPR1 === 'CG' || gEval.ZPR1 === 'GG' || gEval.CYP4F2 === 'TC' || gEval.CYP4F2 === 'CC';
     const isLactoseIntolerant = gEval.MCM6 === 'AG' || gEval.MCM6 === 'GG';
-    const doctorName = gProfile.patient.doctor || resolvedDoctor || 'Clinical Genomic Director';
+    const doctorName = gProfile.patient.doctor || resolvedDoctor || 'Lead Nutrigenomics Specialist';
 
     const pdfDoc = await PDFDocument.create();
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -747,7 +747,7 @@ export async function generatePatientGenomicsPdf({
     }
 
     // Page 1 Footer
-    page1.drawText('Page 1 of 3 · Patient Clinical Reference Guide · Turn to Page 2 for Pathway 1 (Local OTC) & Page 3 for Pathway 2 (Compounding Order)', {
+    page1.drawText('Page 1 of 3 · Personalized Nutrition & DNA Guide · Turn to Page 2 for Local OTC & Page 3 for Custom Formula', {
       x: 36,
       y: 18,
       size: 7,
@@ -1779,7 +1779,7 @@ export async function generatePatientGenomicsPdf({
       }
 
       ay -= 14;
-      ancPage.drawText('Clinical Synthesis & Evolutionary Alignment:', {
+      ancPage.drawText('Nutrition & Heritage Synthesis:', {
         x: 36,
         y: ay,
         size: 10,
@@ -1800,6 +1800,48 @@ export async function generatePatientGenomicsPdf({
       }
       if (synthLine.trim()) {
         ancPage.drawText(synthLine.trim(), { x: 36, y: ay, size: 8.8, font: helvetica, color: darkSlate });
+        ay -= 22;
+      }
+
+      // 4-Column Ancestry × Nutrition Decision Matrix
+      if (ay > 240) {
+        ancPage.drawText('ANCESTRY × NUTRITION DECISION MATRIX (CROSS-TEST INTEGRATION)', {
+          x: 36,
+          y: ay,
+          size: 9,
+          font: helveticaBold,
+          color: navyPrimary,
+        });
+        ay -= 16;
+        ancPage.drawRectangle({ x: 36, y: ay - 6, width: aW - 72, height: 20, color: navyPrimary });
+        ancPage.drawText('Ancestry Signal', { x: 42, y: ay + 1, size: 7.2, font: helveticaBold, color: rgb(1, 1, 1) });
+        ancPage.drawText(isNutritionist ? 'Nutrition Gene' : 'Priority', { x: 168, y: ay + 1, size: 7.2, font: helveticaBold, color: rgb(1, 1, 1) });
+        ancPage.drawText('Combined Effect', { x: 292, y: ay + 1, size: 7.2, font: helveticaBold, color: rgb(1, 1, 1) });
+        ancPage.drawText('Action', { x: 428, y: ay + 1, size: 7.2, font: helveticaBold, color: rgb(1, 1, 1) });
+        ay -= 24;
+
+        const matrix = [
+          [`${anc.primaryRegion || 'MENA'} (${anc.primaryPercent ?? 80.6}%)`, isNutritionist ? 'LCT / MCM6' : 'Dairy', anc.dairyAdaptation?.status || 'A2 fermented tolerance', 'Goat/sheep labneh & feta A2'],
+          ['Nile / Med Heritage', isNutritionist ? 'TCF7L2 / FTO' : 'Glycemia', anc.carbohydrateAdaptation?.status || 'Refined carb sensitivity', '1-2-3 plate order + whole grains'],
+          [`mtDNA ${anc.maternalHaplogroup || 'H13a'}`, isNutritionist ? 'SOD2 / MTHFR' : 'Vitality', 'Oxidative & folate demand', 'EVOO polyphenols + L-5-MTHF'],
+          ['Solar Heritage', isNutritionist ? 'VDR / GC' : 'Vitamin D', 'Higher indoor D3 need', 'Targeted D3 + K2 (MK-7)'],
+        ];
+        matrix.forEach((row, idx) => {
+          ancPage.drawRectangle({
+            x: 36,
+            y: ay - 16,
+            width: aW - 72,
+            height: 24,
+            color: idx % 2 === 0 ? lightBg : rgb(1, 1, 1),
+            borderColor: cardBorder,
+            borderWidth: 0.6,
+          });
+          ancPage.drawText(String(row[0]).slice(0, 24), { x: 42, y: ay - 7, size: 7.2, font: helveticaBold, color: navyPrimary });
+          ancPage.drawText(String(row[1]).slice(0, 22), { x: 168, y: ay - 7, size: 7.2, font: helvetica, color: darkSlate });
+          ancPage.drawText(String(row[2]).slice(0, 26), { x: 292, y: ay - 7, size: 7.2, font: helvetica, color: darkSlate });
+          ancPage.drawText(String(row[3]).slice(0, 28), { x: 428, y: ay - 7, size: 7.2, font: helveticaBold, color: tealAccent });
+          ay -= 26;
+        });
       }
 
       ancPage.drawText('Page 4 of 4 · Evolutionary Nutrigenomics & Ancestry Fusion Engine', {
@@ -1969,7 +2011,7 @@ export async function generatePatientGenomicsPdf({
           font: helvetica,
           color: darkSlate
         });
-        dividerPage.drawText('• Clinical Scope: Complete nutritional predispositions, metabolic profiles & cofactors.', {
+        dividerPage.drawText('• Nutrition Scope: Complete nutritional predispositions, metabolic profiles & cofactors.', {
           x: 88,
           y: boxTop + 22,
           size: 7.2,
