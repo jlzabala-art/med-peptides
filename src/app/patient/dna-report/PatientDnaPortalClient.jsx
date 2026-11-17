@@ -38,9 +38,12 @@ import {
   AlertCircle,
   QrCode
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import CopyableId from '@/components/ui/CopyableId';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { filterAdminDirectoryGroups } from '@/constants/publicAdminDirectory';
 import {
   evaluateNutrigenomicProfile,
   THREE_CAPSULE_PROTOCOL,
@@ -63,12 +66,12 @@ import DnaDownloadsSection from '@/components/patient/dna/DnaDownloadsSection';
 
 const CHAPTERS = [
   { id: 'priorities', label: '1. DNA Priorities', icon: '🧬', subtitle: 'Metabolism & 5 Nutrition Axes', patientSubtitle: 'Your 5 Body Priorities' },
-  { id: 'ancestry', label: '2. Ancestral Origins', icon: '🌍', subtitle: 'Indus Valley & Haplogroup M2a\'b', patientSubtitle: 'Origins & Food Heritage' },
+  { id: 'ancestry', label: '2. Ancestral Origins', icon: '🌍', subtitle: 'MENA / Nile Valley & Haplogroups', patientSubtitle: 'Origins & Food Heritage' },
   { id: 'foods', label: '3. 17 Food Families', icon: '🥗', subtitle: '116 Foods Classified (🟢🟡🔴)', patientSubtitle: 'What to Eat & Avoid (🟢🟡🔴)' },
   { id: 'mealplan', label: '4. 7-Day Meal Plan', icon: '📅', subtitle: 'Daily Menus & 24h Routine', patientSubtitle: 'Daily Menus & Routine' },
   { id: 'grocery', label: '5. Grocery Checklist', icon: '🛒', subtitle: 'Monoprix / Lulu Qatar Ready', patientSubtitle: 'Supermarket Shopping List' },
   { id: 'prescription', label: '6. Supplement Plan', icon: '💊', subtitle: 'Compounded vs Local OTC', patientSubtitle: 'Daily Supplement Guide' },
-  { id: 'downloads', label: '7. PDF Dossiers', icon: '📥', subtitle: 'Nutritionist & Patient PDFs', patientSubtitle: 'Simple Patient PDF' }
+  { id: 'downloads', label: '7. PDF Dossiers', icon: '📥', subtitle: 'Nutritionist & Patient PDFs', patientSubtitle: 'Simple Patient PDF (11p)' }
 ];
 
 export default function PatientDnaPortalClient({
@@ -88,10 +91,13 @@ export default function PatientDnaPortalClient({
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Asymmetric Audience Mode: Patient (default, locked) vs Nutritionist (requires token or specialist auth)
+  const router = useRouter();
+  const { is } = useRoleAccess();
+  const isAdminUser = is('admin');
   const [canAccessNutritionist, setCanAccessNutritionist] = useState(Boolean(initialCanAccessNutritionist));
   const [nutritionistToken, setNutritionistToken] = useState(initialNutritionistToken || null);
   const [audienceMode, setAudienceMode] = useState(initialCanAccessNutritionist ? 'nutritionist' : 'patient');
-  const isNutritionistView = canAccessNutritionist && audienceMode === 'nutritionist';
+  const isNutritionistView = (canAccessNutritionist || isAdminUser) && audienceMode === 'nutritionist';
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [copiedQrType, setCopiedQrType] = useState(null);
 
@@ -145,19 +151,24 @@ export default function PatientDnaPortalClient({
     return clean.slice(0, 2).toUpperCase();
   }, [patientName]);
 
-  // Omnibox Global Search Indexing (Genes, Foods, Priorities, Chapters)
+  // Omnibox Global Search Indexing (Genes, Foods, Priorities, Chapters + Admin Public Screens Index)
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q || q.length < 2) return { chapters: [], axes: [], foods: [] };
+    if (!q || q.length < 2) {
+      return { chapters: CHAPTERS, axes: [], foods: [] };
+    }
 
     const matchingChapters = CHAPTERS.filter(
-      (ch) => ch.label.toLowerCase().includes(q) || ch.subtitle.toLowerCase().includes(q)
+      (ch) =>
+        ch.label.toLowerCase().includes(q) ||
+        ch.subtitle.toLowerCase().includes(q) ||
+        (ch.patientSubtitle && ch.patientSubtitle.toLowerCase().includes(q))
     );
 
     const matchingAxes = (clinicalProfile.fiveClinicalAxes || []).filter(
       (ax) =>
         ax.title.toLowerCase().includes(q) ||
-        ax.genes.toLowerCase().includes(q) ||
+        (isNutritionistView && ax.genes && ax.genes.toLowerCase().includes(q)) ||
         ax.summary.toLowerCase().includes(q)
     );
 
@@ -171,14 +182,22 @@ export default function PatientDnaPortalClient({
     });
 
     return {
-      chapters: matchingChapters.slice(0, 3),
+      chapters: matchingChapters.slice(0, 7),
       axes: matchingAxes.slice(0, 4),
-      foods: allFoods.slice(0, 5)
+      foods: allFoods.slice(0, 6)
     };
-  }, [searchQuery, clinicalProfile]);
+  }, [searchQuery, clinicalProfile, isNutritionistView]);
+
+  const adminDirectoryGroups = useMemo(
+    () => (isAdminUser ? filterAdminDirectoryGroups(searchQuery) : []),
+    [isAdminUser, searchQuery]
+  );
 
   const hasSearchResults =
-    searchResults.chapters.length > 0 || searchResults.axes.length > 0 || searchResults.foods.length > 0;
+    searchResults.chapters.length > 0 ||
+    searchResults.axes.length > 0 ||
+    searchResults.foods.length > 0 ||
+    adminDirectoryGroups.length > 0;
 
   // Global Keyboard Shortcuts (⌘K for Omnibox, Esc for modals)
   useEffect(() => {
@@ -298,11 +317,11 @@ export default function PatientDnaPortalClient({
 
   const handleWhatsAppShare = (lang = 'en') => {
     if (typeof window !== 'undefined') {
-      const url = window.location.href;
+      const url = patientPortalUrl;
       const text =
         lang === 'es'
-          ? `Hola ${patientName}, aquí tienes tu Dossier Genómico Personalizado: ${url}\n\nBasado estrictamente en tu secuenciación de 24Genetics, el equipo clínico de Atlas ha desarrollado las hojas ejecutivas iniciales con tu plan nutricional y suplementación. Al ser un equipo local basado en UAE, cuentan con plena flexibilidad para realizar cualquier adaptación a medida de tus requerimientos.`
-          : `Hello ${patientName}, here is your Personalized Genomic Dossier: ${url}\n\nBased directly on your 24Genetics sequencing report, the Atlas clinical team has developed the executive opening guides for your meal plan and targeted supplementation. As a local UAE-based team, Atlas offers complete flexibility to make tailored adaptations according to your specific requirements.`;
+          ? `Hola ${patientName}, aquí tienes tu Guía Genómica Personalizada: ${url}\n\nBasado en tus informes de Ancestría y Nutrición de 24Genetics, el equipo de Atlas ha preparado tu plan nutricional de 7 días, semáforo de alimentos y suplementación personalizada.`
+          : `Hello ${patientName}, here is your Personalized DNA & Heritage Guide: ${url}\n\nBased on your 24Genetics Ancestry and Nutrition reports, the Atlas team has prepared your 7-day meal plan, food traffic light, and targeted supplement guide.`;
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
       window.open(waUrl, '_blank', 'noopener,noreferrer');
     }
@@ -527,35 +546,36 @@ export default function PatientDnaPortalClient({
               )}
             </div>
 
-            {/* Omnibox Floating Search Results Dropdown */}
-            {isSearchOpen && searchQuery.trim().length >= 2 && (
+            {/* Omnibox Floating Search Results Dropdown (Opens on focus or typing; Admin sees Public Screens Index) */}
+            {isSearchOpen && (
               <div
                 style={{
                   position: 'absolute',
                   top: 'calc(100% + 4px)',
                   left: 0,
                   right: 0,
+                  minWidth: 'min(92vw, 480px)',
                   backgroundColor: '#ffffff',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   border: '1px solid #dadce0',
-                  boxShadow: '0 4px 16px rgba(60,64,67,0.18)',
+                  boxShadow: '0 8px 24px rgba(60,64,67,0.20)',
                   zIndex: 90,
-                  maxHeight: '380px',
+                  maxHeight: '72vh',
                   overflowY: 'auto',
                   padding: '8px 0'
                 }}
               >
                 {!hasSearchResults ? (
                   <div style={{ padding: '12px 16px', fontSize: '0.76rem', color: '#5f6368', textAlign: 'center' }}>
-                    No genomic matches found for &quot;<strong>{searchQuery}</strong>&quot;
+                    No matches found for &quot;<strong>{searchQuery}</strong>&quot;
                   </div>
                 ) : (
                   <>
-                    {/* Chapter Matches */}
+                    {/* Chapter Matches (Current Report Index) */}
                     {searchResults.chapters.length > 0 && (
                       <div style={{ marginBottom: '6px' }}>
                         <div style={{ padding: '4px 14px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          Report Chapters
+                          {selectedLanguage === 'es' ? 'Índice de este Informe (7 Capítulos)' : 'This Report Index (7 Chapters)'}
                         </div>
                         {searchResults.chapters.map((ch) => (
                           <div
@@ -571,6 +591,7 @@ export default function PatientDnaPortalClient({
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'space-between',
+                              gap: '8px',
                               fontSize: '0.78rem',
                               color: '#202124'
                             }}
@@ -581,17 +602,19 @@ export default function PatientDnaPortalClient({
                               <span>{ch.icon}</span>
                               <span style={{ fontWeight: 600 }}>{ch.label}</span>
                             </div>
-                            <span style={{ fontSize: '0.66rem', color: '#5f6368' }}>{ch.subtitle}</span>
+                            <span style={{ fontSize: '0.66rem', color: '#5f6368' }}>
+                              {isNutritionistView ? ch.subtitle : (ch.patientSubtitle || ch.subtitle)}
+                            </span>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    {/* Genes & Clinical Priorities Matches */}
+                    {/* Genes & Priorities Matches */}
                     {searchResults.axes.length > 0 && (
                       <div style={{ marginBottom: '6px', borderTop: '1px solid #f1f3f4', paddingTop: '6px' }}>
                         <div style={{ padding: '4px 14px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          Genes &amp; 5 Priorities
+                          {isNutritionistView ? 'Genes & 5 Priorities' : 'Your 5 Body Priorities'}
                         </div>
                         {searchResults.axes.map((ax, idx) => (
                           <div
@@ -611,7 +634,9 @@ export default function PatientDnaPortalClient({
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                           >
                             <div style={{ fontWeight: 600, color: '#1a73e8' }}>{ax.title}</div>
-                            <div style={{ fontSize: '0.68rem', color: '#5f6368', marginTop: '2px' }}>{ax.genes}</div>
+                            {isNutritionistView && (
+                              <div style={{ fontSize: '0.68rem', color: '#5f6368', marginTop: '2px' }}>{ax.genes}</div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -619,7 +644,7 @@ export default function PatientDnaPortalClient({
 
                     {/* Food Items Matches */}
                     {searchResults.foods.length > 0 && (
-                      <div style={{ borderTop: '1px solid #f1f3f4', paddingTop: '6px' }}>
+                      <div style={{ marginBottom: '6px', borderTop: '1px solid #f1f3f4', paddingTop: '6px' }}>
                         <div style={{ padding: '4px 14px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                           Personalized Foods &amp; Supermarket
                         </div>
@@ -647,6 +672,60 @@ export default function PatientDnaPortalClient({
                             <span style={{ fontSize: '0.66rem', color: '#5f6368', backgroundColor: '#f1f3f4', padding: '1px 6px', borderRadius: '4px' }}>
                               {food.category}
                             </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ADMIN ONLY: Master Public Screens & Catalogs Directory */}
+                    {isAdminUser && adminDirectoryGroups.length > 0 && (
+                      <div style={{ borderTop: '1px solid #dadce0', marginTop: '6px', padding: '8px 12px 4px', backgroundColor: '#f8fafc' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.66rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                          <ShieldCheck size={12} />
+                          <span>{selectedLanguage === 'es' ? 'Índice Maestro de Pantallas Públicas (Solo Admin)' : 'Public Screens & Catalogs Directory (Admin Only)'}</span>
+                        </div>
+                        {adminDirectoryGroups.map((group) => (
+                          <div key={group.id} style={{ marginBottom: '8px' }}>
+                            <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '4px' }}>
+                              {selectedLanguage === 'es' ? group.titleEs : group.titleEn}
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(195px, 1fr))', gap: '5px' }}>
+                              {group.items.map((item) => (
+                                <button
+                                  key={item.href}
+                                  type="button"
+                                  onClick={() => {
+                                    setIsSearchOpen(false);
+                                    setSearchQuery('');
+                                    router.push(item.href);
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    minHeight: '38px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '6px',
+                                    padding: '6px 9px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #dadce0',
+                                    backgroundColor: '#ffffff',
+                                    color: '#202124',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left'
+                                  }}
+                                >
+                                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {selectedLanguage === 'es' ? item.labelEs : item.labelEn}
+                                  </span>
+                                  <span style={{ fontSize: '0.60rem', fontWeight: 700, color: '#1a73e8', backgroundColor: '#e8f0fe', padding: '1px 5px', borderRadius: '4px', flexShrink: 0 }}>
+                                    {item.tag}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -944,7 +1023,7 @@ export default function PatientDnaPortalClient({
                   >
                     <Printer size={14} color="#0d9488" />
                     <div>
-                      <div style={{ fontWeight: 600 }}>Patient Meal &amp; Food Guide (5p)</div>
+                      <div style={{ fontWeight: 600 }}>Patient Meal &amp; Food Guide (11p)</div>
                       <div style={{ fontSize: '0.66rem', color: '#5f6368' }}>Simple edition · No lab annexes</div>
                     </div>
                   </a>

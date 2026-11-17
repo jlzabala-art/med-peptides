@@ -37,8 +37,8 @@ export default function DnaDownloadsSection({
         </div>
         <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
           {isNutritionist
-            ? 'Nutritionist dossiers merge the executive plan with the complete original 24Genetics CE-IVD report. Patient PDFs omit raw lab annexes for clarity.'
-            : 'Clean, practical 5-page PDF with your meal plan, food traffic light, and daily guide—without heavy technical lab annexes.'}
+            ? 'Nutritionist dossiers merge the 11-page executive plan with the complete original 24Genetics Nutrition & Ancestry reports (113 pages total). Patient PDFs omit raw lab annexes for clarity.'
+            : 'Clean, spacious 11-page PDF with your 2-step Ancestry + Nutrition methodology, 7-day meal plan, 17-family food traffic light, and Fridge Cheat Sheet—without heavy lab annexes.'}
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export default function DnaDownloadsSection({
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ fontSize: '0.70rem', fontWeight: 850, backgroundColor: '#0d9488', color: '#ffffff', padding: '2px 8px', borderRadius: '4px' }}>
-                PATIENT EDITION (5 PAGES)
+                PATIENT EDITION (11 PAGES)
               </span>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f766e' }}>No Lab Annexes</span>
             </div>
@@ -57,7 +57,7 @@ export default function DnaDownloadsSection({
               Simple Meal Plan &amp; Food Guide
             </h4>
             <p style={{ margin: 0, fontSize: '0.80rem', color: '#475569', lineHeight: 1.5 }}>
-              Easy-to-read guide: Ancestry × Nutrition summary, 7-day meal plan, 17-family food traffic light, and Patient QR. No heavy technical annexes.
+              Spacious 11-page guide: Ancestry × Nutrition synthesis, 2-page 7-day meal plan, 17-family food matrix, targeted nutrients, and 1-page Fridge Cheat Sheet.
             </p>
           </div>
 
@@ -81,7 +81,7 @@ export default function DnaDownloadsSection({
               }}
             >
               <Printer size={16} />
-              <span>Download Patient Simple PDF (5 Pgs)</span>
+              <span>Download Patient Simple PDF (11 Pgs)</span>
             </a>
             {pdfDownloadUrlLight && (
               <a

@@ -2,35 +2,24 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, X, Clock, Compass, ChevronRight, FileText, FlaskConical, Sparkles } from 'lucide-react';
+import { Search, X, Clock, Compass, ChevronRight, FileText, FlaskConical, Sparkles, ShieldCheck } from 'lucide-react';
 import { useAtlasContext } from '@/context/AtlasContextProvider';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { filterAdminDirectoryGroups } from '@/constants/publicAdminDirectory';
 import { searchAlgoliaFederated } from '@/services/algoliaSearch';
 import { trackSearchClick } from '@/services/algoliaInsights';
-
-const QUICK_MODULES = [
-  { labelEn: 'Clinical Catalog', labelEs: 'Catálogo Clínico', href: '/c/CAT-MU9L9GBN', tag: 'Catalog' },
-  { labelEn: 'Prescriptions & Label Studio', labelEs: 'Prescripciones y Etiquetas', href: '/labels', tag: 'Rx / GMP' },
-  { labelEn: 'Clinical Protocols', labelEs: 'Protocolos Clínicos', href: '/proto', tag: 'Protocols' },
-  { labelEn: 'B2B Price Hub', labelEs: 'Hub de Precios B2B', href: '/pricing', tag: 'Pricing' },
-  { labelEn: '24Genomics DNA Panels', labelEs: 'Paneles ADN 24Genomics', href: '/pricing/24genetics', tag: 'Genomics' },
-  { labelEn: 'Colway Clinical Derma', labelEs: 'Colway Clinical Derma', href: '/pricing/colway', tag: 'Colway' },
-  { labelEn: 'NP LABS Hormones (TRT & BHRT)', labelEs: 'NP LABS Hormonas (TRT y BHRT)', href: '/pricing/nplab-hormones', tag: 'Hormones' },
-  { labelEn: 'Peptides Price Schedule', labelEs: 'Tarifa Oficial Péptidos', href: '/pricing/peptides', tag: 'Peptides' },
-  { labelEn: 'Peptide Vials Directory', labelEs: 'Directorio de Viales', href: '/vials', tag: 'Vials' },
-  { labelEn: 'Reconstitution Calculator', labelEs: 'Calculadora de Reconstitución', href: '/calculator', tag: 'Tools' },
-];
 
 /**
  * GlobalPublicCommandPalette
  * ─────────────────────────────────────────────────────────────────────────────
- * Unified ⌘K / Ctrl+K quick-navigation & recent-context palette across all
- * public routes, connecting Catalog, Protocols, Prescriptions (/labels & /rx),
- * Pricing, and Calculator as a single cohesive application.
+ * Unified ⌘K / Ctrl+K quick-navigation & context-aware search across public routes.
+ * - Admin (`is('admin')`): Full 5-Group Public Screens Index + Live Patient/Rx + Algolia.
+ * - Non-Admin: Strictly scoped to the current page context (never exposes cross-app directory or patient list).
  */
 export default function GlobalPublicCommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [searchScope, setSearchScope] = useState('all'); // 'rx' | 'protocols' | 'products' | 'all'
+  const [searchScope, setSearchScope] = useState('directory'); // 'directory' | 'rx' | 'protocols' | 'products' | 'all'
   const [rxMatches, setRxMatches] = useState([]);
   const [recentRxList, setRecentRxList] = useState([]);
   const [loadingRx, setLoadingRx] = useState(false);
@@ -41,31 +30,52 @@ export default function GlobalPublicCommandPalette() {
   const router = useRouter();
   const pathname = usePathname() || '/';
   const { recentItems } = useAtlasContext();
+  const { is } = useRoleAccess();
+  const isAdminUser = is('admin');
   const isEs = typeof document !== 'undefined' && document.documentElement?.lang === 'es';
 
-  const resolveDefaultScope = (path) => {
-    if (path.startsWith('/labels') || path.startsWith('/rx')) return 'rx';
+  const resolveDefaultScope = (path, adminFlag) => {
     if (path.startsWith('/proto')) return 'protocols';
-    if (path.startsWith('/p/') || path.startsWith('/raw/') || path.startsWith('/pricing') || path.startsWith('/vials') || path.startsWith('/calculator')) return 'products';
-    return 'all';
+    if (
+      path.startsWith('/collection') ||
+      path.startsWith('/p/') ||
+      path.startsWith('/raw/') ||
+      path.startsWith('/pricing') ||
+      path.startsWith('/vials') ||
+      path.startsWith('/calculator')
+    ) {
+      return adminFlag ? 'directory' : 'products';
+    }
+    if (path.startsWith('/labels') || path.startsWith('/rx')) {
+      return adminFlag ? 'rx' : 'products';
+    }
+    return adminFlag ? 'directory' : 'products';
   };
 
   useEffect(() => {
     const handleOpen = () => {
-      setSearchScope(resolveDefaultScope(pathname));
+      if (pathname.startsWith('/patient/dna-report')) {
+        const dnaInput = document.getElementById('gcp-omnibox-search');
+        if (dnaInput) {
+          dnaInput.focus();
+          return;
+        }
+      }
+      setSearchScope(resolveDefaultScope(pathname, isAdminUser));
       setIsOpen(true);
     };
     window.addEventListener('open-atlas-command-palette', handleOpen);
     return () => window.removeEventListener('open-atlas-command-palette', handleOpen);
-  }, [pathname]);
+  }, [pathname, isAdminUser]);
 
   // Listen for ⌘K / Ctrl+K globally across all screens
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        if (pathname.startsWith('/patient/dna-report')) return; // Handled by DNA Portal omnibox
         e.preventDefault();
         setIsOpen((prev) => {
-          if (!prev) setSearchScope(resolveDefaultScope(pathname));
+          if (!prev) setSearchScope(resolveDefaultScope(pathname, isAdminUser));
           return !prev;
         });
       } else if (e.key === 'Escape' && isOpen) {
@@ -74,11 +84,11 @@ export default function GlobalPublicCommandPalette() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [pathname, isOpen]);
+  }, [pathname, isOpen, isAdminUser]);
 
-  // Load recent patients/prescriptions when opened in 'rx' scope with empty query
+  // Load recent patients/prescriptions ONLY for Admin when opened in 'rx' scope with empty query
   useEffect(() => {
-    if (!isOpen || searchScope !== 'rx' || query.trim().length >= 2 || recentRxList.length > 0) return;
+    if (!isOpen || !isAdminUser || searchScope !== 'rx' || query.trim().length >= 2 || recentRxList.length > 0) return;
     let active = true;
     setLoadingRx(true);
     fetch('/api/labels/search?q=')
@@ -93,9 +103,9 @@ export default function GlobalPublicCommandPalette() {
         if (active) setLoadingRx(false);
       });
     return () => { active = false; };
-  }, [isOpen, searchScope, query, recentRxList.length]);
+  }, [isOpen, isAdminUser, searchScope, query, recentRxList.length]);
 
-  // Live federated Algolia + prescription quick search when query >= 2 chars
+  // Live federated Algolia (+ Admin-only prescription search) when query >= 2 chars
   useEffect(() => {
     const trimmed = query.trim();
     if (!isOpen || trimmed.length < 2) {
@@ -107,16 +117,24 @@ export default function GlobalPublicCommandPalette() {
     }
     const controller = new AbortController();
     const timer = setTimeout(async () => {
-      setLoadingRx(true);
+      if (isAdminUser) setLoadingRx(true);
       setLoadingAlgolia(true);
       try {
+        const algoliaTargets = isAdminUser
+          ? ['products', 'protocols']
+          : pathname.startsWith('/proto')
+            ? ['protocols']
+            : ['products'];
+
         const [rxRes, fedRes] = await Promise.allSettled([
-          fetch(`/api/labels/search?q=${encodeURIComponent(trimmed)}`, { signal: controller.signal }),
-          searchAlgoliaFederated(trimmed, ['products', 'protocols'], 5),
+          isAdminUser
+            ? fetch(`/api/labels/search?q=${encodeURIComponent(trimmed)}`, { signal: controller.signal })
+            : Promise.resolve(null),
+          searchAlgoliaFederated(trimmed, algoliaTargets, 6),
         ]);
         if (controller.signal.aborted) return;
 
-        if (rxRes.status === 'fulfilled' && rxRes.value?.ok) {
+        if (isAdminUser && rxRes.status === 'fulfilled' && rxRes.value?.ok) {
           const data = await rxRes.value.json();
           setRxMatches(Array.isArray(data?.results) ? data.results.slice(0, 5) : []);
         } else {
@@ -141,23 +159,20 @@ export default function GlobalPublicCommandPalette() {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [isOpen, query]);
+  }, [isOpen, query, isAdminUser, pathname]);
 
   if (!isOpen) return null;
 
   const qLower = query.trim().toLowerCase();
-  const filteredModules = QUICK_MODULES.filter((m) =>
-    !qLower ||
-    m.labelEn.toLowerCase().includes(qLower) ||
-    m.labelEs.toLowerCase().includes(qLower) ||
-    m.tag.toLowerCase().includes(qLower)
-  );
+  const filteredDirectoryGroups = isAdminUser ? filterAdminDirectoryGroups(query) : [];
 
-  const filteredRecent = (recentItems || []).filter((item) =>
-    !qLower ||
-    item.title.toLowerCase().includes(qLower) ||
-    item.path.toLowerCase().includes(qLower)
-  );
+  const filteredRecent = isAdminUser
+    ? (recentItems || []).filter((item) =>
+        !qLower ||
+        item.title.toLowerCase().includes(qLower) ||
+        item.path.toLowerCase().includes(qLower)
+      )
+    : [];
 
   const navigateTo = (href) => {
     setIsOpen(false);
@@ -181,14 +196,14 @@ export default function GlobalPublicCommandPalette() {
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        padding: '10vh 1rem 1rem',
+        padding: '5vh 0.75rem 0.75rem',
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: '560px',
+          maxWidth: isAdminUser ? '660px' : '540px',
           background: '#ffffff',
           borderRadius: '14px',
           border: '1px solid #cbd5e1',
@@ -212,19 +227,25 @@ export default function GlobalPublicCommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={
-              searchScope === 'rx'
-                ? (isEs ? 'Buscar paciente, #RX, médico o fórmula...' : 'Search patient, #RX code, doctor, or formula...')
-                : searchScope === 'protocols'
-                  ? (isEs ? 'Buscar protocolo, péptido o biomarcador...' : 'Search protocol, peptide, or biomarker...')
-                  : searchScope === 'products'
-                    ? (isEs ? 'Buscar péptido, API o monografía...' : 'Search peptide, API, or monograph...')
-                    : (isEs ? 'Buscar paciente, protocolo, péptido o módulo...' : 'Search patient, protocol, peptide, or module...')
+              !isAdminUser
+                ? pathname.startsWith('/proto')
+                  ? (isEs ? 'Buscar protocolo en esta vista...' : 'Search protocol in this view...')
+                  : (isEs ? 'Buscar formulación en esta vista...' : 'Search formulation in this view...')
+                : searchScope === 'directory'
+                  ? (isEs ? 'Filtrar catálogos, portales, tarifas o #RX...' : 'Filter catalogs, portals, pricing, or #RX...')
+                  : searchScope === 'rx'
+                    ? (isEs ? 'Buscar paciente, #RX, médico o fórmula...' : 'Search patient, #RX code, doctor, or formula...')
+                    : searchScope === 'protocols'
+                      ? (isEs ? 'Buscar protocolo, péptido o biomarcador...' : 'Search protocol, peptide, or biomarker...')
+                      : searchScope === 'products'
+                        ? (isEs ? 'Buscar péptido, API o monografía...' : 'Search peptide, API, or monograph...')
+                        : (isEs ? 'Buscar paciente, protocolo, péptido o módulo...' : 'Search patient, protocol, peptide, or module...')
             }
             style={{
               flex: 1,
               border: 'none',
               outline: 'none',
-              fontSize: '0.9rem',
+              fontSize: '0.92rem',
               color: '#0f172a',
               background: 'transparent',
             }}
@@ -232,44 +253,58 @@ export default function GlobalPublicCommandPalette() {
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
+            style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
           >
-            <X size={17} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Context-Aware Scope Switcher Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc', flexWrap: 'wrap' }}>
-          {[
-            { id: 'rx', label: isEs ? 'Pacientes y Recetas' : 'Patients & Rx' },
-            { id: 'protocols', label: isEs ? 'Protocolos' : 'Protocols' },
-            { id: 'products', label: isEs ? 'Péptidos y Catálogo' : 'Peptides & Catalog' },
-            { id: 'all', label: isEs ? 'Todo Atlas' : 'All Atlas' },
-          ].map((tab) => {
-            const active = searchScope === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSearchScope(tab.id)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '999px',
-                  border: active ? '1px solid #1a73e8' : '1px solid #cbd5e1',
-                  background: active ? '#e8f0fe' : '#ffffff',
-                  color: active ? '#1a73e8' : '#475569',
-                  fontSize: '0.72rem',
-                  fontWeight: active ? 700 : 600,
-                  cursor: 'pointer',
-                }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+        {/* Context-Aware Scope Switcher Pills (Admin Only) vs. Page-Scoped Indicator (Non-Admin) */}
+        {isAdminUser ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc', flexWrap: 'wrap' }}>
+            {[
+              { id: 'directory', label: isEs ? 'Índice Pantallas' : 'Screens Index' },
+              { id: 'rx', label: isEs ? 'Pacientes y Recetas' : 'Patients & Rx' },
+              { id: 'protocols', label: isEs ? 'Protocolos' : 'Protocols' },
+              { id: 'products', label: isEs ? 'Péptidos y Catálogo' : 'Peptides & Catalog' },
+              { id: 'all', label: isEs ? 'Todo Atlas' : 'All Atlas' },
+            ].map((tab) => {
+              const active = searchScope === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSearchScope(tab.id)}
+                  style={{
+                    padding: '5px 11px',
+                    borderRadius: '999px',
+                    border: active ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                    background: active ? '#e8f0fe' : '#ffffff',
+                    color: active ? '#1a73e8' : '#475569',
+                    fontSize: '0.73rem',
+                    fontWeight: active ? 700 : 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 14px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc', fontSize: '0.72rem', color: '#5f6368', fontWeight: 600 }}>
+            <span>
+              {pathname.startsWith('/proto')
+                ? (isEs ? 'Alcance: Catálogo de Protocolos' : 'Scope: Protocols Catalog')
+                : (isEs ? 'Alcance: Catálogo de esta vista' : 'Scope: Current Page Catalog')}
+            </span>
+            <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+              {isEs ? 'Escribe 2+ letras para buscar' : 'Type 2+ letters to search'}
+            </span>
+          </div>
+        )}
 
-        <div style={{ maxHeight: '62vh', overflowY: 'auto', padding: '8px' }}>
+        <div style={{ maxHeight: '68vh', overflowY: 'auto', padding: '10px' }}>
           {/* Empty-state Recent Patients / Prescriptions when in 'rx' scope */}
           {searchScope === 'rx' && query.trim().length < 2 && (
             <div style={{ marginBottom: '8px' }}>
@@ -518,37 +553,81 @@ export default function GlobalPublicCommandPalette() {
             </div>
           )}
 
-          <div>
-            <div style={{ padding: '4px 10px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Compass size={11} />
-              <span>{isEs ? 'Módulos Atlas' : 'Atlas Modules'}</span>
+          {isAdminUser && (searchScope === 'directory' || searchScope === 'all' || query.trim().length >= 2) && filteredDirectoryGroups.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
+              <div style={{ padding: '4px 10px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: '#1a73e8', display: 'flex', alignItems: 'center', gap: '5px', background: '#f8fafc', borderRadius: '6px' }}>
+                <ShieldCheck size={12} />
+                <span>{isEs ? 'Índice Maestro de Pantallas Públicas (Solo Admin)' : 'Public Screens & Catalogs Directory (Admin Only)'}</span>
+              </div>
+              {filteredDirectoryGroups.map((group) => (
+                <div key={group.id}>
+                  <div style={{ padding: '2px 10px 6px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: '#5f6368', letterSpacing: '0.03em' }}>
+                    {isEs ? group.titleEs : group.titleEn}
+                  </div>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(235px, 1fr))',
+                      gap: '6px',
+                    }}
+                  >
+                    {group.items.map((mod) => {
+                      const isCurrent = pathname === mod.href;
+                      return (
+                        <button
+                          key={mod.href}
+                          type="button"
+                          onClick={() => navigateTo(mod.href)}
+                          style={{
+                            width: '100%',
+                            minHeight: '42px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '8px',
+                            padding: '8px 11px',
+                            borderRadius: '8px',
+                            border: isCurrent ? '1px solid #1a73e8' : '1px solid #e2e8f0',
+                            background: isCurrent ? '#e8f0fe' : '#ffffff',
+                            color: isCurrent ? '#1a73e8' : '#202124',
+                            fontSize: '0.79rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                        >
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {isEs ? mod.labelEs : mod.labelEn}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '0.64rem',
+                              fontWeight: 700,
+                              color: isCurrent ? '#1a73e8' : '#5f6368',
+                              background: isCurrent ? '#ffffff' : '#f1f3f4',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {mod.tag}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-            {filteredModules.map((mod) => (
-              <button
-                key={mod.href}
-                type="button"
-                onClick={() => navigateTo(mod.href)}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: pathname === mod.href ? '#eff6ff' : 'transparent',
-                  color: pathname === mod.href ? '#1a73e8' : '#0f172a',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <span>{isEs ? mod.labelEs : mod.labelEn}</span>
-                <ChevronRight size={13} color="#94a3b8" />
-              </button>
-            ))}
-          </div>
+          )}
+
+          {!isAdminUser && query.trim().length < 2 && (
+            <div style={{ padding: '20px 14px', textAlign: 'center', fontSize: '0.8rem', color: '#5f6368' }}>
+              {pathname.startsWith('/proto')
+                ? (isEs ? 'Escribe el nombre de un protocolo, péptido o indicación para buscar en esta vista.' : 'Type a protocol name, peptide, or goal to search within this view.')
+                : (isEs ? 'Escribe el nombre de una formulación o producto para buscar en esta vista.' : 'Type a formulation or product name to search within this view.')}
+            </div>
+          )}
         </div>
       </div>
     </div>
