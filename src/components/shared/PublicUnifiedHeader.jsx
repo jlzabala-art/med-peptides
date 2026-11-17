@@ -14,7 +14,7 @@ import {
   FileText,
   Search
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, LayoutGrid, User, LogOut, FileInput, LayoutList, Home, Sliders, ArrowLeft, HelpCircle } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, LayoutGrid, User, LogOut, FileInput, LayoutList, Home, Sliders, ArrowLeft, HelpCircle, Globe } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
@@ -26,6 +26,7 @@ import AtlasAppSwitcher from './public/AtlasAppSwitcher';
 import BrandLogo from '../common/BrandLogo';
 import DatasheetQuickSearchModal from './DatasheetQuickSearchModal';
 import GcpUserBadge from './GcpUserBadge';
+import PublicLocaleModal from './PublicLocaleModal';
 import '../../styles/publicStickyHeader.css';
 
 export const SUPPORTED_LANGUAGES = [
@@ -130,6 +131,7 @@ export default function PublicUnifiedHeader({
   const [isScrolled, setIsScrolled] = useState(false);
   const [internalInquiryOpen, setInternalInquiryOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isLocaleModalOpen, setIsLocaleModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeAnchor, setActiveAnchor] = useState(controlledActiveAnchorId || anchorTabs[0]?.id || '');
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
@@ -588,6 +590,29 @@ export default function PublicUnifiedHeader({
 
 
 
+              {/* Google Cloud Console Standard Mobile Locale Trigger (Opens Bottom Sheet) */}
+              <button
+                type="button"
+                className="puh-locale-trigger"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setIsLocaleModalOpen(true);
+                }}
+                title={isSpanish ? 'Preferencias regionales (idioma y divisa)' : 'Regional preferences (language and currency)'}
+                aria-label={isSpanish ? 'Cambiar idioma y divisa' : 'Change language and currency'}
+              >
+                <Globe size={14} />
+                <span className="puh-locale-lang-code">{lang.toUpperCase()}</span>
+                {!effectiveHideCurrencySelector && (
+                  <>
+                    <span className="puh-locale-sep">·</span>
+                    <span className="puh-locale-cur-symbol">
+                      {SUPPORTED_CURRENCIES.find((c) => c.code === effectiveCurrency)?.symbol || effectiveCurrency}
+                    </span>
+                  </>
+                )}
+              </button>
+
               {/* Currency Selector (Segmented Pills Google Cloud UX Standard: EUR / USD / AED) */}
               {!effectiveHideCurrencySelector && (
                 <div
@@ -781,7 +806,7 @@ export default function PublicUnifiedHeader({
 
               <button
                 type="button"
-                className="puh-btn puh-btn-ghost"
+                className="puh-btn puh-btn-ghost hide-on-extra-narrow"
                 onClick={() => {
                   if (typeof window !== 'undefined') {
                     window.dispatchEvent(new CustomEvent('open-atlas-help-drawer'));
@@ -927,6 +952,17 @@ export default function PublicUnifiedHeader({
         collectionProducts={collectionProducts}
         collectionTitle={collectionTitle}
         onSelectCollectionProduct={onSelectCollectionProduct}
+      />
+
+      {/* Google Cloud Console Standard Mobile Regional Settings Bottom Sheet */}
+      <PublicLocaleModal
+        isOpen={isLocaleModalOpen}
+        onClose={() => setIsLocaleModalOpen(false)}
+        lang={lang}
+        onLangChange={handleLanguageChange}
+        currency={effectiveCurrency}
+        onCurrencyChange={handleCurrencyChange}
+        hideCurrency={effectiveHideCurrencySelector}
       />
     </>
   );

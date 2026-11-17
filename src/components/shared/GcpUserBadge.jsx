@@ -210,7 +210,8 @@ export default function GcpUserBadge({
         }}
       >
         <LogIn size={13} color={isDark ? '#38bdf8' : '#1a73e8'} />
-        <span>{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
+        <span className="gcp-signin-text-desktop">{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
+        <span className="gcp-signin-text-mobile">{isEs ? 'Entrar' : 'Sign In'}</span>
       </Link>
     );
   }

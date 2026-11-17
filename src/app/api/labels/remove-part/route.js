@@ -150,6 +150,8 @@ export async function POST(request) {
     const updatePayload = {
       pharmacyLabels: nextLabels,
       parts: nextParts,
+      partsCount: nextLabels.length,
+      itemsCount: nextLabels.length,
       ...(origItems.length === baseLabels.length ? { items: nextItems } : {}),
       ...(origLines.length === baseLabels.length ? { prescriptionLines: nextLines } : {}),
       removedParts: [archiveEntry, ...existingRemoved].slice(0, 20),
@@ -164,6 +166,7 @@ export async function POST(request) {
       docId: resolvedDocId,
       labels: sanitized.pharmacyLabels,
       parts: sanitized.parts,
+      partsCount: sanitized.partsCount || sanitized.pharmacyLabels.length,
       removedParts: sanitized.removedParts,
       nextIndex: Math.min(partIndex, sanitized.pharmacyLabels.length - 1),
     });
@@ -228,6 +231,8 @@ export async function PUT(request) {
     const updatePayload = {
       pharmacyLabels: nextLabels,
       parts: nextParts,
+      partsCount: nextLabels.length,
+      itemsCount: nextLabels.length,
       ...(targetEntry.itemSnapshot ? { items: nextItems } : {}),
       ...(targetEntry.lineSnapshot ? { prescriptionLines: nextLines } : {}),
       removedParts: remainingRemoved,
@@ -242,6 +247,7 @@ export async function PUT(request) {
       docId: resolvedDocId,
       labels: sanitized.pharmacyLabels,
       parts: sanitized.parts,
+      partsCount: sanitized.partsCount || sanitized.pharmacyLabels.length,
       removedParts: sanitized.removedParts,
       restoredIndex: insertAt,
     });

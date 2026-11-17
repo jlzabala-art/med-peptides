@@ -49,6 +49,7 @@ import {
 } from './utils/labelHelpers';
 import { useWorkstationPrefs } from './hooks/useWorkstationPrefs';
 import { useLabelsWorklist } from './hooks/useLabelsWorklist';
+import { getWorklistTestKind } from './utils/labelHelpers';
 import { useLabelsQueue } from './hooks/useLabelsQueue';
 import { useBatchExport } from './hooks/useBatchExport';
 
@@ -110,8 +111,11 @@ export default function PublicLabelsAppClient({
     setPrintCountsMap,
     printDetailsMap,
     setPrintDetailsMap,
-    handleClearRecent
+    handleClearRecent,
+    refreshWorklist,
+    updateWorklistItem
   } = useLabelsWorklist();
+  const [worklistTestFilter, setWorklistTestFilter] = useState('all');
 
   const {
     patientQueue,
@@ -498,8 +502,9 @@ export default function PublicLabelsAppClient({
   const filteredWorklistItems = useMemo(() => {
     return baseWorklistItems
       .filter((item) => filterWorklistItem(item))
+      .filter((item) => worklistTestFilter === 'all' || getWorklistTestKind(item) === worklistTestFilter)
       .sort((a, b) => getImportTimestampMs(b) - getImportTimestampMs(a));
-  }, [baseWorklistItems, worklistTab, printCountsMap, getImportTimestampMs]);
+  }, [baseWorklistItems, worklistTab, printCountsMap, getImportTimestampMs, worklistTestFilter]);
 
   const totalWorklistPages = Math.max(1, Math.ceil(filteredWorklistItems.length / worklistPageSize));
   const safeWorklistPage = Math.min(worklistPage, totalWorklistPages);
@@ -571,6 +576,10 @@ export default function PublicLabelsAppClient({
     setPatientQueue,
     setLabelIndex,
     updateUrlWithQueue,
+    onPartsChanged: (targetId, mutation) => {
+      updateWorklistItem?.(targetId, mutation);
+      refreshWorklist?.();
+    },
   });
 
   const hasPendingApprovalsInQueue = patientQueue.some(
@@ -801,6 +810,9 @@ export default function PublicLabelsAppClient({
             totalWorklistPages={totalWorklistPages}
             onOpenImport={() => setShowImport(true)}
             onOpenManualRx={() => setShowManualRxModal(true)}
+            worklistTestFilter={worklistTestFilter}
+            setWorklistTestFilter={setWorklistTestFilter}
+            allWorklistItems={baseWorklistItems}
           />
         ) : isLoadingRx ? (
           <LabelsWorkspaceSkeleton isEs={isEs} />
@@ -931,6 +943,7 @@ export default function PublicLabelsAppClient({
           : 'Import a clinical prescription or Fagron test report directly into Label Studio to review and print labels.'}
         onImported={(created) => {
           setShowImport(false);
+          refreshWorklist?.();
           const first = Array.isArray(created) ? created[0] : null;
           if (first?.id || first?.code) handleSelectOrAddPatient(first.id || first.code, true);
         }}

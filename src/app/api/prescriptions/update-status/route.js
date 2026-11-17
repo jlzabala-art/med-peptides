@@ -4,6 +4,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { invalidateRxCache } from '@/app/rx/[code]/page';
 import { invalidateDoctorCache } from '@/lib/doctorCache';
 import { canEnterProduction, resolvePrescriptionAxes } from '@/utils/prescriptions/statusWorkflow';
+import { syncPrescriptionToAlgolia } from '@/services/algoliaSyncService';
 
 export const PRE_DISPENSED_STATUSES = [
   'draft',
@@ -240,6 +241,18 @@ export async function POST(request) {
       }
     } catch (cacheErr) {
       console.warn('[update-status] Cache invalidation notice:', cacheErr?.message);
+    }
+
+    try {
+      syncPrescriptionToAlgolia(docRef.id, {
+        ...existingData,
+        ...updatePayload,
+        id: docRef.id,
+      }).catch((err) => {
+        console.warn('[update-status] Algolia sync non-fatal warning:', err.message);
+      });
+    } catch {
+      // non-fatal
     }
 
     return NextResponse.json({

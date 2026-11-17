@@ -76,7 +76,7 @@ export default function PricingTopBar({
       <button
         type="button"
         onClick={onWhatsAppShare}
-        className="puh-btn puh-btn-ghost"
+        className="puh-btn puh-btn-ghost hide-on-mobile-header"
         title="Share via WhatsApp"
       >
         <MessageCircle size={14} />

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { notifyPrescriptionMutation } from '../utils/labelHelpers';
 
 /**
  * Encapsulates prescription part-level mutations (remove & restore)
@@ -20,6 +21,7 @@ export function useLabelsPrescriptionActions({
   setPatientQueue,
   setLabelIndex,
   updateUrlWithQueue,
+  onPartsChanged,
 }) {
   const [removingPartIndex, setRemovingPartIndex] = useState(null);
 
@@ -50,6 +52,23 @@ export function useLabelsPrescriptionActions({
       const nextIdx = typeof data.nextIndex === 'number' ? data.nextIndex : 0;
       setLabelIndex(nextIdx);
       updateUrlWithQueue(patientQueue, activeQueueIndex, nextIdx);
+
+      // Reactively sync with Worklist table and cross-tab BroadcastChannel
+      notifyPrescriptionMutation(targetId, {
+        partsCount: data.labels?.length,
+        labels: data.labels,
+        parts: data.parts,
+        removedParts: data.removedParts,
+      });
+      if (onPartsChanged) {
+        onPartsChanged(targetId, {
+          partsCount: data.labels?.length,
+          labels: data.labels,
+          parts: data.parts,
+          removedParts: data.removedParts,
+        });
+      }
+
       toast.success(isEs ? 'Parte eliminada de la prescripción' : 'Part removed from prescription');
     } catch (err) {
       toast.error(err.message || (isEs ? 'Error al eliminar la parte' : 'Error removing part'));
@@ -69,6 +88,7 @@ export function useLabelsPrescriptionActions({
     setPatientQueue,
     setLabelIndex,
     updateUrlWithQueue,
+    onPartsChanged,
   ]);
 
   const handleRestoreRemovedPart = useCallback(async (removedIdx = 0) => {
@@ -92,6 +112,23 @@ export function useLabelsPrescriptionActions({
       const restoredIdx = typeof data.restoredIndex === 'number' ? data.restoredIndex : 0;
       setLabelIndex(restoredIdx);
       updateUrlWithQueue(patientQueue, activeQueueIndex, restoredIdx);
+
+      // Reactively sync with Worklist table and cross-tab BroadcastChannel
+      notifyPrescriptionMutation(targetId, {
+        partsCount: data.labels?.length,
+        labels: data.labels,
+        parts: data.parts,
+        removedParts: data.removedParts,
+      });
+      if (onPartsChanged) {
+        onPartsChanged(targetId, {
+          partsCount: data.labels?.length,
+          labels: data.labels,
+          parts: data.parts,
+          removedParts: data.removedParts,
+        });
+      }
+
       toast.success(isEs ? 'Parte restaurada en la prescripción' : 'Part restored to prescription');
     } catch (err) {
       toast.error(err.message || (isEs ? 'Error al restaurar' : 'Error restoring part'));
@@ -108,6 +145,7 @@ export function useLabelsPrescriptionActions({
     setPatientQueue,
     setLabelIndex,
     updateUrlWithQueue,
+    onPartsChanged,
   ]);
 
   return {

@@ -22,7 +22,7 @@ import DataTable from '@/components/ui/DataTable';
 import LabelsRowQuickPreview from './LabelsRowQuickPreview';
 import PrescriptionStatusPopover from '@/components/prescription/PrescriptionStatusPopover';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
-import { sanitizeRecentCode } from '../utils/labelHelpers';
+import { sanitizeRecentCode, getWorklistTestKind } from '../utils/labelHelpers';
 
 export default function LabelsHomeView({
   isEs,
@@ -49,6 +49,9 @@ export default function LabelsHomeView({
   totalWorklistPages,
   onOpenImport,
   onOpenManualRx,
+  worklistTestFilter = 'all',
+  setWorklistTestFilter,
+  allWorklistItems = [],
 }) {
   const { role } = useRoleAccess();
   const [statusOverrides, setStatusOverrides] = useState({});
@@ -346,6 +349,67 @@ export default function LabelsHomeView({
             </select>
           </div>
 
+          {/* Test kind filter sub-bar */}
+          <div
+            style={{
+              padding: '6px 20px',
+              background: '#ffffff',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', marginRight: '4px' }}>
+              {isEs ? 'Tipo de test:' : 'Test type:'}
+            </span>
+            {[
+              { id: 'all', label: isEs ? 'Todos' : 'All' },
+              { id: 'trichotest', label: 'TrichoTest™' },
+              { id: 'telotest', label: 'TeloTest™' },
+              { id: 'acnetest', label: 'AcneTest™' },
+              { id: 'nutrigen', label: 'NutriGen™' },
+              { id: 'compounding', label: isEs ? 'Magistral' : 'Compounding' },
+            ].map((kind) => {
+              const active = (worklistTestFilter || 'all') === kind.id;
+              const count = kind.id === 'all'
+                ? (Array.isArray(allWorklistItems) ? allWorklistItems.length : 0)
+                : (Array.isArray(allWorklistItems) ? allWorklistItems.filter((item) => getWorklistTestKind(item) === kind.id).length : 0);
+              return (
+                <button
+                  key={kind.id}
+                  type="button"
+                  onClick={() => {
+                    if (setWorklistTestFilter) setWorklistTestFilter(kind.id);
+                    if (setWorklistPage) setWorklistPage(1);
+                  }}
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: active ? 700 : 500,
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    border: active ? '1px solid #1a73e8' : '1px solid #e2e8f0',
+                    background: active ? '#e8f0fe' : '#ffffff',
+                    color: active ? '#1a73e8' : '#475569',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span>{kind.label}</span>
+                  {count > 0 && (
+                    <span style={{ fontSize: '0.62rem', color: active ? '#1a73e8' : '#94a3b8', fontWeight: 700 }}>
+                      ({count})
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Unified Single Worklist Table */}
           <div>
             <div
@@ -401,6 +465,12 @@ export default function LabelsHomeView({
                     align: 'left',
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
+                      const pName = (p.name || p.patientName || '').trim().toLowerCase();
+                      const samePatientItems = pName && Array.isArray(allWorklistItems)
+                        ? allWorklistItems.filter((item) => (item.name || item.patientName || '').trim().toLowerCase() === pName)
+                        : [];
+                      const hasMultipleTests = samePatientItems.length > 1;
+
                       return (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -414,6 +484,42 @@ export default function LabelsHomeView({
                           <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
                             {p.title || p.treatmentTitle || 'Prescription protocol'}
                           </span>
+                          {hasMultipleTests && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const codes = samePatientItems.map((item) => item.code).filter(Boolean);
+                                if (handleAddMultipleToQueue && codes.length > 0) {
+                                  handleAddMultipleToQueue(codes);
+                                  toast.success(
+                                    isEs
+                                      ? `${codes.length} recetas de ${p.name || p.patientName} añadidas a la cola`
+                                      : `Added ${codes.length} prescriptions for ${p.name || p.patientName} to queue`
+                                  );
+                                }
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '2px 7px',
+                                borderRadius: '4px',
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                background: '#eff6ff',
+                                color: '#1d4ed8',
+                                border: '1px solid #bfdbfe',
+                                cursor: 'pointer',
+                                marginTop: '2px',
+                                alignSelf: 'flex-start',
+                              }}
+                              title={isEs ? 'Cargar todos los tests del paciente en la cola' : 'Queue all tests for this patient'}
+                            >
+                              <Layers size={11} />
+                              {isEs ? `${samePatientItems.length} tests · Añadir todos` : `${samePatientItems.length} tests · Queue all`}
+                            </button>
+                          )}
                         </div>
                       );
                     },
@@ -423,15 +529,19 @@ export default function LabelsHomeView({
                     label: isEs ? 'Partes' : 'Parts',
                     align: 'left',
                     render: (_val, p) => {
+                      const removedLen = Array.isArray(p.removedParts) ? p.removedParts.length : 0;
+                      const activeLabelsLen = Array.isArray(p.pharmacyLabels) && p.pharmacyLabels.length > 0 ? p.pharmacyLabels.length : null;
+                      const activePartsLen = Array.isArray(p.parts) && p.parts.length > 0 ? p.parts.length : null;
                       const totalParts = Math.max(
                         1,
-                        Number(
+                        activeLabelsLen ??
+                        activePartsLen ??
+                        Math.max(1, Number(
                           p.partsCount ||
-                            (Array.isArray(p.parts) ? p.parts.length : 0) ||
                             (Array.isArray(p.formulationBlocks) ? p.formulationBlocks.length : 0) ||
                             (Array.isArray(p.items) ? p.items.length : 0) ||
                             1
-                        )
+                        ) - removedLen)
                       );
                       const labeledCount = p.labeledParts && typeof p.labeledParts === 'object'
                         ? Object.values(p.labeledParts).filter(Boolean).length
@@ -525,6 +635,10 @@ export default function LabelsHomeView({
                         ? new Date(ms).toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
                         : '');
                       const isRecentImport = ms > 0 && (Date.now() - ms) < 24 * 60 * 60 * 1000;
+                      const reportDateRaw = p.prescriptionDate || p.date || p.reportDate;
+                      const reportDateStr = formatResultDate(reportDateRaw);
+                      const showReportDate = reportDateStr && reportDateStr !== dateStr;
+
                       return (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
@@ -538,6 +652,11 @@ export default function LabelsHomeView({
                           {dateStr && (
                             <span style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap' }}>
                               {isEs ? 'Importado:' : 'Imported:'} {dateStr}
+                            </span>
+                          )}
+                          {showReportDate && (
+                            <span style={{ fontSize: '0.66rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                              {isEs ? 'Informe:' : 'Report:'} {reportDateStr}
                             </span>
                           )}
                         </div>

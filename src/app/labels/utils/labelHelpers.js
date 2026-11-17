@@ -161,3 +161,58 @@ export function formatResultDate(raw) {
     return null;
   }
 }
+
+export function getWorklistTestKind(item = {}) {
+  const corpus = `${item.code || ''} ${item.title || ''} ${item.treatmentTitle || ''} ${item.testType || ''}`.toUpperCase();
+  if (/AATRI|TRICHO/.test(corpus)) return 'trichotest';
+  if (/AATEL|TELO/.test(corpus)) return 'telotest';
+  if (/AAACN|ACNE/.test(corpus)) return 'acnetest';
+  if (/AANUT|NUTRIGEN/.test(corpus)) return 'nutrigen';
+  return 'compounding';
+}
+
+export const RX_SYNC_CHANNEL = 'pls_rx_sync_channel_v1';
+
+export function notifyPrescriptionMutation(code, patch = {}) {
+  if (typeof window === 'undefined') return;
+  const cleanCode = sanitizeRecentCode(code);
+  const detail = { code: cleanCode, rawCode: code, ...patch, timestamp: Date.now() };
+
+  try {
+    window.dispatchEvent(new CustomEvent('rx:parts-updated', { detail }));
+  } catch {
+    // non-fatal
+  }
+
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel(RX_SYNC_CHANNEL);
+      channel.postMessage({ type: 'PARTS_UPDATED', detail });
+      channel.close();
+    }
+  } catch {
+    // non-fatal
+  }
+}
+
+export function notifyPrescriptionStatusUpdated(code, patch = {}) {
+  if (typeof window === 'undefined') return;
+  const cleanCode = sanitizeRecentCode(code);
+  const detail = { code: cleanCode, rawCode: code, ...patch, timestamp: Date.now() };
+
+  try {
+    window.dispatchEvent(new CustomEvent('rx:status-updated', { detail }));
+  } catch {
+    // non-fatal
+  }
+
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel(RX_SYNC_CHANNEL);
+      channel.postMessage({ type: 'STATUS_UPDATED', detail });
+      channel.close();
+    }
+  } catch {
+    // non-fatal
+  }
+}

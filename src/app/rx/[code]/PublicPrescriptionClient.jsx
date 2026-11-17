@@ -62,6 +62,7 @@ const PatientAuthNoticeModal = dynamic(
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
 import { verifyPatientAccessKey } from '@/utils/prescriptionToken';
+import { notifyPrescriptionStatusUpdated } from '@/app/labels/utils/labelHelpers';
 import toast from 'react-hot-toast';
 import { db } from '@/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -361,6 +362,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       }
       setCurrentStatus('approved');
       triggerHaptic('success');
+      notifyPrescriptionStatusUpdated(rx?.prescriptionNumber || rx?.code || rxId, {
+        status: 'approved',
+        isSigned: true,
+        approvalStatus: 'approved',
+      });
       toast.success(isEs ? 'Receta firmada y autorizada para formulación ✓' : 'Prescription digitally signed & authorized for compounding release ✓');
     } catch (e) {
       console.error('Sign-off error:', e);
@@ -2802,6 +2808,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             validationStatus: 'Ready',
             patientConfig
           }));
+          notifyPrescriptionStatusUpdated(rx?.prescriptionNumber || rx?.code || rxId, {
+            status: 'approved',
+            isSigned: true,
+            approvalStatus: 'approved',
+          });
           setTimeout(() => {
             setShowPatientShareModal(true);
           }, 350);

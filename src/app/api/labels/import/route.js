@@ -103,13 +103,26 @@ export async function POST(request) {
       const code = rawCode || ref.id;
       const patientSlug = `patient-${patientName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
 
+      const doctorApproverName = safe.doctorName || safe.physician || safe.treatingDoctor?.name || 'Treating Physician (Clinical Lab Report)';
       batch.set(
         ref,
         {
           ...safe,
           patientId: safe.patientId || patientSlug,
           testType,
-          status: 'draft',
+          status: 'approved',
+          state: 'approved',
+          clinicalStatus: 'approved',
+          isSigned: true,
+          signedAt: nowIso,
+          signedBy: doctorApproverName,
+          approvalStatus: 'approved',
+          doctorApproval: {
+            approved: true,
+            approvedAt: nowIso,
+            approvedBy: doctorApproverName,
+            source: 'imported_signed_clinical_report'
+          },
           atlasValidation: 'skipped',
           importChannel: 'public_labels_account_manager',
           code,
@@ -156,7 +169,15 @@ export async function POST(request) {
     // In-process atomic Algolia synchronization (Guarantees zero missed search records)
     const algoliaItems = created.map((c, idx) => ({
       id: c.id,
-      record: { ...(list[idx] || {}), id: c.id, code: c.code, patientName: c.patientName, status: 'draft' }
+      record: {
+        ...(list[idx] || {}),
+        id: c.id,
+        code: c.code,
+        patientName: c.patientName,
+        status: 'approved',
+        clinicalStatus: 'approved',
+        isSigned: true,
+      }
     }));
     await syncBatchPrescriptionsToAlgolia(algoliaItems);
 
@@ -175,7 +196,15 @@ export async function POST(request) {
       // Automated email notification to jose@mediluxeme.com on prescription import
       notifyPrescriptionImported({
         prescriptionId: c.id,
-        rxData: { ...rx, id: c.id, code: c.code, patientName: c.patientName, status: 'draft' },
+        rxData: {
+          ...rx,
+          id: c.id,
+          code: c.code,
+          patientName: c.patientName,
+          status: 'approved',
+          clinicalStatus: 'approved',
+          isSigned: true,
+        },
         importChannel: 'public_labels_account_manager'
       }).catch(err => {
         console.warn('[api/labels/import] Prescription import email notification error:', err.message);

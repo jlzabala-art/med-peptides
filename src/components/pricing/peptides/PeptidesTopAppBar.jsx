@@ -50,7 +50,7 @@ export default function PeptidesTopAppBar({
         <button
           type="button"
           onClick={handleShareSchedule}
-          className="puh-btn puh-btn-ghost"
+          className="puh-btn puh-btn-ghost hide-on-mobile-header"
           title={isEs ? 'Compartir lista' : 'Share schedule'}
         >
           {copied ? <Check size={14} /> : <Share2 size={14} />}
@@ -64,7 +64,7 @@ export default function PeptidesTopAppBar({
         <button
           type="button"
           onClick={() => setIsPdfPreviewOpen(true)}
-          className="puh-btn"
+          className="puh-btn hide-on-mobile-header"
           style={{
             background: '#2563eb',
             border: '1px solid #1d4ed8',

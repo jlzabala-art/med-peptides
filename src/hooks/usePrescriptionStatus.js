@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { notifyPrescriptionStatusUpdated } from '@/app/labels/utils/labelHelpers';
 import {
   canEnterProduction,
   cascadeAxisChange,
@@ -109,6 +110,7 @@ export function usePrescriptionStatus(
         setAxes(target);
         setDraft(target);
         setCascadeNote('');
+        notifyPrescriptionStatusUpdated(resolvedCode, { status: nextPrimary, axes: target });
         if (onUpdated) onUpdated(resolvedCode, nextPrimary, target);
         toast.success(isEs ? 'Estados guardados en Firebase' : 'Workflow statuses saved to Firebase');
         return true;
