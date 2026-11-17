@@ -101,7 +101,7 @@ export async function generatePatientGenomicsPdf({
     // Header Area: Left Title & Right Role Badge
     let y = p1Height - 34;
 
-    page1.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
+    page1.drawText('ATLAS HEALTH SERVICES · PRECISION NUTRITION PLATFORM', {
       x: 36,
       y,
       size: 11,
@@ -110,7 +110,7 @@ export async function generatePatientGenomicsPdf({
     });
 
     // Page 1 Role Badge (PATIENT COPY)
-    const p1Badge = 'PAGE 1 OF 3 · PATIENT CLINICAL GUIDE';
+    const p1Badge = 'PAGE 1 OF 3 · PATIENT NUTRITION GUIDE';
     const p1BadgeWidth = helveticaBold.widthOfTextAtSize(p1Badge, 7) + 14;
     page1.drawRectangle({
       x: p1Width - 36 - p1BadgeWidth,
@@ -130,7 +130,7 @@ export async function generatePatientGenomicsPdf({
     });
 
     y -= 14;
-    page1.drawText('PERSONALIZED GENOMIC HEALTH PLAN · 60-DAY CLINICAL PROTOCOL', {
+    page1.drawText('PERSONALIZED GENOMIC HEALTH PLAN · 60-DAY NUTRITION PROTOCOL', {
       x: 36,
       y,
       size: 9.5,
@@ -492,7 +492,7 @@ export async function generatePatientGenomicsPdf({
       });
 
       // Clinical Objective
-      const goalStr = `Clinical Goal: ${p.clinicalGoal}`;
+      const goalStr = `Wellness Goal: ${p.clinicalGoal}`;
       const goalSize = fitTextSize(goalStr, helveticaOblique, 7.2, maxCardTextWidth);
       page1.drawText(goalStr, {
         x: 46,
@@ -710,7 +710,7 @@ export async function generatePatientGenomicsPdf({
       borderWidth: 0.8
     });
 
-    page1.drawText('ACCREDITED EUROPEAN CLINICAL GENETICS · ILLUMINA INFINIUM GSA-24 PLATFORM', {
+    page1.drawText('ACCREDITED EUROPEAN GENETICS LAB · ILLUMINA INFINIUM GSA-24 PLATFORM', {
       x: 48,
       y: y - 13,
       size: 6.8,
@@ -718,7 +718,7 @@ export async function generatePatientGenomicsPdf({
       color: navyPrimary
     });
 
-    page1.drawText('Genomic DNA analyzed with clinical-grade Illumina Infinium Global Screening Array (Madrid, Spain). Verified ISO 15189 and CE-IVD bioinformatic workflow.', {
+    page1.drawText('Genomic DNA analyzed with laboratory-grade Illumina Infinium Global Screening Array (Madrid, Spain). Verified ISO 15189 and CE-IVD bioinformatic workflow.', {
       x: 48,
       y: y - 25,
       size: 6.0,
@@ -796,7 +796,7 @@ export async function generatePatientGenomicsPdf({
     let y2 = p2Height - 26;
 
     // Page 2 Header
-    page2.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
+    page2.drawText('ATLAS HEALTH SERVICES · PRECISION NUTRITION PLATFORM', {
       x: 36,
       y: y2,
       size: 8.5,
@@ -888,14 +888,14 @@ export async function generatePatientGenomicsPdf({
       color: alertRed
     });
 
-    page2.drawText('CRITICAL CLINICAL SAFETY DIRECTIVE · MUTUALLY EXCLUSIVE THERAPEUTIC PATHWAYS', {
+    page2.drawText('IMPORTANT SAFETY DIRECTIVE · MUTUALLY EXCLUSIVE SUPPLEMENT PATHWAYS', {
       x: 48,
       y: y2 + 42,
       size: 7.2,
       font: helveticaBold,
       color: alertRed
     });
-    const otcDirectiveText = 'Pathway 1 (Commercial OTC) and Pathway 2 (Master Compounding) are ALTERNATIVE clinical approaches to resolve your DNA profile.\nNEVER TAKE BOTH TRACKS CONCURRENTLY: If purchasing retail OTC supplements below, DO NOT take the compounded prescription.\nIf your physician prescribes Pathway 2 (Page 3), it fully replaces all standalone OTC vitamins to prevent micronutrient toxicity (hypervitaminosis).';
+    const otcDirectiveText = 'Pathway 1 (Commercial OTC) and Pathway 2 (Master Compounding) are ALTERNATIVE approaches to resolve your DNA profile.\nNEVER TAKE BOTH TRACKS CONCURRENTLY: If purchasing retail OTC supplements below, DO NOT take the compounded formulation.\nIf your specialist recommends Pathway 2 (Page 3), it fully replaces all standalone OTC vitamins to prevent micronutrient toxicity (hypervitaminosis).';
     page2.drawText(otcDirectiveText, {
       x: 48,
       y: y2 + 28,
@@ -1190,7 +1190,7 @@ export async function generatePatientGenomicsPdf({
     let y3 = p3Height - 26;
 
     // Page 3 Header (Hierarchical Google Cloud UX layout: Zero horizontal collisions)
-    page3.drawText('ATLAS HEALTH SERVICES · CLINICAL INTELLIGENCE PLATFORM', {
+    page3.drawText('ATLAS HEALTH SERVICES · PRECISION NUTRITION PLATFORM', {
       x: 36,
       y: y3,
       size: 8.5,
@@ -1593,7 +1593,7 @@ export async function generatePatientGenomicsPdf({
       borderColor: cardBorder,
       borderWidth: 0.8
     });
-    page3.drawText('BASELINE LABS DECISION MATRIX (CLINICAL SAFETY ADJUSTMENT RULES):', {
+    page3.drawText('BASELINE LABS DECISION MATRIX (SAFETY ADJUSTMENT RULES):', {
       x: 44,
       y: y3 + 21,
       size: 6.0,
@@ -1670,7 +1670,7 @@ export async function generatePatientGenomicsPdf({
       color: darkSlate
     });
 
-    const clinicDisplay = clinicName ? `Clinical Center: ${clinicName}` : 'Medical License / Registry Reg. No.: ____________________________________________';
+    const clinicDisplay = clinicName ? `Wellness Center: ${clinicName}` : 'Specialist License / Registry Reg. No.: ____________________________________________';
     page3.drawText(clinicDisplay, {
       x: 44,
       y: y3 + 24,
@@ -1711,7 +1711,7 @@ export async function generatePatientGenomicsPdf({
       color: rgb(160 / 255, 160 / 255, 160 / 255)
     });
 
-    page3.drawText('Authorized Prescribing Signature & Clinical Seal', {
+    page3.drawText('Authorized Specialist Signature & Official Seal', {
       x: 355,
       y: y3 + 6,
       size: 5.6,
@@ -1745,7 +1745,7 @@ export async function generatePatientGenomicsPdf({
         font: helveticaBold,
         color: tealAccent,
       });
-      ancPage.drawText(`${patientName} — Nutrition × Ancestry Clinical Synthesis`, {
+      ancPage.drawText(`${patientName} — Nutrition × Ancestry Synthesis`, {
         x: 36,
         y: aH - 56,
         size: 14,
@@ -1997,7 +1997,7 @@ export async function generatePatientGenomicsPdf({
           font: helveticaBold,
           color: navyPrimary
         });
-        dividerPage.drawText('• Section I: Official clinical prescription, magistral compounding formulation & posology.', {
+        dividerPage.drawText('• Section I: Personalized nutrition guide, compounding formulation & daily posology.', {
           x: 88,
           y: boxTop + 54,
           size: 7.2,

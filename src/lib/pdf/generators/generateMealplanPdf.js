@@ -325,15 +325,15 @@ export async function generateMealplanPdf({
         desc: 'Quick Green / Amber / Red food summary paired with your 4 simple morning-to-bedtime nutrition and supplement moments.'
       },
       {
-        badge: 'STEP 4 · PAGE 5',
+        badge: 'STEP 4 · PAGES 5-6',
         audience: 'FOR YOUR KITCHEN / CHEF',
         badgeColor: tealAccent,
         badgeBg: rgb(240 / 255, 253 / 255, 250 / 255),
-        title: 'Your 7-Day Precision Meal Plan (Monday to Sunday)',
-        desc: 'Ready-to-use breakfast, lunch, and dinner menu for all 7 days of the week. Share this page directly with your kitchen or catering service.'
+        title: 'Your 7-Day Precision Meal Plan (Mon-Thu & Fri-Sun)',
+        desc: 'Spacious 2-page breakfast, lunch, and dinner menu with heritage tags. Share directly with your home kitchen or catering service.'
       },
       {
-        badge: 'STEP 5 · PAGES 6-7',
+        badge: 'STEP 5 · PAGES 7-8',
         audience: 'FOR SUPERMARKET SHOPPING',
         badgeColor: gcpGreen,
         badgeBg: gcpGreenBg,
@@ -341,17 +341,25 @@ export async function generateMealplanPdf({
         desc: '115+ foods across all 17 food families classified as GREEN (Eat Freely), AMBER (Moderate), or RED (Avoid), plus 4 easy kitchen swaps.'
       },
       {
-        badge: 'STEP 6 · PAGES 8-9',
+        badge: 'STEP 6 · PAGES 9-10',
         audience: 'FOR PHARMACY / SPECIALIST',
         badgeColor: gcpAmber,
         badgeBg: gcpAmberBg,
         title: '5 Targeted Nutrients, 3 Simple Packs & Pharmacy Options',
         desc: 'Plain-language guide to your 5 nutrients, 3 pack levels, and Option A (Local Pharmacy) vs. Option B (3-Capsule Compounding).'
+      },
+      {
+        badge: 'BONUS · PAGE 11',
+        audience: 'FOR YOUR FRIDGE / KITCHEN',
+        badgeColor: googleBlue,
+        badgeBg: rgb(232 / 255, 240 / 255, 254 / 255),
+        title: 'One-Page Fridge Cheat Sheet (Daily Checklist & QR)',
+        desc: 'Print and stick on your fridge: 1-2-3 Plate Rule, 3 supplement moments, 4 pantry swaps, and direct QR to your digital portal.'
       }
     ];
 
     coverRoadmap.forEach((sec) => {
-      const sH = 38;
+      const sH = 33;
       coverPage.drawRectangle({
         x: 44,
         y: yCover - sH,
@@ -515,7 +523,7 @@ export async function generateMealplanPdf({
       ancPage.drawRectangle({ x: 0, y: aH - 8, width: aW, height: 8, color: navyPrimary });
       ancPage.drawRectangle({ x: 0, y: aH - 12, width: aW, height: 4, color: tealAccent });
 
-      const ancBadge = 'PAGE 2 OF 9 · METHODOLOGY & HERITAGE';
+      const ancBadge = 'PAGE 2 OF 11 · METHODOLOGY & HERITAGE';
       const ancBadgeW = helveticaBold.widthOfTextAtSize(ancBadge, 7.2) + 16;
       ancPage.drawRectangle({
         x: aW - 36 - ancBadgeW,
@@ -754,8 +762,8 @@ export async function generateMealplanPdf({
 
       ancPage.drawText(
         isNutritionist
-          ? 'Page 2 of 9 · 2-Step Methodology & Ancestry × Nutrition Matrix · Atlas Health Services'
-          : 'Page 2 of 9 · Your Heritage & Nutrition Blueprint · Atlas Health Services',
+          ? 'Page 2 of 11 · 2-Step Methodology & Ancestry × Nutrition Matrix · Atlas Health Services'
+          : 'Page 2 of 11 · Your Heritage & Nutrition Blueprint · Atlas Health Services',
         { x: 36, y: 18, size: 7.0, font: helvetica, color: mutedSlate }
       );
     }
@@ -772,7 +780,7 @@ export async function generateMealplanPdf({
     dnaPage.drawText('ATLAS HEALTH SERVICES · PRECISION NUTRITION PLATFORM', {
       x: 36, y: yd, size: 9.0, font: helveticaBold, color: navyPrimary
     });
-    const badgeDna = 'PAGE 3 OF 9 · DNA INSIGHTS & VISUAL BLUEPRINT';
+    const badgeDna = 'PAGE 3 OF 11 · DNA INSIGHTS & VISUAL BLUEPRINT';
     const badgeDnaW = helveticaBold.widthOfTextAtSize(badgeDna, 7.2) + 16;
     dnaPage.drawRectangle({
       x: dW - 36 - badgeDnaW, y: yd - 4, width: badgeDnaW, height: 18,
@@ -934,7 +942,7 @@ export async function generateMealplanPdf({
       x: 48, y: yd - 33, size: 8.2, font: helvetica, color: darkSlate, maxWidth: dW - 96, lineHeight: 12.0, maxLines: 2
     });
 
-    dnaPage.drawText('Page 3 of 9 · Your DNA in Plain English & Daily Blueprint · Atlas Health Services', {
+    dnaPage.drawText('Page 3 of 11 · Your DNA in Plain English & Daily Blueprint · Atlas Health Services', {
       x: 36, y: 18, size: 7.0, font: helvetica, color: mutedSlate
     });
 
@@ -951,7 +959,7 @@ export async function generateMealplanPdf({
       x: 36, y: y1, size: 9.0, font: helveticaBold, color: navyPrimary
     });
 
-    const badge1 = 'PAGE 4 OF 9 · FOOD TRAFFIC LIGHT & 24H ROUTINE';
+    const badge1 = 'PAGE 4 OF 11 · FOOD TRAFFIC LIGHT & 24H ROUTINE';
     const badge1W = helveticaBold.widthOfTextAtSize(badge1, 7.2) + 16;
     page1.drawRectangle({
       x: p1Width - 36 - badge1W, y: y1 - 4, width: badge1W, height: 18,
@@ -1173,7 +1181,7 @@ export async function generateMealplanPdf({
       console.warn('QR Code generation skipped:', e.message);
     }
 
-    page1.drawText('Page 4 of 9 · Daily Food Traffic Light & 24-Hour Routine · Atlas Health Services · www.atlashealthservices.com', {
+    page1.drawText('Page 4 of 11 · Daily Food Traffic Light & 24-Hour Routine · Atlas Health Services · www.atlashealthservices.com', {
       x: 36, y: 18, size: 7.0, font: helvetica, color: mutedSlate
     });
 
@@ -1184,208 +1192,150 @@ export async function generateMealplanPdf({
     }
 
     // =========================================================================
-    // PAGE 3: 7-DAY NUTRIGENOMIC MEAL PLAN (MON TO SUN) (PAGE 3 OF 5)
-    // Conforms strictly to Google Cloud UX: Dedicated page, generous height,
-    // zero text overlap, full-width Day 7 card with independent columns.
+    // PAGES 5 & 6: 7-DAY PRECISION MEAL PLAN (MON-THU & FRI-SUN)
+    // Spacious 2-page split with 8.0pt typography & Ancestry × DNA tags
     // =========================================================================
+    const dayAncestryTags = [
+      'MENA Heritage · A2 Dairy',
+      'Nile / Med · 1-2-3 Plate',
+      'mtDNA H13a · Polyphenols',
+      'Solar VDR · Healthy Fats',
+      'IRS1 Glucose Control',
+      'MC4R Satiety Protein',
+      'Circadian Gut Reset'
+    ];
+
+    // PAGE 5: DAYS 1 TO 4 (MONDAY TO THURSDAY)
     const page2 = pdfDoc.addPage([595.28, 841.89]);
     const { width: p2Width, height: p2Height } = page2.getSize();
-
-    // Top Accent Strip
-    page2.drawRectangle({
-      x: 0,
-      y: p2Height - 8,
-      width: p2Width,
-      height: 8,
-      color: tealAccent
-    });
+    page2.drawRectangle({ x: 0, y: p2Height - 8, width: p2Width, height: 8, color: tealAccent });
 
     let y2 = p2Height - 28;
-
-    // Header Area
     page2.drawText('ATLAS HEALTH SERVICES · PRECISION NUTRITION PLATFORM', {
-      x: 36,
-      y: y2,
-      size: 9.0,
-      font: helveticaBold,
-      color: navyPrimary
+      x: 36, y: y2, size: 9.0, font: helveticaBold, color: navyPrimary
     });
-
-    const badge2 = 'PAGE 5 OF 9 · 7-DAY PRECISION MEAL PLAN';
-    const badge2W = helveticaBold.widthOfTextAtSize(badge2, 7.5) + 16;
+    const badge2 = 'PAGE 5 OF 11 · 7-DAY MEAL PLAN (MON-THU)';
+    const badge2W = helveticaBold.widthOfTextAtSize(badge2, 7.2) + 16;
     page2.drawRectangle({
-      x: p2Width - 36 - badge2W,
-      y: y2 - 4,
-      width: badge2W,
-      height: 18,
-      color: rgb(240 / 255, 253 / 255, 250 / 255),
-      borderColor: tealAccent,
-      borderWidth: 1.2
+      x: p2Width - 36 - badge2W, y: y2 - 4, width: badge2W, height: 18,
+      color: rgb(240 / 255, 253 / 255, 250 / 255), borderColor: tealAccent, borderWidth: 1.0
     });
     page2.drawText(badge2, {
-      x: p2Width - 36 - badge2W + 8,
-      y: y2 + 1,
-      size: 7.5,
-      font: helveticaBold,
-      color: tealAccent
+      x: p2Width - 36 - badge2W + 8, y: y2 + 1, size: 7.2, font: helveticaBold, color: tealAccent
     });
+
+    y2 -= 20;
+    page2.drawText('7-DAY NUTRIGENOMIC MEAL PLAN · PART 1 (MON TO THU)', {
+      x: 36, y: y2, size: 14.0, font: helveticaBold, color: darkSlate
+    });
+    y2 -= 14;
+    page2.drawText('Precision culinary formulation using green-light foods & ancestral heritage · Sourced for Qatar & GCC', {
+      x: 36, y: y2, size: 8.5, font: helvetica, color: mutedSlate
+    });
+    y2 -= 10;
+    page2.drawLine({ start: { x: 36, y: y2 }, end: { x: p2Width - 36, y: y2 }, thickness: 1.0, color: cardBorder });
 
     y2 -= 18;
-    page2.drawText('7-DAY NUTRIGENOMIC MEAL PLAN (MONDAY TO SUNDAY)', {
-      x: 36,
-      y: y2,
-      size: 14.0,
-      font: helveticaBold,
-      color: darkSlate
-    });
+    const planColW = (p2Width - 72 - 14) / 2;
+    const dayBoxH = 304;
 
-    y2 -= 13;
-    page2.drawText('Precision culinary formulation using strictly allowed green-light foods · Sourced for Qatar & GCC', {
-      x: 36,
-      y: y2,
-      size: 8.5,
-      font: helvetica,
-      color: mutedSlate
-    });
-
-    y2 -= 10;
-    page2.drawLine({
-      start: { x: 36, y: y2 },
-      end: { x: p2Width - 36, y: y2 },
-      thickness: 1.0,
-      color: cardBorder
-    });
-
-    // -------------------------------------------------------------------------
-    // DAYS 1 TO 6: 2-COLUMN GRID (Height: 182pt each, ample breathing room)
-    // -------------------------------------------------------------------------
-    y2 -= 16;
-    page2.drawText('1. WEEKDAY PRECISION NUTRITION (MON TO SAT)', {
-      x: 36,
-      y: y2,
-      size: 10.0,
-      font: helveticaBold,
-      color: navyPrimary
-    });
-
-    y2 -= 8;
-    const planColW = (p2Width - 72 - 12) / 2;
-    const dayBoxH = 175;
-
-    plan.sevenDayMealPlan.slice(0, 6).forEach((d, idx) => {
-      const col = idx % 2;
-      const row = Math.floor(idx / 2);
-      const dX = 36 + col * (planColW + 12);
-      const dY = y2 - (row * (dayBoxH + 8)) - dayBoxH;
-
-      page2.drawRectangle({
-        x: dX,
-        y: dY,
-        width: planColW,
-        height: dayBoxH,
-        color: lightBg,
-        borderColor: cardBorder,
-        borderWidth: 1.0
+    const renderDayCard = (targetPage, d, dX, dY, cardW, cardH, ancTag) => {
+      targetPage.drawRectangle({
+        x: dX, y: dY, width: cardW, height: cardH,
+        color: lightBg, borderColor: cardBorder, borderWidth: 1.0
       });
-
-      // Top Header Strip
-      page2.drawRectangle({
-        x: dX,
-        y: dY + dayBoxH - 22,
-        width: planColW,
-        height: 22,
+      targetPage.drawRectangle({
+        x: dX, y: dY + cardH - 36, width: cardW, height: 36,
         color: rgb(241 / 255, 245 / 255, 249 / 255)
       });
 
-      page2.drawText(`DAY ${d.day} | ${d.dayName.toUpperCase()}`, {
-        x: dX + 8,
-        y: dY + dayBoxH - 11,
-        size: 7.2,
-        font: helveticaBold,
-        color: navyPrimary
+      targetPage.drawText(`DAY ${d.day} | ${d.dayName.toUpperCase()}`, {
+        x: dX + 10, y: dY + cardH - 15, size: 8.6, font: helveticaBold, color: navyPrimary
       });
 
-      page2.drawText(d.themeEn, {
-        x: dX + 8,
-        y: dY + dayBoxH - 19,
-        size: 5.8,
-        font: helveticaBold,
-        color: tealAccent,
-        maxWidth: planColW - 16
+      // Ancestry × DNA tag pill on top right
+      const tagW = helveticaBold.widthOfTextAtSize(ancTag, 6.2) + 12;
+      targetPage.drawRectangle({
+        x: dX + cardW - 10 - tagW, y: dY + cardH - 19, width: tagW, height: 13,
+        color: rgb(240 / 255, 253 / 255, 250 / 255), borderColor: tealAccent, borderWidth: 0.7
+      });
+      targetPage.drawText(ancTag, {
+        x: dX + cardW - 10 - tagW + 6, y: dY + cardH - 15, size: 6.2, font: helveticaBold, color: tealAccent
       });
 
-      // Meals text with generous line wrapping & separation
-      let mealY = dY + dayBoxH - 32;
+      targetPage.drawText(d.themeEn, {
+        x: dX + 10, y: dY + cardH - 29, size: 7.2, font: helveticaBold, color: tealAccent, maxWidth: cardW - 20
+      });
 
-      // Breakfast block
-      page2.drawText('BREAKFAST', {
-        x: dX + 8,
-        y: mealY,
-        size: 5.6,
-        font: helveticaBold,
-        color: mutedSlate
+      let mealY = dY + cardH - 52;
+      const mealBlocks = [
+        { label: 'BREAKFAST', text: d.breakfast, maxLines: 4 },
+        { label: 'LUNCH (1-2-3 PLATE SEQUENCING)', text: d.lunch, maxLines: 5 },
+        { label: 'DINNER', text: d.dinner, maxLines: 4 }
+      ];
+      mealBlocks.forEach((mb) => {
+        targetPage.drawText(mb.label, {
+          x: dX + 10, y: mealY, size: 6.8, font: helveticaBold, color: mutedSlate
+        });
+        mealY -= 11;
+        mealY = drawWrappedBlock(targetPage, mb.text, {
+          x: dX + 10, y: mealY, size: 7.9, font: helvetica, color: darkSlate,
+          maxWidth: cardW - 20, lineHeight: 10.6, maxLines: mb.maxLines
+        });
+        mealY -= 10;
       });
-      mealY -= 8;
-      mealY = drawWrappedBlock(page2, d.breakfast, {
-        x: dX + 8,
-        y: mealY,
-        size: 6.2,
-        font: helvetica,
-        color: darkSlate,
-        maxWidth: planColW - 16,
-        lineHeight: 8.0,
-        maxLines: 3
-      });
-      mealY -= 5;
+    };
 
-      // Lunch block
-      page2.drawText('LUNCH (PLATE SEQUENCING)', {
-        x: dX + 8,
-        y: mealY,
-        size: 5.6,
-        font: helveticaBold,
-        color: mutedSlate
-      });
-      mealY -= 8;
-      mealY = drawWrappedBlock(page2, d.lunch, {
-        x: dX + 8,
-        y: mealY,
-        size: 6.2,
-        font: helvetica,
-        color: darkSlate,
-        maxWidth: planColW - 16,
-        lineHeight: 8.0,
-        maxLines: 4
-      });
-      mealY -= 5;
-
-      // Dinner block
-      page2.drawText('DINNER', {
-        x: dX + 8,
-        y: mealY,
-        size: 5.6,
-        font: helveticaBold,
-        color: mutedSlate
-      });
-      mealY -= 8;
-      drawWrappedBlock(page2, d.dinner, {
-        x: dX + 8,
-        y: mealY,
-        size: 6.2,
-        font: helvetica,
-        color: darkSlate,
-        maxWidth: planColW - 16,
-        lineHeight: 8.0,
-        maxLines: 3
-      });
+    plan.sevenDayMealPlan.slice(0, 4).forEach((d, idx) => {
+      const col = idx % 2;
+      const row = Math.floor(idx / 2);
+      const dX = 36 + col * (planColW + 14);
+      const dY = y2 - (row * (dayBoxH + 14)) - dayBoxH;
+      renderDayCard(page2, d, dX, dY, planColW, dayBoxH, dayAncestryTags[idx] || 'DNA + Heritage');
     });
 
-    y2 -= (3 * (dayBoxH + 8) + 6);
+    page2.drawText('Page 5 of 11 · Atlas Health Services · Precision 7-Day Meal Plan (Mon-Thu) · www.atlashealthservices.com', {
+      x: 36, y: 18, size: 7.0, font: helvetica, color: mutedSlate
+    });
 
-    // -------------------------------------------------------------------------
-    // DAY 7: SUNDAY CIRCADIAN RESET FULL-WIDTH CARD (Height: 90pt)
-    // 3 Dedicated Sub-Columns for Breakfast, Lunch, Dinner - Zero collision!
-    // -------------------------------------------------------------------------
+    // PAGE 6: DAYS 5 TO 7 (FRIDAY TO SUNDAY) + KITCHEN PREP NOTE
+    const page2b = pdfDoc.addPage([595.28, 841.89]);
+    page2b.drawRectangle({ x: 0, y: p2Height - 8, width: p2Width, height: 8, color: tealAccent });
+
+    let y2b = p2Height - 28;
+    page2b.drawText('ATLAS HEALTH SERVICES · PRECISION NUTRITION PLATFORM', {
+      x: 36, y: y2b, size: 9.0, font: helveticaBold, color: navyPrimary
+    });
+    const badge2b = 'PAGE 6 OF 11 · 7-DAY MEAL PLAN (FRI-SUN)';
+    const badge2bW = helveticaBold.widthOfTextAtSize(badge2b, 7.2) + 16;
+    page2b.drawRectangle({
+      x: p2Width - 36 - badge2bW, y: y2b - 4, width: badge2bW, height: 18,
+      color: rgb(240 / 255, 253 / 255, 250 / 255), borderColor: tealAccent, borderWidth: 1.0
+    });
+    page2b.drawText(badge2b, {
+      x: p2Width - 36 - badge2bW + 8, y: y2b + 1, size: 7.2, font: helveticaBold, color: tealAccent
+    });
+
+    y2b -= 20;
+    page2b.drawText('7-DAY NUTRIGENOMIC MEAL PLAN · PART 2 (FRI TO SUN)', {
+      x: 36, y: y2b, size: 14.0, font: helveticaBold, color: darkSlate
+    });
+    y2b -= 14;
+    page2b.drawText('Weekend meals, A2 dairy comfort, and Sunday circadian gut reset', {
+      x: 36, y: y2b, size: 8.5, font: helvetica, color: mutedSlate
+    });
+    y2b -= 10;
+    page2b.drawLine({ start: { x: 36, y: y2b }, end: { x: p2Width - 36, y: y2b }, thickness: 1.0, color: cardBorder });
+
+    y2b -= 18;
+    plan.sevenDayMealPlan.slice(4, 6).forEach((d, idx) => {
+      const dX = 36 + idx * (planColW + 14);
+      const dY = y2b - dayBoxH;
+      renderDayCard(page2b, d, dX, dY, planColW, dayBoxH, dayAncestryTags[4 + idx] || 'DNA + Heritage');
+    });
+
+    y2b -= (dayBoxH + 18);
+
     const d7 = plan.sevenDayMealPlan[6] || {
       day: 7,
       dayName: 'Sunday',
@@ -1394,44 +1344,30 @@ export async function generateMealplanPdf({
       lunch: 'Plate Sequencing: Massaged kale salad -> 180g wild tuna steak -> 1/3 cup brown rice.',
       dinner: 'Mineral-rich vegetable broth with poached cod fillet and steamed zucchini.'
     };
-    const d7H = 92;
+    const d7H = 196;
 
-    page2.drawRectangle({
-      x: 36,
-      y: y2 - d7H,
-      width: p2Width - 72,
-      height: d7H,
-      color: lightBg,
-      borderColor: cardBorder,
-      borderWidth: 1.0
+    page2b.drawRectangle({
+      x: 36, y: y2b - d7H, width: p2Width - 72, height: d7H,
+      color: lightBg, borderColor: cardBorder, borderWidth: 1.0
     });
-
-    // Sunday Header Strip
-    page2.drawRectangle({
-      x: 36,
-      y: y2 - 20,
-      width: p2Width - 72,
-      height: 20,
+    page2b.drawRectangle({
+      x: 36, y: y2b - 32, width: p2Width - 72, height: 32,
       color: rgb(241 / 255, 245 / 255, 249 / 255)
     });
-
-    page2.drawText('DAY 7 | SUNDAY: CIRCADIAN FASTING & DEEP GASTROINTESTINAL REST', {
-      x: 46,
-      y: y2 - 13,
-      size: 7.2,
-      font: helveticaBold,
-      color: navyPrimary
+    page2b.drawText('DAY 7 | SUNDAY: CIRCADIAN FASTING & DEEP GASTROINTESTINAL REST', {
+      x: 48, y: y2b - 20, size: 9.0, font: helveticaBold, color: navyPrimary
     });
-    page2.drawText('REST & WEEKLY RESET PROTOCOL', {
-      x: p2Width - 36 - 150,
-      y: y2 - 13,
-      size: 6.2,
-      font: helveticaBold,
-      color: tealAccent
+    const sunTag = dayAncestryTags[6];
+    const sunTagW = helveticaBold.widthOfTextAtSize(sunTag, 6.6) + 12;
+    page2b.drawRectangle({
+      x: p2Width - 48 - sunTagW, y: y2b - 23, width: sunTagW, height: 15,
+      color: rgb(240 / 255, 253 / 255, 250 / 255), borderColor: tealAccent, borderWidth: 0.8
+    });
+    page2b.drawText(sunTag, {
+      x: p2Width - 48 - sunTagW + 6, y: y2b - 18, size: 6.6, font: helveticaBold, color: tealAccent
     });
 
-    // 3 Sub-columns for Sunday meals
-    const d7ColW = (p2Width - 72 - 32) / 3;
+    const d7ColW = (p2Width - 72 - 40) / 3;
     const d7Meals = [
       { label: 'BREAKFAST (GENTLE AWAKENING)', desc: d7.breakfast },
       { label: 'LUNCH (METABOLIC NOURISHMENT)', desc: d7.lunch },
@@ -1439,36 +1375,27 @@ export async function generateMealplanPdf({
     ];
 
     d7Meals.forEach((m, mIdx) => {
-      const colX = 46 + mIdx * (d7ColW + 12);
-      const colTopY = y2 - 30;
-
-      page2.drawText(m.label, {
-        x: colX,
-        y: colTopY,
-        size: 5.6,
-        font: helveticaBold,
-        color: mutedSlate
-      });
-
-      drawWrappedBlock(page2, m.desc, {
-        x: colX,
-        y: colTopY - 9,
-        size: 6.2,
-        font: helvetica,
-        color: darkSlate,
-        maxWidth: d7ColW,
-        lineHeight: 8.0,
-        maxLines: 5
+      const colX = 48 + mIdx * (d7ColW + 14);
+      const colTopY = y2b - 48;
+      page2b.drawText(m.label, { x: colX, y: colTopY, size: 7.0, font: helveticaBold, color: mutedSlate });
+      drawWrappedBlock(page2b, m.desc, {
+        x: colX, y: colTopY - 14, size: 8.0, font: helvetica, color: darkSlate,
+        maxWidth: d7ColW, lineHeight: 10.8, maxLines: 7
       });
     });
 
-    // Page 5 Footer
-    page2.drawText('Page 5 of 9 · Atlas Health Services · Precision 7-Day Meal Plan · Sourced for Qatar & GCC · www.atlashealthservices.com', {
-      x: 36,
-      y: 18,
-      size: 6.8,
-      font: helvetica,
-      color: mutedSlate
+    y2b -= (d7H + 16);
+    page2b.drawRectangle({
+      x: 36, y: y2b - 58, width: p2Width - 72, height: 58,
+      color: rgb(232 / 255, 240 / 255, 254 / 255), borderColor: rgb(191 / 255, 219 / 255, 254 / 255), borderWidth: 1.0
+    });
+    page2b.drawText('CHEF & CATERING PREP NOTE:', { x: 48, y: y2b - 18, size: 8.2, font: helveticaBold, color: navyPrimary });
+    drawWrappedBlock(page2b, 'Cook exclusively with Extra Virgin Olive Oil (EVOO) or grass-fed ghee. Use A2 goat/sheep dairy only (never cow milk). Serve salad first, protein second, and grains last.', {
+      x: 48, y: y2b - 32, size: 7.8, font: helvetica, color: darkSlate, maxWidth: p2Width - 96, lineHeight: 10.6, maxLines: 2
+    });
+
+    page2b.drawText('Page 6 of 11 · Atlas Health Services · Precision 7-Day Meal Plan (Fri-Sun) · www.atlashealthservices.com', {
+      x: 36, y: 18, size: 7.0, font: helvetica, color: mutedSlate
     });
 
     // =========================================================================
@@ -1480,21 +1407,21 @@ export async function generateMealplanPdf({
     const matrixChunks = [
       {
         rows: allMatrixRows.slice(0, splitIdx),
-        badge: 'PAGE 6 OF 9 · FOOD LIST (PART 1 OF 2)',
+        badge: 'PAGE 7 OF 11 · FOOD LIST (PART 1 OF 2)',
         title: 'COMPLETE PERSONALIZED FOOD LIST · CARBO+ & PROTEIN+',
         subtitle: `Families 1-${splitIdx} of ${allMatrixRows.length}: Whole grains, vegetables, fruits, fish, poultry & dairy tailored to your DNA`,
         rowH: 68,
         includeSwaps: false,
-        footer: 'Page 6 of 9 · Complete 17-Family Personalized Food Matrix (Part 1 of 2) · Atlas Health Services'
+        footer: 'Page 7 of 11 · Complete 17-Family Personalized Food Matrix (Part 1 of 2) · Atlas Health Services'
       },
       {
         rows: allMatrixRows.slice(splitIdx),
-        badge: 'PAGE 7 OF 9 · FOOD LIST (PART 2 OF 2)',
+        badge: 'PAGE 8 OF 11 · FOOD LIST (PART 2 OF 2)',
         title: 'COMPLETE PERSONALIZED FOOD LIST · LIPID+, EXTRAS & SWAPS',
         subtitle: `Families ${splitIdx + 1}-${allMatrixRows.length} of ${allMatrixRows.length}: Healthy fats, nuts, beverages, herbs & 4 essential kitchen swaps`,
         rowH: 60,
         includeSwaps: true,
-        footer: 'Page 7 of 9 · Complete 17-Family Personalized Food Matrix (Part 2 of 2) · Atlas Health Services'
+        footer: 'Page 8 of 11 · Complete 17-Family Personalized Food Matrix (Part 2 of 2) · Atlas Health Services'
       }
     ];
 
@@ -1652,7 +1579,7 @@ export async function generateMealplanPdf({
       x: 36, y: ys1, size: 8.8, font: helveticaBold, color: navyPrimary
     });
 
-    const badge8 = 'PAGE 8 OF 9 · YOUR 5 TARGETED NUTRIENTS';
+    const badge8 = 'PAGE 9 OF 11 · YOUR 5 TARGETED NUTRIENTS';
     const badge8W = helveticaBold.widthOfTextAtSize(badge8, 7.0) + 14;
     suppPage1.drawRectangle({
       x: sp1Width - 36 - badge8W, y: ys1 - 3, width: badge8W, height: 17,
@@ -1685,6 +1612,7 @@ export async function generateMealplanPdf({
       {
         benefit: '[1] IMMUNITY & BONE STRENGTH',
         nutrient: 'Vitamin D3 + K2 (MK-7)',
+        ancTag: 'Solar Latitude · VDR',
         why: 'Your Vitamin D receptors work slower (VDR gene) and your solar latitude heritage increases indoor demand. This pair directs calcium safely into bones and supports immunity.',
         timing: 'Dose 2 (Breakfast): Take with breakfast containing healthy fats (eggs, olive oil, or avocado).',
         priority: 'PRIORITY 1 · ESSENTIAL',
@@ -1694,6 +1622,7 @@ export async function generateMealplanPdf({
       {
         benefit: '[2] ACTIVE VITAMINS & VITALITY',
         nutrient: 'Active Natural Folate (L-5-MTHF)',
+        ancTag: 'mtDNA H13a · MTHFR',
         why: 'Your body uses only 30% of common synthetic folic acid (MTHFR gene). Active Folate gives clean cellular energy directly without synthetic buildup.',
         timing: 'Dose 2 (Breakfast): Take in the morning with your breakfast.',
         priority: 'PRIORITY 1 · ESSENTIAL',
@@ -1703,6 +1632,7 @@ export async function generateMealplanPdf({
       {
         benefit: '[3] DEEP SLEEP & MUSCLE RECOVERY',
         nutrient: 'Magnesium Bisglycinate + L-Theanine',
+        ancTag: 'Circadian Stress · COMT',
         why: 'Calms evening nerve tension, relaxes muscles after exercise, and helps you fall into deep restorative sleep.',
         timing: 'Dose 3 (Bedtime): Take 2 capsules 30-60 min before sleep with water.',
         priority: 'PRIORITY 2 · RECOMMENDED',
@@ -1712,6 +1642,7 @@ export async function generateMealplanPdf({
       {
         benefit: '[4] METABOLISM & MENTAL FOCUS',
         nutrient: 'Active B-Complex (Methyl-B12 + Active B6)',
+        ancTag: 'Oxidative Heritage · SOD2',
         why: 'Works alongside Active Folate to clear homocysteine, protect nerves, and keep daytime energy steady.',
         timing: 'Dose 2 (Breakfast): Take in the morning with breakfast.',
         priority: 'PRIORITY 2 · RECOMMENDED',
@@ -1721,6 +1652,7 @@ export async function generateMealplanPdf({
       {
         benefit: '[5] GUT COMFORT & DAIRY SHIELD',
         nutrient: 'Probiotics in Acid-Resistant Vegetable Capsule',
+        ancTag: 'MENA Heritage · LCT/MCM6',
         why: 'Live beneficial bacteria (LGG + BB-12) protected in a delayed-release vegetable capsule to prevent bloating and sensitivity.',
         timing: 'Dose 1 (Upon Waking): Take 15-30 min before breakfast on an empty stomach with water.',
         priority: 'PRIORITY 3 · OPTIONAL',
@@ -1771,18 +1703,28 @@ export async function generateMealplanPdf({
         thickness: 0.6, color: cardBorder
       });
       suppPage1.drawText(`When to take: ${s.timing}`, {
-        x: 50, y: ys1 + 12, size: 7.8, font: helveticaBold, color: tealAccent
+        x: 50, y: ys1 + 12, size: 7.5, font: helveticaBold, color: tealAccent
       });
+      if (s.ancTag) {
+        const ancTagW = helveticaBold.widthOfTextAtSize(s.ancTag, 6.4) + 10;
+        suppPage1.drawRectangle({
+          x: sp1Width - 48 - ancTagW, y: ys1 + 8, width: ancTagW, height: 14,
+          color: rgb(240 / 255, 253 / 255, 250 / 255), borderColor: tealAccent, borderWidth: 0.7
+        });
+        suppPage1.drawText(s.ancTag, {
+          x: sp1Width - 48 - ancTagW + 5, y: ys1 + 12, size: 6.4, font: helveticaBold, color: tealAccent
+        });
+      }
 
       ys1 -= 12;
     });
 
-    suppPage1.drawText('Page 8 of 9 · Your 5 Targeted Nutrients Explained Simply · Atlas Health Services · www.atlashealthservices.com', {
+    suppPage1.drawText('Page 9 of 11 · Your 5 Targeted Nutrients Explained Simply · Atlas Health Services · www.atlashealthservices.com', {
       x: 36, y: 18, size: 7.0, font: helvetica, color: mutedSlate
     });
 
     // =========================================================================
-    // PAGE 9: CHOOSE YOUR PACK & DISPENSING OPTIONS
+    // PAGE 10: CHOOSE YOUR PACK & DISPENSING OPTIONS
     // =========================================================================
     const page3 = pdfDoc.addPage([595.28, 841.89]);
     const { width: p3Width, height: p3Height } = page3.getSize();
@@ -1794,7 +1736,7 @@ export async function generateMealplanPdf({
       x: 36, y: y3, size: 8.8, font: helveticaBold, color: navyPrimary
     });
 
-    const badge3 = 'PAGE 9 OF 9 · PACKS & DISPENSING OPTIONS';
+    const badge3 = 'PAGE 10 OF 11 · PACKS & DISPENSING OPTIONS';
     const badge3W = helveticaBold.widthOfTextAtSize(badge3, 7.0) + 14;
     page3.drawRectangle({
       x: p3Width - 36 - badge3W, y: y3 - 3, width: badge3W, height: 17,
@@ -1953,7 +1895,7 @@ export async function generateMealplanPdf({
         bullets: [
           'What it is: Buy 2 to 5 separate commercial bottles at any local pharmacy.',
           'Advantage: Immediate same-day purchase without waiting for lab preparation.',
-          'How to buy: Show the 5 active nutrients on Page 8 to your local pharmacist.'
+          'How to buy: Show the 5 active nutrients on Page 9 to your local pharmacist.'
         ]
       },
       {
@@ -2018,8 +1960,134 @@ export async function generateMealplanPdf({
       x: 48, y: y3 - 33, size: 7.6, font: helvetica, color: darkSlate, maxWidth: p3Width - 96, lineHeight: 10.5, maxLines: 2
     });
 
-    // Page 9 Footer
-    page3.drawText('Page 9 of 9 · Atlas Health Services · Personalized Supplement Guide · Designed for clarity & adherence · www.atlashealthservices.com', {
+    // Page 10 Footer
+    page3.drawText('Page 10 of 11 · Atlas Health Services · Personalized Supplement Guide · Designed for clarity & adherence · www.atlashealthservices.com', {
+      x: 36, y: 18, size: 7.0, font: helvetica, color: mutedSlate
+    });
+
+    // =========================================================================
+    // PAGE 11: ONE-PAGE FRIDGE CHEAT SHEET (PRINT & STICK ON YOUR FRIDGE)
+    // =========================================================================
+    const fridgePage = pdfDoc.addPage([595.28, 841.89]);
+    const { width: fW, height: fH } = fridgePage.getSize();
+    fridgePage.drawRectangle({ x: 0, y: fH - 8, width: fW, height: 8, color: gcpGreen });
+
+    let yf = fH - 28;
+    fridgePage.drawText('ATLAS HEALTH SERVICES · KITCHEN CHEAT SHEET', {
+      x: 36, y: yf, size: 9.0, font: helveticaBold, color: navyPrimary
+    });
+    const badgeF = 'PAGE 11 OF 11 · PRINT FOR YOUR FRIDGE';
+    const badgeFW = helveticaBold.widthOfTextAtSize(badgeF, 7.2) + 16;
+    fridgePage.drawRectangle({
+      x: fW - 36 - badgeFW, y: yf - 4, width: badgeFW, height: 18,
+      color: gcpGreenBg, borderColor: gcpGreen, borderWidth: 1.0
+    });
+    fridgePage.drawText(badgeF, {
+      x: fW - 36 - badgeFW + 8, y: yf + 1, size: 7.2, font: helveticaBold, color: gcpGreen
+    });
+
+    yf -= 20;
+    fridgePage.drawText(`DAILY FRIDGE CHECKLIST FOR ${patientName.toUpperCase()}`, {
+      x: 36, y: yf, size: 15.0, font: helveticaBold, color: darkSlate
+    });
+    yf -= 14;
+    fridgePage.drawText('Everything you need at a glance: Plate Order + 3 Supplement Moments + 4 Kitchen Swaps', {
+      x: 36, y: yf, size: 8.6, font: helvetica, color: mutedSlate
+    });
+    yf -= 12;
+    fridgePage.drawLine({ start: { x: 36, y: yf }, end: { x: fW - 36, y: yf }, thickness: 1.0, color: cardBorder });
+
+    // 1. 1-2-3 PLATE RULE BANNER
+    yf -= 22;
+    fridgePage.drawText('1. EAT EVERY PLATE IN THIS 1-2-3 ORDER', {
+      x: 36, y: yf, size: 10.5, font: helveticaBold, color: navyPrimary
+    });
+    yf -= 12;
+    const fPlateSteps = [
+      { num: '1', pct: '50%', label: 'Greens First', sub: 'Salad, arugula, broccoli', bg: gcpGreenBg, fg: gcpGreen },
+      { num: '2', pct: '30%', label: 'Protein + EVOO', sub: 'Fish, eggs, chicken, A2 yogurt', bg: rgb(219 / 255, 234 / 255, 254 / 255), fg: navyPrimary },
+      { num: '3', pct: '20%', label: 'Ancient Carbs Last', sub: 'Max 1 fist quinoa / millet', bg: gcpAmberBg, fg: gcpAmber }
+    ];
+    const fpW = (fW - 72 - 24) / 3;
+    const fpH = 82;
+    fPlateSteps.forEach((st, idx) => {
+      const sx = 36 + idx * (fpW + 12);
+      fridgePage.drawRectangle({ x: sx, y: yf - fpH, width: fpW, height: fpH, color: st.bg, borderColor: st.fg, borderWidth: 1.1 });
+      fridgePage.drawCircle({ x: sx + 18, y: yf - 20, size: 10, color: st.fg });
+      fridgePage.drawText(st.num, { x: sx + 15.2, y: yf - 23.5, size: 9.5, font: helveticaBold, color: white });
+      fridgePage.drawText(`${st.pct} · ${st.label}`, { x: sx + 34, y: yf - 22, size: 8.2, font: helveticaBold, color: st.fg });
+      drawWrappedBlock(fridgePage, st.sub, {
+        x: sx + 12, y: yf - 44, size: 7.9, font: helvetica, color: darkSlate, maxWidth: fpW - 24, lineHeight: 10.6, maxLines: 2
+      });
+      if (idx < 2) {
+        fridgePage.drawText('->', { x: sx + fpW + 2, y: yf - 42, size: 10, font: helveticaBold, color: navyPrimary });
+      }
+    });
+    yf -= (fpH + 26);
+
+    // 2. 3 DAILY SUPPLEMENT MOMENTS
+    fridgePage.drawText('2. YOUR 3 DAILY SUPPLEMENT MOMENTS', {
+      x: 36, y: yf, size: 10.5, font: helveticaBold, color: navyPrimary
+    });
+    yf -= 12;
+    const fMoments = [
+      { badge: 'MORNING · 07:30', title: 'Upon Waking (Empty Stomach)', desc: '[ ] Water + Nutrient [5] Probiotic (15-30 min before food).', accent: tealAccent },
+      { badge: 'BREAKFAST · 08:30', title: 'With Eggs, Avocado or EVOO', desc: '[ ] Nutrients [1] Vit D3/K2 + [2] Active Folate (+ [4] B-Complex).', accent: googleBlue },
+      { badge: 'BEDTIME · 22:00', title: '45 Min Before Sleep', desc: '[ ] Nutrient [3] Magnesium Bisglycinate + chamomile tea.', accent: navyPrimary }
+    ];
+    const fmW = (fW - 72 - 20) / 3;
+    const fmH = 112;
+    fMoments.forEach((fm, idx) => {
+      const fx = 36 + idx * (fmW + 10);
+      fridgePage.drawRectangle({ x: fx, y: yf - fmH, width: fmW, height: fmH, color: white, borderColor: cardBorder, borderWidth: 1.0 });
+      fridgePage.drawRectangle({ x: fx, y: yf - 4, width: fmW, height: 4, color: fm.accent });
+      fridgePage.drawText(fm.badge, { x: fx + 10, y: yf - 20, size: 7.4, font: helveticaBold, color: fm.accent });
+      drawWrappedBlock(fridgePage, fm.title, {
+        x: fx + 10, y: yf - 36, size: 8.6, font: helveticaBold, color: darkSlate, maxWidth: fmW - 20, lineHeight: 11.0, maxLines: 2
+      });
+      drawWrappedBlock(fridgePage, fm.desc, {
+        x: fx + 10, y: yf - 68, size: 7.8, font: helvetica, color: darkSlate, maxWidth: fmW - 20, lineHeight: 10.8, maxLines: 3
+      });
+    });
+    yf -= (fmH + 26);
+
+    // 3. 4 ESSENTIAL PANTRY SWAPS (CHECKLIST)
+    fridgePage.drawText('3. YOUR 4 HERITAGE & DNA PANTRY SWAPS', {
+      x: 36, y: yf, size: 10.5, font: helveticaBold, color: navyPrimary
+    });
+    yf -= 12;
+    const fSwaps = [
+      '[ ] Oils: Extra Virgin Olive Oil (EVOO) or Ghee  (Never sunflower, corn, soy or canola)',
+      '[ ] Dairy: Goat/Sheep Kefir, Labneh & Aged Feta  (Never cow milk or soft cream cheese)',
+      '[ ] Grains: Quinoa, Millet, Buckwheat & Lentils  (Never white bread or fortified cereals)',
+      '[ ] Caffeine & Night Rest: Coffee strictly before 12:00 PM  ·  12h overnight kitchen rest'
+    ];
+    const fsH = 148;
+    fridgePage.drawRectangle({ x: 36, y: yf - fsH, width: fW - 72, height: fsH, color: lightBg, borderColor: cardBorder, borderWidth: 1.0 });
+    let fsy = yf - 22;
+    fSwaps.forEach((sw) => {
+      fridgePage.drawText(sw, { x: 50, y: fsy, size: 8.6, font: helveticaBold, color: darkSlate, maxWidth: fW - 100 });
+      fsy -= 31;
+    });
+    yf -= (fsH + 22);
+
+    // 4. QR PORTAL BANNER
+    const qrBoxH = 88;
+    fridgePage.drawRectangle({
+      x: 36, y: yf - qrBoxH, width: fW - 72, height: qrBoxH,
+      color: rgb(232 / 255, 240 / 255, 254 / 255), borderColor: rgb(191 / 255, 219 / 255, 254 / 255), borderWidth: 1.0
+    });
+    if (qrImage) {
+      fridgePage.drawImage(qrImage, { x: 48, y: yf - qrBoxH + 12, width: 64, height: 64 });
+    }
+    fridgePage.drawText('SCAN FOR YOUR INTERACTIVE MENU & FOOD SEARCH', {
+      x: 126, y: yf - 26, size: 10.0, font: helveticaBold, color: navyPrimary
+    });
+    drawWrappedBlock(fridgePage, 'Open your live digital guide anytime on your phone to search any food (Green / Amber / Red), view your 7-day meals, or share with your chef.', {
+      x: 126, y: yf - 44, size: 8.2, font: helvetica, color: darkSlate, maxWidth: fW - 180, lineHeight: 11.4, maxLines: 2
+    });
+
+    fridgePage.drawText('Page 11 of 11 · One-Page Fridge Cheat Sheet · Atlas Health Services · www.atlashealthservices.com', {
       x: 36, y: 18, size: 7.0, font: helvetica, color: mutedSlate
     });
 
