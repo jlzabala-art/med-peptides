@@ -48,9 +48,31 @@ export default function PricingKpiStrip({
 
   return (
     <>
+      <style jsx>{`
+        @media (max-width: 640px) {
+          .pricing-scope-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 6px !important;
+          }
+          .pricing-scope-badge {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+          .pricing-scope-switcher {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: stretch !important;
+          }
+          .pricing-scope-switcher button {
+            flex: 1 1 50% !important;
+            text-align: center !important;
+          }
+        }
+      `}</style>
       {/* Rule #22: Scope Transparency & Switcher */}
       <div
-        className="no-print"
+        className="no-print pricing-scope-bar"
         style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -61,6 +83,7 @@ export default function PricingKpiStrip({
         }}
       >
         <div
+          className="pricing-scope-badge"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -83,6 +106,7 @@ export default function PricingKpiStrip({
 
         {hasActiveFilters && (
           <div
+            className="pricing-scope-switcher"
             style={{
               display: 'inline-flex',
               alignItems: 'center',

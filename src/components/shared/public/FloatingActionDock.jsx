@@ -287,6 +287,9 @@ export default function FloatingActionDock({
           .atlas-glass-dock__ai-text {
             display: none;
           }
+          .atlas-glass-dock :global(.atlas-glass-dock__qr) {
+            display: none !important;
+          }
           .atlas-glass-dock__ai-short {
             display: inline;
           }

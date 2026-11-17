@@ -584,7 +584,7 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
             <button
               type="button"
               onClick={handleShareSchedule}
-              className="puh-btn puh-btn-ghost"
+              className="puh-btn puh-btn-ghost hide-on-mobile-header"
               title="Share schedule"
             >
               {copied ? <Check size={14} /> : <Share2 size={14} />}

@@ -49,6 +49,7 @@ export default function PeptidesKpiSummaryBar({
     >
       {/* Scope Indicator & Switcher (Google Cloud Standard - Golden Rule #22) */}
       <div
+        className="peptides-scope-bar"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -60,8 +61,9 @@ export default function PeptidesKpiSummaryBar({
           gap: '6px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+        <div className="peptides-scope-left" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           <span
+            className="peptides-scope-count-badge"
             style={{
               fontSize: '0.68rem',
               fontWeight: 700,
@@ -99,6 +101,7 @@ export default function PeptidesKpiSummaryBar({
 
         {/* Scope Switcher: Active Filter View vs Global Catalog */}
         <div
+          className="peptides-scope-switcher-group"
           style={{
             display: 'inline-flex',
             background: '#f1f5f9',

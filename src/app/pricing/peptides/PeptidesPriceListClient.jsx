@@ -69,35 +69,6 @@ export default function PeptidesPriceListClient({
   const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
   const [isCurrencySheetOpen, setIsCurrencySheetOpen] = useState(false);
   const [isMobileKpiExpanded, setIsMobileKpiExpanded] = useState(false);
-
-  useRegisterAtlasContext(
-    {
-      contextAnchor: {
-        type: 'peptides_pricing',
-        name: initialLang === 'es' ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
-      },
-      bottomBar: {
-        summaryTitle: initialLang === 'es' ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
-        summarySubtitle: 'Atlas Health Services',
-        atlasAiLabel: initialLang === 'es' ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
-        onOpenAtlasAi: () => setIsAtlasAiOpen(true),
-        showSections: true,
-        sectionsLabel: initialLang === 'es' ? 'Categorías' : 'Categories',
-        onOpenSections: () => {
-          if (typeof window !== 'undefined' && window.innerWidth <= 900) {
-            setIsCategorySheetOpen(true);
-          } else {
-            setIsSidebarOpen((prev) => !prev);
-          }
-        },
-        primaryAction: {
-          label: initialLang === 'es' ? 'Vista PDF' : 'Preview PDF',
-          onClick: () => setIsPdfPreviewOpen(true),
-        },
-      },
-    },
-    [initialLang]
-  );
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
   const [groupByCategory, setGroupByCategory] = useState(true);
 
@@ -158,6 +129,35 @@ export default function PeptidesPriceListClient({
     initialDest,
     setOrderForm
   });
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'peptides_pricing',
+        name: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
+      },
+      bottomBar: {
+        summaryTitle: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
+        summarySubtitle: 'Atlas Health Services',
+        atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        onOpenAtlasAi: () => setIsAtlasAiOpen(true),
+        showSections: true,
+        sectionsLabel: isEs ? 'Categorías' : 'Categories',
+        onOpenSections: () => {
+          if (typeof window !== 'undefined' && window.innerWidth <= 900) {
+            setIsCategorySheetOpen(true);
+          } else {
+            setIsSidebarOpen((prev) => !prev);
+          }
+        },
+        primaryAction: {
+          label: isEs ? 'Vista PDF' : 'Preview PDF',
+          onClick: () => setIsPdfPreviewOpen(true),
+        },
+      },
+    },
+    [isEs]
+  );
 
   // Contact form validation gate
   const validateOrderForm = useCallback(() => {
@@ -580,6 +580,11 @@ export default function PeptidesPriceListClient({
             .data-table-mobile-cards { width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
             .peptides-kpi-card { padding: 0.55rem 0.65rem !important; }
             .peptides-kpi-val { font-size: 1.15rem !important; }
+            .peptides-scope-bar { display: flex !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; gap: 8px !important; }
+            .peptides-scope-count-badge { display: none !important; }
+            .peptides-scope-left { width: 100% !important; }
+            .peptides-scope-switcher-group { width: 100% !important; display: flex !important; justify-content: stretch !important; margin-top: 2px !important; }
+            .peptides-scope-switcher-group button { flex: 1 1 50% !important; text-align: center !important; padding: 6px 8px !important; font-size: 0.72rem !important; }
           }
         ` }} />
 

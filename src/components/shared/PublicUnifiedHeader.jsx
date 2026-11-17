@@ -689,7 +689,7 @@ export default function PublicUnifiedHeader({
               {!effectiveHideCopyButton && (
               <button
                 type="button"
-                className="puh-btn puh-btn-ghost hide-on-extra-narrow"
+                className="puh-btn puh-btn-ghost hide-on-mobile-header"
                 onClick={handleCopyLink}
                 title={isSpanish ? 'Copiar enlace al portapapeles' : 'Copy link to clipboard'}
               >
@@ -706,7 +706,7 @@ export default function PublicUnifiedHeader({
               {isDoctorView && isAuthorizedDoctorRole && pathname !== '/rx/intake' && !hideImportRx && (
                 <button
                   type="button"
-                  className="puh-btn puh-btn-import-rx hide-on-extra-narrow"
+                  className="puh-btn puh-btn-import-rx hide-on-mobile-header"
                   onClick={() => {
                     triggerHaptic('selection');
                     if (onImportRx) onImportRx();
@@ -795,7 +795,7 @@ export default function PublicUnifiedHeader({
               {!effectiveHideContactButton && (
                 <button
                   type="button"
-                  className="puh-btn puh-btn-contact hide-on-extra-narrow"
+                  className="puh-btn puh-btn-contact hide-on-mobile-header"
                   onClick={handleContactClick}
                   title={isSpanish ? 'Consulta Médica e Institucional (business@atlas-services.com)' : 'Contact Medical Affairs (business@atlas-services.com)'}
                 >
@@ -806,7 +806,7 @@ export default function PublicUnifiedHeader({
 
               <button
                 type="button"
-                className="puh-btn puh-btn-ghost hide-on-extra-narrow"
+                className="puh-btn puh-btn-ghost hide-on-mobile-header"
                 onClick={() => {
                   if (typeof window !== 'undefined') {
                     window.dispatchEvent(new CustomEvent('open-atlas-help-drawer'));
