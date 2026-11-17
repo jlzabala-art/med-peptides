@@ -39,6 +39,7 @@ import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import WorkspaceTopBarControl from '../shared/workspaces/WorkspaceTopBarControl';
 import PublicPortalsTopBarMenu from '../shared/PublicPortalsTopBarMenu';
+import PortalContextSwitcher from '../shared/PortalContextSwitcher';
 import CustomerPreviewDrawer from '../shared/CustomerPreviewDrawer';
 import { useCart } from '../../context/CartProvider';
 import { useSimulationStore } from '../../stores/useSimulationStore';
@@ -567,6 +568,7 @@ export default function PortalLayout({
           <span className="portal-header-switcher">
             <AdminPortalSwitcher />
           </span>
+          <PortalContextSwitcher />
         </div>
 
         {/* CENTER: search bar — hidden on mobile via CSS, collapses to nothing */}

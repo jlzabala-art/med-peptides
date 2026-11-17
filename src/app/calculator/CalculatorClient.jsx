@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { ToolWorkspaceLayout } from '@/components/shared/layouts';
+import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
 import AlgoliaEntityPicker from '@/components/shared/AlgoliaEntityPicker';
 import TemplateSkeleton from '@/components/shared/public/TemplateSkeleton';
 import {
@@ -329,6 +330,9 @@ export default function CalculatorClient() {
       toolbarActions={toolbarActions}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ margin: '-8px -16px 0' }}>
+          <PharmacyOpsWorkspaceBar lang={lang} />
+        </div>
         {/* 1. 4 Executive KPI Cards (Golden Rule #22) */}
         <div
           style={{

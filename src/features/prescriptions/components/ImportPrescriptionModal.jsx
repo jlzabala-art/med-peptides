@@ -182,7 +182,8 @@ export default function ImportPrescriptionModal({
   onExtractionComplete,
   persistEndpoint = null,
   onImported = null,
-  note = null
+  note = null,
+  embeddedPage = false
 }) {
   const [uploading, setUploading] = useState(false);
   const [loadingPhase, setLoadingPhase] = useState(0);
@@ -922,7 +923,12 @@ export default function ImportPrescriptionModal({
   }).filter(Boolean);
 
   return (
-    <div style={{
+    <div style={embeddedPage ? {
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      padding: '1.25rem 1rem 3rem'
+    } : {
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
       backgroundColor: 'rgba(15, 23, 42, 0.70)',
@@ -936,17 +942,17 @@ export default function ImportPrescriptionModal({
     }}>
       <div style={{
         backgroundColor: '#ffffff',
-        borderRadius: '16px',
+        borderRadius: '14px',
         width: '100%',
-        maxWidth: reviewData ? '920px' : '520px',
-        maxHeight: '92vh',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        maxWidth: embeddedPage ? '960px' : (reviewData ? '920px' : '520px'),
+        maxHeight: embeddedPage ? 'none' : '92vh',
+        boxShadow: embeddedPage ? '0 4px 20px rgba(15, 23, 42, 0.06)' : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         display: 'flex',
         flexDirection: 'column',
         animation: 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-        overflow: 'hidden',
+        overflow: embeddedPage ? 'visible' : 'hidden',
         transition: 'max-width 0.2s ease',
-        border: '1px solid #e2e8f0'
+        border: '1px solid #dadce0'
       }}>
         {/* Header (GCP Style) */}
         <div style={{

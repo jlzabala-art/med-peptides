@@ -23,6 +23,7 @@ import { useLabelsPrescriptionActions } from './hooks/useLabelsPrescriptionActio
 import { LabelsWorkspaceProvider } from './context/LabelsWorkspaceContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import {
   Search,
@@ -115,7 +116,9 @@ export default function PublicLabelsAppClient({
     patientQueue,
     setPatientQueue,
     activeQueueIndex,
+    setActiveQueueIndex,
     currentRx,
+    setCurrentRx,
     labels,
     setLabels,
     activeCode,
@@ -654,6 +657,7 @@ export default function PublicLabelsAppClient({
           ]}
         />
       )}
+      {!embedded && <PharmacyOpsWorkspaceBar lang={lang} />}
       <LabelsHeader
         hideTopChrome={!embedded}
         searchBoxRef={searchBoxRef}

@@ -2,10 +2,83 @@
  * publicAdminDirectory.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Canonical Admin-only quick-navigation directory for the public search bar /
- * Command Palette (⌘K). Organized following Google Cloud Console UX patterns.
- * Non-admin users never see this cross-app directory; they only see search
- * results scoped to their current page.
+ * Command Palette (⌘K), plus shared registries for the 4 Unified Portals
+ * (Block 2) and the 4 Pharmacy & Rx Tools (Block 3).
  */
+
+export const FOUR_UNIFIED_PORTALS = [
+  {
+    id: 'doctor',
+    labelEn: 'Doctors Portal',
+    labelEs: 'Portal de Médicos',
+    href: '/doctor',
+    tag: '/doctor · /dr',
+    audience: 'specialist',
+    keywords: 'doctor medicos portal physician workstation dr',
+  },
+  {
+    id: 'patient',
+    labelEn: 'Patients Portal',
+    labelEs: 'Portal de Pacientes',
+    href: '/patient',
+    tag: '/patient',
+    audience: 'patient',
+    keywords: 'patient pacientes portal orders prescriptions',
+  },
+  {
+    id: 'dna-patient',
+    labelEn: 'DNA Portal · Patient View',
+    labelEs: 'Portal ADN · Vista Paciente',
+    href: '/patient/dna-report?patient=Mr.%20Hossam&sample=G000943554',
+    tag: 'DNA Patient',
+    audience: 'patient',
+    keywords: 'hossam dna report paciente patient 24genetics G000943554',
+  },
+  {
+    id: 'dna-nutritionist',
+    labelEn: 'DNA Portal · Nutritionist View',
+    labelEs: 'Portal ADN · Vista Nutricionista',
+    href: '/patient/dna-report?patient=Mr.%20Hossam&sample=G000943554&view=nutritionist&nt=b54e80a0936c1a4f',
+    tag: 'DNA Specialist',
+    audience: 'specialist',
+    keywords: 'hossam dna report nutricionista nutritionist specialist 24genetics',
+  },
+];
+
+export const PHARMACY_OPS_TOOLS = [
+  {
+    id: 'labels',
+    labelEn: 'Labels Studio & Rx',
+    labelEs: 'Labels Studio y Recetas',
+    href: '/labels',
+    tag: '/labels · GMP',
+    keywords: 'labels etiquetas rx prescriptions recetas studio',
+  },
+  {
+    id: 'intake',
+    labelEn: 'New Rx Intake',
+    labelEs: 'Nuevo Intake Receta',
+    href: '/rx/intake',
+    tag: '/rx/intake',
+    keywords: 'intake nueva receta prescription e-rx import',
+  },
+  {
+    id: 'compounding',
+    labelEn: 'Compounding Lab',
+    labelEs: 'Compounding Magistral',
+    href: '/compounding',
+    tag: '/compounding',
+    keywords: 'compounding formulacion magistral capsules',
+  },
+  {
+    id: 'calculator',
+    labelEn: 'Reconstitution Calculator',
+    labelEs: 'Calculadora Reconstitución',
+    href: '/calculator',
+    tag: '/calculator',
+    keywords: 'calculator calculadora reconstitution vials',
+  },
+];
 
 export const ADMIN_DIRECTORY_GROUPS = [
   {
@@ -87,73 +160,15 @@ export const ADMIN_DIRECTORY_GROUPS = [
   },
   {
     id: 'portals',
-    titleEn: '2. Doctor & Patient Portals',
-    titleEs: '2. Portales de Médicos y Pacientes',
-    items: [
-      {
-        labelEn: 'Public Doctors Portal',
-        labelEs: 'Portal Público de Médicos',
-        href: '/doctor',
-        tag: '/doctor · /dr',
-        keywords: 'doctor medicos portal physician workstation dr',
-      },
-      {
-        labelEn: 'Patients Portal',
-        labelEs: 'Portal de Pacientes',
-        href: '/patient',
-        tag: '/patient',
-        keywords: 'patient pacientes portal orders prescriptions',
-      },
-      {
-        labelEn: '24Genetics Hossam · Patient View',
-        labelEs: '24Genetics Hossam · Vista Paciente',
-        href: '/patient/dna-report?patient=Mr.%20Hossam&sample=G000943554',
-        tag: 'DNA Patient',
-        keywords: 'hossam dna report paciente patient 24genetics G000943554',
-      },
-      {
-        labelEn: '24Genetics Hossam · Nutritionist View',
-        labelEs: '24Genetics Hossam · Vista Nutricionista',
-        href: '/patient/dna-report?patient=Mr.%20Hossam&sample=G000943554&view=nutritionist&nt=b54e80a0936c1a4f',
-        tag: 'DNA Specialist',
-        keywords: 'hossam dna report nutricionista nutritionist specialist 24genetics',
-      },
-    ],
+    titleEn: '2. The 4 Unified Portals',
+    titleEs: '2. Los 4 Portales Unificados',
+    items: FOUR_UNIFIED_PORTALS,
   },
   {
     id: 'ops',
-    titleEn: '3. Pharmacy, Labels & Clinical Tools',
-    titleEs: '3. Farmacia, Etiquetas y Herramientas',
-    items: [
-      {
-        labelEn: 'Labels Studio & Rx Registry',
-        labelEs: 'Labels Studio y Registro de Recetas',
-        href: '/labels',
-        tag: '/labels · GMP',
-        keywords: 'labels etiquetas rx prescriptions recetas studio',
-      },
-      {
-        labelEn: 'New Prescription Intake',
-        labelEs: 'Nuevo Intake de Receta (E-Rx)',
-        href: '/rx/intake',
-        tag: '/rx/intake',
-        keywords: 'intake nueva receta prescription e-rx',
-      },
-      {
-        labelEn: 'Compounding & Formulations',
-        labelEs: 'Formulación Magistral (Compounding)',
-        href: '/compounding',
-        tag: '/compounding',
-        keywords: 'compounding formulacion magistral ultraman',
-      },
-      {
-        labelEn: 'Peptide Vials Directory & Calculator',
-        labelEs: 'Directorio de Viales y Calculadora',
-        href: '/vials',
-        tag: '/vials · /calculator',
-        keywords: 'vials viales calculator calculadora reconstitution',
-      },
-    ],
+    titleEn: '3. Pharmacy, Prescriptions & Tools',
+    titleEs: '3. Farmacia, Recetas (Rx) y Herramientas',
+    items: PHARMACY_OPS_TOOLS,
   },
   {
     id: 'pricing',

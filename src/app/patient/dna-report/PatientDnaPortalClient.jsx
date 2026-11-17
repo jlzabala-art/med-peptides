@@ -42,6 +42,7 @@ import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import CopyableId from '@/components/ui/CopyableId';
+import PortalContextSwitcher from '@/components/shared/PortalContextSwitcher';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { filterAdminDirectoryGroups } from '@/constants/publicAdminDirectory';
 import {
@@ -839,53 +840,13 @@ export default function PatientDnaPortalClient({
               )}
             </div>
 
-            {/* Nutritionist Asymmetric Mode Switcher (ONLY visible when authorized as Nutritionist) */}
-            {canAccessNutritionist && (
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: '#f1f3f4',
-                  borderRadius: '6px',
-                  padding: '2px',
-                  border: '1px solid #dadce0'
-                }}
-                title="Nutritionist Mode shows full SNPs & merged 24Genetics PDF. Patient Preview shows exactly what your patient sees."
-              >
-                <button
-                  type="button"
-                  onClick={() => setAudienceMode('nutritionist')}
-                  style={{
-                    padding: '4px 9px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    fontSize: '0.70rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    backgroundColor: audienceMode === 'nutritionist' ? '#003666' : 'transparent',
-                    color: audienceMode === 'nutritionist' ? '#ffffff' : '#5f6368'
-                  }}
-                >
-                  {selectedLanguage === 'es' ? 'Modo Nutricionista' : 'Nutritionist'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAudienceMode('patient')}
-                  style={{
-                    padding: '4px 9px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    fontSize: '0.70rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    backgroundColor: audienceMode === 'patient' ? '#0d9488' : 'transparent',
-                    color: audienceMode === 'patient' ? '#ffffff' : '#5f6368'
-                  }}
-                >
-                  {selectedLanguage === 'es' ? 'Vista Paciente' : 'Patient View'}
-                </button>
-              </div>
-            )}
+            {/* Unified 4-Portal & Dual-Profile Switcher (Doctors / Patients / DNA Patient / DNA Nutritionist) */}
+            <PortalContextSwitcher
+              canAccessNutritionist={canAccessNutritionist}
+              currentAudienceMode={audienceMode}
+              onSelectDnaAudience={setAudienceMode}
+              lang={selectedLanguage}
+            />
 
             {/* QR Codes Button */}
             <button

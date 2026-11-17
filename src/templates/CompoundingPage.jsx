@@ -18,6 +18,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
+import PharmacyOpsWorkspaceBar from '../components/shared/PharmacyOpsWorkspaceBar';
 import PageHeroCard from '../components/ui/PageHeroCard';
 import MetricCard from '../components/ui/MetricCard';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
@@ -338,7 +339,10 @@ export default function CompoundingPage({
   return (
     <div className={`cmp-page atlas-page-bg ${embedded ? 'is-embedded' : ''}`}>
       {!embedded && (
-        <PublicUnifiedHeader track="compounds" lang={lang} onLangChange={handleLangChange} copyUrl={shareUrl} />
+        <>
+          <PublicUnifiedHeader track="compounds" lang={lang} onLangChange={handleLangChange} copyUrl={shareUrl} />
+          <PharmacyOpsWorkspaceBar lang={lang} />
+        </>
       )}
 
       {!embedded && (
