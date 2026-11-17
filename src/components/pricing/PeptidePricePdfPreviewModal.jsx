@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Printer, Sparkles, Layers, List, Smartphone, FileText } from 'lucide-react';
+import { X, Printer, Download, Sparkles, Layers, List, Smartphone, FileText } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import toast from 'react-hot-toast';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
-import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
+import { buildPeptidesPriceSchedulePdfBlob } from '@/lib/pdf/peptidesPriceSchedulePdf';
 
 /**
  * Parses multi-component peptide blends (like GLOW, KLOW, CJC-1295 + Ipamorelin)
@@ -150,6 +151,35 @@ export default function PeptidePricePdfPreviewModal({
   }, [isOpen]);
 
   const isEs = pdfLang === 'es';
+
+  const handleDownloadDirectPdf = () => {
+    try {
+      const blob = buildPeptidesPriceSchedulePdfBlob({
+        products,
+        currency,
+        currencySymbol,
+        formatPrice,
+        isDistributor,
+        isEs,
+        groupByCategory,
+        documentRef: 'ATLAS-B2B-2026-Q4'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = isEs
+        ? `Atlas_Tarifa_Peptidos_${currency}.pdf`
+        : `Atlas_Peptides_Price_Schedule_${currency}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      toast.success(isEs ? 'PDF oficial descargado con éxito' : 'Official PDF downloaded successfully');
+    } catch (err) {
+      console.error('[pdf-download]', err);
+      setIsRealPdfOpen(true);
+    }
+  };
 
   const qrTargetUrl = useMemo(() => {
     const base = 'https://www.atlashealth-services.com/pricing/peptides';
@@ -321,6 +351,10 @@ export default function PeptidePricePdfPreviewModal({
 
         /* Print Override — ALWAYS Print True Full 7-Column A4 Document */
         @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           body * {
             visibility: hidden;
           }
@@ -493,7 +527,7 @@ export default function PeptidePricePdfPreviewModal({
 
             <button
               type="button"
-              onClick={() => setIsRealPdfOpen(true)}
+              onClick={handleDownloadDirectPdf}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -502,16 +536,17 @@ export default function PeptidePricePdfPreviewModal({
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
-                padding: '6px 10px',
+                padding: '6px 12px',
                 fontSize: '0.74rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 boxShadow: '0 1px 2px rgba(26,115,232,0.3)',
                 whiteSpace: 'nowrap'
               }}
+              title={isEs ? 'Descargar archivo PDF oficial (A4)' : 'Download official PDF price schedule (A4)'}
             >
-              <Printer size={13} />
-              <span>{isEs ? 'PDF / Imprimir' : 'Save PDF'}</span>
+              <Download size={13} />
+              <span>{isEs ? 'Descargar PDF' : 'Download PDF'}</span>
             </button>
           </div>
         </div>
@@ -655,7 +690,7 @@ export default function PeptidePricePdfPreviewModal({
 
           <button
             type="button"
-            onClick={() => setIsRealPdfOpen(true)}
+            onClick={handleDownloadDirectPdf}
             className="pdf-desktop-only"
             style={{
               alignItems: 'center',
@@ -670,9 +705,32 @@ export default function PeptidePricePdfPreviewModal({
               cursor: 'pointer',
               boxShadow: '0 1px 3px rgba(60,64,67,0.3)'
             }}
+            title={isEs ? 'Descargar archivo PDF oficial (A4)' : 'Download official PDF price schedule (A4)'}
+          >
+            <Download size={14} />
+            <span>{isEs ? 'Descargar PDF Oficial' : 'Download Official PDF'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsRealPdfOpen(true)}
+            className="pdf-desktop-only"
+            style={{
+              alignItems: 'center',
+              gap: '6px',
+              background: '#ffffff',
+              color: '#334155',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              padding: '7px 12px',
+              fontSize: '0.80rem',
+              fontWeight: 650,
+              cursor: 'pointer'
+            }}
+            title={isEs ? 'Visor de impresión y descarga' : 'Print & viewer modal'}
           >
             <Printer size={14} />
-            <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save as PDF'}</span>
+            <span>{isEs ? 'Imprimir / Visor' : 'Print / Viewer'}</span>
           </button>
 
           <button
@@ -1242,35 +1300,19 @@ export default function PeptidePricePdfPreviewModal({
       <DocumentPreviewModal
         isOpen={isRealPdfOpen}
         onClose={() => setIsRealPdfOpen(false)}
-        getPdfBlob={() => {
-          const head = [
-            '#',
-            isEs ? 'Formulación' : 'Formulation',
-            isEs ? 'Dosis' : 'Dosage',
-            `1× Vial (${currency})`,
-            `Pack ×10 (${currency})`,
-          ];
-          const body = products.map((p, idx) => {
-            const p10 = p.pack10Price || (Number(p.unitPrice || 0) * 10 * 0.85);
-            return [
-              idx + 1,
-              p.productName || p.name || '',
-              p.dosage || '—',
-              typeof formatPrice === 'function' ? formatPrice(p.unitPrice) : `${currencySymbol}${Number(p.unitPrice || 0).toFixed(2)}`,
-              typeof formatPrice === 'function' ? formatPrice(p10) : `${currencySymbol}${Number(p10 || 0).toFixed(2)}`,
-            ];
-          });
-          return buildSchedulePdfBlob({
-            title: isEs ? 'ATLAS HEALTH — TARIFA OFICIAL DE PÉPTIDOS' : 'ATLAS HEALTH — LYOPHILIZED PEPTIDES SCHEDULE',
-            subtitle: `${products.length} SKUs · ${currency}`,
-            metaLine: `Currency: ${currency}  |  Lang: ${pdfLang.toUpperCase()}`,
-            head,
-            body,
-          });
-        }}
-        downloadName={`Atlas_Peptides_Schedule_${currency}.pdf`}
-        title={isEs ? 'Tarifa Oficial de Péptidos (PDF)' : 'Official Peptides Schedule (PDF)'}
-        subtitle={`${products.length} SKUs · ${currency}`}
+        getPdfBlob={() => buildPeptidesPriceSchedulePdfBlob({
+          products,
+          currency,
+          currencySymbol,
+          formatPrice,
+          isDistributor,
+          isEs,
+          groupByCategory,
+          documentRef: 'ATLAS-B2B-2026-Q4'
+        })}
+        downloadName={isEs ? `Atlas_Tarifa_Peptidos_${currency}.pdf` : `Atlas_Peptides_Price_Schedule_${currency}.pdf`}
+        title={isEs ? 'Tarifa Oficial de Péptidos (A4)' : 'Official Peptides Price Schedule (A4)'}
+        subtitle={`${products.length} Items · ${currency}`}
       />
     </div>
   );
