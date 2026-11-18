@@ -9,8 +9,8 @@ export const revalidate = 0;
 export async function generateMetadata({ searchParams }) {
   const resolvedSearch = await searchParams;
   const lang = normalizeMetaLang(resolvedSearch);
-  const currency = String(resolvedSearch?.cur || resolvedSearch?.currency || 'EUR').toUpperCase();
-  const validCurrency = ['EUR', 'USD', 'AED'].includes(currency) ? currency : 'EUR';
+  const currency = String(resolvedSearch?.cur || resolvedSearch?.currency || 'USD').toUpperCase();
+  const validCurrency = ['EUR', 'USD', 'AED'].includes(currency) ? currency : 'USD';
 
   return buildBilingualMetadata({
     lang,
@@ -88,7 +88,7 @@ const TROCAR_KITS = [
 export default async function PelletsPricingPage({ searchParams }) {
   const resolvedSearch = await searchParams;
   const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || '').toUpperCase();
-  const initialCurrency = ['EUR', 'AED', 'USD'].includes(rawCur) ? rawCur : 'EUR';
+  const initialCurrency = ['EUR', 'AED', 'USD'].includes(rawCur) ? rawCur : 'USD';
   const initialLang = normalizeMetaLang(resolvedSearch);
 
   // Authoritative Pellets from Registry

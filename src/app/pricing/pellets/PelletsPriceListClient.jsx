@@ -32,6 +32,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 import './PelletsPriceList.css';
 
@@ -49,11 +50,13 @@ const CURRENCY_SYMBOLS = {
 
 export default function PelletsPriceListClient({
   initialProducts = [],
-  initialCurrency = 'EUR',
+  initialCurrency = 'USD',
   initialLang = 'en'
 }) {
-  const [currency, setCurrency] = useState(initialCurrency);
-  const [lang, setLang] = useState(initialLang);
+  const workspace = usePublicWorkspace();
+  const currency = workspace?.currency || initialCurrency || 'USD';
+  const lang = workspace?.lang || initialLang || 'en';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [cartItems, setCartItems] = useState({}); // { [id]: { single: number, pack10: number } }
@@ -537,7 +540,13 @@ export default function PelletsPriceListClient({
   return (
     <div className="pellets-price-page">
       {/* ── UNIFIED ATLAS PUBLIC HEADER ── */}
-      <PublicUnifiedHeader currentApp="services" />
+      <PublicUnifiedHeader
+        currentApp="services"
+        lang={lang}
+        currency={currency}
+        onCurrencyChange={(c) => workspace?.setCurrency?.(c)}
+        onLangChange={(l) => workspace?.setLang?.(l)}
+      />
 
       {/* ── GOOGLE CLOUD CONSOLE RESOURCE HEADER ── */}
       <div className="gcp-resource-page-header">
@@ -698,7 +707,7 @@ export default function PelletsPriceListClient({
                 -10% Volume Discount
               </span>
               <span className="pellets-kpi-card-sub">
-                {isEs ? 'Desde €351.09 / caja ×10' : 'From €351.09 / 10-pack box'}
+                {isEs ? `Desde ${formatPrice(351.09)} / caja ×10` : `From ${formatPrice(351.09)} / 10-pack box`}
               </span>
             </div>
 

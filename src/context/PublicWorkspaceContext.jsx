@@ -58,24 +58,79 @@ export function PublicWorkspaceProvider({ children }) {
   const [hydrated, setHydrated] = useState(false);
   const [isQuoteDrawerOpen, setIsQuoteDrawerOpen] = useState(false);
 
-  // Hydrate from localStorage on mount
+  // Hydrate from URL, localStorage on mount (English default)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
+      const sp = new URLSearchParams(window.location.search);
+      const urlCur = (sp.get('cur') || sp.get('currency') || '').toUpperCase();
+      const urlLang = (sp.get('lang') || '').toLowerCase();
+
+      const storedLegacyCur = (localStorage.getItem('atlas_portal_currency') || '').toUpperCase();
+      const storedLegacyLang = (localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang') || '').toLowerCase();
+
       const raw = window.localStorage.getItem(STORAGE_KEY);
+      let parsed = {};
       if (raw) {
-        const parsed = JSON.parse(raw);
-        setState({
-          currency: parsed.currency || 'USD',
-          lang: parsed.lang || 'en',
-          rfqItems: Array.isArray(parsed.rfqItems) ? parsed.rfqItems : [],
-          recentItems: Array.isArray(parsed.recentItems) ? parsed.recentItems.slice(0, 6) : [],
-        });
+        try { parsed = JSON.parse(raw); } catch { /* ignore */ }
       }
+
+      const validCurrencies = ['USD', 'EUR', 'AED'];
+      const resolvedCurrency = validCurrencies.includes(urlCur)
+        ? urlCur
+        : validCurrencies.includes(parsed.currency)
+          ? parsed.currency
+          : validCurrencies.includes(storedLegacyCur)
+            ? storedLegacyCur
+            : 'USD';
+
+      const validLangs = ['en', 'es'];
+      const resolvedLang = validLangs.includes(urlLang)
+        ? urlLang
+        : validLangs.includes(parsed.lang)
+          ? parsed.lang
+          : validLangs.includes(storedLegacyLang)
+            ? storedLegacyLang
+            : 'en';
+
+      setState({
+        currency: resolvedCurrency,
+        lang: resolvedLang,
+        rfqItems: Array.isArray(parsed.rfqItems) ? parsed.rfqItems : [],
+        recentItems: Array.isArray(parsed.recentItems) ? parsed.recentItems.slice(0, 6) : [],
+      });
     } catch {
       // ignore storage errors
     }
     setHydrated(true);
+  }, []);
+
+  // Listen for custom events across components (Unified Header, Price List, Drawers)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const onCurChanged = (e) => {
+      const nextCur = (e?.detail || '').toUpperCase();
+      if (['USD', 'EUR', 'AED'].includes(nextCur)) {
+        setState((prev) => (prev.currency === nextCur ? prev : { ...prev, currency: nextCur }));
+      }
+    };
+
+    const onLangChanged = (e) => {
+      const detailLang = typeof e?.detail === 'string' ? e.detail : e?.detail?.lang;
+      const nextLang = String(detailLang || '').toLowerCase();
+      if (['en', 'es'].includes(nextLang)) {
+        setState((prev) => (prev.lang === nextLang ? prev : { ...prev, lang: nextLang }));
+      }
+    };
+
+    window.addEventListener('atlas-currency-changed', onCurChanged);
+    window.addEventListener('atlas-language-changed', onLangChanged);
+
+    return () => {
+      window.removeEventListener('atlas-currency-changed', onCurChanged);
+      window.removeEventListener('atlas-language-changed', onLangChanged);
+    };
   }, []);
 
   // Persist to localStorage after hydration
@@ -128,14 +183,39 @@ export function PublicWorkspaceProvider({ children }) {
     }
   }, [pathname, hydrated, addRecentItem]);
 
-  const setCurrency = useCallback((currency) => {
-    if (!currency) return;
-    setState((prev) => (prev.currency === currency ? prev : { ...prev, currency }));
+  const setCurrency = useCallback((newCur) => {
+    if (!newCur) return;
+    const upper = String(newCur).toUpperCase();
+    if (!['USD', 'EUR', 'AED'].includes(upper)) return;
+
+    setState((prev) => (prev.currency === upper ? prev : { ...prev, currency: upper }));
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_portal_currency', upper);
+      } catch { /* ignore */ }
+      const url = new URL(window.location.href);
+      url.searchParams.set('cur', upper);
+      window.history.replaceState({}, '', url.toString());
+      window.dispatchEvent(new CustomEvent('atlas-currency-changed', { detail: upper }));
+    }
   }, []);
 
-  const setLang = useCallback((lang) => {
-    if (!lang) return;
-    setState((prev) => (prev.lang === lang ? prev : { ...prev, lang }));
+  const setLang = useCallback((newLang) => {
+    if (!newLang) return;
+    const lower = String(newLang).toLowerCase();
+    if (!['en', 'es'].includes(lower)) return;
+
+    setState((prev) => (prev.lang === lower ? prev : { ...prev, lang: lower }));
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_portal_lang', lower);
+        localStorage.setItem('atlas_catalog_lang', lower);
+      } catch { /* ignore */ }
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', lower);
+      window.history.replaceState({}, '', url.toString());
+      window.dispatchEvent(new CustomEvent('atlas-language-changed', { detail: { lang: lower } }));
+    }
   }, []);
 
   const addRfqItem = useCallback((item) => {

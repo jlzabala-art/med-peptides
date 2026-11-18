@@ -437,10 +437,13 @@ export default function PublicLabelsAppClient({
     }
   };
 
-  // Worklist items (real Firestore latest prescriptions, fallback to FEATURED_PATIENTS only if empty)
+  // Worklist items: always prefer real searchResults / Firestore database, fallback to FEATURED_PATIENTS only if completely empty
   const worklistSource = useMemo(() => {
-    return (searchResults.length > 0 && !searchQuery.trim()) ? searchResults : FEATURED_PATIENTS;
-  }, [searchResults, searchQuery]);
+    if (Array.isArray(searchResults) && searchResults.length > 0) {
+      return searchResults;
+    }
+    return FEATURED_PATIENTS;
+  }, [searchResults]);
 
   const matchesDateRange = useMemo(() => {
     const maxAgeMs = worklistDateRange === '7d' ? 7 * 86400000 : worklistDateRange === '30d' ? 30 * 86400000 : null;
@@ -787,6 +790,10 @@ export default function PublicLabelsAppClient({
         {patientQueue.length === 0 ? (
           <LabelsHomeView
             isEs={isEs}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            isSearching={isSearching}
+            searchResults={searchResults}
             labelsKpis={labelsKpis}
             unprintedCodes={unprintedCodes}
             handleAddMultipleToQueue={handleAddMultipleToQueue}

@@ -19,6 +19,7 @@ import {
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import DataTable from '@/components/ui/DataTable';
+import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import LabelsRowQuickPreview from './LabelsRowQuickPreview';
 import PrescriptionStatusPopover from '@/components/prescription/PrescriptionStatusPopover';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
@@ -26,6 +27,10 @@ import { sanitizeRecentCode, getWorklistTestKind } from '../utils/labelHelpers';
 
 export default function LabelsHomeView({
   isEs,
+  searchQuery = '',
+  setSearchQuery,
+  isSearching = false,
+  searchResults = [],
   labelsKpis,
   unprintedCodes,
   handleAddMultipleToQueue,
@@ -261,6 +266,66 @@ export default function LabelsHomeView({
             </div>
           </div>
 
+          {/* Prominent Google Cloud Console Command Search Bar (Golden Rule #7) */}
+          <div
+            style={{
+              padding: '14px 20px',
+              background: '#ffffff',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+            }}
+          >
+            <GlobalSearchBar
+              value={searchQuery || ''}
+              onChange={(val) => {
+                setSearchQuery?.(val);
+                setWorklistPage?.(1);
+              }}
+              placeholder={
+                isEs
+                  ? 'Buscar por paciente, código de receta (#BOX..., #RX...), test o fórmula...'
+                  : 'Search by patient name, prescription code (#BOX..., #RX...), test or formula...'
+              }
+              size="lg"
+            />
+            {searchQuery?.trim() && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontSize: '0.73rem',
+                  color: '#475569',
+                  padding: '2px 4px',
+                }}
+              >
+                <span>
+                  {isSearching
+                    ? (isEs ? 'Buscando en la base de datos...' : 'Searching clinical database...')
+                    : (isEs
+                        ? `Mostrando resultados para: "${searchQuery}" (${filteredWorklistItems.length} encontrados)`
+                        : `Showing matches for: "${searchQuery}" (${filteredWorklistItems.length} found)`)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery?.('')}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#1a73e8',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  {isEs ? 'Limpiar búsqueda' : 'Clear search'}
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Worklist Filter Tabs + Date Range */}
           <div
             style={{
@@ -485,40 +550,65 @@ export default function LabelsHomeView({
                             {p.title || p.treatmentTitle || 'Prescription protocol'}
                           </span>
                           {hasMultipleTests && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const codes = samePatientItems.map((item) => item.code).filter(Boolean);
-                                if (handleAddMultipleToQueue && codes.length > 0) {
-                                  handleAddMultipleToQueue(codes);
-                                  toast.success(
-                                    isEs
-                                      ? `${codes.length} recetas de ${p.name || p.patientName} añadidas a la cola`
-                                      : `Added ${codes.length} prescriptions for ${p.name || p.patientName} to queue`
-                                  );
-                                }
-                              }}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '2px 7px',
-                                borderRadius: '4px',
-                                fontSize: '0.68rem',
-                                fontWeight: 700,
-                                background: '#eff6ff',
-                                color: '#1d4ed8',
-                                border: '1px solid #bfdbfe',
-                                cursor: 'pointer',
-                                marginTop: '2px',
-                                alignSelf: 'flex-start',
-                              }}
-                              title={isEs ? 'Cargar todos los tests del paciente en la cola' : 'Queue all tests for this patient'}
-                            >
-                              <Layers size={11} />
-                              {isEs ? `${samePatientItems.length} tests · Añadir todos` : `${samePatientItems.length} tests · Queue all`}
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '3px' }}>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSearchQuery?.(p.name || p.patientName);
+                                  setWorklistPage?.(1);
+                                }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.67rem',
+                                  fontWeight: 700,
+                                  background: '#f3e8fd',
+                                  color: '#7c3aed',
+                                  border: '1px solid #e9d5ff',
+                                  cursor: 'pointer',
+                                }}
+                                title={isEs ? `Filtrar solo las ${samePatientItems.length} recetas de este paciente` : `Filter only the ${samePatientItems.length} prescriptions of this patient`}
+                              >
+                                <span>{samePatientItems.length} {isEs ? 'recetas' : 'prescriptions'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const codes = samePatientItems.map((item) => item.code).filter(Boolean);
+                                  if (handleAddMultipleToQueue && codes.length > 0) {
+                                    handleAddMultipleToQueue(codes);
+                                    toast.success(
+                                      isEs
+                                        ? `${codes.length} recetas de ${p.name || p.patientName} añadidas a la cola`
+                                        : `Added ${codes.length} prescriptions for ${p.name || p.patientName} to queue`
+                                    );
+                                  }
+                                }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.67rem',
+                                  fontWeight: 700,
+                                  background: '#eff6ff',
+                                  color: '#1d4ed8',
+                                  border: '1px solid #bfdbfe',
+                                  cursor: 'pointer',
+                                }}
+                                title={isEs ? 'Cargar todos los tests del paciente en la cola' : 'Queue all tests for this patient'}
+                              >
+                                <Layers size={10} />
+                                <span>{isEs ? 'Añadir todas al lote' : 'Queue all'}</span>
+                              </button>
+                            </div>
                           )}
                         </div>
                       );

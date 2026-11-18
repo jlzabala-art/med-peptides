@@ -277,28 +277,22 @@ export default function PublicUnifiedHeader({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [anchorTabs, controlledActiveAnchorId]);
 
+  const effectiveLang = workspace?.lang || lang || 'en';
+  const effectiveCurrency = currency || workspace?.currency || internalCurrency || 'USD';
+
   // Language selector handler
   const handleLanguageChange = (nextLang) => {
     triggerHaptic('light');
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('atlas_portal_lang', nextLang);
-        localStorage.setItem('atlas_catalog_lang', nextLang);
-      } catch (_e) {
-        // Ignore localStorage error
-      }
-      const url = new URL(window.location.href);
-      url.searchParams.set('lang', nextLang);
-      window.history.replaceState({}, '', url.toString());
+    if (workspace?.setLang) {
+      workspace.setLang(nextLang);
     }
-    workspace.setLang(nextLang);
     if (onLangChange) {
       onLangChange(nextLang);
     }
   };
 
   // Currency selector state & handler (EUR / USD / AED)
-  const [internalCurrency, setInternalCurrency] = useState(currency || 'EUR');
+  const [internalCurrency, setInternalCurrency] = useState(currency || workspace?.currency || 'USD');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -310,26 +304,17 @@ export default function PublicUnifiedHeader({
         ? urlCur
         : SUPPORTED_CURRENCIES.some(c => c.code === storedCur)
           ? storedCur
-          : (currency || 'EUR');
+          : (currency || workspace?.currency || 'USD');
       setInternalCurrency(resolved);
     } catch (_e) {}
-  }, [currency]);
-
-  const effectiveCurrency = currency || internalCurrency || 'EUR';
+  }, [currency, workspace?.currency]);
 
   const handleCurrencyChange = (nextCurrency) => {
     triggerHaptic('light');
     setInternalCurrency(nextCurrency);
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('atlas_portal_currency', nextCurrency);
-      } catch (_e) {}
-      const url = new URL(window.location.href);
-      url.searchParams.set('cur', nextCurrency);
-      window.history.replaceState({}, '', url.toString());
-      window.dispatchEvent(new CustomEvent('atlas-currency-changed', { detail: nextCurrency }));
+    if (workspace?.setCurrency) {
+      workspace.setCurrency(nextCurrency);
     }
-    workspace.setCurrency(nextCurrency);
     if (onCurrencyChange) {
       onCurrencyChange(nextCurrency);
     }
@@ -671,9 +656,9 @@ export default function PublicUnifiedHeader({
                     onClick={() => handleLanguageChange(l.code)}
                     style={{
                       border: 'none',
-                      background: lang === l.code ? '#0284c7' : 'transparent',
-                      color: lang === l.code ? '#ffffff' : 'rgba(255,255,255,0.7)',
-                      fontWeight: lang === l.code ? 800 : 500,
+                      background: effectiveLang === l.code ? '#0284c7' : 'transparent',
+                      color: effectiveLang === l.code ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                      fontWeight: effectiveLang === l.code ? 800 : 500,
                       fontSize: '0.72rem',
                       padding: '3px 8px',
                       borderRadius: '4px',
