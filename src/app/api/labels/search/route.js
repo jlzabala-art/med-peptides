@@ -100,15 +100,29 @@ export async function GET(request) {
     };
 
     const resolvePartsCount = (d = {}) => {
-      const rawCount =
-        (Array.isArray(d.parts) && d.parts.length > 0 && d.parts.length) ||
-        (Array.isArray(d.formulationBlocks) && d.formulationBlocks.length > 0 && d.formulationBlocks.length) ||
-        (Array.isArray(d.phases) && d.phases.length > 0 && d.phases.length) ||
-        (Array.isArray(d.pharmacyLabels) && d.pharmacyLabels.length > 0 && d.pharmacyLabels.length) ||
-        (Array.isArray(d.items) && d.items.length > 0 && d.items.length) ||
-        Number(d.partsCount || d.itemsCount || 1);
-      const removedLen = Array.isArray(d.removedParts) ? d.removedParts.length : 0;
-      return Math.max(1, Number(rawCount || 1) - removedLen);
+      // 1. Explicit authoritatively registered partsCount field takes precedence
+      if (typeof d.partsCount === 'number' && d.partsCount > 0) {
+        const removedLen = Array.isArray(d.removedParts) ? d.removedParts.length : 0;
+        return Math.max(1, d.partsCount - removedLen);
+      }
+      // 2. Separate formulation blocks (e.g. shampoo, lotion, capsules)
+      if (Array.isArray(d.formulationBlocks) && d.formulationBlocks.length > 0) {
+        return d.formulationBlocks.length;
+      }
+      // 3. Physical pharmacy labels generated for this protocol
+      if (Array.isArray(d.pharmacyLabels) && d.pharmacyLabels.length > 0) {
+        return d.pharmacyLabels.length;
+      }
+      // 4. Structured clinical parts array
+      if (Array.isArray(d.parts) && d.parts.length > 0) {
+        return d.parts.length;
+      }
+      // 5. Clinical phases array
+      if (Array.isArray(d.phases) && d.phases.length > 0) {
+        return d.phases.length;
+      }
+      // Note: d.items contains the raw APIs/ingredients (e.g. 7 or 10 drugs), NOT physical parts.
+      return 1;
     };
 
     // Helper to extract epoch milliseconds from Firestore Timestamp, Admin Timestamp, ISO string, or number

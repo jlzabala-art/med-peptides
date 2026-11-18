@@ -264,7 +264,16 @@ export default function LabelsSearchDropdown({
                             </span>
                           )}
                         </div>
-                        <div className="pls-search-item-desc" style={{ fontSize: '0.71rem', color: '#475569', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div
+                          className="pls-search-item-desc"
+                          style={{
+                            fontSize: '0.73rem',
+                            color: '#334155',
+                            marginTop: '3px',
+                            lineHeight: 1.35,
+                            wordBreak: 'break-word',
+                          }}
+                        >
                           {rx.title}
                         </div>
                       </div>

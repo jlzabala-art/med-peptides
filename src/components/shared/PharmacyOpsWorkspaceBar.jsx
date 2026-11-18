@@ -29,7 +29,8 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
   const router = useRouter();
   const { is } = useRoleAccess();
   const isAdminOrStaff = is('admin') || is('doctor') || is('medical_director') || is('compounding_pharmacy') || is('account_manager');
-  const canQuickSearchRx = isAdminOrStaff || pathname.startsWith('/labels') || pathname.startsWith('/rx');
+  const isLabelsHome = pathname === '/labels' || pathname === '/labels/';
+  const canQuickSearchRx = !isLabelsHome && (isAdminOrStaff || pathname.startsWith('/labels') || pathname.startsWith('/rx'));
   const isEs = lang === 'es' || (typeof document !== 'undefined' && document.documentElement?.lang === 'es');
 
   const [rxQuery, setRxQuery] = useState('');
@@ -235,14 +236,14 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
                   position: 'absolute',
                   top: 'calc(100% + 6px)',
                   right: 0,
-                  width: 'min(94vw, 480px)',
+                  width: 'min(96vw, 580px)',
                   background: '#ffffff',
                   border: '1px solid #cbd5e1',
                   borderRadius: '10px',
                   boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
                   zIndex: 95,
                   padding: '8px',
-                  maxHeight: '420px',
+                  maxHeight: '440px',
                   overflowY: 'auto',
                 }}
               >
