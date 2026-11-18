@@ -48,6 +48,7 @@ import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
 import CopyableId from '@/components/ui/CopyableId';
+import InteractiveTrocarPelletGuide from '@/components/product/InteractiveTrocarPelletGuide';
 import { getPharmapolisPelletBySlug } from '@/data/pharmapolisPelletsRegistry';
 import './HormonePelletDetail.css';
 
@@ -616,83 +617,42 @@ export default function HormonePelletDetail({
             </div>
           )}
 
-          {/* ── TAB 3: TROCAR IMPLANTATION PROCEDURE ── */}
+          {/* ── TAB 3: TROCAR IMPLANTATION PROCEDURE & VISUAL GUIDE ── */}
           {activeTab === 'procedure' && (
             <div className="pellet-tab-card">
-              <h2 className="pellet-tab-title">
-                <Syringe size={18} color="#003666" />
-                <span>{isEs ? 'Protocolo Quirúrgico de Inserción mediante Trócar' : 'Clinical Trocar Implantation Surgical Protocol'}</span>
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '0.75rem' }}>
+                <h2 className="pellet-tab-title" style={{ margin: 0 }}>
+                  <Syringe size={18} color="#003666" />
+                  <span>{isEs ? 'Protocolo Quirúrgico de Inserción mediante Trócar' : 'Clinical Trocar Implantation Surgical Protocol'}</span>
+                </h2>
+
+                <Link
+                  href="/guides/hormone-pellets-implantation"
+                  className="gcp-btn-secondary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    padding: '4px 10px'
+                  }}
+                >
+                  <Sparkles size={12} color="#0284c7" />
+                  <span>{isEs ? 'Guía Gráfica Completa' : 'Full Interactive Guide'}</span>
+                  <ExternalLink size={11} />
+                </Link>
+              </div>
 
               <p style={{ fontSize: '0.88rem', lineHeight: 1.6, color: '#334155', marginBottom: '1.25rem' }}>
                 {isEs
-                  ? 'Procedimiento ambulatorio estéril de 10 minutos realizado bajo anestesia local en consultorio médico especializado.'
-                  : 'Outpatient 10-minute sterile procedure performed under local infiltrative anesthesia in an accredited clinical setting.'}
+                  ? 'Procedimiento ambulatorio estéril de 10 minutos realizado bajo anestesia local en consultorio médico especializado. Siga el simulador visual interactivo a continuación:'
+                  : 'Outpatient 10-minute sterile procedure performed under local infiltrative anesthesia in an accredited clinical setting. Follow the interactive visual simulator below:'}
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div className="pellet-procedure-step">
-                  <div className="pellet-step-number">1</div>
-                  <div className="pellet-step-content">
-                    <div className="pellet-step-title">{isEs ? 'Preparación del Campo y Selección Anatómica' : 'Anatomic Site Selection & Prep'}</div>
-                    <div className="pellet-step-desc">
-                      {dossier.insertionProcedure?.site || 'Cuadrante superior externo del glúteo, 4-5 cm posterior a la cresta ilíaca anterior.'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pellet-procedure-step">
-                  <div className="pellet-step-number">2</div>
-                  <div className="pellet-step-content">
-                    <div className="pellet-step-title">{isEs ? 'Anestesia Local Infiltrativa' : 'Local Infiltration Anesthesia'}</div>
-                    <div className="pellet-step-desc">
-                      {dossier.insertionProcedure?.anesthesia || 'Infiltración con 2.0 mL de Lidocaína al 2% con Epinefrina 1:100.000 para vasoconstricción y hemostasia.'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pellet-procedure-step">
-                  <div className="pellet-step-number">3</div>
-                  <div className="pellet-step-content">
-                    <div className="pellet-step-title">{isEs ? 'Micro-incisión Quirúrgica' : 'Surgical Micro-incision'}</div>
-                    <div className="pellet-step-desc">
-                      {dossier.insertionProcedure?.incision || 'Micro-incisión de 3.5 a 5.0 mm con bisturí #11 a través de la dermis.'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pellet-procedure-step">
-                  <div className="pellet-step-number">4</div>
-                  <div className="pellet-step-content">
-                    <div className="pellet-step-title">{isEs ? 'Canalización con Trócar y Depósito' : 'Trocar Cannulation & Pellet Deployment'}</div>
-                    <div className="pellet-step-desc">
-                      {isEs
-                        ? `Trócar especializado ${dossier.insertionProcedure?.trocarSize || '3.2 mm / 4.5 mm'}. Se avanza a 30° en la grasa subcutánea y luego se coloca paralelo a la fascia glútea. Los pellets se introducen mediante el obturador sin presión forzada.`
-                        : `Specialized ${dossier.insertionProcedure?.trocarSize || '3.2 mm / 4.5 mm'} trocar. Advanced at 30° into subcutaneous fat, then lowered parallel to fascia. Pellets deployed smoothly using blunt obturator.`}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pellet-procedure-step">
-                  <div className="pellet-step-number">5</div>
-                  <div className="pellet-step-content">
-                    <div className="pellet-step-title">{isEs ? 'Cierre sin Sutura y Vendaje Compresivo' : 'Sutureless Closure & Pressure Dressing'}</div>
-                    <div className="pellet-step-desc">
-                      {dossier.insertionProcedure?.closure || 'Aproximación de bordes cutáneos con Steri-Strips y apósito compresivo impermeable. No se requieren suturas.'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pellet-procedure-step">
-                  <div className="pellet-step-number">6</div>
-                  <div className="pellet-step-content">
-                    <div className="pellet-step-title">{isEs ? 'Cuidados Postoperatorios Obligatorios' : 'Mandatory Post-Op Precautions'}</div>
-                    <div className="pellet-step-desc">
-                      {dossier.insertionProcedure?.postOpCare || 'Mantener seco por 48 horas. Evitar sentadillas pesadas, ciclismo o inmersión en agua caliente por 5 días para evitar extrusión.'}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Interactive Visual Trocar Simulator */}
+              <InteractiveTrocarPelletGuide lang={lang} />
             </div>
           )}
 
