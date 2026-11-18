@@ -11,11 +11,13 @@ import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail
 import EternaGenomicsDetail from '../../../components/product/layouts/EternaGenomicsDetail';
 import TeletestDiagnosticDetail from '../../../components/product/layouts/TeletestDiagnosticDetail';
 import NormaPharmaceuticalDetail from '../../../components/product/layouts/NormaPharmaceuticalDetail';
+import HormonePelletDetail from '../../../components/product/layouts/HormonePelletDetail';
 import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
 import { getTeletestProductBySlug } from '../../../data/teletestRegistry';
 import { getLotuslandPeptideBySlug } from '../../../data/lotuslandPeptidesRegistry';
 import { getMcgProductBySlug } from '../../../data/mcgInciRegistry';
 import { getNormaProductBySlug } from '../../../data/normaHellasRegistry';
+import { getPharmapolisPelletBySlug, isPharmapolisPelletSlug } from '../../../data/pharmapolisPelletsRegistry';
 import { isKnownInjectableSlug } from '../../../data/aestheticInjectablesEnrichment';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
@@ -84,6 +86,25 @@ async function getPublicProduct(slug, supplierFilter = null) {
   }
 
   if (!doc) {
+    const pelletProduct = getPharmapolisPelletBySlug(target);
+    if (pelletProduct) {
+      const sanitized = sanitizePublicProduct(pelletProduct, pelletProduct.variants || []);
+      const processedHierarchy = processProductVariants(sanitized.variants || pelletProduct.variants || []);
+      const pelletResult = {
+        ...pelletProduct,
+        ...sanitized,
+        isSingleSupplierLocked: true,
+        availableSuppliers: [{ id: 'supplier-pharmapolis', name: 'Pharmapolis Compounding Pharmacy', isPen: false, isSpray: false }],
+        activeSupplierId: 'supplier-pharmapolis',
+        processedHierarchy,
+      };
+      PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
+        data: pelletResult,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+      return pelletResult;
+    }
+
     const teletestProduct = getTeletestProductBySlug(target);
     if (teletestProduct) {
       const sanitized = sanitizePublicProduct(teletestProduct, teletestProduct.variants || []);
@@ -357,6 +378,10 @@ export async function generateStaticParams() {
     { slug: 'cjc-1295' },
     { slug: 'ipamorelin' },
     { slug: 'nad-plus' },
+    { slug: 'estradiol-12-5mg-pellet' },
+    { slug: 'estradiol-25mg-pellet' },
+    { slug: 'testosterone-50mg-pellet' },
+    { slug: 'testosterone-100mg-pellet' },
   ];
 }
 
@@ -428,8 +453,16 @@ export async function generateMetadata({ params, searchParams }) {
     slug.toLowerCase() === 'testosterone-enanthate-norma-250mg' ||
     slug.toLowerCase() === 'testosterone-enanthate';
 
+  const isPellet = isPharmapolisPelletSlug(slug) ||
+    (product.category || '').toLowerCase().includes('pellet') ||
+    product.is_pellet === true ||
+    product.isPellet === true ||
+    (product.subcategory || '').toLowerCase().includes('pellet');
+
   const pageTitle = viewMode === 'patient'
     ? (isEs ? `${name} — Guía del Paciente y Reconstitución | Atlas Health` : `${name} — Patient Guide & Reconstitution | Atlas Health`)
+    : isPellet
+    ? `${name} | Pharmapolis Compounding Pharmacy • EU GMP Subcutaneous Pellets`
     : isNorma
     ? `${name} | Norma Hellas S.A. • EU GMP Human Pharmaceuticals & TRT`
     : isTeletest
@@ -441,6 +474,8 @@ export async function generateMetadata({ params, searchParams }) {
     ? (isEs
       ? `Guía clara para el paciente sobre ${name}: qué es, pasos de reconstitución, conservación y preguntas frecuentes.`
       : `Clear patient guide for ${name}: overview, step-by-step reconstitution instructions, storage, and safety FAQ.`)
+    : isPellet
+    ? (product.shortDescription || product.description || 'Pharmapolis Bioidentical Hormone Subcutaneous Pellet (EU GMP certified). 100% pure crystalline implant.')
     : isNorma
     ? 'Testosterone Enanthate/Norma® 250 mg/ml oily solution for injection (1 mL ampoule). EOF Greece MA # 45945/03-10-2008. Batch release by EVER Pharma Jena GmbH. Authoritative SmPC and clinical monograph.'
     : isTeletest
@@ -713,6 +748,32 @@ export default async function PublicProductRoute({ params, searchParams }) {
     { name: sectionLabel, url: sectionUrl },
     { name: productName, url: `/p/${slug}` }
   ], BASE_URL);
+
+  const isPellet = isPharmapolisPelletSlug(slug) ||
+    (safeProduct.category || '').toLowerCase().includes('pellet') ||
+    safeProduct.is_pellet === true ||
+    safeProduct.isPellet === true ||
+    (safeProduct.subcategory || '').toLowerCase().includes('pellet');
+
+  if (isPellet) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
+        <HormonePelletDetail product={safeProduct} slug={slug} baseUrl={BASE_URL} />
+      </>
+    );
+  }
 
   if (isNorma) {
     return (

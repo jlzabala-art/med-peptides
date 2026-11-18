@@ -1,0 +1,699 @@
+/* src/components/product/layouts/HormonePelletDetail.css */
+
+.pellet-page-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Institutional Sticky Sub-Header */
+.pellet-institutional-bar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: sticky;
+  top: 56px;
+  z-index: 30;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.pellet-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 0.70rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.pellet-badge-gmp {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.pellet-badge-rx {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.pellet-badge-category {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+/* Main Content Grid */
+.pellet-content-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Hero Card */
+.pellet-hero-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.pellet-hero-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #003666 0%, #0284c7 50%, #0d9488 100%);
+}
+
+.pellet-hero-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0284c7;
+  margin-bottom: 0.75rem;
+}
+
+.pellet-hero-title {
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+  font-weight: 800;
+  color: #003666;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.85rem;
+}
+
+.pellet-hero-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #475569;
+  max-width: 760px;
+  margin-bottom: 1.5rem;
+}
+
+/* Strength Switcher Bar */
+.pellet-strength-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background-color: #f1f5f9;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.pellet-strength-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.pellet-strength-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.pellet-strength-btn.active {
+  background-color: #003666;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 54, 102, 0.2);
+}
+
+.pellet-strength-btn:not(.active) {
+  background-color: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.pellet-strength-btn:not(.active):hover {
+  border-color: #0284c7;
+  color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.pellet-synergy-link {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #0284c7;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pellet-synergy-link:hover {
+  text-decoration: underline;
+}
+
+/* Hero Key Metric Grid */
+.pellet-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.pellet-metric-box {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+}
+
+.pellet-metric-label {
+  font-size: 0.70rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.pellet-metric-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #003666;
+  line-height: 1.2;
+}
+
+.pellet-metric-sub {
+  font-size: 0.70rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Navigation Tabs in Sidebar */
+.pellet-sidebar-nav-card {
+  padding: 0.85rem !important;
+}
+
+.pellet-sidebar-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pellet-sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 10px;
+  background-color: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.pellet-sidebar-nav-item:hover {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  border-left-color: #0284c7;
+  transform: translateX(2px);
+}
+
+.pellet-sidebar-nav-item.active {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  border-left-color: #003666;
+}
+
+.pellet-sidebar-nav-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pellet-sidebar-nav-num {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #64748b;
+  background-color: #f1f5f9;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.pellet-sidebar-nav-item.active .pellet-sidebar-nav-num {
+  background-color: #003666;
+  color: #ffffff;
+}
+
+.pellet-sidebar-nav-icon {
+  color: #64748b;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.pellet-sidebar-nav-item.active .pellet-sidebar-nav-icon {
+  color: #003666;
+}
+
+.pellet-sidebar-nav-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.pellet-sidebar-nav-item.active .pellet-sidebar-nav-title {
+  color: #003666;
+  font-weight: 800;
+}
+
+.pellet-sidebar-nav-arrow {
+  color: #003666;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* Active Section Breadcrumb/Banner in Main Column */
+.pellet-section-indicator-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.pellet-section-indicator-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pellet-section-pill {
+  font-size: 0.70rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: #eff6ff;
+  color: #003666;
+  border: 1px solid #bfdbfe;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.pellet-section-current-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pellet-section-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pellet-section-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #475569;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pellet-section-nav-btn:hover:not(:disabled) {
+  background-color: #003666;
+  color: #ffffff;
+  border-color: #003666;
+}
+
+.pellet-section-nav-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Mobile Quick Navigation Pills (visible only <= 960px) */
+.pellet-mobile-nav-bar {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+  scrollbar-width: none;
+}
+
+.pellet-mobile-nav-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.pellet-mobile-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border-radius: 20px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.pellet-mobile-nav-pill.active {
+  background-color: #003666;
+  border-color: #003666;
+  color: #ffffff;
+}
+
+/* Legacy tabs container (hidden in favor of sidebar & mobile pill bar) */
+.pellet-tabs-container {
+  display: none;
+}
+
+/* Tab Card */
+.pellet-tab-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.pellet-tab-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #003666;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Clinical Lists & Grids */
+.pellet-goals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.pellet-goal-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 0.85rem 1rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.pellet-goal-item svg {
+  color: #0d9488;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Telemetry Table */
+.pellet-telemetry-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.84rem;
+}
+
+.pellet-telemetry-table th {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 700;
+  text-align: left;
+  padding: 9px 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pellet-telemetry-table td {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  line-height: 1.5;
+  vertical-align: top;
+}
+
+.pellet-telemetry-table tr:nth-child(even) td {
+  background-color: #fafbfc;
+}
+
+/* Callout Box */
+.pellet-callout {
+  padding: 1.15rem 1.25rem;
+  border-radius: 8px;
+  margin: 1.25rem 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pellet-callout-warning {
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: #92400e;
+}
+
+.pellet-callout-info {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.pellet-callout-success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+/* Procedure Timeline */
+.pellet-procedure-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pellet-procedure-step:last-child {
+  border-bottom: none;
+}
+
+.pellet-step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #003666;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.pellet-step-content {
+  flex: 1;
+}
+
+.pellet-step-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.pellet-step-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Sticky Sidebar */
+.pellet-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: sticky;
+  top: 110px;
+}
+
+.pellet-sidebar-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.pellet-sidebar-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pellet-price-display {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.pellet-price-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #003666;
+  line-height: 1;
+}
+
+.pellet-price-currency {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.pellet-sidebar-btn-primary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #003666;
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 0.65rem;
+}
+
+.pellet-sidebar-btn-primary:hover {
+  background-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.pellet-sidebar-btn-secondary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  font-size: 0.80rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pellet-sidebar-btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .pellet-content-grid {
+    grid-template-columns: 1fr;
+  }
+  .pellet-sidebar {
+    position: static;
+  }
+  .pellet-mobile-nav-bar {
+    display: flex;
+  }
+  .pellet-hero-card {
+    padding: 1.25rem;
+  }
+  .pellet-institutional-bar {
+    top: 50px;
+    padding: 0.5rem 1rem;
+  }
+}
