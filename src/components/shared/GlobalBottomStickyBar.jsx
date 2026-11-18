@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileText, ShoppingBag, Calculator, FlaskConical, Compass } from 'lucide-react';
+import { FileText, ShoppingBag, Calculator, FlaskConical, Compass, Syringe } from 'lucide-react';
 import FloatingActionDock from './public/FloatingActionDock';
 import { useAtlasContext } from '@/context/AtlasContextProvider';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
