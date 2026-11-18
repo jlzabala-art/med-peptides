@@ -219,78 +219,115 @@ export default function HormonePelletDetail({
       {/* ── UNIFIED ATLAS PUBLIC HEADER ── */}
       <PublicUnifiedHeader currentApp="services" />
 
-      {/* ── INSTITUTIONAL REGULATORY & TRUST BAR (STICKY) ── */}
-      <div className="pellet-institutional-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span className="pellet-badge-pill pellet-badge-gmp">
-            <ShieldCheck size={13} />
-            <span>Pharmapolis EU GMP · Plovdiv (Bulgaria)</span>
-          </span>
-
-          <span className="pellet-badge-pill pellet-badge-category">
-            <Layers size={13} />
-            <span>{isEs ? 'Cat. C · Pellets Hormonales Subcutáneos' : 'Cat. C · Subcutaneous Hormone Pellets'}</span>
-          </span>
-
-          <span className="pellet-badge-pill pellet-badge-rx">
-            <Lock size={12} />
-            <span>{isEs ? 'Uso Médico Exclusivo (POM)' : 'Prescription Only Medicine (POM)'}</span>
-          </span>
-
-          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
-            SKU: <CopyableId value={p.sku || 'SKU-PHARM-HORM'} displayValue={p.sku || 'SKU-PHARM-HORM'} />
-          </span>
-        </div>
-
-        {/* Right Actions: Language Switcher & Share */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ display: 'flex', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
-            <button
-              onClick={() => setLang('en')}
-              style={{
-                padding: '4px 10px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                border: 'none',
-                backgroundColor: lang === 'en' ? '#003666' : '#ffffff',
-                color: lang === 'en' ? '#ffffff' : '#64748b',
-                cursor: 'pointer'
-              }}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLang('es')}
-              style={{
-                padding: '4px 10px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                border: 'none',
-                backgroundColor: lang === 'es' ? '#003666' : '#ffffff',
-                color: lang === 'es' ? '#ffffff' : '#64748b',
-                cursor: 'pointer'
-              }}
-            >
-              ES
-            </button>
+      {/* ── GOOGLE CLOUD CONSOLE RESOURCE HEADER (STICKY) ── */}
+      <div className="gcp-resource-page-header">
+        <div className="gcp-resource-header-container">
+          
+          {/* Top Row: Breadcrumb & Contextual Navigation */}
+          <div className="gcp-resource-breadcrumb-row">
+            <Link href="/catalog" className="gcp-resource-back-link">
+              <ChevronLeft size={14} />
+              <span>{isEs ? 'Catálogo General' : 'Catalog'}</span>
+            </Link>
+            <span className="gcp-resource-breadcrumb-sep">/</span>
+            <span className="gcp-resource-breadcrumb-parent">
+              {isEs ? 'Pellets Hormonales (BHRT)' : 'Hormone Pellets (BHRT)'}
+            </span>
+            <span className="gcp-resource-breadcrumb-sep">/</span>
+            <span className="gcp-resource-breadcrumb-current">
+              {p.canonicalName || p.name}
+            </span>
           </div>
 
-          <button
-            onClick={() => setIsShareDrawerOpen(true)}
-            className="gcp-btn-secondary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-          >
-            <Share2 size={13} />
-            <span>{isEs ? 'Compartir' : 'Share'}</span>
-          </button>
+          {/* Main Resource Header Row: Title + Status + Action Toolbar */}
+          <div className="gcp-resource-main-row">
+            <div className="gcp-resource-title-group">
+              <div className="gcp-resource-title-line">
+                <div className="gcp-resource-icon-badge">
+                  <FlaskConical size={18} />
+                </div>
+                <h1 className="gcp-resource-title">
+                  {p.commercialName || p.canonicalName || p.name}
+                </h1>
+                
+                {/* GCP Status Badge Semántico */}
+                <span className="gcp-status-pill gcp-status-active">
+                  <span className="gcp-status-dot" />
+                  <span>EU GMP Verified</span>
+                </span>
+
+                <span className="gcp-status-pill gcp-status-pom">
+                  <Lock size={11} />
+                  <span>{isEs ? 'Uso Médico (POM)' : 'POM (Rx Only)'}</span>
+                </span>
+
+                <span className="gcp-resource-sku-wrap">
+                  <span className="gcp-resource-sku-label">SKU:</span>
+                  <CopyableId value={p.sku || 'SKU-PHARM-HORM'} displayValue={p.sku || 'SKU-PHARM-HORM'} />
+                </span>
+              </div>
+
+              {/* Sub-line: Clinical Metadata & Origin */}
+              <div className="gcp-resource-meta-line">
+                <span className="gcp-resource-meta-item">
+                  <Building2 size={13} />
+                  <span>Pharmapolis Compounding Pharmacy</span>
+                </span>
+                <span className="gcp-resource-meta-sep">•</span>
+                <span className="gcp-resource-meta-item">
+                  <span>Plovdiv, Bulgaria (EU)</span>
+                </span>
+                <span className="gcp-resource-meta-sep">•</span>
+                <span className="gcp-resource-meta-item">
+                  <span>Subcutaneous Trocar Implant</span>
+                </span>
+                <span className="gcp-resource-meta-sep">•</span>
+                <span className="gcp-resource-meta-item">
+                  <span>E-Beam SAL 10⁻⁶</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Right Action Toolbar: Language Switcher + Share + Request Allocation */}
+            <div className="gcp-resource-action-toolbar">
+              {/* Segmented Language Switcher GCP Style */}
+              <div className="gcp-segmented-switch">
+                <button
+                  type="button"
+                  onClick={() => setLang('en')}
+                  className={`gcp-segmented-btn ${lang === 'en' ? 'active' : ''}`}
+                >
+                  EN
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang('es')}
+                  className={`gcp-segmented-btn ${lang === 'es' ? 'active' : ''}`}
+                >
+                  ES
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsShareDrawerOpen(true)}
+                className="gcp-btn-secondary gcp-header-btn"
+                title={isEs ? 'Compartir Monografía & Código QR' : 'Share Monograph & QR Code'}
+              >
+                <Share2 size={14} />
+                <span>{isEs ? 'Compartir' : 'Share'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsInquiryDrawerOpen(true)}
+                className="gcp-btn-primary gcp-header-btn"
+              >
+                <Building2 size={14} />
+                <span>{isEs ? 'Solicitar Asignación' : 'Request Allocation'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -785,26 +822,146 @@ export default function HormonePelletDetail({
           {/* ── TAB 6: CLINICAL EVIDENCE & REFERENCES ── */}
           {activeTab === 'evidence' && (
             <div className="pellet-tab-card">
-              <h2 className="pellet-tab-title">
-                <FileText size={18} color="#003666" />
-                <span>{isEs ? 'Evidencia Científica & Bibliografía Médica Indexada' : 'Peer-Reviewed Clinical Literature & Scientific Evidence'}</span>
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '0.75rem' }}>
+                <h2 className="pellet-tab-title" style={{ margin: 0 }}>
+                  <FileText size={18} color="#003666" />
+                  <span>{isEs ? 'Evidencia Científica & Ensayos Clínicos en PubMed' : 'Peer-Reviewed Clinical Literature & PubMed Evidence'}</span>
+                </h2>
+
+                <a
+                  href={`https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(p.canonicalName || p.name || 'subcutaneous hormone pellet')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="gcp-btn-secondary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    padding: '4px 10px'
+                  }}
+                >
+                  <span>{isEs ? 'Buscar en NCBI PubMed' : 'Search NCBI PubMed'}</span>
+                  <ExternalLink size={12} />
+                </a>
+              </div>
 
               <p style={{ fontSize: '0.88rem', lineHeight: 1.6, color: '#334155', marginBottom: '1.25rem' }}>
                 {isEs
-                  ? 'La terapia hormonal mediante pellets subcutáneos cuenta con más de 70 años de documentación clínica en Europa, el Reino Unido y los Estados Unidos, destacando por su eficacia sostenida sobre la densidad ósea y la sintomatología vasomotora.'
-                  : 'Subcutaneous hormone pellet implants have over 70 years of peer-reviewed clinical data across Europe, the UK, and the US, proving superior compliance and sustained bone mineral density preservation.'}
+                  ? 'La terapia hormonal mediante pellets subcutáneos cuenta con más de 70 años de documentación clínica indexada en PubMed (NCBI / NLM), demostrando farmacocinética continua de orden cero, biodisponibilidad directa y protección tisular sostenida.'
+                  : 'Subcutaneous hormone pellet implants have over 70 years of peer-reviewed clinical data indexed in PubMed (NCBI / NLM), demonstrating continuous zero-order kinetics, direct capillary bio-uptake, and sustained organoprotection.'}
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {(dossier.clinicalTrialsCitations || []).map((citation, idx) => (
-                  <div key={idx} style={{ padding: '12px 14px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.82rem', lineHeight: 1.5, color: '#1e293b', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#003666', color: '#fff', fontSize: '0.70rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {idx + 1}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {(dossier.clinicalTrialsCitations || []).map((citationItem, idx) => {
+                  const isObj = typeof citationItem === 'object' && citationItem !== null;
+                  const rawText = isObj ? (citationItem.citation || citationItem.title) : String(citationItem);
+                  const pmid = isObj ? citationItem.pmid : null;
+                  const pubmedUrl = isObj && citationItem.url
+                    ? citationItem.url
+                    : pmid
+                    ? `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`
+                    : `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(rawText)}`;
+
+                  // Extract author/title if string has periods
+                  const parts = rawText.split('. ');
+                  const authors = parts.length > 1 ? parts[0] : null;
+                  const title = parts.length > 2 ? parts[1] : rawText;
+                  const journal = parts.length > 2 ? parts.slice(2).join('. ') : '';
+
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        padding: '14px 16px',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        transition: 'border-color 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{
+                            width: '22px',
+                            height: '22px',
+                            borderRadius: '50%',
+                            backgroundColor: '#003666',
+                            color: '#ffffff',
+                            fontSize: '0.70rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            {idx + 1}
+                          </span>
+
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                            color: '#1d4ed8',
+                            backgroundColor: '#eff6ff',
+                            border: '1px solid #bfdbfe',
+                            padding: '2px 7px',
+                            borderRadius: '4px'
+                          }}>
+                            NCBI PubMed Indexed
+                          </span>
+                        </div>
+
+                        <a
+                          href={pubmedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '5px',
+                            padding: '3px 9px',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            color: '#1a73e8',
+                            textDecoration: 'none',
+                            transition: 'all 0.15s ease'
+                          }}
+                          title={isEs ? 'Abrir publicación en NCBI PubMed' : 'Open study directly on NCBI PubMed'}
+                        >
+                          <span>{isEs ? 'Ver en PubMed' : 'View on PubMed'}</span>
+                          <ExternalLink size={12} />
+                        </a>
+                      </div>
+
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.4 }}>
+                        {title}
+                      </div>
+
+                      {authors && (
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                          {authors} · <span style={{ color: '#003666', fontWeight: 700 }}>{journal}</span>
+                        </div>
+                      )}
+
+                      {!authors && (
+                        <div style={{ fontSize: '0.80rem', color: '#475569', lineHeight: 1.5 }}>
+                          {rawText}
+                        </div>
+                      )}
                     </div>
-                    <div>{citation}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

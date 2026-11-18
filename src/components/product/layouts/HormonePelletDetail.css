@@ -7,49 +7,223 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Institutional Sticky Sub-Header */
-.pellet-institutional-bar {
+/* Google Cloud Console Style Resource Header (Sticky) */
+.gcp-resource-page-header {
   background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 0.65rem 1.5rem;
+  border-bottom: 1px solid #dadce0;
+  position: sticky;
+  top: 56px;
+  z-index: 30;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.06);
+}
+
+.gcp-resource-header-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0.65rem 1.5rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Breadcrumb Context Row */
+.gcp-resource-breadcrumb-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: #5f6368;
+  line-height: 1.2;
+}
+
+.gcp-resource-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.gcp-resource-back-link:hover {
+  color: #174ea6;
+  text-decoration: underline;
+}
+
+.gcp-resource-breadcrumb-sep {
+  color: #bdc1c6;
+  user-select: none;
+}
+
+.gcp-resource-breadcrumb-parent {
+  color: #5f6368;
+  font-weight: 500;
+}
+
+.gcp-resource-breadcrumb-current {
+  color: #202124;
+  font-weight: 600;
+}
+
+/* Main Resource Row: Title & Action Toolbar */
+.gcp-resource-main-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  position: sticky;
-  top: 56px;
-  z-index: 30;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  gap: 14px;
 }
 
-.pellet-badge-pill {
+.gcp-resource-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.gcp-resource-title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.gcp-resource-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-color: #e8f0fe;
+  color: #1a73e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gcp-resource-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #202124;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* Status Badges GCP Standard (Green Dot + Border) */
+.gcp-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 9px;
-  border-radius: 4px;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 12px;
   font-size: 0.70rem;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
-.pellet-badge-gmp {
-  background-color: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+.gcp-status-active {
+  background-color: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
 }
 
-.pellet-badge-rx {
-  background-color: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+.gcp-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #188038;
 }
 
-.pellet-badge-category {
-  background-color: #eff6ff;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
+.gcp-status-pom {
+  background-color: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #fad2cf;
+}
+
+.gcp-resource-sku-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.70rem;
+  color: #5f6368;
+  font-weight: 500;
+  background-color: #f1f3f4;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.gcp-resource-sku-label {
+  font-weight: 700;
+  color: #3c4043;
+}
+
+/* Sub-line: Clinical Metadata Strip */
+.gcp-resource-meta-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.73rem;
+  color: #5f6368;
+  line-height: 1.3;
+}
+
+.gcp-resource-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gcp-resource-meta-sep {
+  color: #bdc1c6;
+  user-select: none;
+}
+
+/* Right Action Toolbar */
+.gcp-resource-action-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Segmented Control Language Switcher */
+.gcp-segmented-switch {
+  display: inline-flex;
+  background-color: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.gcp-segmented-btn {
+  border: none;
+  background: transparent;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #5f6368;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gcp-segmented-btn.active {
+  background-color: #ffffff;
+  color: #1a73e8;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
+}
+
+.gcp-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 /* Main Content Grid */
