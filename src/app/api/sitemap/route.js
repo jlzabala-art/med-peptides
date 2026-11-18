@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { catalogRepository } from '../../../repositories/catalogRepository';
+import { adminDb } from '@/lib/firebaseAdmin';
 import { protocolRepository } from '../../../repositories/protocolRepository';
 
 export const revalidate = 3600; // Cache 1 hour
@@ -10,10 +10,22 @@ export async function GET(request) {
   const baseUrl = `${protocol}://${host}`;
 
   try {
-    const [products, protocols] = await Promise.all([
-      catalogRepository.getAllProducts(),
-      protocolRepository.getAllProtocols(),
-    ]);
+    let products = [];
+    if (adminDb) {
+      const snap = await adminDb.collection('products').limit(500).get().catch(() => null);
+      if (snap && !snap.empty) {
+        products = snap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(p => p.status !== 'archived' && p.status !== 'hidden');
+      }
+    }
+
+    let protocols = [];
+    try {
+      protocols = await protocolRepository.getAllProtocols();
+    } catch {
+      protocols = [];
+    }
 
     const staticRoutes = [
       '',
