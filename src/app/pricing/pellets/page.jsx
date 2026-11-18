@@ -43,9 +43,11 @@ const TROCAR_KITS = [
     targetGender: 'unisex',
     pricing: {
       costPriceEur: 29.50,
-      price_eur: 29.50,
-      wholesalePriceAed: 135.25,
-      retailPriceAed: 182.00,
+      price_eur: 39.01,
+      wholesalePriceEur: 39.01,
+      pack10PriceEur: 351.09,
+      wholesalePriceAed: 155.73,
+      retailPriceAed: 210.23,
       currency: 'EUR'
     },
     shortDescription: 'Sterile, single-use 3.2 mm surgical trocar kit designed for precise subdermal implantation of 17β-Estradiol pellets (12.5mg, 25mg) and female Testosterone pellets (50mg). Includes bevelled cannula, obturator with safety lock, scalpel #11, forceps, and sterile drape.',
@@ -68,9 +70,11 @@ const TROCAR_KITS = [
     targetGender: 'unisex',
     pricing: {
       costPriceEur: 34.50,
-      price_eur: 34.50,
-      wholesalePriceAed: 158.00,
-      retailPriceAed: 212.00,
+      price_eur: 45.63,
+      wholesalePriceEur: 45.63,
+      pack10PriceEur: 410.67,
+      wholesalePriceAed: 182.16,
+      retailPriceAed: 245.91,
       currency: 'EUR'
     },
     shortDescription: 'Sterile, single-use 4.5 mm surgical trocar kit optimized for multi-pellet subdermal insertion of high-dose Testosterone pellets (100mg) in male TRT and hormone optimization. Engineered with blunt obturator and graduated insertion sheath to minimize tissue trauma.',

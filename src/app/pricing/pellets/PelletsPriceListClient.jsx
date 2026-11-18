@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
+
+const PelletPricePdfPreviewModal = dynamic(() => import('@/components/pricing/PelletPricePdfPreviewModal'), { ssr: false });
 import {
   Syringe,
   ShieldCheck,
@@ -55,6 +58,7 @@ export default function PelletsPriceListClient({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [cartItems, setCartItems] = useState({}); // { [id]: { single: number, pack10: number } }
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [scopeMode, setScopeMode] = useState('all'); // 'all' | 'filtered'
 
   const isEs = lang === 'es';
@@ -104,9 +108,17 @@ export default function PelletsPriceListClient({
   const filteredProducts = useMemo(() => {
     return initialProducts.filter(item => {
       // Category filter
-      if (selectedCategory === 'estrogen' && item.hormoneType !== 'estrogen') return false;
-      if (selectedCategory === 'androgen' && item.hormoneType !== 'androgen') return false;
-      if (selectedCategory === 'trocar' && item.category !== 'Trocar Kits') return false;
+      if (selectedCategory === 'estrogen') {
+        if (item.hormoneType !== 'estrogen' && item.hormoneType !== 'biest') return false;
+      } else if (selectedCategory === 'androgen') {
+        if (item.hormoneType !== 'androgen') return false;
+      } else if (selectedCategory === 'progesterone') {
+        if (item.hormoneType !== 'progesterone') return false;
+      } else if (selectedCategory === 'synergy') {
+        if (item.hormoneType !== 'synergy') return false;
+      } else if (selectedCategory === 'trocar') {
+        if (item.category !== 'Trocar Kits' && item.hormoneType !== 'instrument') return false;
+      }
 
       // Search query filter
       if (searchQuery.trim()) {
@@ -131,8 +143,8 @@ export default function PelletsPriceListClient({
       const product = initialProducts.find(p => p.id === prodId);
       if (!product) return;
 
-      const singlePriceEur = product.pricing?.costPriceEur || product.pricing?.price_eur || 0;
-      const pack10PriceEur = singlePriceEur * 10 * 0.85; // 15% discount for pack ×10
+      const singlePriceEur = product.pricing?.wholesalePriceEur || product.pricing?.price_eur || product.pricing?.costPriceEur || 0;
+      const pack10PriceEur = product.pricing?.pack10PriceEur || (singlePriceEur * 10 * 0.90); // 10% discount for pack ×10
 
       if (counts.single > 0) {
         totalItems += counts.single;
@@ -163,19 +175,15 @@ export default function PelletsPriceListClient({
     }
   };
 
-  // Print schedule handler
-  const handlePrint = () => {
-    triggerHaptic('selection');
-    window.print();
-  };
-
   // Category counts
   const categoryCounts = useMemo(() => {
-    const counts = { all: initialProducts.length, estrogen: 0, androgen: 0, trocar: 0 };
+    const counts = { all: initialProducts.length, estrogen: 0, androgen: 0, progesterone: 0, synergy: 0, trocar: 0 };
     initialProducts.forEach(p => {
-      if (p.hormoneType === 'estrogen') counts.estrogen++;
-      if (p.hormoneType === 'androgen') counts.androgen++;
-      if (p.category === 'Trocar Kits') counts.trocar++;
+      if (p.hormoneType === 'estrogen' || p.hormoneType === 'biest') counts.estrogen++;
+      else if (p.hormoneType === 'androgen') counts.androgen++;
+      else if (p.hormoneType === 'progesterone') counts.progesterone++;
+      else if (p.hormoneType === 'synergy') counts.synergy++;
+      else if (p.category === 'Trocar Kits' || p.hormoneType === 'instrument') counts.trocar++;
     });
     return counts;
   }, [initialProducts]);
@@ -301,7 +309,7 @@ export default function PelletsPriceListClient({
       width: '140px',
       align: 'right',
       render: (_, row) => {
-        const eur = row.pricing?.costPriceEur || row.pricing?.price_eur || 0;
+        const eur = row.pricing?.wholesalePriceEur || row.pricing?.price_eur || row.pricing?.costPriceEur || 0;
         const currentQty = cartItems[row.id]?.single || 0;
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
@@ -356,12 +364,12 @@ export default function PelletsPriceListClient({
     },
     {
       key: 'pack10Price',
-      label: isEs ? 'Pack ×10 Institucional' : 'Pack ×10 Institutional',
+      label: isEs ? 'Pack ×10 Clínicas (-10%)' : 'Pack ×10 Clinics (-10%)',
       width: '170px',
       align: 'right',
       render: (_, row) => {
-        const eur = row.pricing?.costPriceEur || row.pricing?.price_eur || 0;
-        const pack10Eur = eur * 10 * 0.85; // 15% institutional discount
+        const eur = row.pricing?.wholesalePriceEur || row.pricing?.price_eur || row.pricing?.costPriceEur || 0;
+        const pack10Eur = row.pricing?.pack10PriceEur || (eur * 10 * 0.90); // 10% institutional discount
         const currentQty = cartItems[row.id]?.pack10 || 0;
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
@@ -378,7 +386,7 @@ export default function PelletsPriceListClient({
                 padding: '1px 5px',
                 borderRadius: '3px'
               }}>
-                -15%
+                -10%
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -606,15 +614,16 @@ export default function PelletsPriceListClient({
                 </button>
               </div>
 
-              {/* Print PDF Schedule */}
+              {/* Preview & Save PDF Schedule */}
               <button
                 type="button"
                 className="gcp-btn-secondary"
-                onClick={handlePrint}
-                title={isEs ? 'Imprimir o Guardar PDF' : 'Print or Save PDF'}
+                onClick={() => setIsPdfPreviewOpen(true)}
+                title={isEs ? 'Vista Previa Oficial A4 / Guardar PDF' : 'Official A4 Preview / Save PDF'}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <Download size={13} />
-                <span>PDF</span>
+                <FileText size={13} color="#003666" />
+                <span>{isEs ? 'Vista Previa Tarifa' : 'Preview Schedule'}</span>
               </button>
 
               {/* Share */}
@@ -694,10 +703,10 @@ export default function PelletsPriceListClient({
                 {isEs ? 'Rango Tarifario B2B' : 'Wholesale Price Range'}
               </span>
               <span className="pellets-kpi-card-val">
-                {formatPrice(29.50)} – {formatPrice(54.43)}
+                {formatPrice(39.01)} – {formatPrice(77.90)}
               </span>
               <span className="pellets-kpi-card-sub">
-                {isEs ? 'Coste unitario médico' : 'Clinic unit cost basis'}
+                {isEs ? 'Tarifa mayorista oficial' : 'Official wholesale tariff'}
               </span>
             </div>
 
@@ -706,10 +715,10 @@ export default function PelletsPriceListClient({
                 {isEs ? 'Ahorro Pack ×10 Institucional' : 'Pack ×10 Tier Savings'}
               </span>
               <span className="pellets-kpi-card-val" style={{ color: '#16a34a' }}>
-                -15% Volume Discount
+                -10% Volume Discount
               </span>
               <span className="pellets-kpi-card-sub">
-                {isEs ? 'Desde €250.75 / caja' : 'From €250.75 / 10-pack box'}
+                {isEs ? 'Desde €351.09 / caja ×10' : 'From €351.09 / 10-pack box'}
               </span>
             </div>
 
@@ -751,7 +760,7 @@ export default function PelletsPriceListClient({
                 className={`pellets-cat-btn ${selectedCategory === 'estrogen' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('estrogen')}
               >
-                <span>{isEs ? 'Estradiol (E2)' : 'Estradiol (E2)'}</span>
+                <span>{isEs ? '17β-Estradiol & Biest' : '17β-Estradiol & Biest'}</span>
                 <span className="pellets-cat-count">{categoryCounts.estrogen}</span>
               </button>
 
@@ -762,6 +771,24 @@ export default function PelletsPriceListClient({
               >
                 <span>{isEs ? 'Testosterona (T)' : 'Testosterone (T)'}</span>
                 <span className="pellets-cat-count">{categoryCounts.androgen}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`pellets-cat-btn ${selectedCategory === 'progesterone' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('progesterone')}
+              >
+                <span>{isEs ? 'Progesterona (P4)' : 'Progesterone (P4)'}</span>
+                <span className="pellets-cat-count">{categoryCounts.progesterone}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`pellets-cat-btn ${selectedCategory === 'synergy' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('synergy')}
+              >
+                <span>{isEs ? 'T + Anastrozol' : 'T + Anastrozole'}</span>
+                <span className="pellets-cat-count">{categoryCounts.synergy}</span>
               </button>
 
               <button
@@ -936,6 +963,19 @@ export default function PelletsPriceListClient({
           brandType="pharmapolis_pellets"
           lang={lang}
           customNotes={`Pharmapolis Subcutaneous Pellets RFQ Request. Currency: ${currency}. Selected items: ${JSON.stringify(cartItems)}`}
+        />
+      )}
+
+      {/* ── OFFICIAL PRICE SCHEDULE PDF PREVIEW MODAL ── */}
+      {isPdfPreviewOpen && (
+        <PelletPricePdfPreviewModal
+          isOpen={isPdfPreviewOpen}
+          onClose={() => setIsPdfPreviewOpen(false)}
+          products={initialProducts}
+          currency={currency}
+          currencySymbol={currencySymbol}
+          formatPrice={formatPrice}
+          lang={lang}
         />
       )}
 

@@ -274,12 +274,12 @@ export const BASELINE_PRICE_SCHEDULES = [
     id: 'pellets',
     label: 'Hormone Pellets',
     icon: Syringe,
-    badge: '6 SKUs · EU GMP',
+    badge: '41 SKUs · EU GMP',
     supplier: 'Pharmapolis Compounding Pharmacy (Bulgaria)',
-    description: 'Subcutaneous bioidentical hormone pellets (Estradiol & Testosterone) + Surgical trocar insertion kits',
-    pricingNote: 'Clinic Wholesale EUR · Pack ×10 Institutional (-15%)',
+    description: 'Subcutaneous bioidentical hormone pellets (Estradiol, Testosterone, Progesterone, Biest) + Surgical trocar insertion kits',
+    pricingNote: 'Clinic Wholesale EUR · Pack ×10 Institutional (-10%)',
     route: '/pricing/pellets',
-    skuCount: 6,
+    skuCount: 41,
     currency: 'EUR',
     fetchGroup: 'pellets',
     status: 'active',
@@ -322,7 +322,9 @@ export function invalidatePriceSchedulesCache() {
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
-    } catch (_) {}
+    } catch {
+      // ignore storage errors
+    }
   }
 }
 
@@ -359,7 +361,9 @@ export function usePriceSchedulesData() {
             return;
           }
         }
-      } catch (_) {}
+      } catch {
+        // ignore cache read error
+      }
     }
 
     // Layer 3 / 4: Live Firestore SSOT Sync
@@ -414,7 +418,9 @@ export function usePriceSchedulesData() {
         try {
           const serializable = updatedSchedules.map(({ icon, ...rest }) => rest);
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ data: serializable, timestamp: now }));
-        } catch (_) {}
+        } catch {
+          // ignore storage error
+        }
       }
 
       setSchedules(updatedSchedules);
@@ -448,7 +454,9 @@ export function invalidateGroupProductsCache(groupId) {
     if (typeof window !== 'undefined') {
       try {
         localStorage.removeItem(`${PRODUCT_CACHE_PREFIX}${groupId}`);
-      } catch (_) {}
+      } catch {
+        // ignore storage error
+      }
     }
   } else {
     Object.keys(memoryProductsCache).forEach((k) => delete memoryProductsCache[k]);
@@ -475,7 +483,9 @@ export async function fetchGroupProductsWithCache(groupId, fetchGroup, { forceRe
           return parsed.data;
         }
       }
-    } catch (_) {}
+    } catch {
+      // ignore storage error
+    }
   }
 
   let products = [];
@@ -503,7 +513,9 @@ export async function fetchGroupProductsWithCache(groupId, fetchGroup, { forceRe
         }
       }
     }
-  } catch (_) {}
+  } catch {
+    // ignore fetch error
+  }
 
   // Emergency Fallback (only if Firestore has no seeded docs for aesthetic-injectables or pellets)
   if (products.length === 0 && groupId === 'aesthetic-injectables') {
@@ -528,7 +540,9 @@ export async function fetchGroupProductsWithCache(groupId, fetchGroup, { forceRe
   if (typeof window !== 'undefined' && products.length > 0) {
     try {
       localStorage.setItem(`${PRODUCT_CACHE_PREFIX}${cacheKey}`, JSON.stringify({ data: products, ts: now }));
-    } catch (_) {}
+    } catch {
+      // ignore storage errors
+    }
   }
 
   return products;
