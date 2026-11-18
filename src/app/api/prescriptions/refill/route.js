@@ -206,28 +206,31 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'sourcePrescriptionId is required' }, { status: 400 });
     }
 
-    // 1. Fetch original prescription
-    let origDoc = await adminDb.collection('prescriptions').doc(sourcePrescriptionId).get();
-    let origData = origDoc.exists ? origDoc.data() : null;
-
-    if (!origData) {
-      // Lookup by code or fileNumber
-      const qSnap = await adminDb.collection('prescriptions')
-        .where('code', '==', sourcePrescriptionId.replace(/^#/, ''))
-        .limit(1)
-        .get();
-      if (!qSnap.empty) {
-        origDoc = qSnap.docs[0];
-        origData = origDoc.data();
+    // 1. Fetch original prescription using comprehensive alias-aware resolution
+    let origDoc = null;
+    let origData = null;
+    try {
+      const resolved = await resolvePrescriptionDocAdmin(sourcePrescriptionId);
+      origDoc = resolved.ref;
+      origData = resolved.data;
+    } catch {
+      // Fallback direct get if not found by helper
+      const fallbackSnap = await adminDb.collection('prescriptions').doc(sourcePrescriptionId).get().catch(() => null);
+      if (fallbackSnap && fallbackSnap.exists) {
+        origDoc = fallbackSnap.ref;
+        origData = fallbackSnap.data();
       }
     }
 
-    if (!origData) {
+    if (!origData || !origDoc) {
       return NextResponse.json({ success: false, error: `Original prescription "${sourcePrescriptionId}" not found` }, { status: 404 });
     }
 
     const origId = origDoc.id;
-    const baseCode = (origData.code || origData.prescriptionCode || origData.fileNumber || origId.slice(0, 6)).replace(/^#/, '');
+    let baseCode = (origData.prescriptionCode || origData.fileNumber || origData.sampleCode || origId || origData.code || 'RX').replace(/^#/, '');
+    if (baseCode.toUpperCase() === 'RX' && (origData.fileNumber || origId)) {
+      baseCode = origData.fileNumber || origId;
+    }
     const cleanBaseCode = baseCode.replace(/-R\d+$/i, ''); // Strip previous refill suffix if re-refilling
 
     // 2. Resolve new Refill Prescription Code (e.g. 52228-R1, 52228-R2)

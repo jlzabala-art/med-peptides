@@ -163,13 +163,54 @@ export default function PelletsPriceListClient({
     };
   }, [cartItems, initialProducts, formatPrice]);
 
-  // Share link handler
+  // Listen to open-pellets-pdf-modal from GlobalBottomStickyBar and set Atlas context
+  React.useEffect(() => {
+    const handler = () => setIsPdfPreviewOpen(true);
+    window.addEventListener('open-pellets-pdf-modal', handler);
+
+    // Provide rich Pellets context to Atlas AI
+    const detail = {
+      contextType: 'catalog',
+      storageKey: 'pricing-pellets',
+      contextAnchor: {
+        sectionTitle: isEs
+          ? 'Pellets Hormonales Subcutáneos Pharmapolis (EU GMP) y Kits Quirúrgicos de Trócar'
+          : 'Pharmapolis Subcutaneous Bioidentical Hormone Pellets & Surgical Trocar Kits',
+        keyActives: '17β-Estradiol, Biest, Micronized Testosterone (USP), Progesterone (P4), Testosterone + Anastrozole, Single-Use Surgical Trocars (3.2mm & 4.5mm)',
+        mechanisms: isEs
+          ? 'Implantes cristalinos comprimidos estériles EU GMP, irradiación E-Beam validada SAL 10⁻⁶, liberación continua de orden cero durante 3.5 a 6 meses sin fluctuaciones, 0% primer paso hepático, tarifas mayoristas unitarias y packs de 10.'
+          : 'EU GMP sterile crystalline compressed implants, validated E-Beam SAL 10⁻⁶, zero-order release kinetics over 3.5 to 6 months without peak/trough fluctuations, 0% hepatic first-pass bypass, wholesale unit and pack-of-10 institutional pricing tiers.',
+      },
+    };
+    window.dispatchEvent(new CustomEvent('set-public-atlas-context', { detail }));
+
+    return () => window.removeEventListener('open-pellets-pdf-modal', handler);
+  }, [isEs]);
+
+  // Share link handler (Bilingual WhatsApp-ready)
   const handleShare = async () => {
     const url = 'https://www.atlashealth-services.com/pricing/pellets';
+    const text = isEs
+      ? `Tarifa Oficial B2B · Pellets Hormonales Subcutáneos Pharmapolis (EU GMP)\nMonografías clínicas y precios mayoristas institucionales:\n${url}`
+      : `Official B2B Price Schedule · Pharmapolis Subcutaneous Hormone Pellets (EU GMP)\nClinical monographs & institutional wholesale pricing:\n${url}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: isEs ? 'Tarifa Oficial B2B · Pellets Hormonales Subcutáneos' : 'Official B2B Price Schedule · Hormone Pellets',
+          text,
+          url
+        });
+        return;
+      } catch {
+        // Fallback to clipboard
+      }
+    }
+
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(`${text}\n${url}`);
       triggerHaptic('copy');
-      toast.success(isEs ? 'Enlace de tarifa copiado al portapapeles' : 'Price schedule link copied to clipboard');
+      toast.success(isEs ? 'Enlace y detalles copiados para compartir' : 'Price schedule details copied to clipboard');
     } catch {
       toast.error('Could not copy link');
     }
@@ -188,12 +229,12 @@ export default function PelletsPriceListClient({
     return counts;
   }, [initialProducts]);
 
-  // DataTable columns definition (Strict Rule #3 & Rule #30)
+  // DataTable columns definition (Strict Rule #3 & Rule #30 - Zero horizontal scroll)
   const columns = useMemo(() => [
     {
       key: 'itemNumber',
       label: '#',
-      width: '65px',
+      width: '45px',
       align: 'center',
       render: (val, row) => (
         <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.74rem', color: '#64748b' }}>
@@ -202,22 +243,9 @@ export default function PelletsPriceListClient({
       )
     },
     {
-      key: 'sku',
-      label: 'SKU / REF',
-      width: '180px',
-      render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <CopyableId value={val || row.sku} displayValue={val || row.sku} />
-          <span style={{ fontSize: '0.65rem', color: '#64748b' }}>
-            {row.category === 'Trocar Kits' ? (isEs ? 'Instrumental Quirúrgico' : 'Surgical Kit') : 'EU GMP Blister'}
-          </span>
-        </div>
-      )
-    },
-    {
       key: 'name',
       label: isEs ? 'Formulación & Dosis' : 'Formulation & Strength',
-      width: '280px',
+      width: '270px',
       render: (val, row) => {
         const isPellet = row.category !== 'Trocar Kits';
         return (
@@ -260,6 +288,13 @@ export default function PelletsPriceListClient({
                 </span>
               )}
             </div>
+            {/* Embedded SKU underneath to eliminate dedicated SKU column */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '1px' }}>
+              <CopyableId value={row.sku} displayValue={row.sku} />
+              <span style={{ fontSize: '0.64rem', color: '#64748b' }}>
+                {row.category === 'Trocar Kits' ? (isEs ? 'Instrumental' : 'Surgical Kit') : 'EU GMP Blister'}
+              </span>
+            </div>
           </div>
         );
       }
@@ -267,7 +302,7 @@ export default function PelletsPriceListClient({
     {
       key: 'trocarSize',
       label: isEs ? 'Trócar / Vía' : 'Trocar Cannula',
-      width: '130px',
+      width: '115px',
       render: (val) => (
         <span style={{
           display: 'inline-flex',
@@ -289,7 +324,7 @@ export default function PelletsPriceListClient({
     {
       key: 'duration',
       label: isEs ? 'Cinética' : 'Kinetics / Duration',
-      width: '140px',
+      width: '125px',
       render: (val, row) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
@@ -305,8 +340,8 @@ export default function PelletsPriceListClient({
     },
     {
       key: 'singlePrice',
-      label: isEs ? 'Tarifa Unitaria' : 'Single Unit Price',
-      width: '140px',
+      label: isEs ? 'Tarifa Unitaria' : 'Single Unit',
+      width: '120px',
       align: 'right',
       render: (_, row) => {
         const eur = row.pricing?.wholesalePriceEur || row.pricing?.price_eur || row.pricing?.costPriceEur || 0;
@@ -364,8 +399,8 @@ export default function PelletsPriceListClient({
     },
     {
       key: 'pack10Price',
-      label: isEs ? 'Pack ×10 Clínicas (-10%)' : 'Pack ×10 Clinics (-10%)',
-      width: '170px',
+      label: isEs ? 'Pack ×10 (-10%)' : 'Pack ×10 Box (-10%)',
+      width: '145px',
       align: 'right',
       render: (_, row) => {
         const eur = row.pricing?.wholesalePriceEur || row.pricing?.price_eur || row.pricing?.costPriceEur || 0;
@@ -507,21 +542,6 @@ export default function PelletsPriceListClient({
       {/* ── GOOGLE CLOUD CONSOLE RESOURCE HEADER ── */}
       <div className="gcp-resource-page-header">
         <div className="gcp-resource-header-container">
-          {/* Breadcrumb Hierarchy */}
-          <div className="gcp-resource-breadcrumb-row">
-            <Link href="/" className="gcp-resource-back-link">
-              {isEs ? 'Inicio' : 'Home'}
-            </Link>
-            <span className="gcp-resource-breadcrumb-sep">/</span>
-            <Link href="/pricing" className="gcp-resource-back-link">
-              {isEs ? 'Tarifas B2B' : 'B2B Price Hub'}
-            </Link>
-            <span className="gcp-resource-breadcrumb-sep">/</span>
-            <span className="gcp-resource-breadcrumb-current">
-              {isEs ? 'Pellets Hormonales Subcutáneos Pharmapolis' : 'Pharmapolis Subcutaneous Hormone Pellets'}
-            </span>
-          </div>
-
           {/* Title Row with Status Pills */}
           <div className="gcp-resource-main-row">
             <div className="gcp-resource-title-group">
@@ -551,68 +571,28 @@ export default function PelletsPriceListClient({
                 </div>
               </div>
 
-              {/* Sub-line: Clinical Metadata Strip */}
+              {/* Sub-line: Clinical Metadata Strip (Accurate Bioidentical Pellets Parameters) */}
               <div className="gcp-resource-meta-line">
                 <span className="gcp-resource-meta-item">
-                  <strong>Purity:</strong> ≥ 99.5% USP Bioidentical
+                  <strong>{isEs ? 'Pureza:' : 'Purity:'}</strong> ≥ 99.5% USP/EP Bioidentical Pure
                 </span>
                 <span className="gcp-resource-meta-sep">•</span>
                 <span className="gcp-resource-meta-item">
-                  <strong>Kinetics:</strong> Zero-order 3.5 to 6 months
+                  <strong>{isEs ? 'Cinética:' : 'Kinetics:'}</strong> {isEs ? 'Orden Cero 3.5 a 6 meses' : 'Zero-order 3.5 to 6 months'}
                 </span>
                 <span className="gcp-resource-meta-sep">•</span>
                 <span className="gcp-resource-meta-item">
-                  <strong>Sterilization:</strong> Validated E-Beam SAL 10⁻⁶
+                  <strong>{isEs ? 'Esterilización:' : 'Sterilization:'}</strong> {isEs ? 'E-Beam Validada SAL 10⁻⁶' : 'Validated E-Beam SAL 10⁻⁶'}
                 </span>
                 <span className="gcp-resource-meta-sep">•</span>
                 <span className="gcp-resource-meta-item">
-                  <strong>First-Pass:</strong> 0% (Hepatic Bypassed)
+                  <strong>{isEs ? 'Primer Paso Hepático:' : 'First-Pass:'}</strong> {isEs ? '0% (Absorción Subcutánea Directa)' : '0% (Hepatic Bypassed)'}
                 </span>
               </div>
             </div>
 
-            {/* Right Action Toolbar: Currency + Language + Export + Share */}
+            {/* Right Action Toolbar: Clean GCP 3-Button Standard (Currency/Lang handled by PublicUnifiedHeader) */}
             <div className="gcp-resource-action-toolbar">
-              {/* Currency Selector */}
-              <div className="gcp-segmented-switch">
-                {['EUR', 'USD', 'AED'].map(cur => (
-                  <button
-                    key={cur}
-                    type="button"
-                    className={`gcp-segmented-btn ${currency === cur ? 'active' : ''}`}
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setCurrency(cur);
-                    }}
-                  >
-                    {cur}
-                  </button>
-                ))}
-              </div>
-
-              {/* Language Switcher */}
-              <div className="gcp-segmented-switch">
-                <button
-                  type="button"
-                  className={`gcp-segmented-btn ${lang === 'en' ? 'active' : ''}`}
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setLang('en');
-                  }}
-                >
-                  EN
-                </button>
-                <button
-                  type="button"
-                  className={`gcp-segmented-btn ${lang === 'es' ? 'active' : ''}`}
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setLang('es');
-                  }}
-                >
-                  ES
-                </button>
-              </div>
 
               {/* Preview & Save PDF Schedule */}
               <button

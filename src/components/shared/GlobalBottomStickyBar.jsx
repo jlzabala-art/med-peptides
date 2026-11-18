@@ -92,6 +92,23 @@ export default function GlobalBottomStickyBar() {
       };
     }
 
+    if (pathname.startsWith('/pricing/pellets')) {
+      return {
+        summaryTitle: isSpanish ? 'Pellets Hormonales Subcutáneos' : 'Pharmapolis Hormone Pellets',
+        summarySubtitle: isSpanish ? 'Terapia EU GMP · Trócares Quirúrgicos' : 'EU GMP Subcutaneous Therapy · Surgical Trocars',
+        atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        secondaryAction: quoteAction,
+        primaryAction: {
+          label: isSpanish ? 'Tarifa Pellets (PDF)' : 'Pellets Schedule',
+          icon: <Syringe size={14} />,
+          onClick: () => {
+            const ev = new CustomEvent('open-pellets-pdf-modal');
+            window.dispatchEvent(ev);
+          },
+        },
+      };
+    }
+
     if (pathname.startsWith('/pricing')) {
       return {
         summaryTitle: isSpanish ? 'Directorio de Tarifas B2B' : 'Institutional Price Schedules',

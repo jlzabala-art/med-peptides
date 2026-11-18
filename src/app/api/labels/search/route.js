@@ -40,7 +40,21 @@ export async function GET(request) {
         .replace(/[^a-z0-9]/g, '');
     };
 
-    // Clean clinical title to remove extraction artifacts and surface real medication/formula name
+    // Extract best informative code avoiding degenerate 'RX'
+    const extractBestCode = (d = {}, docId = '') => {
+      const candidates = [
+        d.prescriptionCode,
+        d.sampleCode,
+        d.boxId,
+        d.fagron?.sampleCode,
+        d.fagron?.boxId,
+        d.fileNumber,
+        d.prescriptionNumber,
+        docId,
+        d.code
+      ].filter(c => c && String(c).trim().toUpperCase() !== 'RX' && String(c).trim().length > 2);
+      return cleanCodeStr(candidates[0] || docId || d.code || 'RX');
+    };
     const cleanTitle = (raw) => {
       if (!raw) return 'Compounded Prescription';
       return String(raw).replace(/\s*\(Sample Code.*?\)/gi, '').trim() || 'Compounded Prescription';
@@ -181,8 +195,7 @@ export async function GET(request) {
 
           sortedDocs.forEach(docSnap => {
             const d = docSnap.data();
-            const rawCode = d.prescriptionNumber || d.code || d.fileNumber || docSnap.id;
-            const code = cleanCodeStr(rawCode);
+            const code = extractBestCode(d, docSnap.id);
             const normCode = normalizeCode(code);
             const patName = d.patientName || d.patient?.name || 'Patient';
             const patKey = `${patName.toLowerCase().trim()}::${normCode}`;
@@ -379,14 +392,25 @@ export async function GET(request) {
 
         snap.forEach(docSnap => {
           const d = docSnap.data();
-          const rawCode = d.code || d.prescriptionNumber || d.fileNumber || docSnap.id;
-          const code = cleanCodeStr(rawCode);
+          const code = extractBestCode(d, docSnap.id);
           const pName = String(d.patientName || d.patient?.name || '').trim();
           const normCode = normalizeCode(code);
           const patKey = `${pName.toLowerCase()}::${normCode}`;
 
-          if ((pName.toLowerCase().includes(qLower) || normCode.includes(qLower) || String(docSnap.id).toLowerCase().includes(qLower)) && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
+          // Register all aliases on the document to avoid duplicate presentation
+          const docAliases = [
+            d.fileNumber,
+            d.prescriptionCode,
+            d.sampleCode,
+            d.boxId,
+            docSnap.id,
+            ...(Array.isArray(d.aliases) ? d.aliases : [])
+          ].filter(Boolean);
+
+          const isKnown = seenCodes.has(normCode) || seenPatientCodes.has(patKey) || docAliases.some(a => seenCodes.has(normalizeCode(a)));
+          if ((pName.toLowerCase().includes(qLower) || normCode.includes(qLower) || String(docSnap.id).toLowerCase().includes(qLower) || docAliases.some(a => String(a).toLowerCase().includes(qLower))) && !isKnown) {
             seenCodes.add(normCode);
+            docAliases.forEach(a => seenCodes.add(normalizeCode(a)));
             seenPatientCodes.add(patKey);
             results.push({
               id: docSnap.id,

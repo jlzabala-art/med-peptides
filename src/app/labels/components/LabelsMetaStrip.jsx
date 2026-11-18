@@ -177,11 +177,30 @@ export default function LabelsMetaStrip({
                           gap: '8px'
                         }}
                       >
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
-                            #{itemCode} {isSame ? (isEs ? '(Actual)' : '(Current)') : ''}
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                              #{itemCode} {isSame ? (isEs ? '(Actual)' : '(Current)') : ''}
+                            </span>
+                            {rxItem.date && (
+                              <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
+                                📅 {rxItem.date}
+                              </span>
+                            )}
+                            {rxItem.partsCount > 0 && (
+                              <span style={{
+                                fontSize: '0.64rem',
+                                fontWeight: 700,
+                                color: '#0369a1',
+                                background: '#e0f2fe',
+                                padding: '1px 5px',
+                                borderRadius: '4px'
+                              }}>
+                                📦 {rxItem.partsCount} {rxItem.partsCount === 1 ? (isEs ? 'Parte' : 'Part') : (isEs ? 'Partes' : 'Parts')}
+                              </span>
+                            )}
                           </div>
-                          <div style={{ fontSize: '0.68rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontSize: '0.68rem', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                             {rxItem.title || rxItem.treatmentTitle || 'Prescription'}
                           </div>
                         </div>

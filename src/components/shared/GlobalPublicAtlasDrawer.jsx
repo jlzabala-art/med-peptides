@@ -48,6 +48,18 @@ export default function GlobalPublicAtlasDrawer() {
     const activeCtx = screenContext || customContext;
     if (activeCtx) return activeCtx;
 
+    if (pathname.startsWith('/pricing/pellets')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'pricing-pellets',
+        contextAnchor: {
+          sectionTitle: 'Pharmapolis Subcutaneous Bioidentical Hormone Pellets & Surgical Trocar Kits',
+          keyActives: '17β-Estradiol, Biest, Micronized Testosterone (USP), Progesterone (P4), Testosterone + Anastrozole, Single-Use Surgical Trocars (3.2mm & 4.5mm)',
+          mechanisms: 'EU GMP sterile crystalline compressed implants, validated E-Beam SAL 10⁻⁶, zero-order release kinetics over 3.5 to 6 months, 0% hepatic first-pass bypass, wholesale unit and pack-of-10 institutional pricing tiers.',
+        },
+      };
+    }
+
     if (pathname.startsWith('/pricing/peptides')) {
       return {
         contextType: 'catalog',

@@ -49,14 +49,36 @@ export async function resolvePrescriptionDocAdmin(rawId, fallbackCandidates = []
     ...fallbackCandidates.map((c) => String(c || '').replace(/^#/, '')),
   ].filter(Boolean);
 
+  // Registry match fallback to expand candidates with known aliases
+  try {
+    const { PHARMAPOLIS_LABELS_REGISTRY } = await import('@/data/pharmapolisLabelsMap');
+    const upperId = String(rawId || '').replace(/^#/, '').toUpperCase();
+    const matched = PHARMAPOLIS_LABELS_REGISTRY.find(e => 
+      String(e.fileNumber || '').toUpperCase() === upperId ||
+      String(e.id || '').toUpperCase() === upperId ||
+      (Array.isArray(e.prescriptionMatches) && e.prescriptionMatches.some(m => String(m).toUpperCase() === upperId))
+    );
+    if (matched) {
+      if (matched.fileNumber) candidates.push(matched.fileNumber);
+      if (Array.isArray(matched.prescriptionMatches)) {
+        matched.prescriptionMatches.forEach(m => candidates.push(String(m)));
+      }
+    }
+  } catch {
+    // non-fatal
+  }
+
   for (const cand of candidates) {
     for (const field of [
       'code',
       'prescriptionCode',
       'fileNumber',
       'prescriptionNumber',
+      'sampleCode',
+      'boxId',
       'id',
       'fagron.boxId',
+      'fagron.sampleCode',
       'fagronDetails.boxId',
     ]) {
       try {
@@ -68,6 +90,16 @@ export async function resolvePrescriptionDocAdmin(rawId, fallbackCandidates = []
       } catch {
         // Continue
       }
+    }
+
+    try {
+      const snapAlias = await adminDb.collection('prescriptions').where('aliases', 'array-contains', cand).limit(1).get();
+      if (!snapAlias.empty) {
+        const docSnap = snapAlias.docs[0];
+        return { ref: docSnap.ref, data: docSnap.data(), id: docSnap.id };
+      }
+    } catch {
+      // Continue
     }
   }
 

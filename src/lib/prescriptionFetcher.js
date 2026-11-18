@@ -45,6 +45,31 @@ export const getPrescriptionData = cache(async (code) => {
   const prefixedCode = upperCode.startsWith('RX-') ? upperCode : `RX-${upperCode}`;
   const codesToSearch = Array.from(new Set([upperCode, rawCode, cleanCodeNoPrefix, prefixedCode]));
 
+  // 2.5 Resolve registry aliases (e.g. BOX03088AATRI -> 51890, RX-51890)
+  try {
+    const { PHARMAPOLIS_LABELS_REGISTRY } = await import('@/data/pharmapolisLabelsMap');
+    const matchedEntry = PHARMAPOLIS_LABELS_REGISTRY.find(e => 
+      String(e.fileNumber || '').toUpperCase() === upperCode ||
+      String(e.id || '').toUpperCase() === upperCode ||
+      (Array.isArray(e.prescriptionMatches) && e.prescriptionMatches.some(m => String(m).toUpperCase() === upperCode))
+    );
+    if (matchedEntry) {
+      if (matchedEntry.fileNumber) {
+        codesToSearch.push(String(matchedEntry.fileNumber).toUpperCase());
+      }
+      if (Array.isArray(matchedEntry.prescriptionMatches)) {
+        matchedEntry.prescriptionMatches.forEach(m => {
+          const up = String(m).toUpperCase();
+          codesToSearch.push(up);
+          codesToSearch.push(up.replace(/^RX-/, ''));
+          if (!up.startsWith('RX-')) codesToSearch.push(`RX-${up}`);
+        });
+      }
+    }
+  } catch {
+    // non-fatal
+  }
+
   // 3. Prescription Number lookup
   if (!rxDoc) {
     const qSnap = await adminDb.collection('prescriptions')
@@ -91,15 +116,37 @@ export const getPrescriptionData = cache(async (code) => {
     }
   }
 
-  // 5. Fallback search by Fagron sample code / boxId
+  // 5. Fallback search by Fagron sample code / boxId / aliases
   if (!rxDoc) {
     const qSnap5 = await adminDb.collection('prescriptions')
-      .where('fagron.boxId', 'in', codesToSearch)
+      .where('fagron.boxId', 'in', codesToSearch.slice(0, 10))
       .limit(1)
       .get()
       .catch(() => null);
     if (qSnap5 && !qSnap5.empty) {
       rxDoc = { id: qSnap5.docs[0].id, ...qSnap5.docs[0].data() };
+    }
+  }
+
+  if (!rxDoc) {
+    const qSnapSample = await adminDb.collection('prescriptions')
+      .where('sampleCode', 'in', codesToSearch.slice(0, 10))
+      .limit(1)
+      .get()
+      .catch(() => null);
+    if (qSnapSample && !qSnapSample.empty) {
+      rxDoc = { id: qSnapSample.docs[0].id, ...qSnapSample.docs[0].data() };
+    }
+  }
+
+  if (!rxDoc) {
+    const qSnapAliases = await adminDb.collection('prescriptions')
+      .where('aliases', 'array-contains-any', codesToSearch.slice(0, 10))
+      .limit(1)
+      .get()
+      .catch(() => null);
+    if (qSnapAliases && !qSnapAliases.empty) {
+      rxDoc = { id: qSnapAliases.docs[0].id, ...qSnapAliases.docs[0].data() };
     }
   }
 
