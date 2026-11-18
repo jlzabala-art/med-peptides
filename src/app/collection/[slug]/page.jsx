@@ -394,7 +394,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
           });
         }
       });
-    } catch (err) { }
+    } catch (err) {
+      console.warn('[fetchTargetedBrandProducts] Colway hair registry error:', err?.message);
+    }
 
     const hairPeptidesList = [];
     try {
@@ -421,7 +423,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
           });
         }
       });
-    } catch (err) { }
+    } catch (err) {
+      console.warn('[fetchTargetedBrandProducts] Hair peptides error:', err?.message);
+    }
 
     return [
       ...compoundedList,
@@ -486,7 +490,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
           }
         }
       });
-    } catch (err) { }
+    } catch (err) {
+      console.warn('[fetchTargetedBrandProducts] Weight Loss products fallback error:', err?.message);
+    }
     return fallbackList;
   }
 
@@ -512,7 +518,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
         });
         if (list.length > 0) return list;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Tissue Repair query error:', e?.message);
+    }
 
     const fallbackList = [];
     try {
@@ -522,7 +530,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
         const pid = (p.id || '').toLowerCase();
         if (pid.includes('bpc') || pid.includes('tb-500')) fallbackList.push(p);
       });
-    } catch (err) { }
+    } catch (err) {
+      console.warn('[fetchTargetedBrandProducts] Lotusland repair fallback error:', err?.message);
+    }
     return fallbackList;
   }
 
@@ -543,7 +553,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
         });
         if (list.length > 0) return list;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Longevity query error:', e?.message);
+    }
   }
 
   // Neuro-Performance & Sleep: Semax, Selank, DSIP, Cortisol
@@ -563,7 +575,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
         });
         if (list.length > 0) return list;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Neuro query error:', e?.message);
+    }
   }
 
   // Dermal Aesthetics: Colway Blue Diamond, GHK-Cu, Colvita
@@ -583,7 +597,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
         });
         if (list.length > 0) return list;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Dermal query error:', e?.message);
+    }
   }
 
   // Aesthetic Injectables: Juvéderm, Teoxane, Galderma, Merz, Neauvia, Aqualyx, Croma PhilArt (40 SKUs)
@@ -677,6 +693,10 @@ export default async function NextCollectionPage({ params, searchParams }) {
 
   if (slug === 'protocols' || slug === 'protocol' || slug === 'proto') {
     redirect('/proto');
+  }
+
+  if (slug === 'pellets' || slug === 'hormone-pellets' || slug === 'subcutaneous-pellets') {
+    redirect('/pricing/pellets');
   }
 
   const ref = resolvedSearch?.ref || resolvedSearch?.referral || null;

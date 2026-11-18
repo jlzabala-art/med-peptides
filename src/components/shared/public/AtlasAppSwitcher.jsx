@@ -48,6 +48,7 @@ export default function AtlasAppSwitcher({
     { label: isSpanish ? 'Protocolos Clínicos' : 'Clinical Protocols', href: '/proto' },
     { label: isSpanish ? 'Hub de Precios B2B' : 'B2B Price Hub', href: '/pricing' },
     { label: isSpanish ? 'Lista de Péptidos' : 'Peptides Schedule', href: '/pricing/peptides' },
+    { label: isSpanish ? 'Tarifa de Pellets' : 'Pellets Price Schedule', href: '/pricing/pellets' },
     { label: isSpanish ? 'Directorio de Viales' : 'Peptide Vials', href: '/vials' },
     { label: isSpanish ? 'Guía Implante Pellets' : 'Trocar Pellets Guide', href: '/guides/hormone-pellets-implantation' },
     { label: isSpanish ? 'Calculadora de Dosis' : 'Dosing Calculator', href: '/calculator' },

@@ -40,7 +40,8 @@ import {
   Layers,
   Calendar,
   List,
-  QrCode
+  QrCode,
+  BookOpen
 } from '@/lib/icons';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
@@ -977,7 +978,16 @@ export default function HormonePelletDetail({
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+                <Link
+                  href="/pricing/pellets"
+                  className="gcp-btn-secondary"
+                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <FileText size={14} />
+                  <span>{isEs ? 'Ver Tarifa Oficial Completa de Pellets' : 'View Full Pellets Price Schedule'}</span>
+                </Link>
+
                 <button
                   onClick={() => setIsInquiryDrawerOpen(true)}
                   className="gcp-btn-primary"
@@ -1120,39 +1130,80 @@ export default function HormonePelletDetail({
             </div>
           </div>
 
-          {/* Sibling Pellets in Catalog */}
-          <div className="pellet-sidebar-card">
-            <div className="pellet-sidebar-header">
-              <Layers size={14} />
-              <span>{isEs ? 'Pellets de la Colección' : 'Sister Pellets'}</span>
+          {/* Full Pellets Collection & B2B Price Schedule Card (Option A) */}
+          <div className="pellet-sidebar-card" style={{ border: '1px solid #cbd5e1', background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)' }}>
+            <div className="pellet-sidebar-header" style={{ justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Layers size={14} color="#003666" />
+                <span style={{ color: '#003666', fontWeight: 800 }}>
+                  {isEs ? 'Colección Pellets Pharmapolis' : 'Pharmapolis Pellets Collection'}
+                </span>
+              </div>
+              <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: '#dcfce7', color: '#166534', fontWeight: 700 }}>
+                EU GMP
+              </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {(p.siblingPellets || []).map((sib, idx) => (
-                <Link
-                  key={idx}
-                  href={`/p/${sib.slug}`}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px 10px',
-                    borderRadius: '6px',
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    textDecoration: 'none',
-                    fontSize: '0.78rem',
-                    color: '#334155'
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#003666' }}>{sib.name}</div>
-                    <div style={{ fontSize: '0.70rem', color: '#64748b' }}>{sib.role}</div>
-                  </div>
-                  <ChevronRight size={14} color="#94a3b8" />
-                </Link>
-              ))}
-            </div>
+            <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.45, margin: '0 0 10px 0' }}>
+              {isEs
+                ? 'Catálogo unificado de pellets hormonales bioidénticos y kits de implantación quirúrgica estéril (6 referencias con tarifas oficiales B2B).'
+                : 'Authoritative clinical portfolio of subcutaneous hormone pellets and sterile trocar insertion kits (6 reference SKUs with official B2B schedules).'}
+            </p>
+
+            <ul style={{ margin: '0 0 12px 0', paddingLeft: '1.1rem', fontSize: '0.75rem', color: '#334155', lineHeight: 1.55 }}>
+              <li><strong>17β-Estradiol:</strong> 12.5 mg · 25 mg</li>
+              <li><strong>Testosterone:</strong> 50 mg · 100 mg</li>
+              <li><strong>Trocar Kits:</strong> 3.2 mm · 4.5 mm</li>
+              <li style={{ color: '#16a34a', fontWeight: 600 }}>
+                {isEs ? 'Descuento B2B -15% en Pack ×10' : 'B2B Volume -15% in Pack ×10'}
+              </li>
+            </ul>
+
+            <Link
+              href="/pricing/pellets"
+              className="gcp-btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                boxSizing: 'border-box',
+                borderRadius: '6px',
+                textAlign: 'center',
+                marginBottom: '8px'
+              }}
+            >
+              <span>{isEs ? 'Ver Colección Completa & Tarifas' : 'View Full Pellets Collection & Pricing'}</span>
+              <ArrowRight size={14} />
+            </Link>
+
+            <Link
+              href="/guides/hormone-pellets-implantation"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                width: '100%',
+                padding: '6px 8px',
+                fontSize: '0.72rem',
+                color: '#003666',
+                textDecoration: 'none',
+                borderRadius: '4px',
+                background: '#f1f5f9',
+                border: '1px solid #e2e8f0',
+                boxSizing: 'border-box',
+                fontWeight: 600
+              }}
+            >
+              <BookOpen size={12} color="#003666" />
+              <span>{isEs ? 'Guía Técnica de Implantación Quirúrgica' : 'Surgical Implantation Clinical Guide'}</span>
+            </Link>
           </div>
         </div>
       </div>

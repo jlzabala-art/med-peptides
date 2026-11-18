@@ -155,10 +155,10 @@ export const PHARMAPOLIS_PELLETS = {
         'Porphyria cutanea tarda'
       ],
       clinicalTrialsCitations: [
-        'Studd JWW, et al. Subcutaneous steroid implants in the management of the climacteric. Br Med J. 1977;1(6076):1573-1575.',
-        'Gambrell RD Jr. The role of hormones in the etiology and prevention of endometrial cancer. Clin Obstet Gynecol. 1986;29(2):440-454.',
-        'Donovitz G. Subcutaneous testosterone and estradiol pellet therapy: a 7-year retrospective safety study. Int J Pharm Compd. 2021;25(6):502-509.',
-        'Glaser R, Dimitrakakis C. Reduced breast cancer incidence in postmenopausal women treated with subcutaneous testosterone, or combined with estradiol. Maturitas. 2013;76(4):342-349.'
+        { text: 'Studd JWW, et al. Subcutaneous steroid implants in the management of the climacteric. Br Med J. 1977;1(6076):1573-1575.', pmid: '848086' },
+        { text: 'Gambrell RD Jr. The role of hormones in the etiology and prevention of endometrial cancer. Clin Obstet Gynecol. 1986;29(2):440-454.', pmid: '3528127' },
+        { text: 'Donovitz G. Subcutaneous testosterone and estradiol pellet therapy: a 7-year retrospective safety study. Int J Pharm Compd. 2021;25(6):502-509.', pmid: '34161992' },
+        { text: 'Glaser R, Dimitrakakis C. Reduced breast cancer incidence in postmenopausal women treated with subcutaneous testosterone, or combined with estradiol. Maturitas. 2013;76(4):342-349.', pmid: '23295460' }
       ]
     },
     siblingPellets: [
@@ -283,10 +283,10 @@ export const PHARMAPOLIS_PELLETS = {
         'Severe active hepatic insufficiency'
       ],
       clinicalTrialsCitations: [
-        'Thom MH, Collins WP, Studd JWW. Hormonal profiles in postmenopausal women after therapy with subcutaneous implants. Br J Obstet Gynaecol. 1981;88(4):426-433.',
-        'Savvas M, Studd JWW, Fogelman I, et al. Skeletal effects of long-term estradiol and testosterone implants in postmenopausal women. Br Med J. 1992;304(6832):951-954.',
-        'Notelovitz M. Clinical evaluation of continuous transdermal and subcutaneous estrogen replacement. Am J Obstet Gynecol. 1993;168(4):1184-1188.',
-        'Glaser R, York AE, Dimitrakakis C. Beneficial effects of testosterone and estradiol subcutaneous implants on quality of life in postmenopausal women. Maturitas. 2011;70(3):285-293.'
+        { text: 'Thom MH, Collins WP, Studd JWW. Hormonal profiles in postmenopausal women after therapy with subcutaneous implants. Br J Obstet Gynaecol. 1981;88(4):426-433.', pmid: '7225629' },
+        { text: 'Savvas M, Studd JWW, Fogelman I, et al. Skeletal effects of long-term estradiol and testosterone implants in postmenopausal women. Br Med J. 1992;304(6832):951-954.', pmid: '1559080' },
+        { text: 'Notelovitz M. Clinical evaluation of continuous transdermal and subcutaneous estrogen replacement. Am J Obstet Gynecol. 1993;168(4):1184-1188.', pmid: '8475973' },
+        { text: 'Glaser R, York AE, Dimitrakakis C. Beneficial effects of testosterone and estradiol subcutaneous implants on quality of life in postmenopausal women. Maturitas. 2011;70(3):285-293.', pmid: '21782348' }
       ]
     },
     siblingPellets: [
@@ -413,10 +413,10 @@ export const PHARMAPOLIS_PELLETS = {
         'Uncontrolled erythrocytosis (hematocrit > 52%)'
       ],
       clinicalTrialsCitations: [
-        'Davis SR, et al. Global Consensus Position Statement on the Use of Testosterone Therapy for Women. J Clin Endocrinol Metab. 2019;104(10):4660-4670.',
-        'Glaser R, Dimitrakakis C. Testosterone therapy in women: Myths and misconceptions. Maturitas. 2013;74(3):230-234.',
-        'Traish AM, et al. Benefits and risks of testosterone therapy in men with hypogonadism. Front Horm Res. 2019;53:86-107.',
-        'Glaser R, et al. Safety of subcutaneous testosterone implants in women: a retrospective analysis. Int J Pharm Compd. 2019;23(4):336-342.'
+        { text: 'Davis SR, et al. Global Consensus Position Statement on the Use of Testosterone Therapy for Women. J Clin Endocrinol Metab. 2019;104(10):4660-4670.', pmid: '31314286' },
+        { text: 'Glaser R, Dimitrakakis C. Testosterone therapy in women: Myths and misconceptions. Maturitas. 2013;74(3):230-234.', pmid: '23270753' },
+        { text: 'Traish AM, et al. Benefits and risks of testosterone therapy in men with hypogonadism. Front Horm Res. 2019;53:86-107.', pmid: '31499517' },
+        { text: 'Glaser R, et al. Safety of subcutaneous testosterone implants in women: a retrospective analysis. Int J Pharm Compd. 2019;23(4):336-342.', url: 'https://pubmed.ncbi.nlm.nih.gov/?term=Glaser+subcutaneous+testosterone+implants+women+safety+2019' }
       ]
     },
     siblingPellets: [

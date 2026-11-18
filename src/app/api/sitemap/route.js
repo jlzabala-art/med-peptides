@@ -32,6 +32,7 @@ export async function GET(request) {
       '/proto',
       '/protocol-finder',
       '/guides/hormone-pellets-implantation',
+      '/pricing/pellets',
     ];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;

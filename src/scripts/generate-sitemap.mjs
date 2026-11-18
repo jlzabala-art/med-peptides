@@ -40,6 +40,7 @@ const staticPages = [
   { url: '/compounding', priority: '0.8', changefreq: 'monthly' },
   { url: '/blog', priority: '0.8', changefreq: 'weekly' },
   { url: '/about', priority: '0.6', changefreq: 'monthly' },
+  { url: '/pricing/pellets', priority: '0.9', changefreq: 'weekly' },
   { url: '/guides/hormone-pellets-implantation', priority: '0.9', changefreq: 'weekly' },
   { url: '/contact', priority: '0.5', changefreq: 'monthly' },
 ];

@@ -5,7 +5,7 @@ import { doc, setDoc, collection, query, where, limit, getDocs } from 'firebase/
 import { db } from '@/firebase';
 import {
   FlaskConical, Dna, Scissors, Package, Layers, TestTube,
-  Activity, Microscope, Sparkles, Building2
+  Activity, Microscope, Sparkles, Building2, Syringe
 } from 'lucide-react';
 
 /**
@@ -269,14 +269,33 @@ export const BASELINE_PRICE_SCHEDULES = [
       { name: 'Dr. Carlos Mendez', organization: 'Longevity Clinic Madrid', role: 'doctor', channel: 'whatsapp', date: '31 Oct 2026', views: 6, status: 'opened' },
       { name: 'Dr. Elena Ramos', organization: 'Atlas Partner Clinic Marbella', role: 'doctor', channel: 'email', date: '24 Oct 2026', views: 5, status: 'opened' }
     ]
+  },
+  {
+    id: 'pellets',
+    label: 'Hormone Pellets',
+    icon: Syringe,
+    badge: '6 SKUs · EU GMP',
+    supplier: 'Pharmapolis Compounding Pharmacy (Bulgaria)',
+    description: 'Subcutaneous bioidentical hormone pellets (Estradiol & Testosterone) + Surgical trocar insertion kits',
+    pricingNote: 'Clinic Wholesale EUR · Pack ×10 Institutional (-15%)',
+    route: '/pricing/pellets',
+    skuCount: 6,
+    currency: 'EUR',
+    fetchGroup: 'pellets',
+    status: 'active',
+    sharesCount: 15,
+    recipients: [
+      { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '14 Nov 2026', views: 8, status: 'opened' },
+      { name: 'Dr. Carlos Mendez', organization: 'Longevity Clinic Madrid', role: 'doctor', channel: 'web', date: '08 Nov 2026', views: 5, status: 'opened' }
+    ]
   }
 ];
 
 export const TOTAL_SKUS = BASELINE_PRICE_SCHEDULES.reduce((s, g) => s + g.skuCount, 0);
 
 export const MACRO_CATEGORIES = [
-  { id: 'all', label: 'All Catalogs (13)' },
-  { id: 'peptides', label: '🔬 Peptides & Longevity', groupIds: ['peptides', 'ultraperson', 'weight-management', 'hair-treatments'] },
+  { id: 'all', label: 'All Catalogs (14)' },
+  { id: 'peptides', label: '🔬 Peptides & Hormones', groupIds: ['peptides', 'pellets', 'ultraperson', 'weight-management', 'hair-treatments'] },
   { id: 'genomics', label: '🧬 Genomics CE-IVD', groupIds: ['24genetics', '24genomics-qatar', 'teletest', 'eterna'] },
   { id: 'cosmetics', label: '✨ Cosmetics & Collagen', groupIds: ['colway', 'colway-hair', 'colway-qatar'] },
   { id: 'injectables', label: '💉 Medical Injectables', groupIds: ['aesthetic-injectables'] },
@@ -486,11 +505,20 @@ export async function fetchGroupProductsWithCache(groupId, fetchGroup, { forceRe
     }
   } catch (_) {}
 
-  // Emergency Fallback (only if Firestore has no seeded docs for aesthetic-injectables)
+  // Emergency Fallback (only if Firestore has no seeded docs for aesthetic-injectables or pellets)
   if (products.length === 0 && groupId === 'aesthetic-injectables') {
     try {
       const mod = await import('@/data/aestheticInjectablesRegistry');
       products = mod.getAestheticInjectablesCatalog() || [];
+    } catch (_) {
+      products = [];
+    }
+  }
+
+  if (products.length === 0 && (groupId === 'pellets' || fetchGroup === 'pellets')) {
+    try {
+      const mod = await import('@/data/pharmapolisPelletsRegistry');
+      products = mod.getAllPharmapolisPellets() || [];
     } catch (_) {
       products = [];
     }
