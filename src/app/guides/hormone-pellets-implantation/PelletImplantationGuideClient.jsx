@@ -23,9 +23,7 @@ export default function PelletImplantationGuideClient() {
   const [lang, setLang] = useState('en');
   const [isShareOpen, setIsShareOpen] = useState(false);
   const isEs = lang === 'es';
-
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
-  const shareUrl = `${origin}/guides/hormone-pellets-implantation`;
+  const shareUrl = 'https://www.atlashealth-services.com/guides/hormone-pellets-implantation';
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a' }}>

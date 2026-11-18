@@ -290,95 +290,131 @@ export default function AestheticInjectableDetail({
     <div className="ai-page-container">
       {!isQuickView && <PublicUnifiedHeader currentApp="services" />}
 
-      {/* ── INSTITUTIONAL TRUST & REGULATORY BAR ── */}
+      {/* ── GOOGLE CLOUD CONSOLE RESOURCE HEADER ── */}
       {!isQuickView && (
-        <div className="ai-institutional-bar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span className="ai-badge-pill ai-badge-ce">
-              <ShieldCheck size={13} />
-              <span>{p.regulatory.ceMark}</span>
-            </span>
-            <span className="ai-badge-pill ai-badge-device">
-              <FlaskConical size={12} />
-              <span>{p.regulatory.classification}</span>
-            </span>
-            <span className="ai-badge-pill ai-badge-pro">
-              <Lock size={12} />
-              <span>{isEs ? 'Uso Médico Profesional' : 'Licensed Practitioners Only'}</span>
-            </span>
-            <span style={{ fontSize: '0.73rem', color: '#64748b', fontWeight: 600 }}>
-              {p.manufacturer} · {p.originCountry}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ display: 'flex', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
-              <button
-                onClick={() => setLang('en')}
-                style={{
-                  padding: '4px 10px', fontSize: '0.72rem', fontWeight: 700, border: 'none', cursor: 'pointer',
-                  backgroundColor: lang === 'en' ? '#003666' : '#ffffff',
-                  color: lang === 'en' ? '#ffffff' : '#64748b',
-                }}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLang('es')}
-                style={{
-                  padding: '4px 10px', fontSize: '0.72rem', fontWeight: 700, border: 'none', cursor: 'pointer',
-                  backgroundColor: lang === 'es' ? '#003666' : '#ffffff',
-                  color: lang === 'es' ? '#ffffff' : '#64748b',
-                }}
-              >
-                ES
-              </button>
+        <div className="gcp-resource-page-header">
+          <div className="gcp-resource-header-container">
+            {/* Breadcrumb Hierarchy */}
+            <div className="gcp-resource-breadcrumb-row">
+              <Link href="/" className="gcp-resource-back-link">
+                Home
+              </Link>
+              <span className="gcp-resource-breadcrumb-sep">/</span>
+              <Link href="/collection/aesthetic-injectables" className="gcp-resource-back-link">
+                {isEs ? 'Inyectables Estéticos' : 'Aesthetic Injectables'}
+              </Link>
+              <span className="gcp-resource-breadcrumb-sep">/</span>
+              <span className="gcp-resource-breadcrumb-parent">{p.brand}</span>
+              <span className="gcp-resource-breadcrumb-sep">/</span>
+              <span className="gcp-resource-breadcrumb-current">{p.name}</span>
             </div>
 
-            <button
-              onClick={() => setIsShareDrawerOpen(true)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                padding: '6px 12px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1',
-                borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#334155', cursor: 'pointer',
-              }}
-            >
-              <Share2 size={13} />
-              <span>{isEs ? 'Compartir Ficha' : 'Share Monograph'}</span>
-            </button>
+            {/* Title & Status Pills */}
+            <div className="gcp-resource-main-row">
+              <div className="gcp-resource-title-group">
+                <div className="gcp-resource-title-line">
+                  <div className="gcp-resource-icon-badge">
+                    <Syringe size={16} />
+                  </div>
+                  <h1 className="gcp-resource-title">{p.name}</h1>
+                  <span className="gcp-status-pill gcp-status-active">
+                    <span className="gcp-status-dot"></span>
+                    <span>{p.regulatory.ceMark}</span>
+                  </span>
+                  <span className="gcp-status-pill gcp-status-category">
+                    {p.regulatory.classification}
+                  </span>
+                  <span className="gcp-status-pill gcp-status-pom">
+                    <Lock size={11} />
+                    <span>{isEs ? 'Uso Médico Profesional' : 'Licensed Practitioners Only'}</span>
+                  </span>
+                  <div className="gcp-resource-sku-wrap">
+                    <span className="gcp-resource-sku-label">SKU:</span>
+                    <CopyableId value={p.atlasCode || p.id} displayValue={p.atlasCode || p.id} />
+                  </div>
+                </div>
 
-            <button
-              onClick={() => setIsPdfModalOpen(true)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                padding: '6px 12px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1',
-                borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#334155', cursor: 'pointer',
-              }}
-            >
-              <Download size={13} />
-              <span>PDF</span>
-            </button>
+                {/* Sub-line: Clinical Metadata Strip */}
+                <div className="gcp-resource-meta-line">
+                  <span className="gcp-resource-meta-item">
+                    <strong>Manufacturer:</strong> {p.manufacturer} ({p.originCountry})
+                  </span>
+                  <span className="gcp-resource-meta-sep">•</span>
+                  <span className="gcp-resource-meta-item">
+                    <strong>Active:</strong> {p.activeIngredient}
+                  </span>
+                  {p.haConcentration && (
+                    <>
+                      <span className="gcp-resource-meta-sep">•</span>
+                      <span className="gcp-resource-meta-item">
+                        <strong>HA Concentration:</strong> {p.haConcentration}
+                      </span>
+                    </>
+                  )}
+                  {p.presentation && (
+                    <>
+                      <span className="gcp-resource-meta-sep">•</span>
+                      <span className="gcp-resource-meta-item">
+                        <strong>Presentation:</strong> {p.presentation}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Action Toolbar: Language Segmented Switch + Actions */}
+              <div className="gcp-resource-action-toolbar">
+                <div className="gcp-segmented-switch">
+                  <button
+                    type="button"
+                    className={`gcp-segmented-btn ${lang === 'en' ? 'active' : ''}`}
+                    onClick={() => setLang('en')}
+                  >
+                    EN
+                  </button>
+                  <button
+                    type="button"
+                    className={`gcp-segmented-btn ${lang === 'es' ? 'active' : ''}`}
+                    onClick={() => setLang('es')}
+                  >
+                    ES
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  className="gcp-btn-secondary"
+                  onClick={() => setIsShareDrawerOpen(true)}
+                >
+                  <Share2 size={13} />
+                  <span>{isEs ? 'Compartir' : 'Share'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="gcp-btn-secondary"
+                  onClick={() => setIsPdfModalOpen(true)}
+                >
+                  <Download size={13} />
+                  <span>PDF</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="gcp-btn-primary"
+                  onClick={() => setIsInquiryDrawerOpen(true)}
+                >
+                  <FileText size={13} />
+                  <span>{isEs ? 'Solicitar Cotización' : 'Request Quote'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* ── MAIN CONTENT ── */}
       <main className="ai-content-wrap">
-
-        {/* Breadcrumb */}
-        {!isQuickView && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b', marginBottom: '1rem', flexWrap: 'wrap' }}>
-            <Link href="/" style={{ color: '#64748b', textDecoration: 'none' }}>Home</Link>
-            <ChevronRight size={12} />
-            <Link href="/collection/aesthetic-injectables" style={{ color: '#64748b', textDecoration: 'none' }}>
-              {isEs ? 'Inyectables Estéticos' : 'Aesthetic Injectables'}
-            </Link>
-            <ChevronRight size={12} />
-            <span style={{ color: '#475569', fontWeight: 600 }}>{p.brand}</span>
-            <ChevronRight size={12} />
-            <span style={{ color: '#003666', fontWeight: 700 }}>{p.name}</span>
-          </div>
-        )}
 
         {/* ── HERO PANORAMA CARD ── */}
         <section className="ai-hero-panorama">

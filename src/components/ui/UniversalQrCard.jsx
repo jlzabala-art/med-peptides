@@ -115,15 +115,18 @@ export default function UniversalQrCard({
         )}
 
         {/* QR Code Container */}
-        <div style={{
-          display: 'inline-flex',
-          padding: '8px',
-          background: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          marginBottom: '6px'
-        }}>
+        <div 
+          suppressHydrationWarning
+          style={{
+            display: 'inline-flex',
+            padding: '8px',
+            background: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            marginBottom: '6px'
+          }}
+        >
           <QRCodeSVG 
             id={qrId}
             value={value || 'https://www.atlashealth-services.com'}

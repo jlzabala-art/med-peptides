@@ -110,94 +110,105 @@ export default function NormaPharmaceuticalDetail({
       {/* ── UNIFIED ATLAS PUBLIC HEADER ── */}
       <PublicUnifiedHeader currentApp="services" />
 
-      {/* ── INSTITUTIONAL TRUST & REGULATORY BAR (STICKY) ── */}
-      <div className="norma-institutional-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span className="norma-badge-pill norma-badge-gmp">
-            <ShieldCheck size={13} />
-            <span>EU GMP Certified</span>
-          </span>
-
-          <span className="norma-badge-pill norma-badge-eof">
-            <Award size={13} />
-            <span>EOF Greece MA # 45945/03-10-2008</span>
-          </span>
-
-          <span className="norma-badge-pill norma-badge-rx">
-            <Lock size={12} />
-            <span>{isEs ? 'Medicamento Bajo Receta (POM)' : 'Prescription Only Medicine (POM)'}</span>
-          </span>
-
-          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
-            ATC: <strong style={{ color: '#003666' }}>G03BA03</strong> (Androgens, 3-oxoandrosten)
-          </span>
-        </div>
-
-        {/* Right Actions: Lang toggle & Share */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ display: 'flex', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
-            <button
-              onClick={() => setLang('en')}
-              style={{
-                padding: '4px 10px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                border: 'none',
-                backgroundColor: lang === 'en' ? '#003666' : '#ffffff',
-                color: lang === 'en' ? '#ffffff' : '#64748b',
-                cursor: 'pointer'
-              }}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLang('es')}
-              style={{
-                padding: '4px 10px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                border: 'none',
-                backgroundColor: lang === 'es' ? '#003666' : '#ffffff',
-                color: lang === 'es' ? '#ffffff' : '#64748b',
-                cursor: 'pointer'
-              }}
-            >
-              ES
-            </button>
+      {/* ── GOOGLE CLOUD CONSOLE RESOURCE HEADER ── */}
+      <div className="gcp-resource-page-header">
+        <div className="gcp-resource-header-container">
+          {/* Breadcrumb Hierarchy */}
+          <div className="gcp-resource-breadcrumb-row">
+            <Link href="/" className="gcp-resource-back-link">
+              Home
+            </Link>
+            <span className="gcp-resource-breadcrumb-sep">/</span>
+            <Link href="/catalog" className="gcp-resource-back-link">
+              {isEs ? 'Fármacos Humanos & TRT' : 'Human Pharmaceuticals & TRT'}
+            </Link>
+            <span className="gcp-resource-breadcrumb-sep">/</span>
+            <span className="gcp-resource-breadcrumb-current">{p.name || 'Testosterone Enanthate/Norma® 250 mg/ml'}</span>
           </div>
 
-          <button
-            onClick={() => setIsShareDrawerOpen(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              color: '#334155',
-              cursor: 'pointer'
-            }}
-          >
-            <Share2 size={13} />
-            <span>{isEs ? 'Compartir Ficha' : 'Share Monograph'}</span>
-          </button>
-        </div>
-      </div>
+          {/* Title & Status Pills */}
+          <div className="gcp-resource-main-row">
+            <div className="gcp-resource-title-group">
+              <div className="gcp-resource-title-line">
+                <div className="gcp-resource-icon-badge">
+                  <Syringe size={16} />
+                </div>
+                <h1 className="gcp-resource-title">{p.name || 'Testosterone Enanthate/Norma® 250 mg/ml'}</h1>
+                <span className="gcp-status-pill gcp-status-active">
+                  <span className="gcp-status-dot"></span>
+                  <span>EU GMP Certified · Athens (Greece)</span>
+                </span>
+                <span className="gcp-status-pill gcp-status-category">
+                  EOF Greece MA # 45945/03-10-2008
+                </span>
+                <span className="gcp-status-pill gcp-status-pom">
+                  <Lock size={11} />
+                  <span>{isEs ? 'Uso Médico Exclusivo (POM)' : 'Prescription Only Medicine (POM)'}</span>
+                </span>
+                <div className="gcp-resource-sku-wrap">
+                  <span className="gcp-resource-sku-label">SKU:</span>
+                  <CopyableId value={p.sku || 'SKU-NORMA-TE-250-1ML'} displayValue={p.sku || 'SKU-NORMA-TE-250-1ML'} />
+                </div>
+              </div>
 
-      {/* ── BREADCRUMB ── */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 1.5rem 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#64748b' }}>
-          <Link href="/" style={{ color: '#64748b', textDecoration: 'none' }}>Home</Link>
-          <ChevronRight size={12} />
-          <Link href="/catalog" style={{ color: '#64748b', textDecoration: 'none' }}>
-            {isEs ? 'Fármacos Humanos & TRT' : 'Human Pharmaceuticals & TRT'}
-          </Link>
-          <ChevronRight size={12} />
-          <span style={{ color: '#003666', fontWeight: 700 }}>Testosterone Enanthate/Norma® 250 mg/ml</span>
+              {/* Sub-line: Clinical Metadata Strip */}
+              <div className="gcp-resource-meta-line">
+                <span className="gcp-resource-meta-item">
+                  <strong>ATC:</strong> G03BA03 (Androgens)
+                </span>
+                <span className="gcp-resource-meta-sep">•</span>
+                <span className="gcp-resource-meta-item">
+                  <strong>Form:</strong> 1 mL Amber Ampoule
+                </span>
+                <span className="gcp-resource-meta-sep">•</span>
+                <span className="gcp-resource-meta-item">
+                  <strong>Vehicle:</strong> Castor Oil Depot Excipient
+                </span>
+                <span className="gcp-resource-meta-sep">•</span>
+                <span className="gcp-resource-meta-item">
+                  <strong>Release:</strong> 10 to 14 days depot kinetics
+                </span>
+              </div>
+            </div>
+
+            {/* Right Action Toolbar: Language Segmented Switch + Actions */}
+            <div className="gcp-resource-action-toolbar">
+              <div className="gcp-segmented-switch">
+                <button
+                  type="button"
+                  className={`gcp-segmented-btn ${lang === 'en' ? 'active' : ''}`}
+                  onClick={() => setLang('en')}
+                >
+                  EN
+                </button>
+                <button
+                  type="button"
+                  className={`gcp-segmented-btn ${lang === 'es' ? 'active' : ''}`}
+                  onClick={() => setLang('es')}
+                >
+                  ES
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={() => setIsShareDrawerOpen(true)}
+              >
+                <Share2 size={13} />
+                <span>{isEs ? 'Compartir' : 'Share'}</span>
+              </button>
+
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={() => setIsInquiryDrawerOpen(true)}
+              >
+                <FileText size={13} />
+                <span>{isEs ? 'Solicitar Asignación' : 'Request Allocation'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

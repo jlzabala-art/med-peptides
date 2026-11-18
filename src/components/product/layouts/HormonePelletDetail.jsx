@@ -138,12 +138,7 @@ export default function HormonePelletDetail({
     return () => window.removeEventListener('open-global-qr-modal', handleGlobalQr);
   }, []);
 
-  const canonicalUrl = useMemo(() => {
-    if (typeof window !== 'undefined' && window.location.origin) {
-      return `${window.location.origin}/p/${slug}`;
-    }
-    return `${_baseUrl}/p/${slug}`;
-  }, [slug, _baseUrl]);
+  const canonicalUrl = useMemo(() => `${_baseUrl}/p/${slug}`, [slug, _baseUrl]);
 
   // Merge authoritative registry data with Firestore/page props
   const p = useMemo(() => {
