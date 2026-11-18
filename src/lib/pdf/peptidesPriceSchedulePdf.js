@@ -129,6 +129,14 @@ export function buildPeptidesPriceSchedulePdfBlob({
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
+  doc.setProperties({
+    title: isEs ? 'Tarifa Oficial de Péptidos Bioactivos B2B - Atlas Health' : 'Official B2B Peptide Price Schedule - Atlas Health',
+    subject: 'Certified Lyophilized Bioactive Vials (10R Borosilicate)',
+    author: 'Atlas Health Services · Clinical Supply Division',
+    keywords: 'peptides, price schedule, b2b, atlas health, bioactive, cGMP',
+    creator: 'Atlas Health Verified Document Engine'
+  });
+
   // Helper price formatter
   const formatMoney = (val) => {
     if (typeof formatPrice === 'function') {

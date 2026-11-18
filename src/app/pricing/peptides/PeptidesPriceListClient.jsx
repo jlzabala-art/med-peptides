@@ -151,7 +151,7 @@ export default function PeptidesPriceListClient({
           }
         },
         primaryAction: {
-          label: isEs ? 'Vista PDF' : 'Preview PDF',
+          label: isEs ? 'Tarifa PDF' : 'PDF Schedule',
           onClick: () => setIsPdfPreviewOpen(true),
         },
       },
@@ -487,26 +487,8 @@ export default function PeptidesPriceListClient({
         setIsNavDrawerOpen={setIsNavDrawerOpen}
         lang={lang}
         handleLanguageChange={handleLanguageChange}
-        isAtlasAiOpen={isAtlasAiOpen}
-        setIsAtlasAiOpen={setIsAtlasAiOpen}
         currency={currency}
         handleCurrencyChange={handleCurrencyChange}
-        authUser={authUser}
-        authRole={authRole}
-        avatarBgColor={avatarBgColor}
-        effectiveInitials={effectiveInitials}
-        effectiveDisplayName={effectiveDisplayName}
-        effectiveRoleLabel={effectiveRoleLabel}
-        handleLogout={handleLogout}
-        isCurrencySheetOpen={isCurrencySheetOpen}
-        setIsCurrencySheetOpen={setIsCurrencySheetOpen}
-        isMobileMoreMenuOpen={isMobileMoreMenuOpen}
-        setIsMobileMoreMenuOpen={setIsMobileMoreMenuOpen}
-        setIsPdfPreviewOpen={setIsPdfPreviewOpen}
-        handleShareSchedule={handleShareSchedule}
-        copied={copied}
-        setInquiryProductContext={setInquiryProductContext}
-        setIsInquiryDrawerOpen={setIsInquiryDrawerOpen}
       />
 
       <main className="atlas-page-shell peptides-main-container">

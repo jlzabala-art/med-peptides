@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Printer, Download, Sparkles, Layers, List, Smartphone, FileText } from 'lucide-react';
+import { X, Download, Sparkles, Smartphone, FileText } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import toast from 'react-hot-toast';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
-import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import { buildPeptidesPriceSchedulePdfBlob } from '@/lib/pdf/peptidesPriceSchedulePdf';
 
 /**
@@ -122,8 +121,7 @@ export default function PeptidePricePdfPreviewModal({
   lang = 'en'
 }) {
   const [pdfLang, setPdfLang] = useState(lang || 'en');
-  const [groupByCategory, setGroupByCategory] = useState(true);
-  const [isRealPdfOpen, setIsRealPdfOpen] = useState(false);
+  const groupByCategory = true;
   // Mobile view mode: 'mobile' (3-column adaptive reader without collisions) or 'a4' (scaled A4 paper sheet viewer)
   const [mobileViewMode, setMobileViewMode] = useState('mobile');
   const [a4ZoomScale, setA4ZoomScale] = useState(0.45);
@@ -177,7 +175,7 @@ export default function PeptidePricePdfPreviewModal({
       toast.success(isEs ? 'PDF oficial descargado con éxito' : 'Official PDF downloaded successfully');
     } catch (err) {
       console.error('[pdf-download]', err);
-      setIsRealPdfOpen(true);
+      toast.error(isEs ? 'Error al generar el PDF oficial' : 'Error generating official PDF');
     }
   };
 
@@ -409,7 +407,7 @@ export default function PeptidePricePdfPreviewModal({
         }
       `}</style>
 
-      {/* ── Top Sticky Document Viewer AppBar (Google Drive / GCP Standard) ── */}
+      {/* ── Top Sticky Document Viewer AppBar (Single-Action GCP Standard) ── */}
       <div
         className="pdf-preview-no-print pdf-toolbar-shell"
         style={{
@@ -418,13 +416,8 @@ export default function PeptidePricePdfPreviewModal({
           background: '#ffffff',
           borderRadius: '0 0 8px 8px',
           padding: '10px 18px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '8px',
           marginBottom: '1rem',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.22)',
           position: 'sticky',
           top: 0,
           zIndex: 30,
@@ -432,14 +425,128 @@ export default function PeptidePricePdfPreviewModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Row 1 on Mobile / Left Group on Desktop */}
-        <div className="pdf-toolbar-row1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flex: '1 1 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-            {/* Mobile-first Close Icon Button on the Left (Google Drive Viewer Pattern) */}
+        {/* Desktop Layout: Single Unified Bar */}
+        <div className="pdf-desktop-only" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              background: '#003666',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Sparkles size={16} color="#bae6fd" />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{
+                fontWeight: 800,
+                fontSize: '0.88rem',
+                color: '#0f172a',
+                lineHeight: 1.2
+              }}>
+                {isEs ? 'Tarifa Oficial B2B · Péptidos Bioactivos' : 'Official B2B Price Schedule · Bioactive Peptides'}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontWeight: 700, color: '#0d9488' }}>
+                  {products.length} {isEs ? 'Formulaciones' : 'Formulations'} · {currency}
+                </span>
+                <span>• {isEs ? 'Pureza ≥99.0% HPLC · Calidad cGMP' : '≥99.0% HPLC Purity · cGMP Quality'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+            <div style={{
+              display: 'inline-flex',
+              background: '#f1f5f9',
+              padding: '2px',
+              borderRadius: '6px',
+              border: '1px solid #e2e8f0'
+            }}>
+              {[
+                { code: 'en', label: 'EN' },
+                { code: 'es', label: 'ES' }
+              ].map((item) => {
+                const active = pdfLang === item.code;
+                return (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => setPdfLang(item.code)}
+                    style={{
+                      border: 'none',
+                      background: active ? '#003666' : 'transparent',
+                      color: active ? '#ffffff' : '#475569',
+                      fontWeight: active ? 800 : 600,
+                      fontSize: '0.72rem',
+                      padding: '5px 9px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDownloadDirectPdf}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                background: '#1a73e8',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '7px 16px',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(26,115,232,0.3)',
+                transition: 'background 0.15s ease'
+              }}
+              title={isEs ? 'Descargar PDF Oficial A4 de máxima calidad' : 'Download official high-resolution A4 PDF'}
+            >
+              <Download size={15} />
+              <span>{isEs ? 'Descargar PDF Oficial' : 'Download Official PDF'}</span>
+            </button>
+
             <button
               type="button"
               onClick={onClose}
-              className="pdf-mobile-only"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#5f6368',
+                borderRadius: '6px',
+                padding: '7px 12px',
+                fontSize: '0.80rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              aria-label={isEs ? 'Cerrar' : 'Close'}
+            >
+              <X size={15} />
+              <span>{isEs ? 'Cerrar' : 'Close'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Layout: Compact 2-Row Bar */}
+        <div className="pdf-mobile-only" style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', width: '100%' }}>
+            <button
+              type="button"
+              onClick={onClose}
               aria-label={isEs ? 'Cerrar visor' : 'Close viewer'}
               style={{
                 width: '32px',
@@ -448,6 +555,7 @@ export default function PeptidePricePdfPreviewModal({
                 border: '1px solid #dadce0',
                 background: '#f8fafc',
                 color: '#334155',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
@@ -458,41 +566,6 @@ export default function PeptidePricePdfPreviewModal({
               <X size={16} />
             </button>
 
-            <div className="pdf-desktop-only" style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '6px',
-              background: '#e8f0fe',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <Sparkles size={16} color="#1a73e8" />
-            </div>
-
-            <div style={{ minWidth: 0 }}>
-              <div style={{
-                fontWeight: 800,
-                fontSize: '0.86rem',
-                color: '#202124',
-                lineHeight: 1.2,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}>
-                {isEs ? 'Tarifa Oficial B2B (PDF A4)' : 'Official B2B Schedule (A4)'}
-              </div>
-              <div style={{ fontSize: '0.70rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ fontWeight: 700, color: '#1a73e8' }}>
-                  {products.length} {isEs ? 'Viales' : 'Items'} · {currency}
-                </span>
-                <span className="pdf-desktop-only">• {isEs ? 'Listo para Imprimir o Guardar PDF' : 'A4 Print & PDF Export Ready'}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Row 1 Right: Language + Primary PDF Print/Save CTA */}
-          <div className="pdf-mobile-only" style={{ alignItems: 'center', gap: '6px', flexShrink: 0 }}>
             <div style={{
               display: 'inline-flex',
               background: '#f1f5f9',
@@ -509,11 +582,11 @@ export default function PeptidePricePdfPreviewModal({
                     onClick={() => setPdfLang(code)}
                     style={{
                       border: 'none',
-                      background: active ? '#1a73e8' : 'transparent',
+                      background: active ? '#003666' : 'transparent',
                       color: active ? '#ffffff' : '#475569',
                       fontWeight: active ? 800 : 600,
                       fontSize: '0.68rem',
-                      padding: '4px 7px',
+                      padding: '4px 8px',
                       borderRadius: '4px',
                       cursor: 'pointer',
                       textTransform: 'uppercase'
@@ -536,223 +609,73 @@ export default function PeptidePricePdfPreviewModal({
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
-                padding: '6px 12px',
-                fontSize: '0.74rem',
+                padding: '6px 14px',
+                fontSize: '0.76rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 boxShadow: '0 1px 2px rgba(26,115,232,0.3)',
                 whiteSpace: 'nowrap'
               }}
-              title={isEs ? 'Descargar archivo PDF oficial (A4)' : 'Download official PDF price schedule (A4)'}
+              title={isEs ? 'Descargar PDF oficial' : 'Download official PDF'}
             >
-              <Download size={13} />
+              <Download size={14} />
               <span>{isEs ? 'Descargar PDF' : 'Download PDF'}</span>
             </button>
           </div>
-        </div>
 
-        {/* Row 2 on Mobile / Right Controls on Desktop */}
-        <div className="pdf-toolbar-row2" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {/* Grouping Mode Switcher: By Category (Default) vs Continuous */}
-          <div style={{
-            display: 'inline-flex',
-            background: '#f1f5f9',
-            padding: '2px',
-            borderRadius: '6px',
-            border: '1px solid #e2e8f0'
-          }}>
-            <button
-              type="button"
-              onClick={() => setGroupByCategory(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                border: 'none',
-                background: groupByCategory ? '#ffffff' : 'transparent',
-                color: groupByCategory ? '#0f172a' : '#64748b',
-                fontWeight: groupByCategory ? 700 : 500,
-                fontSize: '0.71rem',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                boxShadow: groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-              }}
-            >
-              <Layers size={12} />
-              <span>{isEs ? 'Categorías' : 'Categories'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setGroupByCategory(false)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                border: 'none',
-                background: !groupByCategory ? '#ffffff' : 'transparent',
-                color: !groupByCategory ? '#0f172a' : '#64748b',
-                fontWeight: !groupByCategory ? 700 : 500,
-                fontSize: '0.71rem',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                boxShadow: !groupByCategory ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-              }}
-            >
-              <List size={12} />
-              <span>{isEs ? 'Continua' : 'Continuous'}</span>
-            </button>
-          </div>
-
-          {/* Mobile View Mode Switcher: 📱 Mobile Reader vs 📄 A4 Sheet */}
-          <div className="pdf-mobile-only" style={{
-            background: '#f1f5f9',
-            padding: '2px',
-            borderRadius: '6px',
-            border: '1px solid #e2e8f0'
-          }}>
-            <button
-              type="button"
-              onClick={() => setMobileViewMode('mobile')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                border: 'none',
-                background: mobileViewMode === 'mobile' ? '#003666' : 'transparent',
-                color: mobileViewMode === 'mobile' ? '#ffffff' : '#475569',
-                fontWeight: 700,
-                fontSize: '0.70rem',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              <Smartphone size={12} />
-              <span>{isEs ? 'Vista Móvil' : 'Mobile View'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMobileViewMode('a4')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                border: 'none',
-                background: mobileViewMode === 'a4' ? '#003666' : 'transparent',
-                color: mobileViewMode === 'a4' ? '#ffffff' : '#475569',
-                fontWeight: 700,
-                fontSize: '0.70rem',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              <FileText size={12} />
-              <span>{isEs ? 'Hoja A4' : 'A4 Sheet'}</span>
-            </button>
-          </div>
-
-          {/* Desktop-Only Language + Print + Close Controls */}
-          <div className="pdf-desktop-only" style={{
-            background: '#f1f5f9',
-            padding: '2px',
-            borderRadius: '6px',
-            border: '1px solid #e2e8f0'
-          }}>
-            {[
-              { code: 'en', label: 'EN' },
-              { code: 'es', label: 'ES' }
-            ].map((item) => {
-              const active = pdfLang === item.code;
-              return (
-                <button
-                  key={item.code}
-                  type="button"
-                  onClick={() => setPdfLang(item.code)}
-                  style={{
-                    border: 'none',
-                    background: active ? '#1a73e8' : 'transparent',
-                    color: active ? '#ffffff' : '#475569',
-                    fontWeight: active ? 800 : 600,
-                    fontSize: '0.72rem',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleDownloadDirectPdf}
-            className="pdf-desktop-only"
-            style={{
-              alignItems: 'center',
-              gap: '6px',
-              background: '#1a73e8',
-              color: '#ffffff',
-              border: 'none',
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#003666' }}>
+              {products.length} {isEs ? 'Formulaciones' : 'Formulations'} · {currency}
+            </span>
+            <div style={{
+              display: 'inline-flex',
+              background: '#f1f5f9',
+              padding: '2px',
               borderRadius: '6px',
-              padding: '7px 14px',
-              fontSize: '0.80rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(60,64,67,0.3)'
-            }}
-            title={isEs ? 'Descargar archivo PDF oficial (A4)' : 'Download official PDF price schedule (A4)'}
-          >
-            <Download size={14} />
-            <span>{isEs ? 'Descargar PDF Oficial' : 'Download Official PDF'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsRealPdfOpen(true)}
-            className="pdf-desktop-only"
-            style={{
-              alignItems: 'center',
-              gap: '6px',
-              background: '#ffffff',
-              color: '#334155',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              padding: '7px 12px',
-              fontSize: '0.80rem',
-              fontWeight: 650,
-              cursor: 'pointer'
-            }}
-            title={isEs ? 'Visor de impresión y descarga' : 'Print & viewer modal'}
-          >
-            <Printer size={14} />
-            <span>{isEs ? 'Imprimir / Visor' : 'Print / Viewer'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="pdf-desktop-only"
-            style={{
-              alignItems: 'center',
-              gap: '4px',
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              color: '#5f6368',
-              borderRadius: '6px',
-              padding: '7px 12px',
-              fontSize: '0.80rem',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            <X size={14} />
-            <span>{isEs ? 'Cerrar' : 'Close'}</span>
-          </button>
+              border: '1px solid #e2e8f0'
+            }}>
+              <button
+                type="button"
+                onClick={() => setMobileViewMode('mobile')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  border: 'none',
+                  background: mobileViewMode === 'mobile' ? '#003666' : 'transparent',
+                  color: mobileViewMode === 'mobile' ? '#ffffff' : '#475569',
+                  fontWeight: 700,
+                  fontSize: '0.70rem',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                <Smartphone size={12} />
+                <span>{isEs ? 'Vista Móvil' : 'Mobile'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileViewMode('a4')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  border: 'none',
+                  background: mobileViewMode === 'a4' ? '#003666' : 'transparent',
+                  color: mobileViewMode === 'a4' ? '#ffffff' : '#475569',
+                  fontWeight: 700,
+                  fontSize: '0.70rem',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                <FileText size={12} />
+                <span>{isEs ? 'Hoja A4' : 'A4 Sheet'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1297,23 +1220,6 @@ export default function PeptidePricePdfPreviewModal({
           </div>
         </div>
       </div>
-      <DocumentPreviewModal
-        isOpen={isRealPdfOpen}
-        onClose={() => setIsRealPdfOpen(false)}
-        getPdfBlob={() => buildPeptidesPriceSchedulePdfBlob({
-          products,
-          currency,
-          currencySymbol,
-          formatPrice,
-          isDistributor,
-          isEs,
-          groupByCategory,
-          documentRef: 'ATLAS-B2B-2026-Q4'
-        })}
-        downloadName={isEs ? `Atlas_Tarifa_Peptidos_${currency}.pdf` : `Atlas_Peptides_Price_Schedule_${currency}.pdf`}
-        title={isEs ? 'Tarifa Oficial de Péptidos (A4)' : 'Official Peptides Price Schedule (A4)'}
-        subtitle={`${products.length} Items · ${currency}`}
-      />
     </div>
   );
 }

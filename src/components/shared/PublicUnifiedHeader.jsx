@@ -83,6 +83,8 @@ export default function PublicUnifiedHeader({
   customTier2 = null,
   // Hide contact / inquiry envelope button in Tier 1
   hideContactButton = false,
+  // Hide canonical copy button in Tier 1
+  hideCopyButton = false,
   // Hide global catalog search button (⌘K) in Tier 1
   hideSearchButton = false,
   // Hide Account Manager multi-portal hub button in Tier 1
@@ -154,7 +156,7 @@ export default function PublicUnifiedHeader({
     pathname?.startsWith('/vials') ||
     pathname?.startsWith('/b2b');
   const effectiveHideCurrencySelector = hideCurrencySelector || (!onCurrencyChange && !isPricingOrCatalogRoute);
-  const effectiveHideCopyButton = Boolean(pathname?.startsWith('/rx/intake'));
+  const effectiveHideCopyButton = hideCopyButton || Boolean(pathname?.startsWith('/rx/intake'));
   const effectiveHideContactButton = hideContactButton || Boolean(screenContext?.bottomBar?.primaryAction);
   const isAuthorizedDoctorRole = ['doctor', 'medical_director', 'admin'].includes(activeRole);
   const isClinicalNonQuoteRoute = Boolean(pathname?.startsWith('/rx') || pathname?.startsWith('/verify'));
