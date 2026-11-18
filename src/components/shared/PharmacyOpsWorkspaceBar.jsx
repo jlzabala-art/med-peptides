@@ -362,7 +362,7 @@ export default function PharmacyOpsWorkspaceBar({ lang = 'en' }) {
                                       </span>
                                     )}
                                   </div>
-                                  <div style={{ fontSize: '0.69rem', color: '#475569', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  <div style={{ fontSize: '0.71rem', color: '#334155', marginTop: '3px', lineHeight: 1.35, wordBreak: 'break-word' }}>
                                     {rx.title}
                                   </div>
                                 </div>

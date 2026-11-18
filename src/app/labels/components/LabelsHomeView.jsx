@@ -620,19 +620,18 @@ export default function LabelsHomeView({
                     align: 'left',
                     render: (_val, p) => {
                       const removedLen = Array.isArray(p.removedParts) ? p.removedParts.length : 0;
-                      const activeLabelsLen = Array.isArray(p.pharmacyLabels) && p.pharmacyLabels.length > 0 ? p.pharmacyLabels.length : null;
-                      const activePartsLen = Array.isArray(p.parts) && p.parts.length > 0 ? p.parts.length : null;
-                      const totalParts = Math.max(
-                        1,
-                        activeLabelsLen ??
-                        activePartsLen ??
-                        Math.max(1, Number(
-                          p.partsCount ||
-                            (Array.isArray(p.formulationBlocks) ? p.formulationBlocks.length : 0) ||
-                            (Array.isArray(p.items) ? p.items.length : 0) ||
-                            1
-                        ) - removedLen)
-                      );
+                      let totalParts = 1;
+                      if (typeof p.partsCount === 'number' && p.partsCount > 0) {
+                        totalParts = Math.max(1, p.partsCount - removedLen);
+                      } else if (Array.isArray(p.formulationBlocks) && p.formulationBlocks.length > 0) {
+                        totalParts = p.formulationBlocks.length;
+                      } else if (Array.isArray(p.pharmacyLabels) && p.pharmacyLabels.length > 0) {
+                        totalParts = p.pharmacyLabels.length;
+                      } else if (Array.isArray(p.parts) && p.parts.length > 0) {
+                        totalParts = p.parts.length;
+                      } else if (Array.isArray(p.phases) && p.phases.length > 0) {
+                        totalParts = p.phases.length;
+                      }
                       const labeledCount = p.labeledParts && typeof p.labeledParts === 'object'
                         ? Object.values(p.labeledParts).filter(Boolean).length
                         : 0;
