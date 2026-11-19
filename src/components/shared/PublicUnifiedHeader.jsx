@@ -112,7 +112,9 @@ export default function PublicUnifiedHeader({
   clinicLogo = null,
   clinicName = null,
   // Sticky sub-banner (e.g. Doctor View / Patient View Mode indicator)
-  banner = null
+  banner = null,
+  // 100% pure public mode: hides internal user/admin portal badge for clean shareable clinical guides
+  purePublic = false
 }) {
   const pathname = usePathname();
   const isPublicProductOrCatalogPage =
@@ -124,8 +126,9 @@ export default function PublicUnifiedHeader({
     pathname?.startsWith('/shared/') ||
     pathname?.startsWith('/rx/') ||
     pathname?.startsWith('/proto') ||
-    pathname?.startsWith('/compounding');
-  const effectiveHideAccountManager = hideAccountManager || isPublicProductOrCatalogPage;
+    pathname?.startsWith('/compounding') ||
+    pathname?.startsWith('/guides');
+  const effectiveHideAccountManager = hideAccountManager || isPublicProductOrCatalogPage || purePublic;
 
   // Rule #69: Atlas AI lives in ONE place (the universal Bottom Sticky Bar), never duplicated in the top header.
   const effectiveHideAiButton = true;
@@ -806,12 +809,14 @@ export default function PublicUnifiedHeader({
                 <HelpCircle size={15} />
               </button>
 
-              {/* Google Cloud Console UX Standard User Badge & Quick Logout */}
-              <GcpUserBadge
-                variant="dark"
-                lang={lang}
-                loginRedirect={resolvedRedirect}
-              />
+              {/* Google Cloud Console UX Standard User Badge & Quick Logout (hidden in 100% purePublic mode) */}
+              {!purePublic && (
+                <GcpUserBadge
+                  variant="dark"
+                  lang={lang}
+                  loginRedirect={resolvedRedirect}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -68,7 +68,8 @@ const PORTAL_PREFIXES = [
   '/pricing',
   '/compounding',
   '/calculator',
-  '/vials'
+  '/vials',
+  '/guides'
 ];
 
 function StorefrontShell({ children }) {
