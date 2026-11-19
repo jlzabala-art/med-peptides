@@ -570,6 +570,10 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'Oral Minoxidil (man) 3.5 mg + Selenium yeast 80 mg',
+    apis: [
+      { name: 'Oral Minoxidil (man)', drugName: 'Oral Minoxidil (man)', dosage: '3.5 mg', dose: '3.5 mg', strength: '3.5 mg', isVehicleOrBase: false },
+      { name: 'Selenium yeast', drugName: 'Selenium yeast', dosage: '80 mg', dose: '80 mg', strength: '80 mg', isVehicleOrBase: false }
+    ],
     directions: 'Take 1 capsule per day with food. 90 capsules for 3 months course.',
     warnings: 'Take with food. Do not exceed prescribed dose. Keep out of reach of children.',
     prodDate: '03-09-2026',
@@ -600,6 +604,11 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'Latanoprost 0.005 % + Dutasteride 0.25 % + TrichoXidil 4 %',
+    apis: [
+      { name: 'Latanoprost', drugName: 'Latanoprost', dosage: '0.005 %', dose: '0.005 %', strength: '0.005 %', isVehicleOrBase: false },
+      { name: 'Dutasteride', drugName: 'Dutasteride', dosage: '0.25 %', dose: '0.25 %', strength: '0.25 %', isVehicleOrBase: false },
+      { name: 'TrichoXidil', drugName: 'TrichoXidil', dosage: '4 %', dose: '4 %', strength: '4 %', isVehicleOrBase: false }
+    ],
     directions: 'Apply at night before bedtime. Leave on scalp overnight. Wash next day. Massage gently.',
     warnings: 'For topical use only. Avoid contact with eyes and mucous membranes.',
     prodDate: '03-09-2026',
@@ -703,6 +712,14 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'P5P (Pyridoxal-5-Phosphate) 25 mg + Magnesium Glycinate 500 mg + L-Theanine 200 mg + Glycine 1000 mg + 5-HTP 50 mg + Apigenin 50 mg',
+    apis: [
+      { name: 'P5P (Pyridoxal-5-Phosphate)', drugName: 'P5P (Pyridoxal-5-Phosphate)', dosage: '25 mg', dose: '25 mg', strength: '25 mg', isVehicleOrBase: false },
+      { name: 'Magnesium Glycinate', drugName: 'Magnesium Glycinate', dosage: '500 mg', dose: '500 mg', strength: '500 mg', isVehicleOrBase: false },
+      { name: 'L-Theanine', drugName: 'L-Theanine', dosage: '200 mg', dose: '200 mg', strength: '200 mg', isVehicleOrBase: false },
+      { name: 'Glycine', drugName: 'Glycine', dosage: '1000 mg', dose: '1000 mg', strength: '1000 mg', isVehicleOrBase: false },
+      { name: '5-HTP', drugName: '5-HTP', dosage: '50 mg', dose: '50 mg', strength: '50 mg', isVehicleOrBase: false },
+      { name: 'Apigenin', drugName: 'Apigenin', dosage: '50 mg', dose: '50 mg', strength: '50 mg', isVehicleOrBase: false }
+    ],
     directions: 'Take 3 capsules per dose nightly 30-60 minutes before bedtime.',
     warnings: 'May cause drowsiness. Do not drive or operate machinery after consumption. Keep out of reach of children.',
     prodDate: '18-08-2026',
@@ -1213,7 +1230,12 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     pharmacyName: 'Pharmapolis Compounding Pharmacy',
     pharmacyEmail: 'pharmapolisplovdiv@gmail.com',
-    formula: 'Fagron TrichoWash™ 250 mL Sulfate-Free Dermocompatible Cleansing Base',
+    formula: 'Zinc Pyrithione 2% + Arginine 1.5% + D-Panthenol 0.5%',
+    apis: [
+      { name: 'Zinc Pyrithione', drugName: 'Zinc Pyrithione', activeIngredient: 'Zinc Pyrithione', dosage: '2 %', dose: '2 %', strength: '2 %', isVehicleOrBase: false },
+      { name: 'Arginine', drugName: 'Arginine', activeIngredient: 'Arginine', dosage: '1.5 %', dose: '1.5 %', strength: '1.5 %', isVehicleOrBase: false },
+      { name: 'D-Panthenol', drugName: 'D-Panthenol', activeIngredient: 'D-Panthenol', dosage: '0.5 %', dose: '0.5 %', strength: '0.5 %', isVehicleOrBase: false }
+    ],
     vehicle: { name: 'TrichoWash™ (Sulfate-Free Dermocompatible Scalp Wash, 250 mL)', volume: '250 mL' },
     directions: 'Directions for use: Massage for 2 minutes and rinse.',
     warnings: 'For topical scalp wash only. Rinse thoroughly with water. Avoid contact with eyes.',
@@ -1249,7 +1271,13 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     pharmacyName: 'Pharmapolis Compounding Pharmacy',
     pharmacyEmail: 'pharmapolisplovdiv@gmail.com',
-    formula: 'Clinical Trichology Synergistic Micronutrient Blend',
+    formula: 'Zinc sulfate 50 mg + Astaxanthin 10 mg + Selenium yeast 90 mg',
+    apis: [
+      { name: 'Zinc sulfate', drugName: 'Zinc sulfate', activeIngredient: 'Zinc sulfate', dosage: '50 mg', dose: '50 mg', strength: '50 mg', isVehicleOrBase: false },
+      { name: 'Astaxanthin', drugName: 'Astaxanthin', activeIngredient: 'Astaxanthin', dosage: '10 mg', dose: '10 mg', strength: '10 mg', isVehicleOrBase: false },
+      { name: 'Selenium yeast', drugName: 'Selenium yeast', activeIngredient: 'Selenium yeast', dosage: '90 mg', dose: '90 mg', strength: '90 mg', isVehicleOrBase: false }
+    ],
+    vehicle: { name: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free.', volume: '60 Capsules' },
     directions: 'Directions: Take one capsule daily.',
     warnings: 'Keep out of reach of children. Store in a cool dry place.',
     prodDate: '23-07-2026',
@@ -1528,6 +1556,84 @@ function extractCleanApisFromSource(source) {
 }
 
 /**
+ * Helper: Parses a compound formula string ("DrugA 2% + DrugB 50 mg") into structured active ingredients.
+ */
+function parseFormulaToApis(formulaStr) {
+  if (!formulaStr || typeof formulaStr !== 'string') return [];
+  const parts = formulaStr.split(/\s*\+\s*/).map(p => p.trim()).filter(Boolean);
+  return parts.map(part => {
+    const m = part.match(/^(.*?)(?::\s*|\s+)(\d+(?:\.\d+)?\s*(?:%|mg|g|mcg|µg|ml|iu|ui|caps?|units?)|\b(?:q\.s\.|as directed)\b.*)$/i);
+    if (m) {
+      const drug = m[1].trim();
+      const dose = m[2].trim();
+      return {
+        name: drug,
+        drugName: drug,
+        activeIngredient: drug,
+        dosage: dose,
+        dose: dose,
+        strength: dose,
+        isVehicleOrBase: false
+      };
+    }
+    return {
+      name: part,
+      drugName: part,
+      activeIngredient: part,
+      dosage: '',
+      dose: '',
+      strength: '',
+      isVehicleOrBase: false
+    };
+  });
+}
+
+/**
+ * Helper: Extracts non-vehicle active ingredients for a specific phase or bottle from a prescription,
+ * strictly preventing ingredients from different phases (e.g. oral capsules vs topical shampoo) from being mixed!
+ */
+function extractApisForPhase(rx, phaseNum, matchItem) {
+  if (!rx) return [];
+  const flatLines = rx.items || rx.prescriptionLines || rx.compounds || [];
+  if (!Array.isArray(flatLines) || flatLines.length === 0) return [];
+
+  // 1. Match by formulationIndex or phaseNumber
+  let matching = flatLines.filter(l => (l.formulationIndex || l.phaseNumber) === phaseNum);
+  if (matching.length > 0) return extractCleanApisFromSource({ items: matching });
+
+  // 2. Match by line ID convention line_XX_<phaseIndex>_YY (0-based)
+  const zeroBasedIdx = phaseNum - 1;
+  matching = flatLines.filter(l => {
+    const id = String(l.id || '');
+    const parts = id.split('_');
+    return parts.length >= 3 && Number(parts[2]) === zeroBasedIdx;
+  });
+  if (matching.length > 0) return extractCleanApisFromSource({ items: matching });
+
+  // 3. Match by pharmaceutical form / vehicle cues (e.g. shampoo/wash vs capsules vs solution vs oil)
+  const targetCues = `${matchItem?.productTitle || ''} ${matchItem?.productName || ''} ${matchItem?.dosageForm || ''} ${matchItem?.vehicle?.name || matchItem?.vehicle || ''}`.toLowerCase();
+  matching = flatLines.filter(l => {
+    const lineCorpus = `${l.name || ''} ${l.productName || ''} ${l.formulationBlock || ''} ${l.dosageForm || ''}`.toLowerCase();
+    if (targetCues.includes('shampoo') || targetCues.includes('wash') || targetCues.includes('trichowash')) {
+      return lineCorpus.includes('wash') || lineCorpus.includes('pyrithione') || lineCorpus.includes('panthenol') || lineCorpus.includes('arginine');
+    }
+    if (targetCues.includes('capsule') || targetCues.includes('oral')) {
+      return lineCorpus.includes('zinc sulfate') || lineCorpus.includes('astaxanthin') || lineCorpus.includes('selenium') || lineCorpus.includes('oral') || lineCorpus.includes('mg');
+    }
+    if (targetCues.includes('oil') || targetCues.includes('pre-wash')) {
+      return lineCorpus.includes('oil') || lineCorpus.includes('clotrimazole') || lineCorpus.includes('ginkgo') || lineCorpus.includes('tocoferol') || lineCorpus.includes('vitamin e');
+    }
+    if (targetCues.includes('solution') || targetCues.includes('trichosol')) {
+      return lineCorpus.includes('sol') || lineCorpus.includes('minoxidil') || lineCorpus.includes('ketoconazole') || lineCorpus.includes('spironolactone');
+    }
+    return false;
+  });
+  if (matching.length > 0) return extractCleanApisFromSource({ items: matching });
+
+  return [];
+}
+
+/**
  * Helper: Extracts compounding vehicle from block/rx or infers the proper galenic vehicle from clinical cues.
  */
 function extractVehicleFromSource(block, rx, volumeStr = '', dosageFormStr = '', directionsStr = '', titleStr = '') {
@@ -1785,23 +1891,40 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       };
     });
   } else if (matches.length > 0) {
-    derivedLabels = matches.map(m => ({
-      ...m,
-      patientName: auth.patientName || m.patientName,
-      doctorName: auth.doctorName || m.doctorName,
-      doctorLicense: auth.doctorLicense || m.doctorLicense,
-      clinicName: '',
-      showClinicOnLabel: false,
-      fileNumber: auth.fileNumber || m.fileNumber,
-      targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
-      pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'Pharmapolis Compounding Pharmacy',
-      pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'Pharmapolis Compounding Pharmacy',
-      pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || m.pharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
-      expDate: rx.expDate || rx.expiryDate || m.expDate || rxExpDate,
-      labelMarkdown: rx.labelMarkdown || m.labelMarkdown || null,
-      apis: m.apis || extractCleanApisFromSource(rx),
-      formula: m.formula || ''
-    }));
+    derivedLabels = matches.map(m => {
+      // Resolve proper active ingredients (never mix multi-part prescription items!)
+      let resolvedApis = Array.isArray(m.apis) && m.apis.length > 0 ? m.apis : null;
+      if (!resolvedApis && m.formula && !/cleansing base|compounded protocol/i.test(m.formula)) {
+        const parsed = parseFormulaToApis(m.formula);
+        if (parsed.length > 0) resolvedApis = parsed;
+      }
+      if (!resolvedApis) {
+        if (matches.length === 1) {
+          resolvedApis = extractCleanApisFromSource(rx);
+        } else {
+          // Multi-part match: filter rx items specifically for this phase/block
+          resolvedApis = extractApisForPhase(rx, m.phaseNumber || (matches.indexOf(m) + 1), m);
+        }
+      }
+
+      return {
+        ...m,
+        patientName: auth.patientName || m.patientName,
+        doctorName: auth.doctorName || m.doctorName,
+        doctorLicense: auth.doctorLicense || m.doctorLicense,
+        clinicName: '',
+        showClinicOnLabel: false,
+        fileNumber: auth.fileNumber || m.fileNumber,
+        targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
+        pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'Pharmapolis Compounding Pharmacy',
+        pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'Pharmapolis Compounding Pharmacy',
+        pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || m.pharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
+        expDate: rx.expDate || rx.expiryDate || m.expDate || rxExpDate,
+        labelMarkdown: rx.labelMarkdown || m.labelMarkdown || null,
+        apis: resolvedApis || [],
+        formula: m.formula || ''
+      };
+    });
   } else {
     // Fallback: dynamically construct label items from multi-part blocks (parts, formulationBlocks, phases, formulations)
     // IMPORTANT: Never treat rx.items / rx.prescriptionLines directly as separate bottles unless grouped by formulationIndex!
