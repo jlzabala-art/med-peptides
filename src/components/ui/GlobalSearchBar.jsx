@@ -551,7 +551,7 @@ export default function GlobalSearchBar({
     const path = (currentPath || '').toLowerCase();
 
     const isPelletsContext = ns.includes('pellet') || path.includes('/pricing/pellets');
-    const isDnLabPensContext = ns.includes('dnlab') || path.includes('/pricing/dnlab-pens');
+    const isDnLabPensContext = ns.includes('dnlab') || ns.includes('atlas-pens') || path.includes('/pricing/dnlab-pens') || path.includes('/pricing/pens');
     const isGenomicsContext = ns.includes('genomic') || ns.includes('genetic') || path.includes('/pricing/24genetics');
 
     // Explicit contextual resolution from the unified matrix (Desktop detailed vs Mobile ≤ 28 chars)

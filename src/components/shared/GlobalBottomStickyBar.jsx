@@ -92,6 +92,20 @@ export default function GlobalBottomStickyBar() {
       };
     }
 
+    if (pathname.startsWith('/pricing/pens') || pathname.startsWith('/pricing/dnlab-pens')) {
+      return {
+        summaryTitle: isSpanish ? 'Plumas Precargadas de Péptidos' : 'Pre-filled Peptide Pens Portfolio',
+        summarySubtitle: isSpanish ? 'Cartucho 3 mL (300 UI) · Atlas Health' : '3 mL Cartridge (300 IU) · Atlas Health',
+        atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        secondaryAction: quoteAction,
+        primaryAction: {
+          label: isSpanish ? 'Guía de Uso / Dial' : 'Pen Dosing Guide',
+          icon: <Calculator size={14} />,
+          onClick: () => router.push('/calculator?format=pen'),
+        },
+      };
+    }
+
     if (pathname.startsWith('/pricing/pellets')) {
       return {
         summaryTitle: isSpanish ? 'Pellets Hormonales Subcutáneos' : 'Pharmapolis Hormone Pellets',
