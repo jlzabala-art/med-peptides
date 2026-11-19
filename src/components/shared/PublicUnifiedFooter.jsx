@@ -180,46 +180,20 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
             </div>
           </div>
 
-          {/* Interactive Mobile Accordions (Static list items) */}
+          {/* Static Mobile Institutional Capabilities List (Clean, zero non-interactive numbers or chevrons) */}
           <div className="public-footer-mobile-accordions">
             {FOOTER_SECTIONS.map((section) => {
-              const isOpen = Boolean(openMobileSections[section.id]);
               const SectionIcon = section.icon;
               return (
                 <div key={section.id} className="gcp-footer-accordion-item">
-                  <div
-                    onClick={() => toggleMobileSection(section.id)}
-                    className={`gcp-footer-accordion-header ${isOpen ? 'active' : ''}`}
-                    style={{ pointerEvents: 'auto', cursor: 'pointer' }}
-                  >
+                  <div className="gcp-footer-accordion-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <SectionIcon size={14} style={{ color: '#5f6368', flexShrink: 0 }} />
                       <span className="gcp-footer-accordion-title">
                         {isEs ? section.titleEs : section.titleMobile}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span className="gcp-footer-accordion-badge">
-                        {section.links.length}
-                      </span>
-                      <ChevronDown
-                        size={15}
-                        className={`gcp-footer-accordion-icon ${isOpen ? 'open' : ''}`}
-                      />
-                    </div>
                   </div>
-
-                  {isOpen && (
-                    <ul className="gcp-footer-accordion-list">
-                      {section.links.map((link, idx) => (
-                        <li key={idx}>
-                          <span className="gcp-footer-accordion-link" style={textStyle}>
-                            <span>{isEs ? link.labelEs : link.label}</span>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </div>
               );
             })}
