@@ -620,7 +620,8 @@ export default function PharmapolisLabelSvg({
   const rawVehLower = rawVehStr.toLowerCase();
 
   const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem') || dFormLower.includes('ointment') || dFormLower.includes('pomade') || pNameLower.includes('pomade') || pNameLower.includes('ointment');
-  const isVaginal = /\b(vagifem|vaginal|intravaginal|intravaginally|pessary|ovule|óvulo|suppository)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
+  const isExplicitTransdermal = /\b(transdermal|transdermally|pentravan|hairless\s+skin)\b/i.test(`${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
+  const isVaginal = !isExplicitTransdermal && /\b(vagifem|vaginal|intravaginal|intravaginally|pessary|ovule|óvulo|suppository)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
   const isScalpTreatment = !isVaginal && /\b(trichosol|trichowash|trichooil|trichofoam|scalp|hair|cabello|cuero cabelludo|shampoo|17-?a|17-?alpha|alfatradiol|igrantine)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
   const isHormone = !isVaginal && !isScalpTreatment && (formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone') || rawVehLower.includes('pentravan'));
 

@@ -801,10 +801,19 @@ export default function ImportPrescriptionModal({
                 importSource: 'fagron_genomics'
               });
               if (res && res[0]) {
-                prodId = res[0].productId || null;
-                matchedName = res[0].matchedName || item.name;
-                isPlace = res[0].isPlaceholder;
-                prodSku = res[0].matchedProduct?.sku || '';
+                const candidateName = res[0].matchedName || '';
+                const rawLower = String(item.name || '').toLowerCase();
+                const candLower = candidateName.toLowerCase();
+                // Prevent finished multi-API or wrong-route SKUs (e.g. "ESTRIOL 1MG + DHEA 10MG (Vaginal Pessaries)") from overwriting a single compounding API
+                const isFalseMultiOrWrongForm =
+                  (candLower.includes('+') && !rawLower.includes('+')) ||
+                  (/\b(pessar|vaginal|suppositor|bundle|kit|pen)\b/i.test(candLower) && !/\b(pessar|vaginal|suppositor|bundle|kit|pen)\b/i.test(rawLower));
+                if (!isFalseMultiOrWrongForm) {
+                  prodId = res[0].productId || null;
+                  matchedName = candidateName || item.name;
+                  isPlace = res[0].isPlaceholder;
+                  prodSku = res[0].matchedProduct?.sku || '';
+                }
               }
             } catch (err) {
               console.warn('[ImportPrescriptionModal] Resolve fallback error for item:', item.name);
@@ -820,8 +829,9 @@ export default function ImportPrescriptionModal({
             formulationBlock: block.treatmentType || `Part ${bIdx + 1}`,
             productId: prodId,
             variantId: null,
-            productName: matchedName || item.name,
-            drugName: matchedName || item.name,
+            productName: item.name,
+            drugName: item.name,
+            catalogProductName: matchedName || item.name,
             sku: prodSku,
             activeIngredient: item.name,
             concentration: item.dose || '',

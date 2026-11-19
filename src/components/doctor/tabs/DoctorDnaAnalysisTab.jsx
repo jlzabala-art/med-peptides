@@ -193,7 +193,7 @@ export default function DoctorDnaAnalysisTab({
   // Filtered dataset
   const filteredData = useMemo(() => {
     return dnaResults.filter((row) => {
-      const text = `${row.patientName || ''} ${row.code || ''} ${row.sampleId || ''} ${row.testName || ''} ${row.testType || ''} ${row.biomarker || ''} ${row.laboratory?.name || ''}`.toLowerCase();
+      const text = `${row.patientName || row.patient?.name || ''} ${row.code || ''} ${row.sampleId || ''} ${row.testName || ''} ${row.testType || ''} ${row.biomarker || ''} ${row.laboratory?.name || ''}`.toLowerCase();
       const matchQuery = !filterQuery || text.includes(filterQuery.toLowerCase());
       if (!matchQuery) return false;
 
@@ -233,19 +233,22 @@ export default function DoctorDnaAnalysisTab({
   const columns = useMemo(() => [
     {
       key: 'code',
-      header: 'Protocol / Specimen ID',
-      width: '18%',
+      header: 'Patient / Specimen ID',
+      width: '22%',
       sortable: true,
       render: (row) => {
-        const sampleCode = row.sampleId || row.code || row.protocolNumber || row.id;
+        const patientDisplay = row.patientName || row.patient?.name || 'Clinical Patient';
+        const rawCode = row.sampleId || row.code || row.protocolNumber || '';
+        const sampleCode = rawCode && rawCode !== '—' ? rawCode : '';
         const specimenType = row.sampleType || 'Saliva CE-IVD (2.0 mL)';
         const dateStr = row.analysisDate || row.date || '2026-11-13';
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CopyableId value={sampleCode} iconOnly={false} />
+            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>
+              {patientDisplay}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.70rem', color: '#5f6368' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', fontSize: '0.70rem', color: '#5f6368' }}>
+              {sampleCode ? <CopyableId value={sampleCode} iconOnly={false} /> : null}
               <span>{specimenType}</span>
               <span>•</span>
               <span>{dateStr.slice(0, 10)}</span>
