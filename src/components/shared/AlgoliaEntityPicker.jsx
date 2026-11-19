@@ -30,12 +30,13 @@ export default function AlgoliaEntityPicker({
   const [open, setOpen] = useState(false);
   const boxRef = useRef(null);
 
-  const { hits, isLoading } = useAlgoliaSearch({
+  const { hits, loading, isLoading: altLoading } = useAlgoliaSearch({
     indexName,
     query: open && String(value || '').trim().length >= 2 ? value : '',
     hitsPerPage,
     debounceMs: 220,
   });
+  const isSearching = Boolean(loading || altLoading);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -69,30 +70,32 @@ export default function AlgoliaEntityPicker({
             onChange?.(val);
             setOpen(true);
           }}
-          onClear={() => {
-            onChange?.('');
-            setOpen(true);
-          }}
           placeholder={placeholder}
           size={size}
-          resultsCount={open ? displayList.length : undefined}
-          storageNamespace={storageNamespace}
+          lang={isEs ? 'es' : 'en'}
+          isLoading={isSearching}
+          resultCount={open ? displayList.length : undefined}
+          namespace={storageNamespace}
+          disableAlgolia={true}
+          showRecent={false}
+          showShortcut={false}
         />
       </div>
 
       {open && (
         <div
+          onMouseDown={(e) => e.preventDefault()}
           style={{
             position: 'absolute',
             top: 'calc(100% + 6px)',
             left: 0,
             right: 0,
-            zIndex: 60,
+            zIndex: 120,
             background: '#ffffff',
             border: '1px solid #cbd5e1',
             borderRadius: '12px',
             boxShadow: '0 16px 40px rgba(15, 23, 42, 0.16)',
-            maxHeight: '340px',
+            maxHeight: '360px',
             overflowY: 'auto',
             padding: '8px',
           }}
@@ -110,8 +113,8 @@ export default function AlgoliaEntityPicker({
             }}
           >
             <span>
-              {isLoading
-                ? (isEs ? 'Buscando en Algolia...' : 'Searching Algolia...')
+              {isSearching
+                ? (isEs ? 'Buscando péptidos...' : 'Searching peptides...')
                 : orderedHits.length > 0
                   ? headerLabel
                   : fallbackHeaderLabel}

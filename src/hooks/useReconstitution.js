@@ -57,16 +57,24 @@ export function computeReconstitutionMetrics({
   bacWaterMl = 2.0,
   desiredDoseMcg = 2500,
   syringeCapacityMl = 1.0,
-  format = 'vial', // 'vial' | 'pen' | 'cartridge'
+  format = 'vial', // 'vial' | 'pen' | 'cartridge' | 'spray' | 'capsule' | 'topical'
   penVolumeMl = 3.0,
+  sprayVolumeMl = 10.0,
+  sprayPuffs = 1,
 }) {
   const isPen = format === 'pen';
   const isCartridge = format === 'cartridge';
+  const isSpray = format === 'spray';
+  const isCapsule = format === 'capsule';
+  const isTopical = format === 'topical';
   const isPenOrCartridge = isPen || isCartridge;
+  const isVial = !isPenOrCartridge && !isSpray && !isCapsule && !isTopical;
 
   const safeMg = Math.max(0.01, Number(vialMg) || 10);
   const effectiveLiquidMl = isPenOrCartridge
     ? Math.max(0.5, Number(penVolumeMl) || 3.0)
+    : isSpray
+    ? Math.max(1.0, Number(sprayVolumeMl) || 10.0)
     : Math.max(0.05, Number(bacWaterMl) || 2.0);
   const safeDose = Math.max(0.1, Number(desiredDoseMcg) || 250);
   const safeSyringeMl = [0.3, 0.5, 1.0].includes(Number(syringeCapacityMl)) ? Number(syringeCapacityMl) : 1.0;
@@ -81,14 +89,24 @@ export function computeReconstitutionMetrics({
   const penClicks = Math.max(1, Math.round(unitsToInject));
   const maxSyringeUnits = Math.round(safeSyringeMl * 100);
   const syringeFillPct = maxSyringeUnits > 0 ? Math.min(100, (unitsToInject / maxSyringeUnits) * 100) : 0;
-  const exceedsSyringe = !isPenOrCartridge && unitsToInject > maxSyringeUnits;
+  const exceedsSyringe = isVial && unitsToInject > maxSyringeUnits;
   const exceedsPenSingleDial = isPenOrCartridge && penClicks > 60;
+
+  // Metered nasal spray math (0.1 mL per actuation -> ~100 sprays per 10 mL bottle)
+  const sprayTotalPuffs = Math.round(effectiveLiquidMl / 0.1);
+  const sprayMcgPerPuff = Math.round(concentrationMcgMl * 0.1);
+  const safePuffs = Math.max(1, Math.round(Number(sprayPuffs) || 1));
+  const sprayDoseMcg = sprayMcgPerPuff * safePuffs;
+  const sprayRemainingDoses = Math.floor(sprayTotalPuffs / safePuffs);
 
   return {
     format,
-    isVial: !isPenOrCartridge,
+    isVial,
     isPen,
     isCartridge,
+    isSpray,
+    isCapsule,
+    isTopical,
     isPenOrCartridge,
     vialMg: safeMg,
     bacWaterMl: effectiveLiquidMl,
@@ -107,13 +125,16 @@ export function computeReconstitutionMetrics({
     syringeFillPct: parseFloat(syringeFillPct.toFixed(1)),
     exceedsSyringe,
     exceedsPenSingleDial,
+    sprayTotalPuffs,
+    sprayMcgPerPuff,
+    sprayDoseMcg,
+    sprayRemainingDoses,
   };
 }
 
 /**
  * Bilingual (EN default / ES) patient-friendly step-by-step protocol generator.
- * Guarantees ZERO mention of vials/syringes when format is Pen or Cartridge,
- * and includes Phase 1 Cartridge Loading when format is Cartridge.
+ * Guarantees ZERO mention of vials/syringes when format is Pen, Cartridge, Spray, Capsule, or Topical.
  */
 export function getFormatProtocolSteps(format = 'vial', {
   lang = 'en',
@@ -121,10 +142,110 @@ export function getFormatProtocolSteps(format = 'vial', {
   penClicks = 15,
   volumeMl = 0.15,
   bacWaterMl = 2.0,
+  sprayPuffs = 1,
 } = {}) {
   const isEs = lang === 'es';
   const volStr = Number(volumeMl || 0).toFixed(2);
   const unitsStr = Math.round(Number(unitsToInject || 0));
+
+  if (format === 'spray') {
+    return [
+      {
+        step: 1,
+        title: isEs ? 'Purga el Pulverizador (Primer Uso)' : 'Prime the Nasal Pump (First Use)',
+        desc: isEs
+          ? 'Retira la tapa protectora y acciona la bomba 1–2 veces al aire hasta ver una niebla fina y uniforme.'
+          : 'Remove the protective cap and press the pump 1–2 times into the air until a fine, even mist appears.',
+      },
+      {
+        step: 2,
+        title: isEs ? 'Mantén la Cabeza Recta (No Hacia Atrás)' : 'Keep Head Level (Do Not Tilt Back)',
+        desc: isEs
+          ? 'Limpia suavemente la nariz antes de aplicar. Mantén la cabeza recta o ligeramente inclinada hacia adelante para que el líquido se absorba en la mucosa nasal.'
+          : 'Gently clear your nose first. Keep your head level or tilted slightly forward so the mist absorbs in the nasal mucosa instead of dripping down the throat.',
+      },
+      {
+        step: 3,
+        title: isEs ? `Aplica ${sprayPuffs} Pulverización(es) con Inhalación Suave` : `Deliver ${sprayPuffs} Spray(s) with Gentle Breath`,
+        desc: isEs
+          ? `Introduce la boquilla apuntando ligeramente hacia el borde externo del ojo. Pulsa ${sprayPuffs} vez/veces mientras inhalas suavemente por la nariz (sin aspirar con fuerza).`
+          : `Insert nozzle angled slightly toward the outer corner of your eye. Press ${sprayPuffs} time(s) while breathing in gently through your nose (do not snort hard).`,
+      },
+      {
+        step: 4,
+        title: isEs ? 'Limpia la Boquilla y Guarda Vertical (2°C–8°C)' : 'Wipe Nozzle & Store Upright (2°C–8°C)',
+        desc: isEs
+          ? 'Limpia la punta con un pañuelo limpio, coloca la tapa y guarda el frasco en posición vertical en nevera (2°C–8°C).'
+          : 'Wipe the nozzle tip with a clean tissue, replace the cap tightly, and store the bottle upright in the fridge (2°C–8°C).',
+      },
+    ];
+  }
+
+  if (format === 'capsule') {
+    return [
+      {
+        step: 1,
+        title: isEs ? 'Toma con el Estómago Vacío' : 'Take on an Empty Stomach',
+        desc: isEs
+          ? 'Para máxima absorción oral, tómala 30 minutos antes del desayuno (o 2 horas después de comer) con un vaso completo de agua natural.'
+          : 'For optimal oral absorption, take 30 minutes before breakfast (or 2 hours after a meal) with a full glass of plain water.',
+      },
+      {
+        step: 2,
+        title: isEs ? 'Traga Entera (No Masticar ni Abrir)' : 'Swallow Intact (Do Not Crush or Open)',
+        desc: isEs
+          ? 'Las cápsulas gastrorresistentes protegen el péptido del ácido gástrico. Si usas troche sublingual, déjalo disolver bajo la lengua 5–10 minutos sin tragar.'
+          : 'Enteric capsules shield delicate peptides from stomach acid. If using a sublingual troche, allow it to dissolve fully under the tongue for 5–10 minutes.',
+      },
+      {
+        step: 3,
+        title: isEs ? 'Mantén el Mismo Horario Diario' : 'Keep a Consistent Daily Time',
+        desc: isEs
+          ? 'Administra a la misma hora cada día para sostener niveles constantes. Si olvidas una toma, continúa con la siguiente sin duplicar dosis.'
+          : 'Take at roughly the same time every day for steady levels. If you miss a dose, resume normally without doubling up.',
+      },
+      {
+        step: 4,
+        title: isEs ? 'Conservación Seca (15°C–25°C)' : 'Cool, Dry Storage (15°C–25°C)',
+        desc: isEs
+          ? 'Guarda el envase bien cerrado en un lugar fresco y seco, protegido de la luz y lejos de la humedad del baño.'
+          : 'Keep tightly sealed in a cool, dry cabinet away from direct sunlight and bathroom humidity.',
+      },
+    ];
+  }
+
+  if (format === 'topical') {
+    return [
+      {
+        step: 1,
+        title: isEs ? 'Limpia y Seca la Zona de Aplicación' : 'Clean & Dry Application Area',
+        desc: isEs
+          ? 'Lava la piel o el cuero cabelludo con limpiador suave y seca completamente antes de aplicar la fórmula para maximizar la penetración.'
+          : 'Wash the target skin or scalp area gently and pat completely dry before applying to maximize absorption.',
+      },
+      {
+        step: 2,
+        title: isEs ? 'Aplica la Cantidad Medida (Sin Exceso)' : 'Apply Measured Amount Evenly',
+        desc: isEs
+          ? 'Aplica la cantidad exacta indicada (1–2 pulsaciones o 1 mL) y distribuye uniformemente con masaje suave con la yema de los dedos.'
+          : 'Dispense the exact measured amount (1–2 pumps or 1 mL) and spread evenly with gentle fingertip massage.',
+      },
+      {
+        step: 3,
+        title: isEs ? 'Deja Absorber (No Aclarar Salvo Champú)' : 'Allow Full Absorption',
+        desc: isEs
+          ? 'Espera 5–10 minutos antes de aplicar otros cosméticos o acostarte. Lávate las manos tras la aplicación.'
+          : 'Wait 5–10 minutes before layering other skincare or going to sleep. Wash hands thoroughly after application.',
+      },
+      {
+        step: 4,
+        title: isEs ? 'Cierra Bien y Protege de la Luz' : 'Cap Tightly & Protect from Heat/Light',
+        desc: isEs
+          ? 'Mantén el envase airless o gotero bien cerrado a temperatura fresca (15°C–25°C) o según indicación de la etiqueta.'
+          : 'Keep airless dispenser or dropper tightly capped in a cool place (15°C–25°C) or as directed on your pharmacy label.',
+      },
+    ];
+  }
 
   if (format === 'cartridge') {
     return [
@@ -270,6 +391,10 @@ export function useReconstitution(product = null, variant = null, options = {}) 
     return starter.value;
   });
   const [syringeCapacityMl, setSyringeCapacityMl] = useState(options.initialSyringeMl ?? 1.0);
+  const [sprayPuffs, setSprayPuffs] = useState(options.initialSprayPuffs ?? 1);
+  const [sprayVolumeMl, setSprayVolumeMl] = useState(options.initialSprayVolumeMl ?? 10.0);
+  const [oralUnitsPerDose, setOralUnitsPerDose] = useState(options.initialOralUnits ?? 1);
+  const [topicalDoseLabel, setTopicalDoseLabel] = useState(options.initialTopicalDose ?? '1 mL / 2 pumps');
 
   // Sync defaults when peptide or strength changes
   useEffect(() => {
@@ -319,8 +444,10 @@ export function useReconstitution(product = null, variant = null, options = {}) 
         syringeCapacityMl,
         format,
         penVolumeMl: options.penVolumeMl ?? 3.0,
+        sprayVolumeMl,
+        sprayPuffs,
       }),
-    [vialMg, bacWaterMl, desiredDoseMcg, syringeCapacityMl, format, options.penVolumeMl]
+    [vialMg, bacWaterMl, desiredDoseMcg, syringeCapacityMl, format, options.penVolumeMl, sprayVolumeMl, sprayPuffs]
   );
 
   const getProtocolSteps = useCallback(
@@ -331,8 +458,9 @@ export function useReconstitution(product = null, variant = null, options = {}) 
         penClicks: calculations.penClicks,
         volumeMl: calculations.volumeMl,
         bacWaterMl: calculations.effectiveLiquidMl,
+        sprayPuffs,
       }),
-    [format, calculations.unitsToInject, calculations.penClicks, calculations.volumeMl, calculations.effectiveLiquidMl]
+    [format, calculations.unitsToInject, calculations.penClicks, calculations.volumeMl, calculations.effectiveLiquidMl, sprayPuffs]
   );
 
   return {
@@ -355,6 +483,14 @@ export function useReconstitution(product = null, variant = null, options = {}) 
     dosePresets: doseUnit === 'mg' ? starter.presetsMg : starter.presetsMcg,
     syringeCapacityMl,
     setSyringeCapacityMl,
+    sprayPuffs,
+    setSprayPuffs,
+    sprayVolumeMl,
+    setSprayVolumeMl,
+    oralUnitsPerDose,
+    setOralUnitsPerDose,
+    topicalDoseLabel,
+    setTopicalDoseLabel,
     getProtocolSteps,
     ...calculations,
   };

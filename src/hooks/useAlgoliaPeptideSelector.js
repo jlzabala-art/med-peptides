@@ -12,15 +12,13 @@ export const DEFAULT_PEPTIDE_CATALOG = [
     id: 'bpc-157',
     slug: 'bpc-157',
     name: 'BPC-157',
-    supplier: 'Lotusland Pharma',
-    strengths: ['2 mg', '5 mg', '10 mg', '20 mg'],
-    formats: ['vial', 'pen', 'cartridge'],
+    strengths: ['5 mg', '10 mg', '20 mg', '500 mcg'],
+    formats: ['vial', 'pen', 'cartridge', 'capsule'],
   },
   {
     id: 'tirzepatide',
     slug: 'tirzepatide',
     name: 'Tirzepatide',
-    supplier: 'Lotusland Pharma',
     strengths: ['5 mg', '10 mg', '15 mg', '20 mg', '30 mg', '60 mg'],
     formats: ['vial', 'pen', 'cartridge'],
   },
@@ -28,7 +26,6 @@ export const DEFAULT_PEPTIDE_CATALOG = [
     id: 'retatrutide',
     slug: 'retatrutide',
     name: 'Retatrutide',
-    supplier: 'Lotusland Pharma',
     strengths: ['5 mg', '10 mg', '15 mg', '20 mg', '30 mg'],
     formats: ['vial', 'pen', 'cartridge'],
   },
@@ -36,33 +33,57 @@ export const DEFAULT_PEPTIDE_CATALOG = [
     id: 'semaglutide',
     slug: 'semaglutide',
     name: 'Semaglutide',
-    supplier: 'Lotusland Pharma',
     strengths: ['2 mg', '5 mg', '10 mg'],
     formats: ['vial', 'pen', 'cartridge'],
   },
   {
-    id: 'tb-500',
-    slug: 'tb-500',
-    name: 'TB-500',
-    supplier: 'Lotusland Pharma',
-    strengths: ['2 mg', '5 mg', '10 mg'],
-    formats: ['vial', 'pen', 'cartridge'],
+    id: 'semax',
+    slug: 'semax',
+    name: 'Semax',
+    strengths: ['10 mg', '30 mg'],
+    formats: ['spray', 'vial'],
+  },
+  {
+    id: 'selank',
+    slug: 'selank',
+    name: 'Selank',
+    strengths: ['10 mg', '30 mg'],
+    formats: ['spray', 'vial'],
   },
   {
     id: 'ghk-cu',
     slug: 'ghk-cu',
     name: 'GHK-Cu',
-    supplier: 'Lotusland Pharma',
     strengths: ['30 mg', '50 mg', '60 mg', '100 mg'],
+    formats: ['vial', 'pen', 'cartridge', 'topical'],
+  },
+  {
+    id: 'tb-500',
+    slug: 'tb-500',
+    name: 'TB-500',
+    strengths: ['5 mg', '10 mg'],
     formats: ['vial', 'pen', 'cartridge'],
   },
   {
-    id: 'cjc-1295-ipamorelin',
-    slug: 'cjc-1295-ipamorelin',
-    name: 'CJC-1295 + Ipamorelin',
-    supplier: 'Lotusland Pharma',
-    strengths: ['5 mg / 5 mg', '10 mg'],
-    formats: ['vial', 'pen', 'cartridge'],
+    id: 'pt-141',
+    slug: 'pt-141',
+    name: 'PT-141 (Bremelanotide)',
+    strengths: ['10 mg', '20 mg'],
+    formats: ['vial', 'pen', 'spray'],
+  },
+  {
+    id: 'kpv',
+    slug: 'kpv',
+    name: 'KPV',
+    strengths: ['5 mg', '10 mg', '500 mcg'],
+    formats: ['vial', 'pen', 'capsule', 'spray'],
+  },
+  {
+    id: 'nad-plus',
+    slug: 'nad-plus',
+    name: 'NAD+',
+    strengths: ['500 mg', '750 mg', '1050 mg'],
+    formats: ['vial', 'pen', 'cartridge', 'spray'],
   },
 ];
 
@@ -73,17 +94,17 @@ export const DELIVERY_FORMAT_OPTIONS = [
     nameEs: 'Vial Liofilizado',
     shortEn: 'Powder + BAC Water',
     shortEs: 'Polvo + Agua BAC',
-    descEn: 'Mix with BAC water & draw with U-100 insulin syringe',
+    descEn: 'Mix with BAC water & draw with U-100 syringe',
     descEs: 'Mezclar con agua BAC y cargar con jeringa U-100',
   },
   {
     id: 'pen',
-    name: 'Pre-filled Pen (3 mL)',
-    nameEs: 'Pluma Precargada (3 mL)',
-    shortEn: 'Ready-to-Use Device',
-    shortEs: 'Lista para usar',
-    descEn: 'Already filled liquid pen — attach needle & dial clicks',
-    descEs: 'Ya viene cargada — solo enroscar aguja y marcar clics',
+    name: 'Injector Pen (3 mL)',
+    nameEs: 'Pluma Inyectora (3 mL)',
+    shortEn: 'Ready-to-Use Pen',
+    shortEs: 'Pluma lista para usar',
+    descEn: 'Factory-filled pen — attach needle & dial clicks',
+    descEs: 'Cargada de fábrica — enroscar aguja y marcar clics',
   },
   {
     id: 'cartridge',
@@ -91,10 +112,101 @@ export const DELIVERY_FORMAT_OPTIONS = [
     nameEs: 'Cartucho Recambio (3 mL)',
     shortEn: 'For Reusable Pen',
     shortEs: 'Para pluma reutilizable',
-    descEn: 'Standalone 3 mL glass refill — Step 1: load into reusable pen',
-    descEs: 'Recambio suelto de 3 mL — Paso 1: insertar en tu pluma',
+    descEn: 'Standalone 3 mL refill — Phase 1: insert into pen',
+    descEs: 'Recambio suelto — Fase 1: insertar en tu pluma',
+  },
+  {
+    id: 'spray',
+    name: 'Nasal Spray',
+    nameEs: 'Spray Nasal',
+    shortEn: 'Metered Pump (0.1 mL)',
+    shortEs: 'Pulverizador dosificado',
+    descEn: 'Needle-free intranasal pump — puffs per dose',
+    descEs: 'Sin agujas — pulverizaciones medidas por dosis',
+  },
+  {
+    id: 'capsule',
+    name: 'Oral Capsules / Troches',
+    nameEs: 'Cápsulas / Troches Orales',
+    shortEn: 'Oral / Sublingual',
+    shortEs: 'Vía Oral / Sublingual',
+    descEn: 'Empty-stomach enteric capsules or sublingual troches',
+    descEs: 'Cápsulas en ayunas o troches sublinguales',
+  },
+  {
+    id: 'topical',
+    name: 'Topical Serum / Cream',
+    nameEs: 'Sérum / Crema Tópica',
+    shortEn: 'Skin / Scalp Formula',
+    shortEs: 'Aplicación Dérmica / Capilar',
+    descEn: 'Measured mL or airless pumps for skin or scalp',
+    descEs: 'Dosis medida en mL o pulsaciones para piel/cabello',
   },
 ];
+
+/**
+ * Strictly excludes Bulk Raw Material / API powder entries so patients ONLY see
+ * finished, ready-to-use clinical peptides in the search dropdown.
+ */
+export function isFinishedPatientProduct(hit) {
+  if (!hit) return false;
+  const name = String(hit.name || hit.title || hit.productName || '').toLowerCase();
+  const slug = String(hit.slug || hit.id || hit.objectID || '').toLowerCase();
+  const cat = String(hit.category || hit.productType || hit.type || '').toLowerCase();
+
+  if (!name) return false;
+  const rawApiPattern = /\b(bulk\s*api|bulk\s*powder|raw\s*material|raw\s*api|api\s*powder|raw\s*powder|active\s*pharmaceutical\s*ingredient)\b/i;
+  if (rawApiPattern.test(name) || rawApiPattern.test(cat)) return false;
+  if (slug.startsWith('api-') || slug.startsWith('raw-') || slug.includes('bulk-api')) return false;
+  if (cat === 'bulk_api' || cat === 'raw_material' || cat === 'raw_api') return false;
+  // Also exclude non-peptide lab diagnostic kits / surgical trocars
+  if (/\b(trocar|dna\s*test|trichotest|telotest|nutrigen|acnetest|genomics)\b/i.test(name)) return false;
+  return true;
+}
+
+/**
+ * Infers all ready-to-use delivery formats available for a peptide from its Algolia record + clinical defaults.
+ */
+export function inferAvailableFormats(hit) {
+  if (Array.isArray(hit?.formats) && hit.formats.length > 0) {
+    return hit.formats;
+  }
+  const corpus = [
+    hit?.name,
+    hit?.title,
+    hit?.category,
+    hit?.route,
+    hit?.form,
+    hit?.presentation,
+    ...(Array.isArray(hit?.availableFormats) ? hit.availableFormats.map((f) => (typeof f === 'string' ? f : f?.id || f?.name)) : []),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  const found = new Set();
+  if (corpus.includes('nasal') || corpus.includes('spray') || /\b(semax|selank|oxytocin|dsip)\b/i.test(corpus)) found.add('spray');
+  if (corpus.includes('capsule') || corpus.includes('oral') || corpus.includes('troche') || /\b(bpc-?157|kpv|ll-?37)\b/i.test(corpus)) found.add('capsule');
+  if (corpus.includes('topical') || corpus.includes('serum') || corpus.includes('cream') || corpus.includes('shampoo') || /\b(ghk-?cu)\b/i.test(corpus)) found.add('topical');
+  if (corpus.includes('cartridge')) found.add('cartridge');
+  if (corpus.includes('pen')) found.add('pen');
+  if (corpus.includes('vial') || corpus.includes('lyophilized') || found.size === 0) found.add('vial');
+
+  // Injectable peptides generally exist as Vial + Injector Pen + Refill Cartridge
+  if (found.has('vial') && !/\b(semax|selank)\b/i.test(corpus)) {
+    found.add('pen');
+    found.add('cartridge');
+  }
+
+  return DELIVERY_FORMAT_OPTIONS.map((o) => o.id).filter((id) => found.has(id));
+}
+
+export function cleanPatientProductName(raw = '') {
+  return String(raw || '')
+    .replace(/\b(bulk\s*api\s*powder|bulk\s*api|api\s*powder|lyophilized\s*vial)\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 
 export function extractStrengthsFromHit(hit) {
   const candidates = [];
@@ -118,24 +230,55 @@ export function extractStrengthsFromHit(hit) {
   if (hit?.strength) pushToken(hit.strength);
 
   const normalized = candidates
-    .filter((c) => /\d+(?:\.\d+)?\s*(?:mg|mcg|iu)/i.test(c))
+    .filter((c) => /\d+(?:\.\d+)?\s*(?:mg|mcg|iu|ml)/i.test(c))
     .slice(0, 8);
 
-  return normalized.length > 0 ? normalized : ['2 mg', '5 mg', '10 mg', '20 mg'];
+  return normalized.length > 0 ? normalized : ['5 mg', '10 mg', '20 mg'];
+}
+
+/**
+ * Filter & deduplicate Algolia hits into clean, supplier-free, ready-to-use peptides.
+ */
+export function filterAndDeduplicatePatientPeptides(hits = []) {
+  const seen = new Set();
+  const clean = [];
+
+  for (const h of hits) {
+    if (!isFinishedPatientProduct(h)) continue;
+    const displayName = cleanPatientProductName(h.canonicalName || h.name || h.title || '');
+    if (!displayName) continue;
+    const key = displayName.toLowerCase().replace(/[^a-z0-9+]+/g, '');
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+
+    clean.push({
+      id: h.id || h.objectID || h.slug || key,
+      slug: h.slug || displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name: displayName,
+      strengths: extractStrengthsFromHit(h),
+      formats: inferAvailableFormats(h),
+    });
+    if (clean.length >= 10) break;
+  }
+
+  return clean;
 }
 
 export function normalizeFormatParam(raw) {
   const val = String(raw || '').toLowerCase().trim();
   if (val.includes('cartridge')) return 'cartridge';
   if (val.includes('pen')) return 'pen';
+  if (val.includes('spray') || val.includes('nasal')) return 'spray';
+  if (val.includes('capsule') || val.includes('oral') || val.includes('troche')) return 'capsule';
+  if (val.includes('topical') || val.includes('cream') || val.includes('serum')) return 'topical';
   return 'vial';
 }
 
 export function formatDoseToken(raw) {
   const s = String(raw || '').trim();
   if (!s) return '10 mg';
-  if (/\d+(?:\.\d+)?\s*(?:mg|mcg|iu)/i.test(s)) {
-    return s.replace(/(\d+(?:\.\d+)?)\s*(mg|mcg|iu)/i, '$1 $2').toLowerCase();
+  if (/\d+(?:\.\d+)?\s*(?:mg|mcg|iu|ml)/i.test(s)) {
+    return s.replace(/(\d+(?:\.\d+)?)\s*(mg|mcg|iu|ml)/i, '$1 $2').toLowerCase();
   }
   const n = parseMgFromPresentation(s, 10);
   return `${n} mg`;
@@ -143,10 +286,11 @@ export function formatDoseToken(raw) {
 
 /**
  * Reusable Hook: useAlgoliaPeptideSelector
- * Encapsulates Algolia peptide lookup, strength/format selection, EN (default) / ES language sync,
- * shareable URL query syncing (?peptide&format&dose&lang), and QR modal triggering.
+ * Searches ONLY finished ready-to-use peptides (zero raw APIs, zero supplier tags),
+ * detects available formats (Vial, Pen, Cartridge, Nasal Spray, Oral, Topical),
+ * syncs ALL dosing & format params to the shareable URL, and provides EN (default) / ES sync.
  */
-export function useAlgoliaPeptideSelector({ syncUrl = true } = {}) {
+export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = null } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const workspace = usePublicWorkspace();
@@ -172,52 +316,49 @@ export function useAlgoliaPeptideSelector({ syncUrl = true } = {}) {
   const initialPeptideSlug = String(searchParams?.get('peptide') || searchParams?.get('slug') || 'bpc-157')
     .toLowerCase()
     .trim();
-  const initialFormat = normalizeFormatParam(searchParams?.get('format') || searchParams?.get('presentation'));
-  const initialDoseParam = searchParams?.get('dose') || searchParams?.get('mg') || '';
+  const initialFormatParam = searchParams?.get('format') || searchParams?.get('presentation') || '';
+  const initialStrengthParam = searchParams?.get('strength') || searchParams?.get('dose') || searchParams?.get('mg') || '';
+  const initialTargetParam = searchParams?.get('target') || '';
+  const initialBacParam = searchParams?.get('bac') || '';
+  const initialSyringeParam = searchParams?.get('syringe') || '';
+  const initialPuffsParam = searchParams?.get('puffs') || '';
 
   const initialLocalMatch =
     DEFAULT_PEPTIDE_CATALOG.find((p) => p.slug === initialPeptideSlug || p.id === initialPeptideSlug) ||
     DEFAULT_PEPTIDE_CATALOG[0];
 
   const [selectedProduct, setSelectedProduct] = useState(initialLocalMatch);
-  const [formatId, setFormatId] = useState(initialFormat);
+  const [formatId, setFormatId] = useState(() =>
+    initialFormatParam ? normalizeFormatParam(initialFormatParam) : (initialLocalMatch.formats[0] || 'vial')
+  );
   const [selectedStrengthStr, setSelectedStrengthStr] = useState(() =>
-    initialDoseParam ? formatDoseToken(initialDoseParam) : (initialLocalMatch.strengths[1] || initialLocalMatch.strengths[0] || '5 mg')
+    initialStrengthParam ? formatDoseToken(initialStrengthParam) : (initialLocalMatch.strengths[0] || '5 mg')
   );
   const [searchQuery, setSearchQuery] = useState(initialLocalMatch.name);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Enrich initial peptide from Algolia when launched with ?peptide=...
+  // Enrich initial peptide from Algolia when launched via URL
   useEffect(() => {
     let active = true;
     if (!initialPeptideSlug) return;
     const cleanTarget = initialPeptideSlug.replace(/-/g, ' ').toLowerCase();
-    searchAlgolia(cleanTarget, { hitsPerPage: 10 })
+    searchAlgolia(cleanTarget, { hitsPerPage: 12 })
       .then((res) => {
-        if (!active || !Array.isArray(res?.products) || res.products.length === 0) return;
-        const lotusHits = res.products.filter((h) =>
-          String(h.supplierId || h.supplier || '').toLowerCase().includes('lotus')
-        );
-        const pool = lotusHits.length > 0 ? lotusHits : res.products;
+        if (!active || !Array.isArray(res?.products)) return;
+        const cleanPool = filterAndDeduplicatePatientPeptides(res.products);
+        if (cleanPool.length === 0) return;
         const exact =
-          pool.find((h) => String(h.slug || '').toLowerCase() === initialPeptideSlug) ||
-          pool.find((h) => String(h.name || '').toLowerCase() === cleanTarget) ||
-          pool.find((h) => String(h.id || h.objectID || '').toLowerCase() === initialPeptideSlug) ||
-          pool.find((h) => String(h.name || '').toLowerCase().startsWith(cleanTarget) && !String(h.name || '').includes('+')) ||
-          pool[0];
+          cleanPool.find((h) => String(h.slug || '').toLowerCase() === initialPeptideSlug) ||
+          cleanPool.find((h) => String(h.name || '').toLowerCase() === cleanTarget) ||
+          cleanPool[0];
         if (!exact) return;
-        const strengths = extractStrengthsFromHit(exact);
-        setSelectedProduct({
-          id: exact.id || exact.objectID || exact.slug || initialPeptideSlug,
-          slug: exact.slug || initialPeptideSlug,
-          name: exact.name || exact.title || initialLocalMatch.name,
-          supplier: exact.supplierName || 'Lotusland Pharma',
-          strengths,
-          formats: ['vial', 'pen', 'cartridge'],
-        });
-        setSearchQuery(exact.name || exact.title || initialLocalMatch.name);
-        if (!initialDoseParam && strengths.length > 0) {
-          setSelectedStrengthStr(strengths[0]);
+        setSelectedProduct(exact);
+        setSearchQuery(exact.name);
+        if (!initialStrengthParam && exact.strengths.length > 0) {
+          setSelectedStrengthStr(exact.strengths[0]);
+        }
+        if (!initialFormatParam && exact.formats.length > 0) {
+          setFormatId(exact.formats[0]);
         }
       })
       .catch(() => {
@@ -226,37 +367,28 @@ export function useAlgoliaPeptideSelector({ syncUrl = true } = {}) {
     return () => {
       active = false;
     };
-  }, [initialPeptideSlug, initialDoseParam, initialLocalMatch.name]);
+  }, [initialPeptideSlug, initialStrengthParam, initialFormatParam]);
 
-  const sharePath = useMemo(() => {
-    const params = new URLSearchParams();
-    params.set('peptide', selectedProduct.slug || selectedProduct.id || 'bpc-157');
-    params.set('format', formatId || 'vial');
-    params.set('dose', selectedStrengthStr.replace(/\s+/g, ''));
-    if (isEs) params.set('lang', 'es');
-    return `/calculator?${params.toString()}`;
-  }, [selectedProduct, formatId, selectedStrengthStr, isEs]);
-
-  useEffect(() => {
-    if (syncUrl) {
-      router.replace(sharePath, { scroll: false });
-    }
-  }, [sharePath, router, syncUrl]);
-
-  const handleSelectPeptideHit = useCallback((hit, preferredDose = null) => {
+  const handleSelectPeptideHit = useCallback((hit, preferredDose = null, preferredFormat = null) => {
+    const cleanName = cleanPatientProductName(hit.name || hit.title || 'Peptide');
     const strengths = Array.isArray(hit.strengths) ? hit.strengths : extractStrengthsFromHit(hit);
+    const formats = inferAvailableFormats(hit);
     const nextProduct = {
       id: hit.id || hit.objectID || hit.slug,
-      slug: hit.slug || String(hit.name || 'peptide').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      name: hit.name || hit.title || 'Peptide',
-      supplier: hit.supplierName || hit.supplier || 'Lotusland Pharma',
+      slug: hit.slug || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name: cleanName,
       strengths,
-      formats: hit.formats || ['vial', 'pen', 'cartridge'],
+      formats,
     };
     setSelectedProduct(nextProduct);
     setSearchQuery(nextProduct.name);
     setSelectedStrengthStr(preferredDose || strengths[0] || '5 mg');
-  }, []);
+    if (preferredFormat) {
+      setFormatId(normalizeFormatParam(preferredFormat));
+    } else if (!formats.includes(formatId)) {
+      setFormatId(formats[0] || 'vial');
+    }
+  }, [formatId]);
 
   const availableStrengths = useMemo(() => {
     const list = selectedProduct.strengths || ['5 mg', '10 mg'];
@@ -274,38 +406,66 @@ export function useAlgoliaPeptideSelector({ syncUrl = true } = {}) {
     [formatId]
   );
 
+  const buildSharePath = useCallback((overrides = {}) => {
+    const params = new URLSearchParams();
+    params.set('peptide', selectedProduct.slug || selectedProduct.id || 'bpc-157');
+    params.set('format', formatId || 'vial');
+    params.set('strength', selectedStrengthStr.replace(/\s+/g, ''));
+
+    const mergedExtra = { ...(extraUrlParams || {}), ...(overrides || {}) };
+    Object.entries(mergedExtra).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && String(v).trim() !== '') {
+        params.set(k, String(v).replace(/\s+/g, ''));
+      }
+    });
+    if (isEs) params.set('lang', 'es');
+    return `/calculator?${params.toString()}`;
+  }, [selectedProduct, formatId, selectedStrengthStr, extraUrlParams, isEs]);
+
+  const sharePath = useMemo(() => buildSharePath(), [buildSharePath]);
+
+  useEffect(() => {
+    if (syncUrl) {
+      router.replace(sharePath, { scroll: false });
+    }
+  }, [sharePath, router, syncUrl]);
+
   const shareFullUrl = useMemo(() => {
     if (typeof window === 'undefined') return `https://www.atlashealth-services.com${sharePath}`;
     return `${window.location.origin}${sharePath}`;
   }, [sharePath]);
 
-  const handleCopyShareUrl = useCallback(async () => {
+  const handleCopyShareUrl = useCallback(async (overrides = {}) => {
+    const path = Object.keys(overrides || {}).length > 0 ? buildSharePath(overrides) : sharePath;
+    const url = typeof window === 'undefined'
+      ? `https://www.atlashealth-services.com${path}`
+      : `${window.location.origin}${path}`;
     try {
-      await navigator.clipboard.writeText(shareFullUrl);
+      await navigator.clipboard.writeText(url);
       setCopiedLink(true);
-      toast.success(isEs ? 'Enlace de guía copiado ✓' : 'Shareable guide link copied ✓');
-      setTimeout(() => setCopiedLink(false), 2200);
+      toast.success(isEs ? 'Enlace personalizado con todos los datos copiado ✓' : 'Personalized guide link copied with full dosing info ✓');
+      setTimeout(() => setCopiedLink(false), 2400);
     } catch {
       toast.error(isEs ? 'No se pudo copiar el enlace' : 'Copy failed');
     }
-  }, [shareFullUrl, isEs]);
+  }, [buildSharePath, sharePath, isEs]);
 
-  const handleOpenQr = useCallback(() => {
+  const handleOpenQr = useCallback((overrides = {}) => {
     if (typeof window === 'undefined') return;
+    const path = Object.keys(overrides || {}).length > 0 ? buildSharePath(overrides) : sharePath;
+    const url = `${window.location.origin}${path}`;
     window.dispatchEvent(
       new CustomEvent('open-global-qr-modal', {
         detail: {
-          url: shareFullUrl,
-          title: `${selectedProduct.name} · ${selectedStrengthStr} (${isEs ? activeFormat.nameEs : activeFormat.name})`,
-          subtitle: formatId === 'cartridge'
-            ? (isEs ? 'Escanea para ver cómo cargar tu cartucho de 3 mL y cuántos clics marcar' : 'Scan to open your 3 mL cartridge loading & click dial guide')
-            : formatId === 'pen'
-            ? (isEs ? 'Escanea para ver cuántos clics marcar en tu pluma precargada' : 'Scan to open your pre-filled pen click dosing guide')
-            : (isEs ? 'Escanea para ver cómo mezclar tu vial y hasta qué marca llenar la jeringa' : 'Scan to open your visual vial mixing & U-100 syringe draw guide'),
+          url,
+          title: `${selectedProduct.name} · ${selectedStrengthStr} · ${isEs ? activeFormat.nameEs : activeFormat.name}`,
+          subtitle: isEs
+            ? 'Escanea para abrir esta guía visual personalizada exactamente con tu péptido, formato y dosis'
+            : 'Scan to open this personalized visual guide with your exact peptide, format & dosing pre-loaded',
         },
       })
     );
-  }, [shareFullUrl, selectedProduct.name, selectedStrengthStr, isEs, activeFormat, formatId]);
+  }, [buildSharePath, sharePath, selectedProduct.name, selectedStrengthStr, isEs, activeFormat]);
 
   return {
     lang,
@@ -324,10 +484,17 @@ export function useAlgoliaPeptideSelector({ syncUrl = true } = {}) {
     handleSelectPeptideHit,
     sharePath,
     shareFullUrl,
+    buildSharePath,
     copiedLink,
     handleCopyShareUrl,
     handleOpenQr,
     formatOptions: DELIVERY_FORMAT_OPTIONS,
     quickPeptides: DEFAULT_PEPTIDE_CATALOG,
+    initialUrlOverrides: {
+      target: initialTargetParam,
+      bac: initialBacParam,
+      syringe: initialSyringeParam,
+      puffs: initialPuffsParam,
+    },
   };
 }
