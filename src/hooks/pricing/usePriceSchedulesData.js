@@ -288,14 +288,33 @@ export const BASELINE_PRICE_SCHEDULES = [
       { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '14 Nov 2026', views: 8, status: 'opened' },
       { name: 'Dr. Carlos Mendez', organization: 'Longevity Clinic Madrid', role: 'doctor', channel: 'web', date: '08 Nov 2026', views: 5, status: 'opened' }
     ]
+  },
+  {
+    id: 'dnlab-pens',
+    label: 'Pre-filled Peptide Pens',
+    icon: Syringe,
+    badge: '21 Pens · UAE & GCC',
+    supplier: 'UAE Peptides (DN LAB)',
+    description: 'Multi-dose pre-filled 3 mL peptide pens (BPC/TB, GLOW, KLOW, Epithalon, MOTS-c, NAD+) with click-dial dosing guidance',
+    pricingNote: 'Clinic Wholesale USD / AED · Multi-dose cartridge',
+    route: '/pricing/dnlab-pens',
+    skuCount: 21,
+    currency: 'USD',
+    fetchGroup: 'dnlab-pens',
+    status: 'active',
+    sharesCount: 18,
+    recipients: [
+      { name: 'Dr. Raffanie Lucenio', organization: 'The Masters Medical Center (Doha)', role: 'doctor', channel: 'whatsapp', date: '18 Nov 2026', views: 7, status: 'opened' },
+      { name: 'Dr. Sajid Burud', organization: 'Transcend Healthcare (Dubai)', role: 'clinic', channel: 'whatsapp', date: '17 Nov 2026', views: 9, status: 'opened' }
+    ]
   }
 ];
 
 export const TOTAL_SKUS = BASELINE_PRICE_SCHEDULES.reduce((s, g) => s + g.skuCount, 0);
 
 export const MACRO_CATEGORIES = [
-  { id: 'all', label: 'All Catalogs (14)' },
-  { id: 'peptides', label: '🔬 Peptides & Hormones', groupIds: ['peptides', 'pellets', 'ultraperson', 'weight-management', 'hair-treatments'] },
+  { id: 'all', label: 'All Catalogs (15)' },
+  { id: 'peptides', label: '🔬 Peptides & Hormones', groupIds: ['peptides', 'pellets', 'dnlab-pens', 'ultraperson', 'weight-management', 'hair-treatments'] },
   { id: 'genomics', label: '🧬 Genomics CE-IVD', groupIds: ['24genetics', '24genomics-qatar', 'teletest', 'eterna'] },
   { id: 'cosmetics', label: '✨ Cosmetics & Collagen', groupIds: ['colway', 'colway-hair', 'colway-qatar'] },
   { id: 'injectables', label: '💉 Medical Injectables', groupIds: ['aesthetic-injectables'] },

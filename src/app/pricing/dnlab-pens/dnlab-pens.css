@@ -1,0 +1,272 @@
+/* DN LAB Pre-filled Pens Catalog Styling */
+
+.dnlab-page-root {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.dnlab-container {
+  max-width: 1360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+/* Header & Banner */
+.dnlab-hero {
+  background: linear-gradient(135deg, #0b192c 0%, #1e3a8a 100%);
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 2rem 2.25rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.15);
+}
+
+.dnlab-hero::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dnlab-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #bfdbfe;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 0.85rem;
+}
+
+.dnlab-hero-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.dnlab-hero-subtitle {
+  font-size: 0.92rem;
+  color: #cbd5e1;
+  max-width: 780px;
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+}
+
+.dnlab-hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.dnlab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-decoration: none;
+}
+
+.dnlab-btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: 1px solid #3b82f6;
+}
+
+.dnlab-btn-primary:hover {
+  background: #1d4ed8;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.dnlab-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+}
+
+.dnlab-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* KPI Cards (Rule #22) */
+.dnlab-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dnlab-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.dnlab-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dnlab-kpi-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+
+.dnlab-kpi-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Category Filter Chips */
+.dnlab-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.dnlab-filter-pill {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dnlab-filter-pill:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.dnlab-filter-pill.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+/* Master-Detail Expandable View */
+.dnlab-detail-panel {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.dnlab-detail-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.dnlab-dial-box {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.dnlab-slider {
+  width: 100%;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+/* Print & PDF Modal */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print, header, footer, .dnlab-hero-actions, .atlas-search__input-wrap {
+    display: none !important;
+  }
+  .dnlab-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .dnlab-table-print {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  .dnlab-table-print th, .dnlab-table-print td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 6px 8px !important;
+    font-size: 8pt !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .dnlab-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dnlab-detail-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dnlab-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .dnlab-hero {
+    padding: 1.25rem;
+  }
+  .dnlab-hero-title {
+    font-size: 1.35rem;
+  }
+}
