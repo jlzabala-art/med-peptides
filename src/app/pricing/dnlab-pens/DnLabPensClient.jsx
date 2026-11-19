@@ -999,7 +999,7 @@ export default function DnLabPensClient({
       />
 
       {/* ── GOOGLE CLOUD UX COMPACT PAGE HEADER (Rules #9, #16, #23, #40, #57, #70) ── */}
-      <header className="atlas-pens-gcp-header">
+      <section className="atlas-pens-gcp-header" aria-label="Formulary Page Header">
         <div className="atlas-pens-gcp-header-inner">
           <div className="atlas-pens-gcp-title-col">
             <div className="atlas-pens-gcp-eyebrow">
@@ -1061,7 +1061,7 @@ export default function DnLabPensClient({
             </Link>
           </div>
         </div>
-      </header>
+      </section>
 
       <main className="dnlab-container">
         {/* ── 4 COMPACT GCP KPI SUMMARY CARDS + SCOPE INDICATOR (Rule #22) ── */}
