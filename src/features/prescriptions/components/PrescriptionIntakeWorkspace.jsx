@@ -16,10 +16,8 @@ import ShareIntakeWhatsAppModal from '../../../components/shared/ShareIntakeWhat
 import toast from 'react-hot-toast';
 import notifier from '../../../services/NotificationService';
 import { useDrawer } from '../../../context/DrawerContext';
+import { usePrescriptionExtraction } from '../../../hooks/usePrescriptionExtraction';
 import {
-  extractPrescriptionFromDocument,
-  normalizeExtractedPrescriptions,
-  checkDuplicatesInFirestore,
   savePrescriptionsToFirestore,
   validatePrescriptionClinicalRules
 } from '../../../services/prescriptionAiService';
@@ -39,6 +37,7 @@ export default function PrescriptionIntakeWorkspace({
 }) {
   const { openDrawer } = useDrawer();
   const { user, activeRole, isAdmin } = useAuth();
+  const { extractFile } = usePrescriptionExtraction({ doctorContext, mode: 'doctor_portal' });
 
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
@@ -193,22 +192,12 @@ export default function PrescriptionIntakeWorkspace({
     setFilePreview(URL.createObjectURL(droppedFile));
 
     try {
-      toast.loading('Extracting document details...', { id: 'ai-intake' });
-      
-      // 1. Multimodal extraction
-      const aiData = await extractPrescriptionFromDocument(droppedFile);
-      setRawAiData(aiData);
-
-      // 2. Normalize to canonical schema & resolve catalog ingredients
-      toast.loading('Matching ingredients against clinical catalogue...', { id: 'ai-intake' });
-      const normalized = await normalizeExtractedPrescriptions(aiData, {
+      toast.loading('Extracting & matching against clinical catalogue...', { id: 'ai-intake' });
+      const { raw: aiData, normalized: deduplicated } = await extractFile(droppedFile, {
         currentUser: user,
-        context: doctorContext || {},
         splitBlocksIntoSeparatePrescriptions: false,
       });
-
-      // 3. Deduplicate against Firestore
-      const deduplicated = await checkDuplicatesInFirestore(normalized);
+      setRawAiData(aiData);
       setNormalizedRxList(deduplicated);
 
       toast.success(
