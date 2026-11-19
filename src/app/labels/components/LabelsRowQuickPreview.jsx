@@ -147,6 +147,19 @@ export default function LabelsRowQuickPreview({
         {items.map((rx, idx) => {
           const rxCode = String(rx?.code || cleanCode || '').replace(/^#/, '');
           const isDeleting = deletingId === rx?.id;
+          const removedLen = Array.isArray(rx?.removedParts) ? rx.removedParts.length : 0;
+          let totalParts = 1;
+          if (typeof rx?.partsCount === 'number' && rx.partsCount > 0) {
+            totalParts = Math.max(1, rx.partsCount - removedLen);
+          } else if (Array.isArray(rx?.formulationBlocks) && rx.formulationBlocks.length > 0) {
+            totalParts = rx.formulationBlocks.length;
+          } else if (Array.isArray(rx?.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
+            totalParts = rx.pharmacyLabels.length;
+          } else if (Array.isArray(rx?.parts) && rx.parts.length > 0) {
+            totalParts = rx.parts.length;
+          } else if (Array.isArray(rx?.phases) && rx.phases.length > 0) {
+            totalParts = rx.phases.length;
+          }
           return (
             <div
               key={rx?.id || `${rxCode}-${idx}`}
@@ -184,6 +197,20 @@ export default function LabelsRowQuickPreview({
                     </span>
                   )}
                   <StatusBadge status={rx?.status || 'draft'} />
+                  <span
+                    style={{
+                      fontSize: '0.67rem',
+                      fontWeight: 700,
+                      padding: '1px 7px',
+                      borderRadius: '999px',
+                      background: totalParts > 1 ? '#e8f0fe' : '#f1f5f9',
+                      color: totalParts > 1 ? '#1a73e8' : '#475569',
+                      border: totalParts > 1 ? '1px solid #bfdbfe' : '1px solid #cbd5e1',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {totalParts} {totalParts === 1 ? (isEs ? 'Parte' : 'Part') : (isEs ? 'Partes' : 'Parts')}
+                  </span>
                   {rx?.doctorName && (
                     <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>
                       {rx.doctorName}

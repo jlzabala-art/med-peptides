@@ -22,18 +22,28 @@ import { normalizeLabelsArray, getLabelDisplayTitle } from '@/utils/labels/label
 /**
  * Intelligent helper to parse treatment course duration in days from parts or instructions.
  */
-function estimateCourseDurationDays(parts = [], labels = []) {
+function estimateCourseDurationDays(parts = [], labels = [], currentRx = {}) {
+  const rxCorpus = `${currentRx?.code || ''} ${currentRx?.documentType || ''} ${currentRx?.testType || ''} ${currentRx?.treatmentTitle || ''}`.toLowerCase();
+  const isFagron =
+    rxCorpus.includes('fagron') ||
+    rxCorpus.includes('tricho') ||
+    rxCorpus.includes('telo') ||
+    rxCorpus.includes('acnetest') ||
+    rxCorpus.includes('nutrigen') ||
+    /aa(?:tri|tel|acn|nut)/i.test(rxCorpus);
+
   const combinedText = [
     ...normalizeLabelsArray(parts).map(p => `${p.title || ''} ${p.volume || ''} ${p.directions || ''} ${p.posology || ''}`),
     ...normalizeLabelsArray(labels).map((l, idx) => `${getLabelDisplayTitle(l, idx)} ${l.volume || ''} ${l.directions || ''}`)
   ].join(' ').toLowerCase();
 
+  if (isFagron) return 90;
   if (combinedText.includes('3 months') || combinedText.includes('90 days') || combinedText.includes('90 días')) return 90;
   if (combinedText.includes('2 months') || combinedText.includes('60 days') || combinedText.includes('60 días') || combinedText.includes('2 meses')) return 60;
   if (combinedText.includes('1 month') || combinedText.includes('30 days') || combinedText.includes('30 días') || combinedText.includes('1 mes')) return 30;
   if (combinedText.includes('15 days') || combinedText.includes('15 días')) return 15;
   if (combinedText.includes('10 days') || combinedText.includes('10 días')) return 10;
-  return 60; // Standard clinical default
+  return 90; // Standard clinical default (90-day cycle)
 }
 
 /**
@@ -86,14 +96,15 @@ export default function PrescriptionRefillModal({
   const newCodePreview = `${cleanRxCode.replace(/-R\d+$/i, '')}-R${nextCycle}`;
 
   // Course duration & intelligent refill date estimation
-  const estimatedDays = useMemo(() => estimateCourseDurationDays(rawParts, labels), [rawParts, labels]);
+  const estimatedDays = useMemo(() => estimateCourseDurationDays(rawParts, labels, currentRx), [rawParts, labels, currentRx]);
   const [durationDays, setDurationDays] = useState(estimatedDays);
 
   const defaultAlertDate = useMemo(() => {
     const d = new Date();
-    d.setDate(d.getDate() + Math.max(durationDays - 15, 5));
+    const numericDays = Number(durationDays) || estimatedDays || 90;
+    d.setDate(d.getDate() + Math.max(numericDays - 15, 5));
     return d.toISOString().split('T')[0];
-  }, [durationDays]);
+  }, [durationDays, estimatedDays]);
 
   const [refillDate, setRefillDate] = useState(defaultAlertDate);
   const [operatorNotes, setOperatorNotes] = useState('');
@@ -103,7 +114,7 @@ export default function PrescriptionRefillModal({
   const [loadingCycles, setLoadingCycles] = useState(false);
   const [manageAlertDate, setManageAlertDate] = useState('');
   const [manageAlertStatus, setManageAlertStatus] = useState('scheduled');
-  const [manageDurationDays, setManageDurationDays] = useState(60);
+  const [manageDurationDays, setManageDurationDays] = useState(estimatedDays || 90);
   const [isSavingSchedule, setIsSavingSchedule] = useState(false);
 
   // Resynchronize selection and fetch cycle history whenever modal opens or prescription/part changes
@@ -198,7 +209,7 @@ export default function PrescriptionRefillModal({
           sourcePrescriptionId: currentRx?.id || cleanRxCode,
           selectedPartIndices: selectedIndices,
           refillCycle: nextCycle,
-          courseDurationDays: Number(durationDays),
+          courseDurationDays: Number(durationDays) || estimatedDays || 90,
           nextRefillDate: refillDate,
           operatorNotes: operatorNotes.trim()
         })
@@ -669,11 +680,30 @@ export default function PrescriptionRefillModal({
                   max="365"
                   value={durationDays}
                   onChange={(e) => {
-                    const days = parseInt(e.target.value, 10) || 60;
-                    setDurationDays(days);
-                    const d = new Date();
-                    d.setDate(d.getDate() + Math.max(days - 15, 5));
-                    setRefillDate(d.toISOString().split('T')[0]);
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      setDurationDays('');
+                      return;
+                    }
+                    const days = parseInt(raw, 10);
+                    if (!Number.isNaN(days)) {
+                      setDurationDays(days);
+                      if (days >= 5) {
+                        const d = new Date();
+                        d.setDate(d.getDate() + Math.max(days - 15, 5));
+                        setRefillDate(d.toISOString().split('T')[0]);
+                      }
+                    }
+                  }}
+                  onBlur={() => {
+                    const numeric = Number(durationDays);
+                    if (!numeric || numeric < 5) {
+                      const fallback = estimatedDays || 90;
+                      setDurationDays(fallback);
+                      const d = new Date();
+                      d.setDate(d.getDate() + Math.max(fallback - 15, 5));
+                      setRefillDate(d.toISOString().split('T')[0]);
+                    }
                   }}
                   style={{
                     width: '100%',

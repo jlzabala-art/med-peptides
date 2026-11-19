@@ -62,6 +62,19 @@ export default function LabelsHomeView({
   const { role } = useRoleAccess();
   const [statusOverrides, setStatusOverrides] = useState({});
 
+  // Group visible worklist rows by patient so each patient appears once in the main table
+  const groupedWorklistRows = React.useMemo(() => {
+    const seen = new Set();
+    const rows = [];
+    for (const item of paginatedWorklistItems || []) {
+      const key = (item.name || item.patientName || '').trim().toLowerCase() || item.id || item.code;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rows.push(item);
+    }
+    return rows;
+  }, [paginatedWorklistItems]);
+
   const renderRefillTag = (item) => {
     const codeStr = String(item.code || '');
     const isRefill = Number(item.refillCycle || 1) > 1 || /-R\d+$/i.test(codeStr) || Boolean(item.refillOf);
@@ -539,7 +552,9 @@ export default function LabelsHomeView({
                       const samePatientItems = pName && Array.isArray(allWorklistItems)
                         ? allWorklistItems.filter((item) => (item.name || item.patientName || '').trim().toLowerCase() === pName)
                         : [];
-                      const hasMultipleTests = samePatientItems.length > 1;
+                      const extraCodes = samePatientItems
+                        .map((item) => sanitizeRecentCode(item.code))
+                        .filter((c) => c && c !== cleanCode);
 
                       return (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
@@ -547,136 +562,86 @@ export default function LabelsHomeView({
                             <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
                               {p.name || p.patientName || 'Patient'}
                             </span>
-                            <span onClick={(e) => e.stopPropagation()}>
+                            <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
                               <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
+                              {extraCodes.map((ec) => (
+                                <CopyableId key={ec} value={ec} displayValue={`#${ec}`} />
+                              ))}
                             </span>
                           </div>
                           <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
                             {p.title || p.treatmentTitle || 'Prescription protocol'}
                           </span>
-                          {hasMultipleTests && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '3px' }}>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSearchQuery?.(p.name || p.patientName);
-                                  setWorklistPage?.(1);
-                                }}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px',
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  fontSize: '0.67rem',
-                                  fontWeight: 700,
-                                  background: '#f3e8fd',
-                                  color: '#7c3aed',
-                                  border: '1px solid #e9d5ff',
-                                  cursor: 'pointer',
-                                }}
-                                title={isEs ? `Filtrar solo las ${samePatientItems.length} recetas de este paciente` : `Filter only the ${samePatientItems.length} prescriptions of this patient`}
-                              >
-                                <span>{samePatientItems.length} {isEs ? 'recetas' : 'prescriptions'}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const codes = samePatientItems.map((item) => item.code).filter(Boolean);
-                                  if (handleAddMultipleToQueue && codes.length > 0) {
-                                    handleAddMultipleToQueue(codes);
-                                    toast.success(
-                                      isEs
-                                        ? `${codes.length} recetas de ${p.name || p.patientName} añadidas a la cola`
-                                        : `Added ${codes.length} prescriptions for ${p.name || p.patientName} to queue`
-                                    );
-                                  }
-                                }}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  padding: '2px 7px',
-                                  borderRadius: '4px',
-                                  fontSize: '0.67rem',
-                                  fontWeight: 700,
-                                  background: '#eff6ff',
-                                  color: '#1d4ed8',
-                                  border: '1px solid #bfdbfe',
-                                  cursor: 'pointer',
-                                }}
-                                title={isEs ? 'Cargar todos los tests del paciente en la cola' : 'Queue all tests for this patient'}
-                              >
-                                <Layers size={10} />
-                                <span>{isEs ? 'Añadir todas al lote' : 'Queue all'}</span>
-                              </button>
-                            </div>
-                          )}
                         </div>
                       );
                     },
                   },
                   {
-                    key: 'parts',
-                    label: isEs ? 'Partes' : 'Parts',
+                    key: 'prescriptions',
+                    label: isEs ? 'Prescripciones' : 'Prescriptions',
                     align: 'left',
                     render: (_val, p) => {
-                      const removedLen = Array.isArray(p.removedParts) ? p.removedParts.length : 0;
-                      let totalParts = 1;
-                      if (typeof p.partsCount === 'number' && p.partsCount > 0) {
-                        totalParts = Math.max(1, p.partsCount - removedLen);
-                      } else if (Array.isArray(p.formulationBlocks) && p.formulationBlocks.length > 0) {
-                        totalParts = p.formulationBlocks.length;
-                      } else if (Array.isArray(p.pharmacyLabels) && p.pharmacyLabels.length > 0) {
-                        totalParts = p.pharmacyLabels.length;
-                      } else if (Array.isArray(p.parts) && p.parts.length > 0) {
-                        totalParts = p.parts.length;
-                      } else if (Array.isArray(p.phases) && p.phases.length > 0) {
-                        totalParts = p.phases.length;
-                      }
-                      const labeledCount = p.labeledParts && typeof p.labeledParts === 'object'
-                        ? Object.values(p.labeledParts).filter(Boolean).length
-                        : 0;
-                      const isMulti = totalParts > 1;
+                      const pName = (p.name || p.patientName || '').trim().toLowerCase();
+                      const samePatientItems = pName && Array.isArray(allWorklistItems)
+                        ? allWorklistItems.filter((item) => (item.name || item.patientName || '').trim().toLowerCase() === pName)
+                        : [];
+                      const rxCount = Math.max(1, samePatientItems.length);
+                      const isMultiRx = rxCount > 1;
                       return (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                           <span
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '4px',
-                              padding: '3px 8px',
+                              padding: '3px 9px',
                               borderRadius: '999px',
                               fontSize: '0.72rem',
                               fontWeight: 700,
-                              background: isMulti ? '#e8f0fe' : '#f1f5f9',
-                              color: isMulti ? '#1a73e8' : '#475569',
-                              border: isMulti ? '1px solid #bfdbfe' : '1px solid #cbd5e1',
+                              background: isMultiRx ? '#f3e8fd' : '#f1f5f9',
+                              color: isMultiRx ? '#7c3aed' : '#475569',
+                              border: isMultiRx ? '1px solid #e9d5ff' : '1px solid #cbd5e1',
                               whiteSpace: 'nowrap',
                             }}
                           >
                             <Layers size={11} />
                             <span>
-                              {totalParts} {totalParts === 1 ? (isEs ? 'Parte' : 'Part') : (isEs ? 'Partes' : 'Parts')}
+                              {rxCount} {rxCount === 1 ? (isEs ? 'Prescripción' : 'Rx') : (isEs ? 'Prescripciones' : 'Rx')}
                             </span>
                           </span>
-                          {labeledCount > 0 && (
-                            <span
+                          {isMultiRx && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const codes = samePatientItems.map((item) => item.code).filter(Boolean);
+                                if (handleAddMultipleToQueue && codes.length > 0) {
+                                  handleAddMultipleToQueue(codes);
+                                  toast.success(
+                                    isEs
+                                      ? `${codes.length} recetas de ${p.name || p.patientName} añadidas a la cola`
+                                      : `Added ${codes.length} prescriptions for ${p.name || p.patientName} to queue`
+                                  );
+                                }
+                              }}
                               style={{
-                                fontSize: '0.66rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                padding: '3px 7px',
+                                borderRadius: '6px',
+                                fontSize: '0.68rem',
                                 fontWeight: 700,
-                                color: '#166534',
-                                background: '#dcfce7',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
+                                background: '#eff6ff',
+                                color: '#1d4ed8',
+                                border: '1px solid #bfdbfe',
+                                cursor: 'pointer',
                                 whiteSpace: 'nowrap',
                               }}
+                              title={isEs ? 'Cargar todas las prescripciones del paciente en la cola' : 'Queue all prescriptions for this patient'}
                             >
-                              {labeledCount}/{totalParts} ✓
-                            </span>
+                              <span>{isEs ? 'Queue all' : 'Queue all'}</span>
+                            </button>
                           )}
                         </div>
                       );
@@ -830,7 +795,7 @@ export default function LabelsHomeView({
                     },
                   },
                 ]}
-                data={paginatedWorklistItems}
+                data={groupedWorklistRows}
                 keyField="code"
                 globalSearch={false}
                 hidePagination={true}
