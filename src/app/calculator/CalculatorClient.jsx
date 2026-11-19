@@ -8,6 +8,7 @@ import FormatPickerCards from '@/components/reconstitution/FormatPickerCards';
 import HorizontalSyringeVisualizer from '@/components/reconstitution/HorizontalSyringeVisualizer';
 import PenDialVisualizer from '@/components/reconstitution/PenDialVisualizer';
 import NonInjectableVisualizer from '@/components/reconstitution/NonInjectableVisualizer';
+import StepTimelineList from '@/components/ui/StepTimelineList';
 import {
   useAlgoliaPeptideSelector,
   filterAndDeduplicatePatientPeptides,
@@ -888,57 +889,31 @@ export default function CalculatorClient() {
             />
           )}
 
-          {/* ── STEP-BY-STEP VISUAL INSTRUCTIONS ── */}
+          {/* ── STEP-BY-STEP VISUAL INSTRUCTIONS (Linear Stepper — Golden Rule #70) ── */}
           <div style={{ marginTop: '4px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-              <Sparkles size={15} color="#003666" />
-              <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#003666' }}>
-                {isEs
-                  ? `Cómo usar ${selectedProduct.name} (${activeFormat.nameEs})`
-                  : `How to Use ${selectedProduct.name} (${activeFormat.name})`}
-              </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles size={15} color="#003666" />
+                <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#003666' }}>
+                  {isEs
+                    ? `Cómo usar ${selectedProduct.name} (${activeFormat.nameEs})`
+                    : `How to Use ${selectedProduct.name} (${activeFormat.name})`}
+                </h3>
+              </div>
+              <span style={{
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                color: '#5f6368',
+                background: '#f1f5f9',
+                border: '1px solid #e2e8f0',
+                padding: '2px 9px',
+                borderRadius: '999px',
+              }}>
+                {protocolSteps.length} {isEs ? 'pasos' : 'steps'}
+              </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-              {protocolSteps.map((s) => (
-                <div
-                  key={s.step}
-                  style={{
-                    background: s.highlight ? '#f0fdf4' : '#f8fafc',
-                    border: s.highlight ? '1.5px solid #86efac' : '1px solid #e2e8f0',
-                    borderRadius: '10px',
-                    padding: '12px 14px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '6px',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{
-                      width: '22px',
-                      height: '22px',
-                      borderRadius: '50%',
-                      background: s.highlight ? '#16a34a' : '#003666',
-                      color: '#ffffff',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      flexShrink: 0,
-                    }}>
-                      {s.step}
-                    </span>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.25 }}>
-                      {s.title}
-                    </span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.5 }}>
-                    {s.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <StepTimelineList steps={protocolSteps} />
           </div>
 
           {/* Shareable Link Preview Strip (Transparent URL + Metadata Summary) */}

@@ -688,6 +688,11 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - Montada globalmente desde [`GlobalClientWrapper.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/app/GlobalClientWrapper.jsx) usando [`FloatingActionDock.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/shared/public/FloatingActionDock.jsx).
   - Toda pantalla personaliza su resumen contextual, acción secundaria, etiqueta de Atlas AI y CTA primario registrando `bottomBar` en `useRegisterAtlasContext(...)` (o mediante los defaults automáticos por ruta).
 
+## 70. Filas Lineales (Stepper / Lista) para Secuencias y Conjuntos Impares (Golden Rule)
+- **Prohibido generar tarjetas huérfanas en rejillas multi-columna** (ej. 3, 5 o 7 pasos/ítems dentro de un grid de 2 o 4 columnas que deja huecos vacíos asimétricos).
+- **Estándar obligatorio para pasos secuenciales o listas impares**: Toda guía paso a paso (*How to Use*, reconstitución, preparación, fases clínicas, checklists) o colección de elementos cuyo número sea impar DEBE renderizarse como **filas horizontales lineales a ancho completo** usando el componente reutilizable [`StepTimelineList.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/ui/StepTimelineList.jsx) (o una lista vertical limpia con separadores `1px solid #f1f5f9`), nunca como tarjetas sueltas en cuadrícula asimétrica.
+- **Rejillas de tarjetas solo para conjuntos estrictamente pares y simétricos**: Usar grids multi-columna únicamente cuando el total de tarjetas sea par y divisible de forma exacta por el número de columnas en cada breakpoint (ej. 4 KPIs en `4×1` / `2×2`, 6 formatos en `3×2` / `2×3` / `1×6`, o 2 tarifas `Single` vs `Pack ×10` en `2×1`). Si el número de elementos es impar, caer automáticamente a presentación por líneas (`1fr`).
+
 
 
 

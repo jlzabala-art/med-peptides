@@ -90,12 +90,34 @@ export default function FormatPickerCards({
     );
   };
 
+  const isOddCount = options.length % 2 === 1;
+
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(195px, 1fr))',
-      gap: '9px',
-    }}>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .atlas-format-picker-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 9px;
+        }
+        .atlas-format-picker-grid.is-odd-list {
+          grid-template-columns: 1fr;
+        }
+        @media (max-width: 768px) {
+          .atlas-format-picker-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .atlas-format-picker-grid.is-odd-list {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 440px) {
+          .atlas-format-picker-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      ` }} />
+      <div className={`atlas-format-picker-grid${isOddCount ? ' is-odd-list' : ''}`}>
       {options.map((opt) => {
         const isAvailable = enabledList.length === 0 ? true : enabledList.includes(opt.id);
         const isActive = isAvailable && activeFormatId === opt.id;
@@ -168,6 +190,7 @@ export default function FormatPickerCards({
           </button>
         );
       })}
-    </div>
+      </div>
+    </>
   );
 }
