@@ -43,7 +43,8 @@ export default function DoctorDnaAnalysisTab({
   dnaResults = [],
   slug = '',
   handleRefresh,
-  isSwitchingDoctor = false
+  isSwitchingDoctor = false,
+  onUploadPdf = null
 }) {
   const [filterQuery, setFilterQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
@@ -680,6 +681,38 @@ export default function DoctorDnaAnalysisTab({
           </div>
         </div>
 
+        {dnaResults.length === 0 ? (
+          <div
+            style={{
+              padding: '28px 20px',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '10px',
+              background: '#f8fafc'
+            }}
+          >
+            <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+              Upload TrichoTest™ or Genomic Report PDF — AI Auto-Links to Patient
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#475569', maxWidth: '520px', lineHeight: 1.45 }}>
+              No DNA microarray reports are linked yet. Upload a patient&apos;s TrichoTest™ or 24Genomics PDF and Atlas AI will extract SNPs and attach it to their profile automatically.
+            </div>
+            {onUploadPdf && (
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={onUploadPdf}
+                style={{ fontSize: '0.78rem', padding: '8px 16px', marginTop: '4px' }}
+              >
+                <Sparkles size={14} />
+                <span>Upload DNA / TrichoTest™ PDF</span>
+              </button>
+            )}
+          </div>
+        ) : (
+        <>
         {/* Filter Bar with GCP Chips */}
         <div
           style={{
@@ -1108,6 +1141,8 @@ export default function DoctorDnaAnalysisTab({
             );
           }}
         />
+        </>
+        )}
       </div>
 
       {/* Interactive Compounded Prescription Customizer Drawer (Rule #4 & #25) */}

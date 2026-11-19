@@ -5261,7 +5261,7 @@ export default function DoctorPublicPortalClient({
             sectionsCount: sidebarNavGroups?.length || 0,
             onOpenSections: () => setIsMobileSidebarOpen(true),
             primaryAction: {
-              label: lang === 'es' ? 'Enviar Receta a este Doctor ➔' : 'Submit Rx to this Doctor ➔',
+              label: lang === 'es' ? 'Nueva Receta / Consulta ➔' : 'New Rx / Consult ➔',
               onClick: () => {
                 window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
               },
@@ -5322,7 +5322,7 @@ export default function DoctorPublicPortalClient({
           flex: 1;
           min-width: 0;
           max-width: var(--atlas-page-max-width, 1360px);
-          padding: 24px 24px 100px 24px;
+          padding: 20px 24px 124px 24px;
           margin: 0 auto;
         }
         @media (max-width: 768px) {
@@ -6523,6 +6523,26 @@ export default function DoctorPublicPortalClient({
                 pendingCount={filteredTasks.length}
                 refillsDueCount={allPrescriptions.filter((r) => Boolean(r.refillAlertDate || Number(r.refillCycle || 1) > 1)).length}
                 activeCount={allPrescriptions.length}
+                topFormulas={(() => {
+                  const counts = new Map();
+                  allPrescriptions.forEach((rx) => {
+                    const title = String(rx.treatmentTitle || rx.formulaName || '').trim();
+                    if (!title || title.toLowerCase() === 'topical solution') return;
+                    counts.set(title, (counts.get(title) || 0) + 1);
+                  });
+                  return Array.from(counts.entries())
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3)
+                    .map(([title, count]) => ({ title, count }));
+                })()}
+                onPrescribeFormula={(formulaTitle) => {
+                  setApiFilter(formulaTitle);
+                  handleOpenNewPrescriptionIntake();
+                }}
+                onQuickRefill={() => {
+                  setQuickRxFilter('refills');
+                  handleSidebarNavigate('prescriptions');
+                }}
                 onOpenPending={() => handleSidebarNavigate(filteredTasks.length > 0 ? 'tasks' : 'prescriptions')}
                 onOpenPrescriptions={() => handleSidebarNavigate('prescriptions')}
                 onNewPrescription={handleOpenNewPrescriptionIntake}
@@ -8018,6 +8038,7 @@ export default function DoctorPublicPortalClient({
                 slug={slug}
                 handleRefresh={handleRefresh}
                 isSwitchingDoctor={isSwitchingDoctor}
+                onUploadPdf={handleOpenNewPrescriptionIntake}
               />
               <GenomicsExplainerVideoCard
                 assistantKey={
@@ -8039,6 +8060,7 @@ export default function DoctorPublicPortalClient({
               slug={slug}
               handleRefresh={handleRefresh}
               isSwitchingDoctor={isSwitchingDoctor}
+              onUploadPdf={handleOpenNewPrescriptionIntake}
             />
           )}
 

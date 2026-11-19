@@ -13,11 +13,12 @@ import DataTable from '../../ui/DataTable';
  * range assessment spectrum bars, interpretations, and protocol synergies.
  */
 export default function DoctorLabResultsTab({
-  allLabResults,
+  allLabResults = [],
   labResultsColumns,
   slug,
   handleRefresh,
-  isSwitchingDoctor
+  isSwitchingDoctor,
+  onUploadPdf = null
 }) {
   return (
     <section
@@ -83,6 +84,37 @@ export default function DoctorLabResultsTab({
         </div>
       </div>
 
+      {allLabResults.length === 0 ? (
+        <div
+          style={{
+            padding: '28px 20px',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '10px',
+            background: '#f8fafc'
+          }}
+        >
+          <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+            Upload Bloodo™ or Lab Biomarker PDF — AI Auto-Links to Patient
+          </div>
+          <div style={{ fontSize: '0.78rem', color: '#475569', maxWidth: '520px', lineHeight: 1.45 }}>
+            No blood or capillary DBS panels are linked yet. Upload a patient&apos;s lab report (Ferritin, TSH, Vitamin D3, DHT) and Atlas AI will parse and link it automatically.
+          </div>
+          {onUploadPdf && (
+            <button
+              type="button"
+              className="gcp-btn-primary"
+              onClick={onUploadPdf}
+              style={{ fontSize: '0.78rem', padding: '8px 16px', marginTop: '4px' }}
+            >
+              <FlaskConical size={14} />
+              <span>Upload Lab PDF</span>
+            </button>
+          )}
+        </div>
+      ) : (
       <DataTable
         columns={labResultsColumns}
         data={allLabResults}
@@ -218,6 +250,7 @@ export default function DoctorLabResultsTab({
           );
         }}
       />
+      )}
     </section>
   );
 }

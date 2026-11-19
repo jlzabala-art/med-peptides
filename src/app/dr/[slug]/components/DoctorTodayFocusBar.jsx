@@ -25,6 +25,9 @@ export default function DoctorTodayFocusBar({
   pendingCount = 0,
   refillsDueCount = 0,
   activeCount = 0,
+  topFormulas = [],
+  onPrescribeFormula,
+  onQuickRefill,
   onOpenPending,
   onOpenPrescriptions,
   onNewPrescription,
@@ -67,6 +70,18 @@ export default function DoctorTodayFocusBar({
             <PlusCircle size={14} />
             <span>{isEs ? 'Nueva Prescripción' : 'New Prescription'}</span>
           </button>
+
+          {onQuickRefill && (
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              onClick={onQuickRefill}
+              style={{ fontSize: '0.75rem', padding: '7px 11px' }}
+            >
+              <Repeat size={13} color="#0d9488" />
+              <span>{isEs ? `Refills (${refillsDueCount})` : `Refill ↻ (${refillsDueCount})`}</span>
+            </button>
+          )}
 
           <Link
             href="/pricing/pens"
@@ -202,6 +217,37 @@ export default function DoctorTodayFocusBar({
           <ChevronRight size={14} color="#94a3b8" />
         </button>
       </div>
+
+      {Array.isArray(topFormulas) && topFormulas.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '4px', borderTop: '1px solid #dbeafe' }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+            {isEs ? 'Top Fórmulas en tu Consulta (1-Clic):' : 'Most Prescribed in Your Practice:'}
+          </span>
+          {topFormulas.map((item) => (
+            <button
+              key={item.title}
+              type="button"
+              onClick={() => onPrescribeFormula?.(item.title)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '9999px',
+                border: '1px solid #bfdbfe',
+                background: '#ffffff',
+                color: '#1e3a8a',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <span>{item.title.length > 42 ? `${item.title.slice(0, 42)}…` : item.title}</span>
+              <span style={{ fontSize: '0.66rem', color: '#0284c7', fontWeight: 700 }}>×{item.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
