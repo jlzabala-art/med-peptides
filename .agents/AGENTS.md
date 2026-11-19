@@ -693,6 +693,11 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Estándar obligatorio para pasos secuenciales o listas impares**: Toda guía paso a paso (*How to Use*, reconstitución, preparación, fases clínicas, checklists) o colección de elementos cuyo número sea impar DEBE renderizarse como **filas horizontales lineales a ancho completo** usando el componente reutilizable [`StepTimelineList.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/ui/StepTimelineList.jsx) (o una lista vertical limpia con separadores `1px solid #f1f5f9`), nunca como tarjetas sueltas en cuadrícula asimétrica.
 - **Rejillas de tarjetas solo para conjuntos estrictamente pares y simétricos**: Usar grids multi-columna únicamente cuando el total de tarjetas sea par y divisible de forma exacta por el número de columnas en cada breakpoint (ej. 4 KPIs en `4×1` / `2×2`, 6 formatos en `3×2` / `2×3` / `1×6`, o 2 tarifas `Single` vs `Pack ×10` en `2×1`). Si el número de elementos es impar, caer automáticamente a presentación por líneas (`1fr`).
 
+## 71. Estándar Universal de Etiquetas Farmacéuticas e Importación (Golden Rule)
+- **Jerarquía de cabecera discreta**: El nombre de la farmacia dispensadora (`PHARMAPOLIS COMPOUNDING PHARMACY`) y su dirección deben renderizarse con tipografía moderada/pequeña en [`PharmapolisLabelSvg.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/prescription/PharmapolisLabelSvg.jsx) para priorizar el nombre del paciente, la fórmula y el QR de refill.
+- **Nombre del paciente directo (sin prefijo `PATIENT:`)**: Toda etiqueta generada o importada debe mostrar directamente el nombre completo del paciente sin la palabra `PATIENT:` delante, limpiando cualquier prefijo residual en los datos importados.
+- **Separación visual destacada bajo `SCAN FOR REFILL`**: Debe existir un margen vertical amplio (`≥ 40px` en coordenadas SVG) entre el botón/pill `SCAN FOR REFILL` y el bloque `DISPENSING SPECS` inferior para dirigir la atención del paciente hacia el escaneo de reposición.
+
 
 
 

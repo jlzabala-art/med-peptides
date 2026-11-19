@@ -254,16 +254,19 @@ export default function PharmapolisLabelSvg({
   const footerFontSize = isShort ? 18 : isMediumHeight ? 21 : 23; // Boosted technical print size
   const footerLineGap = 0; // single-line compact footer, zero vertical waste
 
-  // Header & Patient Box coordinates
-  const headerY = isShort ? 22 : 26;
-  const headerTitleSize = isShort ? 46 : 52;
-  const headerSubSize = isShort ? 22 : 25;
+  // Header & Patient Box coordinates (Pharmacy title intentionally subdued so Patient & Formula lead hierarchy)
+  const headerY = isShort ? 24 : 28;
+  const headerTitleSize = isShort ? 32 : 36;
+  const headerSubSize = isShort ? 17 : 19;
 
   const patientBoxY = isShort ? 114 : 130;
   const patientBoxHeight = isShort ? 64 : 74;
   const patientBoxBottom = patientBoxY + patientBoxHeight;
-  // Extraction of clinical parameters with defensive fallbacks
-  const patientName = (labelData.patientName || labelData.patient?.name || 'PATIENT RECORD').toUpperCase();
+  // Extraction of clinical parameters with defensive fallbacks (never prefix with "PATIENT:")
+  const patientName = String(labelData.patientName || labelData.patient?.name || 'PATIENT RECORD')
+    .replace(/^patient:\s*/i, '')
+    .trim()
+    .toUpperCase();
   const patientLabelFontSize = isShort ? 28 : 32;
   const nameLen = patientName.length;
   // Patient name font: large and crisp with graceful scaling for long names
@@ -374,9 +377,9 @@ export default function PharmapolisLabelSvg({
   const badgeHeight = isShort ? 38 : 44;
   const badgeY = isShort ? 13 : 15;
 
-  // Dynamic zero-collision scaling for PATIENT: <Name> against right-aligned header badge
+  // Dynamic zero-collision scaling for <Patient Name> against right-aligned header badge
   const patientMaxPx = headerBadgeText ? Math.max(360, badgeX - 44) : 1332;
-  const estPatientLabelPx = 9 * (patientLabelFontSize * 0.65);
+  const estPatientLabelPx = 0;
   const estPatientNamePx = nameLen * (patientNameFontSize * 0.68);
   const estTotalPatientPx = estPatientLabelPx + estPatientNamePx;
   const patientScaleRatio = estTotalPatientPx > patientMaxPx ? (patientMaxPx / estTotalPatientPx) : 1;
@@ -960,8 +963,8 @@ export default function PharmapolisLabelSvg({
 
         {/* ── HEADER ── */}
         <g transform={`translate(60, ${headerY})`}>
-          <text x="0" y="34" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">{pharmacyName}</text>
-          <text x="0" y="62" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={headerSubSize} fontWeight="500" fill={isMono ? '#333333' : '#475569'}>{pharmacyAddress}</text>
+          <text x="0" y="30" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="800" letterSpacing="0.4" fill="#000000">{pharmacyName}</text>
+          <text x="0" y="54" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={headerSubSize} fontWeight="500" fill={isMono ? '#333333' : '#475569'}>{pharmacyAddress}</text>
         </g>
 
         {/* EU GMP CERTIFIED BADGE */}
@@ -975,8 +978,8 @@ export default function PharmapolisLabelSvg({
         {/* ── PATIENT BOX ── */}
         <g transform={`translate(60, ${patientBoxY})`}>
           <rect x="0" y="0" width="1380" height={patientBoxHeight} fill={isMono ? '#ffffff' : '#f8fafc'} stroke="#000000" strokeWidth="2.2" rx="4" />
-          <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={resolvedPatientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
-            PATIENT: <tspan fontWeight="800" fontSize={resolvedPatientNameFontSize}>{patientName}</tspan>
+          <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={resolvedPatientNameFontSize} fontWeight="800" letterSpacing="0.4" fill="#000000">
+            {patientName}
           </text>
           {headerBadgeText ? (
             <g transform={`translate(${badgeX}, ${badgeY})`}>
@@ -1159,10 +1162,10 @@ export default function PharmapolisLabelSvg({
             const effectiveVol = cleanVolForVeh || volume || '100 mL';
             const volLines = wrapLines(effectiveVol, 16);
 
-            // Specs origin: positioned cleanly beneath CTA pill (single QR) or dual QRs
-            const ctaBlockBottom = qrY + backQrSize + (isShort ? 38 : 45);
+            // Specs origin: generous breathing room beneath SCAN FOR REFILL CTA so the refill callout stands out
+            const ctaBlockBottom = qrY + backQrSize + (isShort ? 70 : 86);
             const specsOriginY = isDualQrMode
-              ? qrY + (backQrSize * 2) + (isShort ? 54 : 64)
+              ? qrY + (backQrSize * 2) + (isShort ? 82 : 98)
               : ctaBlockBottom;
 
             const railAvailableH = Math.max(90, colHeight - specsOriginY - 8);
@@ -1684,8 +1687,8 @@ export default function PharmapolisLabelSvg({
 
       {/* ── HEADER ── */}
       <g transform={`translate(60, ${headerY})`}>
-        <text x="0" y="34" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">{pharmacyName}</text>
-        <text x="0" y="62" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={headerSubSize} fontWeight="500" fill={isMono ? '#333333' : '#475569'}>{pharmacyAddress}</text>
+        <text x="0" y="30" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="800" letterSpacing="0.4" fill="#000000">{pharmacyName}</text>
+        <text x="0" y="54" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={headerSubSize} fontWeight="500" fill={isMono ? '#333333' : '#475569'}>{pharmacyAddress}</text>
       </g>
 
       {/* MICRO-QR (IF ENABLED): Guaranteed zero overlap with patient box */}
@@ -1710,8 +1713,8 @@ export default function PharmapolisLabelSvg({
       {/* ── PATIENT BOX ── */}
       <g transform={`translate(60, ${patientBoxY})`}>
         <rect x="0" y="0" width="1380" height={patientBoxHeight} fill={isMono ? '#ffffff' : '#f8fafc'} stroke="#000000" strokeWidth="2.2" rx="4" />
-        <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={resolvedPatientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
-          PATIENT: <tspan fontWeight="800" fontSize={resolvedPatientNameFontSize}>{patientName}</tspan>
+        <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={resolvedPatientNameFontSize} fontWeight="800" letterSpacing="0.4" fill="#000000">
+          {patientName}
         </text>
         {headerBadgeText ? (
           <g transform={`translate(${badgeX}, ${badgeY})`}>
