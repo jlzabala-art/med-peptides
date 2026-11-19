@@ -16,6 +16,7 @@ export const TWENTY_FOUR_GENOMICS_ASSISTANTS = {
     subtitleEs: 'Cuidado personalizado de piel y cabello combinando predisposición genética, hábitos y objetivos clínicos',
     sourceUrl: 'https://24genetics.com/24g-ai-skin-and-hair-care-assistant/',
     videoUrl: '/videos/24genomics/ai-skin-hair-assistant.mp4',
+    posterUrl: '/images/genomics/jun-skin-hair-cover.jpg',
     videoTitle: 'Jun — AI Assistant for Skin and Hair Care',
     summary:
       'Jun is the AI avatar of 24Genetics’ Skin and Hair Care Assistant. It combines your 24Genetics Personalized Skin & Hair DNA Test results with a detailed lifestyle, environment, and personal care questionnaire to deliver realistic, science-backed daily and weekly routines, active ingredient guidance, and product recommendations.',

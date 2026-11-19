@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Sparkles, PlayCircle, CheckCircle2, Info, ExternalLink } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Sparkles, PlayCircle, Play, CheckCircle2, Info, ExternalLink } from 'lucide-react';
 import {
   TWENTY_FOUR_GENOMICS_ASSISTANT_LIST,
   getGenomicsAssistantByKey,
@@ -21,9 +21,12 @@ export default function GenomicsExplainerVideoCard({
   showAllTabs = true,
 }) {
   const [internalKey, setInternalKey] = useState(assistantKey);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
   const effectiveKey = activeKey || internalKey;
   const handleSelect = (key) => {
     setInternalKey(key);
+    setIsPlaying(false);
     if (typeof onSelectKey === 'function') onSelectKey(key);
   };
   const isEs = lang === 'es';
@@ -91,27 +94,94 @@ export default function GenomicsExplainerVideoCard({
             alignItems: 'center',
           }}
         >
-          {/* Left: Native Hosted Video Player */}
+          {/* Left: Native Hosted Video Player with Inviting Clinical Cover Overlay */}
           <div>
             <div
               style={{
+                position: 'relative',
                 borderRadius: '8px',
                 overflow: 'hidden',
-                background: '#0f172a',
+                background: 'linear-gradient(135deg, #002b52 0%, #0d9488 100%)',
                 border: '1px solid #dadce0',
                 aspectRatio: '16 / 9',
               }}
             >
               <video
+                ref={videoRef}
                 key={item.videoUrl}
-                controls
+                controls={isPlaying}
                 playsInline
                 preload="metadata"
+                poster={item.posterUrl || undefined}
+                onPlay={() => setIsPlaying(true)}
+                onEnded={() => setIsPlaying(false)}
                 style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
                 aria-label={item.videoTitle}
               >
                 <source src={item.videoUrl} type="video/mp4" />
               </video>
+
+              {!isPlaying && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPlaying(true);
+                    setTimeout(() => {
+                      videoRef.current?.play?.().catch(() => {});
+                    }, 30);
+                  }}
+                  aria-label={`Play ${item.videoTitle}`}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    padding: '16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    background: item.posterUrl
+                      ? `linear-gradient(180deg, rgba(0,30,60,0.22) 0%, rgba(0,30,60,0.68) 100%), url("${item.posterUrl}") center/cover no-repeat`
+                      : 'linear-gradient(135deg, rgba(0,54,102,0.92) 0%, rgba(13,148,136,0.88) 100%)',
+                    color: '#ffffff',
+                    transition: 'transform 0.2s ease',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '56px',
+                      height: '56px',
+                      borderRadius: '50%',
+                      background: 'rgba(255, 255, 255, 0.96)',
+                      color: '#003666',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+                    }}
+                  >
+                    <Play size={24} fill="#003666" style={{ marginLeft: '3px' }} />
+                  </span>
+                  <span
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: '9999px',
+                      background: 'rgba(15, 23, 42, 0.72)',
+                      backdropFilter: 'blur(6px)',
+                      border: '1px solid rgba(255, 255, 255, 0.28)',
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.01em',
+                    }}
+                  >
+                    {isEs ? `Ver presentación · ${item.assistantName} AI` : `Watch Walkthrough · ${item.assistantName} AI`}
+                  </span>
+                </button>
+              )}
             </div>
             <div
               style={{
