@@ -1135,6 +1135,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     clinicName: resolvedClinicName,
     license: doctorDoc.licenseNumber || doctorDoc.license || doctorDoc.dhaLicense || doctorDoc.germanMedicalId || 'DHA Registered',
     email: resolvedEmail,
+    assistantName: doctorDoc.assistantName || doctorDoc.assistant?.name || '',
+    assistantEmail: doctorDoc.assistantEmail || doctorDoc.assistant?.email || '',
     phone: doctorDoc.phone || doctorDoc.mobile || '',
     mobile: doctorDoc.mobile || doctorDoc.phone || '',
     location: doctorDoc.location || doctorDoc.city || 'Dubai, UAE',

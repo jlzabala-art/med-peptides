@@ -82,6 +82,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import DoctorTodayFocusBar from './components/DoctorTodayFocusBar';
+import DoctorTeamAccessBanner from './components/DoctorTeamAccessBanner';
 import GenomicsExplainerVideoCard from '@/components/genomics/GenomicsExplainerVideoCard';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligenceBanner';
@@ -597,6 +598,7 @@ export default function DoctorPublicPortalClient({
   const [isAuthNoticeModalOpen, setIsAuthNoticeModalOpen] = useState(false);
   const [authNoticeResource, setAuthNoticeResource] = useState('');
   const [workstationAuthorized, setWorkstationAuthorized] = useState(false);
+  const [viewerRole, setViewerRole] = useState('doctor');
   const [isSwitchingDoctor, setIsSwitchingDoctor] = useState(false);
   const [followUpModalTask, setFollowUpModalTask] = useState(null);
   const [hoveredInsightBar, setHoveredInsightBar] = useState(null);
@@ -612,9 +614,11 @@ export default function DoctorPublicPortalClient({
     if (!user) return false;
     if (isAdmin || activeRole === 'admin' || activeRole === 'doctor' || activeRole === 'clinic_admin') return true;
     const docEmail = data?.doctor?.email || initialData?.doctor?.email;
+    const assistantEmail = data?.doctor?.assistantEmail || initialData?.doctor?.assistantEmail || data?.doctor?.assistant?.email;
     if (docEmail && user.email && user.email.toLowerCase() === docEmail.toLowerCase()) return true;
+    if (assistantEmail && user.email && user.email.toLowerCase() === assistantEmail.toLowerCase()) return true;
     return false;
-  }, [user, activeRole, isAdmin, data?.doctor?.email, initialData?.doctor?.email, isCustomerAgent, workstationAuthorized]);
+  }, [user, activeRole, isAdmin, data?.doctor?.email, initialData?.doctor?.email, data?.doctor?.assistantEmail, initialData?.doctor?.assistantEmail, data?.doctor?.assistant?.email, isCustomerAgent, workstationAuthorized]);
 
   // Verify Workstation Session (90-day persistence) or 1-Tap Magic Token / Auth Token from WhatsApp
   useEffect(() => {
@@ -645,6 +649,9 @@ export default function DoctorPublicPortalClient({
         .then(resData => {
           if (resData?.authorized) {
             setWorkstationAuthorized(true);
+            if (resData.viewerRole) {
+              setViewerRole(resData.viewerRole);
+            }
             if (resData.workstationToken) {
               try {
                 localStorage.setItem('atlas_workstation_session', resData.workstationToken);
@@ -6493,6 +6500,16 @@ export default function DoctorPublicPortalClient({
           {/* ── View 1: Practice Overview (Adaptive for Zero-Rx vs Active Prescribers) ─ */}
           {activeAnchor === 'overview' && (
             <div id="overview" style={{ marginBottom: '24px' }}>
+              <DoctorTeamAccessBanner
+                isAuthorizedViewer={isAuthorizedViewer}
+                viewerRole={viewerRole}
+                onSetViewerRole={setViewerRole}
+                onOpenMagicLogin={() => setIsClaimModalOpen(true)}
+                onOpenAssistantQueue={() => handleSidebarNavigate(filteredTasks.length > 0 ? 'tasks' : 'prescriptions')}
+                onOpenDoctorSignOff={() => handleSidebarNavigate('tasks')}
+                pendingTasksCount={filteredTasks.length}
+                refillsDueCount={allPrescriptions.filter((r) => Boolean(r.refillAlertDate || Number(r.refillCycle || 1) > 1)).length}
+              />
               <DoctorTodayFocusBar
                 isEs={isEs}
                 doctorName={isAuthorizedViewer ? (doctor?.name || '') : ''}

@@ -328,17 +328,19 @@ export const SPECIALTY_BLUEPRINTS_CATALOG = {
       },
       peptideSynergy: {
         code: 'atlas-glow-blend',
-        name: 'GLOW Complex (BPC-157 10mg / TB-500 10mg / GHK-Cu 75mg)',
-        role: 'Acceleratesrecipient bed neovascularization, endothelial nitric oxide healing, and graft take rate (99% synergy).'
+        name: 'GLOW Complex U-100 Pen or Vial (BPC-157 10mg / TB-500 10mg / GHK-Cu 75mg)',
+        role: 'Accelerates recipient bed neovascularization, endothelial nitric oxide healing, and graft take rate (99% synergy). Available in ready-to-dial U-100 Pens (no reconstitution needed).',
+        penGuideUrl: '/pricing/pens',
+        calculatorUrl: '/calculator?peptide=GLOW&format=pen'
       },
       dermocosmeticSynergy: {
         name: 'Colway Native Transdermal Collagen + Atelocollagen',
         role: 'Restores injured perifollicular extracellular matrix (ECM) and calms donor/recipient erythema post-crusting.'
       },
       nutraceuticalSynergy: {
-        name: 'UltraPerson™ Longevity & Cellular Renewal',
+        name: 'UltraPerson™ Post-FUE Follicular Matrix (Zinc + Biotin + L-Cysteine + Vit D3)',
         slug: 'ultraperson-longevity-cellular-renewal',
-        role: 'Systemic mitochondrial ATP support and oxidative stress protection during follicular re-implantation.'
+        role: 'Supplies keratin infrastructure co-factors, zinc/copper balance, and cellular oxidative protection during follicular re-implantation.'
       },
       diagnosticSynergy: {
         name: 'Fagron TrichoTest™ Pharmacogenomics & Tricho-Genetics DNA Test',
@@ -369,23 +371,25 @@ export const SPECIALTY_BLUEPRINTS_CATALOG = {
       },
       peptideSynergy: {
         code: 'atlas-ghk-cu-50mg',
-        name: 'GHK-Cu (Copper Tripeptide-1) 50 mg Lyophilized Vial',
-        role: 'Blocks TGF-β1 catagen signaling and stimulates dermal papilla fibroblast proliferation.'
+        name: 'GHK-Cu (Copper Tripeptide-1) U-100 Pen or 50 mg Lyophilized Vial',
+        role: 'Blocks TGF-β1 catagen signaling and stimulates dermal papilla fibroblast proliferation. Pre-filled U-100 Pen option maximizes daily patient adherence.',
+        penGuideUrl: '/pricing/pens',
+        calculatorUrl: '/calculator?peptide=GHK-Cu&format=pen'
       },
       dermocosmeticSynergy: {
         name: 'Colway Anti-Hair Loss Shampoo with Diosmin & Native Collagen',
         role: 'Micellar diosmin strengthens perifollicular capillary walls and prepares the scalp barrier before topical drops.'
       },
       nutraceuticalSynergy: {
-        name: 'UltraPerson™ Energy & Metabolic Vitality (CoQ10 + PQQ)',
+        name: 'UltraPerson™ Follicular Density & Anti-DHT Micronutrient Stack',
         slug: 'ultraperson-energy-metabolic-vitality',
-        role: 'Supports dermal papilla mitochondrial cytochrome c oxidase energy production.'
+        role: 'Combines bioavailable Zinc, Astaxanthin, B12/Folate, and mitochondrial co-factors to reinforce topical anti-DHT therapy.'
       },
       diagnosticSynergy: {
         name: 'Bloodo™ Vitamin D + Testosterone+ Capillary DBS Panel',
         role: 'Rules out 25(OH)D3 deficiency (<30 ng/mL) and evaluates free androgen index prior to antiandrogen titration.'
       },
-      protocolUrl: '/proto/melanogenesis-density-protocol-zt-ghk-cu'
+      protocolUrl: '/proto/bpc-157-tb-500-protocol'
     },
     {
       id: 'bp-tricho-female-effluvium',
@@ -410,8 +414,10 @@ export const SPECIALTY_BLUEPRINTS_CATALOG = {
       },
       peptideSynergy: {
         code: 'atlas-dsip-5mg',
-        name: 'DSIP (Delta Sleep-Inducing Peptide) 5 mg + GHK-Cu',
-        role: 'Counteracts HPA-axis cortisol-induced follicular arrest and restores nocturnal growth hormone pulsatility.'
+        name: 'GHK-Cu + DSIP U-100 Pen / 5 mg Vial Protocol',
+        role: 'Counteracts HPA-axis cortisol-induced follicular arrest and supports nocturnal anagen signaling without reconstitution friction.',
+        penGuideUrl: '/pricing/pens',
+        calculatorUrl: '/calculator?peptide=GHK-Cu&format=pen'
       },
       dermocosmeticSynergy: {
         name: 'Colway Native Collagen Gold (Lactoferrin + Chitosan)',
@@ -423,8 +429,8 @@ export const SPECIALTY_BLUEPRINTS_CATALOG = {
         role: 'Adaptogenic neuro-endocrine modulation to halt stress-triggered premature catagen entry.'
       },
       diagnosticSynergy: {
-        name: 'Bloodo™ Omega-3/6 Ratio & Inflammatory Index DBS Test',
-        role: 'Quantifies arachidonic acid (AA/EPA) perifollicular micro-inflammation driving chronic shedding.'
+        name: 'Bloodo™ Ferritin, Thyroid (TSH/Free T4), Zinc & Vitamin D3 Follicular Panel',
+        role: 'First-line workup for female diffuse shedding: verifies Ferritin (>70 ng/mL), thyroid axis, Zinc, 25(OH)D3, and DHEA-S.'
       },
       protocolUrl: '/proto/dsip-bpc-157-cns-rest-protocol'
     }

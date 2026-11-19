@@ -34,7 +34,8 @@ export default function DoctorPracticeClaimModal({
   const [isSendingMagicLink, setIsSendingMagicLink] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [activeTab, setActiveTab] = useState('claim'); // 'claim' | 'magic_link' | 'forgot_password'
+  const [activeTab, setActiveTab] = useState('magic_link'); // 'magic_link' | 'claim'
+  const [accessRole, setAccessRole] = useState('doctor'); // 'doctor' | 'assistant'
 
   if (!isOpen) return null;
 
@@ -133,6 +134,7 @@ export default function DoctorPracticeClaimModal({
           doctorSlug: doctor.slug || opaqueCode,
           phone: targetPhone,
           email: targetEmail,
+          accessRole,
           rememberDevice: Boolean(rememberDevice)
         })
       });
@@ -639,9 +641,45 @@ export default function DoctorPracticeClaimModal({
               ) : (
                 /* 1-Tap WhatsApp Link Tab (Forgot Password / Instant Access) */
                 <div>
-                  <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.4, marginBottom: '14px' }}>
-                    Forgot your password or visiting from your consultation desk? Request an instant, single-use 1-Tap Access Link delivered straight to your verified WhatsApp or email.
+                  <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.4, marginBottom: '12px' }}>
+                    Request an instant, passwordless 1-Tap Access Link delivered to WhatsApp or Email. Works for both the physician and authorized medical assistants.
                   </p>
+
+                  {/* Role Selector: Physician vs Medical Assistant */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setAccessRole('doctor')}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: accessRole === 'doctor' ? '1.5px solid #003666' : '1px solid #cbd5e1',
+                        background: accessRole === 'doctor' ? '#eff6ff' : '#ffffff',
+                        color: accessRole === 'doctor' ? '#003666' : '#475569',
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Treating Physician
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAccessRole('assistant')}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: accessRole === 'assistant' ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
+                        background: accessRole === 'assistant' ? '#f0fdfa' : '#ffffff',
+                        color: accessRole === 'assistant' ? '#0f766e' : '#475569',
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Medical Assistant
+                    </button>
+                  </div>
 
                   <div style={{ marginBottom: '14px' }}>
                     <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>

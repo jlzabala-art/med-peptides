@@ -43,6 +43,7 @@ export async function POST(request) {
             authorized: true,
             workstationToken,
             doctorSlug,
+            viewerRole: data.viewerRole || 'doctor',
             expiresAt: data.expiresAt,
             message: 'Clinical workstation session verified.'
           });
@@ -83,6 +84,7 @@ export async function POST(request) {
             doctorSlug,
             phone: data.phone || '',
             email: data.email || '',
+            viewerRole: data.viewerRole || 'doctor',
             createdAt: now.toISOString(),
             expiresAt: wsExpiresAt
           });
@@ -131,6 +133,7 @@ export async function POST(request) {
             authorized: true,
             workstationToken: newWsToken,
             doctorSlug,
+            viewerRole: data.viewerRole || 'doctor',
             expiresAt: wsExpiresAt,
             message: '1-Tap link verified and workstation trusted for 90 days.'
           });

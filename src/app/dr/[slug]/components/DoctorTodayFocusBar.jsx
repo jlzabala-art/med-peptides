@@ -69,7 +69,16 @@ export default function DoctorTodayFocusBar({
           </button>
 
           <Link
-            href="/calculator"
+            href="/pricing/pens"
+            className="gcp-btn-secondary"
+            style={{ fontSize: '0.75rem', padding: '7px 11px', textDecoration: 'none' }}
+          >
+            <Compass size={13} color="#003666" />
+            <span>{isEs ? 'Plumas U-100' : 'U-100 Pens'}</span>
+          </Link>
+
+          <Link
+            href="/calculator?format=pen"
             className="gcp-btn-secondary"
             style={{ fontSize: '0.75rem', padding: '7px 11px', textDecoration: 'none' }}
           >

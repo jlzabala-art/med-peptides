@@ -193,9 +193,9 @@ export function getPrescriptionAtlasRecommendations(rx) {
       pharmaRationale:
         'Potent follicular bioregulator stimulating dermal papilla fibroblast proliferation, downregulating TGF-β1 (the primary transcriptional driver of catagen transition and follicular miniaturization), and inducing VEGF/bFGF microvascular angiogenesis. Exhibits profound pharmacodynamic synergy with Minoxidil and Dutasteride/Finasteride regimens by accelerating anagen re-entry without androgenic receptor competition.',
       associatedProtocol: {
-        slug: 'melanogenesis-density-protocol-zt-ghk-cu',
-        title: 'Melanogenesis & Density Protocol (ZT + GHK-Cu)',
-        url: '/proto/melanogenesis-density-protocol-zt-ghk-cu'
+        slug: 'bpc-157-tb-500-protocol',
+        title: 'Follicular Revascularization & Tissue Recovery (GHK-Cu + BPC-157)',
+        url: '/proto/bpc-157-tb-500-protocol'
       }
     };
   } else {

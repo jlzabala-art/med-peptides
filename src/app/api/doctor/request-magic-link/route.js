@@ -10,6 +10,7 @@ export async function POST(request) {
       doctorSlug = '',
       phone = '',
       email = '',
+      accessRole = 'doctor',
       rememberDevice = true,
       expiresInHours = 24
     } = body;
@@ -48,7 +49,7 @@ export async function POST(request) {
       alternateSlugs: [cleanSlug, `dr-${norm}`, norm],
       phone: String(phone).trim(),
       email: String(email).toLowerCase().trim(),
-      rememberDevice: Boolean(rememberDevice),
+      viewerRole: accessRole === 'assistant' ? 'assistant' : 'doctor',
       used: false,
       durationHours,
       createdAt: now.toISOString(),
