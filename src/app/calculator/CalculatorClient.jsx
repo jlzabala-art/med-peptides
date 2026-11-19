@@ -9,6 +9,7 @@ import HorizontalSyringeVisualizer from '@/components/reconstitution/HorizontalS
 import PenDialVisualizer from '@/components/reconstitution/PenDialVisualizer';
 import NonInjectableVisualizer from '@/components/reconstitution/NonInjectableVisualizer';
 import StepTimelineList from '@/components/ui/StepTimelineList';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import {
   useAlgoliaPeptideSelector,
   filterAndDeduplicatePatientPeptides,
@@ -70,6 +71,8 @@ export default function CalculatorClient() {
     handleOpenQr,
     formatOptions,
     quickPeptides,
+    hasUserInteracted,
+    setHasUserInteracted,
     initialUrlOverrides,
   } = selector;
 
@@ -177,12 +180,13 @@ export default function CalculatorClient() {
     [buildSharePath, currentShareOverrides]
   );
 
-  // Sync full configuration cleanly into browser address bar without jumping scroll
+  // Sync full configuration cleanly into browser address bar once user interacts or opened with params
   useEffect(() => {
+    if (!hasUserInteracted) return;
     if (typeof window !== 'undefined' && window.history?.replaceState) {
       window.history.replaceState(null, '', fullSharePath);
     }
-  }, [fullSharePath]);
+  }, [fullSharePath, hasUserInteracted]);
 
   const fullShareUrl = useMemo(() => {
     if (typeof window === 'undefined') return `https://www.atlashealth-services.com${fullSharePath}`;
@@ -193,10 +197,110 @@ export default function CalculatorClient() {
 
   const breadcrumbItems = useMemo(() => [
     { label: isEs ? 'Inicio' : 'Home', href: '/' },
-    { label: isEs ? 'Guía de Uso y Dosificación' : 'How to Use & Dosing Guide' },
+    { label: isEs ? 'Guía Universal de Uso y Dosificación' : 'Universal Peptide Dosing Guide' },
   ], [isEs]);
 
   const activeFormatBadge = FORMAT_SHORT_BADGE[formatId] || FORMAT_SHORT_BADGE.vial;
+  const activeCartridgeVolMl = parsedUrlOverrides.penVolumeMl || 3.0;
+
+  // Concise human summary of the exact action for KPI Card #4 & Contextual Help
+  const activeActionSummary = useMemo(() => {
+    if (recon.isVial) {
+      return isEs
+        ? `${recon.doseDisplayValue} ${recon.doseUnit} → Marca ${Math.round(recon.unitsToInject)} U-100 (${recon.volumeMl} mL)`
+        : `${recon.doseDisplayValue} ${recon.doseUnit} → Draw ${Math.round(recon.unitsToInject)} U-100 (${recon.volumeMl} mL)`;
+    }
+    if (recon.isPenOrCartridge) {
+      return isEs
+        ? `${recon.doseDisplayValue} ${recon.doseUnit} → ${recon.penClicks} clics (${recon.volumeMl} mL)`
+        : `${recon.doseDisplayValue} ${recon.doseUnit} → Dial ${recon.penClicks} clicks (${recon.volumeMl} mL)`;
+    }
+    if (recon.isSpray) {
+      return isEs
+        ? `${recon.sprayPuffs} spray(s) (${recon.sprayDoseMcg} mcg)`
+        : `${recon.sprayPuffs} spray(s) (${recon.sprayDoseMcg} mcg)`;
+    }
+    if (recon.isCapsule) {
+      return isEs
+        ? `${recon.oralUnitsPerDose} cápsula(s) / toma`
+        : `${recon.oralUnitsPerDose} capsule(s) / dose`;
+    }
+    return recon.topicalDoseLabel;
+  }, [recon, isEs]);
+
+  // Register live contextual metadata for Atlas AI & HelpDrawer (?)
+  useRegisterAtlasContext(
+    {
+      contextType: 'peptide_calculator',
+      title: isEs
+        ? 'Guía Universal de Preparación y Dosificación de Péptidos'
+        : 'Universal Peptide Administration & Dosing Guide',
+      lang,
+      contextAnchor: {
+        type: 'peptide_calculator',
+        lang,
+        name: isEs
+          ? `Guía de Dosificación · ${selectedProduct.name} (${selectedStrength.name} · ${activeFormat.nameEs})`
+          : `Dosing Guide · ${selectedProduct.name} (${selectedStrength.name} · ${activeFormat.name})`,
+        badgeLabel: isEs ? activeFormat.nameEs : activeFormat.name,
+        sectionTitle: isEs
+          ? `Configuración activa: ${selectedProduct.name} · ${selectedStrength.name} · ${activeFormat.nameEs}`
+          : `Active setup: ${selectedProduct.name} · ${selectedStrength.name} · ${activeFormat.name}`,
+        keyActives: `${selectedProduct.name} (${selectedStrength.name}) — ${isEs ? activeFormat.nameEs : activeFormat.name} — ${activeActionSummary}`,
+        mechanisms: recon.isVial
+          ? (isEs
+              ? `Vial liofilizado reconstituido con ${recon.bacWaterMl.toFixed(1)} mL de agua bacteriostática (${recon.concentrationMgMl} mg/mL). Jeringa U-100 (${recon.syringeCapacityMl} mL): cargar hasta la marca ${Math.round(recon.unitsToInject)} (${recon.volumeMl} mL) para ${recon.doseDisplayValue} ${recon.doseUnit}. Rendimiento: ~${recon.totalDoses} dosis.`
+              : `Lyophilized vial reconstituted with ${recon.bacWaterMl.toFixed(1)} mL BAC water (${recon.concentrationMgMl} mg/mL). U-100 syringe (${recon.syringeCapacityMl} mL): draw to the ${Math.round(recon.unitsToInject)} mark (${recon.volumeMl} mL) for ${recon.doseDisplayValue} ${recon.doseUnit}. Yield: ~${recon.totalDoses} doses.`)
+          : recon.isPenOrCartridge
+            ? (isEs
+                ? `${activeFormat.nameEs} (${selectedStrength.name} en ${activeCartridgeVolMl.toFixed(1)} mL = ${recon.concentrationMgMl} mg/mL). Dial U-100 (100 clics = 1 mL): girar a ${recon.penClicks} clics (${recon.volumeMl} mL) para administrar ${recon.doseDisplayValue} ${recon.doseUnit}. Rendimiento: ~${recon.totalDoses} dosis.`
+                : `${activeFormat.name} (${selectedStrength.name} in ${activeCartridgeVolMl.toFixed(1)} mL = ${recon.concentrationMgMl} mg/mL). U-100 dial (100 clicks = 1 mL): turn to ${recon.penClicks} clicks (${recon.volumeMl} mL) to deliver ${recon.doseDisplayValue} ${recon.doseUnit}. Yield: ~${recon.totalDoses} doses.`)
+            : `${selectedProduct.name} (${selectedStrength.name}) · ${activeActionSummary}`,
+        welcomeIntro: isEs
+          ? `1) Elige cualquier péptido y su concentración en el Paso 1. 2) Selecciona el formato de presentación en el Paso 2 (${availableFormatIds.length} formatos disponibles para ${selectedProduct.name}). 3) Ajusta tu dosis prescrita en el Paso 3 para ver los clics o unidades U-100 exactos y compartir el enlace o QR con el paciente.`
+          : `1) Select any peptide and strength in Step 1. 2) Pick your delivery presentation in Step 2 (${availableFormatIds.length} formats available for ${selectedProduct.name}). 3) Set your prescribed dose in Step 3 to view exact U-100 clicks or syringe units and share the personalized link or QR with the patient.`,
+        helpPrompts: isEs
+          ? [
+              `¿Cómo preparo y administro ${selectedProduct.name} (${selectedStrength.name}) en formato ${activeFormat.nameEs}?`,
+              recon.isPenOrCartridge
+                ? `¿Por qué ${recon.doseDisplayValue} ${recon.doseUnit} equivalen a ${recon.penClicks} clics (${recon.volumeMl} mL) en esta pluma/cartucho?`
+                : `¿Cuánta agua bacteriostática (BAC) debo añadir a un vial de ${selectedStrength.name} de ${selectedProduct.name}?`,
+              `¿Qué presentaciones están disponibles para ${selectedProduct.name} y cómo conservo el producto entre 2°C y 8°C?`,
+              '¿Cómo comparto esta pauta personalizada por enlace o código QR con mi paciente?',
+            ]
+          : [
+              `How do I prepare and administer ${selectedProduct.name} (${selectedStrength.name}) as a ${activeFormat.name}?`,
+              recon.isPenOrCartridge
+                ? `Why does ${recon.doseDisplayValue} ${recon.doseUnit} equal ${recon.penClicks} clicks (${recon.volumeMl} mL) on this pen/cartridge?`
+                : `How much bacteriostatic (BAC) water should I add to a ${selectedStrength.name} vial of ${selectedProduct.name}?`,
+              `Which presentations are available for ${selectedProduct.name} and how should it be stored at 2°C–8°C?`,
+              'How do I share this exact personalized dosing guide via URL or QR code with a patient?',
+            ],
+      },
+    },
+    [
+      isEs,
+      lang,
+      selectedProduct.name,
+      selectedStrength.name,
+      activeFormat.name,
+      activeFormat.nameEs,
+      activeActionSummary,
+      availableFormatIds.length,
+      recon.isVial,
+      recon.isPenOrCartridge,
+      recon.bacWaterMl,
+      recon.concentrationMgMl,
+      recon.syringeCapacityMl,
+      recon.unitsToInject,
+      recon.volumeMl,
+      recon.doseDisplayValue,
+      recon.doseUnit,
+      recon.totalDoses,
+      recon.penClicks,
+      activeCartridgeVolMl,
+    ]
+  );
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a' }}>
@@ -209,7 +313,7 @@ export default function CalculatorClient() {
         breadcrumb={breadcrumbItems}
       />
 
-      {/* ── GENERAL PATIENT-FIRST HERO (Adapts clearly to chosen peptide & format, never hardcoded "Pre-filled") ── */}
+      {/* ── UNIVERSAL GOOGLE CLOUD UX PAGE HEADER (Generic for ANY Peptide + Clear Step-1 Onboarding) ── */}
       <div style={{ background: '#ffffff', borderBottom: '1px solid #dadce0' }}>
         <div style={{
           maxWidth: '1080px',
@@ -221,31 +325,44 @@ export default function CalculatorClient() {
           flexWrap: 'wrap',
           gap: '12px',
         }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.015em' }}>
-                {isEs ? 'Guía Visual de Uso y Dosificación de Péptidos' : 'Peptide Administration & Dosing Guide'}
-              </h1>
+          <div style={{ flex: '1 1 520px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
               <span style={{
-                fontSize: '0.70rem',
-                fontWeight: 700,
-                padding: '2px 9px',
-                borderRadius: '999px',
-                background: activeFormatBadge.bg,
-                color: activeFormatBadge.color,
-                border: '1px solid rgba(0,0,0,0.08)',
+                fontSize: '0.65rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                background: '#e8f0fe',
+                color: '#1a73e8',
               }}>
-                {selectedProduct.name} · {selectedStrength.name} · {isEs ? activeFormat.nameEs : activeFormat.name}
+                {isEs ? 'CALCULADORA Y GUÍA UNIVERSAL' : 'UNIVERSAL PEPTIDE GUIDE'}
+              </span>
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                background: '#f1f5f9',
+                color: '#475569',
+              }}>
+                {isEs ? '6 Formatos: Vial · Pluma · Cartucho · Spray · Oral · Tópico' : '6 Formats: Vial · Pen · Cartridge · Spray · Oral · Topical'}
               </span>
             </div>
-            <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#5f6368' }}>
+            <h1 style={{ margin: 0, fontSize: '1.24rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.015em' }}>
               {isEs
-                ? 'Cómo preparar y administrar tu péptido paso a paso: viales, plumas, cartuchos, spray nasal, cápsulas o tópicos.'
-                : 'Step-by-step visual guide on how to prepare and administer your peptide: vials, pens, cartridges, nasal spray, oral or topical.'}
+                ? 'Guía Universal de Preparación y Dosificación de Péptidos'
+                : 'Universal Peptide Administration & Dosing Guide'}
+            </h1>
+            <p style={{ margin: '4px 0 0', fontSize: '0.80rem', color: '#475569', lineHeight: 1.45 }}>
+              {isEs
+                ? 'Empieza eligiendo tu péptido y su presentación en los Pasos 1 y 2 para obtener la marca exacta de jeringa U-100, los clics del dial o las instrucciones paso a paso.'
+                : 'Start by choosing your peptide and presentation in Steps 1 & 2 below to calculate your exact U-100 syringe mark, pen dial clicks, and step-by-step instructions.'}
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="calc-header-actions">
             <button
               type="button"
               onClick={() => handleOpenQr(currentShareOverrides)}
@@ -262,36 +379,207 @@ export default function CalculatorClient() {
               style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               {copiedLink ? <Check size={14} /> : <Copy size={14} />}
-              <span>{copiedLink ? (isEs ? 'Enlace Copiado' : 'Link Copied') : (isEs ? 'Copiar Enlace Completo' : 'Copy Personalized Link')}</span>
+              <span>{copiedLink ? (isEs ? 'Enlace Copiado' : 'Link Copied') : (isEs ? 'Copiar Guía Personalizada' : 'Copy Personalized Link')}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* ── MAIN 3-STEP PATIENT WORKFLOW ── */}
-      <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '1.25rem 1.25rem 6.5rem', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+      {/* ── MAIN 3-STEP PATIENT WORKFLOW + GCP 4-KPI LIVE CONFIGURATION SUMMARY ── */}
+      <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '1rem 1.25rem 6.5rem', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          .calc-gcp-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+          }
+          .calc-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+          }
+          .calc-quick-pick-rail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 2px;
+          }
+          .calc-quick-pick-rail::-webkit-scrollbar {
+            display: none;
+          }
+          .calc-vial-secondary-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-left: 1px solid #e2e8f0;
+            padding-left: 14px;
+          }
+          .calc-dose-num-input::-webkit-outer-spin-button,
+          .calc-dose-num-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
+          .calc-dose-num-input {
+            -moz-appearance: textfield;
+          }
+          @media (max-width: 860px) {
+            .calc-gcp-kpi-grid {
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 8px;
+            }
+          }
+          @media (max-width: 680px) {
+            .calc-header-actions {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              width: 100%;
+            }
+            .calc-header-actions button {
+              width: 100%;
+              justify-content: center;
+              min-height: 40px;
+            }
+            .calc-vial-secondary-col {
+              border-left: none;
+              padding-left: 0;
+              border-top: 1px solid #e2e8f0;
+              padding-top: 12px;
+            }
+          }
+        ` }} />
+
+        {/* ── GOOGLE CLOUD UX 4-KPI ACTIVE CONFIGURATION SUMMARY + STEP-1 CALLOUT (Rule #22) ── */}
+        <section
+          aria-label={isEs ? 'Resumen de Configuración Activa' : 'Active Dosing Configuration Summary'}
+          style={{
+            background: '#ffffff',
+            border: '1px solid #dadce0',
+            borderRadius: '12px',
+            padding: '10px 14px 12px',
+            boxShadow: '0 1px 2px rgba(60,64,67,0.05)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '9px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.67rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {isEs ? 'RESUMEN DE DOSIFICACIÓN ACTIVA' : 'ACTIVE DOSING SUMMARY'}
+              </span>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                color: '#1e40af',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                padding: '2px 8px',
+                borderRadius: '999px',
+              }}>
+                {isEs
+                  ? 'Paso 1: Elige primero cualquier péptido y su presentación abajo'
+                  : 'First: Choose any peptide & presentation in Steps 1 & 2 below'}
+              </span>
+            </div>
+            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+              {isEs
+                ? `Mostrando guía para: ${selectedProduct.name} (${selectedStrength.name})`
+                : `Showing guide for: ${selectedProduct.name} (${selectedStrength.name})`}
+            </span>
+          </div>
+
+          <div className="calc-gcp-kpi-grid">
+            {/* KPI 1: Selected Peptide */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 11px', minWidth: 0 }}>
+              <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? '1. PÉPTIDO SELECCIONADO' : '1. SELECTED PEPTIDE'}
+              </div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#003666', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {selectedProduct.name}
+              </div>
+              <div style={{ fontSize: '0.67rem', color: '#64748b', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {isEs
+                  ? `${availableFormatIds.length} presentaciones disponibles`
+                  : `${availableFormatIds.length} presentations available`}
+              </div>
+            </div>
+
+            {/* KPI 2: Presentation Format */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 11px', minWidth: 0 }}>
+              <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? '2. PRESENTACIÓN / FORMATO' : '2. PRESENTATION FORMAT'}
+              </div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: activeFormatBadge.color, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {isEs ? activeFormat.nameEs : activeFormat.name}
+              </div>
+              <div style={{ fontSize: '0.67rem', color: '#64748b', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {isEs ? activeFormat.shortEs : activeFormat.shortEn}
+              </div>
+            </div>
+
+            {/* KPI 3: Strength & Concentration */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 11px', minWidth: 0 }}>
+              <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? '3. CONTENIDO Y CONCENTRACIÓN' : '3. CONTENT & CONCENTRATION'}
+              </div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {selectedStrength.name}
+                {(recon.isVial || recon.isPenOrCartridge) ? ` / ${recon.effectiveLiquidMl.toFixed(1)} mL` : ''}
+              </div>
+              <div style={{ fontSize: '0.67rem', color: '#64748b', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {(recon.isVial || recon.isPenOrCartridge)
+                  ? `${recon.concentrationMgMl} mg/mL (${recon.concentrationMcgUnit} mcg/clic)`
+                  : (isEs ? 'Fórmula lista para administrar' : 'Ready-to-use formulation')}
+              </div>
+            </div>
+
+            {/* KPI 4: Exact Dose & Action */}
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '8px 11px', minWidth: 0 }}>
+              <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? '4. DOSIS Y PAUTA EXACTA' : '4. EXACT DOSE & ACTION'}
+              </div>
+              <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#14532d', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {activeActionSummary}
+              </div>
+              <div style={{ fontSize: '0.67rem', color: '#15803d', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 650 }}>
+                {(recon.isVial || recon.isPenOrCartridge)
+                  ? `~${recon.totalDoses} ${isEs ? 'dosis totales por envase' : 'total doses per unit'}`
+                  : recon.isSpray
+                    ? `~${recon.sprayRemainingDoses} ${isEs ? 'tomas por frasco' : 'doses per bottle'}`
+                    : (isEs ? 'Guía paso a paso abajo' : 'Step-by-step guide below')}
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* ── STEP 1: SEARCH READY-TO-USE PEPTIDES (ZERO RAW APIs · ZERO SUPPLIER LABELS) ── */}
         <section style={{
           background: '#ffffff',
-          border: '1px solid #dadce0',
-          borderRadius: '14px',
-          padding: '1.15rem 1.25rem',
-          boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+          border: '1.5px solid #93c5fd',
+          borderRadius: '12px',
+          padding: '1.1rem 1.25rem',
+          boxShadow: '0 2px 8px rgba(26,115,232,0.06)',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#1a73e8', color: '#ffffff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.76rem', fontWeight: 800 }}>1</span>
               <h2 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Busca tu Péptido y Elige Presentación' : 'Find Your Peptide & Presentation'}
+                {isEs ? 'Primero: Elige tu Péptido y Concentración' : 'First: Choose Your Peptide & Strength'}
               </h2>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1a73e8', background: '#e8f0fe', padding: '2px 8px', borderRadius: '999px' }}>
+                {isEs ? 'Empieza aquí' : 'Start here'}
+              </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#003666', background: '#e8f0fe', padding: '3px 10px', borderRadius: '999px' }}>
-                ✓ {selectedProduct.name} · {selectedStrength.name}
+                {isEs ? 'Activo:' : 'Active:'} {selectedProduct.name} · {selectedStrength.name}
               </span>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: activeFormatBadge.color, background: activeFormatBadge.bg, padding: '3px 10px', borderRadius: '999px' }}>
                 {isEs ? activeFormat.nameEs : activeFormat.name}
@@ -311,10 +599,12 @@ export default function CalculatorClient() {
               }
             }}
             fallbackItems={quickPeptides}
-            placeholder={isEs ? 'Buscar péptido listo para usar (BPC-157, Tirzepatide, Semax, GHK-Cu...)' : 'Search ready-to-use peptide (BPC-157, Tirzepatide, Semax, GHK-Cu...)'}
-            headerLabel={isEs ? 'Péptidos Disponibles para Uso (Sin APIs en bruto)' : 'Ready-to-Use Peptides (Finished Presentations Only)'}
-            fallbackHeaderLabel={isEs ? 'Péptidos Más Consultados' : 'Popular Ready-to-Use Peptides'}
-            storageNamespace="calculator-patient-search"
+            placeholder={isEs
+              ? 'Paso 1 · Busca cualquier péptido por nombre (BPC-157, Tirzepatide, Retatrutide, GHK-Cu, NAD+, Semax...)'
+              : 'Step 1 · Search any peptide by name (BPC-157, Tirzepatide, Retatrutide, GHK-Cu, NAD+, Semax...)'}
+            headerLabel={isEs ? 'Péptidos Disponibles para Uso (Haz clic en péptido, formato o mg)' : 'Ready-to-Use Peptides (Click peptide, format or mg)'}
+            fallbackHeaderLabel={isEs ? 'Péptidos Más Consultados (Elige uno o escribe arriba)' : 'Popular Ready-to-Use Peptides (Pick one or type above)'}
+            storageNamespace="calculator-peptide-search"
             hitsPerPage={24}
             isEs={isEs}
             sortHits={(list) => filterAndDeduplicatePatientPeptides(list)}
@@ -405,10 +695,10 @@ export default function CalculatorClient() {
             }}
           />
 
-          {/* Quick-tap popular peptides + strength selector */}
+          {/* Quick-tap popular peptides (Single-row Horizontal Scroll Rail on Mobile) + strength selector */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+            <div className="calc-quick-pick-rail">
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', flexShrink: 0 }}>
                 {isEs ? 'Frecuentes:' : 'Quick Pick:'}
               </span>
               {quickPeptides.slice(0, 8).map((p) => {
@@ -419,7 +709,7 @@ export default function CalculatorClient() {
                     type="button"
                     onClick={() => handleSelectPeptideHit(p, p.strengths[0], p.formats[0])}
                     style={{
-                      padding: '4px 10px',
+                      padding: '4px 11px',
                       borderRadius: '999px',
                       border: active ? '1.5px solid #1a73e8' : '1px solid #e2e8f0',
                       background: active ? '#e8f0fe' : '#f8fafc',
@@ -427,6 +717,8 @@ export default function CalculatorClient() {
                       fontSize: '0.75rem',
                       fontWeight: 700,
                       cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
                     }}
                   >
                     {p.name}
@@ -445,7 +737,10 @@ export default function CalculatorClient() {
                   <button
                     key={st.id}
                     type="button"
-                    onClick={() => setSelectedStrengthStr(st.name)}
+                    onClick={() => {
+                      setHasUserInteracted?.(true);
+                      setSelectedStrengthStr(st.name);
+                    }}
                     style={{
                       padding: '5px 12px',
                       borderRadius: '8px',
@@ -620,7 +915,7 @@ export default function CalculatorClient() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(72px, 1fr))', gap: '6px' }}>
                   {recon.dosePresets.map((val) => {
                     const active = Number(recon.doseDisplayValue) === val;
                     return (
@@ -629,14 +924,16 @@ export default function CalculatorClient() {
                         type="button"
                         onClick={() => recon.setDoseDisplayValue(val)}
                         style={{
-                          padding: '6px 12px',
+                          padding: '6px 8px',
                           borderRadius: '8px',
                           border: active ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
                           background: active ? '#e8f0fe' : '#ffffff',
                           color: active ? '#1a73e8' : '#334155',
-                          fontSize: '0.80rem',
+                          fontSize: '0.78rem',
                           fontWeight: 700,
                           cursor: 'pointer',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap',
                         }}
                       >
                         {val} {recon.doseUnit}
@@ -648,40 +945,41 @@ export default function CalculatorClient() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
                   <button
                     type="button"
-                    onClick={() => recon.setDoseDisplayValue((prev) => Math.max(0.05, +(Number(prev) - (recon.doseUnit === 'mg' ? 0.25 : 50)).toFixed(2)))}
-                    style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer' }}
+                    onClick={() => recon.setDoseDisplayValue((prev) => Math.max(0.05, Number((Number(prev) - (recon.doseUnit === 'mg' ? 0.25 : 50)).toFixed(2))))}
+                    style={{ width: '38px', height: '38px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
                   >
                     −
                   </button>
-                  <div style={{ position: 'relative', flex: 1, maxWidth: '160px' }}>
+                  <div style={{ position: 'relative', flex: 1, maxWidth: '170px' }}>
                     <input
                       type="number"
+                      className="calc-dose-num-input"
                       inputMode="decimal"
                       step={recon.doseUnit === 'mg' ? '0.1' : '25'}
                       min="0.05"
                       value={recon.doseDisplayValue}
                       onChange={(e) => recon.setDoseDisplayValue(Math.max(0, parseFloat(e.target.value) || 0))}
-                      style={{ width: '100%', height: '36px', padding: '0 44px 0 12px', borderRadius: '8px', border: '1.5px solid #93c5fd', fontSize: '0.95rem', fontWeight: 800, fontFamily: 'monospace', boxSizing: 'border-box' }}
+                      style={{ width: '100%', height: '38px', padding: '0 44px 0 12px', borderRadius: '8px', border: '1.5px solid #93c5fd', fontSize: '0.95rem', fontWeight: 800, fontFamily: 'monospace', boxSizing: 'border-box' }}
                     />
-                    <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.78rem', fontWeight: 700, color: '#64748b' }}>
+                    <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.78rem', fontWeight: 700, color: '#64748b', pointerEvents: 'none' }}>
                       {recon.doseUnit}
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => recon.setDoseDisplayValue((prev) => +(Number(prev) + (recon.doseUnit === 'mg' ? 0.25 : 50)).toFixed(2))}
-                    style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer' }}
+                    onClick={() => recon.setDoseDisplayValue((prev) => Number((Number(prev) + (recon.doseUnit === 'mg' ? 0.25 : 50)).toFixed(2)))}
+                    style={{ width: '38px', height: '38px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
                   >
                     +
                   </button>
-                  <span style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: 700, marginLeft: 'auto' }}>
-                    ~{recon.totalDoses} {isEs ? 'dosis totales' : 'total doses'}
+                  <span style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: 800, marginLeft: 'auto', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '4px 9px', borderRadius: '999px', whiteSpace: 'nowrap' }}>
+                    ~{recon.totalDoses} {isEs ? 'dosis' : 'doses'}
                   </span>
                 </div>
               </div>
 
               {recon.isVial && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderLeft: '1px solid #e2e8f0', paddingLeft: '14px' }}>
+                <div className="calc-vial-secondary-col">
                   <div>
                     <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#334155', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <Droplets size={14} color="#0284c7" />
@@ -691,21 +989,22 @@ export default function CalculatorClient() {
                       </span>
                     </div>
                     {!recon.guidedMode ? (
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '6px' }}>
                         {BAC_WATER_PRESETS.map((ml) => (
                           <button
                             key={ml}
                             type="button"
                             onClick={() => recon.setBacWaterMl(ml)}
                             style={{
-                              padding: '5px 10px',
+                              padding: '6px 4px',
                               borderRadius: '7px',
                               border: recon.bacWaterMl === ml ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
                               background: recon.bacWaterMl === ml ? '#e0f2fe' : '#ffffff',
                               color: recon.bacWaterMl === ml ? '#0369a1' : '#334155',
-                              fontSize: '0.76rem',
+                              fontSize: '0.74rem',
                               fontWeight: 700,
                               cursor: 'pointer',
+                              textAlign: 'center',
                             }}
                           >
                             {ml.toFixed(1)} mL
@@ -726,21 +1025,23 @@ export default function CalculatorClient() {
                       <Syringe size={14} color="#0d9488" />
                       <span>{isEs ? 'Tamaño de tu jeringa U-100:' : 'Your U-100 syringe size:'}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '6px' }}>
                       {SYRINGE_SIZES.map((s) => (
                         <button
                           key={s.ml}
                           type="button"
                           onClick={() => recon.setSyringeCapacityMl(s.ml)}
                           style={{
-                            padding: '5px 10px',
+                            padding: '6px 8px',
                             borderRadius: '7px',
                             border: recon.syringeCapacityMl === s.ml ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
                             background: recon.syringeCapacityMl === s.ml ? '#f0fdfa' : '#ffffff',
                             color: recon.syringeCapacityMl === s.ml ? '#0f766e' : '#334155',
-                            fontSize: '0.74rem',
+                            fontSize: '0.73rem',
                             fontWeight: 700,
                             cursor: 'pointer',
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap',
                           }}
                         >
                           {s.label}

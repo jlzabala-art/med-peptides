@@ -131,37 +131,6 @@ export default function PeptidesPriceListClient({
     setOrderForm
   });
 
-  useRegisterAtlasContext(
-    {
-      contextAnchor: {
-        type: 'peptides_pricing',
-        name: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
-      },
-      bottomBar: {
-        // Mutual exclusion: hide GlobalBottomStickyBar while PeptidesBottomCartDock is active
-        hidden: totalCartCount > 0,
-        summaryTitle: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
-        summarySubtitle: 'Atlas Health Services',
-        atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
-        onOpenAtlasAi: () => setIsAtlasAiOpen(true),
-        showSections: true,
-        sectionsLabel: isEs ? 'Categorías' : 'Categories',
-        onOpenSections: () => {
-          if (typeof window !== 'undefined' && window.innerWidth <= 900) {
-            setIsCategorySheetOpen(true);
-          } else {
-            setIsSidebarOpen((prev) => !prev);
-          }
-        },
-        primaryAction: {
-          label: isEs ? 'Tarifa PDF' : 'PDF Schedule',
-          onClick: () => setIsPdfPreviewOpen(true),
-        },
-      },
-    },
-    [isEs, totalCartCount]
-  );
-
   // Contact form validation gate (bilingual EN/ES)
   const validateOrderForm = useCallback(() => {
     const errors = {};
@@ -218,6 +187,37 @@ export default function PeptidesPriceListClient({
     orderForm,
     validateOrderForm
   });
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'peptides_pricing',
+        name: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
+      },
+      bottomBar: {
+        // Mutual exclusion: hide GlobalBottomStickyBar while PeptidesBottomCartDock is active
+        hidden: totalCartCount > 0,
+        summaryTitle: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
+        summarySubtitle: 'Atlas Health Services',
+        atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        onOpenAtlasAi: () => setIsAtlasAiOpen(true),
+        showSections: true,
+        sectionsLabel: isEs ? 'Categorías' : 'Categories',
+        onOpenSections: () => {
+          if (typeof window !== 'undefined' && window.innerWidth <= 900) {
+            setIsCategorySheetOpen(true);
+          } else {
+            setIsSidebarOpen((prev) => !prev);
+          }
+        },
+        primaryAction: {
+          label: isEs ? 'Tarifa PDF' : 'PDF Schedule',
+          onClick: () => setIsPdfPreviewOpen(true),
+        },
+      },
+    },
+    [isEs, totalCartCount]
+  );
 
   // Auth context & user info
   const authContext = useAuth?.() || {};

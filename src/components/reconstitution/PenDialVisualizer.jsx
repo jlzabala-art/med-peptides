@@ -131,60 +131,89 @@ export default function PenDialVisualizer({
         padding: '1.15rem clamp(0.85rem, 2.5vw, 1.5rem)',
         boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.05)',
       }}>
-        {/* Top Readout */}
+        {/* Top Readout + Symmetric 1x3 GCP Metric Strip */}
         <div style={{
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
+          flexDirection: 'column',
+          gap: '10px',
           paddingBottom: '0.9rem',
           borderBottom: '1px solid #e2e8f0',
           marginBottom: '1rem',
         }}>
-          <div>
-            <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {isCartridge
-                ? (isEs ? `Cartucho Precargado ${cleanCartridgeVol} · ${cleanStrength}` : `${cleanCartridgeVol} Pre-filled Cartridge · ${cleanStrength}`)
-                : (isEs ? `Pluma Precargada ${cleanCartridgeVol} · ${cleanStrength}` : `${cleanCartridgeVol} Pre-filled Pen · ${cleanStrength}`)}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {isCartridge
+                  ? (isEs ? `Cartucho Precargado ${cleanCartridgeVol} · ${cleanStrength}` : `${cleanCartridgeVol} Pre-filled Cartridge · ${cleanStrength}`)
+                  : (isEs ? `Pluma Precargada ${cleanCartridgeVol} · ${cleanStrength}` : `${cleanCartridgeVol} Pre-filled Pen · ${cleanStrength}`)}
+              </div>
+              <div style={{ fontSize: '0.94rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                {isEs ? `Gira la ventana del dial hasta ${penClicks} clics` : `Turn the dial window right to ${penClicks} clicks`}
+              </div>
             </div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-              {isEs ? `Gira el dial exactamente hasta ${penClicks} clics` : `Turn the dial window right to ${penClicks} clicks`}
-            </div>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#0369a1',
+              background: '#e0f2fe',
+              border: '1px solid #bae6fd',
+              padding: '2px 8px',
+              borderRadius: '999px',
+            }}>
+              100 clicks = 1.00 mL
+            </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* Symmetric 1x3 Hero Metric Strip (Dial Clicks | Volume mL | Yield / Pen) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: '8px',
+          }}>
             <div style={{
               background: exceedsSingleDial ? '#fef2f2' : '#eff6ff',
-              border: exceedsSingleDial ? '1.5px solid #fca5a5' : '1.5px solid #93c5fd',
-              borderRadius: '10px',
-              padding: '6px 14px',
-              display: 'flex',
-              alignItems: 'baseline',
-              gap: '6px',
+              border: exceedsSingleDial ? '1px solid #fca5a5' : '1px solid #bfdbfe',
+              borderLeft: exceedsSingleDial ? '3px solid #dc2626' : '3px solid #1a73e8',
+              borderRadius: '8px',
+              padding: '7px 10px',
+              minWidth: 0,
             }}>
-              <span style={{ fontSize: '1.75rem', fontWeight: 900, fontFamily: 'monospace', color: exceedsSingleDial ? '#dc2626' : '#003666', lineHeight: 1 }}>
-                {penClicks}
-              </span>
-              <span style={{ fontSize: '0.84rem', fontWeight: 800, color: exceedsSingleDial ? '#dc2626' : '#1d4ed8' }}>
-                {isEs ? 'Clics' : 'Clicks'}
-              </span>
-              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
-                ({volStr} mL)
-              </span>
+              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: exceedsSingleDial ? '#dc2626' : '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? 'DIAL U-100' : 'U-100 PEN DIAL'}
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 900, fontFamily: 'monospace', color: exceedsSingleDial ? '#dc2626' : '#003666', marginTop: '1px' }}>
+                {penClicks} {isEs ? 'clics' : 'clicks'}
+              </div>
+            </div>
+
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderLeft: '3px solid #0284c7',
+              borderRadius: '8px',
+              padding: '7px 10px',
+              minWidth: 0,
+            }}>
+              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? 'VOLUMEN / DOSIS' : 'VOLUME / DOSE'}
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 900, fontFamily: 'monospace', color: '#0f172a', marginTop: '1px' }}>
+                {volStr} mL
+              </div>
             </div>
 
             <div style={{
               background: '#f0fdf4',
               border: '1px solid #bbf7d0',
-              borderRadius: '10px',
-              padding: '6px 12px',
-              textAlign: 'center',
+              borderLeft: '3px solid #16a34a',
+              borderRadius: '8px',
+              padding: '7px 10px',
+              minWidth: 0,
             }}>
-              <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>
-                {isCartridge ? (isEs ? 'Dosis / Cartucho' : 'Doses / Cartridge') : (isEs ? 'Dosis / Pluma' : 'Doses / Pen')}
+              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isCartridge ? (isEs ? 'DOSIS / CARTUCHO' : 'DOSES / CARTRIDGE') : (isEs ? 'DOSIS / PLUMA' : 'DOSES / PEN')}
               </div>
-              <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#166534', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: '1.15rem', fontWeight: 900, fontFamily: 'monospace', color: '#166534', marginTop: '1px' }}>
                 ~{totalDoses}
               </div>
             </div>

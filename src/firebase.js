@@ -38,9 +38,11 @@ if (getApps().length === 0) {
          (/AppleWebKit/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent)));
 
       if (isSafari) {
-        console.info('[Firebase] Safari/WebKit detected: initializing resilient single-tab localCache with long-polling');
+        // Safari/WebKit: use memoryLocalCache() with long-polling to avoid both WebLocks
+        // multi-tab deadlocks AND single-tab IndexedDB exclusive lock failed-precondition warnings
+        // when multiple Safari tabs are open (repository 4-layer RAM + localStorage cache handles persistence).
         firestoreDb = initializeFirestore(app, {
-          localCache: persistentLocalCache({}),
+          localCache: memoryLocalCache(),
           experimentalForceLongPolling: true
         });
       } else {

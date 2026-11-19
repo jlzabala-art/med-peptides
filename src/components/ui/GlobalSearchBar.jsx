@@ -164,6 +164,16 @@ const CONTEXTUAL_PLACEHOLDERS = {
       es: 'Péptido, CAS, vial...',
     },
   },
+  calculator: {
+    desktop: {
+      en: 'Step 1 · Search any peptide by name (BPC-157, Tirzepatide, Retatrutide, GHK-Cu, NAD+...)',
+      es: 'Paso 1 · Busca cualquier péptido por nombre (BPC-157, Tirzepatide, Retatrutide, GHK-Cu, NAD+...)',
+    },
+    mobile: {
+      en: 'Search any peptide (BPC-157...)',
+      es: 'Buscar péptido (BPC-157...)',
+    },
+  },
   local: {
     desktop: {
       en: 'Filter table records by any term, ID, status or date...',
@@ -256,7 +266,8 @@ export default function GlobalSearchBar({
   const isLocalOnly = isExplicitLocal || inferredLocal;
 
   const isLabelsPage = searchScope === 'clinical' || (namespace || '').includes('label') || currentPath.includes('/labels');
-  const isPatientsPage = searchScope === 'patients' || (namespace || '').includes('patient') || currentPath.includes('/patients');
+  const isCalculatorPage = (namespace || '').includes('calculator') || currentPath.includes('/calculator');
+  const isPatientsPage = !isCalculatorPage && (searchScope === 'patients' || (namespace || '').includes('patient') || currentPath.includes('/patients'));
   const isSuppliersPage = searchScope === 'suppliers' || (namespace || '').includes('supplier') || (namespace || '').includes('procurement') || currentPath.includes('/procurement') || currentPath.includes('/suppliers');
   const isPrescriptionsPage = searchScope === 'clinical' || (namespace || '').includes('prescription') || currentPath.includes('/prescriptions') || currentPath.includes('/rx') || isLabelsPage;
   const isProtocolsPage = searchScope === 'protocols' || (namespace || '').includes('protocol') || currentPath.includes('/proto');
@@ -556,11 +567,26 @@ export default function GlobalSearchBar({
     const ns = (namespace || '').toLowerCase();
     const path = (currentPath || '').toLowerCase();
 
+    // If a custom non-default placeholder prop was explicitly provided, respect it first
+    const isGenericPlaceholder = !placeholder || /^(search|buscar|search\s+via\s+algolia)\.{0,3}$/i.test(placeholder.trim());
+    if (!isGenericPlaceholder) {
+      if (isMobile && placeholder.length > 32) {
+        const cleaned = placeholder
+          .replace(/^(step\s*1\s*[·:-]\s*|paso\s*1\s*[·:-]\s*)?(search|buscar|filter|filtrar)\s+(any\s+|cualquier\s+)?(by|por|for|para)?\s*/i, '')
+          .replace(/\s*\(.*?\)\s*/g, '')
+          .trim();
+        const shortened = cleaned.length > 28 ? `${cleaned.slice(0, 27).trim()}…` : `${cleaned}…`;
+        return shortened.charAt(0).toUpperCase() + shortened.slice(1);
+      }
+      return placeholder;
+    }
+
     const isPelletsContext = ns.includes('pellet') || path.includes('/pricing/pellets');
     const isDnLabPensContext = ns.includes('dnlab') || ns.includes('atlas-pens') || path.includes('/pricing/dnlab-pens') || path.includes('/pricing/pens');
     const isGenomicsContext = ns.includes('genomic') || ns.includes('genetic') || path.includes('/pricing/24genetics');
 
     // Explicit contextual resolution from the unified matrix (Desktop detailed vs Mobile ≤ 28 chars)
+    if (isCalculatorPage) return CONTEXTUAL_PLACEHOLDERS.calculator[mode][lc];
     if (isPelletsContext) return CONTEXTUAL_PLACEHOLDERS.pellets[mode][lc];
     if (isDnLabPensContext) return CONTEXTUAL_PLACEHOLDERS.dnlabPens[mode][lc];
     if (isGenomicsContext) return CONTEXTUAL_PLACEHOLDERS.genomics[mode][lc];
@@ -572,22 +598,8 @@ export default function GlobalSearchBar({
     if (isProtocolsPage) return CONTEXTUAL_PLACEHOLDERS.protocols[mode][lc];
     if (isProductsPage) return CONTEXTUAL_PLACEHOLDERS.products[mode][lc];
 
-    // If a non-default explicit placeholder was supplied, use it on desktop and intelligently condense for mobile
-    const isGenericPlaceholder = !placeholder || /^(search|buscar)\.{0,3}$/i.test(placeholder.trim());
-    if (!isGenericPlaceholder) {
-      if (isMobile && placeholder.length > 28) {
-        const cleaned = placeholder
-          .replace(/^(search|buscar|filter|filtrar)\s+(by|por|for|para)?\s*/i, '')
-          .replace(/\s*\(.*?\)\s*/g, '')
-          .trim();
-        const shortened = cleaned.length > 26 ? `${cleaned.slice(0, 25).trim()}…` : `${cleaned}…`;
-        return shortened.charAt(0).toUpperCase() + shortened.slice(1);
-      }
-      return placeholder;
-    }
-
     return CONTEXTUAL_PLACEHOLDERS.local[mode][lc];
-  }, [isMobile, placeholder, namespace, currentPath, isLabelsPage, isPrescriptionsPage, isPatientsPage, isSuppliersPage, isUsersPage, isProductsPage, isProtocolsPage, lang]);
+  }, [isMobile, placeholder, namespace, currentPath, isCalculatorPage, isLabelsPage, isPrescriptionsPage, isPatientsPage, isSuppliersPage, isUsersPage, isProductsPage, isProtocolsPage, lang]);
 
   // ⌘K / Ctrl+K global shortcut & focus-global-search event listener
   useEffect(() => {

@@ -98,20 +98,27 @@ export default function FormatPickerCards({
         .atlas-format-picker-grid {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 9px;
+          gap: 10px;
+          align-items: stretch;
         }
         .atlas-format-picker-grid.is-odd-list {
           grid-template-columns: 1fr;
         }
-        @media (max-width: 768px) {
+        .atlas-format-card {
+          min-height: 76px;
+          height: 100%;
+          box-sizing: border-box;
+        }
+        @media (max-width: 820px) {
           .atlas-format-picker-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
           }
           .atlas-format-picker-grid.is-odd-list {
             grid-template-columns: 1fr;
           }
         }
-        @media (max-width: 440px) {
+        @media (max-width: 400px) {
           .atlas-format-picker-grid {
             grid-template-columns: 1fr;
           }
@@ -121,14 +128,16 @@ export default function FormatPickerCards({
       {options.map((opt) => {
         const isAvailable = enabledList.length === 0 ? true : enabledList.includes(opt.id);
         const isActive = isAvailable && activeFormatId === opt.id;
+        const specBadge = isEs ? (opt.badgeEs || opt.badgeEn) : (opt.badgeEn || opt.badgeEs);
         return (
           <button
             key={opt.id}
             type="button"
+            className="atlas-format-card"
             disabled={!isAvailable}
             aria-disabled={!isAvailable}
             tabIndex={isAvailable ? 0 : -1}
-            title={!isAvailable ? (isEs ? 'No disponible para este producto' : 'Not available for this product') : undefined}
+            title={!isAvailable ? (isEs ? 'No disponible para este péptido' : 'Not available for this peptide') : undefined}
             onClick={() => {
               if (!isAvailable) return;
               onSelectFormat?.(opt.id);
@@ -138,52 +147,73 @@ export default function FormatPickerCards({
               alignItems: 'center',
               gap: '10px',
               padding: '10px 12px',
-              borderRadius: '11px',
+              borderRadius: '10px',
               border: isActive
                 ? '2px solid #1a73e8'
                 : isAvailable
-                  ? '1.5px solid #cbd5e1'
+                  ? '1px solid #cbd5e1'
                   : '1px dashed #cbd5e1',
               background: isActive
                 ? '#f0f7ff'
                 : isAvailable
                   ? '#ffffff'
                   : '#f8fafc',
-              opacity: isAvailable ? 1 : 0.45,
+              opacity: isAvailable ? 1 : 0.48,
               filter: isAvailable ? 'none' : 'grayscale(100%)',
               textAlign: 'left',
               cursor: isAvailable ? 'pointer' : 'not-allowed',
               transition: 'all 0.16s ease',
               boxShadow: isActive
-                ? '0 4px 12px rgba(26, 115, 232, 0.12)'
+                ? '0 3px 10px rgba(26, 115, 232, 0.12)'
                 : isAvailable
                   ? '0 1px 2px rgba(15, 23, 42, 0.04)'
                   : 'none',
             }}
           >
-            <div style={{ flexShrink: 0 }}>
+            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {renderGraphic(opt.id, isActive, isAvailable)}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '3px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', minWidth: 0 }}>
                 <span style={{
                   fontSize: '0.82rem',
                   fontWeight: 800,
                   color: !isAvailable ? '#64748b' : isActive ? '#003666' : '#0f172a',
                   lineHeight: 1.2,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}>
                   {isEs ? opt.nameEs : opt.name}
                 </span>
-                {isActive && <CheckCircle2 size={14} color="#1a73e8" style={{ flexShrink: 0 }} />}
+                {isActive ? (
+                  <CheckCircle2 size={15} color="#1a73e8" style={{ flexShrink: 0 }} />
+                ) : specBadge ? (
+                  <span style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 700,
+                    padding: '1px 6px',
+                    borderRadius: '999px',
+                    background: isAvailable ? '#f1f5f9' : '#e2e8f0',
+                    color: '#475569',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}>
+                    {specBadge}
+                  </span>
+                ) : null}
               </div>
               <div style={{
                 fontSize: '0.70rem',
-                color: !isAvailable ? '#94a3b8' : isActive ? '#1e40af' : '#64748b',
-                marginTop: '2px',
-                lineHeight: 1.3,
+                color: !isAvailable ? '#94a3b8' : isActive ? '#1d4ed8' : '#64748b',
+                lineHeight: 1.25,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                fontWeight: isActive ? 650 : 500,
               }}>
                 {!isAvailable
-                  ? (isEs ? 'No disponible para este producto' : 'Not available for this product')
+                  ? (isEs ? 'No disponible en este péptido' : 'Not available for this peptide')
                   : (isEs ? opt.shortEs : opt.shortEn)}
               </div>
             </div>

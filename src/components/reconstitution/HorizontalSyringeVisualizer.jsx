@@ -282,17 +282,21 @@ export default function HorizontalSyringeVisualizer({
             );
           })}
 
-          <text
-            x={BARREL_START_X + 14}
-            y={BARREL_Y + 27}
-            fill="#003666"
-            fontSize="10"
-            fontWeight="900"
-            letterSpacing="0.04em"
-            opacity="0.85"
-          >
-            U-100 ({safeMax}U = {(safeMax / 100).toFixed(1)} mL)
-          </text>
+          {/* Subtle Right-Aligned Barrel Watermark (hidden when plunger approaches right side so it never collides) */}
+          {clampedUnits < safeMax * 0.65 && (
+            <text
+              x={BARREL_END_X - 14}
+              y={BARREL_Y + 27}
+              fill="#64748b"
+              fontSize="9.5"
+              fontWeight="800"
+              textAnchor="end"
+              letterSpacing="0.04em"
+              opacity="0.55"
+            >
+              U-100 · {safeMax}U = {(safeMax / 100).toFixed(1)} mL
+            </text>
+          )}
 
           {/* Dynamic Laser Alignment Indicator */}
           <g style={{

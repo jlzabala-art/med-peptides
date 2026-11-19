@@ -92,6 +92,8 @@ export const DELIVERY_FORMAT_OPTIONS = [
     id: 'vial',
     name: 'Lyophilized Vial',
     nameEs: 'Vial Liofilizado',
+    badgeEn: 'U-100 Syringe',
+    badgeEs: 'Jeringa U-100',
     shortEn: 'Powder + BAC Water',
     shortEs: 'Polvo + Agua BAC',
     descEn: 'Mix with BAC water & draw with U-100 syringe',
@@ -99,8 +101,10 @@ export const DELIVERY_FORMAT_OPTIONS = [
   },
   {
     id: 'pen',
-    name: 'Injector Pen (3 mL)',
-    nameEs: 'Pluma Inyectora (3 mL)',
+    name: 'Pre-filled Pen',
+    nameEs: 'Pluma Precargada',
+    badgeEn: '2–3 mL · U-100',
+    badgeEs: '2–3 mL · U-100',
     shortEn: 'Ready-to-Use Pen',
     shortEs: 'Pluma lista para usar',
     descEn: 'Factory-filled pen — attach needle & dial clicks',
@@ -108,8 +112,10 @@ export const DELIVERY_FORMAT_OPTIONS = [
   },
   {
     id: 'cartridge',
-    name: 'Refill Cartridge (3 mL)',
-    nameEs: 'Cartucho Recambio (3 mL)',
+    name: 'Refill Cartridge',
+    nameEs: 'Cartucho Recambio',
+    badgeEn: '3 mL Glass',
+    badgeEs: '3 mL Vidrio',
     shortEn: 'For Reusable Pen',
     shortEs: 'Para pluma reutilizable',
     descEn: 'Standalone 3 mL refill — Phase 1: insert into pen',
@@ -119,25 +125,31 @@ export const DELIVERY_FORMAT_OPTIONS = [
     id: 'spray',
     name: 'Nasal Spray',
     nameEs: 'Spray Nasal',
-    shortEn: 'Metered Pump (0.1 mL)',
+    badgeEn: '0.1 mL / spray',
+    badgeEs: '0.1 mL / spray',
+    shortEn: 'Metered Nasal Pump',
     shortEs: 'Pulverizador dosificado',
     descEn: 'Needle-free intranasal pump — puffs per dose',
     descEs: 'Sin agujas — pulverizaciones medidas por dosis',
   },
   {
     id: 'capsule',
-    name: 'Oral Capsules / Troches',
-    nameEs: 'Cápsulas / Troches Orales',
-    shortEn: 'Oral / Sublingual',
+    name: 'Oral Capsules',
+    nameEs: 'Cápsulas Orales',
+    badgeEn: 'Oral / Troche',
+    badgeEs: 'Oral / Troche',
+    shortEn: 'Enteric or Sublingual',
     shortEs: 'Vía Oral / Sublingual',
     descEn: 'Empty-stomach enteric capsules or sublingual troches',
     descEs: 'Cápsulas en ayunas o troches sublinguales',
   },
   {
     id: 'topical',
-    name: 'Topical Serum / Cream',
-    nameEs: 'Sérum / Crema Tópica',
-    shortEn: 'Skin / Scalp Formula',
+    name: 'Topical Serum',
+    nameEs: 'Sérum Tópico',
+    badgeEn: 'Skin / Scalp',
+    badgeEs: 'Piel / Capilar',
+    shortEn: 'Measured mL / Pumps',
     shortEs: 'Aplicación Dérmica / Capilar',
     descEn: 'Measured mL or airless pumps for skin or scalp',
     descEs: 'Dosis medida en mL o pulsaciones para piel/cabello',
@@ -377,7 +389,9 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const initialPeptideSlug = String(searchParams?.get('peptide') || searchParams?.get('slug') || 'bpc-157')
+  const rawPeptideParam = searchParams?.get('peptide') || searchParams?.get('slug') || '';
+  const hasExplicitUrlParams = Boolean(rawPeptideParam || searchParams?.get('format') || searchParams?.get('strength'));
+  const initialPeptideSlug = String(rawPeptideParam || 'bpc-157')
     .toLowerCase()
     .trim();
   const initialFormatParam = searchParams?.get('format') || searchParams?.get('presentation') || '';
@@ -405,7 +419,9 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
   const [selectedStrengthStr, setSelectedStrengthStr] = useState(() =>
     initialStrengthParam ? formatDoseToken(initialStrengthParam) : (initialLocalMatch.strengths[0] || '5 mg')
   );
-  const [searchQuery, setSearchQuery] = useState(initialLocalMatch.name);
+  // Keep search input empty by default so the generic Step 1 search prompt is immediately visible
+  const [searchQuery, setSearchQuery] = useState('');
+  const [hasUserInteracted, setHasUserInteracted] = useState(hasExplicitUrlParams);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isLoadingFormats, setIsLoadingFormats] = useState(false);
 
@@ -536,6 +552,7 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
   const selectFormat = useCallback((nextFormatId) => {
     const normalized = normalizeFormatParam(nextFormatId);
     if (!availableFormatIds.includes(normalized)) return; // Strictly block unavailable formats
+    setHasUserInteracted(true);
     setFormatId(normalized);
     const fmtStrengths = selectedProduct?.formatStrengths?.[normalized];
     if (Array.isArray(fmtStrengths) && fmtStrengths.length > 0) {
@@ -556,8 +573,9 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
       formatStrengths: hit.formatStrengths || {},
       formatsSource: 'selection',
     };
+    setHasUserInteracted(true);
     setSelectedProduct(nextProduct);
-    setSearchQuery(nextProduct.name);
+    setSearchQuery('');
     setSelectedStrengthStr(preferredDose || strengths[0] || '5 mg');
     if (preferredFormat) {
       const normalizedPref = normalizeFormatParam(preferredFormat);
@@ -674,6 +692,8 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
     handleOpenQr,
     formatOptions: DELIVERY_FORMAT_OPTIONS,
     quickPeptides: DEFAULT_PEPTIDE_CATALOG,
+    hasUserInteracted,
+    setHasUserInteracted,
     initialUrlOverrides: {
       target: initialTargetParam,
       bac: initialBacParam,
