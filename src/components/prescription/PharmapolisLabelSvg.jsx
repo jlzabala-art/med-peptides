@@ -386,7 +386,14 @@ export default function PharmapolisLabelSvg({
   const resolvedPatientLabelFontSize = Math.max(18, Math.floor(patientLabelFontSize * patientScaleRatio));
   const resolvedPatientNameFontSize = Math.max(19, Math.floor(patientNameFontSize * patientScaleRatio));
 
-  const productTitle = labelData.productTitle || labelData.productName || 'Compounded Pharmaceutical Protocol';
+  const rawBaseTitle = (labelData.productTitle || labelData.productName || '').trim();
+  const vehicleSearchCorpus = `${labelData.vehicle || ''} ${labelData.base || ''} ${labelData.dispensingForm || ''} ${labelData.formula || ''} ${labelData.subTitle || ''}`;
+  const matchedTrichoVehicle = vehicleSearchCorpus.match(/\b(TrichoSol|TrichoOil|TrichoFoam|TrichoWash|TrichoSerum|TrichoCond)\b/i);
+  const isGenericTopicalTitle = /^(topical\s+treatment|tratamiento\s+t[óo]pico|scalp\s+care(?:\s+and\s+hygiene)?|topical\s+solution)$/i.test(rawBaseTitle);
+  const resolvedProductTitle = (isGenericTopicalTitle && matchedTrichoVehicle)
+    ? matchedTrichoVehicle[1]
+    : (rawBaseTitle || 'Compounded Pharmaceutical Protocol');
+  const productTitle = resolvedProductTitle;
   const formula = labelData.formula || '';
   const rawDirections = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
   const directions = React.useMemo(() => {
@@ -1342,8 +1349,8 @@ export default function PharmapolisLabelSvg({
                 .replace(/\bnatural\s+lipidic\s+carrier\b/gi, '100% Natural Scalp Compounding Vehicle');
             }
 
-            // Formula / Protocol title callout (gives formula immediate clinical identity)
-            const rawTitle = (labelData.productTitle || labelData.productName || '').trim();
+            // Formula / Protocol title callout (upgrades generic "Topical treatment" to specific Tricho vehicle e.g. TrichoSol)
+            const rawTitle = (productTitle || '').trim();
             const hasFormulaTitle = rawTitle.length > 0 && rawTitle.toLowerCase() !== 'compounded pharmaceutical protocol';
             const formulaTitleText = hasFormulaTitle ? rawTitle : '';
 

@@ -698,6 +698,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Nombre del paciente directo (sin prefijo `PATIENT:`)**: Toda etiqueta generada o importada debe mostrar directamente el nombre completo del paciente sin la palabra `PATIENT:` delante, limpiando cualquier prefijo residual en los datos importados.
 - **Separación visual destacada bajo `SCAN FOR REFILL`**: Debe existir un margen vertical amplio (`≥ 40px` en coordenadas SVG) entre el botón/pill `SCAN FOR REFILL` y el bloque `DISPENSING SPECS` inferior para dirigir la atención del paciente hacia el escaneo de reposición.
 - **Sin badges innecesarios de `PART X OF Y`**: Nunca renderizar etiquetas `PART 1 OF 2` / `PART 1 OF 3` en las etiquetas de farmacia; conservar únicamente indicaciones clínicas útiles (p. ej. `NIGHT / BEDTIME`, `MORNING`, `REFILL #...`) cuando apliquen.
+- **Título específico de vehículo en lugar de genéricos**: Si el título de la fórmula es genérico (`Topical treatment`, `Tratamiento tópico`, etc.) y el vehículo es un preparado Tricho (`TrichoSol`, `TrichoOil`, `TrichoFoam`, `TrichoWash`, `TrichoSerum`, `TrichoCond`), mostrar directamente el nombre del vehículo (p. ej. `TrichoSol`) como nombre del producto.
 
 
 
