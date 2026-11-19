@@ -23,6 +23,8 @@ export default function ToolWorkspaceLayout({
   showPublicHeader = true,
   showPublicFooter = true,
   whiteLabel = false,
+  lang = 'en',
+  onLangChange,
   children,
 }) {
   return (
@@ -33,7 +35,13 @@ export default function ToolWorkspaceLayout({
         flexDirection: 'column',
       }}
     >
-      {showPublicHeader && <PublicUnifiedHeader whiteLabel={whiteLabel} />}
+      {showPublicHeader && (
+        <PublicUnifiedHeader
+          whiteLabel={whiteLabel}
+          lang={lang}
+          onLangChange={onLangChange}
+        />
+      )}
 
       <div className="atlas-page-shell" style={{ flex: 1 }}>
         {(title || subtitle || toolbarActions) && (

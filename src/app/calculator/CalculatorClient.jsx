@@ -20,6 +20,7 @@ import {
 } from '@/lib/icons';
 import { parseMgFromPresentation } from '@/hooks/useReconstitution';
 import { searchAlgolia } from '@/services/algoliaSearch';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 const InteractiveReconstitutionGuide = dynamic(
   () => import('@/components/product/InteractiveReconstitutionGuide'),
@@ -89,9 +90,27 @@ const DEFAULT_PEPTIDE_CATALOG = [
 ];
 
 const FORMAT_OPTIONS = [
-  { id: 'vial', name: 'Lyophilized Vial', nameEs: 'Vial Liofilizado' },
-  { id: 'pen', name: 'Injector Pen (3 mL)', nameEs: 'Pluma Inyectora (3 mL)' },
-  { id: 'cartridge', name: 'Cartridge (3 mL)', nameEs: 'Cartucho (3 mL)' },
+  {
+    id: 'vial',
+    name: 'Lyophilized Vial',
+    nameEs: 'Vial Liofilizado',
+    hintEn: 'Powder + BAC Water',
+    hintEs: 'Polvo + Agua BAC',
+  },
+  {
+    id: 'pen',
+    name: 'Pre-filled Pen (3 mL)',
+    nameEs: 'Pluma Precargada (3 mL)',
+    hintEn: 'Ready-to-Use Device',
+    hintEs: 'Lista para usar',
+  },
+  {
+    id: 'cartridge',
+    name: 'Refill Cartridge (3 mL)',
+    nameEs: 'Cartucho Recambio (3 mL)',
+    hintEn: 'For Reusable Pen',
+    hintEs: 'Para pluma reutilizable',
+  },
 ];
 
 function extractStrengthsFromHit(hit) {
@@ -142,8 +161,25 @@ function formatDoseToken(raw) {
 export default function CalculatorClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const lang = String(searchParams?.get('lang') || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const workspace = usePublicWorkspace();
+  const initialUrlLang = String(searchParams?.get('lang') || '').toLowerCase() === 'es' ? 'es' : 'en';
+  const [localLang, setLocalLang] = useState(initialUrlLang);
+  const lang = workspace?.lang || localLang || 'en';
   const isEs = lang === 'es';
+
+  const handleLangChange = useCallback((nextLang) => {
+    const normalized = nextLang === 'es' ? 'es' : 'en';
+    setLocalLang(normalized);
+    if (workspace?.setLang) workspace.setLang(normalized);
+  }, [workspace]);
+
+  // Honor explicit ?lang=es on initial mount if workspace hasn't overridden it
+  useEffect(() => {
+    if (initialUrlLang === 'es' && workspace?.setLang && workspace?.lang !== 'es') {
+      workspace.setLang('es');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initialPeptideSlug = String(searchParams?.get('peptide') || searchParams?.get('slug') || 'bpc-157')
     .toLowerCase()
@@ -252,16 +288,28 @@ export default function CalculatorClient() {
     }
   };
 
+  const isPen = formatId === 'pen';
+  const isCartridge = formatId === 'cartridge';
+  const isPenOrCartridge = isPen || isCartridge;
+
   const handleOpenQr = () => {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('open-global-qr-modal', {
           detail: {
             url: shareFullUrl,
-            title: `${selectedProduct.name} · ${selectedStrengthStr} (${formatId.toUpperCase()})`,
-            subtitle: isEs
-              ? 'Escanea para abrir la calculadora preconfigurada con este péptido y dosis'
-              : 'Scan to open the reconstitution calculator preloaded with this peptide & dosage',
+            title: `${selectedProduct.name} · ${selectedStrengthStr} (${isEs ? activeFormat.nameEs : activeFormat.name})`,
+            subtitle: isCartridge
+              ? (isEs
+                  ? 'Escanea para abrir la guía de carga de cartucho y dosificación por clics'
+                  : 'Scan to open the 3 mL refill cartridge loading & dial dosing guide')
+              : isPen
+              ? (isEs
+                  ? 'Escanea para abrir la calculadora de clics de esta pluma precargada'
+                  : 'Scan to open the pre-filled pen dial dosing calculator for this peptide')
+              : (isEs
+                  ? 'Escanea para abrir la calculadora de reconstitución con este péptido y dosis'
+                  : 'Scan to open the reconstitution calculator preloaded with this peptide & dosage'),
           },
         })
       );
@@ -318,22 +366,38 @@ export default function CalculatorClient() {
 
   return (
     <ToolWorkspaceLayout
-      title={isEs ? 'Calculadora Clínica de Reconstitución' : 'Peptide Reconstitution & Dosing Calculator'}
+      title={
+        isCartridge
+          ? (isEs ? 'Guía de Carga de Cartucho (3 mL) & Calculadora de Dial' : '3 mL Refill Cartridge Loading & Dial Dosing Calculator')
+          : isPen
+          ? (isEs ? 'Calculadora de Dial · Pluma Precargada (3 mL)' : 'Pre-filled Injector Pen Dial Dosing Calculator')
+          : (isEs ? 'Calculadora Clínica de Reconstitución de Viales' : 'Peptide Reconstitution & Dosing Calculator')
+      }
       subtitle={
-        isEs
-          ? 'Simulador clínico unificado · Búsqueda Lotusland por Algolia y enlace directo por péptido, formato y dosis'
-          : 'Unified clinical simulator · Algolia Lotusland peptide search with shareable peptide, format & dosage URL'
+        isCartridge
+          ? (isEs
+              ? 'Cartucho de vidrio estéril de 3 mL vendido suelto para recargar su pluma reutilizable · Paso 1: carga del cartucho + cálculo exacto de clics'
+              : 'Standalone sterile 3 mL glass refill cartridge for reusable injector pens · Phase 1 cartridge loading + exact dial click calculation')
+          : isPen
+          ? (isEs
+              ? 'Pluma multidosis precargada lista para usar (3 mL) · Dosificación exacta por clics sin reconstitución manual'
+              : 'Factory pre-filled multi-dose injector pen (3 mL) · Exact click-dial dosing without manual reconstitution')
+          : (isEs
+              ? 'Simulador clínico unificado · Búsqueda Lotusland por Algolia y enlace directo por péptido, formato y dosis'
+              : 'Unified clinical simulator · Algolia Lotusland peptide search with shareable peptide, format & dosage URL')
       }
       icon={CalculatorIcon}
       showPublicHeader={true}
       showPublicFooter={true}
+      lang={lang}
+      onLangChange={handleLangChange}
       toolbarActions={toolbarActions}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ margin: '-8px -16px 0' }}>
           <PharmacyOpsWorkspaceBar lang={lang} />
         </div>
-        {/* 1. 4 Executive KPI Cards (Golden Rule #22) */}
+        {/* 1. 4 Executive KPI Cards (Golden Rule #22 — strictly format-aware: no Vial/Syringe terms on Pen/Cartridge) */}
         <div
           style={{
             display: 'grid',
@@ -357,26 +421,46 @@ export default function CalculatorClient() {
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               <Droplets size={13} color="#0284c7" />
-              <span>{isEs ? 'Dosis del Vial' : 'Vial Strength'}</span>
+              <span>
+                {isCartridge
+                  ? (isEs ? 'Contenido del Cartucho' : 'Cartridge Strength')
+                  : isPen
+                  ? (isEs ? 'Contenido de la Pluma' : 'Pen Strength')
+                  : (isEs ? 'Dosis del Vial' : 'Vial Strength')}
+              </span>
             </div>
             <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
               {selectedStrength.name}
             </div>
             <div style={{ fontSize: '0.74rem', color: '#475569' }}>
-              {availableStrengths.length} {isEs ? 'concentraciones disponibles' : 'available strengths'}
+              {isPenOrCartridge
+                ? (isEs ? `3.0 mL líquido estéril · ${availableStrengths.length} opciones` : `3.0 mL sterile liquid · ${availableStrengths.length} strengths`)
+                : `${availableStrengths.length} ${isEs ? 'concentraciones disponibles' : 'available strengths'}`}
             </div>
           </div>
 
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               <Syringe size={13} color="#16a34a" />
-              <span>{isEs ? 'Estándar Jeringa' : 'Syringe Standard'}</span>
+              <span>
+                {isCartridge
+                  ? (isEs ? 'Pluma Reutilizable' : 'Reusable Pen System')
+                  : isPen
+                  ? (isEs ? 'Sistema de Dial' : 'Dial Pen Standard')
+                  : (isEs ? 'Estándar Jeringa' : 'Syringe Standard')}
+              </span>
             </div>
             <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
-              U-100 Insulin
+              {isCartridge
+                ? (isEs ? 'Cartucho 3 mL ISO' : '3 mL ISO Cartridge')
+                : isPen
+                ? (isEs ? 'Dial 60 Clics' : '60-Click Dial Pen')
+                : 'U-100 Insulin'}
             </div>
             <div style={{ fontSize: '0.74rem', color: '#475569' }}>
-              0.3 mL / 0.5 mL / 1.0 mL
+              {isPenOrCartridge
+                ? (isEs ? '1 clic = 0.01 mL · Agujas 31G / 32G' : '1 click = 0.01 mL · 31G / 32G needles')
+                : '0.3 mL / 0.5 mL / 1.0 mL'}
             </div>
           </div>
 
@@ -500,7 +584,11 @@ export default function CalculatorClient() {
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-                {isEs ? 'Vial Activo:' : 'Active Vial:'}
+                {isCartridge
+                  ? (isEs ? 'Cartucho Activo:' : 'Active Cartridge:')
+                  : isPen
+                  ? (isEs ? 'Pluma Activa:' : 'Active Pen:')
+                  : (isEs ? 'Vial Activo:' : 'Active Vial:')}
               </span>
               <span
                 style={{
@@ -528,19 +616,27 @@ export default function CalculatorClient() {
                     key={f.id}
                     type="button"
                     onClick={() => setFormatId(f.id)}
+                    title={isEs ? f.hintEs : f.hintEn}
                     style={{
-                      minHeight: '34px',
+                      minHeight: '38px',
                       padding: '4px 11px',
                       borderRadius: '8px',
                       border: isActive ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
                       background: isActive ? '#e0f2fe' : '#ffffff',
                       color: isActive ? '#0369a1' : '#334155',
-                      fontSize: '0.78rem',
+                      fontSize: '0.77rem',
                       fontWeight: 700,
                       cursor: 'pointer',
+                      display: 'inline-flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      lineHeight: 1.2,
                     }}
                   >
-                    {isEs ? f.nameEs : f.name}
+                    <span>{isEs ? f.nameEs : f.name}</span>
+                    <span style={{ fontSize: '0.64rem', fontWeight: 500, opacity: isActive ? 0.9 : 0.7 }}>
+                      {isEs ? f.hintEs : f.hintEn}
+                    </span>
                   </button>
                 );
               })}

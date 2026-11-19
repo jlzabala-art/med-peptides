@@ -907,33 +907,43 @@ export default function InteractiveReconstitutionGuide({
   const [sprayPuffs, setSprayPuffs] = useState(1);
   const [penPresentationMode, setPenPresentationMode] = useState(isCartridge ? 'cartridge' : 'pen');
 
+  // Keep internal pen/cartridge mode strictly synchronized with parent activeFormatId
+  useEffect(() => {
+    setPenPresentationMode(isCartridge ? 'cartridge' : 'pen');
+  }, [isCartridge]);
+
   // ── Dedicated Pre-filled Pen & Cartridge View ──────────────────────────────
   if (isPenOrCartridge) {
-    const isCartridgeActive = penPresentationMode === 'cartridge' || isCartridge;
+    const isCartridgeActive = penPresentationMode === 'cartridge';
+    const isEsPen = lang === 'es';
 
     return (
       <div className="irg-wrapper">
         {/* ── Header ── */}
         <div className="irg-header">
           <div className="irg-header-left">
-            <div className="irg-badge" style={{ background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}>
+            <div className="irg-badge" style={{ background: isCartridgeActive ? '#f0fdf4' : '#eff6ff', color: isCartridgeActive ? '#15803d' : '#1d4ed8', borderColor: isCartridgeActive ? '#bbf7d0' : '#bfdbfe' }}>
               <Sparkles size={13} />
-              <span>{isCartridgeActive ? (lang === 'es' ? 'Cartucho de Recambio 3 mL' : '3 mL Refill Cartridge System') : (lang === 'es' ? 'Bolígrafo Inyector Multidosis' : 'Multi-Dose Pen Delivery System')}</span>
+              <span>
+                {isCartridgeActive
+                  ? (isEsPen ? 'Cartucho de Recambio 3 mL (Para Pluma Reutilizable)' : '3 mL Standalone Refill Cartridge (For Reusable Pen)')
+                  : (isEsPen ? 'Pluma Inyectora Precargada (Lista Para Usar)' : 'Pre-filled Multi-Dose Injector Pen (Ready to Use)')}
+              </span>
             </div>
             <h2 className="irg-title">
               <Thermometer size={20} color="#003666" />
               {isCartridgeActive
-                ? (lang === 'es' ? 'Cartucho de Recambio 3 mL — Calibración de Dial y Compatibilidad' : '3 mL Refill Cartridge — Dial Dosing & Compatibility Guide')
-                : (t.penCalcTitle || (lang === 'es' ? 'Guía de Dosificación en Dial y Administración' : 'Pre-filled Pen Dial Dosing & Administration Guide'))}
+                ? (isEsPen ? 'Cartucho de Recambio 3 mL — Carga en Pluma y Calibración de Dial' : '3 mL Refill Cartridge — Pen Loading & Dial Dosing Guide')
+                : (isEsPen ? 'Pluma Precargada 3 mL — Dosificación por Clics y Administración' : 'Pre-filled Pen Dial Dosing & Administration Guide')}
             </h2>
             <p className="irg-subtitle">
               {isCartridgeActive
-                ? (lang === 'es'
-                    ? 'Cartucho de vidrio borosilicato de 3 mL precargado para recarga de bolígrafos dosificadores reutilizables. Sin reconstitución manual requerida.'
-                    : 'Pre-filled 3 mL borosilicate glass cartridge engineered for reusable dial pen reloading. Zero manual reconstitution required.')
-                : (t.penCalcSubtitle || (lang === 'es'
-                    ? 'Sistema aplicador multidosis de alta precisión. Calibrado para micro-inyección subcutánea sin reconstitución manual.'
-                    : 'Precision multi-dose dial pen delivery system. Calibrated for subcutaneous micro-dial administration without manual reconstitution.'))}
+                ? (isEsPen
+                    ? 'Se suministra el cartucho de vidrio borosilicato de 3 mL precargado (sin el cuerpo exterior de la pluma). Insértelo en su pluma reutilizable (Paso 1) y dosifique exactamente igual que una pluma precargada — sin agua bacteriostática ni mezclas.'
+                    : 'Supplied as a standalone sterile pre-filled 3 mL borosilicate glass cartridge (without the outer pen body). Load into your reusable pen first (Step 1), then dial clicks identically to a pre-filled pen — zero manual mixing.')
+                : (isEsPen
+                    ? 'Dispositivo completo precargado de fábrica con 3.0 mL de solución estéril listo para enroscar aguja 31G/32G y marcar los clics exactos. Sin mezcla ni preparación manual.'
+                    : 'Complete factory-assembled pre-filled pen containing 3.0 mL sterile liquid. Simply attach a sterile 31G/32G pen needle and dial your exact clicks — zero manual preparation.')}
             </p>
           </div>
         </div>
@@ -1012,15 +1022,17 @@ export default function InteractiveReconstitutionGuide({
               <div className="irg-control-label-row">
                 <label className="irg-label">
                   <FlaskConical size={14} color="#0284c7" />
-                  {t.penDeviceContent || 'Device Active Content'}
+                  {isCartridgeActive
+                    ? (isEsPen ? 'Contenido Activo del Cartucho' : 'Cartridge Active Content')
+                    : (t.penDeviceContent || (isEsPen ? 'Contenido Activo de la Pluma' : 'Pen Active Content'))}
                 </label>
                 <span className="irg-val-badge font-mono">{selectedStrength?.name || `${penTotalMg} mg`}</span>
               </div>
               <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.4 }}>
-                Pre-filled sterile formulation: <strong>{penVolumeMl.toFixed(1)} mL</strong>
+                {isEsPen ? 'Formulación líquida estéril precargada:' : 'Pre-filled sterile liquid formulation:'} <strong>{penVolumeMl.toFixed(1)} mL</strong>
               </div>
               <div className="irg-concentration-tag">
-                <span className="irg-ct-label">Nominal Concentration:</span>
+                <span className="irg-ct-label">{isEsPen ? 'Concentración Nominal:' : 'Nominal Concentration:'}</span>
                 <strong className="irg-ct-val font-mono">
                   {penConcentrationMgMl.toFixed(2)} mg/mL ({Math.round(penConcentrationMcgMl).toLocaleString()} mcg/mL)
                 </strong>
@@ -1119,27 +1131,35 @@ export default function InteractiveReconstitutionGuide({
           <div className="irg-visualizer-panel">
             <div className="irg-result-highlight-card">
               <div className="irg-rh-header">
-                <span className="irg-rh-title">Multi-Dose Pen Dial Calibration</span>
-                <span className="irg-rh-spec font-mono">1 Click = 0.01 mL</span>
+                <span className="irg-rh-title">
+                  {isCartridgeActive
+                    ? (isEsPen ? 'Calibración de Dial · Cartucho 3 mL' : '3 mL Cartridge Dial Calibration')
+                    : (isEsPen ? 'Calibración de Dial · Pluma Multidosis' : 'Multi-Dose Pen Dial Calibration')}
+                </span>
+                <span className="irg-rh-spec font-mono">{isEsPen ? '1 Clic = 0.01 mL' : '1 Click = 0.01 mL'}</span>
               </div>
 
               <div className="irg-rh-metrics">
                 <div className="irg-metric-box">
-                  <span className="irg-mb-label">{t.penDialLabel || 'Dial Setting'}</span>
+                  <span className="irg-mb-label">{t.penDialLabel || (isEsPen ? 'Ajuste del Dial' : 'Dial Setting')}</span>
                   <span className="irg-mb-val font-mono text-sky-950">
-                    {penClicks} <small className="text-sky-700">Clicks / Units</small>
+                    {penClicks} <small className="text-sky-700">{isEsPen ? 'Clics / Unidades' : 'Clicks / Units'}</small>
                   </span>
                 </div>
                 <div className="irg-metric-box">
-                  <span className="irg-mb-label">{t.liquidVol || 'Liquid Volume'}</span>
+                  <span className="irg-mb-label">{t.liquidVol || (isEsPen ? 'Volumen Líquido' : 'Liquid Volume')}</span>
                   <span className="irg-mb-val font-mono text-sky-950">
                     {penVolumePerDoseMl.toFixed(2)} <small className="text-sky-700">mL</small>
                   </span>
                 </div>
                 <div className="irg-metric-box">
-                  <span className="irg-mb-label">{t.penDosesInDevice || 'Total Doses in Device'}</span>
+                  <span className="irg-mb-label">
+                    {isCartridgeActive
+                      ? (isEsPen ? 'Dosis en el Cartucho' : 'Total Doses in Cartridge')
+                      : (t.penDosesInDevice || (isEsPen ? 'Dosis en la Pluma' : 'Total Doses in Pen'))}
+                  </span>
                   <span className="irg-mb-val font-mono text-emerald-800">
-                    ~{penTotalDoses} <small className="text-emerald-700">doses</small>
+                    ~{penTotalDoses} <small className="text-emerald-700">{isEsPen ? 'dosis' : 'doses'}</small>
                   </span>
                 </div>
               </div>
@@ -1187,48 +1207,116 @@ export default function InteractiveReconstitutionGuide({
 
               <div className="irg-pen-caption">
                 <ShieldCheck size={13} color="#38bdf8" />
-                <span>Compatible with standard ISO 11608-2 pen needles (31G / 32G × 4mm / 5mm) · 1 Click = 0.01 mL</span>
+                <span>
+                  {isEsPen
+                    ? 'Compatible con agujas estándar ISO 11608-2 para pluma (31G / 32G × 4mm / 5mm) · 1 Clic = 0.01 mL'
+                    : 'Compatible with standard ISO 11608-2 pen needles (31G / 32G × 4mm / 5mm) · 1 Click = 0.01 mL'}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Protocol Steps for Pen */}
+        {/* Protocol Steps for Pen vs Cartridge (Cartridge includes Phase 1: Loading into Reusable Pen) */}
         <div className="irg-protocol-steps">
           <h3 className="irg-steps-heading">
-            Clinical Administration Protocol (Pre-filled Multi-Dose Pen)
+            {isCartridgeActive
+              ? (isEsPen
+                  ? 'Protocolo de Carga de Cartucho (3 mL) y Administración en Pluma Reutilizable'
+                  : '3 mL Refill Cartridge Loading & Reusable Pen Administration Protocol')
+              : (isEsPen
+                  ? 'Protocolo Clínico de Administración (Pluma Precargada Multidosis)'
+                  : 'Clinical Administration Protocol (Pre-filled Multi-Dose Pen)')}
           </h3>
 
+          {isCartridgeActive && (
+            <div style={{
+              marginBottom: '12px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              color: '#166534',
+              fontSize: '0.8rem',
+              lineHeight: 1.5,
+            }}>
+              <strong>{isEsPen ? '¿Cuál es la diferencia frente a la Pluma Precargada?' : 'Difference vs. Pre-filled Injector Pen:'}</strong>{' '}
+              {isEsPen
+                ? 'El cartucho de 3 mL contiene exactamente la misma solución líquida estéril y usa los mismos clics, pero se vende suelto para recargar su pluma metálica reutilizable. Solo requiere realizar el Paso 1 (inserción del cartucho) antes de colocar la aguja.'
+                : 'The 3 mL refill cartridge contains the exact same sterile pre-filled liquid and uses identical dial clicks, but is sold standalone to reload your reusable metal pen. Simply complete Step 1 (cartridge insertion) before attaching your needle.'}
+            </div>
+          )}
+
           <div className="irg-steps-grid">
+            {isCartridgeActive && (
+              <div className="irg-step-card" style={{ borderColor: '#86efac', background: '#f8fff9' }}>
+                <div className="irg-step-number" style={{ background: '#16a34a' }}>1</div>
+                <div className="irg-step-content">
+                  <h4 className="irg-step-title">
+                    {isEsPen ? 'Fase 1 · Insertar Cartucho en Pluma Reutilizable' : 'Phase 1 · Load Cartridge into Reusable Pen'}
+                  </h4>
+                  <p className="irg-step-desc">
+                    {isEsPen
+                      ? 'Desenrosque el portacartuchos de su pluma reutilizable, retraiga el émbolo interno completamente a cero, introduzca el cartucho de vidrio de 3 mL (séptum hacia la punta) y enrosque el cuerpo firmemente hasta hacer tope.'
+                      : 'Unscrew the cartridge holder from your reusable pen body, retract the internal plunger rod fully back to zero, slide the sterile 3 mL glass cartridge in (rubber septum facing front), and screw the barrel firmly back until locked.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="irg-step-card">
-              <div className="irg-step-number">1</div>
+              <div className="irg-step-number">{isCartridgeActive ? 2 : 1}</div>
               <div className="irg-step-content">
-                <h4 className="irg-step-title">{t.penPrepStep}</h4>
-                <p className="irg-step-desc">{t.penPrepText}</p>
+                <h4 className="irg-step-title">
+                  {isEsPen ? 'Inspección y Colocación de Aguja 31G/32G' : 'Clarity Check & Attach 31G/32G Pen Needle'}
+                </h4>
+                <p className="irg-step-desc">
+                  {isEsPen
+                    ? 'Verifique que la solución del cartucho sea 100% transparente, limpie el séptum con alcohol 70% y enrosque una aguja estéril nueva (31G/32G × 4–5 mm) en cada aplicación.'
+                    : 'Inspect liquid clarity through the cartridge window, swab the rubber septum with 70% alcohol, and firmly screw on a fresh sterile ISO pen needle (31G/32G × 4–5 mm).'}
+                </p>
               </div>
             </div>
 
             <div className="irg-step-card">
-              <div className="irg-step-number">2</div>
+              <div className="irg-step-number">{isCartridgeActive ? 3 : 2}</div>
               <div className="irg-step-content">
-                <h4 className="irg-step-title">{t.penNeedleStep}</h4>
-                <p className="irg-step-desc">{t.penNeedleText}</p>
+                <h4 className="irg-step-title">
+                  {isEsPen ? 'Purgado de Aire (1–2 Clics de Prueba)' : 'Air-Purge Priming (1–2 Test Clicks)'}
+                </h4>
+                <p className="irg-step-desc">
+                  {isEsPen
+                    ? 'Marque 1–2 clics de prueba, sostenga la pluma en vertical con la aguja hacia arriba y pulse el botón hasta ver aparecer una gota transparente en la punta.'
+                    : 'Dial 1–2 test clicks, hold the pen upright with the needle pointing up, and press the injection button until a clear droplet appears at the needle tip.'}
+                </p>
               </div>
             </div>
 
             <div className="irg-step-card">
-              <div className="irg-step-number">3</div>
+              <div className="irg-step-number">{isCartridgeActive ? 4 : 3}</div>
               <div className="irg-step-content">
-                <h4 className="irg-step-title">{t.penDoseStep}</h4>
-                <p className="irg-step-desc">{t.penDoseText}</p>
+                <h4 className="irg-step-title">
+                  {isEsPen ? `Marcar ${penClicks} Clics e Inyectar SubQ (90°)` : `Dial ${penClicks} Clicks & SubQ Injection (90°)`}
+                </h4>
+                <p className="irg-step-desc">
+                  {isEsPen
+                    ? `Gire el dial hasta ${penClicks} clics (${penVolumePerDoseMl.toFixed(2)} mL). Inserte a 90° en tejido subcutáneo abdominal o periumbilical, pulse a fondo y mantenga 6–10 segundos antes de retirar.`
+                    : `Turn the dial window to ${penClicks} clicks (${penVolumePerDoseMl.toFixed(2)} mL). Insert at 90° into subcutaneous tissue, depress fully, and hold 6–10 seconds before withdrawing.`}
+                </p>
               </div>
             </div>
 
             <div className="irg-step-card">
-              <div className="irg-step-number">4</div>
+              <div className="irg-step-number">{isCartridgeActive ? 5 : 4}</div>
               <div className="irg-step-content">
-                <h4 className="irg-step-title">{t.penStorageStep}</h4>
-                <p className="irg-step-desc">{t.penStorageText}</p>
+                <h4 className="irg-step-title">
+                  {isEsPen ? 'Retirar Aguja y Refrigerar (2°C–8°C)' : 'Discard Needle & Refrigerate (2°C–8°C)'}
+                </h4>
+                <p className="irg-step-desc">
+                  {isEsPen
+                    ? 'Desenrosque y deseche la aguja inmediatamente en contenedor de punzantes. Coloque el capuchón protector y guarde la pluma (y cartuchos de reserva) en nevera entre 2°C y 8°C. Nunca congelar ni guardar con aguja puesta.'
+                    : 'Unscrew and discard the needle immediately into a sharps container. Replace the protective cap and refrigerate the pen (and spare cartridges) at 2°C–8°C. Never freeze or store with a needle attached.'}
+                </p>
               </div>
             </div>
           </div>
@@ -1237,7 +1325,14 @@ export default function InteractiveReconstitutionGuide({
         {/* Disclaimer */}
         <div className="irg-disclaimer">
           <p>
-            <strong>Clinical Verification Notice:</strong> Pre-filled multi-dose pens are factory-formulated in sterile liquid media and require zero manual solvent reconstitution. Individual dosing units and micro-titrations must be confirmed by an authorized medical practitioner.
+            <strong>{isEsPen ? 'Aviso Clínico:' : 'Clinical Verification Notice:'}</strong>{' '}
+            {isCartridgeActive
+              ? (isEsPen
+                  ? 'Los cartuchos de recambio de 3 mL vienen formulados en medio líquido estéril de fábrica y listos para cargar en plumas reutilizables compatibles (ISO 11608-2). No requieren reconstitución manual ni jeringas de insulina.'
+                  : '3 mL refill cartridges are factory-formulated in sterile liquid media ready for loading into compatible ISO 11608-2 reusable injector pens. Zero manual mixing or insulin syringes required.')
+              : (isEsPen
+                  ? 'Las plumas multidosis precargadas vienen formuladas de fábrica en solución líquida estéril lista para usar. No requieren mezcla manual ni jeringas de insulina; confirme siempre los clics con su médico prescriptor.'
+                  : 'Pre-filled multi-dose pens are factory-formulated in sterile liquid media ready to dial. Zero manual mixing or insulin syringes required; confirm individual click titration with an authorized physician.')}
           </p>
         </div>
       </div>
