@@ -21,6 +21,7 @@ import {
   Check
 } from 'lucide-react';
 import DataTable from '../../ui/DataTable';
+import GlobalSearchBar from '../../ui/GlobalSearchBar';
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
 import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
@@ -47,7 +48,8 @@ export default function DoctorDnaAnalysisTab({
   onUploadPdf = null
 }) {
   const [filterQuery, setFilterQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState('all');
+  const [selectedPlatform, setSelectedPlatform] = useState('all'); // 'all' | 'fagron' | '24genomics' | 'eterna'
+  const [selectedAssay, setSelectedAssay] = useState('all');
   const [prescribingId, setPrescribingId] = useState(null);
   const [createdRx, setCreatedRx] = useState({});
   const [copiedWhatsAppId, setCopiedWhatsAppId] = useState(null);
@@ -145,33 +147,87 @@ export default function DoctorDnaAnalysisTab({
     setTimeout(() => setCopiedWhatsAppId(null), 3500);
   };
 
+  const ASSAY_OPTIONS = useMemo(() => ({
+    all: [
+      { id: 'all', label: 'All DNA & Genomic Panels' },
+      { id: 'tricho', label: 'Fagron TrichoTest™ (Alopecia)' },
+      { id: 'telo', label: 'Fagron TeloTest™ (Biological Age)' },
+      { id: 'nutrigen', label: 'Fagron NutriGen™ (Metabolism)' },
+      { id: 'acne', label: 'Fagron AcneTest™' },
+      { id: 'derma', label: 'Fagron Dermagen™' },
+      { id: 'obesi', label: 'Fagron ObesiGen™' },
+      { id: 'skin-hair', label: '24Genomics · Skin & Hair' },
+      { id: 'nutrition', label: '24Genomics · Nutrition' },
+      { id: 'health', label: '24Genomics · Health & Wellness' },
+      { id: 'pharma', label: '24Genomics · Pharmacogenetics' },
+      { id: 'sports', label: '24Genomics · Sports' },
+      { id: 'ancestry', label: '24Genomics · Ancestry' },
+      { id: 'personality', label: '24Genomics · Personality' },
+      { id: 'eterna', label: 'Eterna™ Epigenetic / Proteomic' },
+    ],
+    fagron: [
+      { id: 'all', label: 'All Fagron Genomics Panels' },
+      { id: 'tricho', label: 'TrichoTest™ (Hair & Alopecia)' },
+      { id: 'telo', label: 'TeloTest™ (Telomere Age)' },
+      { id: 'nutrigen', label: 'NutriGen™ (Nutrigenetics)' },
+      { id: 'acne', label: 'AcneTest™' },
+      { id: 'derma', label: 'Dermagen™' },
+      { id: 'obesi', label: 'ObesiGen™' },
+    ],
+    '24genomics': [
+      { id: 'all', label: 'All 24Genomics Panels' },
+      { id: 'skin-hair', label: 'Skin & Hair' },
+      { id: 'nutrition', label: 'Nutrition' },
+      { id: 'health', label: 'Health & Wellness' },
+      { id: 'pharma', label: 'Pharmacogenetics' },
+      { id: 'sports', label: 'Sports' },
+      { id: 'ancestry', label: 'Ancestry' },
+      { id: 'personality', label: 'Personality' },
+    ],
+    eterna: [
+      { id: 'all', label: 'All Eterna™ Assays' },
+      { id: 'eterna', label: 'Eterna™ Epigenetic / Proteomic Aging' },
+    ],
+  }), []);
+
   // Filtered dataset
   const filteredData = useMemo(() => {
     return dnaResults.filter((row) => {
-      const matchQuery =
-        !filterQuery ||
-        (row.patientName || '').toLowerCase().includes(filterQuery.toLowerCase()) ||
-        (row.code || '').toLowerCase().includes(filterQuery.toLowerCase()) ||
-        (row.testName || '').toLowerCase().includes(filterQuery.toLowerCase()) ||
-        (row.biomarker || '').toLowerCase().includes(filterQuery.toLowerCase());
-
+      const text = `${row.patientName || ''} ${row.code || ''} ${row.sampleId || ''} ${row.testName || ''} ${row.testType || ''} ${row.biomarker || ''} ${row.laboratory?.name || ''}`.toLowerCase();
+      const matchQuery = !filterQuery || text.includes(filterQuery.toLowerCase());
       if (!matchQuery) return false;
 
-      if (selectedTag === 'nutrigenomics') {
-        const t = String(row.testName || row.biomarker || '').toLowerCase();
-        return t.includes('nutri') || t.includes('24gen');
+      if (selectedPlatform === 'fagron') {
+        const isFagron =
+          text.includes('fagron') ||
+          text.includes('tricho') ||
+          text.includes('telo') ||
+          text.includes('nutrigen') ||
+          text.includes('acne') ||
+          text.includes('dermagen') ||
+          text.includes('obesigen');
+        if (!isFagron) return false;
+      } else if (selectedPlatform === '24genomics') {
+        const is24G =
+          text.includes('24gen') ||
+          text.includes('illumina') ||
+          text.includes('nutrigenomics') ||
+          text.includes('skin & hair') ||
+          text.includes('ancestry') ||
+          text.includes('personality');
+        if (!is24G) return false;
+      } else if (selectedPlatform === 'eterna') {
+        const isEterna = text.includes('eterna') || text.includes('proteom');
+        if (!isEterna) return false;
       }
-      if (selectedTag === 'pharmacogenomics') {
-        const t = String(row.testName || row.biomarker || '').toLowerCase();
-        return t.includes('tricho') || t.includes('pharma');
-      }
-      if (selectedTag === 'epigenetics') {
-        const t = String(row.testName || row.biomarker || '').toLowerCase();
-        return t.includes('telo') || t.includes('eterna') || t.includes('proteom');
+
+      if (selectedAssay !== 'all') {
+        if (selectedAssay === 'skin-hair') return text.includes('skin') || text.includes('hair');
+        if (!text.includes(selectedAssay)) return false;
       }
       return true;
     });
-  }, [dnaResults, filterQuery, selectedTag]);
+  }, [dnaResults, filterQuery, selectedPlatform, selectedAssay]);
 
   // Columns definition following strict GCP styling & DataTable Golden Rules
   const columns = useMemo(() => [
@@ -713,73 +769,123 @@ export default function DoctorDnaAnalysisTab({
           </div>
         ) : (
         <>
-        {/* Filter Bar with GCP Chips */}
+        {/* ── Google Cloud UX Search & 2-Level Zero-Scroll Filter Bar (Golden Rule #7 & #24) ── */}
         <div
           style={{
-            padding: '12px 20px',
+            padding: '14px 18px',
             backgroundColor: '#f8f9fa',
             borderBottom: '1px solid #dadce0',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '10px'
+            flexDirection: 'column',
+            gap: '12px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', marginRight: '4px' }}>
-              Modality:
-            </span>
+          <GlobalSearchBar
+            size="lg"
+            value={filterQuery}
+            onChange={setFilterQuery}
+            placeholder="Search by patient name, specimen ID, SNP (SULT1A1, MTHFR), or assay..."
+            resultCount={filteredData.length}
+            namespace={`dna-analysis-${slug || 'default'}`}
+          />
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
+              gap: '8px',
+              alignItems: 'center',
+            }}
+          >
             {[
               { id: 'all', label: 'All DNA Assays' },
-              { id: 'nutrigenomics', label: 'Nutrigenomics (24Genetics)' },
-              { id: 'pharmacogenomics', label: 'Pharmacogenomics (TrichoTest)' },
-              { id: 'epigenetics', label: 'Biological Age (TeloTest)' }
-            ].map((chip) => {
-              const isSelected = selectedTag === chip.id;
+              { id: 'fagron', label: 'Fagron Genomics' },
+              { id: '24genomics', label: '24Genomics' },
+              { id: 'eterna', label: 'Eterna™' },
+            ].map((plat) => {
+              const isSelected = selectedPlatform === plat.id;
               return (
                 <button
-                  key={chip.id}
+                  key={plat.id}
                   type="button"
-                  onClick={() => setSelectedTag(chip.id)}
+                  onClick={() => {
+                    setSelectedPlatform(plat.id);
+                    setSelectedAssay('all');
+                  }}
                   style={{
-                    padding: '4px 10px',
-                    borderRadius: '16px',
-                    fontSize: '0.72rem',
-                    fontWeight: isSelected ? 600 : 500,
+                    height: '34px',
+                    padding: '0 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: isSelected ? 700 : 550,
                     cursor: 'pointer',
-                    border: '1px solid',
-                    borderColor: isSelected ? '#1a73e8' : '#dadce0',
+                    border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
                     backgroundColor: isSelected ? '#e8f0fe' : '#ffffff',
                     color: isSelected ? '#1a73e8' : '#3c4043',
-                    transition: 'all 0.12s ease'
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   }}
                 >
-                  {chip.label}
+                  {plat.label}
                 </button>
               );
             })}
           </div>
 
-          {/* Quick Search Input */}
-          <div style={{ position: 'relative', width: '220px' }}>
-            <Search size={14} style={{ position: 'absolute', left: '9px', top: '50%', transform: 'translateY(-50%)', color: '#5f6368' }} />
-            <input
-              type="text"
-              placeholder="Search patient or SNP..."
-              value={filterQuery}
-              onChange={(e) => setFilterQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '6px 10px 6px 30px',
-                fontSize: '0.76rem',
-                border: '1px solid #dadce0',
-                borderRadius: '4px',
-                outline: 'none',
-                backgroundColor: '#ffffff',
-                color: '#202124'
-              }}
-            />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <label htmlFor={`dna-assay-select-${slug}`} style={{ fontSize: '0.73rem', fontWeight: 600, color: '#5f6368' }}>
+                Specific Assay:
+              </label>
+              <select
+                id={`dna-assay-select-${slug}`}
+                value={selectedAssay}
+                onChange={(e) => setSelectedAssay(e.target.value)}
+                style={{
+                  height: '32px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  backgroundColor: '#ffffff',
+                  color: '#202124',
+                  fontSize: '0.76rem',
+                  fontWeight: 550,
+                  cursor: 'pointer',
+                  maxWidth: '100%',
+                }}
+              >
+                {(ASSAY_OPTIONS[selectedPlatform] || ASSAY_OPTIONS.all).map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {(selectedPlatform !== 'all' || selectedAssay !== 'all' || filterQuery) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedPlatform('all');
+                  setSelectedAssay('all');
+                  setFilterQuery('');
+                }}
+                style={{
+                  height: '28px',
+                  padding: '0 10px',
+                  borderRadius: '14px',
+                  border: '1px solid #dadce0',
+                  backgroundColor: '#ffffff',
+                  color: '#1a73e8',
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
         </div>
 

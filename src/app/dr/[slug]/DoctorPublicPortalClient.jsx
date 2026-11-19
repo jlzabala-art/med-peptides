@@ -1219,19 +1219,29 @@ export default function DoctorPublicPortalClient({
     const tName = String(row.testName || row.biomarker || '').toLowerCase();
     const cat = String(row.category || '').toLowerCase();
     const type = String(row.testType || '').toLowerCase();
+    const labName = String(row.laboratory?.name || row.laboratory || '').toLowerCase();
     return (
       cat.includes('nutri') ||
       cat.includes('genom') ||
+      cat.includes('pharma') ||
       cat.includes('dna') ||
+      labName.includes('fagron') ||
+      labName.includes('24gen') ||
+      labName.includes('eterna') ||
+      tName.includes('fagron') ||
       tName.includes('24gen') ||
       tName.includes('nutri') ||
       tName.includes('telo') ||
       tName.includes('tricho') ||
+      tName.includes('acnetest') ||
+      tName.includes('dermagen') ||
+      tName.includes('obesigen') ||
       tName.includes('eterna') ||
       tName.includes('proteomic') ||
       type.includes('nutri') ||
       type.includes('telo') ||
       type.includes('tricho') ||
+      type.includes('fagron') ||
       type.includes('dna')
     );
   }, []);
