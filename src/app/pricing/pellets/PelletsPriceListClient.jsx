@@ -30,6 +30,7 @@ import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
 import EmptyState from '@/components/ui/EmptyState';
+import PageHeroCard from '@/components/ui/PageHeroCard';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
@@ -750,114 +751,62 @@ export default function PelletsPriceListClient({
       {/* ── UNIFIED CLINICAL FORMAT SWITCHER (1-Click Navigation Across Vials, Pens & Pellets) ── */}
       <ClinicalFormatSwitcher activeFormat="pellets" lang={lang} currency={currency} />
 
-      {/* ── GOOGLE CLOUD CONSOLE RESOURCE HEADER ── */}
-      <div className="gcp-resource-page-header">
-        <div className="gcp-resource-header-container">
-          {/* Title Row with Status Pills */}
-          <div className="gcp-resource-main-row">
-            <div className="gcp-resource-title-group">
-              <div className="gcp-resource-title-line">
-                <div className="gcp-resource-icon-badge">
-                  <Syringe size={16} />
-                </div>
-                <h1 className="gcp-resource-title">
-                  {isEs
-                    ? 'Pellets Hormonales Subcutáneos y Kits Quirúrgicos • Tarifa Oficial B2B'
-                    : 'Subcutaneous Hormone Pellets & Surgical Trocar Kits • Official B2B Schedule'}
-                </h1>
-                <span className="gcp-status-pill gcp-status-active">
-                  <span className="gcp-status-dot"></span>
-                  <span>Pharmapolis EU GMP · Plovdiv (Bulgaria)</span>
-                </span>
-                <span className="gcp-status-pill gcp-status-category">
-                  {isEs ? 'Cat. C · Pellets Subcutáneos' : 'Cat. C · Subcutaneous Pellets'}
-                </span>
-                <span className="gcp-status-pill gcp-status-pom">
-                  <Lock size={11} />
-                  <span>{isEs ? 'Uso Médico Exclusivo (POM)' : 'Prescription Only Medicine (POM)'}</span>
-                </span>
-                <div className="gcp-resource-sku-wrap">
-                  <span className="gcp-resource-sku-label">REF:</span>
-                  <CopyableId value="DOC-BG-PHARM-PELLET-2026" displayValue="DOC-BG-PHARM-PELLET-2026" />
-                </div>
-              </div>
-
-              {/* Mobile Progressive Disclosure Toggle for Technical Specs (Rule #26) */}
-              <button
-                type="button"
-                className="pellets-mobile-specs-toggle"
-                onClick={() => setShowMobileSpecs((v) => !v)}
-              >
-                <ShieldCheck size={12} color="#16a34a" />
-                <span>{isEs ? 'Especificaciones EU GMP' : 'EU GMP Specs & Regulatory'}</span>
-                <ChevronDown
-                  size={12}
-                  style={{ transform: showMobileSpecs ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
-                />
-              </button>
-
-              {/* Sub-line: Clinical Metadata Strip (Accurate Bioidentical Pellets Parameters) */}
-              <div className={`gcp-resource-meta-line ${showMobileSpecs ? '' : 'mobile-collapsed'}`}>
-                <span className="gcp-resource-meta-item">
-                  <strong>{isEs ? 'Pureza:' : 'Purity:'}</strong> ≥ 99.5% USP/EP Bioidentical Pure
-                </span>
-                <span className="gcp-resource-meta-sep">•</span>
-                <span className="gcp-resource-meta-item">
-                  <strong>{isEs ? 'Cinética:' : 'Kinetics:'}</strong> {isEs ? 'Orden Cero 3.5 a 6 meses' : 'Zero-order 3.5 to 6 months'}
-                </span>
-                <span className="gcp-resource-meta-sep">•</span>
-                <span className="gcp-resource-meta-item">
-                  <strong>{isEs ? 'Esterilización:' : 'Sterilization:'}</strong> {isEs ? 'E-Beam Validada SAL 10⁻⁶' : 'Validated E-Beam SAL 10⁻⁶'}
-                </span>
-                <span className="gcp-resource-meta-sep">•</span>
-                <span className="gcp-resource-meta-item">
-                  <strong>{isEs ? 'Primer Paso Hepático:' : 'First-Pass:'}</strong> {isEs ? '0% (Absorción Subcutánea Directa)' : '0% (Hepatic Bypassed)'}
-                </span>
-              </div>
-            </div>
-
-            {/* Right Action Toolbar: Clean GCP 3-Button Standard (Currency/Lang handled by PublicUnifiedHeader) */}
-            <div className="gcp-resource-action-toolbar">
-
-              {/* Preview & Save PDF Schedule */}
+      {/* ── MAIN CONTENT CONTAINER ── */}
+      <main className="pellets-price-container">
+        {/* ── UNIFIED COMPACT GCP RESOURCE HERO (Consistent across all platform screens) ── */}
+        <PageHeroCard
+          brandRight="PHARMAPOLIS EU GMP"
+          badges={[
+            isEs ? 'E-Beam SAL 10⁻⁶ · POM' : 'E-Beam SAL 10⁻⁶ · POM',
+            isEs ? 'Liberación 3.5–6 Meses' : '3.5–6 Mo Zero-Order',
+          ]}
+          metaItems={[{ label: 'REF:', value: 'DOC-BG-PHARM-PELLET-2026', mono: true }]}
+          title={
+            isEs
+              ? 'Pellets Hormonales Subcutáneos y Kits Quirúrgicos · Tarifa B2B'
+              : 'Subcutaneous Hormone Pellets & Surgical Trocar Kits · B2B Schedule'
+          }
+          subtitle={
+            isEs
+              ? 'Pellets bioidénticos estériles (≥99.5% USP/EP, 0% primer paso hepático) y kits de trócar con descuento institucional Pack ×10 (-10%).'
+              : 'Sterile bioidentical hormone pellets (≥99.5% USP/EP, 0% hepatic first-pass) & surgical trocar kits with Pack ×10 (-10%) volume pricing.'
+          }
+          actions={
+            <>
               <button
                 type="button"
                 className="gcp-btn-secondary"
                 onClick={() => setIsPdfPreviewOpen(true)}
                 title={isEs ? 'Vista Previa Oficial A4 / Guardar PDF' : 'Official A4 Preview / Save PDF'}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <FileText size={13} color="#003666" />
-                <span>{isEs ? 'Vista Previa Tarifa' : 'Preview Schedule'}</span>
+                <FileText size={13} color="#5f6368" />
+                <span>{isEs ? 'Tarifa PDF' : 'Preview PDF'}</span>
               </button>
 
-              {/* Share */}
               <button
                 type="button"
                 className="gcp-btn-secondary"
                 onClick={handleShare}
                 title={isEs ? 'Copiar enlace al portapapeles' : 'Copy link to clipboard'}
+                style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <Share2 size={13} />
+                <Share2 size={13} color="#5f6368" />
                 <span>{isEs ? 'Compartir' : 'Share'}</span>
               </button>
 
-              {/* Request Allocation */}
               <button
                 type="button"
                 className="gcp-btn-primary"
                 onClick={() => setIsInquiryDrawerOpen(true)}
+                style={{ height: '36px', padding: '0 13px', fontSize: '0.78rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 <FileText size={13} />
-                <span>{isEs ? 'Solicitar Asignación' : 'Request Allocation'}</span>
+                <span>{isEs ? 'Solicitar' : 'Request Allocation'}</span>
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── MAIN CONTENT CONTAINER ── */}
-      <main className="pellets-price-container">
+            </>
+          }
+        />
         {/* ── 4 KPIs with Scope Switcher (Strict Golden Rule #22) ── */}
         <div className="pellets-kpi-bar">
           <div className="pellets-kpi-header">

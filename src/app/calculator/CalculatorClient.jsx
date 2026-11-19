@@ -9,6 +9,7 @@ import HorizontalSyringeVisualizer from '@/components/reconstitution/HorizontalS
 import PenDialVisualizer from '@/components/reconstitution/PenDialVisualizer';
 import NonInjectableVisualizer from '@/components/reconstitution/NonInjectableVisualizer';
 import StepTimelineList from '@/components/ui/StepTimelineList';
+import PageHeroCard from '@/components/ui/PageHeroCard';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import {
   useAlgoliaPeptideSelector,
@@ -313,80 +314,47 @@ export default function CalculatorClient() {
         breadcrumb={breadcrumbItems}
       />
 
-      {/* ── UNIVERSAL GOOGLE CLOUD UX PAGE HEADER (Generic for ANY Peptide + Clear Step-1 Onboarding) ── */}
-      <div style={{ background: '#ffffff', borderBottom: '1px solid #dadce0' }}>
-        <div style={{
-          maxWidth: '1080px',
-          margin: '0 auto',
-          padding: '1rem 1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-        }}>
-          <div style={{ flex: '1 1 520px', minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
-              <span style={{
-                fontSize: '0.65rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                background: '#e8f0fe',
-                color: '#1a73e8',
-              }}>
-                {isEs ? 'CALCULADORA Y GUÍA UNIVERSAL' : 'UNIVERSAL PEPTIDE GUIDE'}
-              </span>
-              <span style={{
-                fontSize: '0.65rem',
-                fontWeight: 700,
-                padding: '2px 8px',
-                borderRadius: '4px',
-                background: '#f1f5f9',
-                color: '#475569',
-              }}>
-                {isEs ? '6 Formatos: Vial · Pluma · Cartucho · Spray · Oral · Tópico' : '6 Formats: Vial · Pen · Cartridge · Spray · Oral · Topical'}
-              </span>
-            </div>
-            <h1 style={{ margin: 0, fontSize: '1.24rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.015em' }}>
-              {isEs
-                ? 'Guía Universal de Preparación y Dosificación de Péptidos'
-                : 'Universal Peptide Administration & Dosing Guide'}
-            </h1>
-            <p style={{ margin: '4px 0 0', fontSize: '0.80rem', color: '#475569', lineHeight: 1.45 }}>
-              {isEs
-                ? 'Empieza eligiendo tu péptido y su presentación en los Pasos 1 y 2 para obtener la marca exacta de jeringa U-100, los clics del dial o las instrucciones paso a paso.'
-                : 'Start by choosing your peptide and presentation in Steps 1 & 2 below to calculate your exact U-100 syringe mark, pen dial clicks, and step-by-step instructions.'}
-            </p>
-          </div>
-
-          <div className="calc-header-actions">
-            <button
-              type="button"
-              onClick={() => handleOpenQr(currentShareOverrides)}
-              className="gcp-btn-secondary"
-              style={{ padding: '7px 12px', fontSize: '0.76rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <QrCode size={14} />
-              <span>{isEs ? 'Código QR' : 'Share QR'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleCopyShareUrl(currentShareOverrides)}
-              className="gcp-btn-primary"
-              style={{ padding: '7px 14px', fontSize: '0.76rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              {copiedLink ? <Check size={14} /> : <Copy size={14} />}
-              <span>{copiedLink ? (isEs ? 'Enlace Copiado' : 'Link Copied') : (isEs ? 'Copiar Guía Personalizada' : 'Copy Personalized Link')}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ── MAIN 3-STEP PATIENT WORKFLOW + GCP 4-KPI LIVE CONFIGURATION SUMMARY ── */}
-      <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '1rem 1.25rem 6.5rem', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {/* ── MAIN 3-STEP PATIENT WORKFLOW + UNIFIED COMPACT GCP HERO + 4-KPI SUMMARY ── */}
+      <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '0.85rem 1.25rem 6.5rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <PageHeroCard
+          brandRight={isEs ? 'GUÍA UNIVERSAL DE DOSIFICACIÓN' : 'UNIVERSAL DOSING GUIDE'}
+          badges={[
+            isEs ? '6 Formatos: Vial · Pluma · Cartucho · Spray · Oral · Tópico' : '6 Formats: Vial · Pen · Cartridge · Spray · Oral · Topical',
+            'U-100: 100 clicks = 1 mL',
+          ]}
+          title={
+            isEs
+              ? 'Guía Universal de Preparación y Dosificación de Péptidos'
+              : 'Universal Peptide Administration & Dosing Guide'
+          }
+          subtitle={
+            isEs
+              ? 'Empieza eligiendo tu péptido y su presentación en los Pasos 1 y 2 para obtener la marca exacta de jeringa U-100, los clics del dial o las instrucciones paso a paso.'
+              : 'Start by choosing your peptide and presentation in Steps 1 & 2 below to calculate your exact U-100 syringe mark, pen dial clicks, and step-by-step instructions.'
+          }
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => handleOpenQr(currentShareOverrides)}
+                className="gcp-btn-secondary"
+                style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <QrCode size={14} color="#5f6368" />
+                <span>{isEs ? 'Código QR' : 'Share QR'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopyShareUrl(currentShareOverrides)}
+                className="gcp-btn-primary"
+                style={{ height: '36px', padding: '0 13px', fontSize: '0.76rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                {copiedLink ? <Check size={14} /> : <Copy size={14} />}
+                <span>{copiedLink ? (isEs ? 'Enlace Copiado' : 'Link Copied') : (isEs ? 'Copiar Guía Personalizada' : 'Copy Personalized Link')}</span>
+              </button>
+            </>
+          }
+        />
         <style dangerouslySetInnerHTML={{ __html: `
           .calc-gcp-kpi-grid {
             display: grid;

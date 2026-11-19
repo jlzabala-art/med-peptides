@@ -5,11 +5,13 @@ import React from 'react';
 /**
  * PageHeroCard
  * ─────────────────────────────────────────────────────────────────────────────
- * Canonical institutional hero card used across /pricing/*, /vials, /proto,
- * /calculator, /compounding, /p/[slug], and /dr/[slug].
- * Derived from the clean /pricing/colway document header:
- *   - Left: Eyebrow pills/badges + H1 + subtitle
- *   - Right: Stamp / Metadata box (DOCUMENT REF, CURRENCY, etc.)
+ * Unified Google Cloud Console Compact Resource Hero used across all Atlas
+ * screens (/calculator, /pricing/peptides, /pricing/pens, /pricing/pellets,
+ * /pricing/24genetics, /pricing/colway*, /vials, /proto, /compounding).
+ *
+ * Compact Single-Band Architecture (≤ 84px on Laptop · ≤ 112px on Mobile):
+ *   - Left: Eyebrow chips (Brand + Badges + inline REF/Meta chips) + 1-line H1 + concise subtitle
+ *   - Right (same horizontal row on Laptop): Action toolbar buttons
  */
 export default function PageHeroCard({
   brandLeft = 'ATLAS HEALTH',
@@ -23,10 +25,15 @@ export default function PageHeroCard({
   children,
   className = '',
 }) {
-  const hasEyebrow = Boolean(eyebrow || brandLeft || brandRight || badges.length > 0);
+  const hasEyebrow = Boolean(
+    eyebrow || brandLeft || brandRight || badges.length > 0 || metaItems.length > 0
+  );
 
   return (
-    <section className={`atlas-hero-card ${className}`.trim()} aria-label={typeof title === 'string' ? title : 'Page header'}>
+    <section
+      className={`atlas-hero-card ${className}`.trim()}
+      aria-label={typeof title === 'string' ? title : 'Page header'}
+    >
       <div className="atlas-hero-row">
         <div className="atlas-hero-identity">
           {hasEyebrow && (
@@ -36,11 +43,20 @@ export default function PageHeroCard({
               ) : (
                 <>
                   {brandLeft && <span className="atlas-hero-pill-primary">{brandLeft}</span>}
-                  {brandLeft && brandRight && <span className="atlas-hero-cross">×</span>}
                   {brandRight && <span className="atlas-hero-pill-secondary">{brandRight}</span>}
                   {badges.map((badge, idx) => (
                     <span key={idx} className="atlas-hero-pill-secondary">
                       {badge}
+                    </span>
+                  ))}
+                  {metaItems.map((item, idx) => (
+                    <span
+                      key={item.label || idx}
+                      className={`atlas-hero-pill-meta ${item.mono ? 'font-mono' : ''}`.trim()}
+                      style={item.color ? { color: item.color } : undefined}
+                    >
+                      {item.label && <strong className="atlas-hero-pill-meta-lbl">{item.label}</strong>}{' '}
+                      <span>{item.value}</span>
                     </span>
                   ))}
                 </>
@@ -52,24 +68,9 @@ export default function PageHeroCard({
           {subtitle && <p className="atlas-hero-subtitle">{subtitle}</p>}
         </div>
 
-        {metaItems.length > 0 && (
-          <div className="atlas-hero-stamp-box">
-            {metaItems.map((item, idx) => (
-              <div key={item.label || idx} className="atlas-hero-stamp-item">
-                <span className="atlas-hero-stamp-label">{item.label}</span>
-                <span
-                  className={`atlas-hero-stamp-value ${item.mono ? 'font-mono' : ''}`.trim()}
-                  style={item.color ? { color: item.color } : undefined}
-                >
-                  {item.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        {actions && <div className="atlas-hero-actions">{actions}</div>}
       </div>
 
-      {actions && <div className="atlas-hero-actions">{actions}</div>}
       {children}
     </section>
   );

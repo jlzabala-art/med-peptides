@@ -28,6 +28,7 @@ import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
+import PageHeroCard from '@/components/ui/PageHeroCard';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
@@ -1094,72 +1095,65 @@ export default function DnLabPensClient({
       {/* ── UNIFIED CLINICAL FORMAT SWITCHER (1-Click Navigation Across Vials, Pens & Pellets) ── */}
       <ClinicalFormatSwitcher activeFormat="pens" lang={lang} currency={currency} />
 
-      {/* ── GOOGLE CLOUD UX COMPACT PAGE HEADER (Rules #9, #16, #23, #40, #57, #70) ── */}
-      <section className="atlas-pens-gcp-header" aria-label="Formulary Page Header">
-        <div className="atlas-pens-gcp-header-inner">
-          <div className="atlas-pens-gcp-title-col">
-            <div className="atlas-pens-gcp-eyebrow">
-              <Link href="/pricing" className="atlas-pens-back-link">
-                ← {isEs ? 'Tarifas' : 'All Schedules'}
-              </Link>
-              <span>·</span>
-              <span className="atlas-pens-gcp-chip">{isEs ? 'FORMULARIO CLÍNICO' : 'CLINICAL FORMULARY'}</span>
-              <span className="atlas-pens-gcp-chip atlas-pens-gcp-chip-u100">U-100: 100 clicks = 1 mL</span>
-              <span className="atlas-pens-gcp-chip">≥99.2% HPLC · 2–8°C</span>
-            </div>
-
-            <h1 className="atlas-pens-gcp-title">
-              {isEs
-                ? 'Bolígrafos Precargados de Péptidos · Guía Clínica'
-                : 'Pre-filled Multi-Dose Peptide Pens · Dosing Guide'}
-            </h1>
-            <p className="atlas-pens-gcp-sub">
-              {isEs
-                ? `Formulario clínico armonizado (${initialProducts.length} fórmulas · ${totalVariantsCount} presentaciones en 2–3 mL) con dial mecánico U-100 (1 clic = 0.01 mL) y constructor de protocolo en PDF.`
-                : `Harmonized clinical formulary (${initialProducts.length} formulas · ${totalVariantsCount} strength SKUs across 2–3 mL) with U-100 click-dial dosing (1 click = 0.01 mL) and 1-page PDF Protocol Builder.`}
-            </p>
-          </div>
-
-          {/* Symmetric 1x3 Action Toolbar (1 Primary CTA + 2 Monochrome Secondary — Rules #40, #57, #70) */}
-          <div className="atlas-pens-gcp-actions">
-            <button
-              type="button"
-              className="gcp-btn-primary atlas-pens-action-btn"
-              disabled={isExportingPdf}
-              onClick={() => handleExportPdf()}
-            >
-              <FileText size={14} />
-              <span>
-                {isExportingPdf
-                  ? (isEs ? 'Generando...' : 'Generating...')
-                  : protocolItemsList.length > 0
-                    ? (isEs ? `Protocolo PDF (${totalProtocolPens})` : `Protocol PDF (${totalProtocolPens})`)
-                    : (isEs ? 'Exportar Guía PDF' : 'Export PDF Guide')}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              className="gcp-btn-secondary atlas-pens-action-btn"
-              onClick={handleShare}
-            >
-              {copiedLink ? <Check size={14} color="#16a34a" /> : <Share2 size={14} />}
-              <span>{copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
-            </button>
-
-            <Link
-              href={`/calculator?format=pen${isEs ? '&lang=es' : ''}`}
-              className="gcp-btn-secondary atlas-pens-action-btn"
-              style={{ textDecoration: 'none' }}
-            >
-              <Calculator size={14} />
-              <span>{isEs ? 'Calculadora' : 'Calculator'}</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <main className="dnlab-container">
+        {/* ── UNIFIED COMPACT GCP RESOURCE HERO (Consistent across all platform screens) ── */}
+        <PageHeroCard
+          brandRight={isEs ? 'FORMULARIO CLÍNICO' : 'CLINICAL FORMULARY'}
+          badges={[
+            'U-100: 100 clicks = 1 mL',
+            '≥99.2% HPLC · 2–8°C',
+          ]}
+          metaItems={[{ label: 'REF:', value: 'DOC-ATL-PENS-2026', mono: true }]}
+          title={
+            isEs
+              ? 'Bolígrafos Precargados de Péptidos · Guía Clínica de Dosificación'
+              : 'Pre-filled Multi-Dose Peptide Pens · Clinical Dosing Guide'
+          }
+          subtitle={
+            isEs
+              ? `Formulario clínico armonizado (${initialProducts.length} fórmulas · ${totalVariantsCount} presentaciones en 2–3 mL) con dial mecánico U-100 (1 clic = 0.01 mL) y constructor de protocolo en PDF.`
+              : `Harmonized clinical formulary (${initialProducts.length} formulas · ${totalVariantsCount} strength SKUs across 2–3 mL) with U-100 click-dial dosing (1 click = 0.01 mL) and 1-page PDF Protocol Builder.`
+          }
+          actions={
+            <>
+              <Link
+                href={`/calculator?format=pen${isEs ? '&lang=es' : ''}`}
+                className="gcp-btn-secondary"
+                style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Calculator size={14} color="#5f6368" />
+                <span>{isEs ? 'Calculadora' : 'Calculator'}</span>
+              </Link>
+
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={handleShare}
+                style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                {copiedLink ? <Check size={14} color="#16a34a" /> : <Share2 size={14} color="#5f6368" />}
+                <span>{copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
+              </button>
+
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                disabled={isExportingPdf}
+                onClick={() => handleExportPdf()}
+                style={{ height: '36px', padding: '0 13px', fontSize: '0.78rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <FileText size={14} />
+                <span>
+                  {isExportingPdf
+                    ? (isEs ? 'Generando...' : 'Generating...')
+                    : protocolItemsList.length > 0
+                      ? (isEs ? `Protocolo PDF (${totalProtocolPens})` : `Protocol PDF (${totalProtocolPens})`)
+                      : (isEs ? 'Exportar Guía PDF' : 'Export PDF Guide')}
+                </span>
+              </button>
+            </>
+          }
+        />
         {/* ── 4 COMPACT GCP KPI SUMMARY CARDS + SCOPE INDICATOR (Rule #22) ── */}
         <section className="atlas-pens-kpi-section" aria-label="Portfolio Summary KPIs">
           <div className="atlas-pens-kpi-header">

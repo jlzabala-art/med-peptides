@@ -566,18 +566,8 @@ export default function PeptidesPriceListClient({
             .peptides-b2b-portal .peptides-nav-left { width: auto !important; flex: 0 1 auto !important; min-width: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; }
             .peptides-b2b-portal .peptides-nav-actions { width: auto !important; flex: 0 0 auto !important; display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: flex-end !important; gap: 6px !important; }
             .peptides-main-container { padding: 0.5rem 0.75rem 6.5rem 0.75rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            /* Compact Mobile Hero (fixes dead CSS selectors on PageHeroCard) */
-            .peptides-page-header { padding: 0.85rem 0.95rem !important; margin-bottom: 0.65rem !important; }
-            .peptides-page-header .atlas-hero-eyebrow { margin-bottom: 0.4rem !important; gap: 4px !important; }
-            .peptides-page-header .atlas-hero-pill-primary, .peptides-page-header .atlas-hero-pill-secondary { font-size: 0.62rem !important; padding: 2px 6px !important; }
-            .peptides-page-header .atlas-hero-title { font-size: 1.08rem !important; line-height: 1.24 !important; }
-            .peptides-page-header.peptides-hero-meta-collapsed .atlas-hero-subtitle,
-            .peptides-page-header.peptides-hero-meta-collapsed .atlas-hero-stamp-box { display: none !important; }
-            .peptides-page-header .atlas-hero-actions { margin-top: 0.65rem !important; padding-top: 0.65rem !important; }
-            .peptides-hero-mobile-meta-toggle { display: inline-flex !important; align-items: center; gap: 5px; width: fit-content; padding: 4px 10px; border-radius: 999px; border: 1px solid #dadce0; background: #f8fafc; color: #475569; font-size: 0.69rem; font-weight: 700; cursor: pointer; }
-            .peptides-hero-actions-grid { display: grid !important; grid-template-columns: 1fr 1fr; gap: 7px !important; width: 100% !important; }
-            .peptides-hero-btn { min-height: 40px !important; height: auto !important; width: 100% !important; }
-            .peptides-hero-btn-primary { grid-column: 1 / -1 !important; min-height: 42px !important; }
+            .peptides-page-header { padding: 0.68rem 0.85rem !important; margin-bottom: 0.65rem !important; }
+            .peptides-hero-btn { min-height: 36px !important; height: 36px !important; padding: 0 10px !important; font-size: 0.75rem !important; }
             .peptides-secondary-filters-subbar.mobile-secondary-collapsed { display: none !important; }
             .peptides-secondary-filters-subbar.mobile-secondary-expanded { display: flex !important; width: 100% !important; margin-bottom: 8px !important; }
             .gcp-search-and-category-block { order: 1 !important; margin-bottom: 0.6rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }

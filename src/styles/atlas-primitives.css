@@ -41,26 +41,26 @@
   gap: 1.5rem;
 }
 
-/* Canonical PageHeroCard (derived from /pricing/colway clean institutional card) */
+/* Canonical PageHeroCard — Google Cloud Console Compact Resource Hero (Single Horizontal Band) */
 .atlas-hero-card {
   background-color: var(--atlas-surface-card, #ffffff);
-  border: 1px solid var(--atlas-border-subtle, #e2e8f0);
-  border-radius: var(--atlas-radius-card, 12px);
-  box-shadow: var(--atlas-shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
-  padding: 1.5rem 1.75rem;
-  margin-bottom: 1.5rem;
+  border: 1px solid var(--atlas-border-subtle, #dadce0);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.04);
+  padding: 0.72rem 1.15rem;
+  margin-bottom: 0.8rem;
 }
 
 .atlas-hero-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 1.5rem;
+  align-items: center;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 .atlas-hero-identity {
-  flex: 1 1 540px;
+  flex: 1 1 480px;
   min-width: 0;
 }
 
@@ -68,103 +68,93 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: 0.35rem;
+  margin-bottom: 0.28rem;
 }
 
 .atlas-hero-pill-primary {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   background-color: var(--atlas-brand-navy, #003666);
   color: #ffffff;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 0.25rem 0.65rem;
-  border-radius: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .atlas-hero-pill-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   background-color: #f1f5f9;
-  color: #1e293b;
+  color: #334155;
   border: 1px solid #e2e8f0;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 0.25rem 0.65rem;
-  border-radius: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.atlas-hero-pill-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.atlas-hero-pill-meta-lbl {
+  color: #64748b;
+  font-weight: 700;
 }
 
 .atlas-hero-cross {
   color: #94a3b8;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .atlas-hero-title {
   margin: 0;
-  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+  font-size: clamp(1.06rem, 1.45vw, 1.22rem);
   font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  color: var(--atlas-ink-primary, #0f172a);
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  color: var(--atlas-brand-navy, #003666);
 }
 
 .atlas-hero-subtitle {
-  margin: 0.45rem 0 0 0;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--atlas-ink-secondary, #475569);
-  max-width: 78ch;
-}
-
-.atlas-hero-stamp-box {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  background-color: var(--atlas-surface-page, #f8fafc);
-  border: 1px solid var(--atlas-border-subtle, #e2e8f0);
-  border-radius: 10px;
-  padding: 0.85rem 1.1rem;
-  min-width: 220px;
-}
-
-.atlas-hero-stamp-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.75rem;
-}
-
-.atlas-hero-stamp-label {
-  color: var(--atlas-ink-muted, #64748b);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.atlas-hero-stamp-value {
-  color: var(--atlas-ink-primary, #0f172a);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  margin: 0.2rem 0 0 0;
+  font-size: 0.78rem;
+  line-height: 1.38;
+  color: #5f6368;
+  max-width: 88ch;
 }
 
 .atlas-hero-actions {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--atlas-border-subtle, #e2e8f0);
+  flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 @media (max-width: 1024px) {
@@ -175,16 +165,57 @@
 
 @media (max-width: 768px) {
   .atlas-page-shell {
-    padding: 1rem 1rem 5.5rem 1rem;
+    padding: 0.65rem 0.75rem 5.5rem 0.75rem;
   }
 
   .atlas-hero-card {
-    padding: 1.15rem 1.15rem;
+    padding: 0.68rem 0.85rem;
+    margin-bottom: 0.65rem;
   }
 
-  .atlas-hero-stamp-box {
+  .atlas-hero-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+
+  .atlas-hero-identity {
+    flex: 1 1 auto;
+  }
+
+  .atlas-hero-eyebrow {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .atlas-hero-eyebrow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .atlas-hero-title {
+    font-size: 1.02rem;
+    line-height: 1.22;
+  }
+
+  .atlas-hero-subtitle {
+    font-size: 0.74rem;
+    line-height: 1.35;
+  }
+
+  .atlas-hero-actions {
     width: 100%;
-    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: stretch;
+    gap: 6px;
+  }
+
+  .atlas-hero-actions > * {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 36px;
   }
 }
 
