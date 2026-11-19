@@ -119,13 +119,14 @@ export default function PeptidesFilterSheets({
                   background: '#f1f3f4',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '28px',
-                  height: '28px',
+                  width: '36px',
+                  height: '36px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#5f6368',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  flexShrink: 0
                 }}
               >
                 <X size={15} />
@@ -133,7 +134,7 @@ export default function PeptidesFilterSheets({
             </div>
 
             {/* Flat List */}
-            <div style={{ padding: '4px 0 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '4px 0 max(20px, env(safe-area-inset-bottom))', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -313,13 +314,14 @@ export default function PeptidesFilterSheets({
                   background: '#f1f3f4',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '28px',
-                  height: '28px',
+                  width: '36px',
+                  height: '36px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#5f6368',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  flexShrink: 0
                 }}
               >
                 <X size={15} />
@@ -327,7 +329,7 @@ export default function PeptidesFilterSheets({
             </div>
 
             {/* Flat List */}
-            <div style={{ padding: '4px 0 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '4px 0 max(20px, env(safe-area-inset-bottom))', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               {FDA_FILTERS.map(f => {
                 const count =
                   f.id === 'all'

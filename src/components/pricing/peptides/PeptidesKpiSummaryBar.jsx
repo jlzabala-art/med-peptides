@@ -38,6 +38,8 @@ export default function PeptidesKpiSummaryBar({
   const approvedCount = currentProducts.filter(
     p => p.fdaBucket === 'fda_503a' || p.fdaBucket === 'fda_approved'
   ).length;
+  const hasActiveFilter = filteredProducts.length !== processedProducts.length;
+  const showMobileScopeRow = hasActiveFilter || isMobileKpiExpanded;
 
   return (
     <div
@@ -49,7 +51,7 @@ export default function PeptidesKpiSummaryBar({
     >
       {/* Scope Indicator & Switcher (Google Cloud Standard - Golden Rule #22) */}
       <div
-        className="peptides-scope-bar"
+        className={`peptides-scope-bar ${!showMobileScopeRow ? 'mobile-scope-hidden' : ''}`}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -152,7 +154,7 @@ export default function PeptidesKpiSummaryBar({
         </div>
       </div>
 
-      {/* Mobile-Only Compact KPI Summary Bar (Rule #23: Prevents bulky GCP cards from pushing products below fold on mobile) */}
+      {/* Mobile-Only Compact KPI Summary Bar (Clean Lucide Icons, Zero Emojis — Rule #23) */}
       <div
         className="mobile-kpi-summary-strip"
         style={{
@@ -160,21 +162,24 @@ export default function PeptidesKpiSummaryBar({
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '8px',
-          padding: '4px 0',
+          padding: '2px 0',
           fontSize: '0.72rem'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 700, color: '#0f172a' }}>
-            🧬 {currentProducts.length} {isEs ? 'Formulaciones' : 'Formulations'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', minWidth: 0 }}>
+          <span style={{ fontWeight: 750, color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '4px', fontVariantNumeric: 'tabular-nums' }}>
+            <FlaskConical size={12} color="#1a73e8" />
+            <span>{currentProducts.length} {isEs ? 'Fórmulas' : 'Formulas'}</span>
           </span>
-          <span style={{ color: '#cbd5e1' }}>•</span>
-          <span style={{ fontWeight: 650, color: '#0284c7' }}>
-            🏛️ {approvedCount} {isEs ? 'Aprobadas' : 'Approved'}
+          <span style={{ color: '#cbd5e1' }}>·</span>
+          <span style={{ fontWeight: 700, color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '3px', fontVariantNumeric: 'tabular-nums' }}>
+            <ShieldCheck size={12} color="#0284c7" />
+            <span>{approvedCount} 503A</span>
           </span>
-          <span style={{ color: '#cbd5e1' }}>•</span>
-          <span style={{ fontWeight: 650, color: '#16a34a' }}>
-            📦 -15% Pack
+          <span style={{ color: '#cbd5e1' }}>·</span>
+          <span style={{ fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '3px', fontVariantNumeric: 'tabular-nums' }}>
+            <TrendingDown size={12} color="#16a34a" />
+            <span>-15% Pack</span>
           </span>
         </div>
         <button
@@ -183,10 +188,11 @@ export default function PeptidesKpiSummaryBar({
           style={{
             background: isMobileKpiExpanded ? '#e8f0fe' : '#f8fafc',
             border: '1px solid #cbd5e1',
-            borderRadius: '4px',
-            padding: '3px 8px',
+            borderRadius: '6px',
+            padding: '5px 9px',
+            minHeight: '30px',
             fontSize: '0.68rem',
-            fontWeight: 700,
+            fontWeight: 750,
             color: '#1a73e8',
             cursor: 'pointer',
             display: 'inline-flex',
@@ -196,7 +202,7 @@ export default function PeptidesKpiSummaryBar({
           }}
           title={isMobileKpiExpanded ? (isEs ? 'Ocultar tarjetas de métricas' : 'Hide metric cards') : (isEs ? 'Ver tarjetas de métricas completas' : 'Show full metric cards')}
         >
-          <span>{isMobileKpiExpanded ? (isEs ? 'Ocultar' : 'Hide') : (isEs ? 'KPIs' : 'KPIs')}</span>
+          <span>{isMobileKpiExpanded ? (isEs ? 'Ocultar' : 'Hide') : 'KPIs'}</span>
           {isMobileKpiExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
         </button>
       </div>
@@ -235,7 +241,7 @@ export default function PeptidesKpiSummaryBar({
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '1.65rem', fontWeight: 700, color: '#202124', lineHeight: 1.15 }}>
+            <div className="peptides-kpi-val" style={{ fontSize: 'clamp(1.05rem, 4.2vw, 1.55rem)', fontWeight: 700, color: '#202124', lineHeight: 1.15, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
               {currentProducts.length}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -276,7 +282,7 @@ export default function PeptidesKpiSummaryBar({
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '1.65rem', fontWeight: 700, color: '#15803d', lineHeight: 1.15 }}>
+            <div className="peptides-kpi-val" style={{ fontSize: 'clamp(1.02rem, 4vw, 1.50rem)', fontWeight: 700, color: '#15803d', lineHeight: 1.15, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
               {totalCartCount > 0 ? `${totalCartCount} ${isEs ? 'Viales' : 'Vials'}` : (isEs ? '-15% a -52%' : '-15% to -52%')}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -314,7 +320,7 @@ export default function PeptidesKpiSummaryBar({
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '1.65rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.15 }}>
+            <div className="peptides-kpi-val" style={{ fontSize: 'clamp(1.05rem, 4.2vw, 1.55rem)', fontWeight: 700, color: '#0f172a', lineHeight: 1.15, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
               {approvedCount}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -348,7 +354,7 @@ export default function PeptidesKpiSummaryBar({
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '1.65rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.15 }}>
+            <div className="peptides-kpi-val" style={{ fontSize: 'clamp(1.05rem, 4.2vw, 1.55rem)', fontWeight: 700, color: '#0f172a', lineHeight: 1.15, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
               100% COA
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -374,6 +374,15 @@ export default function PharmapolisLabelSvg({
   const badgeHeight = isShort ? 38 : 44;
   const badgeY = isShort ? 13 : 15;
 
+  // Dynamic zero-collision scaling for PATIENT: <Name> against right-aligned header badge
+  const patientMaxPx = headerBadgeText ? Math.max(360, badgeX - 44) : 1332;
+  const estPatientLabelPx = 9 * (patientLabelFontSize * 0.65);
+  const estPatientNamePx = nameLen * (patientNameFontSize * 0.68);
+  const estTotalPatientPx = estPatientLabelPx + estPatientNamePx;
+  const patientScaleRatio = estTotalPatientPx > patientMaxPx ? (patientMaxPx / estTotalPatientPx) : 1;
+  const resolvedPatientLabelFontSize = Math.max(18, Math.floor(patientLabelFontSize * patientScaleRatio));
+  const resolvedPatientNameFontSize = Math.max(19, Math.floor(patientNameFontSize * patientScaleRatio));
+
   const productTitle = labelData.productTitle || labelData.productName || 'Compounded Pharmaceutical Protocol';
   const formula = labelData.formula || '';
   const rawDirections = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
@@ -924,12 +933,12 @@ export default function PharmapolisLabelSvg({
     const rightColWidth = 1440 - rightColX;
     const innerUsableWidth = rightColWidth - 48;
 
-    // Snapped QR sizing: single QR uses 145/174 px; dual QR uses compact 116 px
-    const dualQrSize = isShort ? 105 : 116;
-    const singleQrSize = isShort ? 145 : 174;
+    // Snapped QR sizing: balanced to leave generous vertical budget for prominent CTA + aligned specs (zero overflow)
+    const dualQrSize = isShort ? 100 : 112;
+    const singleQrSize = isShort ? 128 : 152;
     const backQrSize = isDualQrMode ? dualQrSize : singleQrSize;
     const qrX = Math.round((leftColWidth - backQrSize) / 2);
-    const qrY = isShort ? 10 : 14;
+    const qrY = isShort ? 8 : 12;
 
     // Right column layout
     const b1Y = isShort ? 10 : 12;
@@ -966,8 +975,8 @@ export default function PharmapolisLabelSvg({
         {/* ── PATIENT BOX ── */}
         <g transform={`translate(60, ${patientBoxY})`}>
           <rect x="0" y="0" width="1380" height={patientBoxHeight} fill={isMono ? '#ffffff' : '#f8fafc'} stroke="#000000" strokeWidth="2.2" rx="4" />
-          <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
-            PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
+          <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={resolvedPatientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
+            PATIENT: <tspan fontWeight="800" fontSize={resolvedPatientNameFontSize}>{patientName}</tspan>
           </text>
           {headerBadgeText ? (
             <g transform={`translate(${badgeX}, ${badgeY})`}>
@@ -1092,29 +1101,49 @@ export default function PharmapolisLabelSvg({
                 />
               </svg>
 
-              {/* Under QR Refill Callout */}
-              <text
-                x={Math.round(leftColWidth / 2)}
-                y={qrY + backQrSize + (isShort ? 16 : 20)}
-                textAnchor="middle"
-                fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-                fontSize={isShort ? 12 : 14}
-                fontWeight="900"
-                fill={isMono ? '#000000' : '#003666'}
-                letterSpacing="0.4"
-              >
-                <tspan fill={isMono ? '#000000' : '#16a34a'} fontWeight="900">✔ </tspan>SCAN FOR REFILL
-              </text>
-
-              {/* Hairline Divider */}
-              <line
-                x1="14"
-                y1={qrY + backQrSize + (isShort ? 20 : 24)}
-                x2={leftColWidth - 14}
-                y2={qrY + backQrSize + (isShort ? 20 : 24)}
-                stroke={isMono ? '#cccccc' : '#e2e8f0'}
-                strokeWidth="1.5"
-              />
+              {/* High-Attention Prominent CTA Pill under Refill QR */}
+              {(() => {
+                const ctaX = 12;
+                const ctaW = leftColWidth - 24;
+                const ctaH = isShort ? 26 : 30;
+                const ctaY = qrY + backQrSize + (isShort ? 5 : 7);
+                return (
+                  <g>
+                    <rect
+                      x={ctaX}
+                      y={ctaY}
+                      width={ctaW}
+                      height={ctaH}
+                      rx="5"
+                      fill={isMono ? '#000000' : '#003666'}
+                      stroke={isMono ? '#000000' : '#16a34a'}
+                      strokeWidth={isMono ? '1.5' : '1.8'}
+                    />
+                    {!isMono && (
+                      <rect
+                        x={ctaX}
+                        y={ctaY}
+                        width="6"
+                        height={ctaH}
+                        rx="3"
+                        fill="#16a34a"
+                      />
+                    )}
+                    <text
+                      x={Math.round(leftColWidth / 2) + (isMono ? 0 : 2)}
+                      y={ctaY + Math.round(ctaH * 0.68)}
+                      textAnchor="middle"
+                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                      fontSize={isShort ? 12 : 13.5}
+                      fontWeight="900"
+                      fill="#ffffff"
+                      letterSpacing="0.65"
+                    >
+                      {isMono ? '▶ SCAN FOR REFILL' : '✔ SCAN FOR REFILL'}
+                    </text>
+                  </g>
+                );
+              })()}
             </>
           )}
 
@@ -1123,82 +1152,125 @@ export default function PharmapolisLabelSvg({
             <rect x="0" y="0" width={leftColWidth} height={colHeight} rx="8" />
           </clipPath>
 
-          {/* Dispensing & Technical Packaging Specs (Streamlined & High-Legibility, Zero Clipping) */}
+          {/* Dispensing & Technical Packaging Specs (Unified Alignment & Zero-Overflow Budget Engine) */}
           {(() => {
+            const railPadX = 12;
+            const railInnerW = leftColWidth - (railPadX * 2);
             const effectiveVol = cleanVolForVeh || volume || '100 mL';
-            const volLines = wrapLines(effectiveVol, 15);
-            const storageLines = wrapLines(resolvedStorageText, 16);
+            const volLines = wrapLines(effectiveVol, 16);
 
-            // Specs origin: for dual-QR mode push below both QRs; for single-QR mode just below one
+            // Specs origin: positioned cleanly beneath CTA pill (single QR) or dual QRs
+            const ctaBlockBottom = qrY + backQrSize + (isShort ? 38 : 45);
             const specsOriginY = isDualQrMode
-              ? qrY + (backQrSize * 2) + (isShort ? 60 : 70)
-              : qrY + backQrSize + (isShort ? 34 : 42);
+              ? qrY + (backQrSize * 2) + (isShort ? 54 : 64)
+              : ctaBlockBottom;
 
-            // Explicit vertical coordinates with generous font sizing (batch is already in footer)
-            const volTitleY = isShort ? 30 : 38;
-            const firstVolLineY = volTitleY + (isShort ? 17 : 22);
-            const volLineGap = isShort ? 18 : 22;
-            const volBlockBottom = firstVolLineY + ((volLines.length - 1) * volLineGap) + (isShort ? 8 : 12);
+            const railAvailableH = Math.max(90, colHeight - specsOriginY - 8);
+            const headerBadgeH = isShort ? 20 : 22;
+            const pillH = isShort ? 22 : 25;
 
-            const storageTitleY = volBlockBottom + (isShort ? 16 : 24);
-            const firstStorageLineY = storageTitleY + (isShort ? 16 : 20);
-            const storageLineGap = isShort ? 16 : 19;
-            const storageBlockBottom = firstStorageLineY + ((storageLines.length - 1) * storageLineGap) + (isShort ? 10 : 14);
+            const volTitleY = headerBadgeH + (isShort ? 15 : 18);
+            const firstVolLineY = volTitleY + (isShort ? 16 : 19);
+            const volLineGap = isShort ? 16 : 19;
+            const volBlockBottom = firstVolLineY + ((volLines.length - 1) * volLineGap) + (isShort ? 6 : 8);
+
+            const storageTitleY = volBlockBottom + (isShort ? 14 : 18);
+            const storageStartRelY = storageTitleY + (isShort ? 14 : 16);
+            const maxStorageAndPillH = Math.max(46, railAvailableH - storageStartRelY - pillH - 8);
+
+            // Auto-fit storage font & line-wrapping to strictly guarantee zero overflow of PROTECT FROM LIGHT pill
+            const storageCandidates = isShort ? [12, 11, 10, 9.2] : [13, 12, 11, 10];
+            let storageFontSize = storageCandidates[storageCandidates.length - 1];
+            let storageLineGap = Math.round(storageFontSize * 1.32);
+            let storageLines = [];
+
+            for (const candFs of storageCandidates) {
+              const candMaxChars = Math.max(17, Math.floor(railInnerW / (candFs * 0.56)));
+              const candLines = wrapLines(resolvedStorageText, candMaxChars);
+              const candGap = Math.round(candFs * 1.32);
+              const candH = ((candLines.length - 1) * candGap) + Math.round(candFs * 1.1);
+              if (candH <= maxStorageAndPillH || candFs === storageCandidates[storageCandidates.length - 1]) {
+                storageFontSize = candFs;
+                storageLineGap = candGap;
+                storageLines = candLines;
+                break;
+              }
+            }
+
+            const storageTextBottom = storageStartRelY + ((Math.max(1, storageLines.length) - 1) * storageLineGap) + Math.round(storageFontSize * 0.45);
+            const maxPillY = Math.max(storageTextBottom + 6, railAvailableH - pillH);
+            const pillY = Math.min(maxPillY, storageTextBottom + (isShort ? 8 : 11));
+            const clampedPillY = Math.min(pillY, Math.max(storageTextBottom + 4, railAvailableH - pillH));
+            const pillFontSize = storagePillBadge.length > 20 ? (isShort ? 8.2 : 9.2) : (isShort ? 9 : 10);
 
             return (
-              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${specsOriginY})`}>
-                {/* Header badge */}
-                <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 20 : 24} fill={isMono ? '#000000' : '#f0f9ff'} stroke={isMono ? '#000000' : '#bae6fd'} strokeWidth="1.2" rx="4" />
-                <text x="4" y={isShort ? 14 : 17} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10.5 : 12} fontWeight="900" fill={isMono ? '#ffffff' : '#0284c7'} letterSpacing="0.8">
-                  DISPENSING SPECS
-                </text>
-
-                {/* 1. NET CONTENT */}
-                <g>
-                  <text x="0" y={volTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill={isMono ? '#333333' : '#475569'} letterSpacing="0.4">
-                    NET CONTENT
+              <g clipPath="url(#pls-left-col-clip)">
+                <g transform={`translate(${railPadX}, ${specsOriginY})`}>
+                  {/* Header badge (strictly aligned x=0..railInnerW) */}
+                  <rect x="0" y="0" width={railInnerW} height={headerBadgeH} fill={isMono ? '#000000' : '#f0f9ff'} stroke={isMono ? '#000000' : '#bae6fd'} strokeWidth="1.2" rx="4" />
+                  <text x="7" y={Math.round(headerBadgeH * 0.70)} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="900" fill={isMono ? '#ffffff' : '#0284c7'} letterSpacing="0.7">
+                    DISPENSING SPECS
                   </text>
-                  {volLines.map((vLine, vIdx) => (
-                    <text
-                      key={`vol-${vIdx}`}
-                      x="0"
-                      y={firstVolLineY + (vIdx * volLineGap)}
-                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-                      fontSize={isShort ? 16 : 19}
-                      fontWeight="900"
-                      fill="#000000"
-                    >
-                      {vLine}
+
+                  {/* 1. NET CONTENT (strictly aligned x=0) */}
+                  <g>
+                    <text x="0" y={volTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill={isMono ? '#333333' : '#475569'} letterSpacing="0.4">
+                      NET CONTENT
                     </text>
-                  ))}
-                </g>
+                    {volLines.map((vLine, vIdx) => (
+                      <text
+                        key={`vol-${vIdx}`}
+                        x="0"
+                        y={firstVolLineY + (vIdx * volLineGap)}
+                        fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                        fontSize={isShort ? 15 : 17.5}
+                        fontWeight="900"
+                        fill="#000000"
+                      >
+                        {vLine}
+                      </text>
+                    ))}
+                  </g>
 
-                {/* 2. STORAGE & HANDLING */}
-                <g>
-                  <text x="0" y={storageTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill={isMono ? '#333333' : '#475569'} letterSpacing="0.4">
-                    STORAGE & HANDLING
-                  </text>
-                  {storageLines.map((sLine, sIdx) => (
-                    <text
-                      key={`stg-${sIdx}`}
-                      x="0"
-                      y={firstStorageLineY + (sIdx * storageLineGap)}
-                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-                      fontSize={isShort ? 12.5 : 14.5}
-                      fontWeight="700"
-                      fill="#000000"
-                    >
-                      {sLine}
+                  {/* Subtle horizontal divider between Net Content and Storage */}
+                  <line x1="0" y1={volBlockBottom + 2} x2={railInnerW} y2={volBlockBottom + 2} stroke={isMono ? '#cccccc' : '#e2e8f0'} strokeWidth="1" />
+
+                  {/* 2. STORAGE & HANDLING (uniformly aligned x=0) */}
+                  <g>
+                    <text x="0" y={storageTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill={isMono ? '#333333' : '#475569'} letterSpacing="0.4">
+                      STORAGE &amp; HANDLING
                     </text>
-                  ))}
-                </g>
+                    {storageLines.map((sLine, sIdx) => (
+                      <text
+                        key={`stg-${sIdx}`}
+                        x="0"
+                        y={storageStartRelY + (sIdx * storageLineGap)}
+                        fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                        fontSize={storageFontSize}
+                        fontWeight="600"
+                        fill="#111827"
+                      >
+                        {sLine}
+                      </text>
+                    ))}
+                  </g>
 
-                {/* 3. DYNAMIC STORAGE HANDLING PILL (Evidence-based safety guidance) */}
-                <g transform={`translate(0, ${storageBlockBottom + (isShort ? 6 : 10)})`}>
-                  <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 24 : 28} fill={storagePillTheme.fill} stroke={storagePillTheme.stroke} strokeWidth="1.2" rx="4" />
-                  <text x="4" y={isShort ? 16 : 19} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 9 : 10.5} fontWeight="800" fill={storagePillTheme.text} letterSpacing="0.3">
-                    {storagePillBadge}
-                  </text>
+                  {/* 3. DYNAMIC STORAGE HANDLING PILL (Zero-Overflow Bottom-Bounded & Aligned) */}
+                  <g transform={`translate(0, ${clampedPillY})`}>
+                    <rect x="0" y="0" width={railInnerW} height={pillH} fill={storagePillTheme.fill} stroke={storagePillTheme.stroke} strokeWidth="1.2" rx="4" />
+                    <text
+                      x={Math.round(railInnerW / 2)}
+                      y={Math.round(pillH * 0.68)}
+                      textAnchor="middle"
+                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                      fontSize={pillFontSize}
+                      fontWeight="800"
+                      fill={storagePillTheme.text}
+                      letterSpacing="0.35"
+                    >
+                      {storagePillBadge}
+                    </text>
+                  </g>
                 </g>
               </g>
             );
@@ -1279,75 +1351,106 @@ export default function PharmapolisLabelSvg({
             const isUltraSparse = ingCount <= 2 && (directions.length < 95);
             const isSparse = ingCount <= 3 && (directions.length < 145);
 
-            // Single column ingredients (1–3 items): prominent high-legibility font sizing (Compliant with >= 5.8 pt standard)
+            // Refined clinical ingredient font sizing (1–3 items: balanced ~7.5–8.5pt, never oversized)
             const ingFontSize = isShort
-              ? (isUltraSparse ? 35 : isSparse ? 31 : 27)
+              ? (isUltraSparse ? 24 : isSparse ? 22 : 20)
               : isMediumHeight
-                ? (isUltraSparse ? 36 : isSparse ? 32 : 28)
-                : (isUltraSparse ? 38 : isSparse ? 34 : 29);
-            const ingLineGap = Math.round(ingFontSize * 1.48);
-            const ingMaxChars = Math.max(22, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.65)));
+                ? (isUltraSparse ? 25 : isSparse ? 23 : 21)
+                : (isUltraSparse ? 26 : isSparse ? 24 : 22);
+            const ingLineGap = Math.round(ingFontSize * 1.40);
+            const ingMaxChars = Math.max(26, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.62)));
             const singleIngLines = activeIngredientsList.flatMap(it => wrapLines(`• ${it}`, ingMaxChars));
             const ingLines = singleIngLines.length > 0 ? singleIngLines : wrapLines(`• ${activeIngredientsList.join(' — ')}`, ingMaxChars);
             const ingLineCount = isMultiColumn ? multiColMaxLines : ingLines.length;
 
-            const baseFontSize = isShort
-              ? (isUltraSparse ? 22 : isSparse ? 20 : 18)
-              : isMediumHeight
-                ? (isUltraSparse ? 23 : isSparse ? 21 : 19)
-                : (isUltraSparse ? 25 : isSparse ? 22 : 20);
-            const baseLineGap = Math.round(baseFontSize * 1.42);
-            const baseMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.65)));
-            const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
+            // Single-Line Mandatory Auto-Fit Invariant for "Compounding Vehicle: ..."
+            let vehicleSingleLine = `${vehiclePrefix} ${cleanVehicleDisplay}`.replace(/\s{2,}/g, ' ').trim();
+            const vehicleCandidates = isShort
+              ? [16.5, 15.5, 14.5, 13.5, 12.5, 11.5]
+              : [17.5, 16.5, 15.5, 14.5, 13.5, 12.5, 11.5];
+            let baseFontSize = vehicleCandidates[vehicleCandidates.length - 1];
+            const vehicleMaxWidthPx = innerUsableWidth - 8;
 
-            // Bottom-anchored Caution & Prescriber coordinates (crisp 2-line footer block, zero low-contrast clutter)
+            const findFittingVehicleFont = (txt) => {
+              for (const cand of vehicleCandidates) {
+                if (txt.length * cand * 0.56 <= vehicleMaxWidthPx) return cand;
+              }
+              return null;
+            };
+
+            let fittedVehicleFs = findFittingVehicleFont(vehicleSingleLine);
+            if (!fittedVehicleFs) {
+              // Strip redundant volume suffix already shown in NET CONTENT if needed to preserve crisp legibility on 1 line
+              const compactVehicle = vehicleSingleLine.replace(/,\s*\d+(?:\.\d+)?\s*(?:mL|ml|g|capsules?|caps?)\)/gi, ')');
+              const compactFs = findFittingVehicleFont(compactVehicle);
+              if (compactFs) {
+                vehicleSingleLine = compactVehicle;
+                fittedVehicleFs = compactFs;
+              } else {
+                fittedVehicleFs = Math.max(10.5, Number(((vehicleMaxWidthPx / Math.max(1, vehicleSingleLine.length)) / 0.56).toFixed(1)));
+              }
+            }
+            baseFontSize = fittedVehicleFs;
+            const baseLineGap = Math.round(baseFontSize * 1.35);
+            const baseLines = [vehicleSingleLine];
+
+            // Prescriber text & font (computed early so CAUTION can be mathematically centered between Posology and Doctor)
+            const cleanDoctorLicense = doctorLicense ? String(doctorLicense).replace(/^license\s*:\s*/i, '').trim() : '';
+            const rxParts = [];
+            if (doctorName) rxParts.push(`Rx: ${doctorName}`);
+            if (clinicName) rxParts.push(clinicName);
+            if (cleanDoctorLicense) rxParts.push(`(License: ${cleanDoctorLicense})`);
+            const rxFullText = rxParts.length > 0 ? rxParts.join(' • ') : (doctorName ? `Rx: ${doctorName}` : 'Rx: Licensed Clinical Practice');
+            const rxFontSize = isShort ? (rxFullText.length > 68 ? 13.5 : 15) : isMediumHeight ? (rxFullText.length > 68 ? 14.5 : 16.5) : (rxFullText.length > 72 ? 16 : 18);
+
+            // Bottom-anchored Doctor baseline & exact reserved geometry for centered CAUTION banner
             const bottomMargin = isShort ? 12 : isMediumHeight ? 14 : 18;
             const bRxY = colHeight - bottomMargin;
-            const bCautionY = bRxY - (isShort ? 18 : isMediumHeight ? 21 : 25);
-            const bCautionDividerY = bCautionY - (isShort ? 12 : isMediumHeight ? 14 : 17);
+            const rxTopY = bRxY - Math.round(rxFontSize * 0.85);
+            const cautionBoxH = isShort ? 24 : 28;
+            const minCautionGap = isShort ? 12 : 14;
 
-            // Maximum allowed Y coordinate for the bottom edge of posBox (zero overlap guarantee)
-            const maxPosBoxBottom = bCautionDividerY - (isShort ? 10 : isMediumHeight ? 12 : 14);
+            // Maximum allowed Y coordinate for the bottom edge of posBox (guarantees equal air above & below CAUTION)
+            const maxPosBoxBottom = rxTopY - cautionBoxH - (minCautionGap * 2);
 
             // Formula title height if present (Crisp clinical branding callout)
-            const formulaTitleFontSize = isShort ? 22 : isMediumHeight ? 24 : 26;
-            const formulaTitleH = formulaTitleText ? (formulaTitleFontSize + 12) : 0;
+            const formulaTitleFontSize = isShort ? 20 : isMediumHeight ? 22 : 24;
+            const formulaTitleH = formulaTitleText ? (formulaTitleFontSize + 10) : 0;
 
             // Typographical baseline offsets with safe font cap-height clearance (Zero overlap)
             const ingHeaderTitleY = (formulaTitleText ? formulaTitleH + 6 : 0) + (isShort ? 12 : isMediumHeight ? 14 : 16);
-            const firstIngLineY = ingHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 16) + Math.round((isMultiColumn ? multiColFontSize : ingFontSize) * 0.82);
-            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 15 : isSparse ? 12 : 10) + Math.round(baseFontSize * 0.82);
-            const ingBlockH = firstBaseLineY + ((baseLines.length - 1) * baseLineGap) + 8;
+            const firstIngLineY = ingHeaderTitleY + (isShort ? 8 : isMediumHeight ? 10 : 12) + Math.round((isMultiColumn ? multiColFontSize : ingFontSize) * 0.82);
+            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isShort ? 10 : 12) + Math.round(baseFontSize * 0.85);
+            const ingBlockH = firstBaseLineY + 6;
 
             // Ingredients baseline anchor: posBox CAN NEVER START HIGHER than topIngredientsY + ingBlockH + minGap
-            const topIngredientsY = isShort ? (isUltraSparse ? 14 : 10) : isMediumHeight ? 14 : 16;
-            const minMidPad = isShort ? 8 : 12;
+            const topIngredientsY = isShort ? 12 : isMediumHeight ? 14 : 16;
+            const minMidPad = isShort ? 10 : 14;
             const absoluteMinPosBoxY = topIngredientsY + ingBlockH + minMidPad;
 
             // Maximum physical height available for the posology box (without colliding with ingredients or caution footer)
-            const maxAvailablePosBoxHeight = Math.max(70, maxPosBoxBottom - absoluteMinPosBoxY);
+            const maxAvailablePosBoxHeight = Math.max(58, maxPosBoxBottom - absoluteMinPosBoxY);
 
-            // ── Dynamic Auto-Fitting Scale for Directions/Posology (Zero Overlap Guaranteed) ──
-            // Progressive font sizes with compliance for EU GMP / Pharmacopeia legibility (≥13.5px / 5.8pt)
+            // ── Dynamic Auto-Fitting Scale for Directions/Posology (Calibrated Clinical Proportions) ──
             const candidatePosFontSizes = isShort
-              ? [32, 28, 25, 22, 19, 17, 15, 13.5]
+              ? [20.5, 19, 17.5, 16, 14.5, 13.5]
               : isMediumHeight
-                ? [34, 30, 26, 23, 20, 18, 16, 14]
-                : [36, 31, 28, 25, 22, 19, 17, 15, 14];
+                ? [21.5, 20, 18.5, 17, 15.5, 14]
+                : [22.5, 21, 19.5, 18, 16.5, 15, 14];
 
             let resolvedPosFontSize = candidatePosFontSizes[candidatePosFontSizes.length - 1];
-            let resolvedPosLineGap = Math.round(resolvedPosFontSize * 1.42);
+            let resolvedPosLineGap = Math.round(resolvedPosFontSize * 1.38);
             let resolvedPosologyLines = [];
             let resolvedFirstPosLineY = 0;
             let resolvedBasePosBoxHeight = 0;
-            const posHeaderTitleY = isShort ? 15 : isMediumHeight ? 17 : 20;
+            const posHeaderTitleY = isShort ? 16 : isMediumHeight ? 18 : 20;
 
             for (const testFontSize of candidatePosFontSizes) {
               const testLineGap = Math.round(testFontSize * posLineGapFactor);
-              const testMaxChars = Math.max(24, Math.floor((innerUsableWidth - 64) / (testFontSize * posCharWidthFactor)));
+              const testMaxChars = Math.max(28, Math.floor((innerUsableWidth - 52) / (testFontSize * posCharWidthFactor)));
               const testLines = wrapLines(directions, testMaxChars);
-              const testFirstLineY = posHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 14) + Math.round(testFontSize * 0.82);
-              const testBoxH = testFirstLineY + Math.max(0, testLines.length - 1) * testLineGap + (isShort ? 12 : 16);
+              const testFirstLineY = posHeaderTitleY + (isShort ? 9 : isMediumHeight ? 10 : 12) + Math.round(testFontSize * 0.82);
+              const testBoxH = testFirstLineY + Math.max(0, testLines.length - 1) * testLineGap + (isShort ? 12 : 14);
 
               if (testBoxH <= maxAvailablePosBoxHeight || testFontSize === candidatePosFontSizes[candidatePosFontSizes.length - 1]) {
                 resolvedPosFontSize = testFontSize;
@@ -1365,32 +1468,29 @@ export default function PharmapolisLabelSvg({
             const firstPosLineY = resolvedFirstPosLineY;
             const basePosBoxHeight = resolvedBasePosBoxHeight;
 
-            // Available vertical space surplus above Block 4
+            // Harmonious compact posBoxHeight (cleanly hugs text without creating a bloated empty box)
             const totalContentNeeded = ingBlockH + basePosBoxHeight;
-            const totalAvailableSpace = maxPosBoxBottom - (isShort ? 10 : isMediumHeight ? 12 : 16);
+            const totalAvailableSpace = maxPosBoxBottom - topIngredientsY;
             const verticalSurplus = Math.max(0, totalAvailableSpace - totalContentNeeded);
 
-            // Harmonious posBoxHeight: fits content cleanly without creating a giant empty void or exceeding max boundary
-            const extraBoxPad = Math.min(20, Math.round(verticalSurplus * 0.14));
-            const calculatedPosBoxHeight = basePosBoxHeight + extraBoxPad;
-            const posBoxHeight = Math.min(maxAvailablePosBoxHeight, calculatedPosBoxHeight);
+            const extraBoxPad = Math.min(10, Math.round(verticalSurplus * 0.08));
+            const posBoxHeight = Math.min(maxAvailablePosBoxHeight, basePosBoxHeight + extraBoxPad);
 
-            // Mid padding between ingredients and posology
-            const midPad = Math.max(minMidPad, Math.min(28, minMidPad + Math.round(verticalSurplus * 0.28)));
+            // Tidy padding between ingredients and posology
+            const midPad = Math.max(minMidPad, Math.min(24, minMidPad + Math.round(verticalSurplus * 0.22)));
 
             // Absolute invariant: posBoxY is anchored strictly below ingredients, never exceeding maxPosBoxBottom
             let posBoxY = topIngredientsY + ingBlockH + midPad;
             if (posBoxY + posBoxHeight > maxPosBoxBottom) {
               posBoxY = Math.max(absoluteMinPosBoxY, maxPosBoxBottom - posBoxHeight);
             }
+            const posBoxBottom = posBoxY + posBoxHeight;
 
-            const cleanDoctorLicense = doctorLicense ? String(doctorLicense).replace(/^license\s*:\s*/i, '').trim() : '';
-            const rxParts = [];
-            if (doctorName) rxParts.push(`Rx: ${doctorName}`);
-            if (clinicName) rxParts.push(clinicName);
-            if (cleanDoctorLicense) rxParts.push(`(License: ${cleanDoctorLicense})`);
-            const rxFullText = rxParts.length > 0 ? rxParts.join(' • ') : (doctorName ? `Rx: ${doctorName}` : 'Rx: Licensed Clinical Practice');
-            const rxFontSize = isShort ? (rxFullText.length > 68 ? 13.5 : 15.5) : isMediumHeight ? (rxFullText.length > 68 ? 15 : 17) : (rxFullText.length > 72 ? 16.5 : 19);
+            // ── EXACT VERTICAL MIDPOINT INVARIANT FOR CAUTION BANNER ──
+            // Guarantees gap(Posology -> Caution) === gap(Caution -> Doctor) to the exact pixel
+            const zoneBetweenPosAndRx = Math.max(cautionBoxH + 8, rxTopY - posBoxBottom);
+            const cautionBoxY = Math.round(posBoxBottom + (zoneBetweenPosAndRx - cautionBoxH) / 2);
+            const cautionTextY = cautionBoxY + Math.round(cautionBoxH * 0.68);
 
             return (
               <>
@@ -1456,7 +1556,7 @@ export default function PharmapolisLabelSvg({
                       x="22"
                       y={firstPosLineY + (pIdx * posLineGap)}
                       fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-                      fontSize={posFontSize + 1}
+                      fontSize={posFontSize}
                       fontWeight={posFontWeight}
                       fill={isMono ? '#000000' : '#0f172a'}
                     >
@@ -1465,21 +1565,21 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* Block 4: Mandatory Precaution & Prescriber (Inverted High-Contrast Knockout Banner) */}
+                {/* Block 4: Mandatory Precaution (Centered Midpoint between Posology & Doctor) & Prescriber */}
                 <g transform="translate(24, 0)">
                   <rect
                     x="-4"
-                    y={bCautionY - (isShort ? 18 : 22)}
+                    y={cautionBoxY}
                     width={innerUsableWidth + 8}
-                    height={isShort ? 25 : 30}
+                    height={cautionBoxH}
                     fill="#000000"
                     rx="3"
                   />
                   <text
                     x="8"
-                    y={bCautionY - (isShort ? 18 : 22) + (isShort ? 17 : 21)}
+                    y={cautionTextY}
                     fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-                    fontSize={isShort ? 12.5 : 15}
+                    fontSize={isShort ? 12.5 : 14.5}
                     fontWeight="900"
                     fill="#ffffff"
                     letterSpacing="0.5"
@@ -1610,8 +1710,8 @@ export default function PharmapolisLabelSvg({
       {/* ── PATIENT BOX ── */}
       <g transform={`translate(60, ${patientBoxY})`}>
         <rect x="0" y="0" width="1380" height={patientBoxHeight} fill={isMono ? '#ffffff' : '#f8fafc'} stroke="#000000" strokeWidth="2.2" rx="4" />
-        <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
-          PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
+        <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={resolvedPatientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
+          PATIENT: <tspan fontWeight="800" fontSize={resolvedPatientNameFontSize}>{patientName}</tspan>
         </text>
         {headerBadgeText ? (
           <g transform={`translate(${badgeX}, ${badgeY})`}>

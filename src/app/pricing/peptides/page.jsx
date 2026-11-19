@@ -23,8 +23,8 @@ export async function generateMetadata({ searchParams }) {
   const appUrl = 'https://www.atlashealth-services.com';
 
   const title = isEs
-    ? `Péptidos Clínicos Liofilizados • Tarifa Oficial B2B (${currency}) | Atlas Health`
-    : `Clinical Lyophilized Peptides • Official B2B Price Schedule (${currency}) | Atlas Health`;
+    ? `Péptidos Clínicos Liofilizados • Tarifa Oficial B2B (${currency})`
+    : `Clinical Lyophilized Peptides • Official B2B Price Schedule (${currency})`;
 
   const description = isEs
     ? `Tarifa oficial institucional y mayorista en ${currency} para viales de péptidos bioactivos liofilizados estériles (10R). Pureza analítica ≥99.0% HPLC, certificación cGMP y ahorro por volumen en Pack ×10.`

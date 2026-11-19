@@ -91,25 +91,44 @@ export default function PeptideMobileCard({
                 #{row.itemNumber}
               </span>
             )}
-            <Link
-              href={specsUrl}
-              prefetch={false}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => onOpenSpecs && onOpenSpecs(row)}
-              style={{
-                fontSize: '0.98rem',
-                fontWeight: 800,
-                color: '#1a73e8',
-                textDecoration: 'none',
-                wordBreak: 'break-word'
-              }}
-            >
-              {blendInfo.isBlend ? (blendInfo.titleLine || blendInfo.mainTitle || row.productName) : row.productName}
-            </Link>
+            {onOpenSpecs ? (
+              <button
+                type="button"
+                onClick={() => onOpenSpecs(row)}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  padding: 0,
+                  textAlign: 'left',
+                  fontSize: '0.96rem',
+                  fontWeight: 800,
+                  color: '#003666',
+                  cursor: 'pointer',
+                  wordBreak: 'break-word',
+                  lineHeight: 1.25
+                }}
+              >
+                {blendInfo.isBlend ? (blendInfo.titleLine || blendInfo.mainTitle || row.productName) : row.productName}
+              </button>
+            ) : (
+              <Link
+                href={specsUrl}
+                prefetch={false}
+                style={{
+                  fontSize: '0.96rem',
+                  fontWeight: 800,
+                  color: '#003666',
+                  textDecoration: 'none',
+                  wordBreak: 'break-word',
+                  lineHeight: 1.25
+                }}
+              >
+                {blendInfo.isBlend ? (blendInfo.titleLine || blendInfo.mainTitle || row.productName) : row.productName}
+              </Link>
+            )}
             {row.dosage && (
               <span style={{
-                fontSize: '0.74rem',
+                fontSize: '0.72rem',
                 fontWeight: 700,
                 fontFamily: 'monospace',
                 background: '#e8f0fe',
@@ -122,41 +141,39 @@ export default function PeptideMobileCard({
                 {blendInfo.isBlend ? (blendInfo.dosageMain || blendInfo.primaryDose || row.dosage) : row.dosage}
               </span>
             )}
-            {/* Specs ↗ Quick Link */}
+            {/* External Specs Quick Link (opens full monograph without double-triggering drawer) */}
             <Link
               href={specsUrl}
               prefetch={false}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => onOpenSpecs && onOpenSpecs(row)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '3px',
-                fontSize: '0.68rem',
+                fontSize: '0.67rem',
                 fontWeight: 700,
-                color: '#1a73e8',
+                color: '#5f6368',
                 background: '#ffffff',
-                border: '1px solid #c2e7ff',
+                border: '1px solid #dadce0',
                 padding: '2px 7px',
                 borderRadius: '4px',
                 textDecoration: 'none',
                 whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease',
                 flexShrink: 0
               }}
               title={isEs ? `Abrir ficha técnica y estructura 3D de ${row.productName}` : `Open clinical specs & 3D structure for ${row.productName}`}
             >
-              <FileText size={11} />
+              <FileText size={10} />
               <span>{isEs ? 'Ficha ↗' : 'Specs ↗'}</span>
             </Link>
           </div>
 
           {/* Row 2: Category Pill + FDA Regulatory Badge */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
-            {/* Category Badge Pill with Icon & Theme Colors */}
+            {/* Category Badge Pill with Icon & Theme Colors (100% EN/ES) */}
             <span style={{
-              fontSize: '0.64rem',
+              fontSize: '0.63rem',
               fontWeight: 650,
               color: row?.categoryMeta?.color || '#0284c7',
               background: row?.categoryMeta?.bg || '#f0f9ff',
@@ -170,8 +187,7 @@ export default function PeptideMobileCard({
               alignItems: 'center',
               gap: '3px'
             }}>
-              <span>{row?.categoryMeta?.icon || '•'}</span>
-              <span>{row?.categoryMeta?.label || row.therapeuticClass || (isEs ? 'Péptido Clínico' : 'Clinical Peptide')}</span>
+              <span>{isEs ? (row?.categoryMeta?.labelEs || row?.categoryMeta?.label || row.therapeuticClass || 'Péptido Clínico') : (row?.categoryMeta?.labelEn || row?.categoryMeta?.label || row.therapeuticClass || 'Clinical Peptide')}</span>
             </span>
 
             {/* FDA Regulatory Status Badge (100% parity with laptop) */}
@@ -300,7 +316,7 @@ export default function PeptideMobileCard({
                   {inCart1x}
                 </span>
                 <span style={{ fontSize: '0.60rem', color: '#1a73e8', display: 'block', lineHeight: 1 }}>
-                  {isEs ? 'en carro' : 'in cart'}
+                  {isEs ? 'en proforma' : 'in proforma'}
                 </span>
               </div>
               <button
@@ -318,19 +334,18 @@ export default function PeptideMobileCard({
               onClick={() => handleAddToCart && handleAddToCart(row, '1x')}
               style={{
                 width: '100%',
-                minHeight: '40px',
-                fontSize: '0.78rem',
+                minHeight: '38px',
+                fontSize: '0.76rem',
                 fontWeight: 700,
                 background: '#ffffff',
-                border: '1.5px solid #1a73e8',
+                border: '1px solid #cbd5e1',
                 borderRadius: '6px',
-                color: '#1a73e8',
+                color: '#0f172a',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '4px',
-                boxShadow: '0 1px 2px rgba(26,115,232,0.08)',
                 transition: 'all 0.15s ease',
                 boxSizing: 'border-box'
               }}
@@ -365,17 +380,17 @@ export default function PeptideMobileCard({
                 color: '#15803d',
                 background: '#dcfce7',
                 border: '1px solid #86efac',
-                padding: '1px 3px',
+                padding: '1px 4px',
                 borderRadius: '3px',
                 whiteSpace: 'nowrap'
               }}>
                 -{discountPct}%
               </span>
             </div>
-            <div style={{ fontSize: '1.02rem', fontWeight: 800, color: '#15803d', fontFamily: 'monospace', marginTop: '2px', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: '1.02rem', fontWeight: 800, color: '#15803d', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums', marginTop: '2px', whiteSpace: 'nowrap' }}>
               {formatPrice ? formatPrice(p10) : `$${p10.toFixed(2)}`}
             </div>
-            <div style={{ fontSize: '0.62rem', color: '#166534', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ fontSize: '0.62rem', color: '#166534', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               ({formatPrice ? formatPrice(perUnit) : `$${perUnit.toFixed(2)}`}/vial)
             </div>
           </div>
@@ -385,7 +400,7 @@ export default function PeptideMobileCard({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              minHeight: '40px',
+              minHeight: '38px',
               background: '#dcfce7',
               border: '1.5px solid #16a34a',
               borderRadius: '6px',
@@ -406,7 +421,7 @@ export default function PeptideMobileCard({
                   {inCart10x}×10
                 </span>
                 <span style={{ fontSize: '0.60rem', color: '#15803d', display: 'block', lineHeight: 1 }}>
-                  {isEs ? 'en carro' : 'in cart'}
+                  {isEs ? 'en proforma' : 'in proforma'}
                 </span>
               </div>
               <button
@@ -424,19 +439,18 @@ export default function PeptideMobileCard({
               onClick={() => handleAddToCart && handleAddToCart(row, '10x')}
               style={{
                 width: '100%',
-                minHeight: '40px',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                background: '#1a73e8',
-                border: '1.5px solid #1a73e8',
+                minHeight: '38px',
+                fontSize: '0.76rem',
+                fontWeight: 750,
+                background: '#ffffff',
+                border: '1.5px solid #86efac',
                 borderRadius: '6px',
-                color: '#ffffff',
+                color: '#15803d',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '4px',
-                boxShadow: '0 1px 3px rgba(26,115,232,0.25)',
                 transition: 'all 0.15s ease',
                 boxSizing: 'border-box'
               }}
@@ -448,113 +462,90 @@ export default function PeptideMobileCard({
         </div>
       </div>
 
-      {/* Laptop-Parity Quick Action Strip for Mobile (AI Posology & Direct Inquiry) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-        gap: '6px',
-        width: '100%',
-        minWidth: 0,
-        boxSizing: 'border-box'
-      }}>
-        <button
-          type="button"
-          onClick={() => onOpenAi && onOpenAi(row)}
-          style={{
-            minHeight: '34px',
-            padding: '5px 8px',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            background: '#f0f9ff',
-            border: '1px solid #bae6fd',
-            borderRadius: '6px',
-            color: '#0369a1',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}
-          title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
-        >
-          <Sparkles size={13} color="#0284c7" style={{ flexShrink: 0 }} />
-          <span>{isEs ? 'Posología IA' : 'Posology AI'}</span>
-        </button>
+      {/* Unified 1-Row 3-Segment Monochrome Utility Footer (Rules #40, #57, #23) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          border: '1px solid #e2e8f0',
+          borderRadius: isClinicalExpanded ? '6px 6px 0 0' : '6px',
+          background: '#f8fafc',
+          overflow: 'hidden',
+        }}>
+          <button
+            type="button"
+            onClick={() => setIsClinicalExpanded(!isClinicalExpanded)}
+            aria-expanded={isClinicalExpanded}
+            style={{
+              minHeight: '38px',
+              padding: '4px 6px',
+              border: 'none',
+              borderRight: '1px solid #e2e8f0',
+              background: isClinicalExpanded ? '#e8f0fe' : 'transparent',
+              color: isClinicalExpanded ? '#1a73e8' : '#3c4043',
+              fontSize: '0.71rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span>{isEs ? 'Posología' : 'Dosing'}</span>
+            {isClinicalExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
 
-        <button
-          type="button"
-          onClick={() => onInquire && onInquire(row)}
-          style={{
-            minHeight: '34px',
-            padding: '5px 8px',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '6px',
-            color: '#15803d',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}
-          title={isEs ? 'Consultar pedido institucional o lote' : 'Inquire about institutional volume or custom batch'}
-        >
-          <Mail size={13} color="#15803d" style={{ flexShrink: 0 }} />
-          <span>{isEs ? 'Consultar Pedido' : 'Inquire'}</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => onOpenAi && onOpenAi(row)}
+            style={{
+              minHeight: '38px',
+              padding: '4px 6px',
+              border: 'none',
+              borderRight: '1px solid #e2e8f0',
+              background: 'transparent',
+              color: '#3c4043',
+              fontSize: '0.71rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              whiteSpace: 'nowrap',
+            }}
+            title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
+          >
+            <Sparkles size={12} color="#5f6368" style={{ flexShrink: 0 }} />
+            <span>Atlas AI</span>
+          </button>
 
-      {/* ── Clinical Pharmacology & Dosing Quick-Ref Inspector ── */}
-      <div style={{ marginTop: '2px' }}>
-        <button
-          type="button"
-          onClick={() => setIsClinicalExpanded(!isClinicalExpanded)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            padding: '8px 10px',
-            background: isClinicalExpanded ? '#ffffff' : '#f8fafc',
-            border: isClinicalExpanded ? '1px solid #cbd5e1' : '1px solid #dadce0',
-            borderBottom: isClinicalExpanded ? 'none' : '1px solid #dadce0',
-            borderLeft: isClinicalExpanded ? '3px solid #1a73e8' : '1px solid #dadce0',
-            borderRadius: isClinicalExpanded ? '6px 6px 0 0' : '6px',
-            cursor: 'pointer',
-            fontSize: '0.74rem',
-            fontWeight: 750,
-            color: isClinicalExpanded ? '#1a73e8' : '#3c4043',
-            transition: 'all 0.15s ease',
-            boxShadow: isClinicalExpanded ? '0 1px 3px rgba(0,0,0,0.05)' : 'none'
-          }}
-          aria-expanded={isClinicalExpanded}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Sparkles size={13} color="#1a73e8" />
-            <span>{isEs ? 'Guía Clínica & Posología B2B' : 'Clinical Pharmacology & Dosing Guide'}</span>
-            <span style={{
-              fontSize: '0.62rem',
-              fontWeight: 800,
-              background: isClinicalExpanded ? '#e8f0fe' : '#f1f3f4',
-              color: isClinicalExpanded ? '#1a73e8' : '#5f6368',
-              padding: '1px 5px',
-              borderRadius: '3px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.03em'
-            }}>
-              Quick-Ref
-            </span>
-          </span>
-          {isClinicalExpanded ? <ChevronUp size={14} color="#1a73e8" /> : <ChevronDown size={14} color="#5f6368" />}
-        </button>
+          <button
+            type="button"
+            onClick={() => onInquire && onInquire(row)}
+            style={{
+              minHeight: '38px',
+              padding: '4px 6px',
+              border: 'none',
+              background: 'transparent',
+              color: '#3c4043',
+              fontSize: '0.71rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              whiteSpace: 'nowrap',
+            }}
+            title={isEs ? 'Consultar pedido institucional o lote' : 'Inquire about institutional volume or custom batch'}
+          >
+            <Mail size={12} color="#5f6368" style={{ flexShrink: 0 }} />
+            <span>{isEs ? 'Consultar' : 'Inquire'}</span>
+          </button>
+        </div>
 
         {isClinicalExpanded && (
           <div style={{

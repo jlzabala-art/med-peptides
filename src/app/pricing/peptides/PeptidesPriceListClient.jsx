@@ -137,6 +137,8 @@ export default function PeptidesPriceListClient({
         name: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
       },
       bottomBar: {
+        // Mutual exclusion: hide GlobalBottomStickyBar while PeptidesBottomCartDock is active
+        hidden: totalCartCount > 0,
         summaryTitle: isEs ? 'Tarifa Oficial de Péptidos' : 'Official Peptides Schedule',
         summarySubtitle: 'Atlas Health Services',
         atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
@@ -156,20 +158,20 @@ export default function PeptidesPriceListClient({
         },
       },
     },
-    [isEs]
+    [isEs, totalCartCount]
   );
 
-  // Contact form validation gate
+  // Contact form validation gate (bilingual EN/ES)
   const validateOrderForm = useCallback(() => {
     const errors = {};
-    if (!orderForm.name || orderForm.name.trim().length < 2) errors.name = 'Contact name is required.';
-    if (!orderForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(orderForm.email.trim())) errors.email = 'Valid work email required.';
+    if (!orderForm.name || orderForm.name.trim().length < 2) errors.name = isEs ? 'El nombre de contacto es obligatorio.' : 'Contact name is required.';
+    if (!orderForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(orderForm.email.trim())) errors.email = isEs ? 'Se requiere un correo profesional válido.' : 'Valid work email required.';
     const phoneDigits = (orderForm.phone || '').replace(/\D/g, '');
-    if (phoneDigits.length < 7 || phoneDigits.length > 15) errors.phone = 'Valid international phone required.';
-    if (!orderForm.country || !orderForm.country.trim()) errors.country = 'Destination country is required.';
-    if (!orderForm.addressLine1 || orderForm.addressLine1.trim().length < 4) errors.addressLine1 = 'Street address required.';
-    if (!orderForm.city || orderForm.city.trim().length < 2) errors.city = 'City is required.';
-    if (!orderForm.postalCode || orderForm.postalCode.trim().length < 2) errors.postalCode = 'Postal / ZIP code required.';
+    if (phoneDigits.length < 7 || phoneDigits.length > 15) errors.phone = isEs ? 'Se requiere un teléfono internacional válido.' : 'Valid international phone required.';
+    if (!orderForm.country || !orderForm.country.trim()) errors.country = isEs ? 'El país de destino es obligatorio.' : 'Destination country is required.';
+    if (!orderForm.addressLine1 || orderForm.addressLine1.trim().length < 4) errors.addressLine1 = isEs ? 'La dirección es obligatoria.' : 'Street address required.';
+    if (!orderForm.city || orderForm.city.trim().length < 2) errors.city = isEs ? 'La ciudad es obligatoria.' : 'City is required.';
+    if (!orderForm.postalCode || orderForm.postalCode.trim().length < 2) errors.postalCode = isEs ? 'El código postal es obligatorio.' : 'Postal / ZIP code required.';
 
     setFormErrors(errors);
     const errorKeys = Object.keys(errors);
@@ -179,11 +181,11 @@ export default function PeptidesPriceListClient({
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         try { el.focus(); } catch { /* not focusable */ }
       }
-      toast.error('Please complete all required fields (marked with *).');
+      toast.error(isEs ? 'Completa todos los campos obligatorios (marcados con *).' : 'Please complete all required fields (marked with *).');
       return false;
     }
     return true;
-  }, [orderForm]);
+  }, [orderForm, isEs]);
 
   // Business Logic: Cart Management Hook
   const {
@@ -337,7 +339,7 @@ export default function PeptidesPriceListClient({
   const handleSubmitOrder = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (Object.keys(cartItems).length === 0) {
-      toast.error('Your order request is empty. Please select products first.');
+      toast.error(isEs ? 'Tu proforma está vacía. Selecciona productos primero.' : 'Your order request is empty. Please select products first.');
       return;
     }
     if (!validateOrderForm()) return;
@@ -430,7 +432,11 @@ export default function PeptidesPriceListClient({
         shippingDestination: fullAddress
       });
 
-      toast.success('Proforma request submitted! Our medical logistics team will contact you within 24 hours.');
+      toast.success(
+        isEs
+          ? '¡Solicitud de proforma enviada! Nuestro equipo logístico médico te contactará en menos de 24 horas.'
+          : 'Proforma request submitted! Our medical logistics team will contact you within 24 hours.'
+      );
       setCartItems({});
       try {
         localStorage.removeItem(storageKey);
@@ -439,7 +445,7 @@ export default function PeptidesPriceListClient({
       }
     } catch (err) {
       console.error('Order submission error:', err);
-      toast.error(err.message || 'Unable to send order. Please try again or contact support.');
+      toast.error(err.message || (isEs ? 'No se pudo enviar el pedido. Inténtalo de nuevo.' : 'Unable to send order. Please try again or contact support.'));
     } finally {
       setSubmittingOrder(false);
     }
@@ -503,17 +509,20 @@ export default function PeptidesPriceListClient({
           handleShareSchedule={handleShareSchedule}
         />
 
-        {/* Responsive Layout Styles */}
+        {/* Responsive Layout Styles (Google Cloud Mobile UX Standard) */}
         <style dangerouslySetInnerHTML={{ __html: `
           .gcp-pricing-portal-layout { display: flex; gap: 1.25rem; align-items: flex-start; width: 100%; }
           .gcp-pricing-sidebar { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.85rem; position: sticky; top: 72px; }
           .gcp-pricing-workspace { flex: 1; min-width: 0; display: flex; flex-direction: column; }
           .gcp-search-and-category-block { order: 1; width: 100%; min-width: 0; }
           .gcp-kpis-summary-block { order: 2; width: 100%; min-width: 0; }
-          .mobile-only-filter-selectors { order: 3; display: none; width: 100%; min-width: 0; }
-          .mobile-only-secondary-toggle { display: none; }
-          .gcp-table-block { order: 4; width: 100%; min-width: 0; }
+          .gcp-table-block { order: 3; width: 100%; min-width: 0; }
+          .peptides-mobile-category-strip, .peptides-mobile-quick-filters-rail, .peptides-hero-mobile-meta-toggle { display: none; }
           .mobile-only-category-selector, .mobile-nav-drawer-trigger, .mobile-only-header-actions { display: none; }
+          .peptides-hero-actions-wrap { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+          .peptides-hero-actions-grid { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+          .peptides-hero-btn { height: 36px; padding: 0 13px; border-radius: 6px; font-size: 0.80rem; font-weight: 650; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+          .peptides-hero-btn-primary { font-weight: 750; }
           @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
           .screen-nav-bar.peptides-screen-nav-bar { position: sticky !important; top: 0 !important; z-index: 100 !important; background: #002b4d !important; backdrop-filter: blur(8px) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important; box-shadow: 0 4px 16px rgba(0, 30, 60, 0.22) !important; }
           .peptides-nav-container { display: flex; align-items: center; justify-content: space-between; }
@@ -531,6 +540,15 @@ export default function PeptidesPriceListClient({
             .gcp-kpis-summary-block { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .mobile-nav-drawer-trigger { display: inline-flex !important; }
             .mobile-only-category-selector { display: block !important; }
+            .peptides-mobile-category-strip { display: flex !important; align-items: center; gap: 6px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+            .peptides-mobile-category-strip::-webkit-scrollbar { display: none; }
+            .peptides-mob-cat-pill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; min-height: 34px; border-radius: 999px; border: 1px solid #dadce0; background: #ffffff; color: #3c4043; font-size: 0.74rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; cursor: pointer; }
+            .peptides-mob-cat-pill.active { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
+            .peptides-mob-cat-count { font-size: 0.65rem; background: #f1f5f9; color: #475569; padding: 1px 6px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+            .peptides-mob-cat-pill.active .peptides-mob-cat-count { background: #1a73e8; color: #ffffff; }
+            .peptides-mobile-quick-filters-rail { display: grid !important; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+            .peptides-mob-rail-chip { display: inline-flex; align-items: center; justify-content: space-between; gap: 5px; padding: 7px 10px; min-height: 38px; border-radius: 8px; border: 1px solid #dadce0; background: #ffffff; color: #3c4043; font-size: 0.74rem; font-weight: 700; cursor: pointer; min-width: 0; }
+            .peptides-mob-rail-chip.active { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; }
             .peptides-kpis-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
             .gcp-table-block { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .ptr-container { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
@@ -544,25 +562,32 @@ export default function PeptidesPriceListClient({
             .peptides-b2b-portal .peptides-nav-left { width: auto !important; flex: 0 1 auto !important; min-width: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; }
             .peptides-b2b-portal .peptides-nav-actions { width: auto !important; flex: 0 0 auto !important; display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: flex-end !important; gap: 6px !important; }
             .peptides-main-container { padding: 0.5rem 0.75rem 6.5rem 0.75rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            .peptides-page-header { margin-bottom: 0.6rem !important; }
-            .peptides-hero-title { font-size: 1.05rem !important; line-height: 1.24 !important; }
-            .peptides-hero-subtitle { display: none !important; }
-            .mobile-only-secondary-toggle { display: block !important; width: 100% !important; margin-bottom: 6px !important; }
+            /* Compact Mobile Hero (fixes dead CSS selectors on PageHeroCard) */
+            .peptides-page-header { padding: 0.85rem 0.95rem !important; margin-bottom: 0.65rem !important; }
+            .peptides-page-header .atlas-hero-eyebrow { margin-bottom: 0.4rem !important; gap: 4px !important; }
+            .peptides-page-header .atlas-hero-pill-primary, .peptides-page-header .atlas-hero-pill-secondary { font-size: 0.62rem !important; padding: 2px 6px !important; }
+            .peptides-page-header .atlas-hero-title { font-size: 1.08rem !important; line-height: 1.24 !important; }
+            .peptides-page-header.peptides-hero-meta-collapsed .atlas-hero-subtitle,
+            .peptides-page-header.peptides-hero-meta-collapsed .atlas-hero-stamp-box { display: none !important; }
+            .peptides-page-header .atlas-hero-actions { margin-top: 0.65rem !important; padding-top: 0.65rem !important; }
+            .peptides-hero-mobile-meta-toggle { display: inline-flex !important; align-items: center; gap: 5px; width: fit-content; padding: 4px 10px; border-radius: 999px; border: 1px solid #dadce0; background: #f8fafc; color: #475569; font-size: 0.69rem; font-weight: 700; cursor: pointer; }
+            .peptides-hero-actions-grid { display: grid !important; grid-template-columns: 1fr 1fr; gap: 7px !important; width: 100% !important; }
+            .peptides-hero-btn { min-height: 40px !important; height: auto !important; width: 100% !important; }
+            .peptides-hero-btn-primary { grid-column: 1 / -1 !important; min-height: 42px !important; }
             .peptides-secondary-filters-subbar.mobile-secondary-collapsed { display: none !important; }
             .peptides-secondary-filters-subbar.mobile-secondary-expanded { display: flex !important; width: 100% !important; margin-bottom: 8px !important; }
-            .mobile-only-filter-selectors { display: block !important; margin-top: 4px !important; margin-bottom: 6px !important; order: 3 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            .gcp-search-and-category-block { order: 1 !important; margin-bottom: 0.75rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
-            .gcp-kpis-summary-block { order: 2 !important; padding: 0.5rem 0.65rem !important; margin-bottom: 0.5rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .gcp-search-and-category-block { order: 1 !important; margin-bottom: 0.6rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .gcp-kpis-summary-block { order: 2 !important; padding: 0.5rem 0.65rem !important; margin-bottom: 0.55rem !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .mobile-kpi-summary-strip { display: flex !important; width: 100% !important; min-width: 0 !important; }
             .peptides-kpis-grid.mobile-kpi-collapsed { display: none !important; }
             .peptides-kpis-grid.mobile-kpi-expanded { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-top: 8px !important; width: 100% !important; min-width: 0 !important; }
             .peptide-mobile-tiles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            .gcp-table-block { order: 4 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+            .gcp-table-block { order: 3 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .ptr-container { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
             .data-table-mobile-cards { width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
-            .peptides-kpi-card { padding: 0.55rem 0.65rem !important; }
-            .peptides-kpi-val { font-size: 1.15rem !important; }
+            .peptides-kpi-card { padding: 0.55rem 0.65rem !important; min-height: 86px !important; }
             .peptides-scope-bar { display: flex !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; gap: 8px !important; }
+            .peptides-scope-bar.mobile-scope-hidden { display: none !important; }
             .peptides-scope-count-badge { display: none !important; }
             .peptides-scope-left { width: 100% !important; }
             .peptides-scope-switcher-group { width: 100% !important; display: flex !important; justify-content: stretch !important; margin-top: 2px !important; }
@@ -585,7 +610,7 @@ export default function PeptidesPriceListClient({
 
           {/* Main Data Workspace Area */}
           <div className="gcp-pricing-workspace">
-            {/* Search & Category Filter Block */}
+            {/* Search, Mobile Category Strip & Unified Filter Rail */}
             <PeptidesFilterToolbar
               isSidebarOpen={isSidebarOpen}
               setIsSidebarOpen={setIsSidebarOpen}
@@ -597,6 +622,9 @@ export default function PeptidesPriceListClient({
               activeFilterChips={activeFilterChips}
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
+              selectedFdaStatus={selectedFdaStatus}
+              setIsFdaSheetOpen={setIsFdaSheetOpen}
+              setIsCategorySheetOpen={setIsCategorySheetOpen}
               shippingDest={shippingDest}
               handleShippingDestChange={handleShippingDestChange}
               selectedStrength={selectedStrength}
@@ -638,31 +666,6 @@ export default function PeptidesPriceListClient({
               setIsOrderDrawerOpen={setIsOrderDrawerOpen}
               isEs={isEs}
             />
-
-            {/* Single Mobile FDA Regulatory Filter Selector (Category is controlled by top chip strip) */}
-            <div className="mobile-only-filter-selectors">
-              <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '8px', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px', boxShadow: '0 1px 2px rgba(60,64,67,0.05)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span>⚖️ {isEs ? 'Estatus Regulatorio / FDA' : 'FDA Regulatory Status'}</span>
-                  </span>
-                  {selectedFdaStatus !== 'all' && (
-                    <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedFdaStatus('all'); }} style={{ border: 'none', background: '#f1f5f9', color: '#475569', fontSize: '0.66rem', fontWeight: 700, cursor: 'pointer', padding: '1px 6px', borderRadius: '4px' }}>
-                      {isEs ? 'Limpiar ×' : 'Clear ×'}
-                    </button>
-                  )}
-                </div>
-                <button type="button" onClick={() => setIsFdaSheetOpen(true)} style={{ width: '100%', padding: '7px 9px', borderRadius: '6px', border: selectedFdaStatus !== 'all' ? '1.5px solid #1a73e8' : '1px solid #cbd5e1', background: selectedFdaStatus !== 'all' ? '#f0f7ff' : '#ffffff', color: selectedFdaStatus !== 'all' ? '#1a73e8' : '#1e293b', fontSize: '0.80rem', fontWeight: selectedFdaStatus !== 'all' ? 750 : 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', textAlign: 'left' }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {selectedFdaStatus === 'all'
-                      ? (isEs ? `🌐 Toda Regulación (${processedProducts.length})` : `🌐 All Regulatory (${processedProducts.length})`)
-                      : `${FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.icon || '⚖️'} ${isEs ? FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.labelEs : FDA_FILTERS.find(f => f.id === selectedFdaStatus)?.labelEn} (${processedProducts.filter(p => p.fdaBucket === selectedFdaStatus).length})`
-                    }
-                  </span>
-                  <ChevronDown size={14} color="#64748b" style={{ flexShrink: 0 }} />
-                </button>
-              </div>
-            </div>
 
             {/* Peptide DataTable */}
             <div className="gcp-table-block" style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', overflowX: 'clip', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>

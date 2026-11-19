@@ -305,8 +305,9 @@ export async function POST(request) {
     const newRxRef = await adminDb.collection('prescriptions').add(newRxPayload);
     const newRxId = newRxRef.id;
 
-    // 7. Update original prescription tracking status
-    await origDoc.ref.set({
+    // 7. Update original prescription tracking status (origDoc is already a DocumentReference)
+    const origRef = origDoc?.ref || origDoc;
+    await origRef.set({
       lastRefillId: newRxId,
       lastRefillCode: newCode,
       lastRefillDate: todayIso,

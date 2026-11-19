@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, ArrowRight } from 'lucide-react';
+import { ShoppingCart, ArrowRight, Trash2 } from 'lucide-react';
 
 /**
  * PeptidesBottomCartDock
@@ -44,7 +44,8 @@ export default function PeptidesBottomCartDock({
         background: '#ffffff',
         borderTop: '1px solid #dadce0',
         boxShadow: '0 -4px 20px rgba(60, 64, 67, 0.15)',
-        padding: '10px 0',
+        paddingTop: '10px',
+        paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
         backdropFilter: 'blur(10px)',
         backgroundColor: 'rgba(255, 255, 255, 0.98)'
       }}
@@ -107,10 +108,10 @@ export default function PeptidesBottomCartDock({
           </div>
         </div>
 
-        {/* Right: Reset & Review Proforma CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Right: Accessible Reset (Desktop + Mobile) & Review Proforma CTA */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {confirmReset ? (
-            <div className="mobile-hide" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -122,46 +123,55 @@ export default function PeptidesBottomCartDock({
                   border: '1px solid #f6aea9',
                   color: '#c5221f',
                   fontSize: '0.72rem',
-                  fontWeight: 700,
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  fontWeight: 750,
+                  padding: '0 10px',
+                  minHeight: '38px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                {isEs ? 'Confirmar vaciar' : 'Confirm reset'}
+                {isEs ? 'Vaciar' : 'Clear'}
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmReset(false)}
                 style={{
-                  background: 'transparent',
-                  border: 'none',
+                  background: '#f1f5f9',
+                  border: '1px solid #dadce0',
                   color: '#5f6368',
                   fontSize: '0.72rem',
-                  fontWeight: 600,
+                  fontWeight: 650,
+                  padding: '0 8px',
+                  minHeight: '38px',
+                  borderRadius: '6px',
                   cursor: 'pointer'
                 }}
               >
-                {isEs ? 'Cancelar' : 'Cancel'}
+                ×
               </button>
             </div>
           ) : (
             <button
               type="button"
               onClick={() => setConfirmReset(true)}
-              className="mobile-hide"
               style={{
-                background: 'transparent',
-                border: 'none',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
                 color: '#5f6368',
-                fontSize: '0.74rem',
-                fontWeight: 600,
-                textDecoration: 'underline',
-                cursor: 'pointer'
+                width: '38px',
+                height: '38px',
+                borderRadius: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0
               }}
+              aria-label={isEs ? 'Vaciar proforma' : 'Clear all cart items'}
               title={isEs ? 'Vaciar proforma' : 'Clear all cart items'}
             >
-              {isEs ? 'Vaciar' : 'Reset'}
+              <Trash2 size={15} />
             </button>
           )}
 
@@ -176,9 +186,9 @@ export default function PeptidesBottomCartDock({
               color: '#ffffff',
               border: 'none',
               borderRadius: '6px',
-              padding: '9px 18px',
+              padding: '9px 14px',
               fontWeight: 750,
-              fontSize: '0.84rem',
+              fontSize: '0.82rem',
               cursor: 'pointer',
               boxShadow: '0 2px 6px rgba(26, 115, 232, 0.35)',
               whiteSpace: 'nowrap',
@@ -188,7 +198,7 @@ export default function PeptidesBottomCartDock({
             onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#1557b0')}
             onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#1a73e8')}
           >
-            <span>{isEs ? `Revisar Proforma (${totalCartCount})` : `Review Proforma (${totalCartCount})`}</span>
+            <span>{isEs ? `Proforma (${totalCartCount})` : `Proforma (${totalCartCount})`}</span>
             <ArrowRight size={15} />
           </button>
         </div>

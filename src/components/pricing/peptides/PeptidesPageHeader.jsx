@@ -1,18 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Mail,
   FileText,
   Check,
-  Share2
+  Share2,
+  ShieldCheck,
+  ChevronDown
 } from 'lucide-react';
 import PageHeroCard from '@/components/ui/PageHeroCard';
 
 /**
  * PeptidesPageHeader
  * Canonical PageHeroCard wrapper with HPLC purity badges, hero title,
- * subtitle, and verified B2B action toolbar (Inquire, PDF Schedule, Share).
+ * progressive-disclosure mobile specs (Rule #26), and touch-friendly 40px action toolbar (Rules #23, #40, #57).
  */
 export default function PeptidesPageHeader({
   isDistributor = false,
@@ -23,6 +25,8 @@ export default function PeptidesPageHeader({
   setIsPdfPreviewOpen,
   handleShareSchedule
 }) {
+  const [showMobileMeta, setShowMobileMeta] = useState(false);
+
   const title = isDistributor
     ? (isEs ? 'Tarifa Oficial de Péptidos · Distribuidor B2B' : 'Official Peptide Price Schedule · Distributor')
     : (isEs ? 'Tarifa Oficial de Péptidos · Mayoristas y Clínicas' : 'Official Peptide Price Schedule · Wholesaler & Clinic');
@@ -37,7 +41,7 @@ export default function PeptidesPageHeader({
 
   return (
     <PageHeroCard
-      className="peptides-page-header"
+      className={`peptides-page-header ${showMobileMeta ? 'peptides-hero-meta-open' : 'peptides-hero-meta-collapsed'}`}
       brandRight={isDistributor ? (isEs ? 'DISTRIBUIDOR B2B' : 'DISTRIBUTOR B2B') : (isEs ? 'MAYORISTA B2B' : 'WHOLESALE B2B')}
       badges={['≥99.0% HPLC', 'cGMP Release']}
       title={title}
@@ -47,81 +51,57 @@ export default function PeptidesPageHeader({
         { label: 'PURITY:', value: '≥99.0% HPLC', mono: true },
       ]}
       actions={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="peptides-hero-actions-wrap">
+          {/* Mobile-only progressive disclosure toggle for REF / Subtitle */}
           <button
             type="button"
-            onClick={() => {
-              if (setInquiryProductContext) setInquiryProductContext(null);
-              if (setIsInquiryDrawerOpen) setIsInquiryDrawerOpen(true);
-            }}
-            className="gcp-btn-primary"
-            style={{
-              height: '34px',
-              padding: '0 14px',
-              borderRadius: '6px',
-              border: '1px solid #1a73e8',
-              background: '#1a73e8',
-              color: '#ffffff',
-              fontSize: '0.80rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-            title={isEs ? 'Consultar información técnica o solicitud B2B' : 'Institutional Inquiry & Support'}
+            className="peptides-hero-mobile-meta-toggle"
+            onClick={() => setShowMobileMeta((v) => !v)}
+            aria-expanded={showMobileMeta}
           >
-            <Mail size={14} color="#ffffff" />
-            <span>{isEs ? 'Consultar' : 'Inquire'}</span>
+            <ShieldCheck size={12} color="#16a34a" />
+            <span>{isEs ? 'Specs cGMP & Ref.' : 'cGMP Specs & Ref.'}</span>
+            <ChevronDown
+              size={12}
+              style={{ transform: showMobileMeta ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
+            />
           </button>
 
-          <button
-            type="button"
-            onClick={() => setIsPdfPreviewOpen && setIsPdfPreviewOpen(true)}
-            className="gcp-btn-secondary"
-            style={{
-              height: '34px',
-              padding: '0 12px',
-              borderRadius: '6px',
-              border: '1px solid #dadce0',
-              background: '#ffffff',
-              color: '#3c4043',
-              fontSize: '0.80rem',
-              fontWeight: 650,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-            title={isEs ? 'Ver y descargar tarifa oficial PDF (A4)' : 'View and download official A4 PDF schedule'}
-          >
-            <FileText size={14} color="#1a73e8" />
-            <span>{isEs ? 'Tarifa PDF' : 'PDF Schedule'}</span>
-          </button>
+          <div className="peptides-hero-actions-grid">
+            <button
+              type="button"
+              onClick={() => setIsPdfPreviewOpen && setIsPdfPreviewOpen(true)}
+              className="gcp-btn-secondary peptides-hero-btn"
+              title={isEs ? 'Ver y descargar tarifa oficial PDF (A4)' : 'View and download official A4 PDF schedule'}
+            >
+              <FileText size={14} color="#5f6368" />
+              <span>{isEs ? 'Tarifa PDF' : 'PDF Schedule'}</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={handleShareSchedule}
-            className="gcp-btn-secondary"
-            style={{
-              height: '34px',
-              padding: '0 12px',
-              borderRadius: '6px',
-              border: copied ? '1px solid #1a73e8' : '1px solid #dadce0',
-              background: copied ? '#e8f0fe' : '#ffffff',
-              color: copied ? '#1a73e8' : '#3c4043',
-              fontSize: '0.80rem',
-              fontWeight: 650,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-            title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
-          >
-            {copied ? <Check size={14} color="#1a73e8" /> : <Share2 size={14} color="#5f6368" />}
-            <span>{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
-          </button>
+            <button
+              type="button"
+              onClick={handleShareSchedule}
+              className="gcp-btn-secondary peptides-hero-btn"
+              style={copied ? { borderColor: '#1a73e8', background: '#e8f0fe', color: '#1a73e8' } : undefined}
+              title={isEs ? 'Copiar enlace verificado de tarifa' : 'Copy verified price list link'}
+            >
+              {copied ? <Check size={14} color="#1a73e8" /> : <Share2 size={14} color="#5f6368" />}
+              <span>{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (setInquiryProductContext) setInquiryProductContext(null);
+                if (setIsInquiryDrawerOpen) setIsInquiryDrawerOpen(true);
+              }}
+              className="gcp-btn-primary peptides-hero-btn peptides-hero-btn-primary"
+              title={isEs ? 'Consultar información técnica o solicitud B2B' : 'Institutional Inquiry & Support'}
+            >
+              <Mail size={14} color="#ffffff" />
+              <span>{isEs ? 'Consultar' : 'Inquire'}</span>
+            </button>
+          </div>
         </div>
       }
     />
