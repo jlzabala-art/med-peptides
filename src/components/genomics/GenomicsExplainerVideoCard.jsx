@@ -34,10 +34,10 @@ export default function GenomicsExplainerVideoCard({
       aria-label={isEs ? item.titleEs : item.title}
       style={{
         background: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '14px',
-        padding: '20px',
-        boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
+        border: '1px solid #dadce0',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        boxShadow: '0 1px 2px rgba(60, 64, 67, 0.06)',
         marginBottom: '20px',
       }}
     >
@@ -48,12 +48,12 @@ export default function GenomicsExplainerVideoCard({
             alignItems: 'center',
             gap: '6px',
             flexWrap: 'wrap',
-            marginBottom: '16px',
-            paddingBottom: '12px',
-            borderBottom: '1px solid #f1f5f9',
+            padding: '12px 18px',
+            background: '#f8f9fa',
+            borderBottom: '1px solid #dadce0',
           }}
         >
-          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginRight: '4px' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginRight: '4px', letterSpacing: '0.02em' }}>
             {isEs ? 'Asistentes IA 24Genomics:' : '24Genomics AI Assistants:'}
           </span>
           {TWENTY_FOUR_GENOMICS_ASSISTANT_LIST.map((a) => {
@@ -65,12 +65,12 @@ export default function GenomicsExplainerVideoCard({
                 onClick={() => handleSelect(a.id)}
                 style={{
                   padding: '5px 11px',
-                  borderRadius: '9999px',
-                  border: active ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
-                  background: active ? '#eff6ff' : '#ffffff',
-                  color: active ? '#1d4ed8' : '#475569',
+                  borderRadius: '16px',
+                  border: active ? '1px solid #1a73e8' : '1px solid #dadce0',
+                  background: active ? '#e8f0fe' : '#ffffff',
+                  color: active ? '#1a73e8' : '#3c4043',
                   fontSize: '0.74rem',
-                  fontWeight: active ? 750 : 600,
+                  fontWeight: active ? 650 : 500,
                   cursor: 'pointer',
                 }}
               >
@@ -81,154 +81,193 @@ export default function GenomicsExplainerVideoCard({
         </div>
       )}
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '20px',
-          alignItems: 'start',
-        }}
-      >
-        {/* Left: Native Hosted Video Player */}
-        <div>
-          <div
-            style={{
-              borderRadius: '12px',
-              overflow: 'hidden',
-              background: '#0f172a',
-              border: '1px solid #cbd5e1',
-              aspectRatio: '16 / 9',
-            }}
-          >
-            <video
-              key={item.videoUrl}
-              controls
-              playsInline
-              preload="metadata"
-              style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
-              aria-label={item.videoTitle}
-            >
-              <source src={item.videoUrl} type="video/mp4" />
-            </video>
-          </div>
-          <div
-            style={{
-              marginTop: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '8px',
-              fontSize: '0.72rem',
-              color: '#64748b',
-            }}
-          >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
-              <PlayCircle size={13} color="#0284c7" />
-              <span>{item.videoTitle}</span>
-            </span>
-            <a
-              href={item.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-                color: '#1a73e8',
-                fontWeight: 600,
-                textDecoration: 'none',
-              }}
-            >
-              <span>{isEs ? 'Fuente 24Genetics' : '24Genetics Source'}</span>
-              <ExternalLink size={11} />
-            </a>
-          </div>
-        </div>
-
-        {/* Right: Structured Clinical & Patient Documentation */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* ── Row 1: Balanced Video + Overview & Key Highlights (Zero Empty Space) ── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '20px',
+            alignItems: 'center',
+          }}
+        >
+          {/* Left: Native Hosted Video Player */}
           <div>
-            <span
+            <div
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '3px 9px',
-                borderRadius: '9999px',
-                background: '#eff6ff',
-                color: '#1d4ed8',
-                border: '1px solid #bfdbfe',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                marginBottom: '8px',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                background: '#0f172a',
+                border: '1px solid #dadce0',
+                aspectRatio: '16 / 9',
               }}
             >
-              <Sparkles size={12} />
-              <span>24Genomics · {item.assistantName} AI</span>
-            </span>
-
-            <h3 style={{ margin: '0 0 4px', fontSize: '1.12rem', fontWeight: 800, color: '#0f172a' }}>
-              {isEs ? item.titleEs : item.title}
-            </h3>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0284c7', marginBottom: '8px' }}>
-              {isEs ? item.subtitleEs : item.subtitle}
+              <video
+                key={item.videoUrl}
+                controls
+                playsInline
+                preload="metadata"
+                style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
+                aria-label={item.videoTitle}
+              >
+                <source src={item.videoUrl} type="video/mp4" />
+              </video>
             </div>
-            <p style={{ margin: 0, fontSize: '0.84rem', lineHeight: 1.55, color: '#334155' }}>
-              {isEs ? item.summaryEs : item.summary}
-            </p>
-          </div>
-
-          {/* 3-Step Workflow */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
-            {item.howItWorks.map((step) => (
-              <div
-                key={step.step}
+            <div
+              style={{
+                marginTop: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+                fontSize: '0.73rem',
+                color: '#5f6368',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
+                <PlayCircle size={13} color="#1a73e8" />
+                <span>{item.videoTitle}</span>
+              </span>
+              <a
+                href={item.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  color: '#1a73e8',
+                  fontWeight: 600,
+                  textDecoration: 'none',
                 }}
               >
-                <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', marginBottom: '3px' }}>
-                  {step.step}. {isEs ? step.titleEs : step.title}
-                </div>
-                <div style={{ fontSize: '0.73rem', lineHeight: 1.4, color: '#475569' }}>
-                  {isEs ? step.descriptionEs : step.description}
-                </div>
-              </div>
-            ))}
+                <span>{isEs ? 'Fuente 24Genetics' : '24Genetics Source'}</span>
+                <ExternalLink size={11} />
+              </a>
+            </div>
           </div>
 
-          {/* Highlights */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            {(isEs ? item.highlightsEs : item.highlights).map((h, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#1e293b' }}>
-                <CheckCircle2 size={13} color="#0d9488" style={{ flexShrink: 0 }} />
-                <span>{h}</span>
-              </div>
-            ))}
-          </div>
+          {/* Right: Clean GCP Header, Summary & Key Highlights */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '2px 9px',
+                  borderRadius: '4px',
+                  background: '#e8f0fe',
+                  color: '#1a73e8',
+                  border: '1px solid #d2e3fc',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  marginBottom: '8px',
+                }}
+              >
+                <Sparkles size={11} />
+                <span>24Genomics · {item.assistantName} AI</span>
+              </span>
 
-          {/* Clinical Note */}
-          <div
-            style={{
-              padding: '8px 10px',
-              borderRadius: '8px',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '6px',
-              fontSize: '0.72rem',
-              color: '#64748b',
-              lineHeight: 1.4,
-            }}
-          >
-            <Info size={13} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <span>{isEs ? item.clinicalNoteEs : item.clinicalNote}</span>
+              <h3 style={{ margin: '0 0 4px', fontSize: '1.12rem', fontWeight: 700, color: '#202124', letterSpacing: '-0.01em' }}>
+                {isEs ? item.titleEs : item.title}
+              </h3>
+              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a73e8', marginBottom: '8px' }}>
+                {isEs ? item.subtitleEs : item.subtitle}
+              </div>
+              <p style={{ margin: 0, fontSize: '0.84rem', lineHeight: 1.55, color: '#3c4043' }}>
+                {isEs ? item.summaryEs : item.summary}
+              </p>
+            </div>
+
+            {/* Highlights */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+                paddingTop: '8px',
+                borderTop: '1px solid #f1f3f4',
+              }}
+            >
+              {(isEs ? item.highlightsEs : item.highlights).map((h, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', fontSize: '0.79rem', color: '#202124', lineHeight: 1.4 }}>
+                  <CheckCircle2 size={14} color="#137333" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span>{h}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* ── Row 2: Full-Width 3-Step Workflow Strip (3 Columns on Laptop, 1 Column on Mobile) ── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '12px',
+          }}
+        >
+          {item.howItWorks.map((step) => (
+            <div
+              key={step.step}
+              style={{
+                padding: '12px 14px',
+                borderRadius: '8px',
+                background: '#f8f9fa',
+                border: '1px solid #dadce0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '5px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                <span
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background: '#e8f0fe',
+                    color: '#1a73e8',
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {step.step}
+                </span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#202124' }}>
+                  {isEs ? step.titleEs : step.title}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.76rem', lineHeight: 1.45, color: '#5f6368' }}>
+                {isEs ? step.descriptionEs : step.description}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Footer Disclaimer Strip ── */}
+      <div
+        style={{
+          padding: '10px 18px',
+          background: '#f8f9fa',
+          borderTop: '1px solid #dadce0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.73rem',
+          color: '#5f6368',
+          lineHeight: 1.4,
+        }}
+      >
+        <Info size={13} style={{ flexShrink: 0 }} />
+        <span>{isEs ? item.clinicalNoteEs : item.clinicalNote}</span>
       </div>
     </section>
   );
