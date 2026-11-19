@@ -133,6 +133,31 @@ function extractPrescriptionApis(rx) {
  * 2. Matching Parcial (>0% y <100%) -> Links matched items, leaves unmatched for manual review
  * 3. Matching = 0% -> Auto-creates missing items in Zoho Books, registers dictionary, updates prescription to 100%
  */
+function isCompatibleZohoMatch(rawName = '', zohoName = '', rxFormCorpus = '') {
+  const raw = String(rawName || '').toLowerCase().trim();
+  const zoho = String(zohoName || '').toLowerCase().trim();
+  if (!raw || !zoho) return false;
+
+  // Reject multi-ingredient Zoho items when the prescribed API is single-ingredient
+  if (zoho.includes('+') && !raw.includes('+')) return false;
+
+  // Reject incompatible finished dosage forms unless explicitly prescribed
+  const formLower = String(rxFormCorpus || '').toLowerCase();
+  if (/\b(pessar|vaginal|suppositor|bundle|kit)\b/i.test(zoho) && !/\b(pessar|vaginal|suppositor)\b/i.test(`${raw} ${formLower}`)) {
+    return false;
+  }
+  if (/\bvial\b/i.test(zoho) && /\b(cream|transdermal|capsule|solution|trichosol|trichooil|topical)\b/i.test(formLower)) {
+    return false;
+  }
+
+  // Require at least one significant (>= 4 chars) token from raw API name to appear in Zoho item name
+  const tokens = raw.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((t) => t.length >= 4);
+  if (tokens.length > 0 && !tokens.some((t) => zoho.includes(t))) {
+    return false;
+  }
+  return true;
+}
+
 export async function processPrescriptionZohoOnImport({
   prescriptionId,
   rxData,
@@ -187,25 +212,29 @@ export async function processPrescriptionZohoOnImport({
         continue;
       }
 
-      // Check zoho_api_dictionary
+      // Check zoho_api_dictionary (with strict clinical compatibility check)
+      const rxFormCorpus = `${rx?.treatmentTitle || ''} ${rx?.dispensingForm || ''} ${rx?.posology || ''}`;
       let zohoItem = null;
       const dictSnap = await adminDb.collection('zoho_api_dictionary').doc(canonicalKey).get();
       if (dictSnap.exists && dictSnap.data()?.zoho_item_id) {
         const d = dictSnap.data();
-        zohoItem = {
-          item_id: d.zoho_item_id,
-          name: d.zoho_item_name || norm.coreName,
-          sku: d.zoho_sku || suggestedSku,
-          rate: d.zoho_rate || 0,
-          purchase_rate: d.zoho_purchase_rate || 0,
-          unit: d.unit || 'g'
-        };
+        const candidateName = d.zoho_item_name || norm.coreName;
+        if (isCompatibleZohoMatch(norm.coreName, candidateName, rxFormCorpus)) {
+          zohoItem = {
+            item_id: d.zoho_item_id,
+            name: candidateName,
+            sku: d.zoho_sku || suggestedSku,
+            rate: d.zoho_rate || 0,
+            purchase_rate: d.zoho_purchase_rate || 0,
+            unit: d.unit || 'g'
+          };
+        }
       }
 
       // If not in dictionary, check Zoho Books live
       if (!zohoItem && token) {
         const liveFound = await searchZohoItemLive(norm.coreName, token);
-        if (liveFound) {
+        if (liveFound && isCompatibleZohoMatch(norm.coreName, liveFound.name, rxFormCorpus)) {
           const scoreResult = scoreApiAgainstZohoItem(norm, liveFound);
           if (scoreResult.score >= 85) {
             zohoItem = liveFound;

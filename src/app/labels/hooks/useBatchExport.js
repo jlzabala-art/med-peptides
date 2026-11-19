@@ -72,6 +72,34 @@ export function useBatchExport({
   const handleDownloadA4BatchPdf = useCallback(async () => {
     if (!patientQueue || patientQueue.length === 0) return;
 
+    // Phase 3: Clinical Pre-Print Preflight Check
+    for (const qItem of patientQueue) {
+      const qLabels = Array.isArray(qItem.labels) ? qItem.labels : [];
+      for (const lbl of qLabels) {
+        const titleAndDir = `${lbl.productTitle || ''} ${lbl.directions || ''} ${lbl.instructions || ''} ${lbl.vehicle || ''}`.toLowerCase();
+        const apis = Array.isArray(lbl.apis) ? lbl.apis : [];
+        const isTransdermal = /\b(transdermal|transdermally|pentravan|hairless\s+skin)\b/i.test(titleAndDir);
+        const hasVaginalApi = apis.some((a) => /\b(vaginal|pessar)\b/i.test(String(a?.name || a?.productName || '')));
+        if (isTransdermal && hasVaginalApi) {
+          toast.error(
+            isEs
+              ? `Alerta clínica en #${qItem.code}: ingrediente vaginal detectado en crema transdérmica. Revisa antes de imprimir.`
+              : `Clinical preflight block on #${qItem.code}: vaginal SKU detected inside a transdermal formula. Fix before printing.`
+          );
+          return;
+        }
+        const hasBlankPosology = !String(lbl.directions || lbl.instructions || '').trim();
+        if (hasBlankPosology) {
+          toast.error(
+            isEs
+              ? `Falta posología en #${qItem.code} (${lbl.productTitle || 'Fórmula'}).`
+              : `Missing directions/posology on #${qItem.code} (${lbl.productTitle || 'Formula'}).`
+          );
+          return;
+        }
+      }
+    }
+
     setIsGeneratingBatchPdf(true);
     setBatchPdfProgress({ current: 0, total: patientQueue.length });
     try {

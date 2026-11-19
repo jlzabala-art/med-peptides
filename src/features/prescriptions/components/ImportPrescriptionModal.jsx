@@ -933,6 +933,22 @@ export default function ImportPrescriptionModal({
         volume: parts[0]?.volume || '100 mL',
         dispensingForm: parts[0]?.dispensingForm || 'Magistral Formulation',
         prescriptionDate: mfgDate || prescriptionDate || new Date().toISOString().split('T')[0],
+        duration: extractedData?.duration || null,
+        courseDurationDays: (() => {
+          const durStr = String(extractedData?.duration || parts[0]?.posology || '').toLowerCase();
+          if (/\b3\s*months?\b|\b90\s*days?\b/.test(durStr)) return 90;
+          if (/\b2\s*months?\b|\b60\s*days?\b/.test(durStr)) return 60;
+          if (/\b1\s*month\b|\b30\s*days?\b/.test(durStr)) return 30;
+          return /fagron|tricho|telo|acne|nutri/i.test(`${baseTreatmentLabel} ${cleanCode}`) ? 90 : null;
+        })(),
+        applicationInstructions: Array.isArray(extractedData?.applicationInstructions) ? extractedData.applicationInstructions : [],
+        patient: {
+          name: cleanPatientName,
+          code: cleanCode,
+          dob: extractedData?.patient?.dob || extractedData?.dob || null,
+          gender: extractedData?.patient?.gender || extractedData?.gender || null,
+          age: extractedData?.patient?.age || extractedData?.age || null,
+        },
         parts: parts,
         formulationBlocks: parts,
         partsCount: parts.length,

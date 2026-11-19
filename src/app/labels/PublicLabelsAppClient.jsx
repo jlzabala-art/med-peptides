@@ -514,10 +514,20 @@ export default function PublicLabelsAppClient({
   }, []);
 
   const filteredWorklistItems = useMemo(() => {
-    return baseWorklistItems
+    const matched = baseWorklistItems
       .filter((item) => filterWorklistItem(item))
       .filter((item) => worklistTestFilter === 'all' || getWorklistTestKind(item) === worklistTestFilter)
       .sort((a, b) => getImportTimestampMs(b) - getImportTimestampMs(a));
+    // Phase 4: Group by patient before pagination so each page shows N unique patients
+    const seen = new Set();
+    const grouped = [];
+    for (const item of matched) {
+      const key = (item.name || item.patientName || '').trim().toLowerCase() || item.id || item.code;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      grouped.push(item);
+    }
+    return grouped;
   }, [baseWorklistItems, worklistTab, printCountsMap, getImportTimestampMs, worklistTestFilter, searchQuery]);
 
   const totalWorklistPages = Math.max(1, Math.ceil(filteredWorklistItems.length / worklistPageSize));

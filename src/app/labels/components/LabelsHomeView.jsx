@@ -718,6 +718,23 @@ export default function LabelsHomeView({
                               {isEs ? 'Informe:' : 'Report:'} {reportDateStr}
                             </span>
                           )}
+                          <span
+                            style={{
+                              fontSize: '0.62rem',
+                              fontWeight: 700,
+                              padding: '1px 5px',
+                              borderRadius: '4px',
+                              background: (p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl) ? '#ecfdf5' : '#fffbeb',
+                              color: (p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl) ? '#047857' : '#b45309',
+                              border: (p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl) ? '1px solid #a7f3d0' : '1px solid #fde68a',
+                              whiteSpace: 'nowrap',
+                              width: 'fit-content',
+                            }}
+                          >
+                            {(p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl)
+                              ? (isEs ? 'PDF Original ✓' : 'Original PDF ✓')
+                              : (isEs ? 'Sin PDF original' : 'No PDF')}
+                          </span>
                         </div>
                       );
                     },
