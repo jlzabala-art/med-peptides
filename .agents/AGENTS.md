@@ -700,6 +700,8 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Sin badges innecesarios de `PART X OF Y`**: Nunca renderizar etiquetas `PART 1 OF 2` / `PART 1 OF 3` en las etiquetas de farmacia; conservar únicamente indicaciones clínicas útiles (p. ej. `NIGHT / BEDTIME`, `MORNING`, `REFILL #...`) cuando apliquen.
 - **Título específico de vehículo en lugar de genéricos**: Si el título de la fórmula es genérico (`Topical treatment`, `Tratamiento tópico`, etc.) y el vehículo es un preparado Tricho (`TrichoSol`, `TrichoOil`, `TrichoFoam`, `TrichoWash`, `TrichoSerum`, `TrichoCond`), mostrar directamente el nombre del vehículo (p. ej. `TrichoSol`) como nombre del producto; si es genérico oral (`Oral treatment` / `Tratamiento oral`), mostrar `Oral Capsules`.
 - **Prefijo `Dr.` y unidades farmacéuticas uniformes**: Anteponer `Dr. ` automáticamente en la línea `Rx:` si falta, y normalizar todas las unidades en etiquetas a formato estándar (`3%`, `100 mL`, `50 mg`, `1000 mcg`).
+- **Nunca copiar recomendaciones ni marcas de cápsulas sugeridas (`Hygrocaps`, `(recommended ...)`)**: Eliminar automáticamente menciones de recomendación (`(recommended ...)`, `Hygrocaps`) tanto en títulos como en posología, pues la farmacia dispensadora no siempre usa ese excipiente.
+- **Ingredientes > 4 en 2 columnas de una sola línea**: Cuando haya más de 4 principios activos, dividir en 2 columnas con fuente reducida auto-ajustada para que **nombre + peso** queden siempre lado a lado en una sola línea sin partirse.
 
 
 

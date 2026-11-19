@@ -161,10 +161,11 @@ function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a'
   if (match && lineWidth > 220) {
     const namePart = match[1].trim();
     const dosePart = formatPharmaUnits(match[2].trim());
-    const estNameW = Math.round(namePart.length * (fontSize * 0.58) + 24);
-    const estDoseW = Math.round(dosePart.length * (fontSize * 0.62) + 12);
-    const dotStartX = x + estNameW + 8;
-    const dotEndX = x + lineWidth - estDoseW - 8;
+    const isNarrowCol = lineWidth < 520;
+    const estNameW = Math.round(namePart.length * (fontSize * (isNarrowCol ? 0.50 : 0.56)) + (isNarrowCol ? 16 : 24));
+    const estDoseW = Math.round(dosePart.length * (fontSize * 0.56) + 8);
+    const dotStartX = x + estNameW + 6;
+    const dotEndX = x + lineWidth - estDoseW - 6;
 
     return (
       <g key={key}>
@@ -172,15 +173,15 @@ function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a'
           <tspan fill={isMono ? '#000000' : '#0284c7'} fontWeight="900">• </tspan>
           <tspan fontWeight="700" fill={isMono ? '#000000' : '#1e293b'}>{namePart}</tspan>
         </text>
-        {dotEndX > dotStartX + 24 ? (
+        {dotEndX > dotStartX + (isNarrowCol ? 10 : 24) ? (
           <line
             x1={dotStartX}
             y1={y - Math.round(fontSize * 0.28)}
             x2={dotEndX}
             y2={y - Math.round(fontSize * 0.28)}
             stroke={isMono ? '#888888' : '#cbd5e1'}
-            strokeWidth="1.4"
-            strokeDasharray="2,6"
+            strokeWidth="1.2"
+            strokeDasharray="2,5"
           />
         ) : null}
         <text
@@ -393,7 +394,11 @@ export default function PharmapolisLabelSvg({
   const resolvedPatientLabelFontSize = Math.max(18, Math.floor(patientLabelFontSize * patientScaleRatio));
   const resolvedPatientNameFontSize = Math.max(19, Math.floor(patientNameFontSize * patientScaleRatio));
 
-  const rawBaseTitle = (labelData.productTitle || labelData.productName || '').trim();
+  const rawBaseTitle = (labelData.productTitle || labelData.productName || '')
+    .replace(/\s*\((?:recommended|recomendad[oa])[^)]*\)/gi, '')
+    .replace(/\bhygrocaps?\b/gi, 'Capsules')
+    .replace(/\(\s*capsules?\s*\)/gi, '')
+    .trim();
   const vehicleSearchCorpus = `${labelData.vehicle || ''} ${labelData.base || ''} ${labelData.dispensingForm || ''} ${labelData.formula || ''} ${labelData.subTitle || ''}`;
   const matchedTrichoVehicle = vehicleSearchCorpus.match(/\b(TrichoSol|TrichoOil|TrichoFoam|TrichoWash|TrichoSerum|TrichoCond)\b/i);
   const isGenericTopicalTitle = /^(topical\s+treatment|tratamiento\s+t[óo]pico|scalp\s+care(?:\s+and\s+hygiene)?|topical\s+solution)$/i.test(rawBaseTitle);
@@ -411,8 +416,13 @@ export default function PharmapolisLabelSvg({
     // Normalize and remove redundant prefixes like "[Anti-hair loss]: " or "Directions for use: "
     d = d.replace(/^\[[^\]]+\]:\s*/i, '').trim();
     d = d.replace(/^(?:(?:directions\s*(?:for\s*use)?|indicaciones(?:\s*de\s*uso)?|posolog[íi]a|instrucciones|instructions):\s*)+/i, '').trim();
+    // Rule #71: Strip any recommendation-only notes (e.g., "(recommended Hygrocaps capsules)")
+    d = d.replace(/\s*\((?:recommended|recomendad[oa])[^)]*\)/gi, '').trim();
+    d = d.replace(/\s*(?:recommended|recomendad[oa])\s+hygrocaps?[^.]*\.?/gi, '').trim();
+    d = d.replace(/\bhygrocaps?\b/gi, 'capsules');
     // Normalize and remove redundant trailing "as prescribed"
     d = d.replace(/[,.]?\s*as\s+prescribed\.?$/i, '').trim();
+    d = d.replace(/\.{2,}/g, '.').trim();
     if (d && !d.endsWith('.')) d += '.';
     return d || 'Take / apply as directed by prescribing physician.';
   }, [rawDirections]);
@@ -1367,19 +1377,36 @@ export default function PharmapolisLabelSvg({
             const formulaTitleText = hasFormulaTitle ? rawTitle : '';
 
             // Multi-API layout strategy:
-            // Only split into 2 columns when ingCount >= 4 so 1–3 ingredient formulas enjoy full-width single-line typography
+            // Split into 2 columns when ingCount >= 4, auto-shrinking font so name + dose ALWAYS stay side-by-side on 1 line
             const isMultiColumn = ingCount >= 4 && innerUsableWidth >= 700;
             const halfColCount = Math.ceil(ingCount / 2);
             const col1Items = isMultiColumn ? activeIngredientsList.slice(0, halfColCount) : [];
             const col2Items = isMultiColumn ? activeIngredientsList.slice(halfColCount) : [];
             const colWidth = Math.floor((innerUsableWidth - 36) / 2);
 
-            const multiColFontSize = isShort ? 16 : isMediumHeight ? 18 : 22;
-            const multiColLineGap = Math.round(multiColFontSize * 1.42);
-            const multiColMaxChars = Math.max(20, Math.floor((colWidth - 20) / (multiColFontSize * 0.68)));
+            const multiColCandidates = isShort
+              ? [14.5, 13.5, 12.5, 11.5, 10.5]
+              : isMediumHeight
+                ? [15.5, 14.5, 13.5, 12.5, 11.5]
+                : [16.5, 15.5, 14.5, 13.5, 12.5, 11.5];
+            let multiColFontSize = multiColCandidates[multiColCandidates.length - 1];
+            if (isMultiColumn) {
+              const longestItemLen = Math.max(
+                10,
+                ...activeIngredientsList.map((it) => formatPharmaUnits(String(it)).length)
+              );
+              for (const cand of multiColCandidates) {
+                const estLineW = Math.round(longestItemLen * (cand * 0.52) + 28);
+                if (estLineW <= colWidth || cand === multiColCandidates[multiColCandidates.length - 1]) {
+                  multiColFontSize = cand;
+                  break;
+                }
+              }
+            }
+            const multiColLineGap = Math.round(multiColFontSize * 1.44);
 
-            const col1Lines = isMultiColumn ? col1Items.flatMap(it => wrapLines(`• ${it}`, multiColMaxChars)) : [];
-            const col2Lines = isMultiColumn ? col2Items.flatMap(it => wrapLines(`• ${it}`, multiColMaxChars)) : [];
+            const col1Lines = isMultiColumn ? col1Items : [];
+            const col2Lines = isMultiColumn ? col2Items : [];
             const multiColMaxLines = Math.max(col1Lines.length, col2Lines.length);
 
             // Sparsity detection: allows 1–3 ingredient formulas to boost typography and use space
