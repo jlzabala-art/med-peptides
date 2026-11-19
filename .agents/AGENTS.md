@@ -698,7 +698,8 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Nombre del paciente directo (sin prefijo `PATIENT:`)**: Toda etiqueta generada o importada debe mostrar directamente el nombre completo del paciente sin la palabra `PATIENT:` delante, limpiando cualquier prefijo residual en los datos importados.
 - **Separación visual destacada bajo `SCAN FOR REFILL`**: Debe existir un margen vertical amplio (`≥ 40px` en coordenadas SVG) entre el botón/pill `SCAN FOR REFILL` y el bloque `DISPENSING SPECS` inferior para dirigir la atención del paciente hacia el escaneo de reposición.
 - **Sin badges innecesarios de `PART X OF Y`**: Nunca renderizar etiquetas `PART 1 OF 2` / `PART 1 OF 3` en las etiquetas de farmacia; conservar únicamente indicaciones clínicas útiles (p. ej. `NIGHT / BEDTIME`, `MORNING`, `REFILL #...`) cuando apliquen.
-- **Título específico de vehículo en lugar de genéricos**: Si el título de la fórmula es genérico (`Topical treatment`, `Tratamiento tópico`, etc.) y el vehículo es un preparado Tricho (`TrichoSol`, `TrichoOil`, `TrichoFoam`, `TrichoWash`, `TrichoSerum`, `TrichoCond`), mostrar directamente el nombre del vehículo (p. ej. `TrichoSol`) como nombre del producto.
+- **Título específico de vehículo en lugar de genéricos**: Si el título de la fórmula es genérico (`Topical treatment`, `Tratamiento tópico`, etc.) y el vehículo es un preparado Tricho (`TrichoSol`, `TrichoOil`, `TrichoFoam`, `TrichoWash`, `TrichoSerum`, `TrichoCond`), mostrar directamente el nombre del vehículo (p. ej. `TrichoSol`) como nombre del producto; si es genérico oral (`Oral treatment` / `Tratamiento oral`), mostrar `Oral Capsules`.
+- **Prefijo `Dr.` y unidades farmacéuticas uniformes**: Anteponer `Dr. ` automáticamente en la línea `Rx:` si falta, y normalizar todas las unidades en etiquetas a formato estándar (`3%`, `100 mL`, `50 mg`, `1000 mcg`).
 
 
 

@@ -147,13 +147,20 @@ function VectorGlyph({ type, size = 16, fill = '#ffffff' }) {
  * The molecule name is rendered on the left, the dosage/strength is pinned strictly
  * to the right edge with text-anchor="end", and a dotted connecting line prevents eye-slip.
  */
+function formatPharmaUnits(str) {
+  return String(str || '')
+    .replace(/(\d)\s+%/g, '$1%')
+    .replace(/(\d)\s*(ml|mL)\b/gi, '$1 mL')
+    .replace(/(\d)\s*(mcg|mg)\b/gi, (_, d, u) => `${d} ${u.toLowerCase()}`);
+}
+
 function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a', isMono = true, lineWidth = 0) {
   const cleanLine = String(line).replace(/^[•*-]\s*/, '').trim();
   const match = cleanLine.match(/^(.*?\s+)([\d.,]+[\s\u00A0]*(?:mcg|mg|g|%|iu|fu|spu|ml|capsules?|drops?)(?:[\s\u00A0]*\/[\s\u00A0]*(?:ml|g|cap|dose))?(?:[\s\u00A0]*(?:topical|oral))?(?:[\s\u00A0]*\([^)]+\))?)\s*$/i);
 
   if (match && lineWidth > 220) {
     const namePart = match[1].trim();
-    const dosePart = match[2].trim();
+    const dosePart = formatPharmaUnits(match[2].trim());
     const estNameW = Math.round(namePart.length * (fontSize * 0.58) + 24);
     const estDoseW = Math.round(dosePart.length * (fontSize * 0.62) + 12);
     const dotStartX = x + estNameW + 8;
@@ -390,9 +397,12 @@ export default function PharmapolisLabelSvg({
   const vehicleSearchCorpus = `${labelData.vehicle || ''} ${labelData.base || ''} ${labelData.dispensingForm || ''} ${labelData.formula || ''} ${labelData.subTitle || ''}`;
   const matchedTrichoVehicle = vehicleSearchCorpus.match(/\b(TrichoSol|TrichoOil|TrichoFoam|TrichoWash|TrichoSerum|TrichoCond)\b/i);
   const isGenericTopicalTitle = /^(topical\s+treatment|tratamiento\s+t[óo]pico|scalp\s+care(?:\s+and\s+hygiene)?|topical\s+solution)$/i.test(rawBaseTitle);
+  const isGenericOralTitle = /^(oral\s+treatment|tratamiento\s+oral)$/i.test(rawBaseTitle);
   const resolvedProductTitle = (isGenericTopicalTitle && matchedTrichoVehicle)
     ? matchedTrichoVehicle[1]
-    : (rawBaseTitle || 'Compounded Pharmaceutical Protocol');
+    : isGenericOralTitle
+      ? 'Oral Capsules'
+      : (rawBaseTitle || 'Compounded Pharmaceutical Protocol');
   const productTitle = resolvedProductTitle;
   const formula = labelData.formula || '';
   const rawDirections = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
@@ -430,7 +440,8 @@ export default function PharmapolisLabelSvg({
   const prodDate = formatLabelDate(labelData.prodDate || labelData.mfgDate, '05-10-2026');
   const expDate = formatLabelDate(labelData.expDate, '04-10-2027');
   const storage = labelData.storage || 'Store at room temperature';
-  const doctorName = labelData.doctorName !== undefined && labelData.doctorName !== null ? String(labelData.doctorName).trim() : (labelData.physician || '');
+  const rawDoctorName = labelData.doctorName !== undefined && labelData.doctorName !== null ? String(labelData.doctorName).trim() : (labelData.physician || '');
+  const doctorName = rawDoctorName && !/^(dr\.?|dra\.?)\s+/i.test(rawDoctorName) ? `Dr. ${rawDoctorName}` : rawDoctorName;
   const rawClinicName = labelData.clinicName !== undefined && labelData.clinicName !== null ? String(labelData.clinicName).trim() : (labelData.clinic || '');
   // By default, do NOT show clinic name on the printed label (only doctorName + license).
   // It is only rendered if explicitly enabled via showClinicOnLabel === true.
@@ -440,7 +451,7 @@ export default function PharmapolisLabelSvg({
   const doctorLicense = labelData.doctorLicense !== undefined && labelData.doctorLicense !== null ? String(labelData.doctorLicense).trim() : (labelData.license || '');
   const batchCode = labelData.batchCode || 'PHARM-2026-B948';
   const lote = labelData.lote || '2609-PLV';
-  const volume = labelData.volume || labelData.netVolume || labelData.size || labelData.netContent || labelData.totalVolume || labelData.quantity || '100 mL';
+  const volume = formatPharmaUnits(labelData.volume || labelData.netVolume || labelData.size || labelData.netContent || labelData.totalVolume || labelData.quantity || '100 mL');
 
   // Dynamic Dispensing Pharmacy Name & Address
   let rawPharmacyName = (labelData.pharmacyName || labelData.pharmacy || labelData.dispensingPharmacy || 'Pharmapolis Compounding Pharmacy').trim();
@@ -1343,6 +1354,7 @@ export default function PharmapolisLabelSvg({
                 .replace(/\bpatented\s+hydrophilic\s+vehicle\s+for\s+scalp\s+retention\b/gi, 'Alcohol-Free Hydrophilic Compounding Vehicle')
                 .replace(/\bbase\b/gi, 'Compounding Vehicle');
             }
+            cleanVehicleDisplay = formatPharmaUnits(cleanVehicleDisplay);
             if (cleanVehicleDisplay.toLowerCase().includes('trichooil')) {
               cleanVehicleDisplay = cleanVehicleDisplay
                 .replace(/\bbase\b/gi, 'Compounding Vehicle')
