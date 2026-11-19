@@ -14,7 +14,9 @@ import {
   ArrowUpRight,
   BookOpen,
   ExternalLink,
-  Tag
+  Tag,
+  CheckCircle2,
+  Eye
 } from 'lucide-react';
 import GlobalSearchBar from '../../ui/GlobalSearchBar';
 import DataTable from '../../ui/DataTable';
@@ -68,8 +70,57 @@ export default function DoctorPrescriptionsTab({
 }) {
   const isEs = lang === 'es';
   const [expandedApiKeys, setExpandedApiKeys] = React.useState({});
+  const [selectedAdjunctive, setSelectedAdjunctive] = React.useState({});
+  const [approvingRxId, setApprovingRxId] = React.useState(null);
+
   const toggleApiDetails = (key) => {
     setExpandedApiKeys((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const toggleAdjunctiveOption = (rxKey, optionKey) => {
+    setSelectedAdjunctive((prev) => {
+      const current = prev[rxKey] || [];
+      const next = current.includes(optionKey)
+        ? current.filter((k) => k !== optionKey)
+        : [...current, optionKey];
+      return { ...prev, [rxKey]: next };
+    });
+  };
+
+  const handleApproveDraftRx = async (rx) => {
+    const rxId = rx?.id || rx?.code;
+    if (!rxId) return;
+    setApprovingRxId(rxId);
+    try {
+      const chosenKeys = selectedAdjunctive[rxId] || [];
+      const res = await fetch('/api/prescriptions/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptionId: rx.id,
+          code: rx.code,
+          status: 'approved',
+          selectedAdjunctiveOptions: chosenKeys,
+          approvedByDoctor: true,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || 'Could not approve prescription');
+      }
+      toast?.success(
+        isEs
+          ? `Prescripción #${rx.code} aprobada y enviada a farmacia`
+          : `Prescription #${rx.code} approved & authorized for dispensary`
+      );
+      if (typeof handleRefresh === 'function') {
+        handleRefresh();
+      }
+    } catch (err) {
+      toast?.error(err?.message || 'Error approving prescription');
+    } finally {
+      setApprovingRxId(null);
+    }
   };
 
   return (
@@ -297,8 +348,57 @@ export default function DoctorPrescriptionsTab({
           const isAwaitingAtlasReview = !isProposal && (rx.status === 'draft' || rx.ingestionStage === 'awaiting_atlas_review' || rx.state === 'draft');
 
           const [expandedApiKeys, setExpandedApiKeys] = React.useState({});
+  const [selectedAdjunctive, setSelectedAdjunctive] = React.useState({});
+  const [approvingRxId, setApprovingRxId] = React.useState(null);
+
   const toggleApiDetails = (key) => {
     setExpandedApiKeys((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const toggleAdjunctiveOption = (rxKey, optionKey) => {
+    setSelectedAdjunctive((prev) => {
+      const current = prev[rxKey] || [];
+      const next = current.includes(optionKey)
+        ? current.filter((k) => k !== optionKey)
+        : [...current, optionKey];
+      return { ...prev, [rxKey]: next };
+    });
+  };
+
+  const handleApproveDraftRx = async (rx) => {
+    const rxId = rx?.id || rx?.code;
+    if (!rxId) return;
+    setApprovingRxId(rxId);
+    try {
+      const chosenKeys = selectedAdjunctive[rxId] || [];
+      const res = await fetch('/api/prescriptions/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptionId: rx.id,
+          code: rx.code,
+          status: 'approved',
+          selectedAdjunctiveOptions: chosenKeys,
+          approvedByDoctor: true,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || 'Could not approve prescription');
+      }
+      toast?.success(
+        isEs
+          ? `Prescripción #${rx.code} aprobada y enviada a farmacia`
+          : `Prescription #${rx.code} approved & authorized for dispensary`
+      );
+      if (typeof handleRefresh === 'function') {
+        handleRefresh();
+      }
+    } catch (err) {
+      toast?.error(err?.message || 'Error approving prescription');
+    } finally {
+      setApprovingRxId(null);
+    }
   };
 
   return (
@@ -517,8 +617,133 @@ export default function DoctorPrescriptionsTab({
                     <BookOpen size={12} />
                     <span>{isEs ? 'Ficha Clínica Completa' : 'Full Clinical Dossier'}</span>
                   </Link>
+
+                  {/* Original Rx PDF Button (if original document exists) */}
+                  {(rx.originalDocumentUrl || rx.cloudStoragePath || rx.cloudStorageUri || rx.pdfUrl) && (
+                    <a
+                      href={rx.originalDocumentUrl || `/api/prescriptions/original-document?rxId=${encodeURIComponent(rx.id || rx.code)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 10px',
+                        background: '#f0fdf4',
+                        color: '#047857',
+                        border: '1px solid #a7f3d0',
+                        borderRadius: '6px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        textDecoration: 'none'
+                      }}
+                      title={isEs ? 'Ver PDF original de la prescripción' : 'Open original prescription PDF'}
+                    >
+                      <Eye size={12} />
+                      <span>{isEs ? 'PDF Original' : 'Original Rx PDF'}</span>
+                    </a>
+                  )}
                 </div>
               </div>
+
+              {/* 1-Click Draft Approval & Atlas Adjunctive Peptide Selector */}
+              {(String(rx.status || '').toLowerCase() === 'draft' || (Array.isArray(rx.adjunctiveOptions) && rx.adjunctiveOptions.length > 0)) && (
+                <div
+                  style={{
+                    marginBottom: '14px',
+                    padding: '12px 14px',
+                    background: '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    borderLeft: '4px solid #0d9488',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#003666' }}>
+                        {isEs ? 'Revisión Médica · Autorización & Péptidos Sugeridos (Atlas)' : 'Physician Review · Draft Authorization & Atlas Adjunctive Peptides'}
+                      </span>
+                      <span style={{ fontSize: '0.71rem', color: '#475569' }}>
+                        {isEs
+                          ? 'Selecciona las opciones adicionales de Atlas Health Solutions que deseas incluir antes de aprobar.'
+                          : 'Select any Atlas Health Solutions peptide options to include prior to authorizing this prescription.'}
+                      </span>
+                    </div>
+                    {String(rx.status || '').toLowerCase() === 'draft' && (
+                      <button
+                        type="button"
+                        disabled={approvingRxId === (rx.id || rx.code)}
+                        onClick={() => handleApproveDraftRx(rx)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 14px',
+                          background: approvingRxId === (rx.id || rx.code) ? '#94a3b8' : '#0d9488',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: approvingRxId === (rx.id || rx.code) ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        <CheckCircle2 size={14} />
+                        <span>
+                          {approvingRxId === (rx.id || rx.code)
+                            ? (isEs ? 'Aprobando...' : 'Approving...')
+                            : (isEs ? 'Aprobar Borrador y Enviar' : 'Approve Draft & Authorize')}
+                        </span>
+                      </button>
+                    )}
+                  </div>
+
+                  {Array.isArray(rx.adjunctiveOptions) && rx.adjunctiveOptions.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {rx.adjunctiveOptions.map((opt) => {
+                        const rxKey = rx.id || rx.code;
+                        const checked = (selectedAdjunctive[rxKey] || []).includes(opt.optionKey);
+                        return (
+                          <label
+                            key={opt.optionKey}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              flexWrap: 'wrap',
+                              gap: '8px',
+                              padding: '7px 10px',
+                              background: checked ? '#f0fdf4' : '#ffffff',
+                              border: checked ? '1px solid #10b981' : '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '0.75rem'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleAdjunctiveOption(rxKey, opt.optionKey)}
+                              />
+                              <strong style={{ color: '#003666' }}>Option {opt.optionKey}:</strong>
+                              <span style={{ color: '#0f172a', fontWeight: 600 }}>{opt.title}</span>
+                            </div>
+                            {Array.isArray(opt.targetGenotypes) && opt.targetGenotypes.length > 0 && (
+                              <span style={{ fontSize: '0.67rem', color: '#047857', fontWeight: 600 }}>
+                                {opt.targetGenotypes.join(' · ')}
+                              </span>
+                            )}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Multi-Part Formulations Container (Full Horizontal Width) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
