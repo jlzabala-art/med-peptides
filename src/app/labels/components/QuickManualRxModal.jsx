@@ -9,6 +9,73 @@ import {
 import toast from 'react-hot-toast';
 import { searchAlgoliaFederated } from '../../../services/algoliaSearch';
 
+// ── Volume / Quantity Grouped Presets (Compounding & Peptide Standard) ───────
+
+const VOLUME_QTY_GROUPS = [
+  {
+    groupEn: '💉 Pens, Cartridges & Vials',
+    groupEs: '💉 Pens, Cartuchos y Viales',
+    options: [
+      { value: '2 mL', hintEn: 'Pre-filled Pen / Vial', hintEs: 'Pen precargado / Vial' },
+      { value: '2.4 mL', hintEn: 'Pre-filled Pen', hintEs: 'Pen precargado' },
+      { value: '3 mL', hintEn: 'Pre-filled Pen / Cartridge', hintEs: 'Pen precargado / Cartucho' },
+      { value: '5 mL', hintEn: 'Multi-dose Vial', hintEs: 'Vial multidosis' },
+      { value: '10 mL', hintEn: 'Multi-dose Vial', hintEs: 'Vial multidosis' },
+      { value: '1 Vial', hintEn: 'Lyophilized Powder Vial', hintEs: 'Vial liofilizado' },
+      { value: '3 Vials', hintEn: 'Multi-vial Pack', hintEs: 'Pack 3 viales' },
+    ],
+  },
+  {
+    groupEn: '🧴 Topicals, Lotions & Shampoos',
+    groupEs: '🧴 Tópicos, Lociones y Champús',
+    options: [
+      { value: '15 mL', hintEn: 'Dropper / Serum', hintEs: 'Gotero / Sérum' },
+      { value: '30 mL', hintEn: 'Dropper / Airless Pump', hintEs: 'Gotero / Bomba airless' },
+      { value: '50 mL', hintEn: 'Spray / Foam / Airless', hintEs: 'Spray / Espuma / Airless' },
+      { value: '60 mL', hintEn: 'Topical Solution / TrichoSol', hintEs: 'Solución tópica / TrichoSol' },
+      { value: '100 mL', hintEn: 'Lotion / TrichoSol / Foam', hintEs: 'Loción / TrichoSol / Espuma' },
+      { value: '120 mL', hintEn: 'Topical Solution', hintEs: 'Solución tópica' },
+      { value: '200 mL', hintEn: 'Compounded Shampoo', hintEs: 'Champú magistral' },
+      { value: '250 mL', hintEn: 'Shampoo / TrichoWash', hintEs: 'Champú / TrichoWash' },
+    ],
+  },
+  {
+    groupEn: '🧪 Creams, Gels & Ointments',
+    groupEs: '🧪 Cremas, Geles y Pomadas',
+    options: [
+      { value: '15 g', hintEn: 'Tube / Eye / Topical', hintEs: 'Tubo / Contorno / Tópico' },
+      { value: '30 g', hintEn: 'Airless Pump / Cream / Gel', hintEs: 'Airless / Crema / Gel' },
+      { value: '50 g', hintEn: 'Airless Pump / Cream / Gel', hintEs: 'Airless / Crema / Gel' },
+      { value: '100 g', hintEn: 'Jar / Pump Dispenser', hintEs: 'Tarro / Dosificador' },
+    ],
+  },
+  {
+    groupEn: '💊 Oral Capsules & Sublingual Troches',
+    groupEs: '💊 Cápsulas Orales y Troches Sublinguales',
+    options: [
+      { value: '30 Caps', hintEn: '1-month supply (1×/day)', hintEs: 'Suministro 1 mes (1×/día)' },
+      { value: '60 Caps', hintEn: '1–2 month supply', hintEs: 'Suministro 1–2 meses' },
+      { value: '90 Caps', hintEn: '3-month supply', hintEs: 'Suministro 3 meses' },
+      { value: '100 Caps', hintEn: 'Fagron Oral Protocol', hintEs: 'Protocolo oral Fagron' },
+      { value: '120 Caps', hintEn: '2-month supply (2×/day)', hintEs: 'Suministro 2 meses (2×/día)' },
+      { value: '180 Caps', hintEn: '3-month supply (2×/day)', hintEs: 'Suministro 3 meses (2×/día)' },
+      { value: '30 Troches', hintEn: 'Sublingual Lozenge Pack', hintEs: 'Pastillas sublinguales' },
+      { value: '60 Troches', hintEn: 'Sublingual Lozenge Pack', hintEs: 'Pastillas sublinguales' },
+    ],
+  },
+  {
+    groupEn: '🔹 Pellets, Nasal & Other',
+    groupEs: '🔹 Pellets, Nasal y Otros',
+    options: [
+      { value: '1 Pellet', hintEn: 'EU GMP Sterile Blister', hintEs: 'Blíster estéril EU GMP' },
+      { value: '2 Pellets', hintEn: 'Sterile BHRT Implants', hintEs: 'Implantes BHRT estériles' },
+      { value: '10 mL Nasal Spray', hintEn: 'Metered Nasal Spray', hintEs: 'Spray nasal dosificador' },
+      { value: '15 mL Nasal Spray', hintEn: 'Metered Nasal Spray', hintEs: 'Spray nasal dosificador' },
+      { value: '30 Sachets', hintEn: 'Oral Powder Packets', hintEs: 'Sobres de polvo oral' },
+    ],
+  },
+];
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function generateLot() {
@@ -185,6 +252,8 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
 
   // ── Other fields
   const [volume, setVolume] = useState('30 mL');
+  const [volumeDropdown, setVolumeDropdown] = useState(false);
+  const [volumeFilter, setVolumeFilter] = useState('');
   const [directions, setDirections] = useState('');
   const [batchNumber, setBatchNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -192,11 +261,16 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
 
   const debounceRef = useRef({});
   const modalRef = useRef(null);
+  const volumeBoxRef = useRef(null);
 
   // ── Close on outside click ─────────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
     function handler(e) {
+      if (volumeBoxRef.current && !volumeBoxRef.current.contains(e.target)) {
+        setVolumeDropdown(false);
+        setVolumeFilter('');
+      }
       if (modalRef.current && !modalRef.current.contains(e.target)) {
         setPatientDropdown(false);
         setDoctorDropdown(false);
@@ -530,20 +604,184 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
                 }}
                 createLabel={isEs ? `⚙️ Crear fórmula magistral ad-hoc: "${formulaQuery}"` : `⚙️ Create custom ad-hoc formula: "${formulaQuery}"`}
               />
-              <label style={fieldLabel}>
-                <span>{isEs ? 'Volumen / Cant.' : 'Volume / Qty'}</span>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  <input type="text" value={volume} onChange={e => setVolume(e.target.value)} style={{ ...input, flex: 1 }} />
+              <div ref={volumeBoxRef} style={{ ...fieldLabel, position: 'relative' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>{isEs ? 'Volumen / Cant.' : 'Volume / Qty'}</span>
+                </span>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={volume}
+                    onChange={e => {
+                      setVolume(e.target.value);
+                      setVolumeFilter(e.target.value);
+                      setVolumeDropdown(true);
+                    }}
+                    onFocus={() => {
+                      setVolumeFilter('');
+                      setVolumeDropdown(true);
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Escape') {
+                        setVolumeDropdown(false);
+                        setVolumeFilter('');
+                      } else if (e.key === 'Enter' && volumeDropdown) {
+                        e.preventDefault();
+                        setVolumeDropdown(false);
+                        setVolumeFilter('');
+                      }
+                    }}
+                    placeholder={isEs ? 'Ej. 30 mL, 60 Caps…' : 'e.g. 30 mL, 60 Caps…'}
+                    style={{ ...input, paddingRight: '28px', fontWeight: 600 }}
+                  />
+                  <button
+                    type="button"
+                    aria-label={isEs ? 'Abrir opciones de volumen y cantidad' : 'Toggle volume and quantity options'}
+                    onClick={() => {
+                      setVolumeFilter('');
+                      setVolumeDropdown(prev => !prev);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: '4px',
+                      width: '24px',
+                      height: '24px',
+                      border: 'none',
+                      background: 'transparent',
+                      color: '#64748b',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    <ChevronDown size={14} style={{ transform: volumeDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                  </button>
                 </div>
-                <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', marginTop: '2px' }}>
-                  {['3 mL', '30 mL', '60 mL', '250 mL', '60 Caps'].map(v => (
-                    <button key={v} type="button" className="qmrx-chip-btn" onClick={() => setVolume(v)}
-                      style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: '10px', border: '1px solid #e2e8f0', background: volume === v ? '#eff6ff' : '#f8fafc', color: volume === v ? '#1a73e8' : '#64748b', cursor: 'pointer', fontWeight: volume === v ? 700 : 400 }}>
-                      {v}
-                    </button>
-                  ))}
-                </div>
-              </label>
+
+                {volumeDropdown && (() => {
+                  const q = volumeFilter.trim().toLowerCase();
+                  const filteredGroups = VOLUME_QTY_GROUPS.map(g => ({
+                    ...g,
+                    options: g.options.filter(opt =>
+                      !q ||
+                      opt.value.toLowerCase().includes(q) ||
+                      opt.hintEn.toLowerCase().includes(q) ||
+                      opt.hintEs.toLowerCase().includes(q) ||
+                      g.groupEn.toLowerCase().includes(q) ||
+                      g.groupEs.toLowerCase().includes(q)
+                    ),
+                  })).filter(g => g.options.length > 0);
+                  const exactMatch = VOLUME_QTY_GROUPS.some(g => g.options.some(o => o.value.toLowerCase() === volume.trim().toLowerCase()));
+
+                  return (
+                    <div
+                      role="listbox"
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        right: 0,
+                        minWidth: '240px',
+                        width: '100%',
+                        zIndex: 10002,
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 28px rgba(15, 23, 42, 0.16)',
+                        marginTop: '3px',
+                        maxHeight: '260px',
+                        overflowY: 'auto',
+                      }}
+                    >
+                      {filteredGroups.map(group => (
+                        <div key={group.groupEn}>
+                          <div style={{
+                            padding: '5px 10px 3px',
+                            fontSize: '0.64rem',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                            color: '#64748b',
+                            background: '#f8fafc',
+                            borderTop: '1px solid #f1f5f9',
+                            borderBottom: '1px solid #f1f5f9',
+                            position: 'sticky',
+                            top: 0,
+                          }}>
+                            {isEs ? group.groupEs : group.groupEn}
+                          </div>
+                          {group.options.map(opt => {
+                            const isSelected = volume.trim().toLowerCase() === opt.value.toLowerCase();
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => {
+                                  setVolume(opt.value);
+                                  setVolumeDropdown(false);
+                                  setVolumeFilter('');
+                                }}
+                                style={{
+                                  width: '100%',
+                                  textAlign: 'left',
+                                  padding: '6px 10px',
+                                  background: isSelected ? '#eff6ff' : '#ffffff',
+                                  border: 'none',
+                                  borderBottom: '1px solid #f8fafc',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '8px',
+                                }}
+                                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f8fafc'; }}
+                                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = '#ffffff'; }}
+                              >
+                                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: isSelected ? '#1a73e8' : '#0f172a', whiteSpace: 'nowrap' }}>
+                                  {opt.value}
+                                </span>
+                                <span style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {isEs ? opt.hintEs : opt.hintEn}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ))}
+
+                      {volume.trim() && !exactMatch && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVolume(volume.trim());
+                            setVolumeDropdown(false);
+                            setVolumeFilter('');
+                          }}
+                          style={{
+                            width: '100%',
+                            textAlign: 'left',
+                            padding: '8px 10px',
+                            background: '#f8fafc',
+                            border: 'none',
+                            borderTop: '1px solid #e2e8f0',
+                            color: '#1a73e8',
+                            fontSize: '0.76rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                          }}
+                        >
+                          <Plus size={12} />
+                          <span>{isEs ? `Usar personalizado: "${volume.trim()}"` : `Use custom: "${volume.trim()}"`}</span>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
 
             {/* Ingredients chips */}

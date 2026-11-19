@@ -235,25 +235,31 @@ export default function PelletsPriceListClient({
   // DataTable columns definition (Strict Rule #3 & Rule #30 - Zero horizontal scroll)
   const columns = useMemo(() => [
     {
-      key: 'itemNumber',
-      label: '#',
-      width: '45px',
-      align: 'center',
-      render: (val, row) => (
-        <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.74rem', color: '#64748b' }}>
-          {val || row.itemNumber}
-        </span>
-      )
-    },
-    {
       key: 'name',
       label: isEs ? 'Formulación & Dosis' : 'Formulation & Strength',
-      width: '270px',
+      width: '305px',
       render: (val, row) => {
         const isPellet = row.category !== 'Trocar Kits';
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
+              {row.itemNumber && (
+                <span style={{
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  fontSize: '0.68rem',
+                  color: '#334155',
+                  backgroundColor: '#f1f5f9',
+                  border: '1px solid #cbd5e1',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  letterSpacing: '0.02em',
+                }}>
+                  {row.itemNumber}
+                </span>
+              )}
               {isPellet ? (
                 <Link
                   href={`/p/${row.slug}`}

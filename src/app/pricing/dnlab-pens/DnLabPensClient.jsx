@@ -96,7 +96,7 @@ export default function DnLabPensClient({
       header: '#',
       width: '55px',
       render: (val, row) => (
-        <span style={{ fontWeight: 800, color: '#64748b', fontSize: '0.82rem' }}>
+        <span style={{ fontWeight: 800, color: '#64748b', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
           #{row.itemNumber}
         </span>
       )
