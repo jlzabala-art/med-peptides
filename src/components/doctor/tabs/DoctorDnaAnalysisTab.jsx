@@ -707,7 +707,7 @@ export default function DoctorDnaAnalysisTab({
                 border: '1px solid #dadce0'
               }}
             >
-              {filterQuery || selectedTag !== 'all'
+              {filterQuery || selectedPlatform !== 'all' || selectedAssay !== 'all'
                 ? `Filtered View (${filteredData.length} of ${dnaResults.length})`
                 : `Entire Practice (${dnaResults.length} records)`}
             </span>
