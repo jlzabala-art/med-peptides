@@ -816,6 +816,8 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         {/* ── Global Search & Filters (Golden Rule #7) ── */}
         <div style={{ marginBottom: '1.25rem' }}>
           <GlobalSearchBar
+            namespace="genomics"
+            searchScope="local"
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder="Search panels by name, genes or category (e.g. All-in-One, Pharmacogenetics, Skin, MTHFR, CYP450)..."

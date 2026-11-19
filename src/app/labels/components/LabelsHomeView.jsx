@@ -278,6 +278,8 @@ export default function LabelsHomeView({
             }}
           >
             <GlobalSearchBar
+              namespace="labels"
+              lang={isEs ? 'es' : 'en'}
               value={searchQuery || ''}
               onChange={(val) => {
                 setSearchQuery?.(val);

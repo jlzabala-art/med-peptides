@@ -816,6 +816,9 @@ export default function PelletsPriceListClient({
             {/* Global Search Bar (Strict Rule #6 & #7) */}
             <div className="pellets-filter-toolbar">
               <GlobalSearchBar
+                namespace="pellets"
+                searchScope="local"
+                lang={lang}
                 value={searchQuery}
                 onChange={setSearchQuery}
                 placeholder={isEs

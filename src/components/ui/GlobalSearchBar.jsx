@@ -79,6 +79,8 @@ export default function GlobalSearchBar({
   onFocus,
   onBlur,
   lang = 'en',
+  searchScope,           // 'clinical' | 'patients' | 'users' | 'suppliers' | 'protocols' | 'products' | 'local'
+  disableAlgolia = false,// explicitly disable Algolia queries (pure local filter)
   // Integrated filters (Golden Rule #7)
   filters = [],          // Active filter chips rendered below the bar
   filterOptions = [],    // Quick-filter dropdowns rendered inside the bar
@@ -90,11 +92,27 @@ export default function GlobalSearchBar({
   const skipNextSuggestionsRef = useRef(false);
   const [isFocused, setIsFocused] = useState(false);
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-  const isPatientsPage = (namespace || '').includes('patient') || currentPath.includes('/patients');
-  const isSuppliersPage = (namespace || '').includes('supplier') || (namespace || '').includes('procurement') || currentPath.includes('/procurement') || currentPath.includes('/suppliers');
-  const isPrescriptionsPage = (namespace || '').includes('prescription') || currentPath.includes('/prescriptions');
-  const isProtocolsPage = (namespace || '').includes('protocol') || currentPath.includes('/proto');
-  const isUsersPage = !isPatientsPage && ((namespace || '').includes('user') || (namespace || '').includes('customer') || currentPath.includes('/users') || currentPath.includes('/customers'));
+
+  // Scope & Context Resolution (Strict Relevance Audit)
+  const isExplicitLocal = disableAlgolia || searchScope === 'local';
+  const inferredLocal =
+    (namespace || '').includes('-logs') ||
+    (namespace || '').includes('-costs') ||
+    (namespace || '').includes('-templates') ||
+    (namespace || '').includes('-backups') ||
+    (namespace || '').includes('-gadgets') ||
+    (namespace || '').includes('-approvals') ||
+    (namespace || '').includes('-commissions') ||
+    (namespace || '').includes('payables');
+  const isLocalOnly = isExplicitLocal || inferredLocal;
+
+  const isLabelsPage = searchScope === 'clinical' || (namespace || '').includes('label') || currentPath.includes('/labels');
+  const isPatientsPage = searchScope === 'patients' || (namespace || '').includes('patient') || currentPath.includes('/patients');
+  const isSuppliersPage = searchScope === 'suppliers' || (namespace || '').includes('supplier') || (namespace || '').includes('procurement') || currentPath.includes('/procurement') || currentPath.includes('/suppliers');
+  const isPrescriptionsPage = searchScope === 'clinical' || (namespace || '').includes('prescription') || currentPath.includes('/prescriptions') || currentPath.includes('/rx') || isLabelsPage;
+  const isProtocolsPage = searchScope === 'protocols' || (namespace || '').includes('protocol') || currentPath.includes('/proto');
+  const isUsersPage = !isPatientsPage && (searchScope === 'users' || (namespace || '').includes('user') || (namespace || '').includes('customer') || currentPath.includes('/users') || currentPath.includes('/customers'));
+  const isProductsPage = searchScope === 'products' || (namespace || '').includes('product') || (namespace || '').includes('vial') || (namespace || '').includes('catalog') || currentPath.includes('/vials') || currentPath.includes('/pricing/peptides') || currentPath.includes('/admin/products');
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState(() => {
@@ -123,6 +141,13 @@ export default function GlobalSearchBar({
     if (skipNextSuggestionsRef.current) {
       skipNextSuggestionsRef.current = false;
       setShowDropdown(false);
+      return;
+    }
+
+    if (isLocalOnly) {
+      setSuggestions([]);
+      setIsSearchingSuggestions(false);
+      setSelectedIndex(-1);
       return;
     }
 
@@ -191,21 +216,56 @@ export default function GlobalSearchBar({
               setShowDropdown(true);
             }
           }
-        } else if (isPrescriptionsPage) {
-          const res = await searchAlgoliaFederated(effectiveValue.trim(), ['prescriptions'], 8);
+        } else if (isLabelsPage || isPrescriptionsPage) {
+          const res = await searchAlgoliaFederated(effectiveValue.trim(), ['atlas_patients', 'prescriptions'], 8);
           if (isMounted) {
-            const rxHits = (res.prescriptions || []).map((r) => ({
-              key: r.objectID || r.id,
-              id: r.objectID || r.id,
-              name: (r.prescriptionCode || r.code || `RX-${(r.id || '').slice(0, 6)}`).trim(),
-              patientName: r.patientName || '',
-              doctorName: r.doctorName || '',
-              category: (r.status || 'PRESCRIPTION').toUpperCase(),
-              status: r.status || 'pending',
-              indexName: 'prescriptions'
-            }));
-            setSuggestions(rxHits);
-            if (rxHits.length > 0 && isFocused) {
+            // Deduplicate patients by normalized name
+            const seenPatients = new Set();
+            const patientHits = [];
+            for (const p of (res.patients || [])) {
+              const pName = (p.name || p.fullName || '').trim();
+              const normName = pName.toLowerCase();
+              if (!normName || seenPatients.has(normName)) continue;
+              seenPatients.add(normName);
+              patientHits.push({
+                key: `patient_${p.objectID || p.id}`,
+                id: p.objectID || p.id,
+                name: pName,
+                email: p.email || '',
+                phone: p.phone || '',
+                category: 'PATIENT',
+                status: p.status || 'active',
+                indexName: 'atlas_patients'
+              });
+              if (patientHits.length >= 4) break;
+            }
+
+            // Map prescription hits
+            const seenRx = new Set();
+            const rxHits = [];
+            for (const r of (res.prescriptions || [])) {
+              const codeStr = (r.prescriptionCode || r.code || r.fileNumber || `RX-${(r.id || '').slice(0, 6)}`).trim();
+              const normCode = codeStr.toLowerCase();
+              if (!normCode || seenRx.has(normCode)) continue;
+              seenRx.add(normCode);
+              rxHits.push({
+                key: `rx_${r.objectID || r.id}`,
+                id: r.objectID || r.id,
+                code: codeStr,
+                name: codeStr,
+                patientName: r.patientName || '',
+                title: r.treatmentTitle || r.medication || r.title || '',
+                doctorName: r.doctorName || '',
+                category: (r.status || 'PRESCRIPTION').toUpperCase(),
+                status: r.status || 'approved',
+                indexName: 'prescriptions'
+              });
+              if (rxHits.length >= 4) break;
+            }
+
+            const combined = [...patientHits, ...rxHits];
+            setSuggestions(combined);
+            if (combined.length > 0 && isFocused) {
               setShowDropdown(true);
             }
           }
@@ -233,7 +293,7 @@ export default function GlobalSearchBar({
               setShowDropdown(true);
             }
           }
-        } else {
+        } else if (isProductsPage || isProtocolsPage || namespace === 'global') {
           const res = await searchAlgolia(effectiveValue.trim());
           if (isMounted) {
             // Products are now natively deduplicated by Algolia (attributeForDistinct: canonicalKey)
@@ -294,6 +354,9 @@ export default function GlobalSearchBar({
               setShowDropdown(true);
             }
           }
+        } else {
+          // Internal operational tabs (audit, logs, costs, commissions, etc.) do NOT show catalog APIs
+          if (isMounted) setSuggestions([]);
         }
       } catch {
         if (isMounted) setSuggestions([]);
@@ -742,12 +805,14 @@ export default function GlobalSearchBar({
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {(effectiveValue || '').trim().startsWith('/ai')
                   ? '🤖 Atlas AI'
+                  : isLabelsPage
+                  ? (lang === 'es' ? 'Pacientes y Recetas (Algolia)' : 'Patients & Prescriptions (Algolia)')
                   : isPatientsPage
                   ? 'Patients (Algolia)'
                   : isSuppliersPage
                   ? 'Suppliers (Algolia)'
                   : isPrescriptionsPage
-                  ? 'Prescriptions (Algolia)'
+                  ? (lang === 'es' ? 'Recetas y Pacientes (Algolia)' : 'Prescriptions & Patients (Algolia)')
                   : isProtocolsPage
                   ? 'Protocols (Algolia)'
                   : isUsersPage
@@ -758,12 +823,12 @@ export default function GlobalSearchBar({
             </div>
             {suggestions.length === 0 && !isSearchingSuggestions ? (
               <div style={{ padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                {isPatientsPage
+                {isLabelsPage || isPrescriptionsPage
+                  ? (lang === 'es' ? 'No se encontraron pacientes ni recetas coincidentes' : 'No patient or prescription matches found')
+                  : isPatientsPage
                   ? 'No patient matches found'
                   : isSuppliersPage
                   ? 'No supplier matches found'
-                  : isPrescriptionsPage
-                  ? 'No prescription matches found'
                   : isUsersPage
                   ? 'No user matches found'
                   : 'No clinical matches found'}
@@ -819,14 +884,14 @@ export default function GlobalSearchBar({
                         }}>
                           ✨
                         </span>
-                      ) : isUserItem ? (
+                      ) : (isUserItem || item.indexName === 'atlas_patients') ? (
                         <span style={{
                           width: '22px',
                           height: '22px',
                           borderRadius: '50%',
-                          backgroundColor: roleBg,
-                          border: `1px solid ${roleBorder}`,
-                          color: roleColor,
+                          backgroundColor: item.indexName === 'atlas_patients' ? '#faf5ff' : roleBg,
+                          border: item.indexName === 'atlas_patients' ? '1px solid #e9d5ff' : `1px solid ${roleBorder}`,
+                          color: item.indexName === 'atlas_patients' ? '#7c3aed' : roleColor,
                           display: 'inline-flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -945,6 +1010,36 @@ export default function GlobalSearchBar({
                         >
                           {item.indexName === 'protocols' ? 'Protocol' : 'Product'}
                           <ArrowUpRight size={11} />
+                        </span>
+                      ) : item.indexName === 'atlas_patients' ? (
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 7px',
+                            borderRadius: '6px',
+                            backgroundColor: '#faf5ff',
+                            color: '#7c3aed',
+                            border: '1px solid #e9d5ff',
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          Patient
+                        </span>
+                      ) : item.indexName === 'prescriptions' ? (
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 7px',
+                            borderRadius: '6px',
+                            backgroundColor: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1px solid #bfdbfe',
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          Prescription
                         </span>
                       ) : (
                         <span
