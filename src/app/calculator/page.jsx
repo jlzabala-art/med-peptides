@@ -43,16 +43,16 @@ export async function generateMetadata({ searchParams }) {
 
   if (!peptideName) {
     const defaultTitle = isEs
-      ? 'Guía Visual de Uso y Dosificación de Péptidos | Atlas Health'
-      : 'Peptide Administration & Dosing Visual Guide | Atlas Health';
+      ? 'Guía Visual de Uso y Dosificación de Péptidos'
+      : 'Peptide Administration & Dosing Visual Guide';
     const defaultDesc = isEs
       ? 'Guía visual interactiva paso a paso para pacientes: viales liofilizados, plumas inyectoras, cartuchos de 3 mL, sprays nasales, cápsulas y tópicos.'
       : 'Interactive step-by-step patient administration guide for lyophilized vials, injector pens, 3 mL cartridges, nasal sprays, oral capsules, and topicals.';
     return {
       title: defaultTitle,
       description: defaultDesc,
-      openGraph: { title: defaultTitle, description: defaultDesc, type: 'website' },
-      twitter: { card: 'summary_large_image', title: defaultTitle, description: defaultDesc },
+      openGraph: { title: `${defaultTitle} | Atlas Health`, description: defaultDesc, type: 'website' },
+      twitter: { card: 'summary_large_image', title: `${defaultTitle} | Atlas Health`, description: defaultDesc },
     };
   }
 
@@ -65,8 +65,8 @@ export async function generateMetadata({ searchParams }) {
     : '';
 
   const title = isEs
-    ? `Cómo usar ${summaryParts}${targetClause} | Atlas Health`
-    : `How to Use ${summaryParts}${targetClause} | Atlas Health`;
+    ? `Cómo usar ${summaryParts}${targetClause}`
+    : `How to Use ${summaryParts}${targetClause}`;
 
   const detailBits = [
     strength ? (isEs ? `Presentación: ${strength}` : `Strength: ${strength}`) : '',

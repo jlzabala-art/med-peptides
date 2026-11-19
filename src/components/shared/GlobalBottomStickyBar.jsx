@@ -99,12 +99,9 @@ export default function GlobalBottomStickyBar() {
         atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
         secondaryAction: quoteAction,
         primaryAction: {
-          label: isSpanish ? 'Tarifa Pellets (PDF)' : 'Pellets Schedule',
+          label: isSpanish ? 'Guía de Trócar' : 'Trocar Guide',
           icon: <Syringe size={14} />,
-          onClick: () => {
-            const ev = new CustomEvent('open-pellets-pdf-modal');
-            window.dispatchEvent(ev);
-          },
+          onClick: () => router.push('/guides/hormone-pellets-implantation'),
         },
       };
     }

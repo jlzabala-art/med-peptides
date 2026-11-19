@@ -21,7 +21,8 @@ import {
   X,
   Activity,
   CheckCircle2,
-  ShoppingCart
+  ShoppingCart,
+  ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
@@ -48,6 +49,196 @@ const CURRENCY_SYMBOLS = {
   AED: 'AED '
 };
 
+/**
+ * PelletMobileCard — Symmetric 2-Zone Stripe / GCP Mobile Product Card
+ * Zone A: Compact clinical identity ([PL-01] + Name + Expand + Strength/Trocar/Duration + Copyable SKU)
+ * Zone B: Side-by-side 50/50 pricing tiles (Single Unit vs Pack x10 -10%) with full-width 40px tap targets
+ */
+function PelletMobileCard({
+  row,
+  expandableRender,
+  formatPrice,
+  cartItems,
+  onAddToCart,
+  onUpdateQuantity,
+  isEs,
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const isPellet = row.category !== 'Trocar Kits';
+  const unitEur = row.pricing?.wholesalePriceEur || row.pricing?.price_eur || row.pricing?.costPriceEur || 0;
+  const packEur = row.pricing?.box10WholesalePriceEur || Number((unitEur * 10 * 0.90).toFixed(2));
+  const singleQty = cartItems?.[row.id]?.single || 0;
+  const packQty = cartItems?.[row.id]?.pack10 || 0;
+
+  return (
+    <div className="pellet-mcard">
+      {/* Zone A: Clinical Identity */}
+      <div className="pellet-mcard-top">
+        <div className="pellet-mcard-header">
+          <div className="pellet-mcard-title-row">
+            {row.itemNumber && (
+              <span style={{
+                fontFamily: 'monospace',
+                fontWeight: 700,
+                fontSize: '0.68rem',
+                color: '#334155',
+                backgroundColor: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                whiteSpace: 'nowrap',
+              }}>
+                {row.itemNumber}
+              </span>
+            )}
+            {isPellet ? (
+              <Link
+                href={`/p/${row.slug}`}
+                style={{ color: '#003666', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none', lineHeight: 1.25 }}
+              >
+                {row.name}
+              </Link>
+            ) : (
+              <span style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.88rem', lineHeight: 1.25 }}>
+                {row.name}
+              </span>
+            )}
+          </div>
+
+          {expandableRender && (
+            <button
+              type="button"
+              className="pellet-mcard-expand-btn"
+              onClick={() => setExpanded((v) => !v)}
+              aria-label={isEs ? 'Ver detalle clínico' : 'Toggle clinical details'}
+              aria-expanded={expanded}
+            >
+              <ChevronDown
+                size={16}
+                style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.16s ease' }}
+              />
+            </button>
+          )}
+        </div>
+
+        {/* 1-Line Compact Clinical Metadata */}
+        <div className="pellet-mcard-meta-row">
+          <span style={{
+            fontSize: '0.67rem',
+            fontWeight: 700,
+            color: row.hormoneType === 'estrogen' ? '#be185d' : row.hormoneType === 'androgen' ? '#1d4ed8' : '#0d9488',
+            backgroundColor: row.hormoneType === 'estrogen' ? '#fdf2f8' : row.hormoneType === 'androgen' ? '#eff6ff' : '#f0fdfa',
+            border: `1px solid ${row.hormoneType === 'estrogen' ? '#fbcfe8' : row.hormoneType === 'androgen' ? '#bfdbfe' : '#ccfbf1'}`,
+            padding: '1px 6px',
+            borderRadius: '4px',
+          }}>
+            {row.strength}
+          </span>
+          {row.trocarSize && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '3px',
+              background: '#f1f5f9',
+              border: '1px solid #e2e8f0',
+              borderRadius: '4px',
+              padding: '1px 6px',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#334155',
+            }}>
+              <Syringe size={10} color="#003666" />
+              <span>{row.trocarSize}</span>
+            </span>
+          )}
+          {row.duration && (
+            <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#475569' }}>
+              · {row.duration}
+            </span>
+          )}
+        </div>
+
+        {/* Copyable SKU */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <CopyableId value={row.sku} displayValue={row.sku} />
+          <span style={{ fontSize: '0.65rem', color: '#16a34a', fontWeight: 600 }}>
+            {row.category === 'Trocar Kits' ? (isEs ? 'Kit Quirúrgico' : 'Surgical Kit') : 'EU GMP'}
+          </span>
+        </div>
+      </div>
+
+      {/* Zone B: Symmetric 50/50 Pricing Action Footer */}
+      <div className="pellet-mcard-pricing-grid">
+        {/* Single Unit Tile */}
+        <div className="pellet-mcard-price-box">
+          <div className="pellet-mcard-price-label">
+            <span>{isEs ? 'Unidad' : 'Single Unit'}</span>
+          </div>
+          <div className="pellet-mcard-price-val">{formatPrice(unitEur)}</div>
+          {singleQty > 0 ? (
+            <div className="pellet-mcard-stepper">
+              <button type="button" onClick={() => onUpdateQuantity(row.id, 'single', -1)} aria-label="Decrease single">
+                <Minus size={13} />
+              </button>
+              <span>{singleQty}</span>
+              <button type="button" onClick={() => onUpdateQuantity(row.id, 'single', 1)} aria-label="Increase single">
+                <Plus size={13} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="pellet-mcard-action-btn"
+              onClick={() => onAddToCart(row.id, 'single')}
+            >
+              <Plus size={13} />
+              <span>{isEs ? 'Unidad' : 'Single'}</span>
+            </button>
+          )}
+        </div>
+
+        {/* Pack x10 Box Tile */}
+        <div className="pellet-mcard-price-box pack">
+          <div className="pellet-mcard-price-label">
+            <span>{isEs ? 'Caja ×10' : 'Pack ×10'}</span>
+            <span style={{ background: '#dcfce7', color: '#15803d', padding: '1px 5px', borderRadius: '4px', fontSize: '0.62rem' }}>
+              -10%
+            </span>
+          </div>
+          <div className="pellet-mcard-price-val">{formatPrice(packEur)}</div>
+          {packQty > 0 ? (
+            <div className="pellet-mcard-stepper pack">
+              <button type="button" onClick={() => onUpdateQuantity(row.id, 'pack10', -1)} aria-label="Decrease pack">
+                <Minus size={13} />
+              </button>
+              <span>{packQty}</span>
+              <button type="button" onClick={() => onUpdateQuantity(row.id, 'pack10', 1)} aria-label="Increase pack">
+                <Plus size={13} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="pellet-mcard-action-btn pack"
+              onClick={() => onAddToCart(row.id, 'pack10')}
+            >
+              <Plus size={13} />
+              <span>{isEs ? 'Pack ×10' : 'Pack ×10'}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Expandable Master-Detail */}
+      {expanded && expandableRender && (
+        <div style={{ padding: '0 12px 12px', background: '#f8fafc' }}>
+          {expandableRender(row)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PelletsPriceListClient({
   initialProducts = [],
   initialCurrency = 'USD',
@@ -63,6 +254,7 @@ export default function PelletsPriceListClient({
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [scopeMode, setScopeMode] = useState('all'); // 'all' | 'filtered'
+  const [showMobileSpecs, setShowMobileSpecs] = useState(false);
 
   const isEs = lang === 'es';
 
@@ -586,8 +778,22 @@ export default function PelletsPriceListClient({
                 </div>
               </div>
 
+              {/* Mobile Progressive Disclosure Toggle for Technical Specs (Rule #26) */}
+              <button
+                type="button"
+                className="pellets-mobile-specs-toggle"
+                onClick={() => setShowMobileSpecs((v) => !v)}
+              >
+                <ShieldCheck size={12} color="#16a34a" />
+                <span>{isEs ? 'Especificaciones EU GMP' : 'EU GMP Specs & Regulatory'}</span>
+                <ChevronDown
+                  size={12}
+                  style={{ transform: showMobileSpecs ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
+                />
+              </button>
+
               {/* Sub-line: Clinical Metadata Strip (Accurate Bioidentical Pellets Parameters) */}
-              <div className="gcp-resource-meta-line">
+              <div className={`gcp-resource-meta-line ${showMobileSpecs ? '' : 'mobile-collapsed'}`}>
                 <span className="gcp-resource-meta-item">
                   <strong>{isEs ? 'Pureza:' : 'Purity:'}</strong> ≥ 99.5% USP/EP Bioidentical Pure
                 </span>
@@ -830,6 +1036,38 @@ export default function PelletsPriceListClient({
                 size="lg"
               />
 
+              {/* Mobile Horizontal Scrollable Category Strip (Replaces 340px vertical sidebar on mobile) */}
+              <div className="pellets-mobile-cats-strip" role="tablist" aria-label={isEs ? 'Categorías' : 'Categories'}>
+                {[
+                  { id: 'all', label: isEs ? 'Todos' : 'All', count: categoryCounts.all },
+                  { id: 'estrogen', label: 'Estradiol & Biest', count: categoryCounts.estrogen },
+                  { id: 'androgen', label: isEs ? 'Testosterona' : 'Testosterone', count: categoryCounts.androgen },
+                  { id: 'progesterone', label: isEs ? 'Progesterona' : 'Progesterone', count: categoryCounts.progesterone },
+                  { id: 'synergy', label: 'T + Anastrozole', count: categoryCounts.synergy },
+                  { id: 'trocar', label: isEs ? 'Trócares' : 'Trocars', count: categoryCounts.trocar },
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={selectedCategory === cat.id}
+                    className={`pellets-mobile-cat-pill ${selectedCategory === cat.id ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(cat.id)}
+                  >
+                    <span>{cat.label}</span>
+                    <span className="pellets-mobile-cat-pill-count">{cat.count}</span>
+                  </button>
+                ))}
+                <Link
+                  href="/guides/hormone-pellets-implantation"
+                  className="pellets-mobile-cat-pill"
+                  style={{ textDecoration: 'none', color: '#0d9488', borderColor: '#99f6e4', background: '#f0fdfa' }}
+                >
+                  <Activity size={12} />
+                  <span>{isEs ? 'Guía Trócar' : 'Trocar Guide'}</span>
+                </Link>
+              </div>
+
               {/* Active Filter Chips (Rule #24) */}
               {(selectedCategory !== 'all' || searchQuery.trim()) && (
                 <div className="pellets-active-chips">
@@ -879,12 +1117,20 @@ export default function PelletsPriceListClient({
               )}
             </div>
 
-            {/* DataTable (Strict Rule #3 & Rule #4) */}
+            {/* DataTable (Strict Rule #3 & Rule #4 + Symmetric Mobile Card UX) */}
             {filteredProducts.length > 0 ? (
               <DataTable
                 columns={columns}
                 data={filteredProducts}
                 expandableRender={expandableRender}
+                mobileCardComponent={PelletMobileCard}
+                mobileCardProps={{
+                  formatPrice,
+                  cartItems,
+                  onAddToCart: handleAddToCart,
+                  onUpdateQuantity: handleUpdateQuantity,
+                  isEs,
+                }}
                 pagination={false}
               />
             ) : (

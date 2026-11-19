@@ -325,26 +325,309 @@
   color: #0f172a;
 }
 
-/* ── Responsive Mobile ── */
+/* ── Mobile Specs Toggle (Hidden on Desktop) ── */
+.pellets-mobile-specs-toggle {
+  display: none;
+}
+
+.pellets-mobile-cats-strip {
+  display: none;
+}
+
+/* ── Symmetric 2-Zone Stripe/GCP Mobile Product Card ── */
+.pellet-mcard {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.06);
+  margin-bottom: 10px;
+}
+
+.pellet-mcard-top {
+  padding: 12px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pellet-mcard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pellet-mcard-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pellet-mcard-expand-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.pellet-mcard-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #475569;
+}
+
+.pellet-mcard-pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pellet-mcard-price-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.pellet-mcard-price-box.pack {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.pellet-mcard-price-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pellet-mcard-price-box.pack .pellet-mcard-price-label {
+  color: #15803d;
+}
+
+.pellet-mcard-price-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.pellet-mcard-price-box.pack .pellet-mcard-price-val {
+  color: #15803d;
+}
+
+.pellet-mcard-action-btn {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 7px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.76rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.pellet-mcard-action-btn.pack {
+  border-color: #86efac;
+  background: #ffffff;
+  color: #15803d;
+}
+
+.pellet-mcard-stepper {
+  width: 100%;
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  border-radius: 7px;
+  border: 1.5px solid #1a73e8;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.pellet-mcard-stepper.pack {
+  border-color: #16a34a;
+}
+
+.pellet-mcard-stepper button {
+  height: 100%;
+  border: none;
+  background: #f8fafc;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pellet-mcard-stepper span {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* ── Responsive Mobile (Google Cloud UX Mobile-First Standard) ── */
 @media (max-width: 960px) {
+  /* 1. Unstick giant white hero on mobile so 85%+ viewport is free for content */
+  .pellets-price-page .gcp-resource-page-header {
+    position: static !important;
+    top: auto !important;
+  }
+  .pellets-price-container {
+    padding: 0.85rem 0.9rem 2rem;
+  }
+  .pellets-price-page {
+    padding-bottom: 8.5rem;
+  }
   .pellets-content-layout {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
+  /* 2. Hide tall vertical desktop sidebar; show horizontal pill strip directly under search */
   .pellets-sidebar-rail {
-    position: static;
-    margin-bottom: 1rem;
+    display: none;
+  }
+  .pellets-mobile-cats-strip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px 0 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pellets-mobile-cats-strip::-webkit-scrollbar {
+    display: none;
+  }
+  .pellets-mobile-cat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid #dadce0;
+    background: #ffffff;
+    color: #3c4043;
+    font-size: 0.74rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .pellets-mobile-cat-pill.active {
+    background: #e8f0fe;
+    border-color: #1a73e8;
+    color: #1a73e8;
+  }
+  .pellets-mobile-cat-pill-count {
+    font-size: 0.66rem;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 1px 6px;
+    border-radius: 999px;
+  }
+  .pellets-mobile-cat-pill.active .pellets-mobile-cat-pill-count {
+    background: #1a73e8;
+    color: #ffffff;
+  }
+  /* 3. Keep KPI grid strictly 2x2 on all phones (-60% vertical height) */
+  .pellets-kpi-bar {
+    padding: 0.75rem 0.85rem;
+    margin-bottom: 0.9rem;
+  }
+  .pellets-kpi-header {
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.5rem;
   }
   .pellets-kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .pellets-kpi-card {
+    padding: 0.6rem 0.7rem;
+  }
+  .pellets-kpi-card-label {
+    font-size: 0.62rem;
+  }
+  .pellets-kpi-card-val {
+    font-size: 0.98rem;
+  }
+  .pellets-kpi-card-sub {
+    font-size: 0.63rem;
   }
   .pellets-detail-panel {
     grid-template-columns: 1fr;
+    padding: 0.85rem;
   }
-}
-
-@media (max-width: 600px) {
-  .pellets-kpi-grid {
-    grid-template-columns: 1fr;
+  /* 4. Progressive disclosure for secondary specs on mobile */
+  .pellets-mobile-specs-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid #dadce0;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.70rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    width: fit-content;
+  }
+  .pellets-price-page .gcp-resource-meta-line.mobile-collapsed {
+    display: none;
+  }
+  .pellets-price-page .gcp-status-category,
+  .pellets-price-page .gcp-status-pom {
+    display: none;
+  }
+  .pellets-price-page .gcp-resource-action-toolbar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .pellets-price-page .gcp-resource-action-toolbar .gcp-btn-primary {
+    grid-column: 1 / -1;
+    justify-content: center;
+    min-height: 42px;
+  }
+  .pellets-price-page .gcp-resource-action-toolbar .gcp-btn-secondary {
+    justify-content: center;
+    min-height: 40px;
   }
   .pellets-cart-dock-inner {
     flex-direction: column;
