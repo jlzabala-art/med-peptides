@@ -136,7 +136,11 @@ export default function PublicAtlasAIDrawer({
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setMessages(parsed);
+        } else {
+          setMessages([]);
         }
+      } else {
+        setMessages([]);
       }
       if (sessionStorage.getItem(`${sessionKey}_bonus_unlocked`)) {
         setLimit(30);
@@ -144,7 +148,7 @@ export default function PublicAtlasAIDrawer({
         setIsBlocked(false);
       }
     } catch {
-      // Ignore sessionStorage parsing errors
+      setMessages([]);
     }
   }, [sessionKey]);
 
@@ -210,23 +214,77 @@ export default function PublicAtlasAIDrawer({
 
   // Auto-load rich clinical context when opened with a section/collection anchor
   useEffect(() => {
-    if (isOpen && messages.length === 0 && contextAnchor?.sectionTitle) {
-      const welcome = `### 🧬 ${contextAnchor.sectionTitle}
+    const canInjectWelcome =
+      messages.length === 0 || (messages.length === 1 && messages[0]?.isAutoWelcome);
+    if (isOpen && canInjectWelcome && contextAnchor?.sectionTitle) {
+      const isEs = lang === 'es';
+      const productsList = Array.isArray(contextAnchor.products) ? contextAnchor.products.filter(Boolean) : [];
+      const selectedProtocol = Array.isArray(contextAnchor.protocolSelection) ? contextAnchor.protocolSelection : [];
 
-**Formulations in Scope:**
-${(contextAnchor.products || []).map(p => `• **${p}**`).join('\n')}
+      const lines = [`### 🧬 ${contextAnchor.sectionTitle}`];
 
-**Key Bioactive Actives & Complexes:**
-${contextAnchor.keyActives}
+      if (selectedProtocol.length > 0) {
+        lines.push(
+          `**${isEs ? 'Protocolo Activo Seleccionado (Supply Summary):' : 'Active Protocol Selection (Supply Summary):'}**`,
+          selectedProtocol
+            .map(
+              (item) =>
+                `• **${item.name} (${item.concentration} / ${item.volume})** — ${item.qty} ${
+                  item.qty === 1 ? (isEs ? 'pluma' : 'pen') : (isEs ? 'plumas' : 'pens')
+                } · ${item.clicksRange || item.clicksPerDose} clicks (${item.doseBreakdown})`
+            )
+            .join('\n')
+        );
+      } else if (productsList.length > 0) {
+        lines.push(
+          `**${isEs ? 'Formulaciones en Alcance:' : 'Formulations in Scope:'}**`,
+          productsList.map((p) => `• **${p}**`).join('\n')
+        );
+      }
 
-**Clinical Mechanism & Biological Action:**
-${contextAnchor.mechanisms}
+      if (contextAnchor.keyActives) {
+        lines.push(
+          `**${
+            contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing'
+              ? isEs
+                ? 'Porfolio de Bolígrafos Precargados y Especialidades:'
+                : 'Pre-filled Pen Portfolio & Therapeutic Axes:'
+              : isEs
+                ? 'Principios Activos y Complejos Clave:'
+                : 'Key Bioactive Actives & Complexes:'
+          }**`,
+          contextAnchor.keyActives
+        );
+      }
 
----
-*How can I assist your clinical or institutional evaluation today? Feel free to ask about pharmacology, protocol timing, formulation synergies, or international regulatory filings (EU CPNP, UAE MoHAP / Dubai Montaji, Qatar MoPH).*`;
-      setMessages([{ sender: 'bot', text: welcome, timestamp: new Date().toISOString() }]);
+      if (contextAnchor.mechanisms) {
+        lines.push(
+          `**${
+            contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing'
+              ? isEs
+                ? 'Estándar de Dosificación U-100 y Cadena de Frío:'
+                : 'U-100 Dial Standard & Cold-Chain Specifications:'
+              : isEs
+                ? 'Mecanismo Clínico y Acción Biológica:'
+                : 'Clinical Mechanism & Biological Action:'
+          }**`,
+          contextAnchor.mechanisms
+        );
+      }
+
+      const closingNote =
+        contextAnchor.welcomeIntro ||
+        (isEs
+          ? '¿Cómo puedo asistir en tu evaluación clínica hoy? Consulta sobre farmacología, pautas de dosificación, sinergias entre fórmulas o especificaciones analíticas.'
+          : 'How can I assist your clinical evaluation today? Feel free to ask about pharmacology, dosing schedules, formulation synergies, or analytical specifications.');
+
+      lines.push(`*${closingNote}*`);
+      const welcome = lines.join('\n\n');
+      if (messages[0]?.text !== welcome) {
+        setMessages([{ sender: 'bot', text: welcome, isAutoWelcome: true, timestamp: new Date().toISOString() }]);
+      }
     }
-  }, [isOpen, contextAnchor, messages.length]);
+  }, [isOpen, contextAnchor, contextType, lang, messages]);
 
   // 2. Fetch current IP quota status
   useEffect(() => {
@@ -702,8 +760,11 @@ ${contextAnchor.mechanisms}
     const isCorpContext = contextType === 'corporate_residency' || contextAnchor?.category === 'Corporate Services';
     const isProtoContext = contextType === 'protocol_guide' || contextAnchor?.phases;
     const isProtoDirContext = contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog';
+    const isPensContext = contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing';
 
-    const microHeaderTitle = isDiagContext
+    const microHeaderTitle = isPensContext
+      ? (lang === 'es' ? 'DOSIFICACIÓN U-100 Y FORMULARIO DE BOLÍGRAFOS' : 'U-100 PRE-FILLED PEN DOSING & FORMULARY')
+      : isDiagContext
       ? (lang === 'es' ? 'ESPECIFICACIONES DE BIOMARCADORES CLÍNICOS' : 'VERIFIED CLINICAL BIOMARKER SPECIFICATIONS')
       : isCorpContext
       ? (lang === 'es' ? 'ESPECIFICACIONES ESTATUTARIAS CORPORATIVAS' : 'VERIFIED CORPORATE STATUTORY SPECIFICATIONS')
@@ -713,7 +774,9 @@ ${contextAnchor.mechanisms}
       ? (lang === 'es' ? 'ARQUITECTURA DE PROTOCOLO CLÍNICO' : 'VERIFIED CLINICAL PROTOCOL BLUEPRINT')
       : (lang === 'es' ? 'ESPECIFICACIONES ANALÍTICAS VERIFICADAS' : 'VERIFIED ANALYTICAL SPECIFICATIONS');
 
-    const microHeaderSubtitle = isDiagContext
+    const microHeaderSubtitle = isPensContext
+      ? '100 clicks = 1 mL'
+      : isDiagContext
       ? 'CE-IVDR Diagnostic Test'
       : isCorpContext
       ? 'Spanish Law 14/2013'
@@ -744,6 +807,43 @@ ${contextAnchor.mechanisms}
         </div>
 
         {rawLines.map((line, idx) => {
+          // 0. Horizontal rule ("---", "***", "___") — never parse as a bullet box!
+          if (/^[-_*]{3,}$/.test(line)) {
+            return (
+              <div
+                key={idx}
+                style={{
+                  borderTop: '1px solid #e2e8f0',
+                  margin: '4px 0',
+                }}
+              />
+            );
+          }
+
+          // 0b. Single-asterisk italic summary / callout line ("*How can I assist...*")
+          if (/^\*[^*]+\*$/.test(line)) {
+            const cleanItalic = line.replace(/^\*+|\*+$/g, '').trim();
+            return (
+              <div
+                key={idx}
+                style={{
+                  marginTop: '4px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderLeft: '3px solid #0284c7',
+                  borderRadius: '8px',
+                  padding: '8px 11px',
+                  fontSize: '0.79rem',
+                  color: '#334155',
+                  lineHeight: 1.45,
+                  fontWeight: 500,
+                }}
+              >
+                {renderBodyWithHighlights(cleanItalic)}
+              </div>
+            );
+          }
+
           // Check if it's a section header
           const isHeader = (
             (line.endsWith(':') && !line.startsWith('•') && !line.startsWith('-') && !line.startsWith('*') && line.length < 65) ||
@@ -801,18 +901,15 @@ ${contextAnchor.mechanisms}
               >
                 <HelpCircle size={14} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#0369a1', lineHeight: 1.4 }}>
-                  {line}
+                  {line.replace(/^\*+|\*+$/g, '').trim()}
                 </span>
               </div>
             );
           }
 
-          // Check if it's a bullet or parameter item
+          // Check if it's a bullet or parameter item (must have a space after •, -, *, or digit.)
           const isBullet = (
-            line.startsWith('•') ||
-            line.startsWith('-') ||
-            line.startsWith('*') ||
-            /^\d+\.\s/.test(line) ||
+            /^(\s*[•\-*]|\s*\d+\.)\s+/.test(line) ||
             /^[A-Za-z\s/&—-]+:\s+.+/.test(line)
           );
 
@@ -1171,11 +1268,19 @@ ${contextAnchor.mechanisms}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
                 <ShieldCheck size={15} color="#16a34a" style={{ flexShrink: 0 }} />
                 <div style={{ fontWeight: 800, color: '#00284d', wordBreak: 'break-word' }}>
-                  {contextAnchor?.name || 'Active Formulation'}
+                  {contextAnchor?.name || (lang === 'es' ? 'Formulación Activa' : 'Active Formulation')}
                 </div>
               </div>
               <div style={{ flexShrink: 0 }}>
-                {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription' ? (
+                {contextAnchor?.badgeLabel ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#003666', backgroundColor: '#eff6ff', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bfdbfe', whiteSpace: 'nowrap' }}>
+                    {contextAnchor.badgeLabel}
+                  </span>
+                ) : contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing' ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#003666', backgroundColor: '#eff6ff', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bfdbfe', whiteSpace: 'nowrap' }}>
+                    U-100 · 2–8°C
+                  </span>
+                ) : contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription' ? (
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#f0fdf4', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
                     DHA Validated Rx
                   </span>
@@ -1210,6 +1315,35 @@ ${contextAnchor.mechanisms}
                 )}
               </div>
             </div>
+
+            {/* Live Active Protocol Selection Banner (when physician added pens to Supply Summary) */}
+            {Array.isArray(contextAnchor?.protocolSelection) && contextAnchor.protocolSelection.length > 0 && (
+              <div
+                style={{
+                  backgroundColor: '#f0fdf4',
+                  borderBottom: '1px solid #bbf7d0',
+                  padding: '6px 16px',
+                  fontSize: '0.73rem',
+                  color: '#166534',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span style={{ fontWeight: 750 }}>
+                  {lang === 'es'
+                    ? `Protocolo en alcance (${contextAnchor.protocolSelection.length}):`
+                    : `Protocol in scope (${contextAnchor.protocolSelection.length}):`}{' '}
+                  <strong style={{ fontWeight: 800, color: '#14532d' }}>
+                    {contextAnchor.protocolSelection
+                      .map((item) => `${item.name} (${item.concentration}) ×${item.qty}`)
+                      .join(' · ')}
+                  </strong>
+                </span>
+              </div>
+            )}
 
             {/* Dual Mode Tab Selector */}
             <div
@@ -2011,10 +2145,12 @@ ${contextAnchor.mechanisms}
                   disabled={isLoading || isBlocked}
                   placeholder={
                     isBlocked
-                      ? 'Inquiry quota reached (5/5). Please register.'
-                      : (contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog')
-                        ? 'Describe patient goal, route preference, or labs…'
-                        : 'Ask technical question (English only)…'
+                      ? (lang === 'es' ? 'Cuota de consultas alcanzada (5/5). Regístrate para acceso ilimitado.' : 'Inquiry quota reached (5/5). Please register.')
+                      : (contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing')
+                        ? (lang === 'es' ? 'Pregunta sobre clics U-100, combinaciones, dosis, agujas 31G/32G o conservación…' : 'Ask about U-100 dial clicks, pen stacking, dosing, 31G/32G needles, or storage…')
+                        : (contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog')
+                          ? (lang === 'es' ? 'Describe el objetivo del paciente, vía de administración o analíticas…' : 'Describe patient goal, route preference, or labs…')
+                          : (lang === 'es' ? 'Escribe tu consulta técnica o clínica…' : 'Ask a clinical or technical question…')
                   }
                   style={{
                     flex: 1,
@@ -2059,7 +2195,9 @@ ${contextAnchor.mechanisms}
                   textAlign: 'center',
                 }}
               >
-                Strictly English • Verified Analytical Specifications • Confidential Research Session
+                {lang === 'es'
+                  ? 'Bilingüe EN / ES • Especificaciones Analíticas Verificadas • Sesión Clínica Confidencial'
+                  : 'Verified Analytical & Clinical Specifications • Confidential Research Session'}
               </div>
             </div>
           </div>

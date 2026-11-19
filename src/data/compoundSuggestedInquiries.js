@@ -806,11 +806,153 @@ function generateDynamicCompoundInquiries(contextAnchor, lang = 'en') {
 }
 
 /**
+ * Converts a full inquiry question into a complete, readable, Title-Case chip label
+ * without ever cutting words or appending "...".
+ */
+export function synthesizeCompleteChipLabel(questionText, isEs = false) {
+  if (!questionText) return isEs ? 'Consulta Clínica' : 'Clinical Inquiry';
+  if (typeof questionText === 'object' && questionText.label) {
+    return String(questionText.label).replace(/\.{2,}$/, '').trim();
+  }
+  const q = String(questionText).trim();
+  const lower = q.toLowerCase();
+
+  // Semantic clinical intent mapping (100% complete labels, zero truncation)
+  if (lower.includes('u-100') || lower.includes('100 clicks') || (lower.includes('click') && lower.includes('convert'))) {
+    return isEs ? 'Conversión de Clics U-100' : 'U-100 Click-to-Dose Math';
+  }
+  if (lower.includes('mots-c') && (lower.includes('30') || lower.includes('40') || lower.includes('60') || lower.includes('compar'))) {
+    return isEs ? 'Comparativa MOTS-c (30 / 40 / 60 mg)' : 'Compare MOTS-c (30 / 40 / 60 mg)';
+  }
+  if (lower.includes('selected protocol') || lower.includes('protocolo seleccionado') || lower.includes('protocolo activo')) {
+    return isEs ? 'Revisar Mi Protocolo Activo' : 'Review My Selected Protocol';
+  }
+  if (lower.includes('total pens') || lower.includes('bolígrafos totales') || lower.includes('refill schedule')) {
+    return isEs ? 'Bolígrafos Totales y Ciclo' : 'Total Pens & Cycle Duration';
+  }
+  if (lower.includes('am/pm') || lower.includes('am vs pm') || lower.includes('horario óptimo') || lower.includes('injection schedule')) {
+    return isEs ? 'Horario Óptimo AM / PM' : 'Optimal AM / PM Schedule';
+  }
+  if (lower.includes('patient-facing') || lower.includes('instrucciones para el paciente') || lower.includes('patient counseling')) {
+    return isEs ? 'Instrucciones para el Paciente' : 'Patient Dosing Instructions';
+  }
+  if (lower.includes('31g') || lower.includes('32g') || (lower.includes('needle') && lower.includes('2–8'))) {
+    return isEs ? 'Cadena de Frío y Agujas 31G/32G' : 'Cold-Chain & 31G/32G Needles';
+  }
+  if (lower.includes('glow') || lower.includes('klow')) {
+    return isEs ? 'Comparativa GLOW vs KLOW' : 'GLOW vs KLOW Multi-Peptide Pens';
+  }
+  if (lower.includes('pharmacological mechanism') || lower.includes('mecanismo de acción')) {
+    return isEs ? 'Mecanismo y Afinidad de Receptor' : 'Mechanism & Receptor Affinity';
+  }
+  if (lower.includes('reconstitution volume') || lower.includes('técnica de reconstitución') || lower.includes('protocolo estándar de reconstitución')) {
+    return isEs ? 'Guía de Reconstitución y Dilución' : 'Reconstitution & Diluent Guide';
+  }
+  if (lower.includes('thermal stability') || lower.includes('estabilidad térmica') || lower.includes('cadena de frío') || lower.includes('cold-chain')) {
+    return isEs ? 'Estabilidad Térmica y Cadena de Frío' : 'Thermal Stability & Cold-Chain';
+  }
+  if (lower.includes('peer-reviewed') || lower.includes('publicaciones clínicas') || lower.includes('clinical evidence')) {
+    return isEs ? 'Evidencia Clínica Publicada' : 'Published Clinical Evidence';
+  }
+  if (lower.includes('analytical purity') || lower.includes('rp-hplc') || lower.includes('pureza por hplc')) {
+    return isEs ? 'Pureza Analítica RP-HPLC y LC-MS' : 'RP-HPLC & LC-MS Purity Standard';
+  }
+  if (lower.includes('503a') || lower.includes('hhs')) {
+    return isEs ? 'Cobertura Regulatoria HHS 503A' : 'HHS 503A Regulatory Scope';
+  }
+  if (lower.includes('wholesale') || lower.includes('mayorista') || lower.includes('b2b')) {
+    return isEs ? 'Tarifas B2B Clínica y Mayorista' : 'Clinic & Wholesale B2B Tiers';
+  }
+  if (lower.includes('titration') || lower.includes('titulación')) {
+    return isEs ? 'Calendario de Titulación por Fases' : 'Phase Titration Schedule';
+  }
+  if (lower.includes('biomarker') || lower.includes('biomarcadores') || lower.includes('bloodo')) {
+    return isEs ? 'Biomarcadores Basales y Control' : 'Baseline & Follow-Up Biomarkers';
+  }
+  if (lower.includes('synerg') || lower.includes('sinergia') || lower.includes('combinaciones') || lower.includes('stack')) {
+    return isEs ? 'Sinergias y Combinaciones Clínicas' : 'Clinical Synergy & Safe Stacking';
+  }
+  if (lower.includes('half-life') || lower.includes('semivida') || lower.includes('pharmacokinetic')) {
+    return isEs ? 'Farmacocinética y Semivida' : 'Pharmacokinetics & Half-Life';
+  }
+  if (lower.includes('contraindicat') || lower.includes('precaucion') || lower.includes('safety')) {
+    return isEs ? 'Seguridad y Contraindicaciones' : 'Safety & Contraindications';
+  }
+
+  // Clean structural prefix & trailing punctuation without cutting words
+  let clean = q
+    .replace(/^(What is the|What are the|How does the|How do the|How to|How does|How are the|What does|Explain the|Which|Should|Are there|Compare|¿Cuál es el|¿Cuál es la|¿Cuáles son los|¿Cuáles son las|¿Cómo funciona la|¿Cómo funcionan las|¿Cómo se|¿Cómo|¿Qué|¿Existen)\s+/i, '')
+    .replace(/[?.!]+$/, '')
+    .replace(/\([^)]*\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // Take first complete clause before comma/semicolon/for/in if long, preserving whole words
+  if (clean.length > 44) {
+    const clauseSplit = clean.split(/\s+(?:for|in|across|during|with|and how|para|en|durante|con|y cómo)\s+|[,;—]/i)[0]?.trim();
+    if (clauseSplit && clauseSplit.length >= 14 && clauseSplit.length <= 46) {
+      clean = clauseSplit;
+    } else {
+      const words = clean.split(' ');
+      let acc = '';
+      for (const w of words) {
+        if ((acc + ' ' + w).trim().length > 42) break;
+        acc = (acc + ' ' + w).trim();
+      }
+      clean = acc.replace(/\s+(?:and|or|the|of|to|in|for|with|a|an|y|o|de|del|la|el|los|las|en|con|para)$/i, '').trim() || clean;
+    }
+  }
+
+  return clean.charAt(0).toUpperCase() + clean.slice(1);
+}
+
+/**
  * Main Resolver
  * Returns exactly 5 clinical questions tailored to the given product or context.
  */
 export function getSuggestedInquiriesForProduct(contextAnchor, contextType = 'monograph', lang = 'en') {
   const isEs = lang === 'es';
+
+  // 0a. Pre-filled Multi-Dose Peptide Pens Formulary (/pricing/pens)
+  if (contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing') {
+    const selectedPens = Array.isArray(contextAnchor?.protocolSelection) ? contextAnchor.protocolSelection : [];
+    if (selectedPens.length > 0) {
+      const names = selectedPens.map((item) => `${item.name} (${item.concentration} / ${item.volume})`).join(', ');
+      if (isEs) {
+        return [
+          `Revisa mi protocolo seleccionado (${names}): ¿qué sinergia clínica tienen y existen solapamientos de mecanismo?`,
+          `Calcula el número total de bolígrafos y duración exacta del ciclo para mi selección activa (${names}).`,
+          `Organiza el horario óptimo de administración (mañana en ayunas vs noche antes de dormir) y clics U-100 para ${names}.`,
+          `Redacta un resumen claro de instrucciones para el paciente (clics en dial U-100, aguja 31G/32G 4 mm y cadena de frío 2–8°C) para ${names}.`,
+          `¿Qué biomarcadores basales y de seguimiento recomiendas monitorizar durante este protocolo con bolígrafos precargados?`
+        ];
+      }
+      return [
+        `Review my selected pen protocol (${names}) for clinical synergy, dosing alignment, and any overlapping mechanisms.`,
+        `Calculate the total pens required, exact U-100 dial clicks per dose, and cycle duration for my active selection (${names}).`,
+        `Organize the optimal daily/weekly AM vs PM injection timing schedule for my selected pens (${names}).`,
+        `Draft a concise patient-facing dosing, 31G/32G 4mm needle, and 2–8°C cold-chain instruction summary for ${names}.`,
+        `Which baseline and follow-up clinical biomarkers should be monitored for a patient on ${names}?`
+      ];
+    }
+
+    if (isEs) {
+      return [
+        '¿Cómo funciona la conversión del dial U-100 (100 clics = 1 mL) a mg o mcg en los cartuchos de 2 mL (200 IU), 2.4 mL (240 IU) y 3 mL (300 IU)?',
+        'Compara las 3 presentaciones de MOTS-c en bolígrafo (30 mg/3 mL, 40 mg/2 mL y 60 mg/3 mL): clics por dosis de 5 mg y dosis totales por pluma.',
+        '¿Qué combinaciones de bolígrafos precargados se recomiendan para regeneración tisular (BPC-157/TB-500, KPV) y longevidad mitocondrial (NAD+, Epithalon)?',
+        '¿Cuál es la diferencia clínica entre GLOW Peptide Stack (3 activos) y KLOW Peptide Stack (4 activos con KPV) a 10 clics diarios?',
+        '¿Cuáles son las pautas de cadena de frío (2–8°C, BUD 30 días), purga inicial y agujas 31G/32G × 4 mm para los bolígrafos precargados?'
+      ];
+    }
+    return [
+      'How does the U-100 pen dial conversion (100 clicks = 1 mL, 1 click = 0.01 mL) calculate exact mg or mcg doses across 2 mL, 2.4 mL, and 3 mL cartridges?',
+      'Compare the 3 MOTS-c pre-filled pen presentations (30 mg/3 mL, 40 mg/2 mL, and 60 mg/3 mL) in clicks per 5 mg dose and total doses per pen.',
+      'Which pre-filled peptide pens pair safely for accelerated tissue repair (BPC-157/TB-500, KPV) and mitochondrial longevity (NAD+, Epithalon)?',
+      'What is the clinical difference between GLOW Peptide Stack (3 actives) and KLOW Peptide Stack (4 actives with KPV) at 10 clicks daily?',
+      'What are the cold-chain storage (2–8°C, 30-day BUD), priming, and 31G/32G × 4 mm needle guidelines for pre-filled multi-dose pens?'
+    ];
+  }
 
   // 0. If contextAnchor directly provides suggestedQuestions, honor them first!
   if (Array.isArray(contextAnchor?.suggestedQuestions) && contextAnchor.suggestedQuestions.length >= 3) {
@@ -1188,6 +1330,106 @@ export function getContextualAndPopularSuggestions({
         }
       ];
     }
+  } else if (contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing') {
+    const selectedPens = Array.isArray(contextAnchor?.protocolSelection) ? contextAnchor.protocolSelection : [];
+    if (selectedPens.length > 0) {
+      const names = selectedPens.map((item) => `${item.name} (${item.concentration} / ${item.volume})`).join(', ');
+      contextualCandidates = [
+        {
+          label: isEs ? 'Revisar Mi Protocolo Activo' : 'Review My Selected Protocol',
+          query: isEs
+            ? `Revisa mi protocolo seleccionado (${names}): ¿qué sinergia clínica tienen y existen solapamientos de mecanismo?`
+            : `Review my selected pen protocol (${names}) for clinical synergy, dosing alignment, and any overlapping mechanisms.`
+        },
+        {
+          label: isEs ? 'Bolígrafos Totales y Ciclo' : 'Total Pens & Cycle Duration',
+          query: isEs
+            ? `Calcula el número total de bolígrafos, clics exactos del dial U-100 y duración del ciclo para mi selección (${names}).`
+            : `Calculate the total pens required, exact U-100 dial clicks per dose, and cycle duration for my active selection (${names}).`
+        },
+        {
+          label: isEs ? 'Horario Óptimo AM / PM' : 'Optimal AM / PM Schedule',
+          query: isEs
+            ? `Organiza el horario diario y semanal óptimo (mañana en ayunas vs noche antes de dormir) para ${names}.`
+            : `Organize the optimal daily/weekly AM vs PM injection timing schedule for my selected pens (${names}).`
+        },
+        {
+          label: isEs ? 'Instrucciones para el Paciente' : 'Patient Dosing Instructions',
+          query: isEs
+            ? `Redacta un resumen claro de instrucciones para el paciente (clics en dial U-100, aguja 31G/32G 4 mm y cadena de frío 2–8°C) para ${names}.`
+            : `Draft a concise patient-facing dosing, 31G/32G 4mm needle, and 2–8°C cold-chain instruction summary for ${names}.`
+        }
+      ];
+    } else if (turnContext.includes('mots') || turnContext.includes('nad') || turnContext.includes('epithalon') || turnContext.includes('humanin') || turnContext.includes('longev')) {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Comparar MOTS-c (30 / 40 / 60 mg)' : 'Compare MOTS-c (30 / 40 / 60 mg)',
+          query: isEs
+            ? 'Compara las 3 presentaciones de MOTS-c en bolígrafo (30 mg/3 mL, 40 mg/2 mL y 60 mg/3 mL): clics por dosis de 5 mg y dosis totales por pluma.'
+            : 'Compare the 3 MOTS-c pre-filled pen presentations (30 mg/3 mL, 40 mg/2 mL, and 60 mg/3 mL) in clicks per 5 mg dose and total doses per pen.'
+        },
+        {
+          label: isEs ? 'Epithalon 30 mg vs 100 mg' : 'Epithalon 30 mg vs 100 mg Pen',
+          query: isEs
+            ? '¿Cuál es la diferencia en clics U-100 y número de bolígrafos necesarios para el ciclo de 50 mg entre Epithalon 30 mg/3 mL y 100 mg/2 mL?'
+            : 'What is the difference in U-100 dial clicks and pens required for a 50 mg course between Epithalon 30 mg/3 mL and 100 mg/2 mL?'
+        },
+        {
+          label: isEs ? 'NAD+ 750 mg vs 1050 mg' : 'NAD+ 750 mg vs 1050 mg Pen',
+          query: isEs
+            ? '¿Cómo se ajustan los clics diarios (25–50 mg) en el bolígrafo de NAD+ 750 mg/3 mL frente al de 1050 mg/3 mL?'
+            : 'How do daily U-100 dial clicks (25–50 mg) compare between the NAD+ 750 mg/3 mL and 1050 mg/3 mL pens?'
+        }
+      ];
+    } else if (turnContext.includes('bpc') || turnContext.includes('tb-500') || turnContext.includes('kpv') || turnContext.includes('glow') || turnContext.includes('klow') || turnContext.includes('ghk')) {
+      contextualCandidates = [
+        {
+          label: isEs ? 'BPC-157 / TB-500 (6/9 vs 15/22.5 mg)' : 'BPC-157 / TB-500 Strengths',
+          query: isEs
+            ? '¿Cuándo elegir el bolígrafo BPC-157/TB-500 de 6/9 mg (10 clics) frente al de alta potencia 15/22.5 mg (6 clics)?'
+            : 'When should a clinician prescribe the BPC-157/TB-500 6/9 mg pen (10 clicks) versus the high-potency 15/22.5 mg pen (6 clicks)?'
+        },
+        {
+          label: isEs ? 'Comparativa GLOW vs KLOW' : 'GLOW vs KLOW Multi-Peptide Pens',
+          query: isEs
+            ? '¿Cuál es la diferencia clínica entre GLOW Peptide Stack (3 activos) y KLOW Peptide Stack (4 activos con KPV) a 10 clics diarios?'
+            : 'What is the clinical difference between GLOW Peptide Stack (3 actives) and KLOW Peptide Stack (4 actives with KPV) at 10 clicks daily?'
+        },
+        {
+          label: isEs ? 'KPV en Inflamación y Mucosa' : 'KPV 10 mg Pen Dosing (6–15 Clicks)',
+          query: isEs
+            ? '¿Cómo se titula el bolígrafo de KPV 10 mg/3 mL entre 6 y 15 clics (200–500 mcg) para inflamación sistémica o intestinal?'
+            : 'How is the KPV 10 mg/3 mL pen titrated between 6 and 15 clicks (200–500 mcg) for gut or systemic inflammation?'
+        }
+      ];
+    } else {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Conversión Clics U-100' : 'U-100 Click-to-Dose Math',
+          query: isEs
+            ? '¿Cómo funciona la conversión del dial U-100 (100 clics = 1 mL) a mg o mcg en los cartuchos de 2 mL (200 IU), 2.4 mL (240 IU) y 3 mL (300 IU)?'
+            : 'How does the U-100 pen dial conversion (100 clicks = 1 mL, 1 click = 0.01 mL) calculate exact mg or mcg doses across 2 mL, 2.4 mL, and 3 mL cartridges?'
+        },
+        {
+          label: isEs ? 'Comparar MOTS-c (30 / 40 / 60 mg)' : 'Compare MOTS-c (30 / 40 / 60 mg)',
+          query: isEs
+            ? 'Compara las 3 presentaciones de MOTS-c en bolígrafo (30 mg/3 mL, 40 mg/2 mL y 60 mg/3 mL): clics por dosis de 5 mg y dosis totales por pluma.'
+            : 'Compare the 3 MOTS-c pre-filled pen presentations (30 mg/3 mL, 40 mg/2 mL, and 60 mg/3 mL) in clicks per 5 mg dose and total doses per pen.'
+        },
+        {
+          label: isEs ? 'Sinergias y Combinaciones' : 'Synergy & Safe Stacking',
+          query: isEs
+            ? '¿Qué combinaciones de bolígrafos precargados se recomiendan para regeneración tisular (BPC-157/TB-500, KPV) y longevidad mitocondrial (NAD+, Epithalon)?'
+            : 'Which pre-filled peptide pens pair safely for accelerated tissue repair (BPC-157/TB-500, KPV) and mitochondrial longevity (NAD+, Epithalon)?'
+        },
+        {
+          label: isEs ? 'Cadena de Frío y Agujas 31G/32G' : 'Storage & 31G/32G Needles',
+          query: isEs
+            ? '¿Cuáles son las pautas de cadena de frío (2–8°C, BUD 30 días), purga inicial y agujas 31G/32G × 4 mm para los bolígrafos precargados?'
+            : 'What are the cold-chain storage (2–8°C, 30-day BUD), priming, and 31G/32G × 4 mm needle guidelines for pre-filled multi-dose pens?'
+        }
+      ];
+    }
   } else {
     // Monograph sub-topics
     if (turnContext.includes('bac') || turnContext.includes('water') || turnContext.includes('dilut') || turnContext.includes('reconstitut') || turnContext.includes('syringe')) {
@@ -1253,35 +1495,46 @@ export function getContextualAndPopularSuggestions({
     }
   }
 
-  // Pick 2 contextual unasked candidates
-  const unaskedContextual = contextualCandidates.filter(c => !isAsked(c.label) && !isAsked(c.query));
+  // Honor explicit customSuggestionChips from contextAnchor when present
+  const customChips = Array.isArray(contextAnchor?.customSuggestionChips)
+    ? contextAnchor.customSuggestionChips
+        .filter((c) => c && c.label && c.query && !isAsked(c.label) && !isAsked(c.query))
+    : [];
+
+  // Pick 2 contextual unasked candidates (preferring page-registered custom chips if any)
+  const unaskedContextual = [...customChips, ...contextualCandidates].filter(
+    (c, idx, arr) =>
+      !isAsked(c.label) &&
+      !isAsked(c.query) &&
+      arr.findIndex((item) => item.label === c.label) === idx
+  );
   const selectedContextual = unaskedContextual.slice(0, 2);
 
-  // 4. Retrieve Popular Inquiries for this product
+  // 4. Retrieve Popular Inquiries for this product/context (ZERO "..." truncation!)
   const popularPool = getSuggestedInquiriesForProduct(contextAnchor, contextType, lang);
   const unaskedPopular = popularPool
-    .filter(p => !isAsked(p))
+    .filter(p => !isAsked(typeof p === 'object' ? p.query : p))
     .map(p => {
-      // Shorten label for clean chip display
-      let shortLabel = p.replace(/^(What is the|How to|How does|What does|Explain the|Which|Should|Are there|¿Cuál es|¿Cómo|¿Qué|¿Existen)\s+/i, '');
-      shortLabel = shortLabel.replace(/\?$/, '');
-      if (shortLabel.length > 28) {
-        shortLabel = shortLabel.substring(0, 26).trim() + '...';
-      }
+      const queryText = typeof p === 'object' ? p.query : p;
+      const cleanLabel = typeof p === 'object' && p.label
+        ? p.label
+        : synthesizeCompleteChipLabel(queryText, isEs);
       return {
-        label: shortLabel,
-        query: p
+        label: cleanLabel,
+        query: queryText
       };
     });
 
-  const selectedPopular = unaskedPopular.slice(0, 2);
+  const selectedPopular = unaskedPopular
+    .filter((item) => !selectedContextual.some((c) => c.label === item.label))
+    .slice(0, 2);
 
   // 5. Combine: Exactly 50% contextual (2 items) and 50% popular (2 items)
   const combined = [...selectedContextual, ...selectedPopular];
 
   // Fallback if less than 4: fill from remaining candidates
   if (combined.length < 4) {
-    const remaining = [...contextualCandidates, ...unaskedPopular].filter(
+    const remaining = [...unaskedContextual, ...unaskedPopular].filter(
       item => !combined.some(c => c.label === item.label)
     );
     while (combined.length < 4 && remaining.length > 0) {

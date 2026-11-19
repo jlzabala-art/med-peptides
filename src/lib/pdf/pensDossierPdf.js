@@ -282,8 +282,13 @@ export async function generateAtlasPensDossierPdf({
     const doseText = sanitizePdfLatinText(variant.doseBreakdown || `${variant.clicksPerDose || 10} units`);
     const freqText = sanitizePdfLatinText(variant.frequency || 'Daily, Subcutaneous');
     const cycleText = sanitizePdfLatinText(variant.cycleDuration || '4 to 6 weeks');
+    const baseYieldLabel =
+      variant.dosesPerPenLabel ||
+      `${Math.floor((variant.totalUnits || 300) / (variant.clicksPerDose || 10))} doses`;
     const yieldText = sanitizePdfLatinText(
-      `${variant.dosesPerPenLabel || `${Math.floor((variant.totalUnits || 300) / (variant.clicksPerDose || 10))} doses`} · ${variant.volume || '3 mL'} (${variant.totalUnits || 300} IU)`
+      baseYieldLabel.includes('mL') || baseYieldLabel.length > 20
+        ? baseYieldLabel
+        : `${baseYieldLabel} · ${variant.volume || '3 mL'} (${variant.totalUnits || 300} clicks)`
     );
 
     const rightPillTitle = isProtocolMode
@@ -334,9 +339,9 @@ export async function generateAtlasPensDossierPdf({
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6.6);
     const footnoteWrapped = footnoteParts.length > 0
-      ? doc.splitTextToSize(footnoteParts.join(' '), cardW - 14).slice(0, 2)
+      ? doc.splitTextToSize(footnoteParts.join(' '), cardW - 14).slice(0, 3)
       : [];
-    const footnoteH = footnoteWrapped.length > 0 ? (footnoteWrapped.length * 3.1 + 2.5) : 0;
+    const footnoteH = footnoteWrapped.length > 0 ? (footnoteWrapped.length * 3.05 + 2.5) : 0;
 
     // Total card height
     const cardH = 14 + heroRowH + 14.5 + footnoteH + 4;
@@ -451,11 +456,15 @@ export async function generateAtlasPensDossierPdf({
     doc.setFontSize(6.0);
     doc.setTextColor(...SLATE_500);
     doc.text(isEs ? 'RENDIMIENTO / PEN' : 'YIELD / PEN', col2X, secY + 2.8);
+    let yieldFontSize = 8.0;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.1);
+    doc.setFontSize(yieldFontSize);
+    while (doc.getTextWidth(yieldText) > 54 && yieldFontSize > 6.4) {
+      yieldFontSize -= 0.25;
+      doc.setFontSize(yieldFontSize);
+    }
     doc.setTextColor(...SLATE_900);
-    const yieldClipped = doc.splitTextToSize(yieldText, 53)[0] || yieldText;
-    doc.text(yieldClipped, col2X, secY + 7.3);
+    doc.text(yieldText, col2X, secY + 7.3);
 
     // Tinted Right-Hand Highlight Pill (exact LXV signature)
     const specPillX = col3X;
@@ -555,16 +564,215 @@ export async function generateAtlasPensDossierPdf({
     });
   }
 
+  let postSummaryY = curY + summaryBoxH + 5.5;
+
+  // In full formulary mode, render the Visual Multi-Strength Cross-Reference Matrix & Clinical Bundles on the final page
+  if (!isProtocolMode && postSummaryY + 150 <= bottomSafeY) {
+    const matrixBoxH = 114;
+    doc.setFillColor(...WHITE);
+    doc.setDrawColor(...BORDER_CARD);
+    doc.setLineWidth(0.32);
+    doc.roundedRect(marginX, postSummaryY, cardW, matrixBoxH, 3.2, 3.2, 'FD');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.8);
+    doc.setTextColor(...SLATE_900);
+    doc.text(
+      isEs
+        ? 'MATRIZ RAPIDA DE CONVERSION POR CONCENTRACION (AJUSTE DE CLICS U-100 SEGUN PRESENTACION)'
+        : 'MULTI-STRENGTH U-100 DIAL CONVERSION MATRIX (HOW CLICKS ADJUST BY PEN CONCENTRATION)',
+      marginX + 6,
+      postSummaryY + 6.8
+    );
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.6);
+    doc.setTextColor(...SLATE_500);
+    doc.text(
+      isEs
+        ? 'Guia visual para el medico: cuando un mismo peptido dispone de varias concentraciones (mg/mL), el numero de clics cambia proporcionalmente.'
+        : 'Physician reference: when a peptide is dispensed in different strengths (mg/mL), the U-100 dial clicks adjust proportionally to deliver the same active dose.',
+      marginX + 6,
+      postSummaryY + 11.0
+    );
+
+    // Table Header
+    const tblY = postSummaryY + 14.5;
+    doc.setFillColor(...PILL_BG);
+    doc.roundedRect(marginX + 4.5, tblY, cardW - 9, 6.2, 1.5, 1.5, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(5.9);
+    doc.setTextColor(...SLATE_700);
+    const c1 = marginX + 6;
+    const c2 = marginX + 39;
+    const c3 = marginX + 89;
+    const c4 = marginX + 147;
+    doc.text(isEs ? 'PEPTIDO / FORMULA' : 'PEPTIDE / FORMULA', c1, tblY + 4.1);
+    doc.text(isEs ? 'PRESENTACION A (ESTANDAR)' : 'STANDARD PRESENTATION (CLICKS)', c2, tblY + 4.1);
+    doc.text(isEs ? 'PRESENTACION B (ALTA POTENCIA)' : 'ALTERNATIVE / HIGH-CONC (CLICKS)', c3, tblY + 4.1);
+    doc.text(isEs ? 'DOSIS OBJETIVO' : 'TARGET ACTIVE DOSE', c4, tblY + 4.1);
+
+    const matrixRows = [
+      {
+        name: 'BPC-157 / TB-500',
+        std: '6/9 mg (2/3 mg/mL) -> 10 clicks',
+        alt: '7.5/7.5 mg -> 10 cl | 15/22.5 mg -> 4 or 6 cl',
+        dose: '200/300 mcg (6cl=300/450)',
+      },
+      {
+        name: 'KPV Tripeptide',
+        std: '10 mg/3mL (3.3 mg/mL) -> 6-15 cl',
+        alt: '15 mg/3mL (5.0 mg/mL) -> 4-10 clicks',
+        dose: '200-500 mcg / injection',
+      },
+      {
+        name: 'CJC-1295 (No DAC)',
+        std: '3 mg/3mL (1.0 mg/mL) -> 10 clicks',
+        alt: '30 mg/3mL (10 mg/mL, 10x) -> 1-2 clicks',
+        dose: '100-200 mcg nightly fasted',
+      },
+      {
+        name: 'CJC-1295 / Ipamorelin',
+        std: '3/6 mg (1:2, 1/2 mg/mL) -> 10 cl',
+        alt: '5/10 mg (1:2) -> 6 cl | 6/6 mg (1:1) -> 5/10 cl',
+        dose: '100/200 mcg (6/6: 1:1 ratio)',
+      },
+      {
+        name: 'IGF-1 LR3',
+        std: '300 mcg/3mL (100 mcg/mL) -> 20-80 cl',
+        alt: '3 mg/3mL (1,000 mcg/mL, 10x) -> 2-8 clicks',
+        dose: '20-80 mcg post-workout',
+      },
+      {
+        name: 'Ipamorelin',
+        std: '6 mg/3mL (2.0 mg/mL) -> 10-15 cl',
+        alt: '15 mg/3mL (5.0 mg/mL) -> 4-6 clicks',
+        dose: '200-300 mcg fasted',
+      },
+      {
+        name: 'Epithalon (Epitalon)',
+        std: '30 mg/3mL (10 mg/mL) -> 100 clicks',
+        alt: '100 mg/2mL (50 mg/mL) -> 20 clicks',
+        dose: '10 mg q3d x 5 (50mg course)',
+      },
+      {
+        name: 'MOTS-c',
+        std: '15mg/3mL -> 100 cl | 30mg/3mL -> 50 cl',
+        alt: '40mg/2mL & 60mg/3mL (20mg/mL) -> 25 cl',
+        dose: '5.0 mg / dose (50cl=2.5mg)',
+      },
+      {
+        name: 'NAD+ Coenzyme',
+        std: '300 mg/3mL (100 mg/mL) -> 25-50 cl',
+        alt: '750mg (250mg/mL)->10-20 | 1050mg->7-14 cl',
+        dose: '25-50 mg/d (7-14cl=24.5-49)',
+      },
+      {
+        name: 'GHK-Cu (Copper)',
+        std: '30 mg/3mL (10 mg/mL) -> 10-20 cl',
+        alt: '60mg (20mg/mL)->5-10 | 100mg (33.3)->3-6 cl',
+        dose: '1.0-2.0 mg daily SC',
+      },
+      {
+        name: 'Kisspeptin-10',
+        std: '3 mg/3mL (1.0 mg/mL) -> 10 clicks',
+        alt: '15 mg/3mL (5.0 mg/mL, 5x) -> 2-4 clicks',
+        dose: '100-200 mcg daily / pulsed',
+      },
+      {
+        name: 'PT-141 (Bremelanotide)',
+        std: '20 mg/2mL (10 mg/mL) -> 10-18 cl',
+        alt: '15 mg/3mL (5.0 mg/mL) -> 20-35 clicks',
+        dose: '1.0-1.75 mg PRN (max 8/mo)',
+      },
+    ];
+
+    let rowY = tblY + 10.2;
+    matrixRows.forEach((r, rIdx) => {
+      if (rIdx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(marginX + 4.5, rowY - 3.6, cardW - 9, 6.8, 'F');
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.2);
+      doc.setTextColor(...SLATE_900);
+      doc.text(r.name, c1, rowY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(5.95);
+      doc.setTextColor(...SLATE_700);
+      doc.text(r.std, c2, rowY);
+      doc.text(r.alt, c3, rowY);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.95);
+      doc.setTextColor(29, 78, 216);
+      doc.text(r.dose, c4, rowY);
+
+      rowY += 7.0;
+    });
+
+    postSummaryY += matrixBoxH + 4.5;
+
+    // Companion Clinical Notes Card (Single-Patient Multi-Dose Standard & Co-Formulated vs Multi-Pen Bundles)
+    const noteBoxH = 38.5;
+    if (postSummaryY + noteBoxH <= bottomSafeY) {
+      doc.setFillColor(...PILL_BG);
+      doc.setDrawColor(...BORDER_CARD);
+      doc.roundedRect(marginX, postSummaryY, cardW, noteBoxH, 3.0, 3.0, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.1);
+      doc.setTextColor(...SLATE_900);
+      doc.text(
+        isEs
+          ? 'NOTAS DE ARMONIZACION FARMACEUTICA Y PRESENTACIONES COMBINADAS (STACKS VS BUNDLES)'
+          : 'PHARMACEUTICAL HARMONIZATION NOTES · SINGLE-PEN STACKS VS MULTI-PEN BUNDLES',
+        marginX + 6,
+        postSummaryY + 6.0
+      );
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.35);
+      doc.setTextColor(...SLATE_700);
+      const harmonyNotes = isEs
+        ? [
+            '1. Plumas Multidosis de Uso Individual: Cada cartucho de 2.0 mL (200 clics), 2.4 mL (240 clics) o 3.0 mL (300 clics) contiene entre 3 y 100 dosis para un unico paciente (descontar ~1-2 dosis por purga inicial de aguja y volumen muerto residual).',
+            '2. Stacks en 1 Pluma vs Bundles de Plumas Separadas: Las fichas #16 GLOW y #17 KLOW describen el cartucho co-formulado todo-en-uno (10 clics/dia). Si se dispensan como Bundle de 3 o 4 plumas individuales (BPC-157 15mg, TB-500 15mg, GHK-Cu 100mg, KPV 15mg), aplicar los clics individuales de cada pluma.',
+            '3. Unidades Biologicas (IU) vs Volumen (mL): "IU" se reserva exclusivamente para potencia biologica de hCG (#18: 5,000 IU / 2 mL = 25 IU/clic). En el resto de peptidos, el dial mide incrementos volumetricos U-100 (1 clic = 0.01 mL; 100 clics = 1.00 mL).',
+            '4. Peptidos Adicionales bajo Pedido Clinico (3.0 mL): BPC-157 15 mg (5 mg/mL), TB-500 15 mg (5 mg/mL), Tesamorelin 30 mg (10 mg/mL), Thymosin Alpha-1 30 mg (10 mg/mL), Selank 15 mg (5 mg/mL), Semax 15 mg (5 mg/mL) y 5-Amino-1MQ 100 mg (33.3 mg/mL).',
+          ]
+        : [
+            '1. Single-Patient Multi-Dose Pens: Each 2.0 mL (200 clicks), 2.4 mL (240 clicks), or 3.0 mL (300 clicks) cartridge delivers multiple doses for a single patient. Deduct ~1-2 doses from nominal theoretical yield for initial needle priming and cartridge residual dead space.',
+            '2. Co-Formulated Single-Pen Stacks vs Multi-Pen Bundles: Cards #16 GLOW and #17 KLOW specify the co-formulated all-in-one 3 mL pen (10 clicks daily). When dispensed as a multi-pen bundle of separate single-active pens (e.g., BPC-157 15mg + TB-500 15mg + GHK-Cu 100mg + KPV 15mg), dial each individual pen per the matrix above.',
+            '3. Biological Units (IU) vs Volumetric Clicks (mL): "IU" denotes biological gonadotropin activity strictly for hCG (#18: 5,000 IU / 2 mL = 25 IU/click). All other peptide pens measure volumetric U-100 increments (1 click = 0.01 mL; 100 clicks = 1.00 mL).',
+            '4. Additional Wholesale Single-Active Pens Available (3.0 mL): Standalone BPC-157 15 mg (5 mg/mL, 5-10 clicks = 250-500 mcg), TB-500 15 mg (5 mg/mL, 10 clicks = 500 mcg), Tesamorelin 30 mg (10 mg/mL, 10-20 clicks = 1-2 mg), Thymosin Alpha-1 30 mg (10 mg/mL, 16 clicks = 1.6 mg 2x/wk), Selank 15 mg & Semax 15 mg (5 mg/mL, 5-10 clicks = 250-500 mcg), 5-Amino-1MQ 100 mg (33.3 mg/mL).',
+          ];
+
+      let ny = postSummaryY + 10.6;
+      harmonyNotes.forEach((n) => {
+        const wrapped = doc.splitTextToSize(sanitizePdfLatinText(n), cardW - 12);
+        wrapped.forEach((ln) => {
+          doc.text(ln, marginX + 6, ny);
+          ny += 2.75;
+        });
+        ny += 0.55;
+      });
+
+      postSummaryY += noteBoxH + 3.5;
+    }
+  }
+
   // Verification disclaimer centered below summary box
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.9);
   doc.setTextColor(...SLATE_500);
   doc.text(
     isEs
-      ? 'Verificar siempre la concentracion dispensada y la calibracion U-100 del dial antes de administrar.'
-      : 'Verify the dispensed concentration and U-100 pen dial calibration before administration.',
+      ? 'Verificar siempre la concentracion dispensada (mg/mL) y la calibracion U-100 del dial antes de administrar.'
+      : 'Verify the dispensed concentration (mg/mL) and U-100 pen dial calibration before administration.',
     pageW / 2,
-    curY + summaryBoxH + 5.8,
+    Math.min(postSummaryY + 1.5, bottomSafeY + 2),
     { align: 'center' }
   );
 

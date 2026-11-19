@@ -15,12 +15,17 @@ export default function PenDialVisualizer({
   volumeMl = 0.15,
   totalDoses = 20,
   strengthLabel = '5 mg',
+  cartridgeVolume = '3.0 mL',
   isCartridge = false,
   lang = 'en',
 }) {
   const isEs = lang === 'es';
   const volStr = Number(volumeMl || 0).toFixed(2);
   const exceedsSingleDial = penClicks > 60;
+  const cleanStrength = String(strengthLabel || '5 mg')
+    .replace(/\s*\(\d+(?:\.\d+)?\s*mL\)/i, '')
+    .trim();
+  const cleanCartridgeVol = String(cartridgeVolume || '3.0 mL').trim();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -140,8 +145,8 @@ export default function PenDialVisualizer({
           <div>
             <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {isCartridge
-                ? (isEs ? `Cartucho Precargado 3.0 mL (${strengthLabel})` : `3.0 mL Pre-filled Cartridge (${strengthLabel})`)
-                : (isEs ? `Pluma Precargada 3.0 mL (${strengthLabel})` : `3.0 mL Pre-filled Pen (${strengthLabel})`)}
+                ? (isEs ? `Cartucho Precargado ${cleanCartridgeVol} · ${cleanStrength}` : `${cleanCartridgeVol} Pre-filled Cartridge · ${cleanStrength}`)
+                : (isEs ? `Pluma Precargada ${cleanCartridgeVol} · ${cleanStrength}` : `${cleanCartridgeVol} Pre-filled Pen · ${cleanStrength}`)}
             </div>
             <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
               {isEs ? `Gira el dial exactamente hasta ${penClicks} clics` : `Turn the dial window right to ${penClicks} clicks`}
@@ -204,7 +209,7 @@ export default function PenDialVisualizer({
             <line key={x} x1={x} y1="34" x2={x} y2="48" stroke="#0369a1" strokeWidth="1.3" opacity="0.7" />
           ))}
           <text x="160" y="63" fill="#003666" fontSize="11" fontWeight="800" textAnchor="middle">
-            3.0 mL · {strengthLabel}
+            {cleanCartridgeVol} · {cleanStrength}
           </text>
 
           {/* Ergonomic Pen Body */}

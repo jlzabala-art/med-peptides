@@ -290,7 +290,69 @@ export async function POST(req) {
       const isSingleProtocol = screenScope === 'protocol' || screenScope === 'protocol_guide' ||
         contextAnchor?.type === 'protocol' || Boolean(contextAnchor?.phasesCount) || Boolean(contextAnchor?.phases);
 
-      if (isGenomics) {
+      const isPreFilledPens =
+        screenScope === 'pens_formulary' ||
+        contextAnchor?.type === 'pens_pricing' ||
+        String(pathname || '').startsWith('/pricing/pens') ||
+        String(pathname || '').startsWith('/pricing/dnlab-pens');
+
+      if (isPreFilledPens) {
+        const selectedPens = Array.isArray(contextAnchor?.protocolSelection) ? contextAnchor.protocolSelection : [];
+        const inventorySummary = Array.isArray(catalogInventory) && catalogInventory.length > 0
+          ? catalogInventory.map((p) => {
+              const vars = (p.variants || [])
+                .map((v) => `${v.concentration} in ${v.volume} (${v.ratioPerMl || ''}; Dial: ${v.clicksRange || v.clicksPerDose} clicks = ${v.doseBreakdown}; Yield: ${v.dosesPerPenLabel}; Freq: ${v.frequency}; Cycle: ${v.cycleDuration})`)
+                .join(' | ');
+              return `  * #${p.itemNumber || ''} ${p.name} [${p.sku}] (${p.category}): ${vars}. Timing: ${p.timing}. Needle: ${p.needle}. Storage: ${p.storage}.`;
+            }).join('\n')
+          : '19 pre-filled multi-dose peptide pens (26 SKUs across 2 mL, 2.4 mL, and 3 mL sterile cartridges).';
+
+        const activeSelectionBlock = selectedPens.length > 0
+          ? `PHYSICIAN'S ACTIVE PROTOCOL SELECTION (SUPPLY SUMMARY):\n` +
+            selectedPens.map((item) => `  * ${item.name} (${item.concentration} / ${item.volume}, ${item.ratioPerMl || ''}) × ${item.qty} pen(s) — Dial: ${item.clicksRange || item.clicksPerDose} clicks (${item.doseBreakdown}), Freq: ${item.frequency}, Cycle: ${item.cycleDuration}, Yield/Pen: ${item.dosesPerPenLabel}`).join('\n')
+          : 'PHYSICIAN ACTIVE PROTOCOL SELECTION: None currently selected (viewing full 19-pen / 26-SKU formulary).';
+
+        activeEntityContext = `CURRENT ACTIVE ATLAS HEALTH PRE-FILLED MULTI-DOSE PEPTIDE PENS FORMULARY (/pricing/pens):
+- Identity: Atlas Health Services Pre-filled Multi-Dose Peptide Pens Clinical Dosing Guide (19 Formulated Pens · 26 Strength SKUs).
+- Volumetric Dial Standard: U-100 mechanical pen mechanism where 100 dial increments (clicks) = 1.00 mL (1 click = 0.01 mL).
+  * 3.0 mL cartridge = 300 volumetric increments (3.00 mL total).
+  * 2.4 mL cartridge = 240 volumetric increments (2.40 mL total, e.g., MGF 2.4 mg / 2.4 mL).
+  * 2.0 mL cartridge = 200 volumetric increments (2.00 mL total, e.g., DSIP 2 mg/2 mL, Epithalon 100 mg/2 mL, MOTS-c 40 mg/2 mL, hCG 5,000 IU/2 mL, PT-141 20 mg/2 mL).
+- Active Filter / Search State: Category="${contextAnchor?.activeCategory || 'All Pens'}", Search="${contextAnchor?.searchQuery || 'none'}".
+- ${activeSelectionBlock}
+- Complete 19-Pen / 26-SKU Clinical Inventory:
+${inventorySummary}
+${pubmedContextText}`;
+
+        systemPrompt = `You are Atlas Clinical Pen Dosing & Formulary Specialist, the dedicated AI clinical decision support assistant for the Atlas Health Services Pre-filled Multi-Dose Peptide Pens Formulary (/pricing/pens).
+
+CRITICAL OPERATING PRINCIPLES:
+1. ZERO RECONSTITUTION (PRE-FILLED STERILE CARTRIDGES):
+   - These products are READY-TO-INJECT sterile pre-filled multi-dose cartridges.
+   - NEVER tell the user to reconstitute with bacteriostatic water or draw into an insulin syringe.
+   - Always explain administration via the mechanical pen dial (1 click = 0.01 mL; 100 clicks = 1.00 mL) using a fresh sterile ISO 11608-2 pen needle (31G or 32G × 4 mm) per injection and brief initial needle priming.
+2. EXACT PHARMACEUTICAL ARITHMETIC & UNIT SEPARATION:
+   - Strictly separate volume (mL), mass (mg or mcg), dial increments (clicks, where 1 click = 0.01 mL on U-100 calibrated pens), and biological activity units (IU, which apply strictly to hCG 5,000 IU / 2 mL = 2,500 IU/mL = 25 IU per click).
+   - Distinguish nominal theoretical yield (Total Volume ÷ Dose Volume) from usable yield after initial needle priming and cartridge residual dead space.
+   - Note important strength distinctions when asked:
+     * MOTS-c has 3 presentations: 30 mg/3 mL (10 mg/mL → 50 clicks = 5 mg, 6 nominal doses), 40 mg/2 mL (20 mg/mL → 25 clicks = 5 mg, 8 nominal doses), and 60 mg/3 mL (20 mg/mL → 25 clicks = 5 mg, 12 nominal doses).
+     * BPC-157 / TB-500: Primary 6 mg/9 mg in 3 mL (2/3 mg/mL) delivers 200 mcg BPC-157 / 300 mcg TB-500 at 10 clicks (0.10 mL). High-potency 15 mg/22.5 mg in 3 mL (5/7.5 mg/mL) delivers 200 mcg / 300 mcg at 4 clicks (0.04 mL) or 300 mcg / 450 mcg (+50% higher trauma/post-op dose) at 6 clicks (0.06 mL).
+     * CJC-1295 / Ipamorelin: Primary 3 mg/6 mg in 3 mL (1:2 ratio, 1/2 mg/mL) delivers 100 mcg CJC-1295 / 200 mcg Ipamorelin at 10 clicks (0.10 mL). The 6 mg/6 mg in 3 mL variant is a 1:1 ratio (2/2 mg/mL), so 10 clicks (0.10 mL) delivers 200 mcg CJC-1295 / 200 mcg Ipamorelin (or 5 clicks = 100 mcg / 100 mcg).
+     * Epithalon: 30 mg/3 mL (10 mg/mL) delivers 10 mg per 1.00 mL (100 clicks) = 3 nominal doses (30 mg) per pen; a 5-dose (50 mg) course requires 2 pens (60 mg total acquired content, leaving 10 mg surplus). The 100 mg/2 mL (50 mg/mL) pen delivers 10 mg at 20 clicks (0.20 mL) = 10 nominal doses per pen.
+     * CJC-1295 (No DAC) is a short-acting pulsatile GHRH(1-29) analogue (Mod GRF 1-29, half-life ~30 min), distinct from long-acting CJC-1295 with DAC.
+3. ACTIVE PROTOCOL SELECTION AWARENESS:
+   - If the physician has selected pens in the Supply Summary (listed in PHYSICIAN'S ACTIVE PROTOCOL SELECTION above), prioritize analyzing their exact selected pens: check for receptor overlap (e.g., stacking multiple GH secretagogues), organize morning-fasted vs bedtime-fasted administration schedules, and calculate total pens needed for the target cycle.
+4. 100% ATLAS HEALTH SERVICES WHITE-LABEL:
+   - Refer exclusively to Atlas Health Services and ATL-PEN-* SKUs. Never mention external suppliers or third-party wholesalers.
+5. BILINGUAL & STRUCTURED FORMAT:
+   - Reply in the language used by the clinician (English or Spanish, or matching contextAnchor.lang="${contextAnchor?.lang || 'en'}").
+   - Include a [CLINICAL_HIGHLIGHTS] block with 3-4 key parameters (e.g. Dial Setting, Active Dose, Cartridge Yield, Cold-Chain) and a [PREDICTED_NEXT_STEPS] block with 2-3 complete, non-truncated follow-up questions.
+
+${activeEntityContext}
+
+${publicPlatformKnowledge}
+`;
+      } else if (isGenomics) {
         activeEntityContext = `CURRENT ACTIVE 24GENOMICS CLINICAL SUITE & NUTRIGENOMICS CONTEXT:
 - Suite Identity: 24Genomics Nutrition Clinical Suite · State of Qatar & GCC B2B Schedule
 - Laboratory Diagnostics: 24Genetics® Core Clinical Laboratory (Madrid, Spain). CE-IVD accredited molecular genetics facility.

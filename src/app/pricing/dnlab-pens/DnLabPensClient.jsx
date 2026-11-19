@@ -114,6 +114,7 @@ function PenEditorialCard({
 
   return (
     <article
+      id={`pen-card-${row.id}`}
       className={`atlas-pen-editorial-card ${protocolQty > 0 ? 'in-protocol' : ''}`}
       style={protocolQty > 0 ? { borderColor: accentColor } : undefined}
     >
@@ -145,8 +146,8 @@ function PenEditorialCard({
               >
                 {row.category}
               </span>
-              <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                {variant.volume || '3 mL'} · {variant.totalUnits || 300} IU
+              <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
+                {variant.volume || '3 mL'} · {variant.totalUnits || 300} {isEs ? 'clics' : 'clicks'}
               </span>
             </div>
           </div>
@@ -186,7 +187,7 @@ function PenEditorialCard({
 
       {/* Hero 3-Metric Row with Signature 3px Vertical Specialty Accent Bars */}
       <div className="atlas-pen-ec-metrics">
-        <div className="atlas-pen-ec-metric" style={{ '--pen-accent': accentColor }}>
+        <div className="atlas-pen-ec-metric atlas-pen-ec-metric-dose" style={{ '--pen-accent': accentColor }}>
           <span className="atlas-pen-ec-metric-label">{isEs ? 'DOSIS ACTIVA' : 'DOSE'}</span>
           <span className="atlas-pen-ec-metric-val">{variant.doseBreakdown}</span>
         </div>
@@ -230,20 +231,20 @@ function PenEditorialCard({
         </div>
       </div>
 
-      {/* Clinical Footnote + Action Utility Bar */}
+      {/* Clinical Footnote + GCP Monochromatic Action Bar (1 Primary + 2 Monochrome Secondary = 1x3 Symmetric Row) */}
       <div className="atlas-pen-ec-footer">
         <p className="atlas-pen-ec-footnote">
-          <strong>{isEs ? 'Indicaciones y momento:' : 'Clinical notes & timing:'}</strong>{' '}
-          {row.description}{' '}
+          <strong>{isEs ? 'Momento y nota clínica:' : 'Timing & clinical note:'}</strong>{' '}
           {row.timing && (
-            <span style={{ color: '#0369a1', fontWeight: 650 }}>
-              ({isEs ? 'Momento' : 'Timing'}: {row.timing}.)
+            <span style={{ color: '#0f172a', fontWeight: 700 }}>
+              {row.timing} ·{' '}
             </span>
           )}
+          <span>{row.description}</span>
         </p>
 
         <div className="atlas-pen-ec-actions">
-          {/* Protocol Builder Toggle / Stepper (feeds Supply Summary & 1-Page Protocol PDF) */}
+          {/* Primary Action: Protocol Builder Toggle / Stepper (Rules #40 & #57) */}
           {protocolQty > 0 ? (
             <div className="atlas-pen-ec-stepper" style={{ borderColor: accentColor }}>
               <button
@@ -267,36 +268,33 @@ function PenEditorialCard({
           ) : (
             <button
               type="button"
-              className="gcp-btn-secondary atlas-pen-ec-btn"
+              className="gcp-btn-primary atlas-pen-ec-btn atlas-pen-ec-btn-primary"
               onClick={() => onSetProtocolQty?.(1)}
             >
               <Plus size={13} />
-              <span>{isEs ? 'Añadir a Guía PDF' : 'Add to Protocol'}</span>
+              <span>{isEs ? 'Protocolo' : 'Add to Protocol'}</span>
             </button>
           )}
 
+          {/* Secondary Action 1 (Monochrome): Unified Dial Simulator & Specs */}
           <button
             type="button"
-            className={`gcp-btn-secondary atlas-pen-ec-btn ${isExpanded ? 'is-open' : ''}`}
+            className={`gcp-btn-secondary atlas-pen-ec-btn atlas-pen-ec-btn-mono ${isExpanded ? 'is-open' : ''}`}
             onClick={onToggleExpand}
             aria-expanded={isExpanded}
           >
             <Sliders size={13} />
-            <span>{isExpanded ? (isEs ? 'Ocultar Simulador' : 'Hide Dial Sim') : (isEs ? 'Simulador Dial' : 'Dial Simulator')}</span>
+            <span>{isExpanded ? (isEs ? 'Cerrar Dial' : 'Hide Dial') : (isEs ? 'Dial y Ficha' : 'Dial & Specs')}</span>
             <ChevronDown
               size={13}
               style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
             />
           </button>
 
-          <Link href={calcHref} className="gcp-btn-secondary atlas-pen-ec-btn" style={{ textDecoration: 'none' }}>
-            <Calculator size={13} />
-            <span>{isEs ? 'Guía Paciente' : 'Patient Guide'}</span>
-          </Link>
-
+          {/* Secondary Action 2 (Monochrome): Prescribe / Clinical Order */}
           <button
             type="button"
-            className="gcp-btn-secondary atlas-pen-ec-btn"
+            className="gcp-btn-secondary atlas-pen-ec-btn atlas-pen-ec-btn-mono"
             onClick={() => onPrescribe?.(row)}
           >
             <span>{isEs ? 'Prescribir' : 'Prescribe'}</span>
@@ -379,26 +377,61 @@ export default function DnLabPensClient({
     if (selectedCategory !== 'ALL') {
       list = list.filter((p) => p.category === selectedCategory);
     }
-    if (searchQuery && searchQuery.trim().length >= 2) {
-      const q = searchQuery.toLowerCase().trim();
+    if (searchQuery && searchQuery.trim().length >= 1) {
+      const tokens = searchQuery
+        .toLowerCase()
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
       list = list.filter((p) => {
         const atlasSku = formatAtlasPenSku(p.sku, p.itemNumber).toLowerCase();
-        return (
-          (p.name || '').toLowerCase().includes(q) ||
-          atlasSku.includes(q) ||
-          (p.category || '').toLowerCase().includes(q) ||
-          (p.description || '').toLowerCase().includes(q) ||
-          (p.timing || '').toLowerCase().includes(q) ||
-          (p.variants || []).some(
+        const variantCorpus = (p.variants || [])
+          .map(
             (v) =>
-              (v.concentration || '').toLowerCase().includes(q) ||
-              (v.doseBreakdown || '').toLowerCase().includes(q)
+              `${v.label || ''} ${v.concentration || ''} ${v.volume || ''} ${computePerMlRatio(
+                v.concentration,
+                v.volume
+              )} ${v.clicksRange || ''} ${v.clicksPerDose || ''} clicks ${v.doseBreakdown || ''} ${
+                v.dosesPerPenLabel || ''
+              } ${v.frequency || ''} ${v.cycleDuration || ''}`
           )
-        );
+          .join(' ')
+          .toLowerCase();
+        const fullCorpus = `${p.itemNumber || ''} ${p.name || ''} ${atlasSku} ${(p.sku || '').toLowerCase()} ${
+          p.category || ''
+        } ${p.description || ''} ${p.timing || ''} ${p.needle || ''} ${p.storage || ''} ${variantCorpus}`.toLowerCase();
+        return tokens.every((tok) => fullCorpus.includes(tok));
       });
     }
     return list;
   }, [initialProducts, selectedCategory, searchQuery]);
+
+  // Live Local Suggestions for GlobalSearchBar dropdown (eliminates false "No clinical matches found"!)
+  const penSearchSuggestions = useMemo(() => {
+    if (!searchQuery || !searchQuery.trim()) return [];
+    return filteredProducts.map((p) => {
+      const atlasSku = formatAtlasPenSku(p.sku, p.itemNumber);
+      const variantsSummary = (p.variants || [])
+        .map((v) => `${v.concentration}/${v.volume || '3 mL'} (${v.clicksRange || v.clicksPerDose} clicks)`)
+        .join(' · ');
+      return {
+        id: p.id,
+        key: p.id,
+        name: `#${String(p.itemNumber || '').padStart(2, '0')} ${p.name}`,
+        email: `${atlasSku} · ${variantsSummary}`,
+        category: p.category || 'Peptide Pen',
+        searchTerm: p.name.split('(')[0].trim(),
+        onSelect: () => {
+          if (typeof document !== 'undefined') {
+            const el = document.getElementById(`pen-card-${p.id}`);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        },
+      };
+    });
+  }, [filteredProducts, searchQuery]);
 
   // Group filtered products by therapeutic specialty for the Visual Cards view
   const groupedProducts = useMemo(() => {
@@ -541,12 +574,82 @@ export default function DnLabPensClient({
     }
   }, [lang, currency, isEs]);
 
+  // Structured catalog inventory & active protocol selection for Atlas AI
+  const atlasCatalogInventory = useMemo(() => {
+    return (initialProducts || []).map((p) => ({
+      itemNumber: p.itemNumber,
+      name: p.name,
+      sku: formatAtlasPenSku(p.sku),
+      category: p.category,
+      timing: p.timing,
+      needle: p.needle,
+      storage: p.storage,
+      purity: p.purity,
+      variants: (p.variants || []).map((v) => ({
+        label: v.label,
+        concentration: v.concentration,
+        volume: v.volume,
+        ratioPerMl: computePerMlRatio(v.concentration, v.volume),
+        totalUnits: v.totalUnits,
+        clicksRange: v.clicksRange || String(v.clicksPerDose || ''),
+        clicksPerDose: v.clicksPerDose,
+        doseBreakdown: v.doseBreakdown,
+        dosesPerPenLabel: v.dosesPerPenLabel,
+        frequency: v.frequency,
+        cycleDuration: v.cycleDuration,
+      })),
+    }));
+  }, [initialProducts]);
+
+  const atlasProtocolSelection = useMemo(() => {
+    return protocolItemsList.map((item) => ({
+      name: item.product.name,
+      sku: formatAtlasPenSku(item.product.sku),
+      category: item.product.category,
+      concentration: item.variant.concentration,
+      volume: item.variant.volume,
+      ratioPerMl: computePerMlRatio(item.variant.concentration, item.variant.volume),
+      clicksRange: item.variant.clicksRange || String(item.variant.clicksPerDose || ''),
+      clicksPerDose: item.variant.clicksPerDose,
+      doseBreakdown: item.variant.doseBreakdown,
+      dosesPerPenLabel: item.variant.dosesPerPenLabel,
+      frequency: item.variant.frequency,
+      cycleDuration: item.variant.cycleDuration,
+      timing: item.product.timing,
+      qty: item.qty,
+    }));
+  }, [protocolItemsList]);
+
   // Register contextual state for Atlas AI & mutual exclusion with Supply Summary Dock (Rule #69)
   useRegisterAtlasContext(
     {
+      contextType: 'pens_formulary',
+      storageKey: 'pricing-pens-v2',
+      lang,
+      catalogInventory: atlasCatalogInventory,
       contextAnchor: {
         type: 'pens_pricing',
-        name: isEs ? 'Guía de Plumas Precargadas' : 'Peptide Pen Dosing Guide',
+        lang,
+        name: isEs
+          ? `Guía de Bolígrafos Precargados · ${initialProducts.length} Fórmulas (${totalVariantsCount} SKUs)`
+          : `Peptide Pen Dosing Guide · ${initialProducts.length} Formulas (${totalVariantsCount} SKUs)`,
+        badgeLabel: 'U-100 · 2–8°C',
+        sectionTitle: isEs
+          ? 'Guía Clínica Armonizada de Bolígrafos Precargados (Estándar U-100)'
+          : 'Atlas Health Pre-filled Multi-Dose Peptide Pens · U-100 Clinical Formulary',
+        keyActives: isEs
+          ? '20 bolígrafos multidosis estériles (38 presentaciones armonizadas en cartuchos de 2 mL, 2.4 mL y 3 mL): BPC-157/TB-500 (6/9, 7.5/7.5 y 15/22.5 mg), KPV (10 y 15 mg), CJC-1295 No DAC (3 y 30 mg), CJC-1295/Ipamorelin (3/6, 5/10 y 6/6 mg), IGF-1 LR3 (300 mcg y 3 mg), Ipamorelin (6 y 15 mg), MGF (2.4 mg), CJC/Ipamorelin/DSIP (3/6/6 mg), DSIP (2 mg), Epithalon (30 y 100 mg), Humanin (30 mg), MOTS-c (15, 30, 40 y 60 mg), NAD+ (300, 750 y 1050 mg), SS-31 Elamipretide (30 mg), GHK-Cu (30, 60 y 100 mg), GLOW Stack, KLOW Stack, hCG (5000 IU), Kisspeptin-10 (3 y 15 mg) y PT-141 (20 y 15 mg).'
+          : '20 sterile multi-dose peptide pens (38 harmonized strength SKUs across 2 mL, 2.4 mL, and 3 mL cartridges): BPC-157/TB-500 (6/9, 7.5/7.5 & 15/22.5 mg), KPV (10 & 15 mg), CJC-1295 No DAC (3 & 30 mg), CJC-1295/Ipamorelin (3/6, 5/10 & 6/6 mg), IGF-1 LR3 (300 mcg & 3 mg), Ipamorelin (6 & 15 mg), MGF (2.4 mg), CJC/Ipamorelin/DSIP (3/6/6 mg), DSIP (2 mg), Epithalon (30 & 100 mg), Humanin (30 mg), MOTS-c (15, 30, 40 & 60 mg), NAD+ (300, 750 & 1050 mg), SS-31 Elamipretide (30 mg), GHK-Cu (30, 60 & 100 mg), GLOW Stack, KLOW Stack, hCG (5000 IU), Kisspeptin-10 (3 & 15 mg), and PT-141 (20 & 15 mg).',
+        mechanisms: isEs
+          ? 'Conversión mecánica U-100: 100 clics = 1 mL (1 clic = 0.01 mL). Cartuchos precargados estériles de uso individual multidosis listos para administrar (NO requieren reconstitución ni agua bacteriostática). Agujas 31G / 32G × 4 mm. Conservación en frío 2°C–8°C protegida de la luz (estabilidad 30 días tras primera punción).'
+          : 'Mechanical U-100 dial conversion: 100 clicks = 1 mL (1 click = 0.01 mL). Single-patient multi-dose sterile pre-filled cartridges requiring ZERO reconstitution or bacteriostatic water mixing. Compatible with 31G / 32G × 4 mm pen needles. Refrigerated cold-chain 2°C–8°C protected from light (30-day BUD once pierced).',
+        welcomeIntro: isEs
+          ? 'Consulta cálculos exactos de clics U-100 a mg/mcg, comparativas entre presentaciones (MOTS-c 15/30/40/60 mg, NAD+ 300/750/1050 mg, GHK-Cu 30/60/100 mg, SS-31 30 mg), sinergias de combinación o revisión clínica de los bolígrafos añadidos a tu protocolo.'
+          : 'Ask about exact U-100 click-to-dose math, strength comparisons across presentations (MOTS-c 15/30/40/60 mg, NAD+ 300/750/1050 mg, GHK-Cu 30/60/100 mg, SS-31 30 mg), safe multi-pen stacking, or a clinical review of the pens selected in your Supply Summary.',
+        activeCategory: selectedCategory,
+        searchQuery,
+        filteredCount: filteredProducts.length,
+        protocolSelection: atlasProtocolSelection,
       },
       bottomBar: {
         hidden: protocolItemsList.length > 0,
@@ -559,7 +662,19 @@ export default function DnLabPensClient({
         },
       },
     },
-    [isEs, filteredProducts.length, protocolItemsList.length, handleExportPdf]
+    [
+      isEs,
+      lang,
+      selectedCategory,
+      searchQuery,
+      filteredProducts.length,
+      protocolItemsList.length,
+      initialProducts.length,
+      totalVariantsCount,
+      atlasCatalogInventory,
+      atlasProtocolSelection,
+      handleExportPdf,
+    ]
   );
 
   // Master-Detail Live Dial Simulator (used inside both Visual Cards and Compact Table)
@@ -579,72 +694,49 @@ export default function DnLabPensClient({
       const sliderMax = Math.max(50, defaultClicks);
 
       return (
-        <div className="dnlab-detail-panel">
-          {/* Left: Clinical Profile & Visual Pen Dial */}
+        <div className="dnlab-detail-panel dnlab-detail-panel-unified">
           <div className="dnlab-detail-card">
+            {/* Top Header & Purity / Cartridge Badges */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Activity size={16} color="#003666" />
+                <Sliders size={16} color="#003666" />
                 <h4 style={{ margin: 0, fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Especificaciones & Dial Visual' : 'Clinical Specs & Visual Dial'}
+                  {isEs ? 'Simulador Interactivo U-100 & Especificaciones' : 'Interactive U-100 Dial Simulator & Clinical Specs'}
                 </h4>
               </div>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '999px' }}>
-                {row.purity}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1d4ed8', background: '#eff6ff', padding: '2px 8px', borderRadius: '999px', border: '1px solid #bfdbfe' }}>
+                  {currentVariant.volume || '3 mL'} · {totalUnitsInCartridge} {isEs ? 'clics' : 'clicks'}
+                </span>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '999px' }}>
+                  {row.purity}
+                </span>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {/* Compact Clinical Specs Pill Strip */}
+            <div className="dnlab-specs-pill-strip">
               {row.timing && (
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', fontSize: '0.76rem', color: '#334155' }}>
-                  <Clock size={14} color="#003666" style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <span>
-                    <b>{isEs ? 'Momento Óptimo:' : 'Optimal Timing:'}</b> {row.timing}
-                  </span>
+                <div className="dnlab-spec-chip">
+                  <Clock size={13} color="#003666" style={{ flexShrink: 0 }} />
+                  <span><b>{isEs ? 'Momento:' : 'Timing:'}</b> {row.timing}</span>
                 </div>
               )}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', fontSize: '0.76rem', color: '#334155' }}>
-                <ThermometerSnowflake size={14} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>
-                  <b>{isEs ? 'Conservación / BUD:' : 'Cold-Chain / BUD:'}</b> {row.storage}
-                </span>
+              <div className="dnlab-spec-chip">
+                <ThermometerSnowflake size={13} color="#0284c7" style={{ flexShrink: 0 }} />
+                <span><b>{isEs ? 'Frío / BUD:' : 'Cold-Chain:'}</b> {row.storage}</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', fontSize: '0.76rem', color: '#334155' }}>
-                <Info size={14} color="#6366f1" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>
-                  <b>{isEs ? 'Aguja Estándar:' : 'Pen Needle Standard:'}</b> {row.needle}
-                </span>
+              <div className="dnlab-spec-chip">
+                <Info size={13} color="#475569" style={{ flexShrink: 0 }} />
+                <span><b>{isEs ? 'Aguja:' : 'Needle:'}</b> {row.needle}</span>
               </div>
             </div>
 
-            <PenDialVisualizer
-              penClicks={currentUnits}
-              volumeMl={volumeMl}
-              totalDoses={totalDosesAtSetting}
-              strengthLabel={`${currentVariant.concentration || ''} (${currentVariant.volume || '3 mL'})`}
-              isCartridge={false}
-              lang={lang}
-            />
-          </div>
-
-          {/* Right: Live Proportional Click-to-Dose Simulator */}
-          <div className="dnlab-detail-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sliders size={16} color="#1a73e8" />
-                <h4 style={{ margin: 0, fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Simulador Interactivo de Clics' : 'Live Click-to-Dose Simulator'}
-                </h4>
-              </div>
-              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#1d4ed8', background: '#eff6ff', padding: '2px 8px', borderRadius: '999px', border: '1px solid #bfdbfe' }}>
-                {currentVariant.volume || '3 mL'} · {totalUnitsInCartridge} IU
-              </span>
-            </div>
-
+            {/* Variant Strength Switcher (if multiple strengths) */}
             {variants.length > 1 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-                  {isEs ? 'Concentración:' : 'Strength:'}
+                <span style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>
+                  {isEs ? 'Presentación:' : 'Strength:'}
                 </span>
                 {variants.map((v, idx) => {
                   const isSel = idx === activeIdx;
@@ -671,19 +763,31 @@ export default function DnLabPensClient({
               </div>
             )}
 
+            {/* Visual Pen Graphic (Clean, zero double parentheses) */}
+            <PenDialVisualizer
+              penClicks={currentUnits}
+              volumeMl={volumeMl}
+              totalDoses={totalDosesAtSetting}
+              strengthLabel={currentVariant.concentration || '10 mg'}
+              cartridgeVolume={currentVariant.volume || '3.0 mL'}
+              isCartridge={false}
+              lang={lang}
+            />
+
+            {/* Integrated Interactive Click Slider + Live Output Tiles */}
             <div className="dnlab-dial-box">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', gap: '8px' }}>
-                <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155' }}>
-                  {isEs ? 'Ajuste del Dial (1 clic = 0.01 mL):' : 'Dial Setting (1 click = 0.01 mL):'}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
+                  {isEs ? 'Ajustar Clics en Vivo (1 clic = 0.01 mL):' : 'Adjust Live Dial Setting (1 click = 0.01 mL):'}
                 </span>
-                <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#003666', fontVariantNumeric: 'tabular-nums' }}>
+                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#003666', fontVariantNumeric: 'tabular-nums' }}>
                   {currentUnits} {isEs ? 'clics' : 'clicks'} ({volumeMl.toFixed(2)} mL)
                 </span>
               </div>
 
               <input
                 type="range"
-                min="2"
+                min="1"
                 max={sliderMax}
                 step="1"
                 value={currentUnits}
@@ -692,7 +796,7 @@ export default function DnLabPensClient({
               />
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.68rem', color: '#64748b', marginTop: '6px' }}>
-                <span>2 {isEs ? 'clics' : 'clicks'}</span>
+                <span>1 {isEs ? 'clic' : 'click'}</span>
                 <button
                   type="button"
                   onClick={() => setDialSettings((prev) => ({ ...prev, [sliderKey]: defaultClicks }))}
@@ -701,39 +805,39 @@ export default function DnLabPensClient({
                     background: '#ffffff',
                     color: '#003666',
                     borderRadius: '999px',
-                    padding: '2px 9px',
+                    padding: '2px 10px',
                     fontSize: '0.68rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                   }}
                 >
-                  {isEs ? `Estándar (${defaultClicks} clics)` : `Standard (${defaultClicks} clicks)`}
+                  {isEs ? `Restablecer (${defaultClicks} clics)` : `Reset Standard (${defaultClicks} clicks)`}
                 </button>
                 <span>{sliderMax} {isEs ? 'clics' : 'clicks'}</span>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.7rem' }}>
-              <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.66rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 750 }}>
-                  {isEs ? 'Dosis Activa Real / Inyección' : 'Live Active Dose / Injection'}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.65rem' }}>
+              <div style={{ background: '#f8fafc', padding: '9px 11px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.64rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 750 }}>
+                  {isEs ? 'Dosis Activa / Inyección' : 'Live Active Dose / Injection'}
                 </div>
-                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginTop: '3px', fontVariantNumeric: 'tabular-nums' }}>
+                <div style={{ fontSize: '0.83rem', fontWeight: 800, color: '#0f172a', marginTop: '2px', fontVariantNumeric: 'tabular-nums' }}>
                   {dynamicDoseBreakdown}
                 </div>
-                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', marginTop: '2px' }}>
                   {currentVariant.frequency}
                 </div>
               </div>
 
-              <div style={{ background: '#ecfdf5', padding: '10px 12px', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
-                <div style={{ fontSize: '0.66rem', color: '#047857', textTransform: 'uppercase', fontWeight: 750 }}>
-                  {isEs ? 'Rendimiento del Pen' : 'Est. Yield per Pen'}
+              <div style={{ background: '#ecfdf5', padding: '9px 11px', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
+                <div style={{ fontSize: '0.64rem', color: '#047857', textTransform: 'uppercase', fontWeight: 750 }}>
+                  {isEs ? 'Rendimiento a este Dial' : 'Est. Yield at This Dial'}
                 </div>
-                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#065f46', marginTop: '3px', fontVariantNumeric: 'tabular-nums' }}>
-                  {totalDosesAtSetting} {isEs ? 'dosis' : 'doses'}
+                <div style={{ fontSize: '0.83rem', fontWeight: 800, color: '#065f46', marginTop: '2px', fontVariantNumeric: 'tabular-nums' }}>
+                  {totalDosesAtSetting} {isEs ? 'dosis nominales' : 'nominal doses'}
                 </div>
-                <div style={{ fontSize: '0.68rem', color: '#047857', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.67rem', color: '#047857', marginTop: '2px' }}>
                   {isEs ? 'Estabilidad 30 días en frío (BUD)' : '30-day cold-chain BUD once pierced'}
                 </div>
               </div>
@@ -742,16 +846,16 @@ export default function DnLabPensClient({
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
               <Link
                 href={calcHref}
-                className="gcp-btn-primary"
-                style={{ flex: '1 1 170px', justifyContent: 'center', fontSize: '0.78rem', padding: '8px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                className="gcp-btn-secondary"
+                style={{ flex: '1 1 170px', justifyContent: 'center', fontSize: '0.76rem', padding: '7px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <Calculator size={14} />
-                <span>{isEs ? 'Guía Paciente (QR / URL)' : 'Patient Guide (QR / URL)'}</span>
+                <Calculator size={13} />
+                <span>{isEs ? 'Abrir en Calculadora de Paciente (QR / URL)' : 'Open in Patient Calculator (QR / URL)'}</span>
               </Link>
               <Link
                 href={`/labels?search=${encodeURIComponent(row.name)}`}
                 className="gcp-btn-secondary"
-                style={{ justifyContent: 'center', fontSize: '0.76rem', padding: '8px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                style={{ justifyContent: 'center', fontSize: '0.75rem', padding: '7px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
                 <span>Labels Studio</span>
               </Link>
@@ -894,85 +998,119 @@ export default function DnLabPensClient({
         breadcrumb={breadcrumbItems}
       />
 
-      {/* ── EXECUTIVE DARK NAVY BROCHURE HEADER (Matches A4 PDF 1-to-1) ── */}
-      <section className="atlas-pens-exec-banner">
-        <div className="atlas-pens-exec-inner">
-          <div className="atlas-pens-exec-top">
-            <div style={{ minWidth: 0 }}>
-              <div className="atlas-pens-exec-eyebrow">
-                <span>ATLAS HEALTH SERVICES</span>
-                <span>·</span>
-                <span>{isEs ? 'FORMULARIO CLÍNICO' : 'CLINICAL FORMULARY'}</span>
-                <span>·</span>
-                <span>{initialProducts.length} {isEs ? 'Fórmulas' : 'Formulas'} ({totalVariantsCount} SKUs)</span>
-              </div>
-              <h1 className="atlas-pens-exec-title">
-                {isEs ? 'GUÍA DE PLUMAS DE PÉPTIDOS' : 'PEPTIDE PEN DOSING GUIDE'}
-              </h1>
-              <p className="atlas-pens-exec-sub">
-                {isEs
-                  ? 'Protocolo clínico oficial · dosis activa, clics del dial U-100, frecuencia, duración y rendimiento por pen (≥99.2% HPLC · 2°C–8°C).'
-                  : 'Official clinical formulary · active dose, U-100 dial clicks, frequency, cycle duration and yield per pen (≥99.2% HPLC · 2°C–8°C).'}
-              </p>
+      {/* ── GOOGLE CLOUD UX COMPACT PAGE HEADER (Rules #9, #16, #23, #40, #57, #70) ── */}
+      <header className="atlas-pens-gcp-header">
+        <div className="atlas-pens-gcp-header-inner">
+          <div className="atlas-pens-gcp-title-col">
+            <div className="atlas-pens-gcp-eyebrow">
+              <Link href="/pricing" className="atlas-pens-back-link">
+                ← {isEs ? 'Tarifas' : 'All Schedules'}
+              </Link>
+              <span>·</span>
+              <span className="atlas-pens-gcp-chip">{isEs ? 'FORMULARIO CLÍNICO' : 'CLINICAL FORMULARY'}</span>
+              <span className="atlas-pens-gcp-chip atlas-pens-gcp-chip-u100">U-100: 100 clicks = 1 mL</span>
+              <span className="atlas-pens-gcp-chip">≥99.2% HPLC · 2–8°C</span>
             </div>
 
-            {/* Signature U-100 Conversion Pill */}
-            <div className="atlas-pens-conversion-pill">
-              <span className="atlas-pens-conv-label">
-                {isEs ? 'CONVERSIÓN DIAL U-100' : 'U-100 PEN CONVERSION'}
-              </span>
-              <span className="atlas-pens-conv-val">
-                {isEs ? '100 clics = 1 mL' : '100 clicks = 1 mL'}
-              </span>
-              <span className="atlas-pens-conv-sub">
-                {isEs ? '1 clic = 1 UI = 0.01 mL · Agujas 31G/32G 4mm' : '1 click = 1 IU = 0.01 mL · 31G/32G 4mm Needles'}
-              </span>
-            </div>
+            <h1 className="atlas-pens-gcp-title">
+              {isEs
+                ? 'Bolígrafos Precargados de Péptidos · Guía Clínica'
+                : 'Pre-filled Multi-Dose Peptide Pens · Dosing Guide'}
+            </h1>
+            <p className="atlas-pens-gcp-sub">
+              {isEs
+                ? 'Formulario clínico armonizado (20 fórmulas · 38 presentaciones en 2–3 mL) con dial mecánico U-100 (1 clic = 0.01 mL) y constructor de protocolo en PDF.'
+                : 'Harmonized clinical formulary (20 formulas · 38 strength SKUs across 2–3 mL) with U-100 click-dial dosing (1 click = 0.01 mL) and 1-page PDF Protocol Builder.'}
+            </p>
           </div>
 
-          <div className="atlas-pens-exec-actions">
+          {/* Symmetric 1x3 Action Toolbar (1 Primary CTA + 2 Monochrome Secondary — Rules #40, #57, #70) */}
+          <div className="atlas-pens-gcp-actions">
             <button
               type="button"
-              className="atlas-exec-btn-primary"
+              className="gcp-btn-primary atlas-pens-action-btn"
               disabled={isExportingPdf}
               onClick={() => handleExportPdf()}
             >
               <FileText size={14} />
               <span>
                 {isExportingPdf
-                  ? (isEs ? 'Generando PDF...' : 'Generating PDF...')
+                  ? (isEs ? 'Generando...' : 'Generating...')
                   : protocolItemsList.length > 0
-                    ? (isEs
-                        ? `Exportar Guía de Protocolo (${totalProtocolPens} pens)`
-                        : `Export Protocol Guide PDF (${totalProtocolPens} pens)`)
-                    : (isEs ? 'Exportar Guía Visual PDF (A4)' : 'Export Visual Dosing Guide PDF')}
+                    ? (isEs ? `Protocolo PDF (${totalProtocolPens})` : `Protocol PDF (${totalProtocolPens})`)
+                    : (isEs ? 'Exportar Guía PDF' : 'Export PDF Guide')}
               </span>
             </button>
 
-            <button type="button" className="atlas-exec-btn-ghost" onClick={handleShare}>
-              {copiedLink ? <Check size={14} color="#93c5fd" /> : <Share2 size={14} />}
+            <button
+              type="button"
+              className="gcp-btn-secondary atlas-pens-action-btn"
+              onClick={handleShare}
+            >
+              {copiedLink ? <Check size={14} color="#16a34a" /> : <Share2 size={14} />}
               <span>{copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Compartir' : 'Share')}</span>
             </button>
 
             <Link
               href={`/calculator?format=pen${isEs ? '&lang=es' : ''}`}
-              className="atlas-exec-btn-ghost"
+              className="gcp-btn-secondary atlas-pens-action-btn"
               style={{ textDecoration: 'none' }}
             >
               <Calculator size={14} />
-              <span>{isEs ? 'Calculadora Paciente' : 'Patient Calculator'}</span>
-            </Link>
-
-            <Link href="/pricing" className="atlas-exec-btn-ghost" style={{ textDecoration: 'none' }}>
-              <ChevronRight size={14} />
-              <span>{isEs ? 'Todas las Tarifas' : 'All Schedules'}</span>
+              <span>{isEs ? 'Calculadora' : 'Calculator'}</span>
             </Link>
           </div>
         </div>
-      </section>
+      </header>
 
       <main className="dnlab-container">
-        {/* Search + View Mode Switcher Row */}
+        {/* ── 4 COMPACT GCP KPI SUMMARY CARDS + SCOPE INDICATOR (Rule #22) ── */}
+        <section className="atlas-pens-kpi-section" aria-label="Portfolio Summary KPIs">
+          <div className="atlas-pens-kpi-header">
+            <span className="atlas-pens-kpi-kicker">
+              {isEs ? 'RESUMEN DEL PORFOLIO Y ALCANCE' : 'PORTFOLIO SUMMARY & SCOPE'}
+            </span>
+            <span className="atlas-pens-kpi-scope-badge">
+              {selectedCategory !== 'ALL' || searchQuery.trim()
+                ? `${isEs ? 'Filtro Activo' : 'Active Filter'} (${filteredProducts.length} / ${initialProducts.length} Pens)`
+                : `${isEs ? 'Formulario Completo' : 'Entire Formulary'} (${initialProducts.length} Pens · ${totalVariantsCount} SKUs)`}
+            </span>
+          </div>
+
+          <div className="atlas-pens-kpi-grid">
+            <div className="atlas-pens-kpi-card">
+              <span className="atlas-pens-kpi-val">{filteredProducts.length}</span>
+              <span className="atlas-pens-kpi-label">
+                {isEs ? 'BOLÍGRAFOS FORMULADOS' : 'FORMULATED PENS'}
+              </span>
+            </div>
+
+            <div className="atlas-pens-kpi-card">
+              <span className="atlas-pens-kpi-val">
+                {filteredProducts.reduce((acc, p) => acc + (p.variants?.length || 1), 0)}
+              </span>
+              <span className="atlas-pens-kpi-label">
+                {isEs ? 'PRESENTACIONES (2–3 ML)' : 'STRENGTH SKUS (2–3 ML)'}
+              </span>
+            </div>
+
+            <div className="atlas-pens-kpi-card">
+              <span className="atlas-pens-kpi-val">100 clicks</span>
+              <span className="atlas-pens-kpi-label">
+                {isEs ? 'ESTÁNDAR U-100 (= 1 ML)' : 'U-100 DIAL (= 1.00 ML)'}
+              </span>
+            </div>
+
+            <div className="atlas-pens-kpi-card">
+              <span className="atlas-pens-kpi-val" style={{ color: '#059669' }}>≥ 99.2%</span>
+              <span className="atlas-pens-kpi-label">
+                {isEs ? 'PUREZA HPLC · 2°C–8°C' : 'HPLC PURITY · 2°C–8°C'}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SEARCH BAR + VIEW MODE SWITCHER (Rule #7) ── */}
         <div className="atlas-pens-toolbar-row">
           <div style={{ flex: 1, minWidth: 0 }}>
             <GlobalSearchBar
@@ -982,6 +1120,12 @@ export default function DnLabPensClient({
               namespace="atlas-pens"
               size="lg"
               resultCount={filteredProducts.length}
+              localSuggestions={penSearchSuggestions}
+              localSuggestionsLabel={
+                isEs
+                  ? `Fórmulas Coincidentes en Guía (${filteredProducts.length})`
+                  : `Matching Formulary Pens (${filteredProducts.length})`
+              }
               lang={lang}
             />
           </div>
@@ -1020,18 +1164,6 @@ export default function DnLabPensClient({
             </button>
           ))}
         </div>
-
-        {/* Tip Banner for Physicians on Building a 1-Page Custom Patient Protocol PDF */}
-        {protocolItemsList.length === 0 && (
-          <div className="atlas-pens-protocol-hint">
-            <ShieldCheck size={15} color="#003666" style={{ flexShrink: 0 }} />
-            <span>
-              {isEs
-                ? 'Consejo clínico: pulsa "+ Añadir a Guía PDF" en las plumas de un paciente para armar su Supply Summary y exportar una guía visual personalizada de 1 página.'
-                : 'Physician tip: click "+ Add to Protocol" on any pens below to assemble a custom Supply Summary and export a clean 1-page visual dosing guide PDF.'}
-            </span>
-          </div>
-        )}
 
         {/* ── MAIN CONTENT: VISUAL EDITORIAL CARDS (DEFAULT) OR COMPACT TABLE ── */}
         {viewMode === 'cards' ? (

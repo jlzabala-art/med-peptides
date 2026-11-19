@@ -228,6 +228,8 @@ export default function GlobalSearchBar({
   lang = 'en',
   searchScope,           // 'clinical' | 'patients' | 'users' | 'suppliers' | 'protocols' | 'products' | 'local'
   disableAlgolia = false,// explicitly disable Algolia queries (pure local filter)
+  localSuggestions = null, // optional live local dataset matches [{ id, name, email, company, category, onSelect }]
+  localSuggestionsLabel = null,
   // Integrated filters (Golden Rule #7)
   filters = [],          // Active filter chips rendered below the bar
   filterOptions = [],    // Quick-filter dropdowns rendered inside the bar
@@ -291,13 +293,6 @@ export default function GlobalSearchBar({
       return;
     }
 
-    if (isLocalOnly) {
-      setSuggestions([]);
-      setIsSearchingSuggestions(false);
-      setSelectedIndex(-1);
-      return;
-    }
-
     const trimmedVal = (effectiveValue || '').trim();
     if (trimmedVal.startsWith('/ai') || trimmedVal.startsWith('/copilot')) {
       const q = trimmedVal.replace(/^\/(ai|copilot)\s*/i, '').trim();
@@ -314,6 +309,17 @@ export default function GlobalSearchBar({
       setShowDropdown(true);
       setIsSearchingSuggestions(false);
       setSelectedIndex(0);
+      return;
+    }
+
+    if (isLocalOnly) {
+      if (Array.isArray(localSuggestions) && trimmedVal.length >= 1) {
+        setSuggestions(localSuggestions.slice(0, 8));
+      } else {
+        setSuggestions([]);
+      }
+      setIsSearchingSuggestions(false);
+      setSelectedIndex(-1);
       return;
     }
 
@@ -542,7 +548,7 @@ export default function GlobalSearchBar({
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [effectiveValue, isFocused]);
+  }, [effectiveValue, isFocused, isLocalOnly, localSuggestions]);
 
   const effectivePlaceholder = useMemo(() => {
     const lc = lang === 'es' ? 'es' : 'en';
@@ -637,11 +643,17 @@ export default function GlobalSearchBar({
       effectiveOnChange?.(term);
       if (!term) {
         setShowDropdown(showRecent && recentSearches.length > 0);
-      } else if (term.trim().length >= 2) {
+      } else if (Array.isArray(localSuggestions) && term.trim().length >= 1) {
         setShowDropdown(true);
+      } else if (!isLocalOnly && term.trim().length >= 2) {
+        setShowDropdown(true);
+      } else if (term.trim().startsWith('/ai') || term.trim().startsWith('/copilot')) {
+        setShowDropdown(true);
+      } else if (isLocalOnly) {
+        setShowDropdown(false);
       }
     },
-    [effectiveOnChange, showRecent, recentSearches]
+    [effectiveOnChange, showRecent, recentSearches, isLocalOnly, localSuggestions]
   );
 
   const handleClear = useCallback(() => {
@@ -679,6 +691,13 @@ export default function GlobalSearchBar({
         window.dispatchEvent(new CustomEvent('open-atlas-ai', { detail: { query: item.query } }));
         saveRecentSearch(item.name);
         effectiveOnChange?.('');
+        return;
+      }
+
+      // Custom local suggestion callback (e.g. scroll to pen card or select local row)
+      if (typeof item.onSelect === 'function') {
+        saveRecentSearch(item.searchTerm || item.name);
+        item.onSelect(item);
         return;
       }
 
@@ -1019,13 +1038,17 @@ export default function GlobalSearchBar({
           </div>
         )}
 
-        {/* ── ALGLOLIA INSTANT SUGGESTIONS DROPDOWN ───────────────────── */}
-        {showDropdown && (effectiveValue || '').trim().length >= 2 && (
+        {/* ── ALGOLIA OR LOCAL INSTANT SUGGESTIONS DROPDOWN ───────────────────── */}
+        {showDropdown &&
+          (!isLocalOnly || Array.isArray(localSuggestions) || (effectiveValue || '').trim().startsWith('/ai')) &&
+          (effectiveValue || '').trim().length >= (Array.isArray(localSuggestions) ? 1 : 2) && (
           <div className="atlas-search__dropdown" style={{ zIndex: 100 }}>
             <div style={{ padding: '0.5rem 1rem 0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {(effectiveValue || '').trim().startsWith('/ai')
                   ? '🤖 Atlas AI'
+                  : Array.isArray(localSuggestions)
+                  ? (localSuggestionsLabel || (lang === 'es' ? `Coincidencias en Formulario (${suggestions.length})` : `Formulary Matches (${suggestions.length})`))
                   : isLabelsPage
                   ? (lang === 'es' ? 'Pacientes y Recetas (Algolia)' : 'Patients & Prescriptions (Algolia)')
                   : isPatientsPage
@@ -1044,7 +1067,9 @@ export default function GlobalSearchBar({
             </div>
             {suggestions.length === 0 && !isSearchingSuggestions ? (
               <div style={{ padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                {isLabelsPage || isPrescriptionsPage
+                {Array.isArray(localSuggestions)
+                  ? (lang === 'es' ? 'No se encontraron fórmulas coincidentes en esta vista' : 'No matching formulas found in current view')
+                  : isLabelsPage || isPrescriptionsPage
                   ? (lang === 'es' ? 'No se encontraron pacientes ni recetas coincidentes' : 'No patient or prescription matches found')
                   : isPatientsPage
                   ? 'No patient matches found'
