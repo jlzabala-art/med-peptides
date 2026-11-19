@@ -90,6 +90,7 @@ export default function DoctorRecommendationsTab({
   );
   const [isEnrichingWebProfile, setIsEnrichingWebProfile] = useState(false);
   const [localWebProfile, setLocalWebProfile] = useState(null);
+  const [expandedExtraPillars, setExpandedExtraPillars] = useState({});
 
   // ── Doctor-Scoped Favorites & Pinned Regimens (Google Cloud Pinned Pattern) ─
   const pinnedStorageKey = useMemo(() => {
@@ -1140,7 +1141,8 @@ export default function DoctorRecommendationsTab({
             </div>
           )}
 
-          {/* ── UNIVERSAL THERAPEUTIC CATEGORY FILTER CHIPS (GOOGLE CLOUD CONSOLE PATTERN) ── */}
+          {/* ── UNIVERSAL THERAPEUTIC CATEGORY FILTER CHIPS (Hidden when ≤ 3 concise blueprints) ── */}
+          {(blueprintsForSelectedSpecialty.length > 3 || recCategoryFilter !== 'all') && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', padding: '2px 0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.02em', marginRight: '2px' }}>
@@ -1202,6 +1204,7 @@ export default function DoctorRecommendationsTab({
               </button>
             )}
           </div>
+          )}
 
           {/* Specialty Blueprints Cards Grid (Google Cloud Console UX) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
@@ -2044,10 +2047,11 @@ export default function DoctorRecommendationsTab({
                           )}
                         </div>
 
-                        {/* Filas de Productos de Catálogo (GCP Resource List Layout) */}
+                        {/* Filas de Productos de Catálogo (Progressive Disclosure: Top 1 visible + Expandable Extras) */}
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          {synergyItems.map((item, itemIdx) => {
-                            const isLast = itemIdx === synergyItems.length - 1;
+                          {(expandedExtraPillars[bp.id] || recCategoryFilter !== 'all' ? synergyItems : synergyItems.slice(0, 1)).map((item, itemIdx) => {
+                            const visibleItems = (expandedExtraPillars[bp.id] || recCategoryFilter !== 'all') ? synergyItems : synergyItems.slice(0, 1);
+                            const isLast = itemIdx === visibleItems.length - 1;
                             return (
                               <div
                                 key={itemIdx}
@@ -2427,6 +2431,29 @@ export default function DoctorRecommendationsTab({
                               </div>
                             );
                           })}
+
+                          {synergyItems.length > 1 && recCategoryFilter === 'all' && (
+                            <button
+                              type="button"
+                              onClick={() => setExpandedExtraPillars((prev) => ({ ...prev, [bp.id]: !prev[bp.id] }))}
+                              style={{
+                                width: '100%',
+                                padding: '9px 16px',
+                                background: '#f8f9fa',
+                                border: 'none',
+                                borderTop: '1px solid #e8eaed',
+                                color: '#1a73e8',
+                                fontSize: '0.74rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                              }}
+                            >
+                              {expandedExtraPillars[bp.id]
+                                ? 'Hide complementary diagnostics & supplements ▴'
+                                : `Show ${synergyItems.length - 1} complementary diagnostics & supplements ▾`}
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}
