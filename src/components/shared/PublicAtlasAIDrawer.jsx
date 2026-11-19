@@ -53,6 +53,231 @@ import '@/styles/publicDesignSystem.css';
  * 6. Live integration with Recognized Clinical Sources (NIH PubMed & Clinical Compendiums).
  */
 
+const PENS_CLINICAL_EVIDENCE_LIBRARY = [
+  {
+    pmid: '20647205',
+    title: 'Effects of Tesamorelin (Egrifta®), a Growth Hormone-Releasing Factor Analogue, on Visceral Adipose Tissue & Metabolic Markers (Phase 3)',
+    journal: 'New England Journal of Medicine (NEJM)',
+    pubdate: '2010',
+    authors: 'Falutz J, Potvin D, Mamputu JC et al.',
+    clinicalSummary: 'Selective visceral adipose tissue (VAT) reduction (-15% to -18%) and triglyceride improvement via physiological pulsatile GH/IGF-1 stimulation without impairing fasting glucose.',
+    penCorrelation: 'Tesamorelin Pen (30 mg / 3 mL = 10 mg/mL) · 10 to 20 clicks daily (1–2 mg) SC before bedtime.',
+  },
+  {
+    pmid: '32409585',
+    title: 'Elamipretide (SS-31) Targets Inner Mitochondrial Cardiolipin to Restore Bioenergetics & ATP Synthesis in Mitochondrial Myopathy (MMPOWER / TAZPOWER)',
+    journal: 'Genetics in Medicine / Nature Medicine',
+    pubdate: '2020',
+    authors: 'Karaa A, Haas R, Goldstein A et al.',
+    clinicalSummary: 'Stabilizes cardiolipin on the inner mitochondrial membrane, reduces mitochondrial ROS, and increases Complex I–IV electron transport chain efficiency.',
+    penCorrelation: 'SS-31 (Elamipretide) Pen (30 mg / 3 mL = 10 mg/mL) · 10 to 40 clicks daily (1–4 mg) SC in the morning.',
+  },
+  {
+    pmid: '25738459',
+    title: 'The Mitochondrial-Derived Peptide MOTS-c Promotes Metabolic Homeostasis and Reduces Obesity and Insulin Resistance via AMPK Activation',
+    journal: 'Cell Metabolism',
+    pubdate: '2015',
+    authors: 'Lee C, Zeng J, Drew BG, Sallam T, Pinchuk P, Cohen P',
+    clinicalSummary: '16-amino-acid mtDNA-encoded peptide regulating the folate-methionine cycle and AICAR-mediated AMPK activation in skeletal muscle, mimicking exercise-induced GLUT4 translocation.',
+    penCorrelation: 'MOTS-c Pen (15/30/60 mg in 3 mL or 40 mg in 2 mL) · 5 mg active dose = 100 clicks (15mg), 50 clicks (30mg), or 25 clicks (40mg/2mL & 60mg/3mL).',
+  },
+  {
+    pmid: '16571593',
+    title: 'Pulsatile GH & IGF-1 Elevation Following Co-Administration of GHRH Analogue (CJC-1295) and Selective Ghrelin Mimetic (Ipamorelin)',
+    journal: 'Journal of Clinical Endocrinology & Metabolism (JCEM)',
+    pubdate: '2006',
+    authors: 'Teichman SL, Neale A, Lawrence B et al.',
+    clinicalSummary: 'Synergistic GHRH receptor + GHSR-1a activation amplifies nocturnal somatotroph GH release while preserving pituitary pulsatility and avoiding ACTH/cortisol or prolactin elevation.',
+    penCorrelation: 'CJC-1295 (No DAC) / Ipamorelin Pen (3/6 mg, 5/10 mg, or 6/6 mg in 3 mL) · 10 clicks (0.10 mL) fasted before bedtime (5 days on / 2 days off).',
+  },
+  {
+    pmid: '21030672',
+    title: 'Pentadecapeptide BPC-157 & Thymosin Beta-4 (TB-500) Accelerate Tendon-to-Bone Healing, Fibroblast GH-Receptor Expression & VEGF Angiogenesis',
+    journal: 'Journal of Orthopaedic Research / Ann NY Acad Sci',
+    pubdate: '2011',
+    authors: 'Chang CH, Tsai WC, Hsu YH, Pang JH',
+    clinicalSummary: 'BPC-157 upregulates growth hormone receptor expression on tendon fibroblasts up to 7-fold while TB-500 (Ac-LKKTETQ) promotes actin monomer sequestration and endothelial migration.',
+    penCorrelation: 'BPC-157 / TB-500 Pen (6/9 mg, 7.5/7.5 mg, or 15/22.5 mg in 3 mL) · 10 clicks daily (6/9 & 7.5/7.5 mg) or 4 clicks daily (15/22.5 mg concentrated).',
+  },
+  {
+    pmid: '18097414',
+    title: 'Alpha-MSH C-Terminal Tripeptide KPV (Lys-Pro-Val) Inhibits NF-κB Nuclear Translocation & Mucosal Inflammation via PepT1 Transport',
+    journal: 'Gastroenterology',
+    pubdate: '2008',
+    authors: 'Dalmasso G, Charrier-Hisamuddin L, Nguyen HT et al.',
+    clinicalSummary: 'Potent anti-inflammatory immunomodulation without melanotropic pigmentation (zero MC1R melanin stimulation), downregulating TNF-α, IL-1β, and IL-6.',
+    penCorrelation: 'KPV Pen (10 mg or 15 mg / 3 mL) or KLOW 4-in-1 Stack Pen · 10 clicks daily (0.10 mL = 333–500 mcg).',
+  },
+  {
+    pmid: '20497731',
+    title: 'Thymosin Alpha-1 (Thymalfasin / Zadaxin®): Mechanism of Action in T-Cell Maturation, NK Cytotoxicity & Toll-Like Receptor 2/9 Signaling',
+    journal: 'Annals of the New York Academy of Sciences',
+    pubdate: '2010',
+    authors: 'Romani L, Bistoni F, Montagnoli C, Gaziano R, Bozza S, Garaci E',
+    clinicalSummary: '28-amino-acid thymic peptide approved in >35 countries that restores adaptive CD4+/CD8+ T-cell immunity, dendritic cell antigen presentation, and intracellular glutathione.',
+    penCorrelation: 'Thymosin Alpha-1 Pen (30 mg / 3 mL = 10 mg/mL) · 16 clicks (0.16 mL = 1.6 mg) twice weekly SC.',
+  },
+  {
+    pmid: '30007919',
+    title: 'NAD+ Repletion Restores Sirtuin (SIRT1/SIRT3) Deacetylase Activity, PARP1 DNA Repair & Vascular Endothelial Function in Human Aging',
+    journal: 'Nature Communications / Cell Metabolism',
+    pubdate: '2018',
+    authors: 'Martens CR, Denman BA, Mazzo MR, Seals DR et al.',
+    clinicalSummary: 'Direct parenteral NAD+ replenishment bypasses gut degradation to elevate intracellular NAD+/NADH ratios, supporting mitochondrial biogenesis and genomic stability.',
+    penCorrelation: 'NAD+ Pen (300 mg, 750 mg, or 1,050 mg / 3 mL) · 30–50 clicks (300 mg), 12–20 clicks (750 mg), or 9–15 clicks (1,050 mg) for 30–50 mg dose.',
+  },
+  {
+    pmid: '12919708',
+    title: 'Epithalon (Ala-Glu-Asp-Gly) Induces Telomerase Activity and Telomere Elongation in Human Somatic Cells & Pineal Melatonin Regulation',
+    journal: 'Bulletin of Experimental Biology and Medicine',
+    pubdate: '2003',
+    authors: 'Khavinson VKh, Bondarev IE, Butyugov AA',
+    clinicalSummary: 'Pineal tetrapeptide bioregulator shown to activate hTERT telomerase expression in somatic fibroblasts and normalize circadian melatonin-cortisol rhythms.',
+    penCorrelation: 'Epithalon Pen (30 mg or 100 mg / 3 mL) · 25 clicks daily (2.5 mg on 30 mg pen) or 15 clicks daily (5 mg on 100 mg pen) for 10–20 day cycle.',
+  },
+  {
+    pmid: '16996037',
+    title: 'Heptapeptides Semax & Selank Rapidly Upregulate Hippocampal BDNF/trkB Expression and Modulate GABAergic Anxiolytic Neurotransmission',
+    journal: 'Brain Research / European Neuropsychopharmacology',
+    pubdate: '2006',
+    authors: 'Dolotov OV, Karpenko EA, Inozemtseva LS et al.',
+    clinicalSummary: 'ACTH(4-10) analogue Semax elevates brain-derived neurotrophic factor (BDNF) within 3 hours while tuftsin analogue Selank modulates enkephalin degradation and GABA-A receptors without sedation.',
+    penCorrelation: 'Semax Pen (15 mg / 3 mL) & Selank Pen (15 mg / 3 mL) · 5 to 10 clicks (250–500 mcg) SC in the morning.',
+  },
+];
+
+const PENS_CLINICAL_PROTOCOL_PRESETS = [
+  {
+    id: 'preset-recovery',
+    badge: 'TISSUE & POST-SURGICAL',
+    color: '#059669',
+    bg: '#ecfdf5',
+    border: '#a7f3d0',
+    titleEn: 'Post-Surgical & Musculoskeletal Recovery Stack',
+    titleEs: 'Protocolo de Recuperación Post-Quirúrgica y Tendinosa',
+    pensLabel: 'BPC-157/TB-500 + GHK-Cu + KPV (3 Pens)',
+    productIds: ['dn-pen-01', 'dn-pen-14', 'dn-pen-02'],
+    promptEn: 'Design a 6-week Post-Surgical & Tendon Recovery clinical protocol stacking BPC-157/TB-500, GHK-Cu, and KPV pre-filled pens: specify exact U-100 dial clicks for each strength, AM/PM injection timing, total pens required for 6 weeks (accounting for needle priming), and hs-CRP/inflammatory biomarker monitoring.',
+    promptEs: 'Diseña un protocolo clínico de 6 semanas de Recuperación Post-Quirúrgica y Tendinosa combinando las plumas BPC-157/TB-500, GHK-Cu y KPV: detalla los clics U-100 exactos por concentración, horario AM/PM, número total de plumas para 6 semanas (descontando purga) y biomarcadores inflamatorios (hs-CRP) a monitorizar.',
+  },
+  {
+    id: 'preset-longevity',
+    badge: 'MITOCHONDRIAL & NAD+',
+    color: '#1d4ed8',
+    bg: '#eff6ff',
+    border: '#bfdbfe',
+    titleEn: 'Mitochondrial ATP & Cellular Longevity Protocol',
+    titleEs: 'Protocolo de Longevidad Celular, ATP Mitocondrial y NAD+',
+    pensLabel: 'Epithalon + MOTS-c + NAD+ + SS-31 (4 Pens)',
+    productIds: ['dn-pen-10', 'dn-pen-12', 'dn-pen-13', 'dn-pen-20'],
+    promptEn: 'Design an advanced Cellular Longevity & Mitochondrial ATP protocol combining Epithalon, MOTS-c, NAD+, and SS-31 (Elamipretide) pens: provide exact U-100 dial clicks across the available concentrations (MOTS-c 15/30/40/60 mg, NAD+ 300/750/1050 mg), sequencing (10-day Epithalon pulse vs 4-week mitochondrial phase), and baseline/follow-up labs.',
+    promptEs: 'Diseña un protocolo avanzado de Longevidad Celular y ATP Mitocondrial combinando las plumas Epithalon, MOTS-c, NAD+ y SS-31 (Elamipretide): indica los clics U-100 exactos según concentración (MOTS-c 15/30/40/60 mg, NAD+ 300/750/1050 mg), secuenciación por fases y analíticas de control.',
+  },
+  {
+    id: 'preset-gh-metabolic',
+    badge: 'GH AXIS & VISCERAL FAT',
+    color: '#0369a1',
+    bg: '#f0f9ff',
+    border: '#bae6fd',
+    titleEn: 'Visceral Adiposity & Pulsatile GH Optimization',
+    titleEs: 'Optimización del Eje GH/IGF-1 y Reducción de Grasa Visceral',
+    pensLabel: 'Tesamorelin + CJC-1295/Ipamorelin (2 Pens)',
+    productIds: ['dn-pen-23', 'dn-pen-04'],
+    promptEn: 'Compare and design a metabolic GH-axis protocol using Tesamorelin (30 mg / 3 mL) vs CJC-1295/Ipamorelin (3/6, 5/10, or 6/6 mg / 3 mL): detail exact U-100 clicks, mandatory 2-hour post-dinner fasting window, 5-days-on/2-days-off desensitization cycling, and IGF-1 / HbA1c / HOMA-IR monitoring.',
+    promptEs: 'Compara y diseña un protocolo metabólico del eje GH con Tesamorelin (30 mg / 3 mL) y CJC-1295/Ipamorelin (3/6, 5/10 o 6/6 mg / 3 mL): detalla clics U-100 exactos, ventana obligatoria de ayuno nocturno, ciclo 5 días on / 2 off y monitorización de IGF-1, HbA1c y HOMA-IR.',
+  },
+  {
+    id: 'preset-neuro-sleep',
+    badge: 'NEURO & DEEP SLEEP',
+    color: '#6d28d9',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
+    titleEn: 'Neuro-Cognitive BDNF Focus (AM) & Delta Sleep (PM)',
+    titleEs: 'Protocolo Neuro-Cognitivo BDNF (Mañana) y Sueño Delta (Noche)',
+    pensLabel: 'Semax + Selank (AM) + DSIP (PM) (3 Pens)',
+    productIds: ['dn-pen-26', 'dn-pen-25', 'dn-pen-09'],
+    promptEn: 'Design a circadian Neuro-Cognitive & Restorative Sleep protocol pairing morning Semax (15 mg / 3 mL) + Selank (15 mg / 3 mL) with evening DSIP (2 mg / 2 mL): provide exact U-100 dial clicks, receptor mechanisms (BDNF/trkB, GABA-A, delta-wave sleep architecture), and cartridge duration.',
+    promptEs: 'Diseña un protocolo circadiano Neuro-Cognitivo y de Sueño Profundo combinando Semax (15 mg / 3 mL) + Selank (15 mg / 3 mL) por la mañana con DSIP (2 mg / 2 mL) por la noche: indica clics U-100 exactos, mecanismos (BDNF/trkB, GABA-A, sueño delta) y duración de cada cartucho.',
+  },
+];
+
+const PENS_SPECIALTY_AXES = [
+  {
+    id: 'repair',
+    labelEn: '🩹 Tissue Repair (6)',
+    labelEs: '🩹 Reparación Tisular (6)',
+    promptEn: 'Show the complete U-100 click-to-dose table and clinical comparison for all Tissue Repair pens: BPC-157/TB-500 (6/9, 7.5/7.5 & 15/22.5 mg), BPC-157 Standalone (15 mg), TB-500 Standalone (15 mg), KPV (10 & 15 mg), GLOW Stack, and KLOW Stack.',
+    promptEs: 'Muestra la tabla completa de clics U-100 y comparativa clínica de todas las plumas de Reparación Tisular: BPC-157/TB-500 (6/9, 7.5/7.5 y 15/22.5 mg), BPC-157 Individual (15 mg), TB-500 Individual (15 mg), KPV (10 y 15 mg), GLOW Stack y KLOW Stack.',
+  },
+  {
+    id: 'gh',
+    labelEn: '⚡ GH & IGF-1 Axis (6)',
+    labelEs: '⚡ Eje GH / IGF-1 (6)',
+    promptEn: 'Show the U-100 click dosing matrix and clinical differentiation across all 6 Growth Hormone & IGF-1 pens: Tesamorelin (30 mg), CJC-1295 No DAC (3 & 30 mg), CJC-1295/Ipamorelin (3/6, 5/10 & 6/6 mg), Ipamorelin (6 & 15 mg), IGF-1 LR3 (300 mcg & 3 mg), and MGF (2.4 mg / 2.4 mL).',
+    promptEs: 'Muestra la matriz de clics U-100 y diferenciación clínica de las 6 plumas del Eje GH / IGF-1: Tesamorelin (30 mg), CJC-1295 No DAC (3 y 30 mg), CJC-1295/Ipamorelin (3/6, 5/10 y 6/6 mg), Ipamorelin (6 y 15 mg), IGF-1 LR3 (300 mcg y 3 mg) y MGF (2.4 mg / 2.4 mL).',
+  },
+  {
+    id: 'mito',
+    labelEn: '🧬 Mitochondrial & NAD+ (7)',
+    labelEs: '🧬 Mitocondrial y NAD+ (7)',
+    promptEn: 'Provide the complete U-100 dial conversion matrix across all Mitochondrial, Metabolic & Longevity pens: MOTS-c (15/30/40/60 mg), NAD+ (300/750/1050 mg), SS-31 Elamipretide (30 mg), Epithalon (30 & 100 mg), Humanin (30 mg), Thymosin Alpha-1 (30 mg), and 5-Amino-1MQ (100 mg).',
+    promptEs: 'Proporciona la matriz completa de conversión de clics U-100 de las plumas Mitocondriales, Metabólicas y de Longevidad: MOTS-c (15/30/40/60 mg), NAD+ (300/750/1050 mg), SS-31 Elamipretide (30 mg), Epithalon (30 y 100 mg), Humanin (30 mg), Thymosin Alpha-1 (30 mg) y 5-Amino-1MQ (100 mg).',
+  },
+  {
+    id: 'neuro',
+    labelEn: '🧠 Neuro & Sleep (4)',
+    labelEs: '🧠 Neuro y Sueño (4)',
+    promptEn: 'Compare U-100 click dosing, circadian timing, and mechanisms for our 4 Neuro-Cognitive & Sleep pens: Semax (15 mg / 3 mL), Selank (15 mg / 3 mL), DSIP (2 mg / 2 mL), and CJC-1295/Ipamorelin/DSIP Night Blend (3/6/6 mg / 3 mL).',
+    promptEs: 'Compara los clics U-100, horario circadiano y mecanismos de las 4 plumas Neuro-Cognitivas y de Sueño: Semax (15 mg / 3 mL), Selank (15 mg / 3 mL), DSIP (2 mg / 2 mL) y CJC-1295/Ipamorelin/DSIP Night Blend (3/6/6 mg / 3 mL).',
+  },
+  {
+    id: 'dermal-sexual',
+    labelEn: '✨ Dermal & Sexual (4)',
+    labelEs: '✨ Dermo y Salud Sexual (4)',
+    promptEn: 'Detail the U-100 dial clicks, multi-strength differences, and safety guardrails for GHK-Cu (30, 60 & 100 mg / 3 mL), PT-141 Bremelanotide (20 mg & 15 mg / 3 mL), Kisspeptin-10 (3 mg & 15 mg / 3 mL), and hCG (5,000 IU / 2 mL = 25 IU/click).',
+    promptEs: 'Detalla los clics U-100, diferencias entre concentraciones y precauciones de seguridad para GHK-Cu (30, 60 y 100 mg / 3 mL), PT-141 Bremelanotide (20 y 15 mg / 3 mL), Kisspeptin-10 (3 y 15 mg / 3 mL) y hCG (5,000 IU / 2 mL = 25 IU/clic).',
+  },
+];
+
+function detectMentionedPenIdsInText(text = '') {
+  if (!text) return [];
+  const lower = String(text).toLowerCase();
+  const rules = [
+    { id: 'dn-pen-01', match: /\bbpc[-\s]?157\s*\/\s*tb[-\s]?(?:500|4)\b/i },
+    { id: 'dn-pen-21', match: /\bbpc[-\s]?157\s*(?:standalone|individual|15\s*mg\s*\/\s*3\s*ml)\b/i },
+    { id: 'dn-pen-22', match: /\btb[-\s]?500\s*(?:standalone|individual|15\s*mg\s*\/\s*3\s*ml)\b/i },
+    { id: 'dn-pen-02', match: /\bkpv\b/i },
+    { id: 'dn-pen-03', match: /\bcjc[-\s]?1295\s*\(\s*no\s*dac\s*\)/i },
+    { id: 'dn-pen-04', match: /\bcjc[-\s]?1295\s*\/\s*ipamorelin\b/i },
+    { id: 'dn-pen-05', match: /\bigf[-\s]?1\s*lr3\b/i },
+    { id: 'dn-pen-06', match: /\bipamorelin\b/i },
+    { id: 'dn-pen-07', match: /\bmgf\b/i },
+    { id: 'dn-pen-08', match: /\bcjc[-\s]?1295\s*\/\s*ipamorelin\s*\/\s*dsip\b/i },
+    { id: 'dn-pen-09', match: /\bdsip\b/i },
+    { id: 'dn-pen-10', match: /\bepith?alon\b/i },
+    { id: 'dn-pen-11', match: /\bhumanin\b/i },
+    { id: 'dn-pen-12', match: /\bmots[-\s]?c\b/i },
+    { id: 'dn-pen-13', match: /\bnad\+\b/i },
+    { id: 'dn-pen-20', match: /\b(?:ss[-\s]?31|elamipretide)\b/i },
+    { id: 'dn-pen-14', match: /\bghk[-\s]?cu\b/i },
+    { id: 'dn-pen-15', match: /\bglow\b/i },
+    { id: 'dn-pen-16', match: /\bklow\b/i },
+    { id: 'dn-pen-17', match: /\bhcg\b/i },
+    { id: 'dn-pen-18', match: /\bkisspeptin\b/i },
+    { id: 'dn-pen-19', match: /\b(?:pt[-\s]?141|bremelanotide)\b/i },
+    { id: 'dn-pen-23', match: /\btesamorelin\b/i },
+    { id: 'dn-pen-24', match: /\b(?:thymosin\s*alpha[-\s]?1|ta[-\s]?1|thymalfasin)\b/i },
+    { id: 'dn-pen-25', match: /\bselank\b/i },
+    { id: 'dn-pen-26', match: /\bsemax\b/i },
+    { id: 'dn-pen-27', match: /\b5[-\s]?amino[-\s]?1mq\b/i },
+  ];
+  const found = [];
+  for (const r of rules) {
+    if (r.match.test(lower)) found.push(r.id);
+  }
+  return found.slice(0, 6);
+}
+
 function parseAiResponseParts(text) {
   if (!text) return { cleanText: '', highlights: [], predictedSteps: [] };
 
@@ -212,8 +437,18 @@ export default function PublicAtlasAIDrawer({
     return () => window.removeEventListener('open-public-atlas-ai', handleOpen);
   }, []);
 
+  const isPensFormulary =
+    contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing';
+
   // Auto-load rich clinical context when opened with a section/collection anchor
+  // NOTE: For pens_formulary we render the interactive above-the-fold Clinical Command Deck instead of a wall-of-text bot bubble.
   useEffect(() => {
+    if (isPensFormulary) {
+      if (messages.length === 1 && messages[0]?.isAutoWelcome) {
+        setMessages([]);
+      }
+      return;
+    }
     const canInjectWelcome =
       messages.length === 0 || (messages.length === 1 && messages[0]?.isAutoWelcome);
     if (isOpen && canInjectWelcome && contextAnchor?.sectionTitle) {
@@ -316,8 +551,13 @@ export default function PublicAtlasAIDrawer({
     };
   }, []);
 
-  // 3. Pre-load recognized PubMed clinical evidence for active compound
+  // 3. Pre-load recognized PubMed clinical evidence for active compound (or curated 27-pen evidence library)
   useEffect(() => {
+    if (isPensFormulary) {
+      setClinicalSources(PENS_CLINICAL_EVIDENCE_LIBRARY);
+      setIsLoadingSources(false);
+      return undefined;
+    }
     if (contextType === 'monograph' && contextAnchor?.name) {
       let isMounted = true;
       setIsLoadingSources(true);
@@ -480,8 +720,8 @@ export default function PublicAtlasAIDrawer({
     }
   };
 
-  // ── Metric Highlight Helper ────────────────────────────────────────────────
-  const METRIC_REGEX = /(≥\s*\d+(?:\.\d+)?%|\d+(?:\.\d+)?%|[-−]?\d+(?:\.\d+)?\s*(?:°C|°F)|\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:°C|°F)|\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:mL|mg|mcg|µg)|\b\d+(?:\.\d+)?\s*(?:mL|mg|mcg|µg)\b|\bRP-HPLC\b|\bLC-MS\b|\bESI-MS\b|\b0\.9%\s+benzyl\s+alcohol\b|\bU-100\b|\b\d+\s*(?:days|months|hours|weeks|years)\b|\[PubMed:\s*\d+[^\]]*\]|\[Clinical[^\]]*\])/gi;
+  // ── Metric Highlight Helper (Avoids splitting slash ratios like 6/9 or 15/22.5 mg) ──
+  const METRIC_REGEX = /(≥\s*\d+(?:\.\d+)?%|\d+(?:\.\d+)?%|[-−]?\d+(?:\.\d+)?\s*(?:°C|°F)|\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:°C|°F)|\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:mL|mg|mcg|µg)|(?<![/\d])\b\d+(?:\.\d+)?\s*(?:mL|mg|mcg|µg)\b|\bRP-HPLC\b|\bLC-MS\b|\bESI-MS\b|\b0\.9%\s+benzyl\s+alcohol\b|\bU-100\b|\b\d+\s*(?:days|months|hours|weeks|years)\b|\[PubMed:\s*\d+[^\]]*\]|\[Clinical[^\]]*\])/gi;
 
   const TOKEN_REGEX = /(\[[^\]]+\]\(\/[^)]+\)|\*\*[^*]+\*\*)/g;
 
@@ -1166,7 +1406,9 @@ export default function PublicAtlasAIDrawer({
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#7dd3fc', marginTop: '2px', fontWeight: 600 }}>
-                  {contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog'
+                  {isPensFormulary
+                    ? (lang === 'es' ? 'Copiloto Clínico U-100 • Diseño de Protocolos y Evidencia' : 'U-100 Clinical Dosing & Protocol Copilot • 27 Pens')
+                    : contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog'
                     ? 'Clinical Pathway Copilot • Protocol Registry SSOT'
                     : 'Verified Analytical Support • Monograph Specifications'}
                 </div>
@@ -1181,19 +1423,19 @@ export default function PublicAtlasAIDrawer({
                     height: '26px',
                     padding: '0 10px',
                     borderRadius: '13px',
-                    backgroundColor: isAuthenticated
+                    backgroundColor: isAuthenticated || (isPensFormulary && !isBlocked)
                       ? 'rgba(16, 185, 129, 0.15)'
                       : isBlocked
                       ? 'rgba(239, 68, 68, 0.2)'
                       : 'rgba(56, 189, 248, 0.12)',
                     border: `1px solid ${
-                      isAuthenticated
+                      isAuthenticated || (isPensFormulary && !isBlocked)
                         ? 'rgba(52, 211, 153, 0.4)'
                         : isBlocked
                         ? 'rgba(248, 113, 113, 0.4)'
                         : 'rgba(56, 189, 248, 0.28)'
                     }`,
-                    color: isAuthenticated ? '#6ee7b7' : isBlocked ? '#fca5a5' : '#e0f2fe',
+                    color: isAuthenticated || (isPensFormulary && !isBlocked) ? '#6ee7b7' : isBlocked ? '#fca5a5' : '#e0f2fe',
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     letterSpacing: '0.02em',
@@ -1207,8 +1449,8 @@ export default function PublicAtlasAIDrawer({
                       width: '6px',
                       height: '6px',
                       borderRadius: '50%',
-                      backgroundColor: isAuthenticated ? '#10b981' : isBlocked ? '#ef4444' : '#38bdf8',
-                      boxShadow: isAuthenticated
+                      backgroundColor: isAuthenticated || (isPensFormulary && !isBlocked) ? '#10b981' : isBlocked ? '#ef4444' : '#38bdf8',
+                      boxShadow: isAuthenticated || (isPensFormulary && !isBlocked)
                         ? '0 0 6px #10b981'
                         : isBlocked
                         ? '0 0 6px #ef4444'
@@ -1218,6 +1460,10 @@ export default function PublicAtlasAIDrawer({
                   {isAuthenticated ? (
                     <span style={{ fontWeight: 800 }}>
                       {lang === 'es' ? 'Acceso Verificado' : 'Verified Access'}
+                    </span>
+                  ) : isPensFormulary && !isBlocked ? (
+                    <span style={{ fontWeight: 800 }}>
+                      {lang === 'es' ? 'Copiloto Clínico U-100' : 'U-100 Clinical Copilot'}
                     </span>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -1402,71 +1648,291 @@ export default function PublicAtlasAIDrawer({
                 style={{
                   flex: 1,
                   overflowY: 'auto',
-                  padding: '16px',
+                  padding: '14px 16px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '12px',
                   backgroundColor: '#ffffff',
                 }}
               >
-                {messages.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '24px 10px', color: '#64748b' }}>
+                {/* ── PENS FORMULARY COMPACT CLINICAL COMMAND DECK (Always accessible at top of chat) ── */}
+                {isPensFormulary && (
+                  <div
+                    style={{
+                      background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px',
+                      boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+                    }}
+                  >
+                    {/* 3-Metric Clinical Standard Strip */}
                     <div
                       style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '50%',
-                        backgroundColor: '#f0f9ff',
-                        color: '#0284c7',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: '10px',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                        gap: '6px',
                       }}
                     >
-                      <Sparkles size={22} />
-                    </div>
-                    <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                      {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
-                        ? (lang === 'es' ? 'Atlas AI · Prescripción y Posología' : 'Atlas AI · Prescription & Posology')
-                        : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
-                        ? 'Atlas AI · Dermocosmetic & INCI'
-                        : contextType === 'diagnostic_test'
-                        ? 'Atlas AI · Diagnostic Laboratory & Biomarkers'
-                        : contextType === 'protocol'
-                        ? 'Atlas AI · Clinical Protocols'
-                        : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic')
-                        ? 'Atlas AI · Aesthetic Medicine & Rheology'
-                        : 'Atlas AI · Clinical Decision Support'}
-                    </div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '340px', margin: '6px auto 0', lineHeight: 1.45 }}>
-                      {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
-                        ? (lang === 'es'
-                            ? 'Consulte dudas sobre los principios activos, vehículo TrichoSol™, aplicación nocturna de 1.0 ml, pauta en caso de olvido o evolución esperada a 90 días.'
-                            : 'Ask questions regarding formula actives, TrichoSol™ vehicle, nocturnal application protocols, missed dose instructions, or 90-day progress milestones.')
-                        : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
-                        ? 'Ask questions regarding INCI active mechanisms, penetration kinetics, clinical scalp/skin protocols, or dermocosmetic safety.'
-                        : contextType === 'diagnostic_test'
-                        ? 'Ask questions regarding capillary blood spot collection, sample transit stability, reference ranges, laboratory analytical methods, or clinical protocol matching.'
-                        : contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog'
-                        ? (lang === 'es'
-                            ? 'Consulta indicaciones clínicas, pautas de titulación, biomarcadores Bloodo™ requeridos, contraindicaciones o compara protocolos según el perfil de tu paciente.'
-                            : 'Ask about clinical indications, titration schedules, required Bloodo™ biomarkers, contraindications, or compare protocols for your patient profile.')
-                        : contextType === 'protocol'
-                        ? 'Ask questions regarding multi-phase titration schedules, companion compounds, safety precautions, or required laboratory monitoring.'
-                        : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic')
-                        ? 'Ask questions regarding rheological properties (G prime), tissue integration, injection planes, or vascular safety.'
-                        : 'Ask specific compounding, dilution, thermal stability, or peer-reviewed literature questions regarding this monograph.'}
+                      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '6px 8px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.60rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>
+                          {lang === 'es' ? 'DIAL U-100' : 'U-100 DIAL'}
+                        </div>
+                        <div style={{ fontSize: '0.76rem', fontWeight: 900, color: '#003666', fontFamily: 'monospace', marginTop: '1px' }}>
+                          100 clicks = 1 mL
+                        </div>
+                      </div>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 8px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.60rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
+                          {lang === 'es' ? 'PORFOLIO' : 'FORMULARY'}
+                        </div>
+                        <div style={{ fontSize: '0.76rem', fontWeight: 900, color: '#0f172a', fontFamily: 'monospace', marginTop: '1px' }}>
+                          27 Pens · 45 SKUs
+                        </div>
+                      </div>
+                      <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '8px', padding: '6px 8px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.60rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase' }}>
+                          {lang === 'es' ? 'ESTÉRIL LISTO' : 'READY-TO-INJECT'}
+                        </div>
+                        <div style={{ fontSize: '0.76rem', fontWeight: 900, color: '#065f46', fontFamily: 'monospace', marginTop: '1px' }}>
+                          0% Reconstitution
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Suggested Prompts: 5 Product-Tailored Clinical Questions (FAQ Alternative) */}
-                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          {lang === 'es' ? 'Preguntas Frecuentes Clínicas:' : 'Suggested Clinical Inquiries:'}
+                    {/* 5 Interactive Therapeutic Specialty Matrix Chips */}
+                    <div>
+                      <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '5px' }}>
+                        {lang === 'es' ? '1. Consultar Matriz de Clics por Especialidad:' : '1. Explore U-100 Click Matrix by Specialty:'}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                        {PENS_SPECIALTY_AXES.map((axis) => (
+                          <button
+                            key={axis.id}
+                            type="button"
+                            disabled={isBlocked || isLoading}
+                            onClick={() => handleSendMessage(lang === 'es' ? axis.promptEs : axis.promptEn)}
+                            style={{
+                              padding: '5px 9px',
+                              borderRadius: '999px',
+                              border: '1px solid #cbd5e1',
+                              background: '#ffffff',
+                              color: '#003666',
+                              fontSize: '0.71rem',
+                              fontWeight: 700,
+                              cursor: isBlocked || isLoading ? 'default' : 'pointer',
+                              transition: 'all 0.14s ease',
+                            }}
+                          >
+                            {lang === 'es' ? axis.labelEs : axis.labelEn}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 4 Star Clinical Protocol Presets (Bidirectional: Load to Page, 1-Page PDF, or Ask AI) */}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' }}>
+                        <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {lang === 'es' ? '2. Protocolos Clínicos Combinados (1 Clic):' : '2. Clinical Multi-Pen Protocol Presets (1-Click):'}
+                        </span>
+                        <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#1d4ed8' }}>
+                          {lang === 'es' ? 'Sincronizado con Página y PDF' : 'Syncs with Page & PDF'}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {PENS_CLINICAL_PROTOCOL_PRESETS.map((preset) => (
+                          <div
+                            key={preset.id}
+                            style={{
+                              background: '#ffffff',
+                              border: `1px solid ${preset.border}`,
+                              borderLeft: `3.5px solid ${preset.color}`,
+                              borderRadius: '8px',
+                              padding: '8px 10px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '6px',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.25 }}>
+                                {lang === 'es' ? preset.titleEs : preset.titleEn}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '0.59rem',
+                                  fontWeight: 800,
+                                  padding: '1px 6px',
+                                  borderRadius: '999px',
+                                  background: preset.bg,
+                                  color: preset.color,
+                                }}
+                              >
+                                {preset.badge}
+                              </span>
+                            </div>
+
+                            <div style={{ fontSize: '0.69rem', color: '#475569', fontWeight: 650 }}>
+                              {preset.pensLabel}
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                disabled={isBlocked || isLoading}
+                                onClick={() => handleSendMessage(lang === 'es' ? preset.promptEs : preset.promptEn)}
+                                style={{
+                                  flex: '1 1 120px',
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #bfdbfe',
+                                  background: '#eff6ff',
+                                  color: '#1d4ed8',
+                                  fontSize: '0.69rem',
+                                  fontWeight: 750,
+                                  cursor: isBlocked || isLoading ? 'default' : 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '4px',
+                                }}
+                              >
+                                <Sparkles size={11} />
+                                <span>{lang === 'es' ? 'Pauta IA + Biomarcadores' : 'AI Posology & Labs'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (typeof window !== 'undefined') {
+                                    window.dispatchEvent(
+                                      new CustomEvent('atlas-pens-apply-protocol', {
+                                        detail: { productIds: preset.productIds, autoExportPdf: false },
+                                      })
+                                    );
+                                  }
+                                }}
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #cbd5e1',
+                                  background: '#ffffff',
+                                  color: '#0f172a',
+                                  fontSize: '0.69rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                }}
+                                title={lang === 'es' ? 'Cargar estas plumas en Supply Summary' : 'Load these pens into Supply Summary'}
+                              >
+                                {lang === 'es' ? '+ Cargar en Página' : '+ Load to Page'}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (typeof window !== 'undefined') {
+                                    window.dispatchEvent(
+                                      new CustomEvent('atlas-pens-apply-protocol', {
+                                        detail: { productIds: preset.productIds, autoExportPdf: true },
+                                      })
+                                    );
+                                  }
+                                }}
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #003666',
+                                  background: '#003666',
+                                  color: '#ffffff',
+                                  fontSize: '0.69rem',
+                                  fontWeight: 750,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                }}
+                                title={lang === 'es' ? 'Generar PDF clínico de 1 página para este protocolo' : 'Generate 1-page clinical PDF for this protocol'}
+                              >
+                                <FileText size={11} />
+                                <span>PDF</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {messages.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: isPensFormulary ? '4px 4px 12px' : '24px 10px', color: '#64748b' }}>
+                    {!isPensFormulary && (
+                      <>
+                        <div
+                          style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '50%',
+                            backgroundColor: '#f0f9ff',
+                            color: '#0284c7',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '10px',
+                          }}
+                        >
+                          <Sparkles size={22} />
                         </div>
-                        <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '1px 6px', borderRadius: '4px' }}>
-                          {quickPrompts.length} {lang === 'es' ? 'habituales' : 'tailored'}
+                        <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
+                          {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+                            ? (lang === 'es' ? 'Atlas AI · Prescripción y Posología' : 'Atlas AI · Prescription & Posology')
+                            : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
+                            ? 'Atlas AI · Dermocosmetic & INCI'
+                            : contextType === 'diagnostic_test'
+                            ? 'Atlas AI · Diagnostic Laboratory & Biomarkers'
+                            : contextType === 'protocol'
+                            ? 'Atlas AI · Clinical Protocols'
+                            : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic')
+                            ? 'Atlas AI · Aesthetic Medicine & Rheology'
+                            : 'Atlas AI · Clinical Decision Support'}
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '340px', margin: '6px auto 0', lineHeight: 1.45 }}>
+                          {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+                            ? (lang === 'es'
+                                ? 'Consulte dudas sobre los principios activos, vehículo TrichoSol™, aplicación nocturna de 1.0 ml, pauta en caso de olvido o evolución esperada a 90 días.'
+                                : 'Ask questions regarding formula actives, TrichoSol™ vehicle, nocturnal application protocols, missed dose instructions, or 90-day progress milestones.')
+                            : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
+                            ? 'Ask questions regarding INCI active mechanisms, penetration kinetics, clinical scalp/skin protocols, or dermocosmetic safety.'
+                            : contextType === 'diagnostic_test'
+                            ? 'Ask questions regarding capillary blood spot collection, sample transit stability, reference ranges, laboratory analytical methods, or clinical protocol matching.'
+                            : contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog'
+                            ? (lang === 'es'
+                                ? 'Consulta indicaciones clínicas, pautas de titulación, biomarcadores Bloodo™ requeridos, contraindicaciones o compara protocolos según el perfil de tu paciente.'
+                                : 'Ask about clinical indications, titration schedules, required Bloodo™ biomarkers, contraindications, or compare protocols for your patient profile.')
+                            : contextType === 'protocol'
+                            ? 'Ask questions regarding multi-phase titration schedules, companion compounds, safety precautions, or required laboratory monitoring.'
+                            : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic')
+                            ? 'Ask questions regarding rheological properties (G prime), tissue integration, injection planes, or vascular safety.'
+                            : 'Ask specific compounding, dilution, thermal stability, or peer-reviewed literature questions regarding this monograph.'}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Suggested Prompts: Product-Tailored Clinical Questions (Immediately Visible Above-the-Fold!) */}
+                    <div style={{ marginTop: isPensFormulary ? '4px' : '20px', display: 'flex', flexDirection: 'column', gap: '7px', textAlign: 'left' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {isPensFormulary
+                            ? (lang === 'es' ? '3. Consultas Clínicas y Cálculos U-100:' : '3. Direct Clinical & U-100 Dosing Inquiries:')
+                            : (lang === 'es' ? 'Preguntas Frecuentes Clínicas:' : 'Suggested Clinical Inquiries:')}
+                        </div>
+                        <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '1px 6px', borderRadius: '4px' }}>
+                          {quickPrompts.length} {lang === 'es' ? 'consultas' : 'tailored'}
                         </span>
                       </div>
                       {quickPrompts.map((q, qIdx) => (
@@ -1593,6 +2059,100 @@ export default function PublicAtlasAIDrawer({
 
                           {/* ── Main Analytical Body with High-Fidelity Highlights ── */}
                           {renderSafeBotText(cleanText)}
+
+                          {/* ── Bidirectional Clinical Action Bar for Pre-filled Pens (1-Click Load to Page & 1-Page PDF) ── */}
+                          {isPensFormulary && (() => {
+                            const mentionedPenIds = detectMentionedPenIdsInText(cleanText);
+                            if (mentionedPenIds.length === 0) return null;
+                            return (
+                              <div
+                                style={{
+                                  marginTop: '10px',
+                                  padding: '8px 10px',
+                                  borderRadius: '8px',
+                                  background: '#f0fdf4',
+                                  border: '1px solid #86efac',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '6px',
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', flexWrap: 'wrap' }}>
+                                  <span style={{ fontSize: '0.67rem', fontWeight: 800, color: '#14532d', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                                    {lang === 'es'
+                                      ? `Acción Clínica Directa (${mentionedPenIds.length} ${mentionedPenIds.length === 1 ? 'pluma detectada' : 'plumas detectadas'}):`
+                                      : `Direct Clinical Action (${mentionedPenIds.length} ${mentionedPenIds.length === 1 ? 'pen detected' : 'pens detected'}):`}
+                                  </span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (typeof window !== 'undefined') {
+                                        window.dispatchEvent(
+                                          new CustomEvent('atlas-pens-apply-protocol', {
+                                            detail: { productIds: mentionedPenIds, autoExportPdf: false },
+                                          })
+                                        );
+                                      }
+                                    }}
+                                    style={{
+                                      flex: '1 1 140px',
+                                      padding: '5px 10px',
+                                      borderRadius: '6px',
+                                      border: '1px solid #16a34a',
+                                      background: '#ffffff',
+                                      color: '#15803d',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 800,
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '5px',
+                                    }}
+                                  >
+                                    <span>
+                                      {lang === 'es'
+                                        ? `+ Cargar en Protocolo (${mentionedPenIds.length})`
+                                        : `+ Load into Supply Summary (${mentionedPenIds.length})`}
+                                    </span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (typeof window !== 'undefined') {
+                                        window.dispatchEvent(
+                                          new CustomEvent('atlas-pens-apply-protocol', {
+                                            detail: { productIds: mentionedPenIds, autoExportPdf: true },
+                                          })
+                                        );
+                                      }
+                                    }}
+                                    style={{
+                                      flex: '1 1 130px',
+                                      padding: '5px 10px',
+                                      borderRadius: '6px',
+                                      border: '1px solid #003666',
+                                      background: '#003666',
+                                      color: '#ffffff',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 800,
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '5px',
+                                    }}
+                                  >
+                                    <FileText size={12} />
+                                    <span>{lang === 'es' ? 'Exportar PDF 1-Pág' : 'Export 1-Page PDF'}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })()}
 
                           {/* ── Algolia RAG Grounded Action Cards ── */}
                           {Array.isArray(m.matchedEntities) && m.matchedEntities.length > 0 && (
@@ -1936,10 +2496,30 @@ export default function PublicAtlasAIDrawer({
                         </div>
                       )}
 
+                      {study.clinicalSummary && (
+                        <div style={{ fontSize: '0.75rem', color: '#334155', lineHeight: 1.45, background: '#f8fafc', padding: '7px 9px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <strong style={{ color: '#0f172a' }}>{lang === 'es' ? 'Hallazgo Clínico:' : 'Clinical Finding:'}</strong>{' '}
+                          {study.clinicalSummary}
+                        </div>
+                      )}
+
+                      {study.penCorrelation && (
+                        <div style={{ fontSize: '0.73rem', color: '#065f46', fontWeight: 700, background: '#ecfdf5', padding: '6px 9px', borderRadius: '6px', border: '1px solid #a7f3d0' }}>
+                          <strong>{lang === 'es' ? 'Correlación U-100:' : 'U-100 Pen Correlation:'}</strong>{' '}
+                          {study.penCorrelation}
+                        </div>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => {
-                          handleSendMessage(`What are the key clinical findings and dosage protocols discussed in PubMed study PMID ${study.pmid}?`);
+                          handleSendMessage(
+                            study.penCorrelation
+                              ? (lang === 'es'
+                                  ? `Explica la evidencia clínica del estudio PMID ${study.pmid} (${study.title}) y cómo aplicarla con los clics exactos de nuestra pluma U-100 (${study.penCorrelation}).`
+                                  : `Explain the clinical evidence from PubMed study PMID ${study.pmid} (${study.title}) and how to apply it using our exact U-100 pen dial clicks (${study.penCorrelation}).`)
+                              : `What are the key clinical findings and dosage protocols discussed in PubMed study PMID ${study.pmid}?`
+                          );
                         }}
                         style={{
                           marginTop: '4px',

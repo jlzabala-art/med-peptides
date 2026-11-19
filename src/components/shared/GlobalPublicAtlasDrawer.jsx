@@ -67,12 +67,12 @@ export default function GlobalPublicAtlasDrawer() {
         lang: 'en',
         contextAnchor: {
           type: 'pens_pricing',
-          name: 'Peptide Pen Dosing Guide · 19 Formulas (26 SKUs)',
+          name: 'Peptide Pen Dosing Guide · 27 Formulas (45 SKUs)',
           badgeLabel: 'U-100 · 2–8°C',
           sectionTitle: 'Atlas Health Pre-filled Multi-Dose Peptide Pens · U-100 Clinical Formulary',
-          keyActives: '19 ready-to-inject multi-dose peptide pens (26 strength SKUs across 2 mL / 200 IU, 2.4 mL / 240 IU, and 3 mL / 300 IU cartridges): BPC-157/TB-500, KPV, CJC-1295 (No DAC), CJC-1295/Ipamorelin, IGF-1 LR3, Ipamorelin, MGF, CJC/Ipamorelin/DSIP, DSIP, Epithalon, Humanin, MOTS-c (30/40/60 mg), NAD+ (750/1050 mg), GHK-Cu, GLOW Stack, KLOW Stack, hCG, Kisspeptin-10, PT-141.',
+          keyActives: '27 sterile multi-dose peptide pens (45 harmonized strength SKUs across 2 mL, 2.4 mL, and 3 mL cartridges) with mechanical U-100 dial conversion (100 clicks = 1 mL; 1 click = 0.01 mL).',
           mechanisms: 'Precision mechanical U-100 click-dial dosing (100 clicks = 1 mL, 1 click = 0.01 mL). Sterile pre-filled cartridges requiring zero reconstitution or bacteriostatic water mixing. Compatible with 31G/32G × 4 mm pen needles; 2°C–8°C cold-chain stability (30-day BUD once pierced).',
-          welcomeIntro: 'Ask about U-100 click-to-dose calculations, multi-pen protocol combinations, MOTS-c / NAD+ / Epithalon strength comparisons, AM vs PM administration timing, or cold-chain and 31G/32G needle guidelines.',
+          welcomeIntro: 'Explore U-100 click matrices by clinical specialty, launch 1-click multi-pen protocol presets, or ask about dosing, cartridge yields, and biomarker monitoring.',
         },
       };
     }

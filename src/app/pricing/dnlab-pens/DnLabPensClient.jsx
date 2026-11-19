@@ -514,14 +514,18 @@ export default function DnLabPensClient({
   }, []);
 
   const handleExportPdf = useCallback(
-    async ({ forceFullFormulary = false } = {}) => {
+    async ({ forceFullFormulary = false, customProtocolItems = null } = {}) => {
       if (isExportingPdf) return;
       setIsExportingPdf(true);
       try {
-        const useProtocol = !forceFullFormulary && protocolItemsList.length > 0;
+        const activeProtocolList = Array.isArray(customProtocolItems) && customProtocolItems.length > 0
+          ? customProtocolItems
+          : protocolItemsList;
+        const useProtocol = !forceFullFormulary && activeProtocolList.length > 0;
+        const pensCount = activeProtocolList.reduce((acc, it) => acc + (it.qty || 1), 0);
         await generateAtlasPensDossierPdf({
           products: filteredProducts.length > 0 ? filteredProducts : initialProducts,
-          protocolItems: useProtocol ? protocolItemsList : [],
+          protocolItems: useProtocol ? activeProtocolList : [],
           selectedVariants: selectedVariantIdx,
           lang,
           selectedCategory,
@@ -529,8 +533,8 @@ export default function DnLabPensClient({
         toast.success(
           useProtocol
             ? (isEs
-                ? `Guía visual de protocolo (${totalProtocolPens} pens) lista ✓`
-                : `Personalized pen dosing guide (${totalProtocolPens} pens) ready ✓`)
+                ? `Guía visual de protocolo (${pensCount} pens) lista ✓`
+                : `Personalized pen dosing guide (${pensCount} pens) ready ✓`)
             : (isEs
                 ? 'Guía clínica visual PDF lista para previsualización ✓'
                 : 'Visual clinical pen dosing guide ready for preview ✓')
@@ -551,9 +555,50 @@ export default function DnLabPensClient({
       lang,
       selectedCategory,
       isEs,
-      totalProtocolPens,
     ]
   );
+
+  // Bidirectional listener: allows Atlas AI Clinical Copilot to load recommended pens into Supply Summary & export PDF in 1 click
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const handleApplyAiProtocol = (e) => {
+      const ids = Array.isArray(e?.detail?.productIds) ? e.detail.productIds : [];
+      const autoExportPdf = Boolean(e?.detail?.autoExportPdf);
+      if (ids.length === 0) return;
+
+      const nextSelection = {};
+      const resolvedItems = [];
+      ids.forEach((pid) => {
+        const product = initialProducts.find((p) => p.id === pid);
+        if (!product) return;
+        const vIdx = selectedVariantIdx[pid] ?? 0;
+        const variants = product.variants || [{}];
+        nextSelection[pid] = { variantIdx: vIdx, qty: 1 };
+        resolvedItems.push({
+          product,
+          variant: variants[Math.min(vIdx, variants.length - 1)] || variants[0],
+          qty: 1,
+        });
+      });
+
+      if (resolvedItems.length === 0) return;
+      setProtocolSelection((prev) => ({ ...prev, ...nextSelection }));
+      toast.success(
+        isEs
+          ? `✓ Protocolo de ${resolvedItems.length} plumas cargado en Supply Summary`
+          : `✓ ${resolvedItems.length}-Pen Protocol loaded into Supply Summary`
+      );
+
+      if (autoExportPdf) {
+        setTimeout(() => {
+          handleExportPdf({ customProtocolItems: resolvedItems });
+        }, 120);
+      }
+    };
+
+    window.addEventListener('atlas-pens-apply-protocol', handleApplyAiProtocol);
+    return () => window.removeEventListener('atlas-pens-apply-protocol', handleApplyAiProtocol);
+  }, [initialProducts, selectedVariantIdx, isEs, handleExportPdf]);
 
   const handleShare = useCallback(async () => {
     if (typeof window === 'undefined') return;
