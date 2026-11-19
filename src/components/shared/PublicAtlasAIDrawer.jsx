@@ -156,7 +156,7 @@ const PENS_CLINICAL_PROTOCOL_PRESETS = [
     titleEn: 'Post-Surgical & Musculoskeletal Recovery Stack',
     titleEs: 'Protocolo de Recuperación Post-Quirúrgica y Tendinosa',
     pensLabel: 'BPC-157/TB-500 + GHK-Cu + KPV (3 Pens)',
-    productIds: ['dn-pen-01', 'dn-pen-14', 'dn-pen-02'],
+    productIds: ['dn-bpc-tb', 'dn-ghk-cu', 'dn-kpv'],
     promptEn: 'Design a 6-week Post-Surgical & Tendon Recovery clinical protocol stacking BPC-157/TB-500, GHK-Cu, and KPV pre-filled pens: specify exact U-100 dial clicks for each strength, AM/PM injection timing, total pens required for 6 weeks (accounting for needle priming), and hs-CRP/inflammatory biomarker monitoring.',
     promptEs: 'Diseña un protocolo clínico de 6 semanas de Recuperación Post-Quirúrgica y Tendinosa combinando las plumas BPC-157/TB-500, GHK-Cu y KPV: detalla los clics U-100 exactos por concentración, horario AM/PM, número total de plumas para 6 semanas (descontando purga) y biomarcadores inflamatorios (hs-CRP) a monitorizar.',
   },
@@ -169,7 +169,7 @@ const PENS_CLINICAL_PROTOCOL_PRESETS = [
     titleEn: 'Mitochondrial ATP & Cellular Longevity Protocol',
     titleEs: 'Protocolo de Longevidad Celular, ATP Mitocondrial y NAD+',
     pensLabel: 'Epithalon + MOTS-c + NAD+ + SS-31 (4 Pens)',
-    productIds: ['dn-pen-10', 'dn-pen-12', 'dn-pen-13', 'dn-pen-20'],
+    productIds: ['dn-epithalon', 'dn-mots-c', 'dn-nad-plus', 'dnlab-pen-ss31'],
     promptEn: 'Design an advanced Cellular Longevity & Mitochondrial ATP protocol combining Epithalon, MOTS-c, NAD+, and SS-31 (Elamipretide) pens: provide exact U-100 dial clicks across the available concentrations (MOTS-c 15/30/40/60 mg, NAD+ 300/750/1050 mg), sequencing (10-day Epithalon pulse vs 4-week mitochondrial phase), and baseline/follow-up labs.',
     promptEs: 'Diseña un protocolo avanzado de Longevidad Celular y ATP Mitocondrial combinando las plumas Epithalon, MOTS-c, NAD+ y SS-31 (Elamipretide): indica los clics U-100 exactos según concentración (MOTS-c 15/30/40/60 mg, NAD+ 300/750/1050 mg), secuenciación por fases y analíticas de control.',
   },
@@ -182,7 +182,7 @@ const PENS_CLINICAL_PROTOCOL_PRESETS = [
     titleEn: 'Visceral Adiposity & Pulsatile GH Optimization',
     titleEs: 'Optimización del Eje GH/IGF-1 y Reducción de Grasa Visceral',
     pensLabel: 'Tesamorelin + CJC-1295/Ipamorelin (2 Pens)',
-    productIds: ['dn-pen-23', 'dn-pen-04'],
+    productIds: ['dnlab-pen-tesamorelin', 'dn-cjc-ipam'],
     promptEn: 'Compare and design a metabolic GH-axis protocol using Tesamorelin (30 mg / 3 mL) vs CJC-1295/Ipamorelin (3/6, 5/10, or 6/6 mg / 3 mL): detail exact U-100 clicks, mandatory 2-hour post-dinner fasting window, 5-days-on/2-days-off desensitization cycling, and IGF-1 / HbA1c / HOMA-IR monitoring.',
     promptEs: 'Compara y diseña un protocolo metabólico del eje GH con Tesamorelin (30 mg / 3 mL) y CJC-1295/Ipamorelin (3/6, 5/10 o 6/6 mg / 3 mL): detalla clics U-100 exactos, ventana obligatoria de ayuno nocturno, ciclo 5 días on / 2 off y monitorización de IGF-1, HbA1c y HOMA-IR.',
   },
@@ -195,7 +195,7 @@ const PENS_CLINICAL_PROTOCOL_PRESETS = [
     titleEn: 'Neuro-Cognitive BDNF Focus (AM) & Delta Sleep (PM)',
     titleEs: 'Protocolo Neuro-Cognitivo BDNF (Mañana) y Sueño Delta (Noche)',
     pensLabel: 'Semax + Selank (AM) + DSIP (PM) (3 Pens)',
-    productIds: ['dn-pen-26', 'dn-pen-25', 'dn-pen-09'],
+    productIds: ['dnlab-pen-semax', 'dnlab-pen-selank', 'dn-dsip'],
     promptEn: 'Design a circadian Neuro-Cognitive & Restorative Sleep protocol pairing morning Semax (15 mg / 3 mL) + Selank (15 mg / 3 mL) with evening DSIP (2 mg / 2 mL): provide exact U-100 dial clicks, receptor mechanisms (BDNF/trkB, GABA-A, delta-wave sleep architecture), and cartridge duration.',
     promptEs: 'Diseña un protocolo circadiano Neuro-Cognitivo y de Sueño Profundo combinando Semax (15 mg / 3 mL) + Selank (15 mg / 3 mL) por la mañana con DSIP (2 mg / 2 mL) por la noche: indica clics U-100 exactos, mecanismos (BDNF/trkB, GABA-A, sueño delta) y duración de cada cartucho.',
   },
@@ -243,39 +243,39 @@ function detectMentionedPenIdsInText(text = '') {
   if (!text) return [];
   const lower = String(text).toLowerCase();
   const rules = [
-    { id: 'dn-pen-01', match: /\bbpc[-\s]?157\s*\/\s*tb[-\s]?(?:500|4)\b/i },
-    { id: 'dn-pen-21', match: /\bbpc[-\s]?157\s*(?:standalone|individual|15\s*mg\s*\/\s*3\s*ml)\b/i },
-    { id: 'dn-pen-22', match: /\btb[-\s]?500\s*(?:standalone|individual|15\s*mg\s*\/\s*3\s*ml)\b/i },
-    { id: 'dn-pen-02', match: /\bkpv\b/i },
-    { id: 'dn-pen-03', match: /\bcjc[-\s]?1295\s*\(\s*no\s*dac\s*\)/i },
-    { id: 'dn-pen-04', match: /\bcjc[-\s]?1295\s*\/\s*ipamorelin\b/i },
-    { id: 'dn-pen-05', match: /\bigf[-\s]?1\s*lr3\b/i },
-    { id: 'dn-pen-06', match: /\bipamorelin\b/i },
-    { id: 'dn-pen-07', match: /\bmgf\b/i },
-    { id: 'dn-pen-08', match: /\bcjc[-\s]?1295\s*\/\s*ipamorelin\s*\/\s*dsip\b/i },
-    { id: 'dn-pen-09', match: /\bdsip\b/i },
-    { id: 'dn-pen-10', match: /\bepith?alon\b/i },
-    { id: 'dn-pen-11', match: /\bhumanin\b/i },
-    { id: 'dn-pen-12', match: /\bmots[-\s]?c\b/i },
-    { id: 'dn-pen-13', match: /\bnad\+\b/i },
-    { id: 'dn-pen-20', match: /\b(?:ss[-\s]?31|elamipretide)\b/i },
-    { id: 'dn-pen-14', match: /\bghk[-\s]?cu\b/i },
-    { id: 'dn-pen-15', match: /\bglow\b/i },
-    { id: 'dn-pen-16', match: /\bklow\b/i },
-    { id: 'dn-pen-17', match: /\bhcg\b/i },
-    { id: 'dn-pen-18', match: /\bkisspeptin\b/i },
-    { id: 'dn-pen-19', match: /\b(?:pt[-\s]?141|bremelanotide)\b/i },
-    { id: 'dn-pen-23', match: /\btesamorelin\b/i },
-    { id: 'dn-pen-24', match: /\b(?:thymosin\s*alpha[-\s]?1|ta[-\s]?1|thymalfasin)\b/i },
-    { id: 'dn-pen-25', match: /\bselank\b/i },
-    { id: 'dn-pen-26', match: /\bsemax\b/i },
-    { id: 'dn-pen-27', match: /\b5[-\s]?amino[-\s]?1mq\b/i },
+    { id: 'dn-bpc-tb', match: /\bbpc[-\s]?157\s*\/\s*tb[-\s]?(?:500|4)\b/i },
+    { id: 'dnlab-pen-bpc157-solo', match: /\bbpc[-\s]?157\b(?![\s/]*tb)/i },
+    { id: 'dnlab-pen-tb500-solo', match: /(?<!\/)\btb[-\s]?500\b/i },
+    { id: 'dn-kpv', match: /\bkpv\b/i },
+    { id: 'dn-cjc-ipam-dsip', match: /\bcjc[-\s]?1295\s*\/\s*ipamorelin\s*\/\s*dsip\b/i },
+    { id: 'dn-cjc-ipam', match: /\bcjc[-\s]?1295\s*\/\s*ipamorelin\b/i },
+    { id: 'dn-cjc-1295-alone', match: /\bcjc[-\s]?1295\s*\(\s*no\s*dac\s*\)/i },
+    { id: 'dn-igf1-lr3', match: /\bigf[-\s]?1\s*lr3\b/i },
+    { id: 'dn-ipamorelin-alone', match: /(?<!\/)\bipamorelin\b(?!\s*\/)/i },
+    { id: 'dn-mgf', match: /\bmgf\b/i },
+    { id: 'dn-dsip', match: /(?<!\/)\bdsip\b/i },
+    { id: 'dn-epithalon', match: /\bepith?alon\b/i },
+    { id: 'dn-humanin', match: /\bhumanin\b/i },
+    { id: 'dn-mots-c', match: /\bmots[-\s]?c\b/i },
+    { id: 'dn-nad-plus', match: /\bnad\+\b/i },
+    { id: 'dnlab-pen-ss31', match: /\b(?:ss[-\s]?31|elamipretide)\b/i },
+    { id: 'dn-ghk-cu', match: /\bghk[-\s]?cu\b/i },
+    { id: 'dn-glow', match: /\bglow\b/i },
+    { id: 'dn-klow', match: /\bklow\b/i },
+    { id: 'dn-hcg', match: /\bhcg\b/i },
+    { id: 'dn-kisspeptin', match: /\bkisspeptin\b/i },
+    { id: 'dn-pt-141', match: /\b(?:pt[-\s]?141|bremelanotide)\b/i },
+    { id: 'dnlab-pen-tesamorelin', match: /\btesamorelin\b/i },
+    { id: 'dnlab-pen-ta1', match: /\b(?:thymosin\s*alpha[-\s]?1|ta[-\s]?1|thymalfasin)\b/i },
+    { id: 'dnlab-pen-selank', match: /\bselank\b/i },
+    { id: 'dnlab-pen-semax', match: /\bsemax\b/i },
+    { id: 'dnlab-pen-5amino1mq', match: /\b5[-\s]?amino[-\s]?1mq\b/i },
   ];
   const found = [];
   for (const r of rules) {
     if (r.match.test(lower)) found.push(r.id);
   }
-  return found.slice(0, 6);
+  return Array.from(new Set(found)).slice(0, 6);
 }
 
 function parseAiResponseParts(text) {
@@ -1815,6 +1815,7 @@ export default function PublicAtlasAIDrawer({
                                         detail: { productIds: preset.productIds, autoExportPdf: false },
                                       })
                                     );
+                                    handleClose();
                                   }
                                 }}
                                 style={{
@@ -1836,6 +1837,7 @@ export default function PublicAtlasAIDrawer({
                                 type="button"
                                 onClick={() => {
                                   if (typeof window !== 'undefined') {
+                                    handleClose();
                                     window.dispatchEvent(
                                       new CustomEvent('atlas-pens-apply-protocol', {
                                         detail: { productIds: preset.productIds, autoExportPdf: true },
@@ -2094,6 +2096,7 @@ export default function PublicAtlasAIDrawer({
                                             detail: { productIds: mentionedPenIds, autoExportPdf: false },
                                           })
                                         );
+                                        handleClose();
                                       }
                                     }}
                                     style={{
@@ -2123,6 +2126,7 @@ export default function PublicAtlasAIDrawer({
                                     type="button"
                                     onClick={() => {
                                       if (typeof window !== 'undefined') {
+                                        handleClose();
                                         window.dispatchEvent(
                                           new CustomEvent('atlas-pens-apply-protocol', {
                                             detail: { productIds: mentionedPenIds, autoExportPdf: true },
