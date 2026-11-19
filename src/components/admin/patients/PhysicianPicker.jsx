@@ -106,7 +106,9 @@ export default function PhysicianPicker({
       onChange({ 
         doctorId: doctor.id, 
         doctorName: doctor.name || doctor.id,
-        license: doctor.license || null
+        license: doctor.license || null,
+        clinicId: doctor.clinicId || null,
+        clinicName: doctor.clinicName || doctor.clinic || ''
       });
     }
   };

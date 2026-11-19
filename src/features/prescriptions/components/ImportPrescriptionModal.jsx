@@ -450,6 +450,15 @@ export default function ImportPrescriptionModal({
       const doctorName = (typeof extractedData.doctor === 'object' ? extractedData.doctor?.name : extractedData.doctor) || context.doctorName || (isLab ? 'Dr. Çağatay Sezgin, MD, FISHRS' : '');
 
       // Normalize extracted formulation blocks
+      const resolveBlockPosology = (b) => {
+        const direct = b?.posology || b?.directions || b?.instructions || b?.usage || '';
+        if (String(direct).trim()) return String(direct).trim();
+        if (Array.isArray(b?.posologySteps) && b.posologySteps.length > 0) {
+          return b.posologySteps.map((s) => String(s || '').trim()).filter(Boolean).join(' ');
+        }
+        return String(extractedData.posology || extractedData.directions || '').trim();
+      };
+
       const rawBlocks = (extractedData.formulationBlocks && extractedData.formulationBlocks.length > 0)
         ? extractedData.formulationBlocks
         : [{
@@ -457,7 +466,7 @@ export default function ImportPrescriptionModal({
             treatmentProgram: extractedData.clinicalCategory || 'Compounding',
             dispensingForm: extractedData.dispensingForm || 'Magistral Solution',
             volume: extractedData.volume || '100 mL',
-            posology: extractedData.posology || '',
+            posology: extractedData.posology || extractedData.directions || '',
             items: Array.isArray(extractedData.ingredients) ? extractedData.ingredients : []
           }];
 
@@ -468,7 +477,7 @@ export default function ImportPrescriptionModal({
           treatmentProgram: b.treatmentProgram || 'Compounding',
           dispensingForm: b.dispensingForm || 'Magistral Solution',
           volume: b.volume || '100 mL',
-          posology: b.posology || extractedData.posology || '',
+          posology: resolveBlockPosology(b),
           items: rawItems.map((it, itIdx) => ({
             id: `item_${bIdx}_${itIdx}_${Date.now()}`,
             name: it.name || it.activeIngredient || '',
@@ -1597,12 +1606,14 @@ export default function ImportPrescriptionModal({
                           strictClinic={Boolean(reviewData.clinicId || reviewData.clinicName)}
                           allowCustom={true}
                           placeholder="Select clinic physician or enter custom name..."
-                          onChange={({ doctorId, doctorName, license }) => {
+                          onChange={({ doctorId, doctorName, license, clinicId, clinicName }) => {
                             setReviewData(prev => ({
                               ...prev,
                               doctorId: doctorId || '',
                               doctorName: doctorName || '',
-                              doctorLicense: license || prev.doctorLicense
+                              doctorLicense: license || prev.doctorLicense,
+                              clinicId: prev.clinicId || clinicId || '',
+                              clinicName: prev.clinicName || clinicName || '',
                             }));
                           }}
                         />

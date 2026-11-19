@@ -325,7 +325,10 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
    - NEVER leave 'doctor.name' or 'doctor.clinicName' empty if a doctor or clinic is mentioned anywhere in the document.
    - Extract the full name (e.g. "Dr. Marina Cordeiro Fernandes", "Dr. Çağatay Sezgin, MD, FISHRS") into 'doctor.name' and clinic (e.g. "Nova Plastic Surgery Clinic", "Shamma Clinic by Novomed LLC") into 'doctor.clinicName'.
 
-6. FAGRON TELOTEST & TELOMERE REPORTS:
+6. FAGRON TRICHOTEST™ & TELOTEST™ MULTI-PAGE FORMULAS & POSOLOGY (CRITICAL):
+   - On Fagron TrichoTest™ reports (BOX...AATRI), Section "3. Formulas for personalized treatments" spans multiple sequential pages (Topical treatment, Oral treatment, Scalp care and hygiene).
+   - EVERY formula table has a bright green "Posology" banner directly below the ingredients (e.g. "Apply at night before bedtime...", "1 capsule per day, 90 capsules for 3 months", "1-2 times / week, massage for 3-5 minutes...").
+   - You MUST extract that verbatim "Posology" banner text into 'formulationBlocks[i].posology' for EVERY single formula! NEVER leave 'posology' blank when a Posology box/section exists on the page.
    - If the document contains "THE TELOTEST FORMULA™", "TeloTest", "Telomeres", or BOX ID with "...AATEL" (e.g. "BOX03049AATEL"):
      * Set 'documentType' to "FagronGenomics" and 'clinicalCategory' to "compounding" or "standard".
      * Set 'fagronDetails.testName' to "TeloTest" and extract the Box ID.
