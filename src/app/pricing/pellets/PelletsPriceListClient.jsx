@@ -821,10 +821,6 @@ export default function PelletsPriceListClient({
                 lang={lang}
                 value={searchQuery}
                 onChange={setSearchQuery}
-                placeholder={isEs
-                  ? 'Buscar por molécula, dosis, trócar o SKU (Estradiol, Testosterona, 12.5mg, 3.2mm)...'
-                  : 'Search pellets by molecule, dose, trocar or SKU (Estradiol, Testosterone, 12.5mg, 3.2mm)...'
-                }
                 size="lg"
               />
 

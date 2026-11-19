@@ -437,13 +437,16 @@ export default function PublicLabelsAppClient({
     }
   };
 
-  // Worklist items: always prefer real searchResults / Firestore database, fallback to FEATURED_PATIENTS only if completely empty
+  // Worklist items: always prefer real searchResults / Firestore database, fallback to FEATURED_PATIENTS only when idle & empty
   const worklistSource = useMemo(() => {
+    if (searchQuery && searchQuery.trim().length >= 2) {
+      return Array.isArray(searchResults) ? searchResults : [];
+    }
     if (Array.isArray(searchResults) && searchResults.length > 0) {
       return searchResults;
     }
     return FEATURED_PATIENTS;
-  }, [searchResults]);
+  }, [searchResults, searchQuery]);
 
   const matchesDateRange = useMemo(() => {
     const maxAgeMs = worklistDateRange === '7d' ? 7 * 86400000 : worklistDateRange === '30d' ? 30 * 86400000 : null;
@@ -461,6 +464,12 @@ export default function PublicLabelsAppClient({
 
   const filterWorklistItem = (item, tabOverride = null) => {
     const activeTab = tabOverride || worklistTab;
+    // When user is actively searching on the default 'unprinted' tab, show ALL matching results
+    // regardless of print status so printed/historical prescriptions never appear as "0 found".
+    if (!tabOverride && searchQuery && searchQuery.trim().length >= 2 && activeTab === 'unprinted') {
+      return true;
+    }
+
     const pCode = sanitizeRecentCode(item.code).toUpperCase();
     const count = printCountsMap[pCode] ?? printCountsMap[String(item.code).toUpperCase()] ?? item.a4PrintCount ?? 0;
     const isPendingApproval = (item.status && item.status !== 'approved' && !item.isSigned);
@@ -509,7 +518,7 @@ export default function PublicLabelsAppClient({
       .filter((item) => filterWorklistItem(item))
       .filter((item) => worklistTestFilter === 'all' || getWorklistTestKind(item) === worklistTestFilter)
       .sort((a, b) => getImportTimestampMs(b) - getImportTimestampMs(a));
-  }, [baseWorklistItems, worklistTab, printCountsMap, getImportTimestampMs, worklistTestFilter]);
+  }, [baseWorklistItems, worklistTab, printCountsMap, getImportTimestampMs, worklistTestFilter, searchQuery]);
 
   const totalWorklistPages = Math.max(1, Math.ceil(filteredWorklistItems.length / worklistPageSize));
   const safeWorklistPage = Math.min(worklistPage, totalWorklistPages);

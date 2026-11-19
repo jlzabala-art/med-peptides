@@ -360,7 +360,7 @@ export async function GET(request) {
       
       const rxHits = algoliaRes.prescriptions || [];
       for (const hit of rxHits) {
-        const rawCode = hit.code || hit.prescriptionNumber || hit.fileNumber || hit.objectID;
+        const rawCode = hit.prescriptionCode || hit.code || hit.prescriptionNumber || hit.fileNumber || hit.objectID;
         const code = cleanCodeStr(rawCode);
         const normCode = normalizeCode(code);
         const patName = hit.patientName || hit.patient?.name || 'Patient';
@@ -378,7 +378,7 @@ export async function GET(request) {
             clinicName: hit.clinicName || hit.clinic || '',
             title: resolveRxTitle(hit),
             partsCount: resolvePartsCount(hit),
-            date: extractDate(hit.prescriptionDate || hit.date || hit.dispensedDate || hit.createdAt || hit.created_at),
+            date: extractDate(hit.prescriptionDate || hit.date || hit.reportDate || hit.dispensedDate || hit.createdAt || hit.created_at),
             importedAt: extractDate(hit.importedAt || hit.createdAt || hit.created_at || hit.uploadedAt),
             status: hit.status || hit.state || 'approved',
             source: 'algolia'
@@ -392,22 +392,19 @@ export async function GET(request) {
     // ── 4. Firestore Admin SDK Query Fallback ──
     if (adminDb && results.length < 10) {
       try {
-        let snap;
-        try {
-          snap = await adminDb.collection('prescriptions')
-            .orderBy('importedAt', 'desc')
-            .limit(400)
-            .get();
-        } catch {
-          snap = await adminDb.collection('prescriptions')
-            .limit(400)
-            .get();
-        }
+        // Note: Do NOT use .orderBy('importedAt', 'desc') here because Firestore omits
+        // historical documents that lack the 'importedAt' field (e.g., 2025 prescriptions).
+        const snap = await adminDb.collection('prescriptions')
+          .limit(500)
+          .get();
 
+        const fsMatches = [];
         snap.forEach(docSnap => {
           const d = docSnap.data();
           const code = extractBestCode(d, docSnap.id);
           const pName = String(d.patientName || d.patient?.name || '').trim();
+          const docName = String(d.doctorName || d.treatingDoctor?.name || '').trim();
+          const rxTitle = resolveRxTitle(d);
           const normCode = normalizeCode(code);
           const patKey = `${pName.toLowerCase()}::${normCode}`;
 
@@ -422,30 +419,52 @@ export async function GET(request) {
           ].filter(Boolean);
 
           const isKnown = seenCodes.has(normCode) || seenPatientCodes.has(patKey) || docAliases.some(a => seenCodes.has(normalizeCode(a)));
-          if ((pName.toLowerCase().includes(qLower) || normCode.includes(qLower) || String(docSnap.id).toLowerCase().includes(qLower) || docAliases.some(a => String(a).toLowerCase().includes(qLower))) && !isKnown) {
+          const matchesQuery =
+            pName.toLowerCase().includes(qLower) ||
+            normCode.includes(qLower.replace(/[^a-z0-9]/g, '')) ||
+            String(code).toLowerCase().includes(qLower) ||
+            String(docSnap.id).toLowerCase().includes(qLower) ||
+            rxTitle.toLowerCase().includes(qLower) ||
+            docName.toLowerCase().includes(qLower) ||
+            docAliases.some(a => String(a).toLowerCase().includes(qLower));
+
+          if (matchesQuery && !isKnown) {
             seenCodes.add(normCode);
             docAliases.forEach(a => seenCodes.add(normalizeCode(a)));
             seenPatientCodes.add(patKey);
-            results.push({
-              id: docSnap.id,
-              code: String(code),
-              fileNumber: d.fileNumber || String(code),
-              patientName: pName || 'Patient',
-              doctorName: d.doctorName || d.treatingDoctor?.name || 'Treating Physician',
-              clinicName: d.clinicName || d.clinic || '',
-              title: resolveRxTitle(d),
-              partsCount: resolvePartsCount(d),
-              date: extractDate(d.prescriptionDate || d.date || d.dispensedDate || d.createdAt || d.created_at),
-              importedAt: extractDate(d.importedAt || d.createdAt || d.uploadedAt || docSnap.createTime || d.updatedAt),
-              a4PrintCount: d.a4PrintCount || d.printCount || 0,
-              lastPrintedA4At: extractDate(d.lastPrintedA4At),
-              status: d.status || d.state || 'approved',
-              isSigned: Boolean(d.isSigned),
-              labeledParts: d.labeledParts || {},
-              source: 'firestore'
+            const sortTs =
+              extractTimestampMs(d.importedAt) ||
+              extractTimestampMs(d.createdAt) ||
+              extractTimestampMs(d.uploadedAt) ||
+              extractTimestampMs(docSnap.createTime) ||
+              extractTimestampMs(d.prescriptionDate || d.date);
+            fsMatches.push({
+              sortTs,
+              item: {
+                id: docSnap.id,
+                code: String(code),
+                fileNumber: d.fileNumber || String(code),
+                patientName: pName || 'Patient',
+                doctorName: docName || 'Treating Physician',
+                clinicName: d.clinicName || d.clinic || '',
+                title: rxTitle,
+                partsCount: resolvePartsCount(d),
+                date: extractDate(d.prescriptionDate || d.date || d.reportDate || d.dispensedDate || d.createdAt || d.created_at),
+                importedAt: extractDate(d.importedAt || d.createdAt || d.uploadedAt || docSnap.createTime || d.updatedAt),
+                a4PrintCount: d.a4PrintCount || d.printCount || 0,
+                lastPrintedA4At: extractDate(d.lastPrintedA4At),
+                status: d.status || d.state || 'approved',
+                isSigned: Boolean(d.isSigned),
+                labeledParts: d.labeledParts || {},
+                source: 'firestore'
+              }
             });
           }
         });
+
+        fsMatches
+          .sort((a, b) => b.sortTs - a.sortTs)
+          .forEach((m) => results.push(m.item));
       } catch (fsErr) {
         console.warn('[api/labels/search] Firestore query notice:', fsErr.message);
       }

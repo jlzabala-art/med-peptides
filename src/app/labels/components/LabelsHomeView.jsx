@@ -279,17 +279,15 @@ export default function LabelsHomeView({
           >
             <GlobalSearchBar
               namespace="labels"
+              searchScope="clinical"
               lang={isEs ? 'es' : 'en'}
               value={searchQuery || ''}
               onChange={(val) => {
                 setSearchQuery?.(val);
                 setWorklistPage?.(1);
               }}
-              placeholder={
-                isEs
-                  ? 'Buscar por paciente, código de receta (#BOX..., #RX...), test o fórmula...'
-                  : 'Search by patient name, prescription code (#BOX..., #RX...), test or formula...'
-              }
+              isLoading={isSearching}
+              resultCount={searchQuery?.trim() ? filteredWorklistItems.length : undefined}
               size="lg"
             />
             {searchQuery?.trim() && (
@@ -306,9 +304,13 @@ export default function LabelsHomeView({
                 <span>
                   {isSearching
                     ? (isEs ? 'Buscando en la base de datos...' : 'Searching clinical database...')
-                    : (isEs
-                        ? `Mostrando resultados para: "${searchQuery}" (${filteredWorklistItems.length} encontrados)`
-                        : `Showing matches for: "${searchQuery}" (${filteredWorklistItems.length} found)`)}
+                    : filteredWorklistItems.length === 0 && searchResults.length > 0
+                      ? (isEs
+                          ? `${searchResults.length} resultado(s) en Algolia — haz clic en un resultado para abrirlo`
+                          : `${searchResults.length} result(s) found in Algolia — click a result above to open it`)
+                      : (isEs
+                          ? `Mostrando resultados para: "${searchQuery}" (${filteredWorklistItems.length} encontrados)`
+                          : `Showing matches for: "${searchQuery}" (${filteredWorklistItems.length} found)`)}
                 </span>
                 <button
                   type="button"

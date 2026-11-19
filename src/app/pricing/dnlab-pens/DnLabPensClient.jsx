@@ -446,9 +446,9 @@ export default function DnLabPensClient({
           <GlobalSearchBar
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder={isEs ? 'Buscar por péptido, indicación, SKU o protocolo (ej. GLOW, BPC, Epithalon)...' : 'Search peptide, clinical indication, SKU or protocol (e.g. GLOW, BPC, Epithalon)...'}
             searchScope="local"
             namespace="dnlab-pens"
+            size="lg"
             resultCount={filteredProducts.length}
             lang={lang}
           />

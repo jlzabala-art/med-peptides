@@ -51,14 +51,26 @@ export default function LabelsSearchDropdown({
       }
 
       const group = groupsMap.get(normName);
-      const dateStr = formatResultDate ? formatResultDate(item.date) : (item.date || '');
+      const importedRaw = item.importedAt || item.createdAt || item.uploadedAt;
+      const sampleRaw = item.prescriptionDate || item.sampleDate || item.reportDate || item.date;
+      const importedDateStr = formatResultDate ? formatResultDate(importedRaw) : (importedRaw || '');
+      const sampleDateStr = formatResultDate ? formatResultDate(sampleRaw) : (sampleRaw || '');
+      const rawCodeStr = String(item.code || item.id || '').trim();
+      const rootCode = rawCodeStr
+        .replace(/^RX-/i, '')
+        .replace(/-R\d+$/i, '')
+        .replace(/[A-Z]{2,}$/i, '');
+      const importTs = importedRaw ? (Date.parse(String(importedRaw)) || 0) : 0;
       const isInBatch = patientQueue.some(p => String(p.code) === String(item.code));
 
       group.prescriptions.push({
         code: item.code,
         id: item.id,
+        rootCode,
+        importTs,
         title: item.title || item.treatmentTitle || 'Compounded Pharmaceutical Protocol',
-        dateStr,
+        importedDateStr,
+        sampleDateStr,
         partsCount: item.partsCount || 1,
         a4PrintCount: item.a4PrintCount || 0,
         status: item.status || 'approved',
@@ -67,7 +79,15 @@ export default function LabelsSearchDropdown({
       });
     });
 
-    return Array.from(groupsMap.values());
+    // Keep sister prescriptions (same root kit code) strictly consecutive, most recent first
+    const groups = Array.from(groupsMap.values());
+    groups.forEach((g) => {
+      g.prescriptions.sort((a, b) =>
+        a.rootCode.localeCompare(b.rootCode) ||
+        b.importTs - a.importTs
+      );
+    });
+    return groups;
   }, [rawItems, refillsOnly, patientQueue, formatResultDate]);
 
   const totalPrescriptions = React.useMemo(() => {
@@ -236,9 +256,15 @@ export default function LabelsSearchDropdown({
                               {isEs ? '✓ En Lote' : '✓ In Batch'}
                             </span>
                           )}
-                          {rx.dateStr && (
-                            <span className="pls-search-item-date" style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                              📅 {rx.dateStr}
+                          {(rx.importedDateStr || rx.sampleDateStr) && (
+                            <span className="pls-search-item-date" style={{ fontSize: '0.67rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                              {rx.importedDateStr && (
+                                <span>📥 {isEs ? 'Importado:' : 'Imported:'} <strong>{rx.importedDateStr}</strong></span>
+                              )}
+                              {rx.importedDateStr && rx.sampleDateStr && <span>·</span>}
+                              {rx.sampleDateStr && (
+                                <span>🧪 {isEs ? 'Muestra:' : 'Sample:'} <strong>{rx.sampleDateStr}</strong></span>
+                              )}
                             </span>
                           )}
                           <span style={{

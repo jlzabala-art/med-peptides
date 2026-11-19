@@ -63,6 +63,132 @@ import { trackSearchClick } from '@/services/algoliaInsights';
  *   ]}
  * />
  */
+const CONTEXTUAL_PLACEHOLDERS = {
+  labels: {
+    desktop: {
+      en: 'Search patient, Rx code (#BOX..., #RX...), test or formula...',
+      es: 'Buscar paciente, código (#BOX..., #RX...), test o fórmula...',
+    },
+    mobile: {
+      en: 'Patient, Rx code, formula...',
+      es: 'Paciente, receta, fórmula...',
+    },
+  },
+  prescriptions: {
+    desktop: {
+      en: 'Search prescriptions by patient, doctor, #RX or diagnosis...',
+      es: 'Buscar recetas por paciente, médico, #RX o diagnóstico...',
+    },
+    mobile: {
+      en: 'Patient, doctor, #RX...',
+      es: 'Paciente, médico, #RX...',
+    },
+  },
+  patients: {
+    desktop: {
+      en: 'Search patients by full name, file #, email or phone...',
+      es: 'Buscar pacientes por nombre, expediente, email o tel...',
+    },
+    mobile: {
+      en: 'Patient name, file #...',
+      es: 'Nombre, expediente...',
+    },
+  },
+  users: {
+    desktop: {
+      en: 'Search users, doctors or clients by name, email, company...',
+      es: 'Buscar usuarios, médicos o clientes por nombre, email...',
+    },
+    mobile: {
+      en: 'User, doctor, email...',
+      es: 'Usuario, médico, email...',
+    },
+  },
+  suppliers: {
+    desktop: {
+      en: 'Search suppliers, GMP labs or orders by company, country...',
+      es: 'Buscar proveedores, laboratorios GMP u órdenes...',
+    },
+    mobile: {
+      en: 'Supplier, lab, country...',
+      es: 'Proveedor, laboratorio...',
+    },
+  },
+  protocols: {
+    desktop: {
+      en: 'Search protocols by clinical indication, title, biomarker...',
+      es: 'Buscar protocolos por indicación clínica, título...',
+    },
+    mobile: {
+      en: 'Protocol, indication...',
+      es: 'Protocolo, indicación...',
+    },
+  },
+  pellets: {
+    desktop: {
+      en: 'Search pellets by hormone, dose, trocar or SKU (Estradiol, 12.5mg)...',
+      es: 'Buscar pellets por hormona, dosis, trócar o SKU (Estradiol, 12.5mg)...',
+    },
+    mobile: {
+      en: 'Hormone, dose, trocar...',
+      es: 'Hormona, dosis, trócar...',
+    },
+  },
+  dnlabPens: {
+    desktop: {
+      en: 'Search pens by peptide, category, clicks or dose (BPC-157, GHK-Cu)...',
+      es: 'Buscar pens por péptido, categoría, clics o dosis (BPC-157, GHK-Cu)...',
+    },
+    mobile: {
+      en: 'Peptide, category, dose...',
+      es: 'Péptido, categoría, dosis...',
+    },
+  },
+  genomics: {
+    desktop: {
+      en: 'Search DNA panels by name, genes or category (Health, CYP450)...',
+      es: 'Buscar paneles ADN por nombre, genes o categoría...',
+    },
+    mobile: {
+      en: 'DNA panel, gene...',
+      es: 'Panel ADN, gen...',
+    },
+  },
+  products: {
+    desktop: {
+      en: 'Search peptides by molecule, sequence, CAS # or vial format...',
+      es: 'Buscar péptidos por molécula, secuencia, CAS o vial...',
+    },
+    mobile: {
+      en: 'Peptide, CAS, vial...',
+      es: 'Péptido, CAS, vial...',
+    },
+  },
+  local: {
+    desktop: {
+      en: 'Filter table records by any term, ID, status or date...',
+      es: 'Filtrar registros por término, ID, estado o fecha...',
+    },
+    mobile: {
+      en: 'Filter records by ID...',
+      es: 'Filtrar por ID, estado...',
+    },
+  },
+};
+
+const resolveSuggestionPartsCount = (r = {}) => {
+  if (typeof r.partsCount === 'number' && r.partsCount > 0) {
+    const removedLen = Array.isArray(r.removedParts) ? r.removedParts.length : 0;
+    return Math.max(1, r.partsCount - removedLen);
+  }
+  if (Array.isArray(r.formulationBlocks) && r.formulationBlocks.length > 0) return r.formulationBlocks.length;
+  if (Array.isArray(r.pharmacyLabels) && r.pharmacyLabels.length > 0) return r.pharmacyLabels.length;
+  if (Array.isArray(r.parts) && r.parts.length > 0) return r.parts.length;
+  if (Array.isArray(r.phases) && r.phases.length > 0) return r.phases.length;
+  if (typeof r.parts === 'number' && r.parts > 0) return r.parts;
+  return 1;
+};
+
 const formatClinicalDate = (raw, lang = 'en') => {
   if (!raw) return '';
   try {
@@ -254,6 +380,7 @@ export default function GlobalSearchBar({
                 name: pName,
                 email: p.email || '',
                 phone: p.phone || '',
+                location: [p.city, p.country].filter(Boolean).join(', '),
                 category: 'PATIENT',
                 status: p.status || 'active',
                 indexName: 'atlas_patients',
@@ -271,11 +398,14 @@ export default function GlobalSearchBar({
               const normCode = codeStr.toLowerCase();
               if (!normCode || seenRx.has(normCode)) continue;
               seenRx.add(normCode);
-              // Extract root code (e.g. "BOX03048" from "BOX03048AATRI")
-              const rootCode = codeStr.replace(/[A-Z]{2,}$/, '').replace(/^RX-/, '');
+              // Extract root kit code (e.g. "BOX03048" from "BOX03048AATRI", "RX-BOX03048AATEL", or "BOX03048AATRI-R1")
+              const rootCode = codeStr
+                .replace(/^RX-/i, '')
+                .replace(/-R\d+$/i, '')
+                .replace(/[A-Z]{2,}$/i, '');
               // Format dates
-              const importedDateStr = formatClinicalDate(r.importedAt || r.createdAt, lang);
-              const sampleDateStr = formatClinicalDate(r.prescriptionDate || r.date || r.reportDate || r.sampleDate, lang);
+              const importedDateStr = formatClinicalDate(r.importedAt || r.createdAt || r.uploadedAt, lang);
+              const sampleDateStr = formatClinicalDate(r.prescriptionDate || r.sampleDate || r.reportDate || r.date, lang);
               const dateTs = r.importedAt
                 ? (typeof r.importedAt === 'string' ? new Date(r.importedAt).getTime() : r.importedAt?._seconds ? r.importedAt._seconds * 1000 : Number(r.importedAt))
                 : 0;
@@ -288,7 +418,7 @@ export default function GlobalSearchBar({
                 patientName: (r.patientName || '').trim(),
                 title: r.treatmentTitle || r.medication || r.title || '',
                 doctorName: r.doctorName || '',
-                partsCount: Number(r.partsCount || r.parts || 1),
+                partsCount: resolveSuggestionPartsCount(r),
                 importedDateStr,
                 sampleDateStr,
                 dateTs,
@@ -415,43 +545,43 @@ export default function GlobalSearchBar({
   }, [effectiveValue, isFocused]);
 
   const effectivePlaceholder = useMemo(() => {
-    // Clinical/Labels pages: contextual placeholders (desktop vs mobile)
-    if (isLabelsPage || isPrescriptionsPage) {
-      if (isMobile) return lang === 'es' ? 'Buscar paciente o receta…' : 'Patient or Rx…';
-      return lang === 'es'
-        ? 'Buscar por nombre de paciente, código Rx o fecha de importación…'
-        : 'Search by patient name, Rx code, or import date…';
-    }
-    if (isPatientsPage) {
-      if (isMobile) return lang === 'es' ? 'Buscar paciente…' : 'Search patient…';
-      return lang === 'es' ? 'Buscar paciente por nombre, email o teléfono…' : 'Search patient by name, email or phone…';
-    }
-    if (isSuppliersPage) {
-      if (isMobile) return 'Search supplier…';
-      return 'Search supplier by name, country or category…';
-    }
-    if (isUsersPage) {
-      if (isMobile) return 'Search user…';
-      return 'Search user by name, email or role…';
-    }
-    if (isProductsPage) {
-      if (isMobile) return 'Search product…';
-      return 'Search peptide, compound or SKU…';
-    }
-    if (isProtocolsPage) {
-      if (isMobile) return 'Search protocol…';
-      return 'Search clinical protocol or regimen…';
-    }
-    // Fallback: use the provided placeholder, truncate on mobile if needed
-    if (placeholder) {
+    const lc = lang === 'es' ? 'es' : 'en';
+    const mode = isMobile ? 'mobile' : 'desktop';
+    const ns = (namespace || '').toLowerCase();
+    const path = (currentPath || '').toLowerCase();
+
+    const isPelletsContext = ns.includes('pellet') || path.includes('/pricing/pellets');
+    const isDnLabPensContext = ns.includes('dnlab') || path.includes('/pricing/dnlab-pens');
+    const isGenomicsContext = ns.includes('genomic') || ns.includes('genetic') || path.includes('/pricing/24genetics');
+
+    // Explicit contextual resolution from the unified matrix (Desktop detailed vs Mobile ≤ 28 chars)
+    if (isPelletsContext) return CONTEXTUAL_PLACEHOLDERS.pellets[mode][lc];
+    if (isDnLabPensContext) return CONTEXTUAL_PLACEHOLDERS.dnlabPens[mode][lc];
+    if (isGenomicsContext) return CONTEXTUAL_PLACEHOLDERS.genomics[mode][lc];
+    if (isLabelsPage) return CONTEXTUAL_PLACEHOLDERS.labels[mode][lc];
+    if (isPrescriptionsPage) return CONTEXTUAL_PLACEHOLDERS.prescriptions[mode][lc];
+    if (isPatientsPage) return CONTEXTUAL_PLACEHOLDERS.patients[mode][lc];
+    if (isSuppliersPage) return CONTEXTUAL_PLACEHOLDERS.suppliers[mode][lc];
+    if (isUsersPage) return CONTEXTUAL_PLACEHOLDERS.users[mode][lc];
+    if (isProtocolsPage) return CONTEXTUAL_PLACEHOLDERS.protocols[mode][lc];
+    if (isProductsPage) return CONTEXTUAL_PLACEHOLDERS.products[mode][lc];
+
+    // If a non-default explicit placeholder was supplied, use it on desktop and intelligently condense for mobile
+    const isGenericPlaceholder = !placeholder || /^(search|buscar)\.{0,3}$/i.test(placeholder.trim());
+    if (!isGenericPlaceholder) {
       if (isMobile && placeholder.length > 28) {
-        if (placeholder.includes(' by ')) return placeholder.split(' by ')[0] + '…';
-        return placeholder.slice(0, 25) + '…';
+        const cleaned = placeholder
+          .replace(/^(search|buscar|filter|filtrar)\s+(by|por|for|para)?\s*/i, '')
+          .replace(/\s*\(.*?\)\s*/g, '')
+          .trim();
+        const shortened = cleaned.length > 26 ? `${cleaned.slice(0, 25).trim()}…` : `${cleaned}…`;
+        return shortened.charAt(0).toUpperCase() + shortened.slice(1);
       }
       return placeholder;
     }
-    return 'Search…';
-  }, [isMobile, placeholder, isLabelsPage, isPrescriptionsPage, isPatientsPage, isSuppliersPage, isUsersPage, isProductsPage, isProtocolsPage, lang]);
+
+    return CONTEXTUAL_PLACEHOLDERS.local[mode][lc];
+  }, [isMobile, placeholder, namespace, currentPath, isLabelsPage, isPrescriptionsPage, isPatientsPage, isSuppliersPage, isUsersPage, isProductsPage, isProtocolsPage, lang]);
 
   // ⌘K / Ctrl+K global shortcut & focus-global-search event listener
   useEffect(() => {
@@ -662,7 +792,7 @@ export default function GlobalSearchBar({
   const sizeConfig = {
     sm: { height: '34px', fontSize: '0.8rem',  iconSize: 15 },
     md: { height: '40px', fontSize: '0.875rem', iconSize: 17 },
-    lg: { height: '48px', fontSize: '0.95rem',  iconSize: 20 },
+    lg: { height: '48px', fontSize: '0.95rem',  iconSize: 18 },
   };
   const { height, iconSize } = sizeConfig[size] || sizeConfig.md;
 
@@ -678,12 +808,24 @@ export default function GlobalSearchBar({
           className={`atlas-search__input-wrap ${isFocused ? 'focused' : ''} ${hasActiveFilters ? 'has-active-filters' : ''}`}
           onClick={() => inputRef.current?.focus()}
         >
-          {/* Search icon / spinner */}
-          {isLoading ? (
-            <Loader size={iconSize} color="var(--primary, #2563eb)" className="atlas-search__spinner" />
-          ) : (
-            <Search size={iconSize} color={isFocused ? 'var(--primary, #2563eb)' : 'var(--text-muted, #94a3b8)'} />
-          )}
+          {/* Interactive search icon button / micro-spinner (GCP Standard) */}
+          <button
+            type="button"
+            className={`atlas-search__icon-btn ${isFocused || Boolean(effectiveValue) ? 'active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              inputRef.current?.focus();
+              inputRef.current?.select();
+            }}
+            aria-label={lang === 'es' ? 'Enfocar buscador' : 'Focus search'}
+            title={lang === 'es' ? 'Buscar (⌘K)' : 'Search (⌘K)'}
+          >
+            {isLoading || isSearchingSuggestions ? (
+              <Loader size={iconSize} color="#1a73e8" className="atlas-search__spinner" />
+            ) : (
+              <Search size={iconSize} />
+            )}
+          </button>
 
           {/* Text input */}
           <input
@@ -709,7 +851,16 @@ export default function GlobalSearchBar({
 
           {/* Clear button */}
           {effectiveValue && (
-            <button className="atlas-search__clear" onClick={handleClear} title="Clear search (Esc)">
+            <button
+              type="button"
+              className="atlas-search__clear"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClear();
+              }}
+              aria-label={lang === 'es' ? 'Limpiar búsqueda' : 'Clear search'}
+              title={lang === 'es' ? 'Limpiar búsqueda (Esc)' : 'Clear search (Esc)'}
+            >
               <X size={14} />
             </button>
           )}
@@ -907,7 +1058,6 @@ export default function GlobalSearchBar({
               // ── 2-GROUP CLINICAL DROPDOWN ──────────────────────────────
               const patientItems = suggestions.filter(s => s._group === 'patient');
               const rxItems = suggestions.filter(s => s._group === 'prescription');
-              let globalIdx = -1;
 
               const renderGroupHeader = (label, count, color, bg) => (
                 <div key={label} style={{
@@ -955,9 +1105,9 @@ export default function GlobalSearchBar({
                         <span style={{ fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {item.name}
                         </span>
-                        {item.email && (
+                        {(item.email || item.phone || item.location) && (
                           <span style={{ fontSize: '0.7rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {item.email}
+                            {[item.email || item.phone, item.location].filter(Boolean).join(' · ')}
                           </span>
                         )}
                       </div>
@@ -975,6 +1125,9 @@ export default function GlobalSearchBar({
 
               const renderRxItem = (item, itemIdx) => {
                 const isSelected = selectedIndex === itemIdx;
+                const partsLabel = item.partsCount === 1
+                  ? (lang === 'es' ? '1 Parte' : '1 Part')
+                  : (lang === 'es' ? `${item.partsCount} Partes` : `${item.partsCount} Parts`);
                 return (
                   <div
                     key={item.key}
@@ -989,35 +1142,37 @@ export default function GlobalSearchBar({
                   >
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.55rem', minWidth: 0, flex: 1 }}>
                       <Search size={13} color="#003666" style={{ flexShrink: 0, marginTop: '3px' }} />
-                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, gap: '1px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, gap: '2px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                           <span style={{ fontWeight: 700, color: '#0f172a', fontFamily: 'monospace', fontSize: '0.82rem' }}>
                             #{item.code}
                           </span>
-                          {item.partsCount > 1 && (
-                            <span style={{
-                              fontSize: '0.6rem', fontWeight: 600, padding: '1px 5px',
-                              borderRadius: '4px', background: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0'
-                            }}>
-                              📦 {item.partsCount} {lang === 'es' ? 'partes' : 'parts'}
-                            </span>
-                          )}
+                          <span style={{
+                            fontSize: '0.62rem', fontWeight: 700, padding: '1px 6px',
+                            borderRadius: '4px', background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd'
+                          }}>
+                            📦 {partsLabel}
+                          </span>
                         </div>
                         {item.patientName && (
-                          <span style={{ fontSize: '0.72rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            👤 {item.patientName}
+                          <span style={{ fontSize: '0.73rem', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {lang === 'es' ? 'Paciente:' : 'Patient:'} {item.patientName}
                           </span>
                         )}
                         {item.title && (
-                          <span style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ fontSize: '0.71rem', color: '#475569', lineHeight: 1.35, wordBreak: 'break-word' }}>
                             {item.title}
                           </span>
                         )}
                         {(item.importedDateStr || item.sampleDateStr) && (
-                          <span style={{ fontSize: '0.65rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                            {item.importedDateStr && `📥 ${item.importedDateStr}`}
-                            {item.importedDateStr && item.sampleDateStr && ' · '}
-                            {item.sampleDateStr && `🧪 ${item.sampleDateStr}`}
+                          <span style={{ fontSize: '0.67rem', color: '#64748b', display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '1px' }}>
+                            {item.importedDateStr && (
+                              <span>📥 {lang === 'es' ? 'Importado:' : 'Imported:'} <strong>{item.importedDateStr}</strong></span>
+                            )}
+                            {item.importedDateStr && item.sampleDateStr && <span>·</span>}
+                            {item.sampleDateStr && (
+                              <span>🧪 {lang === 'es' ? 'Muestra:' : 'Sample:'} <strong>{item.sampleDateStr}</strong></span>
+                            )}
                           </span>
                         )}
                       </div>

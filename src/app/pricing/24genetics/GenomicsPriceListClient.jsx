@@ -820,7 +820,6 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
             searchScope="local"
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search panels by name, genes or category (e.g. All-in-One, Pharmacogenetics, Skin, MTHFR, CYP450)..."
             size="lg"
             resultCount={filteredProducts.length}
             filters={
