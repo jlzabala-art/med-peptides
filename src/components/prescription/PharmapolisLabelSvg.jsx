@@ -968,9 +968,9 @@ export default function PharmapolisLabelSvg({
         </g>
 
         {/* EU GMP CERTIFIED BADGE */}
-        <g transform={`translate(1440, ${headerY + 2})`}>
-          <rect x="-330" y="0" width="330" height={isShort ? 40 : 46} fill={isMono ? '#ffffff' : '#f8fafc'} stroke={isMono ? '#000000' : '#003666'} strokeWidth="2.2" rx="6" />
-          <text x="-165" y={isShort ? 26 : 30} textAnchor="middle" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="800" fill={isMono ? '#000000' : '#003666'} letterSpacing="0.6">
+        <g transform={`translate(1440, ${headerY + 4})`}>
+          <rect x="-286" y="0" width="286" height={isShort ? 34 : 38} fill={isMono ? '#ffffff' : '#f8fafc'} stroke={isMono ? '#000000' : '#003666'} strokeWidth="2" rx="6" />
+          <text x="-143" y={isShort ? 22 : 24.5} textAnchor="middle" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 12 : 13.5} fontWeight="800" fill={isMono ? '#000000' : '#003666'} letterSpacing="0.55">
             EU GMP CERTIFIED DISPENSARY
           </text>
         </g>
@@ -1144,6 +1144,18 @@ export default function PharmapolisLabelSvg({
                     >
                       {isMono ? '▶ SCAN FOR REFILL' : '✔ SCAN FOR REFILL'}
                     </text>
+                    <text
+                      x={Math.round(leftColWidth / 2)}
+                      y={ctaY + ctaH + (isShort ? 14 : 16)}
+                      textAnchor="middle"
+                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                      fontSize={isShort ? 9.5 : 10.5}
+                      fontWeight="700"
+                      fill={isMono ? '#333333' : '#0369a1'}
+                      letterSpacing="0.25"
+                    >
+                      Scan QR to reorder
+                    </text>
                   </g>
                 );
               })()}
@@ -1209,6 +1221,7 @@ export default function PharmapolisLabelSvg({
             return (
               <g clipPath="url(#pls-left-col-clip)">
                 <g transform={`translate(${railPadX}, ${specsOriginY})`}>
+                  <line x1="0" y1={isShort ? -10 : -12} x2={railInnerW} y2={isShort ? -10 : -12} stroke={isMono ? '#999999' : '#cbd5e1'} strokeWidth="1" strokeDasharray="3,3" />
                   {/* Header badge (strictly aligned x=0..railInnerW) */}
                   <rect x="0" y="0" width={railInnerW} height={headerBadgeH} fill={isMono ? '#000000' : '#f0f9ff'} stroke={isMono ? '#000000' : '#bae6fd'} strokeWidth="1.2" rx="4" />
                   <text x="7" y={Math.round(headerBadgeH * 0.70)} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="900" fill={isMono ? '#ffffff' : '#0284c7'} letterSpacing="0.7">
@@ -1402,8 +1415,8 @@ export default function PharmapolisLabelSvg({
             const rxParts = [];
             if (doctorName) rxParts.push(`Rx: ${doctorName}`);
             if (clinicName) rxParts.push(clinicName);
-            if (cleanDoctorLicense) rxParts.push(`(License: ${cleanDoctorLicense})`);
-            const rxFullText = rxParts.length > 0 ? rxParts.join(' • ') : (doctorName ? `Rx: ${doctorName}` : 'Rx: Licensed Clinical Practice');
+            if (cleanDoctorLicense) rxParts.push(cleanDoctorLicense);
+            const rxFullText = rxParts.length > 0 ? rxParts.join(' · ') : (doctorName ? `Rx: ${doctorName}` : 'Rx: Licensed Clinical Practice');
             const rxFontSize = isShort ? (rxFullText.length > 68 ? 13.5 : 15) : isMediumHeight ? (rxFullText.length > 68 ? 14.5 : 16.5) : (rxFullText.length > 72 ? 16 : 18);
 
             // Bottom-anchored Doctor baseline & exact reserved geometry for centered CAUTION banner
@@ -1434,12 +1447,12 @@ export default function PharmapolisLabelSvg({
             // Maximum physical height available for the posology box (without colliding with ingredients or caution footer)
             const maxAvailablePosBoxHeight = Math.max(58, maxPosBoxBottom - absoluteMinPosBoxY);
 
-            // ── Dynamic Auto-Fitting Scale for Directions/Posology (Calibrated Clinical Proportions) ──
+            // ── Dynamic Auto-Fitting Scale for Directions/Posology (Larger & clearer for short instructions) ──
             const candidatePosFontSizes = isShort
-              ? [20.5, 19, 17.5, 16, 14.5, 13.5]
+              ? [26, 23.5, 21, 19, 17, 15.5, 14, 13]
               : isMediumHeight
-                ? [21.5, 20, 18.5, 17, 15.5, 14]
-                : [22.5, 21, 19.5, 18, 16.5, 15, 14];
+                ? [28, 25.5, 23, 20.5, 18.5, 17, 15.5, 14]
+                : [30, 27, 24.5, 22, 20, 18, 16, 14.5];
 
             let resolvedPosFontSize = candidatePosFontSizes[candidatePosFontSizes.length - 1];
             let resolvedPosLineGap = Math.round(resolvedPosFontSize * 1.38);
