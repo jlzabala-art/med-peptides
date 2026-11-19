@@ -1,55 +1,126 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { ArrowRight, FileText, Loader2, Pill } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, FileText, Trash2, Eye, X, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import StatusBadge from '@/components/ui/StatusBadge';
+import notifier from '@/services/NotificationService';
+import { auth } from '@/firebase';
 
 /**
- * Inline Master-Detail preview rendered directly inside the Worklist table row (Golden Rule #4).
- * Lets operators inspect all prescription parts, ingredients, and posology in 1 click without leaving the table.
+ * LabelsRowQuickPreview
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Inline Master-Detail preview rendered directly inside the /labels Worklist row (Golden Rule #4):
+ *  - Summarizes ALL prescriptions for that patient (e.g. "2 prescriptions")
+ *  - Always provides "Preview PDF" (original document if stored, or /rx/[code] fallback)
+ *  - Provides "Open Studio →" and safe "Delete" (Golden Rule #10 confirmCritical)
  */
 export default function LabelsRowQuickPreview({
   row,
+  patientPrescriptions = [],
   cleanCode,
-  isEs,
+  isEs = false,
   onOpenStudio,
+  onRefreshWorklist,
 }) {
-  const initialParts = Array.isArray(row?.formulaParts) && row.formulaParts.length > 0
-    ? row.formulaParts
-    : Array.isArray(row?.formulas) && row.formulas.length > 0
-      ? row.formulas
-      : null;
+  const [deletingId, setDeletingId] = useState(null);
+  const [deletedIds, setDeletedIds] = useState({});
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewTitle, setPreviewTitle] = useState('');
 
-  const [parts, setParts] = useState(initialParts);
-  const [notes, setNotes] = useState(row?.notes || row?.clinicalNotes || '');
-  const [loading, setLoading] = useState(!initialParts);
+  const items = (Array.isArray(patientPrescriptions) && patientPrescriptions.length > 0 ? patientPrescriptions : [row])
+    .filter(Boolean)
+    .filter((item) => !deletedIds[item.id || item.code]);
 
-  useEffect(() => {
-    if (initialParts || !cleanCode) return;
-    let cancelled = false;
-    setLoading(true);
-    fetch(`/api/prescriptions/${encodeURIComponent(cleanCode)}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (cancelled || !data) return;
-        const rx = data.prescription || data;
-        const fetchedParts =
-          rx.formulaParts ||
-          rx.formulas ||
-          rx.items ||
-          [];
-        setParts(Array.isArray(fetchedParts) ? fetchedParts : []);
-        setNotes(rx.notes || rx.clinicalNotes || rx.instructions || '');
-      })
-      .catch(() => {
-        if (!cancelled) setParts([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [cleanCode, initialParts]);
+  const patientDisplayName = row?.name || row?.patientName || 'Patient';
+
+  const getConcisePartsSummary = (rx) => {
+    const parts = Array.isArray(rx?.parts) && rx.parts.length > 0
+      ? rx.parts
+      : Array.isArray(rx?.formulaParts) && rx.formulaParts.length > 0
+        ? rx.formulaParts
+        : Array.isArray(rx?.formulas) && rx.formulas.length > 0
+          ? rx.formulas
+          : null;
+
+    if (parts && parts.length > 0) {
+      return parts
+        .map((pt, idx) => {
+          const form = pt.dispensingForm || pt.treatmentType || pt.name || `Part ${idx + 1}`;
+          const vol = pt.volume ? ` (${pt.volume})` : '';
+          return `${form}${vol}`;
+        })
+        .join(' · ');
+    }
+    return rx?.title || rx?.treatmentTitle || (isEs ? 'Protocolo magistral' : 'Compounded protocol');
+  };
+
+  const handlePreviewPdf = async (rx) => {
+    const rxCode = String(rx?.code || cleanCode || '').replace(/^#/, '').trim();
+    setPreviewTitle(`#${rxCode} · ${rx?.name || rx?.patientName || patientDisplayName}`);
+
+    // Prefer direct stored URL if present
+    const directUrl = rx?.originalDocumentUrl || rx?.pdfUrl || rx?.fileUrl || rx?.documentUrl;
+    if (directUrl) {
+      setPreviewUrl(directUrl);
+      return;
+    }
+
+    // Try authenticated proxy if originalDocumentPath or rx.id is stored
+    if (rx?.originalDocumentPath && rx?.id) {
+      try {
+        const token = auth?.currentUser ? await auth.currentUser.getIdToken() : '';
+        const url = `/api/prescriptions/original-document?rxId=${encodeURIComponent(rx.id)}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+        setPreviewUrl(url);
+        return;
+      } catch (err) {
+        console.debug('Falling back to /rx preview:', err);
+      }
+    }
+
+    // Always-available fallback: official Rx sheet / PDF view
+    setPreviewUrl(`/rx/${encodeURIComponent(rxCode)}`);
+  };
+
+  const handleDeletePrescription = (rx) => {
+    const targetId = rx?.id;
+    const rxCode = rx?.code || targetId || 'RX';
+    if (!targetId) {
+      toast.error(isEs ? 'Falta el ID de la prescripción.' : 'Missing prescription document ID.');
+      return;
+    }
+
+    notifier.confirmCritical(
+      isEs
+        ? `¿Eliminar la prescripción #${rxCode} de ${patientDisplayName}? Esta acción no se puede deshacer.`
+        : `Delete prescription #${rxCode} for ${patientDisplayName}? This action cannot be undone.`,
+      async () => {
+        setDeletingId(targetId);
+        try {
+          const res = await fetch('/api/prescriptions/public-intake', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: targetId }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data?.success) {
+            throw new Error(data?.error || 'Failed to delete prescription');
+          }
+          setDeletedIds((prev) => ({ ...prev, [targetId]: true }));
+          toast.success(
+            isEs
+              ? `Prescripción #${rxCode} eliminada`
+              : `Deleted prescription #${rxCode}`
+          );
+          onRefreshWorklist?.();
+        } catch (err) {
+          toast.error(err?.message || (isEs ? 'Error al eliminar prescripción.' : 'Could not delete prescription.'));
+        } finally {
+          setDeletingId(null);
+        }
+      }
+    );
+  };
 
   return (
     <div
@@ -59,106 +130,224 @@ export default function LabelsRowQuickPreview({
         borderTop: '1px solid #e2e8f0',
         display: 'flex',
         flexDirection: 'column',
-        gap: '10px',
+        gap: '8px',
       }}
       onClick={(e) => e.stopPropagation()}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <FileText size={14} color="#003666" />
           <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#003666' }}>
-            {isEs ? 'Contenido de la Prescripción' : 'Prescription Content'} · #{row?.code}
+            {isEs ? `Prescripciones del Paciente (${items.length})` : `Patient Prescriptions (${items.length})`} · {patientDisplayName}
           </span>
-          {row?.doctorName && (
-            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-              ({row.doctorName})
-            </span>
-          )}
         </div>
-        <button
-          type="button"
-          onClick={() => onOpenStudio?.(row?.code)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            padding: '5px 12px',
-            borderRadius: '6px',
-            border: 'none',
-            backgroundColor: '#1a73e8',
-            color: '#ffffff',
-            fontSize: '0.74rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
-          <span>{isEs ? 'Abrir en Label Studio' : 'Open in Label Studio'}</span>
-          <ArrowRight size={13} />
-        </button>
       </div>
 
-      {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#64748b', padding: '6px 0' }}>
-          <Loader2 size={14} className="animate-spin" />
-          <span>{isEs ? 'Cargando fórmula...' : 'Loading prescription parts...'}</span>
-        </div>
-      ) : parts && parts.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '8px' }}>
-          {parts.map((part, idx) => {
-            const title = part.title || part.name || part.formulaName || `${isEs ? 'Parte' : 'Part'} ${idx + 1}`;
-            const form = part.form || part.presentation || part.vehicle || '';
-            const posology = part.posology || part.dosage || part.instructions || part.sig || '';
-            const actives = Array.isArray(part.ingredients)
-              ? part.ingredients.map((i) => `${i.name || i.ingredient}${i.dose ? ` ${i.dose}` : ''}`).join(' · ')
-              : part.composition || part.actives || '';
-            return (
-              <div
-                key={idx}
-                style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  borderLeft: '3px solid #1a73e8',
-                  borderRadius: '6px',
-                  padding: '8px 10px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                  <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <Pill size={12} color="#1a73e8" />
-                    <span>{title}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {items.map((rx, idx) => {
+          const rxCode = String(rx?.code || cleanCode || '').replace(/^#/, '');
+          const isDeleting = deletingId === rx?.id;
+          return (
+            <div
+              key={rx?.id || `${rxCode}-${idx}`}
+              style={{
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '10px',
+              }}
+            >
+              {/* Left: 2-line concise summary */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: '220px', flex: '1 1 360px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#202124' }}>
+                    {idx + 1}. #{rxCode}
                   </span>
-                  {form && (
-                    <span style={{ fontSize: '0.66rem', fontWeight: 600, color: '#475569', backgroundColor: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
-                      {form}
+                  {rx?.testType && (
+                    <span
+                      style={{
+                        fontSize: '0.66rem',
+                        fontWeight: 700,
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        background: '#e8f0fe',
+                        color: '#1a73e8',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {rx.testType}
+                    </span>
+                  )}
+                  <StatusBadge status={rx?.status || 'draft'} />
+                  {rx?.doctorName && (
+                    <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>
+                      {rx.doctorName}
+                    </span>
+                  )}
+                  {(rx?.reportDate || rx?.prescriptionDate) && (
+                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                      · {rx.reportDate || rx.prescriptionDate}
                     </span>
                   )}
                 </div>
-                {actives && (
-                  <div style={{ fontSize: '0.72rem', color: '#334155', lineHeight: 1.4 }}>
-                    {actives}
-                  </div>
-                )}
-                {posology && (
-                  <div style={{ fontSize: '0.70rem', color: '#0f766e', fontWeight: 600 }}>
-                    Sig: {posology}
-                  </div>
+
+                <div style={{ fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
+                  {getConcisePartsSummary(rx)}
+                </div>
+              </div>
+
+              {/* Right: Always-available Preview PDF + Open Studio + Safe Delete */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => handlePreviewPdf(rx)}
+                  className="gcp-btn-secondary"
+                  style={{ fontSize: '0.73rem', padding: '5px 10px', minHeight: '32px' }}
+                >
+                  <Eye size={13} color="#003666" />
+                  <span>{isEs ? 'Ver PDF' : 'Preview PDF'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onOpenStudio?.(rx?.code || rxCode)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '5px 11px',
+                    minHeight: '32px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: '#1a73e8',
+                    color: '#ffffff',
+                    fontSize: '0.73rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>{isEs ? 'Abrir Studio' : 'Open Studio'}</span>
+                  <ArrowRight size={13} />
+                </button>
+
+                {rx?.id && (
+                  <button
+                    type="button"
+                    disabled={isDeleting}
+                    onClick={() => handleDeletePrescription(rx)}
+                    title={isEs ? 'Eliminar prescripción' : 'Delete prescription'}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '5px 9px',
+                      minHeight: '32px',
+                      borderRadius: '6px',
+                      border: '1px solid #fecaca',
+                      backgroundColor: '#fef2f2',
+                      color: '#dc2626',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      cursor: isDeleting ? 'not-allowed' : 'pointer',
+                      opacity: isDeleting ? 0.6 : 1,
+                    }}
+                  >
+                    {isDeleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                    <span>{isEs ? 'Borrar' : 'Delete'}</span>
+                  </button>
                 )}
               </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div style={{ fontSize: '0.74rem', color: '#475569' }}>
-          {row?.title || row?.treatmentTitle || (isEs ? 'Sin detalle de partes disponible en resumen.' : 'No part breakdown available in summary.')}
-        </div>
-      )}
+            </div>
+          );
+        })}
+      </div>
 
-      {notes && (
-        <div style={{ fontSize: '0.72rem', color: '#475569', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 10px' }}>
-          <strong>{isEs ? 'Notas:' : 'Notes:'}</strong> {notes}
+      {/* Inline PDF / Original Rx Preview Modal */}
+      {previewUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setPreviewUrl(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '960px',
+              height: '85vh',
+              background: '#ffffff',
+              borderRadius: '10px',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 20px 45px rgba(0,0,0,0.35)',
+            }}
+          >
+            <div
+              style={{
+                padding: '10px 16px',
+                borderBottom: '1px solid #dadce0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: '#f8fafc',
+              }}
+            >
+              <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
+                {previewTitle}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="gcp-btn-secondary"
+                  style={{ fontSize: '0.74rem', padding: '5px 10px', textDecoration: 'none' }}
+                >
+                  {isEs ? 'Abrir en pestaña' : 'Open in New Tab'}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewUrl(null)}
+                  aria-label="Close preview"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <X size={16} color="#334155" />
+                </button>
+              </div>
+            </div>
+            <iframe
+              src={previewUrl}
+              title={previewTitle}
+              style={{ width: '100%', flex: 1, border: 'none', background: '#f1f5f9' }}
+            />
+          </div>
         </div>
       )}
     </div>

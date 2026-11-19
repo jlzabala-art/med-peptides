@@ -831,6 +831,7 @@ export default function PublicLabelsAppClient({
             worklistTestFilter={worklistTestFilter}
             setWorklistTestFilter={setWorklistTestFilter}
             allWorklistItems={baseWorklistItems}
+            onRefreshWorklist={refreshWorklist}
           />
         ) : isLoadingRx ? (
           <LabelsWorkspaceSkeleton isEs={isEs} />

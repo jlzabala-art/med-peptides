@@ -57,6 +57,7 @@ export default function LabelsHomeView({
   worklistTestFilter = 'all',
   setWorklistTestFilter,
   allWorklistItems = [],
+  onRefreshWorklist,
 }) {
   const { role } = useRoleAccess();
   const [statusOverrides, setStatusOverrides] = useState({});
@@ -833,14 +834,22 @@ export default function LabelsHomeView({
                 keyField="code"
                 globalSearch={false}
                 hidePagination={true}
-                expandableRender={(row) => (
-                  <LabelsRowQuickPreview
-                    row={row}
-                    cleanCode={sanitizeRecentCode(row.code)}
-                    isEs={isEs}
-                    onOpenStudio={(code) => handleSelectOrAddPatient(code, true)}
-                  />
-                )}
+                expandableRender={(row) => {
+                  const pName = (row.name || row.patientName || '').trim().toLowerCase();
+                  const samePatientItems = pName && Array.isArray(allWorklistItems)
+                    ? allWorklistItems.filter((item) => (item.name || item.patientName || '').trim().toLowerCase() === pName)
+                    : [row];
+                  return (
+                    <LabelsRowQuickPreview
+                      row={row}
+                      patientPrescriptions={samePatientItems.length > 0 ? samePatientItems : [row]}
+                      cleanCode={sanitizeRecentCode(row.code)}
+                      isEs={isEs}
+                      onOpenStudio={(code) => handleSelectOrAddPatient(code, true)}
+                      onRefreshWorklist={onRefreshWorklist}
+                    />
+                  );
+                }}
                 onRowClick={(row) => handleSelectOrAddPatient(row.code, true)}
               />
             )}
