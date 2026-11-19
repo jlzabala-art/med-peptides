@@ -14,6 +14,7 @@ function getGeminiApiKey() {
 }
 
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB
+export const maxDuration = 120;
 const ALLOWED_MIME_TYPES = new Set([
   'application/pdf',
   'image/jpeg',
@@ -374,8 +375,9 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
     - Store barcodes, sample codes, accession IDs, and protocol numbers into 'labResult.patientCode', 'fileNumber', or 'fagronDetails.boxId'.`;
 
     // Resilient multi-model extraction via Atlas AI Model Router
+    // Use FAST tier for multi-page PDFs to stay well under Firebase Hosting 60s proxy timeout
     const { text } = await generateWithResilientGemini({
-      tier: AI_TIER.REASONING,
+      tier: mimeType === 'application/pdf' ? AI_TIER.FAST : AI_TIER.REASONING,
       aiClient: ai,
       contents: [
         {

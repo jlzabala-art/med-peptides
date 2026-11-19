@@ -26,12 +26,25 @@ export function usePrescriptionExtraction({
   const [rawExtracted, setRawExtracted] = useState(null);
   const [normalizedList, setNormalizedList] = useState([]);
 
+  const extractWithRetry = async (file) => {
+    try {
+      return await extractPrescriptionFromDocument(file);
+    } catch (firstErr) {
+      const msg = String(firstErr?.message || '');
+      if (/\b(502|503|504)\b|bad gateway|temporarily/i.test(msg)) {
+        await new Promise((r) => setTimeout(r, 1500));
+        return await extractPrescriptionFromDocument(file);
+      }
+      throw firstErr;
+    }
+  };
+
   const extractRawDocument = useCallback(async (file) => {
     if (!file) return null;
     setIsExtracting(true);
     setExtractionError(null);
     try {
-      const raw = await extractPrescriptionFromDocument(file);
+      const raw = await extractWithRetry(file);
       setRawExtracted(raw);
       return raw;
     } catch (err) {
@@ -47,7 +60,7 @@ export function usePrescriptionExtraction({
     setIsExtracting(true);
     setExtractionError(null);
     try {
-      const raw = await extractPrescriptionFromDocument(file);
+      const raw = await extractWithRetry(file);
       setRawExtracted(raw);
       const normalized = await normalizeExtractedPrescriptions(raw, {
         currentUser: extraOptions.currentUser || null,
