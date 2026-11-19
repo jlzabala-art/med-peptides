@@ -20,6 +20,7 @@ import ClinicPicker from '../../../components/admin/patients/ClinicPicker';
 import PhysicianPicker from '../../../components/admin/patients/PhysicianPicker';
 import PharmapolisLabelSvg from '../../../components/prescription/PharmapolisLabelSvg';
 import AlgoliaIngredientSearchInput from './AlgoliaIngredientSearchInput';
+import { usePrescriptionExtraction } from '../../../hooks/usePrescriptionExtraction';
 
 function extractIngredientTokens(obj = {}) {
   const names = [];
@@ -257,6 +258,11 @@ export default function ImportPrescriptionModal({
   note = null,
   embeddedPage = false
 }) {
+  const { extractRawDocument } = usePrescriptionExtraction({
+    doctorContext: context,
+    persistEndpoint,
+    mode: 'label_studio',
+  });
   const [uploading, setUploading] = useState(false);
   const [loadingPhase, setLoadingPhase] = useState(0);
   const [preflightEstimate, setPreflightEstimate] = useState({ testType: 'Clinical Document', estimatedSeconds: 12, sizeKb: 0 });
@@ -413,20 +419,7 @@ export default function ImportPrescriptionModal({
       setPreflightEstimate(estimatePass1Preflight(file));
       setUploading(true);
 
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/ai-extract-prescription', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to analyze document');
-      }
-
-      const extractedData = await res.json();
+      const extractedData = await extractRawDocument(file);
       
       // If parent supplied explicit callback, delegate immediately
       if (onExtractionComplete) {

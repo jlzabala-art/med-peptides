@@ -26,6 +26,22 @@ export function usePrescriptionExtraction({
   const [rawExtracted, setRawExtracted] = useState(null);
   const [normalizedList, setNormalizedList] = useState([]);
 
+  const extractRawDocument = useCallback(async (file) => {
+    if (!file) return null;
+    setIsExtracting(true);
+    setExtractionError(null);
+    try {
+      const raw = await extractPrescriptionFromDocument(file);
+      setRawExtracted(raw);
+      return raw;
+    } catch (err) {
+      setExtractionError(err?.message || 'Failed to analyze prescription document');
+      throw err;
+    } finally {
+      setIsExtracting(false);
+    }
+  }, []);
+
   const extractFile = useCallback(async (file, extraOptions = {}) => {
     if (!file) return null;
     setIsExtracting(true);
@@ -93,6 +109,7 @@ export function usePrescriptionExtraction({
     rawExtracted,
     normalizedList,
     setNormalizedList,
+    extractRawDocument,
     extractFile,
     saveExtracted,
     resetExtraction,
