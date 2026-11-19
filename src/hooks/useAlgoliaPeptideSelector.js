@@ -386,6 +386,8 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
   const initialBacParam = searchParams?.get('bac') || '';
   const initialSyringeParam = searchParams?.get('syringe') || '';
   const initialPuffsParam = searchParams?.get('puffs') || '';
+  const initialVolParam = searchParams?.get('vol') || '';
+  const initialClicksParam = searchParams?.get('clicks') || '';
 
   const initialLocalMatch =
     DEFAULT_PEPTIDE_CATALOG.find((p) => p.slug === initialPeptideSlug || p.id === initialPeptideSlug) ||
@@ -677,6 +679,8 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
       bac: initialBacParam,
       syringe: initialSyringeParam,
       puffs: initialPuffsParam,
+      vol: initialVolParam,
+      clicks: initialClicksParam,
     },
   };
 }

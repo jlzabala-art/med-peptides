@@ -109,8 +109,72 @@
     "purity": "≥ 99.5% (HPLC)"
   },
   {
+    "id": "dnlab-pen-bpc157-solo",
+    "name": "BPC-157 (Standalone Pen)",
+    "sku": "ATL-PEN-BPC157",
+    "category": "Tissue Repair & Recovery",
+    "categoryColor": "#059669",
+    "categoryBg": "#ecfdf5",
+    "categoryBorder": "#a7f3d0",
+    "description": "Pure Pentadecapeptide BPC-157 single-active cartridge for targeted tendon, ligament, musculoskeletal, and gastrointestinal mucosal repair.",
+    "variants": [
+      {
+        "id": "v-bpc157-15",
+        "label": "Standalone (15 mg / 3 mL)",
+        "concentration": "15 mg",
+        "volume": "3 mL",
+        "totalUnits": 300,
+        "recommendedDoseUnits": 5,
+        "clicksPerDose": 5,
+        "clicksRange": "5–10",
+        "doseBreakdown": "250–500 mcg daily (50 mcg/click)",
+        "dosesPerPenLabel": "30–60 doses · 3 mL",
+        "frequency": "Once or twice daily, Subcutaneous",
+        "cycleDuration": "4 to 6 weeks",
+        "daysSupply": 30
+      }
+    ],
+    "timing": "Morning or evening on an empty stomach",
+    "needle": "31G × 4mm / 32G × 4mm",
+    "storage": "2°C – 8°C. Protect from light. 30 days stability once pierced.",
+    "purity": "≥ 99.2% (HPLC)",
+    "itemNumber": 3
+  },
+  {
+    "id": "dnlab-pen-tb500-solo",
+    "name": "TB-500 (Thymosin Beta-4 Standalone)",
+    "sku": "ATL-PEN-TB500",
+    "category": "Tissue Repair & Recovery",
+    "categoryColor": "#059669",
+    "categoryBg": "#ecfdf5",
+    "categoryBorder": "#a7f3d0",
+    "description": "Systemic actin-sequestering regenerative peptide promoting endothelial cell migration, angiogenesis, myofibroblast remodeling, and soft-tissue recovery.",
+    "variants": [
+      {
+        "id": "v-tb500-15",
+        "label": "Standalone (15 mg / 3 mL)",
+        "concentration": "15 mg",
+        "volume": "3 mL",
+        "totalUnits": 300,
+        "recommendedDoseUnits": 10,
+        "clicksPerDose": 10,
+        "clicksRange": "10–15",
+        "doseBreakdown": "500–750 mcg per dose (50 mcg/click)",
+        "dosesPerPenLabel": "20–30 doses · 3 mL",
+        "frequency": "Daily or 3×/week, Subcutaneous",
+        "cycleDuration": "4 to 6 weeks",
+        "daysSupply": 30
+      }
+    ],
+    "timing": "Morning or post-rehabilitation session",
+    "needle": "31G × 4mm / 32G × 4mm",
+    "storage": "2°C – 8°C. Protect from light. 30 days stability once pierced.",
+    "purity": "≥ 99.2% (HPLC)",
+    "itemNumber": 4
+  },
+  {
     "id": "dn-cjc-1295-alone",
-    "itemNumber": 3,
+    "itemNumber": 5,
     "name": "CJC-1295 (No DAC)",
     "sku": "ATL-PEN-CJC",
     "category": "Growth Hormone Optimization",
@@ -157,7 +221,7 @@
   },
   {
     "id": "dn-cjc-ipam",
-    "itemNumber": 4,
+    "itemNumber": 6,
     "name": "CJC-1295 / Ipamorelin",
     "sku": "ATL-PEN-CJC-IPAM",
     "category": "Growth Hormone Optimization",
@@ -219,7 +283,7 @@
   },
   {
     "id": "dn-igf1-lr3",
-    "itemNumber": 5,
+    "itemNumber": 7,
     "name": "IGF-1 LR3",
     "sku": "ATL-PEN-IGF1LR3",
     "category": "Growth Hormone Optimization",
@@ -266,7 +330,7 @@
   },
   {
     "id": "dn-ipamorelin-alone",
-    "itemNumber": 6,
+    "itemNumber": 8,
     "name": "Ipamorelin",
     "sku": "ATL-PEN-IPAM",
     "category": "Growth Hormone Optimization",
@@ -313,7 +377,7 @@
   },
   {
     "id": "dn-mgf",
-    "itemNumber": 7,
+    "itemNumber": 9,
     "name": "MGF (Mechano Growth Factor)",
     "sku": "ATL-PEN-MGF",
     "category": "Growth Hormone Optimization",
@@ -344,8 +408,40 @@
     "purity": "≥ 99.0% (HPLC)"
   },
   {
+    "id": "dnlab-pen-tesamorelin",
+    "name": "Tesamorelin (GHRH(1-44) Analogue)",
+    "sku": "ATL-PEN-TESA",
+    "category": "Growth Hormone Optimization",
+    "categoryColor": "#d97706",
+    "categoryBg": "#fffbeb",
+    "categoryBorder": "#fde68a",
+    "description": "Stabilized trans-3-hexenoyl GHRH(1-44) analogue stimulating endogenous pulsatile GH secretion and selective visceral adipose tissue (VAT) reduction.",
+    "variants": [
+      {
+        "id": "v-tesa-30",
+        "label": "Metabolic GH Pen (30 mg / 3 mL)",
+        "concentration": "30 mg",
+        "volume": "3 mL",
+        "totalUnits": 300,
+        "recommendedDoseUnits": 10,
+        "clicksPerDose": 10,
+        "clicksRange": "10–20",
+        "doseBreakdown": "1.0–2.0 mg daily (100 mcg/click)",
+        "dosesPerPenLabel": "15–30 doses · 3 mL",
+        "frequency": "Once daily fasted (5–6 days/week)",
+        "cycleDuration": "8 to 12 weeks",
+        "daysSupply": 25
+      }
+    ],
+    "timing": "Nightly before bed (3h post-meal) or morning fasted",
+    "needle": "31G × 4mm / 32G × 4mm",
+    "storage": "2°C – 8°C. Protect from light. 30 days stability once pierced.",
+    "purity": "≥ 99.2% (HPLC)",
+    "itemNumber": 10
+  },
+  {
     "id": "dn-cjc-ipam-dsip",
-    "itemNumber": 8,
+    "itemNumber": 11,
     "name": "CJC-1295 / Ipamorelin / DSIP",
     "sku": "ATL-PEN-CJC-IPAM-DSIP",
     "category": "Cognitive, Sleep & Neuro",
@@ -377,7 +473,7 @@
   },
   {
     "id": "dn-dsip",
-    "itemNumber": 9,
+    "itemNumber": 12,
     "name": "DSIP (Delta Sleep-Inducing Peptide)",
     "sku": "ATL-PEN-DSIP",
     "category": "Cognitive, Sleep & Neuro",
@@ -408,8 +504,72 @@
     "purity": "≥ 99.0% (HPLC)"
   },
   {
+    "id": "dnlab-pen-selank",
+    "name": "Selank (Anxiolytic Nootropic Heptapeptide)",
+    "sku": "ATL-PEN-SELANK",
+    "category": "Cognitive, Sleep & Neuro",
+    "categoryColor": "#785228",
+    "categoryBg": "#fdf8f0",
+    "categoryBorder": "#e9d5b5",
+    "description": "Synthetic tuftsin analogue (Thr-Lys-Pro-Arg-Pro-Gly-Pro) modulating GABAergic neurotransmission, BDNF expression, and anxiolytic resilience without sedation.",
+    "variants": [
+      {
+        "id": "v-selank-15",
+        "label": "Neuro Pen (15 mg / 3 mL)",
+        "concentration": "15 mg",
+        "volume": "3 mL",
+        "totalUnits": 300,
+        "recommendedDoseUnits": 6,
+        "clicksPerDose": 6,
+        "clicksRange": "5–10",
+        "doseBreakdown": "250–500 mcg daily (50 mcg/click)",
+        "dosesPerPenLabel": "30–60 doses (30d BUD)",
+        "frequency": "Once daily, Subcutaneous",
+        "cycleDuration": "2 to 4 weeks",
+        "daysSupply": 30
+      }
+    ],
+    "timing": "Morning or midday subcutaneous",
+    "needle": "31G × 4mm / 32G × 4mm",
+    "storage": "2°C – 8°C. Protect from light. 30 days stability once pierced.",
+    "purity": "≥ 99.2% (HPLC)",
+    "itemNumber": 13
+  },
+  {
+    "id": "dnlab-pen-semax",
+    "name": "Semax (ACTH(4-10) Nootropic Heptapeptide)",
+    "sku": "ATL-PEN-SEMAX",
+    "category": "Cognitive, Sleep & Neuro",
+    "categoryColor": "#785228",
+    "categoryBg": "#fdf8f0",
+    "categoryBorder": "#e9d5b5",
+    "description": "Non-hormonal ACTH(4-7)-Pro-Gly-Pro neuromodulator elevating hippocampal BDNF/NGF neurotrophins, executive focus, and neurovascular recovery.",
+    "variants": [
+      {
+        "id": "v-semax-15",
+        "label": "Cognitive Pen (15 mg / 3 mL)",
+        "concentration": "15 mg",
+        "volume": "3 mL",
+        "totalUnits": 300,
+        "recommendedDoseUnits": 6,
+        "clicksPerDose": 6,
+        "clicksRange": "5–10",
+        "doseBreakdown": "250–500 mcg daily (50 mcg/click)",
+        "dosesPerPenLabel": "30–60 doses (30d BUD)",
+        "frequency": "Once daily in the morning",
+        "cycleDuration": "2 to 4 weeks",
+        "daysSupply": 30
+      }
+    ],
+    "timing": "Morning upon waking (avoid evening)",
+    "needle": "31G × 4mm / 32G × 4mm",
+    "storage": "2°C – 8°C. Protect from light. 30 days stability once pierced.",
+    "purity": "≥ 99.2% (HPLC)",
+    "itemNumber": 14
+  },
+  {
     "id": "dn-epithalon",
-    "itemNumber": 10,
+    "itemNumber": 15,
     "name": "Epithalon (Epitalon)",
     "sku": "ATL-PEN-EPITHALON",
     "category": "Metabolic & Longevity",
@@ -456,7 +616,7 @@
   },
   {
     "id": "dn-humanin",
-    "itemNumber": 11,
+    "itemNumber": 16,
     "name": "Humanin",
     "sku": "ATL-PEN-HUMANIN",
     "category": "Metabolic & Longevity",
@@ -488,7 +648,7 @@
   },
   {
     "id": "dn-mots-c",
-    "itemNumber": 12,
+    "itemNumber": 17,
     "name": "MOTS-c",
     "sku": "ATL-PEN-MOTSC",
     "category": "Metabolic & Longevity",
@@ -565,7 +725,7 @@
   },
   {
     "id": "dn-nad-plus",
-    "itemNumber": 13,
+    "itemNumber": 18,
     "name": "NAD+ (Nicotinamide Adenine Dinucleotide)",
     "sku": "ATL-PEN-NAD",
     "category": "Metabolic & Longevity",
@@ -627,7 +787,7 @@
   },
   {
     "id": "dnlab-pen-ss31",
-    "itemNumber": 14,
+    "itemNumber": 19,
     "name": "SS-31 (Elamipretide)",
     "sku": "ATL-PEN-SS31",
     "category": "Metabolic & Longevity",
@@ -658,8 +818,72 @@
     "purity": "≥ 99.2% (HPLC)"
   },
   {
+    "id": "dnlab-pen-ta1",
+    "name": "Thymosin Alpha-1 (Thymalfasin)",
+    "sku": "ATL-PEN-TA1",
+    "category": "Metabolic & Longevity",
+    "categoryColor": "#1d4ed8",
+    "categoryBg": "#eff6ff",
+    "categoryBorder": "#bfdbfe",
+    "description": "28-amino-acid thymic immunomodulatory peptide activating Toll-like receptors (TLR2/9), NK cell cytotoxicity, T-cell maturation, and immune surveillance.",
+    "variants": [
+      {
+        "id": "v-ta1-30",
+        "label": "Immune & Longevity (30 mg / 3 mL)",
+        "concentration": "30 mg",
+        "volume": "3 mL",
+        "totalUnits": 300,
+        "recommendedDoseUnits": 16,
+        "clicksPerDose": 16,
+        "clicksRange": "15–16",
+        "doseBreakdown": "1.5–1.6 mg per injection (100 mcg/click)",
+        "dosesPerPenLabel": "18–20 doses (30d BUD)",
+        "frequency": "Twice weekly (or daily 1 mg × 2–4 wks)",
+        "cycleDuration": "4 to 8 weeks",
+        "daysSupply": 30
+      }
+    ],
+    "timing": "Morning subcutaneous, twice weekly",
+    "needle": "31G × 4mm / 32G × 4mm",
+    "storage": "2°C – 8°C. Protect from light. 30 days stability once pierced.",
+    "purity": "≥ 99.2% (HPLC)",
+    "itemNumber": 20
+  },
+  {
+    "id": "dnlab-pen-5amino1mq",
+    "name": "5-Amino-1MQ (NNMT Inhibitor)",
+    "sku": "ATL-PEN-5AMINO",
+    "category": "Metabolic & Longevity",
+    "categoryColor": "#1d4ed8",
+    "categoryBg": "#eff6ff",
+    "categoryBorder": "#bfdbfe",
+    "description": "Selective nicotinamide N-methyltransferase (NNMT) inhibitor preserving intracellular NAD+ salvage flux, SIRT1 activation, and adipocyte lipolysis.",
+    "variants": [
+      {
+        "id": "v-5amino-100",
+        "label": "High-Conc (100 mg / 3 mL)",
+        "concentration": "100 mg",
+        "volume": "3 mL",
+        "totalUnits": 300,
+        "recommendedDoseUnits": 15,
+        "clicksPerDose": 15,
+        "clicksRange": "10–20",
+        "doseBreakdown": "3.3–6.7 mg daily (0.33 mg/click)",
+        "dosesPerPenLabel": "15–30 doses · 3 mL",
+        "frequency": "Once daily in the morning",
+        "cycleDuration": "4 to 6 weeks",
+        "daysSupply": 20
+      }
+    ],
+    "timing": "Morning fasted subcutaneous",
+    "needle": "31G × 4mm / 32G × 4mm",
+    "storage": "2°C – 8°C. Protect from light. 30 days stability once pierced.",
+    "purity": "≥ 99.2% (HPLC)",
+    "itemNumber": 21
+  },
+  {
     "id": "dn-ghk-cu",
-    "itemNumber": 15,
+    "itemNumber": 22,
     "name": "GHK-Cu (Copper Tripeptide-1)",
     "sku": "ATL-PEN-GHK-CU",
     "category": "Aesthetic & Skin Longevity",
@@ -721,7 +945,7 @@
   },
   {
     "id": "dn-glow",
-    "itemNumber": 16,
+    "itemNumber": 23,
     "name": "GLOW Peptide Stack",
     "sku": "ATL-PEN-GLOW",
     "category": "Aesthetic & Skin Longevity",
@@ -753,7 +977,7 @@
   },
   {
     "id": "dn-klow",
-    "itemNumber": 17,
+    "itemNumber": 24,
     "name": "KLOW Peptide Stack",
     "sku": "ATL-PEN-KLOW",
     "category": "Aesthetic & Skin Longevity",
@@ -785,7 +1009,7 @@
   },
   {
     "id": "dn-hcg",
-    "itemNumber": 18,
+    "itemNumber": 25,
     "name": "hCG (Human Chorionic Gonadotropin)",
     "sku": "ATL-PEN-HCG",
     "category": "Sexual Wellness & Libido",
@@ -817,7 +1041,7 @@
   },
   {
     "id": "dn-kisspeptin",
-    "itemNumber": 19,
+    "itemNumber": 26,
     "name": "Kisspeptin-10",
     "sku": "ATL-PEN-KISS",
     "category": "Sexual Wellness & Libido",
@@ -864,7 +1088,7 @@
   },
   {
     "id": "dn-pt-141",
-    "itemNumber": 20,
+    "itemNumber": 27,
     "name": "PT-141 (Bremelanotide)",
     "sku": "ATL-PEN-PT141",
     "category": "Sexual Wellness & Libido",

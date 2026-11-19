@@ -108,6 +108,13 @@ export default function CalculatorClient() {
       const p = parseInt(initialUrlOverrides.puffs, 10);
       if (Number.isFinite(p) && p >= 1 && p <= 8) out.initialSprayPuffs = p;
     }
+    if (initialUrlOverrides?.vol) {
+      const v = parseFloat(String(initialUrlOverrides.vol).replace(/[^0-9.]/g, ''));
+      if (Number.isFinite(v) && v >= 1 && v <= 15) {
+        out.penVolumeMl = v;
+        out.initialSprayVolumeMl = v;
+      }
+    }
     return out;
   }, [initialUrlOverrides]);
 
@@ -128,9 +135,13 @@ export default function CalculatorClient() {
       };
     }
     if (recon.isPenOrCartridge) {
-      return {
+      const out = {
         target: `${recon.doseDisplayValue}${recon.doseUnit}`,
       };
+      if (parsedUrlOverrides.penVolumeMl && parsedUrlOverrides.penVolumeMl !== 3) {
+        out.vol = `${parsedUrlOverrides.penVolumeMl}ml`;
+      }
+      return out;
     }
     if (recon.isSpray) {
       return {
@@ -870,6 +881,7 @@ export default function CalculatorClient() {
               volumeMl={recon.volumeMl}
               totalDoses={recon.totalDoses}
               strengthLabel={selectedStrength.name}
+              cartridgeVolume={`${(parsedUrlOverrides.penVolumeMl || 3.0).toFixed(1)} mL`}
               isCartridge={recon.isCartridge}
               lang={lang}
             />

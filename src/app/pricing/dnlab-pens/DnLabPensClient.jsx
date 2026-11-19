@@ -20,6 +20,9 @@ import {
   ShieldCheck,
   LayoutGrid,
   List,
+  Copy,
+  MessageCircle,
+  ExternalLink,
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
@@ -28,6 +31,7 @@ import CopyableId from '@/components/ui/CopyableId';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
 import PenDialVisualizer from '@/components/reconstitution/PenDialVisualizer';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
@@ -55,16 +59,26 @@ function scaleDoseBreakdown(breakdown = '', baseClicks = 10, targetClicks = 10) 
   );
 }
 
-function getCalculatorUrlForPen(row, variant, lang = 'en') {
+function getCalculatorUrlForPen(row, variant, lang = 'en', customClicks = null) {
   const baseName = String(row?.name || 'BPC-157').split('/')[0].split('(')[0].trim();
   const slug = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const firstStrengthMatch = String(variant?.concentration || '').match(/\d+(?:\.\d+)?\s*(?:mg|mcg|iu)/i);
   const strength = firstStrengthMatch ? firstStrengthMatch[0].replace(/\s+/g, '') : '10mg';
+  const volMatch = String(variant?.volume || '3 mL').match(/(\d+(?:\.\d+)?)/);
+  const volNum = volMatch ? parseFloat(volMatch[1]) : 3;
+  const clicksNum = Number(customClicks || variant?.clicksPerDose || variant?.recommendedDoseUnits) || 10;
+  const firstTargetMatch = String(variant?.doseBreakdown || '').match(/(\d+(?:\.\d+)?)\s*(mg|mcg)/i);
+
   const params = new URLSearchParams({
     peptide: slug || 'bpc-157',
     format: 'pen',
     strength,
+    vol: `${volNum}ml`,
+    clicks: String(clicksNum),
   });
+  if (firstTargetMatch) {
+    params.set('target', `${firstTargetMatch[1]}${firstTargetMatch[2].toLowerCase()}`);
+  }
   if (lang === 'es') params.set('lang', 'es');
   return `/calculator?${params.toString()}`;
 }
@@ -690,8 +704,29 @@ export default function DnLabPensClient({
       const totalDosesAtSetting = Math.max(1, Math.floor(totalUnitsInCartridge / Math.max(1, currentUnits)));
       const volumeMl = Number((currentUnits * 0.01).toFixed(2));
       const dynamicDoseBreakdown = scaleDoseBreakdown(currentVariant.doseBreakdown, defaultClicks, currentUnits);
-      const calcHref = getCalculatorUrlForPen(row, currentVariant, lang);
+      const calcHref = getCalculatorUrlForPen(row, currentVariant, lang, currentUnits);
       const sliderMax = Math.max(50, defaultClicks);
+      const patientInstructionText = isEs
+        ? `${row.name} (${currentVariant.concentration} / ${currentVariant.volume || '3 mL'}) · Marcar ${currentUnits} clics en dial U-100 (${volumeMl.toFixed(2)} mL = ${dynamicDoseBreakdown}) · ${currentVariant.frequency}${row.timing ? ` (${row.timing})` : ''} · Aguja: ${row.needle || '31G × 4mm'} · Conservar en frío 2°C–8°C.`
+        : `${row.name} (${currentVariant.concentration} / ${currentVariant.volume || '3 mL'}) · Dial ${currentUnits} clicks on U-100 pen (${volumeMl.toFixed(2)} mL = ${dynamicDoseBreakdown}) · ${currentVariant.frequency}${row.timing ? ` (${row.timing})` : ''} · Needle: ${row.needle || '31G × 4mm'} · Refrigerate 2°C–8°C.`;
+
+      const handleCopyPatientInstructions = async () => {
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+        const fullText = `${patientInstructionText}\n${isEs ? 'Guía visual paso a paso:' : 'Interactive step-by-step guide:'} ${origin}${calcHref}`;
+        try {
+          await navigator.clipboard.writeText(fullText);
+          toast.success(isEs ? 'Instrucciones para el paciente copiadas ✓' : 'Patient dosing instructions copied ✓');
+        } catch {
+          toast.error(isEs ? 'No se pudo copiar' : 'Could not copy');
+        }
+      };
+
+      const handleWhatsAppPatient = () => {
+        if (typeof window === 'undefined') return;
+        const origin = window.location.origin;
+        const fullText = `${patientInstructionText}\n\n${isEs ? 'Guía visual interactiva:' : 'Interactive visual guide:'} ${origin}${calcHref}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank', 'noopener,noreferrer');
+      };
 
       return (
         <div className="dnlab-detail-panel dnlab-detail-panel-unified">
@@ -843,22 +878,80 @@ export default function DnLabPensClient({
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
-              <Link
-                href={calcHref}
-                className="gcp-btn-secondary"
-                style={{ flex: '1 1 170px', justifyContent: 'center', fontSize: '0.76rem', padding: '7px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            {/* Inline Patient Instructions & 1-Click Share Box (Zero context switching!) */}
+            <div
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderRadius: '10px',
+                padding: '10px 12px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.67rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {isEs ? 'Pauta Lista para Enviar al Paciente (Sin Salir de la Guía)' : 'Ready-to-Share Patient Instructions (Inline)'}
+                </span>
+                <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 650 }}>
+                  100 clicks = 1.00 mL · {currentVariant.volume || '3 mL'}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  fontSize: '0.77rem',
+                  lineHeight: 1.45,
+                  color: '#0f172a',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '7px',
+                  padding: '8px 10px',
+                  fontWeight: 600,
+                }}
               >
-                <Calculator size={13} />
-                <span>{isEs ? 'Abrir en Calculadora de Paciente (QR / URL)' : 'Open in Patient Calculator (QR / URL)'}</span>
-              </Link>
-              <Link
-                href={`/labels?search=${encodeURIComponent(row.name)}`}
-                className="gcp-btn-secondary"
-                style={{ justifyContent: 'center', fontSize: '0.75rem', padding: '7px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-              >
-                <span>Labels Studio</span>
-              </Link>
+                {patientInstructionText}
+              </div>
+
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleCopyPatientInstructions}
+                  className="gcp-btn-secondary"
+                  style={{ flex: '1 1 140px', justifyContent: 'center', fontSize: '0.73rem', padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <Copy size={13} />
+                  <span>{isEs ? 'Copiar Pauta Paciente' : 'Copy Patient Guide'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleWhatsAppPatient}
+                  className="gcp-btn-secondary"
+                  style={{ flex: '1 1 135px', justifyContent: 'center', fontSize: '0.73rem', padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <MessageCircle size={13} />
+                  <span>{isEs ? 'WhatsApp Paciente' : 'WhatsApp Patient'}</span>
+                </button>
+
+                <Link
+                  href={calcHref}
+                  className="gcp-btn-secondary"
+                  style={{ flex: '1 1 150px', justifyContent: 'center', fontSize: '0.73rem', padding: '6px 10px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <Calculator size={13} />
+                  <span>{isEs ? 'Calculadora Interactiva ↗' : 'Patient Calculator ↗'}</span>
+                </Link>
+
+                <Link
+                  href={`/labels?search=${encodeURIComponent(row.name.split('(')[0].trim())}`}
+                  className="gcp-btn-secondary"
+                  style={{ justifyContent: 'center', fontSize: '0.73rem', padding: '6px 10px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <span>Labels Studio ↗</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -998,6 +1091,9 @@ export default function DnLabPensClient({
         breadcrumb={breadcrumbItems}
       />
 
+      {/* ── UNIFIED CLINICAL FORMAT SWITCHER (1-Click Navigation Across Vials, Pens & Pellets) ── */}
+      <ClinicalFormatSwitcher activeFormat="pens" lang={lang} currency={currency} />
+
       {/* ── GOOGLE CLOUD UX COMPACT PAGE HEADER (Rules #9, #16, #23, #40, #57, #70) ── */}
       <section className="atlas-pens-gcp-header" aria-label="Formulary Page Header">
         <div className="atlas-pens-gcp-header-inner">
@@ -1019,8 +1115,8 @@ export default function DnLabPensClient({
             </h1>
             <p className="atlas-pens-gcp-sub">
               {isEs
-                ? 'Formulario clínico armonizado (20 fórmulas · 38 presentaciones en 2–3 mL) con dial mecánico U-100 (1 clic = 0.01 mL) y constructor de protocolo en PDF.'
-                : 'Harmonized clinical formulary (20 formulas · 38 strength SKUs across 2–3 mL) with U-100 click-dial dosing (1 click = 0.01 mL) and 1-page PDF Protocol Builder.'}
+                ? `Formulario clínico armonizado (${initialProducts.length} fórmulas · ${totalVariantsCount} presentaciones en 2–3 mL) con dial mecánico U-100 (1 clic = 0.01 mL) y constructor de protocolo en PDF.`
+                : `Harmonized clinical formulary (${initialProducts.length} formulas · ${totalVariantsCount} strength SKUs across 2–3 mL) with U-100 click-dial dosing (1 click = 0.01 mL) and 1-page PDF Protocol Builder.`}
             </p>
           </div>
 
@@ -1283,6 +1379,38 @@ export default function DnLabPensClient({
               >
                 <Trash2 size={15} />
               </button>
+              <Link
+                href={`/labels?search=${encodeURIComponent(protocolItemsList[0]?.product?.name?.split('(')[0]?.trim() || '')}`}
+                onClick={() => {
+                  try {
+                    if (typeof window !== 'undefined') {
+                      window.sessionStorage.setItem(
+                        'atlas_prefill_pen_protocol_v1',
+                        JSON.stringify(
+                          protocolItemsList.map((it) => ({
+                            id: it.product.id,
+                            name: it.product.name,
+                            sku: formatAtlasPenSku(it.product.sku, it.product.itemNumber),
+                            concentration: it.variant.concentration,
+                            volume: it.variant.volume,
+                            clicksRange: it.variant.clicksRange || String(it.variant.clicksPerDose || 10),
+                            doseBreakdown: it.variant.doseBreakdown,
+                            frequency: it.variant.frequency,
+                            qty: it.qty,
+                          }))
+                        )
+                      );
+                    }
+                  } catch {
+                    /* ignore storage quota */
+                  }
+                }}
+                className="gcp-btn-secondary"
+                style={{ minHeight: '38px', padding: '0 11px', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+              >
+                <span>Labels Studio</span>
+                <ExternalLink size={12} />
+              </Link>
               <button
                 type="button"
                 className="gcp-btn-secondary"

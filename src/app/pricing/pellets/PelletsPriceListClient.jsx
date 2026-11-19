@@ -33,6 +33,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 import './PelletsPriceList.css';
@@ -745,6 +746,9 @@ export default function PelletsPriceListClient({
         onCurrencyChange={(c) => workspace?.setCurrency?.(c)}
         onLangChange={(l) => workspace?.setLang?.(l)}
       />
+
+      {/* ── UNIFIED CLINICAL FORMAT SWITCHER (1-Click Navigation Across Vials, Pens & Pellets) ── */}
+      <ClinicalFormatSwitcher activeFormat="pellets" lang={lang} currency={currency} />
 
       {/* ── GOOGLE CLOUD CONSOLE RESOURCE HEADER ── */}
       <div className="gcp-resource-page-header">
