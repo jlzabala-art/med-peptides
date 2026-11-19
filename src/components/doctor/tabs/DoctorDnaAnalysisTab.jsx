@@ -989,36 +989,72 @@ export default function DoctorDnaAnalysisTab({
                   </div>
                 </div>
 
-                {/* 5 Clinical Axes Mini-Gauges (Dynamically Evaluated) */}
+                {/* 5 Clinical Axes Linear Rows (Rule #70 · Google Cloud Console List UX) */}
                 <div
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                    gap: '10px'
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    borderRadius: '6px',
+                    overflow: 'hidden'
                   }}
                 >
-                  {axes.map((ax) => (
-                    <div
-                      key={ax.id}
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #dadce0',
-                        borderLeft: `3px solid ${ax.badgeColor || '#1a73e8'}`,
-                        borderRadius: '4px',
-                        padding: '10px'
-                      }}
-                    >
-                      <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
-                        Axis {ax.number} · {ax.riskLevel}
+                  {axes.map((ax, axIdx) => {
+                    const accent = ax.badgeColor || '#1a73e8';
+                    return (
+                      <div
+                        key={ax.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '10px',
+                          padding: '10px 14px',
+                          borderLeft: `3px solid ${accent}`,
+                          borderBottom: axIdx < axes.length - 1 ? '1px solid #f1f5f9' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', minWidth: 0, flex: '1 1 320px' }}>
+                          <span
+                            style={{
+                              fontSize: '0.66rem',
+                              fontWeight: 700,
+                              color: '#5f6368',
+                              background: '#f8fafc',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '4px',
+                              padding: '2px 7px',
+                              textTransform: 'uppercase',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            Axis {ax.number}
+                          </span>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124' }}>
+                            {ax.titleEn?.split('(')[0]?.trim()}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>
+                            · Genes: <strong style={{ fontWeight: 600, color: '#3c4043' }}>{ax.keyGenes}</strong>
+                          </span>
+                        </div>
+                        <span
+                          style={{
+                            fontSize: '0.66rem',
+                            fontWeight: 700,
+                            color: accent,
+                            background: '#f8fafc',
+                            border: `1px solid ${accent}33`,
+                            borderRadius: '999px',
+                            padding: '2px 9px',
+                            textTransform: 'uppercase',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {ax.riskLevel}
+                        </span>
                       </div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: ax.badgeColor || '#202124', marginTop: '2px' }}>
-                        {ax.titleEn?.split('(')[0]?.trim()}
-                      </div>
-                      <div style={{ fontSize: '0.68rem', color: '#70757a', marginTop: '3px' }}>
-                        Genes: {ax.keyGenes}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Ancestral Metabolic Heritage & Dietary Compatibility Insight */}
@@ -1067,7 +1103,7 @@ export default function DoctorDnaAnalysisTab({
                       </span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: triangulation.interactions.length % 2 === 0 ? 'repeat(2, minmax(0, 1fr))' : '1fr', gap: '8px' }}>
                       {triangulation.interactions.map(item => {
                         const isHigh = item.convergenceLevel === 'CONFIRMED_HIGH' || item.convergenceLevel === 'HIGH_PRIORITY' || item.convergenceLevel === 'ACTION_REQUIRED';
                         return (
