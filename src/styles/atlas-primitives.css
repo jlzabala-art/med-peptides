@@ -10,9 +10,9 @@
 
 .atlas-page-shell {
   width: 100%;
-  max-width: var(--atlas-page-max-width, 1360px);
+  max-width: var(--atlas-page-max-width, 1240px);
   margin: 0 auto;
-  padding: 1.5rem 1.5rem 6rem 1.5rem;
+  padding: 1rem 1.25rem 6rem 1.25rem;
   box-sizing: border-box;
 }
 

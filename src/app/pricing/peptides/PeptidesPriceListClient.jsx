@@ -8,6 +8,7 @@ import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 
 // Extracted Domain Constants
@@ -489,16 +490,23 @@ export default function PeptidesPriceListClient({
 
   return (
     <div className="colway-price-root atlas-page-bg peptides-b2b-portal">
-      {/* ── Screen Navigation Bar ── */}
-      <PeptidesTopAppBar
-        setIsNavDrawerOpen={setIsNavDrawerOpen}
+      {/* ── Unified Atlas Public Header (Same shell across all 5 clinical & pricing screens) ── */}
+      <PublicUnifiedHeader
+        brandHref="/pricing"
+        loginRedirect="/pricing/peptides"
         lang={lang}
-        handleLanguageChange={handleLanguageChange}
+        onLangChange={handleLanguageChange}
         currency={currency}
-        handleCurrencyChange={handleCurrencyChange}
+        onCurrencyChange={handleCurrencyChange}
+        hideAiButton={true}
+        hideContactButton={true}
+        breadcrumb={[
+          { label: isEs ? 'Tarifas B2B' : 'B2B Schedules', href: '/pricing' },
+          { label: isEs ? 'Péptidos Clínicos' : 'Clinical Peptides' },
+        ]}
       />
 
-      {/* ── Unified Clinical Format Switcher (1-Click Navigation Across Vials, Pens & Pellets) ── */}
+      {/* ── Unified Clinical Format Switcher (1-Click Navigation Across All 5 Suite Screens) ── */}
       <ClinicalFormatSwitcher activeFormat="peptides" lang={lang} currency={currency} />
 
       <main className="atlas-page-shell peptides-main-container">

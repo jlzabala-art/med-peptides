@@ -713,6 +713,45 @@ export function renderPeptideClinicalDetail(row, {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (typeof window !== 'undefined') {
+                    const slug = String(row.productName || row.name || 'bpc-157')
+                      .split('(')[0]
+                      .trim()
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, '-')
+                      .replace(/^-+|-+$/g, '');
+                    const strengthToken = String(row.dosage || '10mg').replace(/\s+/g, '');
+                    const url = `/calculator?peptide=${encodeURIComponent(slug)}&format=vial&strength=${encodeURIComponent(strengthToken)}${isEs ? '&lang=es' : ''}`;
+                    window.location.href = url;
+                  }
+                }}
+                style={{
+                  flex: '1 1 auto',
+                  minHeight: '30px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px',
+                  background: '#ffffff',
+                  color: '#003666',
+                  border: '1px solid #cbd5e1',
+                  padding: '4px 10px',
+                  borderRadius: '5px',
+                  fontSize: '0.71rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+                title={isEs ? 'Abrir calculadora de reconstitución U-100 con este vial' : 'Open U-100 dosing calculator with this vial'}
+              >
+                <span>{isEs ? 'Calculadora ↗' : 'Dosing ↗'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (typeof onOpenAi === 'function') {
                     onOpenAi(row);
                   }

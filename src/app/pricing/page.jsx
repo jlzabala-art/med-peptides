@@ -1,6 +1,7 @@
 import React from 'react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
 import UnifiedPriceHub from '@/components/pricing/UnifiedPriceHub';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import './colway/ColwayPriceList.css';
@@ -39,6 +40,8 @@ export default function PricingDirectoryPage() {
           { label: 'Unified Price Hub' },
         ]}
       />
+
+      <ClinicalFormatSwitcher activeFormat="directory" />
 
       <main className="atlas-page-shell">
         <UnifiedPriceHub />

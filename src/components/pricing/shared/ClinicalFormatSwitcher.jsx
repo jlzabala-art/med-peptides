@@ -2,31 +2,45 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FlaskConical, Syringe, Pill, Layers } from '@/lib/icons';
+import { FlaskConical, Syringe, Pill, Layers, Calculator } from '@/lib/icons';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 /**
  * ClinicalFormatSwitcher
  * ─────────────────────────────────────────────────────────────────────────────
- * Unified Google Cloud UX format navigation bar across the 3 core clinical
- * formularies (/pricing/peptides, /pricing/pens, /pricing/pellets) so
- * clinicians can switch formats in 1 click without returning to /pricing.
+ * Unified Google Cloud UX format navigation bar across all 5 core clinical
+ * & pricing modules (/pricing, /pricing/peptides, /pricing/pens,
+ * /pricing/pellets, /calculator) so clinicians experience one continuous suite.
  */
 export default function ClinicalFormatSwitcher({
-  activeFormat = 'pens', // 'peptides' | 'pens' | 'pellets'
-  lang = 'en',
-  currency = null,
+  activeFormat = 'pens', // 'directory' | 'peptides' | 'pens' | 'pellets' | 'calculator'
+  lang: langProp = null,
+  currency: currencyProp = null,
 }) {
+  const workspace = usePublicWorkspace?.() || null;
+  const lang = langProp || workspace?.lang || 'en';
+  const currency = currencyProp || workspace?.currency || null;
   const isEs = lang === 'es';
 
   const buildHref = (basePath) => {
     const params = new URLSearchParams();
     if (isEs) params.set('lang', 'es');
-    if (currency && basePath !== '/pricing/pens') params.set('currency', currency);
+    if (currency && basePath !== '/pricing/pens' && basePath !== '/calculator') {
+      params.set('currency', currency);
+    }
     const qs = params.toString();
     return qs ? `${basePath}?${qs}` : basePath;
   };
 
   const tabs = [
+    {
+      id: 'directory',
+      href: buildHref('/pricing'),
+      icon: Layers,
+      label: isEs ? 'Todos los Catálogos' : 'All Schedules',
+      shortLabel: isEs ? 'Todos' : 'All',
+      badge: null,
+    },
     {
       id: 'peptides',
       href: buildHref('/pricing/peptides'),
@@ -52,12 +66,12 @@ export default function ClinicalFormatSwitcher({
       badge: 'EU GMP',
     },
     {
-      id: 'directory',
-      href: buildHref('/pricing'),
-      icon: Layers,
-      label: isEs ? 'Todos los Catálogos' : 'All Schedules',
-      shortLabel: isEs ? 'Todos' : 'All',
-      badge: null,
+      id: 'calculator',
+      href: buildHref('/calculator'),
+      icon: Calculator,
+      label: isEs ? 'Calculadora de Uso' : 'Dosing Guide',
+      shortLabel: isEs ? 'Dosis' : 'Dosing',
+      badge: '6 Formats',
     },
   ];
 
@@ -73,12 +87,17 @@ export default function ClinicalFormatSwitcher({
           width: 100%;
         }
         .atlas-format-switcher-inner {
-          max-width: 1120px;
+          max-width: 1240px;
           margin: 0 auto;
-          padding: 6px 14px;
+          padding: 6px 18px;
           display: flex;
           align-items: center;
           gap: 6px;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .atlas-format-switcher-inner::-webkit-scrollbar {
+          display: none;
         }
         .atlas-format-switcher-tab {
           display: inline-flex;
@@ -92,21 +111,23 @@ export default function ClinicalFormatSwitcher({
           white-space: nowrap;
           transition: all 0.15s ease;
           min-width: 0;
+          flex-shrink: 0;
         }
         .atlas-format-switcher-short {
           display: none;
         }
         @media (max-width: 768px) {
           .atlas-format-switcher-inner {
-            padding: 6px 10px;
+            padding: 6px 8px;
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 5px;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 4px;
+            overflow-x: visible;
           }
           .atlas-format-switcher-tab {
-            padding: 6px 4px;
-            font-size: 0.72rem;
-            gap: 4px;
+            padding: 5px 2px;
+            font-size: 0.68rem;
+            gap: 3px;
             border-radius: 7px;
             min-height: 34px;
           }

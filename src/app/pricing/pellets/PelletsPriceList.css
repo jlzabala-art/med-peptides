@@ -9,9 +9,10 @@
 }
 
 .pellets-price-container {
-  max-width: 1320px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
+  box-sizing: border-box;
 }
 
 /* ── Top Summary KPI Bar ── */

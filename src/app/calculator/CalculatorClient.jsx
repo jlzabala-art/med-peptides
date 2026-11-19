@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
 import AlgoliaEntityPicker from '@/components/shared/AlgoliaEntityPicker';
 import FormatPickerCards from '@/components/reconstitution/FormatPickerCards';
 import HorizontalSyringeVisualizer from '@/components/reconstitution/HorizontalSyringeVisualizer';
@@ -314,8 +316,11 @@ export default function CalculatorClient() {
         breadcrumb={breadcrumbItems}
       />
 
+      {/* ── UNIFIED CLINICAL FORMAT SWITCHER (5-Tab Continuous Suite Bar) ── */}
+      <ClinicalFormatSwitcher activeFormat="calculator" lang={lang} />
+
       {/* ── MAIN 3-STEP PATIENT WORKFLOW + UNIFIED COMPACT GCP HERO + 4-KPI SUMMARY ── */}
-      <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '0.85rem 1.25rem 6.5rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '0.85rem 1.25rem 6.5rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <PageHeroCard
           brandRight={isEs ? 'GUÍA UNIVERSAL DE DOSIFICACIÓN' : 'UNIVERSAL DOSING GUIDE'}
           badges={[
@@ -334,6 +339,23 @@ export default function CalculatorClient() {
           }
           actions={
             <>
+              {recon.isPenOrCartridge ? (
+                <Link
+                  href={`/pricing/pens${isEs ? '?lang=es' : ''}`}
+                  className="gcp-btn-secondary"
+                  style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <span>{isEs ? '27 Plumas U-100 ↗' : '27-Pen Guide ↗'}</span>
+                </Link>
+              ) : recon.isVial ? (
+                <Link
+                  href={`/pricing/peptides${isEs ? '?lang=es' : ''}`}
+                  className="gcp-btn-secondary"
+                  style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <span>{isEs ? 'Catálogo Viales ↗' : 'Vials Schedule ↗'}</span>
+                </Link>
+              ) : null}
               <button
                 type="button"
                 onClick={() => handleOpenQr(currentShareOverrides)}
