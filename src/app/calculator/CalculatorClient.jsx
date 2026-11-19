@@ -52,6 +52,9 @@ export default function CalculatorClient() {
     selectedProduct,
     formatId,
     setFormatId,
+    selectFormat,
+    availableFormatIds,
+    isLoadingFormats,
     activeFormat,
     selectedStrengthStr,
     setSelectedStrengthStr,
@@ -468,17 +471,44 @@ export default function CalculatorClient() {
                 {isEs ? 'Elige el Formato que Vas a Utilizar' : 'Choose Your Format'}
               </h2>
             </div>
-            <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 600 }}>
-              {isEs ? 'Formato seleccionado:' : 'Selected format:'}{' '}
-              <strong style={{ color: '#003666' }}>{isEs ? activeFormat.nameEs : activeFormat.name}</strong>
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {isLoadingFormats && (
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#1a73e8',
+                  background: '#e8f0fe',
+                  padding: '2px 8px',
+                  borderRadius: '999px',
+                }}>
+                  {isEs ? 'Verificando presentaciones...' : 'Checking presentations...'}
+                </span>
+              )}
+              <span style={{
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                color: '#15803d',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                padding: '2px 8px',
+                borderRadius: '999px',
+              }}>
+                {isEs
+                  ? `${availableFormatIds.length} de ${formatOptions.length} disponibles`
+                  : `${availableFormatIds.length} of ${formatOptions.length} available`}
+              </span>
+              <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 600 }}>
+                {isEs ? 'Seleccionado:' : 'Selected:'}{' '}
+                <strong style={{ color: '#003666' }}>{isEs ? activeFormat.nameEs : activeFormat.name}</strong>
+              </span>
+            </div>
           </div>
 
           <FormatPickerCards
             options={formatOptions}
-            recommendedFormatIds={selectedProduct.formats || []}
+            availableFormatIds={availableFormatIds}
             activeFormatId={formatId}
-            onSelectFormat={setFormatId}
+            onSelectFormat={selectFormat || setFormatId}
             lang={lang}
           />
         </section>

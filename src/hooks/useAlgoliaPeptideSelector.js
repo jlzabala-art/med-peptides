@@ -165,19 +165,52 @@ export function isFinishedPatientProduct(hit) {
 }
 
 /**
- * Infers all ready-to-use delivery formats available for a peptide from its Algolia record + clinical defaults.
+ * Strips supplier prefixes and trailing presentation parentheticals from a product name
+ * so Algolia hits like "BPC-157 (Pre-filled EpiPen (3ml))" and "BPC-157 Spray (Oral / Nasal...)"
+ * normalize cleanly to their base peptide name "BPC-157" when aggregating formats.
+ */
+export function cleanPatientProductName(raw = '') {
+  return String(raw || '')
+    .replace(/\b(bulk\s*api\s*powder|bulk\s*api|api\s*powder|lyophilized\s*vial)\b/gi, '')
+    .replace(/\(\s*(?:pre-?filled|oral\s*\/\s*nasal|nasal|mucosal|epipen|injector\s*pen|refill\s*cartridge|cartridge|vial|capsule)[^)]*(?:\([^)]*\)[^)]*)*\)/gi, '')
+    .replace(/\b(?:nasal\s*)?spray\s*$/i, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function findCatalogFallback(hit) {
+  const rawSlug = String(hit?.slug || hit?.id || hit?.objectID || '').toLowerCase();
+  const cleanName = cleanPatientProductName(hit?.canonicalName || hit?.name || hit?.title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9+]+/g, '');
+  return (
+    DEFAULT_PEPTIDE_CATALOG.find((p) => {
+      const pKey = p.name.toLowerCase().replace(/[^a-z0-9+]+/g, '');
+      return p.slug === rawSlug || p.id === rawSlug || pKey === cleanName;
+    }) || null
+  );
+}
+
+/**
+ * Infers ready-to-use delivery formats available for a peptide from its Algolia record.
+ * Used as an immediate optimistic estimate before authoritative Firestore hydration completes.
  */
 export function inferAvailableFormats(hit) {
   if (Array.isArray(hit?.formats) && hit.formats.length > 0) {
-    return hit.formats;
+    return DELIVERY_FORMAT_OPTIONS.map((o) => o.id).filter((id) => hit.formats.includes(id));
   }
+
   const corpus = [
     hit?.name,
     hit?.title,
+    hit?.slug,
+    hit?.objectID,
     hit?.category,
     hit?.route,
     hit?.form,
     hit?.presentation,
+    hit?.dosage,
+    ...(Array.isArray(hit?.tags) ? hit.tags : []),
     ...(Array.isArray(hit?.availableFormats) ? hit.availableFormats.map((f) => (typeof f === 'string' ? f : f?.id || f?.name)) : []),
   ]
     .filter(Boolean)
@@ -185,27 +218,25 @@ export function inferAvailableFormats(hit) {
     .toLowerCase();
 
   const found = new Set();
-  if (corpus.includes('nasal') || corpus.includes('spray') || /\b(semax|selank|oxytocin|dsip)\b/i.test(corpus)) found.add('spray');
-  if (corpus.includes('capsule') || corpus.includes('oral') || corpus.includes('troche') || /\b(bpc-?157|kpv|ll-?37)\b/i.test(corpus)) found.add('capsule');
-  if (corpus.includes('topical') || corpus.includes('serum') || corpus.includes('cream') || corpus.includes('shampoo') || /\b(ghk-?cu)\b/i.test(corpus)) found.add('topical');
-  if (corpus.includes('cartridge')) found.add('cartridge');
-  if (corpus.includes('pen')) found.add('pen');
-  if (corpus.includes('vial') || corpus.includes('lyophilized') || found.size === 0) found.add('vial');
 
-  // Injectable peptides generally exist as Vial + Injector Pen + Refill Cartridge
-  if (found.has('vial') && !/\b(semax|selank)\b/i.test(corpus)) {
-    found.add('pen');
-    found.add('cartridge');
+  if (/\b(nasal|intranasal|mucosal\s*spray|spray)\b/i.test(corpus)) found.add('spray');
+  if (/\b(capsule|capsules|tablet|tablets|troche|sublingual|oral\s*cap)\b/i.test(corpus)) found.add('capsule');
+  if (/\b(topical|serum|cream|ointment|shampoo|scalp)\b/i.test(corpus) && !/blood\s*serum/i.test(corpus)) found.add('topical');
+  if (/\b(cartridge|refill_cartridge|single_cartridge_pen|double_cartridge_pen)\b/i.test(corpus)) found.add('cartridge');
+  if (/\b(pen|epipen|prefilled_pen|pre-filled|injector\s*pen)\b/i.test(corpus)) found.add('pen');
+  if (/\b(vial|lyophili[sz]ed|ampoule)\b/i.test(corpus)) found.add('vial');
+
+  // If the lightweight Algolia hit has no explicit presentation hints, consult canonical catalog defaults
+  if (found.size === 0) {
+    const fallback = findCatalogFallback(hit);
+    if (fallback && Array.isArray(fallback.formats) && fallback.formats.length > 0) {
+      fallback.formats.forEach((f) => found.add(f));
+    } else {
+      found.add('vial');
+    }
   }
 
   return DELIVERY_FORMAT_OPTIONS.map((o) => o.id).filter((id) => found.has(id));
-}
-
-export function cleanPatientProductName(raw = '') {
-  return String(raw || '')
-    .replace(/\b(bulk\s*api\s*powder|bulk\s*api|api\s*powder|lyophilized\s*vial)\b/gi, '')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
 }
 
 export function extractStrengthsFromHit(hit) {
@@ -213,8 +244,14 @@ export function extractStrengthsFromHit(hit) {
   const pushToken = (val) => {
     if (!val) return;
     const str = String(val).trim();
-    if (!str || candidates.includes(str)) return;
-    candidates.push(str);
+    if (!str) return;
+    const matches = str.match(/\b\d+(?:\.\d+)?\s*(?:mg|mcg|iu)\b/gi);
+    if (matches) {
+      matches.forEach((m) => {
+        const norm = m.replace(/(\d+(?:\.\d+)?)\s*(mg|mcg|iu)/i, (_, n, u) => `${n} ${u.toLowerCase() === 'iu' ? 'IU' : u.toLowerCase()}`);
+        if (!candidates.includes(norm)) candidates.push(norm);
+      });
+    }
   };
 
   if (Array.isArray(hit?.availableStrengths)) {
@@ -228,40 +265,63 @@ export function extractStrengthsFromHit(hit) {
   }
   if (hit?.dosage) pushToken(hit.dosage);
   if (hit?.strength) pushToken(hit.strength);
+  if (hit?.slug || hit?.objectID) pushToken(String(hit.slug || hit.objectID).replace(/-/g, ' '));
 
-  const normalized = candidates
-    .filter((c) => /\d+(?:\.\d+)?\s*(?:mg|mcg|iu|ml)/i.test(c))
-    .slice(0, 8);
-
-  return normalized.length > 0 ? normalized : ['5 mg', '10 mg', '20 mg'];
+  if (candidates.length > 0) return candidates.slice(0, 8);
+  const fallback = findCatalogFallback(hit);
+  return fallback?.strengths || ['5 mg', '10 mg', '20 mg'];
 }
 
 /**
  * Filter & deduplicate Algolia hits into clean, supplier-free, ready-to-use peptides.
+ * Aggregates formats & strengths across sibling hits (e.g., BPC-157 Vial + BPC-157 Pen + BPC-157 Spray).
  */
 export function filterAndDeduplicatePatientPeptides(hits = []) {
-  const seen = new Set();
-  const clean = [];
+  const grouped = new Map();
 
   for (const h of hits) {
     if (!isFinishedPatientProduct(h)) continue;
     const displayName = cleanPatientProductName(h.canonicalName || h.name || h.title || '');
     if (!displayName) continue;
     const key = displayName.toLowerCase().replace(/[^a-z0-9+]+/g, '');
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
+    if (!key) continue;
 
-    clean.push({
-      id: h.id || h.objectID || h.slug || key,
-      slug: h.slug || displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      name: displayName,
-      strengths: extractStrengthsFromHit(h),
-      formats: inferAvailableFormats(h),
-    });
-    if (clean.length >= 10) break;
+    const hitFormats = inferAvailableFormats(h);
+    const hitStrengths = extractStrengthsFromHit(h);
+    const hitSlug = String(h.slug || h.id || h.objectID || '').toLowerCase();
+    const isCanonicalDoc = hitSlug === key || hitSlug === displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+    if (!grouped.has(key)) {
+      const canonicalSlug = isCanonicalDoc
+        ? hitSlug
+        : displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      grouped.set(key, {
+        id: isCanonicalDoc ? (h.id || h.objectID || canonicalSlug) : canonicalSlug,
+        slug: canonicalSlug,
+        name: displayName,
+        strengths: new Set(hitStrengths),
+        formats: new Set(hitFormats),
+      });
+    } else {
+      const existing = grouped.get(key);
+      if (isCanonicalDoc) {
+        existing.id = h.id || h.objectID || existing.id;
+        existing.slug = hitSlug;
+      }
+      hitFormats.forEach((f) => existing.formats.add(f));
+      hitStrengths.forEach((s) => existing.strengths.add(s));
+    }
   }
 
-  return clean;
+  return Array.from(grouped.values())
+    .slice(0, 10)
+    .map((entry) => ({
+      id: entry.id,
+      slug: entry.slug,
+      name: entry.name,
+      strengths: Array.from(entry.strengths).slice(0, 8),
+      formats: DELIVERY_FORMAT_OPTIONS.map((o) => o.id).filter((id) => entry.formats.has(id)),
+    }));
 }
 
 export function normalizeFormatParam(raw) {
@@ -284,11 +344,15 @@ export function formatDoseToken(raw) {
   return `${n} mg`;
 }
 
+// Layer 1 Client RAM Cache for Firestore product-formats lookups (0ms on repeat peptide selection)
+const CLIENT_FORMATS_CACHE = new Map();
+
 /**
  * Reusable Hook: useAlgoliaPeptideSelector
  * Searches ONLY finished ready-to-use peptides (zero raw APIs, zero supplier tags),
- * detects available formats (Vial, Pen, Cartridge, Nasal Spray, Oral, Topical),
- * syncs ALL dosing & format params to the shareable URL, and provides EN (default) / ES sync.
+ * hydrates REAL available formats & strengths from Firestore (/api/calculator/product-formats),
+ * strictly prevents selecting unavailable formats, syncs ALL dosing & format params to URL,
+ * and provides EN (default) / ES sync.
  */
 export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = null } = {}) {
   const router = useRouter();
@@ -327,22 +391,33 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
     DEFAULT_PEPTIDE_CATALOG.find((p) => p.slug === initialPeptideSlug || p.id === initialPeptideSlug) ||
     DEFAULT_PEPTIDE_CATALOG[0];
 
-  const [selectedProduct, setSelectedProduct] = useState(initialLocalMatch);
-  const [formatId, setFormatId] = useState(() =>
-    initialFormatParam ? normalizeFormatParam(initialFormatParam) : (initialLocalMatch.formats[0] || 'vial')
-  );
+  const [selectedProduct, setSelectedProduct] = useState(() => ({
+    ...initialLocalMatch,
+    formatStrengths: {},
+    formatsSource: 'initial',
+  }));
+  const [formatId, setFormatId] = useState(() => {
+    if (initialFormatParam) return normalizeFormatParam(initialFormatParam);
+    return initialLocalMatch.formats[0] || 'vial';
+  });
   const [selectedStrengthStr, setSelectedStrengthStr] = useState(() =>
     initialStrengthParam ? formatDoseToken(initialStrengthParam) : (initialLocalMatch.strengths[0] || '5 mg')
   );
   const [searchQuery, setSearchQuery] = useState(initialLocalMatch.name);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isLoadingFormats, setIsLoadingFormats] = useState(false);
 
-  // Enrich initial peptide from Algolia when launched via URL
+  // 1. Enrich initial peptide from Algolia when launched via URL with a slug not in local quick-picks
   useEffect(() => {
     let active = true;
     if (!initialPeptideSlug) return;
+    const isInLocalDefaults = DEFAULT_PEPTIDE_CATALOG.some(
+      (p) => p.slug === initialPeptideSlug || p.id === initialPeptideSlug
+    );
+    if (isInLocalDefaults) return;
+
     const cleanTarget = initialPeptideSlug.replace(/-/g, ' ').toLowerCase();
-    searchAlgolia(cleanTarget, { hitsPerPage: 12 })
+    searchAlgolia(cleanTarget, { hitsPerPage: 16, distinct: false })
       .then((res) => {
         if (!active || !Array.isArray(res?.products)) return;
         const cleanPool = filterAndDeduplicatePatientPeptides(res.products);
@@ -352,7 +427,12 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
           cleanPool.find((h) => String(h.name || '').toLowerCase() === cleanTarget) ||
           cleanPool[0];
         if (!exact) return;
-        setSelectedProduct(exact);
+        setSelectedProduct((prev) => ({
+          ...prev,
+          ...exact,
+          formatStrengths: {},
+          formatsSource: 'algolia',
+        }));
         setSearchQuery(exact.name);
         if (!initialStrengthParam && exact.strengths.length > 0) {
           setSelectedStrengthStr(exact.strengths[0]);
@@ -369,6 +449,98 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
     };
   }, [initialPeptideSlug, initialStrengthParam, initialFormatParam]);
 
+  // 2. Authoritative Firestore Format & Strength Hydration (Golden Rule #2)
+  // Fetches the EXACT ready-to-use presentations carried in Firestore for the selected peptide.
+  useEffect(() => {
+    let active = true;
+    const slug = selectedProduct?.slug || selectedProduct?.id;
+    const name = selectedProduct?.name || '';
+    if (!slug) return;
+
+    const applyFirestoreFormats = (payload) => {
+      if (!active || !payload?.success) return;
+      const realFormats = Array.isArray(payload.formats) && payload.formats.length > 0 ? payload.formats : null;
+      const realFormatStrengths = payload.formatStrengths && typeof payload.formatStrengths === 'object' ? payload.formatStrengths : {};
+      const realStrengths = Array.isArray(payload.strengths) && payload.strengths.length > 0 ? payload.strengths : null;
+
+      if (!realFormats) return;
+
+      setSelectedProduct((prev) => {
+        if ((prev.slug || prev.id) !== slug) return prev;
+        return {
+          ...prev,
+          formats: realFormats,
+          formatStrengths: realFormatStrengths,
+          strengths: realStrengths || prev.strengths,
+          formatsSource: payload.source || 'firestore',
+        };
+      });
+
+      // Strictly guarantee active format is genuinely available for this product
+      setFormatId((currentFmt) => {
+        const nextFmt = realFormats.includes(currentFmt) ? currentFmt : realFormats[0];
+        // Also ensure strength aligns with the chosen format's real strengths if available
+        const fmtStrengths = realFormatStrengths[nextFmt];
+        if (Array.isArray(fmtStrengths) && fmtStrengths.length > 0) {
+          setSelectedStrengthStr((currStr) =>
+            fmtStrengths.includes(currStr) ? currStr : fmtStrengths[0]
+          );
+        } else if (realStrengths && realStrengths.length > 0) {
+          setSelectedStrengthStr((currStr) =>
+            realStrengths.includes(currStr) ? currStr : realStrengths[0]
+          );
+        }
+        return nextFmt;
+      });
+    };
+
+    const cacheKey = `${slug}::${name.toLowerCase()}`;
+    if (CLIENT_FORMATS_CACHE.has(cacheKey)) {
+      applyFirestoreFormats(CLIENT_FORMATS_CACHE.get(cacheKey));
+      return;
+    }
+
+    setIsLoadingFormats(true);
+    const params = new URLSearchParams({ slug });
+    if (name) params.set('name', name);
+
+    fetch(`/api/calculator/product-formats?${params.toString()}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!active || !data) return;
+        CLIENT_FORMATS_CACHE.set(cacheKey, data);
+        applyFirestoreFormats(data);
+      })
+      .catch(() => {
+        /* retain optimistic local/Algolia formats on transient network failure */
+      })
+      .finally(() => {
+        if (active) setIsLoadingFormats(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedProduct?.slug, selectedProduct?.id, selectedProduct?.name]);
+
+  const availableFormatIds = useMemo(() => {
+    const list = Array.isArray(selectedProduct?.formats) && selectedProduct.formats.length > 0
+      ? selectedProduct.formats
+      : ['vial'];
+    return DELIVERY_FORMAT_OPTIONS.map((o) => o.id).filter((id) => list.includes(id));
+  }, [selectedProduct?.formats]);
+
+  // Strict Format Selector: refuses unavailable formats & syncs format-specific strengths
+  const selectFormat = useCallback((nextFormatId) => {
+    const normalized = normalizeFormatParam(nextFormatId);
+    if (!availableFormatIds.includes(normalized)) return; // Strictly block unavailable formats
+    setFormatId(normalized);
+    const fmtStrengths = selectedProduct?.formatStrengths?.[normalized];
+    if (Array.isArray(fmtStrengths) && fmtStrengths.length > 0) {
+      setSelectedStrengthStr((curr) => (fmtStrengths.includes(curr) ? curr : fmtStrengths[0]));
+    }
+  }, [availableFormatIds, selectedProduct?.formatStrengths]);
+
   const handleSelectPeptideHit = useCallback((hit, preferredDose = null, preferredFormat = null) => {
     const cleanName = cleanPatientProductName(hit.name || hit.title || 'Peptide');
     const strengths = Array.isArray(hit.strengths) ? hit.strengths : extractStrengthsFromHit(hit);
@@ -379,22 +551,29 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
       name: cleanName,
       strengths,
       formats,
+      formatStrengths: hit.formatStrengths || {},
+      formatsSource: 'selection',
     };
     setSelectedProduct(nextProduct);
     setSearchQuery(nextProduct.name);
     setSelectedStrengthStr(preferredDose || strengths[0] || '5 mg');
     if (preferredFormat) {
-      setFormatId(normalizeFormatParam(preferredFormat));
+      const normalizedPref = normalizeFormatParam(preferredFormat);
+      setFormatId(formats.includes(normalizedPref) ? normalizedPref : (formats[0] || 'vial'));
     } else if (!formats.includes(formatId)) {
       setFormatId(formats[0] || 'vial');
     }
   }, [formatId]);
 
   const availableStrengths = useMemo(() => {
-    const list = selectedProduct.strengths || ['5 mg', '10 mg'];
-    const merged = list.includes(selectedStrengthStr) ? list : [selectedStrengthStr, ...list];
+    const fmtSpecific = selectedProduct?.formatStrengths?.[formatId];
+    const baseList =
+      Array.isArray(fmtSpecific) && fmtSpecific.length > 0
+        ? fmtSpecific
+        : (selectedProduct.strengths || ['5 mg', '10 mg']);
+    const merged = baseList.includes(selectedStrengthStr) ? baseList : [selectedStrengthStr, ...baseList];
     return merged.map((s) => ({ id: s, name: s }));
-  }, [selectedProduct.strengths, selectedStrengthStr]);
+  }, [selectedProduct?.formatStrengths, selectedProduct.strengths, formatId, selectedStrengthStr]);
 
   const selectedStrength = useMemo(
     () => availableStrengths.find((s) => s.name === selectedStrengthStr) || availableStrengths[0] || { id: '5 mg', name: '5 mg' },
@@ -473,7 +652,10 @@ export function useAlgoliaPeptideSelector({ syncUrl = true, extraUrlParams = nul
     handleLangChange,
     selectedProduct,
     formatId,
-    setFormatId,
+    setFormatId: selectFormat,
+    selectFormat,
+    availableFormatIds,
+    isLoadingFormats,
     activeFormat,
     selectedStrengthStr,
     setSelectedStrengthStr,
