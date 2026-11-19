@@ -1,144 +1,195 @@
-/* Atlas Health Services · Clinical Pre-filled Peptide Pens Styling (Google Cloud UX) */
+/* Atlas Health Services · Editorial Visual Peptide Pen Dosing Guide (Online + PDF Parity) */
 
 .dnlab-page-root {
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #f4f6f9;
   display: flex;
   flex-direction: column;
 }
 
+/* ── Executive Dark Navy Brochure Banner (Matches A4 PDF Header 1-to-1) ── */
+.atlas-pens-exec-banner {
+  background: linear-gradient(135deg, #0d1f35 0%, #132c4c 100%);
+  color: #ffffff;
+  border-bottom: 2px solid #1e3a5f;
+}
+
+.atlas-pens-exec-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.atlas-pens-exec-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.atlas-pens-exec-eyebrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.70rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  margin-bottom: 0.35rem;
+}
+
+.atlas-pens-exec-title {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.8vw, 1.95rem);
+  font-weight: 850;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  color: #ffffff;
+}
+
+.atlas-pens-exec-sub {
+  margin: 0.4rem 0 0;
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  max-width: 640px;
+  line-height: 1.48;
+}
+
+/* Elevated Dark U-100 Conversion Pill */
+.atlas-pens-conversion-pill {
+  background: #071321;
+  border: 1px solid #223b5c;
+  border-radius: 12px;
+  padding: 0.75rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 230px;
+  flex-shrink: 0;
+}
+
+.atlas-pens-conv-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.atlas-pens-conv-val {
+  font-size: 1.18rem;
+  font-weight: 850;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas-pens-conv-sub {
+  font-size: 0.68rem;
+  color: #93c5fd;
+}
+
+.atlas-pens-exec-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.atlas-exec-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 15px;
+  border-radius: 8px;
+  border: 1px solid #3b82f6;
+  background: #1a73e8;
+  color: #ffffff;
+  font-size: 0.80rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.atlas-exec-btn-primary:hover {
+  background: #1557b0;
+}
+
+.atlas-exec-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.07);
+  color: #f1f5f9;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.atlas-exec-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ── Main Container ── */
 .dnlab-container {
-  max-width: 1360px;
+  max-width: 1120px;
   width: 100%;
   margin: 0 auto;
-  padding: 1.25rem 1.25rem 6rem;
+  padding: 1.25rem 1.25rem 7.5rem;
   box-sizing: border-box;
 }
 
-.atlas-pens-hero-actions {
+/* Search + View Switcher Row */
+.atlas-pens-toolbar-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* KPI Section with Scope Switcher (Rule #22) */
-.atlas-pens-kpi-wrap {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0.9rem 1rem 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-}
-
-.atlas-pens-kpi-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 0.75rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid #f1f5f9;
 }
 
-.atlas-pens-scope-switch {
+.atlas-pens-view-switch {
   display: inline-flex;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 7px;
-  padding: 2px;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 9px;
+  padding: 3px;
   gap: 2px;
+  flex-shrink: 0;
 }
 
-.atlas-pens-scope-switch button {
+.atlas-pens-view-switch button {
   border: none;
   background: transparent;
   color: #475569;
-  font-size: 0.72rem;
-  font-weight: 650;
-  padding: 4px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.14s ease;
-}
-
-.atlas-pens-scope-switch button.active {
-  background: #ffffff;
-  color: #003666;
-  font-weight: 800;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-}
-
-.dnlab-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
-.dnlab-kpi-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 0.85rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-}
-
-.dnlab-kpi-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.dnlab-kpi-val {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1.15;
-  margin-bottom: 2px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.dnlab-kpi-label {
-  font-size: 0.69rem;
-  color: #64748b;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-/* Inline Badges & Strength Pills */
-.atlas-pen-num-badge {
-  font-family: monospace;
-  font-weight: 800;
-  font-size: 0.70rem;
-  color: #334155;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  padding: 1px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.atlas-pen-strength-pill {
-  font-family: monospace;
-  font-weight: 750;
   font-size: 0.76rem;
-  color: #1e3a8a;
-  background: #eff6ff;
-  padding: 2px 7px;
-  border-radius: 5px;
-  border: 1px solid #bfdbfe;
+  font-weight: 700;
+  padding: 7px 11px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
   white-space: nowrap;
+}
+
+.atlas-pens-view-switch button.active {
+  background: #0d1f35;
+  color: #ffffff;
 }
 
 /* Category Filter Strip */
@@ -147,7 +198,7 @@
   align-items: center;
   gap: 0.45rem;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 }
 
 .dnlab-filter-pill {
@@ -156,7 +207,7 @@
   color: #3c4043;
   padding: 6px 12px;
   border-radius: 999px;
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   font-weight: 650;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -173,14 +224,14 @@
 }
 
 .dnlab-filter-pill.active {
-  background: #e8f0fe;
-  color: #1a73e8;
-  border-color: #1a73e8;
+  background: #0d1f35;
+  color: #ffffff;
+  border-color: #0d1f35;
   font-weight: 750;
 }
 
 .dnlab-filter-pill-count {
-  font-size: 0.67rem;
+  font-size: 0.66rem;
   font-weight: 800;
   background: #f1f5f9;
   color: #475569;
@@ -190,36 +241,424 @@
 }
 
 .dnlab-filter-pill.active .dnlab-filter-pill-count {
-  background: #1a73e8;
+  background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
 }
 
-/* Master-Detail Expandable View */
+/* Protocol Hint Ribbon */
+.atlas-pens-protocol-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  border-left: 3px solid #1a73e8;
+  border-radius: 9px;
+  padding: 9px 13px;
+  margin-bottom: 1.1rem;
+  font-size: 0.76rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+/* ── Specialty Section & Editorial Visual Cards (Rule #70: Full-Width Linear Cards) ── */
+.atlas-pens-editorial-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.65rem;
+}
+
+.atlas-pens-specialty-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.atlas-pens-specialty-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #334155;
+  padding: 0 4px;
+}
+
+.atlas-pens-specialty-count {
+  font-size: 0.68rem;
+  font-weight: 750;
+  color: #475569;
+  background: #e2e8f0;
+  padding: 2px 9px;
+  border-radius: 999px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.atlas-pens-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Individual Editorial Dosing Card */
+.atlas-pen-editorial-card {
+  background: #ffffff;
+  border: 1px solid #dae2ec;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(13, 31, 53, 0.04);
+  overflow: hidden;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.atlas-pen-editorial-card.in-protocol {
+  border-width: 1.5px;
+  box-shadow: 0 4px 14px rgba(13, 31, 53, 0.08);
+}
+
+.atlas-pen-ec-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 18px 12px;
+  border-bottom: 1px solid #edf2f7;
+  flex-wrap: wrap;
+}
+
+.atlas-pen-ec-identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  flex: 1 1 280px;
+}
+
+.atlas-pen-ec-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 850;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas-pen-ec-title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 850;
+  color: #0d1f35;
+  line-height: 1.22;
+}
+
+.atlas-pen-ec-ratio-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.atlas-pen-ec-ratio {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.atlas-pen-ec-variant-pills {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Signature 3-Metric Hero Strip with 3px Vertical Colored Accent Bars */
+.atlas-pen-ec-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 14px 18px 10px;
+}
+
+.atlas-pen-ec-metric {
+  border-left: 3.5px solid var(--pen-accent, #1d4ed8);
+  padding-left: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.atlas-pen-ec-metric-label {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.atlas-pen-ec-metric-val {
+  font-size: 0.98rem;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Secondary 3-Column Strip + Tinted Pen Spec Pill */
+.atlas-pen-ec-secondary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: center;
+  padding: 8px 18px 12px;
+}
+
+.atlas-pen-ec-sec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.atlas-pen-ec-sec-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.atlas-pen-ec-sec-val {
+  font-size: 0.84rem;
+  font-weight: 750;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas-pen-ec-spec-pill {
+  background: #f3f6fa;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.atlas-pen-ec-spec-val {
+  font-size: 0.86rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Card Footnote & Actions */
+.atlas-pen-ec-footer {
+  padding: 10px 18px 13px;
+  background: #fafbfd;
+  border-top: 1px solid #edf2f7;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.atlas-pen-ec-footnote {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #475569;
+  line-height: 1.48;
+}
+
+.atlas-pen-ec-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.atlas-pen-ec-btn {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.atlas-pen-ec-btn.is-open {
+  background: #e8f0fe;
+  border-color: #1a73e8;
+  color: #1a73e8;
+}
+
+.atlas-pen-ec-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 4px;
+  border-radius: 7px;
+  border: 1.5px solid #1a73e8;
+  background: #ffffff;
+}
+
+.atlas-pen-ec-stepper button {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 5px;
+  background: #f1f5f9;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.atlas-pen-ec-stepper span {
+  font-size: 0.75rem;
+  font-weight: 850;
+  min-width: 44px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Floating SUPPLY SUMMARY Dock (Matches LXV Brochure Bottom Card) ── */
+.atlas-pens-supply-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #cbd5e1;
+  box-shadow: 0 -6px 24px rgba(13, 31, 53, 0.14);
+  padding: 10px 14px max(10px, env(safe-area-inset-bottom));
+}
+
+.atlas-pens-supply-dock-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.atlas-pens-supply-summary-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.atlas-pens-supply-kicker {
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.atlas-pens-supply-pills {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.atlas-pens-supply-item {
+  font-size: 0.84rem;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas-pens-supply-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Compact Table Helpers */
+.atlas-pen-num-badge {
+  font-family: monospace;
+  font-weight: 800;
+  font-size: 0.70rem;
+  color: #334155;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.atlas-pen-strength-pill {
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: #1e3a8a;
+  background: #eff6ff;
+  padding: 2px 8px;
+  border-radius: 5px;
+  border: 1px solid #bfdbfe;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas-pen-variant-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+.atlas-pen-variant-matrix-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.95fr) minmax(210px, 1.45fr) minmax(145px, 0.9fr);
+  gap: 12px;
+  align-items: center;
+}
+
+/* Master-Detail Simulator Panel */
 .dnlab-detail-panel {
   background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 1.25rem;
+  padding: 1.15rem;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.15rem;
+  gap: 1rem;
 }
 
 .dnlab-detail-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 1.1rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.75rem;
 }
 
 .dnlab-dial-box {
   background: #f8fafc;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  padding: 0.9rem 1rem;
+  padding: 0.85rem 0.95rem;
 }
 
 .dnlab-slider {
@@ -228,138 +667,23 @@
   cursor: pointer;
 }
 
-/* Dedicated Mobile Card (PenMobileCard · Rule #23) */
-.atlas-pen-mcard {
-  background: #ffffff;
-  border: 1px solid #dadce0;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.06);
-}
-
-.atlas-pen-mcard-top {
-  padding: 12px 13px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.atlas-pen-mcard-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.atlas-pen-mcard-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.atlas-pen-mcard-title {
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: #003666;
-  line-height: 1.25;
-}
-
-.atlas-pen-mcard-expand {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #475569;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.atlas-pen-mcard-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.atlas-pen-mcard-variants {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.atlas-pen-mcard-variant-row {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 8px 10px;
-}
-
-.atlas-pen-mcard-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
-}
-
-.atlas-pen-mcard-btn {
-  min-height: 40px;
-  border: none;
-  border-right: 1px solid #e2e8f0;
-  background: transparent;
-  color: #334155;
-  font-size: 0.74rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.atlas-pen-mcard-btn:last-child {
-  border-right: none;
-}
-
-.atlas-pen-mcard-btn.primary-subtle {
-  color: #003666;
-  background: #f0f7ff;
-  font-weight: 800;
-}
-
-/* Responsive Breakpoints (Rule #23: Strict 2x2 KPIs + Horizontal Category Strip) */
-@media (max-width: 960px) {
-  .dnlab-container {
-    padding: 0.9rem 0.9rem 6.5rem;
-  }
-  .dnlab-kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-  .dnlab-kpi-card {
-    padding: 0.7rem 0.8rem;
-    gap: 0.65rem;
-  }
-  .dnlab-kpi-icon {
-    width: 34px;
-    height: 34px;
-  }
-  .dnlab-kpi-val {
-    font-size: 1.05rem;
-  }
-  .dnlab-kpi-label {
-    font-size: 0.62rem;
-  }
+/* ── Mobile Responsive Breakpoints (Rule #23) ── */
+@media (max-width: 900px) {
   .dnlab-detail-panel {
     grid-template-columns: 1fr;
     padding: 0.9rem;
+  }
+  .atlas-pens-toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .atlas-pens-view-switch {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .atlas-pens-view-switch button {
+    justify-content: center;
   }
   .dnlab-filters-row {
     flex-wrap: nowrap;
@@ -373,20 +697,68 @@
   }
 }
 
-@media (max-width: 600px) {
-  .atlas-pens-hero-actions {
+@media (max-width: 720px) {
+  .atlas-pens-exec-inner {
+    padding: 1.1rem 0.95rem 1rem;
+  }
+  .atlas-pens-conversion-pill {
     width: 100%;
+    min-width: 0;
+  }
+  .atlas-pens-exec-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 7px;
   }
-  .atlas-pens-hero-actions .gcp-btn-primary {
+  .atlas-exec-btn-primary {
     grid-column: 1 / -1;
-    justify-content: center;
     min-height: 42px;
   }
-  .atlas-pens-hero-actions .gcp-btn-secondary {
+  .atlas-exec-btn-ghost {
+    min-height: 38px;
+  }
+  .dnlab-container {
+    padding: 0.95rem 0.85rem 8rem;
+  }
+  .atlas-pen-ec-head {
+    padding: 12px 13px 10px;
+  }
+  .atlas-pen-ec-ratio-wrap {
+    align-items: flex-start;
+    width: 100%;
+  }
+  .atlas-pen-ec-variant-pills {
+    justify-content: flex-start;
+  }
+  .atlas-pen-ec-metrics {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px 13px 8px;
+  }
+  .atlas-pen-ec-secondary {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 6px 13px 10px;
+  }
+  .atlas-pen-ec-spec-pill {
+    grid-column: 1 / -1;
+  }
+  .atlas-pen-ec-footer {
+    padding: 10px 13px 12px;
+  }
+  .atlas-pen-ec-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  .atlas-pen-ec-btn,
+  .atlas-pen-ec-stepper {
+    min-height: 38px;
+    width: 100%;
     justify-content: center;
-    min-height: 40px;
+  }
+  .atlas-pens-supply-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }
