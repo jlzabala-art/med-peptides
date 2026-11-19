@@ -236,7 +236,7 @@ export default function DoctorDnaAnalysisTab({
       header: 'Patient / Specimen ID',
       width: '22%',
       sortable: true,
-      render: (row) => {
+      render: (_val, row) => {
         const patientDisplay = row.patientName || row.patient?.name || 'Clinical Patient';
         const rawCode = row.sampleId || row.code || row.protocolNumber || '';
         const sampleCode = rawCode && rawCode !== '—' ? rawCode : '';
@@ -262,7 +262,7 @@ export default function DoctorDnaAnalysisTab({
       header: 'Genomic Assay & Technology',
       width: '28%',
       sortable: true,
-      render: (row) => {
+      render: (_val, row) => {
         const tName = String(row.testName || row.biomarker || 'Genomic Profile');
         const isNutrigen = tName.toLowerCase().includes('nutri') || tName.toLowerCase().includes('24gen');
         const isTelo = tName.toLowerCase().includes('telo');
@@ -324,7 +324,7 @@ export default function DoctorDnaAnalysisTab({
       header: 'Clinical Findings & Key SNPs',
       width: '26%',
       sortable: true,
-      render: (row) => {
+      render: (_val, row) => {
         const score = Number(row.value) || 85;
         const profileLabel = row.testType || 'Nutrigenomic Profile';
         return (
@@ -367,7 +367,7 @@ export default function DoctorDnaAnalysisTab({
       header: 'Patient Profile',
       width: '14%',
       sortable: true,
-      render: (row) => {
+      render: (_val, row) => {
         const ptName = row.patientName || row.patient?.name || 'Patient';
         const gender = row.patient?.gender || 'Female';
         const age = row.patient?.age ? `${row.patient.age} yrs` : '';
@@ -387,7 +387,7 @@ export default function DoctorDnaAnalysisTab({
       key: 'actions',
       header: 'Clinical Actions',
       width: '14%',
-      render: (row) => {
+      render: (_val, row) => {
         const portalUrl = row.reportUrl || `/patient/dna-report?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
         const rxPdfUrl = row.pdfReportUrl || `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
         const mealPdfUrl = row.mealPlanPdfUrl || `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
