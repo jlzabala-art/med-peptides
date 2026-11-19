@@ -63,6 +63,27 @@ import { trackSearchClick } from '@/services/algoliaInsights';
  *   ]}
  * />
  */
+const formatClinicalDate = (raw, lang = 'en') => {
+  if (!raw) return '';
+  try {
+    const d = typeof raw === 'number'
+      ? new Date(raw)
+      : typeof raw?.toDate === 'function'
+      ? raw.toDate()
+      : typeof raw?._seconds === 'number'
+      ? new Date(raw._seconds * 1000)
+      : new Date(raw);
+    if (isNaN(d.getTime())) return '';
+    return new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(d);
+  } catch {
+    return '';
+  }
+};
+
 export default function GlobalSearchBar({
   value,
   searchTerm,
@@ -217,9 +238,9 @@ export default function GlobalSearchBar({
             }
           }
         } else if (isLabelsPage || isPrescriptionsPage) {
-          const res = await searchAlgoliaFederated(effectiveValue.trim(), ['atlas_patients', 'prescriptions'], 8);
+          const res = await searchAlgoliaFederated(effectiveValue.trim(), ['atlas_patients', 'prescriptions'], 10);
           if (isMounted) {
-            // Deduplicate patients by normalized name
+            // ── PATIENTS: deduplicate by normalized name, sort alphabetically ──
             const seenPatients = new Set();
             const patientHits = [];
             for (const p of (res.patients || [])) {
@@ -235,35 +256,57 @@ export default function GlobalSearchBar({
                 phone: p.phone || '',
                 category: 'PATIENT',
                 status: p.status || 'active',
-                indexName: 'atlas_patients'
+                indexName: 'atlas_patients',
+                _group: 'patient'
               });
               if (patientHits.length >= 4) break;
             }
+            patientHits.sort((a, b) => a.name.localeCompare(b.name));
 
-            // Map prescription hits
+            // ── PRESCRIPTIONS: enrich with dates, rootCode, partsCount ──
             const seenRx = new Set();
-            const rxHits = [];
+            const rxRaw = [];
             for (const r of (res.prescriptions || [])) {
               const codeStr = (r.prescriptionCode || r.code || r.fileNumber || `RX-${(r.id || '').slice(0, 6)}`).trim();
               const normCode = codeStr.toLowerCase();
               if (!normCode || seenRx.has(normCode)) continue;
               seenRx.add(normCode);
-              rxHits.push({
+              // Extract root code (e.g. "BOX03048" from "BOX03048AATRI")
+              const rootCode = codeStr.replace(/[A-Z]{2,}$/, '').replace(/^RX-/, '');
+              // Format dates
+              const importedDateStr = formatClinicalDate(r.importedAt || r.createdAt, lang);
+              const sampleDateStr = formatClinicalDate(r.prescriptionDate || r.date || r.reportDate || r.sampleDate, lang);
+              const dateTs = r.importedAt
+                ? (typeof r.importedAt === 'string' ? new Date(r.importedAt).getTime() : r.importedAt?._seconds ? r.importedAt._seconds * 1000 : Number(r.importedAt))
+                : 0;
+              rxRaw.push({
                 key: `rx_${r.objectID || r.id}`,
                 id: r.objectID || r.id,
                 code: codeStr,
                 name: codeStr,
-                patientName: r.patientName || '',
+                rootCode,
+                patientName: (r.patientName || '').trim(),
                 title: r.treatmentTitle || r.medication || r.title || '',
                 doctorName: r.doctorName || '',
-                category: (r.status || 'PRESCRIPTION').toUpperCase(),
+                partsCount: Number(r.partsCount || r.parts || 1),
+                importedDateStr,
+                sampleDateStr,
+                dateTs,
+                category: 'PRESCRIPTION',
                 status: r.status || 'approved',
-                indexName: 'prescriptions'
+                indexName: 'prescriptions',
+                _group: 'prescription'
               });
-              if (rxHits.length >= 4) break;
+              if (rxRaw.length >= 6) break;
             }
+            // Sort: by patientName asc → rootCode asc → dateTs desc (sister rx adjacent)
+            rxRaw.sort((a, b) =>
+              a.patientName.localeCompare(b.patientName) ||
+              a.rootCode.localeCompare(b.rootCode) ||
+              b.dateTs - a.dateTs
+            );
 
-            const combined = [...patientHits, ...rxHits];
+            const combined = [...patientHits, ...rxRaw];
             setSuggestions(combined);
             if (combined.length > 0 && isFocused) {
               setShowDropdown(true);
@@ -372,16 +415,43 @@ export default function GlobalSearchBar({
   }, [effectiveValue, isFocused]);
 
   const effectivePlaceholder = useMemo(() => {
-    if (isMobile && placeholder) {
-      if (placeholder.includes(' by ')) {
-        return placeholder.split(' by ')[0] + '...';
-      }
-      if (placeholder.length > 25) {
-        return placeholder.slice(0, 22) + '...';
-      }
+    // Clinical/Labels pages: contextual placeholders (desktop vs mobile)
+    if (isLabelsPage || isPrescriptionsPage) {
+      if (isMobile) return lang === 'es' ? 'Buscar paciente o receta…' : 'Patient or Rx…';
+      return lang === 'es'
+        ? 'Buscar por nombre de paciente, código Rx o fecha de importación…'
+        : 'Search by patient name, Rx code, or import date…';
     }
-    return placeholder;
-  }, [isMobile, placeholder]);
+    if (isPatientsPage) {
+      if (isMobile) return lang === 'es' ? 'Buscar paciente…' : 'Search patient…';
+      return lang === 'es' ? 'Buscar paciente por nombre, email o teléfono…' : 'Search patient by name, email or phone…';
+    }
+    if (isSuppliersPage) {
+      if (isMobile) return 'Search supplier…';
+      return 'Search supplier by name, country or category…';
+    }
+    if (isUsersPage) {
+      if (isMobile) return 'Search user…';
+      return 'Search user by name, email or role…';
+    }
+    if (isProductsPage) {
+      if (isMobile) return 'Search product…';
+      return 'Search peptide, compound or SKU…';
+    }
+    if (isProtocolsPage) {
+      if (isMobile) return 'Search protocol…';
+      return 'Search clinical protocol or regimen…';
+    }
+    // Fallback: use the provided placeholder, truncate on mobile if needed
+    if (placeholder) {
+      if (isMobile && placeholder.length > 28) {
+        if (placeholder.includes(' by ')) return placeholder.split(' by ')[0] + '…';
+        return placeholder.slice(0, 25) + '…';
+      }
+      return placeholder;
+    }
+    return 'Search…';
+  }, [isMobile, placeholder, isLabelsPage, isPrescriptionsPage, isPatientsPage, isSuppliersPage, isUsersPage, isProductsPage, isProtocolsPage, lang]);
 
   // ⌘K / Ctrl+K global shortcut & focus-global-search event listener
   useEffect(() => {
@@ -833,7 +903,166 @@ export default function GlobalSearchBar({
                   ? 'No user matches found'
                   : 'No clinical matches found'}
               </div>
-            ) : (
+            ) : (isLabelsPage || isPrescriptionsPage) ? (() => {
+              // ── 2-GROUP CLINICAL DROPDOWN ──────────────────────────────
+              const patientItems = suggestions.filter(s => s._group === 'patient');
+              const rxItems = suggestions.filter(s => s._group === 'prescription');
+              let globalIdx = -1;
+
+              const renderGroupHeader = (label, count, color, bg) => (
+                <div key={label} style={{
+                  padding: '0.3rem 1rem 0.15rem',
+                  fontSize: '0.62rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.07em',
+                  textTransform: 'uppercase',
+                  color,
+                  background: bg,
+                  borderTop: '1px solid #f1f5f9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}>
+                  {label}
+                  <span style={{ fontSize: '0.6rem', fontWeight: 600, opacity: 0.7 }}>({count})</span>
+                </div>
+              );
+
+              const renderPatientItem = (item, itemIdx) => {
+                const isSelected = selectedIndex === itemIdx;
+                return (
+                  <div
+                    key={item.key}
+                    className={`atlas-search__dropdown-item ${isSelected ? 'atlas-search__dropdown-item--selected' : ''}`}
+                    onClick={() => handleSuggestionClick(item)}
+                    style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      cursor: 'pointer',
+                      backgroundColor: isSelected ? '#f5f0ff' : 'transparent',
+                      paddingLeft: '1rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0 }}>
+                      <span style={{
+                        width: '22px', height: '22px', borderRadius: '50%',
+                        backgroundColor: '#faf5ff', border: '1px solid #e9d5ff',
+                        color: '#7c3aed', display: 'inline-flex', alignItems: 'center',
+                        justifyContent: 'center', flexShrink: 0
+                      }}>
+                        <User size={12} />
+                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <span style={{ fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.name}
+                        </span>
+                        {item.email && (
+                          <span style={{ fontSize: '0.7rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.email}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: '0.65rem', fontWeight: 700, padding: '2px 7px', borderRadius: '6px',
+                      backgroundColor: '#faf5ff', color: '#7c3aed', border: '1px solid #e9d5ff',
+                      textTransform: 'uppercase', flexShrink: 0
+                    }}>
+                      {lang === 'es' ? 'Paciente' : 'Patient'}
+                    </span>
+                  </div>
+                );
+              };
+
+              const renderRxItem = (item, itemIdx) => {
+                const isSelected = selectedIndex === itemIdx;
+                return (
+                  <div
+                    key={item.key}
+                    className={`atlas-search__dropdown-item ${isSelected ? 'atlas-search__dropdown-item--selected' : ''}`}
+                    onClick={() => handleSuggestionClick(item)}
+                    style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                      cursor: 'pointer',
+                      backgroundColor: isSelected ? '#eff6ff' : 'transparent',
+                      paddingLeft: '1rem', gap: '0.5rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.55rem', minWidth: 0, flex: 1 }}>
+                      <Search size={13} color="#003666" style={{ flexShrink: 0, marginTop: '3px' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, gap: '1px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 700, color: '#0f172a', fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                            #{item.code}
+                          </span>
+                          {item.partsCount > 1 && (
+                            <span style={{
+                              fontSize: '0.6rem', fontWeight: 600, padding: '1px 5px',
+                              borderRadius: '4px', background: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0'
+                            }}>
+                              📦 {item.partsCount} {lang === 'es' ? 'partes' : 'parts'}
+                            </span>
+                          )}
+                        </div>
+                        {item.patientName && (
+                          <span style={{ fontSize: '0.72rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            👤 {item.patientName}
+                          </span>
+                        )}
+                        {item.title && (
+                          <span style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.title}
+                          </span>
+                        )}
+                        {(item.importedDateStr || item.sampleDateStr) && (
+                          <span style={{ fontSize: '0.65rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                            {item.importedDateStr && `📥 ${item.importedDateStr}`}
+                            {item.importedDateStr && item.sampleDateStr && ' · '}
+                            {item.sampleDateStr && `🧪 ${item.sampleDateStr}`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                      <a
+                        href={`/rx/${encodeURIComponent(item.code)}?edit=true`}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '2px 6px', borderRadius: '4px', background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#1a73e8', fontSize: '0.63rem', fontWeight: 700, textDecoration: 'none' }}
+                        title="Edit Prescription"
+                      >
+                        <Edit3 size={9} color="#1a73e8" /><span>Edit</span>
+                      </a>
+                      <a
+                        href={`/labels?rx=${encodeURIComponent(item.code)}&refill=true`}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '2px 6px', borderRadius: '4px', background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#059669', fontSize: '0.63rem', fontWeight: 700, textDecoration: 'none' }}
+                        title="Issue Refill"
+                      >
+                        <Repeat size={9} color="#059669" /><span>Refill</span>
+                      </a>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', textTransform: 'uppercase', flexShrink: 0 }}>
+                        {lang === 'es' ? 'Receta' : 'Rx'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              };
+
+              return (
+                <>
+                  {patientItems.length > 0 && (
+                    <>
+                      {renderGroupHeader('👤 ' + (lang === 'es' ? 'Pacientes' : 'Patients'), patientItems.length, '#6d28d9', '#faf5ff')}
+                      {patientItems.map(item => renderPatientItem(item, suggestions.indexOf(item)))}
+                    </>
+                  )}
+                  {rxItems.length > 0 && (
+                    <>
+                      {renderGroupHeader('📄 ' + (lang === 'es' ? 'Prescripciones Clínicas' : 'Clinical Prescriptions'), rxItems.length, '#1d4ed8', '#eff6ff')}
+                      {rxItems.map(item => renderRxItem(item, suggestions.indexOf(item)))}
+                    </>
+                  )}
+                </>
+              );
+            })() : (
               suggestions.map((item, idx) => {
                 const isCrossJump = (!isProtocolsPage && item.indexName === 'protocols') || (isProtocolsPage && item.indexName === 'products');
                 const isUserItem = item.indexName === 'atlas_users';

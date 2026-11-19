@@ -448,6 +448,8 @@ export default function PublicLabelsAppClient({
   const matchesDateRange = useMemo(() => {
     const maxAgeMs = worklistDateRange === '7d' ? 7 * 86400000 : worklistDateRange === '30d' ? 30 * 86400000 : null;
     return (item) => {
+      // If user is actively searching a term/patient/code, do NOT filter out historical database matches
+      if (searchQuery && searchQuery.trim().length >= 2) return true;
       if (!maxAgeMs) return true;
       const raw = item.importedAt || item.createdAt || item.uploadedAt || item.date;
       if (!raw) return true;
@@ -455,7 +457,7 @@ export default function PublicLabelsAppClient({
       if (Number.isNaN(ts)) return true;
       return (mountTimestamp - ts) <= maxAgeMs;
     };
-  }, [worklistDateRange, mountTimestamp]);
+  }, [worklistDateRange, mountTimestamp, searchQuery]);
 
   const filterWorklistItem = (item, tabOverride = null) => {
     const activeTab = tabOverride || worklistTab;
