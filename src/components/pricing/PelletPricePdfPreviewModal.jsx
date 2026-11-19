@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { X, Download, FileText } from '@/lib/icons';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import toast from 'react-hot-toast';
 import { buildPelletsPriceSchedulePdfBlob } from '@/lib/pdf/pelletsPriceSchedulePdf';
@@ -17,6 +18,7 @@ export default function PelletPricePdfPreviewModal({
 }) {
   const [pdfLang, setPdfLang] = useState(lang === 'es' ? 'es' : 'en');
   const [prevLang, setPrevLang] = useState(lang);
+  const [isFullPreview, setIsFullPreview] = useState(false);
 
   if (prevLang !== lang) {
     setPrevLang(lang);
@@ -33,14 +35,14 @@ export default function PelletPricePdfPreviewModal({
         currencySymbol,
         formatPrice,
         isEs,
-        documentRef: 'PHARM-PELLETS-B2B-2026'
+        documentRef: 'ATLAS-PELLETS-B2B-2026'
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = isEs
-        ? `Pharmapolis_Tarifa_Oficial_Pellets_${currency}.pdf`
-        : `Pharmapolis_Official_Pellets_Schedule_${currency}.pdf`;
+        ? `Atlas_European_Pharmacy_Tarifa_Pellets_${currency}.pdf`
+        : `Atlas_European_Pharmacy_Pellets_Schedule_${currency}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -166,6 +168,29 @@ export default function PelletPricePdfPreviewModal({
             </button>
           </div>
 
+          {/* Expand Full Preview Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsFullPreview((prev) => !prev)}
+            style={{
+              background: isFullPreview ? '#0d9488' : 'rgba(30, 41, 59, 0.8)',
+              color: '#ffffff',
+              border: '1px solid #334155',
+              borderRadius: '6px',
+              padding: '6px 10px',
+              fontSize: '0.74rem',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              cursor: 'pointer'
+            }}
+            title={isEs ? 'Alternar vista completa' : 'Toggle Full Preview'}
+          >
+            {isFullPreview ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+            <span>{isFullPreview ? (isEs ? 'Vista Normal' : 'Compact View') : (isEs ? 'Desplegar Todo' : 'Expand Full Preview')}</span>
+          </button>
+
           {/* Download / Save Button */}
           <button
             onClick={handleDownloadDirectPdf}
@@ -209,12 +234,13 @@ export default function PelletPricePdfPreviewModal({
       <div
         style={{
           width: '100%',
-          maxWidth: '860px',
+          maxWidth: isFullPreview ? '98vw' : '860px',
           background: '#ffffff',
           borderRadius: '8px',
           boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
           overflow: 'hidden',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          transition: 'max-width 0.2s ease'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -223,21 +249,23 @@ export default function PelletPricePdfPreviewModal({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                ATLAS HEALTH SERVICES · PHARMAPOLIS COMPOUNDING PHARMACY (BULGARIA EU GMP)
+                ATLAS HEALTH SERVICES · EUROPEAN PHARMACY (EU GMP)
               </div>
               <h2 style={{ margin: '4px 0', fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
                 {isEs ? 'Pellets Hormonales Subcutáneos & Kits Trócar · Tarifa Oficial B2B' : 'Subcutaneous Hormone Pellets & Trocar Kits · Official B2B Price Schedule'}
               </h2>
               <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
-                {isEs ? 'Cilindros Cristalinos Puros Sin Aglutinantes · Esterilización Terminal E-Beam SAL 10⁻⁶ · Plovdiv (Bulgaria)' : 'Pure Binder-Free Crystalline Cylinders · Terminal E-Beam Sterilization SAL 10⁻⁶ · Plovdiv (Bulgaria)'}
+                {isEs
+                  ? 'Cilindros Cristalinos Puros Sin Aglutinantes · Esterilización Terminal E-Beam SAL 10⁻⁶ · Farmacia Europea Licenciada (EU GMP)'
+                  : 'Pure Binder-Free Crystalline Cylinders · Terminal E-Beam Sterilization SAL 10⁻⁶ · European Union Licensed Compounding Pharmacy'}
               </div>
             </div>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px', minWidth: '150px' }}>
-              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b' }}>TARIFA / SCHEDULE:</div>
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px', minWidth: '165px' }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b' }}>{isEs ? 'TARIFA:' : 'SCHEDULE:'}</div>
               <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#166534' }}>DISTRIBUTOR B2B</div>
               <div style={{ fontSize: '0.65rem', color: '#475569', marginTop: '2px' }}>
-                REF: <strong>PHARM-PELLETS-B2B-2026</strong>
+                REF: <strong>ATLAS-PELLETS-B2B-2026</strong>
               </div>
             </div>
           </div>
@@ -246,27 +274,59 @@ export default function PelletPricePdfPreviewModal({
         {/* Quality Banner & KPIs */}
         <div style={{ padding: '12px 20px', background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.4 }}>
-            <strong>{isEs ? 'CALIDAD ANALÍTICA:' : 'ANALYTICAL RELEASE:'}</strong> HPLC ≥99.5% · Endotoxinas &lt;0.25 EU/mg · Disolución Continua Orden Cero (3.5 - 6 Meses).
+            <strong>{isEs ? 'CALIDAD ANALÍTICA:' : 'ANALYTICAL RELEASE:'}</strong>{' '}
+            {isEs
+              ? 'HPLC ≥99.5% · Endotoxinas <0.25 EU/mg · Disolución Continua Orden Cero (3.5–6 Meses).'
+              : 'HPLC ≥99.5% · Endotoxins <0.25 EU/mg · Zero-Order Continuous Release (3.5–6 Months).'}
             <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-              {isEs ? 'Precios Wholesaler (+15% + 15%) con Descuento B2B por Volumen en Pack ×10 (-10%).' : 'Wholesaler Tariffs (+15% + 15%) with Institutional Volume Savings in Pack ×10 (-10%).'}
+              {isEs ? 'Tarifas Wholesaler (+15% + 15%) con Ahorro Institucional en Pack ×10 (-10%).' : 'Wholesaler Tariffs (+15% + 15%) with Institutional Volume Savings in Pack ×10 (-10%).'}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.68rem', padding: '3px 8px', borderRadius: '4px', background: '#dcfce7', color: '#166534', fontWeight: 700 }}>
-              {products.length} SKUs OFICIALES
+              {products.length} {isEs ? 'SKUs OFICIALES' : 'OFFICIAL SKUs'}
             </span>
             <span style={{ fontSize: '0.68rem', padding: '3px 8px', borderRadius: '4px', background: '#e0f2fe', color: '#0369a1', fontWeight: 700 }}>
-              EU GMP BULGARIA
+              EUROPEAN PHARMACY · EU GMP
             </span>
           </div>
+        </div>
+
+        {/* Category Quick-Navigation Summary Strip */}
+        <div style={{ padding: '12px 20px 4px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '8px' }}>
+          {groupedSections.map((group) => (
+            <a
+              key={`idx-${group.key}`}
+              href={`#pellet-cat-${group.key}`}
+              style={{
+                padding: '8px 10px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                background: '#f8fafc',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '6px',
+              }}
+            >
+              <span style={{ fontSize: '0.71rem', fontWeight: 700, color: '#003666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {group.title}
+              </span>
+              <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0d9488', background: '#ccfbf1', padding: '1px 6px', borderRadius: '9999px', flexShrink: 0 }}>
+                {group.items.length}
+              </span>
+            </a>
+          ))}
         </div>
 
         {/* Tables */}
         <div style={{ padding: '16px 20px' }}>
           {groupedSections.map((group) => (
-            <div key={group.key} style={{ marginBottom: '20px' }}>
-              <div style={{ background: '#003666', color: '#ffffff', padding: '6px 10px', borderRadius: '4px 4px 0 0', fontSize: '0.78rem', fontWeight: 800 }}>
-                {group.title}
+            <div key={group.key} id={`pellet-cat-${group.key}`} style={{ marginBottom: '20px' }}>
+              <div style={{ background: '#003666', color: '#ffffff', padding: '7px 12px', borderRadius: '6px 6px 0 0', fontSize: '0.78rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>{group.title}</span>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#bae6fd' }}>{group.items.length} SKUs</span>
               </div>
               <div style={{ border: '1px solid #e2e8f0', borderTop: 'none', borderRadius: '0 0 4px 4px', overflowX: 'auto' }}>
                 {/* eslint-disable-next-line no-restricted-syntax */}

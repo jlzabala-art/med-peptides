@@ -57,8 +57,8 @@ export function buildPelletsPriceSchedulePdfBlob({
   doc.setFontSize(7.2);
   doc.text(
     isEs
-      ? 'ATLAS HEALTH SERVICES · PHARMAPOLIS COMPOUNDING PHARMACY (EU GMP)'
-      : 'ATLAS HEALTH SERVICES · PHARMAPOLIS COMPOUNDING PHARMACY (EU GMP)',
+      ? 'ATLAS HEALTH SERVICES · EUROPEAN PHARMACY (EU GMP)'
+      : 'ATLAS HEALTH SERVICES · EUROPEAN PHARMACY (EU GMP)',
     12,
     7.5
   );
@@ -78,8 +78,8 @@ export function buildPelletsPriceSchedulePdfBlob({
   doc.setTextColor(226, 232, 240);
   doc.text(
     isEs
-      ? 'Cilindros Cristalinos Puros Sin Aglutinantes · Esterilización Terminal E-Beam (SAL 10⁻⁶) · Plovdiv (Bulgaria)'
-      : 'Pure Binder-Free Crystalline Cylinders · Terminal E-Beam Sterilization (SAL 10⁻⁶) · Plovdiv (Bulgaria)',
+      ? 'Cilindros Cristalinos Puros Sin Aglutinantes · Esterilización Terminal E-Beam (SAL 10⁻⁶) · Farmacia Europea Licenciada'
+      : 'Pure Binder-Free Crystalline Cylinders · Terminal E-Beam Sterilization (SAL 10⁻⁶) · European Union Licensed Pharmacy',
     12,
     20.5
   );
