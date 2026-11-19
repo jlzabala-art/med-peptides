@@ -237,8 +237,8 @@ export default function PharmapolisLabelSvg({
   const isMono = colorMode === 'monochrome';
   const isBoldPosology = (labelData.boldPosology !== undefined) ? Boolean(labelData.boldPosology) : Boolean(boldPosology);
   const posFontWeight = isBoldPosology ? '800' : '500';
-  const posCharWidthFactor = isBoldPosology ? 0.64 : 0.53;
-  const posLineGapFactor = isBoldPosology ? 1.42 : 1.30;
+  const posCharWidthFactor = isBoldPosology ? 0.50 : 0.45;
+  const posLineGapFactor = isBoldPosology ? 1.40 : 1.30;
 
   // Base coordinates: 1500 px base width, dynamic responsive height
   const WIDTH = 1500;
@@ -1463,7 +1463,7 @@ export default function PharmapolisLabelSvg({
 
             for (const testFontSize of candidatePosFontSizes) {
               const testLineGap = Math.round(testFontSize * posLineGapFactor);
-              const testMaxChars = Math.max(28, Math.floor((innerUsableWidth - 52) / (testFontSize * posCharWidthFactor)));
+              const testMaxChars = Math.max(28, Math.floor((innerUsableWidth - 38) / (testFontSize * posCharWidthFactor)));
               const testLines = wrapLines(directions, testMaxChars);
               const testFirstLineY = posHeaderTitleY + (isShort ? 9 : isMediumHeight ? 10 : 12) + Math.round(testFontSize * 0.82);
               const testBoxH = testFirstLineY + Math.max(0, testLines.length - 1) * testLineGap + (isShort ? 12 : 14);
