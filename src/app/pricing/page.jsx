@@ -1,7 +1,6 @@
 import React from 'react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import Breadcrumb from '@/components/ui/Breadcrumb';
 import UnifiedPriceHub from '@/components/pricing/UnifiedPriceHub';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import './colway/ColwayPriceList.css';
@@ -42,14 +41,7 @@ export default function PricingDirectoryPage() {
       />
 
       <main className="atlas-page-shell">
-        <Breadcrumb items={[
-          { label: 'B2B Portal', href: '/' },
-          { label: 'Unified Price Hub' }
-        ]} />
-
-        <div style={{ marginTop: '1.25rem' }}>
-          <UnifiedPriceHub />
-        </div>
+        <UnifiedPriceHub />
       </main>
 
       <PublicUnifiedFooter />

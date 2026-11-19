@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import PageHeader          from '@/components/ui/PageHeader';
+import PageHeroCard        from '@/components/ui/PageHeroCard';
 import GlobalSearchBar     from '@/components/ui/GlobalSearchBar';
 import MetricCard          from '@/components/ui/MetricCard';
 import KpiScopeBar         from '@/components/ui/KpiScopeBar';
@@ -389,12 +389,39 @@ export default function UnifiedPriceHub({
 
   return (
     <div style={{ width: '100%', maxWidth: '100%', minWidth: 0, margin: '0 auto', boxSizing: 'border-box' }}>
-      {/* ── Page Header (Golden Rule #9, #16) ── */}
+      {/* ── Unified Compact GCP Resource Hero (Consistent across all platform screens) ── */}
       {!embedded && (
-        <PageHeader
+        <PageHeroCard
+          brandRight="B2B PRICE HUB"
+          badges={[
+            `${schedules.length} Schedules`,
+            `${TOTAL_SKUS} SKUs`,
+            'Role-Based Tiering',
+          ]}
+          metaItems={[{ label: 'REF:', value: 'ATLAS-B2B-HUB-2026', mono: true }]}
           title="Unified B2B Price Hub"
-          subtitle={`Single authoritative entry point for all ${schedules.length} product groups with authenticated tier pricing.`}
-          actions={<GcpUserBadge />}
+          subtitle={`Single authoritative entry point for all ${schedules.length} clinical & commercial schedules with real-time EUR / USD / AED conversion.`}
+          actions={
+            <>
+              <Link
+                href="/pricing/pens"
+                className="gcp-btn-secondary"
+                style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Calculator size={14} color="#5f6368" />
+                <span>Pen Dosing Guide</span>
+              </Link>
+              <Link
+                href="/pricing/peptides"
+                className="gcp-btn-primary"
+                style={{ height: '36px', padding: '0 13px', fontSize: '0.78rem', fontWeight: 750, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Package size={14} />
+                <span>Peptide Vials</span>
+              </Link>
+              <GcpUserBadge variant="light" />
+            </>
+          }
         />
       )}
 
