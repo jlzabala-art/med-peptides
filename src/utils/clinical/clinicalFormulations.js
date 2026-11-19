@@ -22,20 +22,24 @@ export function safeRenderText(val, fallback = '') {
   return String(val);
 }
 
-export function enrichApiClinicalDetails(api) {
+export function enrichApiClinicalDetails(api, isEs = false) {
   if (!api) return {};
   const rawName = api.name || api.drugName || api.activeIngredient || api.productName || 'Active Pharmaceutical Ingredient';
   const rawDose = api.dose || api.dosage || api.strength || api.concentration || 'Compounded Strength';
 
-  const resolved = resolveApiClinicalData(api, false);
+  const resolved = resolveApiClinicalData(api, isEs);
   const mono = getFagronClinicalMonograph(api.productId) ||
     getFagronClinicalMonograph(rawName) ||
     getFagronClinicalMonograph(api.activeIngredient) ||
     getFagronClinicalMonograph(rawName.toLowerCase());
 
-  const pharmacologicalClass = api.therapeuticClass || api.pharmacologicalClass || resolved.pharmacologicalClass || mono?.pharmacologicalClass || api.category || 'Therapeutic Active Ingredient (API)';
-  const clinicalIndication = api.clinicalIndication || resolved.clinicalIndication || mono?.clinicalIndication || 'Targeted Follicular / Metabolic Clinical Optimization';
-  const mechanismOfAction = api.mechanism || api.mechanismOfAction || resolved.mechanismOfAction || mono?.mechanismOfAction || null;
+  const monoClass = isEs ? mono?.pharmacologicalClass : (mono?.pharmacologicalClassEn || null);
+  const monoInd = isEs ? mono?.clinicalIndication : (mono?.clinicalIndicationEn || null);
+  const monoMech = isEs ? mono?.mechanismOfAction : (mono?.mechanismOfActionEn || null);
+
+  const pharmacologicalClass = api.therapeuticClass || api.pharmacologicalClass || resolved.pharmacologicalClass || monoClass || api.category || (isEs ? 'Principio Activo Terapéutico (API)' : 'Therapeutic Active Ingredient (API)');
+  const clinicalIndication = api.clinicalIndication || resolved.clinicalIndication || monoInd || (isEs ? 'Optimización Clínica Folicular / Metabólica Personalizada' : 'Targeted Follicular / Metabolic Clinical Optimization');
+  const mechanismOfAction = api.mechanism || api.mechanismOfAction || resolved.mechanismOfAction || monoMech || null;
   const cellularTarget = api.cellularTarget || resolved.cellularTarget || null;
   const geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0) ? mono.geneTargets : ((resolved.geneTargets && resolved.geneTargets.length > 0) ? resolved.geneTargets : (api.geneTargets || []));
 
@@ -154,17 +158,21 @@ export function resolveClinicalVehicle(rxObj = {}, items = [], explicitVehicle =
   };
 }
 
-export function resolvePrescriptionParts(rx) {
+export function resolvePrescriptionParts(rx, lang = 'en') {
   if (!rx) return [];
+  const isEs = lang === 'es';
 
   // 1. Explicit rx.parts array already parsed from doctorCache or document
   if (Array.isArray(rx.parts) && rx.parts.length > 0) {
     return rx.parts.map((p, pIdx) => {
       const partNum = p.partNumber || (pIdx + 1);
-      const vName = p.vehicle || p.title || '';
-      const resolvedVeh = resolveClinicalVehicle(p, p.apis || [], vName);
-      const isOil = String(vName + ' ' + (p.title || '')).toLowerCase().includes('oil') || String(vName).toLowerCase().includes('aceite');
-      const isOral = String(vName + ' ' + (p.format || '') + ' ' + (p.title || '')).toLowerCase().includes('oral') || String(vName + ' ' + (p.format || '')).toLowerCase().includes('capsule');
+      const rawPartApis = Array.isArray(p.apis) && p.apis.length > 0
+        ? p.apis
+        : (Array.isArray(p.items) ? p.items : []);
+      const vName = p.vehicle || p.dispensingForm || p.treatmentType || p.title || '';
+      const resolvedVeh = resolveClinicalVehicle(p, rawPartApis, vName);
+      const isOil = String(vName + ' ' + (p.title || '') + ' ' + (p.treatmentType || '')).toLowerCase().includes('oil') || String(vName).toLowerCase().includes('aceite');
+      const isOral = String(vName + ' ' + (p.format || '') + ' ' + (p.title || '') + ' ' + (p.treatmentType || '')).toLowerCase().includes('oral') || String(vName + ' ' + (p.format || '')).toLowerCase().includes('capsule');
       const isFoam = String(vName + ' ' + (p.title || '')).toLowerCase().includes('foam') || String(vName).toLowerCase().includes('espuma');
       const isNasal = String(vName + ' ' + (p.format || '') + ' ' + (p.title || '')).toLowerCase().includes('nasal') || String(vName).toLowerCase().includes('spray');
 
@@ -173,21 +181,25 @@ export function resolvePrescriptionParts(rx) {
       const accentBg = isNasal ? '#f0f9ff' : (isOil ? '#f0fdfa' : (isOral ? '#fff7ed' : (isFoam ? '#faf5ff' : '#f8fafc')));
       const borderAccent = isNasal ? '#bae6fd' : (isOil ? '#99f6e4' : (isOral ? '#fed7aa' : (isFoam ? '#e9d5ff' : '#cbd5e1')));
 
+      const filteredApis = rawPartApis
+        .filter((a) => !a?.isVehicleOrBase && !/^(trichosol|trichooil|trichofoam|trichowash|pentravan)$/i.test(String(a?.name || a?.activeIngredient || a?.productName || '').trim()))
+        .map((a) => enrichApiClinicalDetails(a, isEs));
+
       return {
         partNumber: partNum,
         totalParts: rx.parts.length,
-        title: p.title || (isNasal ? 'Intranasal Peptide Therapy' : (isOil ? 'Scalp Care & Lipid Protection' : (isOral ? 'Systemic Support' : 'Compounded Solution'))),
-        badge: `PART ${partNum} OF ${rx.parts.length} · ${badgeText}`,
+        title: p.treatmentType || p.title || (isNasal ? 'Intranasal Peptide Therapy' : (isOil ? 'Scalp Care & Lipid Protection' : (isOral ? 'Oral Capsules' : 'Compounded Solution'))),
+        badge: `FORMULA ${partNum} OF ${rx.parts.length} · ${badgeText}`,
         volume: p.volume || (isNasal ? '15 mL' : (isOil ? '30 mL' : (isOral ? '90 Capsules' : '100 mL'))),
         format: p.format || badgeText,
         vehicleLabel: resolvedVeh.label,
         vehicle: resolvedVeh.value,
         vehicleBadge: resolvedVeh.badge,
-        schedule: p.posology || p.directions || (isOil ? '1-2 times weekly, massage 3-5 min, leave 10 min before wash.' : 'Apply as directed by treating physician.'),
+        schedule: p.posology || p.directions || p.instructions || (isOil ? '1-2 times weekly, massage 3-5 min, leave 10 min before wash.' : 'Apply as directed by treating physician.'),
         accentColor,
         accentBg,
         borderAccent,
-        apis: (p.apis || []).map(a => enrichApiClinicalDetails(a))
+        apis: filteredApis
       };
     });
   }
@@ -209,7 +221,7 @@ export function resolvePrescriptionParts(rx) {
         name: c.apiName || c.name || '',
         dose: c.dosage ? `${c.dosage} ${c.units || ''}`.trim() : (c.dose || ''),
         productId: c.productId
-      }));
+      }, isEs));
 
       return {
         partNumber: partNum,

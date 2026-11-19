@@ -63,8 +63,15 @@ export default function DoctorPrescriptionsTab({
   handleReprescribeFormula,
   handleContactAtlasWhatsApp,
   handleOpenLabelsModal,
-  toast
+  toast,
+  lang = 'en'
 }) {
+  const isEs = lang === 'es';
+  const [expandedApiKeys, setExpandedApiKeys] = React.useState({});
+  const toggleApiDetails = (key) => {
+    setExpandedApiKeys((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   return (
     <section
       id="prescriptions"
@@ -283,13 +290,18 @@ export default function DoctorPrescriptionsTab({
         emptyActionLabel={quickRxFilter === 'pending' && quickCounts.all > 0 ? `Show All Prescriptions (${quickCounts.all})` : undefined}
         onEmptyAction={quickRxFilter === 'pending' && quickCounts.all > 0 ? () => setQuickRxFilter('all') : undefined}
         expandableRender={(rx) => {
-          const parts = resolvePrescriptionParts(rx);
+          const parts = resolvePrescriptionParts(rx, lang);
           const totalApisCount = parts.reduce((acc, p) => acc + (p.apis?.length || 0), 0);
 
           const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
           const isAwaitingAtlasReview = !isProposal && (rx.status === 'draft' || rx.ingestionStage === 'awaiting_atlas_review' || rx.state === 'draft');
 
-          return (
+          const [expandedApiKeys, setExpandedApiKeys] = React.useState({});
+  const toggleApiDetails = (key) => {
+    setExpandedApiKeys((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  return (
             <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
               {/* Clinical Treatment Proposal Banner (Unaccepted Offer) */}
               {isProposal && (
@@ -477,10 +489,10 @@ export default function DoctorPrescriptionsTab({
                       fontWeight: 700,
                       textDecoration: 'none'
                     }}
-                    title="Ver cómo lo ve el paciente y enlace para compartir"
+                    title={isEs ? 'Ver cómo lo ve el paciente y enlace para compartir' : 'Preview patient view and shareable link'}
                   >
                     <ExternalLink size={12} />
-                    <span>Vista Paciente / Compartir</span>
+                    <span>{isEs ? 'Vista Paciente / Compartir' : 'Patient View / Share'}</span>
                   </Link>
 
                   {/* View Full Clinical Dossier Button */}
@@ -500,10 +512,10 @@ export default function DoctorPrescriptionsTab({
                       fontWeight: 700,
                       textDecoration: 'none'
                     }}
-                    title="Abrir expediente clínico completo"
+                    title={isEs ? 'Abrir expediente clínico completo' : 'Open complete clinical dossier'}
                   >
                     <BookOpen size={12} />
-                    <span>Ficha Clínica Completa</span>
+                    <span>{isEs ? 'Ficha Clínica Completa' : 'Full Clinical Dossier'}</span>
                   </Link>
                 </div>
               </div>
@@ -626,98 +638,126 @@ export default function DoctorPrescriptionsTab({
                           Personalized compounded active ingredients calibrated to patient clinical profile.
                         </div>
                       ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
-                          {part.apis.map((api, aIdx) => (
-                            <div
-                              key={aIdx}
-                              style={{
-                                background: '#fafbfc',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '6px',
-                                padding: '10px 14px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '6px'
-                              }}
-                            >
-                              {/* Line 1: Compound Name, Dose badge, Pharmacological Class & Gene targets */}
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                  <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
-                                    {api.name}
-                                  </span>
-                                  <span
-                                    style={{
-                                      fontSize: '0.76rem',
-                                      fontWeight: 700,
-                                      background: '#e0f2fe',
-                                      color: '#0369a1',
-                                      border: '1px solid #bae6fd',
-                                      padding: '2px 8px',
-                                      borderRadius: '4px'
-                                    }}
-                                  >
-                                    {api.dose}
-                                  </span>
-                                  {api.geneTargets && api.geneTargets.length > 0 && (
-                                    <span style={{ display: 'inline-flex', gap: '4px' }}>
-                                      {api.geneTargets.map((g, gIdx) => (
-                                        <span
-                                          key={gIdx}
-                                          style={{
-                                            fontSize: '0.66rem',
-                                            fontWeight: 650,
-                                            color: '#475569',
-                                            background: '#f1f5f9',
-                                            border: '1px solid #e2e8f0',
-                                            padding: '1px 5px',
-                                            borderRadius: '3px'
-                                          }}
-                                        >
-                                          🧬 {g}
-                                        </span>
-                                      ))}
+                        <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden', background: '#ffffff' }}>
+                          {part.apis.map((api, aIdx) => {
+                            const apiKey = `${rx.id || rx.code}-${pIdx}-${aIdx}`;
+                            const isApiOpen = Boolean(expandedApiKeys[apiKey]);
+                            return (
+                              <div
+                                key={aIdx}
+                                style={{
+                                  borderBottom: aIdx < part.apis.length - 1 ? '1px solid #f1f5f9' : 'none',
+                                  padding: '8px 12px',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '6px',
+                                  background: isApiOpen ? '#f8fafc' : '#ffffff'
+                                }}
+                              >
+                                {/* Compact 1-line GCP Row (Progressive Disclosure) */}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                    <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
+                                      {api.name}
                                     </span>
-                                  )}
+                                    <span
+                                      style={{
+                                        fontSize: '0.73rem',
+                                        fontWeight: 700,
+                                        background: '#e0f2fe',
+                                        color: '#0369a1',
+                                        border: '1px solid #bae6fd',
+                                        padding: '1px 7px',
+                                        borderRadius: '4px'
+                                      }}
+                                    >
+                                      {api.dose}
+                                    </span>
+                                    {api.geneTargets && api.geneTargets.length > 0 && (
+                                      <span style={{ display: 'inline-flex', gap: '4px', flexWrap: 'wrap' }}>
+                                        {api.geneTargets.map((g, gIdx) => (
+                                          <span
+                                            key={gIdx}
+                                            style={{
+                                              fontSize: '0.65rem',
+                                              fontWeight: 600,
+                                              color: '#475569',
+                                              background: '#f1f5f9',
+                                              border: '1px solid #e2e8f0',
+                                              padding: '1px 5px',
+                                              borderRadius: '3px'
+                                            }}
+                                          >
+                                            🧬 {g}
+                                          </span>
+                                        ))}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span
+                                      style={{
+                                        fontSize: '0.69rem',
+                                        fontWeight: 600,
+                                        color: '#0d9488',
+                                        background: '#f0fdf4',
+                                        border: '1px solid #bbf7d0',
+                                        padding: '1px 7px',
+                                        borderRadius: '4px'
+                                      }}
+                                    >
+                                      {api.pharmacologicalClass}
+                                    </span>
+                                    {(api.clinicalIndication || api.cellularTarget || api.mechanismOfAction) && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleApiDetails(apiKey);
+                                        }}
+                                        style={{
+                                          fontSize: '0.68rem',
+                                          fontWeight: 600,
+                                          color: '#1a73e8',
+                                          background: '#eff6ff',
+                                          border: '1px solid #dbeafe',
+                                          borderRadius: '4px',
+                                          padding: '2px 7px',
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        {isApiOpen ? (isEs ? 'Ocultar ▲' : 'Hide Mechanism ▲') : (isEs ? 'Mecanismo ▾' : 'Mechanism ▾')}
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
 
-                                <span
-                                  style={{
-                                    fontSize: '0.72rem',
-                                    fontWeight: 650,
-                                    color: '#0d9488',
-                                    background: '#f0fdf4',
-                                    border: '1px solid #bbf7d0',
-                                    padding: '2px 8px',
-                                    borderRadius: '4px'
-                                  }}
-                                >
-                                  {api.pharmacologicalClass}
-                                </span>
-                              </div>
-
-                              {/* Line 2: Clinical Indication & Cellular Target */}
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '6px', fontSize: '0.76rem', color: '#475569' }}>
-                                {api.clinicalIndication && (
-                                  <div>
-                                    <strong style={{ color: '#1e293b' }}>Clinical Indication:</strong> {api.clinicalIndication}
-                                  </div>
-                                )}
-                                {api.cellularTarget && (
-                                  <div>
-                                    <strong style={{ color: '#1e293b' }}>Cellular Target:</strong> {api.cellularTarget}
+                                {/* Progressive Disclosure: Clinical Indication & Mechanism of Action */}
+                                {isApiOpen && (
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '4px', borderTop: '1px dashed #e2e8f0' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '6px', fontSize: '0.74rem', color: '#475569' }}>
+                                      {api.clinicalIndication && (
+                                        <div>
+                                          <strong style={{ color: '#1e293b' }}>Clinical Indication:</strong> {api.clinicalIndication}
+                                        </div>
+                                      )}
+                                      {api.cellularTarget && (
+                                        <div>
+                                          <strong style={{ color: '#1e293b' }}>Cellular Target:</strong> {api.cellularTarget}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {api.mechanismOfAction && (
+                                      <div style={{ fontSize: '0.73rem', color: '#334155', lineHeight: 1.45, background: '#ffffff', padding: '6px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                                        <strong style={{ color: '#0f172a' }}>Mechanism of Action:</strong> {api.mechanismOfAction}
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>
-
-                              {/* Line 3: Mechanism of Action (Crucial for Physician) */}
-                              {api.mechanismOfAction && (
-                                <div style={{ fontSize: '0.75rem', color: '#334155', lineHeight: 1.45, background: '#ffffff', padding: '6px 10px', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
-                                  <strong style={{ color: '#0f172a' }}>Mechanism of Action:</strong> {api.mechanismOfAction}
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
 

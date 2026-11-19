@@ -7650,6 +7650,7 @@ export default function DoctorPublicPortalClient({
           {/* ── View 3: Associated Clinical Prescriptions Dossier (Modularized) ── */}
           {activeAnchor === 'prescriptions' && (
             <DoctorPrescriptionsTab
+              lang={lang}
               lastRefreshed={lastRefreshed}
               handleRefresh={handleRefresh}
               searchQuery={searchQuery}
