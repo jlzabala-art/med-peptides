@@ -277,17 +277,15 @@ export default function PharmapolisLabelSvg({
   const patientTextY = isShort ? 42 : 48;
   const fileNumber = labelData.fileNumber || labelData.fileNo || labelData.rxCode || labelData.id || '51857';
 
-  // Extract multi-part prescription badge (e.g. "PART 1 OF 2")
-  const rawPart = labelData.partLabel || labelData.partTag || (labelData.totalParts > 1 ? `Part ${(Number(labelData.partIndex ?? labelData.phaseIndex ?? 0)) + 1} of ${labelData.totalParts}` : '');
+  // Rule #71: Never display redundant "PART X OF Y" badges on patient labels
+  const rawPart = labelData.partLabel || labelData.partTag || '';
   let partBadge = '';
   if (rawPart) {
-    const match = String(rawPart).match(/part\s*(\d+)(?:\s*(?:\/|of)\s*(\d+))?/i);
-    if (match) {
-      const pNum = match[1];
-      const pTot = match[2] || (labelData.totalParts ? String(labelData.totalParts) : '2');
-      partBadge = `PART ${pNum} OF ${pTot}`;
-    } else {
-      partBadge = String(rawPart).toUpperCase().trim();
+    const cleanedPart = String(rawPart)
+      .replace(/part\s*\d+(?:\s*(?:\/|of)\s*\d+)?\s*(?:·|-|\|)?\s*/gi, '')
+      .trim();
+    if (cleanedPart) {
+      partBadge = cleanedPart.toUpperCase();
     }
   }
 
@@ -331,7 +329,9 @@ export default function PharmapolisLabelSvg({
   const headerBadgeText = React.useMemo(() => {
     if (labelData.showHeaderBadge === false) return '';
     const raw = typeof labelData.customHeaderBadge === 'string'
-      ? labelData.customHeaderBadge.trim()
+      ? labelData.customHeaderBadge
+          .replace(/part\s*\d+(?:\s*(?:\/|of)\s*\d+)?\s*(?:·|-|\|)?\s*/gi, '')
+          .trim()
       : autoHeaderBadgeText;
     if (isMono && raw) {
       return raw.replace(/(?:☀️|🌙|🌅)/g, '').replace(/\s*·\s*·\s*/g, ' · ').trim();

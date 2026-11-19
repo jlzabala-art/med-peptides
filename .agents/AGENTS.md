@@ -697,6 +697,7 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Jerarquía de cabecera discreta**: El nombre de la farmacia dispensadora (`PHARMAPOLIS COMPOUNDING PHARMACY`) y su dirección deben renderizarse con tipografía moderada/pequeña en [`PharmapolisLabelSvg.jsx`](file:///Users/joseluiszabala/regenpept-web.nosync/src/components/prescription/PharmapolisLabelSvg.jsx) para priorizar el nombre del paciente, la fórmula y el QR de refill.
 - **Nombre del paciente directo (sin prefijo `PATIENT:`)**: Toda etiqueta generada o importada debe mostrar directamente el nombre completo del paciente sin la palabra `PATIENT:` delante, limpiando cualquier prefijo residual en los datos importados.
 - **Separación visual destacada bajo `SCAN FOR REFILL`**: Debe existir un margen vertical amplio (`≥ 40px` en coordenadas SVG) entre el botón/pill `SCAN FOR REFILL` y el bloque `DISPENSING SPECS` inferior para dirigir la atención del paciente hacia el escaneo de reposición.
+- **Sin badges innecesarios de `PART X OF Y`**: Nunca renderizar etiquetas `PART 1 OF 2` / `PART 1 OF 3` en las etiquetas de farmacia; conservar únicamente indicaciones clínicas útiles (p. ej. `NIGHT / BEDTIME`, `MORNING`, `REFILL #...`) cuando apliquen.
 
 
 
