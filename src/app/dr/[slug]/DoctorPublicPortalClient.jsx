@@ -5569,13 +5569,15 @@ export default function DoctorPublicPortalClient({
         onSwitchRx={() => handleSidebarNavigate('prescriptions')}
         rxSwitcherCount={quickCounts.pending}
         banner={
-          <NominalWelcomeBanner
-            recipientName={isAuthorizedViewer ? (doctor?.name || 'Doctor') : (doctor?.clinic || `Doctor #${doctor?.opaqueCode || slug}`)}
-            role="doctor"
-            clinicName={doctor?.clinic}
-            sessionDuration="90 days"
-            storageKey={`atlas_welcome_doctor_${slug}`}
-          />
+          isAuthorizedViewer ? (
+            <NominalWelcomeBanner
+              recipientName={doctor?.name || 'Doctor'}
+              role="doctor"
+              clinicName={doctor?.clinic}
+              sessionDuration="90 days"
+              storageKey={`atlas_welcome_doctor_${slug}`}
+            />
+          ) : null
         }
       />
 
@@ -6501,9 +6503,14 @@ export default function DoctorPublicPortalClient({
           {activeAnchor === 'overview' && (
             <div id="overview" style={{ marginBottom: '24px' }}>
               <DoctorTeamAccessBanner
+                doctorSlug={slug || propSlug}
                 isAuthorizedViewer={isAuthorizedViewer}
                 viewerRole={viewerRole}
                 onSetViewerRole={setViewerRole}
+                onQuickUnlocked={(role) => {
+                  setWorkstationAuthorized(true);
+                  if (role) setViewerRole(role);
+                }}
                 onOpenMagicLogin={() => setIsClaimModalOpen(true)}
                 onOpenAssistantQueue={() => handleSidebarNavigate(filteredTasks.length > 0 ? 'tasks' : 'prescriptions')}
                 onOpenDoctorSignOff={() => handleSidebarNavigate('tasks')}
@@ -8012,7 +8019,15 @@ export default function DoctorPublicPortalClient({
                 handleRefresh={handleRefresh}
                 isSwitchingDoctor={isSwitchingDoctor}
               />
-              <GenomicsExplainerVideoCard showAllTabs={true} lang={lang} />
+              <GenomicsExplainerVideoCard
+                assistantKey={
+                  ['trichology', 'dermatology'].includes(doctorSpecialtyIntel?.specialtyCategory)
+                    ? 'skin-and-hair'
+                    : 'skin-and-hair'
+                }
+                showAllTabs={!['trichology', 'dermatology'].includes(doctorSpecialtyIntel?.specialtyCategory)}
+                lang={lang}
+              />
             </div>
           )}
 

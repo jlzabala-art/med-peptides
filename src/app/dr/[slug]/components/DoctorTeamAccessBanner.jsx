@@ -1,30 +1,77 @@
 'use client';
 
-import React from 'react';
-import { Lock, Sparkles, UserCheck, Stethoscope, ClipboardList, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Lock, Sparkles, UserCheck, Stethoscope, ClipboardList, ArrowRight, Mail, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 /**
  * DoctorTeamAccessBanner
  * ─────────────────────────────────────────────────────────────────────────────
  * Modular GCP-style banner for /dr/[slug]:
- *  - When unauthenticated: Frictionless 1-Tap Magic Link CTA for Doctor & Assistant.
+ *  - When unauthenticated: Instant 1-step Clinic Email unlock (for Doctor or Assistant)
+ *    plus 1-Tap Magic Link fallback.
  *  - When authenticated: Quick role switcher between Assistant Prep Mode (follow-ups,
  *    portal invites, refills) and Doctor Sign-Off Mode (batch signature queue).
  */
 export default function DoctorTeamAccessBanner({
+  doctorSlug = '',
   isAuthorizedViewer = false,
   viewerRole = 'doctor',
   onSetViewerRole,
+  onQuickUnlocked,
   onOpenMagicLogin,
   onOpenAssistantQueue,
   onOpenDoctorSignOff,
   pendingTasksCount = 0,
   refillsDueCount = 0,
 }) {
+  const [emailInput, setEmailInput] = useState('');
+  const [isUnlocking, setIsUnlocking] = useState(false);
+
+  const handleQuickEmailUnlock = async (e) => {
+    e.preventDefault();
+    const cleanEmail = emailInput.trim();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      toast.error('Enter your registered clinic or assistant email.');
+      return;
+    }
+
+    setIsUnlocking(true);
+    try {
+      const res = await fetch('/api/doctor/quick-email-unlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ doctorSlug, email: cleanEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.authorized) {
+        throw new Error(data?.error || 'Could not verify email.');
+      }
+
+      if (data.workstationToken) {
+        try {
+          localStorage.setItem('atlas_workstation_session', data.workstationToken);
+        } catch (err) {
+          console.debug('Could not save workstation session:', err);
+        }
+      }
+      onQuickUnlocked?.(data.viewerRole || 'doctor');
+      toast.success(
+        data.viewerRole === 'assistant'
+          ? 'Unlocked in Assistant Mode (90 days).'
+          : 'Portal unlocked for 90 days!'
+      );
+    } catch (err) {
+      toast.error(err.message || 'Verification failed.');
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
   if (!isAuthorizedViewer) {
     return (
       <section
-        aria-label="1-Tap Practice and Assistant Access"
+        aria-label="1-Step Practice and Assistant Access"
         style={{
           marginBottom: '16px',
           padding: '12px 16px',
@@ -38,7 +85,7 @@ export default function DoctorTeamAccessBanner({
           gap: '12px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '240px', flex: '1 1 320px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '240px', flex: '1 1 280px' }}>
           <div
             style={{
               width: '34px',
@@ -56,23 +103,59 @@ export default function DoctorTeamAccessBanner({
           </div>
           <div>
             <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
-              Patient Names Masked · 1-Tap Access for Physician &amp; Medical Assistant
+              Patient Names Masked · Instant Clinic Email Unlock
             </div>
             <div style={{ fontSize: '0.75rem', color: '#475569', marginTop: '2px' }}>
-              No password needed. Unlock full patient dossiers, refill reminders, and WhatsApp follow-ups for 90 days on this clinic browser.
+              Enter your registered clinic or assistant email to unlock patient names for 90 days — no password needed.
             </div>
           </div>
         </div>
 
-        <button
-          type="button"
-          className="gcp-btn-primary"
-          onClick={onOpenMagicLogin}
-          style={{ fontSize: '0.78rem', padding: '8px 14px', whiteSpace: 'nowrap' }}
+        <form
+          onSubmit={handleQuickEmailUnlock}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: '1 1 320px', justifyContent: 'flex-end' }}
         >
-          <Sparkles size={14} />
-          <span>1-Tap Login (Doctor / Assistant)</span>
-        </button>
+          <div style={{ position: 'relative', minWidth: '210px', flex: '1 1 210px', maxWidth: '280px' }}>
+            <Mail size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+            <input
+              type="email"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              placeholder="clinic@email.com"
+              aria-label="Registered clinic or assistant email"
+              style={{
+                width: '100%',
+                height: '36px',
+                padding: '0 10px 0 32px',
+                borderRadius: '7px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                fontSize: '0.80rem',
+                color: '#0f172a',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isUnlocking}
+            className="gcp-btn-primary"
+            style={{ fontSize: '0.78rem', height: '36px', padding: '0 14px', whiteSpace: 'nowrap' }}
+          >
+            {isUnlocking ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+            <span>{isUnlocking ? 'Verifying...' : 'Unlock'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenMagicLogin}
+            className="gcp-btn-secondary"
+            style={{ fontSize: '0.76rem', height: '36px', padding: '0 11px', whiteSpace: 'nowrap' }}
+          >
+            <span>WhatsApp Link</span>
+          </button>
+        </form>
       </section>
     );
   }

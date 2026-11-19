@@ -839,7 +839,7 @@ export default function DoctorRecommendationsTab({
               <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                 Specialty Vertical:
               </span>
-              {SPECIALTY_VERTICALS.map((vert) => {
+              {SPECIALTY_VERTICALS.filter((vert) => specialtyIntel.specialtyCategory === vert.key).map((vert) => {
                 const isSelected = selectedSpecialtyKey === vert.key;
                 const isDoctorPrimary = specialtyIntel.specialtyCategory === vert.key;
                 return (
@@ -885,24 +885,6 @@ export default function DoctorRecommendationsTab({
                   </button>
                 );
               })}
-              <button
-                type="button"
-                onClick={() => setSelectedSpecialtyKey('all')}
-                style={{
-                  height: '28px',
-                  padding: '0 10px',
-                  borderRadius: '4px',
-                  border: selectedSpecialtyKey === 'all' ? '1px solid #1a73e8' : '1px solid #dadce0',
-                  background: selectedSpecialtyKey === 'all' ? '#e8f0fe' : '#ffffff',
-                  color: selectedSpecialtyKey === 'all' ? '#1a73e8' : '#3c4043',
-                  fontSize: '0.74rem',
-                  fontWeight: selectedSpecialtyKey === 'all' ? 600 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                All Specialties ({Object.values(SPECIALTY_BLUEPRINTS_CATALOG).flat().length})
-              </button>
             </div>
           </div>
 
