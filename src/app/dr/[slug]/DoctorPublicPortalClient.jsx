@@ -135,28 +135,22 @@ const EditTreatmentDurationModal = dynamic(
   { ssr: false }
 );
 const DoctorRecommendationsTab = dynamic(
-  () => import('@/components/doctor/tabs/DoctorRecommendationsTab'),
-  { ssr: false }
+  () => import('@/components/doctor/tabs/DoctorRecommendationsTab')
 );
 const DoctorTasksTab = dynamic(
-  () => import('@/components/doctor/tabs/DoctorTasksTab'),
-  { ssr: false }
+  () => import('@/components/doctor/tabs/DoctorTasksTab')
 );
 const DoctorPrescriptionsTab = dynamic(
-  () => import('@/components/doctor/tabs/DoctorPrescriptionsTab'),
-  { ssr: false }
+  () => import('@/components/doctor/tabs/DoctorPrescriptionsTab')
 );
 const DoctorLabResultsTab = dynamic(
-  () => import('@/components/doctor/tabs/DoctorLabResultsTab'),
-  { ssr: false }
+  () => import('@/components/doctor/tabs/DoctorLabResultsTab')
 );
 const DoctorDnaAnalysisTab = dynamic(
-  () => import('@/components/doctor/tabs/DoctorDnaAnalysisTab'),
-  { ssr: false }
+  () => import('@/components/doctor/tabs/DoctorDnaAnalysisTab')
 );
 const DoctorDiagnosticsTab = dynamic(
-  () => import('@/components/doctor/tabs/DoctorDiagnosticsTab'),
-  { ssr: false }
+  () => import('@/components/doctor/tabs/DoctorDiagnosticsTab')
 );
 const DoctorMonographDrawer = dynamic(
   () => import('@/components/doctor/modals/DoctorMonographDrawer'),
