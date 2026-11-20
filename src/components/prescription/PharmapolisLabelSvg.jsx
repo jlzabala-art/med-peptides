@@ -505,8 +505,15 @@ export default function PharmapolisLabelSvg({
       ? rawExtraAppInstructions
       : (rawExtraAppInstructions || embeddedExtra);
     const appSummary = summarizeApplicationInstructions(extraSource, basePosology);
-    return appSummary ? `${basePosology} ${appSummary}` : basePosology;
-  }, [rawDirections, rawExtraAppInstructions]);
+    if (appSummary) return `${basePosology} ${appSummary}`;
+    const isHormoneOrTransdermal = /\b(transdermal|cream|pentravan|dhea|testosterone|estradiol|estriol|progesterone|hormone|bhrt|pessar|vaginal)\b/i.test(
+      `${productTitle} ${vehicleSearchCorpus} ${basePosology}`
+    );
+    if (isHormoneOrTransdermal && !/clinic\s+prescription|full\s+application/i.test(basePosology)) {
+      return `${basePosology} Follow full application instructions in your clinic prescription.`;
+    }
+    return basePosology;
+  }, [rawDirections, rawExtraAppInstructions, productTitle, vehicleSearchCorpus]);
   const warnings = labelData.warnings || labelData.warning || 'For external / patient use only. Keep out of reach of children.';
   const formatLabelDate = (val, fallback = '15-09-2026') => {
     if (!val) return fallback;
@@ -557,17 +564,17 @@ export default function PharmapolisLabelSvg({
       ? Math.round(headerTitleSize * 0.84)
       : headerTitleSize;
 
-  // Unique QR URL strictly bound to this prescription (pointing to public patient refill view)
+  // Unique QR URL strictly bound to this prescription & exact formulation (pointing to public patient refill view)
   const targetRxUrl = React.useMemo(() => {
     if (labelData.targetRxUrl) return labelData.targetRxUrl;
     if (labelData.url) return labelData.url;
-    const base = `https://www.atlashealth-services.com/rx/${fileNumber}?view=patient`;
+    const cleanCode = encodeURIComponent(String(fileNumber || 'RX').replace(/^#/, '').trim());
+    const base = `https://www.atlashealth-services.com/rx/${cleanCode}?view=patient`;
     const pIdx = labelData.partIndex ?? labelData.phaseIndex;
-    if (pIdx !== undefined && pIdx !== null && labelData.totalParts > 1) {
-      return `${base}&part=${Number(pIdx) + 1}&action=refill`;
-    }
-    return `${base}&action=refill`;
-  }, [labelData.targetRxUrl, labelData.url, fileNumber, labelData.partIndex, labelData.phaseIndex, labelData.totalParts]);
+    const partParam = pIdx !== undefined && pIdx !== null ? `&part=${Number(pIdx) + 1}` : '';
+    const productParam = productTitle ? `&product=${encodeURIComponent(productTitle)}` : '';
+    return `${base}${partParam}${productParam}&action=refill`;
+  }, [labelData.targetRxUrl, labelData.url, fileNumber, labelData.partIndex, labelData.phaseIndex, productTitle]);
   const cleanDisplayUrl = targetRxUrl.replace(/^https?:\/\//, '');
 
   // Secondary QR URL pointing to Clinical Product Monograph / Patient Guide

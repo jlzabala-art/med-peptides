@@ -47,6 +47,7 @@ import {
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import ExpressQrRefillCard from '@/components/prescription/ExpressQrRefillCard';
 import { RotateCcw, RefreshCw, Home, Loader2, AlertTriangle, MessageCircle, Lock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -133,6 +134,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
   const searchParams = useSearchParams();
   const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
+  const actionParam = searchParams?.get('action') || '';
+  const partParam = searchParams?.get('part') ? Number(searchParams.get('part')) : null;
+  const productParam = searchParams?.get('product') || '';
   const defaultIsPatientView = viewParam === 'patient' || (!isAuthorizedViewer && viewParam !== 'doctor');
   const [overrideView, setOverrideView] = useState(null); // 'patient' | 'doctor' | null
   const isPatientView = overrideView ? overrideView === 'patient' : defaultIsPatientView;
@@ -755,6 +759,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 setSelectedPhase={setSelectedPhase}
                 setExpandedSections={setExpandedSections}
               />
+
+              {/* ── Express QR Refill Card (Always shown when patient scans SCAN FOR REFILL QR) ── */}
+              {actionParam === 'refill' && (
+                <ExpressQrRefillCard
+                  rxCode={rxId || currentRx?.code || ''}
+                  formulations={compoundedFormulations}
+                  initialPartNumber={partParam}
+                  initialProductName={productParam}
+                  defaultContact={currentRx?.patient?.phone || currentRx?.patient?.email || ''}
+                  isEs={isEs}
+                />
+              )}
 
               {/* ── Patient Action & Refill Banner Card (Shown at top ONLY if refill is due or already dispensed) ── */}
               {(!isPatientView || isDispensed || currentRx?.isRefillDue) && (

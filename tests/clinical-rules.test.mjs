@@ -168,3 +168,17 @@ test('DNA Profile Resolver: TrichoTest/TeloTest/AcneTest never show Nutrigenomic
   assert.equal(JSON.stringify(tricho).includes('MCM6'), false, 'TrichoTest must not show lactose MCM6');
   assert.equal(JSON.stringify(tricho).includes('ADORA2A'), false, 'TrichoTest must not show caffeine ADORA2A');
 });
+
+test('QR Refill Flow: deep-links product+part, renders ExpressQrRefillCard, and notifies Atlas via /request-refill', () => {
+  const svgSrc = read('src/components/prescription/PharmapolisLabelSvg.jsx');
+  assert.ok(svgSrc.includes('&action=refill'), 'QR URL must include action=refill');
+  assert.ok(svgSrc.includes('&product=${encodeURIComponent(productTitle)}'), 'QR URL must bind exact product title');
+
+  const rxClientSrc = read('src/app/rx/[code]/PublicPrescriptionClient.jsx');
+  assert.ok(rxClientSrc.includes('ExpressQrRefillCard'), 'PublicPrescriptionClient must render ExpressQrRefillCard');
+  assert.ok(rxClientSrc.includes("actionParam === 'refill'"), 'Must show ExpressQrRefillCard when QR action=refill is scanned');
+
+  const apiSrc = read('src/app/api/prescriptions/[code]/request-refill/route.js');
+  assert.ok(apiSrc.includes("targetRoles: ['admin', 'doctor']"), 'Must notify Atlas admin and doctor in Firestore notifications');
+  assert.ok(apiSrc.includes('mail_notifications'), 'Must log email alert in mail_notifications');
+});
