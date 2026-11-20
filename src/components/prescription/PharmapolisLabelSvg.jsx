@@ -102,6 +102,60 @@ export function computeDefaultHeaderBadge(rawLabelData = {}, fallbackPartIndex =
   return '';
 }
 
+/**
+ * Summarizes additional doctor-provided application method instructions into a concise
+ * patient-facing addendum that fits inside the prescribed posology box.
+ */
+export function summarizeApplicationInstructions(extraInput, baseDirections = '', maxChars = 190) {
+  if (!extraInput) return '';
+  const rawItems = Array.isArray(extraInput)
+    ? extraInput
+    : String(extraInput)
+        .replace(/application\s*instructions\s*:/gi, '\n')
+        .split(/\r?\n|[•▪]/);
+
+  const baseNorm = String(baseDirections || '').toLowerCase();
+  const condensed = [];
+
+  for (const item of rawItems) {
+    let line = String(item || '')
+      .replace(/^[\s•*\-–\d.)]+/, '')
+      .trim();
+    if (!line || line.length < 4) continue;
+
+    line = line
+      .replace(/^preferred\s+sites?\s*:\s*/i, 'Sites: ')
+      .replace(/\ballow\s+(?:the\s+)?(?:cream|gel|solution|lotion)\s+to\s+dry\s+completely\s+before\s+dressing\b/gi, 'Let dry before dressing')
+      .replace(/\bavoid\s+washing\s+or\s+wetting\s+(?:the\s+)?application\s+area\s+for\s+(?:at\s+least\s+)?(\d+\s*(?:h|hours?|hrs?))\s*(?:after\s+application)?/gi, 'No washing for $1')
+      .replace(/\bwash\s+hands\s+(?:thoroughly\s+)?(?:with\s+soap\s+and\s+water\s+)?(?:immediately\s+)?after\s+application\b/gi, 'Wash hands after use')
+      .replace(/\bavoid\s+direct\s+skin-to-skin\s+contact(?:\s+between\s+the\s+treated\s+area\s+and\s+other\s+people)?[.,;]?\s*(?:keep\s+(?:the\s+)?(?:application\s+)?area\s+covered(?:,?\s*particularly\s+around\s+children)?)?/gi, 'Avoid skin contact; cover around children')
+      .replace(/\bdo\s+not\s+apply\s+to\s+irritated\s+or\s+damaged\s+skin\b/gi, 'Avoid broken/irritated skin')
+      .replace(/\brotate\s+application\s+sites\s+daily\b/gi, 'Rotate sites daily')
+      .replace(/\.+$/, '')
+      .trim();
+
+    if (!line) continue;
+    // Skip if already essentially stated in baseDirections
+    const keySlice = line.toLowerCase().slice(0, 24);
+    if (keySlice.length >= 10 && baseNorm.includes(keySlice)) continue;
+    if (!condensed.some((c) => c.toLowerCase() === line.toLowerCase())) {
+      condensed.push(line);
+    }
+  }
+
+  if (condensed.length === 0) return '';
+  let summary = '';
+  for (const clause of condensed) {
+    const next = summary ? `${summary}; ${clause}` : clause;
+    if (next.length > maxChars) break;
+    summary = next;
+  }
+  if (!summary) {
+    summary = condensed[0].slice(0, maxChars - 1).trim();
+  }
+  return summary.endsWith('.') ? summary : `${summary}.`;
+}
+
 function VectorGlyph({ type, size = 16, fill = '#ffffff' }) {
   if (type === 'sun') {
     return (
@@ -391,25 +445,49 @@ export default function PharmapolisLabelSvg({
   const resolvedPatientLabelFontSize = Math.max(18, Math.floor(patientLabelFontSize * patientScaleRatio));
   const resolvedPatientNameFontSize = Math.max(19, Math.floor(patientNameFontSize * patientScaleRatio));
 
+  // Rule #71: Strip any "Part 1", "Part 2", "Part 3", "Part 4", "Parte X", "PART X OF Y" prefixes/tokens
   const rawBaseTitle = (labelData.productTitle || labelData.productName || '')
+    .replace(/\b(?:part|parte)\s*\d+(?:\s*(?:\/|of|de)\s*\d+)?\s*(?:·|:|-|\|)?\s*/gi, '')
     .replace(/\s*\((?:recommended|recomendad[oa])[^)]*\)/gi, '')
     .replace(/\bhygrocaps?\b/gi, 'Capsules')
     .replace(/\(\s*capsules?\s*\)/gi, '')
     .trim();
   const vehicleSearchCorpus = `${labelData.vehicle || ''} ${labelData.base || ''} ${labelData.dispensingForm || ''} ${labelData.formula || ''} ${labelData.subTitle || ''}`;
   const matchedTrichoVehicle = vehicleSearchCorpus.match(/\b(TrichoSol|TrichoOil|TrichoFoam|TrichoWash|TrichoSerum|TrichoCond)\b/i);
-  const isGenericTopicalTitle = /^(topical\s+treatment|tratamiento\s+t[óo]pico|scalp\s+care(?:\s+and\s+hygiene)?|topical\s+solution)$/i.test(rawBaseTitle);
+  const isGenericTopicalTitle =
+    /^(?:topical|scalp)(?:\s+(?:treatment|follicular|precision|therapy|care|and|hygiene|solution|wash|foam|serum|oil|lotion))+(?:\s*\([^)]*\))?$/i.test(rawBaseTitle) ||
+    /^(?:tratamiento\s+t[óo]pico|lavado\s+t[óo]pico)$/i.test(rawBaseTitle);
   const isGenericOralTitle = /^(oral\s+treatment|tratamiento\s+oral)$/i.test(rawBaseTitle);
-  const resolvedProductTitle = (isGenericTopicalTitle && matchedTrichoVehicle)
-    ? matchedTrichoVehicle[1]
-    : isGenericOralTitle
-      ? 'Oral Capsules'
-      : (rawBaseTitle || 'Compounded Pharmaceutical Protocol');
+  const isTrichoWashProduct =
+    /trichowash/i.test(rawBaseTitle) ||
+    (isGenericTopicalTitle && /^trichowash$/i.test(matchedTrichoVehicle?.[1] || ''));
+  const resolvedProductTitle = isTrichoWashProduct
+    ? 'TrichoWash Shampoo 250ml'
+    : (isGenericTopicalTitle && matchedTrichoVehicle)
+      ? matchedTrichoVehicle[1]
+      : isGenericOralTitle
+        ? 'Oral Capsules'
+        : (rawBaseTitle || 'Compounded Pharmaceutical Protocol');
   const productTitle = resolvedProductTitle;
   const formula = labelData.formula || '';
   const rawDirections = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
+  const rawExtraAppInstructions =
+    labelData.applicationInstructions ||
+    labelData.additionalInstructions ||
+    labelData.applicationMethod ||
+    labelData.patientInstructions ||
+    labelData.applicationNotes ||
+    '';
   const directions = React.useMemo(() => {
-    let d = String(rawDirections).trim();
+    let rawStr = String(rawDirections).trim();
+    let embeddedExtra = '';
+    const appSplit = rawStr.match(/^(.*?)(?:\n|\s)*(?:application\s*instructions|additional\s*instructions|application\s*method)\s*:\s*([\s\S]+)$/i);
+    if (appSplit) {
+      rawStr = appSplit[1].trim();
+      embeddedExtra = appSplit[2].trim();
+    }
+
+    let d = rawStr;
     // Normalize and remove redundant prefixes like "[Anti-hair loss]: " or "Directions for use: "
     d = d.replace(/^\[[^\]]+\]:\s*/i, '').trim();
     d = d.replace(/^(?:(?:directions\s*(?:for\s*use)?|indicaciones(?:\s*de\s*uso)?|posolog[íi]a|instrucciones|instructions):\s*)+/i, '').trim();
@@ -421,8 +499,14 @@ export default function PharmapolisLabelSvg({
     d = d.replace(/[,.]?\s*as\s+prescribed\.?$/i, '').trim();
     d = d.replace(/\.{2,}/g, '.').trim();
     if (d && !d.endsWith('.')) d += '.';
-    return d || 'Take / apply as directed by prescribing physician.';
-  }, [rawDirections]);
+    const basePosology = d || 'Take / apply as directed by prescribing physician.';
+
+    const extraSource = (Array.isArray(rawExtraAppInstructions) && rawExtraAppInstructions.length > 0)
+      ? rawExtraAppInstructions
+      : (rawExtraAppInstructions || embeddedExtra);
+    const appSummary = summarizeApplicationInstructions(extraSource, basePosology);
+    return appSummary ? `${basePosology} ${appSummary}` : basePosology;
+  }, [rawDirections, rawExtraAppInstructions]);
   const warnings = labelData.warnings || labelData.warning || 'For external / patient use only. Keep out of reach of children.';
   const formatLabelDate = (val, fallback = '15-09-2026') => {
     if (!val) return fallback;
@@ -1130,12 +1214,12 @@ export default function PharmapolisLabelSvg({
                 />
               </svg>
 
-              {/* High-Attention Prominent CTA Pill under Refill QR */}
+              {/* High-Attention Prominent CTA Pill under Refill QR (full frame width, bigger font, no prefix symbol) */}
               {(() => {
-                const ctaX = 12;
-                const ctaW = leftColWidth - 24;
-                const ctaH = isShort ? 26 : 30;
-                const ctaY = qrY + backQrSize + (isShort ? 5 : 7);
+                const ctaX = 8;
+                const ctaW = leftColWidth - 16;
+                const ctaH = isShort ? 30 : 34;
+                const ctaY = qrY + backQrSize + (isShort ? 6 : 8);
                 return (
                   <g>
                     <rect
@@ -1159,26 +1243,27 @@ export default function PharmapolisLabelSvg({
                       />
                     )}
                     <text
-                      x={Math.round(leftColWidth / 2) + (isMono ? 0 : 2)}
-                      y={ctaY + Math.round(ctaH * 0.68)}
+                      x={Math.round(leftColWidth / 2)}
+                      y={ctaY + Math.round(ctaH * 0.70)}
                       textAnchor="middle"
                       fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-                      fontSize={isShort ? 12 : 13.5}
+                      fontSize={isShort ? 15.5 : 17.5}
                       fontWeight="900"
                       fill="#ffffff"
-                      letterSpacing="0.65"
+                      textLength={ctaW - 14}
+                      lengthAdjust="spacingAndGlyphs"
                     >
-                      {isMono ? '▶ SCAN FOR REFILL' : '✔ SCAN FOR REFILL'}
+                      SCAN FOR REFILL
                     </text>
                     <text
                       x={Math.round(leftColWidth / 2)}
-                      y={ctaY + ctaH + (isShort ? 14 : 16)}
+                      y={ctaY + ctaH + (isShort ? 16 : 18)}
                       textAnchor="middle"
                       fontFamily="Arial, Helvetica, -apple-system, sans-serif"
-                      fontSize={isShort ? 9.5 : 10.5}
-                      fontWeight="700"
-                      fill={isMono ? '#333333' : '#0369a1'}
-                      letterSpacing="0.25"
+                      fontSize={isShort ? 11 : 12.5}
+                      fontWeight="800"
+                      fill={isMono ? '#111111' : '#0369a1'}
+                      letterSpacing="0.2"
                     >
                       Scan QR to reorder
                     </text>
@@ -1193,42 +1278,42 @@ export default function PharmapolisLabelSvg({
             <rect x="0" y="0" width={leftColWidth} height={colHeight} rx="8" />
           </clipPath>
 
-          {/* Dispensing & Technical Packaging Specs (Unified Alignment & Zero-Overflow Budget Engine) */}
+          {/* Dispensing & Technical Packaging Specs (anchored to bottom so Refill QR stays maximally visible) */}
           {(() => {
-            const railPadX = 12;
+            const railPadX = 10;
             const railInnerW = leftColWidth - (railPadX * 2);
             const effectiveVol = cleanVolForVeh || volume || '100 mL';
             const volLines = wrapLines(effectiveVol, 16);
 
-            // Specs origin: generous breathing room beneath SCAN FOR REFILL CTA so the refill callout stands out
-            const ctaBlockBottom = qrY + backQrSize + (isShort ? 70 : 86);
-            const specsOriginY = isDualQrMode
+            // Minimum safe Y below Refill QR + CTA + "Scan QR to reorder"
+            const ctaBlockBottom = qrY + backQrSize + (isShort ? 74 : 90);
+            const minSpecsTop = isDualQrMode
               ? qrY + (backQrSize * 2) + (isShort ? 82 : 98)
               : ctaBlockBottom;
 
-            const railAvailableH = Math.max(90, colHeight - specsOriginY - 8);
-            const headerBadgeH = isShort ? 20 : 22;
-            const pillH = isShort ? 22 : 25;
+            const maxAvailableH = Math.max(90, colHeight - minSpecsTop - 8);
+            const headerBadgeH = isShort ? 18 : 20;
+            const pillH = isShort ? 20 : 23;
 
-            const volTitleY = headerBadgeH + (isShort ? 15 : 18);
-            const firstVolLineY = volTitleY + (isShort ? 16 : 19);
-            const volLineGap = isShort ? 16 : 19;
-            const volBlockBottom = firstVolLineY + ((volLines.length - 1) * volLineGap) + (isShort ? 6 : 8);
+            const volTitleY = headerBadgeH + (isShort ? 13 : 15);
+            const firstVolLineY = volTitleY + (isShort ? 14 : 17);
+            const volLineGap = isShort ? 14 : 17;
+            const volBlockBottom = firstVolLineY + ((volLines.length - 1) * volLineGap) + (isShort ? 5 : 6);
 
-            const storageTitleY = volBlockBottom + (isShort ? 14 : 18);
-            const storageStartRelY = storageTitleY + (isShort ? 14 : 16);
-            const maxStorageAndPillH = Math.max(46, railAvailableH - storageStartRelY - pillH - 8);
+            const storageTitleY = volBlockBottom + (isShort ? 12 : 15);
+            const storageStartRelY = storageTitleY + (isShort ? 13 : 15);
+            const maxStorageAndPillH = Math.max(40, maxAvailableH - storageStartRelY - pillH - 6);
 
-            // Auto-fit storage font & line-wrapping to strictly guarantee zero overflow of PROTECT FROM LIGHT pill
-            const storageCandidates = isShort ? [12, 11, 10, 9.2] : [13, 12, 11, 10];
+            // Auto-fit storage font & line-wrapping
+            const storageCandidates = isShort ? [11, 10, 9.2, 8.5] : [12, 11, 10, 9.2];
             let storageFontSize = storageCandidates[storageCandidates.length - 1];
-            let storageLineGap = Math.round(storageFontSize * 1.32);
+            let storageLineGap = Math.round(storageFontSize * 1.28);
             let storageLines = [];
 
             for (const candFs of storageCandidates) {
-              const candMaxChars = Math.max(17, Math.floor(railInnerW / (candFs * 0.56)));
+              const candMaxChars = Math.max(18, Math.floor(railInnerW / (candFs * 0.56)));
               const candLines = wrapLines(resolvedStorageText, candMaxChars);
-              const candGap = Math.round(candFs * 1.32);
+              const candGap = Math.round(candFs * 1.28);
               const candH = ((candLines.length - 1) * candGap) + Math.round(candFs * 1.1);
               if (candH <= maxStorageAndPillH || candFs === storageCandidates[storageCandidates.length - 1]) {
                 storageFontSize = candFs;
@@ -1239,9 +1324,14 @@ export default function PharmapolisLabelSvg({
             }
 
             const storageTextBottom = storageStartRelY + ((Math.max(1, storageLines.length) - 1) * storageLineGap) + Math.round(storageFontSize * 0.45);
-            const maxPillY = Math.max(storageTextBottom + 6, railAvailableH - pillH);
-            const pillY = Math.min(maxPillY, storageTextBottom + (isShort ? 8 : 11));
-            const clampedPillY = Math.min(pillY, Math.max(storageTextBottom + 4, railAvailableH - pillH));
+            const pillRelY = storageTextBottom + (isShort ? 6 : 8);
+            const totalSpecsH = pillRelY + pillH;
+
+            // Anchor DISPENSING SPECS & STORAGE & HANDLING to the bottom of the left column
+            const specsOriginY = Math.max(minSpecsTop, colHeight - totalSpecsH - 8);
+            const railAvailableH = Math.max(90, colHeight - specsOriginY - 8);
+            const maxPillY = Math.max(storageTextBottom + 4, railAvailableH - pillH);
+            const clampedPillY = Math.min(pillRelY, maxPillY);
             const pillFontSize = storagePillBadge.length > 20 ? (isShort ? 8.2 : 9.2) : (isShort ? 9 : 10);
 
             return (

@@ -25,6 +25,13 @@ test('Rule #71: PharmapolisLabelSvg enforces global pharmacy label standards', (
 
   // 5. Must protect transdermal creams from false vaginal classification
   assert.ok(src.includes('isExplicitTransdermal'), 'Must guard against transdermal-to-vaginal misclassification');
+
+  // 6. Must not render ▶ or ✔ before SCAN FOR REFILL, must strip Part N, and must upgrade Topical Wash / Treatment Solution to Tricho*
+  assert.equal(src.includes('▶ SCAN FOR REFILL'), false, 'Must not render ▶ before SCAN FOR REFILL');
+  assert.equal(src.includes('✔ SCAN FOR REFILL'), false, 'Must not render ✔ before SCAN FOR REFILL');
+  assert.ok(src.includes('solution|wash|foam'), 'Must upgrade Topical Wash / Treatment Solution to TrichoWash / TrichoSol');
+  assert.ok(src.includes("'TrichoWash Shampoo 250ml'"), 'Must normalize TrichoWash product name to TrichoWash Shampoo 250ml');
+  assert.ok(src.includes('summarizeApplicationInstructions'), 'Must summarize additional application instructions into posology');
 });
 
 test('Zoho Matcher: isCompatibleZohoMatch blocks multi-API and wrong-route false positives', () => {
