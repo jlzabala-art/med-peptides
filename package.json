@@ -11,7 +11,7 @@
     "build:webpack": "next build --webpack",
     "start": "next start",
     "lint": "eslint src",
-    "test": "node --test tests/clinical-rules.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "audit:rules": "node scripts/audit-golden-rules.mjs",
     "test:routes": "node scripts/validate-navigation-routes.mjs",
     "analyze": "ANALYZE=true next build",

@@ -5,6 +5,9 @@ name: Deploy to Production (Fast Path Cloud Run & Hosting)
       - main
       - master
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

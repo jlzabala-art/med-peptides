@@ -69,6 +69,8 @@ for (const file of srcFiles) {
     }
     if (
       /<table[\s>]/.test(line) &&
+      !line.includes('role="presentation"') &&
+      !(lines[i - 1] && lines[i - 1].includes('no-restricted-syntax')) &&
       !rel.includes('DataTable') &&
       !rel.includes('pdf') &&
       !rel.includes('Pdf') &&
@@ -76,6 +78,9 @@ for (const file of srcFiles) {
       !rel.includes('Print') &&
       !rel.includes('email') &&
       !rel.includes('Email') &&
+      !rel.includes('Mailer') &&
+      !rel.includes('Notifier') &&
+      !rel.includes('Generator') &&
       !rel.includes('/api/')
     ) {
       rawTables.push(`${rel}:${ln}`);

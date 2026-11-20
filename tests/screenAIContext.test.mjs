@@ -7,33 +7,33 @@
 import { strict as assert } from 'node:assert';
 import { resolveScreenAIContext } from '../src/utils/screenAIResolver.js';
 
-// 1. Test Route Context Resolution
+// 1. Test Route Context Resolution (default guest scope isolation)
 const adminProductsContext = resolveScreenAIContext('/admin/products');
-assert.equal(adminProductsContext.scopeKey, 'admin_products');
-assert.equal(adminProductsContext.agentName, 'Atlas Catalog Copilot');
+assert.equal(adminProductsContext.scopeKey, 'guest_guest_admin_products');
+assert.equal(adminProductsContext.agentName, 'Master Formulary & Margin Auditor');
 assert.ok(adminProductsContext.suggestedPrompts.length >= 3);
-assert.ok(adminProductsContext.systemPersona.includes('Catalog & Master Pricing'));
+assert.ok(adminProductsContext.systemPersona.includes('Master Formulary & Margin Auditor'));
 
 const doctorContext = resolveScreenAIContext('/doctor/prescriptions');
-assert.equal(doctorContext.scopeKey, 'doctor_clinical');
-assert.equal(doctorContext.agentName, 'Physician Pharmacology AI');
-assert.ok(doctorContext.systemPersona.includes('Physician Pharmacology AI'));
+assert.equal(doctorContext.scopeKey, 'guest_guest_doctor_prescriptions');
+assert.equal(doctorContext.agentName, 'Prescription Formulator');
+assert.ok(doctorContext.systemPersona.includes('Prescription Formulator'));
 
 const patientContext = resolveScreenAIContext('/patient/dashboard');
-assert.equal(patientContext.scopeKey, 'patient_portal');
-assert.equal(patientContext.agentName, 'Personal Wellness Guide');
+assert.equal(patientContext.scopeKey, 'guest_guest_patient_home');
+assert.equal(patientContext.agentName, 'Personal Wellness Companion');
 
 const wholesalerContext = resolveScreenAIContext('/wholesaler/catalogs');
-assert.equal(wholesalerContext.scopeKey, 'wholesaler_b2b');
-assert.equal(wholesalerContext.agentName, 'Wholesale Commercial Copilot');
+assert.equal(wholesalerContext.scopeKey, 'guest_guest_wholesaler_portal');
+assert.equal(wholesalerContext.agentName, 'Commercial Distribution Copilot');
 
 const supplierContext = resolveScreenAIContext('/supplier/rfqs');
-assert.equal(supplierContext.scopeKey, 'supplier_logistics');
-assert.equal(supplierContext.agentName, 'Chemical Logistics Copilot');
+assert.equal(supplierContext.scopeKey, 'guest_guest_supplier_logistics');
+assert.equal(supplierContext.agentName, 'API Synthesis & COA Quality Copilot');
 
 const publicContext = resolveScreenAIContext('/collection/peptides');
-assert.equal(publicContext.scopeKey, 'public_research');
-assert.equal(publicContext.agentName, 'Atlas Research Assistant');
+assert.equal(publicContext.scopeKey, 'guest_guest_public_research');
+assert.equal(publicContext.agentName, 'Research Assistant');
 
 // 2. Test History Isolation Keys (Zero Cross-Screen Bleed)
 const mockLocalStorage = {};

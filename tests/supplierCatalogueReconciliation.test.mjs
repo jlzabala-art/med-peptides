@@ -4,13 +4,13 @@ import { isVariantMatchingFilter } from '../src/utils/strictFilterEngine.js';
 
 console.log('🧪 Starting Supplier Catalogue & Pricing Tier Reconciler Test Suite...\n');
 
-// ── TEST 1: Independent Explicit Kit Pricing vs Derived Multiplier ────────────
-console.log('▶ Test 1: Preserving Explicit Kit Price (Retatrutide 10mg: $90 unit vs $580 kit-of-10)');
-const retatrutideVariant = {
-  id: 'lotusland-retatrutide-10mg',
+// ── TEST 1: Independent Explicit Kit Pricing vs Lotusland Dynamic Margin Rule ──
+console.log('▶ Test 1: Preserving Explicit Kit Price on standard suppliers & Lotusland unified margin rules');
+const explicitKitVariant = {
+  id: 'custom-retatrutide-10mg',
   productName: 'Retatrutide',
   dosage: '10 mg / vial',
-  supplier: 'LotusLand',
+  supplier: 'CustomLab',
   catalogBrand: 'RegenPept',
   pricing: {
     master: {
@@ -26,17 +26,26 @@ const retatrutideVariant = {
   }
 };
 
-const resolvedMaster = resolveVariantPrice(retatrutideVariant, { tier: 'master' });
+const resolvedMaster = resolveVariantPrice(explicitKitVariant, { tier: 'master' });
 assert.equal(resolvedMaster.perUnit, 90, 'Master perUnit must be 90');
 assert.equal(resolvedMaster.kit, 580, 'Master kit must be strictly 580 (NOT 900)');
 
-const resolvedClinic = resolveVariantPrice(retatrutideVariant, { tier: 'clinic' });
+const resolvedClinic = resolveVariantPrice(explicitKitVariant, { tier: 'clinic' });
 assert.equal(resolvedClinic.perUnit, 139.5, 'Clinic perUnit must match tier');
 assert.equal(resolvedClinic.kit, 899, 'Clinic kit must match explicit tier kit');
-console.log('✔ Test 1 Passed: Explicit kit pricing preserved independently across tiers.\n');
+
+// Verify LotusLand unified dynamic tier pricing (masterKit = perUnit * 0.85 * 10)
+const lotusVariant = {
+  id: 'lotusland-retatrutide-10mg',
+  supplier: 'LotusLand',
+  pricing: { master: { perUnit: 90, currency: 'USD' } }
+};
+const resolvedLotus = resolveVariantPrice(lotusVariant, { tier: 'master' });
+assert.equal(resolvedLotus.kit, 765, 'LotusLand master kit uses 0.85 * 10 rule');
+console.log('✔ Test 1 Passed: Explicit kit pricing & LotusLand margin rules verified.\n');
 
 // ── TEST 2: Multi-Catalogue Offer Coexistence under same Supplier ──────────────
-console.log('▶ Test 2: Multi-Catalogue Offer Coexistence (Lotusland supplier with RegenPept catalogue vs Direct Lotusland API)');
+console.log('▶ Test 2: Multi-Catalogue Offer Coexistence (RegenPept catalogue vs Magenta catalogue)');
 const regenPeptOffer = {
   id: 'lotusland-retatrutide-10mg-regenpept',
   supplier: 'LotusLand',
@@ -45,19 +54,19 @@ const regenPeptOffer = {
   pricing: { master: { perUnit: 90, kit: 580 } }
 };
 
-const directBulkOffer = {
-  id: 'lotusland-retatrutide-bulk-api',
+const magentaOffer = {
+  id: 'magenta-retatrutide-10mg',
   supplier: 'LotusLand',
-  catalogBrand: 'Lotusland Master API',
-  sourceCatalogue: 'Lotusland Master API',
+  catalogBrand: 'Magenta',
+  sourceCatalogue: 'Magenta',
   pricing: { master: { perUnit: 80, kit: null } }
 };
 
 const matchesRegenFilter1 = isVariantMatchingFilter(regenPeptOffer, {}, { supplierFilter: 'lotusland', catalogueFilter: 'RegenPept' });
-const matchesRegenFilter2 = isVariantMatchingFilter(directBulkOffer, {}, { supplierFilter: 'lotusland', catalogueFilter: 'RegenPept' });
+const matchesRegenFilter2 = isVariantMatchingFilter(magentaOffer, {}, { supplierFilter: 'lotusland', catalogueFilter: 'RegenPept' });
 
 assert.equal(matchesRegenFilter1, true, 'RegenPept offer must pass RegenPept filter');
-assert.equal(matchesRegenFilter2, false, 'Direct Bulk offer must NOT pass RegenPept filter');
+assert.equal(matchesRegenFilter2, false, 'Magenta offer must NOT pass RegenPept filter');
 console.log('✔ Test 2 Passed: Catalogue-specific filtering prevents offer cross-contamination.\n');
 
 // ── TEST 3: Dynamic Kit Price Fallback when Kit Price is genuinely missing ───
@@ -76,10 +85,10 @@ console.log('✔ Test 3 Passed: Dynamic fallback works safely when explicit kit 
 // ── TEST 4: Packaging Types (Syringes, Bac Water, Bundles) ────────────────────
 console.log('▶ Test 4: Accessory & Package Types Normalization');
 const bacWaterBottle = {
-  id: 'lotusland-bac-water-30ml',
+  id: 'custom-bac-water-30ml',
   productName: 'Bacteriostatic Water',
   presentation: 'bottle',
-  supplier: 'LotusLand',
+  supplier: 'CustomLab',
   catalogBrand: 'RegenPept',
   pricing: { master: { perUnit: 20, kit: 20, currency: 'USD' } }
 };
