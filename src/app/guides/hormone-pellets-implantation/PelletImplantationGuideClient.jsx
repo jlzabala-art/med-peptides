@@ -1067,7 +1067,7 @@ export default function PelletImplantationGuideClient() {
         </section>
 
         {/* ── BLOCK 6: PHARMAPOLIS EU GMP PELLETS CATALOG SHORTCUTS ── */}
-        <section id="catalog-pellets" className="pellet-guide-section" style={{ marginBottom: 0 }}>
+        <section id="catalog-pellets" className="pellet-guide-section">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
             <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Layers size={16} color="#0284c7" />
@@ -1113,6 +1113,121 @@ export default function PelletImplantationGuideClient() {
                   <ArrowRight size={12} />
                 </div>
               </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ── BLOCK 7: CLINICAL EVIDENCE, PUBMED STUDIES & REGULATORY STANDARDS ── */}
+        <section id="clinical-studies" className="pellet-guide-section" style={{ marginBottom: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+            <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={16} color="#166534" />
+              <span>{isEs ? 'Evidencia Clínica (PubMed) & Estándares Regulatorios' : 'Peer-Reviewed Clinical Studies (PubMed) & Quality Standards'}</span>
+            </h3>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#166534', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: '999px' }}>
+              {isEs ? 'EU GMP · Kits Trócar Marcado CE · CoA por Lote' : 'EU GMP Sterile · CE-Marked Trocar Kits · Batch CoA'}
+            </span>
+          </div>
+
+          <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px 16px', marginBottom: '14px', fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+            {isEs ? (
+              <>
+                <strong>Calidad y Certificación:</strong> Los pellets hormonales bioidénticos son implantes estériles magistrales elaborados bajo estándares <strong>EU GMP / USP &lt;797&gt; y &lt;71&gt;</strong>, con Certificado de Análisis (CoA), ensayo de potencia, esterilidad y endotoxinas por lote. Los <strong>kits de inserción quirúrgica (trócares estériles de un solo uso)</strong> cuentan con <strong>Marcado CE</strong> como producto sanitario.
+              </>
+            ) : (
+              <>
+                <strong>Quality &amp; Regulatory Status:</strong> Bioidentical hormone pellets are sterile patient-specific compounded implants prepared under <strong>EU GMP / USP &lt;797&gt; &amp; &lt;71&gt;</strong> sterile compounding standards, backed by batch-level Certificate of Analysis (CoA), potency, sterility, and endotoxin testing. Single-use sterile <strong>trocar insertion kits carry CE Marking</strong> as Class IIa sterile medical devices.
+              </>
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+            {[
+              {
+                pmid: '35893288',
+                year: '2022',
+                journal: 'Journal of Personalized Medicine',
+                authors: 'Donovitz GS',
+                title: 'A Personal Prospective on Testosterone Therapy in Women — What We Know in 2022',
+                summaryEs: 'Revisión clínica de implantes subcutáneos de testosterona en mujeres: eficacia sintomática, perfil de seguridad y reducción de incidencia de cáncer de mama frente a cohortes históricas.',
+                summaryEn: 'Clinical outcomes of subcutaneous testosterone pellet therapy in women, demonstrating symptom relief, metabolic benefits, and long-term safety follow-up.'
+              },
+              {
+                pmid: '23265303',
+                year: '2013',
+                journal: 'Maturitas',
+                authors: 'Glaser R, Kalantaridou S, Dimitrakakis C',
+                title: 'Testosterone implants in women: pharmacological dosing for a physiologic effect',
+                summaryEs: 'Estudio farmacocinético en mujeres que demuestra liberación fisiológica estable sin picos suprafisiológicos ni metabolismo hepático de primer paso.',
+                summaryEn: 'Pharmacokinetic study confirming steady physiologic serum levels with subcutaneous testosterone implants and avoidance of first-pass hepatic metabolism.'
+              },
+              {
+                pmid: '11528362',
+                year: '2001',
+                journal: 'Menopause',
+                authors: 'del Carmen Cravioto M, Larrea F et al.',
+                title: 'Pharmacokinetics and pharmacodynamics of 25-mg estradiol implants in postmenopausal women',
+                summaryEs: 'Evaluación farmacocinética de pellets de estradiol de 25 mg en mujeres posmenopáusicas con alivio sostenido de síntomas vasomotores.',
+                summaryEn: 'Pharmacokinetic & pharmacodynamic evaluation of 25 mg estradiol subcutaneous pellets showing sustained relief of vasomotor menopausal symptoms.'
+              },
+              {
+                pmid: '23859250',
+                year: '2013',
+                journal: 'Journal of Sexual Medicine',
+                authors: 'Smith RP, Khanna A et al.',
+                title: 'Factors influencing patient decisions to initiate and discontinue subcutaneous testosterone pellets',
+                summaryEs: 'Estudio clínico en varones con hipogonadismo que muestra alta adherencia y satisfacción frente a inyecciones frecuentes o geles diarios.',
+                summaryEn: 'Clinical adherence study in hypogonadal men showing high patient satisfaction and continuation rates compared with daily gels or frequent injections.'
+              },
+              {
+                pmid: '36912031',
+                year: '2023',
+                journal: 'The Aging Male',
+                authors: 'Dorr B, Abdelaziz A',
+                title: 'Subcutaneous testosterone pellet therapy for reversal of male osteoporosis',
+                summaryEs: 'Revisión clínica del impacto positivo de los pellets subcutáneos de testosterona sobre la densidad mineral ósea en varones.',
+                summaryEn: 'Clinical review documenting bone mineral density improvements and osteoprotective outcomes with subcutaneous testosterone pellet therapy.'
+              }
+            ].map((study) => (
+              <a
+                key={study.pmid}
+                href={`https://pubmed.ncbi.nlm.nih.gov/${study.pmid}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '10px',
+                  padding: '14px',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase' }}>
+                    {study.journal} · {study.year}
+                  </span>
+                  <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#475569', backgroundColor: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
+                    PMID {study.pmid}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                  {study.title}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
+                  {study.authors}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.45 }}>
+                  {isEs ? study.summaryEs : study.summaryEn}
+                </div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.73rem', color: '#1a73e8', fontWeight: 700, marginTop: 'auto', paddingTop: '4px' }}>
+                  <span>{isEs ? 'Ver estudio en PubMed' : 'Read Study on PubMed'}</span>
+                  <ArrowRight size={12} />
+                </div>
+              </a>
             ))}
           </div>
         </section>
