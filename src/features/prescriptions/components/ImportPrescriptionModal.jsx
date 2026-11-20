@@ -278,7 +278,7 @@ export default function ImportPrescriptionModal({
   const [linkedPatientId, setLinkedPatientId] = useState(null);
   const [originalFileUrl, setOriginalFileUrl] = useState(null);
   const [originalFileType, setOriginalFileType] = useState('');
-  const [showOriginalSplit, setShowOriginalSplit] = useState(false);
+  const [showOriginalSplit, setShowOriginalSplit] = useState(() => (typeof window !== 'undefined' ? window.innerWidth >= 1024 : true));
 
   useEffect(() => {
     if (!uploading) {

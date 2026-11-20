@@ -276,7 +276,7 @@ export default function ClinicalProtocolFinderWizard({ onSelectProtocol = null }
                           textDecoration: 'none',
                         }}
                       >
-                        Ver Ficha Clínica →
+                        View Clinical Monograph →
                       </Link>
                     </div>
                   </div>

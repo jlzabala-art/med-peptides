@@ -82,6 +82,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import DoctorTodayFocusBar from './components/DoctorTodayFocusBar';
+import { buildDoctorSidebarGroups } from './components/doctorNavConfig';
 import DoctorTeamAccessBanner from './components/DoctorTeamAccessBanner';
 import GenomicsExplainerVideoCard from '@/components/genomics/GenomicsExplainerVideoCard';
 import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
@@ -5027,106 +5028,18 @@ export default function DoctorPublicPortalClient({
 
   const uniquePatientsCount = doctorPatientsList.length;
 
-  const sidebarNavGroups = useMemo(() => {
-    const workspaceItems = [
-      {
-        id: 'overview',
-        label: 'Overview',
-        icon: BarChart3,
-        badge: null
-      },
-      {
-        id: 'patients',
-        label: 'Patients',
-        icon: Users,
-        isLocked: !isAuthorizedViewer,
-        badge: uniquePatientsCount > 0 ? uniquePatientsCount : null,
-        actionBadgeTooltip: uniquePatientsCount > 0
-          ? `${uniquePatientsCount} unique patients (${soldPatientsCount} sold customers, ${unacceptedPatientsCount} unaccepted proposals)`
-          : undefined
-      },
-      {
-        id: 'prescriptions',
-        label: 'Prescriptions',
-        icon: Layers,
-        isLocked: !isAuthorizedViewer,
-        badge: allPrescriptions.length > 0 ? allPrescriptions.length : null,
-        actionBadgeTooltip: quickCounts.active > 0
-          ? `${allPrescriptions.length} total prescriptions (${quickCounts.active} sold & invoiced, ${quickCounts.proposals} unaccepted proposals)`
-          : undefined
-      }
-    ];
-
-    if (filteredTasks.length > 0 || allPrescriptions.length > 0) {
-      workspaceItems.push({
-        id: 'tasks',
-        label: 'Pending Actions',
-        icon: Clock,
-        isLocked: !isAuthorizedViewer,
-        actionBadge: filteredTasks.length > 0 ? filteredTasks.length : null,
-        actionBadgeTooltip: filteredTasks.length > 0
-          ? `${filteredTasks.length} pending clinical task(s) requiring follow-up or review`
-          : undefined
-      });
-    }
-
-    return [
-      {
-        group: 'CLINICAL WORKSPACE',
-        groupTitle: 'CLINICAL WORKSPACE',
-        items: workspaceItems
-      },
-      {
-        group: 'CLINICAL INTELLIGENCE',
-        groupTitle: 'CLINICAL INTELLIGENCE',
-        items: [
-          {
-            id: 'recommendations',
-            label: 'Atlas Recommendations',
-            icon: Sparkles,
-            badge: doctorSpecialtyIntel.primaryBlueprints.length > 0 ? doctorSpecialtyIntel.primaryBlueprints.length : null
-          },
-          {
-            id: 'dna_analysis',
-            label: 'DNA Analysis',
-            icon: Dna,
-            badge: dnaResults.length > 0 ? dnaResults.length : null
-          },
-          {
-            id: 'lab_results',
-            label: 'Lab Diagnostics',
-            icon: FlaskConical,
-            badge: bloodLabResults.length > 0 ? bloodLabResults.length : null
-          },
-          {
-            id: 'analytics',
-            label: 'Practice Analytics',
-            icon: TrendingUp,
-            badge: null
-          }
-        ]
-      },
-      {
-        group: 'PRACTICE SETTINGS',
-        groupTitle: 'PRACTICE SETTINGS',
-        items: [
-          {
-            id: 'credentials',
-            label: 'Clinic Credentials',
-            icon: ShieldCheck,
-            isLocked: !isAuthorizedViewer,
-            badge: null
-          },
-          {
-            id: 'services_tiers',
-            label: 'Platform Services',
-            icon: Award,
-            badge: null
-          }
-        ]
-      }
-    ];
-  }, [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, dnaResults.length, bloodLabResults.length, allLabResults.length, quickCounts.active, quickCounts.pending, quickCounts.drafts, quickCounts.proposals, doctorSpecialtyIntel.primaryBlueprints.length, soldPatientsCount, unacceptedPatientsCount, isAuthorizedViewer]);
+  const sidebarNavGroups = useMemo(() => buildDoctorSidebarGroups({
+    isAuthorizedViewer,
+    uniquePatientsCount,
+    soldPatientsCount,
+    unacceptedPatientsCount,
+    allPrescriptionsCount: allPrescriptions.length,
+    activeCount: quickCounts.active,
+    proposalsCount: quickCounts.proposals,
+    primaryBlueprintsCount: doctorSpecialtyIntel.primaryBlueprints.length,
+    dnaResultsCount: dnaResults.length,
+    bloodLabResultsCount: bloodLabResults.length,
+  }), [allPrescriptions.length, uniquePatientsCount, dnaResults.length, bloodLabResults.length, quickCounts.active, quickCounts.proposals, doctorSpecialtyIntel.primaryBlueprints.length, soldPatientsCount, unacceptedPatientsCount, isAuthorizedViewer]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');

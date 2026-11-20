@@ -150,7 +150,7 @@ export default function PhaseEditor({ phases, products: catalogProducts, onChang
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
                       onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-                      title="Ver Ficha Clínica (Materia Medica)"
+                      title="View Clinical Monograph (Materia Medica)"
                     >
                       {item.productName ?? item.productId}
                     </button>

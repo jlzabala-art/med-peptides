@@ -483,9 +483,9 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
                     }}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                    title="Ir a Ficha Clínica (Materia Medica)"
+                    title="Open Clinical Monograph (Materia Medica)"
                   >
-                    <BookOpen size={14} /> Ficha Clínica
+                    <BookOpen size={14} /> Clinical Monograph
                   </button>
                 </div>
               ),
