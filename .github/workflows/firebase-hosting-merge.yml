@@ -50,8 +50,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps --prefer-offline
 
-      - name: Run Golden Rules Audit
-        run: npm run audit:rules
+      - name: Run Golden Rules Audit & Clinical Tests
+        run: npm run audit:rules && npm test && npm run test:routes
 
       - name: Build Next.js application (Turbopack Standalone)
         run: npm run build

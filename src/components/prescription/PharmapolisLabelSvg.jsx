@@ -62,18 +62,15 @@ function wrapDirections(text, firstLineMaxChars = 44, otherLinesMaxChars = 56) {
  */
 export function computeDefaultHeaderBadge(rawLabelData = {}, fallbackPartIndex = 0, fallbackTotalParts = 1) {
   const labelData = rawLabelData || {};
-  const effectiveTotalParts = labelData.totalParts || fallbackTotalParts || 1;
-  const effectivePartIdx = labelData.partIndex ?? labelData.phaseIndex ?? fallbackPartIndex ?? 0;
-  const rawPart = labelData.partLabel || labelData.partTag || (effectiveTotalParts > 1 ? `Part ${Number(effectivePartIdx) + 1} of ${effectiveTotalParts}` : '');
+  // Rule #71: Never emit redundant "PART X OF Y" badges on patient labels
+  const rawPart = labelData.partLabel || labelData.partTag || '';
   let partBadge = '';
   if (rawPart) {
-    const match = String(rawPart).match(/part\s*(\d+)(?:\s*(?:\/|of)\s*(\d+))?/i);
-    if (match) {
-      const pNum = match[1];
-      const pTot = match[2] || String(effectiveTotalParts || 2);
-      partBadge = `PART ${pNum} OF ${pTot}`;
-    } else {
-      partBadge = String(rawPart).toUpperCase().trim();
+    const cleanedPart = String(rawPart)
+      .replace(/part\s*\d+(?:\s*(?:\/|of)\s*\d+)?\s*(?:·|-|\|)?\s*/gi, '')
+      .trim();
+    if (cleanedPart) {
+      partBadge = cleanedPart.toUpperCase();
     }
   }
 
