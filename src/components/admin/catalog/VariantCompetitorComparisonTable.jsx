@@ -1,9 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { TrendingUp, ExternalLink, Sliders, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { collection, getDocs, limit, query, where } from 'firebase/firestore';
+import toast from 'react-hot-toast';
+import { db } from '../../../firebase';
 import { getProductVariantsCompetitorReport, isFinishedPeptide, isDiagnosticProduct } from '../../../services/algoliaCompetitorService';
+import { buildSupplierComparisonRows, computeCanonicalKey } from '../../../utils/supplierComparison';
 import DataTable from '../../ui/DataTable';
+import StatusBadge from '../../ui/StatusBadge';
+import CopyableId from '../../ui/CopyableId';
 
 /**
  * VariantCompetitorComparisonTable
@@ -25,6 +31,59 @@ export default function VariantCompetitorComparisonTable({
 }) {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [siblingDocs, setSiblingDocs] = useState([]);
+  const [savingSupplier, setSavingSupplier] = useState(null);
+
+  const canonicalKey = useMemo(() => computeCanonicalKey(product), [product]);
+
+  const loadSiblingOffers = useCallback(async () => {
+    if (!canonicalKey) return;
+    try {
+      const q = query(
+        collection(db, 'products'),
+        where('canonicalKey', '==', canonicalKey),
+        limit(15)
+      );
+      const snap = await getDocs(q);
+      setSiblingDocs(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    } catch (err) {
+      console.warn('[VariantCompetitorComparisonTable] Could not load sibling canonicalKey offers:', err);
+    }
+  }, [canonicalKey]);
+
+  useEffect(() => {
+    loadSiblingOffers();
+  }, [loadSiblingOffers]);
+
+  const supplierBenchmark = useMemo(() => {
+    const pool = siblingDocs.length > 0 ? siblingDocs : [product, ...variants].filter(Boolean);
+    const rows = buildSupplierComparisonRows(pool);
+    return rows[0] || null;
+  }, [siblingDocs, product, variants]);
+
+  const handleSetPreferred = async (supplierId) => {
+    if (!supplierBenchmark) return;
+    setSavingSupplier(supplierId);
+    try {
+      const res = await fetch('/api/suppliers/set-preferred', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          canonicalKey: supplierBenchmark.canonicalKey,
+          supplierId,
+          docIds: supplierBenchmark.docIds,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || 'Update failed');
+      toast.success('Preferred supplier saved');
+      await loadSiblingOffers();
+    } catch (err) {
+      toast.error(err.message || 'Failed to set preferred supplier');
+    } finally {
+      setSavingSupplier(null);
+    }
+  };
 
   // Check if product qualifies for finished peptide or diagnostic competitor benchmark
   const targetVariants = useMemo(() => {
@@ -56,14 +115,108 @@ export default function VariantCompetitorComparisonTable({
     return () => { isMounted = false; };
   }, [product, targetVariants, channel]);
 
-  if (targetVariants.length === 0) {
-    return null; // Only render for benchmarkable products
+  if (targetVariants.length === 0 && !supplierBenchmark) {
+    return null;
   }
 
   const isSummary = mode === 'summary';
   const isDiagnostic = Boolean(report?.isDiagnostic || report?.summary?.isDiagnostic || isDiagnosticProduct(product, product));
 
+  const internalOffersPanel = supplierBenchmark ? (
+    <div style={{
+      marginTop: '0.5rem',
+      backgroundColor: '#ffffff',
+      border: '1px solid #e2e8f0',
+      borderRadius: '8px',
+      overflow: 'hidden',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+    }}>
+      <div style={{
+        padding: '0.65rem 1rem',
+        backgroundColor: '#f8fafc',
+        borderBottom: '1px solid #e2e8f0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.5rem',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>
+            Supplier Sourcing Offers ({supplierBenchmark.offers.length})
+          </span>
+          <CopyableId value={supplierBenchmark.canonicalKey} />
+        </div>
+        {supplierBenchmark.maxSpreadPct != null && (
+          <StatusBadge
+            status={supplierBenchmark.maxSpreadPct > 10 ? 'pending' : 'active'}
+            label={`Spread: +${supplierBenchmark.maxSpreadPct}% (€${supplierBenchmark.maxSpreadEur?.toFixed(2)})`}
+          />
+        )}
+      </div>
+      <DataTable
+        data={supplierBenchmark.offers.map((o) => ({ ...o, id: `${supplierBenchmark.canonicalKey}-${o.supplierId}` }))}
+        columns={[
+          {
+            key: 'supplierName',
+            header: 'Supplier',
+            render: (_v, o) => (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontWeight: 700, color: '#0f172a' }}>{o.supplierName}</span>
+                <CopyableId value={o.sku || o.supplierId} />
+              </div>
+            ),
+          },
+          {
+            key: 'costEur',
+            header: 'Base Cost (EUR)',
+            render: (_v, o) => (
+              <span style={{ fontWeight: 800, color: '#0f172a' }}>
+                €{o.costEur != null ? o.costEur.toFixed(2) : '—'}
+              </span>
+            ),
+          },
+          {
+            key: 'certification',
+            header: 'Quality',
+            render: (_v, o) => (
+              <StatusBadge
+                status={o.certification === 'EU_GMP' ? 'active' : 'pending'}
+                label={o.certification === 'EU_GMP' ? 'EU GMP' : 'International'}
+              />
+            ),
+          },
+          {
+            key: 'preferred',
+            header: 'Sourcing',
+            render: (_v, o) => {
+              const isPref = supplierBenchmark.preferredSupplierId === o.supplierId;
+              return (
+                <button
+                  type="button"
+                  disabled={isPref || Boolean(savingSupplier)}
+                  onClick={() => handleSetPreferred(o.supplierId)}
+                  className={isPref ? 'gcp-btn-secondary' : 'gcp-btn-primary'}
+                  style={{ height: '28px', padding: '0 10px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, cursor: isPref ? 'default' : 'pointer' }}
+                >
+                  {isPref ? 'Preferred ✓' : savingSupplier === o.supplierId ? 'Saving...' : 'Set Preferred'}
+                </button>
+              );
+            },
+          },
+        ]}
+        emptyMessage="No supplier cost offers recorded."
+      />
+    </div>
+  ) : null;
+
+  if (targetVariants.length === 0) {
+    return internalOffersPanel;
+  }
+
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {internalOffersPanel}
     <div style={{
       marginTop: '0.5rem',
       backgroundColor: '#ffffff',
@@ -483,6 +636,7 @@ export default function VariantCompetitorComparisonTable({
           No competitor listings found for these specific variant specifications.
         </div>
       )}
+    </div>
     </div>
   );
 }

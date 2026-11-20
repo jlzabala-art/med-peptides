@@ -7,19 +7,42 @@ import EmptyState from '../../ui/EmptyState';
 export default function BenchmarkingWorkspace({ onProductClick, matches = [], loading = false }) {
   if (loading) return <DataTableSkeleton rows={6} columns={7} />;
 
-  const tableData = matches.map((match, idx) => ({
-    _idx: idx,
-    name: match.productName,
-    retail: match.myPPMs ? match.myPPMs.retail * match.myMg : 0,
-    wholesale: match.myPPMs ? match.myPPMs.wholesaler * match.myMg : 0,
-    distributor: match.myPPMs ? match.myPPMs.distributor * match.myMg : 0,
-    margin: 'TBD',
-    compAvg: match.competitors.length > 0
-      ? (match.competitors.reduce((acc, curr) => acc + (curr.ppm || (curr.price_usd / (curr.dosage_mg || match.myMg))), 0) / match.competitors.length) * match.myMg
-      : 0,
-    score: 85,
-    _match: match
-  }));
+  const tableData = matches.map((match, idx) => {
+    const retail = match.myPPMs ? match.myPPMs.retail * match.myMg : (match.retailPrice || 0);
+    const wholesale = match.myPPMs ? match.myPPMs.wholesaler * match.myMg : (match.wholesalePrice || 0);
+    const distributor = match.myPPMs ? match.myPPMs.distributor * match.myMg : (match.masterCost || 0);
+    const compAvg = match.competitors?.length > 0
+      ? (match.competitors.reduce((acc, curr) => acc + (curr.ppm || (curr.price_usd / (curr.dosage_mg || match.myMg || 1))), 0) / match.competitors.length) * (match.myMg || 1)
+      : 0;
+
+    // Real gross margin %: (wholesale - distributor) / wholesale, or fallback to (retail - wholesale) / retail
+    const baseRev = wholesale > 0 ? wholesale : retail;
+    const baseCost = wholesale > 0 ? distributor : wholesale;
+    const marginPct = baseRev > 0 && baseCost > 0 ? (((baseRev - baseCost) / baseRev) * 100) : null;
+
+    // Real competitiveness score (0-100): 100 when wholesale/retail <= compAvg, scaled down by premium %
+    let score = 50;
+    if (compAvg > 0 && retail > 0) {
+      const ratio = retail / compAvg;
+      score = Math.max(10, Math.min(100, Math.round(115 - ratio * 30)));
+    } else if (marginPct != null) {
+      score = Math.max(20, Math.min(100, Math.round(marginPct * 1.5)));
+    }
+
+    return {
+      _idx: idx,
+      name: match.productName,
+      canonicalKey: match.canonicalKey || null,
+      retail,
+      wholesale,
+      distributor,
+      margin: marginPct != null ? `${marginPct.toFixed(1)}%` : '—',
+      marginNum: marginPct ?? 0,
+      compAvg,
+      score,
+      _match: match,
+    };
+  });
 
   const columns = [
     {

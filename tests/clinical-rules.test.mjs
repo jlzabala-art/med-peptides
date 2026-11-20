@@ -125,3 +125,18 @@ test('Universal Supplier Comparison & resolvePrice: handles N suppliers, FX conv
   assert.equal(resolved.perUnit, 30);
   assert.equal(resolved.currency, 'EUR');
 });
+
+test('Frontend Price Comparison Modules: wired to canonical model without mocks or type restrictions', () => {
+  const variantCompSrc = read('src/components/admin/catalog/VariantCompetitorComparisonTable.jsx');
+  assert.ok(variantCompSrc.includes('buildSupplierComparisonRows'), 'VariantCompetitorComparisonTable must use canonical supplier comparison');
+  assert.ok(variantCompSrc.includes('/api/suppliers/set-preferred'), 'VariantCompetitorComparisonTable must support setting preferred supplier');
+  assert.equal(variantCompSrc.includes('if (targetVariants.length === 0) {\n    return null;'), false, 'Must not block non-peptide products from supplier comparison');
+
+  const supplierModeSrc = read('src/components/admin/imports/pricing/SupplierComparisonMode.jsx');
+  assert.equal(supplierModeSrc.includes('Supplier B'), false, 'SupplierComparisonMode must not use hardcoded mock Supplier B');
+  assert.ok(supplierModeSrc.includes('buildSupplierComparisonRows'), 'SupplierComparisonMode must use live canonical comparison');
+
+  const benchmarkSrc = read('src/components/admin/market/BenchmarkingWorkspace.jsx');
+  assert.equal(benchmarkSrc.includes("margin: 'TBD'"), false, 'BenchmarkingWorkspace must compute real margin');
+  assert.equal(benchmarkSrc.includes('score: 85'), false, 'BenchmarkingWorkspace must compute real score');
+});
