@@ -24,6 +24,7 @@ import DataTable from '../../ui/DataTable';
 import GlobalSearchBar from '../../ui/GlobalSearchBar';
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
+import GcpKpiRow from '../ui/GcpKpiRow';
 import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
 import { triangulateGenotypePhenotype, resolveTargetMagistralTemplate } from '@/data/genomics/biomarkerTriangulationEngine';
 import { detectDnaTestFamily, resolveNonNutrigenomicDnaProfile } from '@/utils/clinical/dnaProfileResolver';
@@ -46,7 +47,9 @@ export default function DoctorDnaAnalysisTab({
   slug = '',
   handleRefresh,
   isSwitchingDoctor = false,
-  onUploadPdf = null
+  onUploadPdf = null,
+  activePatientFilter = 'all',
+  onNavigateToRx = null
 }) {
   const [filterQuery, setFilterQuery] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('all'); // 'all' | 'fagron' | '24genomics' | 'eterna'
@@ -235,6 +238,10 @@ export default function DoctorDnaAnalysisTab({
     const maxAgeDays = timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : null;
 
     return dnaResults.filter((row) => {
+      if (activePatientFilter && activePatientFilter !== 'all') {
+        const ptName = String(row.patientName || row.patient?.name || '').toLowerCase();
+        if (!ptName.includes(String(activePatientFilter).toLowerCase())) return false;
+      }
       const text = `${row.patientName || row.patient?.name || ''} ${row.code || ''} ${row.sampleId || ''} ${row.testName || ''} ${row.testType || ''} ${row.biomarker || ''} ${row.laboratory?.name || ''}`.toLowerCase();
       const matchQuery = !filterQuery || text.includes(filterQuery.toLowerCase());
       if (!matchQuery) return false;
@@ -262,7 +269,7 @@ export default function DoctorDnaAnalysisTab({
       }
       return true;
     });
-  }, [dnaResults, filterQuery, selectedPlatform, selectedAssay, timeRange]);
+  }, [dnaResults, filterQuery, selectedPlatform, selectedAssay, timeRange, activePatientFilter]);
 
   const kpiMetrics = useMemo(() => {
     const source = kpiScope === 'active' ? filteredData : dnaResults;
@@ -486,6 +493,34 @@ export default function DoctorDnaAnalysisTab({
               <ArrowUpRight size={12} />
             </Link>
 
+            {onNavigateToRx && (
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigateToRx(row.sampleId || row.code || row.patientName || '');
+                }}
+                title="View linked prescription in Prescriptions tab"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#3c4043',
+                  fontSize: '0.70rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>Rx →</span>
+              </button>
+            )}
+
             {rxPdfUrl && (
               <a
                 href={rxPdfUrl}
@@ -596,118 +631,49 @@ export default function DoctorDnaAnalysisTab({
         </div>
       </div>
 
-      {/* ── 4 Top Google Cloud Style KPI Cards (Golden Rule #22) ── */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-          gap: '12px'
-        }}
-      >
-        {/* KPI 1 */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '8px',
-            padding: '14px 16px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-          }}
-        >
-          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Sequenced Patients
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#202124', whiteSpace: 'nowrap' }}>
-              {kpiMetrics.total}
-            </span>
-            <span style={{ fontSize: '0.70rem', color: '#137333', fontWeight: 500, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
-              {kpiScope === 'active' ? 'In View' : 'Entire Practice'}
-            </span>
-          </div>
-          <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            CE-IVD pharmacogenomic &amp; DNA assays
-          </div>
-        </div>
-
-        {/* KPI 2 */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '8px',
-            padding: '14px 16px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-          }}
-        >
-          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Fagron Genomics
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#1a73e8', whiteSpace: 'nowrap' }}>
-              {kpiMetrics.fagronCount}
-            </span>
-            <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 500, backgroundColor: '#e8f0fe', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
-              {kpiMetrics.fagronPct}% Share
-            </span>
-          </div>
-          <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            TrichoTest™, TeloTest™ &amp; NutriGen™
-          </div>
-        </div>
-
-        {/* KPI 3 */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '8px',
-            padding: '14px 16px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-          }}
-        >
-          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Active Assay Panels
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#202124', whiteSpace: 'nowrap' }}>
-              {kpiMetrics.panelCount}
-            </span>
-            <span style={{ fontSize: '0.70rem', color: '#b06000', fontWeight: 500, backgroundColor: '#fef7e0', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
-              Multi-Panel
-            </span>
-          </div>
-          <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            Distinct diagnostic modalities
-          </div>
-        </div>
-
-        {/* KPI 4 */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '8px',
-            padding: '14px 16px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-          }}
-        >
-          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Linked Prescriptions
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#137333', whiteSpace: 'nowrap' }}>
-              {kpiMetrics.linkedRxCount}
-            </span>
-            <span style={{ fontSize: '0.70rem', color: '#137333', fontWeight: 500, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
-              Rx Matched
-            </span>
-          </div>
-          <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            Compounded regimens &amp; dossiers
-          </div>
-        </div>
-      </div>
+      {/* ── 4 Top Google Cloud Style KPI Cards (Unified GcpKpiRow - Golden Rule #22) ── */}
+      <GcpKpiRow
+        items={[
+          {
+            id: 'sequenced',
+            label: 'Sequenced Patients',
+            value: kpiMetrics.total,
+            badge: kpiScope === 'active' ? 'In View' : 'Entire Practice',
+            badgeColor: '#137333',
+            badgeBg: '#e6f4ea',
+            subtitle: 'CE-IVD pharmacogenomic & DNA assays'
+          },
+          {
+            id: 'fagron',
+            label: 'Fagron Genomics',
+            value: kpiMetrics.fagronCount,
+            valueColor: '#1a73e8',
+            badge: `${kpiMetrics.fagronPct}% Share`,
+            badgeColor: '#1a73e8',
+            badgeBg: '#e8f0fe',
+            subtitle: 'TrichoTest™, TeloTest™ & NutriGen™'
+          },
+          {
+            id: 'panels',
+            label: 'Active Assay Panels',
+            value: kpiMetrics.panelCount,
+            badge: 'Multi-Panel',
+            badgeColor: '#b06000',
+            badgeBg: '#fef7e0',
+            subtitle: 'Distinct diagnostic modalities'
+          },
+          {
+            id: 'linked-rx',
+            label: 'Linked Prescriptions',
+            value: kpiMetrics.linkedRxCount,
+            valueColor: '#137333',
+            badge: 'Rx Matched',
+            badgeColor: '#137333',
+            badgeBg: '#e6f4ea',
+            subtitle: 'Compounded regimens & dossiers'
+          }
+        ]}
+      />
 
       {/* ── Main Data Card with Unified Search, Chips & Table ── */}
       <div

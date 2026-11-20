@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import SpecialtyBlueprintCard from './SpecialtyBlueprintCard';
+import GcpKpiRow from '../ui/GcpKpiRow';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import {
   SPECIALTY_VERTICALS,
@@ -632,37 +633,56 @@ export default function DoctorRecommendationsTab({
           borderBottom: '1px solid #e8eaed'
         }}
       >
-        {/* ── 4 GCP KPI Summary Cards (Golden Rule #22) ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '12px', width: '100%' }}>
-          <div style={{ background: '#f8f9fa', border: '1px solid #dadce0', borderRadius: '6px', padding: '10px 14px' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Specialty Blueprints</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '3px' }}>
-              <span style={{ fontSize: '1.35rem', fontWeight: 600, color: '#1a73e8' }}>{blueprintsForSelectedSpecialty.length}</span>
-              <span style={{ fontSize: '0.68rem', color: '#5f6368' }}>Protocols matched</span>
-            </div>
-          </div>
-          <div style={{ background: '#f8f9fa', border: '1px solid #dadce0', borderRadius: '6px', padding: '10px 14px' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Patient Rx Synergies</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '3px' }}>
-              <span style={{ fontSize: '1.35rem', fontWeight: 600, color: '#202124' }}>{allPrescriptions.length}</span>
-              <span style={{ fontSize: '0.68rem', color: '#5f6368' }}>Active prescriptions</span>
-            </div>
-          </div>
-          <div style={{ background: '#f8f9fa', border: '1px solid #dadce0', borderRadius: '6px', padding: '10px 14px' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Compounded Formulas</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '3px' }}>
-              <span style={{ fontSize: '1.35rem', fontWeight: 600, color: '#137333' }}>{blueprintsForSelectedSpecialty.filter((b) => Boolean(b.compoundingFormula)).length}</span>
-              <span style={{ fontSize: '0.68rem', color: '#5f6368' }}>Titratable galenic Rx</span>
-            </div>
-          </div>
-          <div style={{ background: '#f8f9fa', border: '1px solid #dadce0', borderRadius: '6px', padding: '10px 14px' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Catalog Co-Therapies</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '3px' }}>
-              <span style={{ fontSize: '1.35rem', fontWeight: 600, color: '#202124' }}>{blueprintsForSelectedSpecialty.reduce((acc, b) => acc + [b.peptideSynergy, b.dermocosmeticSynergy, b.nutraceuticalSynergy, b.diagnosticSynergy].filter(Boolean).length, 0)}</span>
-              <span style={{ fontSize: '0.68rem', color: '#5f6368' }}>In-stock references</span>
-            </div>
-          </div>
-        </div>
+        {/* ── 4 GCP KPI Summary Cards (Unified GcpKpiRow - Golden Rule #22) ── */}
+        <GcpKpiRow
+          items={[
+            {
+              id: 'blueprints',
+              label: 'Specialty Blueprints',
+              value: blueprintsForSelectedSpecialty.length,
+              valueColor: '#1a73e8',
+              badge: 'Matched',
+              badgeColor: '#1a73e8',
+              badgeBg: '#e8f0fe',
+              subtitle: 'Protocols tailored to your specialty',
+              active: recommendationEngineMode === 'specialty',
+              onClick: () => setRecommendationEngineMode('specialty')
+            },
+            {
+              id: 'rx-synergies',
+              label: 'Patient Rx Synergies',
+              value: allPrescriptions.length,
+              badge: 'Active Rx',
+              badgeColor: '#137333',
+              badgeBg: '#e6f4ea',
+              subtitle: 'Prescriptions analyzed for co-therapies',
+              active: recommendationEngineMode === 'prescriptions',
+              onClick: () => setRecommendationEngineMode('prescriptions')
+            },
+            {
+              id: 'compounded',
+              label: 'Compounded Formulas',
+              value: blueprintsForSelectedSpecialty.filter((b) => Boolean(b.compoundingFormula)).length,
+              valueColor: '#137333',
+              badge: 'Titratable',
+              badgeColor: '#137333',
+              badgeBg: '#e6f4ea',
+              subtitle: 'Custom galenic Rx formulations'
+            },
+            {
+              id: 'catalog',
+              label: 'Catalog Co-Therapies',
+              value: blueprintsForSelectedSpecialty.reduce(
+                (acc, b) => acc + [b.peptideSynergy, b.dermocosmeticSynergy, b.nutraceuticalSynergy, b.diagnosticSynergy].filter(Boolean).length,
+                0
+              ),
+              badge: 'In-Stock',
+              badgeColor: '#3c4043',
+              badgeBg: '#f1f3f4',
+              subtitle: 'Complementary commercial references'
+            }
+          ]}
+        />
 
         {/* Dual-Engine Google Cloud Console Material Underline Tabs */}
         <div

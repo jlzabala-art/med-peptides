@@ -6213,6 +6213,85 @@ export default function DoctorPublicPortalClient({
             </div>
           </header>
 
+          {/* ── GCP Active Patient Context Bar (Cross-Tab Resource Linking) ── */}
+          {patientFilter && patientFilter !== 'all' && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '10px',
+                padding: '8px 14px',
+                marginBottom: '16px',
+                backgroundColor: '#e8f0fe',
+                border: '1px solid #d2e3fc',
+                borderRadius: '8px',
+                fontSize: '0.78rem',
+                color: '#1a73e8'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.68rem', letterSpacing: '0.04em' }}>
+                  Active Patient Context:
+                </span>
+                <span style={{ fontWeight: 700, color: '#202124', background: '#ffffff', padding: '2px 8px', borderRadius: '4px', border: '1px solid #d2e3fc' }}>
+                  {patientFilter}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setActiveAnchor('prescriptions')}
+                  style={{
+                    padding: '3px 9px',
+                    borderRadius: '4px',
+                    border: activeAnchor === 'prescriptions' ? '1px solid #1a73e8' : '1px solid #dadce0',
+                    background: '#ffffff',
+                    color: '#1a73e8',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Prescriptions
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveAnchor('dna_analysis')}
+                  style={{
+                    padding: '3px 9px',
+                    borderRadius: '4px',
+                    border: activeAnchor === 'dna_analysis' ? '1px solid #1a73e8' : '1px solid #dadce0',
+                    background: '#ffffff',
+                    color: '#1a73e8',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  DNA Analysis
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPatientFilter('all')}
+                  style={{
+                    padding: '3px 9px',
+                    borderRadius: '4px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    color: '#5f6368',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Clear ×
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ── View 1: Practice Overview (Adaptive for Zero-Rx vs Active Prescribers) ─ */}
           {activeAnchor === 'overview' && (
             <div id="overview" style={{ marginBottom: '24px' }}>
@@ -7755,6 +7834,11 @@ export default function DoctorPublicPortalClient({
                 handleRefresh={handleRefresh}
                 isSwitchingDoctor={isSwitchingDoctor}
                 onUploadPdf={handleOpenNewPrescriptionIntake}
+                activePatientFilter={patientFilter}
+                onNavigateToRx={(codeOrName) => {
+                  if (codeOrName) setSearchQuery(codeOrName);
+                  setActiveAnchor('prescriptions');
+                }}
               />
               <GenomicsExplainerVideoCard
                 assistantKey={
