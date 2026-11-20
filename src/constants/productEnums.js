@@ -70,6 +70,7 @@ export const BILLING_UNIT = Object.freeze({
   DEVICE:       'device',       // Medical device
   AMPOULE:      'ampoule',      // Single-use ampoule
   PATCH:        'patch',        // Transdermal patch
+  PELLET:       'pellet',       // Subcutaneous hormone pellet
 });
 
 export const BILLING_UNIT_LABELS = Object.freeze({
@@ -83,6 +84,7 @@ export const BILLING_UNIT_LABELS = Object.freeze({
   [BILLING_UNIT.DEVICE]:       'Device',
   [BILLING_UNIT.AMPOULE]:      'Ampoule',
   [BILLING_UNIT.PATCH]:        'Patch',
+  [BILLING_UNIT.PELLET]:       'Pellet',
 });
 
 // ── Product Types ─────────────────────────────────────────────────────────────
@@ -94,6 +96,7 @@ export const PRODUCT_TYPE = Object.freeze({
   PROTOCOL:             'protocol',
   PROFESSIONAL_MATERIAL:'professional_material',
   HORMONE:              'hormone',
+  PELLET:               'pellet',
   SMALL_MOLECULE:       'small_molecule',
   INJECTABLE_NUTRIENT:  'injectable_nutrient',
   IV_PROTOCOL:          'iv_protocol',

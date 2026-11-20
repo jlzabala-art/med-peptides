@@ -185,7 +185,7 @@ export function getPharmapolisHormonesCatalog() {
       subtitle: `${pack} · ${tierSummaryParts.join(' · ')}`,
       brand: 'pharmapolis',
       supplierId: 'supplier-pharmapolis',
-      supplierIds: ['supplier-pharmapolis', 'supplier-nplab'],
+      supplierIds: ['supplier-pharmapolis', 'supplier-nplabs'],
       supplierName: 'Pharmapolis Compounding Pharmacy (Bulgaria EU GMP)',
       country: 'BG',
       track: 'hormones',

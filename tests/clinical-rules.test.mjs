@@ -52,3 +52,28 @@ test('Clinical Formulations: filters out vehicles from APIs and respects EN/ES l
   assert.ok(src.includes('export function resolvePrescriptionParts(rx, lang = \'en\')'), 'resolvePrescriptionParts must accept lang');
   assert.ok(src.includes('!a?.isVehicleOrBase'), 'Must exclude vehicles from APIs list');
 });
+
+test('Pellet Data Model & Supplier Cost Benchmark: pairs Pharmapolis vs NP LABS by canonicalKey', async () => {
+  const { PRODUCT_TYPE, BILLING_UNIT } = await import('../src/constants/productEnums.js');
+  const { buildPelletComparisonRows } = await import('../src/utils/pelletComparison.js');
+  const { getAllNpLabsPellets } = await import('../src/data/nplabPelletsRegistry.js');
+  const { getAllPharmapolisPellets } = await import('../src/data/pharmapolisPelletsRegistry.js');
+
+  assert.equal(PRODUCT_TYPE.PELLET, 'pellet');
+  assert.equal(BILLING_UNIT.PELLET, 'pellet');
+
+  const rows = buildPelletComparisonRows([...getAllPharmapolisPellets(), ...getAllNpLabsPellets()]);
+  const t50 = rows.find((r) => r.canonicalKey === 'testosterone-50mg-pellet');
+  assert.ok(t50, 'Must pair Testosterone 50mg across both suppliers');
+  assert.equal(t50.overlapStatus, 'both');
+  assert.equal(t50.pharmapolisCostEur, 50.56);
+  assert.equal(t50.nplabsCostEur, 45);
+  assert.equal(t50.cheaperSupplier, 'nplabs');
+
+  const e25 = rows.find((r) => r.canonicalKey === 'estradiol-25mg-pellet');
+  assert.equal(e25.cheaperSupplier, 'pharmapolis');
+
+  const g10 = rows.find((r) => r.canonicalKey === 'gestrinone-10mg-pellet');
+  assert.equal(g10.overlapStatus, 'nplabs_only');
+  assert.equal(g10.nplabsCostEur, 55);
+});

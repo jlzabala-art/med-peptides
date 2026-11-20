@@ -25,8 +25,10 @@ import { useCategories } from '../../hooks/admin/useCategories';
 import MobileSupplierCard from '../shared/mobile/MobileSupplierCard';
 import MobileActionSheet from '../ui/MobileActionSheet';
 import { exportLotuslandProcurementXlsx } from '../../utils/exportLotuslandProcurementXlsx';
+import PelletSupplierComparison from './suppliers/PelletSupplierComparison';
 
 export default function AdminSuppliersTabClient({ initialData }) {
+  const [showPelletBenchmark, setShowPelletBenchmark] = useState(false);
   const { openDrawer } = useDrawer();
   const {
     suppliers,
@@ -140,6 +142,35 @@ export default function AdminSuppliersTabClient({ initialData }) {
     setSelectedIds([]);
   };
 
+  if (showPelletBenchmark) {
+    return (
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <PageHeader
+          title="Hormone Pellet Cost Benchmark"
+          subtitle="Live Firestore comparison: Pharmapolis Bulgaria (EU GMP) vs. NP LABS International"
+          actions={
+            <button
+              type="button"
+              onClick={() => setShowPelletBenchmark(false)}
+              className="gcp-btn-secondary"
+              style={{
+                height: '36px',
+                padding: '0 14px',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.8125rem',
+                cursor: 'pointer',
+              }}
+            >
+              ← Back to Suppliers
+            </button>
+          }
+        />
+        <PelletSupplierComparison />
+      </div>
+    );
+  }
+
   return (
     <>
       <DataModule
@@ -150,6 +181,27 @@ export default function AdminSuppliersTabClient({ initialData }) {
         kpis={<SupplierKPIs kpiStats={serverKpis} isLoading={kpisLoading} activeKpiFilter={activeKpiFilter} setActiveKpiFilter={setActiveKpiFilter} />}
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setShowPelletBenchmark(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                height: '36px',
+                padding: '0 14px',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.8125rem',
+                backgroundColor: '#eff6ff',
+                color: '#1d4ed8',
+                border: '1px solid #bfdbfe',
+                cursor: 'pointer'
+              }}
+              title="Compare Pharmapolis vs NP LABS hormone pellet base costs"
+            >
+              <span>Pellet Cost Benchmark</span>
+            </button>
             <button
               type="button"
               onClick={() => {
