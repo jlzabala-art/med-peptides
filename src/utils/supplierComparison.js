@@ -112,6 +112,7 @@ export function extractNormalizedOffers(doc = {}, fxToEur = DEFAULT_FX_TO_EUR) {
         wholesaleEur: raw.wholesaleEur ?? doc.pricing?.clinic?.perUnit ?? doc.pricing?.wholesalePriceEur ?? null,
         packPrice: raw.packPrice ?? null,
         packUnits: raw.packUnits ?? null,
+        bulkTier: raw.bulkTier || doc.bulkOffer || null,
         leadTimeDays: raw.leadTimeDays ?? doc.leadTimeDays ?? null,
         certification: raw.certification || (supplierId === 'supplier-pharmapolis' ? 'EU_GMP' : 'STANDARD'),
         moq: raw.moq ?? 1,

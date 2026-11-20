@@ -13,6 +13,8 @@
  *     linearly interpolated EUR cost (`costPriceEur` / `price_eur`) and AED tiers.
  */
 
+import { getBulkOffersForHormoneNo } from './pharmapolisHrtBulkOffers.js';
+
 const EUR_TO_AED = 3.98;
 
 export const PHARMAPOLIS_HORMONES_RAW = [
@@ -213,6 +215,7 @@ export function getPharmapolisHormonesCatalog() {
       clinicPriceAed: Number((landedCostAed * 1.3225).toFixed(2)),
       retailPriceAed: Number((landedCostAed * 1.55).toFixed(2)),
       variants,
+      bulkOffers: getBulkOffersForHormoneNo(no),
       requiresPrescription: true,
       isProfessional: true,
       status: 'published',

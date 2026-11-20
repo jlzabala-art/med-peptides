@@ -133,6 +133,11 @@ export default function PelletSupplierComparison({ defaultCategory = 'pellet' })
               <span style={{ fontWeight: 800, color: '#16a34a' }}>
                 €{row.bestOffer.costEur.toFixed(2)} · {row.bestOffer.supplierName}
               </span>
+              {row.bestOffer.bulkTier && (
+                <span style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: 600 }}>
+                  Batch ×{row.bestOffer.bulkTier.packsPerBatch}: €{Number(row.bestOffer.bulkTier.bulkOfferExclVatEur).toFixed(2)} (Prod €{Number(row.bestOffer.bulkTier.unitProductionCostEur).toFixed(2)})
+                </span>
+              )}
               {row.bestOffer.currency !== 'EUR' && (
                 <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
                   Native: {row.bestOffer.currency} {row.bestOffer.costPrice.toFixed(2)}

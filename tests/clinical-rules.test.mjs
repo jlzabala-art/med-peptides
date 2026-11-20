@@ -182,3 +182,17 @@ test('QR Refill Flow: deep-links product+part, renders ExpressQrRefillCard, and 
   assert.ok(apiSrc.includes("targetRoles: ['admin', 'doctor']"), 'Must notify Atlas admin and doctor in Firestore notifications');
   assert.ok(apiSrc.includes('mail_notifications'), 'Must log email alert in mail_notifications');
 });
+
+test('Pharmapolis HRT Bulk Offers: 6 high-frequency hormones include batch costs and bulkTier comparison', async () => {
+  const { getAllPharmapolisHrtBulkOffers } = await import('../src/data/pharmapolisHrtBulkOffers.js');
+  const { buildSupplierComparisonRows } = await import('../src/utils/supplierComparison.js');
+  const offers = getAllPharmapolisHrtBulkOffers();
+  assert.equal(offers.length, 6);
+
+  const rows = buildSupplierComparisonRows(offers, { productTypeFilter: 'hormone' });
+  const tWomen = rows.find((r) => r.canonicalKey === 'hormone:testosterone-cream-women:1mg-ml');
+  assert.ok(tWomen, 'Must include Testosterone cream (women) bulk offer');
+  assert.equal(tWomen.bestOffer.costEur, 21.04);
+  assert.equal(tWomen.bestOffer.bulkTier.packsPerBatch, 50);
+  assert.equal(tWomen.bestOffer.bulkTier.unitProductionCostEur, 10.52);
+});
