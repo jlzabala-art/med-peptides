@@ -5,7 +5,32 @@
  * and Fagron/Pharmapolis pharmacopeia monograph enrichment.
  */
 
-import { getFagronClinicalMonograph, resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
+import { getFagronClinicalMonograph, resolveApiClinicalData } from '../../data/fagronClinicalMonographs.js';
+
+/**
+ * Normalizes compounded formula titles across the engine:
+ *  - Strips "Part 1", "Part 2", "Part 3", "Part 4", "Parte X", "PART X OF Y"
+ *  - Normalizes TrichoWash variants to "TrichoWash Shampoo 250ml"
+ *  - Normalizes generic topical/treatment titles to their Tricho* vehicle (e.g. "TrichoSol")
+ */
+export function normalizeClinicalFormulaTitle(rawTitle = '', vehicleCorpus = '') {
+  const cleaned = String(rawTitle || '')
+    .replace(/\b(?:part|parte)\s*\d+(?:\s*(?:\/|of|de)\s*\d+)?\s*(?:·|:|-|\|)?\s*/gi, '')
+    .trim();
+  const corpus = `${cleaned} ${vehicleCorpus || ''}`;
+  const matchedTricho = corpus.match(/\b(TrichoWash|TrichoSol|TrichoOil|TrichoFoam|TrichoSerum|TrichoCond)\b/i);
+  const isGenericTopical =
+    /^(?:topical|scalp)(?:\s+(?:treatment|follicular|precision|therapy|care|and|hygiene|solution|wash|foam|serum|oil|lotion))+(?:\s*\([^)]*\))?$/i.test(cleaned) ||
+    /^(?:tratamiento\s+t[óo]pico|lavado\s+t[óo]pico)$/i.test(cleaned);
+
+  if (/trichowash/i.test(cleaned) || (isGenericTopical && /^trichowash$/i.test(matchedTricho?.[1] || ''))) {
+    return 'TrichoWash Shampoo 250ml';
+  }
+  if (isGenericTopical && matchedTricho) {
+    return matchedTricho[1];
+  }
+  return cleaned || (matchedTricho ? matchedTricho[1] : 'Compounded Formulation');
+}
 
 export function safeRenderText(val, fallback = '') {
   if (!val) return fallback;
@@ -226,12 +251,13 @@ export function resolvePrescriptionParts(rx, lang = 'en') {
       return {
         partNumber: partNum,
         totalParts: rx.formulas.length,
-        title: form.formulaName || `Part ${partNum}`,
-        badge: `PART ${partNum} OF ${rx.formulas.length} · ${badgeText}`,
+        title: normalizeClinicalFormulaTitle(form.formulaName, `${form.base || ''} ${badgeText}`),
+        badge: badgeText,
         volume: isOil ? '30 mL' : (isOral ? '90 Capsules' : '100 mL'),
         format: badgeText,
         vehicle: form.base || 'Compounding Galenic Carrier',
         schedule: form.posology || 'Administer as prescribed by treating physician.',
+        applicationInstructions: form.applicationInstructions || rx.applicationInstructions || [],
         accentColor,
         accentBg,
         borderAccent,
@@ -286,12 +312,13 @@ export function resolvePrescriptionParts(rx, lang = 'en') {
       {
         partNumber: 1,
         totalParts: 2,
-        title: 'Topical Follicular Precision Therapy (TrichoSol™)',
-        badge: 'PART 1 OF 2 · TOPICAL SCALP SOLUTION',
+        title: 'TrichoSol',
+        badge: 'TOPICAL SCALP SOLUTION',
         volume: p1Vehicle?.dose || '100 mL',
         format: 'Topical Scalp Solution',
         vehicle: p1Vehicle?.name || 'TrichoSol™ Liposomal Hydrophilic Vehicle (q.s. 100 mL)',
         schedule: p1Schedule,
+        applicationInstructions: rx.applicationInstructions || [],
         accentColor: '#0284c7',
         accentBg: '#f0f9ff',
         borderAccent: '#bae6fd',
@@ -301,11 +328,12 @@ export function resolvePrescriptionParts(rx, lang = 'en') {
         partNumber: 2,
         totalParts: 2,
         title: 'Follicular Protective & Hygiene Elixir (TrichoOil™)',
-        badge: 'PART 2 OF 2 · SCALP CARE & LIPIDIC OIL',
+        badge: 'SCALP CARE & LIPIDIC OIL',
         volume: p2Vehicle?.dose || '30 mL',
         format: 'Lipidic Scalp Oil',
         vehicle: p2Vehicle?.name || 'TrichoOil™ Natural Lipidic Vehicle (q.s. 30 mL)',
         schedule: p2Schedule,
+        applicationInstructions: rx.applicationInstructions || [],
         accentColor: '#0d9488',
         accentBg: '#f0fdfa',
         borderAccent: '#99f6e4',

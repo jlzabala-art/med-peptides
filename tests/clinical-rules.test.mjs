@@ -54,10 +54,18 @@ test('Doctor DNA Table: all DataTable renderers accept (_val, row)', () => {
   assert.equal(badRenders.length, 0, 'Every DataTable column renderer must use (_val, row)');
 });
 
-test('Clinical Formulations: filters out vehicles from APIs and respects EN/ES lang', () => {
+test('Clinical Formulations: filters out vehicles from APIs, normalizes titles, and removes PART X OF Y', async () => {
   const src = read('src/utils/clinical/clinicalFormulations.js');
   assert.ok(src.includes('export function resolvePrescriptionParts(rx, lang = \'en\')'), 'resolvePrescriptionParts must accept lang');
   assert.ok(src.includes('!a?.isVehicleOrBase'), 'Must exclude vehicles from APIs list');
+  assert.equal(src.includes('PART 1 OF 2'), false, 'clinicalFormulations must not emit PART 1 OF 2');
+  assert.equal(src.includes('PART 2 OF 2'), false, 'clinicalFormulations must not emit PART 2 OF 2');
+
+  const { normalizeClinicalFormulaTitle } = await import('../src/utils/clinical/clinicalFormulations.js');
+  assert.equal(normalizeClinicalFormulaTitle('Part 2 · Oral Hair Capsules (90 Capsules)'), 'Oral Hair Capsules (90 Capsules)');
+  assert.equal(normalizeClinicalFormulaTitle('Topical Treatment Solution (TrichoSol™)', 'TrichoSol'), 'TrichoSol');
+  assert.equal(normalizeClinicalFormulaTitle('Topical Wash', 'TrichoWash'), 'TrichoWash Shampoo 250ml');
+  assert.equal(normalizeClinicalFormulaTitle('Shampoo TrichoWash 250ml'), 'TrichoWash Shampoo 250ml');
 });
 
 test('Pellet Data Model & Supplier Cost Benchmark: pairs Pharmapolis vs NP LABS by canonicalKey', async () => {
@@ -146,4 +154,17 @@ test('Frontend Price Comparison Modules: wired to canonical model without mocks 
   const benchmarkSrc = read('src/components/admin/market/BenchmarkingWorkspace.jsx');
   assert.equal(benchmarkSrc.includes("margin: 'TBD'"), false, 'BenchmarkingWorkspace must compute real margin');
   assert.equal(benchmarkSrc.includes('score: 85'), false, 'BenchmarkingWorkspace must compute real score');
+});
+
+test('DNA Profile Resolver: TrichoTest/TeloTest/AcneTest never show Nutrigenomics lactose/caffeine fallback', async () => {
+  const { detectDnaTestFamily, resolveNonNutrigenomicDnaProfile } = await import('../src/utils/clinical/dnaProfileResolver.js');
+  assert.equal(detectDnaTestFamily({ code: 'BOX03519AATRI', testType: 'TrichoTest™ Pharmacogenomics' }), 'trichotest');
+  assert.equal(detectDnaTestFamily({ code: 'BOX001AATEL' }), 'telotest');
+  assert.equal(detectDnaTestFamily({ code: 'BOX001AAACN' }), 'acnetest');
+  assert.equal(detectDnaTestFamily({ testType: '24Genetics Nutrigenomics' }), 'nutrigenomics');
+
+  const tricho = resolveNonNutrigenomicDnaProfile({ code: 'BOX03519AATRI' }, 'trichotest');
+  assert.ok(tricho.axes.some((a) => a.genesLabel.includes('SRD5A1')), 'TrichoTest must show trichology genes');
+  assert.equal(JSON.stringify(tricho).includes('MCM6'), false, 'TrichoTest must not show lactose MCM6');
+  assert.equal(JSON.stringify(tricho).includes('ADORA2A'), false, 'TrichoTest must not show caffeine ADORA2A');
 });

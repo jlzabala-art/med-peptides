@@ -26,6 +26,7 @@ import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
 import { evaluateNutrigenomicProfile } from '@/data/genomics/clinicalNutrigenomicEngine';
 import { triangulateGenotypePhenotype, resolveTargetMagistralTemplate } from '@/data/genomics/biomarkerTriangulationEngine';
+import { detectDnaTestFamily, resolveNonNutrigenomicDnaProfile } from '@/utils/clinical/dnaProfileResolver';
 import CompoundedRxCustomizerDrawer from '../dna/CompoundedRxCustomizerDrawer';
 
 /**
@@ -122,14 +123,16 @@ export default function DoctorDnaAnalysisTab({
     }
   };
 
-  const handleCopyWhatsAppSummary = (row) => {
+  const handleCopyWhatsAppSummary = (row, _profile, nonNutriProfile = null) => {
     const sampleKey = row.sampleId || row.code;
     const patient = row.patientName || 'Patient';
     const doc = row.doctorName || 'Dr. Sajid Burud';
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
     const portalUrl = `${origin}/patient/dna-report?patient=${encodeURIComponent(patient)}&sample=${encodeURIComponent(sampleKey)}&doctor=${encodeURIComponent(doc)}&clinic=Transcend+Healthcare`;
 
-    const text = `🧬 *24Genetics Clinical DNA Intelligence* · Atlas Health Services
+    const text = nonNutriProfile
+      ? nonNutriProfile.whatsappSummary(patient, doc, portalUrl)
+      : `🧬 *24Genetics Clinical DNA Intelligence* · Atlas Health Services
 👤 *Patient:* ${patient} (Specimen #${sampleKey})
 👨‍⚕️ *Physician:* ${doc} · Transcend Healthcare
 
@@ -326,7 +329,21 @@ export default function DoctorDnaAnalysisTab({
       sortable: true,
       render: (_val, row) => {
         const score = Number(row.value) || 85;
-        const profileLabel = row.testType || 'Nutrigenomic Profile';
+        const family = detectDnaTestFamily(row);
+        const nonNutri = family !== 'nutrigenomics' ? resolveNonNutrigenomicDnaProfile(row, family) : null;
+        const profileLabel = row.testType || (nonNutri ? nonNutri.testLabel : 'Nutrigenomic Profile');
+        const badges = nonNutri
+          ? nonNutri.badges
+          : [
+              { label: 'MCM6 GG (Lactose Intolerance)', tone: 'danger' },
+              { label: 'ADORA2A TT (Caffeine Sensitivity)', tone: 'warn' },
+              { label: 'MTHFR GG (Normal Methylation)', tone: 'success' },
+            ];
+        const toneStyles = {
+          danger: { background: '#fce8e6', color: '#c5221f', border: '1px solid #fad2cf' },
+          warn: { background: '#fef7e0', color: '#b06000', border: '1px solid #feefc3' },
+          success: { background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6' },
+        };
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -348,15 +365,11 @@ export default function DoctorDnaAnalysisTab({
               </span>
             </div>
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', fontSize: '0.66rem' }}>
-              <span style={{ background: '#fce8e6', color: '#c5221f', border: '1px solid #fad2cf', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                MCM6 GG (Lactose Intolerance)
-              </span>
-              <span style={{ background: '#fef7e0', color: '#b06000', border: '1px solid #feefc3', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                ADORA2A TT (Caffeine Sensitivity)
-              </span>
-              <span style={{ background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                MTHFR GG (Normal Methylation)
-              </span>
+              {badges.map((b, i) => (
+                <span key={i} style={{ ...(toneStyles[b.tone] || toneStyles.warn), padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                  {b.label}
+                </span>
+              ))}
             </div>
           </div>
         );
@@ -625,11 +638,11 @@ export default function DoctorDnaAnalysisTab({
               5 Axes
             </span>
             <span style={{ fontSize: '0.70rem', color: '#c5221f', fontWeight: 500, backgroundColor: '#fce8e6', padding: '1px 6px', borderRadius: '4px' }}>
-              MCM6 / ADORA2A / IRS1
+              Multi-Panel Genomics
             </span>
           </div>
           <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            Personalized dietary & caffeine limits
+            TrichoTest, TeloTest, AcneTest &amp; 24Genetics
           </div>
         </div>
 
@@ -908,18 +921,29 @@ export default function DoctorDnaAnalysisTab({
             const rxPdfUrl = row.pdfReportUrl || `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
             const mealPdfUrl = row.mealPlanPdfUrl || `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
 
-            const profile = evaluateNutrigenomicProfile({
-              sampleCode: row.sampleId || row.code,
-              patientName: row.patientName,
-              doctor: row.doctorName,
-              clinic: row.clinicName
-            });
-            const triangulation = triangulateGenotypePhenotype({
-              genomicProfile: profile,
-              labResults: dnaResults
-            });
-            const axes = profile.fiveClinicalAxes || [];
-            const ancestral = profile.ancestralMetabolicProfile || {};
+            const family = detectDnaTestFamily(row);
+            const nonNutri = family !== 'nutrigenomics' ? resolveNonNutrigenomicDnaProfile(row, family) : null;
+
+            const profile = nonNutri
+              ? null
+              : evaluateNutrigenomicProfile({
+                  sampleCode: row.sampleId || row.code,
+                  patientName: row.patientName,
+                  doctor: row.doctorName,
+                  clinic: row.clinicName
+                });
+            const triangulation = nonNutri
+              ? {
+                  compositeScore: Number(row.value) || 88,
+                  highPriorityCount: nonNutri.convergenceItems.length,
+                  interactions: nonNutri.convergenceItems,
+                }
+              : triangulateGenotypePhenotype({
+                  genomicProfile: profile,
+                  labResults: dnaResults
+                });
+            const axes = nonNutri ? nonNutri.axes : (profile.fiveClinicalAxes || []);
+            const ancestral = nonNutri ? {} : (profile.ancestralMetabolicProfile || {});
 
             return (
               <div
@@ -939,14 +963,14 @@ export default function DoctorDnaAnalysisTab({
                       CLINICAL GENOMIC AUDIT & MULTIDISCIPLINARY TRANSLATION
                     </span>
                     <div style={{ fontSize: '0.96rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>
-                      5 Clinical Genomic Axes Overview · Specimen {row.sampleId || row.code}
+                      {nonNutri ? nonNutri.headerSubtitle : `5 Clinical Genomic Axes Overview · Specimen ${row.sampleId || row.code}`}
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <button
                       type="button"
-                      onClick={() => handleCopyWhatsAppSummary(row, profile)}
+                      onClick={() => handleCopyWhatsAppSummary(row, profile, nonNutri)}
                       style={{
                         fontSize: '0.74rem',
                         fontWeight: 600,
@@ -1057,8 +1081,28 @@ export default function DoctorDnaAnalysisTab({
                   })}
                 </div>
 
-                {/* Ancestral Metabolic Heritage & Dietary Compatibility Insight */}
-                {ancestral.clinicalSynthesisEn && (
+                {/* Domain-specific synthesis (Trichology / Longevity / Dermatology vs Nutrigenomics Ancestry) */}
+                {nonNutri ? (
+                  <div
+                    style={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderLeft: '4px solid #1a73e8',
+                      borderRadius: '4px',
+                      padding: '12px 14px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <Sparkles size={14} style={{ color: '#1a73e8' }} />
+                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                        {nonNutri.synthesisTitle}
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.76rem', color: '#3c4043', lineHeight: 1.55 }}>
+                      {nonNutri.synthesisText}
+                    </p>
+                  </div>
+                ) : ancestral.clinicalSynthesisEn && (
                   <div
                     style={{
                       backgroundColor: '#ffffff',
