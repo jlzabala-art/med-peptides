@@ -92,7 +92,7 @@ export async function GET() {
         totalPrescriptions,
         totalPrintedA4Count,
         totalPrintedLabelsCount: totalPrintedLabelsCount || totalPrintedA4Count,
-        uploadedThisWeek: uploadedThisWeek || 8
+        uploadedThisWeek: uploadedThisWeek ?? 0
       },
       printCountsByCode,
       printDetailsByCode

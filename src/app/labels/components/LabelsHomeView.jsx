@@ -126,7 +126,7 @@ export default function LabelsHomeView({
             <Printer size={15} color="#0d9488" />
           </div>
           <div className="pls-gcp-kpi-val">
-            {unprintedCodes.length} {isEs ? 'Listas' : 'Ready'}
+            {worklistTabCounts?.unprinted ?? unprintedCodes.length} {isEs ? 'Listas' : 'Ready'}
           </div>
           <div className="pls-gcp-kpi-sub">
             {isEs ? 'Recetas recientes sin imprimir' : 'Recent unprinted prescriptions'}
@@ -791,22 +791,56 @@ export default function LabelsHomeView({
                           >
                             <Plus size={13} />
                           </button>
-                          <span
+                          <button
+                            type="button"
+                            className="gcp-btn-secondary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectOrAddPatient(p.code, true, 'frontWithQr');
+                            }}
+                            title={isEs ? 'Editar etiqueta de producto / dispensación' : 'Open Product / Dispensing Label'}
                             style={{
+                              padding: '5px 9px',
+                              borderRadius: '6px',
+                              border: '1px solid #dadce0',
+                              background: '#ffffff',
+                              color: '#1a73e8',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '3px',
-                              padding: '5px 10px',
-                              borderRadius: '6px',
-                              background: '#e8f0fe',
-                              color: '#1a73e8',
-                              fontSize: '0.73rem',
-                              fontWeight: 700,
+                              whiteSpace: 'nowrap'
                             }}
                           >
-                            <span>{isEs ? 'Abrir' : 'Open'}</span>
-                            <ChevronRight size={13} />
-                          </span>
+                            <span>{isEs ? 'Producto' : 'Product'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="gcp-btn-secondary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectOrAddPatient(p.code, true, 'shipping');
+                            }}
+                            title={isEs ? 'Editar etiqueta de envío / delivery' : 'Open Shipping / Delivery Label'}
+                            style={{
+                              padding: '5px 9px',
+                              borderRadius: '6px',
+                              border: '1px solid #dadce0',
+                              background: '#ffffff',
+                              color: '#3c4043',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            <span>{isEs ? 'Envío' : 'Shipping'}</span>
+                          </button>
                         </div>
                       );
                     },

@@ -180,12 +180,15 @@ export function useLabelsQueue({
     updateUrlWithQueue(patientQueue, idx, nextPart);
   }, [patientQueue, updateUrlWithQueue]);
 
-  const handleSelectOrAddPatient = useCallback(async (code, activateImmediately = true) => {
+  const handleSelectOrAddPatient = useCallback(async (code, activateImmediately = true, preferredVariant = null) => {
     if (!code) return;
     const cleanCode = String(code).trim();
     const existingIdx = patientQueue.findIndex(p => String(p.code).toUpperCase() === cleanCode.toUpperCase());
 
     if (existingIdx >= 0) {
+      if (preferredVariant) {
+        setPatientQueue(prev => prev.map((item, idx) => idx === existingIdx ? { ...item, variant: preferredVariant } : item));
+      }
       if (activateImmediately) handleSwitchActivePatient(existingIdx);
       setSearchOpen?.(false);
       return;
@@ -211,7 +214,7 @@ export function useLabelsQueue({
           rx: data.rx,
           labels: enrichedLabels,
           selectedPartIndex: 'all',
-          variant: 'backQr',
+          variant: preferredVariant || 'backQr',
           widthMm: firstOpt.widthMm,
           heightMm: firstOpt.heightMm,
           containerTag: firstOpt.containerTag
