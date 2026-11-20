@@ -107,7 +107,7 @@ export default function ExpressQrRefillCard({
         </p>
         <div>
           <a
-            href={`https://wa.me/971500000000?text=${waText}`}
+            href={`https://wa.me/971564179256?text=${waText}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{

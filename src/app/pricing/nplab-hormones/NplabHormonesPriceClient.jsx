@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import ModularPriceSchedule from '@/components/pricing/shared/ModularPriceSchedule';
+import { getAllPharmapolisHrtBulkOffers } from '@/data/pharmapolisHrtBulkOffers';
 import '../colway/ColwayPriceList.css';
 
 export default function NplabHormonesPriceClient({
@@ -13,10 +14,43 @@ export default function NplabHormonesPriceClient({
   initialCurrency = 'EUR',
 }) {
   const [selectedLab, setSelectedLab] = useState(
-    ['pharmapolis', 'nplab', 'all'].includes(initialLab) ? initialLab : 'pharmapolis'
+    ['pharmapolis', 'pharmapolis_bulk', 'nplab', 'all'].includes(initialLab) ? initialLab : 'pharmapolis'
   );
 
+  const bulkProducts = useMemo(() => {
+    return getAllPharmapolisHrtBulkOffers().map((offer, idx) => {
+      const eur = Number(offer.bulkOfferExclVatEur || offer.pricing?.costPriceEur || 0);
+      const aed = Number((eur * 3.98).toFixed(2));
+      return {
+        id: offer.id,
+        slug: offer.id,
+        sku: `SKU-PHARM-BULK-${idx + 1}`,
+        name: `${offer.productName} (${offer.strength})`,
+        canonicalName: offer.productName,
+        subtitle: `${offer.packLabel} · Batch MOQ ×${offer.packsPerBatch}`,
+        category: 'E. Bulk Batch Offers (MOQ 33–50)',
+        packSize: `${offer.packLabel} · MOQ ${offer.packsPerBatch}`,
+        volume: `${offer.packLabel} (Batch ×${offer.packsPerBatch})`,
+        presentation: `${offer.packagingType} · Batch ×${offer.packsPerBatch}`,
+        keyActives: `${offer.productName} ${offer.strength} · ${offer.batchSize} ${offer.batchUnit} batch`,
+        clinicalFocus: `Institutional bulk compounding batch (${offer.packsPerBatch} packs/batch) by Pharmapolis Bulgaria (EU GMP). Excl. VAT.`,
+        costCurrency: 'EUR',
+        costPriceEur: eur,
+        landedCostAed: aed,
+        wholesalePriceAed: Number((aed * 1.15).toFixed(2)),
+        clinicPriceAed: Number((aed * 1.3225).toFixed(2)),
+        retailPriceAed: Number((aed * 1.55).toFixed(2)),
+        pricing: offer.pricing,
+        status: 'published',
+        isActive: true,
+      };
+    });
+  }, []);
+
   const activeProducts = useMemo(() => {
+    if (selectedLab === 'pharmapolis_bulk') {
+      return bulkProducts;
+    }
     if (selectedLab === 'pharmapolis' && pharmapolisProducts.length > 0) {
       return pharmapolisProducts;
     }
@@ -24,10 +58,10 @@ export default function NplabHormonesPriceClient({
       return nplabProducts;
     }
     if (selectedLab === 'all') {
-      return [...pharmapolisProducts, ...nplabProducts];
+      return [...pharmapolisProducts, ...bulkProducts, ...nplabProducts];
     }
     return pharmapolisProducts.length > 0 ? pharmapolisProducts : initialProducts;
-  }, [selectedLab, pharmapolisProducts, nplabProducts, initialProducts]);
+  }, [selectedLab, pharmapolisProducts, bulkProducts, nplabProducts, initialProducts]);
 
   const config = useMemo(() => {
     const isPharmapolis = selectedLab === 'pharmapolis';
@@ -94,6 +128,10 @@ export default function NplabHormonesPriceClient({
               {
                 id: 'pharmapolis',
                 label: `🇧🇬 Pharmapolis Bulgaria (${pharmapolisProducts.length} Master Preparations · 240 Strengths)`,
+              },
+              {
+                id: 'pharmapolis_bulk',
+                label: `📦 Pharmapolis Bulk Batch (MOQ 33–50 · ${bulkProducts.length} Top HRT)`,
               },
               {
                 id: 'nplab',

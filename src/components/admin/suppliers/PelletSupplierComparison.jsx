@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { db } from '../../../firebase';
 import { DataTable, GlobalSearchBar, StatusBadge, CopyableId, MetricCard } from '../../ui';
 import { buildSupplierComparisonRows } from '@/utils/supplierComparison';
-import { Layers, CheckCircle, AlertTriangle, DollarSign } from '@/lib/icons';
+import { Layers, CheckCircle, AlertTriangle, DollarSign, Download } from '@/lib/icons';
 
 export default function PelletSupplierComparison({ defaultCategory = 'pellet' }) {
   const [rawProducts, setRawProducts] = useState([]);
@@ -276,6 +276,55 @@ export default function PelletSupplierComparison({ defaultCategory = 'pellet' })
     [savingKey]
   );
 
+  const handleExportCsv = () => {
+    const headers = [
+      'Canonical Key',
+      'Product',
+      'Type',
+      'Suppliers',
+      'Best Supplier',
+      'Best Cost EUR',
+      '2nd Supplier',
+      '2nd Cost EUR',
+      'Spread EUR',
+      'Spread %',
+      'Preferred Supplier',
+      'Bulk Batch MOQ',
+      'Bulk Batch Cost EUR',
+    ];
+    const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const lines = [
+      headers.map(escape).join(','),
+      ...filteredRows.map((r) =>
+        [
+          r.canonicalKey,
+          r.name,
+          r.productType,
+          r.supplierCount,
+          r.bestOffer?.supplierName || '',
+          r.bestOffer?.costEur ?? '',
+          r.secondBestOffer?.supplierName || '',
+          r.secondBestOffer?.costEur ?? '',
+          r.maxSpreadEur ?? '',
+          r.maxSpreadPct ?? '',
+          r.preferredSupplierId || '',
+          r.bestOffer?.bulkTier?.packsPerBatch ?? '',
+          r.bestOffer?.bulkTier?.bulkOfferExclVatEur ?? '',
+        ]
+          .map(escape)
+          .join(',')
+      ),
+    ];
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `atlas-supplier-benchmark-${categoryFilter}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${filteredRows.length} rows to CSV`);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div
@@ -311,60 +360,84 @@ export default function PelletSupplierComparison({ defaultCategory = 'pellet' })
         />
       </div>
 
-      <GlobalSearchBar
-        size="md"
-        searchTerm={searchQuery}
-        onSearchChange={setSearchQuery}
-        placeholder="Search canonical products, strengths, or supplier names..."
-        resultCount={filteredRows.length}
-        namespace="admin-supplier-benchmark"
-        filters={[
-          {
-            key: 'category',
-            label: 'Category',
-            value: categoryFilter,
-            onRemove: categoryFilter !== 'all' ? () => setCategoryFilter('all') : undefined,
-          },
-          ...(scopeFilter !== 'all'
-            ? [
-                {
-                  key: 'scope',
-                  label: 'Coverage',
-                  value: scopeFilter === 'multi' ? 'Multi-Supplier (≥2)' : 'Single Source',
-                  onRemove: () => setScopeFilter('all'),
-                },
-              ]
-            : []),
-        ]}
-        filterOptions={[
-          {
-            key: 'category',
-            label: 'Product Type',
-            multiSelect: false,
-            values: [categoryFilter],
-            options: [
-              { value: 'pellet', label: 'Hormone Pellets' },
-              { value: 'peptide', label: 'Peptides' },
-              { value: 'hormone', label: 'Hormones (BHRT)' },
-              { value: 'raw_material', label: 'Raw Materials / APIs' },
-              { value: 'all', label: 'All Categories (Top 150)' },
-            ],
-            onChange: (vals) => setCategoryFilter(vals?.[0] || 'pellet'),
-          },
-          {
-            key: 'scope',
-            label: 'Supplier Coverage',
-            multiSelect: false,
-            values: [scopeFilter],
-            options: [
-              { value: 'all', label: 'All SKUs' },
-              { value: 'multi', label: 'Comparable (≥2 Suppliers)' },
-              { value: 'single', label: 'Single Source Only' },
-            ],
-            onChange: (vals) => setScopeFilter(vals?.[0] || 'all'),
-          },
-        ]}
-      />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 360px' }}>
+          <GlobalSearchBar
+            size="md"
+            searchTerm={searchQuery}
+            onSearchChange={setSearchQuery}
+            placeholder="Search canonical products, strengths, or supplier names..."
+            resultCount={filteredRows.length}
+            namespace="admin-supplier-benchmark"
+            filters={[
+              {
+                key: 'category',
+                label: 'Category',
+                value: categoryFilter,
+                onRemove: categoryFilter !== 'all' ? () => setCategoryFilter('all') : undefined,
+              },
+              ...(scopeFilter !== 'all'
+                ? [
+                    {
+                      key: 'scope',
+                      label: 'Coverage',
+                      value: scopeFilter === 'multi' ? 'Multi-Supplier (≥2)' : 'Single Source',
+                      onRemove: () => setScopeFilter('all'),
+                    },
+                  ]
+                : []),
+            ]}
+            filterOptions={[
+              {
+                key: 'category',
+                label: 'Product Type',
+                multiSelect: false,
+                values: [categoryFilter],
+                options: [
+                  { value: 'pellet', label: 'Hormone Pellets' },
+                  { value: 'peptide', label: 'Peptides' },
+                  { value: 'hormone', label: 'Hormones (BHRT)' },
+                  { value: 'raw_material', label: 'Raw Materials / APIs' },
+                  { value: 'all', label: 'All Categories (Top 150)' },
+                ],
+                onChange: (vals) => setCategoryFilter(vals?.[0] || 'pellet'),
+              },
+              {
+                key: 'scope',
+                label: 'Supplier Coverage',
+                multiSelect: false,
+                values: [scopeFilter],
+                options: [
+                  { value: 'all', label: 'All SKUs' },
+                  { value: 'multi', label: 'Comparable (≥2 Suppliers)' },
+                  { value: 'single', label: 'Single Source Only' },
+                ],
+                onChange: (vals) => setScopeFilter(vals?.[0] || 'all'),
+              },
+            ]}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleExportCsv}
+          disabled={filteredRows.length === 0}
+          className="gcp-btn-secondary"
+          style={{
+            height: '40px',
+            padding: '0 14px',
+            borderRadius: '8px',
+            fontWeight: 700,
+            fontSize: '0.8rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: filteredRows.length === 0 ? 'not-allowed' : 'pointer',
+          }}
+        >
+          <Download size={14} />
+          <span>Export CSV</span>
+        </button>
+      </div>
 
       <DataTable
         data={filteredRows}
