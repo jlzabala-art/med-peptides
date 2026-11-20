@@ -51,6 +51,7 @@ export default function DoctorDnaAnalysisTab({
   const [filterQuery, setFilterQuery] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('all'); // 'all' | 'fagron' | '24genomics' | 'eterna'
   const [selectedAssay, setSelectedAssay] = useState('all');
+  const [timeRange, setTimeRange] = useState('all'); // 'all' | '30d' | '90d'
   const [prescribingId, setPrescribingId] = useState(null);
   const [createdRx, setCreatedRx] = useState({});
   const [copiedWhatsAppId, setCopiedWhatsAppId] = useState(null);
@@ -193,44 +194,100 @@ export default function DoctorDnaAnalysisTab({
     ],
   }), []);
 
+  const getPlatformBucket = (row) => {
+    const text = `${row.testName || ''} ${row.testType || ''} ${row.biomarker || ''} ${row.laboratory?.name || ''}`.toLowerCase();
+    if (text.includes('eterna') || text.includes('proteom')) return 'eterna';
+    if (
+      text.includes('24gen') ||
+      text.includes('illumina') ||
+      text.includes('skin & hair') ||
+      text.includes('ancestry') ||
+      text.includes('personality')
+    ) {
+      return '24genomics';
+    }
+    if (
+      text.includes('fagron') ||
+      text.includes('tricho') ||
+      text.includes('telo') ||
+      text.includes('nutrigen') ||
+      text.includes('acne') ||
+      text.includes('dermagen') ||
+      text.includes('obesigen')
+    ) {
+      return 'fagron';
+    }
+    return 'fagron';
+  };
+
+  const platformCounts = useMemo(() => {
+    const counts = { all: dnaResults.length, fagron: 0, '24genomics': 0, eterna: 0 };
+    for (const row of dnaResults) {
+      const b = getPlatformBucket(row);
+      counts[b] = (counts[b] || 0) + 1;
+    }
+    return counts;
+  }, [dnaResults]);
+
   // Filtered dataset
   const filteredData = useMemo(() => {
+    const nowMs = Date.now();
+    const maxAgeDays = timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : null;
+
     return dnaResults.filter((row) => {
       const text = `${row.patientName || row.patient?.name || ''} ${row.code || ''} ${row.sampleId || ''} ${row.testName || ''} ${row.testType || ''} ${row.biomarker || ''} ${row.laboratory?.name || ''}`.toLowerCase();
       const matchQuery = !filterQuery || text.includes(filterQuery.toLowerCase());
       if (!matchQuery) return false;
 
-      if (selectedPlatform === 'fagron') {
-        const isFagron =
-          text.includes('fagron') ||
-          text.includes('tricho') ||
-          text.includes('telo') ||
-          text.includes('nutrigen') ||
-          text.includes('acne') ||
-          text.includes('dermagen') ||
-          text.includes('obesigen');
-        if (!isFagron) return false;
-      } else if (selectedPlatform === '24genomics') {
-        const is24G =
-          text.includes('24gen') ||
-          text.includes('illumina') ||
-          text.includes('nutrigenomics') ||
-          text.includes('skin & hair') ||
-          text.includes('ancestry') ||
-          text.includes('personality');
-        if (!is24G) return false;
-      } else if (selectedPlatform === 'eterna') {
-        const isEterna = text.includes('eterna') || text.includes('proteom');
-        if (!isEterna) return false;
+      if (selectedPlatform !== 'all' && getPlatformBucket(row) !== selectedPlatform) {
+        return false;
       }
 
       if (selectedAssay !== 'all') {
-        if (selectedAssay === 'skin-hair') return text.includes('skin') || text.includes('hair');
-        if (!text.includes(selectedAssay)) return false;
+        if (selectedAssay === 'skin-hair') {
+          if (!text.includes('skin') && !text.includes('hair')) return false;
+        } else if (!text.includes(selectedAssay)) {
+          return false;
+        }
+      }
+
+      if (maxAgeDays) {
+        const rawDate = row.analysisDate || row.date;
+        if (rawDate) {
+          const parsed = new Date(rawDate).getTime();
+          if (Number.isFinite(parsed) && nowMs - parsed > maxAgeDays * 86400000) {
+            return false;
+          }
+        }
       }
       return true;
     });
-  }, [dnaResults, filterQuery, selectedPlatform, selectedAssay]);
+  }, [dnaResults, filterQuery, selectedPlatform, selectedAssay, timeRange]);
+
+  const kpiMetrics = useMemo(() => {
+    const source = kpiScope === 'active' ? filteredData : dnaResults;
+    const families = new Set();
+    let fagronCount = 0;
+    let linkedRxCount = 0;
+
+    for (const row of source) {
+      const family = detectDnaTestFamily(row);
+      families.add(family);
+      if (getPlatformBucket(row) === 'fagron') fagronCount += 1;
+      if (row.reportUrl || row.pdfReportUrl) linkedRxCount += 1;
+    }
+
+    const total = source.length;
+    const fagronPct = total > 0 ? Math.round((fagronCount / total) * 100) : 0;
+
+    return {
+      total,
+      fagronCount,
+      fagronPct,
+      panelCount: families.size,
+      linkedRxCount,
+    };
+  }, [kpiScope, filteredData, dnaResults]);
 
   // Columns definition following strict GCP styling & DataTable Golden Rules
   const columns = useMemo(() => [
@@ -325,29 +382,26 @@ export default function DoctorDnaAnalysisTab({
     {
       key: 'findings',
       header: 'Clinical Findings & Key SNPs',
-      width: '26%',
+      width: '24%',
       sortable: true,
       render: (_val, row) => {
         const score = Number(row.value) || 85;
+        const unitLabel = row.unit ? `${score} ${row.unit}` : `${score} Score`;
         const family = detectDnaTestFamily(row);
         const nonNutri = family !== 'nutrigenomics' ? resolveNonNutrigenomicDnaProfile(row, family) : null;
         const profileLabel = row.testType || (nonNutri ? nonNutri.testLabel : 'Nutrigenomic Profile');
         const badges = nonNutri
           ? nonNutri.badges
           : [
-              { label: 'MCM6 GG (Lactose Intolerance)', tone: 'danger' },
-              { label: 'ADORA2A TT (Caffeine Sensitivity)', tone: 'warn' },
-              { label: 'MTHFR GG (Normal Methylation)', tone: 'success' },
+              { label: 'MCM6 GG (Lactose)', tone: 'danger' },
+              { label: 'ADORA2A TT (Caffeine)', tone: 'warn' },
+              { label: 'MTHFR GG (Methylation)', tone: 'success' },
             ];
-        const toneStyles = {
-          danger: { background: '#fce8e6', color: '#c5221f', border: '1px solid #fad2cf' },
-          warn: { background: '#fef7e0', color: '#b06000', border: '1px solid #feefc3' },
-          success: { background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6' },
-        };
+        const summaryPathways = badges.map((b) => String(b.label || '').split('(')[0].trim()).filter(Boolean).join(' · ');
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.90rem', fontWeight: 700, color: '#202124' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.84rem', fontWeight: 650, color: '#202124' }}>
                 {profileLabel}
               </span>
               <span
@@ -358,40 +412,39 @@ export default function DoctorDnaAnalysisTab({
                   backgroundColor: '#e6f4ea',
                   border: '1px solid #ceead6',
                   padding: '1px 6px',
-                  borderRadius: '12px'
+                  borderRadius: '12px',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                {score} Score
+                {unitLabel}
               </span>
             </div>
-            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', fontSize: '0.66rem' }}>
-              {badges.map((b, i) => (
-                <span key={i} style={{ ...(toneStyles[b.tone] || toneStyles.warn), padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                  {b.label}
-                </span>
-              ))}
+            <div style={{ fontSize: '0.70rem', color: '#5f6368', lineHeight: 1.35 }}>
+              {summaryPathways}
             </div>
           </div>
         );
       }
     },
     {
-      key: 'patient',
-      header: 'Patient Profile',
-      width: '14%',
+      key: 'analysisDate',
+      header: 'Date & Status',
+      width: '12%',
       sortable: true,
       render: (_val, row) => {
-        const ptName = row.patientName || row.patient?.name || 'Patient';
-        const gender = row.patient?.gender || 'Female';
+        const dateStr = String(row.analysisDate || row.date || '—').slice(0, 10);
+        const gender = row.patient?.gender || '';
         const age = row.patient?.age ? `${row.patient.age} yrs` : '';
+        const demographics = [gender, age].filter(Boolean).join(' · ');
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-              {ptName}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+            <StatusBadge status={row.status || 'ready'} />
+            <span style={{ fontSize: '0.70rem', color: '#5f6368', fontFamily: 'monospace' }}>
+              {dateStr}
             </span>
-            <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
-              {gender} {age ? `· ${age}` : ''}
-            </span>
+            {demographics && (
+              <span style={{ fontSize: '0.68rem', color: '#70757a' }}>{demographics}</span>
+            )}
           </div>
         );
       }
@@ -402,8 +455,9 @@ export default function DoctorDnaAnalysisTab({
       width: '14%',
       render: (_val, row) => {
         const portalUrl = row.reportUrl || `/patient/dna-report?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
-        const rxPdfUrl = row.pdfReportUrl || `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
-        const mealPdfUrl = row.mealPlanPdfUrl || `/api/reports/24genomics-mealplan-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`;
+        const rxPdfUrl = row.pdfReportUrl || (getPlatformBucket(row) === '24genomics'
+          ? `/api/reports/24genomics-patient-pdf?patient=${encodeURIComponent(row.patientName || 'Patient')}&sample=${encodeURIComponent(row.sampleId || row.code || '')}`
+          : null);
 
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -411,71 +465,53 @@ export default function DoctorDnaAnalysisTab({
               href={portalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              title="Open Interactive Patient DNA Portal"
+              title="Open Clinical Dossier / DNA Portal"
+              className="gcp-btn-secondary"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px',
-                padding: '4px 8px',
+                padding: '4px 9px',
                 borderRadius: '4px',
-                backgroundColor: '#1a73e8',
-                color: '#ffffff',
+                border: '1px solid #dadce0',
+                backgroundColor: '#ffffff',
+                color: '#1a73e8',
                 fontSize: '0.72rem',
-                fontWeight: 500,
-                textDecoration: 'none'
+                fontWeight: 600,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap'
               }}
             >
-              <span>DNA Portal</span>
-              <ArrowUpRight size={11} />
+              <span>Portal</span>
+              <ArrowUpRight size={12} />
             </Link>
 
-            <a
-              href={rxPdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              download
-              title="Download 59-Page Clinical Prescription PDF"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '4px 6px',
-                borderRadius: '4px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #dadce0',
-                color: '#3c4043',
-                fontSize: '0.70rem',
-                fontWeight: 500,
-                textDecoration: 'none'
-              }}
-            >
-              <Download size={11} />
-              <span style={{ marginLeft: '3px' }}>Rx (59p)</span>
-            </a>
-
-            <a
-              href={mealPdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              download
-              title="Download 7-Day Precision Meal Plan PDF"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '4px 6px',
-                borderRadius: '4px',
-                backgroundColor: '#f6fafe',
-                border: '1px solid #d2e3fc',
-                color: '#1a73e8',
-                fontSize: '0.70rem',
-                fontWeight: 500,
-                textDecoration: 'none'
-              }}
-            >
-              <Utensils size={11} />
-              <span style={{ marginLeft: '3px' }}>Menu</span>
-            </a>
+            {rxPdfUrl && (
+              <a
+                href={rxPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+                title="Download Clinical Report PDF"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '4px 7px',
+                  borderRadius: '4px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#5f6368',
+                  fontSize: '0.70rem',
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <Download size={12} />
+                <span style={{ marginLeft: '3px' }}>PDF</span>
+              </a>
+            )}
           </div>
         );
       }
@@ -520,11 +556,11 @@ export default function DoctorDnaAnalysisTab({
           >
             {kpiScope === 'active'
               ? `Matching Active Filters (${filteredData.length} specimens)`
-              : `Entire Clinic Database (${dnaResults.length} unfilitered)`}
+              : `Entire Practice (${dnaResults.length} unfiltered)`}
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <button
             type="button"
             onClick={() => setKpiScope('active')}
@@ -564,7 +600,7 @@ export default function DoctorDnaAnalysisTab({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
           gap: '12px'
         }}
       >
@@ -581,16 +617,16 @@ export default function DoctorDnaAnalysisTab({
           <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Sequenced Patients
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
-            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#202124' }}>
-              {kpiScope === 'active' ? filteredData.length : dnaResults.length}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#202124', whiteSpace: 'nowrap' }}>
+              {kpiMetrics.total}
             </span>
-            <span style={{ fontSize: '0.70rem', color: '#137333', fontWeight: 500, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px' }}>
-              Active in Practice
+            <span style={{ fontSize: '0.70rem', color: '#137333', fontWeight: 500, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+              {kpiScope === 'active' ? 'In View' : 'Entire Practice'}
             </span>
           </div>
           <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            Illumina GSA-24 CE-IVD saliva assays
+            CE-IVD pharmacogenomic &amp; DNA assays
           </div>
         </div>
 
@@ -605,18 +641,18 @@ export default function DoctorDnaAnalysisTab({
           }}
         >
           <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            CE-IVD Validation
+            Fagron Genomics
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
-            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#1a73e8' }}>
-              100%
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#1a73e8', whiteSpace: 'nowrap' }}>
+              {kpiMetrics.fagronCount}
             </span>
-            <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 500, backgroundColor: '#e8f0fe', padding: '1px 6px', borderRadius: '4px' }}>
-              Clinical Grade
+            <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 500, backgroundColor: '#e8f0fe', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+              {kpiMetrics.fagronPct}% Share
             </span>
           </div>
           <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            Whole-genome microarrays (700k+ SNPs)
+            TrichoTest™, TeloTest™ &amp; NutriGen™
           </div>
         </div>
 
@@ -631,18 +667,18 @@ export default function DoctorDnaAnalysisTab({
           }}
         >
           <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Key Actionable SNPs
+            Active Assay Panels
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
-            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#c5221f' }}>
-              5 Axes
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#202124', whiteSpace: 'nowrap' }}>
+              {kpiMetrics.panelCount}
             </span>
-            <span style={{ fontSize: '0.70rem', color: '#c5221f', fontWeight: 500, backgroundColor: '#fce8e6', padding: '1px 6px', borderRadius: '4px' }}>
-              Multi-Panel Genomics
+            <span style={{ fontSize: '0.70rem', color: '#b06000', fontWeight: 500, backgroundColor: '#fef7e0', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+              Multi-Panel
             </span>
           </div>
           <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            TrichoTest, TeloTest, AcneTest &amp; 24Genetics
+            Distinct diagnostic modalities
           </div>
         </div>
 
@@ -657,23 +693,23 @@ export default function DoctorDnaAnalysisTab({
           }}
         >
           <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Clinical Protocols Issued
+            Linked Prescriptions
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
-            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#137333' }}>
-              {dnaResults.length * 2} Dossiers
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '1.60rem', fontWeight: 600, color: '#137333', whiteSpace: 'nowrap' }}>
+              {kpiMetrics.linkedRxCount}
             </span>
-            <span style={{ fontSize: '0.70rem', color: '#137333', fontWeight: 500, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px' }}>
-              Rx + Meal Plan
+            <span style={{ fontSize: '0.70rem', color: '#137333', fontWeight: 500, backgroundColor: '#e6f4ea', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+              Rx Matched
             </span>
           </div>
           <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>
-            59-page clinical PDFs + 3-capsule magistral
+            Compounded regimens &amp; dossiers
           </div>
         </div>
       </div>
 
-      {/* ── Main Data Card with Scope & Filters ── */}
+      {/* ── Main Data Card with Unified Search, Chips & Table ── */}
       <div
         style={{
           background: '#ffffff',
@@ -683,76 +719,6 @@ export default function DoctorDnaAnalysisTab({
           overflow: 'hidden'
         }}
       >
-        {/* Card Header */}
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #dadce0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#202124', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Dna size={18} style={{ color: '#1a73e8' }} />
-                <span>DNA & Genomic Analysis</span>
-              </h2>
-              <span style={{ fontSize: '0.68rem', color: '#1a73e8', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                Illumina Infinium GSA-24 · CE-IVD
-              </span>
-            </div>
-            <p style={{ margin: '3px 0 0 0', fontSize: '0.78rem', color: '#5f6368' }}>
-              Germline genetic polymorphisms, nutrigenomics, pharmacogenomics, and ancestral metabolic compatibility.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* Scope Indicator Badge (Golden Rule #22) */}
-            <span
-              style={{
-                fontSize: '0.70rem',
-                color: '#3c4043',
-                backgroundColor: '#f1f3f4',
-                padding: '4px 10px',
-                borderRadius: '4px',
-                fontWeight: 500,
-                border: '1px solid #dadce0'
-              }}
-            >
-              {filterQuery || selectedPlatform !== 'all' || selectedAssay !== 'all'
-                ? `Filtered View (${filteredData.length} of ${dnaResults.length})`
-                : `Entire Practice (${dnaResults.length} records)`}
-            </span>
-
-            <button
-              type="button"
-              onClick={handleRefresh}
-              title="Refresh DNA Analysis Data"
-              style={{
-                height: '32px',
-                padding: '0 12px',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#3c4043',
-                fontSize: '0.78rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <RotateCw size={13} className={isSwitchingDoctor ? 'animate-spin' : ''} />
-              <span>Sync</span>
-            </button>
-          </div>
-        </div>
-
         {dnaResults.length === 0 ? (
           <div
             style={{
@@ -785,7 +751,7 @@ export default function DoctorDnaAnalysisTab({
           </div>
         ) : (
         <>
-        {/* ── Google Cloud UX Search & 2-Level Zero-Scroll Filter Bar (Golden Rule #7 & #24) ── */}
+        {/* ── Google Cloud UX Search & Unified Filter Toolbar (Golden Rule #7 & #24) ── */}
         <div
           style={{
             padding: '14px 18px',
@@ -793,82 +759,106 @@ export default function DoctorDnaAnalysisTab({
             borderBottom: '1px solid #dadce0',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px',
+            gap: '10px',
           }}
         >
-          <GlobalSearchBar
-            size="lg"
-            value={filterQuery}
-            onChange={setFilterQuery}
-            placeholder="Search by patient name, specimen ID, SNP (SULT1A1, MTHFR), or assay..."
-            resultCount={filteredData.length}
-            namespace={`dna-analysis-${slug || 'default'}`}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 320px', minWidth: 0 }}>
+              <GlobalSearchBar
+                size="lg"
+                value={filterQuery}
+                onChange={setFilterQuery}
+                placeholder="Search by patient name, specimen ID, SNP (SULT1A1, MTHFR), or assay..."
+                resultCount={filteredData.length}
+                namespace={`dna-analysis-${slug || 'default'}`}
+              />
+            </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
-              gap: '8px',
-              alignItems: 'center',
-            }}
-          >
-            {[
-              { id: 'all', label: 'All DNA Assays' },
-              { id: 'fagron', label: 'Fagron Genomics' },
-              { id: '24genomics', label: '24Genomics' },
-              { id: 'eterna', label: 'Eterna™' },
-            ].map((plat) => {
-              const isSelected = selectedPlatform === plat.id;
-              return (
-                <button
-                  key={plat.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedPlatform(plat.id);
-                    setSelectedAssay('all');
-                  }}
-                  style={{
-                    height: '34px',
-                    padding: '0 10px',
-                    borderRadius: '6px',
-                    fontSize: '0.76rem',
-                    fontWeight: isSelected ? 700 : 550,
-                    cursor: 'pointer',
-                    border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
-                    backgroundColor: isSelected ? '#e8f0fe' : '#ffffff',
-                    color: isSelected ? '#1a73e8' : '#3c4043',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {plat.label}
-                </button>
-              );
-            })}
+            <button
+              type="button"
+              onClick={handleRefresh}
+              title="Refresh DNA Analysis Data"
+              className="gcp-btn-secondary"
+              style={{
+                height: '40px',
+                padding: '0 14px',
+                borderRadius: '8px',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#3c4043',
+                fontSize: '0.78rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <RotateCw size={14} className={isSwitchingDoctor ? 'animate-spin' : ''} />
+              <span>Sync</span>
+            </button>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'all', label: 'All DNA Assays', count: platformCounts.all },
+                { id: 'fagron', label: 'Fagron Genomics', count: platformCounts.fagron },
+                { id: '24genomics', label: '24Genomics', count: platformCounts['24genomics'] },
+                { id: 'eterna', label: 'Eterna™', count: platformCounts.eterna },
+              ]
+                .filter((p) => p.id === 'all' || p.count > 0 || selectedPlatform === p.id)
+                .map((plat) => {
+                  const isSelected = selectedPlatform === plat.id;
+                  return (
+                    <button
+                      key={plat.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedPlatform(plat.id);
+                        setSelectedAssay('all');
+                      }}
+                      style={{
+                        height: '30px',
+                        padding: '0 11px',
+                        borderRadius: '16px',
+                        fontSize: '0.74rem',
+                        fontWeight: isSelected ? 700 : 500,
+                        cursor: 'pointer',
+                        border: isSelected ? '1px solid #1a73e8' : '1px solid #dadce0',
+                        backgroundColor: isSelected ? '#e8f0fe' : '#ffffff',
+                        color: isSelected ? '#1a73e8' : '#3c4043',
+                        whiteSpace: 'nowrap',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <span>{plat.label}</span>
+                      <span style={{ fontSize: '0.68rem', opacity: 0.8 }}>({plat.count})</span>
+                    </button>
+                  );
+                })}
+            </div>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <label htmlFor={`dna-assay-select-${slug}`} style={{ fontSize: '0.73rem', fontWeight: 600, color: '#5f6368' }}>
-                Specific Assay:
-              </label>
               <select
                 id={`dna-assay-select-${slug}`}
+                aria-label="Filter by specific assay"
                 value={selectedAssay}
                 onChange={(e) => setSelectedAssay(e.target.value)}
                 style={{
-                  height: '32px',
+                  height: '30px',
                   padding: '0 10px',
                   borderRadius: '6px',
                   border: '1px solid #dadce0',
                   backgroundColor: '#ffffff',
                   color: '#202124',
-                  fontSize: '0.76rem',
-                  fontWeight: 550,
+                  fontSize: '0.74rem',
+                  fontWeight: 500,
                   cursor: 'pointer',
-                  maxWidth: '100%',
+                  maxWidth: '220px',
                 }}
               >
                 {(ASSAY_OPTIONS[selectedPlatform] || ASSAY_OPTIONS.all).map((opt) => (
@@ -877,31 +867,55 @@ export default function DoctorDnaAnalysisTab({
                   </option>
                 ))}
               </select>
-            </div>
 
-            {(selectedPlatform !== 'all' || selectedAssay !== 'all' || filterQuery) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedPlatform('all');
-                  setSelectedAssay('all');
-                  setFilterQuery('');
-                }}
+              <select
+                id={`dna-time-select-${slug}`}
+                aria-label="Filter by timeframe"
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
                 style={{
-                  height: '28px',
+                  height: '30px',
                   padding: '0 10px',
-                  borderRadius: '14px',
+                  borderRadius: '6px',
                   border: '1px solid #dadce0',
                   backgroundColor: '#ffffff',
-                  color: '#1a73e8',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
+                  color: '#202124',
+                  fontSize: '0.74rem',
+                  fontWeight: 500,
                   cursor: 'pointer',
                 }}
               >
-                Reset Filters
-              </button>
-            )}
+                <option value="all">All Time</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
+              </select>
+
+              {(selectedPlatform !== 'all' || selectedAssay !== 'all' || timeRange !== 'all' || filterQuery) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedPlatform('all');
+                    setSelectedAssay('all');
+                    setTimeRange('all');
+                    setFilterQuery('');
+                  }}
+                  style={{
+                    height: '30px',
+                    padding: '0 10px',
+                    borderRadius: '15px',
+                    border: '1px solid #dadce0',
+                    backgroundColor: '#ffffff',
+                    color: '#1a73e8',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Reset Filters
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
