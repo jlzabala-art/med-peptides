@@ -685,12 +685,22 @@ export default function PelletsPriceListClient({
         <p className="pellets-detail-desc">
           {row.shortDescription}
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '0.72rem', color: '#64748b' }}>
-          <span><strong>{isEs ? 'Fabricante:' : 'Manufacturer:'}</strong> Pharmapolis Compounding (Bulgaria)</span>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '6px', fontSize: '0.72rem', color: '#64748b' }}>
+          <span><strong>{isEs ? 'Fabricante:' : 'Manufacturer:'}</strong> Pharmapolis (Bulgaria)</span>
           <span>•</span>
           <span><strong>{isEs ? 'Esterilidad:' : 'Sterility:'}</strong> E-Beam SAL 10⁻⁶</span>
-          <span>•</span>
-          <span><strong>{isEs ? 'Regulación:' : 'Regulation:'}</strong> POM / EU GMP</span>
+          {row.trocarSize && (
+            <>
+              <span>•</span>
+              <span><strong>{isEs ? 'Trócar:' : 'Trocar:'}</strong> {row.trocarSize}</span>
+            </>
+          )}
+          {row.duration && (
+            <>
+              <span>•</span>
+              <span><strong>{isEs ? 'Duración:' : 'Duration:'}</strong> {row.duration}</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -734,8 +744,19 @@ export default function PelletsPriceListClient({
     </div>
   ), [isEs]);
 
-  // Contextual KPI values
-  const activeCount = scopeMode === 'all' ? initialProducts.length : filteredProducts.length;
+  // Contextual KPI values (dynamically computed from active scope)
+  const kpiProducts = scopeMode === 'all' ? initialProducts : filteredProducts;
+  const activeCount = kpiProducts.length;
+  const kpiPriceStats = useMemo(() => {
+    const prices = kpiProducts
+      .map((p) => Number(p.pricing?.wholesalePriceEur || p.pricing?.price_eur || p.pricing?.costPriceEur || 0))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    if (prices.length === 0) return { minUnit: 0, maxUnit: 0, minPack10: 0 };
+    const minUnit = Math.min(...prices);
+    const maxUnit = Math.max(...prices);
+    const minPack10 = Number((minUnit * 10 * 0.90).toFixed(2));
+    return { minUnit, maxUnit, minPack10 };
+  }, [kpiProducts]);
 
   return (
     <div className="pellets-price-page">
@@ -815,8 +836,21 @@ export default function PelletsPriceListClient({
               <span>{isEs ? 'Resumen Métrico Institucional' : 'Institutional Summary & Scope'}</span>
             </div>
 
-            {/* Scope Switcher */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Currency FX + Scope Switcher */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              {currency !== 'EUR' && (
+                <span style={{
+                  fontSize: '0.70rem',
+                  fontWeight: 600,
+                  color: '#0369a1',
+                  backgroundColor: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                }}>
+                  FX: 1 EUR = {FX_RATES_FROM_EUR[currency]} {currency}
+                </span>
+              )}
               <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
                 {isEs ? 'Alcance:' : 'Scope:'}
               </span>
@@ -857,7 +891,9 @@ export default function PelletsPriceListClient({
                 {isEs ? 'Rango Tarifario B2B' : 'Wholesale Price Range'}
               </span>
               <span className="pellets-kpi-card-val">
-                {formatPrice(39.01)} – {formatPrice(77.90)}
+                {kpiPriceStats.minUnit > 0
+                  ? `${formatPrice(kpiPriceStats.minUnit)} – ${formatPrice(kpiPriceStats.maxUnit)}`
+                  : '—'}
               </span>
               <span className="pellets-kpi-card-sub">
                 {isEs ? 'Tarifa mayorista oficial' : 'Official wholesale tariff'}
@@ -869,10 +905,12 @@ export default function PelletsPriceListClient({
                 {isEs ? 'Ahorro Pack ×10 Institucional' : 'Pack ×10 Tier Savings'}
               </span>
               <span className="pellets-kpi-card-val" style={{ color: '#16a34a' }}>
-                -10% Volume Discount
+                {isEs ? '-10% Descuento Volumen' : '-10% Volume Discount'}
               </span>
               <span className="pellets-kpi-card-sub">
-                {isEs ? `Desde ${formatPrice(351.09)} / caja ×10` : `From ${formatPrice(351.09)} / 10-pack box`}
+                {kpiPriceStats.minPack10 > 0
+                  ? (isEs ? `Desde ${formatPrice(kpiPriceStats.minPack10)} / caja ×10` : `From ${formatPrice(kpiPriceStats.minPack10)} / 10-pack box`)
+                  : '—'}
               </span>
             </div>
 
@@ -881,7 +919,7 @@ export default function PelletsPriceListClient({
                 {isEs ? 'Ventana Cinética Meseta' : 'Zero-Order Release'}
               </span>
               <span className="pellets-kpi-card-val">
-                3.5 to 6 Months
+                {isEs ? '3.5 a 6 Meses' : '3.5 to 6 Months'}
               </span>
               <span className="pellets-kpi-card-sub">
                 {isEs ? 'Sin picos ni valles séricos' : 'Steady state without fluctuations'}
