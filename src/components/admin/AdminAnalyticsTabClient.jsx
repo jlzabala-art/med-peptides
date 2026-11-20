@@ -18,10 +18,10 @@ import PageHeader from '../ui/PageHeader';
 
 import dynamic from 'next/dynamic';
 
-const PlatformHealth = dynamic(() => import('./analytics/PlatformHealth'), { ssr: false });
-const ExplorationJourney = dynamic(() => import('./analytics/ExplorationJourney'), { ssr: false });
-const DiscoveryInsights = dynamic(() => import('./analytics/DiscoveryInsights'), { ssr: false });
-const FrictionInsights = dynamic(() => import('./analytics/FrictionInsights'), { ssr: false });
+const PlatformHealth = dynamic(() => import('./analytics/PlatformHealth'));
+const ExplorationJourney = dynamic(() => import('./analytics/ExplorationJourney'));
+const DiscoveryInsights = dynamic(() => import('./analytics/DiscoveryInsights'));
+const FrictionInsights = dynamic(() => import('./analytics/FrictionInsights'));
 
 /* ── Constants ───────────────────────────────────────────────── */
 const ENDPOINT = '/api/analytics-overview';

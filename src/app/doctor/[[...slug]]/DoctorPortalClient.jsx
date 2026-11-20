@@ -1,0 +1,279 @@
+'use client';
+
+import React, { useContext } from 'react';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import { DoctorContext } from '../../../templates/DoctorDashboard';
+import AdminTabErrorBoundary from '../../../components/admin/AdminTabErrorBoundary';
+import EmptyState from '../../../components/ui/EmptyState';
+import { Compass } from '@/lib/icons';
+
+// ── Eager imports (high traffic, primary navigation) ──────────────────────────
+import DoctorOverviewTab from '../../../components/doctor/DoctorOverviewTab';
+import PhysicianPatientsTab from '../../../components/doctor/DoctorPatientsTab';
+import DoctorPrescriptionsTab from '../../../components/doctor/DoctorPrescriptionsTab';
+
+// ── Dynamic imports ──────────────────────────────────────────────────────────
+const DoctorLeadsTab = dynamic(() => import('../../../components/doctor/DoctorLeadsTab'));
+const PhysicianRecommendationsTab = dynamic(() => import('../../../components/doctor/DoctorRecommendationsTab'));
+const PhysicianOrdersTab = dynamic(() => import('../../../components/doctor/DoctorOrdersTab'));
+const PhysicianProtocolsTab = dynamic(() => import('../../../components/doctor/DoctorProtocolsTab'));
+const PhysicianAssistantsTab = dynamic(() => import('../../../components/doctor/DoctorAssistantsTab'));
+const DoctorMessagesTab = dynamic(() => import('../../../components/doctor/DoctorMessagesTab'));
+
+// ── Dynamic imports ──────────────────────────────────────────────────────────
+const UserSettings = dynamic(() => import('../../../templates/UserSettings'));
+const DoctorAppointments = dynamic(() => import('../../../templates/DoctorAppointments'));
+const DoctorLabResults = dynamic(() => import('../../../templates/DoctorLabResults'));
+const DoctorResearch = dynamic(() => import('../../../templates/DoctorResearch'));
+const CatalogCreatorFlow = dynamic(() => import('../../../components/wholesaler/CatalogCreatorFlow'));
+const UserProfileTab = dynamic(() => import('../../../components/shared/UserProfileTab'));
+const AdminCatalogTabClient = dynamic(() => import('../../../components/admin/AdminCatalogTabClient'));
+const DoctorSharedInfoWidget = dynamic(() => import('../../../components/doctor/DoctorSharedInfoWidget'));
+const DoctorMembershipTab = dynamic(() => import('../../../components/doctor/DoctorMembershipTab'));
+const CompoundingPage = dynamic(() => import('../../../templates/CompoundingPage'));
+
+// ── Bridge wrappers ──────────────────────────────────────────────────────────
+function OverviewWrapper() {
+  const { doctorId, doctorMeta, sharedPatients } = useContext(DoctorContext) || {};
+  const router = useRouter();
+  return (
+    <DoctorOverviewTab
+      doctorId={doctorId}
+      doctorMeta={doctorMeta}
+      patients={sharedPatients}
+      onNavigate={(id) => router.push(`/doctor/${id === 'overview' ? '' : id}`)}
+    />
+  );
+}
+
+function NewPrescriptionWrapper() {
+  const { doctorId, doctorMeta, sharedPatients } = useContext(DoctorContext) || {};
+  const router = useRouter();
+  return (
+    <DoctorPrescriptionsTab
+      key="new-prescription"
+      doctorId={doctorId}
+      doctorMeta={doctorMeta}
+      patients={sharedPatients}
+      initialBuilderOpen={true}
+      hideHistory={true}
+      onSavedRedirect={() => router.push('/doctor/prescriptions-history')}
+    />
+  );
+}
+
+function PrescriptionsHistoryWrapper() {
+  const { doctorId, doctorMeta, sharedPatients } = useContext(DoctorContext) || {};
+  return (
+    <DoctorPrescriptionsTab
+      key="prescriptions-history"
+      doctorId={doctorId}
+      doctorMeta={doctorMeta}
+      patients={sharedPatients}
+      initialBuilderOpen={false}
+      hideHistory={false}
+    />
+  );
+}
+
+function PatientsWrapper() {
+  const { doctorId, doctorMeta, setSharedPatients } = useContext(DoctorContext) || {};
+  return (
+    <PhysicianPatientsTab
+      doctorId={doctorId}
+      doctorMeta={doctorMeta}
+      onPatientsLoaded={setSharedPatients}
+    />
+  );
+}
+
+function OrdersWrapper() {
+  const { doctorId, sharedPatients } = useContext(DoctorContext) || {};
+  return <PhysicianOrdersTab doctorId={doctorId} patients={sharedPatients} />;
+}
+
+function RecommendationsWrapper() {
+  const { doctorId, doctorMeta, sharedPatients } = useContext(DoctorContext) || {};
+  return (
+    <PhysicianRecommendationsTab
+      doctorId={doctorId}
+      doctorMeta={doctorMeta}
+      patients={sharedPatients}
+    />
+  );
+}
+
+function ProtocolsWrapper() {
+  const { doctorId, doctorMeta, sharedPatients } = useContext(DoctorContext) || {};
+  return (
+    <PhysicianProtocolsTab
+      doctorId={doctorId}
+      doctorMeta={doctorMeta}
+      patients={sharedPatients}
+    />
+  );
+}
+
+function CatalogBuilderWrapper() {
+  const { doctorId } = useContext(DoctorContext) || {};
+  return <CatalogCreatorFlow ownerId={doctorId} ownerType="doctor" />;
+}
+
+function MessagesWrapper() {
+  const { doctorId } = useContext(DoctorContext) || {};
+  return <DoctorMessagesTab doctorId={doctorId} />;
+}
+
+function AssistantsWrapper() {
+  const { doctorId, doctorMeta } = useContext(DoctorContext) || {};
+  return <PhysicianAssistantsTab doctorId={doctorId} doctorMeta={doctorMeta} />;
+}
+
+function SettingsWrapper() {
+  const router = useRouter();
+  return <UserSettings onBack={() => router.push('/doctor')} />;
+}
+
+function AppointmentsWrapper() {
+  return <DoctorAppointments />;
+}
+
+function LabResultsWrapper() {
+  return <DoctorLabResults />;
+}
+
+function ResearchWrapper() {
+  return <DoctorResearch />;
+}
+
+function LeadsWrapper() {
+  const { doctorId } = useContext(DoctorContext) || {};
+  return <DoctorLeadsTab doctorId={doctorId} />;
+}
+
+function DoctorCatalogWrapper() {
+  const { isSimulatingDrErdmann, isIndividualDoctor } = useContext(DoctorContext) || {};
+  const isLockedLotusland = isSimulatingDrErdmann || isIndividualDoctor;
+
+  return (
+    <div style={{ padding: '0 0.5rem 2rem' }}>
+      {isLockedLotusland && (
+        <div style={{
+          marginBottom: '1rem',
+          padding: '12px 18px',
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px'
+        }}>
+          <div>
+            <div style={{ fontWeight: 800, color: '#1e40af', fontSize: '0.90rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🌿</span>
+              <span>European Analytical Hub — Authorized Clinical Formulary</span>
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#3b82f6', marginTop: '2px' }}>
+              Exclusive authorized clinical catalog for Dr. Hanieh Erdmann. Access restricted to verified clinical peptide preparations and sterile compounding devices.
+            </div>
+          </div>
+          <span style={{ fontSize: '0.72rem', background: '#dbeafe', color: '#1d4ed8', padding: '3px 10px', borderRadius: '12px', fontWeight: 700, border: '1px solid #93c5fd' }}>
+            Authorized Formulary
+          </span>
+        </div>
+      )}
+      <AdminCatalogTabClient
+        readOnly={true}
+        lockedSupplier={isLockedLotusland ? 'supplier-lotusland' : null}
+      />
+    </div>
+  );
+}
+
+function SharedInfoWrapper() {
+  const { doctorId, doctorMeta } = useContext(DoctorContext) || {};
+  const router = useRouter();
+  return (
+    <div style={{ padding: '0 0.5rem 2rem' }}>
+      <DoctorSharedInfoWidget
+        doctorId={doctorId}
+        doctorName={doctorMeta?.name}
+        onNavigate={(target) => router.push(`/doctor/${target}`)}
+      />
+    </div>
+  );
+}
+
+function MembershipWrapper() {
+  return <DoctorMembershipTab />;
+}
+
+function DoctorCompoundingWrapper() {
+  const { doctorId, doctorMeta, patients } = useContext(DoctorContext) || {};
+  const router = useRouter();
+  return (
+    <div style={{ width: '100%', boxSizing: 'border-box' }}>
+      <CompoundingPage
+        embedded={true}
+        initialLang="en"
+        doctorId={doctorId}
+        doctorMeta={doctorMeta}
+        patients={patients}
+        onPrescriptionIssued={(rx) => {
+          router.push(`/doctor/prescriptions-history?highlight=${rx?.id || rx?.code}`);
+        }}
+      />
+    </div>
+  );
+}
+
+// ── Main Dynamic Router ──────────────────────────────────────────────────────
+export default function DoctorPortalClient({ slug = [] }) {
+  const path = slug.join('/');
+
+  switch (path) {
+    case '':
+    case 'overview': return <OverviewWrapper />;
+    case 'membership':
+    case 'subscription':
+    case 'plans': return <MembershipWrapper />;
+    case 'shared':
+    case 'shared-info': return <SharedInfoWrapper />;
+    case 'compounding':
+    case 'tools/compounding': return <DoctorCompoundingWrapper />;
+    case 'catalog':
+    case 'products': return <DoctorCatalogWrapper />;
+    case 'new-prescription': return <NewPrescriptionWrapper />;
+    case 'prescriptions-history': return <PrescriptionsHistoryWrapper />;
+    case 'patients': return <PatientsWrapper />;
+    case 'leads': return <LeadsWrapper />;
+    case 'orders': return <OrdersWrapper />;
+    case 'recommendations': return <RecommendationsWrapper />;
+    case 'protocols': return <ProtocolsWrapper />;
+    case 'catalog-builder': return <CatalogBuilderWrapper />;
+    case 'messages': return <MessagesWrapper />;
+    case 'appointments': return <AppointmentsWrapper />;
+    case 'lab-results': return <LabResultsWrapper />;
+    case 'research': return <ResearchWrapper />;
+    case 'assistants': return <AssistantsWrapper />;
+    case 'settings': return <SettingsWrapper />;
+    case 'profile':
+    case 'my-profile': return <UserProfileTab />;
+    default: return (
+      <div style={{ padding: '3rem 1.5rem' }}>
+        <EmptyState
+          icon={Compass}
+          title="Section Not Found"
+          subtitle={`The requested doctor module "${path}" does not exist or has been moved.`}
+          action={{
+            label: 'Return to Doctor Overview',
+            onClick: () => window.location.assign('/doctor')
+          }}
+        />
+      </div>
+    );
+  }
+}

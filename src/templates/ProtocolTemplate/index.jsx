@@ -62,10 +62,10 @@ import ProtocolOutcomesSection from '../../components/protocol/ProtocolOutcomesS
 import MedicalSupervisionBanner from '../../components/shared/MedicalSupervisionBanner';
 import ClinicalGanttTimeline from '../../components/protocol/ClinicalGanttTimeline';
 
-// ── Heavy Interactive Components dynamically loaded on demand ───────────────
-const InjectionDoseChart = dynamic(() => import('../../components/protocol/InjectionDoseChart'), { ssr: false });
-const ReconstitutionVisualGuide = dynamic(() => import('../../components/protocol/ReconstitutionVisualGuide'), { ssr: false });
-const PharmacokineticsSimulator = dynamic(() => import('../../components/protocol/PharmacokineticsSimulator'), { ssr: false });
+// ── Interactive Components (SSR-enabled to prevent CLS / layout blinking) ───
+const InjectionDoseChart = dynamic(() => import('../../components/protocol/InjectionDoseChart'));
+const ReconstitutionVisualGuide = dynamic(() => import('../../components/protocol/ReconstitutionVisualGuide'));
+const PharmacokineticsSimulator = dynamic(() => import('../../components/protocol/PharmacokineticsSimulator'));
 
 import { normalizeProtocol, frequencyToInjectionsPerWeek } from '../../utils/protocolSchemaAdapter';
 import ClinicalAssistant from '../../components/shared/ClinicalAssistant';
