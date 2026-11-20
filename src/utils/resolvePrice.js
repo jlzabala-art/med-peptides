@@ -29,6 +29,7 @@
  */
 
 import { PRICING_TIER } from '../constants/productEnums.js';
+import { resolveActiveSupplierOffer } from './supplierComparison.js';
 
 let globalActiveTenant = null;
 
@@ -398,6 +399,9 @@ export function resolveVariantPrice(variant, {
   exchangeRates    = DEFAULT_EXCHANGE_RATES,
   includeTax       = false,
   tenant           = null,
+  requireEuGmp     = false,
+  preferLowestCost = false,
+  preferredSupplierId = null,
 } = {}) {
   const activeTenant = tenant || globalActiveTenant;
   // ── Memoization key ──
@@ -448,6 +452,26 @@ export function resolveVariantPrice(variant, {
     }
   }
   pricing = normalisePricingKeys(pricing);
+
+  // If the variant carries multi-supplier `supplierOffers`, resolve the active supplier's base cost into `master`
+  if (variant?.supplierOffers && typeof variant.supplierOffers === 'object') {
+    const activeOffer = resolveActiveSupplierOffer(variant, {
+      requireEuGmp: Boolean(requireEuGmp),
+      preferLowestCost: Boolean(preferLowestCost),
+      preferredSupplierId: preferredSupplierId || variant.preferredSupplierId,
+    });
+    if (activeOffer && activeOffer.costPrice > 0) {
+      pricing = {
+        ...(pricing || {}),
+        master: {
+          ...(pricing?.master || {}),
+          perUnit: activeOffer.costPrice,
+          kit: activeOffer.packPrice ?? pricing?.master?.kit ?? null,
+          currency: activeOffer.currency || pricing?.master?.currency || 'EUR',
+        },
+      };
+    }
+  }
 
   // Apply B2B wholeseller pricing calculations for Lotusland & NPLAB peptide vials:
   // - Master (Supplier Base Cost): baseCost

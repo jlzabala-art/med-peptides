@@ -77,3 +77,51 @@ test('Pellet Data Model & Supplier Cost Benchmark: pairs Pharmapolis vs NP LABS 
   assert.equal(g10.overlapStatus, 'nplabs_only');
   assert.equal(g10.nplabsCostEur, 55);
 });
+
+test('Universal Supplier Comparison & resolvePrice: handles N suppliers, FX conversion, and supplierOffers', async () => {
+  const { buildSupplierComparisonRows, resolveActiveSupplierOffer } = await import('../src/utils/supplierComparison.js');
+  const { resolveVariantPrice } = await import('../src/utils/resolvePrice.js');
+
+  const multiSupplierItem = {
+    id: 'bpc157-10mg',
+    name: 'BPC-157 10 mg',
+    productType: 'peptide',
+    canonicalKey: 'peptide:bpc-157:10mg',
+    preferredSupplierId: 'supplier-pharmapolis',
+    supplierOffers: {
+      'supplier-pharmapolis': {
+        supplierId: 'supplier-pharmapolis',
+        supplierName: 'Pharmapolis',
+        costPrice: 30,
+        currency: 'EUR',
+        certification: 'EU_GMP',
+        leadTimeDays: 3,
+      },
+      'supplier-lotusland': {
+        supplierId: 'supplier-lotusland',
+        supplierName: 'LotusLand',
+        costPrice: 25,
+        currency: 'USD', // 25 * 0.92 = 23.00 EUR
+        certification: 'STANDARD',
+        leadTimeDays: 10,
+      },
+    },
+  };
+
+  const rows = buildSupplierComparisonRows([multiSupplierItem]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].supplierCount, 2);
+  assert.equal(rows[0].bestOffer.supplierId, 'supplier-lotusland');
+  assert.equal(rows[0].bestOffer.costEur, 23);
+  assert.equal(rows[0].maxSpreadEur, 7);
+
+  // Respects preferredSupplierId by default, lowest_cost when requested, and EU_GMP filter
+  assert.equal(resolveActiveSupplierOffer(multiSupplierItem).supplierId, 'supplier-pharmapolis');
+  assert.equal(resolveActiveSupplierOffer(multiSupplierItem, { preferLowestCost: true }).supplierId, 'supplier-lotusland');
+  assert.equal(resolveActiveSupplierOffer(multiSupplierItem, { preferLowestCost: true, requireEuGmp: true }).supplierId, 'supplier-pharmapolis');
+
+  // resolveVariantPrice consumes supplierOffers into master tier
+  const resolved = resolveVariantPrice(multiSupplierItem, { tier: 'master' });
+  assert.equal(resolved.perUnit, 30);
+  assert.equal(resolved.currency, 'EUR');
+});

@@ -146,8 +146,8 @@ export default function AdminSuppliersTabClient({ initialData }) {
     return (
       <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <PageHeader
-          title="Hormone Pellet Cost Benchmark"
-          subtitle="Live Firestore comparison: Pharmapolis Bulgaria (EU GMP) vs. NP LABS International"
+          title="Supplier Price Benchmark"
+          subtitle="Live Firestore multi-supplier cost comparison across Pellets, Peptides, Hormones & Raw Materials"
           actions={
             <button
               type="button"
@@ -198,9 +198,9 @@ export default function AdminSuppliersTabClient({ initialData }) {
                 border: '1px solid #bfdbfe',
                 cursor: 'pointer'
               }}
-              title="Compare Pharmapolis vs NP LABS hormone pellet base costs"
+              title="Compare supplier base costs across Pellets, Peptides, Hormones and Raw Materials"
             >
-              <span>Pellet Cost Benchmark</span>
+              <span>Price Benchmark</span>
             </button>
             <button
               type="button"
