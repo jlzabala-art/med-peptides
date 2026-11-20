@@ -15,6 +15,7 @@ import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
 import { generateLabelZpl } from '@/utils/labels/zplGenerator';
 import RefillFormulaWorkbench from './RefillFormulaWorkbench';
 import ExternalFulfillmentRefillCard from './ExternalFulfillmentRefillCard';
+import DeliveryLabelControls from './labels/DeliveryLabelControls';
 import { Truck } from 'lucide-react';
 
 /**
@@ -2626,31 +2627,18 @@ export default function PharmacyLabelsModal({
                   </select>
                 </div>
 
-                {/* Dual Delivery Label Option (Active when shipping variant is selected) */}
-                {activeVariant === 'shipping' && (
-                  <div className="gcp-toolbar-control">
-                    <label htmlFor="gcp-label-deliverymode" className="gcp-toolbar-label">
-                      {isEs ? 'Tipo Envío:' : 'Delivery Mode:'}
-                    </label>
-                    <select
-                      id="gcp-label-deliverymode"
-                      value={deliveryLabelType}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDeliveryLabelType(val);
-                        if (val === 'clinical') {
-                          handleFieldChange('shippingTitle', currentItem.productTitle || currentItem.productName || '');
-                        } else {
-                          handleFieldChange('shippingTitle', getCustomsFriendlySuggestions(currentItem)[0] || '');
-                        }
-                      }}
-                      className="gcp-toolbar-select"
-                    >
-                      <option value="customs">{isEs ? '✈️ Aduanas GCC (KSA/Qatar/Kuwait - Discreto)' : '✈️ Customs GCC (KSA/Qatar/Kuwait - Discreet)'}</option>
-                      <option value="clinical">{isEs ? '🏥 100% Prescripción Real (Clínico)' : '🏥 100% Prescription Based (Clinical)'}</option>
-                    </select>
-                  </div>
-                )}
+                {/* Dual-Label Level Switcher & Delivery Mode Controls */}
+                <DeliveryLabelControls
+                  hideShippingLabel={hideShippingLabel}
+                  activeVariant={activeVariant}
+                  setActiveVariant={setActiveVariant}
+                  deliveryLabelType={deliveryLabelType}
+                  setDeliveryLabelType={setDeliveryLabelType}
+                  currentItem={currentItem}
+                  handleFieldChange={handleFieldChange}
+                  getCustomsFriendlySuggestions={getCustomsFriendlySuggestions}
+                  isEs={isEs}
+                />
 
                 {/* Field 4: Export Format Selector (PDF / PNG / MD) */}
                 <div className="gcp-toolbar-control">

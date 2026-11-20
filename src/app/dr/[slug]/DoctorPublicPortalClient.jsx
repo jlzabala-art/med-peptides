@@ -954,6 +954,22 @@ export default function DoctorPublicPortalClient({
     if (slug) fetchDoctorPortal();
   }, [slug, initialData]);
 
+  // If SSR payload was server-anonymized for privacy and the client later verifies
+  // an authorized session (e.g. Firebase Auth or localStorage workstation), hydrate nominal data.
+  useEffect(() => {
+    if (!data?.serverAnonymized || !isAuthorizedViewer || !slug) return;
+    let cancelled = false;
+    fetch(`/api/doctor/${encodeURIComponent(slug)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!cancelled && json?.success) {
+          setData(json);
+        }
+      })
+      .catch((err) => console.warn('Could not hydrate unlocked doctor portal data:', err));
+    return () => { cancelled = true; };
+  }, [data?.serverAnonymized, isAuthorizedViewer, slug]);
+
   const doctor = data?.doctor || {};
   // Opaque Doctor Slug (Protects Doctor Identity in URL)
   const opaqueCode = doctor.opaqueCode || doctor.slug || slug;

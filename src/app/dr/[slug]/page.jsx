@@ -1,7 +1,9 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import DoctorPublicPortalClient from './DoctorPublicPortalClient';
 import { getDoctorPortalData } from '@/lib/doctorCache';
+import { anonymizeDoctorPortalData } from '@/lib/doctorPortalAnonymizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -112,10 +114,25 @@ export default async function DoctorPublicPage({ params, searchParams }) {
 
   const initialTab = sParams?.tab || (sParams?.task ? 'tasks' : 'overview');
 
+  // Server-Side DHA/HIPAA Privacy Guard:
+  // If no verified workstation cookie, auth session cookie, or magic/auth token is present,
+  // anonymize nominal patient PII before serializing initialData into SSR HTML.
+  const cookieStore = await cookies();
+  const hasServerAuthCookie = Boolean(
+    cookieStore.get('atlas_workstation_session')?.value ||
+    cookieStore.get('session')?.value ||
+    cookieStore.get('firebase_token')?.value ||
+    cookieStore.get('atlas_session')?.value
+  );
+  const hasUrlToken = Boolean(sParams?.magic_token || sParams?.auth_token);
+  const safeInitialData = (initialData && !hasServerAuthCookie && !hasUrlToken)
+    ? anonymizeDoctorPortalData(initialData)
+    : initialData;
+
   return (
     <DoctorPublicPortalClient
       slug={cleanSlug}
-      initialData={initialData}
+      initialData={safeInitialData}
       initialTab={initialTab}
       initialSearchParams={sParams || {}}
     />
