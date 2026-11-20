@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useAuth } from '@/context/AuthContext';
+import { useDoctorPortalAuth } from '@/hooks/useDoctorPortalAuth';
 import { rememberDoctorSection } from '@/components/doctor/DoctorContinueBanner';
 import { useDoctorPortalFilters } from '@/hooks/useDoctorPortalFilters';
 import {
@@ -593,78 +593,19 @@ export default function DoctorPublicPortalClient({
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [isAuthNoticeModalOpen, setIsAuthNoticeModalOpen] = useState(false);
   const [authNoticeResource, setAuthNoticeResource] = useState('');
-  const [workstationAuthorized, setWorkstationAuthorized] = useState(false);
-  const [viewerRole, setViewerRole] = useState('doctor');
   const [isSwitchingDoctor, setIsSwitchingDoctor] = useState(false);
   const [followUpModalTask, setFollowUpModalTask] = useState(null);
   const [hoveredInsightBar, setHoveredInsightBar] = useState(null);
 
-  const { user, activeRole, isAdmin } = useAuth();
-
-  // DHA / HIPAA Medical Privacy Compliance:
-  // Nominal patient identity is strictly restricted to authenticated authorized practitioners
-  // or verified clinical workstations (remembered for 90 days).
-  const isAuthorizedViewer = useMemo(() => {
-    if (isCustomerAgent) return true;
-    if (workstationAuthorized) return true;
-    if (!user) return false;
-    if (isAdmin || activeRole === 'admin' || activeRole === 'doctor' || activeRole === 'clinic_admin') return true;
-    const docEmail = data?.doctor?.email || initialData?.doctor?.email;
-    const assistantEmail = data?.doctor?.assistantEmail || initialData?.doctor?.assistantEmail || data?.doctor?.assistant?.email;
-    if (docEmail && user.email && user.email.toLowerCase() === docEmail.toLowerCase()) return true;
-    if (assistantEmail && user.email && user.email.toLowerCase() === assistantEmail.toLowerCase()) return true;
-    return false;
-  }, [user, activeRole, isAdmin, data?.doctor?.email, initialData?.doctor?.email, data?.doctor?.assistantEmail, initialData?.doctor?.assistantEmail, data?.doctor?.assistant?.email, isCustomerAgent, workstationAuthorized]);
-
-  // Verify Workstation Session (90-day persistence) or 1-Tap Magic Token / Auth Token from WhatsApp
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const magicToken = params.get('magic_token');
-    const authToken = params.get('auth_token');
-    let savedWsToken = '';
-    try {
-      savedWsToken = localStorage.getItem('atlas_workstation_session') || '';
-    } catch (e) {
-      console.debug('Could not read workstation session token:', e);
-    }
-
-    const targetSlug = slug || propSlug;
-    if ((magicToken || authToken || savedWsToken) && targetSlug) {
-      fetch('/api/doctor/verify-workstation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          doctorSlug: targetSlug,
-          magicToken: magicToken || '',
-          authToken: authToken || '',
-          workstationToken: savedWsToken || ''
-        })
-      })
-        .then(res => res.json())
-        .then(resData => {
-          if (resData?.authorized) {
-            setWorkstationAuthorized(true);
-            if (resData.viewerRole) {
-              setViewerRole(resData.viewerRole);
-            }
-            if (resData.workstationToken) {
-              try {
-                localStorage.setItem('atlas_workstation_session', resData.workstationToken);
-              } catch (e) {
-                console.debug('Could not save workstation session token:', e);
-              }
-            }
-            if (magicToken || authToken) {
-              const cleanUrl = window.location.pathname;
-              window.history.replaceState({}, '', cleanUrl);
-              toast.success('Clinical practice verified! Nominal patient records unlocked.');
-            }
-          }
-        })
-        .catch(err => console.warn('Workstation session verification:', err));
-    }
-  }, [slug, propSlug]);
+  const {
+    user,
+    activeRole,
+    isAdmin,
+    workstationAuthorized,
+    setWorkstationAuthorized,
+    viewerRole,
+    isAuthorizedViewer
+  } = useDoctorPortalAuth({ slug, propSlug, data, initialData, isCustomerAgent });
 
   // Sync if propSlug changes externally
   useEffect(() => {

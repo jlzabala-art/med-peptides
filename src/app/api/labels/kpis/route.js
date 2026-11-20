@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { adminDb, admin } from '@/lib/firebaseAdmin';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,9 +30,10 @@ export async function GET() {
         totalPrescriptions = countSnap.data().count;
       }
 
-      // 2. Query ALL prescriptions that have been printed (a4PrintCount > 0)
+      // 2. Query printed prescriptions (bounded per Golden Rule #1)
       const printedSnap = await adminDb.collection('prescriptions')
         .where('a4PrintCount', '>', 0)
+        .limit(500)
         .get()
         .catch(() => ({ docs: [] }));
 
@@ -243,6 +244,18 @@ export async function POST(request) {
         updatedDetails[key] = detail;
         updated++;
       }
+    }
+
+    if (updated > 0 && admin?.firestore?.FieldValue) {
+      const totalLabelsInc = workItems.reduce(
+        (acc, it) => acc + (Number(it.partsCount) || (Array.isArray(it.parts) ? it.parts.length : 1)),
+        0
+      );
+      await adminDb.collection('_meta').doc('labels_facets').set({
+        totalPrintedA4Count: admin.firestore.FieldValue.increment(updated),
+        totalPrintedLabelsCount: admin.firestore.FieldValue.increment(totalLabelsInc),
+        updatedAt: now
+      }, { merge: true }).catch(() => {});
     }
 
     return NextResponse.json({
