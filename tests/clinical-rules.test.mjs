@@ -208,3 +208,22 @@ test('Sidebar Layout FOUC Prevention: sidebars use static CSS imports instead of
   const ctxSidebar = read('src/components/shared/public/ContextualSidebar.jsx');
   assert.equal(ctxSidebar.includes('<style jsx'), false, 'ContextualSidebar must not use <style jsx>');
 });
+
+test('Clinical Domain Classifier: isolates nasal sprays & BHRT hormones from TrichoSol fallback', async () => {
+  const { resolveClinicalDomain, CLINICAL_DOMAINS } = await import('../src/utils/clinical/clinicalDomainClassifier.js');
+  assert.equal(
+    resolveClinicalDomain({ code: 'NSLBSO1640', productName: 'Selank Nasal Spray (75 mg / 10 mL)' }),
+    CLINICAL_DOMAINS.NASAL_SPRAY
+  );
+  assert.equal(
+    resolveClinicalDomain({ title: 'Morning Formula DHEA + Testosterone Transdermal Cream', vehicle: 'Pentravan' }),
+    CLINICAL_DOMAINS.HORMONE_BHRT
+  );
+  assert.equal(
+    resolveClinicalDomain({ code: 'BOX03519AATRI', items: [{ name: 'Minoxidil 4% + Dutasteride 0.25%' }] }),
+    CLINICAL_DOMAINS.TRICHOLOGY
+  );
+
+  const hookSrc = read('src/hooks/usePrescriptionData.js');
+  assert.ok(hookSrc.includes('resolveClinicalDomain'), 'usePrescriptionData must use resolveClinicalDomain instead of forcing TrichoSol');
+});

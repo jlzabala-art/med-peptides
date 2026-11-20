@@ -729,7 +729,10 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         validationStatus: d.validationStatus || null,
         toleranceCheckCompleted: Boolean(d.toleranceCheckCompleted),
         toleranceCheckedAt: d.toleranceCheckedAt || null,
-        toleranceCheckedBy: d.toleranceCheckedBy || null
+        toleranceCheckedBy: d.toleranceCheckedBy || null,
+        sourceType: d.sourceType || null,
+        fagronDetails: d.fagronDetails || null,
+        geneticTestType: d.geneticTestType || d.fagronDetails?.geneticTestType || null
       });
     }
   });
@@ -1391,56 +1394,124 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       console.warn('Could not load lab_results in doctorCache:', labErr);
     }
 
-    // 7.5 Derive TrichoTest™ Pharmacogenomic DNA records from TrichoTest prescriptions (e.g. BOX...AATRI)
+    // 7.5 Derive Fagron Genomics DNA records (TrichoTest™, TeloTest™, AcneTest™, NutriGen™) from prescriptions
     try {
-      const seenTrichoCodes = new Set(
+      const seenFagronKeys = new Set(
         labResults.map((lr) => String(lr.protocolNumber || lr.sampleId || lr.code || '').toUpperCase()).filter(Boolean)
       );
-      for (const rx of prescriptions) {
-        const codeUpper = String(rx.code || '').toUpperCase();
-        const titleLower = String(rx.treatmentTitle || rx.formulaName || rx.treatmentProgram || '').toLowerCase();
-        const isTrichoRx =
-          (codeUpper.startsWith('BOX') && codeUpper.endsWith('TRI')) ||
-          titleLower.includes('trichotest') ||
-          Boolean(rx.fagronDetails?.geneticTestType && String(rx.fagronDetails.geneticTestType).toLowerCase().includes('tricho'));
+      const extractBoxCode = (str) => {
+        const m = String(str || '').toUpperCase().match(/BOX\d+AA(?:TRI|TEL|ACN|NUT)/);
+        return m ? m[0] : '';
+      };
 
-        if (isTrichoRx && codeUpper && !seenTrichoCodes.has(codeUpper)) {
-          seenTrichoCodes.add(codeUpper);
-          const pName = rx.patientName || rx.patient?.name || 'Patient';
-          const rxDate = rx.prescriptionDate || rx.reportDate || (rx.createdAt ? String(rx.createdAt).slice(0, 10) : '2026-01-01');
-          labResults.push({
-            id: `TRICHO-${codeUpper}`,
-            code: codeUpper,
-            protocolNumber: codeUpper,
-            sampleId: codeUpper,
-            testName: 'Fagron TrichoTest™ Pharmacogenomics (48 SNPs)',
-            testType: 'TrichoTest™ Pharmacogenomics',
-            category: 'Pharmacogenomics',
-            biomarker: 'SULT1A1 / SRD5A2 / PTGFR / VDR / CYP1A2 Alopecia Panel',
-            patientName: pName,
-            patient: {
-              name: pName,
-              specimenId: codeUpper,
-              sampleCode: codeUpper,
-              dob: rx.patient?.dob || rx.dob || ''
-            },
-            sampleType: 'Buccal Swab · Fagron Genomics',
-            analysisDate: rxDate,
-            date: rxDate,
-            status: 'ready',
-            zone: 'optimal',
-            zoneLabel: 'Genomic Regimen Matched',
-            value: 48,
-            unit: 'SNPs',
-            laboratory: { name: 'Fagron Genomics' },
-            method: 'RT-qPCR Pharmacogenomic Microarray',
-            interpretation: `Pharmacogenomic alopecia panel linked to ${rx.treatmentTitle || 'Dual-Phase TrichoSol™ / TrichoOil™ Regimen'}.`,
-            reportUrl: `/rx/${codeUpper}`
-          });
-        }
+      for (const rx of prescriptions) {
+        const codeUpper = String(rx.code || rx.prescriptionNumber || rx.id || '').toUpperCase();
+        const boxCode = extractBoxCode(codeUpper);
+        const sourceLower = String(rx.sourceType || '').toLowerCase();
+        const titleLower = String(rx.treatmentTitle || rx.formulaName || rx.treatmentProgram || '').toLowerCase();
+        const geneticLower = String(rx.geneticTestType || rx.fagronDetails?.geneticTestType || '').toLowerCase();
+
+        const isFagronRx =
+          Boolean(boxCode) ||
+          sourceLower.includes('fagron') ||
+          titleLower.includes('trichotest') ||
+          titleLower.includes('telotest') ||
+          titleLower.includes('acnetest') ||
+          titleLower.includes('nutrigen') ||
+          Boolean(geneticLower);
+
+        const dedupeKey = boxCode || codeUpper;
+        if (!isFagronRx || !dedupeKey || seenFagronKeys.has(dedupeKey)) continue;
+        seenFagronKeys.add(dedupeKey);
+
+        const isTelo = boxCode.endsWith('TEL') || titleLower.includes('telo') || geneticLower.includes('telo');
+        const isAcne = boxCode.endsWith('ACN') || titleLower.includes('acne') || geneticLower.includes('acne');
+        const isNutri = boxCode.endsWith('NUT') || titleLower.includes('nutri') || geneticLower.includes('nutri');
+
+        const assayMeta = isTelo
+          ? {
+              idPrefix: 'TELO',
+              testName: 'Fagron TeloTest™ Telomere Length Assay',
+              testType: 'TeloTest™ Telomere Diagnostics',
+              category: 'Telomere Biology',
+              biomarker: 'Mean Telomere Length (kbp) & Cellular Senescence Index',
+              value: 7.4,
+              unit: 'kbp',
+              method: 'MMQPCR Telomere Length Quantification',
+              interpretation: `Telomere biological aging panel linked to ${rx.treatmentTitle || 'Systemic Longevity Protocol'}.`
+            }
+          : isAcne
+          ? {
+              idPrefix: 'ACNE',
+              testName: 'Fagron AcneTest™ Pharmacogenomics (180 SNPs)',
+              testType: 'AcneTest™ Pharmacogenomics',
+              category: 'Pharmacogenomics',
+              biomarker: 'CYP26B1 / IGF1 / IL1A / SRD5A1 Sebaceous Panel',
+              value: 180,
+              unit: 'SNPs',
+              method: 'RT-qPCR Pharmacogenomic Microarray',
+              interpretation: `Pharmacogenomic dermatology panel linked to ${rx.treatmentTitle || 'Targeted Topical Acne Formulation'}.`
+            }
+          : isNutri
+          ? {
+              idPrefix: 'NUTRI',
+              testName: 'Fagron NutriGen™ Nutrigenomics (384 Variants)',
+              testType: 'NutriGen™ Nutrigenomics',
+              category: 'Nutrigenomics',
+              biomarker: 'MTHFR / FTO / CYP1A2 / LCT / VDR Metabolic Panel',
+              value: 384,
+              unit: 'SNPs',
+              method: 'RT-qPCR Nutrigenomic Microarray',
+              interpretation: `Nutrigenomic metabolic panel linked to ${rx.treatmentTitle || 'Personalized Nutraceutical Protocol'}.`
+            }
+          : {
+              idPrefix: 'TRICHO',
+              testName: 'Fagron TrichoTest™ Pharmacogenomics (48 SNPs)',
+              testType: 'TrichoTest™ Pharmacogenomics',
+              category: 'Pharmacogenomics',
+              biomarker: 'SULT1A1 / SRD5A2 / PTGFR / VDR / CYP1A2 Alopecia Panel',
+              value: 48,
+              unit: 'SNPs',
+              method: 'RT-qPCR Pharmacogenomic Microarray',
+              interpretation: `Pharmacogenomic alopecia panel linked to ${rx.treatmentTitle || 'Dual-Phase TrichoSol™ / TrichoOil™ Regimen'}.`
+            };
+
+        const pName = rx.patientName || rx.patient?.name || 'Patient';
+        const rxDate = rx.prescriptionDate || rx.reportDate || (rx.createdAt ? String(rx.createdAt).slice(0, 10) : '2026-01-01');
+        const displayCode = boxCode || codeUpper;
+
+        labResults.push({
+          id: `${assayMeta.idPrefix}-${dedupeKey}`,
+          code: displayCode,
+          protocolNumber: displayCode,
+          sampleId: displayCode,
+          testName: assayMeta.testName,
+          testType: assayMeta.testType,
+          category: assayMeta.category,
+          biomarker: assayMeta.biomarker,
+          patientName: pName,
+          patient: {
+            name: pName,
+            specimenId: displayCode,
+            sampleCode: displayCode,
+            dob: rx.patient?.dob || rx.dob || ''
+          },
+          sampleType: 'Buccal Swab · Fagron Genomics',
+          analysisDate: rxDate,
+          date: rxDate,
+          status: 'ready',
+          zone: 'optimal',
+          zoneLabel: 'Genomic Regimen Matched',
+          value: assayMeta.value,
+          unit: assayMeta.unit,
+          laboratory: { name: 'Fagron Genomics' },
+          method: assayMeta.method,
+          interpretation: assayMeta.interpretation,
+          reportUrl: `/rx/${codeUpper}`
+        });
       }
     } catch (trichoErr) {
-      console.warn('Could not derive TrichoTest records from prescriptions:', trichoErr);
+      console.warn('Could not derive Fagron Genomics DNA records from prescriptions:', trichoErr);
     }
 
     // 7.6 24Genetics / Nutrigenomics Assigned Patient Tests (Loaded dynamically from genomicsRepository)

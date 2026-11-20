@@ -7,6 +7,7 @@ import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import { getPharmapolisLabelsForPrescription, getAuthoritativeClinicalData } from '@/data/pharmapolisLabelsMap';
 import { resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
 import { sanitizePrescriptionCode, getCodifiedPatientId, getDoctorOpaqueCode } from '@/lib/prescriptionSanitizer';
+import { resolveClinicalDomain, CLINICAL_DOMAINS } from '@/utils/clinical/clinicalDomainClassifier';
 
 export function slugify(text) {
   return String(text || '')
@@ -418,7 +419,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
                        return (an.includes('testosterone') || an.includes('estradiol') || an.includes('progesterone')) && !an.includes('minoxidil') && !an.includes('trichosol');
                      }));
 
-      const resolvedDosageForm = dosageForm || (
+      let resolvedDosageForm = dosageForm || (
         isPen ? (isEs ? 'Pluma Precargada SubQ (Multi-dosis)' : 'Pre-filled SubQ Pen (Multi-dose)') :
         isInjectable ? (isDiluent ? (isEs ? 'Vehículo Diluyente Estéril' : 'Sterile Diluent Vehicle') : (isEs ? 'Vial Liofilizado Estéril' : 'Sterile Lyophilized Vial')) :
         isTrichoOil ? (isEs ? 'Aceite Capilar Tópico' : 'Topical Scalp Oil') :
@@ -529,20 +530,73 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         posologyObj.regimen = safeCustomPosology || (isEs ? '1 Cápsula Diaria con la Cena / Noche' : '1 Capsule Daily with Dinner / Bedtime');
         posologyObj.timing = isEs ? 'Durante la cena con agua' : 'With dinner / evening meal with water';
       } else {
-        accentColor = '#003666';
-        accentBg = '#e0f2fe';
-        badgeText += isEs ? ' · VÍA TÓPICA' : ' · TOPICAL ROUTE';
-        resolvedTitle = treatmentTitle || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™)');
-        resolvedRoute = isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application';
-        resolvedVolume = volume || '100 mL';
-        vehicleObj.name = vehicleName || 'TrichoSol™ (Fagron)';
-        vehicleObj.specs = isEs
-          ? 'Vehículo liposomal hidrofílico patentado TrichoSol™. Libre de alcohol y propilenglicol. Maximiza la retención activa en la papila dérmica.'
-          : 'Patented hydrophilic liposomal TrichoSol™ vehicle. Alcohol & propylene glycol free. Maximizes active retention in the dermal papilla.';
+        const blockDomain = resolveClinicalDomain({
+          treatmentTitle,
+          vehicle: vehicleName,
+          dispensingForm: resolvedDosageForm,
+          route: customRoute,
+          posology: safeCustomPosology,
+          items: apis,
+        });
 
-        posologyObj.title = isEs ? 'Pauta de Aplicación Tópica Nocturna' : 'Nightly Topical Application Regimen';
-        posologyObj.regimen = safeCustomPosology || (isEs ? '1.0 mL Diario por la Noche' : '1.0 mL Nightly at Bedtime');
-        posologyObj.timing = isEs ? 'Cada noche antes de dormir (21:30 - 22:30)' : 'Every night at bedtime (21:30 - 22:30)';
+        if (blockDomain === CLINICAL_DOMAINS.NASAL_SPRAY) {
+          accentColor = '#0284c7';
+          accentBg = '#f0f9ff';
+          badgeText += isEs ? ' · VÍA INTRANASAL' : ' · INTRANASAL SPRAY';
+          resolvedTitle = treatmentTitle || (isEs ? 'Solución Intranasal Magistral' : 'Compounded Intranasal Spray');
+          resolvedRoute = isEs ? 'Vía Intranasal (IN)' : 'Intranasal Spray (IN)';
+          resolvedDosageForm = isEs ? 'Spray Nasal Dosificado' : 'Metered Nasal Spray';
+          resolvedVolume = volume || '10 mL';
+          vehicleObj.name = vehicleName || (isEs ? 'Vehículo Acuoso Estéril Intranasal' : 'Sterile Aqueous Nasal Carrier');
+          vehicleObj.specs = isEs
+            ? 'Solución acuosa estéril isotónica tamponada para administración intranasal dosificada.'
+            : 'Sterile isotonic buffered aqueous carrier calibrated for metered intranasal spray delivery.';
+          posologyObj.title = isEs ? 'Pauta de Administración Intranasal' : 'Intranasal Spray Dosing Schedule';
+          posologyObj.regimen = safeCustomPosology || (isEs ? 'Aplicar según prescripción médica' : 'Apply in each nostril as directed by physician');
+          posologyObj.timing = isEs ? 'Conservar refrigerado (2°C - 8°C)' : 'Store refrigerated (2°C - 8°C)';
+        } else if (blockDomain === CLINICAL_DOMAINS.HORMONE_BHRT) {
+          accentColor = '#0d9488';
+          accentBg = '#f0fdfa';
+          badgeText += isEs ? ' · TERAPIA HORMONAL BIOIDÉNTICA' : ' · BIOIDENTICAL HORMONE (BHRT)';
+          resolvedTitle = treatmentTitle || (isEs ? 'Formulación Hormonal Bioidéntica' : 'Bioidentical Hormone Formulation');
+          resolvedRoute = customRoute || (isEs ? 'Vía Transdérmica / BHRT' : 'Transdermal / BHRT Route');
+          resolvedVolume = volume || '60 mL';
+          vehicleObj.name = vehicleName || 'Pentravan® Liposomal Transdermal Base';
+          vehicleObj.specs = isEs
+            ? 'Base transdérmica liposomal de grado farmacéutico diseñada para absorción sistémica controlada.'
+            : 'Pharmaceutical-grade liposomal transdermal carrier engineered for predictable systemic hormone absorption.';
+          posologyObj.title = isEs ? 'Pauta Hormonal Personalizada' : 'Personalized BHRT Dosing Regimen';
+          posologyObj.regimen = safeCustomPosology || (isEs ? 'Aplicar según pauta médica' : 'Apply as directed by prescribing physician');
+          posologyObj.timing = isEs ? 'Seguir horario indicado por su médico' : 'Follow daily schedule prescribed by physician';
+        } else if (blockDomain === CLINICAL_DOMAINS.TRICHOLOGY) {
+          accentColor = '#003666';
+          accentBg = '#e0f2fe';
+          badgeText += isEs ? ' · VÍA TÓPICA' : ' · TOPICAL ROUTE';
+          resolvedTitle = treatmentTitle || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™)');
+          resolvedRoute = isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application';
+          resolvedVolume = volume || '100 mL';
+          vehicleObj.name = vehicleName || 'TrichoSol™ (Fagron)';
+          vehicleObj.specs = isEs
+            ? 'Vehículo liposomal hidrofílico patentado TrichoSol™. Libre de alcohol y propilenglicol. Maximiza la retención activa en la papila dérmica.'
+            : 'Patented hydrophilic liposomal TrichoSol™ vehicle. Alcohol & propylene glycol free. Maximizes active retention in the dermal papilla.';
+          posologyObj.title = isEs ? 'Pauta de Aplicación Tópica Nocturna' : 'Nightly Topical Application Regimen';
+          posologyObj.regimen = safeCustomPosology || (isEs ? '1.0 mL Diario por la Noche' : '1.0 mL Nightly at Bedtime');
+          posologyObj.timing = isEs ? 'Cada noche antes de dormir (21:30 - 22:30)' : 'Every night at bedtime (21:30 - 22:30)';
+        } else {
+          accentColor = '#003666';
+          accentBg = '#f8fafc';
+          badgeText += isEs ? ' · FORMULACIÓN MAGISTRAL' : ' · COMPOUNDED FORMULATION';
+          resolvedTitle = treatmentTitle || (isEs ? 'Formulación Farmacéutica Personalizada' : 'Compounded Pharmaceutical Formulation');
+          resolvedRoute = customRoute || (isEs ? 'Según Prescripción Médica' : 'As Directed by Physician');
+          resolvedVolume = volume || '1 Unit';
+          vehicleObj.name = vehicleName || (isEs ? 'Base Farmacéutica Validada EU GMP' : 'EU GMP Validated Pharmaceutical Carrier');
+          vehicleObj.specs = isEs
+            ? 'Preparación magistral individualizada bajo estándares de calidad EU GMP.'
+            : 'Individualized pharmaceutical compounding prepared under EU GMP quality standards.';
+          posologyObj.title = isEs ? 'Posología Prescrita' : 'Prescribed Posology';
+          posologyObj.regimen = safeCustomPosology || (isEs ? 'Administrar según prescripción médica' : 'Administer as directed by prescribing physician');
+          posologyObj.timing = isEs ? 'Consultar pauta clínica' : 'Follow clinical schedule';
+        }
       }
 
       return {
@@ -894,16 +948,52 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     }
 
     if (solItems.length > 0) {
-      activeBlocks.push({
-        type: 'trichosol',
-        vehicleName: 'TrichoSol™ (Fagron)',
-        dosageForm: isEs ? 'Solución Tópica' : 'Topical Scalp Solution',
-        treatmentTitle: rx.treatmentType || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™ Solution)'),
-        route: isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application',
-        volume: rx.volume || '100 mL',
-        customPosology: getPosologyText(rx.posology) || '',
-        apis: solItems
-      });
+      const rxDomain = resolveClinicalDomain({ ...rx, items: solItems });
+      if (rxDomain === CLINICAL_DOMAINS.NASAL_SPRAY) {
+        activeBlocks.push({
+          type: 'nasal_spray',
+          vehicleName: rx.vehicle || 'Sterile Aqueous Nasal Carrier',
+          dosageForm: isEs ? 'Spray Nasal Dosificado' : 'Metered Nasal Spray',
+          treatmentTitle: rx.treatmentType || rx.productName || (isEs ? 'Spray Nasal Magistral' : 'Compounded Nasal Spray'),
+          route: isEs ? 'Vía Intranasal (IN)' : 'Intranasal Spray (IN)',
+          volume: rx.volume || '10 mL',
+          customPosology: getPosologyText(rx.posology) || '',
+          apis: solItems
+        });
+      } else if (rxDomain === CLINICAL_DOMAINS.HORMONE_BHRT) {
+        activeBlocks.push({
+          type: 'hormone_bhrt',
+          vehicleName: rx.vehicle || 'Pentravan® Liposomal Transdermal Base',
+          dosageForm: rx.dispensingForm || (isEs ? 'Formulación Hormonal BHRT' : 'BHRT Compounded Formulation'),
+          treatmentTitle: rx.treatmentType || rx.productName || (isEs ? 'Terapia Hormonal Bioidéntica (BHRT)' : 'Bioidentical Hormone Therapy (BHRT)'),
+          route: rx.route || (isEs ? 'Vía Transdérmica / BHRT' : 'Transdermal / BHRT Route'),
+          volume: rx.volume || '60 mL',
+          customPosology: getPosologyText(rx.posology) || '',
+          apis: solItems
+        });
+      } else if (rxDomain === CLINICAL_DOMAINS.TRICHOLOGY) {
+        activeBlocks.push({
+          type: 'trichosol',
+          vehicleName: 'TrichoSol™ (Fagron)',
+          dosageForm: isEs ? 'Solución Tópica' : 'Topical Scalp Solution',
+          treatmentTitle: rx.treatmentType || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™ Solution)'),
+          route: isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application',
+          volume: rx.volume || '100 mL',
+          customPosology: getPosologyText(rx.posology) || '',
+          apis: solItems
+        });
+      } else {
+        activeBlocks.push({
+          type: 'compounding_general',
+          vehicleName: rx.vehicle || (isEs ? 'Base Farmacéutica Validada EU GMP' : 'EU GMP Validated Pharmaceutical Carrier'),
+          dosageForm: rx.dispensingForm || (isEs ? 'Formulación Magistral' : 'Compounded Formulation'),
+          treatmentTitle: rx.treatmentType || rx.productName || (isEs ? 'Formulación Farmacéutica Personalizada' : 'Compounded Pharmaceutical Formulation'),
+          route: rx.route || (isEs ? 'Según Prescripción Médica' : 'As Directed by Physician'),
+          volume: rx.volume || '1 Unit',
+          customPosology: getPosologyText(rx.posology) || '',
+          apis: solItems
+        });
+      }
     }
 
     if (trichoOilItems.length > 0) {
