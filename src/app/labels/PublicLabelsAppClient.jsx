@@ -847,6 +847,43 @@ export default function PublicLabelsAppClient({
           <LabelsWorkspaceSkeleton isEs={isEs} />
         ) : (
           <div id="pls-label-workbench" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* ── 3-Step GCP Progress Stepper ── */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flexWrap: 'wrap',
+                padding: '8px 20px',
+                backgroundColor: '#f8f9fa',
+                borderBottom: '1px solid #dadce0',
+                fontSize: '0.74rem'
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setPatientQueue([])}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '2px 6px',
+                  cursor: 'pointer',
+                  color: '#1a73e8',
+                  fontWeight: 600
+                }}
+              >
+                1. Worklist
+              </button>
+              <span style={{ color: '#9aa0a6' }}>›</span>
+              <span style={{ fontWeight: 700, color: '#202124', background: '#e8f0fe', padding: '2px 8px', borderRadius: '999px' }}>
+                2. Product / Shipping Label
+              </span>
+              <span style={{ color: '#9aa0a6' }}>›</span>
+              <span style={{ color: '#5f6368', fontWeight: 500 }}>
+                3. Export / Print A4
+              </span>
+            </div>
+
             <LabelsPreflightBar
               isEs={isEs}
               isEditing={isEditing}

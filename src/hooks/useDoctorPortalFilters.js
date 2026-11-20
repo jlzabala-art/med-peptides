@@ -18,9 +18,19 @@ export function useDoctorPortalFilters({ initialTab = 'overview', initialSearchP
   const [scopeMode, setScopeMode] = useState('global');
   const [quickRxFilter, setQuickRxFilter] = useState(initialSearchParams?.filter || 'all');
   const [patientFilterMode, setPatientFilterMode] = useState(initialSearchParams?.pmode || 'all');
-  const [activeAnchor, setActiveAnchor] = useState(
+  const [activeAnchor, setActiveAnchorState] = useState(
     initialTab || (initialSearchParams?.task ? 'tasks' : initialSearchParams?.tab) || 'overview'
   );
+  const [previousAnchor, setPreviousAnchor] = useState(null);
+
+  const setActiveAnchor = (nextTab) => {
+    setActiveAnchorState((prev) => {
+      if (nextTab && prev && nextTab !== prev) {
+        setPreviousAnchor(prev);
+      }
+      return nextTab;
+    });
+  };
 
   const isFirstSyncRef = useRef(true);
 
@@ -91,6 +101,8 @@ export function useDoctorPortalFilters({ initialTab = 'overview', initialSearchP
     patientFilterMode,
     setPatientFilterMode,
     activeAnchor,
-    setActiveAnchor
+    setActiveAnchor,
+    previousAnchor,
+    clearPreviousAnchor: () => setPreviousAnchor(null)
   };
 }

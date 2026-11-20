@@ -200,6 +200,10 @@ const DoctorRequestInfoModal = dynamic(
   () => import('@/components/doctor/modals/DoctorRequestInfoModal'),
   { ssr: false }
 );
+const DoctorQuickHelpDrawer = dynamic(
+  () => import('@/components/doctor/modals/DoctorQuickHelpDrawer'),
+  { ssr: false }
+);
 const DoctorBlueprintDossierModal = dynamic(
   () => import('@/components/doctor/modals/DoctorBlueprintDossierModal'),
   { ssr: false }
@@ -695,8 +699,10 @@ export default function DoctorPublicPortalClient({
     patientFilterMode,
     setPatientFilterMode,
     activeAnchor,
-    setActiveAnchor
+    setActiveAnchor,
+    previousAnchor
   } = useDoctorPortalFilters({ initialTab, initialSearchParams });
+  const [isQuickHelpOpen, setIsQuickHelpOpen] = useState(false);
 
   // Table Density & Synchronization (GCP Table Standard)
   const [tableDensity, setTableDensity] = useState('comfortable'); // 'comfortable' | 'compact'
@@ -5767,8 +5773,57 @@ export default function DoctorPublicPortalClient({
               gap: '12px'
             }}
           >
-            {/* Section Breadcrumb, Clean Title & 1-Click Workspace Switcher */}
+            {/* Section Breadcrumb, Clean Title & 1-Click Back / Quick Guide */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '0.70rem', color: '#5f6368' }}>
+                <button
+                  type="button"
+                  onClick={() => setActiveAnchor('overview')}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#1a73e8', fontWeight: 500 }}
+                >
+                  Practice
+                </button>
+                <span>›</span>
+                <span style={{ fontWeight: 600, color: '#202124' }}>
+                  {activeAnchor === 'overview' && 'Overview'}
+                  {activeAnchor === 'search' && 'Search'}
+                  {activeAnchor === 'tasks' && 'Pending Actions'}
+                  {activeAnchor === 'prescriptions' && 'Prescriptions'}
+                  {activeAnchor === 'patients' && 'Patients'}
+                  {activeAnchor === 'recommendations' && 'Atlas Recommendations'}
+                  {activeAnchor === 'dna_analysis' && 'DNA Analysis'}
+                  {activeAnchor === 'lab_results' && 'Lab Diagnostics'}
+                  {activeAnchor === 'analytics' && 'Practice Analytics'}
+                  {activeAnchor === 'credentials' && 'Credentials'}
+                  {activeAnchor === 'services_tiers' && 'Platform Services'}
+                </span>
+                {patientFilter && patientFilter !== 'all' && (
+                  <>
+                    <span>›</span>
+                    <span style={{ fontWeight: 600, color: '#1a73e8' }}>{patientFilter}</span>
+                  </>
+                )}
+                {previousAnchor && previousAnchor !== activeAnchor && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveAnchor(previousAnchor)}
+                    style={{
+                      marginLeft: '6px',
+                      background: '#f1f3f4',
+                      border: '1px solid #dadce0',
+                      borderRadius: '12px',
+                      padding: '1px 8px',
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      color: '#3c4043',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ← Back to {previousAnchor.replace(/_/g, ' ')}
+                  </button>
+                )}
+              </div>
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.64rem', background: '#e8f0fe', color: '#1a73e8', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
                   {isAuthorizedViewer ? (doctor.license || 'DHA Verified') : 'DHA Verified'}
@@ -5893,6 +5948,28 @@ export default function DoctorPublicPortalClient({
 
             {/* Consolidated Header Actions (Clean Physician Command Center - Right Aligned GCP Standard) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginLeft: 'auto', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setIsQuickHelpOpen(true)}
+                title="Quick Guide for this screen"
+                aria-label="Quick Guide for this screen"
+                style={{
+                  height: '34px',
+                  width: '34px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#5f6368',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ?
+              </button>
               {/* Clinic Desk Privacy Mode Toggle (Masks patient names during in-room screen sharing) */}
               <button
                 type="button"
@@ -8299,6 +8376,12 @@ export default function DoctorPublicPortalClient({
         onClose={() => setFollowUpModalTask(null)}
         task={followUpModalTask || {}}
         doctor={doctor || {}}
+      />
+
+      <DoctorQuickHelpDrawer
+        isOpen={isQuickHelpOpen}
+        onClose={() => setIsQuickHelpOpen(false)}
+        activeAnchor={activeAnchor}
       />
     </div>
   );
