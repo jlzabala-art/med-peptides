@@ -1,5 +1,6 @@
 import React from 'react';
 import AtlasHealthLogo from '@/components/brand/AtlasHealthLogo';
+import './DoctorPublicPortal.css';
 
 export default function DoctorPortalLoading() {
   return (
@@ -28,53 +29,40 @@ export default function DoctorPortalLoading() {
         </div>
       </div>
 
-      <div
-        style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '24px 16px',
-          boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px',
-        }}
-      >
-        {/* Doctor Profile Hero Skeleton */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            padding: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '24px',
-            flexWrap: 'wrap',
-          }}
-        >
+      {/* Matches .gcp-portal-layout + .gcp-clinical-sidebar to prevent layout shift */}
+      <div className="gcp-portal-layout">
+        <aside className="gcp-clinical-sidebar" aria-hidden="true" style={{ padding: '16px 14px', gap: '10px', justifyContent: 'flex-start' }}>
+          {[140, 120, 150, 110, 135, 125].map((w, idx) => (
+            <div key={idx} style={{ width: `${w}px`, height: '18px', borderRadius: '4px', marginBottom: '6px' }} className="pds-shimmer" />
+          ))}
+        </aside>
+
+        <div className="gcp-portal-main" style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div
             style={{
-              width: '84px',
-              height: '84px',
-              borderRadius: '50%',
-              backgroundColor: '#e2e8f0',
-              flexShrink: 0,
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              padding: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              flexWrap: 'wrap',
             }}
-            className="pds-shimmer"
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '240px' }}>
-            <div style={{ width: '120px', height: '20px', backgroundColor: '#e2e8f0', borderRadius: '10px' }} className="pds-shimmer" />
-            <div style={{ width: '280px', height: '32px', backgroundColor: '#cbd5e1', borderRadius: '6px' }} className="pds-shimmer" />
-            <div style={{ width: '200px', height: '16px', backgroundColor: '#f1f5f9', borderRadius: '4px' }} className="pds-shimmer" />
+          >
+            <div style={{ width: '72px', height: '72px', borderRadius: '50%', flexShrink: 0 }} className="pds-shimmer" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '220px' }}>
+              <div style={{ width: '120px', height: '18px', borderRadius: '10px' }} className="pds-shimmer" />
+              <div style={{ width: '260px', height: '28px', borderRadius: '6px' }} className="pds-shimmer" />
+              <div style={{ width: '190px', height: '14px', borderRadius: '4px' }} className="pds-shimmer" />
+            </div>
           </div>
-          <div style={{ width: '160px', height: '42px', backgroundColor: '#e2e8f0', borderRadius: '8px' }} className="pds-shimmer" />
-        </div>
 
-        {/* Clinical Protocols Grid Skeleton */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-          <div style={{ height: '220px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px' }} className="pds-shimmer" />
-          <div style={{ height: '220px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px' }} className="pds-shimmer" />
-          <div style={{ height: '220px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px' }} className="pds-shimmer" />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+            <div style={{ height: '180px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px' }} className="pds-shimmer" />
+            <div style={{ height: '180px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px' }} className="pds-shimmer" />
+            <div style={{ height: '180px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px' }} className="pds-shimmer" />
+          </div>
         </div>
       </div>
 

@@ -196,3 +196,15 @@ test('Pharmapolis HRT Bulk Offers: 6 high-frequency hormones include batch costs
   assert.equal(tWomen.bestOffer.bulkTier.packsPerBatch, 50);
   assert.equal(tWomen.bestOffer.bulkTier.unitProductionCostEur, 10.52);
 });
+
+test('Sidebar Layout FOUC Prevention: sidebars use static CSS imports instead of <style jsx>', () => {
+  const drPortal = read('src/app/dr/[slug]/DoctorPublicPortalClient.jsx');
+  assert.equal(drPortal.includes('<style jsx'), false, 'DoctorPublicPortalClient must not use <style jsx>');
+  assert.ok(drPortal.includes('./DoctorPublicPortal.css'), 'DoctorPublicPortalClient must import static DoctorPublicPortal.css');
+
+  const portalSidebar = read('src/components/ui/PortalSidebar.jsx');
+  assert.equal(portalSidebar.includes('<style jsx'), false, 'PortalSidebar must not use <style jsx>');
+
+  const ctxSidebar = read('src/components/shared/public/ContextualSidebar.jsx');
+  assert.equal(ctxSidebar.includes('<style jsx'), false, 'ContextualSidebar must not use <style jsx>');
+});

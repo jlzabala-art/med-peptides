@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Menu, X, Sparkles } from 'lucide-react';
+import './ContextualSidebar.css';
 
 /**
  * ContextualSidebar
@@ -317,24 +318,6 @@ export default function ContextualSidebar({
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .contextual-sidebar-desktop {
-          display: block;
-        }
-        .contextual-sidebar-mobile {
-          display: none;
-        }
-        @media (max-width: 768px) {
-          .contextual-sidebar-desktop {
-            display: none;
-          }
-          .contextual-sidebar-mobile {
-            display: block;
-            margin-bottom: 0.75rem;
-          }
-        }
-      `}</style>
     </>
   );
 }

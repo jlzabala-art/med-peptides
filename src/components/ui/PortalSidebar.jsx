@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePortalNavigation } from '../../hooks/ui/usePortalNavigation';
 import { useAuth } from '../../context/AuthContext';
 import { Menu, X, LogOut } from '@/lib/icons';
+import './PortalSidebar.css';
 
 
 
@@ -194,24 +195,6 @@ export default function PortalSidebar() {
           </button>
         </div>
       </aside>
-
-      <style jsx global>{`
-        @media (max-width: 1024px) {
-          .mobile-sidebar-toggle {
-            display: flex !important;
-          }
-          .mobile-close-btn {
-            display: block !important;
-          }
-          .portal-sidebar {
-            position: fixed !important;
-            transform: translateX(-100%) !important;
-          }
-          .portal-sidebar.open {
-            transform: translateX(0) !important;
-          }
-        }
-      `}</style>
     </>
   );
 }

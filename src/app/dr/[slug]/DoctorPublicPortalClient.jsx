@@ -99,6 +99,7 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import PageSkeleton from '@/components/ui/PageSkeleton';
 import '@/styles/publicDesignSystem.css';
+import './DoctorPublicPortal.css';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
@@ -5216,127 +5217,6 @@ export default function DoctorPublicPortalClient({
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#1e293b' }}>
-      <style jsx global>{`
-        .gcp-portal-layout {
-          display: flex;
-          min-height: calc(100vh - 100px);
-          background: #f8fafc;
-          position: relative;
-        }
-        .gcp-clinical-sidebar {
-          width: 250px;
-          flex-shrink: 0;
-          background: #ffffff;
-          border-right: 1px solid #dadce0;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          position: sticky;
-          top: 100px;
-          height: calc(100vh - 100px);
-          transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-          z-index: 50;
-          overflow-y: auto;
-        }
-        .gcp-clinical-sidebar.collapsed {
-          width: 64px;
-        }
-        .gcp-portal-main {
-          flex: 1;
-          min-width: 0;
-          max-width: var(--atlas-page-max-width, 1360px);
-          padding: 20px 24px 124px 24px;
-          margin: 0 auto;
-        }
-        @media (max-width: 768px) {
-          .doctor-recommendations-section {
-            padding: 16px 12px !important;
-            margin-bottom: 120px !important;
-            border-radius: 8px !important;
-          }
-          .doctor-recommendation-row {
-            padding: 14px 12px !important;
-          }
-          .doctor-recommendation-header-actions {
-            width: 100% !important;
-            justify-content: flex-start !important;
-            margin-top: 4px !important;
-          }
-          .doctor-recommendation-action-btn {
-            flex: 1 1 auto !important;
-            justify-content: center !important;
-            min-height: 38px !important;
-          }
-        }
-        .gcp-mobile-nav-trigger {
-          display: none;
-        }
-        .gcp-mobile-doctor-capsule {
-          display: none;
-        }
-        @media (max-width: 900px) {
-          .gcp-clinical-sidebar {
-            display: none !important;
-          }
-          .gcp-mobile-nav-trigger {
-            display: inline-flex !important;
-          }
-          .gcp-mobile-doctor-capsule {
-            display: flex !important;
-          }
-          .gcp-portal-main {
-            padding: 14px 14px 48px 14px;
-          }
-        }
-        .gcp-kpi-grid {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 16px;
-        }
-        @media (max-width: 1100px) {
-          .gcp-kpi-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-          }
-        }
-        @media (max-width: 580px) {
-          .gcp-kpi-grid {
-            grid-template-columns: 1fr;
-            gap: 10px;
-          }
-        }
-        .gcp-kpi-card {
-          background: #ffffff;
-          border: 1px solid #dadce0;
-          border-radius: 8px;
-          padding: 16px 18px;
-          box-shadow: 0 1px 2px rgba(60,64,67,0.06);
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          transition: border-color 0.15s, box-shadow 0.15s;
-        }
-        .gcp-kpi-card:hover {
-          border-color: #bdc1c6;
-          box-shadow: 0 2px 6px rgba(60,64,67,0.12);
-        }
-        @keyframes slideInLeft {
-          from {
-            transform: translateX(-100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-        @keyframes slideInRight {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-      `}</style>
 
       {/* ── Customer Agent Concierge Physician Switcher Bar (Google Cloud Console UX) ── */}
       {isCustomerAgent && (

@@ -1,0 +1,19 @@
+/* Extracted from <style jsx> in ContextualSidebar.jsx to prevent sidebar FOUC */
+
+.contextual-sidebar-desktop {
+  display: block;
+}
+
+.contextual-sidebar-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .contextual-sidebar-desktop {
+    display: none;
+  }
+  .contextual-sidebar-mobile {
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+}
