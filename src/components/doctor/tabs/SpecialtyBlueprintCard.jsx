@@ -23,7 +23,7 @@ import {
  * Collapsed by default so physicians can scan all specialty protocols above the fold,
  * with a single primary CTA ("Prescribe Protocol") and zero redundant buttons.
  */
-export default function SpecialtyBlueprintCard({
+function SpecialtyBlueprintCard({
   bp,
   isExpanded = false,
   onToggleExpand,
@@ -559,3 +559,5 @@ export default function SpecialtyBlueprintCard({
     </div>
   );
 }
+
+export default React.memo(SpecialtyBlueprintCard);

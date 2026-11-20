@@ -5,7 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import { rememberDoctorSection } from '@/components/doctor/DoctorContinueBanner';
-import { safeReplaceState } from '@/hooks/useSafeUrlState';
+import { useDoctorPortalFilters } from '@/hooks/useDoctorPortalFilters';
 import {
   Stethoscope,
   Share2,
@@ -735,13 +735,27 @@ export default function DoctorPublicPortalClient({
     }
   };
 
-  // Search & Filter State (Google Cloud UX Golden Rules #7, #24, #29)
-  const [searchQuery, setSearchQuery] = useState(initialSearchParams?.q || '');
-  const [statusFilter, setStatusFilter] = useState(initialSearchParams?.status || 'all');
-  const [patientFilter, setPatientFilter] = useState('all');
-  const [taskFilter, setTaskFilter] = useState(initialSearchParams?.task || 'all');
-  const [temporalFilter, setTemporalFilter] = useState(initialSearchParams?.time || 'all'); // 'all' | 'active' | '30d' | '90d'
-  const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22 Scope Switcher)
+  // Search, Filter, Tab & URL Sync Hook (Google Cloud UX Golden Rules #7, #24, #29)
+  const {
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    patientFilter,
+    setPatientFilter,
+    taskFilter,
+    setTaskFilter,
+    temporalFilter,
+    setTemporalFilter,
+    scopeMode,
+    setScopeMode,
+    quickRxFilter,
+    setQuickRxFilter,
+    patientFilterMode,
+    setPatientFilterMode,
+    activeAnchor,
+    setActiveAnchor
+  } = useDoctorPortalFilters({ initialTab, initialSearchParams });
 
   // Table Density & Synchronization (GCP Table Standard)
   const [tableDensity, setTableDensity] = useState('comfortable'); // 'comfortable' | 'compact'
@@ -770,9 +784,6 @@ export default function DoctorPublicPortalClient({
   const isEs = lang === 'es';
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [activeAnchor, setActiveAnchor] = useState(
-    initialTab || (initialSearchParams?.task ? 'tasks' : initialSearchParams?.tab) || 'overview'
-  );
 
   // Modal for Viewing Pharmacy Labels Directly from Doctor Portal
   const [activeLabelRx, setActiveLabelRx] = useState(null);
@@ -880,7 +891,6 @@ export default function DoctorPublicPortalClient({
 
   const [isHandoutOpen, setIsHandoutOpen] = useState(false);
   const [handoutRx, setHandoutRx] = useState(null);
-  const [quickRxFilter, setQuickRxFilter] = useState(initialSearchParams?.filter || 'all'); // 'all' | 'active' (Sold & Invoiced) | 'proposals' (Unaccepted Offers) | 'multipart'
   const [apiFilter, setApiFilter] = useState(null); // Active pharmaceutical ingredient filter from Analytics
 
   // Atlas Recommendations UI State (Consolidated Master Catalog)
@@ -889,7 +899,6 @@ export default function DoctorPublicPortalClient({
   const [expandedRecId, setExpandedRecId] = useState(null);
   const [recFilter, setRecFilter] = useState(null); // { id: string, title: string, rxIds: string[] }
   const [patientSearchQuery, setPatientSearchQuery] = useState('');
-  const [patientFilterMode, setPatientFilterMode] = useState(initialSearchParams?.pmode || 'all'); // 'all' | 'sold' | 'unaccepted'
 
   // ── Treatment Timeline Pop-up Modal State (Mobile & Laptop UX - Golden Rule #5) ──
   const [timelineModalRx, setTimelineModalRx] = useState(null);
@@ -977,58 +986,6 @@ export default function DoctorPublicPortalClient({
       setAiUsesRemaining(5);
     }
   }, [slug]);
-
-  // ── URL Search Params Sync (Golden Rule #24: Sincronización de URL) ───────
-  const isFirstSyncRef = useRef(true);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const q = params.get('q');
-      const s = params.get('status');
-      const f = params.get('filter');
-      const pmode = params.get('pmode');
-      const t = params.get('task');
-      const tab = params.get('tab');
-      const time = params.get('time');
-      if (q !== null) setSearchQuery(q);
-      if (s !== null) setStatusFilter(s);
-      if (f !== null) setQuickRxFilter(f);
-      if (pmode !== null) setPatientFilterMode(pmode);
-      if (t) {
-        setTaskFilter(t);
-        setActiveAnchor('tasks');
-      } else if (tab) {
-        setActiveAnchor(tab);
-      } else {
-        setActiveAnchor('overview');
-      }
-      if (time !== null) setTemporalFilter(time);
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (isFirstSyncRef.current) {
-      isFirstSyncRef.current = false;
-      return;
-    }
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set('q', searchQuery.trim());
-    if (statusFilter !== 'all') params.set('status', statusFilter);
-    if (quickRxFilter !== 'all') params.set('filter', quickRxFilter);
-    if (patientFilterMode !== 'all') params.set('pmode', patientFilterMode);
-    if (taskFilter !== 'all') params.set('task', taskFilter);
-    if (temporalFilter !== 'all') params.set('time', temporalFilter);
-    if (activeAnchor !== 'overview') params.set('tab', activeAnchor);
-    const newSearch = params.toString() ? `?${params.toString()}` : '';
-    if (window.location.search !== newSearch) {
-      safeReplaceState(`${window.location.pathname}${newSearch}`);
-    }
-  }, [searchQuery, statusFilter, quickRxFilter, patientFilterMode, taskFilter, temporalFilter, activeAnchor]);
 
   useEffect(() => {
     // If initialData is already hydrated from server, do NOT flash loading screen or re-fetch on mount

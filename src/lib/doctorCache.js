@@ -1569,7 +1569,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     });
 
     // 9. Compute Server-Side Clinical Analytics & Practice-Wide Lotusland Peptide Synergy
-    const serverAnalytics = computeServerAnalytics(enrichedPrescriptions);
+    const serverAnalytics = computeServerAnalytics(enrichedPrescriptions, deduplicatedPatients.length);
 
     // 9.5 Resolve Physician Specialty Category, Web Footprint Profile & Specialty Practice Blueprints
     const specialtyIntel = resolveDoctorSpecialtyIntelligence(doctorProfile, enrichedPrescriptions);
@@ -1672,7 +1672,7 @@ export function getDonutSlice(startAngle, endAngle, innerR, outerR, cx, cy) {
  * Computes all clinical analytics metrics on the server (Layer 1 Cache)
  * Avoids any client-side loops or performance bottlenecks.
  */
-export function computeServerAnalytics(prescriptions = []) {
+export function computeServerAnalytics(prescriptions = [], knownUniquePatientsCount = 0) {
   if (!Array.isArray(prescriptions) || prescriptions.length === 0) {
     return {
       serverComputed: true,
@@ -1717,15 +1717,19 @@ export function computeServerAnalytics(prescriptions = []) {
   });
 
   const monthlyVolume = Object.values(monthMap).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
-  const monthlyData = monthlyVolume.slice(-8).map(m => ({
-    key: m.monthKey,
-    label: m.label,
-    count: m.count,
-    active: m.active,
-    multipart: m.multipart
-  }));
+  const monthlyData = monthlyVolume.slice(-8).map(m => {
+    const shortYr = String(m.year).slice(-2);
+    const shortMonth = String(m.label || '').split(' ')[0];
+    return {
+      key: m.monthKey,
+      label: `${shortMonth} '${shortYr}`,
+      count: m.count,
+      active: m.active,
+      multipart: m.multipart
+    };
+  });
   const maxMonthlyCount = monthlyData.length > 0 ? Math.max(...monthlyData.map(m => m.count), 1) : 1;
-  const avgMonthlyRx = monthlyData.length > 0 ? (monthlyData.reduce((acc, m) => acc + m.count, 0) / monthlyData.length).toFixed(1) : 0;
+  const avgMonthlyRx = monthlyVolume.length > 0 ? (prescriptions.length / monthlyVolume.length).toFixed(1) : 0;
 
   // 2. Normalized Top APIs
   const apiCounts = {};
@@ -1765,9 +1769,9 @@ export function computeServerAnalytics(prescriptions = []) {
   const getApiMeta = (apiName) => {
     const name = String(apiName || '').toLowerCase();
     
-    // 1. Finished Product Delivery Format Detection (Golden Rule - Specificity)
-    let format = 'Finished Formulation';
-    let formatBadge = 'Finished Product';
+    // 1. Formulation / Delivery Format Detection
+    let format = 'Active Compounded API';
+    let formatBadge = 'Active API';
     let formatColor = '#334155';
     let formatBg = '#f1f5f9';
     let formatBorder = '#cbd5e1';
@@ -2050,9 +2054,28 @@ export function computeServerAnalytics(prescriptions = []) {
   prescriptions.forEach(rx => {
     const seenInRx = new Set();
     const extractApi = raw => {
-      const isVehicle = raw?.isVehicleOrBase || raw?._isVehicleOrBase || String(raw?.name || '').toLowerCase().includes('trichosol') || String(raw?.name || '').toLowerCase().includes('trichooil') || String(raw?.name || '').toLowerCase().includes('vehicle');
+      const rawName = String(raw?.name || raw?.activeIngredient || raw || '').trim();
+      const lower = rawName.toLowerCase();
+      const isVehicle =
+        raw?.isVehicleOrBase ||
+        raw?._isVehicleOrBase ||
+        !rawName ||
+        lower.includes('trichosol') ||
+        lower.includes('trichooil') ||
+        lower.includes('trichofoam') ||
+        lower.includes('trichowash') ||
+        lower.includes('pentravan') ||
+        lower.includes('hpmc') ||
+        lower.includes('drcaps') ||
+        lower.includes('vegetarian') && lower.includes('caps') ||
+        lower.includes('capsule shell') ||
+        lower.includes('vehicle') ||
+        lower.includes('vehiculo') ||
+        lower.includes('excipient') ||
+        lower.includes('bacteriostatic water') ||
+        lower.includes('sterile water');
       if (isVehicle) return;
-      const n = normalizeName(raw?.name || raw?.activeIngredient || raw);
+      const n = normalizeName(rawName);
       if (n && !seenInRx.has(n)) {
         seenInRx.add(n);
         apiCounts[n] = (apiCounts[n] || 0) + 1;
@@ -2102,13 +2125,14 @@ export function computeServerAnalytics(prescriptions = []) {
   // 3. Patient Cohorts with Pre-computed SVG Geometry
   const patientPrescriptionCounts = {};
   prescriptions.forEach(rx => {
-    const patientKey = rx.patientId || rx.patient?.id || rx.patientName || rx.code;
+    const rawKey = rx.patientName || rx.patient?.name || rx.patientId || rx.patient?.id || rx.code;
+    const patientKey = rawKey ? String(rawKey).trim().toLowerCase() : '';
     if (patientKey) {
       patientPrescriptionCounts[patientKey] = (patientPrescriptionCounts[patientKey] || 0) + 1;
     }
   });
 
-  const totalPatients = Object.keys(patientPrescriptionCounts).length;
+  const totalPatients = knownUniquePatientsCount > 0 ? knownUniquePatientsCount : Object.keys(patientPrescriptionCounts).length;
   let singleRxPatients = 0;
   let twoRxsPatients = 0;
   let multiRxsPatients = 0;

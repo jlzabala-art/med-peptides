@@ -817,23 +817,6 @@ export default function DoctorClinicalAnalytics({
               >
                 {isFiltered ? 'Active Filter Scope' : 'Global Practice Scope'}
               </span>
-              <span 
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: '12px',
-                  backgroundColor: '#f0fdf4',
-                  color: '#16a34a',
-                  border: '1px solid #bbf7d0',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-                title="Computed on the server (Layer 1 RAM Cache) for sub-millisecond page delivery"
-              >
-                <Zap size={11} /> Server-Computed • 0ms Engine
-              </span>
             </div>
             <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#5f6368' }}>
               Real-time pharmacogenomic volume, API prevalence, and patient retention cohorts
@@ -1103,25 +1086,13 @@ export default function DoctorClinicalAnalytics({
                       Clinical Formulations
                     </span>
                     <h3 style={{ margin: '2px 0 0 0', fontSize: '14px', fontWeight: 600, color: '#202124' }}>
-                      Top 5 Finished Products & Formulations
+                      Top 5 Active Ingredients & Formulations
                     </h3>
                   </div>
-                  <span 
-                    style={{
-                      fontSize: '11px',
-                      color: '#1a73e8',
-                      backgroundColor: '#e8f0fe',
-                      padding: '2px 8px',
-                      borderRadius: '10px',
-                      fontWeight: 600
-                    }}
-                  >
-                    Click to filter
-                  </span>
                 </div>
 
                 <p style={{ margin: '0 0 14px 0', fontSize: '12px', color: '#5f6368' }}>
-                  Highest frequency finished peptide therapies, delivery formats and clinical regimens in practice.
+                  Highest frequency active ingredients, delivery formats, and clinical regimens in practice.
                 </p>
               </div>
 
