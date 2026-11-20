@@ -481,7 +481,7 @@ export default function DoctorBlueprintDossierModal({
             onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
           >
             <FlaskConical size={14} />
-            <span>Prescribir Fórmula Magistral (Abrir Recetario)</span>
+            <span>Prescribe Compounded Formula (Open Formulary)</span>
             <ArrowRight size={13} />
           </button>
         </div>

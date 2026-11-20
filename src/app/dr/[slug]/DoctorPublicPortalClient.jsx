@@ -4358,6 +4358,7 @@ export default function DoctorPublicPortalClient({
             {/* 1-Click Renew latest prescription */}
             <button
               type="button"
+              className="gcp-btn-secondary"
               onClick={(e) => {
                 e.stopPropagation();
                 const latestRx = pat.prescriptions?.[0];
@@ -4371,13 +4372,13 @@ export default function DoctorPublicPortalClient({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px',
-                padding: '4px 8px',
+                padding: '4px 9px',
                 borderRadius: '4px',
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                color: '#15803d',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#3c4043',
                 fontSize: '0.72rem',
-                fontWeight: 650,
+                fontWeight: 500,
                 cursor: 'pointer'
               }}
               title={`1-Click renew / clone latest regimen for ${pat.name}`}
@@ -4387,6 +4388,7 @@ export default function DoctorPublicPortalClient({
             </button>
             <button
               type="button"
+              className="gcp-btn-secondary"
               onClick={(e) => {
                 e.stopPropagation();
                 setPatientFilter(pat.name);
@@ -4398,15 +4400,16 @@ export default function DoctorPublicPortalClient({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px',
-                padding: '4px 8px',
+                padding: '4px 9px',
                 borderRadius: '4px',
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                color: '#1d4ed8',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#1a73e8',
                 fontSize: '0.72rem',
-                fontWeight: 650,
+                fontWeight: 500,
                 cursor: 'pointer'
               }}
+              title={`Filter prescriptions for ${pat.name}`}
             >
               <FileText size={12} />
               <span>Dossier</span>
@@ -7775,35 +7778,36 @@ export default function DoctorPublicPortalClient({
                                     alignItems: 'center',
                                     gap: '4px'
                                   }}
-                                  title="Aceptar propuesta y registrar pedido confirmado"
+                                  title="Accept proposal and register confirmed order"
                                 >
-                                  <span>✓ Aceptar Oferta</span>
+                                  <span>Accept Proposal</span>
                                 </button>
                               )}
 
                               {pIsSold && !['delivered', 'completed', 'dispensed'].includes(String(p.status || '').toLowerCase()) && (
                                 <button
                                   type="button"
+                                  className="gcp-btn-secondary"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleQuickUpdatePrescriptionStatus(p, 'delivered', null, e);
                                   }}
                                   style={{
-                                    padding: '3px 8px',
+                                    padding: '3px 9px',
                                     fontSize: '0.72rem',
                                     borderRadius: '4px',
-                                    border: '1px solid #0284c7',
-                                    background: '#f0f9ff',
-                                    color: '#0369a1',
+                                    border: '1px solid #dadce0',
+                                    background: '#ffffff',
+                                    color: '#3c4043',
                                     cursor: 'pointer',
-                                    fontWeight: 700,
+                                    fontWeight: 500,
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '4px'
                                   }}
-                                  title="Marcar formulación como entregada al paciente"
+                                  title="Mark formulation as delivered to patient"
                                 >
-                                  <span>📦 Marcar Entregado</span>
+                                  <span>Mark Delivered</span>
                                 </button>
                               )}
 

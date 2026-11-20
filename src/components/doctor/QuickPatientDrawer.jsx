@@ -505,7 +505,7 @@ export default function QuickPatientDrawer({
               cursor: 'pointer',
             }}
           >
-            Cancelar
+            Cancel
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
