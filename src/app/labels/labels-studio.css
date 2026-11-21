@@ -937,8 +937,9 @@
     display: none;
   }
   .pls-btn-print-batch {
-    padding: 6px 10px !important;
-    height: 34px !important;
+    padding: 6px 12px !important;
+    min-height: 44px !important;
+    touch-action: manipulation;
   }
   /* Search drops to its own full-width line */
   .pls-search-container {
@@ -952,10 +953,11 @@
     display: none;
   }
   .pls-btn-import {
-    width: 34px;
-    height: 34px;
-    padding: 0;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 8px;
     justify-content: center;
+    touch-action: manipulation;
   }
   .pls-search-input {
     font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
@@ -967,10 +969,11 @@
     display: none !important;
   }
   .pls-btn-share {
-    width: 34px !important;
-    height: 34px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
     padding: 0 !important;
     justify-content: center !important;
+    touch-action: manipulation;
   }
   .pls-user-profile-text {
     display: none !important;

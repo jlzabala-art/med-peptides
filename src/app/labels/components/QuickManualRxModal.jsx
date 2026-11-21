@@ -4,10 +4,67 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   X, FilePlus2, User, Stethoscope, FlaskConical, Search,
   Check, Loader2, Plus, Zap, ChevronDown, Clock, Pill,
-  Tag, Trash2, Calendar
+  Tag, Trash2, Calendar, AlertTriangle, RotateCcw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { searchAlgoliaFederated } from '../../../services/algoliaSearch';
+import PharmapolisLabelSvg from '@/components/prescription/PharmapolisLabelSvg';
+
+const QMRX_DRAFT_KEY = 'atlas_quick_manual_rx_draft_v1';
+
+const QUICK_RX_TEMPLATES = [
+  {
+    id: 'trichotest-2',
+    labelEn: 'TrichoTest 2-Part',
+    labelEs: 'TrichoTest 2 Partes',
+    parts: [
+      {
+        formulaQuery: 'TrichoSol Topical Solution',
+        volume: '100 mL',
+        ingredientChips: ['Minoxidil: 5%', 'Finasteride: 0.1%'],
+        directions: 'Apply 1 mL to dry scalp once daily before bedtime.',
+      },
+      {
+        formulaQuery: 'TrichoWash Medicated Shampoo',
+        volume: '200 mL',
+        ingredientChips: ['Ketoconazole: 2%', 'Biotin: 0.5%'],
+        directions: 'Apply to wet scalp, massage 2 minutes and rinse.',
+      },
+    ],
+  },
+  {
+    id: 'acnetest-2',
+    labelEn: 'AcneTest 2-Part',
+    labelEs: 'AcneTest 2 Partes',
+    parts: [
+      {
+        formulaQuery: 'Espumil Cleansing Foam',
+        volume: '50 mL',
+        ingredientChips: ['Azelaic Acid: 15%', 'Niacinamide: 4%'],
+        directions: 'Apply foam to affected areas twice daily after cleansing.',
+      },
+      {
+        formulaQuery: 'Oral Sebum Support Capsules',
+        volume: '60 Caps',
+        ingredientChips: ['Zinc Picolinate: 30 mg', 'Vitamin B5: 250 mg'],
+        directions: 'Take 1 capsule twice daily with meals.',
+      },
+    ],
+  },
+  {
+    id: 'peptide-vial',
+    labelEn: 'Peptide Vial (SC)',
+    labelEs: 'Vial Péptido (SC)',
+    parts: [
+      {
+        formulaQuery: 'BPC-157 Lyophilized Vial',
+        volume: '1 Vial',
+        ingredientChips: ['BPC-157: 10 mg'],
+        directions: 'Reconstitute with 2 mL BAC water. Inject 250 mcg (5 units U-100) SC daily.',
+      },
+    ],
+  },
+];
 
 // ── Volume / Quantity Grouped Presets (Compounding & Peptide Standard) ───────
 
@@ -259,9 +316,80 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
   const [expiryDate, setExpiryDate] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // ── Multi-part state (supports 1..N parts per manual prescription)
+  const [partsDraft, setPartsDraft] = useState([]);
+  const [activePartIdx, setActivePartIdx] = useState(0);
+  const [hasDraftRestored, setHasDraftRestored] = useState(false);
+
   const debounceRef = useRef({});
   const modalRef = useRef(null);
   const volumeBoxRef = useRef(null);
+
+  const buildCurrentPartSnapshot = useCallback(() => ({
+    formulaQuery,
+    formulaSelected,
+    volume,
+    ingredientChips,
+    directions,
+    batchNumber,
+    expiryDate,
+  }), [formulaQuery, formulaSelected, volume, ingredientChips, directions, batchNumber, expiryDate]);
+
+  const loadPartSnapshot = useCallback((p = {}) => {
+    setFormulaQuery(p.formulaQuery || '');
+    setFormulaSelected(p.formulaSelected || null);
+    setVolume(p.volume || '30 mL');
+    setIngredientChips(Array.isArray(p.ingredientChips) ? p.ingredientChips : []);
+    setDirections(p.directions || '');
+    setBatchNumber(p.batchNumber || '');
+    setExpiryDate(p.expiryDate || '');
+  }, []);
+
+  // Restore draft from localStorage on open
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(QMRX_DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      if (draft && (draft.patientQuery || draft.formulaQuery || (draft.partsDraft && draft.partsDraft.length > 0))) {
+        if (draft.patientQuery) setPatientQuery(draft.patientQuery);
+        if (draft.patientSelected) setPatientSelected(draft.patientSelected);
+        if (draft.doctorQuery) setDoctorQuery(draft.doctorQuery);
+        if (draft.doctorSelected) setDoctorSelected(draft.doctorSelected);
+        if (Array.isArray(draft.partsDraft) && draft.partsDraft.length > 0) {
+          setPartsDraft(draft.partsDraft);
+          const idx = Math.min(draft.activePartIdx || 0, draft.partsDraft.length - 1);
+          setActivePartIdx(idx);
+          loadPartSnapshot(draft.partsDraft[idx]);
+        } else {
+          loadPartSnapshot(draft);
+        }
+        setHasDraftRestored(true);
+      }
+    } catch { /* ignore */ }
+  }, [isOpen, loadPartSnapshot]);
+
+  // Auto-save draft to localStorage while editing
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined') return;
+    const currentSnap = buildCurrentPartSnapshot();
+    const updatedParts = partsDraft.length > 0
+      ? partsDraft.map((p, i) => (i === activePartIdx ? currentSnap : p))
+      : [currentSnap];
+    const hasContent = Boolean(patientQuery || patientSelected || currentSnap.formulaQuery || currentSnap.ingredientChips.length);
+    if (!hasContent) return;
+    try {
+      window.localStorage.setItem(QMRX_DRAFT_KEY, JSON.stringify({
+        patientQuery,
+        patientSelected,
+        doctorQuery,
+        doctorSelected,
+        activePartIdx,
+        partsDraft: updatedParts,
+      }));
+    } catch { /* ignore */ }
+  }, [isOpen, patientQuery, patientSelected, doctorQuery, doctorSelected, activePartIdx, partsDraft, buildCurrentPartSnapshot]);
 
   // ── Close on outside click ─────────────────────────────────────────────────
   useEffect(() => {
@@ -439,36 +567,122 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
     setDirections(prev => (prev ? prev + ' ' + text : text).trim());
   }
 
+  function handleSwitchPart(nextIdx) {
+    const currentSnap = buildCurrentPartSnapshot();
+    const list = partsDraft.length > 0 ? [...partsDraft] : [currentSnap];
+    list[activePartIdx] = currentSnap;
+    setPartsDraft(list);
+    setActivePartIdx(nextIdx);
+    loadPartSnapshot(list[nextIdx] || {});
+  }
+
+  function handleAddPart() {
+    const currentSnap = buildCurrentPartSnapshot();
+    const list = partsDraft.length > 0 ? [...partsDraft] : [currentSnap];
+    list[activePartIdx] = currentSnap;
+    const newPart = {
+      formulaQuery: '',
+      formulaSelected: null,
+      volume: '30 mL',
+      ingredientChips: [],
+      directions: '',
+      batchNumber: currentSnap.batchNumber || '',
+      expiryDate: currentSnap.expiryDate || '',
+    };
+    const nextList = [...list, newPart];
+    setPartsDraft(nextList);
+    setActivePartIdx(nextList.length - 1);
+    loadPartSnapshot(newPart);
+  }
+
+  function handleRemovePart(idxToRemove) {
+    const currentSnap = buildCurrentPartSnapshot();
+    const list = partsDraft.length > 0 ? [...partsDraft] : [currentSnap];
+    list[activePartIdx] = currentSnap;
+    if (list.length <= 1) return;
+    const nextList = list.filter((_, i) => i !== idxToRemove);
+    const nextIdx = Math.max(0, Math.min(activePartIdx, nextList.length - 1));
+    setPartsDraft(nextList);
+    setActivePartIdx(nextIdx);
+    loadPartSnapshot(nextList[nextIdx]);
+  }
+
+  function applyQuickTemplate(tpl) {
+    const built = tpl.parts.map((p) => ({
+      formulaQuery: p.formulaQuery,
+      formulaSelected: null,
+      volume: p.volume,
+      ingredientChips: p.ingredientChips,
+      directions: p.directions,
+      batchNumber: batchNumber || generateLot(),
+      expiryDate: expiryDate || addDays(90),
+    }));
+    setPartsDraft(built);
+    setActivePartIdx(0);
+    loadPartSnapshot(built[0]);
+    toast.success(isEs ? `Plantilla "${tpl.labelEs}" cargada (${built.length} partes)` : `Template "${tpl.labelEn}" loaded (${built.length} parts)`);
+  }
+
+  function handleClearDraft() {
+    setPatientQuery(''); setPatientSelected(null);
+    setDoctorQuery(''); setDoctorSelected(null);
+    setPartsDraft([]); setActivePartIdx(0);
+    loadPartSnapshot({});
+    setHasDraftRestored(false);
+    try { window.localStorage.removeItem(QMRX_DRAFT_KEY); } catch { /* ignore */ }
+  }
+
   // ── Submit ─────────────────────────────────────────────────────────────────
 
   async function handleSubmit(e) {
     e.preventDefault();
     const pName = patientSelected?.label || patientQuery.trim();
-    const fTitle = formulaSelected?.label || formulaQuery.trim();
-    if (!pName || !fTitle) {
-      toast.error(isEs ? 'Nombre del paciente y fórmula son obligatorios' : 'Patient name and formula title are required');
+    const currentSnap = buildCurrentPartSnapshot();
+    const rawParts = partsDraft.length > 0
+      ? partsDraft.map((p, i) => (i === activePartIdx ? currentSnap : p))
+      : [currentSnap];
+
+    const validParts = rawParts.filter((p) => (p.formulaSelected?.label || p.formulaQuery || '').trim());
+    if (!pName || validParts.length === 0) {
+      toast.error(isEs ? 'Nombre del paciente y al menos 1 fórmula son obligatorios' : 'Patient name and at least 1 formula are required');
+      return;
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const hasExpiredBud = validParts.some((p) => p.expiryDate && p.expiryDate < todayStr);
+    if (hasExpiredBud) {
+      toast.error(isEs ? 'La fecha BUD no puede ser anterior a hoy' : 'BUD / Expiry date cannot be in the past');
       return;
     }
 
     setSubmitting(true);
     try {
       const code = `RX-${Math.floor(10000 + Math.random() * 90000)}`;
-      const activesText = ingredientChips.join(', ');
-      const apis = ingredientChips.map(c => {
-        const [name, dose] = c.split(':').map(s => s.trim());
-        return { name, dose: dose || '' };
-      });
+      const primaryTitle = validParts[0].formulaSelected?.label || validParts[0].formulaQuery.trim();
 
-      const labelObj = {
-        phaseNumber: 1, partKey: 'part_1',
-        productTitle: fTitle, productName: fTitle,
-        volume: volume.trim() || '30 mL',
-        directions: directions.trim() || 'Apply or administer as directed by physician.',
-        apis, composition: activesText, activesSummary: activesText,
-        batchNumber: batchNumber.trim() || undefined,
-        expiryDate: expiryDate || undefined,
-        approvalStatus: 'draft',
-      };
+      const pharmacyLabels = validParts.map((part, idx) => {
+        const fTitle = part.formulaSelected?.label || part.formulaQuery.trim();
+        const chips = Array.isArray(part.ingredientChips) ? part.ingredientChips : [];
+        const activesText = chips.join(', ');
+        const apis = chips.map((c) => {
+          const [name, dose] = c.split(':').map((s) => s.trim());
+          return { name, dose: dose || '' };
+        });
+        return {
+          phaseNumber: idx + 1,
+          partKey: `part_${idx + 1}`,
+          productTitle: fTitle,
+          productName: fTitle,
+          volume: (part.volume || '30 mL').trim(),
+          directions: (part.directions || '').trim() || 'Apply or administer as directed by physician.',
+          apis,
+          composition: activesText,
+          activesSummary: activesText,
+          batchNumber: (part.batchNumber || '').trim() || undefined,
+          expiryDate: part.expiryDate || undefined,
+          approvalStatus: 'draft',
+        };
+      });
 
       const rxPayload = {
         code, prescriptionCode: code,
@@ -476,10 +690,10 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
         patientId: patientSelected?.id || undefined,
         doctorName: doctorSelected?.label || doctorQuery.trim() || 'Prescribing Physician',
         doctorId: doctorSelected?.id || undefined,
-        title: fTitle, treatmentTitle: fTitle,
+        title: primaryTitle, treatmentTitle: primaryTitle,
         status: 'draft',
-        parts: [{ title: fTitle, volume: labelObj.volume, directions: labelObj.directions, apis }],
-        pharmacyLabels: [labelObj],
+        parts: pharmacyLabels.map((l) => ({ title: l.productTitle, volume: l.volume, directions: l.directions, apis: l.apis })),
+        pharmacyLabels,
       };
 
       const res = await fetch('/api/labels/import', {
@@ -490,13 +704,8 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || 'Could not create prescription');
 
-      toast.success(isEs ? `Prescripción #${code} creada` : `Prescription #${code} created`);
-      // Reset
-      setPatientQuery(''); setPatientSelected(null);
-      setDoctorQuery(''); setDoctorSelected(null);
-      setFormulaQuery(''); setFormulaSelected(null);
-      setIngredientChips([]); setIngredientInput('');
-      setDirections(''); setBatchNumber(''); setExpiryDate(''); setVolume('30 mL');
+      toast.success(isEs ? `Prescripción #${code} creada (${pharmacyLabels.length} partes)` : `Prescription #${code} created (${pharmacyLabels.length} parts)`);
+      handleClearDraft();
       onCreated?.(data.created || [{ code }]);
       onClose();
     } catch (err) {
@@ -517,6 +726,30 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
   const fieldLabel = { display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.74rem', fontWeight: 700, color: '#334155' };
   const input = { padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', outline: 'none', width: '100%', boxSizing: 'border-box' };
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isBudExpired = Boolean(expiryDate && expiryDate < todayStr);
+  const effectivePartsCount = Math.max(1, partsDraft.length || 1);
+  const livePreviewLabel = {
+    code: 'RX-PREVIEW',
+    patientName: patientSelected?.label || patientQuery.trim() || (isEs ? 'Paciente Ejemplo' : 'Sample Patient'),
+    doctorName: doctorSelected?.label || doctorQuery.trim() || 'Prescribing Physician',
+    productTitle: formulaSelected?.label || formulaQuery.trim() || (isEs ? 'Fórmula Magistral' : 'Compounded Formula'),
+    productName: formulaSelected?.label || formulaQuery.trim() || (isEs ? 'Fórmula Magistral' : 'Compounded Formula'),
+    volume: volume || '30 mL',
+    directions: directions || (isEs ? 'Aplicar según indicación médica.' : 'Apply or administer as directed.'),
+    apis: ingredientChips.map((c) => {
+      const [name, dose] = c.split(':').map((s) => s.trim());
+      return { name, dose: dose || '' };
+    }),
+    composition: ingredientChips.join(', '),
+    activesSummary: ingredientChips.join(', '),
+    batchNumber: batchNumber || 'PHARM-2026-MAN',
+    expiryDate: expiryDate || addDays(90),
+    partLabel: effectivePartsCount > 1 ? `Part ${activePartIdx + 1} of ${effectivePartsCount}` : '',
+    partIndex: activePartIdx,
+    totalParts: effectivePartsCount,
+  };
+
   return (
     <>
       <style>{`
@@ -524,34 +757,112 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
         .qmrx-chip-btn:hover { background: #e0e7ff !important; }
         .qmrx-posology-chip:hover { background: #f1f5f9 !important; border-color: #94a3b8 !important; }
         .qmrx-bud-btn:hover { background: #eff6ff !important; }
+        .qmrx-body-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr); gap: 18px; align-items: start; }
+        @media (max-width: 900px) {
+          .qmrx-body-grid { grid-template-columns: 1fr; }
+          .qmrx-preview-col { display: none; }
+        }
       `}</style>
       <div
         role="dialog" aria-modal="true"
         aria-label={isEs ? 'Nueva Prescripción Manual' : 'Quick Manual Prescription'}
         onClick={onClose}
-        style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: 'rgba(15,23,42,0.58)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+        className="atlas-mobile-sheet-backdrop"
+        style={{ zIndex: 9999, alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
       >
         <div ref={modalRef} onClick={e => e.stopPropagation()}
-          style={{ width: '100%', maxWidth: '560px', maxHeight: '92vh', overflowY: 'auto', background: '#ffffff', borderRadius: '14px', border: '1px solid #cbd5e1', boxShadow: '0 20px 45px rgba(15,23,42,0.22)' }}>
+          className="atlas-mobile-sheet"
+          style={{ width: '100%', maxWidth: '940px', maxHeight: '92vh', overflowY: 'auto', background: '#ffffff', borderRadius: '14px', border: '1px solid #cbd5e1', boxShadow: '0 20px 45px rgba(15,23,42,0.22)' }}>
 
           {/* ── Header ── */}
-          <div style={{ padding: '14px 18px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
+          <div style={{ padding: '12px 18px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FilePlus2 size={18} color="#1a73e8" />
               <div>
-                <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Nueva Prescripción Manual (Sin PDF)' : 'Quick Manual Prescription (No PDF)'}
+                <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span>{isEs ? 'Nueva Prescripción Manual (Sin PDF)' : 'Quick Manual Prescription (No PDF)'}</span>
+                  {hasDraftRestored && (
+                    <span style={{ fontSize: '0.66rem', background: '#fef9c3', color: '#854d0e', border: '1px solid #fde047', padding: '1px 7px', borderRadius: '999px' }}>
+                      {isEs ? 'Borrador restaurado' : 'Draft restored'}
+                    </span>
+                  )}
                 </h3>
                 <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                  {isEs ? 'Busca pacientes, médicos y fórmulas existentes · Alta rápida si no existen' : 'Search existing patients, doctors & formulas · Quick register if not found'}
+                  {isEs ? 'Multi-parte · Vista previa en vivo · Autoguardado local' : 'Multi-part · Live label preview · Auto-saved draft'}
                 </div>
               </div>
             </div>
-            <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}><X size={18} /></button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={handleClearDraft}
+                title={isEs ? 'Limpiar borrador' : 'Clear draft'}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '5px 9px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#ffffff', color: '#64748b', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                <RotateCcw size={12} />
+                <span>{isEs ? 'Limpiar' : 'Reset'}</span>
+              </button>
+              <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px', minWidth: '36px', minHeight: '36px' }}><X size={18} /></button>
+            </div>
           </div>
 
-          {/* ── Form ── */}
-          <form onSubmit={handleSubmit} style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* ── Quick Templates + Multi-Part Tabs ── */}
+          <div style={{ padding: '10px 18px', background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: '#475569' }}>
+                {isEs ? 'Plantillas:' : 'Templates:'}
+              </span>
+              {QUICK_RX_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  onClick={() => applyQuickTemplate(tpl)}
+                  style={{ fontSize: '0.7rem', fontWeight: 700, padding: '3px 9px', borderRadius: '999px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
+                >
+                  + {isEs ? tpl.labelEs : tpl.labelEn}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+              {Array.from({ length: effectivePartsCount }).map((_, idx) => {
+                const isActive = idx === activePartIdx;
+                return (
+                  <div key={idx} style={{ display: 'inline-flex', alignItems: 'center', borderRadius: '6px', overflow: 'hidden', border: isActive ? '1px solid #1a73e8' : '1px solid #cbd5e1', background: isActive ? '#e8f0fe' : '#ffffff' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchPart(idx)}
+                      style={{ padding: '4px 9px', border: 'none', background: 'transparent', fontSize: '0.72rem', fontWeight: isActive ? 800 : 600, color: isActive ? '#1a73e8' : '#475569', cursor: 'pointer' }}
+                    >
+                      {isEs ? `Parte ${idx + 1}` : `Part ${idx + 1}`}
+                    </button>
+                    {effectivePartsCount > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePart(idx)}
+                        title={isEs ? 'Eliminar parte' : 'Remove part'}
+                        style={{ padding: '4px 5px', border: 'none', borderLeft: '1px solid #e2e8f0', background: 'transparent', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      >
+                        <X size={11} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              <button
+                type="button"
+                onClick={handleAddPart}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '4px 9px', borderRadius: '6px', border: '1px dashed #1a73e8', background: '#ffffff', color: '#1a73e8', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+              >
+                <Plus size={12} />
+                <span>{isEs ? 'Añadir Parte' : 'Add Part'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ── Form + Live Preview Split Grid ── */}
+          <div className="qmrx-body-grid" style={{ padding: '16px 18px' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', minWidth: 0 }}>
 
             {/* Patient + Doctor row */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
@@ -885,10 +1196,41 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
                 style={{ padding: '8px 18px', borderRadius: '6px', border: 'none', background: submitting ? '#93c5fd' : '#1a73e8', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: submitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {submitting
                   ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />{isEs ? 'Creando…' : 'Creating…'}</>
-                  : <><FilePlus2 size={14} />{isEs ? 'Crear y Abrir en Estudio' : 'Create & Open Studio'}</>}
+                  : <><FilePlus2 size={14} />{isEs ? `Crear (${effectivePartsCount}p) y Abrir` : `Create (${effectivePartsCount}p) & Open`}</>}
               </button>
             </div>
           </form>
+
+          {/* ── Right Column: Live Label Preview ── */}
+          <aside className="qmrx-preview-col" style={{ position: 'sticky', top: '72px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#003666' }}>
+                {isEs ? `Vista Previa · Parte ${activePartIdx + 1}` : `Live Preview · Part ${activePartIdx + 1}`}
+              </span>
+              <span style={{ fontSize: '0.68rem', color: directions.length > 180 ? '#d97706' : '#64748b', fontWeight: 600 }}>
+                {directions.length}/180 chars
+              </span>
+            </div>
+
+            <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '8px', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
+              <PharmapolisLabelSvg labelData={livePreviewLabel} variant="backQr" widthMm={86} />
+            </div>
+
+            {isBudExpired && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '7px 10px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>
+                <AlertTriangle size={14} />
+                <span>{isEs ? 'La fecha BUD es anterior a hoy.' : 'BUD date is in the past.'}</span>
+              </div>
+            )}
+
+            {directions.length > 180 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', padding: '7px 10px', borderRadius: '6px', fontSize: '0.72rem' }}>
+                <AlertTriangle size={14} />
+                <span>{isEs ? 'Posología larga: revisa que quepa bien en la etiqueta térmica.' : 'Long directions: check thermal label fit.'}</span>
+              </div>
+            )}
+          </aside>
+          </div>
         </div>
       </div>
     </>

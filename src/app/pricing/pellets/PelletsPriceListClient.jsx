@@ -252,6 +252,7 @@ export default function PelletsPriceListClient({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedProfile, setSelectedProfile] = useState('all'); // 'all' | 'female' | 'male' | 'trocar'
 
   // Hydrate initial search/category from URL query params (?q=..., ?category=...) for cross-catalog synergy links
   useEffect(() => {
@@ -350,6 +351,17 @@ export default function PelletsPriceListClient({
         if (item.category !== 'Trocar Kits' && item.hormoneType !== 'instrument') return false;
       }
 
+      // Clinical profile filter (1-click guided selection)
+      if (selectedProfile === 'female') {
+        const isFemalePellet = item.targetGender === 'female' || item.hormoneType === 'estrogen' || item.hormoneType === 'biest' || item.hormoneType === 'progesterone';
+        if (!isFemalePellet) return false;
+      } else if (selectedProfile === 'male') {
+        const isMalePellet = item.targetGender === 'male' || item.hormoneType === 'synergy';
+        if (!isMalePellet) return false;
+      } else if (selectedProfile === 'trocar') {
+        if (item.category !== 'Trocar Kits' && item.hormoneType !== 'instrument') return false;
+      }
+
       // Search query filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
@@ -362,7 +374,7 @@ export default function PelletsPriceListClient({
 
       return true;
     });
-  }, [initialProducts, selectedCategory, searchQuery]);
+  }, [initialProducts, selectedCategory, selectedProfile, searchQuery]);
 
   // Cart Totals calculation
   const cartSummary = useMemo(() => {
@@ -1105,6 +1117,62 @@ export default function PelletsPriceListClient({
 
           {/* Main Table Column */}
           <div style={{ minWidth: 0 }}>
+            {/* Guided Clinical Profile Strip (1-Click Female BHRT / Male TRT / Trocars + Clinical Window Tip) */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              padding: '10px 14px',
+              marginBottom: '10px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: '#475569', marginRight: '2px' }}>
+                  {isEs ? 'Perfil Clínico:' : 'Clinical Profile:'}
+                </span>
+                {[
+                  { id: 'all', label: isEs ? 'Todos' : 'All Formulations' },
+                  { id: 'female', label: isEs ? '♀️ Mujer / Menopausia' : '♀️ Female BHRT' },
+                  { id: 'male', label: isEs ? '♂️ Hombre / TRT' : '♂️ Male TRT' },
+                  { id: 'trocar', label: isEs ? '🧰 Kits Trócar' : '🧰 Trocar Kits' },
+                ].map((prof) => {
+                  const active = selectedProfile === prof.id;
+                  return (
+                    <button
+                      key={prof.id}
+                      type="button"
+                      onClick={() => setSelectedProfile(prof.id)}
+                      style={{
+                        padding: '5px 11px',
+                        minHeight: '34px',
+                        borderRadius: '999px',
+                        border: active ? '1px solid #003666' : '1px solid #cbd5e1',
+                        background: active ? '#003666' : '#f8fafc',
+                        color: active ? '#ffffff' : '#334155',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {prof.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div style={{ fontSize: '0.73rem', color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
+                {selectedProfile === 'female'
+                  ? (isEs ? 'Trócar 3.2 mm · Ventana T: 150–350 ng/dL · E2: 40–110 pg/mL' : '3.2 mm Trocar · Target T: 150–350 ng/dL · E2: 40–110 pg/mL')
+                  : selectedProfile === 'male'
+                    ? (isEs ? 'Trócar 4.5 mm (>50 mg) · Ventana T: 400–800 ng/dL' : '4.5 mm Trocar (>50 mg) · Target T: 400–800 ng/dL')
+                    : (isEs ? '≥99.5% USP · Liberación orden cero 3.5–6 meses · Sin primer paso hepático' : '≥99.5% USP · Zero-order release 3.5–6 mo · Zero hepatic first-pass')}
+              </div>
+            </div>
+
             {/* Global Search Bar (Strict Rule #6 & #7) */}
             <div className="pellets-filter-toolbar">
               <GlobalSearchBar

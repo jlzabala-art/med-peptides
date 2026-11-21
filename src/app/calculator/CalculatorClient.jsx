@@ -402,6 +402,97 @@ export default function CalculatorClient() {
             </>
           }
         />
+
+        {/* ── Instant Answer Strip + Clinical Precision Safety Tip ── */}
+        <section
+          aria-label={isEs ? 'Resumen instantáneo de dosis' : 'Instant dosing summary'}
+          style={{
+            background: '#f0f9ff',
+            border: '1px solid #bae6fd',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span style={{
+              background: '#0369a1',
+              color: '#ffffff',
+              fontSize: '0.68rem',
+              fontWeight: 800,
+              padding: '2px 8px',
+              borderRadius: '999px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+            }}>
+              {isEs ? 'Resultado Directo' : 'Instant Answer'}
+            </span>
+            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0c4a6e' }}>
+              {selectedProduct?.name || 'Peptide'} ({selectedStrength?.name || `${recon.vialMg}mg`})
+              {recon.isVial && ` · ${recon.bacWaterMl} mL BAC → `}
+              {recon.isVial && (
+                <span style={{ color: '#0284c7' }}>
+                  {recon.unitsToInject} {isEs ? 'U-100' : 'U-100 units'} ({recon.volumeMl} mL · {recon.totalDoses} {isEs ? 'dosis/vial' : 'doses/vial'})
+                </span>
+              )}
+              {recon.isPenOrCartridge && (
+                <span style={{ color: '#0284c7' }}>
+                  {' → '}
+                  {recon.penClicks} {isEs ? 'clics del dial' : 'pen clicks'} ({recon.totalDoses} {isEs ? 'dosis' : 'doses'})
+                </span>
+              )}
+              {recon.isSpray && (
+                <span style={{ color: '#0284c7' }}>
+                  {' → '}
+                  {recon.sprayPuffs} {isEs ? 'pulsaciones' : 'sprays'} ({recon.sprayDoseMcg} mcg)
+                </span>
+              )}
+            </span>
+          </div>
+
+          {recon.isVial && recon.unitsToInject > 0 && recon.unitsToInject < 10 && recon.syringeCapacityMl >= 1.0 && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              flexWrap: 'wrap',
+              background: '#fffbeb',
+              border: '1px solid #fde68a',
+              borderRadius: '8px',
+              padding: '5px 10px',
+              fontSize: '0.74rem',
+              color: '#92400e',
+            }}>
+              <span>
+                <strong>{isEs ? 'Tip de precisión clínica:' : 'Clinical Precision Tip:'}</strong>{' '}
+                {isEs
+                  ? `${recon.unitsToInject} U es un volumen pequeño en jeringa de 1.0 mL.`
+                  : `${recon.unitsToInject} U is a small draw on a 1.0 mL syringe.`}
+              </span>
+              <button
+                type="button"
+                onClick={() => recon.setSyringeCapacityMl?.(0.3)}
+                style={{
+                  background: '#d97706',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '4px 9px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {isEs ? 'Cambiar a 0.3 mL (30U)' : 'Switch to 0.3 mL (30U)'}
+              </button>
+            </div>
+          )}
+        </section>
+
         <style dangerouslySetInnerHTML={{ __html: `
           .calc-gcp-kpi-grid {
             display: grid;
