@@ -280,27 +280,50 @@ export default function PelletsPriceListClient({
     return `${currencySymbol}${converted.toFixed(2)}`;
   }, [fxRate, currencySymbol]);
 
-  // Cart operations
+  // Cart operations (synced with Global PublicWorkspaceContext Quote Cart)
+  const syncPelletToWorkspace = useCallback((productId, type, nextQty) => {
+    if (!workspace?.syncRfqItem) return;
+    const prod = initialProducts.find((p) => p.id === productId);
+    if (!prod) return;
+    const unitEur = prod.pricing?.wholesalePriceEur || prod.pricing?.price_eur || prod.pricing?.costPriceEur || 0;
+    const pack10Eur = prod.pricing?.pack10PriceEur || Number((unitEur * 10 * 0.90).toFixed(2));
+    const rawEur = type === 'pack10' ? pack10Eur : unitEur;
+    workspace.syncRfqItem(
+      {
+        id: `pellet:${productId}:${type}`,
+        sku: prod.sku || prod.itemNumber || productId,
+        name: `${prod.name} (${type === 'pack10' ? 'Pack ×10' : 'Single Unit'})`,
+        unitPrice: Number((rawEur * fxRate).toFixed(2)),
+        source: 'pellets',
+        href: '/pricing/pellets',
+      },
+      nextQty
+    );
+  }, [workspace, initialProducts, fxRate]);
+
   const handleAddToCart = useCallback((productId, type = 'single') => {
     triggerHaptic('selection');
     setCartItems(prev => {
       const current = prev[productId] || { single: 0, pack10: 0 };
+      const nextQty = (current[type] || 0) + 1;
+      syncPelletToWorkspace(productId, type, nextQty);
       return {
         ...prev,
         [productId]: {
           ...current,
-          [type]: (current[type] || 0) + 1
+          [type]: nextQty
         }
       };
     });
     toast.success(isEs ? 'Añadido a la cotización' : 'Added to quote cart');
-  }, [isEs]);
+  }, [isEs, syncPelletToWorkspace]);
 
   const handleUpdateQuantity = useCallback((productId, type, delta) => {
     triggerHaptic('light');
     setCartItems(prev => {
       const current = prev[productId] || { single: 0, pack10: 0 };
       const nextVal = Math.max(0, (current[type] || 0) + delta);
+      syncPelletToWorkspace(productId, type, nextVal);
       return {
         ...prev,
         [productId]: {
@@ -309,7 +332,7 @@ export default function PelletsPriceListClient({
         }
       };
     });
-  }, []);
+  }, [syncPelletToWorkspace]);
 
   // Filtered Products
   const filteredProducts = useMemo(() => {

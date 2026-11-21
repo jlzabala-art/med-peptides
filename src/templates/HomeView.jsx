@@ -10,6 +10,7 @@ import HomeSectionRenderer from '../components/HomeSectionRenderer';
 import HomeLayoutSkeleton from '../components/HomeLayoutSkeleton';
 import MoleculeParticles from '../components/MoleculeParticles';
 import useGuestPreferences from '../hooks/useGuestPreferences';
+import ClinicalFormatSwitcher from '../components/pricing/shared/ClinicalFormatSwitcher';
 
 /**
  * HomeView — unified homepage router for all 8 roles.
@@ -145,6 +146,7 @@ export default function HomeView({
 
   return (
     <div style={{ position: 'relative', background: 'var(--background)' }}>
+      <ClinicalFormatSwitcher activeFormat="" />
       <MoleculeParticles />
       <div className="home-seq" style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 'clamp(56px, 6vw, 84px)', paddingBottom: 'clamp(56px, 6vw, 84px)' }}>
         {sections.map((section, idx) => (

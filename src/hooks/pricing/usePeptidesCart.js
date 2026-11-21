@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { SHIPPING_DESTINATIONS } from '@/constants/peptideCategories';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 /**
  * usePeptidesCart
@@ -27,6 +28,26 @@ export function usePeptidesCart({
   const [cartItems, setCartItems] = useState({});
   const [hasRestoredCart, setHasRestoredCart] = useState(false);
   const storageKey = `atlas_peptides_b2b_cart_${referralCode || 'CAT-RX-7482'}`;
+  const workspace = usePublicWorkspace?.() || null;
+
+  const syncPeptideToWorkspace = useCallback((product, packType, nextQty) => {
+    if (!workspace?.syncRfqItem || !product?.id) return;
+    const isPack10 = packType === '10x';
+    const baseUsd = isPack10
+      ? Number(product.pack10Price || (product.unitPrice || 0) * 10 * 0.85)
+      : Number(product.unitPrice || 0);
+    workspace.syncRfqItem(
+      {
+        id: `peptide:${product.id}:${isPack10 ? '10x' : '1x'}`,
+        sku: product.sku || product.id,
+        name: `${product.productName || product.name} (${isPack10 ? 'Pack ×10' : '1x Vial'})`,
+        unitPrice: Number((baseUsd * (fxRate || 1)).toFixed(2)),
+        source: 'peptides',
+        href: '/pricing/peptides',
+      },
+      nextQty
+    );
+  }, [workspace, fxRate]);
 
   // Persist tier & referral
   useEffect(() => {
@@ -80,6 +101,9 @@ export function usePeptidesCart({
       if (!existing) return prev;
       const field = type === '10x' ? 'quantity10x' : 'quantity1x';
       const nextVal = Math.max(0, (existing[field] || 0) + delta);
+      if (existing.product) {
+        syncPeptideToWorkspace(existing.product, type, nextVal);
+      }
       const otherField = type === '10x' ? 'quantity1x' : 'quantity10x';
       if (nextVal === 0 && (existing[otherField] || 0) === 0) {
         const copy = { ...prev };
@@ -94,19 +118,22 @@ export function usePeptidesCart({
         }
       };
     });
-  }, []);
+  }, [syncPeptideToWorkspace]);
 
   const handleAddToCart = useCallback((product, packType) => {
     setCartItems(prev => {
       const current = prev[product.id] || { quantity1x: 0, quantity10x: 0, product };
+      const field = packType === '10x' ? 'quantity10x' : 'quantity1x';
+      const nextQty = (current[field] || 0) + 1;
+      syncPeptideToWorkspace(product, packType, nextQty);
       const updated = {
         ...current,
-        [packType === '10x' ? 'quantity10x' : 'quantity1x']: current[packType === '10x' ? 'quantity10x' : 'quantity1x'] + 1
+        [field]: nextQty
       };
       return { ...prev, [product.id]: updated };
     });
     toast.success(`Added ${product.productName} (${packType === '10x' ? 'Pack ×10' : '1x Vial'}) to request ✓`);
-  }, []);
+  }, [syncPeptideToWorkspace]);
 
   const handlePrintProforma = useCallback(() => {
     if (Object.keys(cartItems).length === 0) {

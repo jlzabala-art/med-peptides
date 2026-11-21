@@ -2,18 +2,18 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FlaskConical, Syringe, Pill, Layers, Calculator } from '@/lib/icons';
+import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag } from '@/lib/icons';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 /**
  * ClinicalFormatSwitcher
  * ─────────────────────────────────────────────────────────────────────────────
- * Unified Google Cloud UX format navigation bar across all 5 core clinical
+ * Unified Google Cloud UX format navigation bar across all core clinical
  * & pricing modules (/pricing, /pricing/peptides, /pricing/pens,
- * /pricing/pellets, /calculator) so clinicians experience one continuous suite.
+ * /pricing/pellets, /proto, /calculator) so clinicians experience one continuous suite.
  */
 export default function ClinicalFormatSwitcher({
-  activeFormat = 'pens', // 'directory' | 'peptides' | 'pens' | 'pellets' | 'calculator'
+  activeFormat = 'pens', // 'directory' | 'peptides' | 'pens' | 'pellets' | 'protocols' | 'calculator'
   lang: langProp = null,
   currency: currencyProp = null,
 }) {
@@ -21,8 +21,21 @@ export default function ClinicalFormatSwitcher({
   const lang = langProp || workspace?.lang || 'en';
   const currency = currencyProp || workspace?.currency || null;
   const isEs = lang === 'es';
+  const rfqCount = Array.isArray(workspace?.rfqItems) ? workspace.rfqItems.length : 0;
 
   const buildHref = (basePath) => {
+    if (typeof workspace?.buildWorkspaceHref === 'function') {
+      const href = workspace.buildWorkspaceHref(basePath);
+      if (basePath === '/pricing/pens' || basePath === '/calculator') {
+        const [pathOnly, qs] = href.split('?');
+        if (!qs) return pathOnly;
+        const p = new URLSearchParams(qs);
+        p.delete('currency');
+        const nextQs = p.toString();
+        return nextQs ? `${pathOnly}?${nextQs}` : pathOnly;
+      }
+      return href;
+    }
     const params = new URLSearchParams();
     if (isEs) params.set('lang', 'es');
     if (currency && basePath !== '/pricing/pens' && basePath !== '/calculator') {
@@ -64,6 +77,14 @@ export default function ClinicalFormatSwitcher({
       label: isEs ? 'Pellets Hormonales' : 'Hormone Pellets',
       shortLabel: 'Pellets',
       badge: 'EU GMP',
+    },
+    {
+      id: 'protocols',
+      href: buildHref('/proto'),
+      icon: BookOpen,
+      label: isEs ? 'Protocolos Clínicos' : 'Clinical Protocols',
+      shortLabel: isEs ? 'Protocolos' : 'Protocols',
+      badge: null,
     },
     {
       id: 'calculator',
@@ -181,6 +202,26 @@ export default function ClinicalFormatSwitcher({
             </Link>
           );
         })}
+
+        {rfqCount > 0 && typeof workspace?.setIsQuoteDrawerOpen === 'function' && (
+          <button
+            type="button"
+            onClick={() => workspace.setIsQuoteDrawerOpen(true)}
+            className="atlas-format-switcher-tab"
+            style={{
+              marginLeft: 'auto',
+              fontWeight: 750,
+              background: '#f0fdf4',
+              color: '#166534',
+              border: '1px solid #86efac',
+              cursor: 'pointer',
+            }}
+            title={isEs ? 'Abrir cotización combinada B2B' : 'Open combined B2B quote cart'}
+          >
+            <ShoppingBag size={13} color="#16a34a" style={{ flexShrink: 0 }} />
+            <span>{isEs ? `Presupuesto (${rfqCount})` : `Quote (${rfqCount})`}</span>
+          </button>
+        )}
       </div>
     </nav>
   );

@@ -13,6 +13,7 @@ import NonInjectableVisualizer from '@/components/reconstitution/NonInjectableVi
 import StepTimelineList from '@/components/ui/StepTimelineList';
 import PageHeroCard from '@/components/ui/PageHeroCard';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import {
   useAlgoliaPeptideSelector,
   filterAndDeduplicatePatientPeptides,
@@ -28,6 +29,7 @@ import {
   ShieldCheck,
   Sparkles,
   CheckCircle2,
+  ShoppingBag,
 } from '@/lib/icons';
 
 const BAC_WATER_PRESETS = [1.0, 1.5, 2.0, 2.5, 3.0];
@@ -49,6 +51,7 @@ const FORMAT_SHORT_BADGE = {
 };
 
 export default function CalculatorClient() {
+  const workspace = usePublicWorkspace?.() || null;
   const selector = useAlgoliaPeptideSelector({ syncUrl: false });
   const {
     lang,
@@ -339,6 +342,28 @@ export default function CalculatorClient() {
           }
           actions={
             <>
+              {selectedProduct && (recon.isVial || recon.isPenOrCartridge) && typeof workspace?.addRfqItem === 'function' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    workspace.addRfqItem({
+                      id: `calc:${selectedProduct.id || selectedProduct.slug || selectedProduct.productName}:${formatId}`,
+                      sku: selectedProduct.sku || selectedProduct.slug || 'CALC-SKU',
+                      name: `${selectedProduct.name || selectedProduct.productName || 'Peptide'} (${formatId})`,
+                      unitPrice: Number(selectedProduct.unitPrice || selectedProduct.price || 0),
+                      qty: 1,
+                      source: 'calculator',
+                      href: '/calculator',
+                    });
+                    workspace.setIsQuoteDrawerOpen?.(true);
+                  }}
+                  className="gcp-btn-secondary"
+                  style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#166534', borderColor: '#86efac', background: '#f0fdf4' }}
+                >
+                  <ShoppingBag size={14} color="#16a34a" />
+                  <span>{isEs ? 'Añadir al Presupuesto B2B' : 'Add to Quote Cart'}</span>
+                </button>
+              )}
               {recon.isPenOrCartridge ? (
                 <Link
                   href={`/pricing/pens${isEs ? '?lang=es' : ''}`}

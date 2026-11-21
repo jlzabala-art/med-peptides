@@ -15,6 +15,7 @@ import PublicInstitutionalInquiryDrawer from '../shared/PublicInstitutionalInqui
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import ProtocolQrModal from './ProtocolQrModal';
 import PublicUnifiedHeader from '../shared/PublicUnifiedHeader';
+import ClinicalFormatSwitcher from '../pricing/shared/ClinicalFormatSwitcher';
 import PageHeroCard from '../ui/PageHeroCard';
 import PublicUnifiedFooter from '../shared/PublicUnifiedFooter';
 import ProtocolsCatalogSidebar from './ProtocolsCatalogSidebar';
@@ -210,6 +211,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         track="protocols"
         lang={lang}
         onLangChange={handleLangChange}
+        breadcrumb={[
+          { label: lang === 'es' ? 'Suite Clínica' : 'Clinical Suite', href: '/pricing' },
+          { label: lang === 'es' ? 'Protocolos Clínicos' : 'Clinical Protocols' },
+        ]}
         onOpenSearch={() => {
           const el = document.getElementById('protocol-global-search');
           if (el) el.focus();
@@ -218,6 +223,8 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         onCopyUrl={handleCopyDirectoryUrl}
         copiedUrl={copiedDirectoryUrl}
       />
+
+      <ClinicalFormatSwitcher activeFormat="protocols" lang={lang} />
 
       <main className="atlas-page-shell">
         {/* ── 1. Compact Executive Hero Section ── */}

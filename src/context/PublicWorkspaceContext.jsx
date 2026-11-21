@@ -22,9 +22,11 @@ const PublicWorkspaceContext = createContext({
   setLang: () => {},
   addRfqItem: () => {},
   updateRfqQty: () => {},
+  syncRfqItem: () => {},
   removeRfqItem: () => {},
   clearRfqItems: () => {},
   addRecentItem: () => {},
+  buildWorkspaceHref: (path) => path,
 });
 
 function deriveRouteLabel(pathname) {
@@ -34,11 +36,18 @@ function deriveRouteLabel(pathname) {
   if (pathname === '/pricing/colway-qatar') return { label: 'Colway Qatar Schedule', category: 'Pricing' };
   if (pathname === '/pricing/colway-hair') return { label: 'Colway Hair & Trichology', category: 'Pricing' };
   if (pathname === '/pricing/peptides') return { label: 'Peptides Schedule', category: 'Pricing' };
+  if (pathname === '/pricing/pellets') return { label: 'Hormone Pellets Schedule', category: 'Pricing' };
+  if (pathname === '/pricing/pens') return { label: 'Peptide Pen Guide', category: 'Pricing' };
+  if (pathname === '/pricing/dnlab-pens') return { label: 'DNLab Pens Schedule', category: 'Pricing' };
+  if (pathname === '/pricing/nplab-hormones') return { label: 'NP Lab Hormones', category: 'Pricing' };
   if (pathname === '/pricing/24genetics') return { label: '24Genetics DNA Panels', category: 'Pricing' };
   if (pathname === '/pricing/24genomics-qatar') return { label: '24Genetics Qatar', category: 'Pricing' };
   if (pathname === '/vials') return { label: 'Peptide Vials Directory', category: 'Catalog' };
   if (pathname === '/proto') return { label: 'Clinical Protocols', category: 'Protocols' };
+  if (pathname === '/protocol-finder') return { label: 'Protocol Finder', category: 'Protocols' };
   if (pathname === '/calculator') return { label: 'Dosing Calculator', category: 'Tool' };
+  if (pathname === '/compounding') return { label: 'Compounding Lab', category: 'Lab' };
+  if (pathname === '/tools') return { label: 'Clinical Tools', category: 'Tool' };
 
   const slug = pathname.split('/').filter(Boolean).pop() || '';
   const pretty = decodeURIComponent(slug)
@@ -47,6 +56,7 @@ function deriveRouteLabel(pathname) {
 
   if (pathname.startsWith('/p/')) return { label: pretty, category: 'Monograph' };
   if (pathname.startsWith('/proto/')) return { label: pretty, category: 'Protocol' };
+  if (pathname.startsWith('/guides/')) return { label: pretty, category: 'Guide' };
   if (pathname.startsWith('/collection/')) return { label: pretty, category: 'Collection' };
   if (pathname.startsWith('/c/')) return { label: `Catalog ${slug}`, category: 'Catalog' };
   return null;
@@ -257,6 +267,51 @@ export function PublicWorkspaceProvider({ children }) {
     setState((prev) => ({ ...prev, rfqItems: [] }));
   }, []);
 
+  const syncRfqItem = useCallback((item, nextQty) => {
+    if (!item || (!item.id && !item.sku)) return;
+    const key = item.id || item.sku;
+    const qtyNum = Math.max(0, Number(nextQty) || 0);
+    setState((prev) => {
+      if (qtyNum === 0) {
+        return {
+          ...prev,
+          rfqItems: prev.rfqItems.filter((x) => (x.id || x.sku) !== key),
+        };
+      }
+      const existing = prev.rfqItems.find((x) => (x.id || x.sku) === key);
+      if (existing) {
+        return {
+          ...prev,
+          rfqItems: prev.rfqItems.map((x) =>
+            (x.id || x.sku) === key ? { ...x, ...item, qty: qtyNum } : x
+          ),
+        };
+      }
+      return {
+        ...prev,
+        rfqItems: [...prev.rfqItems, { ...item, qty: qtyNum }],
+      };
+    });
+  }, []);
+
+  const buildWorkspaceHref = useCallback((basePath, extraParams = {}) => {
+    const params = new URLSearchParams();
+    if (state.lang === 'es') params.set('lang', 'es');
+    if (state.currency) params.set('currency', state.currency);
+    if (typeof window !== 'undefined') {
+      const currentSp = new URLSearchParams(window.location.search);
+      const ref = currentSp.get('ref');
+      if (ref) params.set('ref', ref);
+    }
+    Object.entries(extraParams || {}).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== '') {
+        params.set(k, String(v));
+      }
+    });
+    const qs = params.toString();
+    return qs ? `${basePath}?${qs}` : basePath;
+  }, [state.lang, state.currency]);
+
   const isSpanish = state.lang === 'es';
   const t = useCallback((en, es) => (state.lang === 'es' ? (es ?? en) : en), [state.lang]);
 
@@ -275,9 +330,11 @@ export function PublicWorkspaceProvider({ children }) {
         setLang,
         addRfqItem,
         updateRfqQty,
+        syncRfqItem,
         removeRfqItem,
         clearRfqItems,
         addRecentItem,
+        buildWorkspaceHref,
       }}
     >
       {children}
