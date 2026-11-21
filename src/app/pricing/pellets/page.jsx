@@ -1,6 +1,7 @@
 import React from 'react';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getAllPharmapolisPellets } from '@/data/pharmapolisPelletsRegistry';
+import { toProductViewModel } from '@/utils/productViewModel';
 import PelletsPriceListClient from './PelletsPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
@@ -157,7 +158,9 @@ export default async function PelletsPricingPage({ searchParams }) {
     duration: p.duration || p.galenicSpecs?.releaseDuration || '3.5 to 6 months'
   }));
 
-  const allProducts = [...pellets, ...TROCAR_KITS];
+  const allProducts = [...pellets, ...TROCAR_KITS].map((item) =>
+    toProductViewModel(item, { tier: 'wholesale', targetCurrency: initialCurrency })
+  );
 
   return (
     <PelletsPriceListClient
