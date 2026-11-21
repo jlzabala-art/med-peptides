@@ -60,5 +60,27 @@ describe('Canonical Model v2 — productViewModel adapter', () => {
     );
     assert.equal(money.unitPrice, 55);
     assert.equal(money.pack10Price, 467.5);
+    assert.equal(money.pack10SavingsPct, 15);
+  });
+
+  it('derives synergyKeys and normalized sortDoseValue across mg and mcg', () => {
+    const pelletVm = toProductViewModel({
+      id: 'est-25',
+      name: 'Estradiol 25 mg Pellet',
+      type: 'pellet',
+      hormoneType: 'estrogen',
+      strength: '25 mg',
+    });
+    assert.deepEqual(pelletVm.synergyKeys, ['ghk-cu', 'epithalon', 'bpc-157']);
+    assert.equal(pelletVm.sortDoseValue, 25);
+
+    const mcgVm = toProductViewModel({
+      id: 'pep-mcg',
+      name: 'Semax 500 mcg',
+      type: 'peptide',
+      strength: '500 mcg',
+    });
+    assert.deepEqual(mcgVm.synergyKeys, ['selank']);
+    assert.equal(mcgVm.sortDoseValue, 0.5);
   });
 });

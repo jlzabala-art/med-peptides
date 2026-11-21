@@ -791,20 +791,19 @@ export default function PelletsPriceListClient({
               {isEs ? 'Sinergias Clínicas en Péptidos' : 'Recommended Peptide Synergies'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {(row.category === 'Trocar Kits'
-                ? [{ q: 'BPC-157', label: isEs ? 'BPC-157 (Recuperación tisular)' : 'BPC-157 (Tissue Recovery)' }]
-                : row.hormoneType === 'estrogen' || row.hormoneType === 'progesterone'
-                  ? [
-                      { q: 'GHK-Cu', label: isEs ? 'GHK-Cu (Colágeno/Piel)' : 'GHK-Cu (Collagen/Dermal)' },
-                      { q: 'Epitalon', label: isEs ? 'Epitalon (Longevidad)' : 'Epitalon (Longevity)' },
-                      { q: 'BPC-157', label: 'BPC-157' },
-                    ]
-                  : [
-                      { q: 'CJC-1295', label: isEs ? 'CJC-1295 / Ipamorelin (Eje GH)' : 'CJC-1295 / Ipamorelin (GH Axis)' },
-                      { q: 'BPC-157', label: isEs ? 'BPC-157 (Tendón/Músculo)' : 'BPC-157 (Tendon/Muscle)' },
-                      { q: 'NAD+', label: 'NAD+' },
-                    ]
-              ).map((syn) => {
+              {((Array.isArray(row.synergyKeys) && row.synergyKeys.length > 0
+                ? row.synergyKeys
+                : (row.category === 'Trocar Kits' ? ['bpc-157'] : ['cjc-1295', 'bpc-157', 'nad'])
+              ).map((key) => {
+                const synMap = {
+                  'bpc-157': { q: 'BPC-157', label: row.category === 'Trocar Kits' ? (isEs ? 'BPC-157 (Recuperación tisular)' : 'BPC-157 (Tissue Recovery)') : 'BPC-157' },
+                  'ghk-cu': { q: 'GHK-Cu', label: isEs ? 'GHK-Cu (Colágeno/Piel)' : 'GHK-Cu (Collagen/Dermal)' },
+                  'epithalon': { q: 'Epitalon', label: isEs ? 'Epitalon (Longevidad)' : 'Epitalon (Longevity)' },
+                  'cjc-1295': { q: 'CJC-1295', label: isEs ? 'CJC-1295 / Ipamorelin (Eje GH)' : 'CJC-1295 / Ipamorelin (GH Axis)' },
+                  'nad': { q: 'NAD+', label: 'NAD+' },
+                };
+                return synMap[key] || { q: key, label: key.toUpperCase() };
+              })).map((syn) => {
                 const synParams = new URLSearchParams({ q: syn.q });
                 if (isEs) synParams.set('lang', 'es');
                 if (currency) synParams.set('currency', currency);

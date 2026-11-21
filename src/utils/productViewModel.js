@@ -93,6 +93,9 @@ export function normalizeMoneyEnvelope(doc = {}, { tier = 'wholesale', targetCur
   );
 
   const resolvedCurrency = String(targetCurrency || baseCurrency).toUpperCase();
+  const pack10SavingsPct = rawUnit > 0 && rawPack10 > 0
+    ? Math.max(0, Math.round((1 - rawPack10 / (rawUnit * 10)) * 100))
+    : 0;
   return {
     baseCurrency,
     currency: resolvedCurrency,
@@ -101,14 +104,45 @@ export function normalizeMoneyEnvelope(doc = {}, { tier = 'wholesale', targetCur
     pack10PriceBase: Number.isFinite(rawPack10) ? Number(rawPack10.toFixed(2)) : 0,
     unitPrice: convertCurrencyAmount(rawUnit, baseCurrency, resolvedCurrency),
     pack10Price: convertCurrencyAmount(rawPack10, baseCurrency, resolvedCurrency),
+    pack10SavingsPct,
   };
+}
+
+export function resolveSynergyKeys(doc = {}, canonicalKey = '') {
+  if (Array.isArray(doc.synergyKeys) && doc.synergyKeys.length > 0) {
+    return doc.synergyKeys;
+  }
+  const key = String(canonicalKey || '').toLowerCase();
+  if (doc.category === 'Trocar Kits' || doc.hormoneType === 'instrument') {
+    return ['bpc-157'];
+  }
+  if (doc.type === 'pellet') {
+    if (doc.hormoneType === 'estrogen' || doc.hormoneType === 'biest' || doc.hormoneType === 'progesterone') {
+      return ['ghk-cu', 'epithalon', 'bpc-157'];
+    }
+    return ['cjc-1295', 'bpc-157', 'nad'];
+  }
+  if (key.includes('bpc-157')) return ['tb-500', 'ghk-cu'];
+  if (key.includes('tb-500')) return ['bpc-157'];
+  if (key.includes('cjc-1295')) return ['ipamorelin'];
+  if (key.includes('ipamorelin')) return ['cjc-1295'];
+  if (key.includes('nad')) return ['ss-31', 'epithalon'];
+  if (key.includes('mots-c')) return ['nad'];
+  if (key.includes('selank')) return ['semax'];
+  if (key.includes('semax')) return ['selank'];
+  return [];
 }
 
 export function toProductViewModel(doc = {}, opts = {}) {
   const canonicalKey = normalizeCanonicalKey(doc);
-  const parsedDose = parseStrength(doc.strength ?? doc.dose, doc.strengthValue);
+  const parsedDose = parseStrength(doc.strength ?? doc.dose ?? doc.presentation, doc.strengthValue);
   const money = normalizeMoneyEnvelope(doc, opts);
   const title = doc.canonicalName || doc.displayName || doc.productName || doc.name || canonicalKey;
+  const strengthValue = doc.strengthValue ?? parsedDose.strengthValue;
+  const strengthUnit = doc.strengthUnit || parsedDose.strengthUnit;
+  const sortDoseValue = typeof strengthValue === 'number' && Number.isFinite(strengthValue)
+    ? (String(strengthUnit || '').toLowerCase() === 'mcg' ? strengthValue / 1000 : strengthValue)
+    : null;
 
   return {
     ...doc,
@@ -118,10 +152,12 @@ export function toProductViewModel(doc = {}, opts = {}) {
     slug: doc.slug || canonicalKey,
     canonicalKey,
     title,
-    strengthValue: doc.strengthValue ?? parsedDose.strengthValue,
-    strengthUnit: doc.strengthUnit || parsedDose.strengthUnit,
+    strengthValue,
+    strengthUnit,
+    sortDoseValue,
     doseLabel: parsedDose.doseLabel || doc.strength || '',
     route: doc.route || doc.routeOfAdministration || (doc.type === 'pellet' ? 'SUBCUTANEOUS_IMPLANT' : 'SC'),
+    synergyKeys: resolveSynergyKeys(doc, canonicalKey),
     money,
   };
 }

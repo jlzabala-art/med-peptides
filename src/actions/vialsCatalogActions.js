@@ -7,6 +7,7 @@ import { resolveVariantPrice } from '@/utils/resolvePrice';
 import { PRICING_TIER } from '@/constants/productEnums';
 import { deduplicateVariants } from '@/utils/variantSorter';
 import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
+import { toProductViewModel } from '@/utils/productViewModel';
 
 /**
  * Sanitizes any proprietary supplier or partner brand name from display texts.
@@ -236,7 +237,7 @@ async function fetchLotuslandVials(referralRef = null) {
   }
 
   vials.sort((a, b) => a.productName.localeCompare(b.productName));
-  return vials;
+  return vials.map((v) => toProductViewModel(v, { tier: 'wholesale', targetCurrency: 'USD' }));
 }
 
 /** 2. Bloodo Diagnostics Fetcher */
