@@ -57,6 +57,35 @@ export default function PeptidesPriceListClient({
 }) {
   // Modal / Drawer UI state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Laptop power-user keyboard shortcuts: '[' or Cmd/Ctrl+B toggles sidebar; 'Escape' closes drawers
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const onKeyDown = (e) => {
+      const tag = String(e.target?.tagName || '').toLowerCase();
+      const isInput = tag === 'input' || tag === 'textarea' || tag === 'select' || e.target?.isContentEditable;
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setIsSidebarOpen((v) => !v);
+        return;
+      }
+      if (!isInput && e.key === '[') {
+        e.preventDefault();
+        setIsSidebarOpen((v) => !v);
+        return;
+      }
+      if (e.key === 'Escape') {
+        setIsPdfPreviewOpen(false);
+        setIsAtlasAiOpen(false);
+        setIsInquiryDrawerOpen(false);
+        setIsOrderDrawerOpen(false);
+        setSelectedSpecsProduct(null);
+        setSelectedProtocol(null);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
   const [copied, setCopied] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(null);
   const [selectedSpecsProduct, setSelectedSpecsProduct] = useState(null);

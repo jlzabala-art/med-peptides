@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { X, Trash2, FileText, ShoppingBag, Plus, Minus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Trash2, FileText, ShoppingBag, Plus, Minus, Pin, PinOff } from 'lucide-react';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import { usePdfPreview } from '@/context/PdfPreviewContext';
@@ -25,6 +25,18 @@ export default function GlobalQuoteCartDrawer() {
     clearRfqItems,
   } = usePublicWorkspace();
   const { openPdfPreview } = usePdfPreview();
+  const [isDocked, setIsDocked] = useState(false);
+
+  useEffect(() => {
+    if (!isQuoteDrawerOpen || typeof window === 'undefined') return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsQuoteDrawerOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isQuoteDrawerOpen, setIsQuoteDrawerOpen]);
 
   if (!isQuoteDrawerOpen) return null;
 
@@ -67,10 +79,12 @@ export default function GlobalQuoteCartDrawer() {
   return (
     <div
       role="dialog"
-      aria-modal="true"
+      aria-modal={!isDocked}
       aria-label={isSpanish ? 'Cotización Activa' : 'Active Quote Workspace'}
-      className="atlas-mobile-sheet-backdrop"
-      onClick={() => setIsQuoteDrawerOpen(false)}
+      className={`atlas-mobile-sheet-backdrop ${isDocked ? 'atlas-sheet-docked' : ''}`.trim()}
+      onClick={() => {
+        if (!isDocked) setIsQuoteDrawerOpen(false);
+      }}
     >
       <div
         className="atlas-mobile-sheet"
@@ -84,7 +98,7 @@ export default function GlobalQuoteCartDrawer() {
           }}
         >
           <div className="atlas-mobile-sheet-handle" aria-hidden="true" />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <ShoppingBag size={18} />
               <div>
@@ -96,25 +110,50 @@ export default function GlobalQuoteCartDrawer() {
                 </div>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsQuoteDrawerOpen(false)}
-              aria-label="Close"
-              style={{
-                background: 'rgba(255,255,255,0.12)',
-                border: 'none',
-                color: '#ffffff',
-                borderRadius: '8px',
-                width: '40px',
-                height: '40px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
-            >
-              <X size={18} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setIsDocked((v) => !v)}
+                aria-label={isDocked ? 'Undock quote workspace' : 'Dock quote workspace'}
+                title={isDocked
+                  ? (isSpanish ? 'Desacoplar panel' : 'Undock panel')
+                  : (isSpanish ? 'Fijar al lateral mientras navegas (≥1280px)' : 'Dock side-by-side while browsing (≥1280px)')}
+                className="hide-on-mobile-header"
+                style={{
+                  background: isDocked ? 'rgba(56, 189, 248, 0.28)' : 'rgba(255,255,255,0.12)',
+                  border: isDocked ? '1px solid rgba(125, 211, 252, 0.6)' : 'none',
+                  color: '#ffffff',
+                  borderRadius: '8px',
+                  width: '36px',
+                  height: '36px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                {isDocked ? <PinOff size={15} /> : <Pin size={15} />}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsQuoteDrawerOpen(false)}
+                aria-label="Close"
+                style={{
+                  background: 'rgba(255,255,255,0.12)',
+                  border: 'none',
+                  color: '#ffffff',
+                  borderRadius: '8px',
+                  width: '40px',
+                  height: '40px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
         </div>
 

@@ -9,10 +9,30 @@
 }
 
 .pellets-price-container {
-  max-width: 1240px;
+  max-width: var(--atlas-page-max-width, 1240px);
   margin: 0 auto;
   padding: 1rem 1.25rem;
   box-sizing: border-box;
+}
+
+@media (min-width: 1025px) and (max-height: 860px) {
+  .pellets-price-container {
+    padding: 0.72rem 1.25rem;
+  }
+
+  .pellets-kpi-bar {
+    padding: 0.72rem 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .pellets-kpi-header {
+    margin-bottom: 0.55rem;
+    padding-bottom: 0.45rem;
+  }
+
+  .pellets-kpi-card {
+    padding: 0.55rem 0.75rem;
+  }
 }
 
 /* ── Top Summary KPI Bar ── */

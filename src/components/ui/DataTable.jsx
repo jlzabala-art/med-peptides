@@ -965,9 +965,10 @@ export default function DataTable({
             style={{
               backgroundColor: 'var(--color-bg-surface)',
               borderBottom: '2px solid var(--color-border)',
+              boxShadow: '0 1px 0 var(--color-border, #e2e8f0)',
               position: 'sticky',
-              top: 0,
-              zIndex: 10,
+              top: 'var(--atlas-table-sticky-top, 0px)',
+              zIndex: 15,
             }}
           >
             <tr
