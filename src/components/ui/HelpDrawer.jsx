@@ -76,6 +76,102 @@ function resolveContextualScreenHelp(pathname = '/', screenContext = null, isEs 
     };
   }
 
+  // 2.5 /labels — Pharmacy Labels Studio
+  if (pathname.startsWith('/labels')) {
+    return {
+      title: entityName || (isEs ? 'Estudio de Etiquetado Farmacéutico' : 'Pharmacy Labels Studio'),
+      subtitle: isEs
+        ? 'Carga Manual Multi-Parte · Vista Previa Térmica · Impresión A4'
+        : 'Multi-Part Manual Rx · Live Label Preview · A4 Batch Printing',
+      summaryGuide: isEs
+        ? 'Usa "+ Nueva Rx Manual" para crear prescripciones multi-parte con vista previa en vivo, o selecciona filas de la cola de trabajo para imprimir etiquetas térmicas o en hoja A4.'
+        : 'Use "+ Quick Manual Rx" to create multi-part prescriptions with live label preview, or select worklist rows for thermal or A4 batch printing.',
+      prompts: customPrompts || (isEs
+        ? [
+            '¿Cómo creo una prescripción manual multi-parte (ej. TrichoTest 2 partes)?',
+            '¿Cómo ajusto el offset de la hoja A4 y el lote/BUD en lote?',
+            '¿Cómo verifico que la posología no desborde la etiqueta térmica?',
+          ]
+        : [
+            'How do I create a multi-part manual prescription (e.g. TrichoTest 2-Part)?',
+            'How do I configure A4 grid offset and batch Lot/BUD values?',
+            'How do I verify directions fit cleanly on a thermal pharmacy label?',
+          ]),
+    };
+  }
+
+  // 2.6 /doctor & /dr/ — Physician Portal
+  if (pathname.startsWith('/doctor') || pathname.startsWith('/dr/')) {
+    return {
+      title: entityName || (isEs ? 'Portal Clínico del Médico' : 'Physician Clinical Portal'),
+      subtitle: isEs
+        ? 'Prescripciones · Alertas de Refill · Análisis DNA · Protocolos'
+        : 'Prescriptions · Refill Alerts · DNA Analysis · Protocols',
+      summaryGuide: isEs
+        ? 'Gestiona prescripciones activas, revisa alertas de renovación (refill) de pacientes y lanza formulaciones magistrales personalizadas.'
+        : 'Manage active prescriptions, review patient refill alerts, and launch personalized compounded formulations.',
+      prompts: customPrompts || (isEs
+        ? [
+            '¿Cómo reviso las alertas de refill pendientes de mis pacientes?',
+            '¿Cómo genero una prescripción magistral desde un análisis genómico?',
+            '¿Cómo comparto una guía visual de dosificación con un paciente?',
+          ]
+        : [
+            'How do I review pending patient refill alerts?',
+            'How do I generate a compounded prescription from a DNA analysis?',
+            'How do I share a visual dosing guide with a patient?',
+          ]),
+    };
+  }
+
+  // 2.7 /patient — Patient Portal
+  if (pathname.startsWith('/patient')) {
+    return {
+      title: entityName || (isEs ? 'Portal del Paciente' : 'Patient Care Portal'),
+      subtitle: isEs
+        ? 'Mis Prescripciones · Pauta Diaria · Solicitud de Refill'
+        : 'My Prescriptions · Daily Schedule · Refill Request',
+      summaryGuide: isEs
+        ? 'Consulta tu pauta exacta de administración, conservación en frío y solicita la renovación de tu tratamiento en un clic.'
+        : 'Review your exact administration schedule, cold-chain storage instructions, and request a treatment refill in one click.',
+      prompts: customPrompts || (isEs
+        ? [
+            '¿Cómo leo mi dosis exacta en unidades U-100 o clics de pluma?',
+            '¿Cómo solicito un refill o renovación de mi prescripción?',
+            '¿Cómo debo conservar mi medicación una vez reconstituida?',
+          ]
+        : [
+            'How do I read my exact dose in U-100 units or pen clicks?',
+            'How do I request a prescription refill or renewal?',
+            'How should I store my medication once reconstituted?',
+          ]),
+    };
+  }
+
+  // 2.8 /admin — Admin Operations Console
+  if (pathname.startsWith('/admin')) {
+    return {
+      title: entityName || (isEs ? 'Consola de Operaciones Admin' : 'Admin Operations Console'),
+      subtitle: isEs
+        ? 'Catálogo Firestore · Proveedores · Prescripciones · Pedidos'
+        : 'Firestore Catalog · Suppliers · Prescriptions · Orders',
+      summaryGuide: isEs
+        ? 'Edita precios y proveedores en línea en DataTable, audita el modelo canónico de productos y gestiona pedidos B2B y prescripciones.'
+        : 'Edit prices and suppliers inline in DataTable, audit canonical product records, and manage B2B orders and prescriptions.',
+      prompts: customPrompts || (isEs
+        ? [
+            '¿Cómo edito precios o proveedores en línea sin abrir modales?',
+            '¿Cómo invalido la caché tras modificar productos en Firestore?',
+            '¿Cómo audito prescripciones incompletas antes de etiquetar?',
+          ]
+        : [
+            'How do I edit prices or suppliers inline without opening modals?',
+            'How do I invalidate cache after modifying products in Firestore?',
+            'How do I audit incomplete prescriptions before labeling?',
+          ]),
+    };
+  }
+
   // 3. /pricing/peptides — Official B2B Lyophilized Peptide Vials Schedule
   if (pathname.startsWith('/pricing/peptides')) {
     return {
@@ -753,46 +849,76 @@ export default function HelpDrawer({ isOpen: controlledIsOpen, onClose: controll
           <div ref={endRef} />
         </div>
 
-        {/* Input Form */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            askAtlasHelp();
-          }}
-          style={{ display: 'flex', gap: '6px' }}
-        >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={isEs ? 'Pregunta a Atlas AI sobre esta pantalla...' : 'Ask Atlas AI about this screen...'}
-            style={{
-              flex: 1,
-              padding: '8px 10px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.82rem',
+        {/* Input Form + Escalate to Full Atlas AI */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              askAtlasHelp();
             }}
-          />
+            style={{ display: 'flex', gap: '6px' }}
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={isEs ? 'Pregunta a Atlas AI sobre esta pantalla...' : 'Ask Atlas AI about this screen...'}
+              style={{
+                flex: 1,
+                padding: '8px 10px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.82rem',
+              }}
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              aria-label={isEs ? 'Enviar pregunta' : 'Send question'}
+              style={{
+                padding: '0 12px',
+                minHeight: '40px',
+                borderRadius: '8px',
+                border: 'none',
+                background: '#1a73e8',
+                color: '#ffffff',
+                cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Send size={15} />
+            </button>
+          </form>
           <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            aria-label={isEs ? 'Enviar pregunta' : 'Send question'}
+            type="button"
+            onClick={() => {
+              handleClose();
+              openAtlasAi?.({
+                initialQuery: input.trim() || undefined,
+              });
+            }}
             style={{
-              padding: '0 12px',
+              width: '100%',
+              padding: '7px 10px',
               borderRadius: '8px',
-              border: 'none',
-              background: '#1a73e8',
-              color: '#ffffff',
-              cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+              border: '1px solid #c7d2fe',
+              background: '#eef2ff',
+              color: '#3730a3',
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: '6px',
             }}
           >
-            <Send size={15} />
+            <Sparkles size={13} />
+            <span>{isEs ? 'Continuar en Atlas AI Completo (⌘I)' : 'Continue in Full Atlas AI (⌘I)'}</span>
           </button>
-        </form>
+        </div>
       </div>
     </StandardDrawer>
   );

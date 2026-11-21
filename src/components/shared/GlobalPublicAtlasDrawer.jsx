@@ -89,6 +89,114 @@ export default function GlobalPublicAtlasDrawer() {
       };
     }
 
+    if (pathname.startsWith('/labels')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'pharmacy-labels-studio',
+        contextAnchor: {
+          sectionTitle: 'Atlas Pharmacy Labels Studio & Multi-Part Rx Entry',
+          keyActives: 'Thermal pharmacy labels, batch/BUD compliance, TrichoTest/AcneTest/TeloTest multi-part formulations, A4 offset printing',
+          mechanisms: 'Quick Manual Rx multi-part entry, live PharmapolisLabelSvg preview, A4 batch printing, and worklist queue management.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/calculator')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'dosing-calculator',
+        contextAnchor: {
+          sectionTitle: 'Universal Peptide Reconstitution & Dosing Guide',
+          keyActives: 'Lyophilized vials, U-100 syringes (0.3/0.5/1.0 mL), BAC water dilution, pre-filled U-100 pens, nasal sprays',
+          mechanisms: 'Exact mg/mcg to U-100 units and pen clicks conversion, vial yield, and 28-day cold-chain stability.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/proto')) {
+      return {
+        contextType: 'protocol',
+        storageKey: 'clinical-protocols',
+        contextAnchor: {
+          sectionTitle: 'Atlas Evidence-Based Clinical Protocols',
+          keyActives: 'GLP-1/GIP metabolism, BPC-157/TB-500 tissue repair, CJC/Ipamorelin GH axis, NAD+/Epitalon longevity',
+          mechanisms: 'Titration schedules, clinical biomarkers, companion Bloodo DBS tests, and full stack B2B quoting.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/pricing/24genetics') || pathname.startsWith('/pricing/24genomics')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'pricing-24genetics',
+        contextAnchor: {
+          sectionTitle: '24Genetics CE-IVD Clinical DNA Panels & Genomics',
+          keyActives: 'Nutrigenomics, Pharmacogenetics, Health, Skin, Sport, and Trichology/Telomere DNA panels',
+          mechanisms: 'Saliva DNA kit workflows, compounding personalization, and B2B wholesale/clinic tiers.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/pricing/nplab-hormones')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'pricing-nplab-hormones',
+        contextAnchor: {
+          sectionTitle: 'NP Lab Bioidentical Hormones & Endocrinology Schedule',
+          keyActives: 'Micronized testosterone, estradiol, progesterone, DHEA, and endocrine compounding formulations',
+          mechanisms: 'BHRT clinical dosing, wholesale pricing tiers, and cross-catalog quote cart.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/doctor') || pathname.startsWith('/dr/')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'doctor-portal',
+        contextAnchor: {
+          sectionTitle: 'Physician Clinical Workstation & Prescriptions',
+          keyActives: 'Patient prescriptions, refill alerts, DNA analysis tabs, compounded customizers, and clinical protocols',
+          mechanisms: 'Prescribing workflows, patient onboarding, and longitudinal biomarker tracking.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/patient')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'patient-portal',
+        contextAnchor: {
+          sectionTitle: 'Patient Care & Precision Dosing Portal',
+          keyActives: 'Active prescriptions, daily administration schedule, DNA report insights, and express refill requests',
+          mechanisms: 'Clear step-by-step dosing guidance, cold-chain storage, and physician contact.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/admin')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'admin-console',
+        contextAnchor: {
+          sectionTitle: 'Atlas Admin Operations & Catalog Governance Console',
+          keyActives: 'Firestore products, supplier offers, prescriptions, orders, physicians, clinics, and Zoho/Algolia sync',
+          mechanisms: 'Canonical pricing governance, SKU auditing, and operational order management.',
+        },
+      };
+    }
+
+    if (pathname.startsWith('/wholesaler') || pathname.startsWith('/clinic')) {
+      return {
+        contextType: 'catalog',
+        storageKey: 'partner-portal',
+        contextAnchor: {
+          sectionTitle: 'Partner, Clinic & Wholesaler B2B Portal',
+          keyActives: 'B2B schedules, clinic allocations, referral tracking, and institutional quotes',
+          mechanisms: 'Wholesale tier management, margin calculation, and consolidated RFQ workflows.',
+        },
+      };
+    }
+
     if (pathname.startsWith('/pricing/colway')) {
       return {
         contextType: 'catalog',

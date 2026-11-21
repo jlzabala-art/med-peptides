@@ -434,7 +434,19 @@ export default function PublicAtlasAIDrawer({
       }
     };
     window.addEventListener('open-public-atlas-ai', handleOpen);
-    return () => window.removeEventListener('open-public-atlas-ai', handleOpen);
+    const handleKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'i') {
+        e.preventDefault();
+        setInternalIsOpen((v) => !v);
+      } else if (e.key === 'Escape') {
+        setInternalIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => {
+      window.removeEventListener('open-public-atlas-ai', handleOpen);
+      window.removeEventListener('keydown', handleKey);
+    };
   }, []);
 
   const isPensFormulary =

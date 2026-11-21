@@ -215,10 +215,10 @@ export default function GlobalClientWrapper({ children }) {
               <Toaster containerStyle={{ zIndex: 99999 }} />
               {children}
               {!isPrivatePortalRoute && <GlobalBottomStickyBar />}
-              {!isPrivatePortalRoute && <GlobalPublicAtlasDrawer />}
+              <GlobalPublicAtlasDrawer />
               {!isPrivatePortalRoute && <GlobalQrModal />}
               {!isPrivatePortalRoute && <GlobalPublicCommandPalette />}
-              {!isPrivatePortalRoute && <GlobalHelpDrawer />}
+              <GlobalHelpDrawer />
               <GlobalQuoteCartDrawer />
               {isSuperUser && <GCPCommandPalette />}
               <PWAInstallPrompt />
