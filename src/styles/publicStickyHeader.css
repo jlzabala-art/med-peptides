@@ -784,7 +784,8 @@
   }
 
   .puh-tier2-inner {
-    padding: 0.35rem 0.85rem;
+    padding: 0.22rem 0.75rem;
+    min-height: 32px;
   }
 
   .puh-tier2-left {
@@ -823,6 +824,12 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     padding-bottom: 2px;
+  }
+
+  .puh-account-group button,
+  .puh-account-group a {
+    min-height: 36px;
+    touch-action: manipulation;
   }
 
   .puh-account-group::-webkit-scrollbar {

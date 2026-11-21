@@ -69,68 +69,53 @@ export default function GlobalQuoteCartDrawer() {
       role="dialog"
       aria-modal="true"
       aria-label={isSpanish ? 'Cotización Activa' : 'Active Quote Workspace'}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 99980,
-        background: 'rgba(15, 23, 42, 0.45)',
-        backdropFilter: 'blur(3px)',
-        display: 'flex',
-        justifyContent: 'flex-end',
-      }}
+      className="atlas-mobile-sheet-backdrop"
       onClick={() => setIsQuoteDrawerOpen(false)}
     >
       <div
+        className="atlas-mobile-sheet"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          width: 'min(440px, 100vw)',
-          height: '100%',
-          background: '#ffffff',
-          boxShadow: '-12px 0 36px rgba(15, 23, 42, 0.18)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
       >
         <div
           style={{
-            padding: '16px 20px',
+            padding: '12px 20px 16px',
             background: '#003666',
             color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <ShoppingBag size={18} />
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-                {isSpanish ? 'Cotización Activa (Cross-Catalog)' : 'Active Quote Workspace'}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#bae6fd' }}>
-                {rfqItems.length} {isSpanish ? 'productos seleccionados' : 'selected items'} · {currency}
+          <div className="atlas-mobile-sheet-handle" aria-hidden="true" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <ShoppingBag size={18} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>
+                  {isSpanish ? 'Cotización Activa (Cross-Catalog)' : 'Active Quote Workspace'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#bae6fd' }}>
+                  {rfqItems.length} {isSpanish ? 'productos seleccionados' : 'selected items'} · {currency}
+                </div>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setIsQuoteDrawerOpen(false)}
+              aria-label="Close"
+              style={{
+                background: 'rgba(255,255,255,0.12)',
+                border: 'none',
+                color: '#ffffff',
+                borderRadius: '8px',
+                width: '40px',
+                height: '40px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <X size={18} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsQuoteDrawerOpen(false)}
-            aria-label="Close"
-            style={{
-              background: 'rgba(255,255,255,0.12)',
-              border: 'none',
-              color: '#ffffff',
-              borderRadius: '8px',
-              width: '32px',
-              height: '32px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            <X size={16} />
-          </button>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>

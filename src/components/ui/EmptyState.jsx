@@ -26,6 +26,7 @@ export default function EmptyState({
 }) {
   return (
     <div
+      className="atlas-empty-state"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -82,6 +83,7 @@ export default function EmptyState({
 
       {action && (
         <button
+          className="atlas-empty-state-btn"
           onClick={action.onClick}
           style={{
             marginTop: compact ? 0 : '0.5rem',
