@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { doc, setDoc, collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase';
+import { toProductViewModel } from '@/utils/productViewModel';
 import {
   FlaskConical, Dna, Scissors, Package, Layers, TestTube,
   Activity, Microscope, Sparkles, Building2, Syringe
@@ -555,16 +556,18 @@ export async function fetchGroupProductsWithCache(groupId, fetchGroup, { forceRe
     }
   }
 
-  memoryProductsCache[cacheKey] = { data: products, ts: now };
-  if (typeof window !== 'undefined' && products.length > 0) {
+  const normalizedProducts = (products || []).map((p) => toProductViewModel(p, { tier: 'wholesale' }));
+
+  memoryProductsCache[cacheKey] = { data: normalizedProducts, ts: now };
+  if (typeof window !== 'undefined' && normalizedProducts.length > 0) {
     try {
-      localStorage.setItem(`${PRODUCT_CACHE_PREFIX}${cacheKey}`, JSON.stringify({ data: products, ts: now }));
+      localStorage.setItem(`${PRODUCT_CACHE_PREFIX}${cacheKey}`, JSON.stringify({ data: normalizedProducts, ts: now }));
     } catch {
-      // ignore storage errors
+      // ignore storage error
     }
   }
 
-  return products;
+  return normalizedProducts;
 }
 
 export async function updateScheduleProductCost(product, newCost, groupId) {

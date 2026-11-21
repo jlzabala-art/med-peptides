@@ -242,17 +242,62 @@ export default function PricingDataTable({
       });
     }
 
+    if (typeof onSyncWorkspaceQuote === 'function') {
+      cols.push({
+        key: 'workspaceQuote',
+        label: 'Quote',
+        width: '125px',
+        align: 'right',
+        render: (_, row) => {
+          const q = typeof getWorkspaceQty === 'function' ? getWorkspaceQty(row) : 0;
+          return q > 0 ? (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', border: '1px solid #86efac', background: '#f0fdf4', borderRadius: '6px', padding: '2px 5px' }}
+            >
+              <button type="button" onClick={() => onSyncWorkspaceQuote(row, Math.max(0, q - 1))} style={{ border: 'none', background: 'transparent', fontWeight: 800, color: '#166534', cursor: 'pointer', minWidth: '22px', minHeight: '22px' }}>-</button>
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#166534' }}>{q}</span>
+              <button type="button" onClick={() => onSyncWorkspaceQuote(row, q + 1)} style={{ border: 'none', background: 'transparent', fontWeight: 800, color: '#166534', cursor: 'pointer', minWidth: '22px', minHeight: '22px' }}>+</button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSyncWorkspaceQuote(row, 1);
+              }}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#003666',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              + Add to Quote
+            </button>
+          );
+        },
+      });
+    }
+
     return cols;
   }, [
     canViewLanded,
     currency,
     formatPrice,
     fxRate,
+    getWorkspaceQty,
     isAdmin,
     isClinicOrDoctor,
     isGuest,
     isWholesaler,
     loginRedirect,
+    onSyncWorkspaceQuote,
     onSaveInlinePrice,
     router,
     showLandedCost,

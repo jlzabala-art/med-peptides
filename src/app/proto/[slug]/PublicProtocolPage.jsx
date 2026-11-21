@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import ClinicalGanttTimeline from '../../../components/protocol/ClinicalGanttTimeline';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import PublicClinicalJsonLd from '@/components/shared/PublicClinicalJsonLd';
 import { 
   generateDynamicReconData, 
@@ -24,7 +25,7 @@ import {
   Thermometer, Copy, Check, Clock,
   ExternalLink, Layers, ArrowRight, Package, Syringe,
   Calendar, CalendarDays, Zap, Box, RotateCcw, Info, QrCode, BarChart3,
-  Moon, ShieldAlert, Calculator, Printer
+  Moon, ShieldAlert, Calculator, Printer, ShoppingBag
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -71,6 +72,7 @@ import ColwayProtocolStreamlinedView from '@/components/protocol/ColwayProtocolS
 import ProductSectionFooterNav from '@/components/product/ProductSectionFooterNav';
 
 export default function PublicProtocolPage({ protocol, slug, baseUrl, similarProtocols = [] }) {
+  const workspace = usePublicWorkspace?.() || null;
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
@@ -951,6 +953,50 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
                   {copiedBlueprint ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
                   <span>{copiedBlueprint ? (lang === 'es' ? 'Copiado ✓' : 'Copied ✓') : (lang === 'es' ? 'Copiar Blueprint Clínico' : 'Copy Clinical Blueprint')}</span>
                 </button>
+
+                {typeof workspace?.addRfqItem === 'function' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const bomList = Array.isArray(protocol?.bom) ? protocol.bom : [];
+                      const stackItems = bomList.length > 0
+                        ? bomList
+                        : [{ name: displayName, sku: `PROTO-${slug}`, qty: 1, unitPrice: 0 }];
+                      stackItems.forEach((bItem, idx) => {
+                        const itemName = bItem.name || bItem.productName || bItem.title || displayName;
+                        workspace.addRfqItem({
+                          id: `proto:${slug}:${bItem.id || bItem.sku || idx}`,
+                          sku: bItem.sku || `PROTO-${slug}-${idx + 1}`,
+                          name: `${itemName} (${displayName})`,
+                          unitPrice: Number(bItem.unitPrice || bItem.price || 0),
+                          qty: Number(bItem.qty || bItem.quantity || 1),
+                          source: 'protocol',
+                          href: `/proto/${slug}`,
+                        });
+                      });
+                      triggerHaptic('selection');
+                      toast.success(lang === 'es' ? `Stack "${displayName}" añadido al presupuesto` : `Stack "${displayName}" added to quote cart`);
+                      workspace.setIsQuoteDrawerOpen?.(true);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '5px 12px',
+                      borderRadius: '6px',
+                      background: '#f0fdf4',
+                      border: '1px solid #86efac',
+                      color: '#166534',
+                      fontSize: '0.74rem',
+                      fontWeight: 750,
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    }}
+                  >
+                    <ShoppingBag size={13} style={{ color: '#16a34a' }} />
+                    <span>{lang === 'es' ? 'Cotizar este Stack' : 'Quote Full Stack'}</span>
+                  </button>
+                )}
 
                 <button
                   type="button"
