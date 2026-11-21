@@ -28,9 +28,14 @@ import {
 
 function getEvidenceTone(grade) {
   const g = String(grade || '').toLowerCase();
-  if (g.includes('high')) return { label: 'High Evidence', bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' };
-  if (g.includes('moderate')) return { label: 'Moderate Evidence', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
-  return { label: grade || 'Emerging', bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
+  if (g.includes('high') || g.includes('tier 1')) return { label: grade || 'High Evidence (Tier 1)', bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' };
+  if (g.includes('moderate') || g.includes('tier 2') || g.includes('clinical data') || g.includes('translational') || g.includes('immunology')) {
+    return { label: grade || 'Clinical Data (Tier 2)', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
+  }
+  if (g.includes('tier 3') || g.includes('consensus')) {
+    return { label: grade || 'Clinical Consensus (Tier 3)', bg: '#faf5ff', color: '#7c3aed', border: '#ddd6fe' };
+  }
+  return { label: grade || 'Emerging (Tier 4)', bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
 }
 
 export default function ProtocolListRow({

@@ -85,6 +85,30 @@ export default function ProtocolCatalogCard({
           </span>
 
           <div className="proto-card-header-badges">
+            {proto.evidence_grade && (
+              <span
+                style={{
+                  fontSize: '0.64rem',
+                  fontWeight: 750,
+                  padding: '2px 7px',
+                  borderRadius: '999px',
+                  background: String(proto.evidence_grade).toLowerCase().includes('tier 1') || String(proto.evidence_grade).toLowerCase().includes('high')
+                    ? '#f0fdf4'
+                    : String(proto.evidence_grade).toLowerCase().includes('tier 2')
+                      ? '#eff6ff'
+                      : '#fffbeb',
+                  color: String(proto.evidence_grade).toLowerCase().includes('tier 1') || String(proto.evidence_grade).toLowerCase().includes('high')
+                    ? '#15803d'
+                    : String(proto.evidence_grade).toLowerCase().includes('tier 2')
+                      ? '#1d4ed8'
+                      : '#b45309',
+                  border: '1px solid rgba(15, 23, 42, 0.08)',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {proto.evidence_grade}
+              </span>
+            )}
             <span className="proto-list-chip-route">{proto.route}</span>
             <button
               type="button"

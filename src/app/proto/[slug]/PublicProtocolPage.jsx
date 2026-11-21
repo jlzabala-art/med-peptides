@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import ClinicalGanttTimeline from '../../../components/protocol/ClinicalGanttTimeline';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
+import { resolveProtocolClinicalEvidence } from '@/constants/protocolClinicalEvidence';
 import PublicClinicalJsonLd from '@/components/shared/PublicClinicalJsonLd';
 import { 
   generateDynamicReconData, 
@@ -73,6 +74,7 @@ import ProductSectionFooterNav from '@/components/product/ProductSectionFooterNa
 
 export default function PublicProtocolPage({ protocol, slug, baseUrl, similarProtocols = [] }) {
   const workspace = usePublicWorkspace?.() || null;
+  const evidenceProfile = useMemo(() => resolveProtocolClinicalEvidence(protocol), [protocol]);
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
@@ -886,6 +888,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
                 <span>{displayDuration}</span>
               </span>
               <span className="pds-cgmp-tag">
+                {protocol?.evidence_grade || protocol?.evidence_level || evidenceProfile.evidenceGradeLabel}
+              </span>
+              <span className="pds-cgmp-tag">
                 {lang === 'es' ? 'Estándares Clínicos Atlas Services' : 'Atlas Services Clinical Standards'}
               </span>
               <span className="pds-version-tag" title={`Clinical Protocol Specification Rev ${versionInfo.version}`}>
@@ -1140,6 +1145,58 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             </div>
           }
         />
+
+        {/* ── Evidence Tier, PubMed Citations & Pre-Prescription Exclusion Checklist ── */}
+        <section
+          aria-label={lang === 'es' ? 'Evidencia Clínica y Seguridad' : 'Clinical Evidence & Safety Checklist'}
+          style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '14px 18px',
+            marginBottom: '1.25rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '14px',
+            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#0369a1', marginBottom: '6px' }}>
+              {lang === 'es' ? 'Nivel de Evidencia & Citas PubMed' : 'Evidence Tier & PubMed References'}
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>
+              {evidenceProfile.evidenceTier} · {evidenceProfile.washoutGuidance}
+            </div>
+            {Array.isArray(evidenceProfile.citations) && evidenceProfile.citations.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {evidenceProfile.citations.map((cit) => (
+                  <a
+                    key={cit.pmid}
+                    href={`https://pubmed.ncbi.nlm.nih.gov/${cit.pmid}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '0.74rem', color: '#1d4ed8', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <span>PMID {cit.pmid} ({cit.journal} {cit.year}): {cit.title}</span>
+                    <ExternalLink size={11} />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#b91c1c', marginBottom: '6px' }}>
+              {lang === 'es' ? 'Criterios de Exclusión Pre-Prescripción' : 'Pre-Prescription Exclusion Criteria'}
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.75rem', color: '#334155', lineHeight: 1.45 }}>
+              {(protocol?.contraindications?.length ? protocol.contraindications : evidenceProfile.contraindications).map((c, idx) => (
+                <li key={idx}>{c}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
         {/* ── Standardized 4-KPI Metric Grid ── */}
         <PublicKpiGrid

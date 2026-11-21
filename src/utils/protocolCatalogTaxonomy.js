@@ -11,6 +11,7 @@ import {
   Award,
 } from '@/lib/icons';
 import { GOAL_TRANSLATIONS } from './protocolTranslations';
+import { resolveProtocolClinicalEvidence } from '../constants/protocolClinicalEvidence';
 
 export const GOAL_BUCKETS = [
   { id: 'all', label: 'All Protocols', icon: FlaskConical, color: '#003666', bg: '#eff6ff' },
@@ -268,19 +269,25 @@ export function enrichProtocolForCatalog(p) {
     ? [...mappedGoals.filter((g) => g !== 'reference_standards'), 'reference_standards']
     : mappedGoals;
 
-  const biomarkers = Array.isArray(p.biomarkers)
-    ? p.biomarkers
-    : Array.isArray(p.recommendedTests)
-      ? p.recommendedTests
-      : Array.isArray(p.required_labs)
-        ? p.required_labs
-        : [];
+  const evidenceProfile = resolveProtocolClinicalEvidence(p);
 
-  const contraindications = Array.isArray(p.contraindications)
+  const biomarkers = Array.isArray(p.biomarkers) && p.biomarkers.length > 0
+    ? p.biomarkers
+    : Array.isArray(p.recommendedTests) && p.recommendedTests.length > 0
+      ? p.recommendedTests
+      : Array.isArray(p.required_labs) && p.required_labs.length > 0
+        ? p.required_labs
+        : evidenceProfile.biomarkers;
+
+  const contraindications = Array.isArray(p.contraindications) && p.contraindications.length > 0
     ? p.contraindications
-    : Array.isArray(p.warnings)
+    : Array.isArray(p.warnings) && p.warnings.length > 0
       ? p.warnings
-      : [];
+      : evidenceProfile.contraindications;
+
+  const citations = Array.isArray(p.citations) && p.citations.length > 0
+    ? p.citations
+    : evidenceProfile.citations;
 
   return {
     id: p.id,
@@ -299,7 +306,10 @@ export function enrichProtocolForCatalog(p) {
     mappedGoals: finalGoals,
     summary,
     route: extractAdministrationRoute(p),
-    evidence_grade: p.evidence_grade || p.evidence_level || 'Clinical Standard',
+    evidence_grade: p.evidence_grade || p.evidence_level || evidenceProfile.evidenceGradeLabel,
+    evidence_tier: evidenceProfile.evidenceTier,
+    citations,
+    washoutGuidance: p.washoutGuidance || evidenceProfile.washoutGuidance,
     biomarkers: biomarkers.slice(0, 6),
     contraindications: contraindications.slice(0, 4),
     is_reference_standard: isRef,
