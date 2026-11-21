@@ -26,6 +26,8 @@ export default function PricingDataTable({
   showLandedCost = false,
   totals,
   onSaveInlinePrice,
+  getWorkspaceQty,
+  onSyncWorkspaceQuote,
   onResetFilters,
 }) {
   const router = useRouter();
@@ -505,6 +507,40 @@ export default function PricingDataTable({
                     </div>
                   )}
                 </div>
+
+                {typeof onSyncWorkspaceQuote === 'function' && (() => {
+                  const q = typeof getWorkspaceQty === 'function' ? getWorkspaceQty(p) : 0;
+                  return (
+                    <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      {q > 0 ? (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1px solid #86efac', background: '#f0fdf4', borderRadius: '6px', padding: '2px 6px' }}>
+                          <button type="button" onClick={() => onSyncWorkspaceQuote(p, Math.max(0, q - 1))} style={{ border: 'none', background: 'transparent', fontWeight: 800, color: '#166534', cursor: 'pointer', minWidth: '28px', minHeight: '28px' }}>-</button>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#166534' }}>{q} in Quote</span>
+                          <button type="button" onClick={() => onSyncWorkspaceQuote(p, q + 1)} style={{ border: 'none', background: 'transparent', fontWeight: 800, color: '#166534', cursor: 'pointer', minWidth: '28px', minHeight: '28px' }}>+</button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onSyncWorkspaceQuote(p, 1)}
+                          style={{
+                            width: '100%',
+                            padding: '7px 10px',
+                            minHeight: '36px',
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            background: '#ffffff',
+                            color: '#003666',
+                            fontSize: '0.76rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          + Add to Quote Cart
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           ))}

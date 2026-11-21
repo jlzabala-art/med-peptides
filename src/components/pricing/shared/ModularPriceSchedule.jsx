@@ -12,8 +12,10 @@ import { useBrandPriceSchedule } from '@/hooks/pricing/useBrandPriceSchedule';
 import { updateProductSchedulePriceAction } from '@/actions/pricingActions';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import PageHeroCard from '@/components/ui/PageHeroCard';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import PricingTopBar from './PricingTopBar';
+import ClinicalFormatSwitcher from './ClinicalFormatSwitcher';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import PricingKpiStrip from './PricingKpiStrip';
 import PricingDataTable from './PricingDataTable';
 import PricingExportModal from './PricingExportModal';
@@ -49,6 +51,7 @@ export default function ModularPriceSchedule({
 
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
+  const workspace = usePublicWorkspace?.() || null;
 
   const isAdmin = is('admin') || is('medical_director');
   const isDistributor = is('distributor');
@@ -257,20 +260,50 @@ export default function ModularPriceSchedule({
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
+  const handleSyncWorkspaceQuote = useCallback((product, nextQty) => {
+    if (!workspace?.syncRfqItem || !product) return;
+    const key = `schedule:${storageNamespace}:${product.id || product.sku}`;
+    const unitPrice = Number(product.calculatedWholesale || product.recommendedClinic || product.recommendedRetail || 0);
+    workspace.syncRfqItem(
+      {
+        id: key,
+        sku: product.sku || product.id,
+        name: product.name,
+        unitPrice: Number((unitPrice * (fxRate || 1)).toFixed(2)),
+        source: storageNamespace,
+        href: loginRedirect,
+      },
+      nextQty
+    );
+  }, [workspace, storageNamespace, fxRate, loginRedirect]);
+
+  const getWorkspaceQty = useCallback((product) => {
+    const key = `schedule:${storageNamespace}:${product?.id || product?.sku}`;
+    const found = (workspace?.rfqItems || []).find((x) => (x.id || x.sku) === key);
+    return found ? Number(found.qty || 0) : 0;
+  }, [workspace?.rfqItems, storageNamespace]);
+
   return (
     <div className="colway-price-root atlas-page-bg">
-      <PricingTopBar
-        sectionLabel={sectionLabel}
-        currentLabel={navCurrentLabel}
+      <PublicUnifiedHeader
+        brandHref="/pricing"
         loginRedirect={loginRedirect}
         currency={currency}
-        setCurrency={setCurrency}
-        availableCurrencies={availableCurrencies}
-        copied={copied}
-        onCopyLink={handleCopyLink}
-        onWhatsAppShare={handleWhatsAppShare}
-        onOpenExport={() => setIsExportModalOpen(true)}
-        onPrint={handlePrint}
+        onCurrencyChange={(c) => {
+          setCurrency(c);
+          workspace?.setCurrency?.(c);
+        }}
+        hideAiButton={true}
+        hideContactButton={true}
+        breadcrumb={[
+          { label: sectionLabel || 'B2B Schedules', href: '/pricing' },
+          { label: navCurrentLabel },
+        ]}
+      />
+
+      <ClinicalFormatSwitcher
+        activeFormat={config.switcherFormat || loginRedirect.replace('/pricing/', '')}
+        currency={currency}
       />
 
       <main className="atlas-page-shell">
@@ -283,25 +316,22 @@ export default function ModularPriceSchedule({
             { label: 'DOCUMENT REF:', value: documentRef, mono: true },
             { label: 'CURRENCY:', value: currency, mono: true },
           ]}
+          actions={
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button type="button" className="gcp-btn-secondary" onClick={() => setIsPdfPreviewOpen(true)} style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650 }}>
+                Preview PDF
+              </button>
+              <button type="button" className="gcp-btn-secondary" onClick={handleCopyLink} style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650 }}>
+                {copied ? 'Copied' : 'Share'}
+              </button>
+              <button type="button" className="gcp-btn-primary" onClick={() => setIsExportModalOpen(true)} style={{ height: '36px', padding: '0 13px', fontSize: '0.76rem', fontWeight: 750 }}>
+                Export / Print
+              </button>
+            </div>
+          }
         />
 
-        <PricingKpiStrip
-          isGuest={isGuest}
-          isClinicOrDoctor={isClinicOrDoctor}
-          isWholesaler={isWholesaler}
-          isAdmin={isAdmin}
-          totals={totals}
-          totalCount={processedProducts.length}
-          filteredCount={filteredProducts.length}
-          hasActiveFilters={hasActiveFilters}
-          scopeMode={scopeMode}
-          setScopeMode={setScopeMode}
-          markupPct={markupPct}
-          hasCustomOverrides={hasCustomOverrides}
-          formatPrice={formatPrice}
-        />
-
-        {/* Rule #7: GlobalSearchBar always first above data controls */}
+        {/* Rule #7: GlobalSearchBar always first above KPIs and data controls */}
         <div className="no-print" style={{ marginBottom: '1rem' }}>
           <GlobalSearchBar
             value={searchQuery}
@@ -325,6 +355,22 @@ export default function ModularPriceSchedule({
             }
           />
         </div>
+
+        <PricingKpiStrip
+          isGuest={isGuest}
+          isClinicOrDoctor={isClinicOrDoctor}
+          isWholesaler={isWholesaler}
+          isAdmin={isAdmin}
+          totals={totals}
+          totalCount={processedProducts.length}
+          filteredCount={filteredProducts.length}
+          hasActiveFilters={hasActiveFilters}
+          scopeMode={scopeMode}
+          setScopeMode={setScopeMode}
+          markupPct={markupPct}
+          hasCustomOverrides={hasCustomOverrides}
+          formatPrice={formatPrice}
+        />
 
         <div className="controls-strip no-print">
           <div className="controls-left">
@@ -388,6 +434,8 @@ export default function ModularPriceSchedule({
           showLandedCost={showLandedCost}
           totals={totals}
           onSaveInlinePrice={handleSaveInlinePrice}
+          getWorkspaceQty={getWorkspaceQty}
+          onSyncWorkspaceQuote={handleSyncWorkspaceQuote}
           onResetFilters={() => {
             setSearchQuery('');
             setSelectedCategory('all');

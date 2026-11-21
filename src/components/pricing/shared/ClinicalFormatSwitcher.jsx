@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag } from '@/lib/icons';
+import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag, ChevronDown } from '@/lib/icons';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 /**
@@ -22,6 +22,17 @@ export default function ClinicalFormatSwitcher({
   const currency = currencyProp || workspace?.currency || null;
   const isEs = lang === 'es';
   const rfqCount = Array.isArray(workspace?.rfqItems) ? workspace.rfqItems.length : 0;
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef(null);
+
+  useEffect(() => {
+    if (!moreOpen || typeof window === 'undefined') return undefined;
+    const onDocClick = (e) => {
+      if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false);
+    };
+    window.addEventListener('mousedown', onDocClick);
+    return () => window.removeEventListener('mousedown', onDocClick);
+  }, [moreOpen]);
 
   const buildHref = (basePath) => {
     if (typeof workspace?.buildWorkspaceHref === 'function') {
@@ -202,6 +213,83 @@ export default function ClinicalFormatSwitcher({
             </Link>
           );
         })}
+
+        {(() => {
+          const moreCatalogs = [
+            { id: '24genetics', href: buildHref('/pricing/24genetics'), label: isEs ? '24Genetics DNA' : '24Genetics DNA Panels' },
+            { id: '24genomics-qatar', href: buildHref('/pricing/24genomics-qatar'), label: '24Genetics Qatar' },
+            { id: 'nplab-hormones', href: buildHref('/pricing/nplab-hormones'), label: isEs ? 'Hormonas NP Lab' : 'NP Lab Hormones' },
+            { id: 'colway', href: buildHref('/pricing/colway'), label: 'Colway UAE Derma' },
+            { id: 'colway-hair', href: buildHref('/pricing/colway-hair'), label: 'Colway Hair & Trichology' },
+            { id: 'colway-qatar', href: buildHref('/pricing/colway-qatar'), label: 'Colway Qatar' },
+            { id: 'dnlab-pens', href: buildHref('/pricing/dnlab-pens'), label: 'DNLab Peptide Pens' },
+          ];
+          const activeMore = moreCatalogs.find((m) => m.id === activeFormat);
+          return (
+            <div ref={moreRef} style={{ position: 'relative', flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => setMoreOpen((v) => !v)}
+                className="atlas-format-switcher-tab"
+                style={{
+                  fontWeight: activeMore ? 800 : 650,
+                  background: activeMore ? '#003666' : '#ffffff',
+                  color: activeMore ? '#ffffff' : '#475569',
+                  border: activeMore ? '1px solid #003666' : '1px solid #cbd5e1',
+                  cursor: 'pointer',
+                }}
+              >
+                <span>{activeMore ? activeMore.label : (isEs ? 'Más Catálogos' : 'More Schedules')}</span>
+                <ChevronDown size={12} style={{ transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+              </button>
+              {moreOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    left: 0,
+                    minWidth: '215px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 28px rgba(15, 23, 42, 0.16)',
+                    padding: '6px',
+                    zIndex: 1200,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  {moreCatalogs.map((item) => {
+                    const isCur = item.id === activeFormat;
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        onClick={() => setMoreOpen(false)}
+                        style={{
+                          padding: '7px 10px',
+                          borderRadius: '6px',
+                          fontSize: '0.76rem',
+                          fontWeight: isCur ? 800 : 600,
+                          color: isCur ? '#003666' : '#334155',
+                          background: isCur ? '#eff6ff' : 'transparent',
+                          textDecoration: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <span>{item.label}</span>
+                        {isCur && <span style={{ fontSize: '0.65rem', color: '#1d4ed8' }}>●</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {rfqCount > 0 && typeof workspace?.setIsQuoteDrawerOpen === 'function' && (
           <button
