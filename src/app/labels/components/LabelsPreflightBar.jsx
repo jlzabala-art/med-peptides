@@ -22,6 +22,14 @@ const CONTAINER_QUICK_PRESETS = [
   { id: 'box', labelEs: 'Caja Exterior', labelEn: 'Outer Box', widthMm: 100, heightMm: 55, variant: 'shipping', storage: '2–8 °C' }
 ];
 
+export function detectContainerPreset(label = {}) {
+  const txt = `${label?.volume || ''} ${label?.productTitle || ''} ${label?.productName || ''}`.toLowerCase();
+  if (/cap|troche|oral|tablet|softgel/.test(txt)) return CONTAINER_QUICK_PRESETS[2];
+  if (/vial|2\s*ml|3\s*ml|5\s*ml|10\s*ml|pellet/.test(txt)) return CONTAINER_QUICK_PRESETS[0];
+  if (/50\s*ml|60\s*ml|100\s*ml|120\s*ml|200\s*ml|250\s*ml|trichosol|shampoo|spray|lotion/.test(txt)) return CONTAINER_QUICK_PRESETS[1];
+  return null;
+}
+
 /**
  * LabelsPreflightBar
  * ─────────────────────────────────────────────────────────────────────────────
@@ -177,6 +185,32 @@ export default function LabelsPreflightBar({
               </button>
             );
           })}
+          {(() => {
+            const suggested = detectContainerPreset(activeLabel);
+            if (!suggested) return null;
+            const alreadyMatches = Number(widthMm) === suggested.widthMm && Number(heightMm) === suggested.heightMm;
+            if (alreadyMatches) return null;
+            return (
+              <button
+                type="button"
+                onClick={() => onApplyPreset?.(suggested)}
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '999px',
+                  border: '1px solid #a7f3d0',
+                  background: '#ecfdf5',
+                  color: '#047857',
+                  fontSize: '0.68rem',
+                  fontWeight: 750,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+                title={isEs ? 'Aplicar tamaño sugerido según fórmula' : 'Apply suggested size based on formula'}
+              >
+                ✨ {isEs ? `Sugerido: ${suggested.labelEs}` : `Suggested: ${suggested.labelEn}`}
+              </button>
+            );
+          })()}
         </div>
       </div>
 

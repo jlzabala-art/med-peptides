@@ -24,6 +24,12 @@ export default function LabelsBatchBar({
     return st !== 'approved' && !p.rx?.isSigned;
   }).length;
 
+  const missingLotBudCount = patientQueue.reduce((acc, p) => {
+    const lbls = Array.isArray(p.labels) && p.labels.length > 0 ? p.labels : [p.rx || {}];
+    const missing = lbls.filter((l) => !(l?.batchNumber || p.rx?.batchNumber) || !(l?.expiryDate || p.rx?.expiryDate)).length;
+    return acc + missing;
+  }, 0);
+
   return (
     <section className="pls-batch-bar" aria-label="Patient Batch Queue">
       <div className="pls-batch-info-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
@@ -44,6 +50,21 @@ export default function LabelsBatchBar({
               <span style={{ fontWeight: 900, color: '#16a34a' }}>✓</span>
             )}
           </span>
+          {missingLotBudCount > 0 && (
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                color: '#b45309',
+                background: '#fffbeb',
+                border: '1px solid #fde68a',
+                padding: '2px 7px',
+                borderRadius: '999px',
+              }}
+            >
+              {isEs ? `⚠️ ${missingLotBudCount} sin Lote/BUD` : `⚠️ ${missingLotBudCount} missing Lot/BUD`}
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto', flexWrap: 'nowrap' }}>

@@ -81,6 +81,7 @@ export default function PublicLabelsAppClient({
   const [showRefillModal, setShowRefillModal] = useState(false);
   const [refillPresetPartIndex, setRefillPresetPartIndex] = useState(null);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [isStudioFocus, setIsStudioFocus] = useState(false);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [copiedShareType, setCopiedShareType] = useState(null);
@@ -675,7 +676,7 @@ export default function PublicLabelsAppClient({
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
       } : undefined}
     >
-      {!embedded && (
+      {!embedded && !isStudioFocus && (
         <PublicUnifiedHeader
           track="protocols"
           lang={lang}
@@ -690,7 +691,7 @@ export default function PublicLabelsAppClient({
           ]}
         />
       )}
-      <PharmacyOpsWorkspaceBar lang={lang} />
+      {!isStudioFocus && <PharmacyOpsWorkspaceBar lang={lang} />}
       {(patientQueue.length > 0 || embedded) && (
       <LabelsHeader
         hideTopChrome={!embedded}
@@ -882,6 +883,59 @@ export default function PublicLabelsAppClient({
               <span style={{ color: '#5f6368', fontWeight: 500 }}>
                 3. Export / Print A4
               </span>
+
+              {(() => {
+                const activeLbl = labels[labelIndex] || {};
+                const hasLotBud = Boolean((activeLbl.batchNumber || currentRx?.batchNumber) && (activeLbl.expiryDate || currentRx?.expiryDate));
+                return (
+                  <span
+                    style={{
+                      marginLeft: 'auto',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 750,
+                        padding: '2px 8px',
+                        borderRadius: '999px',
+                        background: hasLotBud ? '#f0fdf4' : '#fffbeb',
+                        color: hasLotBud ? '#15803d' : '#b45309',
+                        border: hasLotBud ? '1px solid #bbf7d0' : '1px solid #fde68a',
+                      }}
+                    >
+                      {hasLotBud
+                        ? (isEs ? '✓ Lote & BUD Listos' : '✓ Lot & BUD Ready')
+                        : (isEs ? '⚠️ Falta Lote / BUD' : '⚠️ Missing Lot / BUD')}
+                    </span>
+                    {!embedded && (
+                      <button
+                        type="button"
+                        onClick={() => setIsStudioFocus((v) => !v)}
+                        style={{
+                          padding: '3px 9px',
+                          borderRadius: '999px',
+                          border: isStudioFocus ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                          background: isStudioFocus ? '#e8f0fe' : '#ffffff',
+                          color: isStudioFocus ? '#1a73e8' : '#334155',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                        title={isEs ? 'Ocultar barras superiores para maximizar el estudio' : 'Hide top navigation to maximize studio workspace'}
+                      >
+                        {isStudioFocus
+                          ? (isEs ? 'Salir Modo Foco' : 'Exit Focus Mode')
+                          : (isEs ? 'Modo Foco' : 'Focus Mode')}
+                      </button>
+                    )}
+                  </span>
+                );
+              })()}
             </div>
 
             <LabelsPreflightBar
