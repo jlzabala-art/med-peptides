@@ -340,13 +340,14 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             key: 'cleanName',
                             label: isEs ? 'Protocolo / Objetivo' : 'Protocol / Goal',
                             align: 'left',
+                            width: '40%',
                             render: (_val, proto) => (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                   <Link
-                                    href={`/proto/${proto.cleanSlug}`}
+                                    href={`/proto/${proto.cleanSlug}?lang=${lang}`}
                                     onClick={(e) => e.stopPropagation()}
-                                    style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', textDecoration: 'none' }}
+                                    style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', textDecoration: 'none', overflowWrap: 'anywhere' }}
                                   >
                                     {proto.cleanName}
                                   </Link>
@@ -356,7 +357,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                                     </span>
                                   )}
                                 </div>
-                                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                <span style={{ fontSize: '0.72rem', color: '#64748b', overflowWrap: 'anywhere' }}>
                                   {proto.compounds?.map((c) => c.name).filter(Boolean).slice(0, 3).join(' · ') || proto.cleanCode}
                                 </span>
                               </div>
@@ -366,8 +367,9 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             key: 'route',
                             label: isEs ? 'Vía y Duración' : 'Route & Cycle',
                             align: 'left',
+                            width: '15%',
                             render: (_val, proto) => (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.76rem', color: '#334155' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.76rem', color: '#334155', minWidth: 0 }}>
                                 <span style={{ fontWeight: 650 }}>{proto.route || 'SubQ'}</span>
                                 <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
                                   {proto.durationWeeks ? `${proto.durationWeeks}w` : '—'} · {proto.phasesCount || 1} {isEs ? 'fases' : 'ph'}
@@ -379,19 +381,23 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             key: 'evidence_grade',
                             label: isEs ? 'Evidencia' : 'Evidence',
                             align: 'left',
+                            width: '16%',
                             render: (_val, proto) => {
                               const ev = String(proto.evidence_grade || 'Emerging');
                               const isHigh = ev.toLowerCase().includes('high');
                               const isMod = ev.toLowerCase().includes('moderate');
                               return (
                                 <span style={{
-                                  fontSize: '0.70rem',
+                                  display: 'inline-block',
+                                  maxWidth: '100%',
+                                  fontSize: '0.69rem',
                                   fontWeight: 700,
                                   padding: '2px 8px',
                                   borderRadius: '999px',
                                   background: isHigh ? '#dcfce7' : isMod ? '#e0f2fe' : '#fef3c7',
                                   color: isHigh ? '#166534' : isMod ? '#0369a1' : '#92400e',
-                                  whiteSpace: 'nowrap',
+                                  whiteSpace: 'normal',
+                                  lineHeight: 1.25,
                                 }}>
                                   {ev}
                                 </span>
@@ -402,34 +408,36 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             key: 'actions',
                             label: '',
                             align: 'right',
+                            width: '29%',
                             render: (_val, proto) => (
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '5px', maxWidth: '100%' }} onClick={(e) => e.stopPropagation()}>
                                 <button
                                   type="button"
                                   onClick={() => toggleCompare(proto.cleanSlug)}
                                   title={isEs ? 'Comparar protocolo' : 'Compare protocol'}
                                   style={{
-                                    padding: '4px 8px',
+                                    padding: '4px 7px',
                                     borderRadius: '6px',
                                     border: compareSlugs.includes(proto.cleanSlug) ? '1px solid #1a73e8' : '1px solid #cbd5e1',
                                     background: compareSlugs.includes(proto.cleanSlug) ? '#e8f0fe' : '#ffffff',
                                     color: compareSlugs.includes(proto.cleanSlug) ? '#1a73e8' : '#475569',
-                                    fontSize: '0.70rem',
+                                    fontSize: '0.69rem',
                                     fontWeight: 650,
                                     cursor: 'pointer',
+                                    whiteSpace: 'nowrap',
                                   }}
                                 >
                                   {compareSlugs.includes(proto.cleanSlug) ? '✓ Compare' : 'Compare'}
                                 </button>
                                 <Link
-                                  href={`/rx/intake?proto=${encodeURIComponent(proto.cleanSlug)}`}
+                                  href={`/rx/intake?proto=${encodeURIComponent(proto.cleanSlug)}&lang=${lang}`}
                                   style={{
-                                    padding: '4px 9px',
+                                    padding: '4px 8px',
                                     borderRadius: '6px',
                                     border: '1px solid #0d9488',
                                     background: '#f0fdfa',
                                     color: '#0f766e',
-                                    fontSize: '0.70rem',
+                                    fontSize: '0.69rem',
                                     fontWeight: 700,
                                     textDecoration: 'none',
                                     whiteSpace: 'nowrap',
@@ -438,13 +446,13 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                                   {isEs ? 'Prescribir' : 'Prescribe'}
                                 </Link>
                                 <Link
-                                  href={`/proto/${proto.cleanSlug}`}
+                                  href={`/proto/${proto.cleanSlug}?lang=${lang}`}
                                   style={{
-                                    padding: '4px 10px',
+                                    padding: '4px 9px',
                                     borderRadius: '6px',
                                     background: '#003666',
                                     color: '#ffffff',
-                                    fontSize: '0.72rem',
+                                    fontSize: '0.70rem',
                                     fontWeight: 700,
                                     textDecoration: 'none',
                                     whiteSpace: 'nowrap',

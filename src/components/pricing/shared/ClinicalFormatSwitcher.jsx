@@ -49,7 +49,7 @@ export default function ClinicalFormatSwitcher({
       return href;
     }
     const params = new URLSearchParams();
-    if (isEs) params.set('lang', 'es');
+    params.set('lang', isEs ? 'es' : 'en');
     if (currency && basePath !== '/pricing/pens' && basePath !== '/calculator') {
       params.set('currency', currency);
     }

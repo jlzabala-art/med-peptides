@@ -2499,3 +2499,27 @@
     right: 12px;
   }
 }
+
+/* ── Zero horizontal scroll for /proto DataTable on laptop & desktop ── */
+.proto-catalog-main .gcp-table-container {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+.proto-catalog-main .gcp-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.proto-catalog-main .gcp-table th,
+.proto-catalog-main .gcp-table td {
+  padding: 0.7rem 0.75rem;
+  white-space: normal;
+  word-break: break-word;
+  vertical-align: middle;
+}
+
+.proto-catalog-main .gcp-table th {
+  font-size: 0.74rem;
+}

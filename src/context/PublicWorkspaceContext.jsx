@@ -296,7 +296,7 @@ export function PublicWorkspaceProvider({ children }) {
 
   const buildWorkspaceHref = useCallback((basePath, extraParams = {}) => {
     const params = new URLSearchParams();
-    if (state.lang === 'es') params.set('lang', 'es');
+    params.set('lang', state.lang === 'es' ? 'es' : 'en');
     if (state.currency) params.set('currency', state.currency);
     if (typeof window !== 'undefined') {
       const currentSp = new URLSearchParams(window.location.search);

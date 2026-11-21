@@ -113,12 +113,17 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
     setIsUrlHydrated(true);
 
     const handleGlobalLang = (e) => {
-      if (e.detail && VALID_LANGS.includes(e.detail)) {
-        setLang(e.detail);
+      const next = typeof e?.detail === 'string' ? e.detail : e?.detail?.lang;
+      if (next && VALID_LANGS.includes(next)) {
+        setLang(next);
       }
     };
     window.addEventListener('atlas_lang_change', handleGlobalLang);
-    return () => window.removeEventListener('atlas_lang_change', handleGlobalLang);
+    window.addEventListener('atlas-language-changed', handleGlobalLang);
+    return () => {
+      window.removeEventListener('atlas_lang_change', handleGlobalLang);
+      window.removeEventListener('atlas-language-changed', handleGlobalLang);
+    };
   }, []);
 
   // Sync filter state back to URL searchParams
@@ -140,7 +145,7 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
     setOrDelete('exclude', safetyExclusions.join(','), '');
     setOrDelete('sort', sortBy, 'relevance');
     setOrDelete('view', viewMode, 'list');
-    setOrDelete('lang', lang, 'en');
+    url.searchParams.set('lang', VALID_LANGS.includes(lang) ? lang : 'en');
 
     window.history.replaceState({}, '', url.toString());
   }, [
@@ -164,6 +169,7 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
         localStorage.setItem('atlas_portal_lang', nextLang);
         localStorage.setItem('atlas_catalog_lang', nextLang);
         window.dispatchEvent(new CustomEvent('atlas_lang_change', { detail: nextLang }));
+        window.dispatchEvent(new CustomEvent('atlas-language-changed', { detail: { lang: nextLang } }));
       } catch (_) {
         /* storage unavailable */
       }
