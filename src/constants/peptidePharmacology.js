@@ -251,26 +251,70 @@ export function getPeptideClinicalSummary(productName = '', category = '', lang 
       stack: isEs ? 'MOTS-c o L-Carnitina (biogénesis mitocondrial)' : 'MOTS-c or L-Carnitine (mitochondrial stamina)'
     },
     'cjc1295': {
-      dose: isEs ? '100 mcg SubQ nocturno (con Ipamorelin)' : '100 mcg SubQ at bedtime (with Ipamorelin)',
+      dose: isEs ? 'No-DAC: 100 mcg SubQ nocturno · Con DAC: 1–2 mg SubQ 1–2×/semana' : 'No-DAC: 100 mcg SubQ bedtime · With DAC: 1–2 mg SubQ 1–2×/week',
       route: 'SubQ',
-      recon: '2.0 mL BAC Water → 1.0 mg/mL',
-      syringeCalc: isEs ? '10 UI (0.1 mL) = 100 mcg exactos' : '10 IU (0.1 mL) = exactly 100 mcg',
-      vialYield: isEs ? '20 dosis de 100 mcg (ciclo de 20 a 30 días)' : '20 doses @ 100 mcg (20–30 day cycle)',
+      recon: isEs ? 'Ref. vial 5 mg + 2.5 mL BAC → 2.0 mg/mL (verificar mg del vial)' : 'Ref. 5 mg vial + 2.5 mL BAC → 2.0 mg/mL (verify vial mg)',
+      syringeCalc: isEs ? '5 UI (0.05 mL) = 100 mcg (vial 5 mg)' : '5 IU (0.05 mL) = 100 mcg (5 mg vial)',
+      vialYield: isEs ? '50 dosis de 100 mcg (No-DAC 5 mg)' : '50 doses @ 100 mcg (No-DAC 5 mg)',
       stability: isEs ? '21–28 días refrigerado (2–8°C)' : '21–28 days refrigerated (2–8°C)',
       hardware: isEs ? 'Jeringa Insulina U-100 (0.3/0.5 mL) · Aguja 31G (8 mm)' : 'U-100 Insulin Syringe (0.3/0.5 mL) · 31G Needle (8 mm)',
       crossSellName: 'Ipamorelin',
-      stack: isEs ? 'Ipamorelin (estimulación somatotropa dual)' : 'Ipamorelin (dual synergistic somatotroph trigger)'
+      stack: isEs ? 'Ipamorelin (estimulación somatotropa dual fisiológica)' : 'Ipamorelin (dual physiological somatotroph trigger)'
     },
     'ipamorelin': {
-      dose: isEs ? '100–200 mcg SubQ nocturno en ayunas' : '100–200 mcg SubQ at bedtime fasted',
+      dose: isEs ? '100–200 mcg SubQ en ayunas (nocturno)' : '100–200 mcg SubQ fasted at bedtime',
       route: 'SubQ',
-      recon: '2.0 mL BAC Water → 1.0 mg/mL',
-      syringeCalc: isEs ? '10 UI (0.1 mL) = 100 mcg · 20 UI = 200 mcg' : '10 IU (0.1 mL) = 100 mcg · 20 IU = 200 mcg',
-      vialYield: isEs ? '20 dosis de 100 mcg o 10 dosis de 200 mcg' : '20 doses @ 100 mcg or 10 doses @ 200 mcg',
-      stability: isEs ? '21–28 días refrigerado (2–8°C)' : '21–28 days refrigerated (2–8°C)',
+      recon: isEs ? 'Ref. vial 5 mg + 2.5 mL BAC → 2.0 mg/mL' : 'Ref. 5 mg vial + 2.5 mL BAC → 2.0 mg/mL',
+      syringeCalc: isEs ? '5 UI (0.05 mL) = 100 mcg · 10 UI = 200 mcg' : '5 IU (0.05 mL) = 100 mcg · 10 IU = 200 mcg',
+      vialYield: isEs ? '25–50 dosis por vial de 5 mg (verificar mg del vial)' : '25–50 doses per 5 mg vial (verify vial mg)',
+      stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
       hardware: isEs ? 'Jeringa Insulina U-100 (0.3/0.5 mL) · Aguja 31G (8 mm)' : 'U-100 Insulin Syringe (0.3/0.5 mL) · 31G Needle (8 mm)',
       crossSellName: 'CJC-1295',
-      stack: isEs ? 'CJC-1295 No-DAC (picos fisiológicos nocturnos de GH)' : 'CJC-1295 No-DAC (physiological nocturnal GH peaks)'
+      stack: isEs ? 'CJC-1295 No-DAC (pulsos fisiológicos nocturnos de GH sin elevar cortisol/prolactina)' : 'CJC-1295 No-DAC (physiological nocturnal GH peaks without cortisol/prolactin spike)'
+    },
+    'tesamorelin': {
+      dose: isEs ? '1.0–2.0 mg/día SubQ (preferible antes de dormir o mañana en ayunas)' : '1.0–2.0 mg/day SubQ (evening or fasted morning)',
+      route: 'SubQ',
+      recon: isEs ? 'Ref. vial 10 mg + 2.0 mL BAC → 5.0 mg/mL' : 'Ref. 10 mg vial + 2.0 mL BAC → 5.0 mg/mL',
+      syringeCalc: isEs ? '20 UI (0.2 mL) = 1.0 mg · 40 UI = 2.0 mg' : '20 IU (0.2 mL) = 1.0 mg · 40 IU = 2.0 mg',
+      vialYield: isEs ? '5 a 10 dosis por vial de 10 mg (monitorizar IGF-1)' : '5 to 10 doses per 10 mg vial (monitor IGF-1)',
+      stability: isEs ? '21–28 días refrigerado (2–8°C)' : '21–28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.5/1.0 mL) · Aguja 31G' : 'U-100 Insulin Syringe (0.5/1.0 mL) · 31G Needle',
+      crossSellName: 'Ipamorelin',
+      stack: isEs ? 'Ipamorelin (sinergia somatotropa y reducción de tejido adiposo visceral)' : 'Ipamorelin (somatotropic synergy & visceral adipose reduction)'
+    },
+    'sermorelin': {
+      dose: isEs ? '200–300 mcg SubQ al acostarse en ayunas' : '200–300 mcg SubQ at bedtime fasted',
+      route: 'SubQ',
+      recon: isEs ? 'Ref. vial 5 mg + 2.5 mL BAC → 2.0 mg/mL' : 'Ref. 5 mg vial + 2.5 mL BAC → 2.0 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 200 mcg · 15 UI = 300 mcg' : '10 IU (0.1 mL) = 200 mcg · 15 IU = 300 mcg',
+      vialYield: isEs ? '16 a 25 dosis por vial de 5 mg' : '16 to 25 doses per 5 mg vial',
+      stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.3/0.5 mL) · Aguja 31G' : 'U-100 Insulin Syringe (0.3/0.5 mL) · 31G Needle',
+      crossSellName: 'Ipamorelin',
+      stack: isEs ? 'Ipamorelin (soporte eje GHRH + GHSR-1a)' : 'Ipamorelin (GHRH + GHSR-1a dual axis support)'
+    },
+    'ss31': {
+      dose: isEs ? '4–10 mg/día SubQ (protección mitocondrial)' : '4–10 mg/day SubQ (mitochondrial protection)',
+      route: 'SubQ',
+      recon: isEs ? 'Ref. vial 50 mg + 2.5 mL BAC → 20 mg/mL' : 'Ref. 50 mg vial + 2.5 mL BAC → 20 mg/mL',
+      syringeCalc: isEs ? '20 UI (0.2 mL) = 4 mg · 50 UI = 10 mg' : '20 IU (0.2 mL) = 4 mg · 50 IU = 10 mg',
+      vialYield: isEs ? '5 a 12 dosis por vial de 50 mg' : '5 to 12 doses per 50 mg vial',
+      stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.5/1.0 mL) · Aguja 31G' : 'U-100 Insulin Syringe (0.5/1.0 mL) · 31G Needle',
+      crossSellName: 'NAD+',
+      stack: isEs ? 'NAD+ / MOTS-c (estabilización de cardiolipina y cadena respiratoria)' : 'NAD+ / MOTS-c (cardiolipin & respiratory chain stabilization)'
+    },
+    'kpv': {
+      dose: isEs ? '200–500 mcg/día SubQ u oral (inflamación mucosa/cutánea)' : '200–500 mcg/day SubQ or oral (mucosal/dermal inflammation)',
+      route: 'SubQ / Oral',
+      recon: isEs ? 'Ref. vial 5 mg + 2.0 mL BAC → 2.5 mg/mL' : 'Ref. 5 mg vial + 2.0 mL BAC → 2.5 mg/mL',
+      syringeCalc: isEs ? '10 UI (0.1 mL) = 250 mcg · 20 UI = 500 mcg' : '10 IU (0.1 mL) = 250 mcg · 20 IU = 500 mcg',
+      vialYield: isEs ? '10 a 25 dosis por vial de 5 mg' : '10 to 25 doses per 5 mg vial',
+      stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
+      hardware: isEs ? 'Jeringa Insulina U-100 (0.3/0.5 mL) · Aguja 31G' : 'U-100 Insulin Syringe (0.3/0.5 mL) · 31G Needle',
+      crossSellName: 'BPC-157',
+      stack: isEs ? 'BPC-157 (modulación NF-κB y barrera intestinal/dérmica)' : 'BPC-157 (NF-κB modulation & gut/skin barrier)'
     },
     'epithalon': {
       dose: isEs ? '5–10 mg/día SubQ (ciclo anual de 10–20 días)' : '5–10 mg/day SubQ (annual 10–20 day cycle)',
@@ -306,15 +350,15 @@ export function getPeptideClinicalSummary(productName = '', category = '', lang 
       stack: isEs ? 'NAD+ (resistencia metabólica y energía mitocondrial)' : 'NAD+ (metabolic stamina & ATP output)'
     },
     'nad': {
-      dose: isEs ? '50–100 mg SubQ / IM 2–3×/semana' : '50–100 mg SubQ / IM 2–3×/week',
+      dose: isEs ? '25–100 mg SubQ / IM 2–3×/semana (titular gradualmente)' : '25–100 mg SubQ / IM 2–3×/week (titrate gradually)',
       route: 'SubQ / IM',
-      recon: '5.0 mL BAC Water → 100 mg/mL (vial 500mg)',
-      syringeCalc: isEs ? '50 UI (0.5 mL) = 50 mg · 100 UI = 100 mg' : '50 IU (0.5 mL) = 50 mg · 100 IU = 100 mg',
-      vialYield: isEs ? '5 a 10 dosis de 50–100 mg' : '5 to 10 doses @ 50–100 mg',
+      recon: isEs ? 'Ref. vial 500 mg + 5.0 mL BAC → 100 mg/mL (ajustar según mg del vial)' : 'Ref. 500 mg vial + 5.0 mL BAC → 100 mg/mL (verify vial mg)',
+      syringeCalc: isEs ? '25 UI (0.25 mL) = 25 mg · 50 UI = 50 mg (inyección lenta)' : '25 IU (0.25 mL) = 25 mg · 50 IU = 50 mg (slow injection)',
+      vialYield: isEs ? '5 a 10 dosis por vial de 500 mg (usar calculadora para otros mg)' : '5 to 10 doses per 500 mg vial (use calculator for other sizes)',
       stability: isEs ? '28 días refrigerado (2–8°C) protegido de la luz' : '28 days refrigerated (2–8°C) light-protected',
       hardware: isEs ? 'Jeringa 1.0 mL · Aguja 29G–30G SubQ/IM lenta' : '1.0 mL Syringe · 29G–30G Needle SubQ/IM slow',
-      crossSellName: 'Epithalon',
-      stack: isEs ? 'SS-31 o Epithalon (cardiolipina mitocondrial y longevidad)' : 'SS-31 or Epithalon (mitochondrial cardiolipin & longevity)'
+      crossSellName: 'SS-31',
+      stack: isEs ? 'SS-31 o Epithalon (soporte mitocondrial y longevidad celular)' : 'SS-31 or Epithalon (mitochondrial support & cellular longevity)'
     },
     'selank': {
       dose: isEs ? '250–500 mcg/día intranasal o SubQ' : '250–500 mcg/day intranasal or SubQ',
@@ -341,13 +385,13 @@ export function getPeptideClinicalSummary(productName = '', category = '', lang 
     'aod9604': {
       dose: isEs ? '300–500 mcg/día SubQ matutino en ayunas' : '300–500 mcg/day SubQ morning fasted',
       route: 'SubQ',
-      recon: '2.0 mL BAC Water → 2.5 mg/mL',
+      recon: isEs ? 'Ref. vial 5 mg + 2.0 mL BAC → 2.5 mg/mL (verificar mg del vial)' : 'Ref. 5 mg vial + 2.0 mL BAC → 2.5 mg/mL (verify vial mg)',
       syringeCalc: isEs ? '12 UI (0.12 mL) = 300 mcg · 20 UI = 500 mcg' : '12 IU (0.12 mL) = 300 mcg · 20 IU = 500 mcg',
-      vialYield: isEs ? '10 a 16 dosis de 300–500 mcg' : '10 to 16 doses @ 300–500 mcg',
+      vialYield: isEs ? '10 a 16 dosis por vial de 5 mg' : '10 to 16 doses per 5 mg vial',
       stability: isEs ? '28 días refrigerado (2–8°C)' : '28 days refrigerated (2–8°C)',
       hardware: isEs ? 'Jeringa Insulina U-100 (0.5 mL) · Aguja 31G' : 'U-100 Insulin Syringe (0.5 mL) · 31G Needle',
-      crossSellName: 'Tirzepatide',
-      stack: isEs ? 'Agonistas GLP-1/GIP (lipólisis adipocitaria sinérgica)' : 'GLP-1/GIP agonists (synergistic adipocyte lipolysis)'
+      crossSellName: 'MOTS-c',
+      stack: isEs ? 'MOTS-c (oxidación lipídica y sensibilidad metabólica sin elevar IGF-1)' : 'MOTS-c (lipid oxidation & metabolic sensitivity without raising IGF-1)'
     },
     'pt141': {
       dose: isEs ? '1.25–1.75 mg SubQ a demanda (~45 min antes)' : '1.25–1.75 mg SubQ on demand (~45 min prior)',

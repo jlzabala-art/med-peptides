@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag, ChevronDown } from '@/lib/icons';
+import { FlaskConical, Syringe, Pill, Layers, Calculator, BookOpen, ShoppingBag, ChevronDown, Dna, Sparkles } from '@/lib/icons';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
+import { PRICING_GROUPS, findPricingGroupByFormat } from '@/constants/pricingTaxonomy';
 
 /**
  * ClinicalFormatSwitcher
@@ -22,17 +23,17 @@ export default function ClinicalFormatSwitcher({
   const currency = currencyProp || workspace?.currency || null;
   const isEs = lang === 'es';
   const rfqCount = Array.isArray(workspace?.rfqItems) ? workspace.rfqItems.length : 0;
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreRef = useRef(null);
+  const [openGroupId, setOpenGroupId] = useState(null);
+  const switcherRef = useRef(null);
 
   useEffect(() => {
-    if (!moreOpen || typeof window === 'undefined') return undefined;
+    if (!openGroupId || typeof window === 'undefined') return undefined;
     const onDocClick = (e) => {
-      if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false);
+      if (switcherRef.current && !switcherRef.current.contains(e.target)) setOpenGroupId(null);
     };
     window.addEventListener('mousedown', onDocClick);
     return () => window.removeEventListener('mousedown', onDocClick);
-  }, [moreOpen]);
+  }, [openGroupId]);
 
   const buildHref = (basePath) => {
     if (typeof workspace?.buildWorkspaceHref === 'function') {
@@ -56,6 +57,13 @@ export default function ClinicalFormatSwitcher({
     return qs ? `${basePath}?${qs}` : basePath;
   };
 
+  const activeGroup = findPricingGroupByFormat(activeFormat);
+  const groupIconMap = {
+    peptides: FlaskConical,
+    genomics: Dna,
+    derma: Sparkles,
+  };
+
   const tabs = [
     {
       id: 'directory',
@@ -65,30 +73,16 @@ export default function ClinicalFormatSwitcher({
       shortLabel: isEs ? 'Todos' : 'All',
       badge: null,
     },
-    {
-      id: 'peptides',
-      href: buildHref('/pricing/peptides'),
-      icon: FlaskConical,
-      label: isEs ? 'Viales y Péptidos' : 'Peptide Vials & Kits',
-      shortLabel: isEs ? 'Viales' : 'Vials',
-      badge: isEs ? 'Catálogo' : 'Schedule',
-    },
-    {
-      id: 'pens',
-      href: buildHref('/pricing/pens'),
-      icon: Syringe,
-      label: isEs ? 'Guía de Dosificación Pens' : 'Peptide Pen Dosing Guide',
-      shortLabel: isEs ? 'Plumas' : 'Pens',
-      badge: 'U-100 · 27 Pens',
-    },
-    {
-      id: 'pellets',
-      href: buildHref('/pricing/pellets'),
-      icon: Pill,
-      label: isEs ? 'Pellets Hormonales' : 'Hormone Pellets',
-      shortLabel: 'Pellets',
-      badge: 'EU GMP',
-    },
+    ...PRICING_GROUPS.map((grp) => ({
+      id: grp.id,
+      isGroup: true,
+      group: grp,
+      href: buildHref(`/pricing?group=${grp.hubMacroId}`),
+      icon: groupIconMap[grp.iconKey] || Layers,
+      label: isEs ? grp.labelEs : grp.labelEn,
+      shortLabel: isEs ? grp.shortEs : grp.shortEn,
+      badge: String(grp.items.length),
+    })),
     {
       id: 'protocols',
       href: buildHref('/proto'),
@@ -174,10 +168,116 @@ export default function ClinicalFormatSwitcher({
           }
         }
       ` }} />
-      <div className="atlas-format-switcher-inner">
+      <div ref={switcherRef} className="atlas-format-switcher-inner" style={{ position: 'relative', overflow: 'visible', flexWrap: 'wrap' }}>
         {tabs.map((t) => {
           const Icon = t.icon;
-          const isActive = t.id === activeFormat;
+          const isGroupActive = t.isGroup && activeGroup?.id === t.id;
+          const isActive = t.id === activeFormat || isGroupActive;
+          const isDropdownOpen = t.isGroup && openGroupId === t.id;
+
+          if (t.isGroup) {
+            return (
+              <div key={t.id} style={{ position: 'relative', flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => setOpenGroupId((prev) => (prev === t.id ? null : t.id))}
+                  className="atlas-format-switcher-tab"
+                  style={{
+                    fontWeight: isActive ? 800 : 650,
+                    background: isActive ? '#003666' : '#ffffff',
+                    color: isActive ? '#ffffff' : '#475569',
+                    border: isActive ? '1px solid #003666' : '1px solid #cbd5e1',
+                    boxShadow: isActive ? '0 1px 3px rgba(0, 54, 102, 0.16)' : 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Icon size={13} color={isActive ? '#93c5fd' : '#64748b'} style={{ flexShrink: 0 }} />
+                  <span className="atlas-format-switcher-full">{t.label}</span>
+                  <span className="atlas-format-switcher-short">{t.shortLabel}</span>
+                  <span
+                    className="atlas-format-switcher-badge"
+                    style={{
+                      fontSize: '0.62rem',
+                      fontWeight: 750,
+                      padding: '1px 6px',
+                      borderRadius: '999px',
+                      background: isActive ? 'rgba(255, 255, 255, 0.18)' : '#f1f5f9',
+                      color: isActive ? '#e0f2fe' : '#64748b',
+                    }}
+                  >
+                    {t.badge}
+                  </span>
+                  <ChevronDown size={12} style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                </button>
+                {isDropdownOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 6px)',
+                      left: 0,
+                      minWidth: '230px',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '10px',
+                      boxShadow: '0 10px 28px rgba(15, 23, 42, 0.16)',
+                      padding: '6px',
+                      zIndex: 1200,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px',
+                    }}
+                  >
+                    {t.group.items.map((item) => {
+                      const isCur = item.id === activeFormat;
+                      return (
+                        <Link
+                          key={item.id}
+                          href={buildHref(item.href)}
+                          onClick={() => setOpenGroupId(null)}
+                          style={{
+                            padding: '7px 10px',
+                            borderRadius: '6px',
+                            fontSize: '0.76rem',
+                            fontWeight: isCur ? 800 : 600,
+                            color: isCur ? '#003666' : '#334155',
+                            background: isCur ? '#eff6ff' : 'transparent',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '8px',
+                          }}
+                        >
+                          <span>{isEs ? item.labelEs : item.labelEn}</span>
+                          {item.badge && (
+                            <span style={{ fontSize: '0.62rem', padding: '1px 6px', borderRadius: '999px', background: isCur ? '#dbeafe' : '#f1f5f9', color: isCur ? '#1d4ed8' : '#64748b', fontWeight: 700 }}>
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                    <Link
+                      href={t.href}
+                      onClick={() => setOpenGroupId(null)}
+                      style={{
+                        marginTop: '4px',
+                        padding: '7px 10px',
+                        borderTop: '1px solid #f1f5f9',
+                        fontSize: '0.72rem',
+                        fontWeight: 750,
+                        color: '#1a73e8',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      {isEs ? 'Ver todo el grupo en Hub →' : 'View all in Hub →'}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           return (
             <Link
               key={t.id}
@@ -214,83 +314,6 @@ export default function ClinicalFormatSwitcher({
           );
         })}
 
-        {(() => {
-          const moreCatalogs = [
-            { id: '24genetics', href: buildHref('/pricing/24genetics'), label: isEs ? '24Genetics DNA' : '24Genetics DNA Panels' },
-            { id: '24genomics-qatar', href: buildHref('/pricing/24genomics-qatar'), label: '24Genetics Qatar' },
-            { id: 'nplab-hormones', href: buildHref('/pricing/nplab-hormones'), label: isEs ? 'Hormonas NP Lab' : 'NP Lab Hormones' },
-            { id: 'colway', href: buildHref('/pricing/colway'), label: 'Colway UAE Derma' },
-            { id: 'colway-hair', href: buildHref('/pricing/colway-hair'), label: 'Colway Hair & Trichology' },
-            { id: 'colway-qatar', href: buildHref('/pricing/colway-qatar'), label: 'Colway Qatar' },
-            { id: 'dnlab-pens', href: buildHref('/pricing/dnlab-pens'), label: 'DNLab Peptide Pens' },
-          ];
-          const activeMore = moreCatalogs.find((m) => m.id === activeFormat);
-          return (
-            <div ref={moreRef} style={{ position: 'relative', flexShrink: 0 }}>
-              <button
-                type="button"
-                onClick={() => setMoreOpen((v) => !v)}
-                className="atlas-format-switcher-tab"
-                style={{
-                  fontWeight: activeMore ? 800 : 650,
-                  background: activeMore ? '#003666' : '#ffffff',
-                  color: activeMore ? '#ffffff' : '#475569',
-                  border: activeMore ? '1px solid #003666' : '1px solid #cbd5e1',
-                  cursor: 'pointer',
-                }}
-              >
-                <span>{activeMore ? activeMore.label : (isEs ? 'Más Catálogos' : 'More Schedules')}</span>
-                <ChevronDown size={12} style={{ transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-              </button>
-              {moreOpen && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 6px)',
-                    left: 0,
-                    minWidth: '215px',
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '10px',
-                    boxShadow: '0 10px 28px rgba(15, 23, 42, 0.16)',
-                    padding: '6px',
-                    zIndex: 1200,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '2px',
-                  }}
-                >
-                  {moreCatalogs.map((item) => {
-                    const isCur = item.id === activeFormat;
-                    return (
-                      <Link
-                        key={item.id}
-                        href={item.href}
-                        onClick={() => setMoreOpen(false)}
-                        style={{
-                          padding: '7px 10px',
-                          borderRadius: '6px',
-                          fontSize: '0.76rem',
-                          fontWeight: isCur ? 800 : 600,
-                          color: isCur ? '#003666' : '#334155',
-                          background: isCur ? '#eff6ff' : 'transparent',
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                        }}
-                      >
-                        <span>{item.label}</span>
-                        {isCur && <span style={{ fontSize: '0.65rem', color: '#1d4ed8' }}>●</span>}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
         {rfqCount > 0 && typeof workspace?.setIsQuoteDrawerOpen === 'function' && (
           <button
             type="button"
@@ -311,6 +334,56 @@ export default function ClinicalFormatSwitcher({
           </button>
         )}
       </div>
+
+      {/* Level 2: Sibling Schedules Sub-Rail when inside a Theme Group */}
+      {activeGroup && activeGroup.items.length > 1 && (
+        <div
+          style={{
+            borderTop: '1px solid #e2e8f0',
+            background: '#ffffff',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '1240px',
+              margin: '0 auto',
+              padding: '4px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+            }}
+          >
+            <span style={{ fontSize: '0.66rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', whiteSpace: 'nowrap', marginRight: '2px' }}>
+              {isEs ? activeGroup.shortEs : activeGroup.shortEn}:
+            </span>
+            {activeGroup.items.map((sib) => {
+              const isCur = sib.id === activeFormat;
+              return (
+                <Link
+                  key={sib.id}
+                  href={buildHref(sib.href)}
+                  style={{
+                    padding: '3px 9px',
+                    borderRadius: '999px',
+                    fontSize: '0.71rem',
+                    fontWeight: isCur ? 800 : 600,
+                    background: isCur ? '#eff6ff' : 'transparent',
+                    color: isCur ? '#1d4ed8' : '#475569',
+                    border: isCur ? '1px solid #bfdbfe' : '1px solid transparent',
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  {isEs ? sib.labelEs : sib.labelEn}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

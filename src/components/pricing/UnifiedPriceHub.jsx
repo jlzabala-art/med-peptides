@@ -110,6 +110,15 @@ export default function UnifiedPriceHub({
   const [selectedCurrencyFilter, setSelectedCurrencyFilter] = useState('all');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sp = new URLSearchParams(window.location.search);
+    const groupParam = (sp.get('group') || sp.get('category') || '').toLowerCase().trim();
+    if (groupParam && MACRO_CATEGORIES.some((c) => c.id === groupParam)) {
+      setSelectedCategoryFilter(groupParam);
+    }
+  }, []);
+
   // SKU-level filters (when inside a specific catalog tab)
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
