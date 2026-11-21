@@ -609,6 +609,7 @@ export default function DoctorPublicPortalClient({
     workstationAuthorized,
     setWorkstationAuthorized,
     viewerRole,
+    setViewerRole,
     isAuthorizedViewer
   } = useDoctorPortalAuth({ slug, propSlug, data, initialData, isCustomerAgent });
 

@@ -95,6 +95,7 @@ export function useDoctorPortalAuth({ slug, propSlug, data, initialData, isCusto
     workstationAuthorized,
     setWorkstationAuthorized,
     viewerRole,
+    setViewerRole,
     isAuthorizedViewer
   };
 }
