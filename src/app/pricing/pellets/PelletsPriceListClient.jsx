@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 
@@ -252,6 +252,16 @@ export default function PelletsPriceListClient({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  // Hydrate initial search/category from URL query params (?q=..., ?category=...) for cross-catalog synergy links
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    const cat = params.get('category');
+    if (q) setSearchQuery(q);
+    if (cat) setSelectedCategory(cat);
+  }, []);
   const [cartItems, setCartItems] = useState({}); // { [id]: { single: number, pack10: number } }
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
@@ -739,10 +749,58 @@ export default function PelletsPriceListClient({
               <ExternalLink size={12} />
             </Link>
           )}
+
+          {/* Cross-Catalog Peptide Synergies (1-Click Navigation to /pricing/peptides) */}
+          <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', width: '100%' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 750, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#7c3aed', marginBottom: '5px' }}>
+              {isEs ? 'Sinergias Clínicas en Péptidos' : 'Recommended Peptide Synergies'}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {(row.category === 'Trocar Kits'
+                ? [{ q: 'BPC-157', label: isEs ? 'BPC-157 (Recuperación tisular)' : 'BPC-157 (Tissue Recovery)' }]
+                : row.hormoneType === 'estrogen' || row.hormoneType === 'progesterone'
+                  ? [
+                      { q: 'GHK-Cu', label: isEs ? 'GHK-Cu (Colágeno/Piel)' : 'GHK-Cu (Collagen/Dermal)' },
+                      { q: 'Epitalon', label: isEs ? 'Epitalon (Longevidad)' : 'Epitalon (Longevity)' },
+                      { q: 'BPC-157', label: 'BPC-157' },
+                    ]
+                  : [
+                      { q: 'CJC-1295', label: isEs ? 'CJC-1295 / Ipamorelin (Eje GH)' : 'CJC-1295 / Ipamorelin (GH Axis)' },
+                      { q: 'BPC-157', label: isEs ? 'BPC-157 (Tendón/Músculo)' : 'BPC-157 (Tendon/Muscle)' },
+                      { q: 'NAD+', label: 'NAD+' },
+                    ]
+              ).map((syn) => {
+                const synParams = new URLSearchParams({ q: syn.q });
+                if (isEs) synParams.set('lang', 'es');
+                if (currency) synParams.set('currency', currency);
+                return (
+                  <Link
+                    key={syn.q}
+                    href={`/pricing/peptides?${synParams.toString()}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: '#f3e8ff',
+                      border: '1px solid #d8b4fe',
+                      color: '#6b21a8',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <span>+ {syn.label} →</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  ), [isEs]);
+  ), [isEs, currency]);
 
   // Contextual KPI values (dynamically computed from active scope)
   const kpiProducts = scopeMode === 'all' ? initialProducts : filteredProducts;
@@ -762,11 +820,19 @@ export default function PelletsPriceListClient({
     <div className="pellets-price-page">
       {/* ── UNIFIED ATLAS PUBLIC HEADER ── */}
       <PublicUnifiedHeader
+        brandHref="/pricing"
+        loginRedirect="/pricing/pellets"
         currentApp="services"
         lang={lang}
         currency={currency}
         onCurrencyChange={(c) => workspace?.setCurrency?.(c)}
         onLangChange={(l) => workspace?.setLang?.(l)}
+        hideAiButton={true}
+        hideContactButton={true}
+        breadcrumb={[
+          { label: isEs ? 'Tarifas B2B' : 'B2B Schedules', href: '/pricing' },
+          { label: isEs ? 'Pellets Hormonales' : 'Hormone Pellets' },
+        ]}
       />
 
       {/* ── UNIFIED CLINICAL FORMAT SWITCHER (1-Click Navigation Across Vials, Pens & Pellets) ── */}

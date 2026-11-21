@@ -1,4 +1,5 @@
 import React from 'react';
+import { adminDb } from '@/lib/firebaseAdmin';
 import { getAllPharmapolisPellets } from '@/data/pharmapolisPelletsRegistry';
 import PelletsPriceListClient from './PelletsPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
@@ -91,13 +92,69 @@ export default async function PelletsPricingPage({ searchParams }) {
   const initialCurrency = ['EUR', 'AED', 'USD'].includes(rawCur) ? rawCur : 'USD';
   const initialLang = normalizeMetaLang(resolvedSearch);
 
-  // Authoritative Pellets from Registry
-  const pellets = getAllPharmapolisPellets().map((p, idx) => ({
+  // Authoritative Pellets: Firestore Single Source of Truth (Golden Rule #1 & #2) with registry enrichment/fallback
+  const staticPellets = getAllPharmapolisPellets();
+  const staticByKey = new Map();
+  for (const sp of staticPellets) {
+    if (sp.slug) staticByKey.set(String(sp.slug).toLowerCase(), sp);
+    if (sp.id) staticByKey.set(String(sp.id).toLowerCase(), sp);
+    if (sp.sku) staticByKey.set(String(sp.sku).toLowerCase(), sp);
+  }
+
+  let mergedPellets = [];
+  try {
+    if (adminDb) {
+      const snap = await adminDb
+        .collection('products')
+        .where('type', '==', 'pellet')
+        .limit(100)
+        .get();
+
+      if (!snap.empty) {
+        const seenSlugs = new Set();
+        const firestorePellets = [];
+        for (const doc of snap.docs) {
+          const data = doc.data() || {};
+          if (data.status === 'archived' || data.status === 'hidden') continue;
+          const lookupSlug = String(data.slug || doc.id).toLowerCase();
+          const lookupSku = String(data.sku || '').toLowerCase();
+          const fallback = staticByKey.get(lookupSlug) || staticByKey.get(String(doc.id).toLowerCase()) || staticByKey.get(lookupSku) || {};
+
+          const merged = {
+            ...fallback,
+            ...data,
+            id: doc.id,
+            slug: data.slug || fallback.slug || doc.id,
+            pricing: {
+              ...(fallback.pricing || {}),
+              ...(data.pricing || {}),
+            },
+          };
+          if (merged.slug) seenSlugs.add(String(merged.slug).toLowerCase());
+          firestorePellets.push(merged);
+        }
+
+        // Preserve any non-archived static entries not yet seeded in Firestore
+        const remainingStatic = staticPellets.filter(
+          (sp) => !seenSlugs.has(String(sp.slug || sp.id || '').toLowerCase())
+        );
+        mergedPellets = [...firestorePellets, ...remainingStatic];
+      }
+    }
+  } catch (err) {
+    console.error('[PelletsPricingPage] Firestore pellet fetch fallback:', err);
+  }
+
+  if (mergedPellets.length === 0) {
+    mergedPellets = staticPellets;
+  }
+
+  const pellets = JSON.parse(JSON.stringify(mergedPellets)).map((p, idx) => ({
     ...p,
-    itemNumber: `PL-0${idx + 1}`,
-    trocarSize: p.hormoneType === 'estrogen' ? '3.2 mm' : p.strengthValue > 50 ? '4.5 mm' : '3.2 mm',
-    targetSerum: p.monitoring?.targetSerumWindow || (p.hormoneType === 'estrogen' ? '40 - 110 pg/mL' : '400 - 800 ng/dL'),
-    duration: p.galenicSpecs?.releaseDuration || '3.5 to 6 months'
+    itemNumber: p.itemNumber || `PL-${String(idx + 1).padStart(2, '0')}`,
+    trocarSize: p.trocarSize || (p.hormoneType === 'estrogen' ? '3.2 mm' : (p.strengthValue > 50 ? '4.5 mm' : '3.2 mm')),
+    targetSerum: p.targetSerum || p.monitoring?.targetSerumWindow || (p.hormoneType === 'estrogen' ? '40 - 110 pg/mL' : '400 - 800 ng/dL'),
+    duration: p.duration || p.galenicSpecs?.releaseDuration || '3.5 to 6 months'
   }));
 
   const allProducts = [...pellets, ...TROCAR_KITS];

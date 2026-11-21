@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import {
   FileText,
   Plus,
@@ -434,6 +435,7 @@ export function getPeptidesColumns({
  */
 export function renderPeptideClinicalDetail(row, {
   lang = 'en',
+  currency = 'USD',
   onOpenSpecs,
   onOpenAi,
   onInquire,
@@ -441,6 +443,13 @@ export function renderPeptideClinicalDetail(row, {
 } = {}) {
   const clinical = getPeptideClinicalSummary(row.productName, row.therapeuticClass || row.category, lang);
   const isEs = lang === 'es';
+  const normName = String(row.productName || '').toLowerCase();
+  const isPelletSynergyCandidate = /bpc-157|cjc|ipamorelin|sermorelin|tesamorelin|epitalon|ghk-cu|nad\+|mots-c|pt-141|kisspeptin|gonadorelin|hcg|aod/.test(normName)
+    || /longevity|hormone|endocrine|gh|regenerative|repair|metabolic/i.test(String(row.therapeuticClass || row.category || ''));
+  const pelletParams = new URLSearchParams();
+  if (isEs) pelletParams.set('lang', 'es');
+  if (currency) pelletParams.set('currency', currency);
+  const pelletHref = `/pricing/pellets${pelletParams.toString() ? `?${pelletParams.toString()}` : ''}`;
 
   return (
     <div style={{
@@ -588,32 +597,55 @@ export function renderPeptideClinicalDetail(row, {
             <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
               {clinical.synergy}
             </div>
-            {clinical.crossSellName && (
-              <div style={{ marginTop: '6px' }}>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (typeof onFilterByPeptide === 'function') {
-                      onFilterByPeptide(clinical.crossSellName);
-                    }
-                  }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    background: '#f3e8ff',
-                    border: '1px solid #d8b4fe',
-                    color: '#6b21a8',
-                    borderRadius: '4px',
-                    padding: '3px 8px',
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
-                </button>
+            {(clinical.crossSellName || isPelletSynergyCandidate) && (
+              <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {clinical.crossSellName && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (typeof onFilterByPeptide === 'function') {
+                        onFilterByPeptide(clinical.crossSellName);
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: '#f3e8ff',
+                      border: '1px solid #d8b4fe',
+                      color: '#6b21a8',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>+ {isEs ? 'Ver' : 'View'} {clinical.crossSellName} ({isEs ? 'Sinergia' : 'Stack'}) →</span>
+                  </button>
+                )}
+                {isPelletSynergyCandidate && (
+                  <Link
+                    href={pelletHref}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: '#f0fdfa',
+                      border: '1px solid #99f6e4',
+                      color: '#0f766e',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <span>+ {isEs ? 'Ver Pellets Hormonales BHRT' : 'Explore BHRT Hormone Pellets'} →</span>
+                  </Link>
+                )}
               </div>
             )}
           </div>

@@ -472,6 +472,7 @@ export default function PeptidesPriceListClient({
   const handleRenderExpandable = useCallback((row) => {
     return renderPeptideClinicalDetail(row, {
       lang,
+      currency,
       onOpenSpecs: setSelectedSpecsProduct,
       onOpenAi: (prod) => {
         setAiContextProduct(prod);
@@ -486,7 +487,7 @@ export default function PeptidesPriceListClient({
         window.scrollTo({ top: 380, behavior: 'smooth' });
       }
     });
-  }, [lang, setSearchQuery]);
+  }, [lang, currency, setSearchQuery]);
 
   return (
     <div className="colway-price-root atlas-page-bg peptides-b2b-portal">
