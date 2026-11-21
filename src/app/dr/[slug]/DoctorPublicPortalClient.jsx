@@ -103,6 +103,7 @@ import './DoctorPublicPortal.css';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
+import GcpKpiRow from '@/components/doctor/ui/GcpKpiRow';
 import {
   sanitizePrescriptionCode,
   getCodifiedPatientId,
@@ -6022,24 +6023,32 @@ export default function DoctorPublicPortalClient({
                   aria-expanded={isNotifDropdownOpen}
                 >
                   <Bell size={16} />
-                  {filteredTasks.length > 0 && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '-4px',
-                        right: '-4px',
-                        background: '#f59e0b',
-                        color: '#ffffff',
-                        fontSize: '0.60rem',
-                        fontWeight: 700,
-                        borderRadius: '999px',
-                        padding: '1px 5px',
-                        lineHeight: 1.2
-                      }}
-                    >
-                      {filteredTasks.length}
-                    </span>
-                  )}
+                  {(() => {
+                    const urgentCount = filteredTasks.filter((t) => {
+                      const ty = String(t.type || t.category || '').toLowerCase();
+                      const pr = String(t.priority || '').toLowerCase();
+                      return pr === 'high' || pr === 'urgent' || ty.includes('proposal') || ty.includes('refill') || ty.includes('inquiry');
+                    }).length;
+                    const badgeCount = urgentCount > 0 ? urgentCount : Math.min(filteredTasks.length, 9);
+                    return badgeCount > 0 ? (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '-4px',
+                          right: '-4px',
+                          background: urgentCount > 0 ? '#dc2626' : '#f59e0b',
+                          color: '#ffffff',
+                          fontSize: '0.60rem',
+                          fontWeight: 700,
+                          borderRadius: '999px',
+                          padding: '1px 5px',
+                          lineHeight: 1.2
+                        }}
+                      >
+                        {badgeCount}
+                      </span>
+                    ) : null;
+                  })()}
                 </button>
 
                 {isNotifDropdownOpen && (
@@ -7607,68 +7616,60 @@ export default function DoctorPublicPortalClient({
                 </div>
               </div>
 
-              {/* 4 Google Cloud KPI Metric Cards for Patients */}
+              {/* 4 Google Cloud KPI Metric Cards for Patients (Unified GcpKpiRow) */}
               <div style={{ padding: '16px 20px 0 20px' }}>
-                <div className="gcp-kpi-grid" style={{ marginBottom: '16px' }}>
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={() => setPatientFilterMode('all')}
-                    style={{ cursor: 'pointer', border: patientFilterMode === 'all' ? '2px solid #003666' : '1px solid #e8eaed' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>Total Patients</span>
-                      <Users size={15} style={{ color: '#003666' }} />
-                    </div>
-                    <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#202124' }}>
-                      {doctorPatientsList.length}
-                    </div>
-                    <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>All registered patient dossiers</div>
-                  </div>
-
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={() => setPatientFilterMode('sold')}
-                    style={{ cursor: 'pointer', border: patientFilterMode === 'sold' ? '2px solid #16a34a' : '1px solid #e8eaed' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#15803d', textTransform: 'uppercase' }}>Prescribed Patients</span>
-                      <CheckCircle2 size={15} style={{ color: '#16a34a' }} />
-                    </div>
-                    <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#15803d' }}>
-                      {doctorPatientsList.filter(p => p.hasSold).length}
-                    </div>
-                    <div style={{ fontSize: '0.70rem', color: '#15803d', marginTop: '4px', fontWeight: 650 }}>Active & Fulfilled Rx</div>
-                  </div>
-
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={() => setPatientFilterMode('unaccepted')}
-                    style={{ cursor: 'pointer', border: patientFilterMode === 'unaccepted' ? '2px solid #d97706' : '1px solid #e8eaed' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#b45309', textTransform: 'uppercase' }}>Unaccepted Proposals</span>
-                      <Clock size={15} style={{ color: '#d97706' }} />
-                    </div>
-                    <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#d97706' }}>
-                      {doctorPatientsList.filter(p => !p.hasSold && p.hasUnaccepted).length}
-                    </div>
-                    <div style={{ fontSize: '0.70rem', color: '#b45309', marginTop: '4px', fontWeight: 650 }}>Proposal pending checkout</div>
-                  </div>
-
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={() => setPatientFilterMode('refill')}
-                    style={{ cursor: 'pointer', border: patientFilterMode === 'refill' ? '2px solid #2563eb' : '1px solid #e8eaed' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#1d4ed8', textTransform: 'uppercase' }}>Due for Renewal</span>
-                      <RefreshCw size={15} style={{ color: '#2563eb' }} />
-                    </div>
-                    <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#1d4ed8' }}>
-                      {refillDuePatientsCount}
-                    </div>
-                    <div style={{ fontSize: '0.70rem', color: '#1d4ed8', marginTop: '4px', fontWeight: 650 }}>Active cycle candidates for refill →</div>
-                  </div>
+                <div style={{ marginBottom: '16px' }}>
+                  <GcpKpiRow
+                    items={[
+                      {
+                        id: 'all-patients',
+                        label: 'Total Patients',
+                        value: doctorPatientsList.length,
+                        badge: 'Registered',
+                        badgeColor: '#3c4043',
+                        badgeBg: '#f1f3f4',
+                        subtitle: 'All registered patient dossiers',
+                        active: patientFilterMode === 'all',
+                        onClick: () => setPatientFilterMode('all')
+                      },
+                      {
+                        id: 'prescribed-patients',
+                        label: 'Prescribed Patients',
+                        value: doctorPatientsList.filter(p => p.hasSold).length,
+                        valueColor: '#137333',
+                        badge: 'Fulfilled',
+                        badgeColor: '#137333',
+                        badgeBg: '#e6f4ea',
+                        subtitle: 'Active & fulfilled regimens',
+                        active: patientFilterMode === 'sold',
+                        onClick: () => setPatientFilterMode('sold')
+                      },
+                      {
+                        id: 'unaccepted-proposals',
+                        label: 'Unaccepted Proposals',
+                        value: doctorPatientsList.filter(p => !p.hasSold && p.hasUnaccepted).length,
+                        valueColor: '#b06000',
+                        badge: 'Pending',
+                        badgeColor: '#b06000',
+                        badgeBg: '#fef7e0',
+                        subtitle: 'Proposal pending checkout',
+                        active: patientFilterMode === 'unaccepted',
+                        onClick: () => setPatientFilterMode('unaccepted')
+                      },
+                      {
+                        id: 'refill-candidates',
+                        label: 'Due for Renewal',
+                        value: refillDuePatientsCount,
+                        valueColor: '#1a73e8',
+                        badge: 'Refill Ready',
+                        badgeColor: '#1a73e8',
+                        badgeBg: '#e8f0fe',
+                        subtitle: 'Active cycle refill candidates',
+                        active: patientFilterMode === 'refill',
+                        onClick: () => setPatientFilterMode('refill')
+                      }
+                    ]}
+                  />
                 </div>
 
                 {/* Global Search Bar (Rule #7) & Filter Chips */}
@@ -7874,6 +7875,26 @@ export default function DoctorPublicPortalClient({
                                   <span>Mark Delivered</span>
                                 </button>
                               )}
+
+                              <a
+                                href={`/rx/${encodeURIComponent(pCode)}?view=patient`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                style={{
+                                  padding: '3px 8px',
+                                  fontSize: '0.72rem',
+                                  borderRadius: '4px',
+                                  border: '1px solid #dadce0',
+                                  background: '#ffffff',
+                                  color: '#1a73e8',
+                                  fontWeight: 500,
+                                  textDecoration: 'none'
+                                }}
+                                title="Preview exact Patient Mobile View"
+                              >
+                                Patient View ↗
+                              </a>
 
                               <button
                                 type="button"

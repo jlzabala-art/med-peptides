@@ -86,6 +86,7 @@ import MultiPartOverview from './MultiPartOverview';
 import PatientExperienceHub from '@/components/prescription/PatientExperienceHub';
 import AtlasSynergyRecommendationsSection from '@/components/prescription/AtlasSynergyRecommendationsSection';
 import PrescriptionMasterHeader from '@/components/prescription/PrescriptionMasterHeader';
+import TreatmentJourneyStepper from '@/components/prescription/TreatmentJourneyStepper';
 import PrescriptionTrustWatermark from '@/components/prescription/PrescriptionTrustWatermark';
 import PatientActionBannerCard from '@/components/prescription/PatientActionBannerCard';
 import CompoundedFormulationsSection from '@/components/prescription/CompoundedFormulationsSection';
@@ -758,6 +759,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 setExpandedPhases={setExpandedPhases}
                 setSelectedPhase={setSelectedPhase}
                 setExpandedSections={setExpandedSections}
+              />
+
+              <TreatmentJourneyStepper
+                rx={rx}
+                rxId={rxId}
+                currentStatus={currentStatus}
+                isDispensed={isDispensed}
+                isEs={isEs}
+                genomicsData={genomicsData}
+                onRequestRefill={() => {
+                  triggerHaptic('selection');
+                  setShowRefillModal?.(true);
+                }}
               />
 
               {/* ── Express QR Refill Card (Always shown when patient scans SCAN FOR REFILL QR) ── */}
