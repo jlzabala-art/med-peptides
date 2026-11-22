@@ -417,7 +417,11 @@ export default function PublicLabelsAppClient({
     let title = '';
     let text = '';
 
-    if (type === 'clean') {
+    if (type === 'patient') {
+      url = `${origin}/rx/${encodeURIComponent(activeCode)}?view=patient&lang=${lang}`;
+      title = `${patientName} • #${rxCode} Patient Instructions`;
+      text = isEs ? `📱 Instrucciones del tratamiento #${rxCode}` : `📱 Treatment instructions for #${rxCode}`;
+    } else if (type === 'clean') {
       url = `${origin}/labels`;
       title = 'Compounding Label Studio • Atlas Health';
       text = isEs ? '🏷️ Atlas Compounding Studio — Espacio de trabajo.' : '🏷️ Atlas Compounding Studio — Compounding workspace.';

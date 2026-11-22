@@ -726,6 +726,56 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
+              {/* ── Patient-Friendly 3-Card "Your Treatment Today" Strip ── */}
+              {isPatientView && (
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                    gap: '10px',
+                  }}
+                >
+                  <div style={{ background: '#ffffff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? '1. Tu Dosis Diaria' : '1. Your Daily Dose'}
+                    </div>
+                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginTop: '4px', lineHeight: 1.35 }}>
+                      {currentRx?.posology || currentRx?.items?.[0]?.instructions || (isEs ? 'Sigue la pauta indicada en tu etiqueta.' : 'Follow the instructions printed on your label.')}
+                    </div>
+                  </div>
+                  <div style={{ background: '#ffffff', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 14px' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? '2. Cómo Guardarlo' : '2. How to Store'}
+                    </div>
+                    <div style={{ fontSize: '0.84rem', fontWeight: 650, color: '#78350f', marginTop: '4px', lineHeight: 1.35 }}>
+                      {currentRx?.storage || (isEs ? 'Consultar etiqueta (2°C–8°C si es refrigerado).' : 'Check label instructions (2°C–8°C if refrigerated).')}
+                    </div>
+                  </div>
+                  <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? '3. Reposición Rápida' : '3. Need a Refill?'}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenInquiry()}
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '7px',
+                        border: 'none',
+                        background: '#059669',
+                        color: '#ffffff',
+                        fontSize: '0.78rem',
+                        fontWeight: 750,
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                      }}
+                    >
+                      🔄 {isEs ? 'Solicitar Refill / Ayuda' : 'Request Refill / Help'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* ── Master Header Card (Google Cloud Console High-Density Resource Header) ─────── */}
               <PrescriptionMasterHeader
                 rx={rx}

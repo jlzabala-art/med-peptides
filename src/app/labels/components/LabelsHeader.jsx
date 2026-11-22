@@ -366,6 +366,38 @@ export default function LabelsHeader({
                   </div>
                 </button>
 
+                {/* Option 1b: Patient QR Instructions Link */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="pls-share-menu-item"
+                  disabled={!activeCode}
+                  onClick={() => {
+                    if (onShareType) onShareType('patient');
+                    setIsShareMenuOpen(false);
+                  }}
+                >
+                  <div className="pls-share-item-icon">
+                    <span style={{ fontSize: '0.95rem' }}>📱</span>
+                  </div>
+                  <div className="pls-share-item-body">
+                    <div className="pls-share-item-title-row">
+                      <span className="pls-share-item-title">
+                        {isEs ? 'Link Paciente (QR)' : 'Patient Link (QR)'}
+                      </span>
+                      {copiedShareType === 'patient' && (
+                        <span className="pls-share-item-badge copied">
+                          <Check size={11} style={{ marginRight: 3 }} />
+                          {isEs ? 'Copiado' : 'Copied'}
+                        </span>
+                      )}
+                    </div>
+                    <span className="pls-share-item-desc">
+                      {isEs ? 'Instrucciones simples + botón Refill para WhatsApp' : 'Simple patient dosing guide + Refill button'}
+                    </span>
+                  </div>
+                </button>
+
                 {/* Option 2: Lote Completo en Curso */}
                 <button
                   type="button"
