@@ -9,13 +9,20 @@ export default function NplabHormonesPriceClient({
   pharmapolisProducts = [],
   nplabProducts = [],
   initialProducts = [],
+  supplierLock = null, // 'pharmapolis' | 'nplab' | null
   initialLab = 'pharmapolis',
   initialCategory = 'all',
   initialCurrency = 'EUR',
 }) {
-  const [selectedLab, setSelectedLab] = useState(
-    ['pharmapolis', 'pharmapolis_bulk', 'nplab', 'all'].includes(initialLab) ? initialLab : 'pharmapolis'
-  );
+  const [selectedLab, setSelectedLab] = useState(() => {
+    if (supplierLock === 'pharmapolis') {
+      return ['pharmapolis', 'pharmapolis_bulk', 'pharmapolis_all'].includes(initialLab) ? initialLab : 'pharmapolis';
+    }
+    if (supplierLock === 'nplab') {
+      return 'nplab';
+    }
+    return ['pharmapolis', 'pharmapolis_bulk', 'pharmapolis_all', 'nplab', 'all'].includes(initialLab) ? initialLab : 'pharmapolis';
+  });
 
   const bulkProducts = useMemo(() => {
     return getAllPharmapolisHrtBulkOffers().map((offer, idx) => {
@@ -51,10 +58,13 @@ export default function NplabHormonesPriceClient({
     if (selectedLab === 'pharmapolis_bulk') {
       return bulkProducts;
     }
+    if (selectedLab === 'pharmapolis_all') {
+      return [...pharmapolisProducts, ...bulkProducts];
+    }
     if (selectedLab === 'pharmapolis' && pharmapolisProducts.length > 0) {
       return pharmapolisProducts;
     }
-    if (selectedLab === 'nplab' && nplabProducts.length > 0) {
+    if (selectedLab === 'nplab') {
       return nplabProducts;
     }
     if (selectedLab === 'all') {
@@ -64,43 +74,97 @@ export default function NplabHormonesPriceClient({
   }, [selectedLab, pharmapolisProducts, bulkProducts, nplabProducts, initialProducts]);
 
   const config = useMemo(() => {
-    const isPharmapolis = selectedLab === 'pharmapolis';
+    const isPharmapolis = supplierLock === 'pharmapolis' || selectedLab.startsWith('pharmapolis');
+    const isNplabOnly = supplierLock === 'nplab' || selectedLab === 'nplab';
     return {
       sectionLabel: 'B2B Compounding Pharmacy',
       navCurrentLabel: isPharmapolis
-        ? 'Pharmapolis Bulgaria Hormones (BHRT & Pellets)'
-        : 'EU GMP Hormones (Pharmapolis & NP LABS)',
-      loginRedirect: '/pricing/nplab-hormones',
+        ? 'Pharmapolis Bulgaria HRT (BHRT & Pellets)'
+        : isNplabOnly
+          ? 'NP LABS Hormones (TRT & BHRT)'
+          : 'EU GMP Hormones (Pharmapolis & NP LABS)',
+      loginRedirect: supplierLock === 'pharmapolis' ? '/pricing/pharmapolis-hrt' : '/pricing/nplab-hormones',
+      switcherFormat: supplierLock === 'pharmapolis' ? 'pharmapolis-hrt' : 'nplab-hormones',
       brandLeft: 'ATLAS HEALTH',
       brandRight: isPharmapolis
-        ? 'PHARMAPOLIS BULGARIA · BHRT & PELLETS'
-        : 'NP LABS & PHARMAPOLIS · COMPOUNDED HORMONES',
+        ? 'PHARMAPOLIS BULGARIA · EU GMP HRT'
+        : isNplabOnly
+          ? 'NP LABS · COMPOUNDED HORMONES'
+          : 'NP LABS & PHARMAPOLIS · COMPOUNDED HORMONES',
       documentTitle: isPharmapolis
-        ? 'PHARMAPOLIS BULGARIA EU GMP HORMONES & PELLETS SCHEDULE'
-        : "MEN'S TRT, BHRT & SUBCUTANEOUS PELLETS SCHEDULE",
+        ? 'PHARMAPOLIS BULGARIA EU GMP HRT & PELLETS SCHEDULE'
+        : isNplabOnly
+          ? 'NP LABS TRT, BHRT & SUBCUTANEOUS PELLETS SCHEDULE'
+          : "MEN'S TRT, BHRT & SUBCUTANEOUS PELLETS SCHEDULE",
       documentSubtitle: isPharmapolis
-        ? '43 Master Preparations (240 Standardized Strengths) · Topical, Oral Capsules, Subcutaneous Pellets & Vaginal · EUR incl. VAT'
+        ? 'Master Preparations & Institutional Bulk Batches · Topical Topi-CLICK, Oral Capsules, Subcutaneous Pellets & Vaginal · EUR'
         : 'Bioidentical Hormone Replacement Therapy (BHRT), Pellets & Testosterone Formulations · Cost Basis in EUR',
       documentRef: isPharmapolis ? 'DOC-BG-PHARM-HORM-2026' : 'DOC-EU-NPLAB-HORM-2026',
       defaultCurrency: ['EUR', 'AED', 'USD'].includes(initialCurrency) ? initialCurrency : 'EUR',
       availableCurrencies: ['EUR', 'AED', 'USD'],
       defaultMarkupPct: 15,
-      skuPrefixPattern: /^SKU-(PHARM-HORM|NPLAB)-/i,
+      skuPrefixPattern: /^SKU-(PHARM-HORM|PHARM-BULK|NPLAB)-/i,
       searchPlaceholder:
         'Search hormones by preparation, strength or active ingredient (Biest, Triest, Progesterone, Testosterone, Pellets, DHEA)...',
       storageNamespace: isPharmapolis ? 'pharmapolis_hormones_pricing' : 'nplab_hormones_pricing',
       exportBrandTitle: isPharmapolis ? 'Pharmapolis Bulgaria Hormones' : 'NP LABS Hormones',
       exportFilePrefix: isPharmapolis ? 'Pharmapolis_Hormones_Price_Schedule' : 'NPLAB_Hormones_Price_Schedule',
       whatsappHeader: isPharmapolis
-        ? '*PHARMAPOLIS BULGARIA EU GMP — BHRT, CAPSULES & PELLETS SCHEDULE*'
+        ? '*PHARMAPOLIS BULGARIA EU GMP — HRT, CAPSULES & PELLETS SCHEDULE*'
         : '*NP LABS INTERNATIONAL COMPOUNDING — TRT & BHRT SCHEDULE*',
       persistInlineEdits: true,
     };
-  }, [selectedLab, initialCurrency]);
+  }, [selectedLab, supplierLock, initialCurrency]);
+
+  const switcherTabs = useMemo(() => {
+    if (supplierLock === 'pharmapolis') {
+      return [
+        {
+          id: 'pharmapolis',
+          label: `🇧🇬 Standard Master Preparations (${pharmapolisProducts.length} Preparations · 240 Strengths)`,
+        },
+        {
+          id: 'pharmapolis_bulk',
+          label: `📦 Bulk Batch Offers (MOQ 33–50 · ${bulkProducts.length} Top HRT)`,
+        },
+        {
+          id: 'pharmapolis_all',
+          label: `All Pharmapolis HRT (${pharmapolisProducts.length + bulkProducts.length})`,
+        },
+      ];
+    }
+    if (supplierLock === 'nplab') {
+      return [
+        {
+          id: 'nplab',
+          label: `🇬🇷 NP LABS Compounded Hormones (${nplabProducts.length} SKUs)`,
+        },
+      ];
+    }
+    return [
+      {
+        id: 'pharmapolis',
+        label: `🇧🇬 Pharmapolis Bulgaria (${pharmapolisProducts.length} Master Preparations · 240 Strengths)`,
+      },
+      {
+        id: 'pharmapolis_bulk',
+        label: `📦 Pharmapolis Bulk Batch (MOQ 33–50 · ${bulkProducts.length} Top HRT)`,
+      },
+      {
+        id: 'nplab',
+        label: `🇬🇷 NP LABS Legacy (${nplabProducts.length} SKUs)`,
+      },
+      {
+        id: 'all',
+        label: `All EU GMP Hormones (${pharmapolisProducts.length + nplabProducts.length})`,
+      },
+    ];
+  }, [supplierLock, pharmapolisProducts.length, bulkProducts.length, nplabProducts.length]);
 
   return (
     <div>
       {/* GCP Compounding Lab Switcher Strip */}
+      {switcherTabs.length > 1 && (
       <div
         className="no-print"
         style={{
@@ -121,27 +185,10 @@ export default function NplabHormonesPriceClient({
           }}
         >
           <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-            Compounding Laboratory Schedule:
+            {supplierLock === 'pharmapolis' ? 'Pharmapolis EU GMP Catalog Views:' : 'Compounding Laboratory Schedule:'}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            {[
-              {
-                id: 'pharmapolis',
-                label: `🇧🇬 Pharmapolis Bulgaria (${pharmapolisProducts.length} Master Preparations · 240 Strengths)`,
-              },
-              {
-                id: 'pharmapolis_bulk',
-                label: `📦 Pharmapolis Bulk Batch (MOQ 33–50 · ${bulkProducts.length} Top HRT)`,
-              },
-              {
-                id: 'nplab',
-                label: `🇬🇷 NP LABS Legacy (${nplabProducts.length} SKUs)`,
-              },
-              {
-                id: 'all',
-                label: `All EU GMP Hormones (${pharmapolisProducts.length + nplabProducts.length})`,
-              },
-            ].map((tab) => {
+            {switcherTabs.map((tab) => {
               const active = selectedLab === tab.id;
               return (
                 <button
@@ -166,6 +213,7 @@ export default function NplabHormonesPriceClient({
           </div>
         </div>
       </div>
+      )}
 
       <ModularPriceSchedule
         key={selectedLab}
