@@ -11,6 +11,7 @@ import { getCustomsFriendlySuggestions, findCustomsRisks } from '@/utils/labels/
 import { formatApisForEditor, labelToMarkdown, parseMarkdownToLabel } from '@/utils/labels/labelMarkdown';
 import ClinicPicker from '@/components/admin/patients/ClinicPicker';
 import PhysicianPicker from '@/components/admin/patients/PhysicianPicker';
+import { searchDoctorsAction } from '@/actions/patientsActions';
 import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
 import { generateLabelZpl } from '@/utils/labels/zplGenerator';
 import RefillFormulaWorkbench from './RefillFormulaWorkbench';
@@ -329,6 +330,55 @@ export default function PharmacyLabelsModal({
   const baseItem = labels?.[selectedProductIdx] || labels?.[0] || null;
   const currentItem = editedOverrides[selectedProductIdx] || baseItem || {};
   const rawId = currentItem?.rxId || currentItem?.prescriptionId || currentItem?.fileNumber || currentItem?.id || sourceRx?.id || sourceRx?.code || sourceRx?.fileNumber || null;
+
+  // Auto-resolve Doctor's Clinic by default whenever a doctor is present and clinicName is empty
+  const autoResolvedClinicKeysRef = useRef(new Set());
+  React.useEffect(() => {
+    if (!isOpen || !currentItem) return;
+    if (currentItem.clinicName || currentItem._clinicOmittedByUser) return;
+    const docQuery = (currentItem.doctorName || currentItem.physician || currentItem.doctorId || '').trim();
+    if (!docQuery) return;
+    const lookupKey = `${selectedProductIdx}:${docQuery.toLowerCase()}`;
+    if (autoResolvedClinicKeysRef.current.has(lookupKey)) return;
+    autoResolvedClinicKeysRef.current.add(lookupKey);
+
+    const applyResolvedClinic = (cName, cId = '') => {
+      const cleanCName = (cName || '').trim();
+      if (!cleanCName || /^licensed\s+clinical\s+practice$/i.test(cleanCName) || /^centro\s+m[eé]dico\s+prescriptor$/i.test(cleanCName)) return;
+      const updated = {
+        ...currentItem,
+        clinicName: cleanCName,
+        clinicId: cId || currentItem.clinicId || '',
+        showClinicOnLabel: true
+      };
+      const newMd = labelToMarkdown(updated);
+      updated.labelMarkdown = newMd;
+      setEditedOverrides(prev => ({ ...prev, [selectedProductIdx]: updated }));
+      setMarkdownText(newMd);
+      onLabelDataChange?.(selectedProductIdx, updated);
+    };
+
+    if (sourceRx?.clinicName && String(sourceRx.clinicName).trim()) {
+      applyResolvedClinic(sourceRx.clinicName, sourceRx.clinicId || '');
+      return;
+    }
+
+    let cancelled = false;
+    searchDoctorsAction(docQuery, '', 5).then((results) => {
+      if (cancelled || !Array.isArray(results) || results.length === 0) return;
+      const qLower = docQuery.toLowerCase().replace(/^dr\.?\s+/i, '');
+      const exact = results.find((d) =>
+        (d.id && d.id === currentItem.doctorId) ||
+        (d.name || '').toLowerCase().includes(qLower)
+      ) || results[0];
+      const resolvedName = exact?.clinicName || exact?.clinic || '';
+      if (resolvedName) {
+        applyResolvedClinic(resolvedName, exact?.clinicId || '');
+      }
+    }).catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [isOpen, selectedProductIdx, currentItem?.doctorName, currentItem?.doctorId, currentItem?.clinicName, currentItem?._clinicOmittedByUser, sourceRx?.clinicName, sourceRx?.clinicId]);
 
   const saveSecurity = React.useMemo(() => {
     return verifyLabelSaveSecurity({
@@ -2454,28 +2504,41 @@ export default function PharmacyLabelsModal({
                   </div>
 
                   {fulfillmentMode !== 'external_supplier' && (
-                    <button
-                      type="button"
-                      onClick={() => setShowPrintSettings((prev) => !prev)}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        border: showPrintSettings ? '1px solid #1a73e8' : '1px solid #cbd5e1',
-                        background: showPrintSettings ? '#e8f0fe' : '#ffffff',
-                        color: showPrintSettings ? '#1a73e8' : '#475569',
-                        fontSize: '0.72rem',
-                        fontWeight: 650,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <span>⚙ {isEs ? 'Ajustes Impresión' : 'Print Settings'}</span>
-                      <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
-                        ({dimensions.widthMm}×{dimensions.heightMm} · {dpi} DPI)
-                      </span>
-                    </button>
+                    <>
+                      <DeliveryLabelControls
+                        hideShippingLabel={hideShippingLabel}
+                        activeVariant={activeVariant}
+                        setActiveVariant={setActiveVariant}
+                        deliveryLabelType={deliveryLabelType}
+                        setDeliveryLabelType={setDeliveryLabelType}
+                        currentItem={currentItem}
+                        handleFieldChange={handleFieldChange}
+                        getCustomsFriendlySuggestions={getCustomsFriendlySuggestions}
+                        isEs={isEs}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPrintSettings((prev) => !prev)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          border: showPrintSettings ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                          background: showPrintSettings ? '#e8f0fe' : '#ffffff',
+                          color: showPrintSettings ? '#1a73e8' : '#475569',
+                          fontSize: '0.72rem',
+                          fontWeight: 650,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span>⚙ {isEs ? 'Ajustes Impresión' : 'Print Settings'}</span>
+                        <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
+                          ({dimensions.widthMm}×{dimensions.heightMm} · {dpi} DPI)
+                        </span>
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -2633,19 +2696,6 @@ export default function PharmacyLabelsModal({
                     <option value="normal">{isEs ? 'Normal / Compacto (Ahorra Espacio)' : 'Normal / Compact (Save Space)'}</option>
                   </select>
                 </div>
-
-                {/* Dual-Label Level Switcher & Delivery Mode Controls */}
-                <DeliveryLabelControls
-                  hideShippingLabel={hideShippingLabel}
-                  activeVariant={activeVariant}
-                  setActiveVariant={setActiveVariant}
-                  deliveryLabelType={deliveryLabelType}
-                  setDeliveryLabelType={setDeliveryLabelType}
-                  currentItem={currentItem}
-                  handleFieldChange={handleFieldChange}
-                  getCustomsFriendlySuggestions={getCustomsFriendlySuggestions}
-                  isEs={isEs}
-                />
 
                 {/* Field 4: Export Format Selector (PDF / PNG / MD) */}
                 <div className="gcp-toolbar-control">
@@ -3472,16 +3522,17 @@ export default function PharmacyLabelsModal({
                         strictClinic={false}
                         allowCustom={true}
                         placeholder={isEs ? "Seleccionar o escribir doctor..." : "Select or type doctor..."}
-                        onChange={({ doctorId, doctorName, license }) => {
+                        onChange={({ doctorId, doctorName, license, clinicId, clinicName }) => {
+                          const resolvedClinic = (clinicName || '').trim();
                           const updated = {
                             ...currentItem,
                             doctorName: doctorName || '',
                             doctorId: doctorId || '',
                             doctorLicense: license || currentItem.doctorLicense || '',
-                            // By default, only Doctor's name appears on the label (no clinic name)
-                            clinicName: '',
-                            clinicId: '',
-                            showClinicOnLabel: false
+                            clinicName: resolvedClinic,
+                            clinicId: clinicId || '',
+                            showClinicOnLabel: Boolean(resolvedClinic),
+                            _clinicOmittedByUser: false
                           };
                           const newMd = labelToMarkdown(updated);
                           updated.labelMarkdown = newMd;
@@ -3511,7 +3562,8 @@ export default function PharmacyLabelsModal({
                                 ...currentItem,
                                 clinicName: '',
                                 clinicId: '',
-                                showClinicOnLabel: false
+                                showClinicOnLabel: false,
+                                _clinicOmittedByUser: true
                               };
                               const newMd = labelToMarkdown(updated);
                               updated.labelMarkdown = newMd;
