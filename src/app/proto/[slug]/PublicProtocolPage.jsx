@@ -1146,6 +1146,41 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
           }
         />
 
+        {/* ── 10-Second Clinical Summary Strip ── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+            gap: '10px',
+            marginBottom: '12px',
+          }}
+        >
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 14px' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {lang === 'es' ? '1. Objetivo Clínico' : '1. Clinical Goal'}
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginTop: '3px' }}>
+              {protocol?.goal || protocol?.primary_goal || protocol?.category || 'Targeted Peptide Therapy'}
+            </div>
+          </div>
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 14px' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {lang === 'es' ? '2. Pauta & Evidencia' : '2. Regimen & Evidence'}
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0369a1', marginTop: '3px' }}>
+              {displayDuration} · {evidenceProfile.evidenceTier}
+            </div>
+          </div>
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 14px' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {lang === 'es' ? '3. Exclusión Principal' : '3. Key Exclusion'}
+            </div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 650, color: '#7f1d1d', marginTop: '3px' }}>
+              {(protocol?.contraindications?.[0] || evidenceProfile.contraindications?.[0] || 'Physician oversight required')}
+            </div>
+          </div>
+        </div>
+
         {/* ── Evidence Tier, PubMed Citations & Pre-Prescription Exclusion Checklist ── */}
         <section
           aria-label={lang === 'es' ? 'Evidencia Clínica y Seguridad' : 'Clinical Evidence & Safety Checklist'}

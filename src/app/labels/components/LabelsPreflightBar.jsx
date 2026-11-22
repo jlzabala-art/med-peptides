@@ -293,7 +293,7 @@ export default function LabelsPreflightBar({
             }}
           >
             <CheckCircle2 size={11} />
-            <span>{isEs ? 'Fórmula' : 'Formula'}</span>
+            <span>1. {isEs ? 'Fórmula' : 'Formula'}</span>
           </span>
 
           <button
@@ -315,7 +315,7 @@ export default function LabelsPreflightBar({
             title={isEs ? 'Ir al campo de Lote / BUD' : 'Jump to Lot / BUD field'}
           >
             <CheckCircle2 size={11} />
-            <span>{hasLotBud ? 'Lot & BUD' : (isEs ? 'Falta Lote/BUD' : 'No Lot/BUD')}</span>
+            <span>2. {hasLotBud ? 'Lot & BUD' : (isEs ? 'Falta Lote/BUD' : 'No Lot/BUD')}</span>
           </button>
 
           {overflow.hasOverflow && (

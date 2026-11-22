@@ -360,6 +360,48 @@ export default function ModularPriceSchedule({
 
         {topShellSlot}
 
+        {isGuest && (
+          <div
+            className="no-print"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '8px',
+              padding: '9px 14px',
+              marginBottom: '12px',
+              borderRadius: '8px',
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              fontSize: '0.78rem',
+              color: '#1e3a8a',
+            }}
+          >
+            <span>
+              {t(
+                'Clinical Catalog View — Sign in with your clinic or distributor account to unlock wholesale & clinic pricing.',
+                'Vista de Catálogo Clínico — Inicia sesión con tu cuenta de clínica o distribuidor para ver tarifas B2B.'
+              )}
+            </span>
+            <a
+              href={`/login?redirect=${encodeURIComponent(loginRedirect)}`}
+              style={{
+                padding: '4px 11px',
+                borderRadius: '6px',
+                background: '#003666',
+                color: '#ffffff',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {t('Sign In for B2B Pricing →', 'Iniciar Sesión B2B →')}
+            </a>
+          </div>
+        )}
+
         {/* Rule #7: GlobalSearchBar always first above KPIs and data controls */}
         <div className="no-print" style={{ marginBottom: '1rem' }}>
           <GlobalSearchBar

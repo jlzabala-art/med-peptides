@@ -452,6 +452,23 @@ export default function CalculatorClient() {
                 </span>
               )}
             </span>
+            <a
+              href={`/rx/intake?peptide=${encodeURIComponent(selectedProduct?.name || '')}&dose=${encodeURIComponent(`${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim())}&lang=${lang}`}
+              style={{
+                marginLeft: 'auto',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: '1px solid #0d9488',
+                background: '#f0fdfa',
+                color: '#0f766e',
+                fontSize: '0.73rem',
+                fontWeight: 750,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {isEs ? 'Prescribir este cálculo →' : 'Prescribe This Calculation →'}
+            </a>
           </div>
 
           {recon.isVial && recon.unitsToInject > 0 && recon.unitsToInject < 10 && recon.syringeCapacityMl >= 1.0 && (
@@ -596,6 +613,23 @@ export default function CalculatorClient() {
                 ? `Mostrando guía para: ${selectedProduct.name} (${selectedStrength.name})`
                 : `Showing guide for: ${selectedProduct.name} (${selectedStrength.name})`}
             </span>
+            <a
+              href={`/rx/intake?peptide=${encodeURIComponent(selectedProduct?.name || '')}&dose=${encodeURIComponent(`${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim())}&lang=${lang}`}
+              style={{
+                marginLeft: 'auto',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: '1px solid #0d9488',
+                background: '#f0fdfa',
+                color: '#0f766e',
+                fontSize: '0.73rem',
+                fontWeight: 750,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {isEs ? 'Prescribir este cálculo →' : 'Prescribe This Calculation →'}
+            </a>
           </div>
 
           <div className="calc-gcp-kpi-grid">
