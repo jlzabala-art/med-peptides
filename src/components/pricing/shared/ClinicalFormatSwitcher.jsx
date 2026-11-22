@@ -142,6 +142,16 @@ export default function ClinicalFormatSwitcher({
         .atlas-format-switcher-short {
           display: none;
         }
+        .atlas-switcher-dropdown-item {
+          transition: background-color 0.14s ease, color 0.14s ease;
+        }
+        .atlas-switcher-dropdown-item:hover {
+          background-color: #f1f5f9 !important;
+          color: #003666 !important;
+        }
+        .atlas-switcher-dropdown-footer:hover {
+          background-color: #f8fafc !important;
+        }
         @media (max-width: 768px) {
           .atlas-format-switcher-inner {
             padding: 6px 8px;
@@ -211,46 +221,79 @@ export default function ClinicalFormatSwitcher({
                 </button>
                 {isDropdownOpen && (
                   <div
+                    role="menu"
                     style={{
                       position: 'absolute',
-                      top: 'calc(100% + 6px)',
+                      top: 'calc(100% + 8px)',
                       left: 0,
-                      minWidth: '230px',
+                      minWidth: '295px',
+                      width: 'max-content',
+                      maxWidth: 'min(360px, calc(100vw - 24px))',
                       background: '#ffffff',
                       border: '1px solid #cbd5e1',
-                      borderRadius: '10px',
-                      boxShadow: '0 10px 28px rgba(15, 23, 42, 0.16)',
-                      padding: '6px',
+                      borderRadius: '12px',
+                      boxShadow: '0 14px 34px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.06)',
+                      padding: '8px',
                       zIndex: 1200,
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '2px',
+                      gap: '3px',
                     }}
                   >
+                    <div
+                      style={{
+                        padding: '4px 10px 6px',
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        color: '#64748b',
+                        borderBottom: '1px solid #f1f5f9',
+                        marginBottom: '2px',
+                      }}
+                    >
+                      {t.label}
+                    </div>
                     {t.group.items.map((item) => {
                       const isCur = item.id === activeFormat;
                       return (
                         <Link
                           key={item.id}
+                          role="menuitem"
                           href={buildHref(item.href)}
                           onClick={() => setOpenGroupId(null)}
+                          className="atlas-switcher-dropdown-item"
                           style={{
-                            padding: '7px 10px',
-                            borderRadius: '6px',
-                            fontSize: '0.76rem',
-                            fontWeight: isCur ? 800 : 600,
-                            color: isCur ? '#003666' : '#334155',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            fontSize: '0.78rem',
+                            fontWeight: isCur ? 750 : 600,
+                            color: isCur ? '#003666' : '#1e293b',
                             background: isCur ? '#eff6ff' : 'transparent',
+                            border: isCur ? '1px solid #bfdbfe' : '1px solid transparent',
                             textDecoration: 'none',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            gap: '8px',
+                            gap: '14px',
                           }}
                         >
-                          <span>{isEs ? item.labelEs : item.labelEn}</span>
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {isCur ? '✓ ' : ''}{isEs ? item.labelEs : item.labelEn}
+                          </span>
                           {item.badge && (
-                            <span style={{ fontSize: '0.62rem', padding: '1px 6px', borderRadius: '999px', background: isCur ? '#dbeafe' : '#f1f5f9', color: isCur ? '#1d4ed8' : '#64748b', fontWeight: 700 }}>
+                            <span
+                              style={{
+                                fontSize: '0.64rem',
+                                padding: '2px 8px',
+                                borderRadius: '999px',
+                                background: isCur ? '#dbeafe' : '#f1f5f9',
+                                color: isCur ? '#1d4ed8' : '#475569',
+                                fontWeight: 700,
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                              }}
+                            >
                               {item.badge}
                             </span>
                           )}
@@ -260,17 +303,23 @@ export default function ClinicalFormatSwitcher({
                     <Link
                       href={t.href}
                       onClick={() => setOpenGroupId(null)}
+                      className="atlas-switcher-dropdown-footer"
                       style={{
                         marginTop: '4px',
-                        padding: '7px 10px',
-                        borderTop: '1px solid #f1f5f9',
-                        fontSize: '0.72rem',
+                        padding: '8px 10px',
+                        borderTop: '1px solid #e2e8f0',
+                        borderRadius: '0 0 8px 8px',
+                        fontSize: '0.74rem',
                         fontWeight: 750,
                         color: '#1a73e8',
                         textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
                       }}
                     >
-                      {isEs ? 'Ver todo el grupo en Hub →' : 'View all in Hub →'}
+                      <span>{isEs ? 'Ver todo el grupo en Hub' : 'View all in Hub'}</span>
+                      <span>→</span>
                     </Link>
                   </div>
                 )}
