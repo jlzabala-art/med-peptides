@@ -82,6 +82,25 @@ export default function PublicLabelsAppClient({
   const [refillPresetPartIndex, setRefillPresetPartIndex] = useState(null);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [isStudioFocus, setIsStudioFocus] = useState(false);
+  const [colorMode, setColorMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return localStorage.getItem('atlas_label_color_mode') === 'color' ? 'color' : 'monochrome';
+      } catch (_) {
+        return 'monochrome';
+      }
+    }
+    return 'monochrome';
+  });
+  const handleColorModeChange = useCallback((nextMode) => {
+    const resolved = nextMode === 'color' ? 'color' : 'monochrome';
+    setColorMode(resolved);
+    try {
+      localStorage.setItem('atlas_label_color_mode', resolved);
+    } catch (_) {
+      /* storage unavailable */
+    }
+  }, []);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [copiedShareType, setCopiedShareType] = useState(null);
@@ -884,58 +903,37 @@ export default function PublicLabelsAppClient({
                 3. Export / Print A4
               </span>
 
-              {(() => {
-                const activeLbl = labels[labelIndex] || {};
-                const hasLotBud = Boolean((activeLbl.batchNumber || currentRx?.batchNumber) && (activeLbl.expiryDate || currentRx?.expiryDate));
-                return (
-                  <span
+              {!embedded && (
+                <span
+                  style={{
+                    marginLeft: 'auto',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setIsStudioFocus((v) => !v)}
                     style={{
-                      marginLeft: 'auto',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      flexWrap: 'wrap',
+                      padding: '3px 9px',
+                      borderRadius: '999px',
+                      border: isStudioFocus ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                      background: isStudioFocus ? '#e8f0fe' : '#ffffff',
+                      color: isStudioFocus ? '#1a73e8' : '#334155',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
                     }}
+                    title={isEs ? 'Ocultar barras superiores para maximizar el estudio' : 'Hide top navigation to maximize studio workspace'}
                   >
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 750,
-                        padding: '2px 8px',
-                        borderRadius: '999px',
-                        background: hasLotBud ? '#f0fdf4' : '#fffbeb',
-                        color: hasLotBud ? '#15803d' : '#b45309',
-                        border: hasLotBud ? '1px solid #bbf7d0' : '1px solid #fde68a',
-                      }}
-                    >
-                      {hasLotBud
-                        ? (isEs ? '✓ Lote & BUD Listos' : '✓ Lot & BUD Ready')
-                        : (isEs ? '⚠️ Falta Lote / BUD' : '⚠️ Missing Lot / BUD')}
-                    </span>
-                    {!embedded && (
-                      <button
-                        type="button"
-                        onClick={() => setIsStudioFocus((v) => !v)}
-                        style={{
-                          padding: '3px 9px',
-                          borderRadius: '999px',
-                          border: isStudioFocus ? '1px solid #1a73e8' : '1px solid #cbd5e1',
-                          background: isStudioFocus ? '#e8f0fe' : '#ffffff',
-                          color: isStudioFocus ? '#1a73e8' : '#334155',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                        }}
-                        title={isEs ? 'Ocultar barras superiores para maximizar el estudio' : 'Hide top navigation to maximize studio workspace'}
-                      >
-                        {isStudioFocus
-                          ? (isEs ? 'Salir Modo Foco' : 'Exit Focus Mode')
-                          : (isEs ? 'Modo Foco' : 'Focus Mode')}
-                      </button>
-                    )}
-                  </span>
-                );
-              })()}
+                    {isStudioFocus
+                      ? (isEs ? 'Salir Modo Foco' : 'Exit Focus Mode')
+                      : (isEs ? 'Modo Foco' : 'Focus Mode')}
+                  </button>
+                </span>
+              )}
             </div>
 
             <LabelsPreflightBar
@@ -948,6 +946,21 @@ export default function PublicLabelsAppClient({
               activeLabel={labels[labelIndex] || {}}
               currentRx={currentRx || {}}
               activeQueueItem={patientQueue[activeQueueIndex] || {}}
+              colorMode={colorMode}
+              onColorModeChange={handleColorModeChange}
+              onFocusLotBud={() => {
+                if (!isEditing) {
+                  setIsEditing(true);
+                  updatePref('preferredEditMode', true);
+                }
+                setTimeout(() => {
+                  const batchEl = document.querySelector('input[placeholder*="PHARM-"], input[name="batchNumber"]');
+                  if (batchEl) {
+                    batchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    batchEl.focus();
+                  }
+                }, 80);
+              }}
               onApplyPreset={(preset) => {
                 handleUpdatePatientConfig(activeQueueIndex, {
                   widthMm: preset.widthMm,
@@ -1035,12 +1048,14 @@ export default function PublicLabelsAppClient({
                 initialEditMode={isEditing}
                 isStandalone={true}
                 isEs={isEs}
+                colorMode={colorMode}
+                onColorModeChange={handleColorModeChange}
               />
             </LabelsErrorBoundary>
           </div>
         )}
 
-        <LabelsOffscreenRenderer patientQueue={patientQueue} />
+        <LabelsOffscreenRenderer patientQueue={patientQueue} colorMode={colorMode} />
       </main>
 
       <QuickManualRxModal

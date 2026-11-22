@@ -1168,6 +1168,52 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>
               {evidenceProfile.evidenceTier} · {evidenceProfile.washoutGuidance}
             </div>
+            {evidenceProfile.indicationScope && (
+              <div style={{ fontSize: '0.73rem', color: '#334155', marginBottom: '6px', background: '#f8fafc', padding: '6px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <strong>{lang === 'es' ? 'Alcance de evidencia:' : 'Evidence Scope:'}</strong> {evidenceProfile.indicationScope.primaryTier} · <em>{evidenceProfile.indicationScope.note}</em>
+              </div>
+            )}
+            {evidenceProfile.regulatoryPosture && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1' }}>
+                  {evidenceProfile.regulatoryPosture.status}
+                </span>
+                {evidenceProfile.regulatoryPosture.coaRequired && (
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>
+                    {lang === 'es' ? 'CoA & Cadena de Frío' : 'CoA & Cold-Chain Required'}
+                  </span>
+                )}
+                {evidenceProfile.regulatoryPosture.wadaProhibited && (
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '2px 8px', borderRadius: '999px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}>
+                    {evidenceProfile.regulatoryPosture.wadaNote || 'WADA Prohibited'}
+                  </span>
+                )}
+              </div>
+            )}
+            {Array.isArray(evidenceProfile.coInterventions) && evidenceProfile.coInterventions.length > 0 && (
+              <div style={{ marginTop: '6px', marginBottom: '6px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '6px', padding: '7px 9px' }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: '#065f46', marginBottom: '3px' }}>
+                  {lang === 'es' ? 'Co-Intervención Clínica Obligatoria' : 'Mandatory Clinical Co-Interventions'}
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.73rem', color: '#064e3b', lineHeight: 1.4 }}>
+                  {evidenceProfile.coInterventions.map((ci, idx) => (
+                    <li key={idx}>{ci}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {Array.isArray(evidenceProfile.sequencingPhases) && evidenceProfile.sequencingPhases.length > 0 && (
+              <div style={{ marginTop: '6px', marginBottom: '6px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '7px 9px' }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: '#1e40af', marginBottom: '3px' }}>
+                  {lang === 'es' ? 'Secuenciación Clínica (Repair → Optimize → Fuel)' : 'Clinical Sequencing (Repair → Optimize → Fuel)'}
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.73rem', color: '#1e3a8a', lineHeight: 1.4 }}>
+                  {evidenceProfile.sequencingPhases.map((sp, idx) => (
+                    <li key={idx}>{sp}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {Array.isArray(evidenceProfile.citations) && evidenceProfile.citations.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {evidenceProfile.citations.map((cit) => (
@@ -1195,6 +1241,18 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
                 <li key={idx}>{c}</li>
               ))}
             </ul>
+            {Array.isArray(evidenceProfile.stoppingRules) && evidenceProfile.stoppingRules.length > 0 && (
+              <div style={{ marginTop: '10px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '7px 9px' }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#92400e', marginBottom: '4px' }}>
+                  {lang === 'es' ? 'Criterios de Parada / Ajuste en Curso' : 'Clinical Stopping & De-Escalation Rules'}
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.73rem', color: '#78350f', lineHeight: 1.4 }}>
+                  {evidenceProfile.stoppingRules.map((sr, idx) => (
+                    <li key={idx}>{sr}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </section>
 

@@ -4,7 +4,7 @@ import React from 'react';
 import PharmapolisLabelSvg from '@/components/prescription/PharmapolisLabelSvg';
 import { detectOptimalLabelDimensions } from '@/utils/labels/containerDimensionDetector';
 
-export default function LabelsOffscreenRenderer({ patientQueue = [] }) {
+export default function LabelsOffscreenRenderer({ patientQueue = [], colorMode = 'monochrome' }) {
   return (
     <div
       id="pls-offscreen-batch-render"
@@ -44,6 +44,7 @@ export default function LabelsOffscreenRenderer({ patientQueue = [] }) {
                 variant={pLabel.variant || pLabel.lastVariant || pItem.variant || 'backQr'}
                 widthMm={effectiveWidthMm}
                 heightMm={effectiveHeightMm}
+                colorMode={colorMode}
                 showCutGuides={false}
                 svgRef={(node) => {
                   if (node) {

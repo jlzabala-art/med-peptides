@@ -100,7 +100,9 @@ export default function PharmacyLabelsModal({
   onConfigChange = null,
   onLabelDataChange = null,
   readOnly = false,
-  canSaveOverride = null
+  canSaveOverride = null,
+  colorMode: externalColorMode = null,
+  onColorModeChange = null
 }) {
   const { can, is, effectiveRole } = useRoleAccess();
   const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
@@ -148,7 +150,12 @@ export default function PharmacyLabelsModal({
   const [boldPosology, setBoldPosology] = useState(true); // true = Bold 800 (standard), false = Normal 500 (compact, saves space)
   const [deliveryLabelType, setDeliveryLabelType] = useState('customs'); // 'customs' (GCC Discreet Aduanas) | 'clinical' (100% Prescription Based)
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
-  const [colorMode, setColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (screen preview)
+  const [internalColorMode, setInternalColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (vector color)
+  const colorMode = externalColorMode || internalColorMode;
+  const setColorMode = (nextMode) => {
+    setInternalColorMode(nextMode);
+    if (onColorModeChange) onColorModeChange(nextMode);
+  };
   const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)
   const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
   const [fulfillmentMode, setFulfillmentMode] = useState(() => {

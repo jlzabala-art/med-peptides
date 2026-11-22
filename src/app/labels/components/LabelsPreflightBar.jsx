@@ -53,7 +53,10 @@ export default function LabelsPreflightBar({
   onDownloadA4BatchPdf = null,
   onOpenShortcuts,
   strictGmpGate = false,
-  onToggleStrictGmpGate = null
+  onToggleStrictGmpGate = null,
+  colorMode = 'monochrome',
+  onColorModeChange = null,
+  onFocusLotBud = null
 }) {
   const [exportOpen, setExportOpen] = useState(false);
   const exportRef = useRef(null);
@@ -233,7 +236,9 @@ export default function LabelsPreflightBar({
             <span>{isEs ? 'Fórmula' : 'Formula'}</span>
           </span>
 
-          <span
+          <button
+            type="button"
+            onClick={() => onFocusLotBud?.()}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -242,28 +247,16 @@ export default function LabelsPreflightBar({
               borderRadius: '12px',
               background: hasLotBud ? '#f0fdf4' : '#fffbeb',
               color: hasLotBud ? '#16a34a' : '#d97706',
-              border: `1px solid ${hasLotBud ? '#bbf7d0' : '#fde68a'}`
+              border: `1px solid ${hasLotBud ? '#bbf7d0' : '#fde68a'}`,
+              cursor: onFocusLotBud ? 'pointer' : 'default',
+              fontSize: 'inherit',
+              fontWeight: 'inherit',
             }}
+            title={isEs ? 'Ir al campo de Lote / BUD' : 'Jump to Lot / BUD field'}
           >
             <CheckCircle2 size={11} />
-            <span>{hasLotBud ? 'Lot & BUD' : (isEs ? 'Sin Lote/BUD' : 'No Lot/BUD')}</span>
-          </span>
-
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '3px',
-              padding: '2px 7px',
-              borderRadius: '12px',
-              background: isApproved ? '#f0fdf4' : '#fffbeb',
-              color: isApproved ? '#16a34a' : '#d97706',
-              border: `1px solid ${isApproved ? '#bbf7d0' : '#fde68a'}`
-            }}
-          >
-            <CheckCircle2 size={11} />
-            <span>{isApproved ? (isEs ? 'Aprobada' : 'Approved') : (isEs ? 'Pendiente' : 'Pending')}</span>
-          </span>
+            <span>{hasLotBud ? 'Lot & BUD' : (isEs ? 'Falta Lote/BUD' : 'No Lot/BUD')}</span>
+          </button>
 
           {overflow.hasOverflow && (
             <button
@@ -314,6 +307,61 @@ export default function LabelsPreflightBar({
         </div>
 
         <span style={{ color: '#cbd5e1' }}>|</span>
+
+        {/* Vector SVG Print Palette Toggle (Thermal B&W vs Vector Color) */}
+        {onColorModeChange && (
+          <div
+            role="group"
+            aria-label={isEs ? 'Modo de color de impresión SVG' : 'SVG print color mode'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              background: '#f1f5f9',
+              padding: '2px',
+              borderRadius: '7px',
+              border: '1px solid #cbd5e1',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => onColorModeChange('monochrome')}
+              style={{
+                padding: '3px 8px',
+                borderRadius: '5px',
+                border: 'none',
+                background: colorMode !== 'color' ? '#ffffff' : 'transparent',
+                color: colorMode !== 'color' ? '#0f172a' : '#64748b',
+                boxShadow: colorMode !== 'color' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+              title={isEs ? 'SVG Blanco y Negro (Térmica / Alto contraste)' : 'Vector B&W (Thermal / High contrast)'}
+            >
+              🖨️ B&amp;W
+            </button>
+            <button
+              type="button"
+              onClick={() => onColorModeChange('color')}
+              style={{
+                padding: '3px 8px',
+                borderRadius: '5px',
+                border: 'none',
+                background: colorMode === 'color' ? '#ffffff' : 'transparent',
+                color: colorMode === 'color' ? '#1a73e8' : '#64748b',
+                boxShadow: colorMode === 'color' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+              title={isEs ? 'SVG Color Vectorial (Sin pérdida de calidad)' : 'Vector Color SVG (Full sharpness)'}
+            >
+              🎨 Color
+            </button>
+          </div>
+        )}
 
         {/* Unified Print / Export Dropdown (GCP Action Menu) */}
         <div ref={exportRef} style={{ position: 'relative' }}>

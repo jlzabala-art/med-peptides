@@ -480,9 +480,36 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                                   <strong>{isEs ? 'Analíticas:' : 'Labs:'}</strong> {proto.biomarkers.join(', ')}
                                 </div>
                               )}
+                              {Array.isArray(proto.coInterventions) && proto.coInterventions.length > 0 && (
+                                <div style={{ fontSize: '0.72rem', color: '#065f46', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '6px', padding: '6px 8px' }}>
+                                  <strong>{isEs ? 'Co-intervención obligatoria:' : 'Mandatory Co-Intervention:'}</strong> {proto.coInterventions.join(' · ')}
+                                </div>
+                              )}
+                              {Array.isArray(proto.sequencingPhases) && proto.sequencingPhases.length > 0 && (
+                                <div style={{ fontSize: '0.72rem', color: '#1e40af', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '6px 8px' }}>
+                                  <strong>{isEs ? 'Secuenciación (Repair → Optimize → Fuel):' : 'Sequencing (Repair → Optimize → Fuel):'}</strong> {proto.sequencingPhases.join(' · ')}
+                                </div>
+                              )}
                               {Array.isArray(proto.contraindications) && proto.contraindications.length > 0 && (
                                 <div style={{ fontSize: '0.72rem', color: '#b91c1c', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '6px 8px' }}>
                                   <strong>{isEs ? 'Contraindicaciones:' : 'Contraindications:'}</strong> {proto.contraindications.join(' · ')}
+                                </div>
+                              )}
+                              {Array.isArray(proto.stoppingRules) && proto.stoppingRules.length > 0 && (
+                                <div style={{ fontSize: '0.72rem', color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '6px 8px' }}>
+                                  <strong>{isEs ? 'Criterios de parada:' : 'Stopping Rules:'}</strong> {proto.stoppingRules[0]}
+                                </div>
+                              )}
+                              {proto.regulatoryPosture && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', fontSize: '0.68rem', color: '#475569' }}>
+                                  <span style={{ padding: '2px 7px', borderRadius: '999px', background: '#f1f5f9', border: '1px solid #cbd5e1', fontWeight: 700 }}>
+                                    {proto.regulatoryPosture.status}
+                                  </span>
+                                  {proto.regulatoryPosture.wadaProhibited && (
+                                    <span style={{ padding: '2px 7px', borderRadius: '999px', background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', fontWeight: 800 }}>
+                                      WADA Prohibited
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </div>
