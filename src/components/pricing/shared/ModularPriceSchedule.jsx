@@ -27,6 +27,7 @@ export default function ModularPriceSchedule({
   initialProducts = [],
   initialCategory = 'all',
   config = {},
+  topShellSlot = null,
 }) {
   const {
     sectionLabel = 'B2B Wholesale',
@@ -52,6 +53,7 @@ export default function ModularPriceSchedule({
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
   const workspace = usePublicWorkspace?.() || null;
+  const t = workspace?.t || ((en) => en);
 
   const isAdmin = is('admin') || is('medical_director');
   const isDistributor = is('distributor');
@@ -293,10 +295,8 @@ export default function ModularPriceSchedule({
           setCurrency(c);
           workspace?.setCurrency?.(c);
         }}
-        hideAiButton={true}
-        hideContactButton={true}
         breadcrumb={[
-          { label: sectionLabel || 'B2B Schedules', href: '/pricing' },
+          { label: sectionLabel || t('B2B Schedules', 'Tarifas B2B'), href: '/pricing' },
           { label: navCurrentLabel },
         ]}
       />
@@ -313,23 +313,25 @@ export default function ModularPriceSchedule({
           title={documentTitle}
           subtitle={documentSubtitle}
           metaItems={[
-            { label: 'DOCUMENT REF:', value: documentRef, mono: true },
-            { label: 'CURRENCY:', value: currency, mono: true },
+            { label: t('DOCUMENT REF:', 'REF. DOCUMENTO:'), value: documentRef, mono: true },
+            { label: t('CURRENCY:', 'MONEDA:'), value: currency, mono: true },
           ]}
           actions={
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button type="button" className="gcp-btn-secondary" onClick={() => setIsPdfPreviewOpen(true)} style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650 }}>
-                Preview PDF
+                {t('Preview PDF', 'Vista Previa PDF')}
               </button>
               <button type="button" className="gcp-btn-secondary" onClick={handleCopyLink} style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650 }}>
-                {copied ? 'Copied' : 'Share'}
+                {copied ? t('Copied', 'Copiado') : t('Share', 'Compartir')}
               </button>
               <button type="button" className="gcp-btn-primary" onClick={() => setIsExportModalOpen(true)} style={{ height: '36px', padding: '0 13px', fontSize: '0.76rem', fontWeight: 750 }}>
-                Export / Print
+                {t('Export / Print', 'Exportar / Imprimir')}
               </button>
             </div>
           }
         />
+
+        {topShellSlot}
 
         {/* Rule #7: GlobalSearchBar always first above KPIs and data controls */}
         <div className="no-print" style={{ marginBottom: '1rem' }}>
@@ -382,7 +384,7 @@ export default function ModularPriceSchedule({
                   onClick={() => setSelectedCategory(cat)}
                   className={`category-chip ${selectedCategory === cat ? 'active' : ''}`}
                 >
-                  {cat === 'all' ? 'All Formulations' : cat}
+                  {cat === 'all' ? t('All Formulations', 'Todas las Formulaciones') : cat}
                 </button>
               ))}
             </div>
@@ -411,7 +413,7 @@ export default function ModularPriceSchedule({
                 }}
               >
                 <RotateCcw size={14} />
-                <span>Reset Overrides</span>
+                <span>{t('Reset Overrides', 'Restablecer Precios')}</span>
               </button>
             )}
 
