@@ -56,7 +56,10 @@ export default function LabelsPreflightBar({
   onToggleStrictGmpGate = null,
   colorMode = 'monochrome',
   onColorModeChange = null,
-  onFocusLotBud = null
+  onFocusLotBud = null,
+  editorTab = 'fields',
+  onChangeEditorTab = null,
+  onQueueRxQuantity = null
 }) {
   const [exportOpen, setExportOpen] = useState(false);
   const exportRef = useRef(null);
@@ -115,7 +118,7 @@ export default function LabelsPreflightBar({
         >
           <button
             type="button"
-            onClick={() => isEditing && onToggleEditMode?.(false)}
+            onClick={() => onToggleEditMode?.(false)}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -132,11 +135,14 @@ export default function LabelsPreflightBar({
             }}
           >
             <Eye size={13} />
-            <span>{isEs ? 'Vista Impresión' : 'Print View'}</span>
+            <span>{isEs ? 'Vista Previa' : 'Preview'}</span>
           </button>
           <button
             type="button"
-            onClick={() => !isEditing && onToggleEditMode?.(true)}
+            onClick={() => {
+              onChangeEditorTab?.('fields');
+              if (!isEditing) onToggleEditMode?.(true);
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -144,17 +150,42 @@ export default function LabelsPreflightBar({
               padding: '4px 10px',
               borderRadius: '5px',
               border: 'none',
-              background: isEditing ? '#ffffff' : 'transparent',
-              color: isEditing ? '#1a73e8' : '#475569',
+              background: isEditing && editorTab !== 'markdown' ? '#ffffff' : 'transparent',
+              color: isEditing && editorTab !== 'markdown' ? '#1a73e8' : '#475569',
               fontSize: '0.73rem',
-              fontWeight: isEditing ? 700 : 600,
+              fontWeight: isEditing && editorTab !== 'markdown' ? 700 : 600,
               cursor: 'pointer',
-              boxShadow: isEditing ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+              boxShadow: isEditing && editorTab !== 'markdown' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
             }}
           >
             <Edit3 size={13} />
-            <span>{isEs ? 'Modo Edición (E)' : 'Edit Mode (E)'}</span>
+            <span>{isEs ? 'Editar Campos' : 'Edit Fields'}</span>
           </button>
+          {onChangeEditorTab && (
+            <button
+              type="button"
+              onClick={() => {
+                onChangeEditorTab('markdown');
+                if (!isEditing) onToggleEditMode?.(true);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                borderRadius: '5px',
+                border: 'none',
+                background: isEditing && editorTab === 'markdown' ? '#ffffff' : 'transparent',
+                color: isEditing && editorTab === 'markdown' ? '#1a73e8' : '#475569',
+                fontSize: '0.73rem',
+                fontWeight: isEditing && editorTab === 'markdown' ? 700 : 600,
+                cursor: 'pointer',
+                boxShadow: isEditing && editorTab === 'markdown' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+              }}
+            >
+              <span>📝 .md</span>
+            </button>
+          )}
         </div>
 
         <span style={{ color: '#cbd5e1' }}>|</span>
@@ -364,6 +395,35 @@ export default function LabelsPreflightBar({
         )}
 
         {/* Unified Print / Export Dropdown (GCP Action Menu) */}
+        {(() => {
+          const rawItemQty = Number(currentRx?.items?.[0]?.quantity || activeLabel?.rxQty || 0);
+          const parsedQtyMatch = String(activeLabel?.quantity || '').match(/[×x]\s*(\d+)/i);
+          const rxQty = rawItemQty > 1 ? rawItemQty : (parsedQtyMatch ? Number(parsedQtyMatch[1]) : 0);
+          if (!onQueueRxQuantity || rxQty <= 1) return null;
+          return (
+            <button
+              type="button"
+              onClick={() => onQueueRxQuantity(rxQty)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 9px',
+                borderRadius: '6px',
+                border: '1px solid #0d9488',
+                background: '#f0fdfa',
+                color: '#0f766e',
+                fontSize: '0.70rem',
+                fontWeight: 750,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+              title={isEs ? `Añadir las ${rxQty} unidades de esta receta a la cola de impresión A4/lote` : `Queue all ${rxQty} units from this Rx for batch A4 printing`}
+            >
+              <span>+ {isEs ? `Cola ×${rxQty}` : `Queue ×${rxQty}`}</span>
+            </button>
+          );
+        })()}
         <div ref={exportRef} style={{ position: 'relative' }}>
           <button
             type="button"

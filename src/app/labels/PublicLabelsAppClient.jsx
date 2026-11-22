@@ -82,6 +82,7 @@ export default function PublicLabelsAppClient({
   const [refillPresetPartIndex, setRefillPresetPartIndex] = useState(null);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [isStudioFocus, setIsStudioFocus] = useState(false);
+  const [editorTab, setEditorTab] = useState('fields');
   const [colorMode, setColorMode] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -948,6 +949,24 @@ export default function PublicLabelsAppClient({
               activeQueueItem={patientQueue[activeQueueIndex] || {}}
               colorMode={colorMode}
               onColorModeChange={handleColorModeChange}
+              editorTab={editorTab}
+              onChangeEditorTab={setEditorTab}
+              onQueueRxQuantity={(qty) => {
+                const activeItem = patientQueue[activeQueueIndex];
+                if (!activeItem || qty <= 1) return;
+                const extraCopies = Array.from({ length: qty - 1 }, (_, i) => ({
+                  ...activeItem,
+                  code: `${activeItem.code}-C${i + 2}`,
+                  rxCode: activeItem.code,
+                  selectedPartIndex: activeItem.selectedPartIndex ?? labelIndex,
+                }));
+                setPatientQueue((prev) => [...prev, ...extraCopies]);
+                toast.success(
+                  isEs
+                    ? `Añadidas ×${qty} etiquetas de ${activeItem.code} a la cola Batch A4`
+                    : `Queued ×${qty} labels for ${activeItem.code} in Batch A4`
+                );
+              }}
               onFocusLotBud={() => {
                 if (!isEditing) {
                   setIsEditing(true);
@@ -1050,6 +1069,8 @@ export default function PublicLabelsAppClient({
                 isEs={isEs}
                 colorMode={colorMode}
                 onColorModeChange={handleColorModeChange}
+                editorTab={editorTab}
+                onEditorTabChange={setEditorTab}
               />
             </LabelsErrorBoundary>
           </div>

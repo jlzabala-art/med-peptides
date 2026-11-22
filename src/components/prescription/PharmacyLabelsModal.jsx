@@ -102,7 +102,9 @@ export default function PharmacyLabelsModal({
   readOnly = false,
   canSaveOverride = null,
   colorMode: externalColorMode = null,
-  onColorModeChange = null
+  onColorModeChange = null,
+  editorTab: externalEditorTab = null,
+  onEditorTabChange = null
 }) {
   const { can, is, effectiveRole } = useRoleAccess();
   const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
@@ -239,7 +241,12 @@ export default function PharmacyLabelsModal({
 
   // Live Online Editing & Markdown Support
   const [isEditing, setIsEditing] = useState(Boolean(initialEditMode));
-  const [editorTab, setEditorTab] = useState('fields'); // 'fields' | 'markdown'
+  const [internalEditorTab, setInternalEditorTab] = useState('fields'); // 'fields' | 'markdown'
+  const editorTab = externalEditorTab || internalEditorTab;
+  const setEditorTab = (nextTab) => {
+    setInternalEditorTab(nextTab);
+    if (onEditorTabChange) onEditorTabChange(nextTab);
+  };
   const [editedOverrides, setEditedOverrides] = useState({});
   const [markdownText, setMarkdownText] = useState('');
   const [apisEditorText, setApisEditorText] = useState('');
@@ -2844,22 +2851,26 @@ export default function PharmacyLabelsModal({
               <div className="gcp-editor-header-bar">
                 {/* Tabs & Approval Status (Golden Rule #8 & #28) */}
                 <div className="gcp-editor-tabs-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => setEditorTab('fields')}
-                    className={`gcp-editor-tab-btn ${editorTab === 'fields' ? 'active' : ''}`}
-                  >
-                    <Edit3 size={13} />
-                    <span>{isEs ? 'Campos' : 'Fields'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditorTab('markdown')}
-                    className={`gcp-editor-tab-btn ${editorTab === 'markdown' ? 'active' : ''}`}
-                  >
-                    <FileText size={13} />
-                    <span>Markdown (.md)</span>
-                  </button>
+                  {!externalEditorTab && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setEditorTab('fields')}
+                        className={`gcp-editor-tab-btn ${editorTab === 'fields' ? 'active' : ''}`}
+                      >
+                        <Edit3 size={13} />
+                        <span>{isEs ? 'Campos' : 'Fields'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditorTab('markdown')}
+                        className={`gcp-editor-tab-btn ${editorTab === 'markdown' ? 'active' : ''}`}
+                      >
+                        <FileText size={13} />
+                        <span>Markdown (.md)</span>
+                      </button>
+                    </>
+                  )}
 
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
                     <StatusBadge status={currentItem.approvalStatus || 'draft'} />

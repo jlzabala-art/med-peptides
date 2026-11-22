@@ -204,11 +204,15 @@ export function PublicWorkspaceProvider({ children }) {
         localStorage.setItem('atlas_portal_currency', upper);
       } catch { /* ignore */ }
       const url = new URL(window.location.href);
-      url.searchParams.set('cur', upper);
+      url.searchParams.delete('cur');
+      url.searchParams.set('currency', upper);
+      if (!url.searchParams.get('lang')) {
+        url.searchParams.set('lang', state.lang === 'es' ? 'es' : 'en');
+      }
       window.history.replaceState({}, '', url.toString());
       window.dispatchEvent(new CustomEvent('atlas-currency-changed', { detail: upper }));
     }
-  }, []);
+  }, [state.lang]);
 
   const setLang = useCallback((newLang) => {
     if (!newLang) return;
@@ -223,10 +227,13 @@ export function PublicWorkspaceProvider({ children }) {
       } catch { /* ignore */ }
       const url = new URL(window.location.href);
       url.searchParams.set('lang', lower);
+      if (state.currency && !url.searchParams.get('currency')) {
+        url.searchParams.set('currency', state.currency);
+      }
       window.history.replaceState({}, '', url.toString());
       window.dispatchEvent(new CustomEvent('atlas-language-changed', { detail: { lang: lower } }));
     }
-  }, []);
+  }, [state.currency]);
 
   const addRfqItem = useCallback((item) => {
     if (!item || (!item.id && !item.sku)) return;

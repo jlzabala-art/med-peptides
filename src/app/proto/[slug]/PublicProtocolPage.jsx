@@ -1253,6 +1253,26 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
                 </ul>
               </div>
             )}
+            <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <Link
+                href={`/calculator?peptide=${encodeURIComponent(protocol?.compounds?.[0]?.name || protocol?.name || protocol?.title || '')}&lang=${lang}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '5px 11px',
+                  borderRadius: '6px',
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  color: '#1d4ed8',
+                  fontSize: '0.73rem',
+                  fontWeight: 750,
+                  textDecoration: 'none',
+                }}
+              >
+                <span>{lang === 'es' ? 'Calcular Dosis y Clics U-100 →' : 'Open in Calculator →'}</span>
+              </Link>
+            </div>
           </div>
         </section>
 

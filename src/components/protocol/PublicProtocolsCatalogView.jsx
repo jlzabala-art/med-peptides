@@ -48,6 +48,8 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
     setRouteFilter,
     evidenceFilter,
     setEvidenceFilter,
+    wadaSafeOnly,
+    setWadaSafeOnly,
     safetyExclusions,
     toggleSafetyExclusion,
     onlyShortlisted,
@@ -291,6 +293,25 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
             t={t}
           />
 
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            <button
+              type="button"
+              onClick={() => setWadaSafeOnly((prev) => !prev)}
+              style={{
+                padding: '4px 11px',
+                borderRadius: '999px',
+                border: wadaSafeOnly ? '1px solid #059669' : '1px solid #cbd5e1',
+                background: wadaSafeOnly ? '#ecfdf5' : '#ffffff',
+                color: wadaSafeOnly ? '#047857' : '#475569',
+                fontSize: '0.73rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              {wadaSafeOnly ? '✓ ' : ''}{isEs ? 'Solo WADA-Safe (Atletas)' : 'WADA-Safe Only (Athletes)'}
+            </button>
+          </div>
+
           {/* ── 4. Protocol Groups by Therapeutic Goals ── */}
           {groupedProtocols.length > 0 ? (
             <div className="proto-goal-groups-container">
@@ -510,6 +531,20 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                                       WADA Prohibited
                                     </span>
                                   )}
+                                  <Link
+                                    href={`/calculator?peptide=${encodeURIComponent(proto.compounds?.[0]?.name || proto.cleanName)}&lang=${lang}`}
+                                    style={{
+                                      padding: '2px 8px',
+                                      borderRadius: '999px',
+                                      background: '#eff6ff',
+                                      border: '1px solid #bfdbfe',
+                                      color: '#1d4ed8',
+                                      fontWeight: 750,
+                                      textDecoration: 'none',
+                                    }}
+                                  >
+                                    {isEs ? 'Abrir en Calculadora →' : 'Open in Calculator →'}
+                                  </Link>
                                 </div>
                               )}
                             </div>

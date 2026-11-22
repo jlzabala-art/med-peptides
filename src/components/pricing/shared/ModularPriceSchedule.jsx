@@ -71,6 +71,7 @@ export default function ModularPriceSchedule({
   const [copied, setCopied] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+  const [viewMode, setViewMode] = useState(config.defaultViewMode || 'table');
   const showLandedCost = true;
 
   const { currency, setCurrency, fxRate, formatPrice } = useCurrencyConverter({
@@ -390,7 +391,44 @@ export default function ModularPriceSchedule({
             </div>
           </div>
 
-          <div className="controls-right">
+          <div className="controls-right" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '2px', borderRadius: '7px', border: '1px solid #cbd5e1' }}>
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '5px',
+                  border: 'none',
+                  background: viewMode === 'table' ? '#ffffff' : 'transparent',
+                  color: viewMode === 'table' ? '#003666' : '#64748b',
+                  fontSize: '0.73rem',
+                  fontWeight: viewMode === 'table' ? 750 : 600,
+                  cursor: 'pointer',
+                  boxShadow: viewMode === 'table' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                }}
+              >
+                {t('Table', 'Tabla')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('cards')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '5px',
+                  border: 'none',
+                  background: viewMode === 'cards' ? '#ffffff' : 'transparent',
+                  color: viewMode === 'cards' ? '#003666' : '#64748b',
+                  fontSize: '0.73rem',
+                  fontWeight: viewMode === 'cards' ? 750 : 600,
+                  cursor: 'pointer',
+                  boxShadow: viewMode === 'cards' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                }}
+              >
+                {t('Cards', 'Tarjetas')}
+              </button>
+            </div>
+
             {hasCustomOverrides && (
               <button
                 type="button"
@@ -422,7 +460,7 @@ export default function ModularPriceSchedule({
 
         <PricingDataTable
           products={filteredProducts}
-          viewMode="cards"
+          viewMode={viewMode}
           skuPrefixPattern={skuPrefixPattern}
           loginRedirect={loginRedirect}
           currency={currency}

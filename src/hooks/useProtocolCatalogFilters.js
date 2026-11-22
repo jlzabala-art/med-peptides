@@ -51,6 +51,7 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
   const [phasesFilter, setPhasesFilter] = useState('all');
   const [routeFilter, setRouteFilter] = useState('all');
   const [evidenceFilter, setEvidenceFilter] = useState('all');
+  const [wadaSafeOnly, setWadaSafeOnly] = useState(false);
   const [safetyExclusions, setSafetyExclusions] = useState([]);
   const [onlyShortlisted, setOnlyShortlisted] = useState(false);
   const [sortBy, setSortBy] = useState('relevance');
@@ -285,6 +286,8 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
 
       if (!matchesSafetyExclusions(p, safetyExclusions)) return false;
 
+      if (wadaSafeOnly && p.regulatoryPosture?.wadaProhibited) return false;
+
       if (onlyShortlisted && !shortlistSlugs.has(p.cleanSlug)) return false;
 
       if (q) {
@@ -329,6 +332,7 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
     phasesFilter,
     routeFilter,
     evidenceFilter,
+    wadaSafeOnly,
     safetyExclusions,
     onlyShortlisted,
     shortlistSlugs,
@@ -344,6 +348,7 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
       phasesFilter !== 'all' ||
       routeFilter !== 'all' ||
       evidenceFilter !== 'all' ||
+      wadaSafeOnly ||
       safetyExclusions.length > 0 ||
       onlyShortlisted
   );
@@ -472,6 +477,7 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
     setPhasesFilter('all');
     setRouteFilter('all');
     setEvidenceFilter('all');
+    setWadaSafeOnly(false);
     setSafetyExclusions([]);
     setOnlyShortlisted(false);
     setSortBy('relevance');
@@ -492,6 +498,8 @@ export function useProtocolCatalogFilters(initialProtocols = []) {
     setRouteFilter,
     evidenceFilter,
     setEvidenceFilter,
+    wadaSafeOnly,
+    setWadaSafeOnly,
     safetyExclusions,
     toggleSafetyExclusion,
     onlyShortlisted,
