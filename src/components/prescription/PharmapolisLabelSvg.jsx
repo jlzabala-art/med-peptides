@@ -1729,19 +1729,29 @@ export default function PharmapolisLabelSvg({
                     y={cautionBoxY}
                     width={innerUsableWidth + 8}
                     height={cautionBoxH}
-                    fill="#000000"
+                    fill={isMono ? '#ffffff' : '#fffbeb'}
+                    stroke={isMono ? '#000000' : '#d97706'}
+                    strokeWidth={isMono ? '1.8' : '1.5'}
                     rx="3"
                   />
+                  <rect
+                    x="-4"
+                    y={cautionBoxY}
+                    width="5"
+                    height={cautionBoxH}
+                    fill={isMono ? '#000000' : '#d97706'}
+                    rx="1.5"
+                  />
                   <text
-                    x="8"
+                    x="10"
                     y={cautionTextY}
                     fontFamily="Arial, Helvetica, -apple-system, sans-serif"
                     fontSize={isShort ? 12.5 : 14.5}
                     fontWeight="900"
-                    fill="#ffffff"
-                    letterSpacing="0.5"
+                    fill={isMono ? '#000000' : '#78350f'}
+                    letterSpacing="0.4"
                   >
-                    ⚠️ {cautionText}
+                    ▲ {cautionText}
                   </text>
                   <text
                     x="0"
