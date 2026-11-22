@@ -16,7 +16,6 @@ import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
 import { generateLabelZpl } from '@/utils/labels/zplGenerator';
 import RefillFormulaWorkbench from './RefillFormulaWorkbench';
 import ExternalFulfillmentRefillCard from './ExternalFulfillmentRefillCard';
-import DeliveryLabelControls from './labels/DeliveryLabelControls';
 import { Truck } from 'lucide-react';
 
 /**
@@ -2462,60 +2461,110 @@ export default function PharmacyLabelsModal({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Truck size={15} color="#003666" />
                   <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>
-                    {isEs ? 'Modalidad de Despacho & Refill:' : 'Fulfillment & Refill Mode:'}
+                    {isEs ? 'Tipo:' : 'View:'}
                   </span>
                 </div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '2px', borderRadius: '6px', border: '1px solid #dadce0', gap: '2px' }}>
+                  <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '2px', borderRadius: '7px', border: '1px solid #dadce0', gap: '2px' }}>
                     <button
                       type="button"
-                      onClick={() => setFulfillmentMode('internal')}
+                      onClick={() => {
+                        setFulfillmentMode('internal');
+                        if (activeVariant === 'shipping') setActiveVariant('frontWithQr');
+                      }}
                       style={{
                         padding: '4px 10px',
-                        borderRadius: '4px',
-                        border: fulfillmentMode === 'internal' ? '1px solid #1a73e8' : '1px solid transparent',
-                        background: fulfillmentMode === 'internal' ? '#e8f0fe' : 'transparent',
-                        color: fulfillmentMode === 'internal' ? '#1a73e8' : '#475569',
+                        borderRadius: '5px',
+                        border: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? '1px solid #1a73e8' : '1px solid transparent',
+                        background: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? '#ffffff' : 'transparent',
+                        color: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? '#1a73e8' : '#475569',
+                        boxShadow: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
                         fontSize: '0.72rem',
-                        fontWeight: fulfillmentMode === 'internal' ? 750 : 600,
+                        fontWeight: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? 750 : 600,
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      🏷️ {isEs ? 'Etiqueta Atlas' : 'Atlas Label'}
+                      🏷️ {isEs ? 'Etiqueta Producto' : 'Product Label'}
                     </button>
+                    {!hideShippingLabel && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFulfillmentMode('internal');
+                          setActiveVariant('shipping');
+                        }}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '5px',
+                          border: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? '1px solid #1a73e8' : '1px solid transparent',
+                          background: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? '#ffffff' : 'transparent',
+                          color: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? '#1a73e8' : '#475569',
+                          boxShadow: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                          fontSize: '0.72rem',
+                          fontWeight: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? 750 : 600,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        📦 {isEs ? 'Etiqueta Envío' : 'Shipping Label'}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => setFulfillmentMode('external_supplier')}
                       style={{
                         padding: '4px 10px',
-                        borderRadius: '4px',
+                        borderRadius: '5px',
                         border: fulfillmentMode === 'external_supplier' ? '1px solid #1a73e8' : '1px solid transparent',
-                        background: fulfillmentMode === 'external_supplier' ? '#e8f0fe' : 'transparent',
+                        background: fulfillmentMode === 'external_supplier' ? '#ffffff' : 'transparent',
                         color: fulfillmentMode === 'external_supplier' ? '#1a73e8' : '#475569',
+                        boxShadow: fulfillmentMode === 'external_supplier' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
                         fontSize: '0.72rem',
                         fontWeight: fulfillmentMode === 'external_supplier' ? 750 : 600,
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      📦 {isEs ? 'Tarjeta Refill' : 'Refill Card'}
+                      🔄 {isEs ? 'Tarjeta Refill' : 'Refill Card'}
                     </button>
                   </div>
 
                   {fulfillmentMode !== 'external_supplier' && (
                     <>
-                      <DeliveryLabelControls
-                        hideShippingLabel={hideShippingLabel}
-                        activeVariant={activeVariant}
-                        setActiveVariant={setActiveVariant}
-                        deliveryLabelType={deliveryLabelType}
-                        setDeliveryLabelType={setDeliveryLabelType}
-                        currentItem={currentItem}
-                        handleFieldChange={handleFieldChange}
-                        getCustomsFriendlySuggestions={getCustomsFriendlySuggestions}
-                        isEs={isEs}
-                      />
+                      {!hideShippingLabel && activeVariant === 'shipping' && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <label htmlFor="gcp-label-deliverymode" style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>
+                            {isEs ? 'Modo:' : 'Mode:'}
+                          </label>
+                          <select
+                            id="gcp-label-deliverymode"
+                            value={deliveryLabelType}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setDeliveryLabelType(val);
+                              if (val === 'clinical') {
+                                handleFieldChange('shippingTitle', currentItem.productTitle || currentItem.productName || '');
+                              } else {
+                                handleFieldChange('shippingTitle', getCustomsFriendlySuggestions(currentItem)[0] || '');
+                              }
+                            }}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              background: '#ffffff',
+                              color: '#0f172a',
+                              fontSize: '0.72rem',
+                              fontWeight: 650,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="customs">{isEs ? 'Discreto (Aduanas)' : 'Discreet (Customs)'}</option>
+                            <option value="clinical">{isEs ? 'Clínico (Receta)' : 'Clinical (Rx)'}</option>
+                          </select>
+                        </div>
+                      )}
                       <button
                         type="button"
                         onClick={() => setShowPrintSettings((prev) => !prev)}
@@ -2533,9 +2582,9 @@ export default function PharmacyLabelsModal({
                           cursor: 'pointer'
                         }}
                       >
-                        <span>⚙ {isEs ? 'Ajustes Impresión' : 'Print Settings'}</span>
+                        <span>⚙ {isEs ? 'Ajustes' : 'Settings'}</span>
                         <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
-                          ({dimensions.widthMm}×{dimensions.heightMm} · {dpi} DPI)
+                          ({dimensions.widthMm}×{dimensions.heightMm} mm)
                         </span>
                       </button>
                     </>

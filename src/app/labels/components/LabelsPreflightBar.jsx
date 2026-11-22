@@ -301,7 +301,7 @@ export default function LabelsPreflightBar({
                 cursor: 'pointer'
               }}
             >
-              <span>{strictGmpGate ? '🔒 GMP Strict' : '🔓 GMP'}</span>
+              <span>{strictGmpGate ? (isEs ? '🔒 Bloqueo GMP' : '🔒 GMP Lock') : (isEs ? '🔓 GMP Libre' : '🔓 GMP Off')}</span>
             </button>
           )}
         </div>
