@@ -320,6 +320,8 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
   const [partsDraft, setPartsDraft] = useState([]);
   const [activePartIdx, setActivePartIdx] = useState(0);
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
+  const [pdfParsing, setPdfParsing] = useState(false);
+  const pdfInputRef = useRef(null);
 
   const debounceRef = useRef({});
   const modalRef = useRef(null);
@@ -793,6 +795,75 @@ export default function QuickManualRxModal({ isOpen, onClose, onCreated, isEs = 
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <input
+                ref={pdfInputRef}
+                type="file"
+                accept=".pdf,image/*"
+                style={{ display: 'none' }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  if (!file) return;
+                  setPdfParsing(true);
+                  try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    const res = await fetch('/api/labels/parse-plan-pdf', { method: 'POST', body: fd });
+                    const json = await res.json();
+                    if (!res.ok || !json?.success) throw new Error(json?.error || 'Parse failed');
+                    const d = json.data || {};
+                    if (d.patientName) {
+                      setPatientQuery(d.patientName);
+                      setPatientSelected({ name: d.patientName, fileNumber: d.fileNumber || '' });
+                    }
+                    if (d.doctorName) {
+                      setDoctorQuery(d.doctorName);
+                      setDoctorSelected({ name: d.doctorName, clinicName: d.clinicName || '', license: d.doctorLicense || '' });
+                    }
+                    if (Array.isArray(d.parts) && d.parts.length > 0) {
+                      const mappedParts = d.parts.map((p) => ({
+                        formulaQuery: p.formulaQuery || '',
+                        formulaSelected: null,
+                        volume: p.volume || '3 mL',
+                        ingredientChips: Array.isArray(p.ingredientChips) ? p.ingredientChips : [],
+                        directions: p.directions || '',
+                        batchNumber: '',
+                        expiryDate: '',
+                      }));
+                      setPartsDraft(mappedParts);
+                      setActivePartIdx(0);
+                      loadPartSnapshot(mappedParts[0]);
+                    }
+                    toast.success(isEs ? 'Plan PDF importado — revisa y guarda' : 'PDF plan imported — review & save');
+                  } catch (err) {
+                    toast.error(err?.message || (isEs ? 'Error leyendo el PDF' : 'Failed to parse PDF'));
+                  } finally {
+                    setPdfParsing(false);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                disabled={pdfParsing}
+                onClick={() => pdfInputRef.current?.click()}
+                title={isEs ? 'Extraer datos automáticamente desde un PDF de clínica' : 'Auto-extract patient, doctor & Rx from a clinic PDF'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #0d9488',
+                  background: '#f0fdfa',
+                  color: '#0f766e',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: pdfParsing ? 'wait' : 'pointer',
+                }}
+              >
+                {pdfParsing ? <Loader2 size={12} className="animate-spin" /> : <span>📄</span>}
+                <span>{pdfParsing ? (isEs ? 'Leyendo PDF...' : 'Parsing PDF...') : (isEs ? 'Importar PDF' : 'Import PDF')}</span>
+              </button>
               <button
                 type="button"
                 onClick={handleClearDraft}

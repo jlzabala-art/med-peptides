@@ -62,8 +62,37 @@ export default function LabelsPreflightBar({
   onQueueRxQuantity = null
 }) {
   const [exportOpen, setExportOpen] = useState(false);
+  const [lastPrintAction, setLastPrintAction] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return localStorage.getItem('atlas_labels_last_print_action') || 'a4';
+      } catch (_) {
+        return 'a4';
+      }
+    }
+    return 'a4';
+  });
   const exportRef = useRef(null);
   const { markPrintedInFirestore } = useLabelsExport({ currentRx, activeQueueItem });
+
+  const runPrintAction = (action) => {
+    setLastPrintAction(action);
+    try {
+      localStorage.setItem('atlas_labels_last_print_action', action);
+    } catch (_) {
+      /* ignore */
+    }
+    setExportOpen(false);
+    if (action === 'a4' && onDownloadA4BatchPdf) {
+      onDownloadA4BatchPdf();
+      markPrintedInFirestore();
+    } else if (action === 'zpl' && onDownloadZplBatch) {
+      onDownloadZplBatch();
+      markPrintedInFirestore();
+    } else if (action === 'packing' && onDownloadPackingListPdf) {
+      onDownloadPackingListPdf();
+    }
+  };
 
   useEffect(() => {
     if (!exportOpen) return undefined;
@@ -424,17 +453,24 @@ export default function LabelsPreflightBar({
             </button>
           );
         })()}
-        <div ref={exportRef} style={{ position: 'relative' }}>
+        <div ref={exportRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
           <button
             type="button"
-            onClick={() => setExportOpen((v) => !v)}
+            onClick={() => {
+              if (gmpBlocked) {
+                setExportOpen((v) => !v);
+                return;
+              }
+              runPrintAction(lastPrintAction);
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '5px',
-              padding: '5px 11px',
-              borderRadius: '6px',
+              padding: '5px 10px',
+              borderRadius: '6px 0 0 6px',
               border: 'none',
+              borderRight: '1px solid rgba(255,255,255,0.25)',
               background: gmpBlocked ? '#94a3b8' : '#1a73e8',
               color: '#ffffff',
               fontSize: '0.73rem',
@@ -442,10 +478,33 @@ export default function LabelsPreflightBar({
               cursor: 'pointer',
               whiteSpace: 'nowrap',
             }}
-            title={isEs ? 'Opciones de impresión y exportación GMP' : 'GMP Print & Export options'}
+            title={isEs ? 'Imprimir directamente con el último formato usado' : '1-click print with last used format'}
           >
             <Printer size={13} />
-            <span>{isEs ? 'Imprimir / Exportar' : 'Print / Export'}</span>
+            <span>
+              {lastPrintAction === 'zpl'
+                ? (isEs ? 'Imprimir ZPL' : 'Print ZPL')
+                : lastPrintAction === 'packing'
+                  ? 'Packing List'
+                  : (isEs ? 'Imprimir A4' : 'Print A4')}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setExportOpen((v) => !v)}
+            aria-label={isEs ? 'Más opciones de impresión' : 'More print options'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '5px 7px',
+              borderRadius: '0 6px 6px 0',
+              border: 'none',
+              background: gmpBlocked ? '#94a3b8' : '#1a73e8',
+              color: '#ffffff',
+              cursor: 'pointer',
+            }}
+          >
             <ChevronDown size={13} />
           </button>
 
@@ -472,11 +531,7 @@ export default function LabelsPreflightBar({
                 <button
                   type="button"
                   disabled={gmpBlocked}
-                  onClick={() => {
-                    setExportOpen(false);
-                    markPrintedInFirestore();
-                    onDownloadA4BatchPdf();
-                  }}
+                  onClick={() => runPrintAction('a4')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -500,11 +555,7 @@ export default function LabelsPreflightBar({
               <button
                 type="button"
                 disabled={gmpBlocked}
-                onClick={() => {
-                  setExportOpen(false);
-                  markPrintedInFirestore();
-                  onDownloadZplBatch?.();
-                }}
+                onClick={() => runPrintAction('zpl')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

@@ -893,6 +893,82 @@ export default function DatasheetQuickSearchModal({
           </div>
         )}
 
+        {/* Universal Suite Quick-Jump & Rx Launcher (⌘K) */}
+        {(() => {
+          const qClean = String(searchTerm || '').trim();
+          const looksLikeRxCode = /^[A-Za-z]{2,8}\d{3,8}$/i.test(qClean.replace(/^#/, ''));
+          const quickRoutes = [
+            { label: 'Pharmapolis HRT', href: `/pricing/pharmapolis-hrt?lang=${lang}`, match: /pharm|hrt|bhrt|progest|testost|biest|cream/i },
+            { label: 'Hormone Pellets', href: `/pricing/pellets?lang=${lang}`, match: /pellet|trocar|estradiol|testost/i },
+            { label: 'Peptides & Kits', href: `/pricing/peptides?lang=${lang}`, match: /pept|vial|kit|bpc|tirz|reta|sema/i },
+            { label: 'Clinical Protocols', href: `/proto?lang=${lang}`, match: /proto|guide|wada|longev/i },
+            { label: 'Dosing Calculator', href: `/calculator?lang=${lang}`, match: /calc|click|clic|u-100|dose|reconst/i },
+            { label: 'Labels Studio', href: `/labels?lang=${lang}`, match: /label|etiquet|rx|print|zpl/i },
+          ].filter((r) => !qClean || r.match.test(qClean) || r.label.toLowerCase().includes(qClean.toLowerCase()));
+
+          if (!looksLikeRxCode && quickRoutes.length === 0) return null;
+          return (
+            <div
+              style={{
+                padding: '7px 14px',
+                background: '#ffffff',
+                borderBottom: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isSpanish ? 'Acceso Rápido:' : 'Quick Jump:'}
+              </span>
+              {looksLikeRxCode && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose?.();
+                    router.push(`/labels?code=${encodeURIComponent(qClean.replace(/^#/, '').toUpperCase())}&lang=${lang}`);
+                  }}
+                  style={{
+                    padding: '3px 9px',
+                    borderRadius: '999px',
+                    border: '1px solid #0d9488',
+                    background: '#f0fdfa',
+                    color: '#0f766e',
+                    fontSize: '0.70rem',
+                    fontWeight: 750,
+                    cursor: 'pointer',
+                  }}
+                >
+                  🏷️ {isSpanish ? `Abrir Rx #${qClean.replace(/^#/, '').toUpperCase()} en Labels →` : `Open Rx #${qClean.replace(/^#/, '').toUpperCase()} in Labels →`}
+                </button>
+              )}
+              {quickRoutes.slice(0, 5).map((r) => (
+                <button
+                  key={r.href}
+                  type="button"
+                  onClick={() => {
+                    onClose?.();
+                    router.push(r.href);
+                  }}
+                  style={{
+                    padding: '3px 9px',
+                    borderRadius: '999px',
+                    border: '1px solid #cbd5e1',
+                    background: '#f8fafc',
+                    color: '#0f172a',
+                    fontSize: '0.70rem',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {r.label} →
+                </button>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* Results Container */}
         <div
           ref={listRef}

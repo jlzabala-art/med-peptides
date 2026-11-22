@@ -240,9 +240,32 @@ export default function ModularPriceSchedule({
     if (typeof window !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      toast.success('Price Sheet link copied to clipboard');
+      toast.success(t('Price Sheet link copied to clipboard', 'Enlace copiado al portapapeles'));
       setTimeout(() => setCopied(false), 2200);
     }
+  };
+
+  const handleCopyWhatsappPitch = () => {
+    if (typeof window === 'undefined' || !navigator.clipboard) return;
+    const sampleItems = filteredProducts.slice(0, 8).map((p) => {
+      const name = p.name || p.canonicalName || 'Formulation';
+      const strength = p.strength ? ` (${p.strength})` : '';
+      return `• ${name}${strength}`;
+    });
+    const moreCount = Math.max(0, filteredProducts.length - sampleItems.length);
+    const pitch = [
+      `Hi! Here is an overview of our EU GMP ${exportBrandTitle} clinical schedule:`,
+      '',
+      ...sampleItems,
+      ...(moreCount > 0 ? [`• ...plus ${moreCount} additional standardized preparations`] : []),
+      '',
+      `Full catalog link (no pricing exposed externally unless logged in):`,
+      window.location.href,
+      '',
+      'Let me know which formulations or strengths you would like to review for your clinic.',
+    ].join('\n');
+    navigator.clipboard.writeText(pitch);
+    toast.success(t('WhatsApp Pitch (no prices) copied!', '¡Pitch de WhatsApp (sin precios) copiado!'));
   };
 
   const handleWhatsAppShare = () => {
@@ -324,6 +347,9 @@ export default function ModularPriceSchedule({
               </button>
               <button type="button" className="gcp-btn-secondary" onClick={handleCopyLink} style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650 }}>
                 {copied ? t('Copied', 'Copiado') : t('Share', 'Compartir')}
+              </button>
+              <button type="button" className="gcp-btn-secondary" onClick={handleCopyWhatsappPitch} style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650 }} title={t('Copy clinical WhatsApp pitch without prices', 'Copiar resumen clínico para WhatsApp sin precios')}>
+                📋 {t('WhatsApp Pitch', 'Pitch WhatsApp')}
               </button>
               <button type="button" className="gcp-btn-primary" onClick={() => setIsExportModalOpen(true)} style={{ height: '36px', padding: '0 13px', fontSize: '0.76rem', fontWeight: 750 }}>
                 {t('Export / Print', 'Exportar / Imprimir')}

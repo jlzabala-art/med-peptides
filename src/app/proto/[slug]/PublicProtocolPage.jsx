@@ -1272,6 +1272,38 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               >
                 <span>{lang === 'es' ? 'Calcular Dosis y Clics U-100 →' : 'Open in Calculator →'}</span>
               </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  const title = protocol?.name || protocol?.title || 'Clinical Protocol';
+                  const compounds = (protocol?.compounds || []).map((c) => c.name).filter(Boolean).join(', ');
+                  const pitch = [
+                    `Hi! Here is our clinical protocol summary for *${title}*:`,
+                    compounds ? `• Compounds: ${compounds}` : null,
+                    `• Evidence Tier: ${evidenceProfile.evidenceTier}`,
+                    `• Review full clinical blueprint & PubMed references:`,
+                    typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/proto/${protocol?.slug || ''}`,
+                  ].filter(Boolean).join('\n');
+                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(pitch);
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '5px 11px',
+                  borderRadius: '6px',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  color: '#334155',
+                  fontSize: '0.73rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                <span>📋 {lang === 'es' ? 'Pitch WhatsApp (Sin Precios)' : 'WhatsApp Pitch (No Prices)'}</span>
+              </button>
             </div>
           </div>
         </section>
