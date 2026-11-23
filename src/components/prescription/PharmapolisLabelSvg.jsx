@@ -498,6 +498,24 @@ export default function PharmapolisLabelSvg({
     // Normalize and remove redundant trailing "as prescribed"
     d = d.replace(/[,.]?\s*as\s+prescribed\.?$/i, '').trim();
     d = d.replace(/\.{2,}/g, '.').trim();
+
+    // For transdermal cream / pump dispensers (e.g. Pentravan), express dose in pumps instead of mL
+    // so patients know exact actuations without guessing dispenser volume per pump.
+    const isTransdermalPumpDispenser =
+      /\b(transdermal|transdermally|pentravan|cream|crema|topiclick|pump|dispenser)\b/i.test(
+        `${productTitle} ${vehicleSearchCorpus} ${d}`
+      ) &&
+      !/\b(inject|subcutan|intramuscular|nasal|spray|capsule|caps|oral|vial|syringe|drops|trichosol|trichowash|trichooil)\b/i.test(
+        `${productTitle} ${vehicleSearchCorpus} ${d}`
+      );
+    if (isTransdermalPumpDispenser && !/\bpumps?\b/i.test(d)) {
+      d = d.replace(/\b(\d+(?:[.,]\d+)?)\s*m[lL]\b/gi, (match, numStr) => {
+        const val = parseFloat(String(numStr).replace(',', '.'));
+        if (!Number.isFinite(val) || val <= 0) return match;
+        return val === 1 ? '1 pump' : `${val} pumps`;
+      });
+    }
+
     if (d && !d.endsWith('.')) d += '.';
     const basePosology = d || 'Take / apply as directed by prescribing physician.';
 
