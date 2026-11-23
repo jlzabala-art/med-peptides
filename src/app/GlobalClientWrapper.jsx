@@ -69,7 +69,8 @@ const PORTAL_PREFIXES = [
   '/compounding',
   '/calculator',
   '/vials',
-  '/guides'
+  '/guides',
+  '/eterna'
 ];
 
 function StorefrontShell({ children }) {
@@ -204,6 +205,11 @@ export default function GlobalClientWrapper({ children }) {
     '/auth',
     '/session-ended',
   ].some((prefix) => pathname === prefix || pathname?.startsWith(`${prefix}/`));
+
+  // Standalone document/share routes (zero generic or admin header, zero external links)
+  if (pathname === '/eterna' || pathname?.startsWith('/eterna/')) {
+    return <AppErrorBoundary>{children}</AppErrorBoundary>;
+  }
 
   // Portal routes have their own layout — just render children without loading B2C data
   if (isPortalRoute) {
