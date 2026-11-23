@@ -255,8 +255,8 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         lang={lang}
       />
 
-      {/* ── 3. Google Cloud Console 2-Column Responsive Layout ── */}
-      <div className="proto-content-grid">
+      {/* ── 3. Google Cloud Console Full-Width Table Layout (Filters inline in Toolbar/Drawer) ── */}
+      <div className="proto-content-grid" style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}>
         <div className="proto-main-column">
           {/* Prioritized Search Bar + Mobile Quick Pills + Physician Triage Bar */}
           <ProtocolCatalogSearchToolbar
@@ -361,14 +361,14 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             key: 'cleanName',
                             label: isEs ? 'Protocolo / Objetivo' : 'Protocol / Goal',
                             align: 'left',
-                            width: '40%',
+                            width: '46%',
                             render: (_val, proto) => (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                   <Link
                                     href={`/proto/${proto.cleanSlug}?lang=${lang}`}
                                     onClick={(e) => e.stopPropagation()}
-                                    style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', textDecoration: 'none', overflowWrap: 'anywhere' }}
+                                    style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1a73e8', textDecoration: 'none', overflowWrap: 'anywhere' }}
                                   >
                                     {proto.cleanName}
                                   </Link>
@@ -388,7 +388,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             key: 'route',
                             label: isEs ? 'Vía y Duración' : 'Route & Cycle',
                             align: 'left',
-                            width: '15%',
+                            width: '18%',
                             render: (_val, proto) => (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.76rem', color: '#334155', minWidth: 0 }}>
                                 <span style={{ fontWeight: 650 }}>{proto.route || 'SubQ'}</span>
@@ -402,7 +402,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             key: 'evidence_grade',
                             label: isEs ? 'Evidencia' : 'Evidence',
                             align: 'left',
-                            width: '16%',
+                            width: '18%',
                             render: (_val, proto) => {
                               const ev = String(proto.evidence_grade || 'Emerging');
                               const isHigh = ev.toLowerCase().includes('high');
@@ -429,124 +429,125 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             key: 'actions',
                             label: '',
                             align: 'right',
-                            width: '29%',
+                            width: '18%',
                             render: (_val, proto) => (
-                              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '5px', maxWidth: '100%' }} onClick={(e) => e.stopPropagation()}>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '6px', maxWidth: '100%' }} onClick={(e) => e.stopPropagation()}>
                                 <button
                                   type="button"
                                   onClick={() => toggleCompare(proto.cleanSlug)}
                                   title={isEs ? 'Comparar protocolo' : 'Compare protocol'}
                                   style={{
-                                    padding: '4px 7px',
+                                    padding: '4px 8px',
                                     borderRadius: '6px',
-                                    border: compareSlugs.includes(proto.cleanSlug) ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                                    border: compareSlugs.includes(proto.cleanSlug) ? '1px solid #1a73e8' : '1px solid #dadce0',
                                     background: compareSlugs.includes(proto.cleanSlug) ? '#e8f0fe' : '#ffffff',
-                                    color: compareSlugs.includes(proto.cleanSlug) ? '#1a73e8' : '#475569',
-                                    fontSize: '0.69rem',
-                                    fontWeight: 650,
+                                    color: compareSlugs.includes(proto.cleanSlug) ? '#1a73e8' : '#5f6368',
+                                    fontSize: '0.70rem',
+                                    fontWeight: 600,
                                     cursor: 'pointer',
                                     whiteSpace: 'nowrap',
                                   }}
                                 >
-                                  {compareSlugs.includes(proto.cleanSlug) ? '✓ Compare' : 'Compare'}
+                                  {compareSlugs.includes(proto.cleanSlug) ? '✓ Compare' : '+ Compare'}
                                 </button>
                                 <Link
                                   href={`/rx/intake?proto=${encodeURIComponent(proto.cleanSlug)}&lang=${lang}`}
+                                  className="gcp-btn-secondary"
                                   style={{
-                                    padding: '4px 8px',
+                                    padding: '4px 10px',
                                     borderRadius: '6px',
-                                    border: '1px solid #0d9488',
-                                    background: '#f0fdfa',
-                                    color: '#0f766e',
-                                    fontSize: '0.69rem',
-                                    fontWeight: 700,
+                                    border: '1px solid #dadce0',
+                                    background: '#ffffff',
+                                    color: '#3c4043',
+                                    fontSize: '0.71rem',
+                                    fontWeight: 650,
                                     textDecoration: 'none',
                                     whiteSpace: 'nowrap',
                                   }}
                                 >
                                   {isEs ? 'Prescribir' : 'Prescribe'}
                                 </Link>
-                                <Link
-                                  href={`/proto/${proto.cleanSlug}?lang=${lang}`}
-                                  style={{
-                                    padding: '4px 9px',
-                                    borderRadius: '6px',
-                                    background: '#003666',
-                                    color: '#ffffff',
-                                    fontSize: '0.70rem',
-                                    fontWeight: 700,
-                                    textDecoration: 'none',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  {isEs ? 'Abrir →' : 'Blueprint →'}
-                                </Link>
                               </div>
                             ),
                           },
                         ]}
                         expandableRender={(proto) => (
-                          <div style={{ padding: '12px 16px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                          <div style={{ padding: '14px 18px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
                             <div>
-                              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '5px' }}>
                                 {isEs ? 'Resumen Clínico' : 'Clinical Summary'}
                               </div>
-                              <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.5 }}>
+                              <p style={{ margin: 0, fontSize: '0.77rem', color: '#334155', lineHeight: 1.55 }}>
                                 {proto.summary || (isEs ? 'Protocolo clínico estandarizado.' : 'Standardized clinical protocol.')}
                               </p>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderLeft: '1px solid #e2e8f0', paddingLeft: '14px' }}>
                               {Array.isArray(proto.biomarkers) && proto.biomarkers.length > 0 && (
                                 <div style={{ fontSize: '0.74rem', color: '#0f172a' }}>
-                                  <strong>{isEs ? 'Analíticas:' : 'Labs:'}</strong> {proto.biomarkers.join(', ')}
+                                  <span style={{ color: '#64748b', fontWeight: 700, marginRight: '6px' }}>{isEs ? 'Analíticas:' : 'Labs:'}</span>
+                                  <span>{proto.biomarkers.join(', ')}</span>
                                 </div>
                               )}
                               {Array.isArray(proto.coInterventions) && proto.coInterventions.length > 0 && (
-                                <div style={{ fontSize: '0.72rem', color: '#065f46', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '6px', padding: '6px 8px' }}>
-                                  <strong>{isEs ? 'Co-intervención obligatoria:' : 'Mandatory Co-Intervention:'}</strong> {proto.coInterventions.join(' · ')}
+                                <div style={{ fontSize: '0.73rem', color: '#334155', borderLeft: '2px solid #10b981', paddingLeft: '8px' }}>
+                                  <strong style={{ color: '#065f46' }}>{isEs ? 'Co-intervención:' : 'Co-Intervention:'}</strong> {proto.coInterventions.join(' · ')}
                                 </div>
                               )}
                               {Array.isArray(proto.sequencingPhases) && proto.sequencingPhases.length > 0 && (
-                                <div style={{ fontSize: '0.72rem', color: '#1e40af', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '6px 8px' }}>
-                                  <strong>{isEs ? 'Secuenciación (Repair → Optimize → Fuel):' : 'Sequencing (Repair → Optimize → Fuel):'}</strong> {proto.sequencingPhases.join(' · ')}
+                                <div style={{ fontSize: '0.73rem', color: '#334155', borderLeft: '2px solid #3b82f6', paddingLeft: '8px' }}>
+                                  <strong style={{ color: '#1e40af' }}>{isEs ? 'Secuencia:' : 'Sequencing:'}</strong> {proto.sequencingPhases.join(' · ')}
                                 </div>
                               )}
                               {Array.isArray(proto.contraindications) && proto.contraindications.length > 0 && (
-                                <div style={{ fontSize: '0.72rem', color: '#b91c1c', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '6px 8px' }}>
-                                  <strong>{isEs ? 'Contraindicaciones:' : 'Contraindications:'}</strong> {proto.contraindications.join(' · ')}
+                                <div style={{ fontSize: '0.73rem', color: '#334155', borderLeft: '2px solid #ef4444', paddingLeft: '8px' }}>
+                                  <strong style={{ color: '#b91c1c' }}>{isEs ? 'Contraindicaciones:' : 'Contraindications:'}</strong> {proto.contraindications.join(' · ')}
                                 </div>
                               )}
                               {Array.isArray(proto.stoppingRules) && proto.stoppingRules.length > 0 && (
-                                <div style={{ fontSize: '0.72rem', color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '6px 8px' }}>
-                                  <strong>{isEs ? 'Criterios de parada:' : 'Stopping Rules:'}</strong> {proto.stoppingRules[0]}
+                                <div style={{ fontSize: '0.73rem', color: '#334155', borderLeft: '2px solid #f59e0b', paddingLeft: '8px' }}>
+                                  <strong style={{ color: '#92400e' }}>{isEs ? 'Criterios de parada:' : 'Stopping Rules:'}</strong> {proto.stoppingRules[0]}
                                 </div>
                               )}
-                              {proto.regulatoryPosture && (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', fontSize: '0.68rem', color: '#475569' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', fontSize: '0.68rem', color: '#475569', paddingTop: '2px' }}>
+                                {proto.regulatoryPosture?.status && (
                                   <span style={{ padding: '2px 7px', borderRadius: '999px', background: '#f1f5f9', border: '1px solid #cbd5e1', fontWeight: 700 }}>
                                     {proto.regulatoryPosture.status}
                                   </span>
-                                  {proto.regulatoryPosture.wadaProhibited && (
-                                    <span style={{ padding: '2px 7px', borderRadius: '999px', background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', fontWeight: 800 }}>
-                                      WADA Prohibited
-                                    </span>
-                                  )}
-                                  <Link
-                                    href={`/calculator?peptide=${encodeURIComponent(proto.compounds?.[0]?.name || proto.cleanName)}&lang=${lang}`}
-                                    style={{
-                                      padding: '2px 8px',
-                                      borderRadius: '999px',
-                                      background: '#eff6ff',
-                                      border: '1px solid #bfdbfe',
-                                      color: '#1d4ed8',
-                                      fontWeight: 750,
-                                      textDecoration: 'none',
-                                    }}
-                                  >
-                                    {isEs ? 'Abrir en Calculadora →' : 'Open in Calculator →'}
-                                  </Link>
-                                </div>
-                              )}
+                                )}
+                                {proto.regulatoryPosture?.wadaProhibited && (
+                                  <span style={{ padding: '2px 7px', borderRadius: '999px', background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', fontWeight: 800 }}>
+                                    WADA Prohibited
+                                  </span>
+                                )}
+                                <Link
+                                  href={`/proto/${proto.cleanSlug}?lang=${lang}`}
+                                  style={{
+                                    padding: '2px 8px',
+                                    borderRadius: '999px',
+                                    background: '#ffffff',
+                                    border: '1px solid #cbd5e1',
+                                    color: '#0f172a',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                  }}
+                                >
+                                  {isEs ? 'Ver Blueprint →' : 'Open Blueprint →'}
+                                </Link>
+                                <Link
+                                  href={`/calculator?peptide=${encodeURIComponent(proto.compounds?.[0]?.name || proto.cleanName)}&lang=${lang}`}
+                                  style={{
+                                    padding: '2px 8px',
+                                    borderRadius: '999px',
+                                    background: '#eff6ff',
+                                    border: '1px solid #bfdbfe',
+                                    color: '#1d4ed8',
+                                    fontWeight: 750,
+                                    textDecoration: 'none',
+                                  }}
+                                >
+                                  {isEs ? 'Abrir en Calculadora →' : 'Open in Calculator →'}
+                                </Link>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -623,27 +624,29 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           </div>
         </div>
 
-        {/* Persistent Sticky Sidebar */}
-        <ProtocolsCatalogSidebar
-          selectedGoal={selectedGoal}
-          onSelectGoal={setSelectedGoal}
-          goalBuckets={GOAL_BUCKETS}
-          goalCounts={goalCounts}
-          durationFilter={durationFilter}
-          onSelectDuration={setDurationFilter}
-          phasesFilter={phasesFilter}
-          onSelectPhases={setPhasesFilter}
-          sortBy={sortBy}
-          onSelectSort={setSortBy}
-          onResetFilters={handleResetFilters}
-          hasActiveFilters={hasActiveFilters}
-          lang={lang}
-          t={t}
-          publicUrl={typeof window !== 'undefined' ? `${window.location.origin}/proto` : 'https://www.atlashealth-services.com/proto'}
-          onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
-          isMobileDrawerOpen={isMobileDrawerOpen}
-          onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
-        />
+        {/* Mobile-only Filter Drawer (table uses 100% width on desktop) */}
+        {isMobileDrawerOpen && (
+          <ProtocolsCatalogSidebar
+            selectedGoal={selectedGoal}
+            onSelectGoal={setSelectedGoal}
+            goalBuckets={GOAL_BUCKETS}
+            goalCounts={goalCounts}
+            durationFilter={durationFilter}
+            onSelectDuration={setDurationFilter}
+            phasesFilter={phasesFilter}
+            onSelectPhases={setPhasesFilter}
+            sortBy={sortBy}
+            onSelectSort={setSortBy}
+            onResetFilters={handleResetFilters}
+            hasActiveFilters={hasActiveFilters}
+            lang={lang}
+            t={t}
+            publicUrl={typeof window !== 'undefined' ? `${window.location.origin}/proto` : 'https://www.atlashealth-services.com/proto'}
+            onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+            isMobileDrawerOpen={isMobileDrawerOpen}
+            onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
+          />
+        )}
       </div>
 
       {/* Floating Side-by-Side Compare Pill */}
