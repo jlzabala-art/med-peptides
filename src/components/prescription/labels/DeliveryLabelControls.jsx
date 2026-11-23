@@ -45,7 +45,7 @@ export default function DeliveryLabelControls({
           <button
             type="button"
             onClick={() => {
-              if (isShipping) setActiveVariant('frontWithQr');
+              if (isShipping) setActiveVariant('backQr');
             }}
             style={{
               padding: '3px 9px',

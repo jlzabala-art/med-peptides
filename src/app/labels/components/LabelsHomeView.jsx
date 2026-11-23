@@ -767,7 +767,7 @@ export default function LabelsHomeView({
                             className="gcp-btn-secondary"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleSelectOrAddPatient(p.code, true, 'frontWithQr');
+                              handleSelectOrAddPatient(p.code, true, 'backQr');
                             }}
                             title={isEs ? 'Editar etiqueta clínica de Delivery' : 'Open Delivery Label (Clinical)'}
                             style={{
