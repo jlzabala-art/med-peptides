@@ -580,39 +580,43 @@ export default function FillersPriceListClient({
               <div style={{
                 padding: '14px 18px',
                 background: '#f8fafc',
+                borderLeft: '3px solid #003666',
                 borderTop: '1px solid #e2e8f0',
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                gap: '14px'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                gap: '16px'
               }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ fontSize: '0.67rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {isEs ? 'Indicación Clínica' : 'Clinical Indication'}
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.77rem', color: '#334155', lineHeight: 1.5 }}>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#1e293b', lineHeight: 1.55 }}>
                     {row.indication || row.description || (isEs ? 'Formulación estética profesional para uso médico.' : 'Professional aesthetic injectable formulation for medical practice.')}
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', borderLeft: '1px solid #e2e8f0', paddingLeft: '14px' }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '130px minmax(0, 1fr)',
+                  rowGap: '6px',
+                  columnGap: '12px',
+                  alignContent: 'start',
+                  fontSize: '0.76rem'
+                }}>
                   {(row.technology || row.clinical?.mechanism_of_action) && (
-                    <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                      <strong style={{ color: '#475569' }}>{isEs ? 'Tecnología / Composición:' : 'Technology / Composition:'}</strong>{' '}
-                      <span>{row.technology || row.clinical?.mechanism_of_action}</span>
-                    </div>
+                    <>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>{isEs ? 'Tecnología' : 'Technology'}</span>
+                      <span style={{ color: '#0f172a', fontWeight: 600 }}>{row.technology || row.clinical?.mechanism_of_action}</span>
+                    </>
                   )}
-                  <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                    <strong style={{ color: '#475569' }}>{isEs ? 'Fabricante:' : 'Manufacturer:'}</strong>{' '}
-                    <span>{row.manufacturer || row.brand || 'EU Certified'}</span>
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                    <strong style={{ color: '#475569' }}>{isEs ? 'Conservación:' : 'Storage:'}</strong>{' '}
-                    <span>
-                      {row.requiresColdChain
-                        ? (isEs ? 'Cadena fría (2–8 °C)' : 'Cold Chain (2–8 °C)')
-                        : (isEs ? 'Temperatura ambiente (2–25 °C)' : 'Ambient (2–25 °C)')}
-                    </span>
-                  </div>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>{isEs ? 'Fabricante' : 'Manufacturer'}</span>
+                  <span style={{ color: '#0f172a', fontWeight: 600 }}>{row.manufacturer || row.brand || 'EU Certified'}</span>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>{isEs ? 'Conservación' : 'Storage'}</span>
+                  <span style={{ color: '#0f172a', fontWeight: 600 }}>
+                    {row.requiresColdChain
+                      ? (isEs ? 'Cadena fría (2–8 °C)' : 'Cold Chain (2–8 °C)')
+                      : (isEs ? 'Temperatura ambiente (2–25 °C)' : 'Ambient (2–25 °C)')}
+                  </span>
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -626,9 +630,6 @@ export default function FillersPriceListClient({
                     unitPrice={row.clinicPrice}
                     formattedPrice={formatMoney(row.clinicPrice, currency)}
                     categoryLabel="Aesthetic Injectables & Skin Boosters"
-                    onQuickView={(r) =>
-                      setQuickProduct({ slug: r.slug || r.id, title: r.name || r.product_name })
-                    }
                   />
                 </div>
               </div>

@@ -271,15 +271,17 @@ export default function AestheticInjectableDetail({
             summaryTitle: p.name,
             summarySubtitle: `${p.brand} · ${p.activeIngredient}`,
             badge: p.regulatory?.ceMark || null,
-            atlasAiLabel: 'Atlas AI',
+            atlasAiLabel: 'Ask Atlas AI',
             onOpenAtlasAi: () => setIsAiDrawerOpen(true),
             showSections: true,
             sectionsLabel: isEs ? 'Secciones' : 'Sections',
             sectionsCount: sidebarSections.length,
             activeSectionIndex: activeSectionIndex + 1,
             primaryAction: {
-              label: isEs ? 'Solicitar Cotización' : 'Request Quote',
-              onClick: () => setIsInquiryDrawerOpen(true),
+              label: isEs ? 'Ver Tarifa Fillers' : 'Fillers Price Schedule',
+              onClick: () => {
+                if (typeof window !== 'undefined') window.location.href = '/pricing/fillers';
+              },
             },
           },
     },
@@ -362,25 +364,8 @@ export default function AestheticInjectableDetail({
                 </div>
               </div>
 
-              {/* Right Action Toolbar: Language Segmented Switch + Actions */}
-              <div className="gcp-resource-action-toolbar">
-                <div className="gcp-segmented-switch">
-                  <button
-                    type="button"
-                    className={`gcp-segmented-btn ${lang === 'en' ? 'active' : ''}`}
-                    onClick={() => setLang('en')}
-                  >
-                    EN
-                  </button>
-                  <button
-                    type="button"
-                    className={`gcp-segmented-btn ${lang === 'es' ? 'active' : ''}`}
-                    onClick={() => setLang('es')}
-                  >
-                    ES
-                  </button>
-                </div>
-
+              {/* Right Action Toolbar: Clean GCP Actions (EN/ES lives in global header) */}
+              <div className="gcp-resource-action-toolbar" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   className="gcp-btn-secondary"
@@ -417,40 +402,33 @@ export default function AestheticInjectableDetail({
       <main className="ai-content-wrap">
 
         {/* ── HERO PANORAMA CARD ── */}
-        <section className="ai-hero-panorama">
-          {/* 1. Product Visual */}
+        <section
+          className="ai-hero-panorama"
+          style={!imageUrl ? { gridTemplateColumns: 'minmax(0, 1.6fr) minmax(270px, 0.9fr)' } : undefined}
+        >
+          {/* 1. Product Visual (only when real image exists; avoids repeating title 3x) */}
+          {imageUrl && (
           <div
             className="ai-hero-image-box"
-            style={{ cursor: imageUrl ? 'zoom-in' : 'default' }}
-            onClick={() => { if (imageUrl) setIsImageModalOpen(true); }}
+            style={{ cursor: 'zoom-in' }}
+            onClick={() => setIsImageModalOpen(true)}
           >
             <span className="ai-code-badge">{p.atlasCode}</span>
-
-            {imageUrl ? (
-              <>
-                <img src={imageUrl} alt={p.name} />
-                <span style={{
-                  position: 'absolute', top: '10px', right: '10px',
-                  background: 'rgba(255,255,255,0.9)', border: '1px solid #cbd5e1',
-                  borderRadius: '6px', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: '4px',
-                  fontSize: '0.65rem', fontWeight: 600, color: '#475569'
-                }}>
-                  <ZoomIn size={11} /> Zoom
-                </span>
-              </>
-            ) : (
-              <BrandedPackagingFallback
-                brand={p.brand}
-                name={p.name}
-                packSize={p.packSize}
-                color={p.catMeta.color}
-              />
-            )}
+            <img src={imageUrl} alt={p.name} />
+            <span style={{
+              position: 'absolute', top: '10px', right: '10px',
+              background: 'rgba(255,255,255,0.9)', border: '1px solid #cbd5e1',
+              borderRadius: '6px', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: '4px',
+              fontSize: '0.65rem', fontWeight: 600, color: '#475569'
+            }}>
+              <ZoomIn size={11} /> Zoom
+            </span>
 
             <div className="ai-reversible-pill">
               {p.regulatory.reversible}
             </div>
           </div>
+          )}
 
           {/* 2. Clinical Identity & GCP Key-Value Specs Grid */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -472,7 +450,7 @@ export default function AestheticInjectableDetail({
               </p>
             </div>
 
-            <div className="ai-kv-grid">
+            <div className="ai-kv-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))' }}>
               <div className="ai-kv-item">
                 <span className="ai-kv-label">{isEs ? 'Concentración Activa' : 'Active Formulation'}</span>
                 <span className="ai-kv-value" style={{ color: '#003666' }}>{p.activeIngredient}</span>
@@ -482,16 +460,8 @@ export default function AestheticInjectableDetail({
                 <span className="ai-kv-value">{p.platformTechnology}</span>
               </div>
               <div className="ai-kv-item">
-                <span className="ai-kv-label">{isEs ? 'Plano de Inyección' : 'Injection Plane'}</span>
-                <span className="ai-kv-value">{p.injectionDepth}</span>
-              </div>
-              <div className="ai-kv-item">
                 <span className="ai-kv-label">{isEs ? 'Aguja / Cánula' : 'Needle / Cannula'}</span>
                 <span className="ai-kv-value">{p.needlesIncluded}</span>
-              </div>
-              <div className="ai-kv-item">
-                <span className="ai-kv-label">{isEs ? 'Duración Clínica' : 'Clinical Longevity'}</span>
-                <span className="ai-kv-value">{p.longevity}</span>
               </div>
               <div className="ai-kv-item">
                 <span className="ai-kv-label">{isEs ? 'Presentación' : 'Pack Configuration'}</span>
@@ -500,7 +470,7 @@ export default function AestheticInjectableDetail({
             </div>
           </div>
 
-          {/* 3. B2B Institutional Inquiry & Action Card */}
+          {/* 3. B2B Institutional Supply Summary Card (single action link; Request Quote & Atlas AI live in header & dock) */}
           <aside className="ai-action-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -527,15 +497,14 @@ export default function AestheticInjectableDetail({
               </div>
             </div>
 
-            <button className="ai-btn-primary" onClick={() => setIsInquiryDrawerOpen(true)}>
-              <Package size={15} />
-              <span>{isEs ? 'Solicitar Cotización B2B' : 'Request Institutional Quote'}</span>
-            </button>
-
-            <button className="ai-btn-secondary" onClick={() => setIsAiDrawerOpen(true)}>
-              <Sparkles size={14} color="#003666" />
-              <span>{isEs ? 'Consultar a Atlas AI' : 'Ask Atlas Clinical AI'}</span>
-            </button>
+            <Link
+              href="/pricing/fillers"
+              className="gcp-btn-secondary"
+              style={{ justifyContent: 'center', textDecoration: 'none' }}
+            >
+              <Package size={14} />
+              <span>{isEs ? 'Ver Tarifa B2B Fillers →' : 'View Fillers Price Schedule →'}</span>
+            </Link>
 
             <div style={{ fontSize: '0.69rem', color: '#64748b', lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: '6px', marginTop: '2px' }}>
               <ShieldCheck size={13} color="#047857" style={{ flexShrink: 0, marginTop: '1px' }} />

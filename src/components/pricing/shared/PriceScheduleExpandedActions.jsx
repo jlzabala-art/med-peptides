@@ -4,15 +4,11 @@ import React, { useMemo } from 'react';
 import {
   ArrowRight,
   Calculator,
-  Check,
   Copy,
-  Eye,
   FilePlus2,
-  Plus,
   Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useAtlasContext } from '@/context/AtlasContextProvider';
 import { buildPriceActionPayload } from './priceActionHelpers';
 import './PriceScheduleActions.css';
@@ -20,8 +16,9 @@ import './PriceScheduleActions.css';
 /**
  * PriceScheduleExpandedActions
  * ─────────────────────────────────────────────────────────────────────────────
- * Unified action bar rendered inside expandableRender panels across all /pricing/*
- * DataTables. Responsive on laptop and mobile (>=44px touch targets on <768px).
+ * Unified, non-redundant action bar rendered inside expandableRender panels
+ * across all /pricing/* DataTables (Quote & Quick View live in the row above).
+ * Responsive on laptop and mobile (>=44px touch targets on <768px).
  */
 export default function PriceScheduleExpandedActions({
   item,
@@ -30,13 +27,10 @@ export default function PriceScheduleExpandedActions({
   formattedPrice = '',
   categoryLabel = '',
   monographUrl = null,
-  onQuickView = null,
   onPrescribe = null,
   onOpenCalculator = null,
   onOpenMonograph = null,
-  onAddToQuote = null,
 }) {
-  const workspace = usePublicWorkspace();
   const { openAtlasAi } = useAtlasContext();
 
   const payload = useMemo(
@@ -50,25 +44,6 @@ export default function PriceScheduleExpandedActions({
       }),
     [item, currency, unitPrice, formattedPrice, monographUrl, categoryLabel]
   );
-
-  const isQuoted = useMemo(() => {
-    const items = workspace?.rfqItems || [];
-    return items.some((x) => (x.id || x.sku) === payload.key || (x.id || x.sku) === payload.sku);
-  }, [workspace?.rfqItems, payload.key, payload.sku]);
-
-  const handleQuote = (e) => {
-    e.stopPropagation();
-    if (isQuoted) {
-      workspace?.setIsQuoteDrawerOpen?.(true);
-      return;
-    }
-    if (typeof onAddToQuote === 'function') {
-      onAddToQuote(item, payload);
-    } else {
-      workspace?.addRfqItem?.(payload.rfqPayload);
-    }
-    toast.success(`Added ${payload.name} to RFQ Quote`);
-  };
 
   const handleCopy = async (e) => {
     e.stopPropagation();
@@ -87,15 +62,6 @@ export default function PriceScheduleExpandedActions({
 
   return (
     <div className="ps-expanded-actions" onClick={(e) => e.stopPropagation()}>
-      <button
-        type="button"
-        className={`ps-expanded-btn ${isQuoted ? 'is-quoted' : ''}`}
-        onClick={handleQuote}
-      >
-        {isQuoted ? <Check size={14} /> : <Plus size={14} />}
-        <span>{isQuoted ? 'In Quote (View)' : 'Add to Quote'}</span>
-      </button>
-
       <button type="button" className="ps-expanded-btn" onClick={handleCopy}>
         <Copy size={14} />
         <span>Copy B2B Summary</span>
@@ -105,20 +71,6 @@ export default function PriceScheduleExpandedActions({
         <Sparkles size={14} />
         <span>Ask AI</span>
       </button>
-
-      {typeof onQuickView === 'function' && (
-        <button
-          type="button"
-          className="ps-expanded-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onQuickView(item);
-          }}
-        >
-          <Eye size={14} />
-          <span>Quick View</span>
-        </button>
-      )}
 
       {typeof onPrescribe === 'function' && (
         <button
