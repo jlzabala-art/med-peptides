@@ -206,17 +206,19 @@ export default function FillersPriceListClient({
     return cols;
   }, [isEs, currency]);
 
-  const groupedByBrand = useMemo(() => {
-    const groups = new Map();
-    for (const row of filteredRows) {
-      const brandKey = String(row.brand || row.manufacturer || 'Other').trim();
-      if (!groups.has(brandKey)) groups.set(brandKey, []);
-      groups.get(brandKey).push(row);
-    }
-    return Array.from(groups.entries()).map(([brandName, rows]) => ({
-      brandName,
-      rows
-    }));
+  const tableRows = useMemo(() => {
+    return [...filteredRows]
+      .map((row) => ({
+        ...row,
+        brandGroup: String(row.brand || row.manufacturer || 'Other').trim(),
+      }))
+      .sort((a, b) => {
+        const bCmp = a.brandGroup.localeCompare(b.brandGroup);
+        if (bCmp !== 0) return bCmp;
+        return String(a.name || a.product_name || '').localeCompare(
+          String(b.name || b.product_name || '')
+        );
+      });
   }, [filteredRows]);
 
   const handleExportPdf = async () => {
@@ -416,29 +418,6 @@ export default function FillersPriceListClient({
           </div>
 
           <select
-            aria-label={isEs ? 'Filtrar por marca' : 'Filter by brand'}
-            value={selectedBrand}
-            onChange={(e) => setSelectedBrand(e.target.value)}
-            style={{
-              height: '44px',
-              padding: '0 12px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#0f172a',
-              fontSize: '0.82rem',
-              fontWeight: 650,
-              cursor: 'pointer'
-            }}
-          >
-            {brands.map((b) => (
-              <option key={b} value={b}>
-                {b === 'all' ? (isEs ? 'Marca: Todas' : 'Brand: All') : b}
-              </option>
-            ))}
-          </select>
-
-          <select
             aria-label={isEs ? 'Filtrar por tipo' : 'Filter by type'}
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
@@ -460,6 +439,37 @@ export default function FillersPriceListClient({
             <option value="biostimulators">{isEs ? 'Bioestimuladores (PLLA/CaHA)' : 'Biostimulators (PLLA/CaHA)'}</option>
           </select>
         </div>
+
+        {/* 1-Click Brand Jump Pills */}
+        {brands.length > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            {brands.map((b) => {
+              const isActive = selectedBrand === b;
+              return (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setSelectedBrand(b)}
+                  style={{
+                    padding: '5px 12px',
+                    minHeight: '32px',
+                    borderRadius: '999px',
+                    border: isActive ? '1px solid #003666' : '1px solid #cbd5e1',
+                    background: isActive ? '#003666' : '#ffffff',
+                    color: isActive ? '#ffffff' : '#334155',
+                    fontSize: '0.74rem',
+                    fontWeight: isActive ? 700 : 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.12s ease'
+                  }}
+                >
+                  {b === 'all' ? (isEs ? 'Todas las Marcas' : 'All Brands') : b}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {trendingFillers.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -503,93 +513,98 @@ export default function FillersPriceListClient({
             }}
           />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            {groupedByBrand.map(({ brandName, rows }) => (
-              <section key={brandName} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h2 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#003666' }}>
-                      {brandName}
-                    </h2>
-                    <span style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 750,
-                      padding: '2px 8px',
-                      borderRadius: '999px',
-                      background: '#eff6ff',
-                      color: '#1d4ed8',
-                      border: '1px solid #bfdbfe'
-                    }}>
-                      {rows.length} {rows.length === 1 ? 'SKU' : 'SKUs'}
+          <DataTable
+            data={tableRows}
+            columns={columns}
+            keyField="id"
+            hidePagination={true}
+            pageSize={100}
+            stickyTopOffset={64}
+            groupByKey="brandGroup"
+            renderGroupHeader={(brandName, _firstRow, count) => (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+                background: '#e8f0fe',
+                borderRadius: '6px',
+                padding: '6px 12px',
+              }}>
+                <span style={{ fontWeight: 800, fontSize: '0.80rem', color: '#003666', letterSpacing: '0.02em' }}>
+                  {brandName}
+                </span>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 750,
+                  padding: '2px 8px',
+                  borderRadius: '999px',
+                  background: '#ffffff',
+                  color: '#1d4ed8',
+                  border: '1px solid #bfdbfe'
+                }}>
+                  {count} {count === 1 ? 'SKU' : 'SKUs'}
+                </span>
+              </div>
+            )}
+            expandableRender={(row) => (
+              <div style={{
+                padding: '14px 18px',
+                background: '#f8fafc',
+                borderTop: '1px solid #e2e8f0',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                gap: '14px'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {isEs ? 'Indicación Clínica' : 'Clinical Indication'}
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.77rem', color: '#334155', lineHeight: 1.5 }}>
+                    {row.indication || row.description || (isEs ? 'Formulación estética profesional para uso médico.' : 'Professional aesthetic injectable formulation for medical practice.')}
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', borderLeft: '1px solid #e2e8f0', paddingLeft: '14px' }}>
+                  {(row.technology || row.clinical?.mechanism_of_action) && (
+                    <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                      <strong style={{ color: '#475569' }}>{isEs ? 'Tecnología / Composición:' : 'Technology / Composition:'}</strong>{' '}
+                      <span>{row.technology || row.clinical?.mechanism_of_action}</span>
+                    </div>
+                  )}
+                  <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                    <strong style={{ color: '#475569' }}>{isEs ? 'Fabricante:' : 'Manufacturer:'}</strong>{' '}
+                    <span>{row.manufacturer || row.brand || 'EU Certified'}</span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                    <strong style={{ color: '#475569' }}>{isEs ? 'Conservación:' : 'Storage:'}</strong>{' '}
+                    <span>
+                      {row.requiresColdChain
+                        ? (isEs ? 'Cadena fría (2–8 °C)' : 'Cold Chain (2–8 °C)')
+                        : (isEs ? 'Temperatura ambiente (2–25 °C)' : 'Ambient (2–25 °C)')}
                     </span>
                   </div>
                 </div>
-                <DataTable
-                  data={rows}
-                  columns={columns}
-                  hidePagination={true}
-                  pageSize={50}
-                  expandableRender={(row) => (
-                    <div style={{
-                      padding: '14px 18px',
-                      background: '#f8fafc',
-                      borderTop: '1px solid #e2e8f0',
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                      gap: '14px'
-                    }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          {isEs ? 'Indicación Clínica' : 'Clinical Indication'}
-                        </div>
-                        <p style={{ margin: 0, fontSize: '0.77rem', color: '#334155', lineHeight: 1.5 }}>
-                          {row.indication || row.description || (isEs ? 'Formulación estética profesional para uso médico.' : 'Professional aesthetic injectable formulation for medical practice.')}
-                        </p>
-                      </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', borderLeft: '1px solid #e2e8f0', paddingLeft: '14px' }}>
-                        {(row.technology || row.clinical?.mechanism_of_action) && (
-                          <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                            <strong style={{ color: '#475569' }}>{isEs ? 'Tecnología / Composición:' : 'Technology / Composition:'}</strong>{' '}
-                            <span>{row.technology || row.clinical?.mechanism_of_action}</span>
-                          </div>
-                        )}
-                        <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                          <strong style={{ color: '#475569' }}>{isEs ? 'Fabricante:' : 'Manufacturer:'}</strong>{' '}
-                          <span>{row.manufacturer || row.brand || 'EU Certified'}</span>
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                          <strong style={{ color: '#475569' }}>{isEs ? 'Conservación:' : 'Storage:'}</strong>{' '}
-                          <span>
-                            {row.requiresColdChain
-                              ? (isEs ? 'Cadena fría (2–8 °C)' : 'Cold Chain (2–8 °C)')
-                              : (isEs ? 'Temperatura ambiente (2–25 °C)' : 'Ambient (2–25 °C)')}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div style={{ gridColumn: '1 / -1' }}>
-                        <PriceScheduleExpandedActions
-                          item={{
-                            ...row,
-                            name: row.name || row.product_name,
-                            sku: row.atlas_product_code || row.sku || row.code,
-                          }}
-                          currency={currency}
-                          unitPrice={row.clinicPrice}
-                          formattedPrice={formatMoney(row.clinicPrice, currency)}
-                          categoryLabel="Aesthetic Injectables & Skin Boosters"
-                          onQuickView={(r) =>
-                            setQuickProduct({ slug: r.slug || r.id, title: r.name || r.product_name })
-                          }
-                        />
-                      </div>
-                    </div>
-                  )}
-                />
-              </section>
-            ))}
-          </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <PriceScheduleExpandedActions
+                    item={{
+                      ...row,
+                      name: row.name || row.product_name,
+                      sku: row.atlas_product_code || row.sku || row.code,
+                    }}
+                    currency={currency}
+                    unitPrice={row.clinicPrice}
+                    formattedPrice={formatMoney(row.clinicPrice, currency)}
+                    categoryLabel="Aesthetic Injectables & Skin Boosters"
+                    onQuickView={(r) =>
+                      setQuickProduct({ slug: r.slug || r.id, title: r.name || r.product_name })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+          />
         )}
       </main>
 
