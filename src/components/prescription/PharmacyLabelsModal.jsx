@@ -160,7 +160,6 @@ export default function PharmacyLabelsModal({
   const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
   const [boldPosology, setBoldPosology] = useState(true); // true = Bold 800 (standard), false = Normal 500 (compact, saves space)
   const [shippingSameAsDelivery, setShippingSameAsDelivery] = useState(false); // default false (discreet Customs-Safe); true mirrors Delivery Clinical Label
-  const [showLegacyLabels, setShowLegacyLabels] = useState(false); // optional Legacy Labels suggestions (Shipping only)
   const [showShippingDatesEditor, setShowShippingDatesEditor] = useState(false); // progressive disclosure for Mfg/Exp/Storage in Shipping
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [internalColorMode, setInternalColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (vector color)
@@ -3545,10 +3544,12 @@ export default function PharmacyLabelsModal({
                       const defaultShippingTitle = legacySuggestions[0] || customsSuggestions[0] || '';
                       const activeShippingTitle = currentItem.shippingTitle || defaultShippingTitle;
                       const isCustomShippingTitle = Boolean(currentItem.shippingTitle && currentItem.shippingTitle !== defaultShippingTitle);
+                      const allShippingPresets = [...legacySuggestions, ...customsSuggestions.filter((c) => !legacySuggestions.includes(c))];
+                      const isPresetShippingTitle = allShippingPresets.includes(activeShippingTitle);
                       return (
                       <div className="gcp-col-12 gcp-field-wrap">
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                          <label className="gcp-form-label" style={{ marginBottom: 0 }}>
+                          <label className="gcp-form-label" htmlFor="gcp-shipping-name-select" style={{ marginBottom: 0 }}>
                             <span>{isEs ? 'Nombre para Aduanas / Shipping' : 'Customs / Shipping Name'}</span>
                             <span
                               style={{
@@ -3566,152 +3567,103 @@ export default function PharmacyLabelsModal({
                               {isCustomShippingTitle ? (isEs ? 'Personalizado' : 'Custom') : (isEs ? 'Legacy · Defecto' : 'Legacy · Default')}
                             </span>
                           </label>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          {isCustomShippingTitle && defaultShippingTitle && (
                             <button
                               type="button"
-                              onClick={() => setShowLegacyLabels((prev) => !prev)}
+                              onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', defaultShippingTitle); }}
                               style={{
-                                background: showLegacyLabels ? '#e8f0fe' : 'transparent',
-                                border: showLegacyLabels ? '1px solid #1a73e8' : '1px solid #dadce0',
+                                background: 'transparent',
+                                border: '1px solid #dadce0',
                                 borderRadius: '4px',
-                                color: showLegacyLabels ? '#174ea6' : '#5f6368',
+                                color: '#5f6368',
                                 fontSize: '0.68rem',
                                 fontWeight: 600,
                                 padding: '2px 8px',
                                 cursor: 'pointer'
                               }}
                             >
-                              {showLegacyLabels ? (isEs ? '✓ Alternativas Botánicas' : '✓ Botanical Alternatives') : (isEs ? '+ Alternativas Botánicas' : '+ Botanical Alternatives')}
+                              ↺ {isEs ? 'Restaurar defecto' : 'Reset to default'}
                             </button>
-                            {isCustomShippingTitle && defaultShippingTitle && (
-                              <button
-                                type="button"
-                                onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', defaultShippingTitle); }}
-                                style={{
-                                  background: 'transparent',
-                                  border: '1px solid #dadce0',
-                                  borderRadius: '4px',
-                                  color: '#5f6368',
-                                  fontSize: '0.68rem',
-                                  fontWeight: 600,
-                                  padding: '2px 8px',
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                ↺ {isEs ? 'Restaurar defecto' : 'Reset to default'}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <input
-                            type="text"
-                            value={shippingDraft !== null ? shippingDraft : activeShippingTitle}
-                            onChange={(e) => setShippingDraft(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') { handleFieldChange('shippingTitle', shippingDraft ?? ''); setShippingDraft(null); }
-                              if (e.key === 'Escape') setShippingDraft(null);
-                            }}
-                            onBlur={() => {
-                              if (shippingDraft !== null) { handleFieldChange('shippingTitle', shippingDraft); setShippingDraft(null); }
-                            }}
-                            className="gcp-form-input"
-                            style={{ flex: 1, minWidth: 0 }}
-                            placeholder={defaultShippingTitle}
-                          />
-                          {shippingDraft !== null && (
-                            <>
-                              <button
-                                type="button"
-                                aria-label={isEs ? 'Guardar nombre' : 'Save name'}
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => { handleFieldChange('shippingTitle', shippingDraft); setShippingDraft(null); }}
-                                style={{ width: '44px', height: '44px', flexShrink: 0, borderRadius: '6px', border: '1px solid #137333', background: '#e6f4ea', color: '#137333', fontSize: '1rem', cursor: 'pointer' }}
-                              >
-                                ✔
-                              </button>
-                              <button
-                                type="button"
-                                aria-label={isEs ? 'Cancelar edición' : 'Cancel edit'}
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => setShippingDraft(null)}
-                                style={{ width: '44px', height: '44px', flexShrink: 0, borderRadius: '6px', border: '1px solid #c5221f', background: '#fce8e6', color: '#c5221f', fontSize: '1rem', cursor: 'pointer' }}
-                              >
-                                ❌
-                              </button>
-                            </>
                           )}
                         </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
-                          {legacySuggestions.map((s, idx) => {
-                            const isSelected = activeShippingTitle === s;
-                            return (
-                              <button
-                                key={`legacy-def-${s}`}
-                                type="button"
-                                onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', s); }}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  padding: '6px 12px',
-                                  minHeight: '44px',
-                                  borderRadius: '6px',
-                                  border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
-                                  background: isSelected ? '#e8f0fe' : '#ffffff',
-                                  color: isSelected ? '#174ea6' : '#3c4043',
-                                  fontSize: '0.73rem',
-                                  fontWeight: isSelected ? 700 : 500,
-                                  cursor: 'pointer',
-                                  textAlign: 'left',
-                                  transition: 'all 0.12s ease'
-                                }}
-                              >
-                                {isSelected && <span aria-hidden="true">✓</span>}
-                                <span>{s}</span>
-                                {idx === 0 && (
-                                  <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: isSelected ? '#d2e3fc' : '#f1f3f4', color: isSelected ? '#174ea6' : '#5f6368' }}>
-                                    {isEs ? 'Defecto' : 'Default'}
-                                  </span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {showLegacyLabels && customsSuggestions.length > 0 && (
-                          <div style={{ marginTop: '8px', padding: '8px 10px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #dadce0' }}>
-                            <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-                              {isEs ? 'Alternativas Botánicas (Solo Shipping)' : 'Botanical Customs-Safe Alternatives (Shipping Only)'}
-                            </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                              {customsSuggestions.map((cs) => {
-                                const isSelected = activeShippingTitle === cs;
-                                return (
-                                  <button
-                                    key={`alt-${cs}`}
-                                    type="button"
-                                    onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', cs); }}
-                                    style={{
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      gap: '6px',
-                                      padding: '6px 12px',
-                                      minHeight: '44px',
-                                      borderRadius: '6px',
-                                      border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
-                                      background: isSelected ? '#e8f0fe' : '#ffffff',
-                                      color: isSelected ? '#174ea6' : '#3c4043',
-                                      fontSize: '0.73rem',
-                                      fontWeight: isSelected ? 700 : 500,
-                                      cursor: 'pointer'
-                                    }}
-                                  >
-                                    {isSelected && <span aria-hidden="true">✓</span>}
-                                    <span>{cs}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
+                        <select
+                          id="gcp-shipping-name-select"
+                          value={shippingDraft === null && isPresetShippingTitle ? activeShippingTitle : '__custom__'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val !== '__custom__') {
+                              setShippingDraft(null);
+                              handleFieldChange('shippingTitle', val);
+                            } else {
+                              setShippingDraft(activeShippingTitle || '');
+                            }
+                          }}
+                          className="gcp-form-input"
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <optgroup label={isEs ? 'Legacy / Coherente Escáner (Por defecto)' : 'Legacy / Scanner-Coherent (Default)'}>
+                            {legacySuggestions.map((s, idx) => (
+                              <option key={`leg-opt-${s}`} value={s}>
+                                {idx === 0 ? `${s} (${isEs ? 'Defecto' : 'Default'})` : s}
+                              </option>
+                            ))}
+                          </optgroup>
+                          {customsSuggestions.some((c) => !legacySuggestions.includes(c)) && (
+                            <optgroup label={isEs ? 'Alternativas Botánicas' : 'Botanical Alternatives'}>
+                              {customsSuggestions
+                                .filter((c) => !legacySuggestions.includes(c))
+                                .map((cs) => (
+                                  <option key={`bot-opt-${cs}`} value={cs}>
+                                    {cs}
+                                  </option>
+                                ))}
+                            </optgroup>
+                          )}
+                          <option value="__custom__">
+                            {isPresetShippingTitle && shippingDraft === null
+                              ? (isEs ? 'Personalizado…' : 'Custom…')
+                              : `${(shippingDraft ?? activeShippingTitle) || (isEs ? 'Personalizado' : 'Custom')}`}
+                          </option>
+                        </select>
+                        {(shippingDraft !== null || !isPresetShippingTitle) && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
+                            <input
+                              type="text"
+                              value={shippingDraft !== null ? shippingDraft : activeShippingTitle}
+                              onChange={(e) => setShippingDraft(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') { handleFieldChange('shippingTitle', shippingDraft ?? ''); setShippingDraft(null); }
+                                if (e.key === 'Escape') setShippingDraft(null);
+                              }}
+                              onBlur={() => {
+                                if (shippingDraft !== null) { handleFieldChange('shippingTitle', shippingDraft); setShippingDraft(null); }
+                              }}
+                              className="gcp-form-input"
+                              style={{ flex: 1, minWidth: 0 }}
+                              placeholder={defaultShippingTitle}
+                            />
+                            {shippingDraft !== null && (
+                              <>
+                                <button
+                                  type="button"
+                                  aria-label={isEs ? 'Guardar nombre' : 'Save name'}
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => { handleFieldChange('shippingTitle', shippingDraft); setShippingDraft(null); }}
+                                  style={{ width: '44px', height: '44px', flexShrink: 0, borderRadius: '6px', border: '1px solid #137333', background: '#e6f4ea', color: '#137333', fontSize: '1rem', cursor: 'pointer' }}
+                                >
+                                  ✔
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={isEs ? 'Cancelar edición' : 'Cancel edit'}
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => setShippingDraft(null)}
+                                  style={{ width: '44px', height: '44px', flexShrink: 0, borderRadius: '6px', border: '1px solid #c5221f', background: '#fce8e6', color: '#c5221f', fontSize: '1rem', cursor: 'pointer' }}
+                                >
+                                  ❌
+                                </button>
+                              </>
+                            )}
                           </div>
                         )}
                         {(() => {
