@@ -39,12 +39,10 @@ export default function ProductDetailInline({
 
   return (
     <div style={{
-      padding: '16px 20px',
+      padding: '14px 18px',
       backgroundColor: '#f8fafc',
-      borderLeft: '4px solid var(--color-primary, #003666)',
-      borderRadius: '6px',
-      margin: '6px 0',
-      boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.03)',
+      borderLeft: '3px solid var(--color-primary, #003666)',
+      borderTop: '1px solid #e2e8f0',
     }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '16px' }}>
         {/* Col 1: SKU Reference & Therapeutic Profile */}

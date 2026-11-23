@@ -19,29 +19,22 @@ export default function CatalogMasterDetailPanel({
   return (
     <div
       style={{
-        padding: '1.15rem 1.5rem 1.25rem',
-        background: '#f8f9fa',
-        borderTop: '1px solid #dadce0',
+        padding: '14px 18px',
+        background: '#f8fafc',
+        borderTop: '1px solid #e2e8f0',
+        borderLeft: '3px solid var(--color-primary, #003666)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1rem',
+        gap: '12px',
       }}
     >
       {description && (
-        <div
-          style={{
-            background: '#ffffff',
-            border: '1px solid #dadce0',
-            borderLeft: '3px solid #1a73e8',
-            borderRadius: '6px',
-            padding: '0.75rem 1rem',
-          }}
-        >
+        <div>
           <div
             style={{
               fontSize: '0.68rem',
               fontWeight: 700,
-              color: '#5f6368',
+              color: '#64748b',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               marginBottom: '4px',
@@ -52,8 +45,8 @@ export default function CatalogMasterDetailPanel({
           <p
             style={{
               margin: 0,
-              fontSize: '0.84rem',
-              color: '#202124',
+              fontSize: '0.82rem',
+              color: '#1e293b',
               lineHeight: 1.5,
             }}
           >
@@ -67,17 +60,16 @@ export default function CatalogMasterDetailPanel({
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: '1rem',
+            gap: '14px',
+            borderTop: description ? '1px solid #e2e8f0' : 'none',
+            paddingTop: description ? '12px' : 0,
           }}
         >
           {sections.map((section, idx) => (
             <div
               key={section.key || idx}
               style={{
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                padding: '0.85rem 1rem',
+                padding: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.45rem',
