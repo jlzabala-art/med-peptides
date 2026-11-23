@@ -38,6 +38,12 @@ test('Rule #71: PharmapolisLabelSvg enforces global pharmacy label standards', (
   assert.ok(src.includes("'1 pump'"), 'Must express 1 mL transdermal dispenser dose as 1 pump');
 });
 
+test('Nasal Spray & Container Detection: Dispensing Container never triggers isPen', () => {
+  const detSrc = read('src/utils/prescriptionTypeDetection.js');
+  assert.ok(detSrc.includes('isNasalSpray'), 'Must detect nasal_spray explicitly before pen/injectable');
+  assert.equal(detSrc.includes("container.includes('pen')"), false, 'Must use word-boundary pen check so disPENsing never triggers isPen');
+});
+
 test('Zoho Matcher: isCompatibleZohoMatch blocks multi-API and wrong-route false positives', () => {
   const src = read('src/actions/zohoAutoIngestMatcher.js');
   assert.ok(src.includes('function isCompatibleZohoMatch'), 'isCompatibleZohoMatch must exist');

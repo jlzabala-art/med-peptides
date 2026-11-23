@@ -35,15 +35,27 @@ export function detectPrescriptionType(rx = {}, formulations = []) {
     );
   });
 
-  // 1. Pre-filled Pen (SubQ Pen, ready-to-inject, no reconstitution)
-  const isPen = Boolean(
+  // 0. Metered Nasal Spray (Intranasal peptide / hormone spray)
+  const isNasalSpray = Boolean(
+    firstForm?.isNasalSpray ||
+    formType === 'nasal_spray' ||
+    rxDispensingForm === 'nasal_spray' ||
+    /\b(nasal\s*spray|intranasal|in\s+each\s+nostril|nostril)\b/i.test(
+      `${rxTitle} ${rxRoute} ${formTitle} ${formRoute} ${dosageForm} ${vehicleName} ${container}`
+    ) ||
+    forms.some((f) => f.isNasalSpray || f.type === 'nasal_spray')
+  );
+
+  // 1. Pre-filled Pen (SubQ Pen, ready-to-inject, no reconstitution; use word-boundary \bpen\b so "dispensing" never matches)
+  const hasWordPen = (s) => /\b(pre-?filled\s*pen|subq\s*pen|pluma\s*precargada|pen\s*injector|pen)\b/i.test(String(s || ''));
+  const isPen = !isNasalSpray && Boolean(
     firstForm?.isPen ||
     firstForm?.isPrefilledPen ||
     formType === 'prefilled_pen' ||
     rxDispensingForm === 'prefilled_pen' ||
-    rxFormat.includes('pen') ||
-    dosageForm.includes('pen') ||
-    container.includes('pen') ||
+    hasWordPen(rxFormat) ||
+    hasWordPen(dosageForm) ||
+    hasWordPen(container) ||
     vehicleName.includes('ready-to-use pen') ||
     vehicleName.includes('solución tampón') ||
     vehicleName.includes('sterile buffer') ||
@@ -55,11 +67,11 @@ export function detectPrescriptionType(rx = {}, formulations = []) {
     formTitle.includes('pluma precargada') ||
     formTitle.includes('subq pen') ||
     hasPenApiSignal ||
-    forms.some(f => f.isPen || f.type === 'prefilled_pen' || String(f.container || '').toLowerCase().includes('pen'))
+    forms.some(f => f.isPen || f.type === 'prefilled_pen' || hasWordPen(f.container))
   );
 
   // 2. Injectable Vial (Lyophilized vial + diluent requiring reconstitution)
-  const isInjectable = !isPen && Boolean(
+  const isInjectable = !isNasalSpray && !isPen && Boolean(
     firstForm?.isInjectable ||
     rxDispensingForm === 'vial' ||
     rxDispensingForm.includes('inject') ||
@@ -78,7 +90,7 @@ export function detectPrescriptionType(rx = {}, formulations = []) {
   );
 
   // 3. Oral (Capsules, tablets, oral drops)
-  const isOral = !isPen && !isInjectable && Boolean(
+  const isOral = !isNasalSpray && !isPen && !isInjectable && Boolean(
     firstForm?.isOral ||
     rxDispensingForm.includes('capsule') ||
     rxDispensingForm.includes('cápsula') ||
@@ -95,7 +107,7 @@ export function detectPrescriptionType(rx = {}, formulations = []) {
   );
 
   // 4. Topical (Hair lotions, foams, scalp solutions, tricho-oils)
-  const isTopical = !isPen && !isInjectable && !isOral && Boolean(
+  const isTopical = !isNasalSpray && !isPen && !isInjectable && !isOral && Boolean(
     firstForm?.isTopical ||
     firstForm?.isTrichoOil ||
     rxDispensingForm.includes('topical') ||
@@ -112,7 +124,7 @@ export function detectPrescriptionType(rx = {}, formulations = []) {
   );
 
   // 5. Transdermal / BHRT (Creams, lipoderm, pentravan)
-  const isTransdermal = !isPen && !isInjectable && !isOral && !isTopical && Boolean(
+  const isTransdermal = !isNasalSpray && !isPen && !isInjectable && !isOral && !isTopical && Boolean(
     firstForm?.isBHRT ||
     firstForm?.isTransdermal ||
     rxDispensingForm.includes('transdermal') ||
@@ -128,59 +140,67 @@ export function detectPrescriptionType(rx = {}, formulations = []) {
 
   // Primary category designation
   let primaryCategory = 'oral';
-  if (isPen) primaryCategory = 'prefilled_pen';
+  if (isNasalSpray) primaryCategory = 'nasal_spray';
+  else if (isPen) primaryCategory = 'prefilled_pen';
   else if (isInjectable) primaryCategory = 'injectable_vial';
   else if (isTopical) primaryCategory = 'topical';
   else if (isTransdermal) primaryCategory = 'transdermal';
 
   return {
+    isNasalSpray,
     isPen,
     isInjectable,
-    isOral: isOral || (!isPen && !isInjectable && !isTopical && !isTransdermal),
+    isOral: isOral || (!isNasalSpray && !isPen && !isInjectable && !isTopical && !isTransdermal),
     isTopical,
     isTransdermal,
     primaryCategory,
-    requiresReconstitution: isInjectable && !isPen,
+    requiresReconstitution: isInjectable && !isPen && !isNasalSpray,
 
     // Formatted GCP Console Ribbon attributes helper
     getAttributes: (isEs = false) => ({
-      routeDisplay: isPen
-        ? (isEs ? '💉 SubQ · Semanal' : '💉 SubQ · Weekly')
-        : isInjectable
-          ? (isEs ? '💉 SubQ · Titulado' : '💉 SubQ · Titrated')
-          : isTopical
-            ? (isEs ? '💧 Tópica · Nocturna' : '💧 Topical · Nightly')
-            : isTransdermal
-              ? (isEs ? '⚡ Transdérmica · Diaria' : '⚡ Transdermal · Daily')
-              : (isEs ? '💊 Vía Oral · Diario' : '💊 Oral · Daily'),
+      routeDisplay: isNasalSpray
+        ? (isEs ? '💧 Intranasal · Diario' : '💧 Intranasal · Daily')
+        : isPen
+          ? (isEs ? '💉 SubQ · Semanal' : '💉 SubQ · Weekly')
+          : isInjectable
+            ? (isEs ? '💉 SubQ · Titulado' : '💉 SubQ · Titrated')
+            : isTopical
+              ? (isEs ? '💧 Tópica · Nocturna' : '💧 Topical · Nightly')
+              : isTransdermal
+                ? (isEs ? '⚡ Transdérmica · Diaria' : '⚡ Transdermal · Daily')
+                : (isEs ? '💊 Vía Oral · Diario' : '💊 Oral · Daily'),
 
-      deviceDisplay: isPen
-        ? (isEs ? '🖊️ Pluma Precargada (Multidosis)' : '🖊️ Pre-filled Pen (Multi-dose)')
-        : isInjectable
-          ? (isEs ? '🧪 Vial Liofilizado + Diluyente' : '🧪 Lyophilized Vial + Diluent')
-          : isTopical
-            ? (isEs ? '🧴 Solución Tópica' : '🧴 Topical Solution')
-            : isTransdermal
-              ? (isEs ? '🧴 Dispensador Airless (BHRT)' : '🧴 Airless Dispenser (BHRT)')
-              : (isEs ? '💊 Cápsulas Vegetales HPMC' : '💊 HPMC Vegetable Capsules'),
+      deviceDisplay: isNasalSpray
+        ? (isEs ? '💧 Spray Nasal Dosificado' : '💧 Metered Nasal Spray')
+        : isPen
+          ? (isEs ? '🖊️ Pluma Precargada (Multidosis)' : '🖊️ Pre-filled Pen (Multi-dose)')
+          : isInjectable
+            ? (isEs ? '🧪 Vial Liofilizado + Diluyente' : '🧪 Lyophilized Vial + Diluent')
+            : isTopical
+              ? (isEs ? '🧴 Solución Tópica' : '🧴 Topical Solution')
+              : isTransdermal
+                ? (isEs ? '🧴 Dispensador Airless (BHRT)' : '🧴 Airless Dispenser (BHRT)')
+                : (isEs ? '💊 Cápsulas Vegetales HPMC' : '💊 HPMC Vegetable Capsules'),
 
-      storageDisplay: (isPen || isInjectable)
+      storageDisplay: (isNasalSpray || isPen || isInjectable)
         ? (isEs ? '❄️ 2°C – 8°C Nevera' : '❄️ 2°C – 8°C Refrigerated')
         : (isEs ? '🏠 15°C – 25°C Ambiente' : '🏠 15°C – 25°C Room Temp'),
 
       cycleDisplay: rx?.duration
         ? `⏱️ ${rx.duration}`
-        : (isEs ? `⏱️ ${rx?.cycleDays || 84} Días de Suministro` : `⏱️ ${rx?.cycleDays || 84} Days Supply`),
+        : (isEs ? `⏱️ ${rx?.cycleDays || (isNasalSpray ? 30 : 84)} Días de Suministro` : `⏱️ ${rx?.cycleDays || (isNasalSpray ? 30 : 84)} Days Supply`),
 
-      categoryBadge: isPen
-        ? (isEs ? 'PLUMA PRECARGADA DE PÉPTIDOS (SUBQ PEN)' : 'PRE-FILLED PEPTIDE PEN (SUBQ PEN)')
-        : isInjectable
-          ? (isEs ? 'PÉPTIDO INYECTABLE (SUBQ)' : 'INJECTABLE PEPTIDE (SUBQ)')
-          : isTopical
-            ? (isEs ? 'LOCIÓN CAPILAR / TÓPICA' : 'TOPICAL SCALP / DERMAL LOTION')
-            : isTransdermal
-              ? (isEs ? 'CREMA TRANSDÉRMICA (BHRT)' : 'TRANSDERMAL CREAM (BHRT)')
-              : (isEs ? 'SUPLEMENTO / NUTRACÉUTICO ORAL' : 'ORAL SUPPLEMENT / NUTRACEUTICAL')
+      categoryBadge: isNasalSpray
+        ? (isEs ? 'SPRAY NASAL DOSIFICADO (INTRANASAL)' : 'METERED INTRANASAL SPRAY')
+        : isPen
+          ? (isEs ? 'PLUMA PRECARGADA DE PÉPTIDOS (SUBQ PEN)' : 'PRE-FILLED PEPTIDE PEN (SUBQ PEN)')
+          : isInjectable
+            ? (isEs ? 'PÉPTIDO INYECTABLE (SUBQ)' : 'INJECTABLE PEPTIDE (SUBQ)')
+            : isTopical
+              ? (isEs ? 'LOCIÓN CAPILAR / TÓPICA' : 'TOPICAL SCALP / DERMAL LOTION')
+              : isTransdermal
+                ? (isEs ? 'CREMA TRANSDÉRMICA (BHRT)' : 'TRANSDERMAL CREAM (BHRT)')
+                : (isEs ? 'SUPLEMENTO / NUTRACÉUTICO ORAL' : 'ORAL SUPPLEMENT / NUTRACEUTICAL')
     })
   };
 }

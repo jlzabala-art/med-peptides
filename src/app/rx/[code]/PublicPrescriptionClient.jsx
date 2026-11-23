@@ -802,7 +802,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 onOpenInquiry={() => setShowDoctorContactModal(true)}
                 onSyncCalendar={() => setShowCalendarSyncModal(true)}
                 activeGcpTab={activeGcpTab}
-                setActiveGcpTab={setActiveGcpTab}
+                setActiveGcpTab={null}
                 compoundedFormulations={compoundedFormulations}
                 genomicsData={genomicsData}
                 atlasRecs={atlasRecs}
@@ -852,70 +852,61 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 />
               )}
 
-              {/* ── Sequential Roadmap Tab: MultiPartOverview & KPIs ────────────────────── */}
-              {activeGcpTab === 'roadmap' && (
+              {/* ── Compounded Formulations & Dedicated Posology Architecture (Patient vs Clinical) ──────────── */}
+              {isPatientView ? (
+                <PatientPrescriptionGuide
+                  rx={currentRx}
+                  compoundedFormulations={compoundedFormulations}
+                  isEs={isEs}
+                  doctorName={displayDoctorNameShort}
+                  doctorClinic={doctorClinic}
+                  doctorPhone={safeDoctorPhone}
+                  patientName={patientName}
+                  rxId={rxId}
+                  patientPublicUrl={patientPublicUrl}
+                  onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+                  onOpenDoctorContact={() => setShowDoctorContactModal(true)}
+                />
+              ) : (
+                <CompoundedFormulationsSection
+                  compoundedFormulations={compoundedFormulations}
+                  isEs={isEs}
+                  prescriptionLabels={prescriptionLabels}
+                  expandedPhases={expandedPhases}
+                  setExpandedPhases={setExpandedPhases}
+                  setSelectedPhase={setSelectedPhase}
+                  togglePhase={togglePhase}
+                  setSelectedLabelIndex={setSelectedLabelIndex}
+                  setShowLabelsModal={setShowLabelsModal}
+                  canManageLabels={isAdmin}
+                />
+              )}
+
+              {/* ── Sequential Roadmap: MultiPartOverview & Biological Milestones (Expanded) ── */}
+              <div id="roadmap-section" style={{ scrollMarginTop: '100px' }}>
                 <MultiPartOverview
                   formulations={compoundedFormulations}
                   onSelectPhase={(phaseId) => {
                     setSelectedPhase(phaseId);
-                    setActiveGcpTab('treatment');
                     setExpandedPhases(prev => ({ ...prev, [phaseId]: true }));
                   }}
                 />
-              )}
-
-              {/* ── Compounded Formulations & Dedicated Posology Architecture (Patient vs Clinical) ──────────── */}
-              {activeGcpTab === 'treatment' && (
-                isPatientView ? (
-                  <PatientPrescriptionGuide
-                    rx={currentRx}
-                    compoundedFormulations={compoundedFormulations}
-                    isEs={isEs}
-                    doctorName={displayDoctorNameShort}
-                    doctorClinic={doctorClinic}
-                    doctorPhone={safeDoctorPhone}
-                    patientName={patientName}
-                    rxId={rxId}
-                    patientPublicUrl={patientPublicUrl}
-                    onOpenQuotation={() => setShowAtlasQuotationModal(true)}
-                    onOpenDoctorContact={() => setShowDoctorContactModal(true)}
-                  />
-                ) : (
-                  <CompoundedFormulationsSection
-                    compoundedFormulations={compoundedFormulations}
-                    isEs={isEs}
-                    prescriptionLabels={prescriptionLabels}
-                    expandedPhases={expandedPhases}
-                    setExpandedPhases={setExpandedPhases}
-                    setSelectedPhase={setSelectedPhase}
-                    togglePhase={togglePhase}
-                    setSelectedLabelIndex={setSelectedLabelIndex}
-                    setShowLabelsModal={setShowLabelsModal}
-                    canManageLabels={isAdmin}
-                  />
-                )
-              )}
-
-              {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
-              {activeGcpTab === 'roadmap' && (
                 <RoadmapMilestonesSection
                   timeline={timeline}
                   isEs={isEs}
                 />
-              )}
+              </div>
 
-              {/* ── Section: Quality, Laboratory & EU GMP Traceability (Authentic Dossier) ──────────────── */}
-              {activeGcpTab === 'traceability' && (
-                <QualityTraceabilitySection
-                  rxId={rxId}
-                  rx={currentRx}
-                  isEs={isEs}
-                />
-              )}
+              {/* ── Section: Quality, Laboratory & EU GMP Traceability (Expanded) ──────────────── */}
+              <QualityTraceabilitySection
+                rxId={rxId}
+                rx={currentRx}
+                isEs={isEs}
+              />
 
               {/* ── Atlas Clinical Recommendations (Only visible in Doctor View; hidden from patient) ── */}
-              {(activeGcpTab === 'recommendations') && !isPatientView && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway || atlasRecs?.teletestHairMineral) && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+              {!isPatientView && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway || atlasRecs?.teletestHairMineral) && (
+                <div id="recommendations-section" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
                   <AtlasSynergyRecommendationsSection
                     atlasRecs={atlasRecs}
                     isEs={isEs}
@@ -931,8 +922,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
-              {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
-              {activeGcpTab === 'genomics' && genomicsData && (
+              {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics, Expanded) ───────────── */}
+              {genomicsData && (
                 <div id="genomics-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
                   <GenomicsPrescriptionGuidanceCard
                     genomicsData={genomicsData}
@@ -943,8 +934,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
-              {/* ── Section: Doctor & Patient Credentials (Activated from Sidebar or Sub-Tab) ── */}
-              {(activeGcpTab === 'credentials') && (
+              {/* ── Section: Doctor & Patient Credentials (Expanded in Doctor View) ── */}
+              {!isPatientView && (
                 <div id="doctor-patient-credentials" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
                   <div style={{
                     display: 'flex',

@@ -236,26 +236,34 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     ...(Array.isArray(rx.prescriptionLines) ? rx.prescriptionLines.map(l => `${l.name || ''} ${l.productName || ''} ${l.format || ''} ${l.presentation || ''} ${l.activeIngredient || ''}`) : [])
   ].join(' ').toLowerCase();
 
+  const isNasalRx =
+    /\b(nasal\s*spray|intranasal|in\s+each\s+nostril|nostril|nasal)\b/i.test(rxSig) ||
+    rx.dispensingForm === 'nasal_spray';
+
   const isPenRx =
-    rx.dispensingForm === 'prefilled_pen' ||
-    (rx.format || '').toLowerCase().includes('pen') ||
-    rxSig.includes('pre-filled pen') || rxSig.includes('prefilled pen') ||
-    rxSig.includes('pre-filled') || rxSig.includes('pluma precargada') ||
-    rxSig.includes('subq pen') || rxSig.includes('pen 30 mg') ||
-    rxSig.includes('pen 15 mg') || rxSig.includes('pen 10 mg') ||
-    rxSig.includes('pen 5 mg') || rxSig.includes('pen 7.5 mg') ||
-    (rxSig.includes('pen') && (rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') || rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') || rxSig.includes('semaglutide')));
+    !isNasalRx && (
+      rx.dispensingForm === 'prefilled_pen' ||
+      (rx.format || '').toLowerCase().includes('pen') ||
+      rxSig.includes('pre-filled pen') || rxSig.includes('prefilled pen') ||
+      rxSig.includes('pre-filled') || rxSig.includes('pluma precargada') ||
+      rxSig.includes('subq pen') || rxSig.includes('pen 30 mg') ||
+      rxSig.includes('pen 15 mg') || rxSig.includes('pen 10 mg') ||
+      rxSig.includes('pen 5 mg') || rxSig.includes('pen 7.5 mg') ||
+      (rxSig.includes('pen') && (rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') || rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') || rxSig.includes('semaglutide')))
+    );
 
   const isInjectableRx =
-    isPenRx ||
-    rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') ||
-    rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') ||
-    rxSig.includes('semaglutide') || rxSig.includes('cagrilintide') || rxSig.includes('mazdutide') ||
-    rxSig.includes('survodutide') || rxSig.includes('bpc-157') || rxSig.includes('tb-500') ||
-    rxSig.includes('kisspeptin') || rxSig.includes('ipamorelin') || rxSig.includes('sermorelin') ||
-    rxSig.includes('ghk-cu') || rxSig.includes('epithalon') || rxSig.includes('mots-c') ||
-    rxSig.includes('lyophilized') || rxSig.includes('liofilizado') ||
-    rxSig.includes('subcutaneous') || rxSig.includes('subq');
+    !isNasalRx && (
+      isPenRx ||
+      rxSig.includes('retatrutide') || rxSig.includes('glp-3') || rxSig.includes('glp3') ||
+      rxSig.includes('glp-1') || rxSig.includes('glp1') || rxSig.includes('tirzepatide') ||
+      rxSig.includes('semaglutide') || rxSig.includes('cagrilintide') || rxSig.includes('mazdutide') ||
+      rxSig.includes('survodutide') || rxSig.includes('bpc-157') || rxSig.includes('tb-500') ||
+      rxSig.includes('kisspeptin') || rxSig.includes('ipamorelin') || rxSig.includes('sermorelin') ||
+      rxSig.includes('ghk-cu') || rxSig.includes('epithalon') || rxSig.includes('mots-c') ||
+      rxSig.includes('lyophilized') || rxSig.includes('liofilizado') ||
+      rxSig.includes('subcutaneous') || rxSig.includes('subq')
+    );
 
   // Raw Lines Normalization
   const rawLines = useMemo(() => {
@@ -599,10 +607,23 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         }
       }
 
+      const isNasalSpray = isNasalRx || /\b(nasal\s*spray|intranasal|in\s+each\s+nostril|nostril)\b/i.test(`${titleLower} ${routeLower} ${dosageLower} ${vNameLower}`);
+      const effectiveIsPen = !isNasalSpray && isPen;
+      const effectiveIsInjectable = !isNasalSpray && isInjectable;
+
+      const filteredApis = apis.filter((a) => {
+        if (apis.length <= 1) return true;
+        const an = (a.name || a.drugName || a.productName || a.activeIngredient || '').toLowerCase();
+        const isExcipient = /\b(benzalkonium|sterile water|water for injection|bacteriostatic water|sodium chloride|isotonic buffer|carrier|excipient|vehicle)\b/i.test(an) ||
+          /\b(q\.?s\.?\s*to)\b/i.test(String(a.dosage || a.dose || a.strength || ''));
+        return !isExcipient;
+      });
+      const displayApis = filteredApis.length > 0 ? filteredApis : apis;
+
       return {
         id: `formulation-${index - 1}`,
         index,
-        type: isPen ? 'prefilled_pen' : (isInjectable ? (isDiluent ? 'diluent' : 'injectable_vial') : (isOral ? 'oral' : (isTrichoOil ? 'topical_oil' : 'topical'))),
+        type: isNasalSpray ? 'nasal_spray' : (effectiveIsPen ? 'prefilled_pen' : (effectiveIsInjectable ? (isDiluent ? 'diluent' : 'injectable_vial') : (isOral ? 'oral' : (isTrichoOil ? 'topical_oil' : 'topical')))),
         accentColor,
         accentBg,
         badgeText,
@@ -611,23 +632,26 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         dosageForm: resolvedDosageForm,
         route: resolvedRoute,
         volume: resolvedVolume,
+        isNasalSpray,
         isOral,
-        isInjectable,
-        isPen,
+        isInjectable: effectiveIsInjectable,
+        isPen: effectiveIsPen,
         isDiluent,
-        container: isPen
-          ? (isEs ? 'Dispositivo Inyector Multidosis Tipo Pluma Precargada con Agujas Ultrafinas de Seguridad (31G/32G)' : 'Multi-dose Pre-filled Pen Injector Device with Ultra-fine Safety Needles (31G/32G)')
-          : (isInjectable
-              ? (isEs ? 'Vial de Vidrio Borosilicato Tipo I con Tapón de Clorobutilo y Sellado Flip-Off' : 'Type I Borosilicate Glass Vial with Chlorobutyl Stopper & Flip-Off Seal')
-              : (isOral 
-                  ? (isEs ? 'Frasco HDPE Farmacéutico de Seguridad con Cierre Inviolable' : 'Pharmaceutical HDPE Safety Bottle with Tamper-Evident Cap')
-                  : (isTrichoOil ? 'Amber Glass Dropper Bottle' : 'Dispensing Container'))),
+        container: isNasalSpray
+          ? (isEs ? `Frasco Spray Nasal Dosificado (${resolvedVolume || '10 mL'})` : `Metered Nasal Spray Bottle (${resolvedVolume || '10 mL'})`)
+          : (effectiveIsPen
+            ? (isEs ? 'Dispositivo Inyector Multidosis Tipo Pluma Precargada con Agujas Ultrafinas de Seguridad (31G/32G)' : 'Multi-dose Pre-filled Pen Injector Device with Ultra-fine Safety Needles (31G/32G)')
+            : (effectiveIsInjectable
+                ? (isEs ? 'Vial de Vidrio Borosilicato Tipo I con Tapón de Clorobutilo y Sellado Flip-Off' : 'Type I Borosilicate Glass Vial with Chlorobutyl Stopper & Flip-Off Seal')
+                : (isOral 
+                    ? (isEs ? 'Frasco HDPE Farmacéutico de Seguridad con Cierre Inviolable' : 'Pharmaceutical HDPE Safety Bottle with Tamper-Evident Cap')
+                    : (isTrichoOil ? 'Amber Glass Dropper Bottle' : 'Compounded Dispensing Container')))),
         isTrichoOil,
         isPomade,
         isBHRT,
         vehicle: vehicleObj,
         posology: posologyObj,
-        apis: apis.map(a => {
+        apis: displayApis.map(a => {
           const apiName = a.name || a.drugName || a.productName || a.activeIngredient || 'Active API';
           const clinical = resolveApiClinicalData({ ...a, name: apiName }, isEs);
           return {

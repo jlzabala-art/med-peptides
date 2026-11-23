@@ -296,13 +296,15 @@ export default function CompoundedFormulationsSection({
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <CheckCircle2 size={13} />
                       <span>
-                        {(formulation.isPen || formulation.type === 'prefilled_pen' || (formulation.dosageForm || '').toLowerCase().includes('pen'))
-                          ? (isEs ? 'Solución Isotónica Estéril Lista para Inyectar · Dispositivo Pluma Multidosis' : 'Sterile Ready-to-Inject Isotonic Solution · Multi-dose Pen Device')
-                          : formulation.isInjectable 
-                            ? (isEs ? 'Matriz Liofilizada Estéril Libre de Pirógenos · Grado Farmacéutico cGMP' : 'Sterile Pyrogen-Free Lyophilized Matrix · cGMP Cleanroom Compliant')
-                            : formulation.isOral 
-                              ? (isEs ? '100% Cápsulas Vegetales HPMC · Sin Gluten · Sin Alérgenos' : '100% Plant-Based HPMC Capsules · Gluten-Free · Allergen-Free') 
-                              : (formulation.id?.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Enteric Bioavailable Powder')}
+                        {(formulation.isNasalSpray || /nasal|intranasal/i.test(`${formulation.route || ''} ${formulation.dosageForm || ''}`))
+                          ? (isEs ? 'Solución Acuosa Isotónica Tamponada · Spray Nasal Dosificado' : 'Isotonic Buffered Aqueous Solution · Metered Nasal Spray')
+                          : (formulation.isPen || formulation.type === 'prefilled_pen' || (formulation.dosageForm || '').toLowerCase().includes('pen'))
+                            ? (isEs ? 'Solución Isotónica Estéril Lista para Inyectar · Dispositivo Pluma Multidosis' : 'Sterile Ready-to-Inject Isotonic Solution · Multi-dose Pen Device')
+                            : formulation.isInjectable 
+                              ? (isEs ? 'Matriz Liofilizada Estéril Libre de Pirógenos · Grado Farmacéutico cGMP' : 'Sterile Pyrogen-Free Lyophilized Matrix · cGMP Cleanroom Compliant')
+                              : formulation.isOral 
+                                ? (isEs ? '100% Cápsulas Vegetales HPMC · Sin Gluten · Sin Alérgenos' : '100% Plant-Based HPMC Capsules · Gluten-Free · Allergen-Free') 
+                                : (formulation.id?.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Compounded Pharmaceutical Carrier')}
                       </span>
                     </div>
                   </div>
@@ -768,8 +770,46 @@ export default function CompoundedFormulationsSection({
                     ))}
                   </div>
 
-                  {/* Sub-Section 3a: Pre-filled Pen Banner (No Reconstitution) vs Reconstitution Guide for Vials */}
-                  {(formulation.isPen || formulation.type === 'prefilled_pen' || (formulation.dosageForm || '').toLowerCase().includes('pen') || (formulation.container || '').toLowerCase().includes('pen')) ? (
+                  {/* Sub-Section 3a: Nasal Spray Metered Bottle vs Pre-filled Pen Banner vs Reconstitution Guide */}
+                  {(formulation.isNasalSpray || /nasal|intranasal/i.test(`${formulation.route || ''} ${formulation.dosageForm || ''}`)) ? (
+                    <div style={{
+                      marginTop: '0.75rem',
+                      background: '#f0f9ff',
+                      border: '1px solid #bae6fd',
+                      borderRadius: '10px',
+                      padding: '12px 16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '12px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.35rem' }}>💧</span>
+                        <div>
+                          <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0369a1' }}>
+                            {isEs ? 'Spray Nasal Dosificado · Listo para Usar' : 'Metered Intranasal Spray Bottle · Ready to Use'}
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#0284c7', marginTop: '2px' }}>
+                            {isEs
+                              ? '✓ Solución acuosa isotónica calibrada por pulsación. No requiere reconstitución ni agujas.'
+                              : '✓ Calibrated isotonic aqueous spray delivery. No reconstitution or needles required.'}
+                          </div>
+                        </div>
+                      </div>
+                      <span style={{
+                        fontSize: '0.70rem',
+                        fontWeight: 700,
+                        background: '#ffffff',
+                        border: '1px solid #bae6fd',
+                        color: '#0369a1',
+                        padding: '4px 10px',
+                        borderRadius: '6px'
+                      }}>
+                        ❄️ 2°C – 8°C {isEs ? 'Nevera' : 'Refrigerated'}
+                      </span>
+                    </div>
+                  ) : (formulation.isPen || formulation.type === 'prefilled_pen' || /\bpen\b/i.test(formulation.dosageForm || '') || /\bpen\b/i.test(formulation.container || '')) ? (
                     <div style={{
                       marginTop: '0.75rem',
                       background: '#f5f3ff',
