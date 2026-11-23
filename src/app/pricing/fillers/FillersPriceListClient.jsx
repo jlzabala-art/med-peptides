@@ -13,22 +13,14 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import ProductQuickViewDrawer from '@/components/shared/ProductQuickViewDrawer';
 import { exportPriceSchedulePdf } from '@/utils/exportPriceSchedulePdf';
+import { convertCurrencyAmount } from '@/utils/productViewModel';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import { useAuth } from '@/context/AuthContext';
 import { Sparkles, Syringe, Layers, ShieldCheck, Download } from 'lucide-react';
 import '../colway/ColwayPriceList.css';
 
-const FX_FROM_EUR = {
-  EUR: 1,
-  USD: 1.08,
-  AED: 3.98
-};
-
 function convertFromEur(amountEur, targetCurrency) {
-  const n = Number(amountEur || 0);
-  if (!n) return 0;
-  const rate = FX_FROM_EUR[targetCurrency] || 1;
-  return Math.round((n * rate + Number.EPSILON) * 100) / 100;
+  return convertCurrencyAmount(amountEur, 'EUR', targetCurrency);
 }
 
 function formatMoney(amount, currency) {
