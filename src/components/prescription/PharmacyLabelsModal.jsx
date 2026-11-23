@@ -4064,10 +4064,11 @@ export default function PharmacyLabelsModal({
                         { icon: '☀️', label: isEs ? 'Proteger de Luz' : 'Protect from Light', val: 'Protect from direct light and moisture (below 25°C).' },
                         { icon: '🧊', label: isEs ? '-20°C Congelado' : '-20°C Frozen', val: 'Store frozen (-20°C). Protect from light.' },
                       ];
+                      const isPresetStorage = storagePresets.some((st) => st.val === curStorage);
                       return (
                         <div className="gcp-col-12 gcp-field-wrap">
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                            <label className="gcp-form-label" style={{ marginBottom: 0 }}>
+                            <label className="gcp-form-label" htmlFor="gcp-storage-select" style={{ marginBottom: 0 }}>
                               <span>{isEs ? 'Conservación / Almacenamiento' : 'Storage Conditions'}</span>
                               <span
                                 style={{
@@ -4104,48 +4105,41 @@ export default function PharmacyLabelsModal({
                               </button>
                             )}
                           </div>
-                          <input
-                            type="text"
-                            value={curStorage}
-                            onChange={(e) => handleFieldChange('storage', e.target.value)}
+                          <select
+                            id="gcp-storage-select"
+                            value={isPresetStorage ? curStorage : '__custom__'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val !== '__custom__') {
+                                handleFieldChange('storage', val);
+                              } else if (isPresetStorage) {
+                                handleFieldChange('storage', '');
+                              }
+                            }}
                             className="gcp-form-input"
-                            placeholder={defaultStorage}
-                          />
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
-                            {storagePresets.map((st) => {
-                              const active = curStorage === st.val;
-                              return (
-                                <button
-                                  key={st.label}
-                                  type="button"
-                                  onClick={() => handleFieldChange('storage', st.val)}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    border: active ? '1.5px solid #1a73e8' : '1px solid #dadce0',
-                                    background: active ? '#e8f0fe' : '#ffffff',
-                                    color: active ? '#174ea6' : '#3c4043',
-                                    borderRadius: '6px',
-                                    fontSize: '0.73rem',
-                                    fontWeight: active ? 700 : 500,
-                                    padding: '6px 12px',
-                                    minHeight: '44px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.12s ease'
-                                  }}
-                                >
-                                  <span aria-hidden="true">{active ? '✓' : st.icon}</span>
-                                  <span>{st.label}</span>
-                                  {st.isDefault && (
-                                    <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: active ? '#d2e3fc' : '#f1f3f4', color: active ? '#174ea6' : '#5f6368' }}>
-                                      {isEs ? 'Defecto' : 'Default'}
-                                    </span>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {storagePresets.map((st) => (
+                              <option key={st.val} value={st.val}>
+                                {`${st.icon} ${st.label}${st.isDefault ? (isEs ? ' (Defecto)' : ' (Default)') : ''} — ${st.val}`}
+                              </option>
+                            ))}
+                            <option value="__custom__">
+                              {isPresetStorage
+                                ? (isEs ? 'Personalizado…' : 'Custom…')
+                                : `${curStorage || (isEs ? 'Personalizado' : 'Custom')}`}
+                            </option>
+                          </select>
+                          {!isPresetStorage && (
+                            <input
+                              type="text"
+                              value={curStorage}
+                              onChange={(e) => handleFieldChange('storage', e.target.value)}
+                              className="gcp-form-input"
+                              style={{ marginTop: '6px' }}
+                              placeholder={defaultStorage}
+                            />
+                          )}
                         </div>
                       );
                     })()}
