@@ -694,47 +694,39 @@ export default function LabelsHomeView({
                         ? new Date(ms).toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
                         : '');
                       const isRecentImport = ms > 0 && (Date.now() - ms) < 24 * 60 * 60 * 1000;
-                      const reportDateRaw = p.prescriptionDate || p.date || p.reportDate;
-                      const reportDateStr = formatResultDate(reportDateRaw);
-                      const showReportDate = reportDateStr && reportDateStr !== dateStr;
+                      const hasShippingConfigured = Boolean(
+                        p.shippingTitle ||
+                        p.legacyShippingApplied ||
+                        (Array.isArray(p.items) && p.items.some((it) => it?.shippingTitle || it?.legacyShippingApplied))
+                      );
+                      const hasPdf = Boolean(p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl);
 
                       return (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '3px' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
                             {renderPrintStatusBadge(p.code, p.a4PrintCount)}
                             {isRecentImport && (
-                              <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#0f766e', background: '#ccfbf1', padding: '1px 5px', borderRadius: '4px' }}>
+                              <span style={{ fontSize: '0.60rem', fontWeight: 800, color: '#0f766e', background: '#ccfbf1', padding: '1px 5px', borderRadius: '4px' }}>
                                 NEW
                               </span>
                             )}
+                            {hasShippingConfigured && (
+                              <span
+                                style={{ fontSize: '0.60rem', fontWeight: 700, color: '#174ea6', background: '#e8f0fe', padding: '1px 5px', borderRadius: '4px' }}
+                                title={isEs ? 'Etiqueta de Shipping configurada (Legacy)' : 'Shipping label configured (Legacy)'}
+                              >
+                                Legacy ✓
+                              </span>
+                            )}
                           </div>
-                          {dateStr && (
-                            <span style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap' }}>
-                              {isEs ? 'Importado:' : 'Imported:'} {dateStr}
-                            </span>
-                          )}
-                          {showReportDate && (
-                            <span style={{ fontSize: '0.66rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                              {isEs ? 'Informe:' : 'Report:'} {reportDateStr}
-                            </span>
-                          )}
-                          <span
-                            style={{
-                              fontSize: '0.62rem',
-                              fontWeight: 700,
-                              padding: '1px 5px',
-                              borderRadius: '4px',
-                              background: (p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl) ? '#ecfdf5' : '#fffbeb',
-                              color: (p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl) ? '#047857' : '#b45309',
-                              border: (p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl) ? '1px solid #a7f3d0' : '1px solid #fde68a',
-                              whiteSpace: 'nowrap',
-                              width: 'fit-content',
-                            }}
-                          >
-                            {(p.cloudStoragePath || p.cloudStorageUri || p.pdfUrl)
-                              ? (isEs ? 'PDF Original ✓' : 'Original PDF ✓')
-                              : (isEs ? 'Sin PDF original' : 'No PDF')}
-                          </span>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '0.68rem', color: '#64748b' }}>
+                            {dateStr && <span style={{ whiteSpace: 'nowrap' }}>{dateStr}</span>}
+                            {hasPdf && (
+                              <span style={{ fontSize: '0.60rem', fontWeight: 700, color: '#047857', background: '#ecfdf5', padding: '0 4px', borderRadius: '3px', border: '1px solid #a7f3d0' }}>
+                                PDF ✓
+                              </span>
+                            )}
+                          </div>
                         </div>
                       );
                     },

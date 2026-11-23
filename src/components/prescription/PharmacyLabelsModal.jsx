@@ -161,6 +161,7 @@ export default function PharmacyLabelsModal({
   const [boldPosology, setBoldPosology] = useState(true); // true = Bold 800 (standard), false = Normal 500 (compact, saves space)
   const [shippingSameAsDelivery, setShippingSameAsDelivery] = useState(false); // default false (discreet Customs-Safe); true mirrors Delivery Clinical Label
   const [showLegacyLabels, setShowLegacyLabels] = useState(false); // optional Legacy Labels suggestions (Shipping only)
+  const [showShippingDatesEditor, setShowShippingDatesEditor] = useState(false); // progressive disclosure for Mfg/Exp/Storage in Shipping
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [internalColorMode, setInternalColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (vector color)
   const colorMode = externalColorMode || internalColorMode;
@@ -2878,6 +2879,31 @@ export default function PharmacyLabelsModal({
                         ? (isEs ? '↺ Revertir a Borrador' : '↺ Revert to Draft')
                         : (isEs ? '✓ Aprobar Etiqueta' : '✓ Approve Label')}
                     </button>
+                    {labels.length > 1 && selectedProductIdx < labels.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (saveSecurity.canApprove && !isSavingToFirebase && currentItem.approvalStatus !== 'approved') {
+                            handleFieldChange('approvalStatus', 'approved');
+                            handleSaveToFirebase('approved');
+                          }
+                          setSelectedProductIdx((idx) => Math.min(labels.length - 1, idx + 1));
+                        }}
+                        disabled={isSavingToFirebase}
+                        className="gcp-btn-primary"
+                        style={{
+                          padding: '3px 10px',
+                          minHeight: '28px',
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          whiteSpace: 'nowrap',
+                          cursor: isSavingToFirebase ? 'not-allowed' : 'pointer'
+                        }}
+                        title={isEs ? 'Aprobar esta parte y pasar a la siguiente' : 'Approve this part and advance to next'}
+                      >
+                        {isEs ? '✓ Aprobar y Siguiente →' : '✓ Approve & Next →'}
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -3862,6 +3888,69 @@ export default function PharmacyLabelsModal({
                     </>
                     )}
 
+                    {activeVariant === 'shipping' && !showShippingDatesEditor ? (
+                      <div className="gcp-col-12 gcp-field-wrap">
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '8px',
+                            flexWrap: 'wrap',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #dadce0',
+                            background: '#f8f9fa',
+                            fontSize: '0.73rem',
+                            color: '#3c4043'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span><b>Mfg:</b> {toIsoDateInput(currentItem.prodDate || currentItem.mfgDate) || getFormattedDate()}</span>
+                            <span style={{ color: '#94a3b8' }}>·</span>
+                            <span><b>Exp:</b> {toIsoDateInput(currentItem.expDate) || getOffsetDate(90)}</span>
+                            <span style={{ color: '#94a3b8' }}>·</span>
+                            <span><b>Storage:</b> {currentItem.storage ? currentItem.storage.slice(0, 28) + (currentItem.storage.length > 28 ? '…' : '') : 'Default'}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowShippingDatesEditor(true)}
+                            style={{
+                              background: '#ffffff',
+                              border: '1px solid #dadce0',
+                              borderRadius: '4px',
+                              color: '#5f6368',
+                              fontSize: '0.68rem',
+                              fontWeight: 600,
+                              padding: '4px 10px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isEs ? 'Editar Fechas y Conservación' : 'Edit Dates & Storage'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                    <>
+                    {activeVariant === 'shipping' && showShippingDatesEditor && (
+                      <div className="gcp-col-12" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-4px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setShowShippingDatesEditor(false)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#1a73e8',
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            padding: '2px 4px'
+                          }}
+                        >
+                          {isEs ? '▲ Ocultar Fechas y Conservación' : '▲ Collapse Dates & Storage'}
+                        </button>
+                      </div>
+                    )}
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -4033,6 +4122,8 @@ export default function PharmacyLabelsModal({
                         </div>
                       );
                     })()}
+                    </>
+                    )}
                   </div>
 
                 ) : (
