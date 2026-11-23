@@ -237,3 +237,42 @@ test('Clinical Domain Classifier: isolates nasal sprays & BHRT hormones from Tri
   const hookSrc = read('src/hooks/usePrescriptionData.js');
   assert.ok(hookSrc.includes('resolveClinicalDomain'), 'usePrescriptionData must use resolveClinicalDomain instead of forcing TrichoSol');
 });
+
+test('Firestore Model Guard: enforces AGENTS.md Rule #28 status taxonomy and canonical dispensingForm', async () => {
+  const {
+    normalizeRxStatus,
+    resolveCanonicalDispensingForm,
+    normalizePrescriptionWritePayload,
+    RX_VALID_STATUSES,
+    CANONICAL_DISPENSING_FORMS,
+  } = await import('../src/utils/firestoreModelGuard.js');
+
+  assert.equal(normalizeRxStatus('active'), 'approved');
+  assert.equal(normalizeRxStatus('proposal_pending'), 'pending');
+  assert.equal(normalizeRxStatus('ordered'), 'processing');
+  assert.equal(normalizeRxStatus(''), 'draft');
+  assert.equal(normalizeRxStatus('unknown_legacy_state'), 'draft');
+  assert.ok(RX_VALID_STATUSES.has(normalizeRxStatus('APPROVED')));
+
+  assert.equal(
+    resolveCanonicalDispensingForm({ dispensingForm: 'Nasal Spray', productTitle: 'Selank Nasal Spray (75 mg / 10 mL)' }),
+    'nasal_spray'
+  );
+  assert.equal(
+    resolveCanonicalDispensingForm({ dispensingForm: '4-part regimen', items: [{ name: 'A' }, { name: 'B' }] }),
+    'multi_part_kit'
+  );
+  assert.ok(CANONICAL_DISPENSING_FORMS.has(resolveCanonicalDispensingForm({ title: 'Testosterone Pentravan' })));
+
+  const guarded = normalizePrescriptionWritePayload({
+    code: 'NSLBSO1640',
+    status: 'active',
+    dispensingForm: 'Nasal Spray',
+    productTitle: 'Selank Nasal Spray (75 mg / 10 mL)',
+  });
+  assert.equal(guarded.status, 'approved');
+  assert.equal(guarded.dispensingForm, 'nasal_spray');
+  assert.equal(guarded.legacyDispensingForm, 'Nasal Spray');
+  assert.ok(guarded.batchCode?.startsWith('PHARM-'), 'Approved Rx without batchCode must get deterministic PHARM batchCode');
+  assert.ok(guarded.prodDate && guarded.expDate, 'Approved Rx must have prodDate and expDate');
+});

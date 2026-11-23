@@ -5,6 +5,7 @@ import { syncPrescriptionToAlgolia } from '@/services/algoliaSyncService';
 import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { getCustomsFriendlySuggestions } from '@/utils/labels/customsNaming';
 import { deepSanitize, resolvePrescriptionDocAdmin } from '@/lib/labels/resolvePrescriptionAdmin';
+import { normalizePrescriptionWritePayload } from '@/utils/firestoreModelGuard';
 
 export const dynamic = 'force-dynamic';
 
@@ -285,8 +286,11 @@ export async function POST(request) {
     updatePayload.nextRefillDate = currentItem.nextRefillDate || existingData?.nextRefillDate || alertDateStr;
     updatePayload.refillAlertStatus = existingData?.refillAlertStatus || 'scheduled';
 
+    // Enforce canonical Rule #28 status, dispensingForm, and approved batch/date defaults
+    const guardedPayload = normalizePrescriptionWritePayload(updatePayload, existingData || {});
+
     // Sanitize and perform Admin Firestore Update
-    const sanitizedPayload = deepSanitize(updatePayload);
+    const sanitizedPayload = deepSanitize(guardedPayload);
     await targetDocRef.update(sanitizedPayload);
 
     // Save into granular subcollection prescriptions/{rxId}/labels/{partKey}

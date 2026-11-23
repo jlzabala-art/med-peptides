@@ -5,6 +5,7 @@ import { syncBatchPrescriptionsToAlgolia } from '@/services/algoliaSyncService';
 import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { processPrescriptionZohoOnImport } from '@/actions/zohoAutoIngestMatcher';
 import { notifyPrescriptionImported } from '@/lib/prescriptionImportNotifier';
+import { normalizePrescriptionWritePayload } from '@/utils/firestoreModelGuard';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,34 +105,31 @@ export async function POST(request) {
       const patientSlug = `patient-${patientName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
 
       const doctorApproverName = safe.doctorName || safe.physician || safe.treatingDoctor?.name || 'Treating Physician (Clinical Lab Report)';
-      batch.set(
-        ref,
-        {
-          ...safe,
-          patientId: safe.patientId || patientSlug,
-          testType,
-          status: 'approved',
-          state: 'approved',
-          clinicalStatus: 'approved',
-          isSigned: true,
-          signedAt: nowIso,
-          signedBy: doctorApproverName,
-          approvalStatus: 'approved',
-          doctorApproval: {
-            approved: true,
-            approvedAt: nowIso,
-            approvedBy: doctorApproverName,
-            source: 'imported_signed_clinical_report'
-          },
-          atlasValidation: 'skipped',
-          importChannel: 'public_labels_account_manager',
-          code,
-          importedAt: nowIso,
-          createdAt: now,
-          updatedAt: now,
+      const rxPayload = normalizePrescriptionWritePayload({
+        ...safe,
+        patientId: safe.patientId || patientSlug,
+        testType,
+        status: 'approved',
+        state: 'approved',
+        clinicalStatus: 'approved',
+        isSigned: true,
+        signedAt: nowIso,
+        signedBy: doctorApproverName,
+        approvalStatus: 'approved',
+        doctorApproval: {
+          approved: true,
+          approvedAt: nowIso,
+          approvedBy: doctorApproverName,
+          source: 'imported_signed_clinical_report'
         },
-        { merge: true }
-      );
+        atlasValidation: 'skipped',
+        importChannel: 'public_labels_account_manager',
+        code,
+        importedAt: nowIso,
+        createdAt: now,
+        updatedAt: now,
+      });
+      batch.set(ref, rxPayload, { merge: true });
 
       // Link this test/prescription to the single unified patient record (supports multiple tests on the same day without duplicating the patient)
       if (patientName && patientName !== 'Unknown Patient') {
