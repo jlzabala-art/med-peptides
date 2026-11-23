@@ -65,6 +65,57 @@ export function normalizeProductStatus(raw) {
   return s;
 }
 
+export const CANONICAL_PROTOCOL_CATEGORIES = Object.freeze([
+  'Recovery & Tissue Repair',
+  'Longevity',
+  'Cognitive Support',
+  'Metabolism & Weight',
+  'Hormonal Support',
+  'Sexual Health',
+  'Immune & Inflammation',
+  'Skin & Aesthetics',
+]);
+
+export const PROTOCOL_VALID_STATUSES = new Set([
+  'draft',
+  'active',
+  'paused',
+  'archived',
+]);
+
+export function normalizeProtocolStatus(raw) {
+  const s = String(raw || '').trim().toLowerCase();
+  if (!s) return 'draft';
+  if (s === 'approved' || s === 'published') return 'active';
+  if (s === 'inactive') return 'paused';
+  if (PROTOCOL_VALID_STATUSES.has(s)) return s;
+  return 'draft';
+}
+
+export function normalizeProtocolCategory(raw) {
+  const s = String(raw || '').trim();
+  const low = s.toLowerCase();
+  if (!low) return 'Recovery & Tissue Repair';
+  if (/sexual|libido/.test(low)) return 'Sexual Health';
+  if (/metabol|weight|body\s*composition|energy/.test(low)) return 'Metabolism & Weight';
+  if (/hormon|bhrt|testosteron|thyroid/.test(low)) return 'Hormonal Support';
+  if (/cognit|neuro|brain|nootrop/.test(low)) return 'Cognitive Support';
+  if (/longev|anti-?aging|telomer|mitochond/.test(low)) return 'Longevity';
+  if (/immun|inflam/.test(low)) return 'Immune & Inflammation';
+  if (/skin|aesthet|hair|tricho|scalp/.test(low)) return 'Skin & Aesthetics';
+  if (/recover|repair|regenerat|tissue|healing/.test(low)) return 'Recovery & Tissue Repair';
+  if (CANONICAL_PROTOCOL_CATEGORIES.includes(s)) return s;
+  return 'Recovery & Tissue Repair';
+}
+
+export function normalizeEvidenceLevel(raw) {
+  const low = String(raw || '').trim().toLowerCase();
+  if (!low) return 'Tier 2 - Clinical Trial / Cohort';
+  if (/tier\s*1|established|high|\brct\b/.test(low)) return 'Tier 1 - Established / RCT';
+  if (/tier\s*3|emerging|preclinical|low/.test(low)) return 'Tier 3 - Emerging / Preclinical';
+  return 'Tier 2 - Clinical Trial / Cohort';
+}
+
 /**
  * Resolves a canonical `dispensingForm` key from prescription metadata and items.
  * @param {Record<string, any>} data

@@ -297,3 +297,31 @@ test('Algolia Prescriptions Sync & Search: indexes canonical status/dispensingFo
   const searchSrc = read('src/services/algoliaSearch.js');
   assert.ok(searchSrc.includes('NOT status:cancelled'), 'searchAlgoliaFederated must exclude cancelled prescriptions by default');
 });
+
+test('Protocol Write Guard & Completeness: enforces Rule #28 status, canonical categoryId/evidence_level, and categoryId completeness', async () => {
+  const { validateProtocolWrite } = await import('../src/repositories/protocolWriteGuard.js');
+  const { calculateClinicalCompleteness } = await import('../src/utils/protocolHelpers.js');
+
+  const validated = validateProtocolWrite({
+    protocol_title: 'Legacy Title',
+    status: 'approved',
+    categoryId: 'Sexual Health & Libido',
+    evidence_level: 'High',
+  });
+  assert.equal(validated.name, 'Legacy Title');
+  assert.equal(validated.status, 'active');
+  assert.equal(validated.categoryId, 'Sexual Health');
+  assert.equal(validated.evidence_level, 'Tier 1 - Established / RCT');
+
+  const aiActionsSrc = read('src/actions/aiActions.js');
+  assert.ok(aiActionsSrc.includes('validateProtocolWrite('), 'aiActions must route custom protocol writes through validateProtocolWrite');
+  assert.ok(aiActionsSrc.includes('isCustomTemplate: true'), 'aiActions custom protocols must be flagged as isCustomTemplate');
+
+  const comp = calculateClinicalCompleteness({
+    name: 'Test Protocol',
+    categoryId: 'Longevity',
+    phases: [{ drugs_used: [{ product_title: 'NAD+' }] }],
+  });
+  assert.ok(comp.checks.find((c) => c.id === 'overview')?.done, 'categoryId must satisfy Overview category check');
+  assert.ok(comp.checks.find((c) => c.id === 'dosage')?.done, 'drugs_used fallback must satisfy Dosage check');
+});

@@ -31,6 +31,11 @@ import {
   DEPRECATED_PROTOCOL_NAME_FIELDS,
   DEPRECATED_PROTOCOL_FIELDS,
 } from '../schemas/firestoreProtocolSchema.js';
+import {
+  normalizeProtocolStatus,
+  normalizeProtocolCategory,
+  normalizeEvidenceLevel,
+} from '../utils/firestoreModelGuard.js';
 
 // ── Custom Error ──────────────────────────────────────────────────────────────
 
@@ -129,11 +134,14 @@ export function validateProtocolWrite(data, opts = {}) {
     }
   }
 
-  // ── 3. Enum validation ────────────────────────────────────────────────────
-  if (cleaned.status !== undefined && !VALID_PROTOCOL_STATUSES.includes(cleaned.status)) {
-    errors.push(
-      `Invalid status: "${cleaned.status}". Must be one of: ${VALID_PROTOCOL_STATUSES.join(', ')}`
-    );
+  // ── 3. Enum validation & normalization ────────────────────────────────────
+  if (cleaned.status !== undefined) {
+    cleaned.status = normalizeProtocolStatus(cleaned.status);
+    if (!VALID_PROTOCOL_STATUSES.includes(cleaned.status)) {
+      errors.push(
+        `Invalid status: "${cleaned.status}". Must be one of: ${VALID_PROTOCOL_STATUSES.join(', ')}`
+      );
+    }
   }
 
   // ── 4. Type coercion & defaults ───────────────────────────────────────────
@@ -162,6 +170,13 @@ export function validateProtocolWrite(data, opts = {}) {
       warnings.push(`Legacy "category" auto-resolved to "categoryId"`);
       delete cleaned.category;
     }
+  }
+
+  if (cleaned.categoryId !== undefined || !isUpdate) {
+    cleaned.categoryId = normalizeProtocolCategory(cleaned.categoryId);
+  }
+  if (cleaned.evidence_level !== undefined || !isUpdate) {
+    cleaned.evidence_level = normalizeEvidenceLevel(cleaned.evidence_level);
   }
 
   // Map primary_goal / goal to goals array

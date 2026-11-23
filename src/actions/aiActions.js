@@ -3,6 +3,7 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import logger from '../utils/logger';
 import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
+import { validateProtocolWrite } from '../repositories/protocolWriteGuard';
 
 function getGenAIClient() {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -267,22 +268,23 @@ export async function matchProtocolAction(items = []) {
 
     const newProtocolSlug = newProtocolName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-    const newProtocol = {
-      protocol_title: newProtocolName,
-      protocol_slug: newProtocolSlug,
+    const newProtocol = validateProtocolWrite({
+      name: newProtocolName,
+      slug: newProtocolSlug,
       protocol_id: `custom_${Date.now()}`,
-      status: 'approved',
-      metadata: {
-        scientificName: newProtocolName,
-        description: `Automatically generated protocol based on prescription.`,
-        primary_goal: 'custom_prescription',
-        updated_at: new Date().toISOString()
-      },
+      status: 'draft',
+      isCustomTemplate: true,
+      categoryId: 'Recovery & Tissue Repair',
+      evidence_level: 'Tier 3 - Emerging / Preclinical',
+      duration_weeks: 4,
+      goals: ['custom_prescription'],
+      overview_summary: 'Automatically generated protocol based on prescription.',
+      clinical_rationale: 'Custom prescription-derived protocol awaiting editorial review.',
       phases: [{
         phase_title: 'Primary Treatment',
         start_week: 1,
         end_week: 4,
-        drugs_used: items.map(i => ({
+        drugs: items.map(i => ({
           product_title: i.name || i.productName || 'Compound',
           product_slug: i.product_slug || i.name || '',
           weekly_dose: i.dosage || i.dose || i.quantity || '',
@@ -292,7 +294,7 @@ export async function matchProtocolAction(items = []) {
           description: i.instructions || ''
         }))
       }]
-    };
+    });
 
     const docRef = await dbAdmin.collection('protocols').add({
       ...newProtocol,

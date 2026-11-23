@@ -227,6 +227,11 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
   const locallySearchedProtocols = useMemo(() => {
     let list = protocols;
 
+    // Hide Rx-derived custom templates from standard catalog unless viewing Drafts or searching
+    if (filterStatus !== 'draft' && filterGoal !== 'custom_prescription' && !searchTerm?.trim()) {
+      list = list.filter(p => !p.isCustomTemplate && !p.goals?.includes('custom_prescription'));
+    }
+
     // Filter by Goal
     if (filterGoal && filterGoal !== 'all') {
       const gLower = filterGoal.toLowerCase();
@@ -265,7 +270,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
       (Array.isArray(p.bom) && p.bom.some(b => (b.product_name || b.name || '').toLowerCase().includes(lower))) ||
       (Array.isArray(p.peptides) && p.peptides.some(pep => String(pep).toLowerCase().includes(lower)))
     );
-  }, [protocols, searchTerm, filterGoal, filterRange]);
+  }, [protocols, searchTerm, filterGoal, filterRange, filterStatus]);
 
   const finalFiltered = useMemo(() => {
     if (!searchTerm || !searchTerm.trim()) return locallySearchedProtocols;

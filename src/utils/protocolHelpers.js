@@ -24,13 +24,13 @@ export function getProtocolDisplayName(protocol) {
 export function calculateClinicalCompleteness(protocol) {
   // Tras la normalización, `name` es el único campo canónico.
   const hasName = !!(protocol?.name);
-  const hasCategory = !!(protocol?.therapeutic_category || protocol?.category);
+  const hasCategory = !!(protocol?.categoryId || protocol?.therapeutic_category || protocol?.category);
   const hasRationale = !!(protocol?.clinical_rationale || protocol?.summary || protocol?.description || protocol?.overview || protocol?.overview_summary);
 
   const checks = [
     { id: 'overview', label: 'Overview', done: hasName && (hasCategory || hasRationale) },
     { id: 'treatment', label: 'Treatment', done: !!(protocol?.phases?.length > 0 || protocol?.duration_weeks || protocol?.durationWeeks || protocol?.peptides?.length > 0 || protocol?.items?.length > 0) },
-    { id: 'dosage', label: 'Dosage',    done: !!(protocol?.dosage_schedule?.length > 0 || protocol?.weekly_doses || protocol?.dosing_instructions || (Array.isArray(protocol?.phases) && protocol.phases.some(p => (p.compounds && p.compounds.length > 0) || (p.drugs && p.drugs.length > 0)))) },
+    { id: 'dosage', label: 'Dosage',    done: !!(protocol?.dosage_schedule?.length > 0 || protocol?.weekly_doses || protocol?.dosing_instructions || (Array.isArray(protocol?.phases) && protocol.phases.some(p => (p.compounds && p.compounds.length > 0) || (p.drugs && p.drugs.length > 0) || (p.drugs_used && p.drugs_used.length > 0)))) },
     { id: 'monitoring', label: 'Monitoring', done: !!(protocol?.monitoring_cadence || protocol?.check_in_weeks || protocol?.monitoring || protocol?.safetyGuidelines) },
     { id: 'labs', label: 'Labs',      done: !!(protocol?.required_labs?.length > 0 || protocol?.biomarkers?.length > 0 || protocol?.labs) },
     { id: 'progress', label: 'Progress Tracker', done: !!(protocol?.clinical_biomarker_data || protocol?.progress_tracker || protocol?.kpis || protocol?.expected_outcomes) },
