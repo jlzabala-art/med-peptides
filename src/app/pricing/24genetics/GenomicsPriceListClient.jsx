@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -588,6 +589,31 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
       }
     />
   ), [handleAddToCart, currency, formatPrice, isClinicOrDoctor, isWholesaler]);
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'pricing-24genetics',
+        name: '24Genetics Clinical DNA Panels',
+        subtitle: 'CE-IVD Genomics · Illumina GSA',
+        sectionTitle: '24Genetics Clinical DNA Panels',
+        currency,
+        skuCount: initialProducts.length,
+      },
+      bottomBar: {
+        summaryTitle: '24Genetics Clinical DNA Panels',
+        summarySubtitle: `${currency} · CE-IVD Genomics`,
+        atlasAiLabel: 'Ask Atlas AI',
+        primaryAction: {
+          label: 'Clinical Protocols',
+          onClick: () => {
+            if (typeof window !== 'undefined') window.location.href = '/proto';
+          },
+        },
+      },
+    },
+    [currency, initialProducts.length]
+  );
 
   return (
     <div className="colway-price-root atlas-page-bg">

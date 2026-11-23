@@ -46,6 +46,7 @@ import {
   fetchGroupProductsWithCache
 } from '@/hooks/pricing/usePriceSchedulesData';
 import { exportPriceSchedulePdf } from '@/utils/exportPriceSchedulePdf';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 
 import PriceSchedulesOverviewTable from './unified/PriceSchedulesOverviewTable';
 import PriceScheduleSkuTable      from './unified/PriceScheduleSkuTable';
@@ -395,6 +396,39 @@ export default function UnifiedPriceHub({
       window.open(waUrl, '_blank', 'noopener,noreferrer');
     }
   }, []);
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'pricing-hub',
+        name: selectedGroup?.label || 'Unified B2B Price Hub',
+        subtitle: selectedGroup
+          ? `${selectedGroup.skuCount || ''} SKUs · ${currency}`
+          : `${schedules.length} Schedules · ${TOTAL_SKUS} SKUs`,
+        sectionTitle: selectedGroup?.label || 'Unified B2B Price Hub',
+        currency,
+      },
+      bottomBar: {
+        summaryTitle: selectedGroup?.label || 'Institutional Price Schedules',
+        summarySubtitle: selectedGroup
+          ? `${currency} · ${selectedGroup.label}`
+          : `${currency} · ${schedules.length} Schedules · ${TOTAL_SKUS} SKUs`,
+        atlasAiLabel: 'Ask Atlas AI',
+        primaryAction: selectedGroup
+          ? {
+              label: 'Download PDF',
+              onClick: () => handleGeneratePdf(selectedGroup),
+            }
+          : {
+              label: 'Explore Catalog',
+              onClick: () => {
+                if (typeof window !== 'undefined') window.location.href = '/catalog';
+              },
+            },
+      },
+    },
+    [selectedGroup, currency, schedules.length, handleGeneratePdf]
+  );
 
   return (
     <div style={{ width: '100%', maxWidth: '100%', minWidth: 0, margin: '0 auto', boxSizing: 'border-box' }}>

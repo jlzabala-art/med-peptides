@@ -1,5 +1,5 @@
 import React from 'react';
-import QatarColwayPriceClient from './QatarColwayPriceClient';
+import QatarColwayPriceListClient from './QatarColwayPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export const revalidate = 60;
@@ -24,6 +24,6 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default function QatarColwayPricingPage() {
-  return <QatarColwayPriceClient />;
+  return <QatarColwayPriceListClient />;
 }
 

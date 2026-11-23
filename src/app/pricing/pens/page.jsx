@@ -1,6 +1,6 @@
 import React from 'react';
 import dnLabCatalog from '@/data/dnLabPensCatalog.json';
-import DnLabPensClient from '@/app/pricing/dnlab-pens/DnLabPensClient';
+import DnLabPensPriceListClient from '@/app/pricing/dnlab-pens/DnLabPensPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ export default async function AtlasPensPricingPage({ searchParams }) {
   const validCurrency = ['EUR', 'USD', 'AED'].includes(currency) ? currency : 'USD';
 
   return (
-    <DnLabPensClient
+    <DnLabPensPriceListClient
       initialProducts={dnLabCatalog}
       initialCurrency={validCurrency}
       initialLang={lang}

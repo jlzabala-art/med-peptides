@@ -1,6 +1,6 @@
 import React from 'react';
 import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
-import NplabHormonesPriceClient from './NplabHormonesPriceClient';
+import NplabHormonesPriceListClient from './NplabHormonesPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export const dynamic = 'force-dynamic';
@@ -41,7 +41,7 @@ export default async function NplabHormonesPricingPage({ searchParams }) {
   });
 
   return (
-    <NplabHormonesPriceClient
+    <NplabHormonesPriceListClient
       pharmapolisProducts={[]}
       nplabProducts={nplabProducts}
       supplierLock="nplab"

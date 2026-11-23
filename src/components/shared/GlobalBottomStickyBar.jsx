@@ -134,6 +134,34 @@ export default function GlobalBottomStickyBar() {
       };
     }
 
+    if (pathname.startsWith('/pricing/colway')) {
+      return {
+        summaryTitle: isSpanish ? 'Colway Bio-Colágeno & Tricología' : 'Colway Bio-Collagen & Trichology',
+        summarySubtitle: `${currency} · Official B2B Schedule`,
+        atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        secondaryAction: quoteAction,
+        primaryAction: {
+          label: isSpanish ? 'Ver Catálogo' : 'Explore Catalog',
+          icon: <FlaskConical size={14} />,
+          onClick: () => router.push('/pricing/colway'),
+        },
+      };
+    }
+
+    if (pathname.startsWith('/pricing/nplab-hormones') || pathname.startsWith('/pricing/pharmapolis-hrt')) {
+      return {
+        summaryTitle: isSpanish ? 'Terapia Hormonal & Longevidad B2B' : 'Hormone Therapy & Longevity B2B',
+        summarySubtitle: `${currency} · EU GMP Schedule`,
+        atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        secondaryAction: quoteAction,
+        primaryAction: {
+          label: isSpanish ? 'Protocolos' : 'Protocols',
+          icon: <FlaskConical size={14} />,
+          onClick: () => router.push('/proto'),
+        },
+      };
+    }
+
     if (pathname.startsWith('/pricing')) {
       return {
         summaryTitle: isSpanish ? 'Directorio de Tarifas B2B' : 'Institutional Price Schedules',
@@ -141,9 +169,9 @@ export default function GlobalBottomStickyBar() {
         atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
         secondaryAction: quoteAction,
         primaryAction: {
-          label: isSpanish ? 'Ver Viales' : 'Peptide Vials',
-          icon: <FlaskConical size={14} />,
-          onClick: () => router.push('/vials'),
+          label: isSpanish ? 'Ver Catálogo' : 'Explore Catalog',
+          icon: <FileText size={14} />,
+          onClick: () => router.push('/catalog'),
         },
       };
     }

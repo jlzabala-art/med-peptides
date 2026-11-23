@@ -1,5 +1,5 @@
 import React from 'react';
-import QatarGenomicsPriceClient from './QatarGenomicsPriceClient';
+import QatarGenomicsPriceListClient from './QatarGenomicsPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export const revalidate = 60;
@@ -24,6 +24,6 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default function QatarGenomicsPricingPage() {
-  return <QatarGenomicsPriceClient />;
+  return <QatarGenomicsPriceListClient />;
 }
 

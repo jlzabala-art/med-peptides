@@ -37,6 +37,7 @@ import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitut
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 
 import './PelletsPriceList.css';
 
@@ -860,6 +861,31 @@ export default function PelletsPriceListClient({
     const minPack10 = Number((minUnit * 10 * 0.90).toFixed(2));
     return { minUnit, maxUnit, minPack10 };
   }, [kpiProducts]);
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'pricing-pellets',
+        name: 'Pharmapolis Hormone Pellets',
+        subtitle: 'EU GMP Subcutaneous Therapy · Surgical Trocars',
+        sectionTitle: isEs ? 'Pellets Hormonales Subcutáneos' : 'Pharmapolis Hormone Pellets',
+        currency,
+        skuCount: initialProducts.length,
+      },
+      bottomBar: {
+        summaryTitle: isEs ? 'Pellets Hormonales Subcutáneos' : 'Pharmapolis Hormone Pellets',
+        summarySubtitle: `${currency} · ${initialProducts.length} SKUs · EU GMP`,
+        atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        primaryAction: {
+          label: isEs ? 'Guía de Trócar' : 'Trocar Guide',
+          onClick: () => {
+            if (typeof window !== 'undefined') window.location.href = '/guides/hormone-pellets-implantation';
+          },
+        },
+      },
+    },
+    [isEs, currency, initialProducts.length]
+  );
 
   return (
     <div className="pellets-price-page">

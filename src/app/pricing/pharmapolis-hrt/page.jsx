@@ -1,7 +1,7 @@
 import React from 'react';
 import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
 import { getPharmapolisHormonesCatalog } from '@/data/pharmapolisHormonesRegistry';
-import NplabHormonesPriceClient from '../nplab-hormones/NplabHormonesPriceClient';
+import NplabHormonesPriceListClient from '../nplab-hormones/NplabHormonesPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 
 export const dynamic = 'force-dynamic';
@@ -45,7 +45,7 @@ export default async function PharmapolisHrtPricingPage({ searchParams }) {
   });
 
   return (
-    <NplabHormonesPriceClient
+    <NplabHormonesPriceListClient
       pharmapolisProducts={pharmapolisProducts}
       nplabProducts={[]}
       supplierLock="pharmapolis"
