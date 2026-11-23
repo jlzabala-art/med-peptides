@@ -1,5 +1,5 @@
 import React from 'react';
-import ToolsClient from './ToolsClient';
+import ToolsPageClient from './ToolsPageClient';
 
 export const metadata = {
   title: 'Clinical & Admin Tools • Atlas Health Services',
@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function ToolsPage() {
-  return <ToolsClient />;
+  return <ToolsPageClient />;
 }

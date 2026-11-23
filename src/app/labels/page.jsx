@@ -1,7 +1,7 @@
 import React from 'react';
 import { getPrescriptionData } from '@/lib/prescriptionFetcher';
 import { getPharmapolisLabelsForPrescription, PHARMAPOLIS_LABELS_REGISTRY } from '@/data/pharmapolisLabelsMap';
-import PublicLabelsAppClient from './PublicLabelsAppClient';
+import LabelsPageClient from './LabelsPageClient';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -119,7 +119,7 @@ export default async function PublicLabelsPage({ searchParams }) {
   const primaryItem = initialQueue[0] || null;
 
   return (
-    <PublicLabelsAppClient
+    <LabelsPageClient
       initialRx={primaryItem?.rx || null}
       initialLabels={primaryItem?.labels || []}
       initialCode={primaryItem?.code || primaryCode || ''}

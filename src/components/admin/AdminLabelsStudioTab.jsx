@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import PublicLabelsAppClient from '@/app/labels/PublicLabelsAppClient';
+import LabelsPageClient from '@/app/labels/LabelsPageClient';
 
 /**
  * AdminLabelsStudioTab
@@ -13,7 +13,7 @@ import PublicLabelsAppClient from '@/app/labels/PublicLabelsAppClient';
 export default function AdminLabelsStudioTab() {
   return (
     <div style={{ width: '100%' }}>
-      <PublicLabelsAppClient embedded={true} />
+      <LabelsPageClient embedded={true} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import HomeClientWrapper from './HomeClientWrapper';
+import HomePageClient from './HomePageClient';
 import { getFeaturedProductsServer } from '../repositories/productRepository';
 
 export const metadata = {
@@ -27,7 +27,7 @@ export default async function HomePage() {
   const serializedCatalog = sanitizeForClient(safeCatalog);
   
   return (
-    <HomeClientWrapper initialProducts={serializedCatalog} />
+    <HomePageClient initialProducts={serializedCatalog} />
   );
 }
 

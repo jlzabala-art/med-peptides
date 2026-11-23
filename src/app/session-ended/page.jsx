@@ -1,10 +1,10 @@
 import React from 'react';
-import SessionEndedClient from './SessionEndedClient';
+import SessionEndedPageClient from './SessionEndedPageClient';
 
 export const metadata = {
   title: 'Session Ended • Atlas Health Services',
 };
 
 export default function SessionEndedPortalPage() {
-  return <SessionEndedClient />;
+  return <SessionEndedPageClient />;
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import CalculatorClient from './CalculatorClient';
+import CalculatorPageClient from './CalculatorPageClient';
 
 const FORMAT_LABELS = {
   vial: { en: 'Lyophilized Vial (U-100 Syringe)', es: 'Vial Liofilizado (Jeringa U-100)' },
@@ -98,5 +98,5 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default function CalculatorRoute() {
-  return <CalculatorClient />;
+  return <CalculatorPageClient />;
 }
