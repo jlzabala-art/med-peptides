@@ -13,6 +13,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import ProductQuickViewDrawer from '@/components/shared/ProductQuickViewDrawer';
 import { exportPriceSchedulePdf } from '@/utils/exportPriceSchedulePdf';
+import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import { useAuth } from '@/context/AuthContext';
 import { Sparkles, Syringe, Layers, ShieldCheck, Download } from 'lucide-react';
 import '../colway/ColwayPriceList.css';
@@ -47,8 +48,9 @@ export default function FillersPriceListClient({
   const isEs = lang === 'es';
   const [currency, setCurrency] = useState(initialCurrency);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSubcategory, setSelectedSubcategory] = useState('all');
-  const [tierMode, setTierMode] = useState('clinic'); // 'wholesale' (+15%) | 'clinic' (+15%+15%) | 'retail' (+50%) | 'master' (cost)
+  const [selectedBrand, setSelectedBrand] = useState('all');
+  const [selectedType, setSelectedType] = useState('all'); // 'all' | 'boosters' | 'fillers' | 'biostimulators'
+  const [tierMode, setTierMode] = useState('clinic'); // 'wholesale' (mediluxe) | 'clinic' (wholeseller) | 'master' (cost)
   const [quickProduct, setQuickProduct] = useState(null);
 
   const brands = useMemo(() => {
@@ -91,14 +93,20 @@ export default function FillersPriceListClient({
   const filteredRows = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return enrichedRows.filter((r) => {
-      if (selectedSubcategory !== 'all' && String(r.brand || '').trim() !== selectedSubcategory) {
+      if (selectedBrand !== 'all' && String(r.brand || '').trim() !== selectedBrand) {
         return false;
       }
+      if (selectedType !== 'all') {
+        const sub = `${r.subcategory || ''} ${r.name || ''} ${r.technology || ''}`.toLowerCase();
+        if (selectedType === 'boosters' && !/booster|revive|redensity|hydro|skinvive|philart|polynucleotide/.test(sub)) return false;
+        if (selectedType === 'biostimulators' && !/sculptra|radiesse|stimulate|biostimulator|plla|caha/.test(sub)) return false;
+        if (selectedType === 'fillers' && /booster|revive|redensity|hydro|skinvive|philart|polynucleotide|sculptra|radiesse|aqualyx/.test(sub)) return false;
+      }
       if (!q) return true;
-      const hay = `${r.name || ''} ${r.brand || ''} ${r.product_name || ''} ${r.subcategory || ''} ${r.code || ''}`.toLowerCase();
+      const hay = `${r.name || ''} ${r.brand || ''} ${r.product_name || ''} ${r.subcategory || ''} ${r.packSize || ''} ${r.code || ''}`.toLowerCase();
       return hay.includes(q);
     });
-  }, [enrichedRows, searchQuery, selectedSubcategory]);
+  }, [enrichedRows, searchQuery, selectedBrand, selectedType]);
 
   const minB2bPrice = useMemo(() => {
     const prices = enrichedRows.map((r) => r.clinicPrice).filter((n) => n > 0);
@@ -113,16 +121,10 @@ export default function FillersPriceListClient({
   const columns = useMemo(() => {
     const cols = [
       {
-        key: 'code',
-        label: isEs ? 'Código' : 'Code',
-        width: '130px',
-        render: (_val, row) => <CopyableId value={row.code} />
-      },
-      {
         key: 'name',
-        label: isEs ? 'Producto / Marca' : 'Product / Brand',
+        label: isEs ? 'Producto y Referencia' : 'Product & Reference',
         render: (_val, row) => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <button
               type="button"
               onClick={() => setQuickProduct({ slug: row.slug || row.id, title: row.name || row.product_name })}
@@ -133,22 +135,37 @@ export default function FillersPriceListClient({
                 textAlign: 'left',
                 color: '#003666',
                 fontWeight: 750,
-                fontSize: '0.86rem',
+                fontSize: '0.88rem',
                 cursor: 'pointer'
               }}
             >
               {row.name || row.product_name}
             </button>
-            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-              {row.brand ? `${row.brand} · ` : ''}{row.subcategory || 'Aesthetic Injectable'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '0.72rem', color: '#64748b' }}>
+              <span>{row.subcategory || 'Aesthetic Injectable'}</span>
+              <span style={{ opacity: 0.4 }}>·</span>
+              <CopyableId
+                value={row.code}
+                displayValue={row.atlas_product_code || row.sku || (String(row.code).length > 14 ? 'ID' : row.code)}
+              />
+            </div>
           </div>
         )
       },
       {
+        key: 'packSize',
+        label: isEs ? 'Presentación' : 'Pack Size',
+        width: '190px',
+        render: (_val, row) => (
+          <span style={{ fontSize: '0.78rem', color: '#334155', fontWeight: 600 }}>
+            {row.packSize || row.dosage || 'Standard Box'}
+          </span>
+        )
+      },
+      {
         key: 'status',
-        label: isEs ? 'Estado' : 'Status',
-        width: '110px',
+        label: isEs ? 'Disponibilidad' : 'Availability',
+        width: '115px',
         render: (_val, row) => <StatusBadge status={row.status || 'published'} />
       }
     ];
@@ -157,7 +174,7 @@ export default function FillersPriceListClient({
       cols.push({
         key: 'masterPrice',
         label: isEs ? 'Coste' : 'Cost',
-        width: '110px',
+        width: '105px',
         render: (_val, row) => (
           <span style={{ fontWeight: 700, color: '#475569' }}>
             {formatMoney(row.masterPrice, currency)}
@@ -170,7 +187,7 @@ export default function FillersPriceListClient({
       cols.push({
         key: 'wholesalePrice',
         label: 'Mediluxe',
-        width: '120px',
+        width: '115px',
         render: (_val, row) => (
           <span style={{ fontWeight: 700, color: '#0369a1' }}>
             {formatMoney(row.wholesalePrice, currency)}
@@ -181,28 +198,30 @@ export default function FillersPriceListClient({
 
     cols.push({
       key: 'clinicPrice',
-      label: isEs ? `Precio B2B (${currency})` : `B2B Price (${currency})`,
-      width: '140px',
+      label: isEs ? `Wholeseller (${currency})` : `Wholeseller Price (${currency})`,
+      width: '165px',
       render: (_val, row) => (
-        <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.9rem' }}>
+        <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.92rem' }}>
           {formatMoney(row.clinicPrice, currency)}
-        </span>
-      )
-    });
-
-    cols.push({
-      key: 'retailPrice',
-      label: isEs ? 'PVP Ref.' : 'Retail Ref.',
-      width: '125px',
-      render: (_val, row) => (
-        <span style={{ fontWeight: 600, color: '#64748b' }}>
-          {formatMoney(row.retailPrice, currency)}
         </span>
       )
     });
 
     return cols;
   }, [isEs, isAdmin, tierMode, currency]);
+
+  const groupedByBrand = useMemo(() => {
+    const groups = new Map();
+    for (const row of filteredRows) {
+      const brandKey = String(row.brand || row.manufacturer || 'Other').trim();
+      if (!groups.has(brandKey)) groups.set(brandKey, []);
+      groups.get(brandKey).push(row);
+    }
+    return Array.from(groups.entries()).map(([brandName, rows]) => ({
+      brandName,
+      rows
+    }));
+  }, [filteredRows]);
 
   const handleExportPdf = () => {
     exportPriceSchedulePdf({
@@ -231,10 +250,33 @@ export default function FillersPriceListClient({
         clinicPrice: row.retailPrice
       }),
       formatPrice: (val, cur) => formatMoney(val, cur || currency),
-      brandFilter: selectedSubcategory,
+      brandFilter: selectedBrand,
       isGuest: !isAdmin
     });
   };
+
+  useRegisterAtlasContext(
+    {
+      contextAnchor: {
+        type: 'pricing-fillers',
+        name: 'Aesthetic Injectables & Skin Boosters (Dermal Fillers, Biostimulators, Polynucleotides)',
+        category: 'dermal-fillers',
+        currency,
+        skuCount: enrichedRows.length
+      },
+      bottomBar: {
+        summaryTitle: isEs ? 'Inyectables Estéticos y Skin Boosters' : 'Aesthetic Injectables & Skin Boosters',
+        summarySubtitle: `${currency} · ${enrichedRows.length} SKUs · ${uniqueBrandsCount} ${isEs ? 'Marcas' : 'Brands'}`,
+        badge: isEs ? 'Tarifa Wholeseller' : 'Wholeseller B2B',
+        atlasAiLabel: 'Ask Atlas AI',
+        primaryAction: {
+          label: isEs ? 'Descargar PDF' : 'Download PDF',
+          onClick: handleExportPdf
+        }
+      }
+    },
+    [isEs, currency, enrichedRows.length, uniqueBrandsCount]
+  );
 
   return (
     <div className="colway-price-root atlas-page-bg">
@@ -288,7 +330,7 @@ export default function FillersPriceListClient({
             icon={Layers}
           />
           <MetricCard
-            title={isEs ? 'Desde (Precio B2B)' : 'Starting B2B Price'}
+            title={isEs ? 'Desde (Wholeseller)' : 'Starting Wholeseller'}
             value={minB2bPrice > 0 ? formatMoney(minB2bPrice, currency) : '—'}
             subtitle={isEs ? 'Skin Boosters y Polinucleótidos' : 'Skin Boosters & Polynucleotides'}
             icon={Sparkles}
@@ -300,26 +342,69 @@ export default function FillersPriceListClient({
             icon={ShieldCheck}
           />
           <MetricCard
-            title={isEs ? 'Margen Clínica Est.' : 'Est. Clinic Margin'}
-            value="25–35%"
-            subtitle={isEs ? 'Frente a PVP recomendado' : 'vs. Recommended Retail'}
+            title={isEs ? 'Condiciones B2B' : 'Wholeseller Terms'}
+            value={isEs ? 'Directo' : 'Direct B2B'}
+            subtitle={isEs ? 'Caja original · Sin pedido mínimo' : 'Original sealed box · No MOQ'}
             icon={Syringe}
           />
         </div>
 
-        <GlobalSearchBar
-          size="lg"
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder={isEs ? 'Buscar booster, filler, marca o código...' : 'Search booster, filler, brand or code...'}
-          resultCount={filteredRows.length}
-          filters={brands.map((brand) => ({
-            id: brand,
-            label: brand === 'all' ? (isEs ? 'Todas las marcas' : 'All Brands') : brand,
-            active: selectedSubcategory === brand,
-            onClick: () => setSelectedSubcategory(brand)
-          }))}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 320px' }}>
+            <GlobalSearchBar
+              size="lg"
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder={isEs ? 'Buscar booster, filler, marca o código...' : 'Search booster, filler, brand or code...'}
+              resultCount={filteredRows.length}
+            />
+          </div>
+
+          <select
+            aria-label={isEs ? 'Filtrar por marca' : 'Filter by brand'}
+            value={selectedBrand}
+            onChange={(e) => setSelectedBrand(e.target.value)}
+            style={{
+              height: '44px',
+              padding: '0 12px',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#0f172a',
+              fontSize: '0.82rem',
+              fontWeight: 650,
+              cursor: 'pointer'
+            }}
+          >
+            {brands.map((b) => (
+              <option key={b} value={b}>
+                {b === 'all' ? (isEs ? 'Marca: Todas' : 'Brand: All') : b}
+              </option>
+            ))}
+          </select>
+
+          <select
+            aria-label={isEs ? 'Filtrar por tipo' : 'Filter by type'}
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            style={{
+              height: '44px',
+              padding: '0 12px',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#0f172a',
+              fontSize: '0.82rem',
+              fontWeight: 650,
+              cursor: 'pointer'
+            }}
+          >
+            <option value="all">{isEs ? 'Tipo: Todos' : 'Type: All'}</option>
+            <option value="boosters">{isEs ? 'Skin Boosters & Polinucleótidos' : 'Skin Boosters & Polynucleotides'}</option>
+            <option value="fillers">{isEs ? 'Dermal Fillers (HA)' : 'Dermal Fillers (HA)'}</option>
+            <option value="biostimulators">{isEs ? 'Bioestimuladores (PLLA/CaHA)' : 'Biostimulators (PLLA/CaHA)'}</option>
+          </select>
+        </div>
 
         {isAdmin && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -361,16 +446,42 @@ export default function FillersPriceListClient({
               label: isEs ? 'Limpiar filtros' : 'Reset filters',
               onClick: () => {
                 setSearchQuery('');
-                setSelectedSubcategory('all');
+                setSelectedBrand('all');
+                setSelectedType('all');
               }
             }}
           />
         ) : (
-          <DataTable
-            data={filteredRows}
-            columns={columns}
-            pageSize={50}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {groupedByBrand.map(({ brandName, rows }) => (
+              <section key={brandName} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h2 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#003666' }}>
+                      {brandName}
+                    </h2>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 750,
+                      padding: '2px 8px',
+                      borderRadius: '999px',
+                      background: '#eff6ff',
+                      color: '#1d4ed8',
+                      border: '1px solid #bfdbfe'
+                    }}>
+                      {rows.length} {rows.length === 1 ? 'SKU' : 'SKUs'}
+                    </span>
+                  </div>
+                </div>
+                <DataTable
+                  data={rows}
+                  columns={columns}
+                  hidePagination={true}
+                  pageSize={50}
+                />
+              </section>
+            ))}
+          </div>
         )}
       </main>
 
