@@ -23,6 +23,7 @@ import { useLabelsPrescriptionActions } from './hooks/useLabelsPrescriptionActio
 import { LabelsWorkspaceProvider } from './context/LabelsWorkspaceContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
@@ -688,6 +689,20 @@ export default function PublicLabelsAppClient({
     },
   };
 
+  const setActiveClinicalResource = useActiveClinicalStore((s) => s.setActiveClinicalResource);
+  const syncedRxCode = cleanRxCode || activeCode;
+
+  useEffect(() => {
+    if (syncedRxCode) {
+      setActiveClinicalResource({
+        activeRxCode: syncedRxCode,
+        patientName: patientName || '',
+        doctorName: docName || '',
+        formulaTitle: labels?.[labelIndex]?.productTitle || labels?.[labelIndex]?.productName || ''
+      });
+    }
+  }, [syncedRxCode, patientName, docName, labels, labelIndex, setActiveClinicalResource]);
+
   return (
     <LabelsWorkspaceProvider value={workspaceContextValue}>
     <div
@@ -829,6 +844,7 @@ export default function PublicLabelsAppClient({
           canApproveRx={canApproveRx}
           canEditRxParts={canEditRxParts}
           isPartLabeledFn={(idx) => isPartLabeled(cleanRxCode || activeCode, idx)}
+          hidePrescriptionMeta={true}
         />
       )}
 
@@ -872,75 +888,6 @@ export default function PublicLabelsAppClient({
           <LabelsWorkspaceSkeleton isEs={isEs} />
         ) : (
           <div id="pls-label-workbench" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            {/* ── 3-Step GCP Progress Stepper ── */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                flexWrap: 'wrap',
-                padding: '8px 20px',
-                backgroundColor: '#f8f9fa',
-                borderBottom: '1px solid #dadce0',
-                fontSize: '0.74rem'
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setPatientQueue([])}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '2px 6px',
-                  cursor: 'pointer',
-                  color: '#1a73e8',
-                  fontWeight: 600
-                }}
-              >
-                1. Worklist
-              </button>
-              <span style={{ color: '#9aa0a6' }}>›</span>
-              <span style={{ fontWeight: 700, color: '#202124', background: '#e8f0fe', padding: '2px 8px', borderRadius: '999px' }}>
-                2. Product / Shipping Label
-              </span>
-              <span style={{ color: '#9aa0a6' }}>›</span>
-              <span style={{ color: '#5f6368', fontWeight: 500 }}>
-                3. Export / Print A4
-              </span>
-
-              {!embedded && (
-                <span
-                  style={{
-                    marginLeft: 'auto',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setIsStudioFocus((v) => !v)}
-                    style={{
-                      padding: '3px 9px',
-                      borderRadius: '999px',
-                      border: isStudioFocus ? '1px solid #1a73e8' : '1px solid #cbd5e1',
-                      background: isStudioFocus ? '#e8f0fe' : '#ffffff',
-                      color: isStudioFocus ? '#1a73e8' : '#334155',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                    }}
-                    title={isEs ? 'Ocultar barras superiores para maximizar el estudio' : 'Hide top navigation to maximize studio workspace'}
-                  >
-                    {isStudioFocus
-                      ? (isEs ? 'Salir Modo Foco' : 'Exit Focus Mode')
-                      : (isEs ? 'Modo Foco' : 'Focus Mode')}
-                  </button>
-                </span>
-              )}
-            </div>
-
             <LabelsPreflightBar
               isEs={isEs}
               isEditing={isEditing}
@@ -955,6 +902,9 @@ export default function PublicLabelsAppClient({
               onColorModeChange={handleColorModeChange}
               editorTab={editorTab}
               onChangeEditorTab={setEditorTab}
+              hidePrintButton={!embedded}
+              isStudioFocus={isStudioFocus}
+              onToggleFocus={!embedded ? () => setIsStudioFocus((v) => !v) : null}
               onQueueRxQuantity={(qty) => {
                 const activeItem = patientQueue[activeQueueIndex];
                 if (!activeItem || qty <= 1) return;
@@ -1008,6 +958,42 @@ export default function PublicLabelsAppClient({
               strictGmpGate={Boolean(prefs.strictGmpGate)}
               onToggleStrictGmpGate={(val) => updatePref('strictGmpGate', val)}
             />
+
+            {currentRx?.clinicalNotes && (
+              <details
+                style={{
+                  marginBottom: '10px',
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                }}
+              >
+                <summary
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '0.75rem',
+                    fontWeight: 750,
+                    color: '#0f172a',
+                    userSelect: 'none',
+                  }}
+                >
+                  📋 {isEs ? 'Notas Clínicas y Suplementos de la Rx' : 'Rx Clinical Notes & Co-Prescribed Plan'}
+                </summary>
+                <pre
+                  style={{
+                    margin: '8px 0 0',
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'inherit',
+                    fontSize: '0.73rem',
+                    color: '#334155',
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {currentRx.clinicalNotes}
+                </pre>
+              </details>
+            )}
 
             <LabelsErrorBoundary isEs={isEs}>
               <PharmacyLabelsModal

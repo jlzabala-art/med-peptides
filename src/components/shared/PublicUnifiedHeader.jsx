@@ -23,6 +23,7 @@ import { useAtlasContext } from '../../context/AtlasContextProvider';
 import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer';
 import PublicProviderCTA from './public/PublicProviderCTA';
 import AtlasAppSwitcher from './public/AtlasAppSwitcher';
+import ActiveClinicalPill from './ActiveClinicalPill';
 import BrandLogo from '../common/BrandLogo';
 import DatasheetQuickSearchModal from './DatasheetQuickSearchModal';
 import GcpUserBadge from './GcpUserBadge';
@@ -493,6 +494,12 @@ export default function PublicUnifiedHeader({
                     ) : null
                   }
                 />
+              )}
+
+              {!purePublic && !whiteLabel && (
+                <div className="puh-desktop-only-pill" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <ActiveClinicalPill isSpanish={isSpanish} />
+                </div>
               )}
 
               {clinicLogo ? (

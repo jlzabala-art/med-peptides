@@ -6,8 +6,12 @@ import { CheckCircle2, Tags, FileText, Upload, ShieldCheck, Sparkles, Database }
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
+import PageHeader from '@/components/ui/PageHeader';
+import RxQuickViewDrawer from '@/components/shared/RxQuickViewDrawer';
 import ImportPrescriptionModal from '@/features/prescriptions/components/ImportPrescriptionModal';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
+import '@/styles/themes/roles.css';
 import '@/styles/publicDesignSystem.css';
 
 /**
@@ -25,6 +29,8 @@ export default function PublicPrescriptionIntakeClient() {
   const isEs = lang === 'es';
   const [importedRecords, setImportedRecords] = useState([]);
   const [modalKey, setModalKey] = useState(0);
+  const [quickDrawerCode, setQuickDrawerCode] = useState('');
+  const setActiveClinicalResource = useActiveClinicalStore((s) => s.setActiveClinicalResource);
 
   useRegisterAtlasContext(
     {
@@ -52,7 +58,10 @@ export default function PublicPrescriptionIntakeClient() {
   const importedCode = primaryImported?.code || primaryImported?.id || '';
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
+    <div
+      className="theme-admin"
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--color-bg-app, #f8fafc)' }}
+    >
       <PublicUnifiedHeader
         track="protocols"
         lang={lang}
@@ -67,7 +76,24 @@ export default function PublicPrescriptionIntakeClient() {
 
       <PharmacyOpsWorkspaceBar lang={lang} />
 
-      <main style={{ flex: 1, maxWidth: '1040px', width: '100%', margin: '0 auto', padding: '16px 16px 64px' }}>
+      <main style={{ flex: 1, maxWidth: '1040px', width: '100%', margin: '0 auto', padding: '12px 16px 64px' }}>
+        <PageHeader
+          title={isEs ? 'Nuevo Intake e Importación de Receta' : 'New Prescription Intake & Import'}
+          subtitle={isEs ? 'Extracción IA, validación galénica y sincronización directa con Labels Studio' : 'AI extraction, galenic validation, and direct Labels Studio sync'}
+          panel="admin"
+          actions={
+            <button
+              type="button"
+              onClick={() => router.push('/labels')}
+              className="gcp-btn-primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Tags size={14} />
+              <span>{isEs ? 'Ir a Labels Studio' : 'Open Labels Studio'}</span>
+            </button>
+          }
+        />
+
         {/* 4 Compact GCP KPI Cards */}
         <div
           style={{
@@ -172,7 +198,7 @@ export default function PublicPrescriptionIntakeClient() {
 
               <button
                 type="button"
-                onClick={() => router.push(`/rx/${encodeURIComponent(importedCode)}`)}
+                onClick={() => setQuickDrawerCode(importedCode)}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -234,9 +260,26 @@ export default function PublicPrescriptionIntakeClient() {
           onImported={(created) => {
             const list = Array.isArray(created) ? created : created ? [created] : [];
             setImportedRecords(list);
+            const first = list[0];
+            const code = first?.code || first?.id || '';
+            if (code) {
+              setActiveClinicalResource({
+                activeRxCode: code,
+                patientName: first?.patientName || first?.patient?.name || '',
+                doctorName: first?.doctorName || first?.doctor || '',
+                formulaTitle: first?.title || first?.treatmentTitle || ''
+              });
+            }
           }}
         />
       </main>
+
+      <RxQuickViewDrawer
+        isOpen={Boolean(quickDrawerCode)}
+        rxCode={quickDrawerCode}
+        isEs={isEs}
+        onClose={() => setQuickDrawerCode('')}
+      />
 
       <PublicUnifiedFooter lang={lang} />
     </div>

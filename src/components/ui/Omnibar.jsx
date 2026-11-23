@@ -32,13 +32,13 @@ const TRENDING_SUGGESTIONS = [
 ];
 
 const QUICK_ACTIONS = [
-  // ── Public Portals & Storefronts ──
-  { id: 'pub_store', label: '🌐 Open Public B2C Storefront', icon: Globe, route: '/', external: true },
-  { id: 'pub_24g', label: '🧬 Open 24Genetics Genomics Portal', icon: Globe, route: '/pricing/24genetics', external: true },
-  { id: 'pub_colway', label: '🌿 Open Colway Trichology Collection', icon: Globe, route: '/pricing/colway', external: true },
-  { id: 'pub_comp', label: '🧪 Open Custom Compounding Lab', icon: Globe, route: '/compounding', external: true },
-  { id: 'pub_proto', label: '📋 Open Clinical Protocols Formulary', icon: Globe, route: '/proto', external: true },
-  { id: 'pub_labels', label: '🏷️ Open Label Studio Standalone', icon: Globe, route: '/labels', external: true },
+  // ── Portals & Storefronts (SPA Navigation) ──
+  { id: 'pub_store', label: '🌐 Open Public B2C Storefront', icon: Globe, route: '/' },
+  { id: 'pub_24g', label: '🧬 Open 24Genetics Genomics Portal', icon: Globe, route: '/pricing/24genetics' },
+  { id: 'pub_colway', label: '🌿 Open Colway Trichology Collection', icon: Globe, route: '/pricing/colway' },
+  { id: 'pub_comp', label: '🧪 Open Custom Compounding Lab', icon: Globe, route: '/compounding' },
+  { id: 'pub_proto', label: '📋 Open Clinical Protocols Formulary', icon: Globe, route: '/proto' },
+  { id: 'pub_labels', label: '🏷️ Open Label Studio Standalone', icon: Globe, route: '/labels' },
 
   // ── Administrative Tools ──
   { id: 'go_finder', label: 'Guided Protocol Finder (Wizard)', icon: Navigation, route: '/protocol-finder' },

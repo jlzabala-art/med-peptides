@@ -316,9 +316,15 @@ export default function ProtocolTemplate({
           return;
         }
 
-        // 2. If not cached, generate it
-        const chartDataUrl = await captureChartDataUrl();
-        const blob = await generateClinicalProtocol(protocol, { returnBlob: true, chartPng: chartDataUrl });
+        // 2. If not cached, generate it (prefer pure vector SVG chart, keep PNG fallback)
+        const chartContainer = protocolChartRef.current?.current ?? protocolChartRef.current;
+        const chartSvgEl = chartContainer?.querySelector?.('svg') || null;
+        const chartDataUrl = chartSvgEl ? null : await captureChartDataUrl();
+        const blob = await generateClinicalProtocol(protocol, {
+          returnBlob: true,
+          chartSvg: chartSvgEl,
+          chartPng: chartDataUrl
+        });
 
         if (blob) {
           // 3. Cache it for future use (don't await this to speed up download)

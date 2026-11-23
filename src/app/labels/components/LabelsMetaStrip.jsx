@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User, FileText, Stethoscope, Search, ExternalLink, Check, Copy, ShieldCheck, Clock, CheckCircle2, Edit3, Repeat } from '@/lib/icons';
 import { Trash2, RotateCcw, X, ChevronDown, QrCode } from 'lucide-react';
 import { getLabelDisplayTitle } from '@/utils/labels/labelContract';
+import RxQuickViewDrawer from '@/components/shared/RxQuickViewDrawer';
 
 export default function LabelsMetaStrip({
   isEs,
@@ -35,10 +36,12 @@ export default function LabelsMetaStrip({
   canApproveRx = true,
   canEditRxParts = true,
   isPartLabeledFn = null,
+  hidePrescriptionMeta = false,
 }) {
   const [confirmRemoveIdx, setConfirmRemoveIdx] = useState(null);
   const [removeReason, setRemoveReason] = useState('');
   const [showPatientRxMenu, setShowPatientRxMenu] = useState(false);
+  const [quickDrawerCode, setQuickDrawerCode] = useState('');
   const [patientRxList, setPatientRxList] = useState([]);
   const [loadingPatientRx, setLoadingPatientRx] = useState(false);
   const patientMenuRef = useRef(null);
@@ -226,10 +229,12 @@ export default function LabelsMetaStrip({
                               {isEs ? 'Cargar' : 'Load'}
                             </button>
                           )}
-                          <a
-                            href={`/rx/${encodeURIComponent(itemCode)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowPatientRxMenu(false);
+                              setQuickDrawerCode(itemCode);
+                            }}
                             style={{
                               padding: '3px 7px',
                               borderRadius: '4px',
@@ -238,15 +243,15 @@ export default function LabelsMetaStrip({
                               color: '#334155',
                               fontSize: '0.68rem',
                               fontWeight: 700,
-                              textDecoration: 'none',
+                              cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '2px'
                             }}
                           >
                             <span>Rx</span>
-                            <ExternalLink size={9} />
-                          </a>
+                            <FileText size={9} />
+                          </button>
                         </div>
                       </div>
                     );
@@ -257,37 +262,41 @@ export default function LabelsMetaStrip({
           )}
         </div>
 
-        <span className="pls-meta-divider" aria-hidden="true" />
+        {!hidePrescriptionMeta && (
+          <>
+            <span className="pls-meta-divider" aria-hidden="true" />
 
-        {/* Prescription Item */}
-        <div className="pls-meta-item">
-          <span className="pls-meta-icon" style={{ background: '#e8f0fe', color: '#1a73e8' }}>
-            <FileText size={13} />
-          </span>
-          <div className="pls-meta-text">
-            <span className="pls-meta-k">{isEs ? 'Prescripción' : 'Prescription'}:</span>
-            <a
-              href={`/rx/${encodeURIComponent(cleanRxCode)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pls-meta-v mono pls-meta-link"
-              title={isEs ? `Abrir prescripción #${cleanRxCode}` : `Open prescription #${cleanRxCode}`}
-            >
-              #{cleanRxCode}
-              <ExternalLink size={11} style={{ opacity: 0.6 }} />
-            </a>
-          </div>
-          <button
-            type="button"
-            className="pls-meta-action-btn"
-            onClick={onCopyCode}
-            title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
-            aria-label={isEs ? 'Copiar código' : 'Copy code'}
-            style={{ marginLeft: '4px' }}
-          >
-            {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
-          </button>
-        </div>
+            {/* Prescription Item */}
+            <div className="pls-meta-item">
+              <span className="pls-meta-icon" style={{ background: '#e8f0fe', color: '#1a73e8' }}>
+                <FileText size={13} />
+              </span>
+              <div className="pls-meta-text">
+                <span className="pls-meta-k">{isEs ? 'Prescripción' : 'Prescription'}:</span>
+                <a
+                  href={`/rx/${encodeURIComponent(cleanRxCode)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pls-meta-v mono pls-meta-link"
+                  title={isEs ? `Abrir prescripción #${cleanRxCode}` : `Open prescription #${cleanRxCode}`}
+                >
+                  #{cleanRxCode}
+                  <ExternalLink size={11} style={{ opacity: 0.6 }} />
+                </a>
+              </div>
+              <button
+                type="button"
+                className="pls-meta-action-btn"
+                onClick={onCopyCode}
+                title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
+                aria-label={isEs ? 'Copiar código' : 'Copy code'}
+                style={{ marginLeft: '4px' }}
+              >
+                {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
+              </button>
+            </div>
+          </>
+        )}
 
         <span className="pls-meta-divider" aria-hidden="true" />
 
@@ -383,11 +392,10 @@ export default function LabelsMetaStrip({
           <div className="pls-meta-primary-ops" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '6px' }}>
             <span style={{ height: '16px', width: '1px', background: '#cbd5e1', display: 'inline-block', margin: '0 2px' }} />
 
-            {/* 1. Open & Edit Current Prescription */}
-            <a
-              href={`/rx/${encodeURIComponent(cleanRxCode)}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* 1. Open & Inspect Current Prescription In-App Drawer */}
+            <button
+              type="button"
+              onClick={() => setQuickDrawerCode(cleanRxCode)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -400,15 +408,15 @@ export default function LabelsMetaStrip({
                 color: '#334155',
                 fontWeight: 700,
                 fontSize: '0.71rem',
-                textDecoration: 'none',
+                cursor: 'pointer',
                 boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
                 transition: 'all 0.15s ease'
               }}
-              title={isEs ? `Abrir ficha pública de prescripción #${cleanRxCode}` : `Open public prescription dossier #${cleanRxCode}`}
+              title={isEs ? `Vista rápida de prescripción #${cleanRxCode}` : `Quick-view prescription dossier #${cleanRxCode}`}
             >
               <span>{isEs ? 'Ver Rx' : 'View Rx'}</span>
-              <ExternalLink size={10} />
-            </a>
+              <FileText size={10} />
+            </button>
 
             <button
               type="button"
@@ -749,18 +757,14 @@ export default function LabelsMetaStrip({
           </>
         )}
 
-        {/* Bench Laboratory Hotkeys Tip (Reimi & Kasia Quick Guide) - Desktop only (Rule #23) */}
-        <div className="pls-desktop-only" style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.67rem', color: '#64748b' }}>
-          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px', fontWeight: 800, color: '#334155' }}>⌨️ A</span>
-          <span>{isEs ? 'Aprobar' : 'Approve'}</span>
-          <span style={{ opacity: 0.4 }}>·</span>
-          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px', fontWeight: 800, color: '#334155' }}>L</span>
-          <span>{isEs ? 'Etiquetar' : 'Label'}</span>
-          <span style={{ opacity: 0.4 }}>·</span>
-          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px', fontWeight: 800, color: '#334155' }}>1-4</span>
-          <span>{isEs ? 'Variante' : 'Variant'}</span>
-        </div>
       </div>
+
+      <RxQuickViewDrawer
+        isOpen={Boolean(quickDrawerCode)}
+        rxCode={quickDrawerCode}
+        isEs={isEs}
+        onClose={() => setQuickDrawerCode('')}
+      />
     </div>
   );
 }

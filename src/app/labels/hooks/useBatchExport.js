@@ -115,8 +115,9 @@ export function useBatchExport({
           : pLabels.map((_, i) => i);
 
         for (const pIdx of partIndices) {
-          const domId = `pls-offscreen-svg-${qIdx}-${pIdx}`;
-          const svgEl = document.getElementById(domId);
+          const svgEl =
+            document.getElementById(`batch-svg-${pItem.code}-${pIdx}`) ||
+            document.getElementById(`pls-offscreen-svg-${qIdx}-${pIdx}`);
           if (svgEl) {
             const lbl = pLabels[pIdx] || {};
             labelsPayload.push({
@@ -124,7 +125,10 @@ export function useBatchExport({
               widthMm: lbl.widthMm || pItem.widthMm || 75,
               heightMm: lbl.heightMm || pItem.heightMm || 45,
               patientName: pItem.rx?.patient?.name || pItem.rx?.patientName || 'Patient',
-              code: pItem.code
+              rxCode: pItem.code,
+              code: pItem.code,
+              partLabel: lbl.partLabel || (pLabels.length > 1 ? `Part ${pIdx + 1}/${pLabels.length}` : ''),
+              variant: lbl.variant || pItem.variant || 'backQr'
             });
           }
         }

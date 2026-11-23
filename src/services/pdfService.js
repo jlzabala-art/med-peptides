@@ -440,7 +440,7 @@ const drawNativeDoseChart = (doc, startY, weeks) => {
  * CLINICAL PROTOCOL: Structured, Visual & Professional
  */
 export const generateClinicalProtocol = async (rawProtocol, options = {}) => {
-  const { formData = {}, chartPng = null, timelinePng = null, localTier = 'retail', user = null } = options;
+  const { formData = {}, chartPng = null, chartSvg = null, timelinePng = null, localTier = 'retail', user = null } = options;
   const [jsPdfModule, autoTableModule] = await Promise.all([
     import('jspdf'),
     import('jspdf-autotable')
@@ -504,7 +504,28 @@ export const generateClinicalProtocol = async (rawProtocol, options = {}) => {
     yPos += 4;
 
     let chartRendered = false;
-    if (chartPng) {
+    if (chartSvg) {
+      try {
+        const { renderSvgToPdfVector } = await import('@/utils/labels/vectorPdfEngine');
+        doc.setDrawColor(241, 245, 249);
+        doc.roundedRect(13, yPos - 1, contentWidth + 2, 74, 2, 2, 'D');
+        const { vector } = await renderSvgToPdfVector(chartSvg, doc, {
+          x: 14,
+          y: yPos,
+          width: contentWidth,
+          height: 72,
+          fallbackDpi: 300
+        });
+        if (vector) {
+          yPos += 80;
+          chartRendered = true;
+        }
+      } catch (vecErr) {
+        logger.warn('[pdfService] Vector chartSvg failed — falling back to chartPng', vecErr);
+      }
+    }
+
+    if (!chartRendered && chartPng) {
       try {
         doc.setDrawColor(241, 245, 249);
         doc.roundedRect(13, yPos - 1, contentWidth + 2, 74, 2, 2, 'D');

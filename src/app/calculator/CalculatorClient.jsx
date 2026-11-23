@@ -4,6 +4,8 @@ import React, { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import PharmacyOpsWorkspaceBar from '@/components/shared/PharmacyOpsWorkspaceBar';
+import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
 import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
 import AlgoliaEntityPicker from '@/components/shared/AlgoliaEntityPicker';
 import FormatPickerCards from '@/components/reconstitution/FormatPickerCards';
@@ -52,6 +54,7 @@ const FORMAT_SHORT_BADGE = {
 
 export default function CalculatorClient() {
   const workspace = usePublicWorkspace?.() || null;
+  const { activeRxCode, patientName: activePatientName, formulaTitle: activeFormulaTitle } = useActiveClinicalStore();
   const selector = useAlgoliaPeptideSelector({ syncUrl: false });
   const {
     lang,
@@ -319,11 +322,71 @@ export default function CalculatorClient() {
         breadcrumb={breadcrumbItems}
       />
 
+      {/* ── UNIFIED PHARMACY OPS BAR (shown seamlessly when operator has active Rx context) ── */}
+      {activeRxCode && <PharmacyOpsWorkspaceBar lang={lang} />}
+
       {/* ── UNIFIED CLINICAL FORMAT SWITCHER (5-Tab Continuous Suite Bar) ── */}
       <ClinicalFormatSwitcher activeFormat="calculator" lang={lang} />
 
       {/* ── MAIN 3-STEP PATIENT WORKFLOW + UNIFIED COMPACT GCP HERO + 4-KPI SUMMARY ── */}
       <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '0.85rem 1.25rem 6.5rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {activeRxCode && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '8px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              fontSize: '0.78rem',
+              color: '#1e3a8a'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 800, fontFamily: 'monospace' }}>#{activeRxCode}</span>
+              {activePatientName && <span style={{ fontWeight: 700 }}>{activePatientName}</span>}
+              {activeFormulaTitle && <span style={{ color: '#3b82f6' }}>· {activeFormulaTitle}</span>}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {activeFormulaTitle && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery(activeFormulaTitle.split('(')[0].trim())}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #93c5fd',
+                    background: '#ffffff',
+                    color: '#1d4ed8',
+                    fontWeight: 700,
+                    fontSize: '0.72rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isEs ? 'Cargar fórmula en calculadora' : 'Load formula in calculator'}
+                </button>
+              )}
+              <Link
+                href={`/labels?rx=${encodeURIComponent(activeRxCode)}`}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.72rem',
+                  textDecoration: 'none'
+                }}
+              >
+                {isEs ? '← Volver a Labels' : '← Back to Labels'}
+              </Link>
+            </div>
+          </div>
+        )}
         <PageHeroCard
           brandRight={isEs ? 'GUÍA UNIVERSAL DE DOSIFICACIÓN' : 'UNIVERSAL DOSING GUIDE'}
           badges={[
@@ -452,23 +515,57 @@ export default function CalculatorClient() {
                 </span>
               )}
             </span>
-            <a
-              href={`/rx/intake?peptide=${encodeURIComponent(selectedProduct?.name || '')}&dose=${encodeURIComponent(`${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim())}&lang=${lang}`}
-              style={{
-                marginLeft: 'auto',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                border: '1px solid #0d9488',
-                background: '#f0fdfa',
-                color: '#0f766e',
-                fontSize: '0.73rem',
-                fontWeight: 750,
-                textDecoration: 'none',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {isEs ? 'Prescribir este cálculo →' : 'Prescribe This Calculation →'}
-            </a>
+            <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const pName = selectedProduct?.name || 'Peptide';
+                  const sName = selectedStrength?.name || `${recon.vialMg}mg`;
+                  const doseVal = `${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim();
+                  let line = `${pName} (${sName}) — Dose: ${doseVal}`;
+                  if (recon.isVial) {
+                    line += ` · Reconstitute with ${recon.bacWaterMl} mL BAC → Draw ${recon.unitsToInject} U-100 units (${recon.volumeMl} mL) · ${recon.totalDoses} doses/vial`;
+                  } else if (recon.isPenOrCartridge) {
+                    line += ` · Dial ${recon.penClicks} clicks (${recon.volumeMl} mL) · ${recon.totalDoses} doses/pen`;
+                  } else if (recon.isSpray) {
+                    line += ` · ${recon.sprayPuffs} sprays (${recon.sprayDoseMcg} mcg)`;
+                  }
+                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(line);
+                    toast.success(isEs ? 'Pauta copiada para etiqueta / WhatsApp' : 'Dosing line copied for label / WhatsApp');
+                  }
+                }}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  fontSize: '0.73rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                📋 {isEs ? 'Copiar Pauta' : 'Copy Dosing Line'}
+              </button>
+              <a
+                href={`/rx/intake?peptide=${encodeURIComponent(selectedProduct?.name || '')}&dose=${encodeURIComponent(`${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim())}&lang=${lang}`}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #0d9488',
+                  background: '#f0fdfa',
+                  color: '#0f766e',
+                  fontSize: '0.73rem',
+                  fontWeight: 750,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {isEs ? 'Prescribir este cálculo →' : 'Prescribe This Calculation →'}
+              </a>
+            </div>
           </div>
 
           {recon.isVial && recon.unitsToInject > 0 && recon.unitsToInject < 10 && recon.syringeCapacityMl >= 1.0 && (
@@ -613,23 +710,57 @@ export default function CalculatorClient() {
                 ? `Mostrando guía para: ${selectedProduct.name} (${selectedStrength.name})`
                 : `Showing guide for: ${selectedProduct.name} (${selectedStrength.name})`}
             </span>
-            <a
-              href={`/rx/intake?peptide=${encodeURIComponent(selectedProduct?.name || '')}&dose=${encodeURIComponent(`${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim())}&lang=${lang}`}
-              style={{
-                marginLeft: 'auto',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                border: '1px solid #0d9488',
-                background: '#f0fdfa',
-                color: '#0f766e',
-                fontSize: '0.73rem',
-                fontWeight: 750,
-                textDecoration: 'none',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {isEs ? 'Prescribir este cálculo →' : 'Prescribe This Calculation →'}
-            </a>
+            <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const pName = selectedProduct?.name || 'Peptide';
+                  const sName = selectedStrength?.name || `${recon.vialMg}mg`;
+                  const doseVal = `${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim();
+                  let line = `${pName} (${sName}) — Dose: ${doseVal}`;
+                  if (recon.isVial) {
+                    line += ` · Reconstitute with ${recon.bacWaterMl} mL BAC → Draw ${recon.unitsToInject} U-100 units (${recon.volumeMl} mL) · ${recon.totalDoses} doses/vial`;
+                  } else if (recon.isPenOrCartridge) {
+                    line += ` · Dial ${recon.penClicks} clicks (${recon.volumeMl} mL) · ${recon.totalDoses} doses/pen`;
+                  } else if (recon.isSpray) {
+                    line += ` · ${recon.sprayPuffs} sprays (${recon.sprayDoseMcg} mcg)`;
+                  }
+                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(line);
+                    toast.success(isEs ? 'Pauta copiada para etiqueta / WhatsApp' : 'Dosing line copied for label / WhatsApp');
+                  }
+                }}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  fontSize: '0.73rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                📋 {isEs ? 'Copiar Pauta' : 'Copy Dosing Line'}
+              </button>
+              <a
+                href={`/rx/intake?peptide=${encodeURIComponent(selectedProduct?.name || '')}&dose=${encodeURIComponent(`${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim())}&lang=${lang}`}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #0d9488',
+                  background: '#f0fdfa',
+                  color: '#0f766e',
+                  fontSize: '0.73rem',
+                  fontWeight: 750,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {isEs ? 'Prescribir este cálculo →' : 'Prescribe This Calculation →'}
+              </a>
+            </div>
           </div>
 
           <div className="calc-gcp-kpi-grid">

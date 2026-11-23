@@ -917,26 +917,14 @@ export default function PharmacyLabelsModal({
         compress: true
       });
 
-      // Attempt native vector SVG-to-PDF export via svg2pdf.js for pure vector typography & crispness
-      let vectorSuccess = false;
-      try {
-        const { svg2pdf } = await import('svg2pdf.js');
-        await svg2pdf(svgElement, pdf, {
-          x: 0,
-          y: 0,
-          width: dimensions.widthMm,
-          height: dimensions.heightMm
-        });
-        vectorSuccess = true;
-      } catch (vecErr) {
-        console.warn('Native svg2pdf vector export failed, falling back to 600 DPI raster:', vecErr);
-      }
-
-      // Fallback to high-DPI raster image if vector export encounters any environment issue
-      if (!vectorSuccess) {
-        const imgData = await svgElementToImageData(svgElement, dimensions.widthMm, dimensions.heightMm, Math.max(dpi, 600));
-        pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
-      }
+      const { renderSvgToPdfVector } = await import('@/utils/labels/vectorPdfEngine');
+      await renderSvgToPdfVector(svgElement, pdf, {
+        x: 0,
+        y: 0,
+        width: dimensions.widthMm,
+        height: dimensions.heightMm,
+        fallbackDpi: Math.max(dpi, 600)
+      });
 
       // Standardized Clinical File Naming Engine (Supplier + Patient + Rx + Part + Size + Specs)
       const rawSupplier = currentItem.pharmacy || currentItem.supplier || 'Pharmapolis';
@@ -1116,23 +1104,14 @@ export default function PharmacyLabelsModal({
             const container = document.getElementById(`pharmapolis-bulk-label-${globalIdx}`);
             const svgEl = container?.querySelector('svg');
             if (svgEl) {
-              let vecDone = false;
-              try {
-                const { svg2pdf } = await import('svg2pdf.js');
-                await svg2pdf(svgEl, pdf, {
-                  x,
-                  y,
-                  width: STICKER_W,
-                  height: STICKER_H
-                });
-                vecDone = true;
-              } catch (vecErr) {
-                console.warn('A4 sticker vector export fallback to raster:', vecErr);
-              }
-              if (!vecDone) {
-                const imgData = await svgElementToImageData(svgEl, STICKER_W, STICKER_H, 600);
-                pdf.addImage(imgData, 'PNG', x, y, STICKER_W, STICKER_H, undefined, 'SLOW');
-              }
+              const { renderSvgToPdfVector } = await import('@/utils/labels/vectorPdfEngine');
+              await renderSvgToPdfVector(svgEl, pdf, {
+                x,
+                y,
+                width: STICKER_W,
+                height: STICKER_H,
+                fallbackDpi: 600
+              });
               pdf.setDrawColor(226, 232, 240);
               pdf.setLineWidth(0.2);
               pdf.roundedRect(x, y, STICKER_W, STICKER_H, 1.5, 1.5, 'S');
@@ -1159,23 +1138,14 @@ export default function PharmacyLabelsModal({
           const container = document.getElementById(`pharmapolis-bulk-label-${idx}`);
           const svgEl = container?.querySelector('svg');
           if (svgEl) {
-            let vecDone = false;
-            try {
-              const { svg2pdf } = await import('svg2pdf.js');
-              await svg2pdf(svgEl, pdf, {
-                x: 0,
-                y: 0,
-                width: dimensions.widthMm,
-                height: dimensions.heightMm
-              });
-              vecDone = true;
-            } catch (vecErr) {
-              console.warn('Bulk label vector export fallback to raster:', vecErr);
-            }
-            if (!vecDone) {
-              const imgData = await svgElementToImageData(svgEl, dimensions.widthMm, dimensions.heightMm, Math.max(dpi, 600));
-              pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
-            }
+            const { renderSvgToPdfVector } = await import('@/utils/labels/vectorPdfEngine');
+            await renderSvgToPdfVector(svgEl, pdf, {
+              x: 0,
+              y: 0,
+              width: dimensions.widthMm,
+              height: dimensions.heightMm,
+              fallbackDpi: Math.max(dpi, 600)
+            });
           }
         }
 
@@ -1201,6 +1171,27 @@ export default function PharmacyLabelsModal({
   return (
     <div className={`gcp-labels-backdrop ${isStandalone ? 'is-standalone-page' : ''}`}>
       <style>{`
+        .gcp-split-workbench {
+          display: grid;
+          grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+          gap: 16px;
+          align-items: start;
+          width: 100%;
+          max-width: 1320px;
+          margin: 0 auto;
+        }
+        .gcp-split-preview-col {
+          position: sticky;
+          top: 12px;
+        }
+        @media (max-width: 1024px) {
+          .gcp-split-workbench {
+            grid-template-columns: 1fr;
+          }
+          .gcp-split-preview-col {
+            position: static;
+          }
+        }
         .gcp-labels-backdrop {
           position: fixed;
           inset: 0;
@@ -2492,7 +2483,7 @@ export default function PharmacyLabelsModal({
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      🏷️ {isEs ? 'Etiqueta Producto' : 'Product Label'}
+                      {isEs ? 'Envase / Producto' : 'Product Label'}
                     </button>
                     {!hideShippingLabel && (
                       <button
@@ -2514,28 +2505,23 @@ export default function PharmacyLabelsModal({
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        📦 {isEs ? 'Etiqueta Envío' : 'Shipping Label'}
+                        {isEs ? 'Caja / Envío' : 'Shipping Label'}
                       </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => setFulfillmentMode('external_supplier')}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '5px',
-                        border: fulfillmentMode === 'external_supplier' ? '1px solid #1a73e8' : '1px solid transparent',
-                        background: fulfillmentMode === 'external_supplier' ? '#ffffff' : 'transparent',
-                        color: fulfillmentMode === 'external_supplier' ? '#1a73e8' : '#475569',
-                        boxShadow: fulfillmentMode === 'external_supplier' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
-                        fontSize: '0.72rem',
-                        fontWeight: fulfillmentMode === 'external_supplier' ? 750 : 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      🔄 {isEs ? 'Tarjeta Refill' : 'Refill Card'}
-                    </button>
                   </div>
+                  {fulfillmentMode === 'external_supplier' && (
+                    <span style={{
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
+                      color: '#6b21a8',
+                      background: '#f3e8ff',
+                      border: '1px solid #d8b4fe',
+                      padding: '3px 8px',
+                      borderRadius: '6px'
+                    }}>
+                      {isEs ? 'Modo Proveedor Externo (Refill Card)' : 'External Supplier (Refill Card)'}
+                    </span>
+                  )}
 
                   {fulfillmentMode !== 'external_supplier' && (
                     <>
@@ -2830,7 +2816,8 @@ export default function PharmacyLabelsModal({
           </div>
           )}
 
-          {/* Online Label Editor & Markdown Sync Panel */}
+          {/* Online Label Editor & Live SVG Preview (Split-View on Desktop when Editing) */}
+          <div className={isEditing ? 'gcp-split-workbench' : undefined} style={!isEditing ? { width: '100%' } : undefined}>
           {isEditing && (
             <div style={{
               width: '100%',
@@ -3230,24 +3217,30 @@ export default function PharmacyLabelsModal({
                       ];
 
                       return (
-                        <div className="gcp-col-12 gcp-field-wrap" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px' }}>
-                          <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                              <span>{isEs ? 'Insignia Superior (Parte / Cuándo tomar o aplicar)' : 'Top Header Badge (Part / When to take or apply)'}</span>
-                              <span style={{
-                                fontSize: '0.65rem',
-                                fontWeight: 700,
-                                padding: '2px 7px',
-                                borderRadius: '999px',
-                                background: isBadgeVisible && currentBadgeVal ? '#dcfce7' : '#f1f5f9',
-                                color: isBadgeVisible && currentBadgeVal ? '#166534' : '#475569',
-                                border: `1px solid ${isBadgeVisible && currentBadgeVal ? '#86efac' : '#cbd5e1'}`
-                              }}>
-                                {isBadgeVisible && currentBadgeVal
-                                  ? (isEs ? '✓ Visible al imprimir' : '✓ Visible on print')
-                                  : (isEs ? 'Oculto al imprimir (Anulado)' : 'Hidden on print (Disabled)')}
-                              </span>
-                            </div>
+                        <details className="gcp-col-12" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 12px' }}>
+                          <summary style={{ cursor: 'pointer', fontSize: '0.73rem', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', userSelect: 'none' }}>
+                            <span>
+                              {isEs ? '▸ Insignia Superior (Parte / Horario)' : '▸ Top Header Badge (Part / Timing)'}
+                            </span>
+                            <span style={{
+                              fontSize: '0.65rem',
+                              fontWeight: 700,
+                              padding: '1px 7px',
+                              borderRadius: '999px',
+                              background: isBadgeVisible && currentBadgeVal ? '#dcfce7' : '#f1f5f9',
+                              color: isBadgeVisible && currentBadgeVal ? '#166534' : '#475569',
+                              border: `1px solid ${isBadgeVisible && currentBadgeVal ? '#86efac' : '#cbd5e1'}`
+                            }}>
+                              {isBadgeVisible && currentBadgeVal
+                                ? (isEs ? 'Visible al imprimir' : 'Visible on print')
+                                : (isEs ? 'Oculto' : 'Hidden')}
+                            </span>
+                          </summary>
+                          <div className="gcp-field-wrap" style={{ marginTop: '8px' }}>
+                            <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                <span>{isEs ? 'Insignia Superior (Parte / Cuándo tomar o aplicar)' : 'Top Header Badge (Part / When to take or apply)'}</span>
+                              </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <button
@@ -3398,7 +3391,8 @@ export default function PharmacyLabelsModal({
                               ))}
                             </div>
                           </div>
-                        </div>
+                          </div>
+                        </details>
                       );
                     })()}
 
@@ -3858,6 +3852,7 @@ export default function PharmacyLabelsModal({
 
           {/* High-Precision Interactive Vector SVG Preview Frame */}
           <div
+            className={isEditing ? 'gcp-split-preview-col' : undefined}
             style={{
               width: '100%',
               maxWidth: '960px',
@@ -4024,6 +4019,7 @@ export default function PharmacyLabelsModal({
                 </div>
               );
             })()}
+          </div>
           </div>
           </>
           )}

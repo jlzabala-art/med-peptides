@@ -33,19 +33,32 @@ export default function NplabHormonesPriceClient({
     return getAllPharmapolisHrtBulkOffers().map((offer, idx) => {
       const eur = Number(offer.bulkOfferExclVatEur || offer.pricing?.costPriceEur || 0);
       const aed = Number((eur * 3.98).toFixed(2));
+      const matchedStd = pharmapolisProducts.find((p) => {
+        const pName = String(p?.name || p?.canonicalName || '').toLowerCase();
+        const oName = offer.productName.toLowerCase();
+        if (oName.includes('progesterone capsules') && pName.includes('progesterone capsules, immediate')) return true;
+        if (oName.includes('testosterone cream (women)') && pName.includes('testosterone cream, women')) return true;
+        if (oName.includes('testosterone cream (men)') && pName.includes('testosterone cream/gel, men')) return true;
+        if (oName.includes('biest cream') && pName.includes('biest 80:20')) return true;
+        if (oName.includes('progesterone cream') && pName.includes('progesterone cream')) return true;
+        return false;
+      });
+      const stdEur = Number(matchedStd?.costPriceEur || 0);
+      const savingsPct = stdEur > eur ? Math.round(((stdEur - eur) / stdEur) * 100) : 0;
+      const savingsBadge = savingsPct > 0 ? ` · Save ${savingsPct}% vs. €${stdEur.toFixed(2)} single-unit` : '';
       return {
         id: offer.id,
         slug: offer.id,
         sku: `SKU-PHARM-BULK-${idx + 1}`,
         name: `${offer.productName} (${offer.strength})`,
         canonicalName: offer.productName,
-        subtitle: `${offer.packLabel} · Batch MOQ ×${offer.packsPerBatch}`,
+        subtitle: `${offer.packLabel} · Batch MOQ ×${offer.packsPerBatch}${savingsBadge}`,
         category: 'E. Bulk Batch Offers (MOQ 33–50)',
         packSize: `${offer.packLabel} · MOQ ${offer.packsPerBatch}`,
         volume: `${offer.packLabel} (Batch ×${offer.packsPerBatch})`,
         presentation: `${offer.packagingType} · Batch ×${offer.packsPerBatch}`,
         keyActives: `${offer.productName} ${offer.strength} · ${offer.batchSize} ${offer.batchUnit} batch`,
-        clinicalFocus: `Institutional bulk compounding batch (${offer.packsPerBatch} packs/batch) by Pharmapolis Bulgaria (EU GMP). Excl. VAT.`,
+        clinicalFocus: `Institutional bulk compounding batch (${offer.packsPerBatch} packs/batch) by Pharmapolis Bulgaria (EU GMP). Excl. VAT.${savingsBadge}`,
         costCurrency: 'EUR',
         costPriceEur: eur,
         landedCostAed: aed,
@@ -57,7 +70,7 @@ export default function NplabHormonesPriceClient({
         isActive: true,
       };
     });
-  }, []);
+  }, [pharmapolisProducts]);
 
   const enrichedPharmapolisProducts = useMemo(() => {
     const offers = getAllPharmapolisHrtBulkOffers();

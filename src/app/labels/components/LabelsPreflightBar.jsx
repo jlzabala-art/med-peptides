@@ -59,7 +59,10 @@ export default function LabelsPreflightBar({
   onFocusLotBud = null,
   editorTab = 'fields',
   onChangeEditorTab = null,
-  onQueueRxQuantity = null
+  onQueueRxQuantity = null,
+  hidePrintButton = false,
+  isStudioFocus = false,
+  onToggleFocus = null
 }) {
   const [exportOpen, setExportOpen] = useState(false);
   const [lastPrintAction, setLastPrintAction] = useState(() => {
@@ -453,6 +456,7 @@ export default function LabelsPreflightBar({
             </button>
           );
         })()}
+        {!hidePrintButton && (
         <div ref={exportRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
           <button
             type="button"
@@ -602,6 +606,30 @@ export default function LabelsPreflightBar({
             </div>
           )}
         </div>
+        )}
+
+        {onToggleFocus && (
+          <button
+            type="button"
+            onClick={onToggleFocus}
+            style={{
+              padding: '4px 9px',
+              borderRadius: '6px',
+              border: isStudioFocus ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+              background: isStudioFocus ? '#e8f0fe' : '#ffffff',
+              color: isStudioFocus ? '#1a73e8' : '#334155',
+              fontSize: '0.69rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+            title={isEs ? 'Ocultar barras superiores para maximizar el estudio' : 'Hide top navigation to maximize studio workspace'}
+          >
+            {isStudioFocus
+              ? (isEs ? 'Salir Foco' : 'Exit Focus')
+              : (isEs ? 'Modo Foco' : 'Focus')}
+          </button>
+        )}
 
         <button
           type="button"

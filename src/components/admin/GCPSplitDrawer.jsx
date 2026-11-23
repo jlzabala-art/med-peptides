@@ -23,12 +23,15 @@ import {
 } from '@/lib/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import { toast } from 'react-hot-toast';
+import ProductQuickViewDrawer from '../shared/ProductQuickViewDrawer';
 import CopyableId from '../ui/CopyableId';
 import StatusBadge from '../ui/StatusBadge';
 
 export default function GCPSplitDrawer({ item, type, onClose }) {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'audit' | 'dossier'
   const [copied, setCopied] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+  const [quickProduct, setQuickProduct] = useState(null);
 
   if (!item) return null;
 
@@ -365,19 +368,20 @@ export default function GCPSplitDrawer({ item, type, onClose }) {
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <Link
-                      href={`/p/${item.slug}`}
-                      target="_blank"
+                    <button
+                      type="button"
+                      onClick={() => setQuickProduct({ slug: item.slug, title: item.name || item.slug })}
                       style={{
                         flex: 1,
                         padding: '10px 14px',
                         background: '#d97706',
                         color: '#ffffff',
+                        border: 'none',
                         borderRadius: '8px',
                         fontWeight: 700,
                         fontSize: '0.82rem',
                         textAlign: 'center',
-                        textDecoration: 'none',
+                        cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -385,8 +389,7 @@ export default function GCPSplitDrawer({ item, type, onClose }) {
                       }}
                     >
                       <span>Ver Monografía (/p)</span>
-                      <ExternalLink size={14} />
-                    </Link>
+                    </button>
 
                     <Link
                       href={`/vial-label/${item.slug}`}
@@ -573,6 +576,13 @@ export default function GCPSplitDrawer({ item, type, onClose }) {
 
         </div>
       </div>
+
+      <ProductQuickViewDrawer
+        isOpen={Boolean(quickProduct)}
+        slug={quickProduct?.slug || ''}
+        title={quickProduct?.title || ''}
+        onClose={() => setQuickProduct(null)}
+      />
     </>
   );
 }

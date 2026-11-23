@@ -41,6 +41,7 @@ import { triggerHaptic } from '../../utils/haptics';
 import CopyableId from '../ui/CopyableId';
 import StatusBadge from '../ui/StatusBadge';
 import GCPSplitDrawer from './GCPSplitDrawer';
+import ProductQuickViewDrawer from '../shared/ProductQuickViewDrawer';
 import DataTable from '../ui/DataTable';
 import AppActionGroup from '../ui/AppActionGroup';
 import { setActiveDoctor } from '../../services/activeContextService';
@@ -58,6 +59,7 @@ export default function AdminToolsTab() {
 
   // Side Drawer Split-View state (GCP Master-Detail)
   const [drawerItem, setDrawerItem] = useState(null);
+  const [quickProduct, setQuickProduct] = useState(null);
   const [drawerType, setDrawerType] = useState('doctor'); // 'doctor' | 'patient' | 'product'
 
   const openDrawer = (item, type) => {
@@ -1993,20 +1995,20 @@ export default function AdminToolsTab() {
                       <span>Details</span>
                     </button>
 
-                    <Link
-                      href={`/p/${prod.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => setQuickProduct({ slug: prod.slug, title: prod.name || prod.slug })}
                       style={{
                         flex: 1,
                         padding: '7px 12px',
                         borderRadius: '6px',
+                        border: 'none',
                         background: '#d97706',
                         color: '#ffffff',
                         fontSize: '0.78rem',
                         fontWeight: 700,
                         textAlign: 'center',
-                        textDecoration: 'none',
+                        cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -2014,8 +2016,7 @@ export default function AdminToolsTab() {
                       }}
                     >
                       <span>View Monograph (/p)</span>
-                      <ExternalLink size={13} />
-                    </Link>
+                    </button>
 
                     <Link
                       href={`/vial-label/${prod.slug}`}
@@ -2131,6 +2132,13 @@ export default function AdminToolsTab() {
           onClose={() => setDrawerItem(null)}
         />
       )}
+
+      <ProductQuickViewDrawer
+        isOpen={Boolean(quickProduct)}
+        slug={quickProduct?.slug || ''}
+        title={quickProduct?.title || ''}
+        onClose={() => setQuickProduct(null)}
+      />
 
     </div>
   );

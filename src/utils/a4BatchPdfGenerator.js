@@ -1,48 +1,10 @@
 import { jsPDF } from 'jspdf';
+import {
+  rasterizeSvgToImageData,
+  renderSvgToPdfVector
+} from '@/utils/labels/vectorPdfEngine';
 
-/**
- * Rasterizes an SVG DOM element to a high-res PNG Data URL at exact physical millimeter dimensions.
- */
-export async function rasterizeSvgToImageData(svgEl, widthMm, heightMm, targetDpi = 600) {
-  const widthPx = Math.round((widthMm / 25.4) * targetDpi);
-  const heightPx = Math.round((heightMm / 25.4) * targetDpi);
-
-  const clonedSvg = svgEl.cloneNode(true);
-  if (!clonedSvg.getAttribute('xmlns')) {
-    clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  }
-  clonedSvg.setAttribute('width', `${widthPx}px`);
-  clonedSvg.setAttribute('height', `${heightPx}px`);
-
-  const svgXml = new XMLSerializer().serializeToString(clonedSvg);
-  const svgBlob = new Blob([svgXml], { type: 'image/svg+xml;charset=utf-8' });
-  const svgUrl = URL.createObjectURL(svgBlob);
-
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = widthPx;
-        canvas.height = heightPx;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, widthPx, heightPx);
-        ctx.drawImage(img, 0, 0, widthPx, heightPx);
-        URL.revokeObjectURL(svgUrl);
-        resolve(canvas.toDataURL('image/png', 1.0));
-      } catch (err) {
-        URL.revokeObjectURL(svgUrl);
-        reject(err);
-      }
-    };
-    img.onerror = (err) => {
-      URL.revokeObjectURL(svgUrl);
-      reject(err);
-    };
-    img.src = svgUrl;
-  });
-}
+export { rasterizeSvgToImageData };
 
 /**
  * Packs labels into strict guillotine-friendly horizontal shelves (rows).
@@ -112,13 +74,18 @@ function buildGuillotineOptimizedRows(items, maxRowWidth, minGapX) {
  * Generates an A4 Multi-Patient Batch PDF sheet laying out each label maintaining
  * its exact physical mm dimensions, with crop marks, patient captions, and guillotine-optimized spacing.
  */
-export async function generateA4BatchPdf({
-  items = [],
-  isEs = false,
-  dpi = 600,
-  onProgress = null,
-  startOffset = 0
-}) {
+export async function generateA4BatchPdf(itemsOrOpts = {}, maybeOpts = {}) {
+  const isArrayFirst = Array.isArray(itemsOrOpts);
+  const opts = isArrayFirst ? (maybeOpts || {}) : (itemsOrOpts || {});
+  const items = isArrayFirst ? itemsOrOpts : (opts.items || []);
+  const {
+    isEs = false,
+    dpi = 600,
+    onProgress = null,
+    startOffset = 0,
+    fileName = null
+  } = opts;
+
   if (!items || items.length === 0) {
     throw new Error(isEs ? 'No hay etiquetas en la cola para imprimir' : 'No labels in queue to print');
   }
@@ -295,19 +262,20 @@ export async function generateA4BatchPdf({
       processedCount++;
 
       if (onProgress) {
-        onProgress({ current: processedCount, total: items.length, patient: item.patientName });
+        // Support both (current, total, patient) and ({ current, total, patient })
+        onProgress(processedCount, items.length, item.patientName);
       }
 
-      // Rasterize SVG element to high-res image
-      let imgData = null;
+      // Render SVG element as pure 100% vector PDF via svg2pdf.js (falls back to 600 DPI raster only on error)
       const targetSvg = item.svgEl || item.svgElement;
       if (targetSvg) {
-        imgData = await rasterizeSvgToImageData(targetSvg, wMm, hMm, dpi);
-      }
-
-      if (imgData) {
-        // Draw physical 1:1 image
-        pdf.addImage(imgData, 'PNG', itemX, itemY, wMm, hMm, undefined, 'SLOW');
+        await renderSvgToPdfVector(targetSvg, pdf, {
+          x: itemX,
+          y: itemY,
+          width: wMm,
+          height: hMm,
+          fallbackDpi: dpi
+        });
 
         // Draw outer label border
         pdf.setDrawColor(203, 213, 225); // slate-300
@@ -372,7 +340,7 @@ export async function generateA4BatchPdf({
   }
 
   const dateStr = new Date().toISOString().slice(0, 10);
-  const filename = `PHARMAPOLIS_A4_BATCH_${items.length}_LABELS_${dateStr}.pdf`;
+  const filename = fileName || `PHARMAPOLIS_A4_BATCH_${items.length}_LABELS_${dateStr}.pdf`;
   pdf.save(filename);
 
   return { success: true, filename, totalLabels: items.length, totalPages: currentPage };
