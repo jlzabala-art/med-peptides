@@ -32,6 +32,10 @@ test('Rule #71: PharmapolisLabelSvg enforces global pharmacy label standards', (
   assert.ok(src.includes('solution|wash|foam'), 'Must upgrade Topical Wash / Treatment Solution to TrichoWash / TrichoSol');
   assert.ok(src.includes("'TrichoWash Shampoo 250ml'"), 'Must normalize TrichoWash product name to TrichoWash Shampoo 250ml');
   assert.ok(src.includes('summarizeApplicationInstructions'), 'Must summarize additional application instructions into posology');
+
+  // 7. Must convert mL to pump(s) for transdermal cream / pump dispensers in posology
+  assert.ok(src.includes('isTransdermalPumpDispenser'), 'Must convert mL to pump(s) in posology for transdermal pump/pen dispensers');
+  assert.ok(src.includes("'1 pump'"), 'Must express 1 mL transdermal dispenser dose as 1 pump');
 });
 
 test('Zoho Matcher: isCompatibleZohoMatch blocks multi-API and wrong-route false positives', () => {
