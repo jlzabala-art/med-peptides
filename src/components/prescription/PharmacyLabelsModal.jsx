@@ -8,6 +8,7 @@ import { verifyLabelSaveSecurity } from '@/utils/labels/labelSecurityGuard';
 import { labelsRepository } from '@/repositories/labelsRepository';
 import PharmapolisLabelSvg, { computeDefaultHeaderBadge } from './PharmapolisLabelSvg';
 import { getCustomsFriendlySuggestions, findCustomsRisks } from '@/utils/labels/customsNaming';
+import { getLegacyLabelSuggestions } from '@/utils/legacyLabels';
 import { formatApisForEditor, labelToMarkdown, parseMarkdownToLabel } from '@/utils/labels/labelMarkdown';
 import ClinicPicker from '@/components/admin/patients/ClinicPicker';
 import PhysicianPicker from '@/components/admin/patients/PhysicianPicker';
@@ -159,6 +160,7 @@ export default function PharmacyLabelsModal({
   const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
   const [boldPosology, setBoldPosology] = useState(true); // true = Bold 800 (standard), false = Normal 500 (compact, saves space)
   const [shippingSameAsDelivery, setShippingSameAsDelivery] = useState(false); // default false (discreet Customs-Safe); true mirrors Delivery Clinical Label
+  const [showLegacyLabels, setShowLegacyLabels] = useState(false); // optional Legacy Labels suggestions (Shipping only)
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [internalColorMode, setInternalColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (vector color)
   const colorMode = externalColorMode || internalColorMode;
@@ -3486,6 +3488,7 @@ export default function PharmacyLabelsModal({
                     {/* Customs-friendly quick suggestions (Shipping variant only, when not mirroring Delivery) */}
                     {activeVariant === 'shipping' && !shippingSameAsDelivery && (() => {
                       const customsSuggestions = getCustomsFriendlySuggestions(currentItem);
+                      const legacySuggestions = getLegacyLabelSuggestions(currentItem, labels);
                       const defaultShippingTitle = customsSuggestions[0] || '';
                       const activeShippingTitle = currentItem.shippingTitle || defaultShippingTitle;
                       const isCustomShippingTitle = Boolean(currentItem.shippingTitle && currentItem.shippingTitle !== defaultShippingTitle);
@@ -3510,24 +3513,42 @@ export default function PharmacyLabelsModal({
                               {isCustomShippingTitle ? (isEs ? 'Personalizado' : 'Custom') : (isEs ? 'Por defecto' : 'Default')}
                             </span>
                           </label>
-                          {isCustomShippingTitle && defaultShippingTitle && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                             <button
                               type="button"
-                              onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', defaultShippingTitle); }}
+                              onClick={() => setShowLegacyLabels((prev) => !prev)}
                               style={{
-                                background: 'transparent',
-                                border: '1px solid #dadce0',
+                                background: showLegacyLabels ? '#e8f0fe' : 'transparent',
+                                border: showLegacyLabels ? '1px solid #1a73e8' : '1px solid #dadce0',
                                 borderRadius: '4px',
-                                color: '#5f6368',
+                                color: showLegacyLabels ? '#174ea6' : '#5f6368',
                                 fontSize: '0.68rem',
                                 fontWeight: 600,
                                 padding: '2px 8px',
                                 cursor: 'pointer'
                               }}
                             >
-                              ↺ {isEs ? 'Restaurar defecto' : 'Reset to default'}
+                              {showLegacyLabels ? '✓ Legacy Labels' : '+ Legacy Labels'}
                             </button>
-                          )}
+                            {isCustomShippingTitle && defaultShippingTitle && (
+                              <button
+                                type="button"
+                                onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', defaultShippingTitle); }}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1px solid #dadce0',
+                                  borderRadius: '4px',
+                                  color: '#5f6368',
+                                  fontSize: '0.68rem',
+                                  fontWeight: 600,
+                                  padding: '2px 8px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                ↺ {isEs ? 'Restaurar defecto' : 'Reset to default'}
+                              </button>
+                            )}
+                          </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <input
@@ -3604,6 +3625,42 @@ export default function PharmacyLabelsModal({
                             );
                           })}
                         </div>
+                        {showLegacyLabels && legacySuggestions.length > 0 && (
+                          <div style={{ marginTop: '8px', padding: '8px 10px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #dadce0' }}>
+                            <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+                              {isEs ? 'Legacy Labels (Histórico / Tricho-Care · Solo Shipping)' : 'Legacy Labels (Historical / Tricho-Care · Shipping Only)'}
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                              {legacySuggestions.map((ls) => {
+                                const isSelected = activeShippingTitle === ls;
+                                return (
+                                  <button
+                                    key={`legacy-${ls}`}
+                                    type="button"
+                                    onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', ls); }}
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '6px',
+                                      padding: '6px 12px',
+                                      minHeight: '44px',
+                                      borderRadius: '6px',
+                                      border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+                                      background: isSelected ? '#e8f0fe' : '#ffffff',
+                                      color: isSelected ? '#174ea6' : '#3c4043',
+                                      fontSize: '0.73rem',
+                                      fontWeight: isSelected ? 700 : 500,
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    {isSelected && <span aria-hidden="true">✓</span>}
+                                    <span>{ls}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                         {(() => {
                           const risks = findCustomsRisks(currentItem);
                           if (risks.length === 0) {
