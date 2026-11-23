@@ -9,20 +9,20 @@ export const revalidate = 0;
 export async function generateMetadata({ searchParams }) {
   const resolvedSearch = await searchParams;
   const lang = normalizeMetaLang(resolvedSearch);
-  const currency = String(resolvedSearch?.cur || resolvedSearch?.currency || 'AED').toUpperCase();
-  const validCurrency = ['AED', 'USD', 'EUR'].includes(currency) ? currency : 'AED';
+  const currency = String(resolvedSearch?.cur || resolvedSearch?.currency || 'EUR').toUpperCase();
+  const validCurrency = ['AED', 'USD', 'EUR'].includes(currency) ? currency : 'EUR';
 
   return buildBilingualMetadata({
     lang,
     path: '/pricing/fillers',
     siteName: 'Atlas Health Services',
     en: {
-      title: `Aesthetic Injectables, Skin Boosters & Dermal Fillers • Official B2B Price Schedule (${validCurrency})`,
-      description: `Official B2B price schedule for Skin Boosters, Dermal Fillers, Biostimulators, and Polynucleotides (PharmaMedic / Lorenzo) in ${validCurrency} with tiered wholesale (+15%) and clinic (+15% + 15%) pricing.`
+      title: `Dermal Fillers & Skin Boosters • Wholeseller B2B Catalog (${validCurrency})`,
+      description: `Direct Wholeseller pricing for 40 CE-marked originals across 8 leading brands (Juvéderm, Restylane, Belotero, Profhilo, Sculptra, Radiesse, PhilArt, Aqualyx). Local stock in Dubai · Fast dispatch & live PDF.`
     },
     es: {
-      title: `Inyectables Estéticos, Skin Boosters y Fillers Dérmicos • Tarifa Oficial B2B (${validCurrency})`,
-      description: `Tarifa oficial B2B de Skin Boosters, Fillers Dérmicos, Bioestimuladores y Polinucleótidos (PharmaMedic / Lorenzo) en ${validCurrency} con niveles mayorista (+15%) y clínica (+15% + 15%).`
+      title: `Fillers Dérmicos y Skin Boosters • Tarifa Wholeseller B2B (${validCurrency})`,
+      description: `Precios directos Wholeseller en 40 referencias originales con marcado CE de 8 marcas líderes (Juvéderm, Restylane, Belotero, Profhilo, Sculptra, Radiesse, PhilArt, Aqualyx). Stock local en Dubái · Envío rápido y PDF.`
     }
   });
 }
