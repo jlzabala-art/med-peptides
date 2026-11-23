@@ -3152,44 +3152,71 @@ export default function PharmacyLabelsModal({
                     </div>
                     )}
 
-                    <div className={`${activeVariant === 'shipping' ? 'gcp-col-6' : 'gcp-col-3'} gcp-field-wrap`}>
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Cantidad Neta' : 'Net Quantity'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={currentItem.volume || currentItem.size || currentItem.netContent || '10 mL'}
-                        onChange={(e) => handleFieldChange('volume', e.target.value)}
-                        className="gcp-form-input"
-                        placeholder="10 mL"
-                      />
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '5px' }}>
-                        {['5 mL', '10 mL', '15 mL', '30 mL', '60 Caps', '100 mL'].map((qPreset) => {
-                          const curVol = currentItem.volume || currentItem.size || currentItem.netContent || '10 mL';
-                          const active = curVol === qPreset;
-                          return (
-                            <button
-                              key={qPreset}
-                              type="button"
-                              onClick={() => handleFieldChange('volume', qPreset)}
-                              style={{
-                                border: active ? '1px solid #1a73e8' : '1px solid #cbd5e1',
-                                background: active ? '#e8f0fe' : '#f8fafc',
-                                color: active ? '#1a73e8' : '#475569',
-                                borderRadius: '4px',
-                                fontSize: '0.64rem',
-                                fontWeight: active ? 700 : 600,
-                                padding: '2px 7px',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              {qPreset}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    {(() => {
+                      const netQtyPresets = [
+                        '3 mL',
+                        '5 mL',
+                        '10 mL',
+                        '15 mL',
+                        '30 mL',
+                        '60 mL',
+                        '90 mL',
+                        '100 mL',
+                        '250 mL',
+                        '30 Caps',
+                        '60 Caps',
+                        '90 Caps',
+                        '120 Caps',
+                        '180 Caps',
+                        '270 Caps',
+                        '30 Tabs'
+                      ];
+                      const curVol = currentItem.volume || currentItem.size || currentItem.netContent || '10 mL';
+                      const isPresetVol = netQtyPresets.includes(curVol);
+                      return (
+                        <div className={`${activeVariant === 'shipping' ? 'gcp-col-6' : 'gcp-col-3'} gcp-field-wrap`}>
+                          <label className="gcp-form-label" htmlFor="gcp-net-qty-select">
+                            <span>{isEs ? 'Cantidad Neta' : 'Net Quantity'}</span>
+                            <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                          </label>
+                          <select
+                            id="gcp-net-qty-select"
+                            value={isPresetVol ? curVol : '__custom__'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val !== '__custom__') {
+                                handleFieldChange('volume', val);
+                              } else if (isPresetVol) {
+                                handleFieldChange('volume', '');
+                              }
+                            }}
+                            className="gcp-form-input"
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {netQtyPresets.map((qPreset) => (
+                              <option key={qPreset} value={qPreset}>
+                                {qPreset}
+                              </option>
+                            ))}
+                            <option value="__custom__">
+                              {isPresetVol
+                                ? (isEs ? 'Personalizado…' : 'Custom…')
+                                : `${curVol || (isEs ? 'Personalizado' : 'Custom')}`}
+                            </option>
+                          </select>
+                          {!isPresetVol && (
+                            <input
+                              type="text"
+                              value={curVol}
+                              onChange={(e) => handleFieldChange('volume', e.target.value)}
+                              className="gcp-form-input"
+                              style={{ marginTop: '6px' }}
+                              placeholder="e.g. 45 mL"
+                            />
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     {/* Row 1.5: Header Timing / Part Badge (Delivery only) */}
                     {activeVariant !== 'shipping' && (() => {

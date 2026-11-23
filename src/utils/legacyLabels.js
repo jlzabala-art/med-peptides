@@ -154,7 +154,28 @@ export function getLegacyLabelSuggestions(item = {}, siblingItems = []) {
   const historical = findHistoricalLegacyLabel(item.patientName, title);
   if (historical) candidates.push(historical);
 
-  if (/\btrichosol\b/i.test(low)) {
+  if (/\b(nasal|intranasal|nostril|spray|mist)\b/i.test(low) && !/\btrichosol\b/i.test(low)) {
+    const v = volLabel || '10 mL';
+    candidates.push(
+      `Botanical Nasal Mist ${v}`,
+      `Isotonic Saline Nasal Spray ${v}`,
+      `Scalp Mist Spray ${v}`
+    );
+  } else if (/\b(pen|cartridge|pluma|semaglutide|tirzepatide|retatrutide|cagrilintide|liraglutide)\b/i.test(low)) {
+    const v = volLabel || '3 mL';
+    candidates.push(
+      `Precision Dermal Serum Pen ${v}`,
+      `Botanical Applicator Pen ${v}`,
+      `Cosmetic Serum Cartridge ${v}`
+    );
+  } else if (/\b(vial|lyophilized|liofilizado|ampoule|bpc|tb-?500|cjc|ipamorelin|ghk-?cu|epithalon|nad\+|glutathione|peptid)\b/i.test(low)) {
+    const v = volLabel || '10 mL';
+    candidates.push(
+      `Botanical Scalp Ampoule ${v}`,
+      `Cosmetic Ampoule Serum ${v}`,
+      `Concentrate Serum Vial ${v}`
+    );
+  } else if (/\btrichosol\b/i.test(low)) {
     const v = volLabel || '100ml';
     candidates.push(`Hair Lotion ${v}`, `TrichoSol ${v}`, `TrichoShampoo ${v}`);
   } else if (/\btrichooil\b/i.test(low)) {
