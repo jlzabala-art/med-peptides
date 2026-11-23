@@ -3486,18 +3486,55 @@ export default function PharmacyLabelsModal({
                     )}
 
                     {/* Customs-friendly quick suggestions (Shipping variant only, when not mirroring Delivery) */}
-                    {activeVariant === 'shipping' && !shippingSameAsDelivery && (
+                    {activeVariant === 'shipping' && !shippingSameAsDelivery && (() => {
+                      const customsSuggestions = getCustomsFriendlySuggestions(currentItem);
+                      const defaultShippingTitle = customsSuggestions[0] || '';
+                      const activeShippingTitle = currentItem.shippingTitle || defaultShippingTitle;
+                      const isCustomShippingTitle = Boolean(currentItem.shippingTitle && currentItem.shippingTitle !== defaultShippingTitle);
+                      return (
                       <div className="gcp-col-12 gcp-field-wrap">
-                        <label className="gcp-form-label">
-                          <span>{isEs ? 'Nombre para Aduanas / Shipping' : 'Customs / Shipping Name'}</span>
-                          <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
-                            {isEs ? '(Opcional)' : '(Optional)'}
-                          </span>
-                        </label>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                          <label className="gcp-form-label" style={{ marginBottom: 0 }}>
+                            <span>{isEs ? 'Nombre para Aduanas / Shipping' : 'Customs / Shipping Name'}</span>
+                            <span
+                              style={{
+                                marginLeft: '6px',
+                                padding: '2px 7px',
+                                borderRadius: '4px',
+                                fontSize: '0.64rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.03em',
+                                background: isCustomShippingTitle ? '#e8f0fe' : '#f1f3f4',
+                                color: isCustomShippingTitle ? '#174ea6' : '#5f6368'
+                              }}
+                            >
+                              {isCustomShippingTitle ? (isEs ? 'Personalizado' : 'Custom') : (isEs ? 'Por defecto' : 'Default')}
+                            </span>
+                          </label>
+                          {isCustomShippingTitle && defaultShippingTitle && (
+                            <button
+                              type="button"
+                              onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', defaultShippingTitle); }}
+                              style={{
+                                background: 'transparent',
+                                border: '1px solid #dadce0',
+                                borderRadius: '4px',
+                                color: '#5f6368',
+                                fontSize: '0.68rem',
+                                fontWeight: 600,
+                                padding: '2px 8px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              ↺ {isEs ? 'Restaurar defecto' : 'Reset to default'}
+                            </button>
+                          )}
+                        </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <input
                             type="text"
-                            value={shippingDraft !== null ? shippingDraft : (currentItem.shippingTitle || '')}
+                            value={shippingDraft !== null ? shippingDraft : activeShippingTitle}
                             onChange={(e) => setShippingDraft(e.target.value)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') { handleFieldChange('shippingTitle', shippingDraft ?? ''); setShippingDraft(null); }
@@ -3508,7 +3545,7 @@ export default function PharmacyLabelsModal({
                             }}
                             className="gcp-form-input"
                             style={{ flex: 1, minWidth: 0 }}
-                            placeholder={getCustomsFriendlySuggestions(currentItem)[0]}
+                            placeholder={defaultShippingTitle}
                           />
                           {shippingDraft !== null && (
                             <>
@@ -3533,27 +3570,41 @@ export default function PharmacyLabelsModal({
                             </>
                           )}
                         </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
-                          {getCustomsFriendlySuggestions(currentItem).map((s) => (
-                            <button
-                              key={s}
-                              type="button"
-                              onClick={() => handleFieldChange('shippingTitle', s)}
-                              style={{
-                                padding: '6px 10px',
-                                minHeight: '44px',
-                                borderRadius: '999px',
-                                border: currentItem.shippingTitle === s ? '1px solid #1a73e8' : '1px solid #dadce0',
-                                background: currentItem.shippingTitle === s ? '#e8f0fe' : '#fff',
-                                color: currentItem.shippingTitle === s ? '#1a73e8' : '#3c4043',
-                                fontSize: '0.72rem',
-                                fontWeight: 600,
-                                cursor: 'pointer'
-                              }}
-                            >
-                              {s}
-                            </button>
-                          ))}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                          {customsSuggestions.map((s, idx) => {
+                            const isSelected = activeShippingTitle === s;
+                            return (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', s); }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  padding: '6px 12px',
+                                  minHeight: '44px',
+                                  borderRadius: '6px',
+                                  border: isSelected ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+                                  background: isSelected ? '#e8f0fe' : '#ffffff',
+                                  color: isSelected ? '#174ea6' : '#3c4043',
+                                  fontSize: '0.73rem',
+                                  fontWeight: isSelected ? 700 : 500,
+                                  cursor: 'pointer',
+                                  textAlign: 'left',
+                                  transition: 'all 0.12s ease'
+                                }}
+                              >
+                                {isSelected && <span aria-hidden="true">✓</span>}
+                                <span>{s}</span>
+                                {idx === 0 && (
+                                  <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: isSelected ? '#d2e3fc' : '#f1f3f4', color: isSelected ? '#174ea6' : '#5f6368' }}>
+                                    {isEs ? 'Defecto' : 'Default'}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                         {(() => {
                           const risks = findCustomsRisks(currentItem);
@@ -3578,7 +3629,8 @@ export default function PharmacyLabelsModal({
                           );
                         })()}
                       </div>
-                    )}
+                      );
+                    })()}
 
                     {/* Clinical-only fields (Delivery Label) */}
                     {activeVariant !== 'shipping' && (
@@ -3827,50 +3879,101 @@ export default function PharmacyLabelsModal({
                       </div>
                     </div>
 
-                    <div className="gcp-col-12 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Conservación / Almacenamiento' : 'Storage Conditions'}</span>
-                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
-                          {isEs ? '(Opcional)' : '(Optional)'}
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        value={currentItem.storage || 'Keep refrigerated (2°C-8°C). Do not freeze.'}
-                        onChange={(e) => handleFieldChange('storage', e.target.value)}
-                        className="gcp-form-input"
-                        placeholder="Keep refrigerated (2°C-8°C). Do not freeze."
-                      />
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
-                        {[
-                          { label: '2–8°C Refrigerated', val: 'Keep refrigerated (2°C-8°C). Do not freeze.' },
-                          { label: '15–25°C Ambient', val: 'Store in a cool, dry place (15°C-25°C).' },
-                          { label: 'Protect from Light', val: 'Protect from direct light and moisture (below 25°C).' },
-                        ].map((st) => {
-                          const curStorage = currentItem.storage || 'Keep refrigerated (2°C-8°C). Do not freeze.';
-                          const active = curStorage === st.val;
-                          return (
-                            <button
-                              key={st.label}
-                              type="button"
-                              onClick={() => handleFieldChange('storage', st.val)}
-                              style={{
-                                border: active ? '1px solid #1a73e8' : '1px solid #cbd5e1',
-                                background: active ? '#e8f0fe' : '#f8fafc',
-                                color: active ? '#1a73e8' : '#475569',
-                                borderRadius: '4px',
-                                fontSize: '0.66rem',
-                                fontWeight: active ? 700 : 600,
-                                padding: '3px 8px',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              {st.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    {(() => {
+                      const defaultStorage = 'Keep refrigerated (2°C-8°C). Do not freeze.';
+                      const curStorage = currentItem.storage || defaultStorage;
+                      const isCustomStorage = Boolean(currentItem.storage && currentItem.storage !== defaultStorage);
+                      const storagePresets = [
+                        { icon: '❄️', label: isEs ? '2–8°C Refrigerado' : '2–8°C Refrigerated', val: defaultStorage, isDefault: true },
+                        { icon: '🌡️', label: isEs ? '15–25°C Ambiente' : '15–25°C Ambient', val: 'Store in a cool, dry place (15°C-25°C).' },
+                        { icon: '☀️', label: isEs ? 'Proteger de Luz' : 'Protect from Light', val: 'Protect from direct light and moisture (below 25°C).' },
+                        { icon: '🧊', label: isEs ? '-20°C Congelado' : '-20°C Frozen', val: 'Store frozen (-20°C). Protect from light.' },
+                      ];
+                      return (
+                        <div className="gcp-col-12 gcp-field-wrap">
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                            <label className="gcp-form-label" style={{ marginBottom: 0 }}>
+                              <span>{isEs ? 'Conservación / Almacenamiento' : 'Storage Conditions'}</span>
+                              <span
+                                style={{
+                                  marginLeft: '6px',
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.64rem',
+                                  fontWeight: 700,
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.03em',
+                                  background: isCustomStorage ? '#e8f0fe' : '#f1f3f4',
+                                  color: isCustomStorage ? '#174ea6' : '#5f6368'
+                                }}
+                              >
+                                {isCustomStorage ? (isEs ? 'Personalizado' : 'Custom') : (isEs ? 'Por defecto' : 'Default')}
+                              </span>
+                            </label>
+                            {isCustomStorage && (
+                              <button
+                                type="button"
+                                onClick={() => handleFieldChange('storage', defaultStorage)}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1px solid #dadce0',
+                                  borderRadius: '4px',
+                                  color: '#5f6368',
+                                  fontSize: '0.68rem',
+                                  fontWeight: 600,
+                                  padding: '2px 8px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                ↺ {isEs ? 'Restaurar defecto' : 'Reset to default'}
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            value={curStorage}
+                            onChange={(e) => handleFieldChange('storage', e.target.value)}
+                            className="gcp-form-input"
+                            placeholder={defaultStorage}
+                          />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+                            {storagePresets.map((st) => {
+                              const active = curStorage === st.val;
+                              return (
+                                <button
+                                  key={st.label}
+                                  type="button"
+                                  onClick={() => handleFieldChange('storage', st.val)}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    border: active ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+                                    background: active ? '#e8f0fe' : '#ffffff',
+                                    color: active ? '#174ea6' : '#3c4043',
+                                    borderRadius: '6px',
+                                    fontSize: '0.73rem',
+                                    fontWeight: active ? 700 : 500,
+                                    padding: '6px 12px',
+                                    minHeight: '44px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.12s ease'
+                                  }}
+                                >
+                                  <span aria-hidden="true">{active ? '✓' : st.icon}</span>
+                                  <span>{st.label}</span>
+                                  {st.isDefault && (
+                                    <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: active ? '#d2e3fc' : '#f1f3f4', color: active ? '#174ea6' : '#5f6368' }}>
+                                      {isEs ? 'Defecto' : 'Default'}
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                 ) : (
