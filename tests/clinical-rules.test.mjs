@@ -276,3 +276,24 @@ test('Firestore Model Guard: enforces AGENTS.md Rule #28 status taxonomy and can
   assert.ok(guarded.batchCode?.startsWith('PHARM-'), 'Approved Rx without batchCode must get deterministic PHARM batchCode');
   assert.ok(guarded.prodDate && guarded.expDate, 'Approved Rx must have prodDate and expDate');
 });
+
+test('Algolia Prescriptions Sync & Search: indexes canonical status/dispensingForm/batchCode and excludes cancelled', async () => {
+  const { formatPrescriptionRecord } = await import('../src/services/algoliaSyncService.js');
+  const rec = formatPrescriptionRecord('rx-123', {
+    code: 'NSLBSO1640',
+    status: 'active',
+    dispensingForm: 'Nasal Spray',
+    batchCode: 'PHARM-2026-SO1640',
+    expDate: '2027-01-21',
+    a4PrintCount: 2,
+    items: [{ name: 'Selank Nasal Spray (75 mg / 10 mL)' }],
+  });
+  assert.equal(rec.status, 'approved');
+  assert.equal(rec.dispensingForm, 'nasal_spray');
+  assert.equal(rec.batchCode, 'PHARM-2026-SO1640');
+  assert.equal(rec.expDate, '2027-01-21');
+  assert.equal(rec.isPrinted, true);
+
+  const searchSrc = read('src/services/algoliaSearch.js');
+  assert.ok(searchSrc.includes('NOT status:cancelled'), 'searchAlgoliaFederated must exclude cancelled prescriptions by default');
+});

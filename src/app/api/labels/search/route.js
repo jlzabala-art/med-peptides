@@ -401,6 +401,8 @@ export async function GET(request) {
         const fsMatches = [];
         snap.forEach(docSnap => {
           const d = docSnap.data();
+          const st = String(d.status || d.state || '').trim().toLowerCase();
+          if (st === 'cancelled' || st === 'archived') return;
           const code = extractBestCode(d, docSnap.id);
           const pName = String(d.patientName || d.patient?.name || '').trim();
           const docName = String(d.doctorName || d.treatingDoctor?.name || '').trim();

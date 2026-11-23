@@ -239,7 +239,7 @@ export async function searchAlgoliaFederated(
   query,
   indices = ['products', 'protocols', 'atlas_patients', 'atlas_users', 'prescriptions'],
   hitsPerPage = 4,
-  { distinct = true } = {}
+  { distinct = true, includeCancelled = false, filtersByIndex = {} } = {}
 ) {
   const currentClient = getClient();
   if (!currentClient || !query || query.trim().length < 2) {
@@ -248,18 +248,23 @@ export async function searchAlgoliaFederated(
 
   const rawClean = query.trim();
   const cleanQuery = expandClinicalQuery(rawClean);
-  const cacheKey = `federated:${rawClean.toLowerCase()}:${indices.join(',')}:${distinct ? 1 : 0}:${hitsPerPage}`;
+  const filterKey = JSON.stringify(filtersByIndex);
+  const cacheKey = `federated:${rawClean.toLowerCase()}:${indices.join(',')}:${distinct ? 1 : 0}:${includeCancelled ? 1 : 0}:${filterKey}:${hitsPerPage}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
   try {
-    const requests = indices.map((idx) => ({
-      indexName: idx,
-      query: cleanQuery,
-      hitsPerPage,
-      ...(idx === 'products' ? { distinct: distinct ? 1 : 0 } : {}),
-      clickAnalytics: true,
-    }));
+    const requests = indices.map((idx) => {
+      const idxFilter = filtersByIndex[idx] || (idx === 'prescriptions' && !includeCancelled ? 'NOT status:cancelled' : undefined);
+      return {
+        indexName: idx,
+        query: cleanQuery,
+        hitsPerPage,
+        ...(idx === 'products' ? { distinct: distinct ? 1 : 0 } : {}),
+        ...(idxFilter ? { filters: idxFilter } : {}),
+        clickAnalytics: true,
+      };
+    });
 
     const results = await currentClient.search({ requests });
 

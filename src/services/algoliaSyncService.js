@@ -12,6 +12,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import logger from '../utils/logger.js';
+import { normalizeRxStatus, resolveCanonicalDispensingForm } from '../utils/firestoreModelGuard.js';
 
 let directAdminClient = null;
 async function getDirectAdminClient() {
@@ -41,7 +42,7 @@ function getTimestamp(val) {
   return isNaN(parsed) ? Date.now() : parsed;
 }
 
-function formatPrescriptionRecord(id, record = {}) {
+export function formatPrescriptionRecord(id, record = {}) {
   const targetId = String(id || record.id || record.objectID);
   const rawLines = Array.isArray(record.items) ? record.items : (Array.isArray(record.prescriptionLines) ? record.prescriptionLines : []);
   
@@ -97,7 +98,13 @@ function formatPrescriptionRecord(id, record = {}) {
     doctorName: record.doctorName || record.doctor?.name || record.treatingDoctor?.name || '',
     doctorId: record.doctorId || record.doctor?.id || '',
     clinicName: record.clinicName || record.clinic?.name || record.clinic || '',
-    status: (record.status || 'pending').toLowerCase(),
+    status: normalizeRxStatus(record.status || record.state),
+    dispensingForm: resolveCanonicalDispensingForm(record),
+    batchCode: record.batchCode || record.dispensingBatch || '',
+    dispensingBatch: record.dispensingBatch || record.batchCode || '',
+    expDate: record.expDate || record.expiryDate || '',
+    isPrinted: Boolean(record.isPrinted || record.printedAt || Number(record.a4PrintCount || record.printCount || 0) > 0),
+    a4PrintCount: Number(record.a4PrintCount || record.printCount || 0),
     date: record.prescriptionDate || record.date || rawDate || formattedDate,
     prescriptionDate: record.prescriptionDate || record.date || rawDate || '',
     importedAt: record.importedAt || (typeof record.createdAt === 'string' ? record.createdAt : new Date().toISOString()),
