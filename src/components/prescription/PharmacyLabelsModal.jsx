@@ -159,6 +159,7 @@ export default function PharmacyLabelsModal({
   const [compareMode, setCompareMode] = useState(!hideShippingLabel); // show Delivery + Shipping side by side only if shipping label is enabled
   const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
   const [boldPosology, setBoldPosology] = useState(true); // true = Bold 800 (standard), false = Normal 500 (compact, saves space)
+  const [shippingSameAsDelivery, setShippingSameAsDelivery] = useState(false); // default false (discreet Customs-Safe); true mirrors Delivery Clinical Label
   const [deliveryLabelType, setDeliveryLabelType] = useState('customs'); // 'customs' (GCC Discreet Aduanas) | 'clinical' (100% Prescription Based)
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [internalColorMode, setInternalColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (vector color)
@@ -3427,8 +3428,65 @@ export default function PharmacyLabelsModal({
                     </div>
                     )}
 
-                    {/* Customs-friendly quick suggestions (Shipping variant only) */}
+                    {/* 1-Click Option: Same as Delivery Label (Shipping variant only, off by default) */}
                     {activeVariant === 'shipping' && (
+                      <div className="gcp-col-12 gcp-field-wrap" style={{ marginBottom: '4px' }}>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={shippingSameAsDelivery}
+                          onClick={() => setShippingSameAsDelivery((prev) => !prev)}
+                          style={{
+                            width: '100%',
+                            minHeight: '44px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            border: shippingSameAsDelivery ? '1.5px solid #1a73e8' : '1px solid #dadce0',
+                            background: shippingSameAsDelivery ? '#e8f0fe' : '#f8f9fa',
+                            color: shippingSameAsDelivery ? '#1a73e8' : '#3c4043',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: shippingSameAsDelivery ? '#174ea6' : '#202124' }}>
+                              {isEs ? 'Igual que Delivery Label (Clínica)' : 'Same as Delivery Label (Clinical)'}
+                            </span>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 500, color: shippingSameAsDelivery ? '#1967d2' : '#5f6368' }}>
+                              {shippingSameAsDelivery
+                                ? (isEs
+                                  ? 'Activado: la etiqueta de Shipping copia exactamente la Delivery Label clínica.'
+                                  : 'Enabled: Shipping Label mirrors the full clinical Delivery Label.')
+                                : (isEs
+                                  ? 'Por defecto: etiqueta discreta para Aduanas. Pulsa para usar la misma que Delivery.'
+                                  : 'Default: discreet Customs-Safe label. Click to mirror Delivery Label.')}
+                            </span>
+                          </div>
+                          <span
+                            style={{
+                              flexShrink: 0,
+                              padding: '4px 10px',
+                              borderRadius: '999px',
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              background: shippingSameAsDelivery ? '#1a73e8' : '#ffffff',
+                              color: shippingSameAsDelivery ? '#ffffff' : '#5f6368',
+                              border: shippingSameAsDelivery ? '1px solid #1a73e8' : '1px solid #dadce0'
+                            }}
+                          >
+                            {shippingSameAsDelivery ? (isEs ? '✓ Activado' : '✓ Active') : (isEs ? 'Activar' : 'Use Delivery')}
+                          </span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Customs-friendly quick suggestions (Shipping variant only, when not mirroring Delivery) */}
+                    {activeVariant === 'shipping' && !shippingSameAsDelivery && (
                       <div className="gcp-col-12 gcp-field-wrap">
                         <label className="gcp-form-label">
                           <span>{isEs ? 'Nombre para Aduanas / Shipping' : 'Customs / Shipping Name'}</span>
@@ -4050,7 +4108,9 @@ export default function PharmacyLabelsModal({
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 750, color: isShippingActive ? '#1a73e8' : '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? '2. Shipping Label (Envío / Aduanas)' : '2. Shipping Label (Simple / Customs)'}
+                      {shippingSameAsDelivery
+                        ? (isEs ? '2. Shipping Label (= Delivery)' : '2. Shipping Label (= Delivery)')
+                        : (isEs ? '2. Shipping Label (Envío / Aduanas)' : '2. Shipping Label (Simple / Customs)')}
                     </span>
                     <span style={{
                       fontSize: '0.66rem',
@@ -4104,7 +4164,7 @@ export default function PharmacyLabelsModal({
                           partIndex: selectedProductIdx || 0,
                           totalParts: labels.length
                         }}
-                        variant="shipping"
+                        variant={shippingSameAsDelivery ? 'backQr' : 'shipping'}
                         widthMm={dimensions.widthMm}
                         heightMm={dimensions.heightMm}
                         colorMode={colorMode}
@@ -4497,7 +4557,7 @@ export default function PharmacyLabelsModal({
                   partIndex: idx,
                   totalParts: labels.length
                 }}
-                variant={activeVariant}
+                variant={activeVariant === 'shipping' && shippingSameAsDelivery ? 'backQr' : activeVariant}
                 widthMm={exportFormat === 'pdf_a4' ? 75 : dimensions.widthMm}
                 heightMm={exportFormat === 'pdf_a4' ? 45 : dimensions.heightMm}
                 dpi={Math.max(dpi, 300)}
