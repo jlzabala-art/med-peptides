@@ -2859,7 +2859,7 @@ export default function PharmacyLabelsModal({
                     </>
                   )}
 
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginLeft: '4px' }}>
                     <StatusBadge status={currentItem.approvalStatus || 'draft'} />
 
                     {/* Print Status & Reprint Index Badge */}
@@ -2872,7 +2872,8 @@ export default function PharmacyLabelsModal({
                           background: '#f1f5f9',
                           border: '1px solid #e2e8f0',
                           padding: '2px 7px',
-                          borderRadius: '4px'
+                          borderRadius: '4px',
+                          whiteSpace: 'nowrap'
                         }}
                       >
                         ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
@@ -2889,7 +2890,8 @@ export default function PharmacyLabelsModal({
                           borderRadius: '4px',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '3px'
+                          gap: '3px',
+                          whiteSpace: 'nowrap'
                         }}
                         title={isEs ? 'Etiqueta original emitida (1 vez)' : 'Original label issued (1 time)'}
                       >
@@ -2908,6 +2910,7 @@ export default function PharmacyLabelsModal({
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '3px',
+                          whiteSpace: 'nowrap',
                           boxShadow: '0 1px 2px rgba(234, 88, 12, 0.08)'
                         }}
                         title={isEs ? `Aviso de Farmacia: Esta etiqueta ya se ha impreso ${modalPrintCount} veces (Reimpresión)` : `Pharmacy Alert: This label has already been printed ${modalPrintCount} times (Reprint #${modalPrintCount})`}
@@ -2915,7 +2918,7 @@ export default function PharmacyLabelsModal({
                         🔁 {isEs ? `Reimpresión #${modalPrintCount}` : `Reprint #${modalPrintCount}`}
                       </span>
                     )}
-                    <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700 }}>
+                    <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, whiteSpace: 'nowrap' }}>
                       v{currentItem.version || 1}
                     </span>
                     <button
@@ -2928,17 +2931,15 @@ export default function PharmacyLabelsModal({
                       }}
                       disabled={!saveSecurity.canApprove || isSavingToFirebase}
                       aria-disabled={!saveSecurity.canApprove || isSavingToFirebase}
+                      className="gcp-btn-secondary"
                       style={{
-                        padding: '3px 8px',
-                        borderRadius: '4px',
+                        padding: '3px 9px',
+                        minHeight: '28px',
                         fontSize: '0.68rem',
-                        fontWeight: 700,
-                        border: currentItem.approvalStatus === 'approved' ? '1px solid #dadce0' : '1px solid #ceead6',
-                        background: currentItem.approvalStatus === 'approved' ? '#fff' : '#e6f4ea',
-                        color: currentItem.approvalStatus === 'approved' ? '#5f6368' : '#137333',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
                         cursor: !saveSecurity.canApprove || isSavingToFirebase ? 'not-allowed' : 'pointer',
                         opacity: !saveSecurity.canApprove || isSavingToFirebase ? 0.45 : 1,
-                        transition: 'all 0.15s ease'
                       }}
                       title={saveSecurity.approveReason}
                     >
@@ -2949,9 +2950,8 @@ export default function PharmacyLabelsModal({
                   </div>
                 </div>
 
-                {/* Editor Action Buttons: Save, Download .md, Reset */}
+                {/* Editor Aux Action Buttons: Download .md, Reset (Save lives in unified bottom bar) */}
                 <div className="gcp-editor-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  {/* Informative reassurance or security guard badge */}
                   {!saveSecurity.canSave ? (
                     <div style={{
                       display: 'inline-flex',
@@ -2969,55 +2969,15 @@ export default function PharmacyLabelsModal({
                       <span>{saveSecurity.reason}</span>
                     </div>
                   ) : (
-                    <div style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      padding: '4px 8px',
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '5px',
-                      fontSize: '0.70rem',
-                      color: '#475569',
-                      lineHeight: 1.2
-                    }}>
-                      <Info size={12} color="#1a73e8" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.70rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Info size={12} color="#64748b" style={{ flexShrink: 0 }} />
                       <span>
-                        {isEs 
-                          ? 'Al guardar, se sincroniza la prescripción clínica original.' 
-                          : 'Saving synchronizes directly with the master clinical prescription.'}
+                        {isEs
+                          ? 'Sincronizado con prescripción maestra'
+                          : 'Syncs with master prescription'}
                       </span>
-                    </div>
+                    </span>
                   )}
-
-                  {/* SAVE BUTTON */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!saveSecurity.canSave) return;
-                      handleSaveToFirebase();
-                    }}
-                    disabled={!saveSecurity.canSave}
-                    aria-disabled={!saveSecurity.canSave}
-                    className={`gcp-editor-save-btn ${firebaseSaveSuccess ? 'is-success' : ''} ${!saveSecurity.canSave ? 'is-disabled' : ''}`}
-                    title={saveSecurity.reason}
-                    style={{
-                      opacity: !saveSecurity.canSave && !isSavingToFirebase && !firebaseSaveSuccess ? 0.45 : 1,
-                      cursor: !saveSecurity.canSave ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    {firebaseSaveSuccess ? (
-                      <>
-                        <Check size={13} color="#137333" />
-                        <span>{isEs ? 'Guardado ✓ (Receta Sincronizada)' : 'Saved ✓ (Master Rx Updated)'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Database size={13} />
-                        <span>{isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar' : 'Save')}</span>
-                      </>
-                    )}
-                  </button>
 
                   <button
                     type="button"
@@ -3094,14 +3054,16 @@ export default function PharmacyLabelsModal({
                   <div className="gcp-editor-fields-grid">
                     {/* Patient Name field */}
 
-                    {/* Row 1: Patient Name (6 cols) | Dispensing Batch (3 cols) | Net Quantity (3 cols) */}
-                    <div className="gcp-col-6 gcp-field-wrap">
+                    {/* Row 1: Patient Name (5 cols) | Dispensing Batch (4 cols) | Net Quantity (3 cols) */}
+                    <div className="gcp-col-5 gcp-field-wrap">
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <span>{isEs ? 'Nombre Paciente' : 'Patient Name'}</span>
                           <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                         </div>
-                        <FontLegibilityPill pt={patientPt} isEs={isEs} compact={true} threshold={legalThreshold} />
+                        {patientPt < legalThreshold && (
+                          <FontLegibilityPill pt={patientPt} isEs={isEs} compact={true} threshold={legalThreshold} />
+                        )}
                       </label>
                       <input
                         type="text"
@@ -3112,37 +3074,33 @@ export default function PharmacyLabelsModal({
                       />
                     </div>
 
-                    <div className="gcp-col-3 gcp-field-wrap">
-                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span>{isEs ? 'Lote (Batch)' : 'Dispensing Batch'}</span>
+                    <div className="gcp-col-4 gcp-field-wrap">
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'nowrap', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                          <span>{isEs ? 'Lote' : 'Batch'}</span>
                           <span style={{ color: '#dc2626', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                           {isRealVerifiedBatch ? (
-                            <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '1px 5px', borderRadius: '4px', fontSize: '0.64rem', fontWeight: 750 }} title={isEs ? 'Lote verificado y trazable en base de datos oficial' : 'Verified and traceable lot from official database'}>
-                              ✓ {isEs ? 'Verificado' : 'Verified'}
+                            <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '1px 5px', borderRadius: '4px', fontSize: '0.62rem', fontWeight: 750 }} title={isEs ? 'Lote verificado y trazable en base de datos oficial' : 'Verified and traceable lot from official database'}>
+                              ✓ {isEs ? 'Verif.' : 'Verified'}
                             </span>
-                          ) : (
-                            <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 5px', borderRadius: '4px', fontSize: '0.64rem', fontWeight: 750 }} title={isEs ? 'Lote sugerido compounding auto-generado' : 'Auto-generated compounding lot'}>
-                              ⚡ {isEs ? 'Auto' : 'Auto'}
-                            </span>
-                          )}
+                          ) : null}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
                           {realDbBatch && currentBatch !== realDbBatch && (
                             <button
                               type="button"
                               onClick={() => handleFieldChange('batchCode', realDbBatch)}
                               style={{
-                                border: '1px solid #93c5fd',
-                                background: '#eff6ff',
-                                color: '#1d4ed8',
+                                border: '1px solid #cbd5e1',
+                                background: '#ffffff',
+                                color: '#334155',
                                 borderRadius: '4px',
-                                fontSize: '0.64rem',
-                                fontWeight: 700,
+                                fontSize: '0.62rem',
+                                fontWeight: 600,
                                 padding: '1px 5px',
                                 cursor: 'pointer'
                               }}
-                              title={isEs ? `Restaurar lote oficial de base de datos (${realDbBatch})` : `Restore official database lot (${realDbBatch})`}
+                              title={isEs ? `Restaurar lote oficial (${realDbBatch})` : `Restore official lot (${realDbBatch})`}
                             >
                               ↺ {isEs ? 'Real' : 'Real'}
                             </button>
@@ -3154,18 +3112,18 @@ export default function PharmacyLabelsModal({
                               handleFieldChange('batchCode', newLot);
                             }}
                             style={{
-                              border: '1px solid #a7f3d0',
-                              background: '#ecfdf5',
-                              color: '#047857',
+                              border: '1px solid #cbd5e1',
+                              background: '#f8fafc',
+                              color: '#334155',
                               borderRadius: '4px',
-                              fontSize: '0.64rem',
-                              fontWeight: 750,
-                              padding: '1px 5px',
+                              fontSize: '0.62rem',
+                              fontWeight: 600,
+                              padding: '1px 6px',
                               cursor: 'pointer'
                             }}
                             title={isEs ? 'Generar código de lote estandarizado GMP con fecha de hoy' : 'Generate standardized GMP batch code with today date'}
                           >
-                            ⚡ {isEs ? 'Lote Hoy' : 'Auto LOT'}
+                            ⚡ {isEs ? 'Auto' : 'Auto LOT'}
                           </button>
                         </div>
                       </label>
@@ -3420,7 +3378,9 @@ export default function PharmacyLabelsModal({
                             🛡️ {isEs ? 'Sugerencias Aduanas' : 'Customs Names'}
                           </button>
                         </div>
-                        <FontLegibilityPill pt={titlePt} isEs={isEs} compact={true} threshold={legalThreshold} />
+                        {titlePt < legalThreshold && (
+                          <FontLegibilityPill pt={titlePt} isEs={isEs} compact={true} threshold={legalThreshold} />
+                        )}
                       </label>
                       {showCustomsTitleSuggestions && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
@@ -3601,13 +3561,8 @@ export default function PharmacyLabelsModal({
                     </div>
 
                     <div className="gcp-col-6 gcp-field-wrap">
-                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <span>{isEs ? 'Clínica en Etiqueta' : 'Clinic on Label'}</span>
-                          <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
-                            {isEs ? '(Opcional · No altera datos del médico en Firebase)' : '(Optional · Label-only, does not alter doctor record)'}
-                          </span>
-                        </div>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <span style={{ whiteSpace: 'nowrap' }}>{isEs ? 'Clínica en Etiqueta' : 'Clinic on Label'}</span>
                         {currentItem.clinicName ? (
                           <button
                             type="button"
@@ -3629,18 +3584,19 @@ export default function PharmacyLabelsModal({
                               onLabelDataChange?.(selectedProductIdx, updated);
                             }}
                             style={{
-                              border: '1px solid #fecaca',
-                              background: '#fef2f2',
-                              color: '#dc2626',
+                              border: '1px solid #cbd5e1',
+                              background: '#ffffff',
+                              color: '#475569',
                               borderRadius: '4px',
                               fontSize: '0.64rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               padding: '1px 6px',
-                              cursor: 'pointer'
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap'
                             }}
                             title={isEs ? 'Ocultar clínica en la etiqueta impresa' : 'Omit clinic from printed label'}
                           >
-                            {isEs ? 'Omitir en etiqueta ×' : 'Omit on label ×'}
+                            {isEs ? 'Omitir ×' : 'Omit ×'}
                           </button>
                         ) : null}
                       </label>
@@ -3666,6 +3622,9 @@ export default function PharmacyLabelsModal({
                         }}
                         placeholder={isEs ? "Sin clínica en etiqueta (Opcional)..." : "No clinic on label (Optional)..."}
                       />
+                      <div style={{ fontSize: '0.67rem', color: '#64748b', marginTop: '3px' }}>
+                        {isEs ? 'Opcional · Solo etiqueta (no altera ficha del médico)' : 'Optional · Label-only, does not alter doctor record'}
+                      </div>
                     </div>
 
                     <div className="gcp-col-12 gcp-field-wrap">
@@ -3677,7 +3636,9 @@ export default function PharmacyLabelsModal({
                             {isEs ? '(un ingrediente por línea · formato: Fármaco: Dosis)' : '(one per line · Drug: Dose)'}
                           </span>
                         </div>
-                        <FontLegibilityPill pt={ingPt} isEs={isEs} compact={true} threshold={legalThreshold} />
+                        {ingPt < legalThreshold && (
+                          <FontLegibilityPill pt={ingPt} isEs={isEs} compact={true} threshold={legalThreshold} />
+                        )}
                       </label>
                       <textarea
                         rows={4}
@@ -3711,7 +3672,9 @@ export default function PharmacyLabelsModal({
                           <span>{isEs ? 'Posología / Modo de Empleo (Directions for Use)' : 'Directions for Use'}</span>
                           <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                         </div>
-                        <FontLegibilityPill pt={dirPt} isEs={isEs} compact={true} threshold={legalThreshold} />
+                        {dirPt < legalThreshold && (
+                          <FontLegibilityPill pt={dirPt} isEs={isEs} compact={true} threshold={legalThreshold} />
+                        )}
                       </label>
                       <input
                         type="text"
@@ -3722,7 +3685,7 @@ export default function PharmacyLabelsModal({
                       />
                     </div>
 
-                    <div className="gcp-col-3 gcp-field-wrap">
+                    <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <span>{isEs ? 'Fecha Fabricación (Mfg)' : 'Mfg Date'}</span>
@@ -3751,54 +3714,52 @@ export default function PharmacyLabelsModal({
                         value={currentItem.prodDate || currentItem.mfgDate || ''}
                         onChange={(e) => handleFieldChange('prodDate', e.target.value)}
                         className="gcp-form-input"
-                        placeholder="DD-MM-YYYY"
+                        placeholder="YYYY-MM-DD"
                       />
                     </div>
 
-                    <div className="gcp-col-3 gcp-field-wrap">
-                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <span>{isEs ? 'Fecha Caducidad (Exp)' : 'Expiry Date'}</span>
-                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
-                        </div>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-                          {[
-                            { label: '+30d', days: 30, title: '+30 días' },
-                            { label: '+60d', days: 60, title: '+60 días' },
-                            { label: '+90d', days: 90, title: '+90 días' },
-                            { label: '+180d', days: 180, title: '+180 días' },
-                          ].map((preset) => (
-                            <button
-                              key={preset.days}
-                              type="button"
-                              onClick={() => handleFieldChange('expDate', getOffsetDate(preset.days))}
-                              style={{
-                                border: '1px solid #cbd5e1',
-                                background: '#f8fafc',
-                                color: '#334155',
-                                borderRadius: '3px',
-                                fontSize: '0.62rem',
-                                fontWeight: 750,
-                                padding: '1px 4px',
-                                cursor: 'pointer'
-                              }}
-                              title={preset.title}
-                            >
-                              {preset.label}
-                            </button>
-                          ))}
-                        </div>
+                    <div className="gcp-col-6 gcp-field-wrap">
+                      <label className="gcp-form-label">
+                        <span>{isEs ? 'Fecha Caducidad (Exp)' : 'Expiry Date'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
                         value={currentItem.expDate || ''}
                         onChange={(e) => handleFieldChange('expDate', e.target.value)}
                         className="gcp-form-input"
-                        placeholder="DD-MM-YYYY"
+                        placeholder="YYYY-MM-DD"
                       />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '5px' }}>
+                        {[
+                          { label: '+30d', days: 30, title: '+30 días' },
+                          { label: '+60d', days: 60, title: '+60 días' },
+                          { label: '+90d', days: 90, title: '+90 días' },
+                          { label: '+180d', days: 180, title: '+180 días' },
+                        ].map((preset) => (
+                          <button
+                            key={preset.days}
+                            type="button"
+                            onClick={() => handleFieldChange('expDate', getOffsetDate(preset.days))}
+                            style={{
+                              border: '1px solid #cbd5e1',
+                              background: '#f8fafc',
+                              color: '#475569',
+                              borderRadius: '4px',
+                              fontSize: '0.66rem',
+                              fontWeight: 600,
+                              padding: '2px 7px',
+                              cursor: 'pointer'
+                            }}
+                            title={preset.title}
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="gcp-col-6 gcp-field-wrap">
+                    <div className="gcp-col-12 gcp-field-wrap">
                       <label className="gcp-form-label">
                         <span>{isEs ? 'Conservación / Almacenamiento' : 'Storage Conditions'}</span>
                         <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
