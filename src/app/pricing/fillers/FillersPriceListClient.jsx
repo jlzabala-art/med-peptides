@@ -11,6 +11,7 @@ import DataTable from '@/components/ui/DataTable';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import ProductQuickViewDrawer from '@/components/shared/ProductQuickViewDrawer';
 import PriceScheduleRowActions from '@/components/pricing/shared/PriceScheduleRowActions';
 import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
@@ -43,6 +44,7 @@ export default function FillersPriceListClient({
   const [selectedType, setSelectedType] = useState('all'); // 'all' | 'boosters' | 'fillers' | 'biostimulators'
   const [quickProduct, setQuickProduct] = useState(null);
   const [trendingFillers, setTrendingFillers] = useState([]);
+  const [pdfPreviewState, setPdfPreviewState] = useState({ open: false, blob: null, name: '' });
 
   useEffect(() => {
     let active = true;
@@ -247,41 +249,63 @@ export default function FillersPriceListClient({
       startY: nextY,
       items: [
         { label: isEs ? 'Divisa' : 'Currency', value: currency },
-        { label: isEs ? 'Catálogo' : 'Catalog Scope', value: `${filteredRows.length} SKUs` },
-        { label: isEs ? 'Logística' : 'Dispatch', value: '24–48h EU Verified' }
+        { label: isEs ? 'Marcas Líderes' : 'Top Brands', value: `${uniqueBrandsCount} Brands · ${filteredRows.length} SKUs` },
+        { label: isEs ? 'Stock Local' : 'Local Stock', value: isEs ? 'Disponible · 24–48h' : 'In Stock · 24–48h' }
       ]
     });
 
     const sortedRows = [...filteredRows].sort((a, b) => {
-      const bCmp = String(a.brand || '').localeCompare(String(b.brand || ''));
+      const bCmp = String(a.brand || a.manufacturer || '').localeCompare(String(b.brand || b.manufacturer || ''));
       if (bCmp !== 0) return bCmp;
-      return String(a.name || '').localeCompare(String(b.name || ''));
+      return String(a.name || a.product_name || '').localeCompare(String(b.name || b.product_name || ''));
     });
 
-    autoTable(doc, {
-      ...chrome.getAtlasAutoTableDefaults(nextY),
-      head: [[
-        isEs ? 'Marca' : 'Brand',
-        isEs ? 'Producto, Presentación y Ref.' : 'Product, Pack Size & Ref.',
-        isEs ? 'Disponibilidad' : 'Availability',
-        isEs ? `Wholeseller (${currency})` : `Wholeseller (${currency})`
-      ]],
-      body: sortedRows.map((r) => {
+    // Build brand-grouped body rows (no repetitive Availability column)
+    const groupedMap = new Map();
+    for (const r of sortedRows) {
+      const bName = String(r.brand || r.manufacturer || 'Other').trim();
+      if (!groupedMap.has(bName)) groupedMap.set(bName, []);
+      groupedMap.get(bName).push(r);
+    }
+
+    const bodyRows = [];
+    for (const [bName, bRows] of groupedMap.entries()) {
+      bodyRows.push([
+        {
+          content: `${bName}  (${bRows.length} ${bRows.length === 1 ? 'SKU' : 'SKUs'})`,
+          colSpan: 2,
+          styles: {
+            fillColor: [239, 246, 255],
+            textColor: [0, 54, 102],
+            fontStyle: 'bold',
+            fontSize: 8.5,
+            cellPadding: { top: 2.5, bottom: 2.5, left: 4, right: 4 }
+          }
+        }
+      ]);
+      for (const r of bRows) {
         const refCode = r.atlas_product_code || r.sku || r.code;
         const pack = r.packSize || r.dosage || 'Standard Box';
         const sub = r.subcategory ? `${r.subcategory} · ` : '';
-        return [
-          r.brand || r.manufacturer || '—',
+        bodyRows.push([
           `${r.name || r.product_name}\n${pack} · ${sub}Ref: ${refCode}`,
-          'In Stock',
           formatMoney(r.clinicPrice, currency)
-        ];
-      }),
+        ]);
+      }
+    }
+
+    autoTable(doc, {
+      ...chrome.getAtlasAutoTableDefaults({ rightAlignCols: [1] }),
+      startY: nextY + 2,
+      margin: { top: 18, bottom: 18, left: 14, right: 14 },
+      head: [[
+        isEs ? 'Producto, Presentación y Referencia' : 'Product, Pack Size & Reference',
+        isEs ? `Wholeseller (${currency})` : `Wholeseller (${currency})`
+      ]],
+      body: bodyRows,
       columnStyles: {
-        0: { cellWidth: 28, fontStyle: 'bold' },
-        1: { cellWidth: 96 },
-        2: { cellWidth: 26, halign: 'center' },
-        3: { cellWidth: 32, halign: 'right', fontStyle: 'bold' }
+        0: { cellWidth: 146 },
+        1: { cellWidth: 36, halign: 'right', fontStyle: 'bold' }
       }
     });
 
@@ -296,7 +320,12 @@ export default function FillersPriceListClient({
       eventName: 'Wholeseller Fillers PDF Exported'
     });
 
-    doc.save(`WHOLESELLER_FILLERS_SCHEDULE_${currency}_${dateStr}.pdf`);
+    const blob = doc.output('blob');
+    setPdfPreviewState({
+      open: true,
+      blob,
+      name: `WHOLESELLER_FILLERS_SCHEDULE_${currency}_${dateStr}.pdf`
+    });
   };
 
   useRegisterAtlasContext(
@@ -614,6 +643,15 @@ export default function FillersPriceListClient({
         title={quickProduct?.title || ''}
         isEs={isEs}
         onClose={() => setQuickProduct(null)}
+      />
+
+      <DocumentPreviewModal
+        isOpen={pdfPreviewState.open}
+        onClose={() => setPdfPreviewState({ open: false, blob: null, name: '' })}
+        pdfBlob={pdfPreviewState.blob}
+        downloadName={pdfPreviewState.name}
+        title={isEs ? 'Inyectables Estéticos y Skin Boosters — Tarifa PDF' : 'Aesthetic Injectables & Skin Boosters — Official PDF'}
+        subtitle={`${filteredRows.length} SKUs · ${currency}`}
       />
 
       <PublicUnifiedFooter lang={lang} />
