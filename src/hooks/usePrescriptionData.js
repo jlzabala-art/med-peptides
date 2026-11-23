@@ -534,7 +534,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
           treatmentTitle,
           vehicle: vehicleName,
           dispensingForm: resolvedDosageForm,
-          route: customRoute,
+          route,
           posology: safeCustomPosology,
           items: apis,
         });
@@ -559,7 +559,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
           accentBg = '#f0fdfa';
           badgeText += isEs ? ' · TERAPIA HORMONAL BIOIDÉNTICA' : ' · BIOIDENTICAL HORMONE (BHRT)';
           resolvedTitle = treatmentTitle || (isEs ? 'Formulación Hormonal Bioidéntica' : 'Bioidentical Hormone Formulation');
-          resolvedRoute = customRoute || (isEs ? 'Vía Transdérmica / BHRT' : 'Transdermal / BHRT Route');
+          resolvedRoute = route || (isEs ? 'Vía Transdérmica / BHRT' : 'Transdermal / BHRT Route');
           resolvedVolume = volume || '60 mL';
           vehicleObj.name = vehicleName || 'Pentravan® Liposomal Transdermal Base';
           vehicleObj.specs = isEs
@@ -587,7 +587,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
           accentBg = '#f8fafc';
           badgeText += isEs ? ' · FORMULACIÓN MAGISTRAL' : ' · COMPOUNDED FORMULATION';
           resolvedTitle = treatmentTitle || (isEs ? 'Formulación Farmacéutica Personalizada' : 'Compounded Pharmaceutical Formulation');
-          resolvedRoute = customRoute || (isEs ? 'Según Prescripción Médica' : 'As Directed by Physician');
+          resolvedRoute = route || (isEs ? 'Según Prescripción Médica' : 'As Directed by Physician');
           resolvedVolume = volume || '1 Unit';
           vehicleObj.name = vehicleName || (isEs ? 'Base Farmacéutica Validada EU GMP' : 'EU GMP Validated Pharmaceutical Carrier');
           vehicleObj.specs = isEs
