@@ -1173,7 +1173,7 @@ export default function PharmacyLabelsModal({
       <style>{`
         .gcp-split-workbench {
           display: grid;
-          grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+          grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
           gap: 16px;
           align-items: start;
           width: 100%;
@@ -1181,6 +1181,7 @@ export default function PharmacyLabelsModal({
           margin: 0 auto;
         }
         .gcp-split-preview-col {
+          order: -1;
           position: sticky;
           top: 12px;
         }
@@ -1189,6 +1190,7 @@ export default function PharmacyLabelsModal({
             grid-template-columns: 1fr;
           }
           .gcp-split-preview-col {
+            order: -1;
             position: static;
           }
         }
@@ -1752,7 +1754,9 @@ export default function PharmacyLabelsModal({
           box-sizing: border-box;
         }
         .gcp-col-12 { grid-column: span 12; }
+        .gcp-col-8  { grid-column: span 8; }
         .gcp-col-6  { grid-column: span 6; }
+        .gcp-col-5  { grid-column: span 5; }
         .gcp-col-4  { grid-column: span 4; }
         .gcp-col-3  { grid-column: span 3; }
 
@@ -1900,7 +1904,7 @@ export default function PharmacyLabelsModal({
             grid-template-columns: 1fr !important;
             gap: 12px !important;
           }
-          .gcp-col-12, .gcp-col-6, .gcp-col-4, .gcp-col-3 {
+          .gcp-col-12, .gcp-col-8, .gcp-col-6, .gcp-col-5, .gcp-col-4, .gcp-col-3 {
             grid-column: span 1 !important;
           }
           .gcp-form-input {
@@ -2443,72 +2447,31 @@ export default function PharmacyLabelsModal({
             </div>
           ) : modalMainTab === 'label' ? (
             <>
-              {/* Logistic Channel Switcher (Internal Delivery vs External Supplier) */}
+              {/* Compact GCP Context Bar (Click Preview to Edit + Settings) */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '8px 12px',
+                padding: '6px 12px',
                 background: '#f8fafc',
-                border: '1px solid #cbd5e1',
+                border: '1px solid #e2e8f0',
                 borderRadius: '8px',
                 marginBottom: '10px',
                 flexWrap: 'wrap',
                 gap: '8px'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Truck size={15} color="#003666" />
-                  <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>
-                    {isEs ? 'Tipo:' : 'View:'}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <Truck size={14} color="#003666" />
+                  <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0f172a' }}>
+                    {activeVariant === 'shipping'
+                      ? (isEs ? 'Editando: Etiqueta de Envío (Shipping)' : 'Editing: Shipping Label')
+                      : (isEs ? 'Editando: Etiqueta de Entrega (Delivery)' : 'Editing: Delivery Label')}
+                  </span>
+                  <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                    {isEs ? '· Pulsa cualquier vista previa a la izquierda para cambiar' : '· Click any preview card on the left to switch'}
                   </span>
                 </div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '2px', borderRadius: '7px', border: '1px solid #dadce0', gap: '2px' }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFulfillmentMode('internal');
-                        if (activeVariant === 'shipping') setActiveVariant('frontWithQr');
-                      }}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '5px',
-                        border: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? '1px solid #1a73e8' : '1px solid transparent',
-                        background: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? '#ffffff' : 'transparent',
-                        color: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? '#1a73e8' : '#475569',
-                        boxShadow: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
-                        fontSize: '0.72rem',
-                        fontWeight: fulfillmentMode === 'internal' && activeVariant !== 'shipping' ? 750 : 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      {isEs ? 'Envase / Producto' : 'Product Label'}
-                    </button>
-                    {!hideShippingLabel && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFulfillmentMode('internal');
-                          setActiveVariant('shipping');
-                        }}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '5px',
-                          border: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? '1px solid #1a73e8' : '1px solid transparent',
-                          background: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? '#ffffff' : 'transparent',
-                          color: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? '#1a73e8' : '#475569',
-                          boxShadow: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
-                          fontSize: '0.72rem',
-                          fontWeight: fulfillmentMode === 'internal' && activeVariant === 'shipping' ? 750 : 600,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {isEs ? 'Caja / Envío' : 'Shipping Label'}
-                      </button>
-                    )}
-                  </div>
                   {fulfillmentMode === 'external_supplier' && (
                     <span style={{
                       fontSize: '0.70rem',
@@ -2524,63 +2487,28 @@ export default function PharmacyLabelsModal({
                   )}
 
                   {fulfillmentMode !== 'external_supplier' && (
-                    <>
-                      {!hideShippingLabel && activeVariant === 'shipping' && (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <label htmlFor="gcp-label-deliverymode" style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>
-                            {isEs ? 'Modo:' : 'Mode:'}
-                          </label>
-                          <select
-                            id="gcp-label-deliverymode"
-                            value={deliveryLabelType}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setDeliveryLabelType(val);
-                              if (val === 'clinical') {
-                                handleFieldChange('shippingTitle', currentItem.productTitle || currentItem.productName || '');
-                              } else {
-                                handleFieldChange('shippingTitle', getCustomsFriendlySuggestions(currentItem)[0] || '');
-                              }
-                            }}
-                            style={{
-                              padding: '4px 8px',
-                              borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
-                              background: '#ffffff',
-                              color: '#0f172a',
-                              fontSize: '0.72rem',
-                              fontWeight: 650,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <option value="customs">{isEs ? 'Discreto (Aduanas)' : 'Discreet (Customs)'}</option>
-                            <option value="clinical">{isEs ? 'Clínico (Receta)' : 'Clinical (Rx)'}</option>
-                          </select>
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setShowPrintSettings((prev) => !prev)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          border: showPrintSettings ? '1px solid #1a73e8' : '1px solid #cbd5e1',
-                          background: showPrintSettings ? '#e8f0fe' : '#ffffff',
-                          color: showPrintSettings ? '#1a73e8' : '#475569',
-                          fontSize: '0.72rem',
-                          fontWeight: 650,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <span>⚙ {isEs ? 'Ajustes' : 'Settings'}</span>
-                        <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
-                          ({dimensions.widthMm}×{dimensions.heightMm} mm)
-                        </span>
-                      </button>
-                    </>
+                    <button
+                      type="button"
+                      onClick={() => setShowPrintSettings((prev) => !prev)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: showPrintSettings ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                        background: showPrintSettings ? '#e8f0fe' : '#ffffff',
+                        color: showPrintSettings ? '#1a73e8' : '#475569',
+                        fontSize: '0.72rem',
+                        fontWeight: 650,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <span>⚙ {isEs ? 'Ajustes' : 'Settings'}</span>
+                      <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
+                        ({dimensions.widthMm}×{dimensions.heightMm} mm)
+                      </span>
+                    </button>
                   )}
                 </div>
               </div>
@@ -3054,8 +2982,8 @@ export default function PharmacyLabelsModal({
                   <div className="gcp-editor-fields-grid">
                     {/* Patient Name field */}
 
-                    {/* Row 1: Patient Name (5 cols) | Dispensing Batch (4 cols) | Net Quantity (3 cols) */}
-                    <div className="gcp-col-5 gcp-field-wrap">
+                    {/* Row 1: Patient Name | Dispensing Batch (Delivery only) | Net Quantity */}
+                    <div className={`${activeVariant === 'shipping' ? 'gcp-col-8' : 'gcp-col-5'} gcp-field-wrap`}>
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <span>{isEs ? 'Nombre Paciente' : 'Patient Name'}</span>
@@ -3074,6 +3002,7 @@ export default function PharmacyLabelsModal({
                       />
                     </div>
 
+                    {activeVariant !== 'shipping' && (
                     <div className="gcp-col-4 gcp-field-wrap">
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'nowrap', gap: '4px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
@@ -3144,8 +3073,9 @@ export default function PharmacyLabelsModal({
                         </span>
                       )}
                     </div>
+                    )}
 
-                    <div className="gcp-col-3 gcp-field-wrap">
+                    <div className={`${activeVariant === 'shipping' ? 'gcp-col-4' : 'gcp-col-3'} gcp-field-wrap`}>
                       <label className="gcp-form-label">
                         <span>{isEs ? 'Cantidad Neta' : 'Net Quantity'}</span>
                         <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
@@ -3159,8 +3089,8 @@ export default function PharmacyLabelsModal({
                       />
                     </div>
 
-                    {/* Row 1.5: Header Timing / Part Badge (Optional — Show/Hide on Print, Edit Text, or Nullify) */}
-                    {(() => {
+                    {/* Row 1.5: Header Timing / Part Badge (Delivery only) */}
+                    {activeVariant !== 'shipping' && (() => {
                       const autoBadge = computeDefaultHeaderBadge(currentItem, selectedProductIdx, labels.length);
                       const isBadgeVisible = currentItem.showHeaderBadge !== false;
                       const currentBadgeVal = typeof currentItem.customHeaderBadge === 'string' ? currentItem.customHeaderBadge : autoBadge;
@@ -3354,7 +3284,8 @@ export default function PharmacyLabelsModal({
                       );
                     })()}
 
-                    {/* Row 2: Product Title / Formula (12 cols - full width so complete formula title is 100% visible) */}
+                    {/* Row 2: Product Title / Formula (Delivery only) */}
+                    {activeVariant !== 'shipping' && (
                     <div className="gcp-col-12 gcp-field-wrap">
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -3419,6 +3350,7 @@ export default function PharmacyLabelsModal({
                         placeholder="e.g. Phase 2: Metabolic & Lipid Optimization Evening Formula"
                       />
                     </div>
+                    )}
 
                     {/* Customs-friendly quick suggestions (Shipping variant only) */}
                     {activeVariant === 'shipping' && (
@@ -3515,6 +3447,9 @@ export default function PharmacyLabelsModal({
                       </div>
                     )}
 
+                    {/* Clinical-only fields (Delivery Label) */}
+                    {activeVariant !== 'shipping' && (
+                    <>
                     {/* Row 3: Prescribing Doctor (6 cols) & Clinic (6 cols) -> linked clinic & physician selection */}
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
@@ -3684,6 +3619,8 @@ export default function PharmacyLabelsModal({
                         placeholder="Take 1 capsule once daily with breakfast."
                       />
                     </div>
+                    </>
+                    )}
 
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -3828,31 +3765,10 @@ export default function PharmacyLabelsModal({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px', flexWrap: 'wrap', gap: '6px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  {isEs ? 'Vista Previa en Vivo' : 'Live Preview'}
+                  {isEs ? 'Vistas Previas (Pulsa para editar)' : 'Live Previews (Click to edit)'}
                 </span>
                 <FontLegibilityPill pt={minPatientPt} isEs={isEs} compact={false} threshold={legalThreshold} />
               </div>
-
-              {!hideShippingLabel && (
-                <button
-                  type="button"
-                  onClick={() => setCompareMode((v) => !v)}
-                  aria-pressed={compareMode}
-                  style={{
-                    padding: '6px 10px',
-                    minHeight: '32px',
-                    borderRadius: '4px',
-                    border: compareMode ? '1px solid #1a73e8' : '1px solid #dadce0',
-                    background: compareMode ? '#e8f0fe' : '#fff',
-                    color: compareMode ? '#1a73e8' : '#3c4043',
-                    fontSize: '0.70rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {isEs ? 'Comparar Envase / Envío' : 'Compare Product / Shipping'}
-                </button>
-              )}
 
               {/* Multi-step Zoom Bar */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -3890,77 +3806,89 @@ export default function PharmacyLabelsModal({
               </div>
             </div>
 
-            <div
-              ref={svgContainerRef}
-              style={{
-                width: '100%',
-                borderRadius: '8px',
-                border: '1px solid #dadce0',
-                boxShadow: '0 2px 6px rgba(60,64,67,0.12), 0 6px 14px rgba(60,64,67,0.06)',
-                overflow: 'auto',
-                background: '#ffffff',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: zoomLevel === 'fit' ? 'center' : 'flex-start',
-                padding: zoomLevel === 'fit' ? '8px' : '20px',
-                maxHeight: zoomLevel === 'fit' ? 'clamp(180px, 30vh, 250px)' : '420px',
-                boxSizing: 'border-box'
-              }}
-            >
-              <div style={{
-                width: zoomLevel === 'fit' 
-                  ? 'auto' 
-                  : zoomLevel === 1 
-                    ? '380px' 
-                    : zoomLevel === 1.5 
-                      ? '620px' 
-                      : '860px',
-                height: zoomLevel === 'fit' ? '100%' : 'auto',
-                maxWidth: zoomLevel === 'fit' ? '100%' : 'none',
-                maxHeight: zoomLevel === 'fit' ? 'clamp(170px, 28vh, 240px)' : 'none',
-                aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}`,
-                flexShrink: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: zoomLevel === 'fit' ? '0' : '0 auto'
-              }}>
-                <PharmapolisLabelSvg
-                  labelData={{
-                    ...currentItem,
-                    partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${(selectedProductIdx || 0) + 1} of ${labels.length}` : ''),
-                    partIndex: selectedProductIdx || 0,
-                    totalParts: labels.length
-                  }}
-                  variant={activeVariant}
-                  widthMm={dimensions.widthMm}
-                  heightMm={dimensions.heightMm}
-                  colorMode={colorMode}
-                  showCutGuides={showCutGuides}
-                  boldPosology={boldPosology}
-                />
-              </div>
-            </div>
-
-            {!hideShippingLabel && compareMode && (() => {
-              const otherVariant = activeVariant === 'shipping' ? 'backQr' : 'shipping';
+            {/* Card 1: Delivery Label (Clinical Client Label — Clickable) */}
+            {(() => {
+              const isDeliveryActive = activeVariant !== 'shipping';
+              const deliveryVariant = activeVariant === 'shipping' ? 'backQr' : activeVariant;
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    {otherVariant === 'shipping' ? 'Shipping' : 'Delivery'}
-                  </span>
-                  <div style={{
-                    width: '100%',
-                    borderRadius: '8px',
-                    border: '1px solid #dadce0',
-                    background: '#ffffff',
-                    padding: '8px',
-                    boxSizing: 'border-box',
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    setFulfillmentMode('internal');
+                    if (activeVariant === 'shipping') setActiveVariant('backQr');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setFulfillmentMode('internal');
+                      if (activeVariant === 'shipping') setActiveVariant('backQr');
+                    }
+                  }}
+                  style={{
                     display: 'flex',
-                    justifyContent: 'center'
-                  }}>
-                    <div style={{ width: '100%', maxWidth: '380px', aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}` }}>
+                    flexDirection: 'column',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    borderRadius: '10px',
+                    padding: '10px',
+                    border: isDeliveryActive ? '2px solid #1a73e8' : '1px solid #dadce0',
+                    background: isDeliveryActive ? '#f8fbff' : '#ffffff',
+                    boxShadow: isDeliveryActive
+                      ? '0 4px 14px rgba(26, 115, 232, 0.14)'
+                      : '0 1px 3px rgba(60, 64, 67, 0.06)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 750, color: isDeliveryActive ? '#1a73e8' : '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? '1. Delivery Label (Cliente)' : '1. Delivery Label (Client)'}
+                    </span>
+                    <span style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '999px',
+                      background: isDeliveryActive ? '#1a73e8' : '#f1f5f9',
+                      color: isDeliveryActive ? '#ffffff' : '#64748b'
+                    }}>
+                      {isDeliveryActive ? (isEs ? '✓ Editando' : '✓ Editing') : (isEs ? 'Pulsa para editar' : 'Click to edit')}
+                    </span>
+                  </div>
+                  <div
+                    ref={isDeliveryActive ? svgContainerRef : undefined}
+                    style={{
+                      width: '100%',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      overflow: 'auto',
+                      background: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: zoomLevel === 'fit' ? 'center' : 'flex-start',
+                      padding: zoomLevel === 'fit' ? '8px' : '16px',
+                      maxHeight: zoomLevel === 'fit' ? 'clamp(170px, 28vh, 240px)' : '400px',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <div style={{
+                      width: zoomLevel === 'fit'
+                        ? 'auto'
+                        : zoomLevel === 1
+                          ? '380px'
+                          : zoomLevel === 1.5
+                            ? '620px'
+                            : '860px',
+                      height: zoomLevel === 'fit' ? '100%' : 'auto',
+                      maxWidth: zoomLevel === 'fit' ? '100%' : 'none',
+                      maxHeight: zoomLevel === 'fit' ? 'clamp(160px, 26vh, 225px)' : 'none',
+                      aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}`,
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: zoomLevel === 'fit' ? '0' : '0 auto'
+                    }}>
                       <PharmapolisLabelSvg
                         labelData={{
                           ...currentItem,
@@ -3968,11 +3896,113 @@ export default function PharmacyLabelsModal({
                           partIndex: selectedProductIdx || 0,
                           totalParts: labels.length
                         }}
-                        variant={otherVariant}
+                        variant={deliveryVariant}
                         widthMm={dimensions.widthMm}
                         heightMm={dimensions.heightMm}
                         colorMode={colorMode}
-                        showCutGuides={false}
+                        showCutGuides={showCutGuides}
+                        boldPosology={boldPosology}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Card 2: Shipping Label (Simple Customs / Outer Parcel — Clickable) */}
+            {!hideShippingLabel && (() => {
+              const isShippingActive = activeVariant === 'shipping';
+              return (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    setFulfillmentMode('internal');
+                    setActiveVariant('shipping');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setFulfillmentMode('internal');
+                      setActiveVariant('shipping');
+                    }
+                  }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    borderRadius: '10px',
+                    padding: '10px',
+                    border: isShippingActive ? '2px solid #1a73e8' : '1px solid #dadce0',
+                    background: isShippingActive ? '#f8fbff' : '#ffffff',
+                    boxShadow: isShippingActive
+                      ? '0 4px 14px rgba(26, 115, 232, 0.14)'
+                      : '0 1px 3px rgba(60, 64, 67, 0.06)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 750, color: isShippingActive ? '#1a73e8' : '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? '2. Shipping Label (Envío / Aduanas)' : '2. Shipping Label (Simple / Customs)'}
+                    </span>
+                    <span style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '999px',
+                      background: isShippingActive ? '#1a73e8' : '#f1f5f9',
+                      color: isShippingActive ? '#ffffff' : '#64748b'
+                    }}>
+                      {isShippingActive ? (isEs ? '✓ Editando' : '✓ Editing') : (isEs ? 'Pulsa para editar' : 'Click to edit')}
+                    </span>
+                  </div>
+                  <div
+                    ref={isShippingActive ? svgContainerRef : undefined}
+                    style={{
+                      width: '100%',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      overflow: 'auto',
+                      background: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: zoomLevel === 'fit' ? 'center' : 'flex-start',
+                      padding: zoomLevel === 'fit' ? '8px' : '16px',
+                      maxHeight: zoomLevel === 'fit' ? 'clamp(170px, 28vh, 240px)' : '400px',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <div style={{
+                      width: zoomLevel === 'fit'
+                        ? 'auto'
+                        : zoomLevel === 1
+                          ? '380px'
+                          : zoomLevel === 1.5
+                            ? '620px'
+                            : '860px',
+                      height: zoomLevel === 'fit' ? '100%' : 'auto',
+                      maxWidth: zoomLevel === 'fit' ? '100%' : 'none',
+                      maxHeight: zoomLevel === 'fit' ? 'clamp(160px, 26vh, 225px)' : 'none',
+                      aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}`,
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: zoomLevel === 'fit' ? '0' : '0 auto'
+                    }}>
+                      <PharmapolisLabelSvg
+                        labelData={{
+                          ...currentItem,
+                          partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${(selectedProductIdx || 0) + 1} of ${labels.length}` : ''),
+                          partIndex: selectedProductIdx || 0,
+                          totalParts: labels.length
+                        }}
+                        variant="shipping"
+                        widthMm={dimensions.widthMm}
+                        heightMm={dimensions.heightMm}
+                        colorMode={colorMode}
+                        showCutGuides={isShippingActive ? showCutGuides : false}
                         boldPosology={boldPosology}
                       />
                     </div>
