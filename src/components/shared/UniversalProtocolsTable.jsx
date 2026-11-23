@@ -36,6 +36,7 @@ import {
 import UniversalShareDrawer from '../ui/UniversalShareDrawer';
 import InlineEditableCell from '../ui/InlineEditableCell';
 import { calculateClinicalCompleteness, getProtocolDisplayName } from '../../utils/protocolHelpers';
+import { CANONICAL_PROTOCOL_CATEGORIES } from '../../utils/firestoreModelGuard';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import MobileProtocolCard from './mobile/MobileProtocolCard';
@@ -85,6 +86,9 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
 
   // Filters
   const filterStatus = getUrlParam('status', '');
+  const filterCategory = getUrlParam('category', '');
+  const filterEvidence = getUrlParam('evidence', '');
+  const filterReview = getUrlParam('review', '');
   const filterGoal = getUrlParam('goals', '');
   const filterRange = getUrlParam('range', 'all');
   const filterPeptides = getUrlParam('peptides', '');
@@ -194,11 +198,13 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
   const algoliaFacetFilters = useMemo(() => {
     const filters = [];
     if (filterStatus && filterStatus !== 'all') filters.push(`status:${filterStatus}`);
+    if (filterCategory && filterCategory !== 'all') filters.push(`categoryId:${filterCategory}`);
+    if (filterEvidence && filterEvidence !== 'all') filters.push(`evidence_level:${filterEvidence}`);
     if (filterGoal && filterGoal !== 'all') filters.push(`primary_goal:${filterGoal}`);
     if (filterPeptides === 'true') filters.push(`has_peptides:true`);
     if (filterPeptides === 'false') filters.push(`has_peptides:false`);
     return filters;
-  }, [filterStatus, filterGoal, filterPeptides]);
+  }, [filterStatus, filterCategory, filterEvidence, filterGoal, filterPeptides]);
 
   const algoliaNumericFilters = useMemo(() => {
     const filters = [];
@@ -230,6 +236,21 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
     // Hide Rx-derived custom templates from standard catalog unless viewing Drafts or searching
     if (filterStatus !== 'draft' && filterGoal !== 'custom_prescription' && !searchTerm?.trim()) {
       list = list.filter(p => !p.isCustomTemplate && !p.goals?.includes('custom_prescription'));
+    }
+
+    // Filter by Canonical Category
+    if (filterCategory && filterCategory !== 'all') {
+      list = list.filter(p => (p.categoryId || p.category || p.therapeutic_category) === filterCategory);
+    }
+
+    // Filter by Evidence Level
+    if (filterEvidence && filterEvidence !== 'all') {
+      list = list.filter(p => p.evidence_level === filterEvidence);
+    }
+
+    // Filter by Clinical Review Freshness (>90d stale)
+    if (filterReview === 'stale') {
+      list = list.filter(p => calculateClinicalCompleteness(p).isStale);
     }
 
     // Filter by Goal
@@ -270,7 +291,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
       (Array.isArray(p.bom) && p.bom.some(b => (b.product_name || b.name || '').toLowerCase().includes(lower))) ||
       (Array.isArray(p.peptides) && p.peptides.some(pep => String(pep).toLowerCase().includes(lower)))
     );
-  }, [protocols, searchTerm, filterGoal, filterRange, filterStatus]);
+  }, [protocols, searchTerm, filterGoal, filterRange, filterStatus, filterCategory, filterEvidence, filterReview]);
 
   const finalFiltered = useMemo(() => {
     if (!searchTerm || !searchTerm.trim()) return locallySearchedProtocols;
@@ -504,6 +525,38 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
           onChange: (val) => updateUrlParam('status', val)
         },
         {
+          key: 'category',
+          label: 'Category',
+          value: filterCategory,
+          options: [
+            { label: 'All Categories', value: '' },
+            ...CANONICAL_PROTOCOL_CATEGORIES.map((c) => ({ label: c, value: c }))
+          ],
+          onChange: (val) => updateUrlParam('category', val)
+        },
+        {
+          key: 'evidence',
+          label: 'Evidence Tier',
+          value: filterEvidence,
+          options: [
+            { label: 'All Evidence Tiers', value: '' },
+            { label: 'Tier 1 - Established / RCT', value: 'Tier 1 - Established / RCT' },
+            { label: 'Tier 2 - Clinical Trial / Cohort', value: 'Tier 2 - Clinical Trial / Cohort' },
+            { label: 'Tier 3 - Emerging / Preclinical', value: 'Tier 3 - Emerging / Preclinical' }
+          ],
+          onChange: (val) => updateUrlParam('evidence', val)
+        },
+        {
+          key: 'review',
+          label: 'Clinical Review',
+          value: filterReview,
+          options: [
+            { label: 'All Protocols', value: '' },
+            { label: 'Needs Review (>90d)', value: 'stale' }
+          ],
+          onChange: (val) => updateUrlParam('review', val)
+        },
+        {
           key: 'goals',
           label: 'Clinical Goal',
           value: filterGoal,
@@ -530,6 +583,9 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
       filters={[
         filterPeptides && filterPeptides !== 'all' && { key: 'peptides', label: 'Peptides', value: filterPeptides === 'true' ? 'Yes' : 'No', onRemove: () => updateUrlParam('peptides', 'all') },
         filterStatus && filterStatus !== 'all' && { key: 'status', label: 'Status', value: filterStatus, onRemove: () => updateUrlParam('status', 'all') },
+        filterCategory && filterCategory !== 'all' && { key: 'category', label: 'Category', value: filterCategory, onRemove: () => updateUrlParam('category', '') },
+        filterEvidence && filterEvidence !== 'all' && { key: 'evidence', label: 'Evidence', value: filterEvidence, onRemove: () => updateUrlParam('evidence', '') },
+        filterReview === 'stale' && { key: 'review', label: 'Clinical Review', value: 'Needs Review (>90d)', onRemove: () => updateUrlParam('review', '') },
         filterGoal && filterGoal !== 'all' && { key: 'goals', label: 'Goal', value: filterGoal, onRemove: () => updateUrlParam('goals', 'all') },
         filterRange && filterRange !== 'all' && { key: 'range', label: 'Created', value: filterRange, onRemove: () => updateUrlParam('range', 'all') }
       ].filter(Boolean)}
@@ -783,6 +839,20 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
             };
 
             const baseActions = [
+              ...((p.isCustomTemplate || p.status === 'draft') ? [{
+                type: 'promote_standard',
+                label: 'Promote to Standard Protocol',
+                icon: Play,
+                onClick: async () => {
+                  try {
+                    await updateProtocol(p.id, { status: 'active', isCustomTemplate: false });
+                    toast.success(`"${getProtocolDisplayName(p)}" promoted to Standard Active Protocol`);
+                    refetchProtocols();
+                  } catch (err) {
+                    toast.error('Failed to promote protocol: ' + (err?.message || 'Unknown error'));
+                  }
+                }
+              }] : []),
               {
                 type: 'view_public_guide',
                 label: 'View Public Clinical Guide',

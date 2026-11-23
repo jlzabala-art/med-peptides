@@ -304,11 +304,27 @@ export default function ProtocolMasterDetailRow({
           boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <Pill size={14} color="#15803d" />
               <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Active Compounds & Clinical Dosing Schedule ({protocol.bom.length})
               </span>
+              {(() => {
+                const unlinkedCount = protocol.bom.filter((item) => !item?.productId && !item?.sku && !item?.id).length;
+                return (
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    background: unlinkedCount > 0 ? '#fffbeb' : '#f0fdf4',
+                    color: unlinkedCount > 0 ? '#d97706' : '#16a34a',
+                    border: `1px solid ${unlinkedCount > 0 ? '#fde68a' : '#bbf7d0'}`
+                  }}>
+                    {unlinkedCount > 0 ? `${unlinkedCount} unlinked SKU` : 'All SKUs linked'}
+                  </span>
+                );
+              })()}
             </div>
             {protocol.dosage_schedule && protocol.dosage_schedule.length > 0 && (
               <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
