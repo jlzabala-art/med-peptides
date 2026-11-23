@@ -12,7 +12,6 @@ import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import ProductQuickViewDrawer from '@/components/shared/ProductQuickViewDrawer';
-import { exportPriceSchedulePdf } from '@/utils/exportPriceSchedulePdf';
 import { convertCurrencyAmount } from '@/utils/productViewModel';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import { useAuth } from '@/context/AuthContext';
@@ -215,43 +214,96 @@ export default function FillersPriceListClient({
     }));
   }, [filteredRows]);
 
-  const handleExportPdf = () => {
-    exportPriceSchedulePdf({
-      group: {
-        id: 'fillers',
-        label: isEs ? 'Inyectables Estéticos y Skin Boosters' : 'Aesthetic Injectables & Skin Boosters',
-        description: isEs
-          ? 'Tarifa oficial B2B · Skin Boosters, Fillers Dérmicos, Bioestimuladores y Polinucleótidos'
-          : 'Official B2B Clinical Price Schedule · Skin Boosters, Dermal Fillers, Biostimulators & Polynucleotides',
-        currency,
-        supplier: 'PharmaMedic / Atlas Verified Network',
-        documentRef: 'CAT-B2B-FILLERS-2026'
-      },
-      products: filteredRows.map((r) => ({
-        ...r,
-        id: r.code,
-        packSize: r.subcategory || 'Standard',
-        inStock: true
-      })),
-      tier: isAdmin ? 'admin' : 'wholesale',
-      priceFor: (row) => ({
-        price: row.clinicPrice,
-        costPrice: row.masterPrice,
-        mediluxePrice: row.wholesalePrice,
-        wholesalePrice: row.clinicPrice,
-        clinicPrice: row.retailPrice
-      }),
-      formatPrice: (val, cur) => formatMoney(val, cur || currency),
-      brandFilter: selectedBrand,
-      isGuest: !isAdmin
+  const handleExportPdf = async () => {
+    const [{ jsPDF }, { default: autoTable }, chrome] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable'),
+      import('@/lib/pdf/atlasPdfChrome')
+    ]);
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const dateStr = new Date().toISOString().slice(0, 10);
+
+    let nextY = chrome.drawAtlasInstitutionalHeader(doc, {
+      title: isEs
+        ? 'ATLAS HEALTH SERVICES — Inyectables Estéticos y Skin Boosters'
+        : 'ATLAS HEALTH SERVICES — Aesthetic Injectables & Skin Boosters',
+      subtitle: isEs
+        ? 'Tarifa Oficial B2B Wholeseller · Fillers Dérmicos, Skin Boosters, Bioestimuladores y Polinucleótidos'
+        : 'Official Wholeseller B2B Price Schedule · Dermal Fillers, Skin Boosters, Biostimulators & Polynucleotides',
+      documentRef: 'CAT-B2B-FILLERS-2026',
+      issuedDate: dateStr,
+      tierLabel: isEs ? 'Tarifa Oficial Wholeseller B2B' : 'Official Wholeseller B2B Schedule'
     });
+
+    nextY = chrome.drawAtlasKpiStrip(doc, {
+      startY: nextY,
+      items: [
+        { label: isEs ? 'Divisa' : 'Currency', value: currency },
+        { label: isEs ? 'Catálogo' : 'Catalog Scope', value: `${filteredRows.length} SKUs` },
+        { label: isEs ? 'Red' : 'Network', value: 'Atlas Health Verified' }
+      ]
+    });
+
+    const sortedRows = [...filteredRows].sort((a, b) => {
+      const bCmp = String(a.brand || '').localeCompare(String(b.brand || ''));
+      if (bCmp !== 0) return bCmp;
+      return String(a.name || '').localeCompare(String(b.name || ''));
+    });
+
+    autoTable(doc, {
+      ...chrome.getAtlasAutoTableDefaults(nextY),
+      head: [[
+        isEs ? 'Marca' : 'Brand',
+        isEs ? 'Producto, Presentación y Ref.' : 'Product, Pack Size & Ref.',
+        isEs ? 'Disponibilidad' : 'Availability',
+        isEs ? `Wholeseller (${currency})` : `Wholeseller (${currency})`
+      ]],
+      body: sortedRows.map((r) => {
+        const refCode = r.atlas_product_code || r.sku || r.code;
+        const pack = r.packSize || r.dosage || 'Standard Box';
+        const sub = r.subcategory ? `${r.subcategory} · ` : '';
+        return [
+          r.brand || r.manufacturer || '—',
+          `${r.name || r.product_name}\n${pack} · ${sub}Ref: ${refCode}`,
+          'In Stock',
+          formatMoney(r.clinicPrice, currency)
+        ];
+      }),
+      columnStyles: {
+        0: { cellWidth: 28, fontStyle: 'bold' },
+        1: { cellWidth: 96 },
+        2: { cellWidth: 26, halign: 'center' },
+        3: { cellWidth: 32, halign: 'right', fontStyle: 'bold' }
+      }
+    });
+
+    chrome.applyAtlasRunningFooter(doc, {
+      documentRef: 'CAT-B2B-FILLERS-2026',
+      tierLabel: isEs ? 'Tarifa Oficial Wholeseller B2B' : 'Official Wholeseller B2B Schedule'
+    });
+
+    doc.save(`ATLAS_WHOLESELLER_FILLERS_${currency}_${dateStr}.pdf`);
   };
 
   useRegisterAtlasContext(
     {
       contextAnchor: {
         type: 'pricing-fillers',
-        name: 'Aesthetic Injectables & Skin Boosters (Dermal Fillers, Biostimulators, Polynucleotides)',
+        name: 'Aesthetic Injectables & Skin Boosters',
+        subtitle: 'Dermal Fillers · Skin Boosters · Biostimulators · Polynucleotides',
+        sectionTitle: isEs
+          ? 'Portafolio Clínico de Inyectables Estéticos y Skin Boosters'
+          : 'Aesthetic Injectables & Skin Boosters Portfolio',
+        keyActives: 'Crosslinked Hyaluronic Acid (Vycross / OBT / NASHA) · PLLA (Sculptra) · CaHA (Radiesse) · PN-HPT® Polynucleotides (PhilArt) · Deoxycholic Acid (Aqualyx)',
+        products: enrichedRows.slice(0, 40).map((r) => ({
+          name: r.name || r.product_name,
+          brand: r.brand,
+          category: r.subcategory,
+          packSize: r.packSize,
+          price: formatMoney(r.clinicPrice, currency),
+          indication: r.indication
+        })),
         category: 'dermal-fillers',
         currency,
         skuCount: enrichedRows.length
@@ -267,7 +319,7 @@ export default function FillersPriceListClient({
         }
       }
     },
-    [isEs, currency, enrichedRows.length, uniqueBrandsCount]
+    [isEs, currency, enrichedRows, uniqueBrandsCount]
   );
 
   return (
@@ -470,6 +522,64 @@ export default function FillersPriceListClient({
                   columns={columns}
                   hidePagination={true}
                   pageSize={50}
+                  expandableRender={(row) => (
+                    <div style={{
+                      padding: '14px 18px',
+                      background: '#f8fafc',
+                      borderTop: '1px solid #e2e8f0',
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                      gap: '14px'
+                    }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {isEs ? 'Indicación Clínica' : 'Clinical Indication'}
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.77rem', color: '#334155', lineHeight: 1.5 }}>
+                          {row.indication || row.description || (isEs ? 'Formulación estética profesional para uso médico.' : 'Professional aesthetic injectable formulation for medical practice.')}
+                        </p>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', borderLeft: '1px solid #e2e8f0', paddingLeft: '14px' }}>
+                        {(row.technology || row.clinical?.mechanism_of_action) && (
+                          <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                            <strong style={{ color: '#475569' }}>{isEs ? 'Tecnología / Composición:' : 'Technology / Composition:'}</strong>{' '}
+                            <span>{row.technology || row.clinical?.mechanism_of_action}</span>
+                          </div>
+                        )}
+                        <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                          <strong style={{ color: '#475569' }}>{isEs ? 'Fabricante:' : 'Manufacturer:'}</strong>{' '}
+                          <span>{row.manufacturer || row.brand || 'EU Certified'}</span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                          <strong style={{ color: '#475569' }}>{isEs ? 'Conservación:' : 'Storage:'}</strong>{' '}
+                          <span>
+                            {row.requiresColdChain
+                              ? (isEs ? 'Cadena fría (2–8 °C)' : 'Cold Chain (2–8 °C)')
+                              : (isEs ? 'Temperatura ambiente (2–25 °C)' : 'Ambient (2–25 °C)')}
+                          </span>
+                        </div>
+                        <div style={{ paddingTop: '4px' }}>
+                          <button
+                            type="button"
+                            onClick={() => setQuickProduct({ slug: row.slug || row.id, title: row.name || row.product_name })}
+                            style={{
+                              padding: '5px 11px',
+                              borderRadius: '6px',
+                              border: '1px solid #bfdbfe',
+                              background: '#eff6ff',
+                              color: '#1d4ed8',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isEs ? 'Abrir Ficha Completa →' : 'Open Full Monograph →'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 />
               </section>
             ))}
