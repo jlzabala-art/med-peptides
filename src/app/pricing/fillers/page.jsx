@@ -39,7 +39,7 @@ function serializeDoc(doc) {
 export default async function FillersPricingPage({ searchParams }) {
   const resolvedSearch = await searchParams;
   const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || '').toUpperCase();
-  const initialCurrency = ['AED', 'USD', 'EUR'].includes(rawCur) ? rawCur : 'AED';
+  const initialCurrency = ['EUR', 'AED', 'USD'].includes(rawCur) ? rawCur : 'EUR';
   const initialLang = normalizeMetaLang(resolvedSearch);
 
   let products = [];
@@ -47,19 +47,24 @@ export default async function FillersPricingPage({ searchParams }) {
     if (adminDb) {
       const snap = await adminDb
         .collection('products')
-        .where('category', '==', 'Aesthetic Injectables')
+        .where('categoryId', '==', 'dermal-fillers')
         .limit(100)
         .get();
 
       if (!snap.empty) {
         products = snap.docs
           .map(serializeDoc)
-          .filter((p) => p.status !== 'archived' && p.status !== 'hidden')
+          .filter((p) => p.status !== 'archived' && p.status !== 'hidden' && p.isActive !== false)
           .sort((a, b) => String(a.brand || a.name || '').localeCompare(String(b.brand || b.name || '')));
       }
     }
   } catch (err) {
     console.error('[FillersPricingPage] Firestore query error:', err);
+  }
+
+  if (products.length === 0) {
+    const { getAestheticInjectablesCatalog } = await import('@/data/aestheticInjectablesRegistry');
+    products = getAestheticInjectablesCatalog();
   }
 
   return (

@@ -12,22 +12,21 @@ import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import ProductQuickViewDrawer from '@/components/shared/ProductQuickViewDrawer';
-import { resolveVariantPrice } from '@/utils/resolvePrice';
 import { exportPriceSchedulePdf } from '@/utils/exportPriceSchedulePdf';
 import { useAuth } from '@/context/AuthContext';
 import { Sparkles, Syringe, Layers, ShieldCheck, Download } from 'lucide-react';
 import '../colway/ColwayPriceList.css';
 
-const FX_FROM_AED = {
-  AED: 1,
-  USD: 1 / 3.6725,
-  EUR: 1 / 3.98
+const FX_FROM_EUR = {
+  EUR: 1,
+  USD: 1.08,
+  AED: 3.98
 };
 
-function convertFromAed(amountAed, targetCurrency) {
-  const n = Number(amountAed || 0);
+function convertFromEur(amountEur, targetCurrency) {
+  const n = Number(amountEur || 0);
   if (!n) return 0;
-  const rate = FX_FROM_AED[targetCurrency] || 1;
+  const rate = FX_FROM_EUR[targetCurrency] || 1;
   return Math.round((n * rate + Number.EPSILON) * 100) / 100;
 }
 
@@ -38,7 +37,7 @@ function formatMoney(amount, currency) {
 
 export default function FillersPriceListClient({
   initialProducts = [],
-  initialCurrency = 'AED',
+  initialCurrency = 'EUR',
   initialLang = 'en'
 }) {
   const { activeRole } = useAuth();
@@ -62,32 +61,29 @@ export default function FillersPriceListClient({
 
   const enrichedRows = useMemo(() => {
     return initialProducts.map((p) => {
-      const variant = (Array.isArray(p.variants) && p.variants[0]) ? p.variants[0] : p;
-      const baseVariant = {
-        ...variant,
-        supplierId: variant.supplierId || p.supplierId || 'supplier-pharmamedic',
-        supplier: variant.supplier || p.supplier || 'PharmaMedic',
-        currency: variant.currency || p.currency || 'AED',
-        cost_1: variant.costPrice ?? variant.unit_price ?? p.costPrice ?? p.unit_price ?? p.price ?? 0
-      };
+      const pPricing = p.pricing || {};
+      const baseCostEur = Number(
+        pPricing.masterPrice ??
+        p.cost ??
+        p.costPrice ??
+        p.unit_price ??
+        p.price ??
+        0
+      );
 
-      const masterRes = resolveVariantPrice(baseVariant, { tier: 'master' });
-      const wholesaleRes = resolveVariantPrice(baseVariant, { tier: 'wholesale' });
-      const clinicRes = resolveVariantPrice(baseVariant, { tier: 'clinic' });
-      const retailRes = resolveVariantPrice(baseVariant, { tier: 'retail' });
-
-      const masterAed = masterRes?.perUnit || baseVariant.cost_1 || 0;
-      const wholesaleAed = wholesaleRes?.perUnit || Math.round(masterAed * 1.15 * 100) / 100;
-      const clinicAed = clinicRes?.perUnit || Math.round(wholesaleAed * 1.15 * 100) / 100;
-      const retailAed = retailRes?.perUnit || Math.round(masterAed * 1.5 * 100) / 100;
+      const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+      const masterEur = round2(baseCostEur);
+      const mediluxeEur = round2(pPricing.mediluxePrice ?? masterEur * 1.15);
+      const wholesaleEur = round2(pPricing.wholesalePrice ?? mediluxeEur * 1.15);
+      const clinicEur = round2(pPricing.clinicPrice ?? masterEur * 1.45);
 
       return {
         ...p,
         code: p.atlas_product_code || p.sku || p.id,
-        masterPrice: convertFromAed(masterAed, currency),
-        wholesalePrice: convertFromAed(wholesaleAed, currency),
-        clinicPrice: convertFromAed(clinicAed, currency),
-        retailPrice: convertFromAed(retailAed, currency)
+        masterPrice: convertFromEur(masterEur, currency),
+        wholesalePrice: convertFromEur(mediluxeEur, currency),
+        clinicPrice: convertFromEur(wholesaleEur, currency),
+        retailPrice: convertFromEur(clinicEur, currency)
       };
     });
   }, [initialProducts, currency]);
