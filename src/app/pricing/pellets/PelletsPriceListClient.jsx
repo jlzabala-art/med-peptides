@@ -35,6 +35,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
+import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 import './PelletsPriceList.css';
@@ -833,6 +834,16 @@ export default function PelletsPriceListClient({
           </div>
         </div>
       </div>
+
+      <PriceScheduleExpandedActions
+        item={{
+          ...row,
+          packSize: row.strength || row.trocarSize || 'EU GMP Blister',
+        }}
+        currency={currency}
+        unitPrice={Number(row.pricing?.wholesalePriceEur ?? row.pricing?.price_eur ?? 0)}
+        categoryLabel="BHRT Hormone Pellets"
+      />
     </div>
   ), [isEs, currency]);
 

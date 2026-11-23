@@ -39,6 +39,8 @@ import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import DataTable from '@/components/ui/DataTable';
 import CatalogMasterDetailPanel from '@/components/pricing/shared/CatalogMasterDetailPanel';
+import PriceScheduleRowActions from '@/components/pricing/shared/PriceScheduleRowActions';
+import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
@@ -426,6 +428,28 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
       )
     });
 
+    cols.push({
+      key: 'actions',
+      label: 'Actions',
+      width: '120px',
+      align: 'right',
+      render: (_val, row) => {
+        const displayUnit = isClinicOrDoctor || isWholesaler
+          ? Number(row.clinicPriceEur ?? row.retailPriceEur ?? 0)
+          : Number(row.retailPriceEur ?? 0);
+        return (
+          <PriceScheduleRowActions
+            item={row}
+            currency={currency}
+            unitPrice={displayUnit}
+            formattedPrice={displayUnit ? formatPrice(displayUnit) : ''}
+            categoryLabel="24Genetics Genomics"
+            onAddToQuote={(r) => handleAddToCart(r, '1x')}
+          />
+        );
+      },
+    });
+
     return cols;
   }, [formatPrice, isClinicOrDoctor, isWholesaler, canViewCost, showCostBasis, searchQuery]);
 
@@ -545,28 +569,25 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         }
       ]}
       actions={
-        <button
-          onClick={() => handleAddToCart(row, '1x')}
-          style={{
-            padding: '7px 14px',
-            fontSize: '0.78rem',
-            fontWeight: 600,
-            background: '#1a73e8',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          <ShoppingCart size={13} />
-          <span>Add Kit to Proforma Request</span>
-        </button>
+        <PriceScheduleExpandedActions
+          item={row}
+          currency={currency}
+          unitPrice={
+            isClinicOrDoctor || isWholesaler
+              ? Number(row.clinicPriceEur ?? row.retailPriceEur ?? 0)
+              : Number(row.retailPriceEur ?? 0)
+          }
+          formattedPrice={formatPrice(
+            isClinicOrDoctor || isWholesaler
+              ? (row.clinicPriceEur ?? row.retailPriceEur ?? 0)
+              : (row.retailPriceEur ?? 0)
+          )}
+          categoryLabel="24Genetics Genomics"
+          onAddToQuote={(r) => handleAddToCart(r, '1x')}
+        />
       }
     />
-  ), [handleAddToCart]);
+  ), [handleAddToCart, currency, formatPrice, isClinicOrDoctor, isWholesaler]);
 
   return (
     <div className="colway-price-root atlas-page-bg">

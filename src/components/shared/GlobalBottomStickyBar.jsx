@@ -120,6 +120,20 @@ export default function GlobalBottomStickyBar() {
       };
     }
 
+    if (pathname.startsWith('/pricing/fillers')) {
+      return {
+        summaryTitle: isSpanish ? 'Inyectables Estéticos y Skin Boosters' : 'Aesthetic Injectables & Skin Boosters',
+        summarySubtitle: `${currency} · Wholeseller B2B`,
+        atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
+        secondaryAction: quoteAction,
+        primaryAction: {
+          label: isSpanish ? 'Descargar PDF' : 'Download PDF',
+          icon: <Syringe size={14} />,
+          onClick: () => router.push('/pricing/fillers'),
+        },
+      };
+    }
+
     if (pathname.startsWith('/pricing')) {
       return {
         summaryTitle: isSpanish ? 'Directorio de Tarifas B2B' : 'Institutional Price Schedules',

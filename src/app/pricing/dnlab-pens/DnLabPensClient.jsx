@@ -33,6 +33,8 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
+import PriceScheduleRowActions from '@/components/pricing/shared/PriceScheduleRowActions';
+import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import PenDialVisualizer from '@/components/reconstitution/PenDialVisualizer';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
@@ -998,12 +1000,26 @@ export default function DnLabPensClient({
                   <span>Labels Studio ↗</span>
                 </Link>
               </div>
+
+              <PriceScheduleExpandedActions
+                item={row}
+                currency={currency}
+                unitPrice={Number(currentVariant?.clinicPrice ?? row.clinicPrice ?? row.price ?? 0)}
+                categoryLabel="Peptide Pens"
+                onPrescribe={(r) => {
+                  setSelectedItemForInquiry(r);
+                  setIsInquiryDrawerOpen(true);
+                }}
+                onOpenCalculator={() => {
+                  if (typeof window !== 'undefined') window.location.href = calcHref;
+                }}
+              />
             </div>
           </div>
         </div>
       );
     },
-    [selectedVariantIdx, dialSettings, isEs, lang, handleSelectVariantForProduct]
+    [selectedVariantIdx, dialSettings, isEs, lang, currency, handleSelectVariantForProduct]
   );
 
   // Compact Table Mode Columns (Optional toggle for physicians who prefer dense spreadsheet view)
@@ -1070,48 +1086,24 @@ export default function DnLabPensClient({
       },
       {
         key: 'actions',
-        header: '',
-        width: '132px',
-        render: (val, row) => {
-          const qty = protocolSelection[row.id]?.qty || 0;
-          return (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                className="gcp-btn-secondary"
-                style={{
-                  padding: '5px 9px',
-                  fontSize: '0.72rem',
-                  fontWeight: 750,
-                  borderColor: qty > 0 ? '#1a73e8' : undefined,
-                  background: qty > 0 ? '#e8f0fe' : undefined,
-                  color: qty > 0 ? '#1a73e8' : undefined,
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSetProtocolQty(row.id, qty + 1);
-                }}
-              >
-                {qty > 0 ? `${qty} pen${qty > 1 ? 's' : ''}` : '+ PDF'}
-              </button>
-              <button
-                type="button"
-                className="gcp-btn-secondary"
-                style={{ padding: '5px 10px', fontSize: '0.72rem', fontWeight: 700 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedItemForInquiry(row);
-                  setIsInquiryDrawerOpen(true);
-                }}
-              >
-                {isEs ? 'Prescribir' : 'Prescribe'}
-              </button>
-            </div>
-          );
-        },
+        header: isEs ? 'Acciones' : 'Actions',
+        width: '120px',
+        align: 'right',
+        render: (val, row) => (
+          <PriceScheduleRowActions
+            item={row}
+            currency={currency}
+            unitPrice={Number(row.clinicPrice ?? row.price ?? 0)}
+            categoryLabel="Peptide Pens"
+            onPrescribe={(r) => {
+              setSelectedItemForInquiry(r);
+              setIsInquiryDrawerOpen(true);
+            }}
+          />
+        ),
       },
     ],
-    [isEs, protocolSelection, handleSetProtocolQty]
+    [isEs, currency]
   );
 
   const breadcrumbItems = useMemo(

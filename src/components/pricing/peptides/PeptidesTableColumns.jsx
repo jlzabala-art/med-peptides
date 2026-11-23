@@ -17,6 +17,7 @@ import { parsePeptideBlendDisplay } from '@/components/pricing/PeptidePricePdfPr
 import { getPeptideClinicalSummary } from '@/constants/peptidePharmacology';
 import CopyableId from '@/components/ui/CopyableId';
 import PriceDisplay from '@/components/pricing/PriceDisplay';
+import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 
 /**
  * Factory function returning the DataTable columns array.
@@ -728,23 +729,20 @@ export function renderPeptideClinicalDetail(row, {
               </div>
             </div>
 
-            {/* Action Toolbar Footer */}
-            <div
-              style={{
-                borderTop: '1px solid #f1f3f4',
-                background: '#f8fafc',
-                padding: '8px 10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                flexWrap: 'wrap',
-                gap: '6px'
-              }}
-            >
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
+            {/* Unified Action Toolbar Footer */}
+            <div style={{ padding: '0 10px 10px' }}>
+              <PriceScheduleExpandedActions
+                item={{
+                  ...row,
+                  name: row.productName || row.name,
+                  packSize: row.dosage || 'Lyophilized Vial',
+                  sku: row.sku || row.id,
+                }}
+                currency={currency}
+                unitPrice={Number(row.clinicPrice ?? row.price_1x ?? row.price ?? 0)}
+                categoryLabel={row.therapeuticClass || row.category || 'Peptide Vials'}
+                onQuickView={typeof onOpenSpecs === 'function' ? () => onOpenSpecs(row) : null}
+                onOpenCalculator={() => {
                   if (typeof window !== 'undefined') {
                     const slug = String(row.productName || row.name || 'bpc-157')
                       .split('(')[0]
@@ -753,142 +751,10 @@ export function renderPeptideClinicalDetail(row, {
                       .replace(/[^a-z0-9]+/g, '-')
                       .replace(/^-+|-+$/g, '');
                     const strengthToken = String(row.dosage || '10mg').replace(/\s+/g, '');
-                    const url = `/calculator?peptide=${encodeURIComponent(slug)}&format=vial&strength=${encodeURIComponent(strengthToken)}${isEs ? '&lang=es' : ''}`;
-                    window.location.href = url;
+                    window.location.href = `/calculator?peptide=${encodeURIComponent(slug)}&format=vial&strength=${encodeURIComponent(strengthToken)}${isEs ? '&lang=es' : ''}`;
                   }
                 }}
-                style={{
-                  flex: '1 1 auto',
-                  minHeight: '30px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '5px',
-                  background: '#ffffff',
-                  color: '#003666',
-                  border: '1px solid #cbd5e1',
-                  padding: '4px 10px',
-                  borderRadius: '5px',
-                  fontSize: '0.71rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-                title={isEs ? 'Abrir calculadora de reconstitución U-100 con este vial' : 'Open U-100 dosing calculator with this vial'}
-              >
-                <span>{isEs ? 'Calculadora ↗' : 'Dosing ↗'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (typeof onOpenAi === 'function') {
-                    onOpenAi(row);
-                  }
-                }}
-                style={{
-                  flex: '1 1 auto',
-                  minHeight: '30px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '5px',
-                  background: '#f0f9ff',
-                  color: '#0369a1',
-                  border: '1px solid #bae6fd',
-                  padding: '4px 10px',
-                  borderRadius: '5px',
-                  fontSize: '0.71rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-                title={isEs ? 'Consultar dosificación y posología con Atlas AI' : 'Calculate clinical posology with Atlas AI'}
-              >
-                <Sparkles size={12} color="#0284c7" />
-                <span>{isEs ? 'Posología IA' : 'Posology AI'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (typeof onOpenSpecs === 'function') {
-                    onOpenSpecs(row);
-                  }
-                }}
-                style={{
-                  flex: '1 1 auto',
-                  minHeight: '30px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '5px',
-                  background: '#ffffff',
-                  color: '#1a73e8',
-                  border: '1px solid #c2e7ff',
-                  padding: '4px 10px',
-                  borderRadius: '5px',
-                  fontSize: '0.71rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e8f0fe';
-                  e.currentTarget.style.borderColor = '#1a73e8';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.borderColor = '#c2e7ff';
-                }}
-              >
-                <BookOpen size={12} />
-                <span>{isEs ? 'Dossier & Ficha →' : 'Dossier & Specs →'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (typeof onInquire === 'function') {
-                    onInquire(row);
-                  }
-                }}
-                style={{
-                  flex: '0 1 auto',
-                  minHeight: '30px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                  background: '#f0fdf4',
-                  color: '#15803d',
-                  border: '1px solid #bbf7d0',
-                  padding: '4px 10px',
-                  borderRadius: '5px',
-                  fontSize: '0.71rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#dcfce7';
-                  e.currentTarget.style.borderColor = '#15803d';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f0fdf4';
-                  e.currentTarget.style.borderColor = '#bbf7d0';
-                }}
-              >
-                <Mail size={12} />
-                <span>{isEs ? 'Consultar' : 'Inquire'}</span>
-              </button>
+              />
             </div>
           </div>
         </div>

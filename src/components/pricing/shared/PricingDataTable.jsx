@@ -9,6 +9,8 @@ import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import InlineEditableCell from '@/components/ui/InlineEditableCell';
 import EmptyState from '@/components/ui/EmptyState';
+import PriceScheduleRowActions from './PriceScheduleRowActions';
+import PriceScheduleExpandedActions from './PriceScheduleExpandedActions';
 
 export default function PricingDataTable({
   products = [],
@@ -242,48 +244,30 @@ export default function PricingDataTable({
       });
     }
 
-    if (typeof onSyncWorkspaceQuote === 'function') {
-      cols.push({
-        key: 'workspaceQuote',
-        label: 'Quote',
-        width: '125px',
-        align: 'right',
-        render: (_, row) => {
-          const q = typeof getWorkspaceQty === 'function' ? getWorkspaceQty(row) : 0;
-          return q > 0 ? (
-            <div
-              onClick={(e) => e.stopPropagation()}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', border: '1px solid #86efac', background: '#f0fdf4', borderRadius: '6px', padding: '2px 5px' }}
-            >
-              <button type="button" onClick={() => onSyncWorkspaceQuote(row, Math.max(0, q - 1))} style={{ border: 'none', background: 'transparent', fontWeight: 800, color: '#166534', cursor: 'pointer', minWidth: '22px', minHeight: '22px' }}>-</button>
-              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#166534' }}>{q}</span>
-              <button type="button" onClick={() => onSyncWorkspaceQuote(row, q + 1)} style={{ border: 'none', background: 'transparent', fontWeight: 800, color: '#166534', cursor: 'pointer', minWidth: '22px', minHeight: '22px' }}>+</button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSyncWorkspaceQuote(row, 1);
-              }}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#003666',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              + Add to Quote
-            </button>
-          );
-        },
-      });
-    }
+    cols.push({
+      key: 'actions',
+      label: 'Actions',
+      width: '120px',
+      align: 'right',
+      render: (_, row) => {
+        const displayUnit = !isGuest
+          ? Number(row.calculatedClinic ?? row.calculatedWholesale ?? 0)
+          : null;
+        return (
+          <PriceScheduleRowActions
+            item={row}
+            currency={currency}
+            unitPrice={displayUnit}
+            formattedPrice={displayUnit ? formatPrice(displayUnit) : ''}
+            onAddToQuote={
+              typeof onSyncWorkspaceQuote === 'function'
+                ? (r) => onSyncWorkspaceQuote(r, 1)
+                : null
+            }
+          />
+        );
+      },
+    });
 
     return cols;
   }, [
@@ -429,6 +413,22 @@ export default function PricingDataTable({
             </div>
           </div>
         )}
+
+        <PriceScheduleExpandedActions
+          item={row}
+          currency={currency}
+          unitPrice={!isGuest ? Number(row.calculatedClinic ?? row.calculatedWholesale ?? 0) : null}
+          formattedPrice={
+            !isGuest
+              ? formatPrice(Number(row.calculatedClinic ?? row.calculatedWholesale ?? 0))
+              : ''
+          }
+          onAddToQuote={
+            typeof onSyncWorkspaceQuote === 'function'
+              ? (r) => onSyncWorkspaceQuote(r, 1)
+              : null
+          }
+        />
       </div>
     );
   };

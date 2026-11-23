@@ -19,6 +19,7 @@ import InlineEditableCell from '@/components/ui/InlineEditableCell';
 import EmptyState from '@/components/ui/EmptyState';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import ProductDetailInline from './ProductDetailInline';
+import PriceScheduleRowActions from '@/components/pricing/shared/PriceScheduleRowActions';
 
 import {
   fetchGroupProductsWithCache,
@@ -510,6 +511,29 @@ export default function PriceScheduleSkuTable({
         },
       });
     }
+
+    cols.push({
+      key: 'actions',
+      label: 'Actions',
+      width: '120px',
+      align: 'right',
+      render: (_val, row) => {
+        const resolved = priceFor(row);
+        const amount =
+          effectiveTier === 'clinic'
+            ? (resolved.clinicPrice ?? row.pricing?.clinicPrice ?? resolved.price ?? row.price)
+            : (resolved.wholesalePrice ?? row.pricing?.wholesalePrice ?? resolved.price ?? row.price);
+        return (
+          <PriceScheduleRowActions
+            item={row}
+            currency={group?.currency || 'EUR'}
+            unitPrice={Number(amount || 0)}
+            formattedPrice={amount ? formatPrice(amount, group?.currency || 'EUR') : ''}
+            categoryLabel={group?.label || ''}
+          />
+        );
+      },
+    });
 
     return cols;
   }, [

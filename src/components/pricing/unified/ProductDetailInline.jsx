@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { ExternalLink, Snowflake, Thermometer } from 'lucide-react';
+import { Snowflake, Thermometer } from 'lucide-react';
 import CopyableId from '@/components/ui/CopyableId';
+import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 
 /**
  * ProductDetailInline
@@ -14,6 +14,9 @@ import CopyableId from '@/components/ui/CopyableId';
 export default function ProductDetailInline({
   row,
   group,
+  effectiveTier = 'wholesale',
+  priceFor,
+  formatPrice,
 }) {
   const brand = row.brand || row.manufacturer || group?.supplier || 'Atlas Health Services';
   const manufacturer = row.manufacturer && row.manufacturer !== brand ? row.manufacturer : null;
@@ -112,29 +115,31 @@ export default function ProductDetailInline({
               )}
             </div>
           </div>
-
-          <Link
-            href={`/p/${dossierSlug}`}
-            target="_blank"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '7px 14px',
-              backgroundColor: 'var(--color-primary, #003666)',
-              color: '#ffffff',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontWeight: 600,
-              textDecoration: 'none',
-              boxShadow: '0 1px 3px rgba(0,54,102,0.2)',
-            }}
-          >
-            <span>View Product Dossier</span>
-            <ExternalLink size={13} />
-          </Link>
         </div>
       </div>
+
+      <PriceScheduleExpandedActions
+        item={row}
+        currency={group?.currency || 'EUR'}
+        unitPrice={(() => {
+          if (typeof priceFor !== 'function') return null;
+          const resolved = priceFor(row);
+          return effectiveTier === 'clinic'
+            ? (resolved.clinicPrice ?? row.pricing?.clinicPrice ?? resolved.price ?? row.price)
+            : (resolved.wholesalePrice ?? row.pricing?.wholesalePrice ?? resolved.price ?? row.price);
+        })()}
+        formattedPrice={(() => {
+          if (typeof priceFor !== 'function' || typeof formatPrice !== 'function') return '';
+          const resolved = priceFor(row);
+          const amount =
+            effectiveTier === 'clinic'
+              ? (resolved.clinicPrice ?? row.pricing?.clinicPrice ?? resolved.price ?? row.price)
+              : (resolved.wholesalePrice ?? row.pricing?.wholesalePrice ?? resolved.price ?? row.price);
+          return amount ? formatPrice(amount, group?.currency || 'EUR') : '';
+        })()}
+        categoryLabel={group?.label || ''}
+        monographUrl={`/p/${dossierSlug}`}
+      />
     </div>
   );
 }

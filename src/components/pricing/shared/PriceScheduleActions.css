@@ -1,0 +1,213 @@
+/* Unified Price Schedule Row & Expanded Actions (Desktop + Mobile-First Rule #23) */
+
+.ps-row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  position: relative;
+  white-space: nowrap;
+}
+
+.ps-row-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ps-row-action-btn:hover {
+  background: #f8fafc;
+  border-color: var(--color-primary, #003666);
+  color: var(--color-primary, #003666);
+}
+
+.ps-row-action-btn.is-quoted {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.ps-row-action-btn.is-quoted:hover {
+  background: #dcfce7;
+  border-color: #4ade80;
+  color: #166534;
+}
+
+.ps-row-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ps-row-menu-btn:hover,
+.ps-row-menu-btn[aria-expanded='true'] {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.ps-action-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 220px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.15);
+  padding: 6px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ps-action-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #1e293b;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.ps-action-menu-item:hover {
+  background: #f1f5f9;
+  color: var(--color-primary, #003666);
+}
+
+.ps-action-menu-item.is-ai:hover {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.ps-expanded-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.ps-expanded-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.ps-expanded-btn:hover {
+  background: #f8fafc;
+  border-color: var(--color-primary, #003666);
+  color: var(--color-primary, #003666);
+}
+
+.ps-expanded-btn.is-quoted {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.ps-expanded-btn.is-ai:hover {
+  background: #f5f3ff;
+  border-color: #c4b5fd;
+  color: #6d28d9;
+}
+
+.ps-expanded-btn.is-primary {
+  background: var(--color-primary, #003666);
+  border-color: var(--color-primary, #003666);
+  color: #ffffff;
+}
+
+.ps-expanded-btn.is-primary:hover {
+  opacity: 0.92;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .ps-row-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .ps-row-action-btn {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 0.84rem;
+  }
+
+  .ps-row-menu-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .ps-action-menu {
+    min-width: 240px;
+  }
+
+  .ps-action-menu-item {
+    min-height: 44px;
+    font-size: 0.88rem;
+    padding: 8px 12px;
+  }
+
+  .ps-expanded-actions {
+    gap: 8px;
+  }
+
+  .ps-expanded-btn {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 0.84rem;
+    flex: 1 1 calc(50% - 4px);
+  }
+}

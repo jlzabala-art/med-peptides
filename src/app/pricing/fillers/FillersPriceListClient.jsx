@@ -12,11 +12,12 @@ import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import ProductQuickViewDrawer from '@/components/shared/ProductQuickViewDrawer';
+import PriceScheduleRowActions from '@/components/pricing/shared/PriceScheduleRowActions';
+import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import { convertCurrencyAmount } from '@/utils/productViewModel';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
 import { trackSearchClick, trackConversion } from '@/services/algoliaInsights';
 import { getTrendingItems } from '@/services/algoliaRecommendService';
-import { useAuth } from '@/context/AuthContext';
 import { Sparkles, Syringe, Layers, ShieldCheck, Download } from 'lucide-react';
 import '../colway/ColwayPriceList.css';
 
@@ -34,16 +35,12 @@ export default function FillersPriceListClient({
   initialCurrency = 'EUR',
   initialLang = 'en'
 }) {
-  const { activeRole } = useAuth();
-  const isAdmin = activeRole === 'admin';
-
   const [lang, setLang] = useState(initialLang);
   const isEs = lang === 'es';
   const [currency, setCurrency] = useState(initialCurrency);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [selectedType, setSelectedType] = useState('all'); // 'all' | 'boosters' | 'fillers' | 'biostimulators'
-  const [tierMode, setTierMode] = useState('clinic'); // 'wholesale' (mediluxe) | 'clinic' (wholeseller) | 'master' (cost)
   const [quickProduct, setQuickProduct] = useState(null);
   const [trendingFillers, setTrendingFillers] = useState([]);
 
@@ -117,11 +114,6 @@ export default function FillersPriceListClient({
     });
   }, [enrichedRows, searchQuery, selectedBrand, selectedType]);
 
-  const minB2bPrice = useMemo(() => {
-    const prices = enrichedRows.map((r) => r.clinicPrice).filter((n) => n > 0);
-    return prices.length > 0 ? Math.min(...prices) : 0;
-  }, [enrichedRows]);
-
   const uniqueBrandsCount = useMemo(
     () => Math.max(0, brands.length - 1),
     [brands]
@@ -160,6 +152,7 @@ export default function FillersPriceListClient({
                 value={row.code}
                 displayValue={row.atlas_product_code || row.sku || (String(row.code).length > 14 ? 'ID' : row.code)}
               />
+              {row.status === 'out of stock' && <StatusBadge status="out of stock" />}
             </div>
           </div>
         )
@@ -173,40 +166,8 @@ export default function FillersPriceListClient({
             {row.packSize || row.dosage || 'Standard Box'}
           </span>
         )
-      },
-      {
-        key: 'status',
-        label: isEs ? 'Disponibilidad' : 'Availability',
-        width: '115px',
-        render: (_val, row) => <StatusBadge status={row.status || 'published'} />
       }
     ];
-
-    if (isAdmin && tierMode === 'master') {
-      cols.push({
-        key: 'masterPrice',
-        label: isEs ? 'Coste' : 'Cost',
-        width: '105px',
-        render: (_val, row) => (
-          <span style={{ fontWeight: 700, color: '#475569' }}>
-            {formatMoney(row.masterPrice, currency)}
-          </span>
-        )
-      });
-    }
-
-    if (isAdmin && (tierMode === 'wholesale' || tierMode === 'master')) {
-      cols.push({
-        key: 'wholesalePrice',
-        label: 'Mediluxe',
-        width: '115px',
-        render: (_val, row) => (
-          <span style={{ fontWeight: 700, color: '#0369a1' }}>
-            {formatMoney(row.wholesalePrice, currency)}
-          </span>
-        )
-      });
-    }
 
     cols.push({
       key: 'clinicPrice',
@@ -219,8 +180,31 @@ export default function FillersPriceListClient({
       )
     });
 
+    cols.push({
+      key: 'actions',
+      label: isEs ? 'Acciones' : 'Actions',
+      width: '120px',
+      align: 'right',
+      render: (_val, row) => (
+        <PriceScheduleRowActions
+          item={{
+            ...row,
+            name: row.name || row.product_name,
+            sku: row.atlas_product_code || row.sku || row.code,
+          }}
+          currency={currency}
+          unitPrice={row.clinicPrice}
+          formattedPrice={formatMoney(row.clinicPrice, currency)}
+          categoryLabel="Aesthetic Injectables & Skin Boosters"
+          onQuickView={(r) =>
+            setQuickProduct({ slug: r.slug || r.id, title: r.name || r.product_name })
+          }
+        />
+      )
+    });
+
     return cols;
-  }, [isEs, isAdmin, tierMode, currency]);
+  }, [isEs, currency]);
 
   const groupedByBrand = useMemo(() => {
     const groups = new Map();
@@ -397,25 +381,25 @@ export default function FillersPriceListClient({
           <MetricCard
             title={isEs ? 'SKUs Certificados' : 'Certified SKUs'}
             value={String(enrichedRows.length)}
-            subtitle={isEs ? `${uniqueBrandsCount} marcas europeas líderes` : `${uniqueBrandsCount} leading European brands`}
+            subtitle={isEs ? 'Originales con marcado CE · Trazabilidad de lote' : 'CE-marked originals · Full batch traceability'}
             icon={Layers}
           />
           <MetricCard
-            title={isEs ? 'Desde (Wholeseller)' : 'Starting Wholeseller'}
-            value={minB2bPrice > 0 ? formatMoney(minB2bPrice, currency) : '—'}
-            subtitle={isEs ? 'Skin Boosters y Polinucleótidos' : 'Skin Boosters & Polynucleotides'}
+            title={isEs ? 'Marcas Líderes' : 'Top Market Brands'}
+            value={isEs ? `${uniqueBrandsCount} Marcas` : `${uniqueBrandsCount} Brands`}
+            subtitle="Juvéderm · Restylane · Belotero · Profhilo · Sculptra"
             icon={Sparkles}
           />
           <MetricCard
-            title={isEs ? 'Envío Cadena Fría' : 'Cold-Chain Dispatch'}
-            value="24–48h"
-            subtitle={isEs ? 'Logística verificada · Trazabilidad' : 'Verified EU logistics & batch'}
+            title={isEs ? 'Stock Local' : 'Local Stock'}
+            value={isEs ? 'Disponible' : 'In Stock'}
+            subtitle={isEs ? 'Almacén local UE · Envío 24–48h' : 'Ready in local EU warehouse · 24–48h dispatch'}
             icon={ShieldCheck}
           />
           <MetricCard
             title={isEs ? 'Condiciones B2B' : 'Wholeseller Terms'}
-            value={isEs ? 'Directo' : 'Direct B2B'}
-            subtitle={isEs ? 'Caja original · Sin pedido mínimo' : 'Original sealed box · No MOQ'}
+            value={isEs ? 'B2B Directo' : 'Direct B2B'}
+            subtitle={isEs ? 'Caja original precintada · Sin pedido mínimo' : 'Original sealed box · No MOQ'}
             icon={Syringe}
           />
         </div>
@@ -504,37 +488,6 @@ export default function FillersPriceListClient({
           </div>
         )}
 
-        {isAdmin && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>
-              {isEs ? 'Vista de margen:' : 'Margin view:'}
-            </span>
-            {[
-              { id: 'clinic', label: 'B2B (+15% + 15%)' },
-              { id: 'wholesale', label: 'Mediluxe (+15%)' },
-              { id: 'master', label: 'Master Cost' }
-            ].map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTierMode(t.id)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: tierMode === t.id ? '1.5px solid #003666' : '1px solid #cbd5e1',
-                  background: tierMode === t.id ? '#eff6ff' : '#ffffff',
-                  color: tierMode === t.id ? '#003666' : '#475569',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        )}
-
         {filteredRows.length === 0 ? (
           <EmptyState
             icon={Syringe}
@@ -613,24 +566,23 @@ export default function FillersPriceListClient({
                               : (isEs ? 'Temperatura ambiente (2–25 °C)' : 'Ambient (2–25 °C)')}
                           </span>
                         </div>
-                        <div style={{ paddingTop: '4px' }}>
-                          <button
-                            type="button"
-                            onClick={() => setQuickProduct({ slug: row.slug || row.id, title: row.name || row.product_name })}
-                            style={{
-                              padding: '5px 11px',
-                              borderRadius: '6px',
-                              border: '1px solid #bfdbfe',
-                              background: '#eff6ff',
-                              color: '#1d4ed8',
-                              fontSize: '0.72rem',
-                              fontWeight: 700,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {isEs ? 'Abrir Ficha Completa →' : 'Open Full Monograph →'}
-                          </button>
-                        </div>
+                      </div>
+
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <PriceScheduleExpandedActions
+                          item={{
+                            ...row,
+                            name: row.name || row.product_name,
+                            sku: row.atlas_product_code || row.sku || row.code,
+                          }}
+                          currency={currency}
+                          unitPrice={row.clinicPrice}
+                          formattedPrice={formatMoney(row.clinicPrice, currency)}
+                          categoryLabel="Aesthetic Injectables & Skin Boosters"
+                          onQuickView={(r) =>
+                            setQuickProduct({ slug: r.slug || r.id, title: r.name || r.product_name })
+                          }
+                        />
                       </div>
                     </div>
                   )}
