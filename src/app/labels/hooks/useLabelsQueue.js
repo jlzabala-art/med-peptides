@@ -254,7 +254,7 @@ export function useLabelsQueue({
     }
   }, [patientQueue, handleSwitchActivePatient, setSearchOpen, updateUrlWithQueue, activeQueueIndex, labelIndex, setRecentPrescriptions, isEs]);
 
-  const handleAddMultipleToQueue = useCallback(async (codes = []) => {
+  const handleAddMultipleToQueue = useCallback(async (codes = [], activateIfEmpty = true) => {
     const uniqueNewCodes = codes
       .map(c => String(c).trim())
       .filter(c => c && !patientQueue.some(p => String(p.code).toUpperCase() === c.toUpperCase()));
@@ -305,7 +305,7 @@ export function useLabelsQueue({
 
       const nextQueue = [...patientQueue, ...loaded];
       setPatientQueue(nextQueue);
-      if (patientQueue.length === 0 && loaded[0]) {
+      if (activateIfEmpty && patientQueue.length === 0 && loaded[0]) {
         setActiveQueueIndex(0);
         setCurrentRx(loaded[0].rx);
         setLabels(loaded[0].labels);

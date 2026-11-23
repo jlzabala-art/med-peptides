@@ -870,6 +870,7 @@ export default function PublicLabelsAppClient({
             filterWorklistItem={filterWorklistItem}
             handleClearRecent={handleClearRecent}
             handleSelectOrAddPatient={handleSelectOrAddPatient}
+            handleAddMultipleToQueue={handleAddMultipleToQueue}
             formatResultDate={formatResultDate}
             renderPrintStatusBadge={renderPrintStatusBadge}
             paginatedWorklistItems={paginatedWorklistItems}

@@ -563,9 +563,14 @@ export default function LabelsHomeView({
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <button
                       type="button"
-                      onClick={() => {
-                        selectedCodes.forEach((c) => handleSelectOrAddPatient(c, false));
-                        toast.success(isEs ? `${selectedCodes.length} añadidas a la zona de trabajo` : `Added ${selectedCodes.length} to workspace`);
+                      onClick={async () => {
+                        if (handleAddMultipleToQueue) {
+                          await handleAddMultipleToQueue(selectedCodes, false);
+                        } else {
+                          for (const c of selectedCodes) {
+                            await handleSelectOrAddPatient(c, false);
+                          }
+                        }
                         setSelectedCodes([]);
                       }}
                       className="gcp-btn-secondary"
@@ -575,8 +580,14 @@ export default function LabelsHomeView({
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        selectedCodes.forEach((c, idx) => handleSelectOrAddPatient(c, idx === selectedCodes.length - 1));
+                      onClick={async () => {
+                        if (handleAddMultipleToQueue) {
+                          await handleAddMultipleToQueue(selectedCodes, true);
+                        } else {
+                          for (let i = 0; i < selectedCodes.length; i += 1) {
+                            await handleSelectOrAddPatient(selectedCodes[i], i === selectedCodes.length - 1);
+                          }
+                        }
                         setSelectedCodes([]);
                       }}
                       className="gcp-btn-primary"
@@ -605,35 +616,12 @@ export default function LabelsHomeView({
               <DataTable
                 columns={[
                   {
-                    key: 'select',
-                    label: '',
-                    align: 'center',
-                    render: (_val, p) => {
-                      const cleanCode = sanitizeRecentCode(p.code);
-                      const isChecked = selectedCodes.includes(cleanCode);
-                      return (
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          aria-label={isEs ? `Seleccionar ${p.name || cleanCode}` : `Select ${p.name || cleanCode}`}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setSelectedCodes((prev) =>
-                              checked ? (prev.includes(cleanCode) ? prev : [...prev, cleanCode]) : prev.filter((x) => x !== cleanCode)
-                            );
-                          }}
-                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#1a73e8' }}
-                        />
-                      );
-                    },
-                  },
-                  {
                     key: 'patient',
                     label: isEs ? 'Paciente / Código / Fórmula' : 'Patient / Code / Formula',
                     align: 'left',
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
+                      const isChecked = selectedCodes.includes(cleanCode);
                       const pName = (p.name || p.patientName || '').trim().toLowerCase();
                       const samePatientItems = pName && Array.isArray(allWorklistItems)
                         ? allWorklistItems.filter((item) => (item.name || item.patientName || '').trim().toLowerCase() === pName)
@@ -643,21 +631,36 @@ export default function LabelsHomeView({
                         .filter((c) => c && c !== cleanCode);
 
                       return (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
-                              {p.name || p.patientName || 'Patient'}
-                            </span>
-                            <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                              <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
-                              {extraCodes.map((ec) => (
-                                <CopyableId key={ec} value={ec} displayValue={`#${ec}`} />
-                              ))}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', minWidth: 0 }}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            aria-label={isEs ? `Seleccionar ${p.name || cleanCode}` : `Select ${p.name || cleanCode}`}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setSelectedCodes((prev) =>
+                                checked ? (prev.includes(cleanCode) ? prev : [...prev, cleanCode]) : prev.filter((x) => x !== cleanCode)
+                              );
+                            }}
+                            style={{ width: '16px', height: '16px', marginTop: '3px', flexShrink: 0, cursor: 'pointer', accentColor: '#1a73e8' }}
+                          />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
+                                {p.name || p.patientName || 'Patient'}
+                              </span>
+                              <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                                <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
+                                {extraCodes.map((ec) => (
+                                  <CopyableId key={ec} value={ec} displayValue={`#${ec}`} />
+                                ))}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                              {p.title || p.treatmentTitle || 'Prescription protocol'}
                             </span>
                           </div>
-                          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                            {p.title || p.treatmentTitle || 'Prescription protocol'}
-                          </span>
                         </div>
                       );
                     },
