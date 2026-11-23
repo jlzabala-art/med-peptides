@@ -86,6 +86,28 @@ export const PEPTIDE_SYNONYM_DICTIONARY = [
     objectID: 'syn-tesamorelin',
     synonyms: ['tesamorelin', 'egrifta', 'th9507', 'grf analog', 'visceral fat peptide']
   },
+
+  // Aesthetic Injectables, Skin Boosters & Pellets
+  {
+    type: 'synonyms',
+    objectID: 'syn-skin-boosters',
+    synonyms: ['skin booster', 'skin boosters', 'booster', 'boosters', 'profhilo', 'polynucleotides', 'polinucleotidos', 'biorevitalization', 'nctf', 'rejuran']
+  },
+  {
+    type: 'synonyms',
+    objectID: 'syn-dermal-fillers',
+    synonyms: ['dermal filler', 'dermal fillers', 'filler', 'fillers', 'hyaluronic acid', 'acido hialuronico', 'juvederm', 'teoxane', 'restylane', 'belotero']
+  },
+  {
+    type: 'synonyms',
+    objectID: 'syn-biostimulators',
+    synonyms: ['biostimulator', 'biostimulators', 'bioestimulador', 'sculptra', 'radiesse', 'plla', 'caha', 'collagen stimulator']
+  },
+  {
+    type: 'synonyms',
+    objectID: 'syn-pellets-trocar',
+    synonyms: ['pellet', 'pellets', 'bhrt', 'estradiol pellet', 'testosterone pellet', 'trocar', 'trocar kit', 'cannula']
+  },
   {
     type: 'synonyms',
     objectID: 'syn-sermorelin',

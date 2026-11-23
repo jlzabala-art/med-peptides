@@ -1,0 +1,506 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  Menu,
+  X,
+  ChevronDown,
+  ChevronRight,
+  Compass,
+  Search,
+  Tags,
+  Layers,
+  FileText
+} from 'lucide-react';
+import {
+  B2B_NAV_DOMAINS,
+  getRelatedRoutes,
+  getActiveDomainId
+} from '@/constants/b2bNavigationGraph';
+import { useActiveClinicalStore } from '@/store/useActiveClinicalStore';
+
+/**
+ * B2BUniversalMenu
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Unified B2B contextual navigation menu for both Laptop and Mobile:
+ *  - Laptop (>= 1024px): Slide-over contextual rail (Cmd/Ctrl+B or edge/header trigger)
+ *    with "Related to this screen" pinned at top + 4 collapsible B2B domains.
+ *  - Mobile (< 1024px): Thumb-friendly bottom bar (44px+ targets) + swipe-style
+ *    Bottom Sheet with Related Screens, Active Rx Context, and B2B domains.
+ */
+export default function B2BUniversalMenu({
+  isSpanish = false,
+  controlledOpen = null,
+  onControlledOpenChange = null,
+  hideMobileBar = false
+}) {
+  const pathname = usePathname() || '/';
+  const [internalOpen, setInternalOpen] = useState(false);
+  const [mobileSheetMode, setMobileSheetMode] = useState('all'); // 'all' | 'related'
+  const [openDomainId, setOpenDomainId] = useState(() => getActiveDomainId(pathname));
+  const [prevPathname, setPrevPathname] = useState(pathname);
+
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setOpenDomainId(getActiveDomainId(pathname));
+  }
+
+  const isOpen = controlledOpen !== null ? controlledOpen : internalOpen;
+  const setOpen = (next) => {
+    if (onControlledOpenChange) onControlledOpenChange(next);
+    else setInternalOpen(next);
+  };
+
+  const { activeRxCode, patientName } = useActiveClinicalStore();
+  const relatedRoutes = getRelatedRoutes(pathname);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setOpen(!isOpen);
+      }
+      if (e.key === 'Escape' && isOpen) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  });
+
+  const triggerGlobalSearch = () => {
+    setOpen(false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }));
+    }
+  };
+
+  const isRouteActive = (href) => {
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  return (
+    <>
+      <style>{`
+        .b2b-edge-trigger {
+          position: fixed;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 9900;
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          padding: 10px 6px;
+          background: #003666;
+          color: #ffffff;
+          border: 1px solid rgba(255,255,255,0.2);
+          border-left: none;
+          border-radius: 0 8px 8px 0;
+          box-shadow: 2px 4px 14px rgba(15, 23, 42, 0.18);
+          cursor: pointer;
+          font-size: 0.66rem;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+        }
+        .b2b-edge-trigger:hover {
+          background: #0f4c81;
+          padding-left: 9px;
+        }
+        .b2b-mobile-bottom-bar {
+          display: none;
+        }
+        @media (max-width: 1023px) {
+          .b2b-edge-trigger {
+            display: none !important;
+          }
+          .b2b-mobile-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9920;
+            height: 58px;
+            background: #ffffff;
+            border-top: 1px solid #cbd5e1;
+            box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.08);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 4px 6px env(safe-area-inset-bottom, 4px);
+          }
+        }
+        .b2b-mobile-tab-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 2px;
+          min-height: 44px;
+          border: none;
+          background: transparent;
+          color: #475569;
+          font-size: 0.65rem;
+          font-weight: 700;
+          cursor: pointer;
+          text-decoration: none;
+          border-radius: 8px;
+        }
+        .b2b-mobile-tab-btn.is-active,
+        .b2b-mobile-tab-btn:active {
+          color: #003666;
+          background: #eff6ff;
+        }
+      `}</style>
+
+      {/* ── Laptop Left-Edge Persistent Trigger (always reachable, 0 layout squeeze) ── */}
+      {!isOpen && (
+        <button
+          type="button"
+          className="b2b-edge-trigger no-print"
+          onClick={() => {
+            setMobileSheetMode('all');
+            setOpen(true);
+          }}
+          title={isSpanish ? 'Abrir Menú B2B y Pantallas Relacionadas (⌘B)' : 'Open B2B Menu & Related Screens (⌘B)'}
+          aria-label={isSpanish ? 'Menú B2B' : 'B2B Menu'}
+        >
+          <Menu size={14} />
+          <span style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>B2B</span>
+        </button>
+      )}
+
+      {/* ── Mobile Fixed Bottom Navigation Bar (< 1024px) ── */}
+      {!hideMobileBar && (
+        <nav className="b2b-mobile-bottom-bar no-print" aria-label={isSpanish ? 'Navegación B2B móvil' : 'Mobile B2B navigation'}>
+          <button
+            type="button"
+            className={`b2b-mobile-tab-btn ${isOpen && mobileSheetMode === 'related' ? 'is-active' : ''}`}
+            onClick={() => {
+              setMobileSheetMode('related');
+              setOpen(true);
+            }}
+          >
+            <Compass size={17} />
+            <span>{isSpanish ? 'Relacionadas' : 'Related'}</span>
+          </button>
+
+          <button
+            type="button"
+            className="b2b-mobile-tab-btn"
+            onClick={triggerGlobalSearch}
+          >
+            <Search size={17} />
+            <span>{isSpanish ? 'Buscar' : 'Search'}</span>
+          </button>
+
+          <Link
+            href={activeRxCode ? `/labels?rx=${encodeURIComponent(activeRxCode)}` : '/labels'}
+            className={`b2b-mobile-tab-btn ${pathname.startsWith('/labels') ? 'is-active' : ''}`}
+          >
+            <Tags size={17} />
+            <span>Labels</span>
+          </Link>
+
+          <button
+            type="button"
+            className={`b2b-mobile-tab-btn ${isOpen && mobileSheetMode === 'all' ? 'is-active' : ''}`}
+            onClick={() => {
+              setMobileSheetMode('all');
+              setOpen(true);
+            }}
+          >
+            <Menu size={17} />
+            <span>{isSpanish ? 'Menú B2B' : 'B2B Menu'}</span>
+          </button>
+        </nav>
+      )}
+
+      {/* ── Unified Responsive Drawer (Left Rail on Laptop / Bottom Sheet on Mobile) ── */}
+      {isOpen && (
+        <div
+          className="no-print"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10060,
+            background: 'rgba(15, 23, 42, 0.45)',
+            backdropFilter: 'blur(2px)',
+            display: 'flex',
+            justifyContent: 'flex-start',
+            alignItems: 'stretch'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOpen(false);
+          }}
+        >
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label={isSpanish ? 'Menú B2B Contextual' : 'Contextual B2B Menu'}
+            style={{
+              width: 'min(320px, 92vw)',
+              height: '100%',
+              background: '#ffffff',
+              boxShadow: '8px 0 32px rgba(15, 23, 42, 0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                background: '#003666',
+                color: '#ffffff'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Layers size={16} />
+                <span style={{ fontSize: '0.86rem', fontWeight: 800, letterSpacing: '0.02em' }}>
+                  {isSpanish ? 'Navegación B2B' : 'B2B Navigation'}
+                </span>
+                <span style={{ fontSize: '0.65rem', opacity: 0.75, background: 'rgba(255,255,255,0.16)', padding: '1px 6px', borderRadius: '4px' }}>
+                  ⌘B
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label={isSpanish ? 'Cerrar menú' : 'Close menu'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  background: 'transparent',
+                  color: '#ffffff',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Active Clinical Context */}
+            {activeRxCode && (
+              <div
+                style={{
+                  margin: '10px 12px 0',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px'
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>
+                    {isSpanish ? 'Receta Activa' : 'Active Rx'}
+                  </div>
+                  <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    #{activeRxCode}{patientName ? ` · ${patientName}` : ''}
+                  </div>
+                </div>
+                <Link
+                  href={`/labels?rx=${encodeURIComponent(activeRxCode)}`}
+                  onClick={() => setOpen(false)}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    background: '#1a73e8',
+                    color: '#ffffff',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    flexShrink: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <FileText size={11} />
+                  <span>Labels</span>
+                </Link>
+              </div>
+            )}
+
+            {/* Scrollable Body */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
+              {/* 1. Dynamic "Related to this screen" block */}
+              <div
+                style={{
+                  marginBottom: '14px',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '0.7rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <Compass size={13} />
+                  <span>{isSpanish ? 'Relacionadas desde aquí' : 'Related Screens'}</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                  {relatedRoutes.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 9px',
+                        minHeight: '40px',
+                        borderRadius: '7px',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        color: '#0f172a',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        textDecoration: 'none'
+                      }}
+                    >
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {isSpanish ? item.labelEs : item.labelEn}
+                      </span>
+                      <ChevronRight size={12} color="#64748b" style={{ flexShrink: 0 }} />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Collapsible 4 B2B Domains */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {B2B_NAV_DOMAINS.map((domain) => {
+                  const expanded = openDomainId === domain.id;
+                  return (
+                    <div
+                      key={domain.id}
+                      style={{
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        background: '#ffffff'
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setOpenDomainId(expanded ? '' : domain.id)}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '10px 12px',
+                          minHeight: '44px',
+                          border: 'none',
+                          background: expanded ? '#f1f5f9' : '#ffffff',
+                          color: '#0f172a',
+                          fontSize: '0.78rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          textAlign: 'left'
+                        }}
+                      >
+                        <span>{isSpanish ? domain.titleEs : domain.titleEn}</span>
+                        {expanded ? <ChevronDown size={15} color="#475569" /> : <ChevronRight size={15} color="#64748b" />}
+                      </button>
+
+                      {expanded && (
+                        <div style={{ display: 'flex', flexDirection: 'column', padding: '4px 6px 8px' }}>
+                          {domain.items.map((item) => {
+                            const active = isRouteActive(item.href);
+                            return (
+                              <Link
+                                key={item.id}
+                                href={item.href}
+                                onClick={() => setOpen(false)}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  padding: '8px 10px',
+                                  minHeight: '40px',
+                                  borderRadius: '6px',
+                                  background: active ? '#e8f0fe' : 'transparent',
+                                  color: active ? '#1a73e8' : '#334155',
+                                  fontSize: '0.78rem',
+                                  fontWeight: active ? 750 : 600,
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                <span>{isSpanish ? item.labelEs : item.labelEn}</span>
+                                {item.badge && (
+                                  <span style={{
+                                    fontSize: '0.62rem',
+                                    fontWeight: 800,
+                                    padding: '1px 5px',
+                                    borderRadius: '4px',
+                                    background: active ? '#1a73e8' : '#e2e8f0',
+                                    color: active ? '#ffffff' : '#475569'
+                                  }}>
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer Quick Search */}
+            <div style={{ padding: '10px 12px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
+              <button
+                type="button"
+                onClick={triggerGlobalSearch}
+                style={{
+                  width: '100%',
+                  minHeight: '42px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Search size={14} />
+                  <span>{isSpanish ? 'Buscar en todo el portal…' : 'Search entire portal…'}</span>
+                </span>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
+                  ⌘K
+                </span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+    </>
+  );
+}

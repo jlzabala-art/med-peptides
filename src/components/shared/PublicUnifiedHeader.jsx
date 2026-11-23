@@ -24,6 +24,7 @@ import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer
 import PublicProviderCTA from './public/PublicProviderCTA';
 import AtlasAppSwitcher from './public/AtlasAppSwitcher';
 import ActiveClinicalPill from './ActiveClinicalPill';
+import B2BUniversalMenu from './B2BUniversalMenu';
 import BrandLogo from '../common/BrandLogo';
 import DatasheetQuickSearchModal from './DatasheetQuickSearchModal';
 import GcpUserBadge from './GcpUserBadge';
@@ -963,6 +964,10 @@ export default function PublicUnifiedHeader({
         onCurrencyChange={handleCurrencyChange}
         hideCurrency={effectiveHideCurrencySelector}
       />
+
+      {!purePublic && !whiteLabel && (
+        <B2BUniversalMenu isSpanish={isSpanish} />
+      )}
     </>
   );
 }

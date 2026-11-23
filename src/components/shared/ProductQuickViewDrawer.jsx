@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { X, ExternalLink, Package } from 'lucide-react';
+import { trackProductView } from '@/services/algoliaInsights';
 
 /**
  * ProductQuickViewDrawer
@@ -17,13 +18,14 @@ export default function ProductQuickViewDrawer({
   onClose = null
 }) {
   useEffect(() => {
-    if (!isOpen) return undefined;
+    if (!isOpen || !slug) return undefined;
+    trackProductView({ indexName: 'products', objectID: slug, eventName: 'Product QuickView Opened' });
     const onKeyDown = (e) => {
       if (e.key === 'Escape') onClose?.();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, slug, onClose]);
 
   if (!isOpen || !slug) return null;
 

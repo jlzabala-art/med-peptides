@@ -6,6 +6,7 @@ import { generateA4BatchPdf } from '@/utils/a4BatchPdfGenerator';
 import { generateBatchZpl } from '@/utils/labels/zplGenerator';
 import { generatePackingListPdf } from '@/utils/labels/packingListPdfGenerator';
 import { trackToolUsage } from '@/hooks/useAnalytics';
+import { trackConversion } from '@/services/algoliaInsights';
 
 export function useBatchExport({
   patientQueue,
@@ -147,6 +148,17 @@ export function useBatchExport({
       });
 
       await recordPrintAudit('a4');
+
+      try {
+        const printedCodes = Array.from(new Set(patientQueue.map((q) => String(q.code || '').trim()).filter(Boolean)));
+        if (printedCodes.length > 0) {
+          trackConversion({
+            indexName: 'prescriptions',
+            objectIDs: printedCodes,
+            eventName: 'Batch A4 Labels Printed'
+          });
+        }
+      } catch { /* ignore insights */ }
 
       try {
         trackToolUsage({

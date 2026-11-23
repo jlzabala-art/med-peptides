@@ -39,6 +39,30 @@ function getClient() {
   return client;
 }
 
+/**
+ * Direct REST call to Algolia Recommend API (/1/indexes/[index]/recommendations).
+ * Works reliably even when algoliasearch/lite omits the Recommend mixin,
+ * ensuring the 10K/month Recommend quota is actively utilized.
+ */
+async function fetchAlgoliaRecommendRest(requests = []) {
+  if (!APP_ID || !SEARCH_KEY || !Array.isArray(requests) || requests.length === 0) return null;
+  try {
+    const res = await fetch(`https://${APP_ID}-dsn.algolia.net/1/indexes/*/recommendations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Algolia-Application-Id': APP_ID,
+        'X-Algolia-API-Key': SEARCH_KEY
+      },
+      body: JSON.stringify({ requests })
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 // ── In-Memory LRU/TTL Cache (5 min TTL) to save Algolia Recommend Quota ─────
 const recommendCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -103,19 +127,20 @@ export async function getRelatedProducts({
   if (!client) return [];
 
   try {
-    // 1. Attempt Algolia Recommend API (v5 getRecommendations)
-    if (typeof client.getRecommendations === 'function' && objectID) {
-      const response = await client.getRecommendations({
-        requests: [
-          {
-            indexName: INDEX_PRODUCTS,
-            model: 'related-products',
-            objectID: String(objectID),
-            maxRecommendations,
-            threshold: 30,
-          },
-        ],
-      });
+    // 1. Attempt Algolia Recommend API (v5 getRecommendations or direct REST fallback)
+    if (objectID) {
+      const reqPayload = [
+        {
+          indexName: INDEX_PRODUCTS,
+          model: 'related-products',
+          objectID: String(objectID),
+          maxRecommendations,
+          threshold: 25,
+        },
+      ];
+      const response = typeof client.getRecommendations === 'function'
+        ? await client.getRecommendations({ requests: reqPayload })
+        : await fetchAlgoliaRecommendRest(reqPayload);
 
       const hits = response?.results?.[0]?.hits || [];
       if (hits.length > 0) {
@@ -298,6 +323,47 @@ export async function getRelatedProtocols({
     return filtered;
   } catch (err) {
     logger.warn('[AlgoliaRecommend] getRelatedProtocols error:', err.message);
+  }
+  return [];
+}
+
+/**
+ * Fetches Trending Items from Algolia Recommend (trending-items model)
+ * for B2B pricing schedules & catalog discovery.
+ */
+export async function getTrendingItems({
+  indexName = INDEX_PRODUCTS,
+  facetName = '',
+  facetValue = '',
+  maxRecommendations = 4
+} = {}) {
+  const cacheKey = `trending:${indexName}:${facetName}:${facetValue}:${maxRecommendations}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const req = {
+    indexName,
+    model: 'trending-items',
+    maxRecommendations,
+    threshold: 0
+  };
+  if (facetName && facetValue) {
+    req.facetName = facetName;
+    req.facetValue = facetValue;
+  }
+
+  const client = getClient();
+  try {
+    const res = client && typeof client.getRecommendations === 'function'
+      ? await client.getRecommendations({ requests: [req] })
+      : await fetchAlgoliaRecommendRest([req]);
+    const hits = res?.results?.[0]?.hits || [];
+    if (hits.length > 0) {
+      setCached(cacheKey, hits);
+      return hits;
+    }
+  } catch {
+    // non-fatal
   }
   return [];
 }

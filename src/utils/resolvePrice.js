@@ -473,7 +473,7 @@ export function resolveVariantPrice(variant, {
     }
   }
 
-  // Apply B2B wholeseller pricing calculations for Lotusland & NPLAB peptide vials:
+  // Apply B2B wholeseller pricing calculations for Lotusland, NPLAB, & PharmaMedic (Aesthetic Injectables / Boosters):
   // - Master (Supplier Base Cost): baseCost
   // - Wholesale (Mediluxe +15% over Supplier Cost): round2(baseCost * 1.15)
   // - Clinic / Wholeseller Public Link (+15% Mediluxe + +15% Wholeseller over Mediluxe = baseCost * 1.15 * 1.15): round2(wholesalePrice * 1.15)
@@ -481,7 +481,8 @@ export function resolveVariantPrice(variant, {
   const vSuppStr = String(variant?.supplierId || variant?.supplier_id || variant?.supplier || variant?.supplierName || '').toLowerCase();
   const isLotusland = vSuppStr.includes('lotusland') || variant?.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
   const isNpLabs = vSuppStr.includes('nplab') || vSuppStr.includes('np-lab') || vSuppStr.includes('np lab');
-  if (pricing && variant && (isLotusland || isNpLabs)) {
+  const isPharmaMedic = vSuppStr.includes('pharmamedic') || variant?.supplierId === 'supplier-pharmamedic';
+  if (pricing && variant && (isLotusland || isNpLabs || isPharmaMedic)) {
     const baseCost = Number(
       variant.cost_tiers?.cost_1 ??
       variant.cost_1 ??
@@ -489,12 +490,13 @@ export function resolveVariantPrice(variant, {
       variant.price_eur ??
       pricing.master?.perUnit ??
       variant.unit_price ??
+      variant.price ??
       0
     );
 
     if (baseCost > 0) {
       const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
-      const cur = isNpLabs ? 'EUR' : (variant.currency || pricing.master?.currency || 'USD');
+      const cur = isNpLabs ? 'EUR' : (variant.currency || variant.origCurrency || pricing.master?.currency || (isPharmaMedic ? 'AED' : 'USD'));
       const masterPrice = round2(baseCost);
       const masterKit = round2(masterPrice * 0.85 * 10);
 
