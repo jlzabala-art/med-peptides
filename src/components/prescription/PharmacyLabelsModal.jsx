@@ -14,19 +14,28 @@ import PhysicianPicker from '@/components/admin/patients/PhysicianPicker';
 import { searchDoctorsAction } from '@/actions/patientsActions';
 import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
 import { generateLabelZpl } from '@/utils/labels/zplGenerator';
+import { searchAlgoliaFederated } from '@/services/algoliaSearch';
 import RefillFormulaWorkbench from './RefillFormulaWorkbench';
 import ExternalFulfillmentRefillCard from './ExternalFulfillmentRefillCard';
 import { Truck } from 'lucide-react';
 
 /**
- * Optical Print Legibility Pill Badge
- * Alarms with warning red when font size drops below 6.0 pt legal pharmaceutical threshold.
+ * Unified YYYY-MM-DD date formatter for native <input type="date"> pickers.
  */
 function getFormattedDate(d = new Date()) {
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
-  return `${day}-${month}-${year}`;
+  return `${year}-${month}-${day}`;
+}
+
+function toIsoDateInput(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const ddmmyyyy = s.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+  if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2]}-${ddmmyyyy[1]}`;
+  return '';
 }
 
 function getOffsetDate(days) {
@@ -164,6 +173,42 @@ export default function PharmacyLabelsModal({
     return sourceRx?.fulfillmentMode || (sourceRx?.supplierFulfillment ? 'external_supplier' : 'internal');
   });
   const [showPrintSettings, setShowPrintSettings] = useState(false);
+  const [patientSuggestions, setPatientSuggestions] = useState([]);
+  const [showPatientSuggestions, setShowPatientSuggestions] = useState(false);
+  const patientSearchTimerRef = useRef(null);
+
+  const handlePatientSearchChange = (val) => {
+    handleFieldChange('patientName', val);
+    if (patientSearchTimerRef.current) clearTimeout(patientSearchTimerRef.current);
+    const trimmed = String(val || '').trim();
+    if (trimmed.length < 2) {
+      setPatientSuggestions([]);
+      setShowPatientSuggestions(false);
+      return;
+    }
+    patientSearchTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await searchAlgoliaFederated(trimmed, { hitsPerPage: 5 });
+        const hits = [
+          ...(res?.patients || []),
+          ...(res?.prescriptions || []),
+        ];
+        const names = [];
+        const seen = new Set();
+        for (const h of hits) {
+          const n = String(h.name || h.patientName || h.patient?.name || '').trim();
+          if (n && !seen.has(n.toLowerCase())) {
+            seen.add(n.toLowerCase());
+            names.push({ name: n, sub: h.clinicName || h.clinic || h.rxCode || h.code || 'Patient' });
+          }
+        }
+        setPatientSuggestions(names.slice(0, 6));
+        setShowPatientSuggestions(names.length > 0);
+      } catch {
+        setPatientSuggestions([]);
+      }
+    }, 220);
+  };
 
   // Track print count and reprint index in real-time
   const [modalPrintCount, setModalPrintCount] = useState(() => {
@@ -1120,7 +1165,8 @@ export default function PharmacyLabelsModal({
         }
 
         const dateStr = new Date().toISOString().slice(0, 10);
-        pdf.save(`PHARMAPOLIS_A4_STICKERS_SHEET_${labels.length}_LABELS_${dateStr}.pdf`);
+        const variantTag = activeVariant === 'shipping' ? 'SHIPPING' : 'DELIVERY';
+        pdf.save(`PHARMAPOLIS_A4_${variantTag}_SHEET_${labels.length}_LABELS_${dateStr}.pdf`);
       } else {
         // Individual 1:1 Scale Multi-page PDF for Thermal Label / Roll Printers
         const isLandscape = dimensions.widthMm >= dimensions.heightMm;
@@ -2281,7 +2327,7 @@ export default function PharmacyLabelsModal({
               </div>
 
               {/* Single Universal Segmented Formula Switcher (Shared by Label, Edit, and Refill) */}
-              {labels.length > 1 && (
+              {labels.length >= 1 && (
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -2680,7 +2726,7 @@ export default function PharmacyLabelsModal({
                   >
                     <option value="png">{isEs ? `PNG (Imagen HD · ${dpi} DPI)` : `PNG (HD Graphic · ${dpi} DPI)`}</option>
                     <option value="pdf">{isEs ? `PDF (Esta Etiqueta · ${dimensions.widthMm}×${dimensions.heightMm}mm)` : `PDF (Current Label · ${dimensions.widthMm}×${dimensions.heightMm}mm)`}</option>
-                    {labels.length > 1 && (
+                    {labels.length >= 1 && (
                       <>
                         <option value="pdf_all">{isEs ? `PDF (Todas · ${labels.length} Etiquetas)` : `PDF (All ${labels.length} Labels)`}</option>
                         <option value="pdf_a4">{isEs ? `Hoja A4 (10 por hoja · 2×5 Grid)` : `A4 Sheet (10 per page · 2×5 Grid)`}</option>
@@ -2982,8 +3028,8 @@ export default function PharmacyLabelsModal({
                   <div className="gcp-editor-fields-grid">
                     {/* Patient Name field */}
 
-                    {/* Row 1: Patient Name | Dispensing Batch (Delivery only) | Net Quantity */}
-                    <div className={`${activeVariant === 'shipping' ? 'gcp-col-8' : 'gcp-col-5'} gcp-field-wrap`}>
+                    {/* Row 1: Patient Name (Algolia) | Dispensing Batch (Delivery only) | Net Quantity (Tabulated) */}
+                    <div className={`${activeVariant === 'shipping' ? 'gcp-col-6' : 'gcp-col-5'} gcp-field-wrap`} style={{ position: 'relative' }}>
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <span>{isEs ? 'Nombre Paciente' : 'Patient Name'}</span>
@@ -2996,10 +3042,58 @@ export default function PharmacyLabelsModal({
                       <input
                         type="text"
                         value={currentItem.patientName || currentItem.patient?.name || ''}
-                        onChange={(e) => handleFieldChange('patientName', e.target.value)}
+                        onChange={(e) => handlePatientSearchChange(e.target.value)}
+                        onBlur={() => setTimeout(() => setShowPatientSuggestions(false), 180)}
                         className="gcp-form-input"
-                        placeholder="e.g. Amna Sultan Mohamed Ahmed Alotaiba"
+                        placeholder="Search patient via Algolia or type..."
                       />
+                      {showPatientSuggestions && patientSuggestions.length > 0 && (
+                        <div style={{
+                          position: 'absolute',
+                          left: 0,
+                          right: 0,
+                          top: '100%',
+                          marginTop: '4px',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 24px rgba(15,23,42,0.14)',
+                          zIndex: 60,
+                          padding: '4px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '2px'
+                        }}>
+                          {patientSuggestions.map((s) => (
+                            <button
+                              key={s.name}
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => {
+                                handleFieldChange('patientName', s.name);
+                                setShowPatientSuggestions(false);
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '7px 10px',
+                                minHeight: '36px',
+                                border: 'none',
+                                borderRadius: '6px',
+                                background: 'transparent',
+                                textAlign: 'left',
+                                cursor: 'pointer',
+                                fontSize: '0.78rem',
+                                color: '#0f172a'
+                              }}
+                            >
+                              <span style={{ fontWeight: 650 }}>{s.name}</span>
+                              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{s.sub}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {activeVariant !== 'shipping' && (
@@ -3075,18 +3169,43 @@ export default function PharmacyLabelsModal({
                     </div>
                     )}
 
-                    <div className={`${activeVariant === 'shipping' ? 'gcp-col-4' : 'gcp-col-3'} gcp-field-wrap`}>
+                    <div className={`${activeVariant === 'shipping' ? 'gcp-col-6' : 'gcp-col-3'} gcp-field-wrap`}>
                       <label className="gcp-form-label">
                         <span>{isEs ? 'Cantidad Neta' : 'Net Quantity'}</span>
                         <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
-                        value={currentItem.volume || currentItem.size || currentItem.netContent || ''}
+                        value={currentItem.volume || currentItem.size || currentItem.netContent || '10 mL'}
                         onChange={(e) => handleFieldChange('volume', e.target.value)}
                         className="gcp-form-input"
-                        placeholder="60 Caps / 100 mL"
+                        placeholder="10 mL"
                       />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '5px' }}>
+                        {['5 mL', '10 mL', '15 mL', '30 mL', '60 Caps', '100 mL'].map((qPreset) => {
+                          const curVol = currentItem.volume || currentItem.size || currentItem.netContent || '10 mL';
+                          const active = curVol === qPreset;
+                          return (
+                            <button
+                              key={qPreset}
+                              type="button"
+                              onClick={() => handleFieldChange('volume', qPreset)}
+                              style={{
+                                border: active ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                                background: active ? '#e8f0fe' : '#f8fafc',
+                                color: active ? '#1a73e8' : '#475569',
+                                borderRadius: '4px',
+                                fontSize: '0.64rem',
+                                fontWeight: active ? 700 : 600,
+                                padding: '2px 7px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {qPreset}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     {/* Row 1.5: Header Timing / Part Badge (Delivery only) */}
@@ -3647,11 +3766,10 @@ export default function PharmacyLabelsModal({
                         </button>
                       </label>
                       <input
-                        type="text"
-                        value={currentItem.prodDate || currentItem.mfgDate || ''}
+                        type="date"
+                        value={toIsoDateInput(currentItem.prodDate || currentItem.mfgDate) || getFormattedDate()}
                         onChange={(e) => handleFieldChange('prodDate', e.target.value)}
                         className="gcp-form-input"
-                        placeholder="YYYY-MM-DD"
                       />
                     </div>
 
@@ -3661,11 +3779,10 @@ export default function PharmacyLabelsModal({
                         <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
-                        type="text"
-                        value={currentItem.expDate || ''}
+                        type="date"
+                        value={toIsoDateInput(currentItem.expDate) || getOffsetDate(90)}
                         onChange={(e) => handleFieldChange('expDate', e.target.value)}
                         className="gcp-form-input"
-                        placeholder="YYYY-MM-DD"
                       />
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '5px' }}>
                         {[
@@ -3705,11 +3822,40 @@ export default function PharmacyLabelsModal({
                       </label>
                       <input
                         type="text"
-                        value={currentItem.storage || ''}
+                        value={currentItem.storage || 'Keep refrigerated (2°C-8°C). Do not freeze.'}
                         onChange={(e) => handleFieldChange('storage', e.target.value)}
                         className="gcp-form-input"
-                        placeholder="Store in a cool dry place, below 25°C."
+                        placeholder="Keep refrigerated (2°C-8°C). Do not freeze."
                       />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                        {[
+                          { label: '2–8°C Refrigerated', val: 'Keep refrigerated (2°C-8°C). Do not freeze.' },
+                          { label: '15–25°C Ambient', val: 'Store in a cool, dry place (15°C-25°C).' },
+                          { label: 'Protect from Light', val: 'Protect from direct light and moisture (below 25°C).' },
+                        ].map((st) => {
+                          const curStorage = currentItem.storage || 'Keep refrigerated (2°C-8°C). Do not freeze.';
+                          const active = curStorage === st.val;
+                          return (
+                            <button
+                              key={st.label}
+                              type="button"
+                              onClick={() => handleFieldChange('storage', st.val)}
+                              style={{
+                                border: active ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                                background: active ? '#e8f0fe' : '#f8fafc',
+                                color: active ? '#1a73e8' : '#475569',
+                                borderRadius: '4px',
+                                fontSize: '0.66rem',
+                                fontWeight: active ? 700 : 600,
+                                padding: '3px 8px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {st.label}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 
@@ -3919,6 +4065,10 @@ export default function PharmacyLabelsModal({
                   onClick={() => {
                     setFulfillmentMode('internal');
                     setActiveVariant('shipping');
+                    if (!currentItem.shippingTitle) {
+                      const defTitle = getCustomsFriendlySuggestions(currentItem)[0];
+                      if (defTitle) handleFieldChange('shippingTitle', defTitle);
+                    }
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -4367,7 +4517,7 @@ export default function PharmacyLabelsModal({
       </div>
 
       {/* Hidden offscreen vector container for bulk PDF and A4 grid generation */}
-      {labels.length > 1 && (
+      {labels.length >= 1 && (
         <div
           style={{ position: 'fixed', left: '-9999px', top: '-9999px', opacity: 0, pointerEvents: 'none' }}
           aria-hidden="true"

@@ -15,6 +15,7 @@ export function useBatchExport({
   user,
   userProfile,
   zplDpi = 203,
+  activeVariant = null,
   setPrintCountsMap,
   setPrintDetailsMap,
   setLabelsKpis
@@ -129,7 +130,7 @@ export function useBatchExport({
               rxCode: pItem.code,
               code: pItem.code,
               partLabel: lbl.partLabel || (pLabels.length > 1 ? `Part ${pIdx + 1}/${pLabels.length}` : ''),
-              variant: lbl.variant || pItem.variant || 'backQr'
+              variant: activeVariant || lbl.variant || pItem.variant || 'backQr'
             });
           }
         }

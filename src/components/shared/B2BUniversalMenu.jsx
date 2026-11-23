@@ -78,7 +78,7 @@ export default function B2BUniversalMenu({
   };
 
   const isRouteActive = (href) => {
-    if (href === '/') return pathname === '/';
+    if (href === '/' || href === '/pricing' || href === '/catalog') return pathname === href;
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
@@ -354,35 +354,63 @@ export default function B2BUniversalMenu({
                   <Compass size={13} />
                   <span>{isSpanish ? 'Relacionadas desde aquí' : 'Related Screens'}</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {relatedRoutes.map((item) => (
                     <Link
                       key={item.id}
                       href={item.href}
                       onClick={() => setOpen(false)}
                       style={{
-                        display: 'flex',
+                        display: 'inline-flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '8px 9px',
+                        gap: '5px',
+                        padding: '7px 10px',
                         minHeight: '40px',
                         borderRadius: '7px',
                         background: '#ffffff',
                         border: '1px solid #cbd5e1',
                         color: '#0f172a',
-                        fontSize: '0.74rem',
+                        fontSize: '0.73rem',
                         fontWeight: 700,
-                        textDecoration: 'none'
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {isSpanish ? item.labelEs : item.labelEn}
-                      </span>
+                      <span>{isSpanish ? item.labelEs : item.labelEn}</span>
                       <ChevronRight size={12} color="#64748b" style={{ flexShrink: 0 }} />
                     </Link>
                   ))}
                 </div>
               </div>
+
+              {/* Quick Search (Rule #7: Search First at top of drawer) */}
+              <button
+                type="button"
+                onClick={triggerGlobalSearch}
+                style={{
+                  width: '100%',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Search size={14} />
+                  <span>{isSpanish ? 'Buscar en todo el portal…' : 'Search entire portal…'}</span>
+                </span>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
+                  ⌘K
+                </span>
+              </button>
 
               {/* 2. Collapsible 4 B2B Domains */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -466,37 +494,6 @@ export default function B2BUniversalMenu({
                   );
                 })}
               </div>
-            </div>
-
-            {/* Footer Quick Search */}
-            <div style={{ padding: '10px 12px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
-              <button
-                type="button"
-                onClick={triggerGlobalSearch}
-                style={{
-                  width: '100%',
-                  minHeight: '42px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#475569',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <Search size={14} />
-                  <span>{isSpanish ? 'Buscar en todo el portal…' : 'Search entire portal…'}</span>
-                </span>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
-                  ⌘K
-                </span>
-              </button>
             </div>
           </aside>
         </div>

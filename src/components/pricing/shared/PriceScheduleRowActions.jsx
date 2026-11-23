@@ -15,6 +15,7 @@ import {
 import toast from 'react-hot-toast';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useAtlasContext } from '@/context/AtlasContextProvider';
+import { trackConversion } from '@/services/algoliaInsights';
 import { buildPriceActionPayload } from './priceActionHelpers';
 import './PriceScheduleActions.css';
 
@@ -88,6 +89,11 @@ export default function PriceScheduleRowActions({
     } else {
       workspace?.addRfqItem?.(payload.rfqPayload);
     }
+    trackConversion({
+      indexName: 'products',
+      objectIDs: [String(payload.sku || payload.key || payload.name)],
+      eventName: 'RFQ Quote Added',
+    });
     toast.success(`Added ${payload.name} to RFQ Quote`);
   };
 
