@@ -83,6 +83,7 @@ export default function PublicLabelsAppClient({
   const [refillPresetPartIndex, setRefillPresetPartIndex] = useState(null);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [isStudioFocus, setIsStudioFocus] = useState(false);
+  const [showPreflightBar, setShowPreflightBar] = useState(false);
   const [editorTab, setEditorTab] = useState('fields');
   const [colorMode, setColorMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -888,6 +889,28 @@ export default function PublicLabelsAppClient({
           <LabelsWorkspaceSkeleton isEs={isEs} />
         ) : (
           <div id="pls-label-workbench" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: showPreflightBar ? '6px' : '4px' }}>
+              <button
+                type="button"
+                onClick={() => setShowPreflightBar((prev) => !prev)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: showPreflightBar ? '1px solid #1a73e8' : '1px solid #dadce0',
+                  background: showPreflightBar ? '#e8f0fe' : '#ffffff',
+                  color: showPreflightBar ? '#174ea6' : '#5f6368',
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <span>{showPreflightBar ? (isEs ? '▲ Ocultar Presets & GMP' : '▲ Hide Presets & GMP') : (isEs ? '⚙ Presets · B&W/Color · GMP' : '⚙ Presets · B&W/Color · GMP')}</span>
+              </button>
+            </div>
+            {showPreflightBar && (
             <LabelsPreflightBar
               isEs={isEs}
               isEditing={isEditing}
@@ -958,6 +981,7 @@ export default function PublicLabelsAppClient({
               strictGmpGate={Boolean(prefs.strictGmpGate)}
               onToggleStrictGmpGate={(val) => updatePref('strictGmpGate', val)}
             />
+            )}
 
             {currentRx?.clinicalNotes && (
               <details

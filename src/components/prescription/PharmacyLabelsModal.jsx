@@ -3480,9 +3480,9 @@ export default function PharmacyLabelsModal({
                     </div>
                     )}
 
-                    {/* 1-Click Option: Same as Delivery Label (Shipping variant only, off by default) */}
+                    {/* 1-Click Compact 1-Line Switch: Same as Delivery Label (Shipping variant only, off by default) */}
                     {activeVariant === 'shipping' && (
-                      <div className="gcp-col-12 gcp-field-wrap" style={{ marginBottom: '4px' }}>
+                      <div className="gcp-col-12 gcp-field-wrap" style={{ marginBottom: '2px' }}>
                         <button
                           type="button"
                           role="switch"
@@ -3494,44 +3494,33 @@ export default function PharmacyLabelsModal({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            gap: '12px',
-                            padding: '10px 12px',
-                            borderRadius: '8px',
+                            gap: '10px',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
                             border: shippingSameAsDelivery ? '1.5px solid #1a73e8' : '1px solid #dadce0',
                             background: shippingSameAsDelivery ? '#e8f0fe' : '#f8f9fa',
-                            color: shippingSameAsDelivery ? '#1a73e8' : '#3c4043',
+                            color: shippingSameAsDelivery ? '#174ea6' : '#3c4043',
                             cursor: 'pointer',
                             textAlign: 'left',
                             transition: 'all 0.15s ease'
                           }}
                         >
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
-                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: shippingSameAsDelivery ? '#174ea6' : '#202124' }}>
-                              {isEs ? 'Igual que Delivery Label (Clínica)' : 'Same as Delivery Label (Clinical)'}
-                            </span>
-                            <span style={{ fontSize: '0.7rem', fontWeight: 500, color: shippingSameAsDelivery ? '#1967d2' : '#5f6368' }}>
-                              {shippingSameAsDelivery
-                                ? (isEs
-                                  ? 'Activado: la etiqueta de Shipping copia exactamente la Delivery Label clínica.'
-                                  : 'Enabled: Shipping Label mirrors the full clinical Delivery Label.')
-                                : (isEs
-                                  ? 'Por defecto: etiqueta discreta para Aduanas. Pulsa para usar la misma que Delivery.'
-                                  : 'Default: discreet Customs-Safe label. Click to mirror Delivery Label.')}
-                            </span>
-                          </div>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {isEs ? 'Igual que Delivery Label (Clínica)' : 'Same as Delivery Label (Clinical)'}
+                          </span>
                           <span
                             style={{
                               flexShrink: 0,
-                              padding: '4px 10px',
+                              padding: '3px 10px',
                               borderRadius: '999px',
-                              fontSize: '0.7rem',
+                              fontSize: '0.68rem',
                               fontWeight: 700,
                               background: shippingSameAsDelivery ? '#1a73e8' : '#ffffff',
                               color: shippingSameAsDelivery ? '#ffffff' : '#5f6368',
                               border: shippingSameAsDelivery ? '1px solid #1a73e8' : '1px solid #dadce0'
                             }}
                           >
-                            {shippingSameAsDelivery ? (isEs ? '✓ Activado' : '✓ Active') : (isEs ? 'Activar' : 'Use Delivery')}
+                            {shippingSameAsDelivery ? (isEs ? '✓ Activado' : '✓ Active') : (isEs ? 'Usar Delivery' : 'Use Delivery')}
                           </span>
                         </button>
                       </div>
