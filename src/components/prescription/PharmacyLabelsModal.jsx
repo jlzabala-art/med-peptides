@@ -115,7 +115,7 @@ export default function PharmacyLabelsModal({
   editorTab: externalEditorTab = null,
   onEditorTabChange = null
 }) {
-  const { can, is, effectiveRole } = useRoleAccess();
+  const { can, effectiveRole } = useRoleAccess();
   const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
 
   React.useEffect(() => {
@@ -156,11 +156,9 @@ export default function PharmacyLabelsModal({
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isGeneratingZip, setIsGeneratingZip] = useState(false);
-  const [compareMode, setCompareMode] = useState(!hideShippingLabel); // show Delivery + Shipping side by side only if shipping label is enabled
   const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
   const [boldPosology, setBoldPosology] = useState(true); // true = Bold 800 (standard), false = Normal 500 (compact, saves space)
   const [shippingSameAsDelivery, setShippingSameAsDelivery] = useState(false); // default false (discreet Customs-Safe); true mirrors Delivery Clinical Label
-  const [deliveryLabelType, setDeliveryLabelType] = useState('customs'); // 'customs' (GCC Discreet Aduanas) | 'clinical' (100% Prescription Based)
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [internalColorMode, setInternalColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (vector color)
   const colorMode = externalColorMode || internalColorMode;
@@ -3880,12 +3878,16 @@ export default function PharmacyLabelsModal({
                     </div>
 
                     {(() => {
-                      const defaultStorage = 'Keep refrigerated (2°C-8°C). Do not freeze.';
+                      const productTitleHint = `${currentItem.productTitle || ''} ${currentItem.productName || ''} ${currentItem.dosageForm || ''} ${currentItem.dose || ''}`.toLowerCase();
+                      const isAmbientProduct = /\b(pellet|pellets|capsule|capsules|caps|tablet|tablets|tabs|cream|gel|topical|serum)\b/.test(productTitleHint);
+                      const defaultStorage = isAmbientProduct
+                        ? 'Store in a cool, dry place (15°C-25°C).'
+                        : 'Keep refrigerated (2°C-8°C). Do not freeze.';
                       const curStorage = currentItem.storage || defaultStorage;
                       const isCustomStorage = Boolean(currentItem.storage && currentItem.storage !== defaultStorage);
                       const storagePresets = [
-                        { icon: '❄️', label: isEs ? '2–8°C Refrigerado' : '2–8°C Refrigerated', val: defaultStorage, isDefault: true },
-                        { icon: '🌡️', label: isEs ? '15–25°C Ambiente' : '15–25°C Ambient', val: 'Store in a cool, dry place (15°C-25°C).' },
+                        { icon: '❄️', label: isEs ? '2–8°C Refrigerado' : '2–8°C Refrigerated', val: 'Keep refrigerated (2°C-8°C). Do not freeze.', isDefault: !isAmbientProduct },
+                        { icon: '🌡️', label: isEs ? '15–25°C Ambiente' : '15–25°C Ambient', val: 'Store in a cool, dry place (15°C-25°C).', isDefault: isAmbientProduct },
                         { icon: '☀️', label: isEs ? 'Proteger de Luz' : 'Protect from Light', val: 'Protect from direct light and moisture (below 25°C).' },
                         { icon: '🧊', label: isEs ? '-20°C Congelado' : '-20°C Frozen', val: 'Store frozen (-20°C). Protect from light.' },
                       ];

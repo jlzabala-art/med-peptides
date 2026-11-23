@@ -12,7 +12,9 @@ import {
   Search,
   Tags,
   Layers,
-  FileText
+  FileText,
+  Copy,
+  Check
 } from 'lucide-react';
 import {
   B2B_NAV_DOMAINS,
@@ -38,6 +40,7 @@ export default function B2BUniversalMenu({
 }) {
   const pathname = usePathname() || '/';
   const [internalOpen, setInternalOpen] = useState(false);
+  const [copiedCatalog, setCopiedCatalog] = useState(null);
   const [mobileSheetMode, setMobileSheetMode] = useState('all'); // 'all' | 'related'
   const [openDomainId, setOpenDomainId] = useState(() => getActiveDomainId(pathname));
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -411,6 +414,47 @@ export default function B2BUniversalMenu({
                   ⌘K
                 </span>
               </button>
+
+              {/* Quick Outreach Share Links (Peptides & Pellets) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '8px', marginBottom: '10px' }}>
+                {[
+                  { id: 'peptides', label: isSpanish ? 'Copiar Péptidos' : 'Copy Peptides', url: 'https://www.atlashealth-services.com/pricing/peptides' },
+                  { id: 'pellets', label: isSpanish ? 'Copiar Pellets' : 'Copy Pellets', url: 'https://www.atlashealth-services.com/pricing/pellets' }
+                ].map((cat) => {
+                  const isCopied = copiedCatalog === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                          navigator.clipboard.writeText(cat.url).catch(() => {});
+                        }
+                        setCopiedCatalog(cat.id);
+                        setTimeout(() => setCopiedCatalog(null), 1800);
+                      }}
+                      style={{
+                        minHeight: '40px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '5px',
+                        padding: '6px 8px',
+                        borderRadius: '6px',
+                        border: isCopied ? '1px solid #137333' : '1px solid #dadce0',
+                        background: isCopied ? '#e6f4ea' : '#ffffff',
+                        color: isCopied ? '#137333' : '#5f6368',
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isCopied ? <Check size={12} /> : <Copy size={12} />}
+                      <span>{isCopied ? (isSpanish ? 'Copiado' : 'Copied') : cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
               {/* 2. Collapsible 4 B2B Domains */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
