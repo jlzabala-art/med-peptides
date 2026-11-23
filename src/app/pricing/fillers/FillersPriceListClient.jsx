@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
@@ -14,6 +14,8 @@ import EmptyState from '@/components/ui/EmptyState';
 import ProductQuickViewDrawer from '@/components/shared/ProductQuickViewDrawer';
 import { convertCurrencyAmount } from '@/utils/productViewModel';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import { trackSearchClick, trackConversion } from '@/services/algoliaInsights';
+import { getTrendingItems } from '@/services/algoliaRecommendService';
 import { useAuth } from '@/context/AuthContext';
 import { Sparkles, Syringe, Layers, ShieldCheck, Download } from 'lucide-react';
 import '../colway/ColwayPriceList.css';
@@ -43,6 +45,22 @@ export default function FillersPriceListClient({
   const [selectedType, setSelectedType] = useState('all'); // 'all' | 'boosters' | 'fillers' | 'biostimulators'
   const [tierMode, setTierMode] = useState('clinic'); // 'wholesale' (mediluxe) | 'clinic' (wholeseller) | 'master' (cost)
   const [quickProduct, setQuickProduct] = useState(null);
+  const [trendingFillers, setTrendingFillers] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    getTrendingItems({
+      indexName: 'products',
+      facetName: 'categoryId',
+      facetValue: 'dermal-fillers',
+      maxRecommendations: 4
+    }).then((hits) => {
+      if (active && Array.isArray(hits) && hits.length > 0) {
+        setTrendingFillers(hits);
+      }
+    });
+    return () => { active = false; };
+  }, []);
 
   const brands = useMemo(() => {
     const set = new Set();
@@ -118,7 +136,10 @@ export default function FillersPriceListClient({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <button
               type="button"
-              onClick={() => setQuickProduct({ slug: row.slug || row.id, title: row.name || row.product_name })}
+              onClick={() => {
+                trackSearchClick({ indexName: 'products', objectID: row.id || row.slug, eventName: 'Fillers Schedule Item Clicked' });
+                setQuickProduct({ slug: row.slug || row.id, title: row.name || row.product_name });
+              }}
               style={{
                 background: 'none',
                 border: 'none',
@@ -226,12 +247,12 @@ export default function FillersPriceListClient({
 
     let nextY = chrome.drawAtlasInstitutionalHeader(doc, {
       title: isEs
-        ? 'ATLAS HEALTH SERVICES — Inyectables Estéticos y Skin Boosters'
-        : 'ATLAS HEALTH SERVICES — Aesthetic Injectables & Skin Boosters',
+        ? 'Inyectables Estéticos y Skin Boosters'
+        : 'Aesthetic Injectables & Skin Boosters',
       subtitle: isEs
         ? 'Tarifa Oficial B2B Wholeseller · Fillers Dérmicos, Skin Boosters, Bioestimuladores y Polinucleótidos'
         : 'Official Wholeseller B2B Price Schedule · Dermal Fillers, Skin Boosters, Biostimulators & Polynucleotides',
-      documentRef: 'CAT-B2B-FILLERS-2026',
+      documentRef: 'B2B-FILLERS-2026',
       issuedDate: dateStr,
       tierLabel: isEs ? 'Tarifa Oficial Wholeseller B2B' : 'Official Wholeseller B2B Schedule'
     });
@@ -241,7 +262,7 @@ export default function FillersPriceListClient({
       items: [
         { label: isEs ? 'Divisa' : 'Currency', value: currency },
         { label: isEs ? 'Catálogo' : 'Catalog Scope', value: `${filteredRows.length} SKUs` },
-        { label: isEs ? 'Red' : 'Network', value: 'Atlas Health Verified' }
+        { label: isEs ? 'Logística' : 'Dispatch', value: '24–48h EU Verified' }
       ]
     });
 
@@ -279,11 +300,17 @@ export default function FillersPriceListClient({
     });
 
     chrome.applyAtlasRunningFooter(doc, {
-      documentRef: 'CAT-B2B-FILLERS-2026',
+      documentRef: 'B2B-FILLERS-2026',
       tierLabel: isEs ? 'Tarifa Oficial Wholeseller B2B' : 'Official Wholeseller B2B Schedule'
     });
 
-    doc.save(`ATLAS_WHOLESELLER_FILLERS_${currency}_${dateStr}.pdf`);
+    trackConversion({
+      indexName: 'products',
+      objectIDs: sortedRows.slice(0, 20).map((r) => String(r.id || r.slug)),
+      eventName: 'Wholeseller Fillers PDF Exported'
+    });
+
+    doc.save(`WHOLESELLER_FILLERS_SCHEDULE_${currency}_${dateStr}.pdf`);
   };
 
   useRegisterAtlasContext(
@@ -341,8 +368,8 @@ export default function FillersPriceListClient({
 
       <main className="atlas-page-shell" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <PageHeroCard
-          brandLeft="ATLAS HEALTH SERVICES"
-          brandRight={isEs ? 'TARIFA OFICIAL B2B' : 'OFFICIAL B2B SCHEDULE'}
+          brandLeft={isEs ? 'PORTAFOLIO ESTÉTICO CLÍNICO' : 'CLINICAL AESTHETICS PORTFOLIO'}
+          brandRight={isEs ? 'TARIFA OFICIAL WHOLESELLER' : 'OFFICIAL WHOLESELLER SCHEDULE'}
           badges={[
             isEs ? 'Skin Boosters · Fillers · Polinucleótidos' : 'Skin Boosters · Fillers · Polynucleotides',
             isEs ? 'Marcado CE · Trazabilidad Lote' : 'CE Marked · Full Batch Traceability'
@@ -449,6 +476,33 @@ export default function FillersPriceListClient({
             <option value="biostimulators">{isEs ? 'Bioestimuladores (PLLA/CaHA)' : 'Biostimulators (PLLA/CaHA)'}</option>
           </select>
         </div>
+
+        {trendingFillers.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>
+              {isEs ? 'Tendencia en Clínicas:' : 'Trending in Clinics:'}
+            </span>
+            {trendingFillers.map((item) => (
+              <button
+                key={item.objectID || item.id}
+                type="button"
+                onClick={() => setQuickProduct({ slug: item.slug || item.objectID, title: item.name })}
+                style={{
+                  padding: '3px 10px',
+                  borderRadius: '999px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#003666',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {isAdmin && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
