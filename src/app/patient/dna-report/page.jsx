@@ -54,7 +54,7 @@ export default async function PatientDnaReportPage({ searchParams }) {
   const patientName = sp?.patient || (isWafa ? 'Ms. Wafa Burud' : 'Hossam Ahmed');
   const clinic = sp?.clinic || (isWafa ? 'Transcend Healthcare' : 'Ryhanh Medical Company · Doha');
   const doctor = sp?.doctor || (isWafa ? 'Dr. Sajid Burud' : 'Lead Nutrigenomics Specialist');
-  const requestedView = sp?.view === 'nutritionist' ? 'nutritionist' : 'patient';
+  const requestedView = (sp?.view === 'nutritionist' || sp?.audience === 'nutritionist') ? 'nutritionist' : 'patient';
   const canAccessNutritionist = requestedView === 'nutritionist' && verifyNutritionistToken(sampleCode, sp?.nt);
   const nutritionistToken = canAccessNutritionist ? computeNutritionistToken(sampleCode) : null;
 

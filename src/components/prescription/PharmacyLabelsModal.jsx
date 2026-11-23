@@ -3889,7 +3889,7 @@ export default function PharmacyLabelsModal({
                     cursor: 'pointer'
                   }}
                 >
-                  {isEs ? 'Comparar Delivery / Shipping' : 'Compare Delivery / Shipping'}
+                  {isEs ? 'Comparar Envase / Envío' : 'Compare Product / Shipping'}
                 </button>
               )}
 

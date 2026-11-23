@@ -43,7 +43,7 @@ export default function DnaDownloadsSection({
       </div>
 
       {/* Grid of PDF Download Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
         {/* Simple Patient PDF (Always visible) */}
         <div style={{ backgroundColor: '#ffffff', borderRadius: '14px', border: '1.5px solid #99f6e4', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 16px rgba(13, 148, 136, 0.08)' }}>
           <div>

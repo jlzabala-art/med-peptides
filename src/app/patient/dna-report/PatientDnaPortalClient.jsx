@@ -2215,6 +2215,15 @@ export default function PatientDnaPortalClient({
           .dna-hide-mobile {
             display: none !important;
           }
+          .dna-mobile-pill-bar button {
+            min-height: 44px;
+            padding: 8px 14px !important;
+            font-size: 0.8rem !important;
+          }
+          .dna-mobile-bottom-bar button,
+          .dna-mobile-bottom-bar a {
+            min-height: 44px;
+          }
         }
 
         @media (min-width: 1024px) {
