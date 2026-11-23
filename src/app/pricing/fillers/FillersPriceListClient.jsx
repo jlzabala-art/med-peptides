@@ -51,10 +51,10 @@ export default function FillersPriceListClient({
   const [tierMode, setTierMode] = useState('clinic'); // 'wholesale' (+15%) | 'clinic' (+15%+15%) | 'retail' (+50%) | 'master' (cost)
   const [quickProduct, setQuickProduct] = useState(null);
 
-  const subcategories = useMemo(() => {
+  const brands = useMemo(() => {
     const set = new Set();
     initialProducts.forEach((p) => {
-      if (p.subcategory) set.add(String(p.subcategory));
+      if (p.brand) set.add(String(p.brand).trim());
     });
     return ['all', ...Array.from(set).sort()];
   }, [initialProducts]);
@@ -91,7 +91,7 @@ export default function FillersPriceListClient({
   const filteredRows = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return enrichedRows.filter((r) => {
-      if (selectedSubcategory !== 'all' && String(r.subcategory || '') !== selectedSubcategory) {
+      if (selectedSubcategory !== 'all' && String(r.brand || '').trim() !== selectedSubcategory) {
         return false;
       }
       if (!q) return true;
@@ -100,9 +100,14 @@ export default function FillersPriceListClient({
     });
   }, [enrichedRows, searchQuery, selectedSubcategory]);
 
-  const boostersCount = useMemo(
-    () => enrichedRows.filter((r) => /booster|polynucleotide|biostimulator/i.test(`${r.subcategory || ''} ${r.name || ''}`)).length,
-    [enrichedRows]
+  const minB2bPrice = useMemo(() => {
+    const prices = enrichedRows.map((r) => r.clinicPrice).filter((n) => n > 0);
+    return prices.length > 0 ? Math.min(...prices) : 0;
+  }, [enrichedRows]);
+
+  const uniqueBrandsCount = useMemo(
+    () => Math.max(0, brands.length - 1),
+    [brands]
   );
 
   const columns = useMemo(() => {
@@ -250,17 +255,17 @@ export default function FillersPriceListClient({
 
       <main className="atlas-page-shell" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <PageHeroCard
-          brandLeft="ATLAS HEALTH × PHARMAMEDIC"
+          brandLeft="ATLAS HEALTH SERVICES"
           brandRight={isEs ? 'TARIFA OFICIAL B2B' : 'OFFICIAL B2B SCHEDULE'}
           badges={[
             isEs ? 'Skin Boosters · Fillers · Polinucleótidos' : 'Skin Boosters · Fillers · Polynucleotides',
-            isEs ? 'Margen Estándar +15% / +15%' : 'Standard +15% / +15% Tiering'
+            isEs ? 'Marcado CE · Trazabilidad Lote' : 'CE Marked · Full Batch Traceability'
           ]}
-          title={isEs ? 'Inyectables Estéticos & Skin Boosters (Lorenzo)' : 'Aesthetic Injectables & Skin Boosters (Lorenzo)'}
+          title={isEs ? 'Inyectables Estéticos & Skin Boosters' : 'Aesthetic Injectables & Skin Boosters'}
           subtitle={
             isEs
-              ? 'Tarifa homogénea B2B en tiempo real con niveles Mayorista (+15%), Clínica/Wholeseller (+15% + 15%) y PVP (+50%).'
-              : 'Homogeneous real-time B2B price schedule with Wholesale (+15%), Clinic/Wholeseller (+15% + 15%), and Retail (+50%) tiers.'
+              ? 'Portafolio europeo certificado de Fillers Dérmicos, Skin Boosters, Bioestimuladores y Polinucleótidos con tarifa directa para clínicas.'
+              : 'Certified European portfolio of Dermal Fillers, Skin Boosters, Biostimulators & Polynucleotides with direct B2B clinic pricing.'
           }
           actions={
             <button
@@ -277,27 +282,27 @@ export default function FillersPriceListClient({
 
         <div className="atlas-kpi-grid" style={{ marginBottom: 0 }}>
           <MetricCard
-            title="Total Catalog SKUs"
+            title={isEs ? 'SKUs Certificados' : 'Certified SKUs'}
             value={String(enrichedRows.length)}
-            subtitle="Active in Firestore"
+            subtitle={isEs ? `${uniqueBrandsCount} marcas europeas líderes` : `${uniqueBrandsCount} leading European brands`}
             icon={Layers}
           />
           <MetricCard
-            title="Skin Boosters & Bio"
-            value={String(boostersCount)}
-            subtitle="Boosters & Polynucleotides"
+            title={isEs ? 'Desde (Precio B2B)' : 'Starting B2B Price'}
+            value={minB2bPrice > 0 ? formatMoney(minB2bPrice, currency) : '—'}
+            subtitle={isEs ? 'Skin Boosters y Polinucleótidos' : 'Skin Boosters & Polynucleotides'}
             icon={Sparkles}
           />
           <MetricCard
-            title="B2B Margin Structure"
-            value="+15% / +15%"
-            subtitle="Mediluxe + Wholeseller"
+            title={isEs ? 'Envío Cadena Fría' : 'Cold-Chain Dispatch'}
+            value="24–48h"
+            subtitle={isEs ? 'Logística verificada · Trazabilidad' : 'Verified EU logistics & batch'}
             icon={ShieldCheck}
           />
           <MetricCard
-            title="Active Currency"
-            value={currency}
-            subtitle="Live FX Conversion"
+            title={isEs ? 'Margen Clínica Est.' : 'Est. Clinic Margin'}
+            value="25–35%"
+            subtitle={isEs ? 'Frente a PVP recomendado' : 'vs. Recommended Retail'}
             icon={Syringe}
           />
         </div>
@@ -308,11 +313,11 @@ export default function FillersPriceListClient({
           onChange={setSearchQuery}
           placeholder={isEs ? 'Buscar booster, filler, marca o código...' : 'Search booster, filler, brand or code...'}
           resultCount={filteredRows.length}
-          filters={subcategories.map((sub) => ({
-            id: sub,
-            label: sub === 'all' ? (isEs ? 'Todos' : 'All') : sub,
-            active: selectedSubcategory === sub,
-            onClick: () => setSelectedSubcategory(sub)
+          filters={brands.map((brand) => ({
+            id: brand,
+            label: brand === 'all' ? (isEs ? 'Todas las marcas' : 'All Brands') : brand,
+            active: selectedSubcategory === brand,
+            onClick: () => setSelectedSubcategory(brand)
           }))}
         />
 
