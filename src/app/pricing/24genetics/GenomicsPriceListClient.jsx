@@ -35,7 +35,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
-import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
+import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import DataTable from '@/components/ui/DataTable';
 import CatalogMasterDetailPanel from '@/components/pricing/shared/CatalogMasterDetailPanel';
@@ -611,7 +611,7 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         }
       />
 
-      <ClinicalFormatSwitcher activeFormat="24genetics" currency={currency} />
+      <CatalogPricingBridgeBar activeMode="pricing" slug="24genomics" />
 
       <main className="atlas-page-shell">
         <div style={{ marginBottom: '1rem' }}>

@@ -21,7 +21,7 @@ import {
 // Extracted UI Components
 import PeptidesTopAppBar from '@/components/pricing/peptides/PeptidesTopAppBar';
 import PeptidesPageHeader from '@/components/pricing/peptides/PeptidesPageHeader';
-import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
+import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import PeptidesSidebarRail from '@/components/pricing/peptides/PeptidesSidebarRail';
 import PeptidesFilterToolbar from '@/components/pricing/peptides/PeptidesFilterToolbar';
 import PeptidesKpiSummaryBar from '@/components/pricing/peptides/PeptidesKpiSummaryBar';
@@ -537,7 +537,7 @@ export default function PeptidesPriceListClient({
       />
 
       {/* ── Unified Clinical Format Switcher (1-Click Navigation Across All 5 Suite Screens) ── */}
-      <ClinicalFormatSwitcher activeFormat="peptides" lang={lang} currency={currency} />
+      <CatalogPricingBridgeBar activeMode="pricing" slug="peptides" lang={lang} />
 
       <main className="atlas-page-shell peptides-main-container">
         {/* Page Header (Consolidated Hero & Action Toolbar) */}

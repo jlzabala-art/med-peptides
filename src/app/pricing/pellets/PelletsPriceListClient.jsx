@@ -34,7 +34,7 @@ import PageHeroCard from '@/components/ui/PageHeroCard';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
-import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
+import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 
 import './PelletsPriceList.css';
@@ -870,7 +870,7 @@ export default function PelletsPriceListClient({
       />
 
       {/* ── UNIFIED CLINICAL FORMAT SWITCHER (1-Click Navigation Across Vials, Pens & Pellets) ── */}
-      <ClinicalFormatSwitcher activeFormat="pellets" lang={lang} currency={currency} />
+      <CatalogPricingBridgeBar activeMode="pricing" slug="pellets" lang={lang} />
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <main className="pellets-price-container">

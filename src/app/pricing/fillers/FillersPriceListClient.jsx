@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import ClinicalFormatSwitcher from '@/components/pricing/shared/ClinicalFormatSwitcher';
+import CatalogPricingBridgeBar from '@/components/shared/CatalogPricingBridgeBar';
 import PageHeroCard from '@/components/ui/PageHeroCard';
 import MetricCard from '@/components/ui/MetricCard';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
@@ -250,7 +250,7 @@ export default function FillersPriceListClient({
         ]}
       />
 
-      <ClinicalFormatSwitcher activeFormat="fillers" lang={lang} />
+      <CatalogPricingBridgeBar activeMode="pricing" slug="fillers" lang={lang} />
 
       <main className="atlas-page-shell" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <PageHeroCard
