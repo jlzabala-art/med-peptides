@@ -61,6 +61,7 @@ export default function LabelsHomeView({
 }) {
   const { role } = useRoleAccess();
   const [statusOverrides, setStatusOverrides] = useState({});
+  const [selectedCodes, setSelectedCodes] = useState([]);
 
   // Group visible worklist rows by patient so each patient appears once in the main table
   const groupedWorklistRows = React.useMemo(() => {
@@ -540,8 +541,93 @@ export default function LabelsHomeView({
                 </button>
               </div>
             ) : (
+              <>
+              {selectedCodes.length > 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px',
+                    flexWrap: 'wrap',
+                    padding: '8px 14px',
+                    marginBottom: '8px',
+                    borderRadius: '8px',
+                    background: '#e8f0fe',
+                    border: '1px solid #c2e7ff'
+                  }}
+                >
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#174ea6' }}>
+                    {isEs ? `${selectedCodes.length} seleccionada(s) para lote` : `${selectedCodes.length} selected for batch`}
+                  </span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        selectedCodes.forEach((c) => handleSelectOrAddPatient(c, false));
+                        toast.success(isEs ? `${selectedCodes.length} añadidas a la zona de trabajo` : `Added ${selectedCodes.length} to workspace`);
+                        setSelectedCodes([]);
+                      }}
+                      className="gcp-btn-secondary"
+                      style={{ minHeight: '36px', fontSize: '0.74rem', fontWeight: 600 }}
+                    >
+                      {isEs ? '+ Añadir a Zona de Trabajo' : '+ Add to Workspace'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        selectedCodes.forEach((c, idx) => handleSelectOrAddPatient(c, idx === selectedCodes.length - 1));
+                        setSelectedCodes([]);
+                      }}
+                      className="gcp-btn-primary"
+                      style={{ minHeight: '36px', fontSize: '0.74rem', fontWeight: 700 }}
+                    >
+                      {isEs ? 'Abrir Lote e Imprimir →' : 'Open Batch & Print →'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCodes([])}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#5f6368',
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        padding: '4px 8px'
+                      }}
+                    >
+                      {isEs ? 'Limpiar' : 'Clear'}
+                    </button>
+                  </div>
+                </div>
+              )}
               <DataTable
                 columns={[
+                  {
+                    key: 'select',
+                    label: '',
+                    align: 'center',
+                    render: (_val, p) => {
+                      const cleanCode = sanitizeRecentCode(p.code);
+                      const isChecked = selectedCodes.includes(cleanCode);
+                      return (
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          aria-label={isEs ? `Seleccionar ${p.name || cleanCode}` : `Select ${p.name || cleanCode}`}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setSelectedCodes((prev) =>
+                              checked ? (prev.includes(cleanCode) ? prev : [...prev, cleanCode]) : prev.filter((x) => x !== cleanCode)
+                            );
+                          }}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#1a73e8' }}
+                        />
+                      );
+                    },
+                  },
                   {
                     key: 'patient',
                     label: isEs ? 'Paciente / Código / Fórmula' : 'Patient / Code / Formula',
@@ -839,6 +925,7 @@ export default function LabelsHomeView({
                 }}
                 onRowClick={(row) => handleSelectOrAddPatient(row.code, true)}
               />
+              </>
             )}
 
             {/* Pagination Footer */}
