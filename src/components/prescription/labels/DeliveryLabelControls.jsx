@@ -59,7 +59,7 @@ export default function DeliveryLabelControls({
               boxShadow: !isShipping ? '0 1px 2px rgba(60,64,67,0.15)' : 'none'
             }}
           >
-            {isEs ? 'Producto' : 'Product'}
+            Delivery
           </button>
           <button
             type="button"
@@ -76,7 +76,7 @@ export default function DeliveryLabelControls({
               boxShadow: isShipping ? '0 1px 2px rgba(60,64,67,0.15)' : 'none'
             }}
           >
-            {isEs ? 'Envío / Delivery' : 'Shipping / Delivery'}
+            Shipping
           </button>
         </div>
       </div>

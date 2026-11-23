@@ -746,7 +746,7 @@ export default function LabelsHomeView({
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
                       return (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                           <a
                             href={`/rx/${encodeURIComponent(cleanCode)}`}
                             target="_blank"
@@ -754,7 +754,7 @@ export default function LabelsHomeView({
                             onClick={(e) => e.stopPropagation()}
                             title={isEs ? `Ver prescripción #${p.code}` : `Open prescription #${p.code}`}
                             style={{
-                              padding: '5px 8px',
+                              padding: '5px 7px',
                               borderRadius: '6px',
                               border: '1px solid #cbd5e1',
                               background: '#ffffff',
@@ -772,35 +772,14 @@ export default function LabelsHomeView({
                           </a>
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelectOrAddPatient(p.code, false);
-                              toast.success(isEs ? `#${p.code} añadido a la cola` : `#${p.code} queued`);
-                            }}
-                            title={isEs ? 'Añadir al lote sin salir de la lista' : 'Add to batch queue'}
-                            style={{
-                              padding: '5px 8px',
-                              borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
-                              background: '#ffffff',
-                              color: '#475569',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                            }}
-                          >
-                            <Plus size={13} />
-                          </button>
-                          <button
-                            type="button"
                             className="gcp-btn-secondary"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSelectOrAddPatient(p.code, true, 'frontWithQr');
                             }}
-                            title={isEs ? 'Editar etiqueta de producto / dispensación' : 'Open Product / Dispensing Label'}
+                            title={isEs ? 'Editar etiqueta clínica de Delivery' : 'Open Delivery Label (Clinical)'}
                             style={{
-                              padding: '5px 9px',
+                              padding: '5px 8px',
                               borderRadius: '6px',
                               border: '1px solid #dadce0',
                               background: '#ffffff',
@@ -814,7 +793,7 @@ export default function LabelsHomeView({
                               whiteSpace: 'nowrap'
                             }}
                           >
-                            <span>{isEs ? 'Producto' : 'Product'}</span>
+                            <span>Delivery</span>
                           </button>
                           <button
                             type="button"
@@ -823,9 +802,9 @@ export default function LabelsHomeView({
                               e.stopPropagation();
                               handleSelectOrAddPatient(p.code, true, 'shipping');
                             }}
-                            title={isEs ? 'Editar etiqueta de envío / delivery' : 'Open Shipping / Delivery Label'}
+                            title={isEs ? 'Editar etiqueta de Shipping (Aduanas)' : 'Open Shipping Label (Customs)'}
                             style={{
-                              padding: '5px 9px',
+                              padding: '5px 8px',
                               borderRadius: '6px',
                               border: '1px solid #dadce0',
                               background: '#ffffff',
@@ -839,7 +818,7 @@ export default function LabelsHomeView({
                               whiteSpace: 'nowrap'
                             }}
                           >
-                            <span>{isEs ? 'Envío' : 'Shipping'}</span>
+                            <span>Shipping</span>
                           </button>
                         </div>
                       );

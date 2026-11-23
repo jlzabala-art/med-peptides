@@ -3489,7 +3489,7 @@ export default function PharmacyLabelsModal({
                     {activeVariant === 'shipping' && !shippingSameAsDelivery && (() => {
                       const customsSuggestions = getCustomsFriendlySuggestions(currentItem);
                       const legacySuggestions = getLegacyLabelSuggestions(currentItem, labels);
-                      const defaultShippingTitle = customsSuggestions[0] || '';
+                      const defaultShippingTitle = legacySuggestions[0] || customsSuggestions[0] || '';
                       const activeShippingTitle = currentItem.shippingTitle || defaultShippingTitle;
                       const isCustomShippingTitle = Boolean(currentItem.shippingTitle && currentItem.shippingTitle !== defaultShippingTitle);
                       return (
@@ -3510,7 +3510,7 @@ export default function PharmacyLabelsModal({
                                 color: isCustomShippingTitle ? '#174ea6' : '#5f6368'
                               }}
                             >
-                              {isCustomShippingTitle ? (isEs ? 'Personalizado' : 'Custom') : (isEs ? 'Por defecto' : 'Default')}
+                              {isCustomShippingTitle ? (isEs ? 'Personalizado' : 'Custom') : (isEs ? 'Legacy · Defecto' : 'Legacy · Default')}
                             </span>
                           </label>
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -3528,7 +3528,7 @@ export default function PharmacyLabelsModal({
                                 cursor: 'pointer'
                               }}
                             >
-                              {showLegacyLabels ? '✓ Legacy Labels' : '+ Legacy Labels'}
+                              {showLegacyLabels ? (isEs ? '✓ Alternativas Botánicas' : '✓ Botanical Alternatives') : (isEs ? '+ Alternativas Botánicas' : '+ Botanical Alternatives')}
                             </button>
                             {isCustomShippingTitle && defaultShippingTitle && (
                               <button
@@ -3590,11 +3590,11 @@ export default function PharmacyLabelsModal({
                           )}
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
-                          {customsSuggestions.map((s, idx) => {
+                          {legacySuggestions.map((s, idx) => {
                             const isSelected = activeShippingTitle === s;
                             return (
                               <button
-                                key={s}
+                                key={`legacy-def-${s}`}
                                 type="button"
                                 onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', s); }}
                                 style={{
@@ -3625,19 +3625,19 @@ export default function PharmacyLabelsModal({
                             );
                           })}
                         </div>
-                        {showLegacyLabels && legacySuggestions.length > 0 && (
+                        {showLegacyLabels && customsSuggestions.length > 0 && (
                           <div style={{ marginTop: '8px', padding: '8px 10px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #dadce0' }}>
                             <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-                              {isEs ? 'Legacy Labels (Histórico / Tricho-Care · Solo Shipping)' : 'Legacy Labels (Historical / Tricho-Care · Shipping Only)'}
+                              {isEs ? 'Alternativas Botánicas (Solo Shipping)' : 'Botanical Customs-Safe Alternatives (Shipping Only)'}
                             </div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                              {legacySuggestions.map((ls) => {
-                                const isSelected = activeShippingTitle === ls;
+                              {customsSuggestions.map((cs) => {
+                                const isSelected = activeShippingTitle === cs;
                                 return (
                                   <button
-                                    key={`legacy-${ls}`}
+                                    key={`alt-${cs}`}
                                     type="button"
-                                    onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', ls); }}
+                                    onClick={() => { setShippingDraft(null); handleFieldChange('shippingTitle', cs); }}
                                     style={{
                                       display: 'inline-flex',
                                       alignItems: 'center',
@@ -3654,7 +3654,7 @@ export default function PharmacyLabelsModal({
                                     }}
                                   >
                                     {isSelected && <span aria-hidden="true">✓</span>}
-                                    <span>{ls}</span>
+                                    <span>{cs}</span>
                                   </button>
                                 );
                               })}
@@ -4214,6 +4214,7 @@ export default function PharmacyLabelsModal({
                       <PharmapolisLabelSvg
                         labelData={{
                           ...currentItem,
+                          shippingTitle: currentItem.shippingTitle || getLegacyLabelSuggestions(currentItem, labels)[0] || '',
                           partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${(selectedProductIdx || 0) + 1} of ${labels.length}` : ''),
                           partIndex: selectedProductIdx || 0,
                           totalParts: labels.length
@@ -4242,7 +4243,7 @@ export default function PharmacyLabelsModal({
                     setFulfillmentMode('internal');
                     setActiveVariant('shipping');
                     if (!currentItem.shippingTitle) {
-                      const defTitle = getCustomsFriendlySuggestions(currentItem)[0];
+                      const defTitle = getLegacyLabelSuggestions(currentItem, labels)[0] || getCustomsFriendlySuggestions(currentItem)[0];
                       if (defTitle) handleFieldChange('shippingTitle', defTitle);
                     }
                   }}
@@ -4322,6 +4323,7 @@ export default function PharmacyLabelsModal({
                       <PharmapolisLabelSvg
                         labelData={{
                           ...currentItem,
+                          shippingTitle: currentItem.shippingTitle || getLegacyLabelSuggestions(currentItem, labels)[0] || '',
                           partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${(selectedProductIdx || 0) + 1} of ${labels.length}` : ''),
                           partIndex: selectedProductIdx || 0,
                           totalParts: labels.length
@@ -4715,6 +4717,7 @@ export default function PharmacyLabelsModal({
                 }}
                 labelData={{
                   ...(editedOverrides[idx] || item),
+                  shippingTitle: (editedOverrides[idx] || item).shippingTitle || getLegacyLabelSuggestions(editedOverrides[idx] || item, labels)[0] || '',
                   partLabel: (editedOverrides[idx] || item).partLabel || (labels.length > 1 ? `Part ${idx + 1} of ${labels.length}` : ''),
                   partIndex: idx,
                   totalParts: labels.length
