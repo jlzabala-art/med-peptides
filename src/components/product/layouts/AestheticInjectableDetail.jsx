@@ -744,6 +744,33 @@ export default function AestheticInjectableDetail({
                   { label: isEs ? 'Clasificación' : 'Device Classification', value: p.regulatory.classification },
                   { label: isEs ? 'Fabricante' : 'Manufacturer', value: `${p.manufacturer} (${p.originCountry})` },
                   {
+                    label: isEs ? 'Web Oficial Fabricante' : 'Manufacturer Portal',
+                    value: (() => {
+                      const m = String(p.manufacturer || p.brand || '').toLowerCase();
+                      const officialUrl =
+                        m.includes('merz') ? 'https://www.merzaesthetics.com/'
+                        : m.includes('galderma') ? 'https://www.galdermaaesthetics.com/'
+                        : m.includes('allergan') || m.includes('abbvie') ? 'https://www.juvederm.com/'
+                        : m.includes('ibsa') ? 'https://www.ibsaderma.com/'
+                        : m.includes('croma') ? 'https://www.cromapharma.com/'
+                        : m.includes('teoxane') ? 'https://www.teoxane.com/'
+                        : m.includes('neauvia') || m.includes('matex') ? 'https://www.neauvia.com/'
+                        : m.includes('marllor') || m.includes('aqualyx') ? 'https://www.marllor.com/'
+                        : null;
+                      if (!officialUrl) return p.manufacturer;
+                      return (
+                        <a
+                          href={officialUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#003666', fontWeight: 600, textDecoration: 'underline' }}
+                        >
+                          {officialUrl.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} ↗
+                        </a>
+                      );
+                    })(),
+                  },
+                  {
                     label: isEs ? 'Conservación' : 'Storage Conditions',
                     value: (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>

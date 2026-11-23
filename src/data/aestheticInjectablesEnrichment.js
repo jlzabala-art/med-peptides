@@ -1017,7 +1017,7 @@ export const INJECTABLE_MONOGRAPHS = {
     ],
     treatmentAreas: ['Full Face', 'Cheeks', 'Temples', 'Jawline', 'Body Laxity'],
     clinicalProtocol: {
-      preparation: 'Reconstitute with 8 mL Sterile Water for Injection (SWFI) + 1 mL 2% lidocaine immediately before use (total 9 mL); shake vigorously for 1 min until homogenous.',
+      preparation: 'Reconstitute with 5–8 mL Sterile Water for Injection (SWFI) + 1 mL 2% lidocaine optional (6–9 mL total) immediately before use; shake vigorously for 1 min until homogenous.',
       dosingGuidance: 'Typically 1–2 vials per session; series of 2–3 sessions spaced 4–6 weeks apart ("1 vial per decade" guideline).',
       touchUpInterval: 'Annual single-vial maintenance after initial series.',
       postCare: POST_CARE_BIOSTIMULATOR,
@@ -1501,10 +1501,10 @@ export const INJECTABLE_MONOGRAPHS = {
     crosslinkingAgent: 'BDDE (CPM® Polydensified)',
     lidocaine: '0.3% (3 mg/mL) Lidocaine HCl',
     packSize: '1 × 1.0 mL prefilled syringe',
-    needlesIncluded: '2 × 27G ½" and 30G ½" sterile needles',
+    needlesIncluded: '2 × 30G ½" sterile needles',
     injectionDepth: 'Superficial-to-Mid Dermis',
     injectionTechnique: 'Blanching, linear threading, or cross-hatching',
-    longevity: '9 – 12 Months',
+    longevity: '6 – 12 Months (area-dependent)',
     rheology: {
       elasticityGPrime: 'Moderate-Low',
       cohesivity: 'Very High',
@@ -1992,7 +1992,7 @@ export const INJECTABLE_MONOGRAPHS = {
   // 6. POLYNUCLEOTIDES (Croma PhilArt, Nucleofill, Plinest, Pluryal, Pronova)
   // ═══════════════════════════════════════════════════════════════════════════
   'croma-philart': {
-    canonicalName: 'Croma PhilArt® (Face, Neck & Body)',
+    canonicalName: 'Croma PhilArt® / PolyPhil® (Face, Neck & Body)',
     brand: 'Croma PhilArt',
     manufacturer: 'Croma-Pharma GmbH (Mastelli)',
     originCountry: 'Austria / Italy',
@@ -2043,7 +2043,7 @@ export const INJECTABLE_MONOGRAPHS = {
   },
 
   'croma-philart-eye': {
-    canonicalName: 'Croma PhilArt® Eye',
+    canonicalName: 'Croma PhilArt® Eye / PolyPhil® Eye',
     brand: 'Croma PhilArt',
     manufacturer: 'Croma-Pharma GmbH (Mastelli)',
     originCountry: 'Austria / Italy',
@@ -2094,7 +2094,7 @@ export const INJECTABLE_MONOGRAPHS = {
   },
 
   'croma-philart-next': {
-    canonicalName: 'Croma PhilArt® Next (PN + HA Hybrid)',
+    canonicalName: 'Croma PhilArt® Next / PolyPhil® Next (PN + HA Hybrid)',
     brand: 'Croma PhilArt',
     manufacturer: 'Croma-Pharma GmbH (Mastelli)',
     originCountry: 'Austria / Italy',
