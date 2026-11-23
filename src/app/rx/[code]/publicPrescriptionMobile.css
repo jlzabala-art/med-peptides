@@ -1399,4 +1399,32 @@ nav.site-nav,
   }
 }
 
+/* ── Clean Clinical Dossier Print / Save-as-PDF Stylesheet ── */
+@media print {
+  aside,
+  nav,
+  header,
+  .gcp-bottom-sticky-bar,
+  .rx-bottom-sticky-bar,
+  .rx-header-actions,
+  .rx-no-print,
+  button[aria-label*="menu"],
+  [class*="B2BUniversalMenu"] {
+    display: none !important;
+  }
+  body,
+  main,
+  .rx-dossier-layout {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+  .rx-card {
+    box-shadow: none !important;
+    border-color: #cbd5e1 !important;
+    break-inside: avoid;
+  }
+}
+
 

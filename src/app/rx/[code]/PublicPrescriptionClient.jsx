@@ -2193,8 +2193,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               publicUrl={publicUrl}
               onOpenPdf={() => setShowBrochureModal(true)}
               onExportExcel={handleExportExcel}
-              activeGcpTab={activeGcpTab}
-              onSelectTab={setActiveGcpTab}
+              activeGcpTab=""
+              onSelectTab={null}
               lang={lang}
               isAuthorizedViewer={isAuthorizedViewer}
               isPatientView={isPatientView}

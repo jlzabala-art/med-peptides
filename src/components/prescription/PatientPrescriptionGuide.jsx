@@ -430,19 +430,31 @@ export default function PatientPrescriptionGuide({
                     </div>
 
                     {/* Regimen badge */}
-                    <div
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #dadce0',
-                        color: '#202124',
-                        padding: '4px 12px',
-                        borderRadius: '16px',
-                        fontSize: '0.80rem',
-                        fontWeight: 700
-                      }}
-                    >
-                      {String(item.posology?.regimen || (isEs ? 'Consultar pauta' : 'Follow prescription'))}
-                    </div>
+                    {(() => {
+                      const rawReg = String(item.posology?.regimen || (isEs ? 'Consultar pauta' : 'Follow prescription'));
+                      const isPump = item.category?.isTransdermal || /\b(transdermal|pentravan|cream|crema|topiclick|pump)\b/i.test(`${item.title || ''} ${item.vehicle?.name || ''} ${rawReg}`);
+                      const displayReg = isPump && !/\bpumps?\b/i.test(rawReg)
+                        ? rawReg.replace(/\b(\d+(?:[.,]\d+)?)\s*m[lL]\b/gi, (m, n) => {
+                            const v = parseFloat(String(n).replace(',', '.'));
+                            return Number.isFinite(v) && v > 0 ? (v === 1 ? '1 pump' : `${v} pumps`) : m;
+                          })
+                        : rawReg;
+                      return (
+                        <div
+                          style={{
+                            background: '#ffffff',
+                            border: '1px solid #dadce0',
+                            color: '#202124',
+                            padding: '4px 12px',
+                            borderRadius: '16px',
+                            fontSize: '0.80rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          {displayReg}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Contextual Posology Advice: Pre-filled Pen vs Peptide vs Supplement vs Topical */}
@@ -587,7 +599,16 @@ export default function PatientPrescriptionGuide({
                           {isEs ? '🧴 Cantidad por Aplicación:' : '🧴 Dose Volume:'}
                         </div>
                         <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
-                          {item.posology?.regimen || '1.0 mL'}
+                          {(() => {
+                            const rawDose = String(item.posology?.regimen || '1.0 mL');
+                            const isPump = item.category?.isTransdermal || /\b(transdermal|pentravan|cream|crema|topiclick|pump)\b/i.test(`${item.title || ''} ${item.vehicle?.name || ''} ${rawDose}`);
+                            return isPump && !/\bpumps?\b/i.test(rawDose)
+                              ? rawDose.replace(/\b(\d+(?:[.,]\d+)?)\s*m[lL]\b/gi, (m, n) => {
+                                  const v = parseFloat(String(n).replace(',', '.'));
+                                  return Number.isFinite(v) && v > 0 ? (v === 1 ? '1 pump' : `${v} pumps`) : m;
+                                })
+                              : rawDose;
+                          })()}
                         </div>
                       </div>
 
