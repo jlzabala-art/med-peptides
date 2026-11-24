@@ -118,7 +118,7 @@ function WelcomeA6Card({
       {/* Footer */}
       <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '2mm', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '7.5px', color: '#5f6368' }}>
         <span>{doctorName ? `${pdfEs ? 'Dr.' : 'By'} ${doctorName}` : 'Atlas Health'}</span>
-        <span>WhatsApp +971 56 417 9256</span>
+        <span>WhatsApp +971 55 356 1058</span>
       </div>
     </div>
   );
