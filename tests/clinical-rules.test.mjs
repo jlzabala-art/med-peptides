@@ -339,4 +339,14 @@ test('Rx Mobile & Nasal Spray UX: isolates nasal spray timeline, dynamic duratio
 
   const gsbSrc = read('src/components/ui/GlobalSearchBar.jsx');
   assert.equal(gsbSrc.includes("style={{ position: 'absolute', top: height"), false, 'GlobalSearchBar chips zone must stay in-flow so it never overlaps pills on mobile');
+
+  const dockSrc = read('src/components/shared/GlobalBottomStickyBar.jsx');
+  assert.ok(dockSrc.includes('atlas_bottom_dock_minimized'), 'GlobalBottomStickyBar must support collapsible/minimizable state');
+
+  const switcherSrc = read('src/components/pricing/shared/ClinicalFormatSwitcher.jsx');
+  assert.equal(switcherSrc.includes('repeat(5, minmax(0, 1fr))'), false, 'ClinicalFormatSwitcher must use horizontal flex on mobile so tabs never overlap');
+
+  const protoCatalogSrc = read('src/components/protocol/PublicProtocolsCatalogView.jsx');
+  assert.ok(protoCatalogSrc.includes('<DataTable'), 'PublicProtocolsCatalogView must use shared DataTable');
+  assert.equal(protoCatalogSrc.includes('<table'), false, 'PublicProtocolsCatalogView must not render raw <table> tags');
 });

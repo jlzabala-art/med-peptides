@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileText, ShoppingBag, Calculator, FlaskConical, Compass, Syringe } from 'lucide-react';
+import { FileText, ShoppingBag, Calculator, FlaskConical, Compass, Syringe, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import FloatingActionDock from './public/FloatingActionDock';
 import { useAtlasContext } from '@/context/AtlasContextProvider';
 import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
@@ -26,6 +26,28 @@ export default function GlobalBottomStickyBar() {
     totalSections: 0,
     hasToc: false,
   });
+  const [isMinimized, setIsMinimized] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      setIsMinimized(sessionStorage.getItem('atlas_bottom_dock_minimized') === '1');
+    } catch {
+      // ignore storage access errors
+    }
+  }, []);
+
+  const toggleMinimized = () => {
+    setIsMinimized((prev) => {
+      const next = !prev;
+      try {
+        sessionStorage.setItem('atlas_bottom_dock_minimized', next ? '1' : '0');
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   // Reset TOC progress on route change
   useEffect(() => {
@@ -280,6 +302,81 @@ export default function GlobalBottomStickyBar() {
     return null;
   }
 
+  if (isMinimized) {
+    return (
+      <div
+        className="no-print"
+        style={{
+          position: 'sticky',
+          bottom: '0.75rem',
+          zIndex: 42,
+          padding: '0 0.75rem',
+          pointerEvents: 'none',
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <div
+          style={{
+            pointerEvents: 'auto',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            background: 'rgba(255, 255, 255, 0.94)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid #dadce0',
+            borderRadius: '999px',
+            padding: '4px 6px',
+            boxShadow: '0 4px 14px rgba(15, 23, 42, 0.12)',
+          }}
+        >
+          {resolvedConfig.showAtlasAi !== false && (
+            <button
+              type="button"
+              onClick={handleOpenAi}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 10px',
+                borderRadius: '999px',
+                border: 'none',
+                background: 'transparent',
+                color: '#3c4043',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+              }}
+            >
+              <Sparkles size={13} color="#7c3aed" />
+              <span>{resolvedConfig.atlasAiLabel || 'Ask Atlas AI'}</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={toggleMinimized}
+            title={isSpanish ? 'Expandir barra inferior' : 'Expand bottom dock'}
+            aria-label={isSpanish ? 'Expandir barra inferior' : 'Expand bottom dock'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              borderRadius: '999px',
+              border: '1px solid #dadce0',
+              background: '#ffffff',
+              color: '#5f6368',
+              cursor: 'pointer',
+            }}
+          >
+            <ChevronUp size={14} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="no-print"
@@ -291,7 +388,7 @@ export default function GlobalBottomStickyBar() {
         pointerEvents: 'none',
       }}
     >
-      <div style={{ pointerEvents: 'auto' }}>
+      <div style={{ pointerEvents: 'auto', position: 'relative' }}>
         <FloatingActionDock
           summaryTitle={resolvedConfig.summaryTitle}
           summarySubtitle={resolvedConfig.summarySubtitle}
@@ -305,6 +402,30 @@ export default function GlobalBottomStickyBar() {
           secondaryAction={resolvedConfig.secondaryAction || null}
           primaryAction={resolvedConfig.primaryAction || null}
         />
+        <button
+          type="button"
+          onClick={toggleMinimized}
+          title={isSpanish ? 'Minimizar barra inferior' : 'Minimize bottom dock'}
+          aria-label={isSpanish ? 'Minimizar barra inferior' : 'Minimize bottom dock'}
+          style={{
+            position: 'absolute',
+            top: '-10px',
+            right: '14px',
+            width: '22px',
+            height: '22px',
+            borderRadius: '999px',
+            border: '1px solid #dadce0',
+            background: '#ffffff',
+            color: '#5f6368',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 1px 4px rgba(15, 23, 42, 0.12)',
+          }}
+        >
+          <ChevronDown size={12} />
+        </button>
       </div>
     </div>
   );

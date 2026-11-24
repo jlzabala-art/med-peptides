@@ -33,6 +33,16 @@
     margin-bottom: 0.62rem;
   }
 
+  .atlas-hero-title {
+    font-size: 1.15rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .atlas-hero-subtitle {
+    font-size: 0.78rem;
+    line-height: 1.32;
+  }
+
   .atlas-kpi-grid {
     gap: 0.72rem;
     margin-bottom: 0.85rem;
