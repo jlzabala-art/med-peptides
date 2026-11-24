@@ -201,7 +201,7 @@ export default function DoctorAuthNoticeModal({
                 {maskedName}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#0d9488', fontWeight: 600 }}>
-                Practice ID: {opaqueCode || 'DR-ACTIVE'} · DHA Registered
+                Practice ID: {opaqueCode || 'DR-ACTIVE'} · Certified Doctor
               </div>
             </div>
             <div

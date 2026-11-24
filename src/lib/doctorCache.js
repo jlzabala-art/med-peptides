@@ -1133,7 +1133,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   const defaultLicenseFallback = /\b(qatar|doha)\b/i.test(docLocStr)
     ? 'DHP Qatar Registered'
     : /\b(dubai|uae|abu\s*dhabi|sharjah)\b/i.test(docLocStr)
-      ? 'DHA Registered'
+      ? 'Certified Doctor'
       : 'Licensed Physician';
 
   const doctorProfile = {

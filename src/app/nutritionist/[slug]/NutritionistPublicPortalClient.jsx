@@ -98,7 +98,7 @@ export default function NutritionistPublicPortalClient({
       name: doc.displayName || doc.name || 'Dr. Nahla ElAwady',
       title: 'Clinical Nutritionist & Longevity Medicine Specialist',
       specialty: 'Precision Nutrigenomics, Cellular Metabolism & Anti-Aging',
-      license: doc.license || 'DHA Registered Clinical Nutritionist / Functional Medicine',
+      license: doc.license || 'Certified Clinical Nutritionist / Functional Medicine',
       clinic: doc.clinicName || doc.clinic || 'Atlas Longevity & Nutrition Clinic',
       opaqueCode: doc.opaqueCode || slug || 'NUT-LONGEVITY',
       avatarUrl: doc.avatarUrl || null,

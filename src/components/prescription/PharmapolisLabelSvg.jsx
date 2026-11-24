@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { sanitizeDoctorLicense } from '@/utils/doctorLicenseSanitizer';
 import { formatCustomsDate, getCustomsFriendlyDefault } from '@/utils/labels/customsNaming';
 
 /**
@@ -564,7 +565,8 @@ export default function PharmapolisLabelSvg({
   const clinicName = (labelData.showClinicOnLabel === true && rawClinicName && !/^licensed\s+clinical\s+practice$/i.test(rawClinicName) && !/^centro\s+m[eé]dico\s+prescriptor$/i.test(rawClinicName))
     ? rawClinicName
     : '';
-  const doctorLicense = labelData.doctorLicense !== undefined && labelData.doctorLicense !== null ? String(labelData.doctorLicense).trim() : (labelData.license || '');
+  const rawDoctorLicense = labelData.doctorLicense !== undefined && labelData.doctorLicense !== null ? String(labelData.doctorLicense).trim() : (labelData.license || '');
+  const doctorLicense = sanitizeDoctorLicense(rawDoctorLicense, labelData.lang === 'es');
   const batchCode = labelData.batchCode || 'PHARM-2026-B948';
   const lote = labelData.lote || '2609-PLV';
   const volume = formatPharmaUnits(labelData.volume || labelData.netVolume || labelData.size || labelData.netContent || labelData.totalVolume || labelData.quantity || '100 mL');

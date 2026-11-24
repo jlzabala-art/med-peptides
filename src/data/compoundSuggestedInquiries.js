@@ -1298,8 +1298,8 @@ export function getContextualAndPopularSuggestions({
           query: isEs ? '¿Qué hitos y cronograma de evolución clínica capilar se esperan durante los primeros 90 días?' : 'What clinical milestones and shedding/growth timeline are expected across the first 90 days?'
         },
         {
-          label: isEs ? 'Autenticidad y DHA' : 'DHA Validation & Pharmacy',
-          query: isEs ? '¿Cómo se verifica la autenticidad de la prescripción y la licencia médica DHA del facultativo?' : 'How is prescription authenticity and prescribing physician DHA credential validated?'
+          label: isEs ? 'Autenticidad y Médico' : 'Doctor Validation & Pharmacy',
+          query: isEs ? '¿Cómo se verifica la autenticidad de la prescripción y la acreditación médica del facultativo?' : 'How is prescription authenticity and prescribing physician credential validated?'
         },
         {
           label: isEs ? 'Renovación y Envío' : 'Cycle Refill Logistics',

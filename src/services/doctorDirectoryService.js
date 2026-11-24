@@ -74,7 +74,7 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     country: 'United Arab Emirates',
     phone: '+971 4 348 8870',
     email: 'dr.hanieh@bedayaclinic.com',
-    license: 'DHA Registered'
+    license: 'Certified Doctor'
   },
   {
     id: 'dr-anitathurasini-rajoo',
@@ -89,7 +89,7 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     country: 'United Arab Emirates',
     phone: '+971 4 247 5555',
     email: 'anita.rajoo@novomed.com',
-    license: 'DHA Registered'
+    license: 'Certified Doctor'
   },
   {
     id: 'dr-marina-cordeiro',
@@ -179,7 +179,7 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     mobile: '+971 52 425 1519',
     email: 'Intensivedoctor@gmail.com',
     secondaryEmail: 'dr.khalid@shukriclinic.com',
-    license: 'DHA Registered',
+    license: 'Certified Doctor',
     authority: 'DHA'
   },
   {
@@ -196,7 +196,7 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     country: 'United Arab Emirates',
     phone: '+971 4 554 8091',
     email: 'accounts@mylondonskinclinic.com',
-    license: 'DHA Registered',
+    license: 'Certified Doctor',
     authority: 'DHA'
   },
   {
@@ -213,7 +213,7 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     country: 'United Arab Emirates',
     phone: '04 395 5591',
     email: 'info@dlsclinic.com',
-    license: 'DHA Registered Specialist',
+    license: 'Certified Doctor',
     authority: 'DHA'
   },
   {

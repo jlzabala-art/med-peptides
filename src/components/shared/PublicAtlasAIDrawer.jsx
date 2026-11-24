@@ -1346,7 +1346,7 @@ export default function PublicAtlasAIDrawer({
               {contextType === 'diagnostic_test'
                 ? 'CE-IVDR Certified • ISO 15189 Laboratory Standard'
                 : contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
-                ? 'DHA Licensed Physician & Compounding Dispensary'
+                ? 'Certified Doctor & Precision Dispensary'
                 : 'Dual-Stage RP-HPLC & LC-MS Verified'}
             </span>
           </div>

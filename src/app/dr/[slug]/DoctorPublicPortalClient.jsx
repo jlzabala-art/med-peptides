@@ -5587,7 +5587,7 @@ export default function DoctorPublicPortalClient({
                     justifyContent: 'center',
                     flexShrink: 0
                   }}
-                  title={isAuthorizedViewer ? "View and edit physician profile" : "Sign in with DHA credentials to unlock dossiers"}
+                  title={isAuthorizedViewer ? "View and edit physician profile" : "Sign in with physician credentials to unlock dossiers"}
                 >
                   {isAuthorizedViewer ? <Edit3 size={12} /> : <Lock size={12} />}
                 </div>

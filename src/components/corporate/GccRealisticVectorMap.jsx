@@ -71,7 +71,7 @@ const HUBS = [
     telemetry: '+3.9°C · Active Transit',
     status: 'Operating 24/7',
     transit: 'Same-Day Express (2–4 hrs Direct)',
-    compliance: 'DHA Licensed Facility',
+    compliance: 'Certified Medical Facility',
     fleet: '12 Urban Cold-Van Couriers',
     flag: '🇦🇪',
     details: 'Strategic forward operating depot serving premier aesthetic, longevity, hormone therapy, and dermatology practices across Dubai & Northern Emirates.'

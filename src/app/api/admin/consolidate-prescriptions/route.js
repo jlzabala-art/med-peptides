@@ -158,14 +158,14 @@ export async function POST(request) {
               doctorId: 'dr-sobia',
               doctorSlug: 'dr-sobia',
               doctorName: 'Dr. Sobia Mirza',
-              doctorLicense: 'DHA Registered',
+              doctorLicense: 'Certified Doctor',
               clinicName: 'My London Skin Clinic',
               clinicId: 'IdDU1oK1VuAVVYrGz6E7',
               doctor: {
                 id: 'dr-sobia',
                 name: 'Dr. Sobia Mirza',
                 displayName: 'Dr. Sobia Mirza',
-                license: 'DHA Registered',
+                license: 'Certified Doctor',
                 clinic: 'My London Skin Clinic',
                 clinicName: 'My London Skin Clinic'
               }
@@ -230,7 +230,7 @@ export async function POST(request) {
         doctorId: 'dr-sobia',
         doctorSlug: 'dr-sobia',
         doctorName: 'Dr. Sobia Mirza',
-        doctorLicense: 'DHA Registered',
+        doctorLicense: 'Certified Doctor',
         clinicName: 'My London Skin Clinic',
         clinicId: 'IdDU1oK1VuAVVYrGz6E7',
         updatedAt: now

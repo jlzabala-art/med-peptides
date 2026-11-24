@@ -1431,7 +1431,7 @@ export function getAuthoritativeClinicalData(rx) {
 
   if (isMarina) {
     doctorName = (doctorName && doctorName !== 'Licensed Clinical Practice') ? doctorName : 'Dr. Marina Cordeiro Fernandes';
-    doctorLicense = (doctorLicense && doctorLicense !== 'DHA Registered') ? doctorLicense : 'DHA-91105367';
+    doctorLicense = 'Certified Doctor';
     clinicName = (clinicName && clinicName !== 'Licensed Clinical Practice') ? clinicName : 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE';
   }
 
@@ -1439,15 +1439,7 @@ export function getAuthoritativeClinicalData(rx) {
     clinicName = 'Licensed Clinical Practice';
   }
 
-  if (!doctorLicense || doctorLicense === 'DHA Registered') {
-    const rxLocStr = `${rx.country || ''} ${rx.clinicName || ''} ${rx.clinic || ''} ${clinicName || ''} ${rx.treatingDoctor?.country || ''}`.toLowerCase();
-    const regionFallback = /\b(qatar|doha)\b/i.test(rxLocStr)
-      ? 'DHP Qatar Registered'
-      : /\b(dubai|uae|abu\s*dhabi|sharjah)\b/i.test(rxLocStr)
-        ? 'DHA Registered'
-        : 'Licensed Physician';
-    doctorLicense = rx.treatingDoctor?.license || rx.doctorLicense || (isSezgin ? 'DHA 00208953-005' : (isHaytham ? 'DHA-P-0319842' : (isMarina ? 'DHA-91105367' : regionFallback)));
-  }
+  doctorLicense = 'Certified Doctor';
 
   // QR encoded URL on bottles points directly to patient portal
   const targetRxUrl = `https://www.atlashealth-services.com/rx/${fileNumber}?view=patient`;

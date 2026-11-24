@@ -48,6 +48,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ExpressQrRefillCard from '@/components/prescription/ExpressQrRefillCard';
+import PatientContactAtlasCard from '@/components/prescription/PatientContactAtlasCard';
 import { RotateCcw, RefreshCw, Home, Loader2, AlertTriangle, MessageCircle, Lock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -819,111 +820,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
               {/* ── Contact Atlas Card (Dedicated, simple contact tab in Patient View) ── */}
               {isPatientView && activeGcpTab === 'contactAtlas' && (
-                <div
-                  id="contact-atlas-card"
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid #dadce0',
-                    borderRadius: '8px',
-                    padding: '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    boxShadow: '0 1px 2px 0 rgba(60, 64, 67, 0.08)'
-                  }}
-                >
-                  <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? 'Soporte al Paciente' : 'Patient Support'}
-                    </div>
-                    <h3 style={{ margin: '4px 0 4px', fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
-                      {isEs ? '5. Contactar con Atlas' : '5. Contact Atlas'}
-                    </h3>
-                    <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.45 }}>
-                      {isEs
-                        ? '¿Tienes alguna duda sobre tu tratamiento, envíos o cómo usar tu envase? Escríbenos y nuestro equipo te responderá.'
-                        : 'Have a question about your treatment, delivery, or how to use your device? Send us a quick message and our team will reply.'}
-                    </p>
-                  </div>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const formEl = e.currentTarget;
-                      const contactVal = formEl.elements.patientContact?.value?.trim() || '';
-                      const msgVal = formEl.elements.patientMessage?.value?.trim() || '';
-                      if (!contactVal || !msgVal) {
-                        toast.error(isEs ? 'Por favor indica tu contacto y tu consulta.' : 'Please enter your contact and message.');
-                        return;
-                      }
-                      try {
-                        const res = await fetch('/api/portal/inquiry', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            type: 'patient_contact_atlas',
-                            rxId,
-                            patientName,
-                            contact: contactVal,
-                            message: msgVal,
-                          }),
-                        });
-                        if (res.ok) {
-                          toast.success(isEs ? 'Mensaje enviado a Atlas ✓' : 'Message sent to Atlas ✓');
-                          formEl.reset();
-                        } else {
-                          toast.error(isEs ? 'No se pudo enviar el mensaje.' : 'Could not send message.');
-                        }
-                      } catch {
-                        toast.error(isEs ? 'Error de conexión.' : 'Connection error.');
-                      }
-                    }}
-                    style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
-                  >
-                    <input
-                      name="patientContact"
-                      type="text"
-                      defaultValue={currentRx?.patient?.phone || currentRx?.patient?.email || ''}
-                      placeholder={isEs ? 'Tu WhatsApp o email...' : 'Your WhatsApp or email...'}
-                      style={{
-                        minHeight: '42px',
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.84rem'
-                      }}
-                    />
-                    <textarea
-                      name="patientMessage"
-                      rows={3}
-                      placeholder={isEs ? 'Escribe tu consulta aquí...' : 'Write your question here...'}
-                      style={{
-                        padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.84rem',
-                        resize: 'vertical'
-                      }}
-                    />
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <button
-                        type="submit"
-                        style={{
-                          minHeight: '44px',
-                          padding: '8px 18px',
-                          borderRadius: '8px',
-                          border: 'none',
-                          background: '#1a73e8',
-                          color: '#ffffff',
-                          fontSize: '0.84rem',
-                          fontWeight: 700,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {isEs ? 'Enviar a Atlas' : 'Send to Atlas'}
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                <PatientContactAtlasCard
+                  rx={currentRx}
+                  rxId={rxId}
+                  patientName={patientName}
+                  isEs={isEs}
+                />
               )}
 
               {/* ── Patient Action & Refill Banner Card (Doctor / Institutional view only; in Patient View, Refill has its own tab) ── */}
