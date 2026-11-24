@@ -24,6 +24,7 @@ export default function LabelsHeader({
   batchPdfProgress,
   patientQueue = [],
   onDownloadA4BatchPdf,
+  onOpenWelcomeCards,
   startOffset = 0,
   setStartOffset = null,
   onOpenImport,
@@ -267,6 +268,33 @@ export default function LabelsHeader({
               </span>
             </button>
 
+            {onOpenWelcomeCards && activeCode && (
+              <button
+                type="button"
+                onClick={onOpenWelcomeCards}
+                disabled={patientQueue.length === 0}
+                title={isEs ? 'Imprimir Tarjetas de Bienvenida (4×A6 en A4)' : 'Print Welcome Cards (4×A6 on A4)'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  height: '32px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span>🪪</span>
+                <span className="pls-desktop-only-action">{isEs ? 'Tarjetas 4×A6' : 'Cards 4×A6'}</span>
+              </button>
+            )}
+
             {/* Visual 2x5 A4 sheet grid start offset picker */}
             {patientQueue.length > 0 && typeof setStartOffset === 'function' && (
               <div className="pls-desktop-only-action">
@@ -394,6 +422,58 @@ export default function LabelsHeader({
                     </div>
                     <span className="pls-share-item-desc">
                       {isEs ? 'Instrucciones simples + botón Refill para WhatsApp' : 'Simple patient dosing guide + Refill button'}
+                    </span>
+                  </div>
+                </button>
+
+                {/* Option 1b: WhatsApp Paciente Directo */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="pls-share-menu-item"
+                  disabled={!activeCode}
+                  onClick={() => {
+                    if (onShareType) onShareType('whatsapp_patient');
+                    setIsShareMenuOpen(false);
+                  }}
+                >
+                  <div className="pls-share-item-icon">
+                    <span style={{ fontSize: '0.95rem' }}>💬</span>
+                  </div>
+                  <div className="pls-share-item-body">
+                    <div className="pls-share-item-title-row">
+                      <span className="pls-share-item-title">
+                        {isEs ? 'Enviar WhatsApp al Paciente' : 'Send WhatsApp to Patient'}
+                      </span>
+                    </div>
+                    <span className="pls-share-item-desc">
+                      {isEs ? 'Abre WhatsApp con guía + link directo de Refill' : 'Opens WhatsApp with guide + direct Refill link'}
+                    </span>
+                  </div>
+                </button>
+
+                {/* Option 1c: WhatsApp Partner / Terceros */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="pls-share-menu-item"
+                  disabled={!activeCode}
+                  onClick={() => {
+                    if (onShareType) onShareType('whatsapp_partner');
+                    setIsShareMenuOpen(false);
+                  }}
+                >
+                  <div className="pls-share-item-icon">
+                    <span style={{ fontSize: '0.95rem' }}>🤝</span>
+                  </div>
+                  <div className="pls-share-item-body">
+                    <div className="pls-share-item-title-row">
+                      <span className="pls-share-item-title">
+                        {isEs ? 'Enviar a Partner / Clínica' : 'Send to Partner / Clinic'}
+                      </span>
+                    </div>
+                    <span className="pls-share-item-desc">
+                      {isEs ? 'Mensaje listo para aprobar/reenviar por terceros' : 'Ready-to-approve message for partner clinics'}
                     </span>
                   </div>
                 </button>

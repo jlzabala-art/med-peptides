@@ -160,15 +160,17 @@ export default function PatientWelcomePdfModal({
   urlLot = '',
   urlBud = '',
   initialIsEs = false,
+  defaultLayoutMode = 'a6',
 }) {
   const [pdfEs, setPdfEs] = useState(Boolean(initialIsEs));
-  const [layoutMode, setLayoutMode] = useState('a6'); // 'a6' | 'a4_4up'
+  const [layoutMode, setLayoutMode] = useState(defaultLayoutMode); // 'a6' | 'a4_4up'
 
   useEffect(() => {
     if (isOpen) {
       setPdfEs(Boolean(initialIsEs));
+      setLayoutMode(defaultLayoutMode);
     }
-  }, [isOpen, initialIsEs]);
+  }, [isOpen, initialIsEs, defaultLayoutMode]);
 
   if (!isOpen || typeof document === 'undefined') return null;
 

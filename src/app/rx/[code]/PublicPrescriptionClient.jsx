@@ -990,7 +990,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <RoadmapMilestonesSection
                   timeline={timeline}
                   isEs={isEs}
+                  rx={currentRx}
+                  formulations={compoundedFormulations}
                   durationLabel={posology?.duration || currentRx?.duration || (prescriptionTypeInfo?.clinicalDomain === 'nasal_spray' ? (isEs ? '30 Días' : '30 Days') : null)}
+                  onRequestRefill={isPatientView ? () => setActiveGcpTab('refill') : undefined}
                 />
               </div>
               )}

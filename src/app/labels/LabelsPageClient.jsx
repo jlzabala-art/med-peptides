@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import './labels-studio.css';
 import { useSearchParams } from 'next/navigation';
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
+import PatientWelcomePdfModal from '@/components/prescription/PatientWelcomePdfModal';
 import ImportPrescriptionModal from '@/features/prescriptions/components/ImportPrescriptionModal';
 import PrescriptionRefillModal from '@/components/prescription/PrescriptionRefillModal';
 import LabelsHeader from './components/LabelsHeader';
@@ -112,6 +113,7 @@ export default function PublicLabelsAppClient({
   const [worklistDateRange, setWorklistDateRange] = useState('30d');
   const [mountTimestamp] = useState(() => Date.now());
 
+  const [showWelcomeCardsModal, setShowWelcomeCardsModal] = useState(false);
   const searchBoxRef = useRef(null);
   const searchInputRef = useRef(null);
 
@@ -418,6 +420,25 @@ export default function PublicLabelsAppClient({
     let url = '';
     let title = '';
     let text = '';
+
+    if (type === 'whatsapp_patient' || type === 'whatsapp_partner') {
+      const currentLabel = labels[labelIndex] || {};
+      const lotVal = currentLabel?.lotNumber || currentLabel?.batchCode || currentRx?.lotNumber || currentRx?.lote || '';
+      const budVal = currentLabel?.bud || currentLabel?.expiryDate || currentRx?.expDate || currentRx?.bud || '';
+      const lotQs = lotVal ? `&lot=${encodeURIComponent(lotVal)}` : '';
+      const budQs = budVal ? `&bud=${encodeURIComponent(budVal)}` : '';
+      const patientUrl = `${origin}/rx/${encodeURIComponent(activeCode)}?view=patient&src=whatsapp&lang=${lang}${lotQs}${budQs}`;
+      const msg =
+        type === 'whatsapp_partner'
+          ? (isEs
+              ? `Hola, compartimos el enlace privado de seguimiento y refill para el paciente ${patientName || ''} (#${rxCode}) para su revisión/reenvío: ${patientUrl}`
+              : `Hi, here is the private treatment guide & refill link for patient ${patientName || ''} (#${rxCode}) for your review/forwarding: ${patientUrl}`)
+          : (isEs
+              ? `Hola ${patientName || ''}, gracias por confiar en Atlas Health. Aquí tienes tu guía privada de tratamiento (#${rxCode}) donde podrás ver cómo usarlo, registrar tus tomas y pedir tu refill en 1 clic: ${patientUrl}`
+              : `Hi ${patientName || ''}, thank you for trusting Atlas Health. Here is your private treatment guide (#${rxCode}) to view instructions, log doses, and request a 1-click refill: ${patientUrl}`);
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
 
     if (type === 'patient') {
       const currentLabel = labels[labelIndex] || {};
@@ -753,6 +774,7 @@ export default function PublicLabelsAppClient({
         batchPdfProgress={batchPdfProgress}
         patientQueue={patientQueue}
         onDownloadA4BatchPdf={handleDownloadA4BatchPdf}
+        onOpenWelcomeCards={() => setShowWelcomeCardsModal(true)}
         startOffset={prefs.startOffset || 0}
         setStartOffset={setStartOffset}
         onOpenImport={() => setShowImport(true)}
@@ -1155,6 +1177,20 @@ export default function PublicLabelsAppClient({
         isOpen={showShortcutsModal}
         onClose={() => setShowShortcutsModal(false)}
         isEs={isEs}
+      />
+
+      <PatientWelcomePdfModal
+        isOpen={showWelcomeCardsModal}
+        onClose={() => setShowWelcomeCardsModal(false)}
+        rx={currentRx || {}}
+        rxId={activeCode}
+        patientName={patientName}
+        doctorName={docName}
+        compoundedFormulations={labels}
+        urlLot={labels[labelIndex]?.lotNumber || labels[labelIndex]?.batchCode || currentRx?.lotNumber || ''}
+        urlBud={labels[labelIndex]?.bud || labels[labelIndex]?.expiryDate || currentRx?.expDate || ''}
+        initialIsEs={isEs}
+        defaultLayoutMode="a4_4up"
       />
 
       {!embedded && <PublicUnifiedFooter lang={lang} />}
