@@ -121,6 +121,148 @@ export default function PatientPrescriptionGuide({
 
   const loggedCount7d = Object.values(loggedDaysMap).filter(Boolean).length;
 
+  // Posology-aware schedule classifier (strictly scoped to this prescription, never mixing types)
+  const posologySchedule = useMemo(() => {
+    const rawPos = [
+      rx?.posology,
+      rx?.frequency,
+      rx?.items?.[0]?.instructions,
+      compoundedFormulations?.[0]?.posology?.regimen,
+      compoundedFormulations?.[0]?.posology?.timing,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    const formStr = `${rx?.dispensingForm || ''} ${rx?.treatmentTitle || ''} ${rx?.title || ''}`.toLowerCase();
+
+    if (/\b(pellet|implant)\b/i.test(`${formStr} ${rawPos}`)) {
+      return { mode: 'in_clinic', targetPerWeek: 0, timeHint: null };
+    }
+    if (/\b(twice\s*daily|bid|2x\s*\/?\s*day|2\s*times?\s*(?:a|per)\s*day|every\s*12\s*h|cada\s*12\s*h|dos\s*veces\s*al\s*d[ií]a|morning\s*(?:and|&)\s*(?:evening|night)|ma[nñ]ana\s*y\s*(?:tarde|noche))\b/i.test(rawPos)) {
+      return { mode: 'twice_daily', targetPerWeek: 14, timeHint: isEs ? 'Mañana y tarde/noche' : 'Morning & Evening' };
+    }
+    const multiWeekMatch = rawPos.match(/\b([2-6])\s*(?:x\s*\/?\s*week|times?\s*(?:a|per)\s*week|veces\s*(?:a\s*la|por)\s*semana|days?\s*(?:a|per)\s*week|d[ií]as\s*(?:a\s*la|por)\s*semana|days?\s*on)\b/i);
+    if (multiWeekMatch) {
+      const n = parseInt(multiWeekMatch[1], 10);
+      return { mode: 'custom_weekly', targetPerWeek: n, timeHint: isEs ? `${n} días por semana` : `${n} days per week` };
+    }
+    if (/\b(weekly|once\s*(?:a|per)\s*week|1x\s*\/?\s*week|every\s*week|cada\s*semana|semanal|1\s*vez\s*(?:a\s*la|por)\s*semana)\b/i.test(rawPos)) {
+      return { mode: 'weekly', targetPerWeek: 1, timeHint: isEs ? '1 vez por semana' : 'Once a week' };
+    }
+    const isMorning = /\b(morning|am|breakfast|ma[nñ]ana|desayuno)\b/i.test(rawPos);
+    const isEvening = /\b(evening|night|bedtime|pm|tarde|noche|antes\s*de\s*dormir)\b/i.test(rawPos);
+    return {
+      mode: 'daily',
+      targetPerWeek: 7,
+      timeHint: isMorning
+        ? (isEs ? 'Cada mañana' : 'Every morning')
+        : isEvening
+        ? (isEs ? 'Cada tarde / noche' : 'Every evening / night')
+        : (isEs ? '1 vez al día' : 'Once daily'),
+    };
+  }, [rx, compoundedFormulations, isEs]);
+
+  // Twice-daily AM/PM state for today + Weekly 4-week state
+  const todayKey = last7Days[last7Days.length - 1]?.key || 'today';
+  const [amPmToday, setAmPmToday] = useState(() => {
+    if (typeof window === 'undefined') return { am: false, pm: false };
+    try {
+      return {
+        am: Boolean(localStorage.getItem(`atlas_rx_adherence_${rxId}_${todayKey}_am`)),
+        pm: Boolean(localStorage.getItem(`atlas_rx_adherence_${rxId}_${todayKey}_pm`)),
+      };
+    } catch {
+      return { am: false, pm: false };
+    }
+  });
+
+  const handleToggleAmPm = (slot) => {
+    triggerHaptic('selection');
+    const nextVal = !amPmToday[slot];
+    const updated = { ...amPmToday, [slot]: nextVal };
+    setAmPmToday(updated);
+    try {
+      const k = `atlas_rx_adherence_${rxId}_${todayKey}_${slot}`;
+      if (nextVal) {
+        localStorage.setItem(k, JSON.stringify({ taken: true, slot, time: new Date().toLocaleTimeString() }));
+        toast.success(
+          slot === 'am'
+            ? (isEs ? 'Toma de la mañana registrada ✓' : 'Morning dose logged ✓')
+            : (isEs ? 'Toma de la tarde/noche registrada ✓' : 'Evening dose logged ✓'),
+          { icon: slot === 'am' ? '☀️' : '🌙' }
+        );
+      } else {
+        localStorage.removeItem(k);
+      }
+      const dayFullKey = `atlas_rx_adherence_${rxId}_${todayKey}`;
+      if (updated.am || updated.pm) {
+        localStorage.setItem(dayFullKey, JSON.stringify({ taken: true, am: updated.am, pm: updated.pm }));
+        setLoggedDaysMap((prev) => ({ ...prev, [todayKey]: true }));
+        setHasTakenDoseToday(true);
+      } else {
+        localStorage.removeItem(dayFullKey);
+        setLoggedDaysMap((prev) => ({ ...prev, [todayKey]: false }));
+        setHasTakenDoseToday(false);
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const last4Weeks = useMemo(() => {
+    const weeks = [];
+    const now = new Date();
+    for (let w = 3; w >= 0; w--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - w * 7);
+      // ISO week key approximation (Monday-based year-week)
+      const jan1 = new Date(d.getFullYear(), 0, 1);
+      const weekNum = Math.ceil((((d - jan1) / 86400000) + jan1.getDay() + 1) / 7);
+      const key = `${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+      weeks.push({
+        key,
+        isCurrent: w === 0,
+        label: w === 0
+          ? (isEs ? 'Esta semana' : 'This week')
+          : w === 1
+          ? (isEs ? 'Semana pasada' : 'Last week')
+          : (isEs ? `Hace ${w} sem.` : `${w} wks ago`),
+      });
+    }
+    return weeks;
+  }, [isEs]);
+
+  const [loggedWeeksMap, setLoggedWeeksMap] = useState(() => {
+    const map = {};
+    if (typeof window === 'undefined') return map;
+    try {
+      last4Weeks.forEach((wk) => {
+        map[wk.key] = Boolean(localStorage.getItem(`atlas_rx_adherence_${rxId}_${wk.key}`));
+      });
+    } catch {
+      /* ignore */
+    }
+    return map;
+  });
+
+  const handleToggleWeek = (weekKey, isCurrent) => {
+    triggerHaptic('selection');
+    const nextVal = !loggedWeeksMap[weekKey];
+    setLoggedWeeksMap((prev) => ({ ...prev, [weekKey]: nextVal }));
+    if (isCurrent) setHasTakenDoseToday(nextVal);
+    try {
+      const k = `atlas_rx_adherence_${rxId}_${weekKey}`;
+      if (nextVal) {
+        localStorage.setItem(k, JSON.stringify({ taken: true, time: new Date().toLocaleDateString() }));
+        toast.success(isEs ? 'Dosis semanal registrada ✓' : 'Weekly dose logged ✓', { icon: '💊' });
+      } else {
+        localStorage.removeItem(k);
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
   const handleToggleDose = () => {
     triggerHaptic('selection');
     const newState = !hasTakenDoseToday;
@@ -270,7 +412,8 @@ export default function PatientPrescriptionGuide({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', marginBottom: '2rem' }}>
       
-      {/* ── Universal 7-Day Dose Tracker + Direct Message to Prescribing Doctor (No Duplicate Greeting Hero) ── */}
+      {/* ── Posology-Adapted Dose Tracker (Daily / Morning+Evening / Weekly / N×Week; hidden for Pellets) ── */}
+      {posologySchedule.mode !== 'in_clinic' && (
       <div
         style={{
           background: '#ffffff',
@@ -286,12 +429,28 @@ export default function PatientPrescriptionGuide({
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'Registro Rápido de Tomas (Últimos 7 Días)' : 'Quick Dose Log (Last 7 Days)'}
+              {posologySchedule.mode === 'weekly'
+                ? (isEs ? 'Registro Semanal de Tomas (Últimas 4 Semanas)' : 'Weekly Dose Log (Last 4 Weeks)')
+                : posologySchedule.mode === 'twice_daily'
+                ? (isEs ? 'Registro de Tomas: Mañana y Tarde' : 'Dose Log: Morning & Evening')
+                : (isEs ? 'Registro Rápido de Tomas (Últimos 7 Días)' : 'Quick Dose Log (Last 7 Days)')}
             </div>
             <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '2px' }}>
-              {isEs
-                ? `Toca cada día que hayas tomado tu pauta · ${loggedCount7d}/7 días`
-                : `Tap each day you took your dose · ${loggedCount7d}/7 days logged`}
+              {posologySchedule.mode === 'weekly'
+                ? (isEs
+                    ? `${posologySchedule.timeHint} · Toca la semana en la que aplicaste tu dosis`
+                    : `${posologySchedule.timeHint} · Tap the week you took your dose`)
+                : posologySchedule.mode === 'twice_daily'
+                ? (isEs
+                    ? `${posologySchedule.timeHint} · Marca mañana y tarde/noche hoy`
+                    : `${posologySchedule.timeHint} · Mark morning and evening today`)
+                : posologySchedule.mode === 'custom_weekly'
+                ? (isEs
+                    ? `${posologySchedule.timeHint} · ${loggedCount7d}/${posologySchedule.targetPerWeek} esta semana`
+                    : `${posologySchedule.timeHint} · ${loggedCount7d}/${posologySchedule.targetPerWeek} this week`)
+                : (isEs
+                    ? `${posologySchedule.timeHint} · ${loggedCount7d}/7 días`
+                    : `${posologySchedule.timeHint} · ${loggedCount7d}/7 days logged`)}
             </div>
           </div>
 
@@ -343,11 +502,100 @@ export default function PatientPrescriptionGuide({
               }}
             >
               <MessageCircle size={13} color="#1a73e8" />
-              <span>{isEs ? `Preguntar a ${doctorName || 'mi médico'}` : `Message ${doctorName || 'My Doctor'}`}</span>
+              <span>{isEs ? 'Enviar Consulta' : 'Ask a Question'}</span>
             </button>
           </div>
         </div>
 
+        {posologySchedule.mode === 'twice_daily' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => handleToggleAmPm('am')}
+              aria-pressed={amPmToday.am}
+              style={{
+                minHeight: '48px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: amPmToday.am ? '1.5px solid #16a34a' : '1.5px solid #1a73e8',
+                background: amPmToday.am ? '#f0fdf4' : '#eff6ff',
+                color: amPmToday.am ? '#15803d' : '#1e40af',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>☀️</span>
+              <span>{isEs ? (amPmToday.am ? 'Mañana ✓' : 'Marcar Mañana') : (amPmToday.am ? 'Morning ✓' : 'Log Morning')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleToggleAmPm('pm')}
+              aria-pressed={amPmToday.pm}
+              style={{
+                minHeight: '48px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: amPmToday.pm ? '1.5px solid #16a34a' : '1.5px solid #6366f1',
+                background: amPmToday.pm ? '#f0fdf4' : '#eef2ff',
+                color: amPmToday.pm ? '#15803d' : '#3730a3',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>🌙</span>
+              <span>{isEs ? (amPmToday.pm ? 'Tarde / Noche ✓' : 'Marcar Tarde') : (amPmToday.pm ? 'Evening ✓' : 'Log Evening')}</span>
+            </button>
+          </div>
+        )}
+
+        {posologySchedule.mode === 'weekly' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '6px' }}>
+            {last4Weeks.map((wk) => {
+              const checked = Boolean(loggedWeeksMap[wk.key]);
+              return (
+                <button
+                  key={wk.key}
+                  type="button"
+                  onClick={() => handleToggleWeek(wk.key, wk.isCurrent)}
+                  aria-pressed={checked}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '3px',
+                    minHeight: '52px',
+                    padding: '6px 4px',
+                    borderRadius: '8px',
+                    border: checked ? '1.5px solid #16a34a' : (wk.isCurrent ? '1.5px solid #1a73e8' : '1px solid #e2e8f0'),
+                    background: checked ? '#f0fdf4' : (wk.isCurrent ? '#eff6ff' : '#f8fafc'),
+                    color: checked ? '#15803d' : '#334155',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    minWidth: 0,
+                  }}
+                >
+                  <span style={{ fontSize: '0.64rem', fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>
+                    {wk.label}
+                  </span>
+                  <span style={{ fontSize: '0.84rem', fontWeight: 800 }}>
+                    {checked ? '✓' : '○'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '4px' }}>
           {last7Days.map((day) => {
             const checked = Boolean(loggedDaysMap[day.key]);
@@ -384,7 +632,9 @@ export default function PatientPrescriptionGuide({
             );
           })}
         </div>
+        )}
       </div>
+      )}
 
       {/* ── Item-by-Item Presentation with Differentiated Posology ──────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -798,19 +1048,29 @@ export default function PatientPrescriptionGuide({
                     </div>
                   )}
 
-                  {/* Collapsible 3-Step Visual Device Guide (Nasal Spray or Pen) */}
+                  {/* Collapsible 3-Step Visual Device Guide (strictly isolated by prescription type) */}
                   {(() => {
                     const isNasal = String(rx?.dispensingForm || item.title || '').toLowerCase().includes('nasal') ||
                       String(rx?.treatmentTitle || '').toLowerCase().includes('nasal');
                     const isPenDevice = item.category?.type === 'peptide_pen';
-                    if (!isNasal && !isPenDevice) return null;
+                    const isHormonalTransdermal = !isNasal && !isPenDevice && (item.category?.isTransdermal || /\b(topiclick|pentravan|hormon|estradiol|progesterone|testosterone|dhea)\b/i.test(`${item.title || ''} ${item.vehicle?.name || ''}`));
+                    const isHairTopical = !isNasal && !isPenDevice && !isHormonalTransdermal && (item.category?.type === 'topical' || /\b(trichosol|scalp|hair|capilar|minoxidil|finasteride|dutasteride|latanoprost)\b/i.test(`${item.title || ''} ${item.vehicle?.name || ''}`));
+                    if (!isNasal && !isPenDevice && !isHormonalTransdermal && !isHairTopical) return null;
                     const stepsList = isNasal
                       ? (isEs
                           ? ['1. Limpia suavemente la nariz antes de aplicar.', '2. Aplica 1 pulsación en cada fosa nasal respirando suave.', '3. Limpia la boquilla y guarda en nevera (2°C–8°C).']
                           : ['1. Gently clear your nose before using.', '2. Apply 1 spray into each nostril while breathing in gently.', '3. Wipe the nozzle and return to the fridge (2°C–8°C).'])
-                      : (isEs
+                      : isPenDevice
+                      ? (isEs
                           ? ['1. Coloca una aguja estéril nueva en la pluma.', '2. Gira el dial hasta los clics indicados en tu pauta.', '3. Aplica en abdomen o muslo y mantén 5–10 segundos.']
-                          : ['1. Attach a fresh sterile needle to your pen.', '2. Turn the dial to your prescribed number of clicks.', '3. Press on abdomen or thigh and hold for 5–10 seconds.']);
+                          : ['1. Attach a fresh sterile needle to your pen.', '2. Turn the dial to your prescribed number of clicks.', '3. Press on abdomen or thigh and hold for 5–10 seconds.'])
+                      : isHormonalTransdermal
+                      ? (isEs
+                          ? ['1. Limpia y seca la piel (antebrazo interno o muslo).', '2. Aplica los clics/pumps indicados y masajea hasta absorber.', '3. Lávate las manos después y evita contacto piel con piel 1–2 h.']
+                          : ['1. Clean and dry the skin (inner forearm or thigh).', '2. Apply your prescribed clicks/pumps and rub in until absorbed.', '3. Wash hands afterward and avoid skin-to-skin contact for 1–2 hours.'])
+                      : (isEs
+                          ? ['1. Con el cuero cabelludo seco, abre raya en las zonas a tratar.', '2. Aplica la cantidad exacta y masajea suave 30 segundos.', '3. Deja actuar al menos 4 horas antes de lavar el cabello.']
+                          : ['1. On a dry scalp, part your hair over the target areas.', '2. Apply the exact dose and massage gently for 30 seconds.', '3. Leave on for at least 4 hours before washing your hair.']);
                     return (
                       <details
                         style={{
