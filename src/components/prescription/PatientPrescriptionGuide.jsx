@@ -33,6 +33,7 @@ import PatientPhysicianGreetingHero from './PatientPhysicianGreetingHero';
 import { detectPrescriptionType } from '@/utils/prescriptionTypeDetection';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
 import { computeRefillSchedule, formatShortDate } from '@/utils/refillSchedule';
+import { resolveProductId, COMPOUND_INDEX } from '@/data/compoundIndex';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
@@ -1076,12 +1077,34 @@ export default function PatientPrescriptionGuide({
                 </div>
 
                 {(() => {
+                  let resolvedCompoundId = null;
+                  if (Array.isArray(item.apis)) {
+                    for (const api of item.apis) {
+                      const candidate = api?.slug || api?.name || api?.productName || '';
+                      const hit = resolveProductId(candidate);
+                      if (hit) {
+                        resolvedCompoundId = hit;
+                        break;
+                      }
+                    }
+                  }
+                  if (!resolvedCompoundId && item.title) {
+                    const lowerTitle = String(item.title).toLowerCase();
+                    for (const key of Object.keys(COMPOUND_INDEX)) {
+                      if (key.length >= 3 && lowerTitle.includes(key)) {
+                        resolvedCompoundId = COMPOUND_INDEX[key];
+                        break;
+                      }
+                    }
+                  }
+
                   const datasheetHref =
                     item.datasheetUrl ||
                     item.monographUrl ||
                     (item.productSlug ? `/p/${encodeURIComponent(item.productSlug)}` : '') ||
                     (rx?.productSlug ? `/p/${encodeURIComponent(rx.productSlug)}` : '') ||
-                    (rx?.productUrl && /\/p\//.test(rx.productUrl) ? rx.productUrl : '');
+                    (rx?.productUrl && /\/p\//.test(rx.productUrl) ? rx.productUrl : '') ||
+                    (resolvedCompoundId ? `/p/${encodeURIComponent(resolvedCompoundId)}` : '');
                   if (!datasheetHref) return null;
                   return (
                     <a
