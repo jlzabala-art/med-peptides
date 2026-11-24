@@ -18,6 +18,7 @@ export default function LabelsStepSelector({
   dimensions = { widthMm: 75, heightMm: 45 },
   onSelectDelivery,
   onSelectShipping,
+  onSelectExternalSupplier,
   onToggleSettings,
 }) {
   return (
@@ -52,64 +53,66 @@ export default function LabelsStepSelector({
           {isEs ? 'Etiqueta' : 'Label'}
         </span>
 
-        {fulfillmentMode !== 'external_supplier' && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', background: '#e2e8f0', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', background: '#e2e8f0', borderRadius: '6px', padding: '2px', gap: '2px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={onSelectDelivery}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '5px',
+              border: 'none',
+              background: fulfillmentMode !== 'external_supplier' && activeVariant !== 'shipping' ? '#ffffff' : 'transparent',
+              color: fulfillmentMode !== 'external_supplier' && activeVariant !== 'shipping' ? '#1a73e8' : '#475569',
+              fontSize: '0.74rem',
+              fontWeight: fulfillmentMode !== 'external_supplier' && activeVariant !== 'shipping' ? 750 : 600,
+              boxShadow: fulfillmentMode !== 'external_supplier' && activeVariant !== 'shipping' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {isEs ? '1. Delivery Label (Clínica)' : '1. Delivery Label (Client)'}
+          </button>
+          {!hideShippingLabel && (
             <button
               type="button"
-              onClick={onSelectDelivery}
+              onClick={onSelectShipping}
               style={{
                 padding: '4px 10px',
                 borderRadius: '5px',
                 border: 'none',
-                background: activeVariant !== 'shipping' ? '#ffffff' : 'transparent',
-                color: activeVariant !== 'shipping' ? '#1a73e8' : '#475569',
+                background: fulfillmentMode !== 'external_supplier' && activeVariant === 'shipping' ? '#ffffff' : 'transparent',
+                color: fulfillmentMode !== 'external_supplier' && activeVariant === 'shipping' ? '#1a73e8' : '#475569',
                 fontSize: '0.74rem',
-                fontWeight: activeVariant !== 'shipping' ? 750 : 600,
-                boxShadow: activeVariant !== 'shipping' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                fontWeight: fulfillmentMode !== 'external_supplier' && activeVariant === 'shipping' ? 750 : 600,
+                boxShadow: fulfillmentMode !== 'external_supplier' && activeVariant === 'shipping' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
               }}
             >
-              {isEs ? '1. Delivery Label (Clínica)' : '1. Delivery Label (Client)'}
+              {isEs ? '2. Shipping (Aduanas)' : '2. Shipping (Customs)'}
             </button>
-            {!hideShippingLabel && (
-              <button
-                type="button"
-                onClick={onSelectShipping}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '5px',
-                  border: 'none',
-                  background: activeVariant === 'shipping' ? '#ffffff' : 'transparent',
-                  color: activeVariant === 'shipping' ? '#1a73e8' : '#475569',
-                  fontSize: '0.74rem',
-                  fontWeight: activeVariant === 'shipping' ? 750 : 600,
-                  boxShadow: activeVariant === 'shipping' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {isEs ? '2. Shipping (Aduanas)' : '2. Shipping (Customs)'}
-              </button>
-            )}
-          </div>
-        )}
-
-        {fulfillmentMode === 'external_supplier' && (
-          <span
-            style={{
-              fontSize: '0.70rem',
-              fontWeight: 700,
-              color: '#6b21a8',
-              background: '#f3e8ff',
-              border: '1px solid #d8b4fe',
-              padding: '3px 8px',
-              borderRadius: '6px',
-            }}
-          >
-            {isEs ? 'Modo Proveedor Externo (Refill Card)' : 'External Supplier (Refill Card)'}
-          </span>
-        )}
+          )}
+          {onSelectExternalSupplier && (
+            <button
+              type="button"
+              onClick={onSelectExternalSupplier}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '5px',
+                border: 'none',
+                background: fulfillmentMode === 'external_supplier' ? '#ffffff' : 'transparent',
+                color: fulfillmentMode === 'external_supplier' ? '#6b21a8' : '#475569',
+                fontSize: '0.74rem',
+                fontWeight: fulfillmentMode === 'external_supplier' ? 750 : 600,
+                boxShadow: fulfillmentMode === 'external_supplier' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {isEs ? '3. BioBlend / Partner QR' : '3. BioBlend / Partner QR'}
+            </button>
+          )}
+        </div>
       </div>
 
       {fulfillmentMode !== 'external_supplier' && (

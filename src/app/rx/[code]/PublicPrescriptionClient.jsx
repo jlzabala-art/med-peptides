@@ -864,6 +864,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   patientName={patientName}
                   rxId={rxId}
                   patientPublicUrl={patientPublicUrl}
+                  urlLot={searchParams?.get('lot') || ''}
+                  urlBud={searchParams?.get('bud') || ''}
                   onOpenQuotation={() => setShowAtlasQuotationModal(true)}
                   onOpenDoctorContact={() => setShowDoctorContactModal(true)}
                 />

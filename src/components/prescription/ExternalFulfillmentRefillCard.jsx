@@ -40,6 +40,12 @@ export default function ExternalFulfillmentRefillCard({
 }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
+  const [supplierLot, setSupplierLot] = useState(
+    () => String(labelData?.batchCode || prescription?.batchCode || '').trim()
+  );
+  const [supplierBud, setSupplierBud] = useState(
+    () => String(labelData?.expDate || prescription?.expDate || '').trim()
+  );
 
   const fileNumber = (
     prescription?.fileNumber ||
@@ -103,12 +109,23 @@ export default function ExternalFulfillmentRefillCard({
     prescription?.storage ||
     'Conservar refrigerado (2°C - 8°C). No congelar.';
 
-  // QR URLs
-  const refillUrl =
+  // QR URLs (bind supplier Lot & BUD so patient dossier displays verified pen traceability)
+  const baseRefillUrl =
     labelData?.targetRxUrl ||
     labelData?.qrRefillUrl ||
     prescription?.qrRefillUrl ||
     `https://www.atlashealth-services.com/rx/${encodeURIComponent(fileNumber)}?view=patient&action=refill`;
+
+  const refillUrl = (() => {
+    const cleanLot = supplierLot.trim();
+    const cleanBud = supplierBud.trim();
+    const sep = baseRefillUrl.includes('?') ? '&' : '?';
+    const extra = [
+      cleanLot ? `lot=${encodeURIComponent(cleanLot)}` : '',
+      cleanBud ? `bud=${encodeURIComponent(cleanBud)}` : '',
+    ].filter(Boolean).join('&');
+    return extra ? `${baseRefillUrl}${sep}${extra}` : baseRefillUrl;
+  })();
 
   const productUrl =
     labelData?.qrProductUrl ||
@@ -186,6 +203,83 @@ Atlas Health Clinical Services`;
       flexDirection: 'column',
       gap: '16px'
     }}>
+      {/* ── BIOBLEND / SUPPLIER LOT & BUD TRACEABILITY + SHAREABLE PATIENT URL ── */}
+      <div style={{
+        background: '#ffffff',
+        border: '1px solid #dadce0',
+        borderRadius: '10px',
+        padding: '12px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            {isEs ? 'Trazabilidad Pen Proveedor (BioBlend / Partner)' : 'Supplier Pen Traceability (BioBlend / Partner)'}
+          </span>
+          <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
+            {isEs ? 'Se incrusta automáticamente en el QR del paciente' : 'Embedded automatically into the patient QR'}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
+              {isEs ? 'Lote del Pen (Lot Number)' : 'Pen Lot Number'}
+            </label>
+            <input
+              type="text"
+              value={supplierLot}
+              onChange={(e) => setSupplierLot(e.target.value)}
+              placeholder="270726122609RX"
+              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.78rem', fontFamily: 'monospace' }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
+              {isEs ? 'Caducidad / BUD' : 'Beyond Use Date (BUD)'}
+            </label>
+            <input
+              type="text"
+              value={supplierBud}
+              onChange={(e) => setSupplierBud(e.target.value)}
+              placeholder="2027-01-23"
+              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.78rem', fontFamily: 'monospace' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '7px 10px' }}>
+          <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#1a73e8', whiteSpace: 'nowrap' }}>
+            {isEs ? 'URL Paciente:' : 'Patient URL:'}
+          </span>
+          <code style={{ fontSize: '0.72rem', color: '#0f172a', wordBreak: 'break-all', flex: 1 }}>
+            {refillUrl}
+          </code>
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 10px',
+              borderRadius: '5px',
+              border: '1px solid #dadce0',
+              background: copiedLink ? '#f0fdf4' : '#ffffff',
+              color: copiedLink ? '#15803d' : '#3c4043',
+              fontSize: '0.71rem',
+              fontWeight: 650,
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            {copiedLink ? <Check size={12} /> : <Copy size={12} />}
+            <span>{copiedLink ? (isEs ? 'Copiada' : 'Copied') : (isEs ? 'Copiar URL' : 'Copy URL')}</span>
+          </button>
+        </div>
+      </div>
+
       {/* ── LOGISTIC CONTEXT BANNER ── */}
       <div style={{
         background: '#eff6ff',

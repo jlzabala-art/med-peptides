@@ -350,3 +350,15 @@ test('Rx Mobile & Nasal Spray UX: isolates nasal spray timeline, dynamic duratio
   assert.ok(protoCatalogSrc.includes('<DataTable'), 'PublicProtocolsCatalogView must use shared DataTable');
   assert.equal(protoCatalogSrc.includes('<table'), false, 'PublicProtocolsCatalogView must not render raw <table> tags');
 });
+
+test('BioBlend Prefilled Pen QR: ExternalFulfillmentRefillCard binds lot/bud into patient URL & PatientGuide renders pen dial/lot', () => {
+  const refillCardSrc = read('src/components/prescription/ExternalFulfillmentRefillCard.jsx');
+  assert.ok(refillCardSrc.includes('supplierLot') && refillCardSrc.includes('supplierBud'), 'ExternalFulfillmentRefillCard must support supplierLot and supplierBud');
+  assert.ok(refillCardSrc.includes('view=patient&action=refill'), 'BioBlend QR URL must link to patient prescription view');
+
+  const stepSelectorSrc = read('src/components/prescription/labels/LabelsStepSelector.jsx');
+  assert.ok(stepSelectorSrc.includes('BioBlend / Partner QR'), 'LabelsStepSelector must allow switching to BioBlend / Partner QR');
+
+  const patientGuideSrc = read('src/components/prescription/PatientPrescriptionGuide.jsx');
+  assert.ok(patientGuideSrc.includes('urlLot') && patientGuideSrc.includes('Pen Dial & Sterile Needles'), 'PatientPrescriptionGuide must show pen needle guidance and supplier lot/BUD');
+});

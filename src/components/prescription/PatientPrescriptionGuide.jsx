@@ -47,6 +47,8 @@ export default function PatientPrescriptionGuide({
   patientName = '',
   rxId = '',
   patientPublicUrl = '',
+  urlLot = '',
+  urlBud = '',
   rx = {},
   onOpenDoctorContact = null,
   onOpenQuotation = null
@@ -496,6 +498,24 @@ export default function PatientPrescriptionGuide({
                         <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
                           {isEs ? 'Nevera 2°C–8°C · Lista para usar · No congelar' : 'Refrigerator 2°C–8°C · Ready-to-use · Do not freeze'}
                         </div>
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {isEs ? '🎯 Dial y Agujas Estériles:' : '🎯 Pen Dial & Sterile Needles:'}
+                        </div>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
+                          {isEs
+                            ? 'Usa una aguja estéril nueva en cada aplicación · Mantén pulsado 5–10 s tras inyectar'
+                            : 'Attach a fresh sterile pen needle per dose · Hold 5–10s after dialing'}
+                        </div>
+                        {(urlLot || rx?.batchCode || urlBud || rx?.expDate) && (
+                          <div style={{ marginTop: '4px', fontSize: '0.72rem', fontFamily: 'monospace', color: '#5b21b6', fontWeight: 700 }}>
+                            {(urlLot || rx?.batchCode) ? `Lot: ${urlLot || rx?.batchCode}` : ''}
+                            {(urlLot || rx?.batchCode) && (urlBud || rx?.expDate) ? ' · ' : ''}
+                            {(urlBud || rx?.expDate) ? `BUD: ${urlBud || rx?.expDate}` : ''}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : item.category.type === 'peptide' ? (

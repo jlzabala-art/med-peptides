@@ -2513,6 +2513,7 @@ export default function PharmacyLabelsModal({
                     if (defTitle) handleFieldChange('shippingTitle', defTitle);
                   }
                 }}
+                onSelectExternalSupplier={() => setFulfillmentMode('external_supplier')}
                 onToggleSettings={() => setShowPrintSettings((prev) => !prev)}
               />
 
