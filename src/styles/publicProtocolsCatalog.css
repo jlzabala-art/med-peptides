@@ -1466,7 +1466,7 @@
 @media (min-width: 1024px) {
   .proto-content-grid {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 290px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 1.5rem !important;
     align-items: flex-start !important;
   }

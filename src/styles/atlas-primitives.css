@@ -211,6 +211,8 @@
   .atlas-hero-card {
     padding: 0.68rem 0.85rem;
     margin-bottom: 0.65rem;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .atlas-hero-row {
@@ -221,27 +223,34 @@
 
   .atlas-hero-identity {
     flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .atlas-hero-eyebrow {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    flex-wrap: wrap;
+    gap: 0.3rem;
   }
 
-  .atlas-hero-eyebrow::-webkit-scrollbar {
-    display: none;
+  .atlas-hero-pill-primary,
+  .atlas-hero-pill-secondary,
+  .atlas-hero-pill-meta {
+    white-space: normal;
+    max-width: 100%;
+    line-height: 1.25;
   }
 
   .atlas-hero-title {
     font-size: 1.02rem;
     line-height: 1.22;
+    overflow-wrap: anywhere;
   }
 
   .atlas-hero-subtitle {
     font-size: 0.74rem;
     line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .atlas-hero-actions {

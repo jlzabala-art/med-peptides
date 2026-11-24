@@ -278,6 +278,8 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
             onToggleSafetyExclusion={toggleSafetyExclusion}
             onlyShortlisted={onlyShortlisted}
             onToggleOnlyShortlisted={() => setOnlyShortlisted((prev) => !prev)}
+            wadaSafeOnly={wadaSafeOnly}
+            onToggleWadaSafeOnly={() => setWadaSafeOnly((prev) => !prev)}
             shortlistCount={shortlistSlugs.size}
             viewMode={viewMode}
             onChangeViewMode={setViewMode}
@@ -292,25 +294,6 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
             lang={lang}
             t={t}
           />
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-            <button
-              type="button"
-              onClick={() => setWadaSafeOnly((prev) => !prev)}
-              style={{
-                padding: '4px 11px',
-                borderRadius: '999px',
-                border: wadaSafeOnly ? '1px solid #059669' : '1px solid #cbd5e1',
-                background: wadaSafeOnly ? '#ecfdf5' : '#ffffff',
-                color: wadaSafeOnly ? '#047857' : '#475569',
-                fontSize: '0.73rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              {wadaSafeOnly ? '✓ ' : ''}{isEs ? 'Solo WADA-Safe (Atletas)' : 'WADA-Safe Only (Athletes)'}
-            </button>
-          </div>
 
           {/* ── 4. Protocol Groups by Therapeutic Goals ── */}
           {groupedProtocols.length > 0 ? (
@@ -405,8 +388,9 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             width: '18%',
                             render: (_val, proto) => {
                               const ev = String(proto.evidence_grade || 'Emerging');
-                              const isHigh = ev.toLowerCase().includes('high');
-                              const isMod = ev.toLowerCase().includes('moderate');
+                              const evLow = ev.toLowerCase();
+                              const isHigh = evLow.includes('high') || evLow.includes('tier 1') || evLow.includes('established');
+                              const isMod = evLow.includes('moderate') || evLow.includes('tier 2') || evLow.includes('cohort');
                               return (
                                 <span style={{
                                   display: 'inline-block',

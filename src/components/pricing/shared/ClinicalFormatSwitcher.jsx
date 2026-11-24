@@ -154,18 +154,21 @@ export default function ClinicalFormatSwitcher({
         }
         @media (max-width: 768px) {
           .atlas-format-switcher-inner {
-            padding: 6px 8px;
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 4px;
-            overflow-x: visible;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
           }
           .atlas-format-switcher-tab {
-            padding: 5px 2px;
-            font-size: 0.68rem;
-            gap: 3px;
+            padding: 5px 10px;
+            font-size: 0.72rem;
+            gap: 5px;
             border-radius: 7px;
             min-height: 34px;
+            flex-shrink: 0;
           }
           .atlas-format-switcher-full,
           .atlas-format-switcher-badge {

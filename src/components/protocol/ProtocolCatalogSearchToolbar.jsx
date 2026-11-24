@@ -42,6 +42,8 @@ export default function ProtocolCatalogSearchToolbar({
   onToggleSafetyExclusion,
   onlyShortlisted,
   onToggleOnlyShortlisted,
+  wadaSafeOnly = false,
+  onToggleWadaSafeOnly = () => {},
   shortlistCount = 0,
   viewMode,
   onChangeViewMode,
@@ -154,6 +156,18 @@ export default function ProtocolCatalogSearchToolbar({
           >
             <ShieldAlert size={12} />
             <span>{isEs ? 'Sin riesgo MEN2/Tiroides' : 'No MEN2/Thyroid Risk'}</span>
+          </button>
+
+          <button
+            type="button"
+            className={`proto-triage-chip ${wadaSafeOnly ? 'is-active-teal' : ''}`}
+            onClick={() => {
+              triggerHaptic('selection');
+              onToggleWadaSafeOnly();
+            }}
+            title={isEs ? 'Filtrar solo protocolos aptos para atletas (sin sustancias prohibidas WADA)' : 'Filter only athlete-safe protocols (no WADA prohibited substances)'}
+          >
+            <span>{wadaSafeOnly ? '✓ ' : ''}{isEs ? 'Solo WADA-Safe (Atletas)' : 'WADA-Safe Only (Athletes)'}</span>
           </button>
 
           {shortlistCount > 0 && (
