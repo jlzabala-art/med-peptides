@@ -33,7 +33,7 @@ import PatientPhysicianGreetingHero from './PatientPhysicianGreetingHero';
 import { detectPrescriptionType } from '@/utils/prescriptionTypeDetection';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
 import { computeRefillSchedule, formatShortDate } from '@/utils/refillSchedule';
-import { resolveProductId, COMPOUND_INDEX } from '@/data/compoundIndex';
+import COMPOUND_INDEX, { resolveProductId } from '@/data/compoundIndex';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
