@@ -2256,6 +2256,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   <span style={{ color: '#64748b', fontWeight: 600 }}>Ref:</span>
                   <span style={{ color: '#0f172a', fontWeight: 800, fontFamily: 'monospace' }}>{rxId}</span>
                 </div>
+                {isPatientView && (
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '6px 10px',
+                  }}>
+                    <QRCodeSVG
+                      value={`${patientPublicUrl}${urlLot ? `&lot=${encodeURIComponent(urlLot)}` : ''}${urlBud ? `&bud=${encodeURIComponent(urlBud)}` : ''}`}
+                      size={52}
+                      level="M"
+                    />
+                    <div style={{ textAlign: 'left', fontSize: '0.70rem', color: '#64748b', lineHeight: 1.3 }}>
+                      <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                        {isEs ? 'Tu Código QR' : 'Your Rx QR'}
+                      </div>
+                      <div>{isEs ? 'Escanea para abrir en el móvil' : 'Scan to open on mobile'}</div>
+                    </div>
+                  </div>
+                )}
                 {!isPatientView && (
                   <>
                     <div style={{ color: '#64748b', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>

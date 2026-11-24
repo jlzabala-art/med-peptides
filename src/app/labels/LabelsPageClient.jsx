@@ -420,7 +420,12 @@ export default function PublicLabelsAppClient({
     let text = '';
 
     if (type === 'patient') {
-      url = `${origin}/rx/${encodeURIComponent(activeCode)}?view=patient&lang=${lang}`;
+      const currentLabel = labels[labelIndex] || {};
+      const lotVal = currentLabel?.lotNumber || currentLabel?.batchCode || currentRx?.lotNumber || currentRx?.lote || '';
+      const budVal = currentLabel?.bud || currentLabel?.expiryDate || currentRx?.expDate || currentRx?.bud || '';
+      const lotQs = lotVal ? `&lot=${encodeURIComponent(lotVal)}` : '';
+      const budQs = budVal ? `&bud=${encodeURIComponent(budVal)}` : '';
+      url = `${origin}/rx/${encodeURIComponent(activeCode)}?view=patient&lang=${lang}${lotQs}${budQs}`;
       title = `${patientName} • #${rxCode} Patient Instructions`;
       text = isEs ? `📱 Instrucciones del tratamiento #${rxCode}` : `📱 Treatment instructions for #${rxCode}`;
     } else if (type === 'clean') {
