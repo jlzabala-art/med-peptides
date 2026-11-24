@@ -2907,7 +2907,7 @@ export default function PharmacyLabelsModal({
                 </div>
 
                 {/* Editor Aux Action Buttons: Download .md, Reset (Save lives in unified bottom bar) */}
-                <div className="gcp-editor-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div className="gcp-editor-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                   {!saveSecurity.canSave ? (
                     <div style={{
                       display: 'inline-flex',
@@ -3687,12 +3687,12 @@ export default function PharmacyLabelsModal({
                     {/* Row 3: Prescribing Doctor (6 cols) & Clinic (6 cols) -> linked clinic & physician selection */}
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', overflow: 'hidden' }}>
                           <span>{isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}</span>
                           <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                           {(currentItem.clinicName || currentItem.clinicId) && (
-                            <span style={{ fontSize: '0.66rem', color: '#1a73e8', fontWeight: 600, marginLeft: '4px' }} title={isEs ? 'Doctores asociados a esta clínica' : 'Doctors associated with this clinic'}>
-                              {isEs ? '(Asociados a clínica)' : '(Clinic-associated)'}
+                            <span style={{ fontSize: '0.64rem', color: '#1a73e8', fontWeight: 600, marginLeft: '4px', whiteSpace: 'nowrap' }} title={isEs ? 'Doctores asociados a esta clínica' : 'Doctors associated with this clinic'}>
+                              {isEs ? '(Clínica)' : '(Clinic)'}
                             </span>
                           )}
                         </div>

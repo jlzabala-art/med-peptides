@@ -460,8 +460,8 @@ export default function LabelsMetaStrip({
                 borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #dadce0',
-                color: '#1a73e8',
-                fontWeight: 750,
+                color: '#3c4043',
+                fontWeight: 650,
                 fontSize: '0.71rem',
                 textDecoration: 'none',
                 boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
@@ -469,7 +469,7 @@ export default function LabelsMetaStrip({
               }}
               title={isEs ? `Modificar fórmula, instrucciones o notas de la prescripción actual #${cleanRxCode}` : `Modify formula, posology or instructions for #${cleanRxCode}`}
             >
-              <Edit3 size={11} color="#1a73e8" />
+              <Edit3 size={11} color="#5f6368" />
               <span>{isEs ? 'Editar Prescripción' : 'Edit Rx'}</span>
             </a>
 
@@ -486,20 +486,20 @@ export default function LabelsMetaStrip({
                   height: '24px',
                   padding: '0 9px',
                   borderRadius: '4px',
-                  background: '#ecfdf5',
-                  border: '1.5px solid #10b981',
-                  color: '#065f46',
-                  fontWeight: 800,
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#3c4043',
+                  fontWeight: 650,
                   fontSize: '0.71rem',
                   cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(16,185,129,0.15)',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
                   transition: 'all 0.15s ease'
                 }}
                 title={isEs
                   ? `Renovar ciclo de tratamiento / Duplicar prescripción (Prefijada en Parte ${labelIndex + 1})`
                   : `Issue new refill / Renew treatment cycle (Preset to Part ${labelIndex + 1})`}
               >
-                <Repeat size={11} color="#059669" />
+                <Repeat size={11} color="#5f6368" />
                 <span>{isEs ? 'Renovar / Refill' : 'Issue Refill'}</span>
                 {Number(refillCycle) > 1 && (
                   <span style={{
