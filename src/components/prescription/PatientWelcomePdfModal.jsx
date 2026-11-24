@@ -111,7 +111,7 @@ function drawA6CardToPdf(doc, offsetX, offsetY, data) {
   y += 23.5;
   doc.setFillColor(255, 255, 255);
   doc.setDrawColor(218, 220, 224);
-  doc.roundedRect(offsetX + pad, y, innerW, 24, 1.5, 1.5, 'FD');
+  doc.roundedRect(offsetX + pad, y, innerW, 26, 1.5, 1.5, 'FD');
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
@@ -119,15 +119,15 @@ function drawA6CardToPdf(doc, offsetX, offsetY, data) {
   doc.text(doc.splitTextToSize(treatmentName, innerW - 6)[0] || treatmentName, offsetX + pad + 3, y + 5.5);
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.2);
   doc.setTextColor(26, 115, 232);
   const posLines = doc.splitTextToSize(posologyLine, innerW - 6);
-  doc.text(posLines.slice(0, 2), offsetX + pad + 3, y + 10.5);
+  doc.text(posLines.slice(0, 2), offsetX + pad + 3, y + 10.2);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.8);
   doc.setTextColor(95, 99, 104);
-  doc.text(doc.splitTextToSize(storageLine, innerW - 6)[0] || storageLine, offsetX + pad + 3, y + 17.5);
+  doc.text(doc.splitTextToSize(storageLine, innerW - 6)[0] || storageLine, offsetX + pad + 3, y + 18.5);
 
   if (lotVal || budVal) {
     const metaStr = [
@@ -137,13 +137,13 @@ function drawA6CardToPdf(doc, offsetX, offsetY, data) {
       .filter(Boolean)
       .join(' · ');
     doc.setFont('courier', 'normal');
-    doc.setFontSize(6.5);
-    doc.text(metaStr, offsetX + pad + 3, y + 21.5);
+    doc.setFontSize(6.4);
+    doc.text(metaStr, offsetX + pad + 3, y + 23);
   }
 
   // Central QR + 4 Features Box
-  y += 27.5;
-  const qrBoxH = 48;
+  y += 29;
+  const qrBoxH = 47;
   doc.setFillColor(248, 251, 255);
   doc.setDrawColor(191, 219, 254);
   doc.roundedRect(offsetX + pad, y, innerW, qrBoxH, 1.5, 1.5, 'FD');
@@ -164,23 +164,28 @@ function drawA6CardToPdf(doc, offsetX, offsetY, data) {
   doc.setTextColor(95, 99, 104);
   doc.text(pdfEs ? 'Apunta y pulsa el enlace' : 'Point here & tap the link', offsetX + pad + 17.5, y + 41, { align: 'center' });
 
-  // 4 Features on right
-  let fy = y + 6.5;
-  const fx = offsetX + pad + 36;
+  // 4 Numbered Features on right
+  let fy = y + 6.8;
+  const fx = offsetX + pad + 35.5;
   const fw = innerW - 38;
-  features.forEach((feat) => {
+  features.forEach((feat, idx) => {
     doc.setFillColor(232, 240, 254);
-    doc.roundedRect(fx, fy - 2.6, 3.5, 3.5, 0.7, 0.7, 'F');
+    doc.circle(fx + 2, fy - 1.0, 2.1, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.2);
+    doc.setTextColor(26, 115, 232);
+    doc.text(String(idx + 1), fx + 2, fy - 0.1, { align: 'center' });
+
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7);
     doc.setTextColor(32, 33, 36);
-    doc.text(feat.title, fx + 5, fy);
+    doc.text(feat.title, fx + 6, fy);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
     doc.setTextColor(95, 99, 104);
-    doc.text(doc.splitTextToSize(feat.desc, fw - 5)[0] || feat.desc, fx + 5, fy + 3.2);
-    fy += 10.5;
+    doc.text(doc.splitTextToSize(feat.desc, fw - 6.5)[0] || feat.desc, fx + 6, fy + 3.2);
+    fy += 10.2;
   });
 
   // Footer
