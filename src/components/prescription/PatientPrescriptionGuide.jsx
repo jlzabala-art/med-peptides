@@ -163,7 +163,6 @@ export default function PatientPrescriptionGuide({
   }, [rx, compoundedFormulations, isEs]);
 
   // Twice-daily AM/PM state for today + Weekly 4-week state
-  const todayKey = last7Days[last7Days.length - 1]?.key || 'today';
   const [amPmToday, setAmPmToday] = useState(() => {
     if (typeof window === 'undefined') return { am: false, pm: false };
     try {

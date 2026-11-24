@@ -138,6 +138,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const actionParam = searchParams?.get('action') || '';
   const partParam = searchParams?.get('part') ? Number(searchParams.get('part')) : null;
   const productParam = searchParams?.get('product') || '';
+  const urlLot = searchParams?.get('lot') || '';
+  const urlBud = searchParams?.get('bud') || '';
   const defaultIsPatientView = viewParam === 'patient' || (!isAuthorizedViewer && viewParam !== 'doctor');
   const [overrideView, setOverrideView] = useState(null); // 'patient' | 'doctor' | null
   const isPatientView = overrideView ? overrideView === 'patient' : defaultIsPatientView;
