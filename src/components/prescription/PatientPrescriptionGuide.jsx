@@ -132,6 +132,107 @@ export default function PatientPrescriptionGuide({
     return map;
   });
 
+  const [loggedCountToastShown, setLoggedCountToastShown] = useState(false);
+  const [notifPermission, setNotifPermission] = useState(() => {
+    if (typeof window === 'undefined' || typeof Notification === 'undefined') return 'unsupported';
+    return Notification.permission || 'default';
+  });
+  const [showNotifPromptCard, setShowNotifPromptCard] = useState(false);
+  const [notifDismissed, setNotifDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return localStorage.getItem(`atlas_rx_notif_dismissed_${rxId}`) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const [isIosNonStandalone] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isIos = /iphone|ipad|ipod/.test(ua);
+    const isStandalone = window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)')?.matches;
+    return isIos && !isStandalone;
+  });
+  const [refillAlertOptIn, setRefillAlertOptIn] = useState(false);
+  const [refillAlertContact, setRefillAlertContact] = useState('');
+  const [refillAlertSaved, setRefillAlertSaved] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return Boolean(localStorage.getItem(`atlas_rx_refill_alert_${rxId}`));
+    } catch {
+      return false;
+    }
+  });
+
+  const maybePromptNotifications = () => {
+    if (notifDismissed || notifPermission === 'granted') return;
+    setShowNotifPromptCard(true);
+  };
+
+  const handleRequestNotifications = async () => {
+    triggerHaptic('selection');
+    if (typeof window === 'undefined' || typeof Notification === 'undefined') {
+      toast(isEs ? 'Usa "Añadir al Calendario" para recibir recordatorios en este dispositivo.' : 'Use "Add to Calendar" to get reminders on this device.');
+      return;
+    }
+    try {
+      const result = await Notification.requestPermission();
+      setNotifPermission(result);
+      if (result === 'granted') {
+        toast.success(
+          isEs
+            ? 'Notificaciones activadas ✓ Te avisaremos para tus tomas y tu próximo refill.'
+            : 'Notifications enabled ✓ We will remind you for doses and refills.'
+        );
+        try {
+          new Notification(isEs ? 'Recordatorios activados' : 'Reminders enabled', {
+            body: isEs
+              ? `Pauta: ${posologySchedule.timeHint || 'Según etiqueta'}`
+              : `Schedule: ${posologySchedule.timeHint || 'As labeled'}`,
+          });
+        } catch {
+          /* ignore browsers requiring SW for new Notification() */
+        }
+      } else if (result === 'denied') {
+        toast.error(
+          isEs
+            ? 'Permiso denegado en el navegador. Puedes usar "Añadir al Calendario".'
+            : 'Browser permission blocked. You can still use "Add to Calendar".'
+        );
+      }
+    } catch {
+      toast(isEs ? 'Usa "Añadir al Calendario" para configurar recordatorios.' : 'Use "Add to Calendar" to set up reminders.');
+    }
+  };
+
+  const handleSaveRefillAlert = async (e) => {
+    e.preventDefault();
+    const val = refillAlertContact.trim();
+    if (!val || val.length < 5) {
+      toast.error(isEs ? 'Introduce tu WhatsApp o email.' : 'Please enter your WhatsApp or email.');
+      return;
+    }
+    triggerHaptic('selection');
+    try {
+      localStorage.setItem(`atlas_rx_refill_alert_${rxId}`, val);
+      await fetch('/api/portal/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'patient_refill_reminder_optin',
+          rxId,
+          patientName,
+          contact: val,
+          message: `Patient opted in to 7-day pre-refill reminder for #${rxId} (${posologySchedule.timeHint || 'treatment'}).`,
+        }),
+      }).catch(() => {});
+      setRefillAlertSaved(true);
+      toast.success(isEs ? 'Aviso de refill guardado ✓' : 'Refill reminder saved ✓');
+    } catch {
+      toast.error(isEs ? 'No se pudo guardar.' : 'Could not save.');
+    }
+  };
+
   const handleToggleDay = (dayKey, isToday) => {
     triggerHaptic('selection');
     const nextVal = !loggedDaysMap[dayKey];
@@ -142,6 +243,7 @@ export default function PatientPrescriptionGuide({
       if (nextVal) {
         localStorage.setItem(fullKey, JSON.stringify({ taken: true, time: new Date().toLocaleTimeString() }));
         toast.success(isEs ? 'Dosis registrada ✓' : 'Dose logged ✓', { icon: '💊' });
+        maybePromptNotifications();
       } else {
         localStorage.removeItem(fullKey);
       }
@@ -221,6 +323,7 @@ export default function PatientPrescriptionGuide({
             : (isEs ? 'Toma de la tarde/noche registrada ✓' : 'Evening dose logged ✓'),
           { icon: slot === 'am' ? '☀️' : '🌙' }
         );
+        maybePromptNotifications();
       } else {
         localStorage.removeItem(k);
       }
@@ -285,6 +388,7 @@ export default function PatientPrescriptionGuide({
       if (nextVal) {
         localStorage.setItem(k, JSON.stringify({ taken: true, time: new Date().toLocaleDateString() }));
         toast.success(isEs ? 'Dosis semanal registrada ✓' : 'Weekly dose logged ✓', { icon: '💊' });
+        maybePromptNotifications();
       } else {
         localStorage.removeItem(k);
       }
@@ -664,6 +768,157 @@ export default function PatientPrescriptionGuide({
         </div>
         )}
       </div>
+      )}
+
+      {/* ── Post-Dose Notification Permission & Reminders Card (iOS, Android, Desktop + Refill Alert) ── */}
+      {showNotifPromptCard && (
+        <div
+          style={{
+            background: '#f8fafc',
+            border: '1px solid #bfdbfe',
+            borderRadius: '10px',
+            padding: '14px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1d4ed8' }}>
+                {isEs ? '🔔 ¿Quieres recordatorios para tus tomas y tu refill?' : '🔔 Want reminders for your doses & refill?'}
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#475569', marginTop: '2px', lineHeight: 1.4 }}>
+                {isEs
+                  ? 'Activa avisos para no olvidar tu pauta y saber cuándo pedir tu reposición antes de que se acabe.'
+                  : 'Enable gentle alerts so you never miss a dose and know when to request a refill before you run out.'}
+              </div>
+            </div>
+            <button
+              type="button"
+              aria-label={isEs ? 'Cerrar' : 'Dismiss'}
+              onClick={() => {
+                setShowNotifPromptCard(false);
+                setNotifDismissed(true);
+                try {
+                  localStorage.setItem(`atlas_rx_notif_dismissed_${rxId}`, '1');
+                } catch { /* ignore */ }
+              }}
+              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.85rem', padding: '4px 6px' }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {isIosNonStandalone && notifPermission !== 'granted' && (
+            <div style={{ fontSize: '0.74rem', color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '7px 10px' }}>
+              {isEs
+                ? '📱 En iPhone: pulsa primero "Añadir a Inicio" arriba para activar notificaciones push, o usa "Añadir al Calendario".'
+                : '📱 On iPhone: tap "Add to Home Screen" at the top first for push alerts, or use "Add to Calendar" below.'}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {notifPermission !== 'granted' ? (
+              <button
+                type="button"
+                onClick={handleRequestNotifications}
+                style={{
+                  minHeight: '40px',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                {isEs ? 'Activar Notificaciones' : 'Enable Notifications'}
+              </button>
+            ) : (
+              <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '6px 10px' }}>
+                {isEs ? '✓ Notificaciones activadas' : '✓ Notifications enabled'}
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowCalendarModal(true)}
+              style={{
+                minHeight: '40px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#1e293b',
+                fontSize: '0.78rem',
+                fontWeight: 650,
+                cursor: 'pointer'
+              }}
+            >
+              {isEs ? '📅 Añadir al Calendario' : '📅 Add to Calendar'}
+            </button>
+          </div>
+
+          {/* Optional 7-day pre-refill WhatsApp/Email opt-in */}
+          {!refillAlertSaved ? (
+            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.76rem', color: '#334155', fontWeight: 600, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={refillAlertOptIn}
+                  onChange={(e) => setRefillAlertOptIn(e.target.checked)}
+                />
+                <span>
+                  {isEs
+                    ? 'Avísame 7 días antes de que se acabe mi tratamiento para hacer el refill'
+                    : 'Remind me 7 days before I run out so I can request a refill'}
+                </span>
+              </label>
+              {refillAlertOptIn && (
+                <form onSubmit={handleSaveRefillAlert} style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    value={refillAlertContact}
+                    onChange={(e) => setRefillAlertContact(e.target.value)}
+                    placeholder={isEs ? 'Tu WhatsApp o email...' : 'Your WhatsApp or email...'}
+                    style={{
+                      flex: '1 1 180px',
+                      minHeight: '38px',
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.78rem'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      minHeight: '38px',
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: '#0f172a',
+                      color: '#ffffff',
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isEs ? 'Guardar aviso' : 'Save reminder'}
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: 600 }}>
+              {isEs ? '✓ Aviso de refill activado para antes de terminar tu tratamiento.' : '✓ Pre-refill reminder saved.'}
+            </div>
+          )}
+        </div>
       )}
 
       {/* ── Item-by-Item Presentation with Differentiated Posology ──────────── */}
@@ -1446,24 +1701,24 @@ export default function PatientPrescriptionGuide({
                   letterSpacing: '0.04em',
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  background: '#e8f0fe',
-                  color: '#1a73e8',
-                  border: '1px solid #d2e3fc',
+                  background: '#f0fdf4',
+                  color: '#15803d',
+                  border: '1px solid #bbf7d0',
                 }}
               >
-                {isEs ? 'Preparación en Laboratorio Homologado' : 'Authorized Pharmaceutical Compounding'}
+                {isEs ? 'Continuación del Tratamiento' : 'Treatment Continuation'}
               </span>
               <span style={{ fontSize: '0.70rem', color: '#5f6368', fontFamily: 'monospace' }}>
                 Ref: #{rxId}
               </span>
             </div>
             <h3 style={{ margin: '0 0 0.35rem 0', fontSize: '1.05rem', fontWeight: 700, color: '#202124' }}>
-              {isEs ? '¿Deseas recibir tu medicación personalizada en casa?' : 'Receive Your Physician-Prescribed Formulations'}
+              {isEs ? '¿Se te está acabando el tratamiento?' : 'Running low or finishing your treatment?'}
             </h3>
             <p style={{ margin: 0, fontSize: '0.80rem', color: '#5f6368', lineHeight: 1.5, maxWidth: '640px' }}>
               {isEs
-                ? 'Tu médico ha autorizado la preparación de esta pauta en laboratorio especializado bajo normativa EU GMP cleanroom. Puedes solicitar la dispensación oficial y el envío con control térmico a tu domicilio o clínica.'
-                : 'Your physician has authorized official compounding for this custom formula under certified EU GMP cleanroom standards. Request pharmaceutical preparation with direct cold-chain delivery.'}
+                ? 'Cuando te quede aproximadamente una semana, solicita tu reposición (refill) para continuar tu pauta sin interrupciones.'
+                : 'When you have about one week left, request your refill so you can continue your routine without interruption.'}
             </p>
           </div>
 
@@ -1472,25 +1727,31 @@ export default function PatientPrescriptionGuide({
               type="button"
               onClick={() => {
                 triggerHaptic('selection');
-                if (onOpenQuotation) onOpenQuotation();
+                const el = typeof document !== 'undefined' ? document.getElementById('express-refill-card') : null;
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else if (onOpenDoctorContact) {
+                  onOpenDoctorContact('renewal');
+                }
               }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
+                minHeight: '44px',
                 padding: '9px 18px',
                 borderRadius: '6px',
-                background: '#1a73e8',
+                background: '#16a34a',
                 color: '#ffffff',
                 border: 'none',
                 fontSize: '0.82rem',
                 fontWeight: 700,
                 cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(26, 115, 232, 0.3)',
+                boxShadow: '0 1px 2px rgba(22, 163, 74, 0.3)',
                 transition: 'all 0.15s ease',
               }}
             >
-              <span>{isEs ? 'Solicitar Preparación en Farmacia' : 'Request Official Compounding'}</span>
+              <span>{isEs ? 'Solicitar Refill' : 'Request Refill'}</span>
               <span>→</span>
             </button>
 
@@ -1506,6 +1767,7 @@ export default function PatientPrescriptionGuide({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
+                minHeight: '44px',
                 padding: '9px 14px',
                 borderRadius: '6px',
                 background: '#ffffff',
@@ -1516,7 +1778,7 @@ export default function PatientPrescriptionGuide({
                 cursor: 'pointer',
               }}
             >
-              <span>{isEs ? 'Preguntar a la Clínica' : 'Ask Clinic a Question'}</span>
+              <span>{isEs ? 'Enviar una Consulta' : 'Ask a Question'}</span>
             </button>
           </div>
         </div>
