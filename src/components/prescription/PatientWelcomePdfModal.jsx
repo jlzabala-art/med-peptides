@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Printer, X, FileText, CheckCircle2, Calendar, RefreshCw, MessageCircle } from '@/lib/icons';
 import { computeRefillSchedule, formatShortDate } from '@/utils/refillSchedule';
@@ -169,7 +170,7 @@ export default function PatientWelcomePdfModal({
     }
   }, [isOpen, initialIsEs]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const cleanCode = String(rxId || rx?.code || rx?.fileNumber || 'RX').replace(/^#/, '').trim();
   const baseUrl = patientPublicUrl || `https://www.atlashealth-services.com/rx/${encodeURIComponent(cleanCode)}?view=patient`;
@@ -234,7 +235,7 @@ export default function PatientWelcomePdfModal({
     features,
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -242,15 +243,14 @@ export default function PatientWelcomePdfModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 9999,
-        background: 'rgba(15, 23, 42, 0.72)',
+        zIndex: 99999,
+        background: 'rgba(15, 23, 42, 0.74)',
         backdropFilter: 'blur(3px)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: '0 16px 24px',
-        overflowY: 'auto',
+        padding: '12px 16px',
+        boxSizing: 'border-box',
       }}
       onClick={onClose}
     >
@@ -283,22 +283,19 @@ export default function PatientWelcomePdfModal({
         }
       `}</style>
 
-      {/* Sticky Top Preview Toolbar (Always visible when scrolling) */}
+      {/* Fixed Top Preview Toolbar (Always visible above any page header) */}
       <div
         className="atlas-pdf-no-print"
         onClick={(e) => e.stopPropagation()}
         style={{
-          position: 'sticky',
-          top: '12px',
-          zIndex: 20,
+          flexShrink: 0,
           width: '100%',
           maxWidth: layoutMode === 'a4_4up' ? '210mm' : '460px',
           background: '#0f172a',
           color: '#ffffff',
           borderRadius: '10px',
           padding: '10px 14px',
-          marginTop: '12px',
-          marginBottom: '14px',
+          marginBottom: '12px',
           boxShadow: '0 8px 24px rgba(15, 23, 42, 0.35)',
           display: 'flex',
           alignItems: 'center',
@@ -430,36 +427,50 @@ export default function PatientWelcomePdfModal({
         </div>
       </div>
 
-      {/* Printable Sheet */}
+      {/* Scrollable Preview Area */}
       <div
-        id="atlas-welcome-pdf-sheet"
-        onClick={(e) => e.stopPropagation()}
         style={{
-          boxShadow: '0 20px 40px rgba(15, 23, 42, 0.30)',
-          background: layoutMode === 'a4_4up' ? '#ffffff' : 'transparent',
-          maxWidth: '100%',
-          overflowX: 'auto',
+          flex: 1,
+          minHeight: 0,
+          width: '100%',
+          overflowY: 'auto',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          paddingBottom: '16px',
         }}
       >
-        {layoutMode === 'a4_4up' ? (
-          <div
-            style={{
-              width: '210mm',
-              height: '296mm',
-              display: 'grid',
-              gridTemplateColumns: '105mm 105mm',
-              gridTemplateRows: '148mm 148mm',
-              background: '#ffffff',
-            }}
-          >
-            {[0, 1, 2, 3].map((idx) => (
-              <WelcomeA6Card key={idx} {...cardProps} isGridCell />
-            ))}
-          </div>
-        ) : (
-          <WelcomeA6Card {...cardProps} />
-        )}
+        <div
+          id="atlas-welcome-pdf-sheet"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            boxShadow: '0 20px 40px rgba(15, 23, 42, 0.30)',
+            background: layoutMode === 'a4_4up' ? '#ffffff' : 'transparent',
+            maxWidth: '100%',
+            overflowX: 'auto',
+          }}
+        >
+          {layoutMode === 'a4_4up' ? (
+            <div
+              style={{
+                width: '210mm',
+                height: '296mm',
+                display: 'grid',
+                gridTemplateColumns: '105mm 105mm',
+                gridTemplateRows: '148mm 148mm',
+                background: '#ffffff',
+              }}
+            >
+              {[0, 1, 2, 3].map((idx) => (
+                <WelcomeA6Card key={idx} {...cardProps} isGridCell />
+              ))}
+            </div>
+          ) : (
+            <WelcomeA6Card {...cardProps} />
+          )}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

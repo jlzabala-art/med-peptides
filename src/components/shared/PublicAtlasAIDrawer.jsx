@@ -692,6 +692,9 @@ export default function PublicAtlasAIDrawer({
         }),
       });
 
+      if (!res.ok && res.status !== 429) {
+        throw new Error(`HTTP ${res.status}`);
+      }
       const data = await res.json();
 
       if (res.status === 429 || data.error === 'QUOTA_EXCEEDED') {
@@ -754,7 +757,9 @@ export default function PublicAtlasAIDrawer({
         ...newMsgList,
         {
           sender: 'bot',
-          text: 'Temporary network connection delay. Dual-stage RP-HPLC specifications remain verified on the primary document.',
+          text: isEs
+            ? 'No hemos podido conectar con Atlas AI en este momento. Por favor, vuelve a intentarlo en unos segundos.'
+            : 'We could not reach Atlas AI right now. Please try your question again in a few seconds.',
           timestamp: new Date().toISOString(),
         },
       ]);

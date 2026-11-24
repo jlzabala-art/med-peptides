@@ -1295,6 +1295,7 @@ export default function PatientPrescriptionGuide({
       <CalendarSyncModal
         isOpen={showCalendarModal}
         onClose={() => setShowCalendarModal(false)}
+        rx={rx}
         rxId={rxId}
         patientName={patientName}
         doctorName={doctorName}

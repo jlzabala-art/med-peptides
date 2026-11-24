@@ -1211,7 +1211,42 @@ export function getContextualAndPopularSuggestions({
   let contextualCandidates = [];
 
   if (contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription') {
-    if (turnContext.includes('genom') || turnContext.includes('fagron') || turnContext.includes('trichotest') || turnContext.includes('dna') || turnContext.includes('gene') || turnContext.includes('snp') || turnContext.includes('test')) {
+    const anchorHay = JSON.stringify(contextAnchor || {}).toLowerCase();
+    const isNasalRx = /\b(nasal|intranasal|spray|selank|semax|oxytocin)\b/i.test(anchorHay) && !/\b(trichosol|scalp|hair)\b/i.test(anchorHay);
+    const isPenOrPeptideRx = !isNasalRx && /\b(pen|pluma|subq|subcutaneous|tirzepatide|semaglutide|glutathione|bpc-157|tb-500|cjc|ipamorelin)\b/i.test(anchorHay);
+    const isHairScalpRx = !isNasalRx && !isPenOrPeptideRx && /\b(trichosol|trichotest|hair|scalp|capilar|latanoprost|estradiol|minoxidil|finasteride)\b/i.test(anchorHay);
+
+    if (isNasalRx) {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Cómo usar el spray nasal' : 'How to use the nasal spray',
+          query: isEs ? '¿Cómo debo aplicar correctamente mi spray nasal y qué hago si olvido una dosis?' : 'How should I properly apply my nasal spray and what if I miss a dose?'
+        },
+        {
+          label: isEs ? 'Conservación en nevera' : 'Refrigerated storage (2°C–8°C)',
+          query: isEs ? '¿Cómo debo conservar el spray nasal en nevera y cuánto tiempo dura tras abrirlo?' : 'How should I store the nasal spray in the fridge and how long is it valid?'
+        },
+        {
+          label: isEs ? 'Cuándo pedir mi refill' : 'When to request a refill',
+          query: isEs ? '¿Cuándo debo solicitar mi próximo refill para no quedarme sin tratamiento?' : 'When should I request my next refill so I do not run out?'
+        }
+      ];
+    } else if (isPenOrPeptideRx) {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Dosis y horario' : 'Dose & timing',
+          query: isEs ? '¿Cuál es la mejor hora del día para aplicar mi dosis y qué hago si olvido una?' : 'What is the best time of day to take my dose and what if I miss one?'
+        },
+        {
+          label: isEs ? 'Zona de aplicación y agujas' : 'Injection site & needles',
+          query: isEs ? '¿Cómo debo rotar las zonas de aplicación y cuidar la conservación en nevera?' : 'How should I rotate application sites and keep my treatment refrigerated?'
+        },
+        {
+          label: isEs ? 'Cuándo pedir mi refill' : 'When to request a refill',
+          query: isEs ? '¿Cuándo debo solicitar mi próximo refill para recibirlo a tiempo?' : 'When should I request my next refill so it arrives on time?'
+        }
+      ];
+    } else if (isHairScalpRx && (turnContext.includes('genom') || turnContext.includes('fagron') || turnContext.includes('trichotest') || turnContext.includes('dna') || turnContext.includes('gene') || turnContext.includes('snp') || turnContext.includes('test'))) {
       contextualCandidates = [
         {
           label: isEs ? 'Informe Fagron TrichoTest™' : 'Fagron TrichoTest™ Report',
@@ -1226,7 +1261,7 @@ export function getContextualAndPopularSuggestions({
           query: isEs ? '¿Qué rutas de los 48 SNPs analizados en TrichoTest™ justifican la combinación de prostaglandinas y antiandrógenos?' : 'Which pathways among the 48 SNPs analyzed in TrichoTest™ justify combining prostaglandins and antiandrogens?'
         }
       ];
-    } else if (turnContext.includes('latano') || turnContext.includes('estradi') || turnContext.includes('active') || turnContext.includes('formula') || turnContext.includes('tricho') || turnContext.includes('vehicle') || turnContext.includes('lipid')) {
+    } else if (isHairScalpRx && (turnContext.includes('latano') || turnContext.includes('estradi') || turnContext.includes('active') || turnContext.includes('formula') || turnContext.includes('tricho') || turnContext.includes('vehicle') || turnContext.includes('lipid'))) {
       contextualCandidates = [
         {
           label: isEs ? 'Activos y TrichoSol™' : 'Actives & TrichoSol™ Vehicle',
@@ -1241,7 +1276,7 @@ export function getContextualAndPopularSuggestions({
           query: isEs ? '¿Qué evidencia clínica avala el Latanoprost al 0.005% para prolongar la fase anágena capilar?' : 'What clinical evidence supports Latanoprost 0.005% in prolonging follicle anagen growth phase?'
         }
       ];
-    } else if (turnContext.includes('miss') || turnContext.includes('olvid') || turnContext.includes('daily') || turnContext.includes('night') || turnContext.includes('apply') || turnContext.includes('schedule') || turnContext.includes('posolog') || turnContext.includes('wash')) {
+    } else if (isHairScalpRx && (turnContext.includes('miss') || turnContext.includes('olvid') || turnContext.includes('daily') || turnContext.includes('night') || turnContext.includes('apply') || turnContext.includes('schedule') || turnContext.includes('posolog') || turnContext.includes('wash'))) {
       contextualCandidates = [
         {
           label: isEs ? 'Dosis Olvidada' : 'Missed Dose Protocol',
@@ -1256,7 +1291,7 @@ export function getContextualAndPopularSuggestions({
           query: isEs ? '¿Cuántas horas mínimas debe permanecer la loción en el cuero cabelludo antes de lavarse el pelo?' : 'How many hours must the compound remain on the scalp before showering or washing?'
         }
       ];
-    } else {
+    } else if (isHairScalpRx) {
       contextualCandidates = [
         {
           label: isEs ? 'Evolución a 90 Días' : '90-Day Expected Timeline',
@@ -1269,6 +1304,21 @@ export function getContextualAndPopularSuggestions({
         {
           label: isEs ? 'Renovación y Envío' : 'Cycle Refill Logistics',
           query: isEs ? '¿Cómo se gestiona el refill de los siguientes 3 frascos al completar el ciclo de 90 días?' : 'How is the cycle refill of the next 3x 100ml bottles processed upon finishing this 90-day phase?'
+        }
+      ];
+    } else {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Cómo tomarlo' : 'How to take it',
+          query: isEs ? '¿Cuál es la forma correcta de usar mi tratamiento y qué hago si olvido una toma?' : 'What is the proper way to take my treatment and what if I miss a dose?'
+        },
+        {
+          label: isEs ? 'Conservación' : 'Storage & handling',
+          query: isEs ? '¿Cómo debo conservar mi tratamiento y hasta qué fecha es válido?' : 'How should I store my treatment and until what date is it valid?'
+        },
+        {
+          label: isEs ? 'Refill y seguimiento' : 'Refill & follow-up',
+          query: isEs ? '¿Cuándo debo pedir mi próximo refill para no interrumpir mi tratamiento?' : 'When should I request my next refill so I do not interrupt my treatment?'
         }
       ];
     }

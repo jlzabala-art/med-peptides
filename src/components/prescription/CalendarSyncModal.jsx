@@ -12,11 +12,13 @@ import {
 } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 import { generateGoogleCalendarUrl, downloadIcsFile } from '@/utils/calendarSync';
+import { extractDurationDays } from '@/utils/refillSchedule';
 import toast from 'react-hot-toast';
 
 export default function CalendarSyncModal({
   isOpen,
   onClose,
+  rx = {},
   rxId = '',
   patientName = '',
   doctorName = '',
@@ -26,8 +28,21 @@ export default function CalendarSyncModal({
 }) {
   if (!isOpen) return null;
 
+  const daysCount = extractDurationDays(rx || {}, compoundedFormulations);
+
   const formulaSummary = (compoundedFormulations || [])
-    .map(f => f.title || f.name)
+    .map((f) => {
+      const firstApi = Array.isArray(f.apis) && f.apis.length > 0 ? f.apis[0] : null;
+      if (firstApi?.name || firstApi?.productName) {
+        const name = firstApi.name || firstApi.productName;
+        return firstApi.dosage ? `${name} (${firstApi.dosage})` : name;
+      }
+      return String(f.title || f.name || '')
+        .replace(/\bCompounded\b/gi, '')
+        .replace(/\bCompounding\b/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+    })
     .filter(Boolean)
     .join(' + ') || `Prescripción #${rxId}`;
 
@@ -51,7 +66,7 @@ export default function CalendarSyncModal({
       description: eventDescription,
       startHour: 8,
       durationMinutes: 15,
-      daysCount: 90
+      daysCount
     });
     window.open(url, '_blank', 'noopener,noreferrer');
     toast.success(isEs ? 'Abriendo Google Calendar...' : 'Opening Google Calendar...');
@@ -66,7 +81,7 @@ export default function CalendarSyncModal({
       description: eventDescription,
       startHour: 8,
       durationMinutes: 15,
-      daysCount: 90
+      daysCount
     });
     toast.success(isEs ? 'Archivo de calendario descargado (.ics) ✓' : 'Calendar file downloaded (.ics) ✓');
     onClose();
@@ -152,8 +167,8 @@ export default function CalendarSyncModal({
         <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
             {isEs
-              ? 'Añade recordatorios diarios automáticos para no olvidar ninguna toma a lo largo de tu ciclo de 90 días.'
-              : 'Add automatic daily reminders to your calendar so you never miss a dose throughout your 90-day cycle.'}
+              ? `Añade recordatorios diarios automáticos para no olvidar ninguna toma a lo largo de tu ciclo de ${daysCount} días.`
+              : `Add automatic daily reminders to your calendar so you never miss a dose throughout your ${daysCount}-day cycle.`}
           </p>
 
           {/* Regimen Summary Card */}
@@ -177,7 +192,11 @@ export default function CalendarSyncModal({
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#16a34a', marginTop: '2px' }}>
               <Clock size={13} />
-              <span>{isEs ? 'Horario recomendado: 08:00 AM (90 días recurrentes)' : 'Recommended schedule: 08:00 AM (90 daily recurring)'}</span>
+              <span>
+                {isEs
+                  ? `Horario recomendado: 08:00 AM (${daysCount} días recurrentes)`
+                  : `Recommended schedule: 08:00 AM (${daysCount} daily recurring)`}
+              </span>
             </div>
           </div>
 
