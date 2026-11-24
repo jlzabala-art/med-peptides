@@ -596,8 +596,8 @@ export default function PatientPrescriptionGuide({
                     ? `${posologySchedule.timeHint} · ${loggedCount7d}/${posologySchedule.targetPerWeek} esta semana`
                     : `${posologySchedule.timeHint} · ${loggedCount7d}/${posologySchedule.targetPerWeek} this week`)
                 : (isEs
-                    ? `${posologySchedule.timeHint} · ${loggedCount7d}/7 días`
-                    : `${posologySchedule.timeHint} · ${loggedCount7d}/7 days logged`)}
+                    ? `${posologySchedule.timeHint} · ${loggedCount7d}/7 días · Pulsa en Hoy para marcar tu toma`
+                    : `${posologySchedule.timeHint} · ${loggedCount7d}/7 days logged · Tap Today to log your dose`)}
             </div>
           </div>
 
