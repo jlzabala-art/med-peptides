@@ -270,40 +270,16 @@ export default function PatientPrescriptionGuide({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', marginBottom: '2rem' }}>
       
-      {/* ── Patient & Physician Unified Greeting Hero (Trust-First Architecture) ── */}
-      <PatientPhysicianGreetingHero
-        patientName={patientName || (isEs ? 'Paciente' : 'Patient')}
-        patientRef={rxId}
-        doctorName={doctorName || (isEs ? 'Dra. Marina Cordeiro Fernandes' : 'Dr. Marina Cordeiro Fernandes')}
-        doctorSpecialty="Longevity & Integrative Medicine"
-        doctorClinic={doctorClinic || 'Atlas Health Services'}
-        doctorNote={rx?.patientInstructions || rx?.doctorNotes || rx?.instructions || ''}
-        formulationsCount={categorizedItems.length}
-        isPen={detectPrescriptionType(rx, compoundedFormulations).isPen}
-        isInjectable={detectPrescriptionType(rx, compoundedFormulations).isInjectable}
-        isOral={detectPrescriptionType(rx, compoundedFormulations).isOral}
-        isTopical={detectPrescriptionType(rx, compoundedFormulations).isTopical}
-        duration={rx?.duration || (categorizedItems[0]?.duration)}
-        cycleDays={rx?.cycleDays}
-        onSyncCalendar={() => setShowCalendarModal(true)}
-        onOpenDoctorContact={() => {
-          if (onOpenDoctorContact) {
-            onOpenDoctorContact('posology');
-          }
-        }}
-        isEs={isEs}
-      />
-
-      {/* ── Universal 7-Day Dose Tracker + Direct Message to Prescribing Doctor ── */}
+      {/* ── Universal 7-Day Dose Tracker + Direct Message to Prescribing Doctor (No Duplicate Greeting Hero) ── */}
       <div
         style={{
           background: '#ffffff',
           border: '1px solid #dadce0',
           borderRadius: '10px',
-          padding: '14px 16px',
+          padding: '12px 14px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '12px',
+          gap: '10px',
           boxShadow: '0 1px 2px rgba(60, 64, 67, 0.06)',
         }}
       >
@@ -312,41 +288,67 @@ export default function PatientPrescriptionGuide({
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               {isEs ? 'Registro Rápido de Tomas (Últimos 7 Días)' : 'Quick Dose Log (Last 7 Days)'}
             </div>
-            <div style={{ fontSize: '0.78rem', color: '#5f6368', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '2px' }}>
               {isEs
-                ? `Toca cada día que hayas tomado tu pauta · ${loggedCount7d}/7 días registrados`
-                : `Tap each day you took your dose · ${loggedCount7d}/7 days logged this week`}
+                ? `Toca cada día que hayas tomado tu pauta · ${loggedCount7d}/7 días`
+                : `Tap each day you took your dose · ${loggedCount7d}/7 days logged`}
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (onOpenDoctorContact) {
-                onOpenDoctorContact('posology');
-              }
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '7px 12px',
-              minHeight: '36px',
-              borderRadius: '6px',
-              border: '1px solid #dadce0',
-              background: '#ffffff',
-              color: '#3c4043',
-              fontSize: '0.76rem',
-              fontWeight: 650,
-              cursor: 'pointer',
-            }}
-          >
-            <MessageCircle size={14} color="#1a73e8" />
-            <span>{isEs ? `Preguntar a ${doctorName || 'mi médico'}` : `Message ${doctorName || 'My Doctor'}`}</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setShowCalendarModal(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 10px',
+                minHeight: '36px',
+                borderRadius: '6px',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#3c4043',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Calendar size={13} color="#5f6368" />
+              <span>{isEs ? 'Recordatorios' : 'Reminders'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (onOpenDoctorContact) {
+                  onOpenDoctorContact('posology');
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 11px',
+                minHeight: '36px',
+                borderRadius: '6px',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#3c4043',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <MessageCircle size={13} color="#1a73e8" />
+              <span>{isEs ? `Preguntar a ${doctorName || 'mi médico'}` : `Message ${doctorName || 'My Doctor'}`}</span>
+            </button>
+          </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '6px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '4px' }}>
           {last7Days.map((day) => {
             const checked = Boolean(loggedDaysMap[day.key]);
             return (
@@ -361,20 +363,21 @@ export default function PatientPrescriptionGuide({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '3px',
-                  minHeight: '52px',
-                  padding: '6px 4px',
+                  minHeight: '48px',
+                  padding: '6px 2px',
                   borderRadius: '8px',
                   border: checked ? '1.5px solid #16a34a' : (day.isToday ? '1.5px solid #1a73e8' : '1px solid #e2e8f0'),
                   background: checked ? '#f0fdf4' : (day.isToday ? '#eff6ff' : '#f8fafc'),
                   color: checked ? '#15803d' : '#334155',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
+                  minWidth: 0,
                 }}
               >
-                <span style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85 }}>
+                <span style={{ fontSize: '0.60rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85 }}>
                   {day.isToday ? (isEs ? 'Hoy' : 'Today') : day.label}
                 </span>
-                <span style={{ fontSize: '0.84rem', fontWeight: 800 }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800 }}>
                   {checked ? '✓' : day.dayNum}
                 </span>
               </button>

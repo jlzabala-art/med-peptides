@@ -825,18 +825,20 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 setExpandedSections={setExpandedSections}
               />
 
-              <TreatmentJourneyStepper
-                rx={rx}
-                rxId={rxId}
-                currentStatus={currentStatus}
-                isDispensed={isDispensed}
-                isEs={isEs}
-                genomicsData={genomicsData}
-                onRequestRefill={() => {
-                  triggerHaptic('selection');
-                  setShowRefillModal?.(true);
-                }}
-              />
+              {(!isPatientView || activeGcpTab === 'traceability') && (
+                <TreatmentJourneyStepper
+                  rx={rx}
+                  rxId={rxId}
+                  currentStatus={currentStatus}
+                  isDispensed={isDispensed}
+                  isEs={isEs}
+                  genomicsData={genomicsData}
+                  onRequestRefill={() => {
+                    triggerHaptic('selection');
+                    setShowRefillModal?.(true);
+                  }}
+                />
+              )}
 
               {/* ── Express QR Refill Card (Always shown when patient scans SCAN FOR REFILL QR) ── */}
               {actionParam === 'refill' && (
