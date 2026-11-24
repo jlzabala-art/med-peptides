@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { QRCodeSVG } from 'qrcode.react';
-import { Printer, X, FileText, CheckCircle2, Calendar, RefreshCw, MessageCircle } from '@/lib/icons';
+import { Download, X, FileText, CheckCircle2, Calendar, RefreshCw, MessageCircle } from '@/lib/icons';
 import { computeRefillSchedule, formatShortDate } from '@/utils/refillSchedule';
+import toast from 'react-hot-toast';
 
 function cleanTreatmentTitle(rawTitle, apis = [], pdfEs = false) {
   const firstApi = Array.isArray(apis) && apis.length > 0 ? apis[0] : null;
@@ -19,6 +20,178 @@ function cleanTreatmentTitle(rawTitle, apis = [], pdfEs = false) {
     .replace(/\s{2,}/g, ' ')
     .trim();
   return cleaned || (pdfEs ? 'Tratamiento Personalizado' : 'Personalized Treatment');
+}
+
+function drawA6CardToPdf(doc, offsetX, offsetY, data) {
+  const {
+    pdfEs,
+    cleanCode,
+    patientName,
+    doctorName,
+    treatmentName,
+    posologyLine,
+    storageLine,
+    lotVal,
+    budVal,
+    qrDataUrl,
+    features,
+    isGridCell,
+  } = data;
+
+  const w = 105;
+  const h = 148;
+  const pad = 6.5;
+  const innerW = w - pad * 2;
+
+  if (isGridCell) {
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineDashPattern([1.5, 1.5], 0);
+    doc.rect(offsetX, offsetY, w, h);
+    doc.setLineDashPattern([], 0);
+  }
+
+  // Header
+  let y = offsetY + 8.5;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(0, 54, 102);
+  doc.text('Atlas Health Services', offsetX + pad, y);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(95, 99, 104);
+  doc.text(pdfEs ? 'Cuidado Clínico Personalizado' : 'Personalized Precision Care', offsetX + pad, y + 3.5);
+
+  // Rx badge
+  const badgeText = `#${cleanCode}`;
+  doc.setFont('courier', 'bold');
+  doc.setFontSize(7.5);
+  const badgeW = Math.max(18, doc.getTextWidth(badgeText) + 5);
+  doc.setFillColor(232, 240, 254);
+  doc.roundedRect(offsetX + w - pad - badgeW, offsetY + 5, badgeW, 5.5, 1.2, 1.2, 'F');
+  doc.setTextColor(26, 115, 232);
+  doc.text(badgeText, offsetX + w - pad - badgeW / 2, offsetY + 8.7, { align: 'center' });
+
+  // Divider
+  y += 6.5;
+  doc.setDrawColor(232, 240, 254);
+  doc.setLineWidth(0.4);
+  doc.line(offsetX + pad, y, offsetX + w - pad, y);
+
+  // Thank You Box
+  y += 4;
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(offsetX + pad, y, innerW, 20, 1.5, 1.5, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  doc.setTextColor(22, 163, 74);
+  doc.text(pdfEs ? 'GRACIAS POR TU COMPRA' : 'THANK YOU FOR YOUR ORDER', offsetX + pad + 3, y + 4.8);
+
+  doc.setFontSize(9.5);
+  doc.setTextColor(32, 33, 36);
+  const thankTitle = pdfEs
+    ? `Gracias por confiar en Atlas${patientName ? `, ${patientName}` : ''}`
+    : `Thank you for trusting Atlas${patientName ? `, ${patientName}` : ''}`;
+  const thankLines = doc.splitTextToSize(thankTitle, innerW - 6);
+  doc.text(thankLines[0] || thankTitle, offsetX + pad + 3, y + 10);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(95, 99, 104);
+  const subTxt = pdfEs
+    ? 'Guarda esta tarjeta junto a tu tratamiento para acceder desde tu móvil.'
+    : 'Keep this card with your treatment for instant access from your phone.';
+  const subLines = doc.splitTextToSize(subTxt, innerW - 6);
+  doc.text(subLines.slice(0, 2), offsetX + pad + 3, y + 14.2);
+
+  // Treatment Summary Box
+  y += 23.5;
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(218, 220, 224);
+  doc.roundedRect(offsetX + pad, y, innerW, 24, 1.5, 1.5, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(32, 33, 36);
+  doc.text(doc.splitTextToSize(treatmentName, innerW - 6)[0] || treatmentName, offsetX + pad + 3, y + 5.5);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(26, 115, 232);
+  const posLines = doc.splitTextToSize(posologyLine, innerW - 6);
+  doc.text(posLines.slice(0, 2), offsetX + pad + 3, y + 10.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.8);
+  doc.setTextColor(95, 99, 104);
+  doc.text(doc.splitTextToSize(storageLine, innerW - 6)[0] || storageLine, offsetX + pad + 3, y + 17.5);
+
+  if (lotVal || budVal) {
+    const metaStr = [
+      lotVal ? `${pdfEs ? 'Lote' : 'Lot'}: ${lotVal}` : '',
+      budVal ? `${pdfEs ? 'Usar antes' : 'Use before'}: ${budVal}` : '',
+    ]
+      .filter(Boolean)
+      .join(' · ');
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(6.5);
+    doc.text(metaStr, offsetX + pad + 3, y + 21.5);
+  }
+
+  // Central QR + 4 Features Box
+  y += 27.5;
+  const qrBoxH = 48;
+  doc.setFillColor(248, 251, 255);
+  doc.setDrawColor(191, 219, 254);
+  doc.roundedRect(offsetX + pad, y, innerW, qrBoxH, 1.5, 1.5, 'FD');
+
+  if (qrDataUrl) {
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(218, 220, 224);
+    doc.roundedRect(offsetX + pad + 3, y + 4, 29, 29, 1.2, 1.2, 'FD');
+    doc.addImage(qrDataUrl, 'PNG', offsetX + pad + 4.5, y + 5.5, 26, 26);
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  doc.setTextColor(26, 115, 232);
+  doc.text(pdfEs ? '1. Abre tu cámara' : '1. Open phone camera', offsetX + pad + 17.5, y + 37.5, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(5.8);
+  doc.setTextColor(95, 99, 104);
+  doc.text(pdfEs ? 'Apunta y pulsa el enlace' : 'Point here & tap the link', offsetX + pad + 17.5, y + 41, { align: 'center' });
+
+  // 4 Features on right
+  let fy = y + 6.5;
+  const fx = offsetX + pad + 36;
+  const fw = innerW - 38;
+  features.forEach((feat) => {
+    doc.setFillColor(232, 240, 254);
+    doc.roundedRect(fx, fy - 2.6, 3.5, 3.5, 0.7, 0.7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(32, 33, 36);
+    doc.text(feat.title, fx + 5, fy);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6);
+    doc.setTextColor(95, 99, 104);
+    doc.text(doc.splitTextToSize(feat.desc, fw - 5)[0] || feat.desc, fx + 5, fy + 3.2);
+    fy += 10.5;
+  });
+
+  // Footer
+  const footerY = offsetY + h - 7.5;
+  doc.setDrawColor(226, 232, 240);
+  doc.line(offsetX + pad, footerY - 3.5, offsetX + w - pad, footerY - 3.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.5);
+  doc.setTextColor(95, 99, 104);
+  doc.text(doctorName ? `${pdfEs ? 'Dr.' : 'By'} ${doctorName}` : 'Certified Doctor', offsetX + pad, footerY);
+  doc.text('WhatsApp +971 55 356 1058', offsetX + w - pad, footerY, { align: 'right' });
 }
 
 function WelcomeA6Card({
@@ -141,7 +314,7 @@ function WelcomeA6Card({
 
       {/* Footer */}
       <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '2mm', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '7.5px', color: '#5f6368' }}>
-        <span>{doctorName ? `${pdfEs ? 'Dr.' : 'By'} ${doctorName}` : 'Atlas Health'}</span>
+        <span>{doctorName ? `${pdfEs ? 'Dr.' : 'By'} ${doctorName}` : 'Certified Doctor'}</span>
         <span>WhatsApp +971 55 356 1058</span>
       </div>
     </div>
@@ -164,6 +337,7 @@ export default function PatientWelcomePdfModal({
 }) {
   const [pdfEs, setPdfEs] = useState(Boolean(initialIsEs));
   const [layoutMode, setLayoutMode] = useState(defaultLayoutMode); // 'a6' | 'a4_4up'
+  const [savingPdf, setSavingPdf] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -217,9 +391,56 @@ export default function PatientWelcomePdfModal({
         { icon: MessageCircle, title: 'Contact Atlas', desc: '24/7 Atlas AI & WhatsApp support.' },
       ];
 
-  const handlePrintPdf = () => {
-    if (typeof window !== 'undefined') {
-      window.print();
+  const handleSaveDirectPdf = async () => {
+    if (savingPdf) return;
+    setSavingPdf(true);
+    try {
+      const [{ jsPDF }, QRCode] = await Promise.all([
+        import('jspdf'),
+        import('qrcode'),
+      ]);
+      const qrDataUrl = await QRCode.toDataURL(qrUrl, {
+        width: 320,
+        margin: 1,
+        color: { dark: '#0f172a', light: '#ffffff' },
+      });
+
+      const is4Up = layoutMode === 'a4_4up';
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: is4Up ? 'a4' : 'a6',
+      });
+
+      const payload = {
+        pdfEs,
+        cleanCode,
+        patientName,
+        doctorName,
+        treatmentName,
+        posologyLine,
+        storageLine,
+        lotVal,
+        budVal,
+        qrDataUrl,
+        features,
+      };
+
+      if (is4Up) {
+        drawA6CardToPdf(doc, 0, 0, { ...payload, isGridCell: true });
+        drawA6CardToPdf(doc, 105, 0, { ...payload, isGridCell: true });
+        drawA6CardToPdf(doc, 0, 148, { ...payload, isGridCell: true });
+        drawA6CardToPdf(doc, 105, 148, { ...payload, isGridCell: true });
+        doc.save(`Atlas_Welcome_${cleanCode}_4xA6_A4.pdf`);
+      } else {
+        drawA6CardToPdf(doc, 0, 0, { ...payload, isGridCell: false });
+        doc.save(`Atlas_Welcome_${cleanCode}_A6.pdf`);
+      }
+      toast.success(pdfEs ? 'PDF guardado ✓' : 'PDF saved ✓');
+    } catch (err) {
+      toast.error(err?.message || (pdfEs ? 'No se pudo generar el PDF' : 'Could not generate PDF'));
+    } finally {
+      setSavingPdf(false);
     }
   };
 
@@ -256,157 +477,32 @@ export default function PatientWelcomePdfModal({
       }}
       onClick={onClose}
     >
-      <style>{`
-        @page {
-          size: ${layoutMode === 'a4_4up' ? 'A4 portrait' : 'A6 portrait'};
-          margin: 0;
-        }
-        @media print {
-          body * {
-            visibility: hidden !important;
-          }
-          #atlas-welcome-pdf-sheet,
-          #atlas-welcome-pdf-sheet * {
-            visibility: visible !important;
-          }
-          #atlas-welcome-pdf-sheet {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-            background: #ffffff !important;
-          }
-          .atlas-pdf-no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-
-      {/* Fixed Top Preview Toolbar (Always visible above any page header) */}
+      {/* Clean 2-Row Mobile-First Top Preview Toolbar */}
       <div
-        className="atlas-pdf-no-print"
         onClick={(e) => e.stopPropagation()}
         style={{
           flexShrink: 0,
           width: '100%',
-          maxWidth: layoutMode === 'a4_4up' ? '210mm' : '460px',
+          maxWidth: layoutMode === 'a4_4up' ? '210mm' : '400px',
           background: '#0f172a',
           color: '#ffffff',
           borderRadius: '10px',
-          padding: '10px 14px',
+          padding: '10px 12px',
           marginBottom: '12px',
           boxShadow: '0 8px 24px rgba(15, 23, 42, 0.35)',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
+          flexDirection: 'column',
           gap: '8px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FileText size={16} color="#60a5fa" />
-          <span style={{ fontSize: '0.84rem', fontWeight: 700 }}>
-            {pdfEs ? 'Vista previa · Tarjeta A6' : 'Preview · A6 Welcome Card'}
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          {/* Format Switcher: 1x A6 vs 4x A6 on A4 */}
-          <div style={{ display: 'inline-flex', background: '#1e293b', borderRadius: '6px', padding: '2px', border: '1px solid #334155' }}>
-            <button
-              type="button"
-              onClick={() => setLayoutMode('a6')}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: 'none',
-                background: layoutMode === 'a6' ? '#1a73e8' : 'transparent',
-                color: '#ffffff',
-                fontSize: '0.70rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              1 × A6
-            </button>
-            <button
-              type="button"
-              onClick={() => setLayoutMode('a4_4up')}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: 'none',
-                background: layoutMode === 'a4_4up' ? '#1a73e8' : 'transparent',
-                color: '#ffffff',
-                fontSize: '0.70rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              4 × A6 (A4)
-            </button>
+        {/* Row 1: Title + Fixed Close Button */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <FileText size={15} color="#60a5fa" />
+            <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>
+              {pdfEs ? 'Vista previa · Tarjeta A6' : 'Preview · A6 Card'}
+            </span>
           </div>
-
-          {/* Language Switcher */}
-          <div style={{ display: 'inline-flex', background: '#1e293b', borderRadius: '6px', padding: '2px', border: '1px solid #334155' }}>
-            <button
-              type="button"
-              onClick={() => setPdfEs(false)}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: 'none',
-                background: !pdfEs ? '#1a73e8' : 'transparent',
-                color: '#ffffff',
-                fontSize: '0.70rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              EN
-            </button>
-            <button
-              type="button"
-              onClick={() => setPdfEs(true)}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: 'none',
-                background: pdfEs ? '#1a73e8' : 'transparent',
-                color: '#ffffff',
-                fontSize: '0.70rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              ES
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={handlePrintPdf}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              border: 'none',
-              background: '#1a73e8',
-              color: '#ffffff',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            <Printer size={14} />
-            <span>{pdfEs ? 'Guardar / Imprimir PDF' : 'Save / Print PDF'}</span>
-          </button>
-
           <button
             type="button"
             onClick={onClose}
@@ -415,16 +511,116 @@ export default function PatientWelcomePdfModal({
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '30px',
-              height: '30px',
+              width: '28px',
+              height: '28px',
               borderRadius: '6px',
               border: '1px solid #334155',
               background: 'transparent',
               color: '#cbd5e1',
               cursor: 'pointer',
+              flexShrink: 0,
             }}
           >
             <X size={15} />
+          </button>
+        </div>
+
+        {/* Row 2: Format + Language + Direct Save PDF */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'inline-flex', background: '#1e293b', borderRadius: '6px', padding: '2px', border: '1px solid #334155' }}>
+              <button
+                type="button"
+                onClick={() => setLayoutMode('a6')}
+                style={{
+                  padding: '4px 7px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: layoutMode === 'a6' ? '#1a73e8' : 'transparent',
+                  color: '#ffffff',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                1×A6
+              </button>
+              <button
+                type="button"
+                onClick={() => setLayoutMode('a4_4up')}
+                style={{
+                  padding: '4px 7px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: layoutMode === 'a4_4up' ? '#1a73e8' : 'transparent',
+                  color: '#ffffff',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                4×A6
+              </button>
+            </div>
+
+            <div style={{ display: 'inline-flex', background: '#1e293b', borderRadius: '6px', padding: '2px', border: '1px solid #334155' }}>
+              <button
+                type="button"
+                onClick={() => setPdfEs(false)}
+                style={{
+                  padding: '4px 7px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: !pdfEs ? '#1a73e8' : 'transparent',
+                  color: '#ffffff',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setPdfEs(true)}
+                style={{
+                  padding: '4px 7px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: pdfEs ? '#1a73e8' : 'transparent',
+                  color: '#ffffff',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                ES
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSaveDirectPdf}
+            disabled={savingPdf}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '5px',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              border: 'none',
+              background: '#1a73e8',
+              color: '#ffffff',
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              cursor: savingPdf ? 'wait' : 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <Download size={14} />
+            <span>{savingPdf ? (pdfEs ? 'Guardando...' : 'Saving...') : (pdfEs ? 'Guardar PDF' : 'Save PDF')}</span>
           </button>
         </div>
       </div>
