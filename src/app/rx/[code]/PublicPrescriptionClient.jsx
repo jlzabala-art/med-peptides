@@ -663,10 +663,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             inquiryGoal: isPatientView ? (isDispensed ? 'renewal' : 'support') : 'inquiry',
             priceFormatted: isPatientView ? null : (resolvedPrice?.formatted || 'AED 1,450.00')
           }}
-          breadcrumb={isPatientView ? [
-            { label: patientName || (isEs ? 'Mi Tratamiento' : 'My Treatment') },
-            { label: `#${rxId}` }
-          ] : [
+          breadcrumb={isPatientView ? null : [
             { label: displayDoctorNameShort, href: doctorPublicUrl },
             { label: isEs ? 'Pacientes' : 'Patients', href: isAuthorizedViewer ? `${doctorPublicUrl}#patients` : undefined },
             { label: patientName || (isEs ? 'Expediente Paciente' : 'Patient Dossier') },

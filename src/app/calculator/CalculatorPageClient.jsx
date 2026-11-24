@@ -568,15 +568,6 @@ export default function CalculatorClient() {
                   alignItems: 'center',
                   whiteSpace: 'nowrap',
                 }}
-                  borderRadius: '6px',
-                  border: '1px solid #0d9488',
-                  background: '#f0fdfa',
-                  color: '#0f766e',
-                  fontSize: '0.73rem',
-                  fontWeight: 750,
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                }}
               >
                 {isEs ? 'Prescribir este cálculo →' : 'Prescribe This Calculation →'}
               </a>
@@ -773,15 +764,6 @@ export default function CalculatorClient() {
                   textDecoration: 'none',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  whiteSpace: 'nowrap',
-                }}
-                  borderRadius: '6px',
-                  border: '1px solid #0d9488',
-                  background: '#f0fdfa',
-                  color: '#0f766e',
-                  fontSize: '0.73rem',
-                  fontWeight: 750,
-                  textDecoration: 'none',
                   whiteSpace: 'nowrap',
                 }}
               >

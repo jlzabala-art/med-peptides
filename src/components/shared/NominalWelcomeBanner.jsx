@@ -118,8 +118,10 @@ export default function NominalWelcomeBanner({
     >
       <style>{`
         @media (max-width: 768px) {
+          .nwb-root { padding: 5px 12px !important; }
           .nwb-root .nwb-tagline { display: none; }
-          .nwb-root button { min-height: 44px; min-width: 44px; justify-content: center; }
+          .nwb-root .nwb-patient-welcome-text { display: none; }
+          .nwb-root button { min-height: 32px; justify-content: center; }
         }
       `}</style>
       <div
@@ -155,7 +157,7 @@ export default function NominalWelcomeBanner({
             </div>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div className={isPatient ? 'nwb-patient-welcome-text' : ''} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>
               {isEs ? 'Bienvenido/a,' : 'Welcome,'} <strong>{cleanTitle}</strong>
             </span>
