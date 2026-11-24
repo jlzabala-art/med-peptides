@@ -1418,7 +1418,9 @@ export default function PublicAtlasAIDrawer({
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#7dd3fc', marginTop: '2px', fontWeight: 600 }}>
-                  {isPensFormulary
+                  {contextAnchor?.patientMode
+                    ? (lang === 'es' ? `Asistente para tu tratamiento #${contextAnchor?.rxId || ''}` : `Assistant for your treatment #${contextAnchor?.rxId || ''}`)
+                    : isPensFormulary
                     ? (lang === 'es' ? 'Copiloto Clínico U-100 • Diseño de Protocolos y Evidencia' : 'U-100 Clinical Dosing & Protocol Copilot • 27 Pens')
                     : contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog'
                     ? 'Clinical Pathway Copilot • Protocol Registry SSOT'
@@ -1540,7 +1542,7 @@ export default function PublicAtlasAIDrawer({
                   </span>
                 ) : contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription' ? (
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#f0fdf4', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
-                    DHA Validated Rx
+                    {contextAnchor?.patientMode ? (lang === 'es' ? 'Guía de Paciente' : 'Patient Guide') : 'DHA Validated Rx'}
                   </span>
                 ) : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair') ? (
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', padding: '2px 7px', borderRadius: '4px', border: '1px solid #ccfbf1', whiteSpace: 'nowrap' }}>
@@ -1903,7 +1905,9 @@ export default function PublicAtlasAIDrawer({
                           <Sparkles size={22} />
                         </div>
                         <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                          {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+                          {contextAnchor?.patientMode
+                            ? (lang === 'es' ? 'Pregunta sobre tu tratamiento' : 'Ask about your treatment')
+                            : contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
                             ? (lang === 'es' ? 'Atlas AI · Prescripción y Posología' : 'Atlas AI · Prescription & Posology')
                             : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
                             ? 'Atlas AI · Dermocosmetic & INCI'
@@ -1916,7 +1920,11 @@ export default function PublicAtlasAIDrawer({
                             : 'Atlas AI · Clinical Decision Support'}
                         </div>
                         <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '340px', margin: '6px auto 0', lineHeight: 1.45 }}>
-                          {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+                          {contextAnchor?.patientMode
+                            ? (lang === 'es'
+                                ? 'Pregunta cómo aplicar tu dosis, cómo conservar el producto, qué hacer si olvidas una toma o cuándo pedir un refill.'
+                                : 'Ask how to take your dose, how to store your product, what to do if you miss a dose, or when to request a refill.')
+                            : contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
                             ? (lang === 'es'
                                 ? 'Consulte dudas sobre los principios activos, vehículo TrichoSol™, aplicación nocturna de 1.0 ml, pauta en caso de olvido o evolución esperada a 90 días.'
                                 : 'Ask questions regarding formula actives, TrichoSol™ vehicle, nocturnal application protocols, missed dose instructions, or 90-day progress milestones.')
@@ -2750,6 +2758,8 @@ export default function PublicAtlasAIDrawer({
                         ? (lang === 'es' ? 'Pregunta sobre clics U-100, combinaciones, dosis, agujas 31G/32G o conservación…' : 'Ask about U-100 dial clicks, pen stacking, dosing, 31G/32G needles, or storage…')
                         : (contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog')
                           ? (lang === 'es' ? 'Describe el objetivo del paciente, vía de administración o analíticas…' : 'Describe patient goal, route preference, or labs…')
+                        : contextAnchor?.patientMode
+                          ? (lang === 'es' ? 'Escribe tu duda sobre este tratamiento…' : 'Ask a question about your treatment…')
                           : (lang === 'es' ? 'Escribe tu consulta técnica o clínica…' : 'Ask a clinical or technical question…')
                   }
                   style={{
@@ -2795,7 +2805,11 @@ export default function PublicAtlasAIDrawer({
                   textAlign: 'center',
                 }}
               >
-                {lang === 'es'
+                {contextAnchor?.patientMode
+                  ? (lang === 'es'
+                      ? 'Asistente acotado únicamente a tu prescripción actual'
+                      : 'Assistant scoped strictly to your current prescription')
+                  : lang === 'es'
                   ? 'Bilingüe EN / ES • Especificaciones Analíticas Verificadas • Sesión Clínica Confidencial'
                   : 'Verified Analytical & Clinical Specifications • Confidential Research Session'}
               </div>

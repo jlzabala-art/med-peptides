@@ -967,6 +967,31 @@ export function getSuggestedInquiriesForProduct(contextAnchor, contextType = 'mo
     return list.slice(0, 5);
   }
 
+  // 0a. Prescription-specific dynamic patient/clinical questions (never leak unrelated TrichoTest defaults)
+  if (contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription') {
+    const rawFormula = String(contextAnchor?.formula || '').split(' // ')[0].trim();
+    const formulaLabel = rawFormula && rawFormula !== 'Custom Compounded Formulation'
+      ? rawFormula.slice(0, 60)
+      : (isEs ? 'mi tratamiento' : 'my treatment');
+
+    if (contextAnchor?.patientMode || contextAnchor?.view === 'patient') {
+      if (isEs) {
+        return [
+          `¿Cómo y cuándo debo aplicar o tomar ${formulaLabel}?`,
+          '¿Cómo debo conservarlo y hasta qué fecha puedo usarlo?',
+          '¿Qué debo hacer si se me olvida una dosis?',
+          '¿Cómo registro mis tomas y cuándo debo pedir un refill?',
+        ];
+      }
+      return [
+        `How and when should I take ${formulaLabel}?`,
+        'How should I store it and until what date can I use it?',
+        'What should I do if I miss a dose?',
+        'How do I log my doses and know when to request a refill?',
+      ];
+    }
+  }
+
   // 0b. If contextType is 'protocols_directory'
   if (contextType === 'protocols_directory' || contextType === 'protocols_catalog') {
     if (isEs) {
