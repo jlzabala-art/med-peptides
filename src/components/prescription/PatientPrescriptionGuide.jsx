@@ -28,6 +28,7 @@ import ReconstitutionGuideCard from './ReconstitutionGuideCard';
 import CalendarSyncModal from './CalendarSyncModal';
 import PatientPhysicianGreetingHero from './PatientPhysicianGreetingHero';
 import { detectPrescriptionType } from '@/utils/prescriptionTypeDetection';
+import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
@@ -909,12 +910,12 @@ export default function PatientPrescriptionGuide({
                 boxShadow: '0 1px 3px rgba(60, 64, 67, 0.08)'
               }}
             >
-              {/* Header Bar: Category Badge + Product Name */}
+              {/* Header Bar: Real Device Thumbnail + Clean Product Title */}
               <div
                 style={{
-                  background: '#f8fafc',
-                  borderBottom: '1px solid #dadce0',
-                  padding: '12px 16px',
+                  background: '#ffffff',
+                  borderBottom: '1px solid #f1f3f4',
+                  padding: '14px 16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -923,452 +924,281 @@ export default function PatientPrescriptionGuide({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 280px' }}>
-                  <div
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: '8px',
-                      background: '#f1f5f9',
-                      border: '1px solid #e2e8f0',
-                      color: '#1e293b',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.15rem',
-                      flexShrink: 0
-                    }}
-                  >
-                    {item.category.icon}
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
-                      <span
+                  {(() => {
+                    const deviceImg = resolveVariantClinicalImage(
+                      {
+                        presentation: rx?.dispensingForm || item.category?.type || item.title,
+                        name: item.title,
+                        title: item.title,
+                      },
+                      { name: item.title, category: rx?.dispensingForm || item.category?.type }
+                    );
+                    return deviceImg ? (
+                      <img
+                        src={deviceImg}
+                        alt={item.title}
                         style={{
-                          fontSize: '0.68rem',
-                          fontWeight: 700,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.04em',
-                          color: '#334155',
-                          background: '#ffffff',
+                          width: 48,
+                          height: 48,
+                          borderRadius: '8px',
+                          objectFit: 'cover',
                           border: '1px solid #dadce0',
-                          padding: '2px 8px',
-                          borderRadius: '4px'
+                          flexShrink: 0,
+                          background: '#f8fafc'
                         }}
-                      >
-                        {item.category.badge}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: '0.70rem',
-                          fontWeight: 600,
-                          color: '#5f6368',
-                          background: '#ffffff',
-                          border: '1px solid #dadce0',
-                          padding: '2px 8px',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        📦 {item.volume}
-                      </span>
-                    </div>
-                    <h3 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
-                      {item.title}
-                    </h3>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                
-                {/* 1. ¿Para qué me lo han recetado? (Objetivo Terapéutico en Lenguaje Humano) */}
-                <div
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid #dadce0',
-                    borderRadius: '8px',
-                    padding: '12px 14px',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '10px'
-                  }}
-                >
-                  <ShieldCheck size={18} style={{ color: '#1a73e8', flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    {item.plainClinicalGoal && !/Targeted Clinical Optimization/i.test(item.plainClinicalGoal) && (
-                      <>
-                        <div style={{ fontSize: '0.70rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368' }}>
-                          {isEs ? 'Objetivo Terapéutico' : 'Clinical Objective'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124', marginTop: '2px', marginBottom: '6px', lineHeight: 1.45 }}>
-                          {item.plainClinicalGoal}
-                        </div>
-                      </>
-                    )}
-                    {item.apis && item.apis.length > 0 && (
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                        {item.apis.map((a, aIdx) => (
-                          <span
-                            key={aIdx}
-                            style={{
-                              fontSize: '0.70rem',
-                              fontWeight: 600,
-                              color: '#3c4043',
-                              background: '#f8fafc',
-                              border: '1px solid #dadce0',
-                              padding: '2px 7px',
-                              borderRadius: '4px'
-                            }}
-                          >
-                            ✓ {a.name || a.productName} ({a.dosage})
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 2. Posología Ultra Clara y Específica */}
-                <div
-                  style={{
-                    background: '#f8fafc',
-                    border: '1px solid #dadce0',
-                    borderRadius: '8px',
-                    padding: '14px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      />
+                    ) : (
                       <div
                         style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: '6px',
-                          background: '#e8f0fe',
-                          color: '#1a73e8',
+                          width: 44,
+                          height: 44,
+                          borderRadius: '8px',
+                          background: '#f1f5f9',
+                          border: '1px solid #dadce0',
+                          color: '#1e293b',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          fontSize: '1.15rem',
                           flexShrink: 0
                         }}
                       >
-                        <Clock size={16} />
+                        {item.category.icon}
                       </div>
-                      <div>
-                        <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a73e8' }}>
-                          {isEs ? 'PAUTA Y POSOLOGÍA RECOMENDADA' : 'DOSING & SCHEDULE'}
-                        </div>
-                        <h4 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 700, color: '#202124' }}>
-                          {item.posology?.title || (isEs ? 'Pauta de Administración' : 'Dosing Protocol')}
-                        </h4>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contextual Posology Advice: Pre-filled Pen vs Peptide vs Supplement vs Topical */}
-                  {item.category.type === 'prefilled_pen' ? (
-                    /* PRE-FILLED PEN DOSING BOX */
-                    <div
-                      style={{
-                        background: '#faf5ff',
-                        border: '1px solid #ddd6fe',
-                        borderRadius: '6px',
-                        padding: '12px 14px',
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '12px'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {/\b(daily|every\s*morning|every\s*evening|once\s*daily|cada\s*mañana|al\s*día)\b/i.test(item.posology?.regimen || '')
-                            ? (isEs ? '🖊️ Dosis Diaria (Pluma):' : '🖊️ Daily Dose (Pen):')
-                            : (isEs ? '🖊️ Dosis Semanal (Pluma):' : '🖊️ Weekly Dose (Pen):')}
-                        </div>
-                        <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#5b21b6' }}>
-                          {localizePatientText(item.posology?.regimen, isEs) || (isEs ? '1 inyección subcutánea semanal' : '1 subcutaneous injection weekly')}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '📍 Zona de Inyección:' : '📍 Injection Site:'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
-                          {(item.posology?.timing && item.posology.timing.trim() !== (item.posology?.regimen || '').trim())
-                            ? item.posology.timing
-                            : (isEs ? 'Rotación: abdomen o muslos (SubQ)' : 'Rotation: abdomen or front of thigh (SubQ)')}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '❄️ Conservación:' : '❄️ Storage:'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
-                          {localizePatientText(rx?.storage || item.storage, isEs) || (isEs ? 'Nevera 2°C–8°C · Lista para usar · No congelar' : 'Refrigerator 2°C–8°C · Ready-to-use · Do not freeze')}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '🎯 Dial y Agujas Estériles:' : '🎯 Pen Dial & Sterile Needles:'}
-                        </div>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
-                          {isEs
-                            ? 'Usa una aguja estéril nueva en cada aplicación · Mantén pulsado 5–10 s tras inyectar'
-                            : 'Attach a fresh sterile pen needle per dose · Hold 5–10s after dialing'}
-                        </div>
-                        {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode || urlBud || rx?.expDate || rx?.bud) && (
-                          <div style={{ marginTop: '4px', fontSize: '0.72rem', fontFamily: 'monospace', color: '#5b21b6', fontWeight: 700 }}>
-                            {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode) ? `${isEs ? 'Lote' : 'Lot'}: ${urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode}` : ''}
-                            {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode) && (urlBud || rx?.expDate || rx?.bud) ? ' · ' : ''}
-                            {(urlBud || rx?.expDate || rx?.bud) ? `${isEs ? 'Usar antes del' : 'Use before'}: ${urlBud || rx?.expDate || rx?.bud}` : ''}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : item.category.type === 'peptide' ? (
-                    /* PEPTIDE DOSING BOX */
-                    <div
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #dadce0',
-                        borderRadius: '6px',
-                        padding: '12px 14px',
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '12px'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '💉 Dosis por Inyección:' : '💉 Dose per Injection:'}
-                        </div>
-                        <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#1a73e8' }}>
-                          {item.estimatedDoseMcg} mcg{' '}
-                          <span style={{ fontSize: '0.76rem', color: '#5f6368', fontWeight: 500 }}>
-                            (aprox. 10 unidades en U-100)
-                          </span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '🕒 Momento / Frecuencia:' : '🕒 Timing & Schedule:'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-                          {item.posology?.timing || (isEs ? 'Por la noche, rotando sitios en abdomen' : 'At bedtime, rotating abdominal sites')}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '📍 Zona de Aplicación:' : '📍 Injection Site:'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-                          {isEs ? 'Tejido graso subcutáneo del abdomen' : 'Subcutaneous abdominal fat'}
-                        </div>
-                      </div>
-                    </div>
-                  ) : item.category.type === 'supplement' ? (
-                    /* ORAL SUPPLEMENT DOSING BOX */
-                    <div
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #dadce0',
-                        borderRadius: '6px',
-                        padding: '12px 14px',
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '12px'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '💊 Toma Diaria:' : '💊 Daily Intake:'}
-                        </div>
-                        <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
-                          {item.posology?.regimen || (isEs ? '1–2 cápsulas con agua' : '1–2 capsules with water')}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '🕒 Momento del Día:' : '🕒 Best Time:'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-                          {item.posology?.timing || (isEs ? 'Con el desayuno o cena' : 'With breakfast or dinner')}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '💡 Recomendación:' : '💡 Tip:'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-                          {isEs ? 'Acompañar siempre de un vaso completo de agua' : 'Always take with a full glass of water'}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* TOPICAL / TRANSDERMAL DOSING BOX */
-                    <div
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #dadce0',
-                        borderRadius: '6px',
-                        padding: '12px 14px',
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '12px'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '🧴 Cantidad por Aplicación:' : '🧴 Dose Volume:'}
-                        </div>
-                        <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
-                          {(() => {
-                            const rawDose = String(item.posology?.regimen || '1.0 mL');
-                            const isPump = item.category?.isTransdermal || /\b(transdermal|pentravan|cream|crema|topiclick|pump)\b/i.test(`${item.title || ''} ${item.vehicle?.name || ''} ${rawDose}`);
-                            return isPump && !/\bpumps?\b/i.test(rawDose)
-                              ? rawDose.replace(/\b(\d+(?:[.,]\d+)?)\s*m[lL]\b/gi, (m, n) => {
-                                  const v = parseFloat(String(n).replace(',', '.'));
-                                  return Number.isFinite(v) && v > 0 ? (v === 1 ? '1 pump' : `${v} pumps`) : m;
-                                })
-                              : rawDose;
-                          })()}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '🕒 Momento y Frecuencia:' : '🕒 Timing & Application:'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-                          {(item.posology?.timing && !/refrigerat|2°c|8°c|room temp/i.test(item.posology.timing))
-                            ? item.posology.timing
-                            : (posologySchedule.timeHint || (isEs ? 'Según pauta diaria' : 'As directed'))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '💆 Modo de Empleo:' : '💆 Application Method:'}
-                        </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-                          {(String(rx?.dispensingForm || item.title || '').toLowerCase().includes('nasal') ||
-                            String(rx?.treatmentTitle || '').toLowerCase().includes('nasal'))
-                            ? (isEs ? 'Pulverización intranasal · Limpiar boquilla tras usar' : 'Intranasal spray · Wipe nozzle after use')
-                            : (isEs ? 'Masajear suavemente con la yema de los dedos hasta absorción' : 'Gently massage with fingertips until absorbed')}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Collapsible 3-Step Visual Device Guide (strictly isolated by prescription type) */}
-                  {(() => {
-                    const isNasal = String(rx?.dispensingForm || item.title || '').toLowerCase().includes('nasal') ||
-                      String(rx?.treatmentTitle || '').toLowerCase().includes('nasal');
-                    const isPenDevice = item.category?.type === 'peptide_pen';
-                    const isHormonalTransdermal = !isNasal && !isPenDevice && (item.category?.isTransdermal || /\b(topiclick|pentravan|hormon|estradiol|progesterone|testosterone|dhea)\b/i.test(`${item.title || ''} ${item.vehicle?.name || ''}`));
-                    const isHairTopical = !isNasal && !isPenDevice && !isHormonalTransdermal && (item.category?.type === 'topical' || /\b(trichosol|scalp|hair|capilar|minoxidil|finasteride|dutasteride|latanoprost)\b/i.test(`${item.title || ''} ${item.vehicle?.name || ''}`));
-                    if (!isNasal && !isPenDevice && !isHormonalTransdermal && !isHairTopical) return null;
-                    const stepsList = isNasal
-                      ? (isEs
-                          ? ['1. Limpia suavemente la nariz antes de aplicar.', '2. Aplica 1 pulsación en cada fosa nasal respirando suave.', '3. Limpia la boquilla y guarda en nevera (2°C–8°C).']
-                          : ['1. Gently clear your nose before using.', '2. Apply 1 spray into each nostril while breathing in gently.', '3. Wipe the nozzle and return to the fridge (2°C–8°C).'])
-                      : isPenDevice
-                      ? (isEs
-                          ? ['1. Coloca una aguja estéril nueva en la pluma.', '2. Gira el dial hasta los clics indicados en tu pauta.', '3. Aplica en abdomen o muslo y mantén 5–10 segundos.']
-                          : ['1. Attach a fresh sterile needle to your pen.', '2. Turn the dial to your prescribed number of clicks.', '3. Press on abdomen or thigh and hold for 5–10 seconds.'])
-                      : isHormonalTransdermal
-                      ? (isEs
-                          ? ['1. Limpia y seca la piel (antebrazo interno o muslo).', '2. Aplica los clics/pumps indicados y masajea hasta absorber.', '3. Lávate las manos después y evita contacto piel con piel 1–2 h.']
-                          : ['1. Clean and dry the skin (inner forearm or thigh).', '2. Apply your prescribed clicks/pumps and rub in until absorbed.', '3. Wash hands afterward and avoid skin-to-skin contact for 1–2 hours.'])
-                      : (isEs
-                          ? ['1. Con el cuero cabelludo seco, abre raya en las zonas a tratar.', '2. Aplica la cantidad exacta y masajea suave 30 segundos.', '3. Deja actuar al menos 4 horas antes de lavar el cabello.']
-                          : ['1. On a dry scalp, part your hair over the target areas.', '2. Apply the exact dose and massage gently for 30 seconds.', '3. Leave on for at least 4 hours before washing your hair.']);
-                    return (
-                      <details
-                        style={{
-                          marginTop: '10px',
-                          background: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px',
-                          padding: '10px 12px'
-                        }}
-                      >
-                        <summary style={{
-                          fontSize: '0.82rem',
-                          fontWeight: 700,
-                          color: '#0f172a',
-                          cursor: 'pointer',
-                          listStyle: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between'
-                        }}>
-                          <span>{isEs ? 'Cómo usarlo (3 pasos sencillos)' : 'How to use it (3 simple steps)'}</span>
-                          <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>
-                            {isEs ? 'Ver pasos ▾' : 'Show steps ▾'}
-                          </span>
-                        </summary>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
-                          {stepsList.map((st, idx) => (
-                            <div key={idx} style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.4, fontWeight: 500 }}>
-                              {st}
-                            </div>
-                          ))}
-                        </div>
-                      </details>
                     );
                   })()}
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.04rem', fontWeight: 700, color: '#202124' }}>
+                      {(/compounded\s+(nasal\s*spray|formula|solution)/i.test(item.title || '') && item.apis?.length > 0)
+                        ? `${item.apis.map(a => `${a.name || a.productName}${a.dosage ? ` (${a.dosage})` : ''}`).join(' + ')}`
+                        : item.title}
+                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                      {item.volume && (
+                        <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', background: '#f8fafc', border: '1px solid #dadce0', padding: '2px 8px', borderRadius: '4px' }}>
+                          {item.volume}
+                        </span>
+                      )}
+                      {item.apis?.length > 0 && !/compounded\s+(nasal\s*spray|formula|solution)/i.test(item.title || '') && item.apis.map((a, aIdx) => (
+                        <span key={aIdx} style={{ fontSize: '0.72rem', fontWeight: 600, color: '#3c4043', background: '#f8fafc', border: '1px solid #dadce0', padding: '2px 8px', borderRadius: '4px' }}>
+                          {a.name || a.productName}{a.dosage ? ` (${a.dosage})` : ''}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                  {/* Specific Doctor Clinical Directions if any */}
-                  {item.posology?.dosageInstructions && (
-                    <div
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '6px',
-                        padding: '8px 12px',
-                        fontSize: '0.78rem',
-                        color: '#1e293b',
-                        lineHeight: 1.45,
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '8px'
-                      }}
-                    >
-                      <Info size={15} style={{ flexShrink: 0, marginTop: '2px', color: '#2563eb' }} />
-                      <div>
-                        <strong>{isEs ? 'Instrucciones adicionales de tu médico:' : 'Physician notes:'}</strong>{' '}
-                        <span>{item.posology.dosageInstructions}</span>
+              {/* Card Body (Flat Google Cloud UX: How to take it 16px + Quick tip + 3-Phase Visual Stepper) */}
+              {(() => {
+                const hay = `${rx?.dispensingForm || ''} ${item.title || ''} ${rx?.treatmentTitle || ''} ${item.vehicle?.name || ''}`.toLowerCase();
+                const isNasal = hay.includes('nasal');
+                const isPenDevice = item.category?.type === 'prefilled_pen' || item.category?.type === 'peptide_pen';
+                const isHormonalTransdermal = !isNasal && !isPenDevice && (item.category?.isTransdermal || /\b(topiclick|pentravan|hormon|estradiol|progesterone|testosterone|dhea)\b/i.test(hay));
+                const isHairTopical = !isNasal && !isPenDevice && !isHormonalTransdermal && (item.category?.type === 'topical' || /\b(trichosol|scalp|hair|capilar|minoxidil|finasteride|dutasteride|latanoprost)\b/i.test(hay));
+
+                const rawDirection =
+                  item.posology?.dosageInstructions ||
+                  localizePatientText(item.posology?.regimen, isEs) ||
+                  (item.category?.type === 'peptide' && item.estimatedDoseMcg
+                    ? `${item.estimatedDoseMcg} mcg (${isEs ? 'aprox. 10 unidades en U-100' : 'approx. 10 units on U-100'})`
+                    : isNasal
+                    ? (isEs ? 'Aplicar una (1) pulverización en cada fosa nasal según indicación médica.' : 'Apply one (1) spray in each nostril as directed by physician.')
+                    : isEs ? 'Seguir la pauta indicada por tu médico.' : 'Take as directed by your physician.');
+
+                const quickTip = isNasal
+                  ? (isEs ? 'Limpia la boquilla tras usar' : 'Wipe nozzle after use')
+                  : isPenDevice
+                  ? (isEs ? 'Dial y Agujas Estériles: Usa una aguja estéril nueva cada vez · Mantén 5–10 s' : 'Pen Dial & Sterile Needles: Use a fresh sterile needle each time · Hold 5–10s')
+                  : isHormonalTransdermal
+                  ? (isEs ? 'Lávate las manos tras aplicar' : 'Wash hands after applying')
+                  : isHairTopical
+                  ? (isEs ? 'Deja actuar al menos 4 horas antes de lavar' : 'Leave on at least 4 hours before washing')
+                  : (isEs ? 'Tómala a la misma hora cada día' : 'Take at the same time each day');
+
+                const lotVal = urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode;
+                const budVal = urlBud || rx?.expDate || rx?.bud;
+
+                const phases = isNasal
+                  ? (isEs
+                      ? [
+                          { title: 'Preparar', desc: 'Limpia suavemente la nariz antes de aplicar.' },
+                          { title: 'Aplicar', desc: 'Aplica 1 pulsación en cada fosa nasal respirando suave.' },
+                          { title: 'Guardar', desc: 'Limpia la boquilla y guarda en nevera (2°C–8°C).' }
+                        ]
+                      : [
+                          { title: 'Prepare', desc: 'Gently clear your nose before using.' },
+                          { title: 'Apply', desc: 'Apply 1 spray into each nostril while breathing in gently.' },
+                          { title: 'Store', desc: 'Wipe the nozzle and return to the fridge (2°C–8°C).' }
+                        ])
+                  : isPenDevice
+                  ? (isEs
+                      ? [
+                          { title: 'Preparar', desc: 'Coloca una aguja estéril nueva en la pluma.' },
+                          { title: 'Ajustar dosis', desc: 'Gira el dial hasta la dosis indicada en tu pauta.' },
+                          { title: 'Aplicar', desc: 'Presiona en abdomen o muslo y mantén 5–10 segundos.' }
+                        ]
+                      : [
+                          { title: 'Prepare', desc: 'Attach a fresh sterile needle to your pen.' },
+                          { title: 'Dial dose', desc: 'Turn the dial to your prescribed dose.' },
+                          { title: 'Inject', desc: 'Press on abdomen or thigh and hold for 5–10 seconds.' }
+                        ])
+                  : isHormonalTransdermal
+                  ? (isEs
+                      ? [
+                          { title: 'Limpiar', desc: 'Limpia y seca la piel (antebrazo interno o muslo).' },
+                          { title: 'Aplicar', desc: 'Aplica los clics/pumps indicados y masajea hasta absorber.' },
+                          { title: 'Proteger', desc: 'Lávate las manos y evita contacto piel con piel 1–2 h.' }
+                        ]
+                      : [
+                          { title: 'Clean', desc: 'Clean and dry the skin (inner forearm or thigh).' },
+                          { title: 'Apply', desc: 'Apply your prescribed clicks/pumps and rub in until absorbed.' },
+                          { title: 'Protect', desc: 'Wash hands afterward and avoid skin-to-skin contact for 1–2 hours.' }
+                        ])
+                  : isHairTopical
+                  ? (isEs
+                      ? [
+                          { title: 'Preparar', desc: 'Con el cuero cabelludo seco, abre raya en las zonas a tratar.' },
+                          { title: 'Aplicar', desc: 'Aplica la cantidad exacta y masajea suave 30 segundos.' },
+                          { title: 'Dejar actuar', desc: 'Deja actuar al menos 4 horas antes de lavar el cabello.' }
+                        ]
+                      : [
+                          { title: 'Prepare', desc: 'On a dry scalp, part your hair over the target areas.' },
+                          { title: 'Apply', desc: 'Apply the exact dose and massage gently for 30 seconds.' },
+                          { title: 'Absorb', desc: 'Leave on for at least 4 hours before washing your hair.' }
+                        ])
+                  : (isEs
+                      ? [
+                          { title: 'Preparar', desc: 'Ten a mano un vaso completo de agua.' },
+                          { title: 'Tomar', desc: 'Toma la dosis indicada con o sin alimentos según tu pauta.' },
+                          { title: 'Constancia', desc: 'Mantén un horario fijo cada día para mejores resultados.' }
+                        ]
+                      : [
+                          { title: 'Prepare', desc: 'Have a full glass of water ready.' },
+                          { title: 'Take', desc: 'Take your prescribed dose as directed in your schedule.' },
+                          { title: 'Stay consistent', desc: 'Take at the same time each day for best results.' }
+                        ]);
+
+                return (
+                  <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* 1. Primary Instruction (16px, clean, zero nested boxes) */}
+                    <div>
+                      <div style={{ fontSize: '0.70rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368', marginBottom: '4px' }}>
+                        {isEs ? 'Cómo tomarlo' : 'How to take it'}
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 600, color: '#202124', lineHeight: 1.5 }}>
+                        {rawDirection}
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* 3. GUÍA DE RECONSTITUCIÓN (Si es Péptido o Vial Liofilizado) */}
-                {item.category.requiresReconstitution && (
-                  <div style={{ marginTop: '4px' }}>
-                    <ReconstitutionGuideCard
-                      productName={item.title}
-                      vialDoseMg={item.estimatedVialMg || 5}
-                      diluentVolumeMl={2.0}
-                      prescribedDoseMcg={item.estimatedDoseMcg || 250}
-                      lang={isEs ? 'es' : 'en'}
-                      initiallyExpanded={true}
-                    />
+                    {/* 2. Discrete 1-line Quick Tip + Lot/BUD metadata */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', fontSize: '0.80rem', color: '#5f6368' }}>
+                      <span>
+                        <strong style={{ color: '#3c4043', fontWeight: 600 }}>{isEs ? 'Tip rápido:' : 'Quick tip:'}</strong>{' '}
+                        {quickTip}
+                      </span>
+                      {(lotVal || budVal) && (
+                        <span style={{ fontFamily: 'monospace', fontSize: '0.74rem', color: '#5f6368', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: '4px' }}>
+                          {lotVal ? `${isEs ? 'Lote' : 'Lot'}: ${lotVal}` : ''}
+                          {lotVal && budVal ? ' · ' : ''}
+                          {budVal ? `${isEs ? 'Usar antes del' : 'Use before'}: ${budVal}` : ''}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 3. Collapsible 3-Phase Visual Stepper */}
+                    <details
+                      style={{
+                        marginTop: '2px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '10px 14px'
+                      }}
+                    >
+                      <summary style={{
+                        fontSize: '0.84rem',
+                        fontWeight: 700,
+                        color: '#202124',
+                        cursor: 'pointer',
+                        listStyle: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}>
+                        <span>{isEs ? 'Cómo usarlo (3 pasos sencillos)' : 'How to use it (3 simple steps)'}</span>
+                        <span style={{ fontSize: '0.76rem', color: '#1a73e8', fontWeight: 600 }}>
+                          {isEs ? 'Ver pasos ▾' : 'Show steps ▾'}
+                        </span>
+                      </summary>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+                        gap: '10px',
+                        marginTop: '12px',
+                        paddingTop: '12px',
+                        borderTop: '1px solid #e2e8f0'
+                      }}>
+                        {phases.map((phase, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              background: '#ffffff',
+                              border: '1px solid #dadce0',
+                              borderRadius: '8px',
+                              padding: '10px 12px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '6px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: '50%',
+                                background: '#1a73e8',
+                                color: '#ffffff',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
+                              }}>
+                                {idx + 1}
+                              </span>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a73e8' }}>
+                                {isEs ? `Fase ${idx + 1}` : `Phase ${idx + 1}`}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
+                              {phase.title}
+                            </div>
+                            <div style={{ fontSize: '0.80rem', color: '#5f6368', lineHeight: 1.45 }}>
+                              {phase.desc}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+
+                    {/* 4. Reconstitution Guide (Only for lyophilized peptides) */}
+                    {item.category.requiresReconstitution && (
+                      <div style={{ marginTop: '4px' }}>
+                        <ReconstitutionGuideCard
+                          productName={item.title}
+                          vialDoseMg={item.estimatedVialMg || 5}
+                          diluentVolumeMl={2.0}
+                          prescribedDoseMcg={item.estimatedDoseMcg || 250}
+                          lang={isEs ? 'es' : 'en'}
+                          initiallyExpanded={true}
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
-
-              </div>
+                );
+              })()}
             </div>
           );
         })}
