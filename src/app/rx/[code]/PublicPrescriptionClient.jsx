@@ -144,7 +144,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [overrideView, setOverrideView] = useState(null); // 'patient' | 'doctor' | null
   const isPatientView = overrideView ? overrideView === 'patient' : defaultIsPatientView;
 
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState(() => (String(searchParams?.get('lang') || '').toLowerCase() === 'es' ? 'es' : 'en'));
   const [copied, setCopied] = useState(false);
   const [previewDoc, setPreviewDoc] = useState(null);
   const [showQrModal, setShowQrModal] = useState(false);

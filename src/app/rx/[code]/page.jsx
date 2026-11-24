@@ -26,6 +26,9 @@ export async function generateMetadata({ params, searchParams }) {
   const resolvedSearch = await searchParams;
   const lang = String(resolvedSearch?.lang || '').toLowerCase() === 'es' ? 'es' : 'en';
   const isEs = lang === 'es';
+  const isPatientView = String(resolvedSearch?.view || resolvedSearch?.mode || '').toLowerCase() === 'patient';
+  const urlLot = resolvedSearch?.lot ? String(resolvedSearch.lot).trim() : '';
+  const urlBud = resolvedSearch?.bud ? String(resolvedSearch.bud).trim() : '';
   const rawCode = resolvedParams?.code || '';
   const cleanCode = sanitizePrescriptionCode(rawCode);
   const rx = await getPrescriptionData(cleanCode || rawCode);
@@ -56,11 +59,36 @@ export async function generateMetadata({ params, searchParams }) {
   const rawPos = rx?.structuredPosology?.summary || rx?.posology || rx?.dosageSchedule || '';
   const posologySummary = typeof rawPos === 'object' ? (rawPos.regimen || rawPos.summary || rawPos.timing || rawPos.notes || '') : String(rawPos || '');
   const packSummary = rx?.structuredPosology?.packLabel || '';
+  const storageSummary = rx?.storage ? String(rx.storage).trim() : '';
+  const lotSummary = urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode || '';
+  const budSummary = urlBud || rx?.expDate || rx?.bud || '';
+
+  let title = isEs
+    ? `Expediente de Prescripción Clínica #${cleanCode} • Atlas Health Services`
+    : `Clinical Prescription Dossier #${cleanCode} • Atlas Health Services`;
 
   let description = isEs
     ? 'Monografía verificada de formulación clínica y protocolo de posología farmacéutica. Verificación médica autorizada • Atlas Health Services.'
     : 'Verified clinical formulation monograph and pharmaceutical posology protocol. Authorized medical verification • Atlas Health Services.';
-  if (formulaSummary) {
+
+  if (isPatientView) {
+    const cleanTreatmentName = rx?.treatmentTitle || formulaSummary || '';
+    title = cleanTreatmentName
+      ? `${cleanTreatmentName} · ${isEs ? 'Guía de Tratamiento' : 'Treatment Guide'}`
+      : (isEs ? `Tu Guía de Tratamiento (#${cleanCode})` : `Your Treatment Guide (#${cleanCode})`);
+
+    const patientParts = [];
+    if (posologySummary) patientParts.push(posologySummary);
+    if (storageSummary) patientParts.push(storageSummary);
+    if (budSummary) patientParts.push(`${isEs ? 'Usar antes del' : 'Use before'}: ${budSummary}`);
+    else if (lotSummary) patientParts.push(`Lot: ${lotSummary}`);
+
+    description = patientParts.length > 0
+      ? patientParts.join(' · ')
+      : (isEs
+          ? 'Consulta cómo tomar tu tratamiento, conservación y registro diario de dosis.'
+          : 'View how to take your treatment, storage instructions, and your daily dose log.');
+  } else if (formulaSummary) {
     description = `${isEs ? 'Fórmula' : 'Formula'}: ${formulaSummary}${packSummary ? ` (${packSummary})` : ''}. `;
     if (posologySummary) {
       description += `${isEs ? 'Posología' : 'Posology'}: ${posologySummary}. `;
@@ -72,10 +100,10 @@ export async function generateMetadata({ params, searchParams }) {
     description = description.slice(0, 197).trim() + '...';
   }
 
-  const title = isEs
-    ? `Expediente de Prescripción Clínica #${cleanCode} • Atlas Health Services`
-    : `Clinical Prescription Dossier #${cleanCode} • Atlas Health Services`;
   const ogLogoUrl = `${BASE_URL}/atlas-health-logo-wa.png`;
+  const ogUrl = isPatientView
+    ? `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}?view=patient`
+    : `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}`;
 
   return {
     title,
@@ -83,8 +111,10 @@ export async function generateMetadata({ params, searchParams }) {
     openGraph: {
       title,
       description,
-      url: `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}`,
-      siteName: isEs ? 'Atlas Health Services · Formulario Clínico' : 'Atlas Health Services · Clinical Formulary',
+      url: ogUrl,
+      siteName: isPatientView
+        ? (isEs ? 'Guía de Tratamiento' : 'Treatment Guide')
+        : (isEs ? 'Atlas Health Services · Formulario Clínico' : 'Atlas Health Services · Clinical Formulary'),
       locale: isEs ? 'es_ES' : 'en_US',
       type: 'article',
       images: [
