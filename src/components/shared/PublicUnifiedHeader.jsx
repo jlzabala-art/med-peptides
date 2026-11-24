@@ -498,7 +498,7 @@ export default function PublicUnifiedHeader({
               )}
 
               {!purePublic && !whiteLabel && (
-                <div className="puh-desktop-only-pill" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <div className="puh-desktop-only-pill">
                   <ActiveClinicalPill isSpanish={isSpanish} />
                 </div>
               )}

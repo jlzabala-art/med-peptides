@@ -1469,6 +1469,38 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
 
   // Localized clinical milestones
   const timeline = useMemo(() => {
+    const rxDomain = resolveClinicalDomain({ ...rx, items: rawLines, formulations: compoundedFormulations });
+
+    // ── Intranasal Peptide / Neurotrophic Spray Timeline (30-Day Standard) ───
+    if (rxDomain === CLINICAL_DOMAINS.NASAL_SPRAY) {
+      const nasalEs = [
+        { phase: 'Semanas 1 - 2', title: 'Biodisponibilidad Intranasal & Cebado Neurotrófico', badge: 'Fase 1', description: 'Absorción directa a través de la mucosa olfatoria y trigeminal. Inicio de modulación neuroquímica y adaptación de dosis diaria.' },
+        { phase: 'Semanas 3 - 4', title: 'Estabilización Cognitiva & Regulación Neuroendocrina', badge: 'Fase 2', description: 'Consolidación de respuesta clínica (claridad mental, respuesta al estrés y equilibrio neurotrófico) manteniendo cadena de frío (2°C – 8°C).' },
+        { phase: rx.duration || 'Día 30+', title: 'Evaluación Clínica & Renovación de Ciclo', badge: 'Revisión', description: `Valoración evolutiva con ${doctorName || 'el médico prescriptor'} para confirmar continuidad o ajuste de pauta.` }
+      ];
+      const nasalEn = [
+        { phase: 'Weeks 1 - 2', title: 'Intranasal Bioavailability & Neurotrophic Priming', badge: 'Phase 1', description: 'Direct mucosal absorption via olfactory and trigeminal pathways. Initial neurochemical modulation and daily spray titration.' },
+        { phase: 'Weeks 3 - 4', title: 'Cognitive Stabilization & Neuroendocrine Balance', badge: 'Phase 2', description: 'Consolidation of clinical response (mental clarity, stress resilience, and neurotrophic balance) while maintaining 2°C – 8°C cold-chain storage.' },
+        { phase: rx.duration || 'Day 30+', title: 'Clinical Follow-up & Cycle Evaluation', badge: 'Follow-up', description: `Outcome review with ${doctorName || 'the prescribing physician'} to confirm continuation or dosing adjustment.` }
+      ];
+      return isEs ? (posology.timeline || nasalEs) : (posology.timeline || nasalEn);
+    }
+
+    // ── BHRT / Endocrine Hormone Timeline ────────────────────────────────────
+    if (rxDomain === CLINICAL_DOMAINS.HORMONE_BHRT) {
+      const bhrtEs = [
+        { phase: 'Semanas 1 - 2', title: 'Absorción Transdérmica & Equilibrio Inicial', badge: 'Fase 1', description: 'Estabilización inicial de niveles hormonales bioidénticos mediante vehículo Pentravan®.' },
+        { phase: 'Semanas 3 - 6', title: 'Optimización Endocrina & Respuesta Sintomática', badge: 'Fase 2', description: 'Mejora progresiva de energía, tono metabólico y parámetros endocrinos basales.' },
+        { phase: rx.duration || 'Semanas 7 - 12', title: 'Control Analítico & Ajuste de Dosis', badge: 'Revisión', description: `Analítica hormonal de seguimiento y ajuste clínico con ${doctorName || 'el médico prescriptor'}.` }
+      ];
+      const bhrtEn = [
+        { phase: 'Weeks 1 - 2', title: 'Transdermal Absorption & Initial Equilibrium', badge: 'Phase 1', description: 'Initial stabilization of bioidentical hormone levels via Pentravan® transdermal vehicle.' },
+        { phase: 'Weeks 3 - 6', title: 'Endocrine Optimization & Symptomatic Response', badge: 'Phase 2', description: 'Progressive improvement in energy, metabolic tone, and basal endocrine biomarkers.' },
+        { phase: rx.duration || 'Weeks 7 - 12', title: 'Lab Monitoring & Dose Titration', badge: 'Follow-up', description: `Follow-up hormone panel and clinical adjustment with ${doctorName || 'the prescribing physician'}.` }
+      ];
+      return isEs ? (posology.timeline || bhrtEs) : (posology.timeline || bhrtEn);
+    }
+
     // ── Incretin / Peptide Pen Timeline ──────────────────────────────────────
     if (isInjectableRx || isPenRx) {
       const penTimelineEs = [
@@ -1560,7 +1592,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         description: `Measurable caliber increase in hair shafts and visible density coverage. Completion of course. Follow-up clinical review with ${doctorName || 'the prescribing physician'}.`
       }
     ]));
-  }, [isEs, posology.timeline, isEntirelyOral, isInjectableRx, isPenRx, rx.duration, doctorName]);
+  }, [isEs, posology.timeline, isEntirelyOral, isInjectableRx, isPenRx, rx, rawLines, compoundedFormulations, doctorName]);
 
   return {
     rxId,

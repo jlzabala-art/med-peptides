@@ -894,6 +894,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <RoadmapMilestonesSection
                   timeline={timeline}
                   isEs={isEs}
+                  durationLabel={posology?.duration || currentRx?.duration || (prescriptionTypeInfo?.clinicalDomain === 'nasal_spray' ? (isEs ? '30 Días' : '30 Days') : null)}
                 />
               </div>
 

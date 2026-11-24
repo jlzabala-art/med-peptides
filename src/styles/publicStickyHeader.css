@@ -893,8 +893,23 @@
     gap: 5px;
   }
 
+  .puh-desktop-only-pill {
+    display: none !important;
+  }
+
   .puh-breadcrumb {
-    display: none; /* Prefer anchor tabs on narrow mobile viewports */
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .puh-breadcrumb::-webkit-scrollbar {
+    display: none;
   }
 }
 

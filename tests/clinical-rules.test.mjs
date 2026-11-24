@@ -325,3 +325,15 @@ test('Protocol Write Guard & Completeness: enforces Rule #28 status, canonical c
   assert.ok(comp.checks.find((c) => c.id === 'overview')?.done, 'categoryId must satisfy Overview category check');
   assert.ok(comp.checks.find((c) => c.id === 'dosage')?.done, 'drugs_used fallback must satisfy Dosage check');
 });
+
+test('Rx Mobile & Nasal Spray UX: isolates nasal spray timeline, dynamic duration, and mobile header pill', () => {
+  const hookSrc = read('src/hooks/usePrescriptionData.js');
+  assert.ok(hookSrc.includes('rxDomain === CLINICAL_DOMAINS.NASAL_SPRAY'), 'timeline must branch on NASAL_SPRAY domain');
+  assert.ok(hookSrc.includes('Intranasal Bioavailability'), 'nasal spray timeline must use intranasal milestones');
+
+  const roadmapSrc = read('src/components/prescription/RoadmapMilestonesSection.jsx');
+  assert.ok(roadmapSrc.includes('durationLabel'), 'RoadmapMilestonesSection must accept dynamic durationLabel');
+
+  const headerCss = read('src/styles/publicStickyHeader.css');
+  assert.ok(headerCss.includes('.puh-desktop-only-pill'), 'publicStickyHeader.css must hide desktop-only pill on mobile');
+});

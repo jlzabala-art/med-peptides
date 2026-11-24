@@ -10,9 +10,11 @@ import { Clock } from '@/lib/icons';
  */
 export default function RoadmapMilestonesSection({
   timeline = [],
-  isEs = false
+  isEs = false,
+  durationLabel = null
 }) {
   if (!timeline || timeline.length === 0) return null;
+  const resolvedDuration = durationLabel || (isEs ? '90 Días' : '90 Days');
 
   return (
     <div id="milestones-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
@@ -40,7 +42,7 @@ export default function RoadmapMilestonesSection({
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 600, color: '#202124' }}>
-                {isEs ? '2. Pauta de Tratamiento & Evolución Biológica (90 Días)' : '2. Treatment Regimen & Biological Evolution (90 Days)'}
+                {isEs ? `2. Pauta de Tratamiento & Evolución Biológica (${resolvedDuration})` : `2. Treatment Regimen & Biological Evolution (${resolvedDuration})`}
               </h3>
               <p style={{ margin: 0, fontSize: '0.76rem', color: '#5f6368' }}>
                 {isEs ? 'Instrucciones paso a paso, administración cronobiológica y evolución clínica esperada' : 'Step-by-step application guidance, daily routine and expected biological pathway'}
@@ -69,7 +71,7 @@ export default function RoadmapMilestonesSection({
               fontSize: '0.72rem', 
               fontWeight: 600 
             }}>
-              {isEs ? 'Ciclo Completo: 90 Días' : 'Full Cycle: 90 Days'}
+              {isEs ? `Ciclo Completo: ${resolvedDuration}` : `Full Cycle: ${resolvedDuration}`}
             </span>
           </div>
         </div>

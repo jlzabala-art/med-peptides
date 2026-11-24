@@ -49,7 +49,8 @@ export default function ActiveClinicalPill({ isSpanish = false }) {
           fontFamily: 'monospace',
           fontWeight: 800,
           color: '#93c5fd',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          flexShrink: 0
         }}
       >
         #{activeRxCode}
