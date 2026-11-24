@@ -73,22 +73,7 @@ export async function POST(req) {
   const entityIdentifier = contextAnchor?.slug || contextAnchor?.name || contextAnchor?.code || contextAnchor?.sectionTitle || 'global';
   const queryCacheKey = `${effectiveMode}:${effectiveRole}:${entityIdentifier}:${message.trim().toLowerCase()}`;
 
-  // 1. Quota-free cache lookup: If answered previously for this resource, return 0-latency reply without consuming quota
-  const cachedHit = getCachedQuery(queryCacheKey);
-  if (cachedHit) {
-    const quota = isPublicSandbox 
-      ? peekRateLimit(req, { limit: SANDBOX_QUERY_LIMIT, tier: 'ai-public-sandbox' }) 
-      : { remaining: 999, count: 0 };
-
-    return NextResponse.json({
-      ...cachedHit,
-      cached: true,
-      remaining: isPublicSandbox ? quota.remaining : undefined,
-      limit: isPublicSandbox ? SANDBOX_QUERY_LIMIT : undefined,
-    });
-  }
-
-  // 2. Rate limit evaluation for uncached public queries
+  // 1. Rate limit evaluation for all public guest queries (strict 5-query limit; unlimited for signed-in users)
   let sandboxRateInfo = null;
   if (isPublicSandbox) {
     sandboxRateInfo = checkRateLimit(req, {
@@ -108,6 +93,17 @@ export async function POST(req) {
         { status: 429 }
       );
     }
+  }
+
+  // 2. Cache lookup: Return 0-latency reply using remaining quota from step 1
+  const cachedHit = getCachedQuery(queryCacheKey);
+  if (cachedHit) {
+    return NextResponse.json({
+      ...cachedHit,
+      cached: true,
+      remaining: isPublicSandbox ? sandboxRateInfo?.remaining : undefined,
+      limit: isPublicSandbox ? SANDBOX_QUERY_LIMIT : undefined,
+    });
   }
 
   const rateInfo = checkRateLimit(req, { limit: 30, windowMs: 60 * 1000, tier: 'ai-chat' });

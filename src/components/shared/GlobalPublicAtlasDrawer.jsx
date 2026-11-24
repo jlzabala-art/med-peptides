@@ -256,7 +256,8 @@ export default function GlobalPublicAtlasDrawer() {
   const hasSpecializedCopilot =
     pathname.startsWith('/pricing/peptides') ||
     pathname.startsWith('/b2b/lotusland') ||
-    pathname.startsWith('/dr/');
+    pathname.startsWith('/dr/') ||
+    pathname.startsWith('/rx/');
 
   if (hasPageDrawer || hasSpecializedCopilot) return null;
 

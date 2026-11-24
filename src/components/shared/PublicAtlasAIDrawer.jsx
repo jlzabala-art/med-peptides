@@ -327,9 +327,9 @@ export default function PublicAtlasAIDrawer({
     ? isOpenControlled 
     : (isOpenProp !== null && isOpenProp !== undefined ? isOpenProp : internalIsOpen);
   const handleClose = () => {
+    setInternalIsOpen(false);
     if (onCloseControlled) onCloseControlled();
-    else if (onCloseProp) onCloseProp();
-    else setInternalIsOpen(false);
+    if (onCloseProp) onCloseProp();
   };
   const handleOpenDrawer = () => {
     setInternalIsOpen(true);

@@ -181,11 +181,18 @@ export default function GcpUserBadge({
 
   // ── Unauthenticated State: Clean GCP Sign In Button ──
   if (!user) {
+    const isRxPage = String(pathname || '').startsWith('/rx/');
     return (
       <Link
-        href={`/login?redirect=${encodeURIComponent(resolvedRedirect)}`}
+        href={`/login?redirect=${encodeURIComponent(resolvedRedirect)}${isRxPage ? '&patient_optional=1' : ''}`}
         className="gcp-header-signin-btn"
-        title={isEs ? 'Iniciar sesión institucional o acceder' : 'Sign in to access clinical pricing'}
+        title={
+          isRxPage
+            ? (isEs
+                ? 'Opcional: regístrate para funciones avanzadas y consultas ilimitadas de Atlas AI. Esta guía ya es 100% operativa sin registro.'
+                : 'Optional: sign in for advanced features & unlimited Atlas AI queries. Your current guide is already 100% operational.')
+            : (isEs ? 'Iniciar sesión institucional o acceder' : 'Sign in to access clinical pricing')
+        }
         style={{
           display: 'inline-flex',
           alignItems: 'center',
