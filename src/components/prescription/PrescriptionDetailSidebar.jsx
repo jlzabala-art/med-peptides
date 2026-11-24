@@ -331,6 +331,7 @@ export default function PrescriptionDetailSidebar({
     if (iconType === 'dna' || id.includes('genomics')) return Dna;
     if (iconType === 'clock' || id.includes('posology')) return Clock;
     if (iconType === 'calendar' || id.includes('milestone')) return Calendar;
+    if (iconType === 'message' || id.includes('patient-sharing')) return MessageCircle;
     if (iconType === 'stethoscope' || id.includes('doctor') || id.includes('clinical')) return Stethoscope;
     if (iconType === 'shield' || id.includes('qr')) return ShieldCheck;
     if (iconType === 'file' || id.includes('doc')) return FileText;
@@ -392,8 +393,8 @@ export default function PrescriptionDetailSidebar({
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  <span>{isEs ? 'Paciente' : 'Patient'}</span>
-                  {!isAuthorizedViewer && (
+                  <span>{isPatientView ? (isEs ? 'Tu Tratamiento' : 'Your Treatment') : (isEs ? 'Paciente' : 'Patient')}</span>
+                  {!isAuthorizedViewer && !isPatientView && (
                     <span style={{ fontSize: '0.58rem', background: '#f1f5f9', color: '#475569', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
                       🔒 DHA/HIPAA
                     </span>
@@ -714,7 +715,7 @@ export default function PrescriptionDetailSidebar({
             </form>
           )}
 
-          {!isAuthorizedViewer && (
+          {!isAuthorizedViewer && !isPatientView && (
             <div style={{ fontSize: '0.65rem', color: '#64748b', lineHeight: 1.3, background: '#f8fafc', padding: '5px 7px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
               <span style={{ color: '#003666', fontWeight: 600 }}>Privacy Protected:</span> Nominal record restricted.{' '}
               <Link href={`/login?redirect=/rx/${prescriptionCode}`} style={{ color: '#003666', fontWeight: 700, textDecoration: 'underline' }}>
@@ -735,18 +736,22 @@ export default function PrescriptionDetailSidebar({
             }}>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  {isAuthorizedViewer ? (isEs ? 'Médico Prescriptor' : 'Prescribing Physician') : (isEs ? 'Práctica Médica' : 'Medical Practice')}
+                  {isPatientView
+                    ? (isEs ? 'Recetado por' : 'Prescribed by')
+                    : (isAuthorizedViewer ? (isEs ? 'Médico Prescriptor' : 'Prescribing Physician') : (isEs ? 'Práctica Médica' : 'Medical Practice'))}
                 </div>
                 <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#202124', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
-                  {isAuthorizedViewer 
+                  {(isAuthorizedViewer || isPatientView)
                     ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`)
                     : (isEs ? 'Práctica Médica Verificada' : 'Verified Clinical Practice')}
                 </div>
                 <div style={{ fontSize: '0.68rem', color: '#5f6368', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {isAuthorizedViewer ? (doctorTitle || (isEs ? 'Facultativo Colegiado' : 'Licensed Physician')) : (isEs ? 'Acreditación Oficial DHA' : 'Official DHA Accreditation')}
+                  {(isAuthorizedViewer || isPatientView)
+                    ? (doctorTitle || (isEs ? 'Facultativo Colegiado' : 'Licensed Physician'))
+                    : (isEs ? 'Acreditación Oficial DHA' : 'Official DHA Accreditation')}
                 </div>
               </div>
-              {doctorPublicUrl && (
+              {doctorPublicUrl && !isPatientView && (
                 <Link
                   href={doctorPublicUrl}
                   title={isAuthorizedViewer ? (isEs ? `Ir al portal de ${doctorName}` : `Go to ${doctorName}'s Portal`) : (isEs ? 'Ir al portal de la práctica' : 'Go to practice portal')}
@@ -877,7 +882,7 @@ export default function PrescriptionDetailSidebar({
 
         {/* 3. Google Cloud Minimalist "ON THIS PAGE" Rail Navigation (Grouped: Formulas vs Dossier Modules) */}
         <nav
-          aria-label={isEs ? 'En este dossier' : 'On this dossier'}
+          aria-label={isPatientView ? (isEs ? 'Mi tratamiento' : 'My treatment') : (isEs ? 'En este dossier' : 'On this dossier')}
           style={{
             padding: '4px 2px',
             display: 'flex',
@@ -892,12 +897,58 @@ export default function PrescriptionDetailSidebar({
             paddingLeft: '4px'
           }}>
             <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {isEs ? 'EN ESTE DOSSIER' : 'ON THIS DOSSIER'}
+              {isPatientView ? (isEs ? 'MI TRATAMIENTO' : 'MY TREATMENT') : (isEs ? 'EN ESTE DOSSIER' : 'ON THIS DOSSIER')}
             </span>
           </div>
 
-          {/* Group A: Active Regimen Formulations */}
-          {formulaSections.length > 0 && (
+          {isPatientView ? (
+            <div style={{ display: 'flex', flexDirection: 'column', borderLeft: '2px solid #e2e8f0', marginLeft: '4px', gap: '2px' }}>
+              {availableSections.map((sec) => {
+                const mappedTab = SECTION_TO_TAB[sec.id];
+                const isActive = (mappedTab && activeGcpTab === mappedTab) || activeId === sec.id;
+                const IconComp = getSectionIcon(sec.id, sec.icon);
+                return (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    onClick={() => scrollTo(sec.id)}
+                    title={sec.label}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '9px',
+                      width: '100%',
+                      minHeight: '42px',
+                      padding: '8px 10px 8px 12px',
+                      marginLeft: '-2px',
+                      border: 'none',
+                      borderLeft: isActive ? '2px solid #0284c7' : '2px solid transparent',
+                      background: isActive ? 'rgba(2, 132, 199, 0.08)' : 'transparent',
+                      color: isActive ? '#0284c7' : '#3c4043',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      borderRadius: '0 8px 8px 0'
+                    }}
+                  >
+                    <IconComp size={15} color={isActive ? '#0284c7' : '#64748b'} style={{ flexShrink: 0 }} />
+                    <span style={{
+                      fontSize: '0.80rem',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? '#0284c7' : '#3c4043',
+                      lineHeight: 1.3,
+                      wordBreak: 'break-word'
+                    }}>
+                      {sec.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              {/* Group A: Active Regimen Formulations */}
+              {formulaSections.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '0 0 4px 10px' }}>
                 {isEs ? 'Fórmulas Prescritas' : 'Compounded Formulas'}
@@ -1003,6 +1054,8 @@ export default function PrescriptionDetailSidebar({
               </div>
             </div>
           )}
+            </>
+          )}
         </nav>
 
       </div>
@@ -1041,7 +1094,7 @@ export default function PrescriptionDetailSidebar({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', fontWeight: 800, color: '#003666' }}>
                 <List size={16} color="#0284c7" />
-                <span>{isEs ? 'Secciones del Dossier' : 'Dossier Sections'}</span>
+                <span>{isPatientView ? (isEs ? 'Mi Tratamiento' : 'My Treatment') : (isEs ? 'Secciones del Dossier' : 'Dossier Sections')}</span>
               </div>
               <button
                 type="button"
@@ -1050,8 +1103,8 @@ export default function PrescriptionDetailSidebar({
                   background: '#f1f5f9',
                   border: 'none',
                   borderRadius: '6px',
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1063,7 +1116,8 @@ export default function PrescriptionDetailSidebar({
               </button>
             </div>
 
-            {/* Permanent URL Action in Mobile */}
+            {/* Permanent URL Action in Mobile (Doctor / Institutional only) */}
+            {!isPatientView && (
             <div style={{
               background: '#f0fdf4',
               border: '1px solid #86efac',
@@ -1102,6 +1156,7 @@ export default function PrescriptionDetailSidebar({
                 <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy URL')}</span>
               </button>
             </div>
+            )}
 
             {/* Compounding Quote Action in Mobile */}
             {!isPatientView && (

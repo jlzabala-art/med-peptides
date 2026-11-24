@@ -1114,11 +1114,13 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     } else {
       list.push({ 
         id: 'formula-card', 
-        label: isEs ? 'Fórmula Magistral & Posología' : 'Compounded Formula & Posology', 
+        label: isPatientView
+          ? (isEs ? 'Mi Dosis y Registro' : 'My Dose & Log')
+          : (isEs ? 'Fórmula Magistral & Posología' : 'Compounded Formula & Posology'), 
         category: 'formula',
-        badge: isEs ? 'Fórmula Única' : 'Single Compound',
+        badge: isPatientView ? null : (isEs ? 'Fórmula Única' : 'Single Compound'),
         accentColor: '#003666',
-        icon: 'flask'
+        icon: isPatientView ? 'clock' : 'flask'
       });
     }
 
@@ -1133,14 +1135,18 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
 
     list.push({ 
       id: 'milestones-card', 
-      label: isEs ? 'Roadmap & Hitos Clínicos' : 'Roadmap & Milestones',
+      label: isPatientView
+        ? (isEs ? 'Plan de Tratamiento' : 'Treatment Plan')
+        : (isEs ? 'Roadmap & Hitos Clínicos' : 'Roadmap & Milestones'),
       category: 'milestones',
       icon: 'calendar'
     });
 
     list.push({ 
       id: 'quality-card', 
-      label: isEs ? 'Calidad & Trazabilidad GMP' : 'Quality & EU Traceability',
+      label: isPatientView
+        ? (isEs ? 'Seguridad y Lote' : 'Safety & Batch Info')
+        : (isEs ? 'Calidad & Trazabilidad GMP' : 'Quality & EU Traceability'),
       category: 'traceability',
       icon: 'shield'
     });
@@ -1154,20 +1160,22 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       });
     }
 
-    list.push({ 
-      id: 'doctor-patient-credentials', 
-      label: isEs ? 'Datos de Médico & Paciente' : 'Doctor & Patient Info',
-      category: 'credentials',
-      icon: 'stethoscope'
-    });
+    if (!isPatientView) {
+      list.push({ 
+        id: 'doctor-patient-credentials', 
+        label: isEs ? 'Datos de Médico & Paciente' : 'Doctor & Patient Info',
+        category: 'credentials',
+        icon: 'stethoscope'
+      });
+    }
 
-    // In Patient View, keep dedicated clinical contact and clinic support
+    // In Patient View, consolidate doctor info & support into a single clear item
     if (isPatientView) {
       list.push({ 
         id: 'patient-sharing-card', 
-        label: isEs ? 'Contacto con Médico' : 'Doctor & Clinic Support',
+        label: isEs ? 'Preguntar al Médico' : 'Ask My Doctor',
         category: 'patient-sharing',
-        icon: 'stethoscope'
+        icon: 'message'
       });
     }
 
