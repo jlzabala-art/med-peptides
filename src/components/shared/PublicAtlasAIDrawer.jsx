@@ -36,6 +36,7 @@ import {
   getSuggestedInquiriesForProduct,
   getContextualAndPopularSuggestions,
 } from '@/data/compoundSuggestedInquiries';
+import { getCuratedClinicalEvidence } from '@/data/peptideClinicalEvidence';
 import '@/styles/publicDesignSystem.css';
 
 /**
@@ -591,43 +592,7 @@ export default function PublicAtlasAIDrawer({
         .trim();
 
       // Immediate curated PubMed fallback for key peptides (0ms latency, guaranteed verified PMIDs)
-      const lowerClean = cleanName.toLowerCase();
-      const curatedRxSources = lowerClean.includes('selank')
-        ? [
-            {
-              pmid: '18454096',
-              title: 'Efficacy and possible mechanisms of action of a new peptide anxiolytic selank in the therapy of generalized anxiety disorders and neurasthenia',
-              journal: 'Zh Nevrol Psikhiatr Im S S Korsakova',
-              pubdate: '2008',
-              authors: 'Zozulia AA, Neznamov GG',
-              pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/18454096/'
-            },
-            {
-              pmid: '25176261',
-              title: 'Comparative clinical evaluation of Selank and phenazepam in anxiety and somatoform disorders',
-              journal: 'Eksp Klin Farmakol',
-              pubdate: '2014',
-              authors: 'Medvedev VE, Tereshchenko ON',
-              pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/25176261/'
-            },
-            {
-              pmid: '32015829',
-              title: 'Functional Connectomic Approach to Studying Selank and Semax Effects in Healthy Volunteers (fMRI)',
-              journal: 'Brain Sci',
-              pubdate: '2020',
-              authors: 'Panikratova YR, Lebedeva IS',
-              pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/32015829/'
-            },
-            {
-              pmid: '18841804',
-              title: 'Intranasal administration of the peptide Selank regulates BDNF expression in the rat hippocampus in vivo',
-              journal: 'Dokl Biol Sci',
-              pubdate: '2008',
-              authors: 'Inozemtseva LS, Karpenko MN',
-              pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/18841804/'
-            }
-          ]
-        : null;
+      const curatedRxSources = getCuratedClinicalEvidence(cleanName);
 
       if (curatedRxSources) {
         setClinicalSources(curatedRxSources);
@@ -1698,7 +1663,7 @@ export default function PublicAtlasAIDrawer({
                 }}
               >
                 <Sparkles size={13} color={activeTab === 'chat' ? '#0284c7' : '#94a3b8'} />
-                <span>Technical Inquiry</span>
+                <span>{contextAnchor?.patientMode ? (lang === 'es' ? 'Preguntar' : 'Ask AI') : 'Technical Inquiry'}</span>
               </button>
               <button
                 type="button"
@@ -1718,7 +1683,7 @@ export default function PublicAtlasAIDrawer({
                 }}
               >
                 <BookOpen size={13} color={activeTab === 'evidence' ? '#0284c7' : '#94a3b8'} />
-                <span>Clinical Evidence {clinicalSources.length > 0 ? `(${clinicalSources.length})` : ''}</span>
+                <span>{contextAnchor?.patientMode ? (lang === 'es' ? 'Estudios' : 'Clinical Evidence') : 'Clinical Evidence'} {clinicalSources.length > 0 ? `(${clinicalSources.length})` : ''}</span>
               </button>
             </div>
 
@@ -2491,6 +2456,10 @@ export default function PublicAtlasAIDrawer({
                         ? (lang === 'es' ? 'Especificaciones del Test Diagnóstico' : 'Diagnostic Test Kit Specifications')
                         : contextType === 'cosmetic_product'
                         ? (lang === 'es' ? 'Especificaciones Dermocosméticas' : 'Dermocosmetic Product Specifications')
+                        : contextAnchor?.patientMode
+                        ? (lang === 'es' ? 'Resumen de Tu Tratamiento' : 'Your Treatment Summary')
+                        : contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+                        ? (lang === 'es' ? 'Especificaciones de Prescripción' : 'Prescription Specifications')
                         : (lang === 'es' ? 'Especificaciones Monográficas de Formulación' : 'Active Formulation Monograph Specifications')}
                     </span>
                   </div>

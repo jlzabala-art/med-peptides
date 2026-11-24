@@ -15,11 +15,22 @@ import {
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
+import { getCuratedClinicalEvidence } from '@/data/peptideClinicalEvidence';
 
 export default function ReferencesTab({ product = {}, slug = 'tirzepatide' }) {
   const [activeRefCategory, setActiveRefCategory] = useState('regulatory'); // 'regulatory' | 'pharmacology' | 'literature' | 'safety'
 
   const activeData = getPeptideReferenceDossier(product?.slug || product?.canonicalName || product?.name || slug);
+  const literatureList = (activeData.literature && activeData.literature.length > 0)
+    ? activeData.literature
+    : (getCuratedClinicalEvidence(product?.canonicalName || product?.name || slug) || []).map((s, idx) => ({
+        id: `curated-${idx}`,
+        pmid: s.pmid,
+        title: s.title,
+        authors: s.authors,
+        journal: s.journal,
+        year: s.pubdate,
+      }));
 
   return (
     <div className="pds-tab-content pds-references-tab">
@@ -279,7 +290,7 @@ export default function ReferencesTab({ product = {}, slug = 'tirzepatide' }) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {activeData.literature.map((study) => (
+            {literatureList.map((study) => (
               <div
                 key={study.id}
                 className="pds-ref-study-card"
