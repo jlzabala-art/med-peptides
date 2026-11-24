@@ -3042,9 +3042,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 bottom: 0;
                 z-index: 9950;
                 display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 4px;
-                padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+                grid-template-columns: repeat(5, 1fr);
+                gap: 2px;
+                padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
                 background: rgba(255, 255, 255, 0.96);
                 backdrop-filter: blur(16px);
                 -webkit-backdrop-filter: blur(16px);
@@ -3062,10 +3062,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 border-radius: 10px;
                 background: transparent;
                 color: #475569;
-                font-size: 0.72rem;
+                font-size: 0.66rem;
                 font-weight: 700;
                 cursor: pointer;
-                padding: 4px 6px;
+                padding: 4px 2px;
+                white-space: nowrap;
                 transition: background 0.15s ease, color 0.15s ease;
               }
               .rx-patient-mobile-btn.is-active {
@@ -3130,6 +3131,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             >
               <Sparkles size={18} color="#7c3aed" />
               <span>{isEs ? 'Atlas AI' : 'Atlas AI'}</span>
+            </button>
+            <button
+              type="button"
+              className={`rx-patient-mobile-btn ${activeGcpTab === 'contactAtlas' ? 'is-active' : ''}`}
+              onClick={() => {
+                triggerHaptic('selection');
+                setActiveGcpTab('contactAtlas');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              <MessageCircle size={18} />
+              <span>{isEs ? 'Contacto' : 'Contact'}</span>
             </button>
           </nav>
         </>

@@ -484,20 +484,20 @@ export default function ExpressQrRefillCard({
               value={dialCode}
               onChange={(e) => setDialCode(e.target.value)}
               style={{
-                width: '112px',
+                width: '104px',
                 flexShrink: 0,
-                height: '38px',
+                height: '40px',
                 borderRadius: '6px',
                 border: `1px solid ${fieldErrors.phone ? '#dc2626' : '#cbd5e1'}`,
                 padding: '0 6px',
-                fontSize: '0.80rem',
-                fontWeight: 600,
+                fontSize: '0.82rem',
+                fontWeight: 700,
                 background: '#f8fafc',
               }}
             >
               {COUNTRY_DIAL_CODES.map((c) => (
                 <option key={`${c.iso}-${c.code}`} value={c.code}>
-                  {c.flag} {c.code} ({c.iso})
+                  {c.flag} {c.code}
                 </option>
               ))}
             </select>

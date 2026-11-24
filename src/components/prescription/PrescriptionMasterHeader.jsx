@@ -351,16 +351,25 @@ export default function PrescriptionMasterHeader({
         const attrs = rxType.getAttributes(isEs);
 
         return (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-            gap: '10px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            padding: '8px 12px',
-            margin: '8px 0 10px 0'
-          }}>
+          <>
+            <style>{`
+              .atlas-rx-attrs-grid {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 10px;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: '6px';
+                padding: 8px 12px;
+                margin: 8px 0 10px 0;
+              }
+              @media (max-width: 640px) {
+                .atlas-rx-attrs-grid {
+                  grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+              }
+            `}</style>
+            <div className="atlas-rx-attrs-grid" style={{ borderRadius: '6px' }}>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isPatientView ? (isEs ? 'Cómo tomarlo' : 'How to take') : (isEs ? 'Vía & Frecuencia' : 'Route & Frequency')}
@@ -396,6 +405,7 @@ export default function PrescriptionMasterHeader({
               </div>
             </div>
           </div>
+          </>
         );
       })()}
       {/* ── GCP Resource Horizontal Tabs Bar ──────────────────────────────────── */}
