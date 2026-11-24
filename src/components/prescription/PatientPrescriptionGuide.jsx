@@ -31,6 +31,37 @@ import { detectPrescriptionType } from '@/utils/prescriptionTypeDetection';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
+function localizePatientText(raw, isEs) {
+  if (!raw || !isEs) return raw;
+  let t = String(raw);
+  const rules = [
+    [/\bInject\b/gi, 'Aplicar'],
+    [/\bclicks\b/gi, 'clics'],
+    [/\bsubcutaneously\b/gi, 'por vía subcutánea'],
+    [/\bevery morning\b/gi, 'cada mañana'],
+    [/\bevery evening\b/gi, 'cada tarde/noche'],
+    [/\bonce daily\b/gi, '1 vez al día'],
+    [/\btwice daily\b/gi, '2 veces al día'],
+    [/\bonce weekly\b/gi, '1 vez por semana'],
+    [/\b(\d+)-month plan\b/gi, 'plan de $1 meses'],
+    [/\bpens total\b/gi, 'plumas en total'],
+    [/\bfor (\d+) months?\b/gi, 'durante $1 mes(es)'],
+    [/\bfor (\d+) weeks?\b/gi, 'durante $1 semana(s)'],
+    [/\bApply one \(1\) spray in each nostril as directed by physician\.?/gi, 'Aplicar 1 pulverización en cada fosa nasal según pauta indicada.'],
+    [/\bas directed by physician\b/gi, 'según pauta indicada'],
+    [/\bRefrigerate at\b/gi, 'Conservar en nevera a'],
+    [/\bKeep refrigerated\b/gi, 'Conservar en nevera'],
+    [/\bProtect from light\b/gi, 'Proteger de la luz'],
+    [/\bOpen one pen at a time\b/gi, 'Abrir una pluma cada vez'],
+    [/\bDo not freeze\b/gi, 'No congelar'],
+    [/\bStore at room temperature\b/gi, 'Conservar a temperatura ambiente'],
+  ];
+  for (const [re, rep] of rules) {
+    t = t.replace(re, rep);
+  }
+  return t;
+}
+
 /**
  * PatientPrescriptionGuide
  * ─────────────────────────────────────────────────────────────────────────────
@@ -844,7 +875,7 @@ export default function PatientPrescriptionGuide({
                             fontWeight: 700
                           }}
                         >
-                          {displayReg}
+                          {localizePatientText(displayReg, isEs)}
                         </div>
                       );
                     })()}
@@ -871,7 +902,7 @@ export default function PatientPrescriptionGuide({
                             : (isEs ? '🖊️ Dosis Semanal (Pluma):' : '🖊️ Weekly Dose (Pen):')}
                         </div>
                         <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#5b21b6' }}>
-                          {item.posology?.regimen || (isEs ? '1 inyección subcutánea semanal' : '1 subcutaneous injection weekly')}
+                          {localizePatientText(item.posology?.regimen, isEs) || (isEs ? '1 inyección subcutánea semanal' : '1 subcutaneous injection weekly')}
                         </div>
                       </div>
 
@@ -891,7 +922,7 @@ export default function PatientPrescriptionGuide({
                           {isEs ? '❄️ Conservación:' : '❄️ Storage:'}
                         </div>
                         <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
-                          {rx?.storage || item.storage || (isEs ? 'Nevera 2°C–8°C · Lista para usar · No congelar' : 'Refrigerator 2°C–8°C · Ready-to-use · Do not freeze')}
+                          {localizePatientText(rx?.storage || item.storage, isEs) || (isEs ? 'Nevera 2°C–8°C · Lista para usar · No congelar' : 'Refrigerator 2°C–8°C · Ready-to-use · Do not freeze')}
                         </div>
                       </div>
 
@@ -906,7 +937,7 @@ export default function PatientPrescriptionGuide({
                         </div>
                         {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode || urlBud || rx?.expDate || rx?.bud) && (
                           <div style={{ marginTop: '4px', fontSize: '0.72rem', fontFamily: 'monospace', color: '#5b21b6', fontWeight: 700 }}>
-                            {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode) ? `Lot: ${urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode}` : ''}
+                            {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode) ? `${isEs ? 'Lote' : 'Lot'}: ${urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode}` : ''}
                             {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode) && (urlBud || rx?.expDate || rx?.bud) ? ' · ' : ''}
                             {(urlBud || rx?.expDate || rx?.bud) ? `${isEs ? 'Usar antes del' : 'Use before'}: ${urlBud || rx?.expDate || rx?.bud}` : ''}
                           </div>
@@ -1281,7 +1312,7 @@ export default function PatientPrescriptionGuide({
           </div>
           <div>
             <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#137333' }}>
-              {isEs ? 'Mesa Clínica del Médico' : 'Direct Doctor Clinical Desk'}
+              {isEs ? 'Enviar una Consulta' : 'Ask a Question'}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368' }}>
               {isEs ? 'Aclarar pauta, horarios o tolerancia' : 'Clarify dosage, schedule or tolerance'}

@@ -591,7 +591,11 @@ export default function PharmapolisLabelSvg({
     const pIdx = labelData.partIndex ?? labelData.phaseIndex;
     const partParam = pIdx !== undefined && pIdx !== null ? `&part=${Number(pIdx) + 1}` : '';
     const productParam = productTitle ? `&product=${encodeURIComponent(productTitle)}` : '';
-    return `${base}${partParam}${productParam}&action=refill`;
+    const lotVal = labelData.lotNumber || labelData.batchCode || '';
+    const budVal = labelData.bud || labelData.expiryDate || labelData.expDate || '';
+    const lotParam = lotVal ? `&lot=${encodeURIComponent(lotVal)}` : '';
+    const budParam = budVal ? `&bud=${encodeURIComponent(budVal)}` : '';
+    return `${base}${partParam}${productParam}${lotParam}${budParam}&action=refill`;
   }, [labelData.targetRxUrl, labelData.url, fileNumber, labelData.partIndex, labelData.phaseIndex, productTitle]);
   const cleanDisplayUrl = targetRxUrl.replace(/^https?:\/\//, '');
 

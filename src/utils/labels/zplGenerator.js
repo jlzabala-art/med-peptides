@@ -38,7 +38,7 @@ export function generateLabelZpl(labelItem = {}, rx = {}, options = {}) {
   const bud = sanitizeZplText(labelItem.expiryDate || labelItem.bud || 'BUD-30D');
   const storage = sanitizeZplText(labelItem.storage || labelItem.storageConditions || 'Store 2-8 C / Refrigerated');
 
-  const qrUrl = `https://www.atlashealth-services.com/rx/${encodeURIComponent(rxCode)}`;
+  const qrUrl = `https://www.atlashealth-services.com/rx/${encodeURIComponent(rxCode)}?view=patient&lot=${encodeURIComponent(batchNumber)}&bud=${encodeURIComponent(bud)}`;
 
   const fTitle = Math.round(2.8 * dotsPerMm);
   const fBody = Math.round(2.1 * dotsPerMm);
