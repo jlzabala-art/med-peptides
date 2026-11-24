@@ -14,7 +14,9 @@ import {
   Layers,
   FileText,
   Copy,
-  Check
+  Check,
+  FlaskConical,
+  Calculator
 } from 'lucide-react';
 import {
   B2B_NAV_DOMAINS,
@@ -58,6 +60,15 @@ export default function B2BUniversalMenu({
 
   const { activeRxCode, patientName } = useActiveClinicalStore();
   const relatedRoutes = getRelatedRoutes(pathname);
+  const isRouteActive = (href) => {
+    if (href === '/' || href === '/pricing' || href === '/catalog') return pathname === href;
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+  const expandedDomain = B2B_NAV_DOMAINS.find((d) => d.id === openDomainId);
+  const expandedItemIds = new Set((expandedDomain?.items || []).map((i) => i.id));
+  const dedupedRelatedRoutes = relatedRoutes.filter(
+    (r) => !expandedItemIds.has(r.id) && !isRouteActive(r.href)
+  );
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -78,11 +89,6 @@ export default function B2BUniversalMenu({
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }));
     }
-  };
-
-  const isRouteActive = (href) => {
-    if (href === '/' || href === '/pricing' || href === '/catalog') return pathname === href;
-    return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   return (
@@ -295,110 +301,22 @@ export default function B2BUniversalMenu({
               </button>
             </div>
 
-            {/* Active Clinical Context */}
-            {activeRxCode && (
-              <div
-                style={{
-                  margin: '10px 12px 0',
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  background: '#eff6ff',
-                  border: '1px solid #bfdbfe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '8px'
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>
-                    {isSpanish ? 'Receta Activa' : 'Active Rx'}
-                  </div>
-                  <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    #{activeRxCode}{patientName ? ` · ${patientName}` : ''}
-                  </div>
-                </div>
-                <Link
-                  href={`/labels?rx=${encodeURIComponent(activeRxCode)}`}
-                  onClick={() => setOpen(false)}
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    background: '#1a73e8',
-                    color: '#ffffff',
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                    flexShrink: 0,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <FileText size={11} />
-                  <span>Labels</span>
-                </Link>
-              </div>
-            )}
-
-            {/* Scrollable Body */}
+            {/* Scrollable Body (Rule #7: Search First) */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-              {/* 1. Dynamic "Related to this screen" block */}
-              <div
-                style={{
-                  marginBottom: '14px',
-                  padding: '10px',
-                  borderRadius: '10px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '0.7rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  <Compass size={13} />
-                  <span>{isSpanish ? 'Relacionadas desde aquí' : 'Related Screens'}</span>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {relatedRoutes.map((item) => (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '7px 10px',
-                        minHeight: '40px',
-                        borderRadius: '7px',
-                        background: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        color: '#0f172a',
-                        fontSize: '0.73rem',
-                        fontWeight: 700,
-                        textDecoration: 'none',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      <span>{isSpanish ? item.labelEs : item.labelEn}</span>
-                      <ChevronRight size={12} color="#64748b" style={{ flexShrink: 0 }} />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quick Search (Rule #7: Search First at top of drawer) */}
+              {/* 1. Quick Search (Rule #7: Search is ALWAYS first) */}
               <button
                 type="button"
                 onClick={triggerGlobalSearch}
                 style={{
                   width: '100%',
-                  minHeight: '44px',
+                  minHeight: '42px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '0 12px',
+                  marginBottom: '10px',
                   borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid #dadce0',
                   background: '#ffffff',
                   color: '#475569',
                   fontSize: '0.78rem',
@@ -407,7 +325,7 @@ export default function B2BUniversalMenu({
                 }}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <Search size={14} />
+                  <Search size={14} color="#5f6368" />
                   <span>{isSpanish ? 'Buscar en todo el portal…' : 'Search entire portal…'}</span>
                 </span>
                 <span style={{ fontSize: '0.68rem', fontWeight: 700, background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
@@ -415,46 +333,98 @@ export default function B2BUniversalMenu({
                 </span>
               </button>
 
-              {/* Quick Outreach Share Links (Peptides & Pellets) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '8px', marginBottom: '10px' }}>
-                {[
-                  { id: 'peptides', label: isSpanish ? 'Copiar Péptidos' : 'Copy Peptides', url: 'https://www.atlashealth-services.com/pricing/peptides' },
-                  { id: 'pellets', label: isSpanish ? 'Copiar Pellets' : 'Copy Pellets', url: 'https://www.atlashealth-services.com/pricing/pellets' }
-                ].map((cat) => {
-                  const isCopied = copiedCatalog === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => {
-                        if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                          navigator.clipboard.writeText(cat.url).catch(() => {});
-                        }
-                        setCopiedCatalog(cat.id);
-                        setTimeout(() => setCopiedCatalog(null), 1800);
-                      }}
+              {/* 2. Active Clinical Context (suppress redundant Labels CTA when already on /labels) */}
+              {activeRxCode && (
+                <div
+                  style={{
+                    marginBottom: '10px',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>
+                      {isSpanish ? 'Receta Activa' : 'Active Rx'}
+                    </div>
+                    <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      #{activeRxCode}{patientName ? ` · ${patientName}` : ''}
+                    </div>
+                  </div>
+                  {!pathname.startsWith('/labels') && (
+                    <Link
+                      href={`/labels?rx=${encodeURIComponent(activeRxCode)}`}
+                      onClick={() => setOpen(false)}
                       style={{
-                        minHeight: '40px',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        background: '#1a73e8',
+                        color: '#ffffff',
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                        flexShrink: 0,
                         display: 'inline-flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '5px',
-                        padding: '6px 8px',
-                        borderRadius: '6px',
-                        border: isCopied ? '1px solid #137333' : '1px solid #dadce0',
-                        background: isCopied ? '#e6f4ea' : '#ffffff',
-                        color: isCopied ? '#137333' : '#5f6368',
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        cursor: 'pointer'
+                        gap: '4px'
                       }}
                     >
-                      {isCopied ? <Check size={12} /> : <Copy size={12} />}
-                      <span>{isCopied ? (isSpanish ? 'Copiado' : 'Copied') : cat.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+                      <FileText size={11} />
+                      <span>Labels</span>
+                    </Link>
+                  )}
+                </div>
+              )}
+
+              {/* 3. Cross-domain Related Screens (deduplicated against open accordion items) */}
+              {dedupedRelatedRoutes.length > 0 && (
+                <div
+                  style={{
+                    marginBottom: '10px',
+                    padding: '9px 10px',
+                    borderRadius: '8px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '7px', fontSize: '0.68rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <Compass size={12} />
+                    <span>{isSpanish ? 'Accesos Cruzados' : 'Cross-Domain Shortcuts'}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {dedupedRelatedRoutes.map((item) => (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          padding: '6px 10px',
+                          minHeight: '36px',
+                          borderRadius: '6px',
+                          background: '#ffffff',
+                          border: '1px solid #dadce0',
+                          color: '#3c4043',
+                          fontSize: '0.72rem',
+                          fontWeight: 650,
+                          textDecoration: 'none',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        <span>{isSpanish ? item.labelEs : item.labelEn}</span>
+                        <ChevronRight size={12} color="#64748b" style={{ flexShrink: 0 }} />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 2. Collapsible 4 B2B Domains */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -516,7 +486,18 @@ export default function B2BUniversalMenu({
                                   textDecoration: 'none'
                                 }}
                               >
-                                <span>{isSpanish ? item.labelEs : item.labelEn}</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                                  {item.href?.includes('calculator') ? (
+                                    <Calculator size={14} color={active ? '#1a73e8' : '#64748b'} style={{ flexShrink: 0 }} />
+                                  ) : item.href?.includes('compounding') || item.href?.includes('proto') ? (
+                                    <FlaskConical size={14} color={active ? '#1a73e8' : '#64748b'} style={{ flexShrink: 0 }} />
+                                  ) : item.href?.includes('labels') ? (
+                                    <Tags size={14} color={active ? '#1a73e8' : '#64748b'} style={{ flexShrink: 0 }} />
+                                  ) : (
+                                    <Layers size={14} color={active ? '#1a73e8' : '#64748b'} style={{ flexShrink: 0 }} />
+                                  )}
+                                  <span>{isSpanish ? item.labelEs : item.labelEn}</span>
+                                </span>
                                 {item.badge && (
                                   <span style={{
                                     fontSize: '0.62rem',
@@ -538,6 +519,47 @@ export default function B2BUniversalMenu({
                   );
                 })}
               </div>
+            </div>
+
+            {/* Footer Quick Copy Utilities (kept out of primary nav flow) */}
+            <div style={{ padding: '10px 12px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+              {[
+                { id: 'peptides', label: isSpanish ? 'Copiar Péptidos' : 'Copy Peptides', url: 'https://www.atlashealth-services.com/pricing/peptides' },
+                { id: 'pellets', label: isSpanish ? 'Copiar Pellets' : 'Copy Pellets', url: 'https://www.atlashealth-services.com/pricing/pellets' }
+              ].map((cat) => {
+                const isCopied = copiedCatalog === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => {
+                      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText(cat.url).catch(() => {});
+                      }
+                      setCopiedCatalog(cat.id);
+                      setTimeout(() => setCopiedCatalog(null), 1800);
+                    }}
+                    style={{
+                      minHeight: '36px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      border: isCopied ? '1px solid #137333' : '1px solid #dadce0',
+                      background: isCopied ? '#e6f4ea' : '#ffffff',
+                      color: isCopied ? '#137333' : '#5f6368',
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isCopied ? <Check size={12} /> : <Copy size={12} />}
+                    <span>{isCopied ? (isSpanish ? 'Copiado' : 'Copied') : cat.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </aside>
         </div>
