@@ -976,24 +976,6 @@ export default function PatientPrescriptionGuide({
                     </h3>
                   </div>
                 </div>
-
-                {/* Storage Pill */}
-                <div
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid #dadce0',
-                    color: '#5f6368',
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <span>{item.category.storageNote}</span>
-                </div>
               </div>
 
               {/* Card Body */}
@@ -1013,14 +995,18 @@ export default function PatientPrescriptionGuide({
                 >
                   <ShieldCheck size={18} style={{ color: '#1a73e8', flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <div style={{ fontSize: '0.70rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368' }}>
-                      {isEs ? 'Objetivo Terapéutico' : 'Clinical Objective'}
-                    </div>
-                    <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124', marginTop: '2px', lineHeight: 1.45 }}>
-                      {item.plainClinicalGoal}
-                    </div>
+                    {item.plainClinicalGoal && !/Targeted Clinical Optimization/i.test(item.plainClinicalGoal) && (
+                      <>
+                        <div style={{ fontSize: '0.70rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368' }}>
+                          {isEs ? 'Objetivo Terapéutico' : 'Clinical Objective'}
+                        </div>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124', marginTop: '2px', marginBottom: '6px', lineHeight: 1.45 }}>
+                          {item.plainClinicalGoal}
+                        </div>
+                      </>
+                    )}
                     {item.apis && item.apis.length > 0 && (
-                      <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                         {item.apis.map((a, aIdx) => (
                           <span
                             key={aIdx}
@@ -1080,33 +1066,6 @@ export default function PatientPrescriptionGuide({
                         </h4>
                       </div>
                     </div>
-
-                    {/* Regimen badge */}
-                    {(() => {
-                      const rawReg = String(item.posology?.regimen || (isEs ? 'Consultar pauta' : 'Follow prescription'));
-                      const isPump = item.category?.isTransdermal || /\b(transdermal|pentravan|cream|crema|topiclick|pump)\b/i.test(`${item.title || ''} ${item.vehicle?.name || ''} ${rawReg}`);
-                      const displayReg = isPump && !/\bpumps?\b/i.test(rawReg)
-                        ? rawReg.replace(/\b(\d+(?:[.,]\d+)?)\s*m[lL]\b/gi, (m, n) => {
-                            const v = parseFloat(String(n).replace(',', '.'));
-                            return Number.isFinite(v) && v > 0 ? (v === 1 ? '1 pump' : `${v} pumps`) : m;
-                          })
-                        : rawReg;
-                      return (
-                        <div
-                          style={{
-                            background: '#ffffff',
-                            border: '1px solid #dadce0',
-                            color: '#202124',
-                            padding: '4px 12px',
-                            borderRadius: '16px',
-                            fontSize: '0.80rem',
-                            fontWeight: 700
-                          }}
-                        >
-                          {localizePatientText(displayReg, isEs)}
-                        </div>
-                      );
-                    })()}
                   </div>
 
                   {/* Contextual Posology Advice: Pre-filled Pen vs Peptide vs Supplement vs Topical */}
@@ -1291,7 +1250,9 @@ export default function PatientPrescriptionGuide({
                           {isEs ? '🕒 Momento y Frecuencia:' : '🕒 Timing & Application:'}
                         </div>
                         <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-                          {item.posology?.timing || (isEs ? 'Por la noche sobre piel limpia y seca' : 'Nightly on clean and dry skin')}
+                          {(item.posology?.timing && !/refrigerat|2°c|8°c|room temp/i.test(item.posology.timing))
+                            ? item.posology.timing
+                            : (posologySchedule.timeHint || (isEs ? 'Según pauta diaria' : 'As directed'))}
                         </div>
                       </div>
 
