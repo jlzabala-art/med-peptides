@@ -89,6 +89,7 @@ export default function PublicUnifiedHeader({
   hideCopyButton = false,
   // Hide global catalog search button (⌘K) in Tier 1
   hideSearchButton = false,
+  hideAppSwitcher = false,
   // Hide Account Manager multi-portal hub button in Tier 1
   hideAccountManager = false,
   // Hide Atlas AI copilot button in Tier 1 (e.g. when present in floating bottom dock)
@@ -458,7 +459,7 @@ export default function PublicUnifiedHeader({
           <div className="puh-brand-row-inner">
             {/* Left: App Switcher + Brand Logo / Title or White-Label Clinic Logo */}
             <div className="puh-brand-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {!whiteLabel && (
+              {!whiteLabel && !hideAppSwitcher && (
                 <AtlasAppSwitcher
                   isSpanish={isSpanish}
                   portalHref={getDashboardPath()}

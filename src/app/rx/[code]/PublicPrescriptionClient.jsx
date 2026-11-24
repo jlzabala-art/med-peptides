@@ -622,6 +622,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           hideAccountManager={true}
           hideImportRx={isPatientView || !isAuthorizedViewer}
           hideSwitchRx={isPatientView || !isAuthorizedViewer}
+          hideAppSwitcher={isPatientView}
+          hideSearchButton={isPatientView}
           isDoctorView={!isPatientView && isAuthorizedViewer}
           inquiryContextType="prescription"
           inquiryEntity={{
@@ -731,61 +733,80 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
-              {/* ── Patient-Friendly 3-Card "Your Treatment Today" Strip + Personalized Atlas AI ── */}
+              {/* ── Patient-Friendly Single "Today's Treatment" Summary Card + Ask AI ── */}
               {isPatientView && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '8px' }}>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-                      gap: '10px',
-                    }}
-                  >
-                    <div style={{ background: '#ffffff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {isEs ? '1. Tu Dosis Diaria' : '1. Your Daily Dose'}
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  marginBottom: '8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {isEs ? 'Tu Tratamiento Hoy' : "Today's Treatment"}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={isEs ? `Preguntar a Atlas AI sobre #${rxId}` : `Ask Atlas AI about #${rxId}`}
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          window.dispatchEvent(new CustomEvent('atlas:open-ai-drawer'));
+                        }
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        minHeight: '36px',
+                        borderRadius: '8px',
+                        border: '1px solid #c4b5fd',
+                        background: '#f5f3ff',
+                        color: '#6d28d9',
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <Sparkles size={13} />
+                      <span>{isEs ? '¿Necesitas ayuda? Preguntar' : 'Need Help? Ask AI'}</span>
+                    </button>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                    gap: '10px',
+                  }}>
+                    <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                        {isEs ? 'Qué tomar / aplicar' : 'What to take'}
                       </div>
-                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginTop: '4px', lineHeight: 1.35 }}>
-                        {currentRx?.posology || currentRx?.items?.[0]?.instructions || (isEs ? 'Sigue la pauta indicada en tu etiqueta.' : 'Follow the instructions printed on your label.')}
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', lineHeight: 1.35 }}>
+                        {resolvedFormulaSummary || currentRx?.treatmentTitle || (isEs ? 'Tu tratamiento' : 'Your treatment')}
                       </div>
                     </div>
-                    <div style={{ background: '#ffffff', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 14px' }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {isEs ? '2. Conservación' : '2. How to Store'}
+                    <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                        {isEs ? 'Cómo y cuándo' : 'How & when'}
                       </div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginTop: '4px', lineHeight: 1.35 }}>
-                        {prescriptionTypeInfo?.storageDisplay || (isEs ? 'Conservar refrigerado (2°C–8°C).' : 'Refrigerate at 2°C–8°C. Do not freeze.')}
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', lineHeight: 1.35 }}>
+                        {currentRx?.posology || currentRx?.items?.[0]?.instructions || (isEs ? 'Sigue la pauta de tu etiqueta.' : 'Follow the instructions on your label.')}
                       </div>
                     </div>
-                    <div style={{ background: '#ffffff', border: '1px solid #c7d2fe', borderRadius: '10px', padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {isEs ? '3. ¿Dudas sobre tu pauta?' : '3. Questions About Your Rx?'}
+                    <div style={{ background: '#fffbeb', borderRadius: '8px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#b45309', textTransform: 'uppercase' }}>
+                        {isEs ? 'Conservación' : 'Keep it safe'}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (typeof window !== 'undefined') {
-                            window.dispatchEvent(new CustomEvent('atlas:open-ai-drawer'));
-                          }
-                        }}
-                        style={{
-                          padding: '7px 12px',
-                          borderRadius: '6px',
-                          border: '1px solid #7c3aed',
-                          background: '#f5f3ff',
-                          color: '#6d28d9',
-                          fontSize: '0.76rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px',
-                        }}
-                      >
-                        <Sparkles size={13} />
-                        <span>{isEs ? `Preguntar a Atlas AI sobre #${rxId}` : `Ask Atlas AI about #${rxId}`}</span>
-                      </button>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginTop: '3px', lineHeight: 1.35 }}>
+                        {prescriptionTypeInfo?.storageDisplay || (isEs ? 'Nevera 2°C–8°C · No congelar' : 'Fridge 2°C–8°C · Do not freeze')}
+                        {(urlBud || currentRx?.expDate || currentRx?.bud) ? ` · ${isEs ? 'Usar antes del' : 'Use before'}: ${urlBud || currentRx?.expDate || currentRx?.bud}` : ''}
+                      </div>
                     </div>
                   </div>
                 </div>

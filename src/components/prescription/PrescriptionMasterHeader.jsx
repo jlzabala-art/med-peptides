@@ -360,15 +360,17 @@ export default function PrescriptionMasterHeader({
           }}>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'Vía & Frecuencia' : 'Route & Frequency'}
+                {isPatientView ? (isEs ? 'Cómo tomarlo' : 'How to take') : (isEs ? 'Vía & Frecuencia' : 'Route & Frequency')}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {attrs.routeDisplay}
+                {isPatientView
+                  ? String(attrs.routeDisplay || '').replace(/\bSubQ\b/gi, isEs ? 'Subcutánea' : 'Under the skin')
+                  : attrs.routeDisplay}
               </div>
             </div>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'Dispositivo / Formato' : 'Device / Presentation'}
+                {isPatientView ? (isEs ? 'Formato' : 'Device') : (isEs ? 'Dispositivo / Formato' : 'Device / Presentation')}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
                 {attrs.deviceDisplay}
@@ -376,7 +378,7 @@ export default function PrescriptionMasterHeader({
             </div>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'Almacenamiento' : 'Storage Standard'}
+                {isPatientView ? (isEs ? 'Conservación' : 'Storage') : (isEs ? 'Almacenamiento' : 'Storage Standard')}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: (rxType.isPen || rxType.isInjectable) ? '#0284c7' : '#0f172a', marginTop: '2px' }}>
                 {attrs.storageDisplay}
@@ -384,7 +386,7 @@ export default function PrescriptionMasterHeader({
             </div>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'Ciclo Clínico' : 'Clinical Duration'}
+                {isPatientView ? (isEs ? 'Duración' : 'Duration') : (isEs ? 'Ciclo Clínico' : 'Clinical Duration')}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
                 {attrs.cycleDisplay}

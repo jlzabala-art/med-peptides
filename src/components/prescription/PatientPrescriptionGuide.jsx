@@ -798,6 +798,55 @@ export default function PatientPrescriptionGuide({
                     </div>
                   )}
 
+                  {/* Collapsible 3-Step Visual Device Guide (Nasal Spray or Pen) */}
+                  {(() => {
+                    const isNasal = String(rx?.dispensingForm || item.title || '').toLowerCase().includes('nasal') ||
+                      String(rx?.treatmentTitle || '').toLowerCase().includes('nasal');
+                    const isPenDevice = item.category?.type === 'peptide_pen';
+                    if (!isNasal && !isPenDevice) return null;
+                    const stepsList = isNasal
+                      ? (isEs
+                          ? ['1. Limpia suavemente la nariz antes de aplicar.', '2. Aplica 1 pulsación en cada fosa nasal respirando suave.', '3. Limpia la boquilla y guarda en nevera (2°C–8°C).']
+                          : ['1. Gently clear your nose before using.', '2. Apply 1 spray into each nostril while breathing in gently.', '3. Wipe the nozzle and return to the fridge (2°C–8°C).'])
+                      : (isEs
+                          ? ['1. Coloca una aguja estéril nueva en la pluma.', '2. Gira el dial hasta los clics indicados en tu pauta.', '3. Aplica en abdomen o muslo y mantén 5–10 segundos.']
+                          : ['1. Attach a fresh sterile needle to your pen.', '2. Turn the dial to your prescribed number of clicks.', '3. Press on abdomen or thigh and hold for 5–10 seconds.']);
+                    return (
+                      <details
+                        style={{
+                          marginTop: '10px',
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          padding: '10px 12px'
+                        }}
+                      >
+                        <summary style={{
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          color: '#0f172a',
+                          cursor: 'pointer',
+                          listStyle: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
+                        }}>
+                          <span>{isEs ? 'Cómo usarlo (3 pasos sencillos)' : 'How to use it (3 simple steps)'}</span>
+                          <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>
+                            {isEs ? 'Ver pasos ▾' : 'Show steps ▾'}
+                          </span>
+                        </summary>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
+                          {stepsList.map((st, idx) => (
+                            <div key={idx} style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.4, fontWeight: 500 }}>
+                              {st}
+                            </div>
+                          ))}
+                        </div>
+                      </details>
+                    );
+                  })()}
+
                   {/* Specific Doctor Clinical Directions if any */}
                   {item.posology?.dosageInstructions && (
                     <div
