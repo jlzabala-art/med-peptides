@@ -5,6 +5,21 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Printer, X, FileText, CheckCircle2, Calendar, RefreshCw, MessageCircle } from '@/lib/icons';
 import { computeRefillSchedule, formatShortDate } from '@/utils/refillSchedule';
 
+function cleanTreatmentTitle(rawTitle, apis = [], pdfEs = false) {
+  const firstApi = Array.isArray(apis) && apis.length > 0 ? apis[0] : null;
+  const apiName = firstApi?.name || firstApi?.productName || '';
+  const apiDosage = firstApi?.dosage || '';
+  if (apiName) {
+    return apiDosage ? `${apiName} (${apiDosage})` : apiName;
+  }
+  const cleaned = String(rawTitle || '')
+    .replace(/\bCompounded\b/gi, '')
+    .replace(/\bCompounding\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return cleaned || (pdfEs ? 'Tratamiento Personalizado' : 'Personalized Treatment');
+}
+
 function WelcomeA6Card({
   pdfEs,
   cleanCode,
@@ -26,11 +41,11 @@ function WelcomeA6Card({
         width: '105mm',
         height: '148mm',
         background: '#ffffff',
-        padding: '7mm 7.5mm',
+        padding: '6.5mm 7mm',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        gap: '3.5mm',
+        gap: '3mm',
         color: '#202124',
         boxSizing: 'border-box',
         border: isGridCell ? '1px dashed #cbd5e1' : '1px solid #dadce0',
@@ -41,63 +56,71 @@ function WelcomeA6Card({
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1.5px solid #e8f0fe', paddingBottom: '2.5mm' }}>
         <div>
-          <div style={{ fontSize: '11px', fontWeight: 800, color: '#003666', letterSpacing: '-0.01em' }}>
+          <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#003666', letterSpacing: '-0.01em' }}>
             Atlas Health Services
           </div>
           <div style={{ fontSize: '8.5px', color: '#5f6368', fontWeight: 600 }}>
-            {pdfEs ? 'Farmacia de Precisión' : 'Precision Compounding'}
+            {pdfEs ? 'Cuidado Clínico Personalizado' : 'Personalized Precision Care'}
           </div>
         </div>
-        <span style={{ fontSize: '9px', fontWeight: 800, color: '#1a73e8', background: '#e8f0fe', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
+        <span style={{ fontSize: '9px', fontWeight: 800, color: '#1a73e8', background: '#e8f0fe', padding: '2.5px 7px', borderRadius: '4px', fontFamily: 'monospace' }}>
           #{cleanCode}
         </span>
       </div>
 
       {/* Thank You Hero */}
-      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 8px' }}>
+      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '7px 9px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#16a34a', fontSize: '8.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: '2px' }}>
           <CheckCircle2 size={11} color="#16a34a" />
           <span>{pdfEs ? 'Gracias por tu compra' : 'Thank you for your order'}</span>
         </div>
-        <div style={{ fontSize: '12px', fontWeight: 800, color: '#202124', lineHeight: 1.25 }}>
+        <div style={{ fontSize: '12.5px', fontWeight: 800, color: '#202124', lineHeight: 1.25 }}>
           {pdfEs
             ? `Gracias por confiar en Atlas${patientName ? `, ${patientName}` : ''}`
             : `Thank you for trusting Atlas${patientName ? `, ${patientName}` : ''}`}
         </div>
+        <div style={{ fontSize: '8.5px', color: '#5f6368', marginTop: '2px', lineHeight: 1.3 }}>
+          {pdfEs
+            ? 'Guarda esta tarjeta junto a tu tratamiento para acceder rápido con tu móvil.'
+            : 'Keep this card with your treatment for instant access from your phone.'}
+        </div>
       </div>
 
       {/* Essential Summary */}
-      <div style={{ border: '1px solid #dadce0', borderRadius: '6px', padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#202124', lineHeight: 1.2 }}>
+      <div style={{ border: '1px solid #dadce0', borderRadius: '6px', padding: '7px 9px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <div style={{ fontSize: '11px', fontWeight: 800, color: '#202124', lineHeight: 1.2 }}>
           {treatmentName}
         </div>
-        <div style={{ fontSize: '9.5px', fontWeight: 600, color: '#1a73e8', lineHeight: 1.25 }}>
+        <div style={{ fontSize: '9.5px', fontWeight: 600, color: '#1a73e8', lineHeight: 1.3 }}>
           {posologyLine}
         </div>
         <div style={{ fontSize: '8.5px', color: '#5f6368', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', marginTop: '2px' }}>
           <span>{storageLine}</span>
           {(lotVal || budVal) && (
             <span style={{ fontFamily: 'monospace' }}>
-              {lotVal ? `${pdfEs ? 'L' : 'Lot'}:${lotVal}` : ''}
+              {lotVal ? `${pdfEs ? 'Lote' : 'Lot'}: ${lotVal}` : ''}
               {lotVal && budVal ? ' · ' : ''}
-              {budVal ? `${pdfEs ? 'Cad' : 'BUD'}:${budVal}` : ''}
+              {budVal ? `${pdfEs ? 'Usar antes' : 'Use before'}: ${budVal}` : ''}
             </span>
           )}
         </div>
       </div>
 
       {/* Central QR + 4 Features */}
-      <div style={{ display: 'grid', gridTemplateColumns: '94px 1fr', gap: '8px', alignItems: 'center', border: '1px solid #bfdbfe', background: '#f8fbff', borderRadius: '6px', padding: '7px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '8px', alignItems: 'center', border: '1px solid #bfdbfe', background: '#f8fbff', borderRadius: '6px', padding: '8px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '3px' }}>
           <div style={{ background: '#ffffff', padding: '5px', borderRadius: '6px', border: '1px solid #dadce0' }}>
-            <QRCodeSVG value={qrUrl} size={78} level="M" />
+            <QRCodeSVG value={qrUrl} size={76} level="M" />
           </div>
-          <div style={{ fontSize: '7.5px', fontWeight: 700, color: '#1a73e8', lineHeight: 1.15 }}>
-            {pdfEs ? 'Escanea con tu móvil' : 'Scan with phone'}
+          <div style={{ fontSize: '7.5px', fontWeight: 800, color: '#1a73e8', lineHeight: 1.15 }}>
+            {pdfEs ? '1. Abre tu cámara' : '1. Open phone camera'}
+          </div>
+          <div style={{ fontSize: '6.8px', color: '#5f6368', lineHeight: 1.2 }}>
+            {pdfEs ? 'Apunta aquí y pulsa el enlace' : 'Point here & tap the link'}
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
           {features.map((feat, i) => {
             const IconComp = feat.icon;
             return (
@@ -156,11 +179,11 @@ export default function PatientWelcomePdfModal({
   const primaryFormulation = Array.isArray(compoundedFormulations) && compoundedFormulations.length > 0
     ? compoundedFormulations[0]
     : null;
-  const treatmentName =
-    primaryFormulation?.title ||
-    rx?.treatmentTitle ||
-    rx?.dispensingForm ||
-    (pdfEs ? 'Fórmula Magistral Personalizada' : 'Personalized Compounded Formula');
+  const treatmentName = cleanTreatmentTitle(
+    primaryFormulation?.title || rx?.treatmentTitle || rx?.dispensingForm,
+    primaryFormulation?.apis || rx?.apis,
+    pdfEs
+  );
   const posologyLine =
     primaryFormulation?.posology?.dosageInstructions ||
     primaryFormulation?.posology?.regimen ||
@@ -220,13 +243,13 @@ export default function PatientWelcomePdfModal({
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        background: 'rgba(15, 23, 42, 0.68)',
+        background: 'rgba(15, 23, 42, 0.72)',
         backdropFilter: 'blur(3px)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        padding: '16px',
+        padding: '0 16px 24px',
         overflowY: 'auto',
       }}
       onClick={onClose}
@@ -260,18 +283,23 @@ export default function PatientWelcomePdfModal({
         }
       `}</style>
 
-      {/* Top Preview Toolbar */}
+      {/* Sticky Top Preview Toolbar (Always visible when scrolling) */}
       <div
         className="atlas-pdf-no-print"
         onClick={(e) => e.stopPropagation()}
         style={{
+          position: 'sticky',
+          top: '12px',
+          zIndex: 20,
           width: '100%',
           maxWidth: layoutMode === 'a4_4up' ? '210mm' : '460px',
           background: '#0f172a',
           color: '#ffffff',
           borderRadius: '10px',
           padding: '10px 14px',
-          marginBottom: '12px',
+          marginTop: '12px',
+          marginBottom: '14px',
+          boxShadow: '0 8px 24px rgba(15, 23, 42, 0.35)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -377,7 +405,7 @@ export default function PatientWelcomePdfModal({
             }}
           >
             <Printer size={14} />
-            <span>{pdfEs ? 'Descargar / Imprimir PDF' : 'Download / Print PDF'}</span>
+            <span>{pdfEs ? 'Guardar / Imprimir PDF' : 'Save / Print PDF'}</span>
           </button>
 
           <button
