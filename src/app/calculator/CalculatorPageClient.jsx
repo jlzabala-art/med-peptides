@@ -351,20 +351,20 @@ export default function CalculatorClient() {
               {activePatientName && <span style={{ fontWeight: 700 }}>{activePatientName}</span>}
               {activeFormulaTitle && <span style={{ color: '#3b82f6' }}>· {activeFormulaTitle}</span>}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {activeFormulaTitle && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery(activeFormulaTitle.split('(')[0].trim())}
+                  className="gcp-btn-secondary"
                   style={{
-                    padding: '4px 10px',
+                    minHeight: '34px',
+                    padding: '6px 12px',
                     borderRadius: '6px',
-                    border: '1px solid #93c5fd',
-                    background: '#ffffff',
-                    color: '#1d4ed8',
-                    fontWeight: 700,
-                    fontSize: '0.72rem',
-                    cursor: 'pointer'
+                    fontWeight: 600,
+                    fontSize: '0.74rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {isEs ? 'Cargar fórmula en calculadora' : 'Load formula in calculator'}
@@ -372,14 +372,17 @@ export default function CalculatorClient() {
               )}
               <Link
                 href={`/labels?rx=${encodeURIComponent(activeRxCode)}`}
+                className="gcp-btn-primary"
                 style={{
-                  padding: '4px 10px',
+                  minHeight: '34px',
+                  padding: '6px 12px',
                   borderRadius: '6px',
-                  background: '#1a73e8',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  fontSize: '0.72rem',
-                  textDecoration: 'none'
+                  fontWeight: 600,
+                  fontSize: '0.74rem',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {isEs ? '← Volver a Labels' : '← Back to Labels'}
@@ -421,9 +424,9 @@ export default function CalculatorClient() {
                     workspace.setIsQuoteDrawerOpen?.(true);
                   }}
                   className="gcp-btn-secondary"
-                  style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#166534', borderColor: '#86efac', background: '#f0fdf4' }}
+                  style={{ height: '36px', padding: '0 12px', fontSize: '0.76rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <ShoppingBag size={14} color="#16a34a" />
+                  <ShoppingBag size={14} color="#5f6368" />
                   <span>{isEs ? 'Añadir al Presupuesto B2B' : 'Add to Quote Cart'}</span>
                 </button>
               )}
@@ -515,7 +518,7 @@ export default function CalculatorClient() {
                 </span>
               )}
             </span>
-            <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', width: '100%' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -535,15 +538,17 @@ export default function CalculatorClient() {
                     toast.success(isEs ? 'Pauta copiada para etiqueta / WhatsApp' : 'Dosing line copied for label / WhatsApp');
                   }
                 }}
+                className="gcp-btn-secondary"
                 style={{
-                  padding: '4px 10px',
+                  minHeight: '36px',
+                  padding: '6px 12px',
                   borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#0f172a',
-                  fontSize: '0.73rem',
-                  fontWeight: 700,
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
                   cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -551,8 +556,18 @@ export default function CalculatorClient() {
               </button>
               <a
                 href={`/rx/intake?peptide=${encodeURIComponent(selectedProduct?.name || '')}&dose=${encodeURIComponent(`${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim())}&lang=${lang}`}
+                className="gcp-btn-secondary"
                 style={{
-                  padding: '4px 10px',
+                  minHeight: '36px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  whiteSpace: 'nowrap',
+                }}
                   borderRadius: '6px',
                   border: '1px solid #0d9488',
                   background: '#f0fdfa',
@@ -710,7 +725,7 @@ export default function CalculatorClient() {
                 ? `Mostrando guía para: ${selectedProduct.name} (${selectedStrength.name})`
                 : `Showing guide for: ${selectedProduct.name} (${selectedStrength.name})`}
             </span>
-            <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', width: '100%' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -730,15 +745,17 @@ export default function CalculatorClient() {
                     toast.success(isEs ? 'Pauta copiada para etiqueta / WhatsApp' : 'Dosing line copied for label / WhatsApp');
                   }
                 }}
+                className="gcp-btn-secondary"
                 style={{
-                  padding: '4px 10px',
+                  minHeight: '36px',
+                  padding: '6px 12px',
                   borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#0f172a',
-                  fontSize: '0.73rem',
-                  fontWeight: 700,
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
                   cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -746,8 +763,18 @@ export default function CalculatorClient() {
               </button>
               <a
                 href={`/rx/intake?peptide=${encodeURIComponent(selectedProduct?.name || '')}&dose=${encodeURIComponent(`${recon.doseDisplayValue || ''} ${recon.doseUnit || ''}`.trim())}&lang=${lang}`}
+                className="gcp-btn-secondary"
                 style={{
-                  padding: '4px 10px',
+                  minHeight: '36px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  whiteSpace: 'nowrap',
+                }}
                   borderRadius: '6px',
                   border: '1px solid #0d9488',
                   background: '#f0fdfa',
