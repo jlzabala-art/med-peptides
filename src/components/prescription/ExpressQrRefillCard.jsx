@@ -5,6 +5,79 @@ import { RefreshCw, CheckCircle2, MessageSquare, Calendar, AlertTriangle } from 
 import { computeRefillSchedule, formatShortDate } from '@/utils/refillSchedule';
 import toast from 'react-hot-toast';
 
+const COUNTRY_DIAL_CODES = [
+  { code: '+971', iso: 'AE', flag: '🇦🇪', name: 'UAE', aliases: ['uae', 'ae', 'united arab emirates', 'dubai', 'abu dhabi'] },
+  { code: '+34', iso: 'ES', flag: '🇪🇸', name: 'Spain', aliases: ['es', 'spain', 'españa', 'espana'] },
+  { code: '+1', iso: 'US', flag: '🇺🇸', name: 'US / CA', aliases: ['us', 'usa', 'united states', 'ca', 'canada'] },
+  { code: '+44', iso: 'GB', flag: '🇬🇧', name: 'UK', aliases: ['gb', 'uk', 'united kingdom', 'england'] },
+  { code: '+966', iso: 'SA', flag: '🇸🇦', name: 'Saudi Arabia', aliases: ['sa', 'ksa', 'saudi', 'saudi arabia'] },
+  { code: '+974', iso: 'QA', flag: '🇶🇦', name: 'Qatar', aliases: ['qa', 'qatar'] },
+  { code: '+965', iso: 'KW', flag: '🇰🇼', name: 'Kuwait', aliases: ['kw', 'kuwait'] },
+  { code: '+973', iso: 'BH', flag: '🇧🇭', name: 'Bahrain', aliases: ['bh', 'bahrain'] },
+  { code: '+968', iso: 'OM', flag: '🇴🇲', name: 'Oman', aliases: ['om', 'oman'] },
+  { code: '+49', iso: 'DE', flag: '🇩🇪', name: 'Germany', aliases: ['de', 'germany', 'deutschland'] },
+  { code: '+33', iso: 'FR', flag: '🇫🇷', name: 'France', aliases: ['fr', 'france'] },
+  { code: '+39', iso: 'IT', flag: '🇮🇹', name: 'Italy', aliases: ['it', 'italy', 'italia'] },
+  { code: '+351', iso: 'PT', flag: '🇵🇹', name: 'Portugal', aliases: ['pt', 'portugal'] },
+  { code: '+41', iso: 'CH', flag: '🇨🇭', name: 'Switzerland', aliases: ['ch', 'switzerland'] },
+  { code: '+31', iso: 'NL', flag: '🇳🇱', name: 'Netherlands', aliases: ['nl', 'netherlands'] },
+  { code: '+52', iso: 'MX', flag: '🇲🇽', name: 'Mexico', aliases: ['mx', 'mexico', 'méxico'] },
+  { code: '+57', iso: 'CO', flag: '🇨🇴', name: 'Colombia', aliases: ['co', 'colombia'] },
+  { code: '+54', iso: 'AR', flag: '🇦🇷', name: 'Argentina', aliases: ['ar', 'argentina'] },
+  { code: '+56', iso: 'CL', flag: '🇨🇱', name: 'Chile', aliases: ['cl', 'chile'] },
+  { code: '+55', iso: 'BR', flag: '🇧🇷', name: 'Brazil', aliases: ['br', 'brazil', 'brasil'] },
+  { code: '+91', iso: 'IN', flag: '🇮🇳', name: 'India', aliases: ['in', 'india'] },
+  { code: '+61', iso: 'AU', flag: '🇦🇺', name: 'Australia', aliases: ['au', 'australia'] },
+];
+
+const SORTED_DIAL_CODES = [...COUNTRY_DIAL_CODES].sort((a, b) => b.code.length - a.code.length);
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function resolveInitialPhoneState(rawPhone = '', rawCountry = '') {
+  const trimmed = String(rawPhone || '').trim();
+  if (trimmed) {
+    const normalized = trimmed.replace(/[\s()-]/g, '');
+    const withPlus = normalized.startsWith('00') ? `+${normalized.slice(2)}` : normalized;
+    if (withPlus.startsWith('+')) {
+      const match = SORTED_DIAL_CODES.find((c) => withPlus.startsWith(c.code));
+      if (match) {
+        return {
+          dialCode: match.code,
+          digits: withPlus.slice(match.code.length).replace(/\D/g, '').slice(0, 15),
+        };
+      }
+    }
+    const onlyDigits = trimmed.replace(/\D/g, '').slice(0, 15);
+    if (onlyDigits) {
+      return { dialCode: '+971', digits: onlyDigits };
+    }
+  }
+
+  const cNorm = String(rawCountry || '').trim().toLowerCase();
+  if (cNorm) {
+    const byCountry = COUNTRY_DIAL_CODES.find((c) => c.aliases.includes(cNorm));
+    if (byCountry) {
+      return { dialCode: byCountry.code, digits: '' };
+    }
+  }
+
+  return { dialCode: '+971', digits: '' };
+}
+
+function cleanProductTitle(f, fallback) {
+  const firstApi = Array.isArray(f?.apis) && f.apis.length > 0 ? f.apis[0] : null;
+  if (firstApi?.name || firstApi?.productName) {
+    const name = firstApi.name || firstApi.productName;
+    return firstApi.dosage ? `${name} (${firstApi.dosage})` : name;
+  }
+  const raw = String(f?.title || f?.treatmentType || f?.dispensingForm || fallback || '');
+  return raw
+    .replace(/\bCompounded\b/gi, '')
+    .replace(/\bCompounding\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim() || fallback;
+}
+
 export default function ExpressQrRefillCard({
   rxCode,
   rx = null,
@@ -12,6 +85,9 @@ export default function ExpressQrRefillCard({
   initialPartNumber = null,
   initialProductName = '',
   defaultContact = '',
+  defaultPhone = '',
+  defaultEmail = '',
+  defaultCountry = '',
   scanSource = '',
   isEs = false,
 }) {
@@ -19,10 +95,10 @@ export default function ExpressQrRefillCard({
     if (Array.isArray(formulations) && formulations.length > 0) {
       return formulations.map((f, idx) => ({
         partNumber: f.partNumber || idx + 1,
-        title: f.title || f.treatmentType || f.dispensingForm || `Formulation ${idx + 1}`,
+        title: cleanProductTitle(f, `Treatment ${idx + 1}`),
       }));
     }
-    return [{ partNumber: initialPartNumber || 1, title: initialProductName || 'Compounded Formulation' }];
+    return [{ partNumber: initialPartNumber || 1, title: cleanProductTitle({}, initialProductName || 'Personalized Treatment') }];
   }, [formulations, initialPartNumber, initialProductName]);
 
   const defaultSelected = useMemo(() => {
@@ -38,10 +114,20 @@ export default function ExpressQrRefillCard({
     return options[0];
   }, [options, initialPartNumber, initialProductName]);
 
+  const initialPhoneSource = defaultPhone || (!String(defaultContact || '').includes('@') ? defaultContact : '');
+  const initialEmailSource = defaultEmail || (String(defaultContact || '').includes('@') ? defaultContact : '');
+  const initialPhoneParsed = useMemo(
+    () => resolveInitialPhoneState(initialPhoneSource, defaultCountry || rx?.patient?.country || rx?.country || ''),
+    [initialPhoneSource, defaultCountry, rx?.patient?.country, rx?.country]
+  );
+
   const [selectedPart, setSelectedPart] = useState(defaultSelected?.partNumber || 1);
   const [quantity, setQuantity] = useState(1);
-  const [contactInfo, setContactInfo] = useState(defaultContact || '');
+  const [dialCode, setDialCode] = useState(initialPhoneParsed.dialCode);
+  const [phoneDigits, setPhoneDigits] = useState(initialPhoneParsed.digits);
+  const [email, setEmail] = useState(String(initialEmailSource || '').trim());
   const [notes, setNotes] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({ phone: '', email: '', general: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submittedResult, setSubmittedResult] = useState(null);
 
@@ -53,11 +139,56 @@ export default function ExpressQrRefillCard({
   const selectedTitle =
     options.find((o) => Number(o.partNumber) === Number(selectedPart))?.title ||
     initialProductName ||
-    'Compounded Formulation';
+    'Personalized Treatment';
+
+  const handlePhoneChange = (e) => {
+    const digitsOnly = String(e.target.value || '').replace(/\D/g, '').slice(0, 15);
+    setPhoneDigits(digitsOnly);
+    if (fieldErrors.phone || fieldErrors.general) {
+      setFieldErrors((prev) => ({ ...prev, phone: '', general: '' }));
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    const val = String(e.target.value || '').replace(/\s+/g, '');
+    setEmail(val);
+    if (fieldErrors.email || fieldErrors.general) {
+      setFieldErrors((prev) => ({ ...prev, email: '', general: '' }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
+
+    const cleanDigits = phoneDigits.replace(/\D/g, '');
+    const cleanEmail = email.trim();
+    const nextErrors = { phone: '', email: '', general: '' };
+
+    if (!cleanDigits && !cleanEmail) {
+      nextErrors.general = isEs
+        ? 'Introduce al menos un móvil/WhatsApp o un email válido para confirmar el refill.'
+        : 'Please enter a valid mobile/WhatsApp number or email address.';
+    }
+    if (cleanDigits && (cleanDigits.length < 7 || cleanDigits.length > 15)) {
+      nextErrors.phone = isEs
+        ? 'El número debe tener entre 7 y 15 dígitos (sin incluir el prefijo).'
+        : 'Phone number must be 7 to 15 digits (excluding country code).';
+    }
+    if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
+      nextErrors.email = isEs
+        ? 'Formato de email no válido (ej. nombre@dominio.com).'
+        : 'Invalid email format (e.g. name@domain.com).';
+    }
+
+    if (nextErrors.phone || nextErrors.email || nextErrors.general) {
+      setFieldErrors(nextErrors);
+      return;
+    }
+
+    const fullPhone = cleanDigits ? `${dialCode}${cleanDigits}` : '';
+    const combinedContact = [fullPhone, cleanEmail].filter(Boolean).join(' · ');
+
     setSubmitting(true);
     try {
       const res = await fetch(`/api/prescriptions/${encodeURIComponent(rxCode)}/request-refill`, {
@@ -67,7 +198,9 @@ export default function ExpressQrRefillCard({
           partNumber: selectedPart,
           productName: selectedTitle,
           quantity,
-          contactInfo,
+          phone: fullPhone,
+          email: cleanEmail,
+          contactInfo: combinedContact,
           notes,
           source: scanSource || 'direct',
         }),
@@ -116,7 +249,7 @@ export default function ExpressQrRefillCard({
         </p>
         <div>
           <a
-            href={`https://wa.me/971564179256?text=${waText}`}
+            href={`https://wa.me/971553561058?text=${waText}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -144,6 +277,7 @@ export default function ExpressQrRefillCard({
   return (
     <form
       onSubmit={handleSubmit}
+      noValidate
       style={{
         background: '#ffffff',
         border: '1px solid #dadce0',
@@ -226,7 +360,8 @@ export default function ExpressQrRefillCard({
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+      {/* Row 1: Product & Quantity */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
         <div>
           <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
             {isEs ? 'Producto a repetir' : 'Product to Refill'}
@@ -260,20 +395,97 @@ export default function ExpressQrRefillCard({
             ))}
           </select>
         </div>
+      </div>
+
+      {/* Row 2: Dedicated Mobile (Country Flag + Digits) & Email */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+        <div>
+          <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+            {isEs ? 'Móvil / WhatsApp' : 'Mobile / WhatsApp'}
+          </label>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <select
+              aria-label={isEs ? 'Prefijo de país' : 'Country dial code'}
+              value={dialCode}
+              onChange={(e) => setDialCode(e.target.value)}
+              style={{
+                width: '112px',
+                flexShrink: 0,
+                height: '38px',
+                borderRadius: '6px',
+                border: `1px solid ${fieldErrors.phone ? '#dc2626' : '#cbd5e1'}`,
+                padding: '0 6px',
+                fontSize: '0.80rem',
+                fontWeight: 600,
+                background: '#f8fafc',
+              }}
+            >
+              {COUNTRY_DIAL_CODES.map((c) => (
+                <option key={`${c.iso}-${c.code}`} value={c.code}>
+                  {c.flag} {c.code} ({c.iso})
+                </option>
+              ))}
+            </select>
+            <input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
+              value={phoneDigits}
+              onChange={handlePhoneChange}
+              placeholder={isEs ? '55 123 4567' : '55 123 4567'}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                height: '38px',
+                borderRadius: '6px',
+                border: `1px solid ${fieldErrors.phone ? '#dc2626' : '#cbd5e1'}`,
+                padding: '0 10px',
+                fontSize: '0.84rem',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+          {fieldErrors.phone && (
+            <div style={{ fontSize: '0.72rem', color: '#dc2626', marginTop: '4px', fontWeight: 600 }}>
+              {fieldErrors.phone}
+            </div>
+          )}
+        </div>
 
         <div>
           <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-            {isEs ? 'Tu WhatsApp / Teléfono o Email' : 'Your WhatsApp / Phone or Email'}
+            {isEs ? 'Correo electrónico (Email)' : 'Email Address'}
           </label>
           <input
-            type="text"
-            value={contactInfo}
-            onChange={(e) => setContactInfo(e.target.value)}
-            placeholder={isEs ? '+971... o email@ejemplo.com' : '+971... or email@example.com'}
-            style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.84rem', boxSizing: 'border-box' }}
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={handleEmailChange}
+            placeholder={isEs ? 'nombre@ejemplo.com' : 'name@example.com'}
+            style={{
+              width: '100%',
+              height: '38px',
+              borderRadius: '6px',
+              border: `1px solid ${fieldErrors.email ? '#dc2626' : '#cbd5e1'}`,
+              padding: '0 10px',
+              fontSize: '0.84rem',
+              boxSizing: 'border-box',
+            }}
           />
+          {fieldErrors.email && (
+            <div style={{ fontSize: '0.72rem', color: '#dc2626', marginTop: '4px', fontWeight: 600 }}>
+              {fieldErrors.email}
+            </div>
+          )}
         </div>
       </div>
+
+      {fieldErrors.general && (
+        <div style={{ fontSize: '0.76rem', color: '#dc2626', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '8px 10px', fontWeight: 600 }}>
+          {fieldErrors.general}
+        </div>
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
         <input

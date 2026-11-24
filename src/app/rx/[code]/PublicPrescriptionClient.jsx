@@ -812,6 +812,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   initialPartNumber={partParam}
                   initialProductName={productParam}
                   defaultContact={currentRx?.patient?.phone || currentRx?.patient?.email || ''}
+                  defaultPhone={currentRx?.patient?.phone || currentRx?.patientPhone || ''}
+                  defaultEmail={currentRx?.patient?.email || currentRx?.patientEmail || ''}
+                  defaultCountry={currentRx?.patient?.country || currentRx?.country || ''}
                   scanSource={srcParam || (actionParam === 'refill' ? 'label_qr' : 'direct')}
                   isEs={isEs}
                 />
