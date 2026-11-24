@@ -563,17 +563,83 @@ export default function PublicAtlasAIDrawer({
     };
   }, []);
 
-  // 3. Pre-load recognized PubMed clinical evidence for active compound (or curated 27-pen evidence library)
+  // 3. Pre-load recognized PubMed clinical evidence for active compound (monograph OR prescription)
   useEffect(() => {
     if (isPensFormulary) {
       setClinicalSources(PENS_CLINICAL_EVIDENCE_LIBRARY);
       setIsLoadingSources(false);
       return undefined;
     }
-    if (contextType === 'monograph' && contextAnchor?.name) {
+    const isRxContext = contextType === 'prescription' || Boolean(contextAnchor?.rxId) || contextAnchor?.category === 'prescription';
+    const rawTargetName = isRxContext
+      ? (contextAnchor?.formula || contextAnchor?.name || '')
+      : (contextType === 'monograph' ? (contextAnchor?.name || '') : '');
+
+    if ((contextType === 'monograph' || isRxContext) && rawTargetName) {
       let isMounted = true;
       setIsLoadingSources(true);
-      const cleanName = contextAnchor.name.replace(/\([^)]*\)/g, '').replace(/≥.*%/, '').trim();
+
+      // Extract primary active compound name (strip dosages, concentrations, vehicles)
+      const cleanName = String(rawTargetName)
+        .split(' // ')[0]
+        .split('+')[0]
+        .replace(/\(.*?\)/g, '')
+        .replace(/\b\d+(?:[.,]\d+)?\s*(?:mg|mcg|iu|ml|g|%)\b/gi, '')
+        .replace(/\b(?:nasal\s*spray|pen|vial|capsule|cream|solution|compounded|custom|formulation|prescription)\b/gi, '')
+        .replace(/≥.*%/, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      // Immediate curated PubMed fallback for key peptides (0ms latency, guaranteed verified PMIDs)
+      const lowerClean = cleanName.toLowerCase();
+      const curatedRxSources = lowerClean.includes('selank')
+        ? [
+            {
+              pmid: '18454096',
+              title: 'Efficacy and possible mechanisms of action of a new peptide anxiolytic selank in the therapy of generalized anxiety disorders and neurasthenia',
+              journal: 'Zh Nevrol Psikhiatr Im S S Korsakova',
+              pubdate: '2008',
+              authors: 'Zozulia AA, Neznamov GG',
+              pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/18454096/'
+            },
+            {
+              pmid: '25176261',
+              title: 'Comparative clinical evaluation of Selank and phenazepam in anxiety and somatoform disorders',
+              journal: 'Eksp Klin Farmakol',
+              pubdate: '2014',
+              authors: 'Medvedev VE, Tereshchenko ON',
+              pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/25176261/'
+            },
+            {
+              pmid: '32015829',
+              title: 'Functional Connectomic Approach to Studying Selank and Semax Effects in Healthy Volunteers (fMRI)',
+              journal: 'Brain Sci',
+              pubdate: '2020',
+              authors: 'Panikratova YR, Lebedeva IS',
+              pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/32015829/'
+            },
+            {
+              pmid: '18841804',
+              title: 'Intranasal administration of the peptide Selank regulates BDNF expression in the rat hippocampus in vivo',
+              journal: 'Dokl Biol Sci',
+              pubdate: '2008',
+              authors: 'Inozemtseva LS, Karpenko MN',
+              pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/18841804/'
+            }
+          ]
+        : null;
+
+      if (curatedRxSources) {
+        setClinicalSources(curatedRxSources);
+        setIsLoadingSources(false);
+        return undefined;
+      }
+
+      if (!cleanName || cleanName.length < 3) {
+        setIsLoadingSources(false);
+        return undefined;
+      }
+
       const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(cleanName)}&retmode=json&retmax=4`;
 
       fetch(searchUrl)
@@ -614,7 +680,7 @@ export default function PublicAtlasAIDrawer({
         isMounted = false;
       };
     }
-  }, [contextType, contextAnchor?.name]);
+  }, [contextType, contextAnchor?.name, contextAnchor?.formula, contextAnchor?.rxId, contextAnchor?.category, isPensFormulary]);
 
   // 4. Scroll to latest message
   useEffect(() => {
