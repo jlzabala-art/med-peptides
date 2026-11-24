@@ -157,18 +157,25 @@ export function detectPrescriptionType(rx = {}, formulations = []) {
     requiresReconstitution: isInjectable && !isPen && !isNasalSpray,
 
     // Formatted GCP Console Ribbon attributes helper
-    getAttributes: (isEs = false) => ({
-      routeDisplay: isNasalSpray
-        ? (isEs ? '💧 Intranasal · Diario' : '💧 Intranasal · Daily')
-        : isPen
-          ? (isEs ? '💉 SubQ · Semanal' : '💉 SubQ · Weekly')
-          : isInjectable
-            ? (isEs ? '💉 SubQ · Titulado' : '💉 SubQ · Titrated')
-            : isTopical
-              ? (isEs ? '💧 Tópica · Nocturna' : '💧 Topical · Nightly')
-              : isTransdermal
-                ? (isEs ? '⚡ Transdérmica · Diaria' : '⚡ Transdermal · Daily')
-                : (isEs ? '💊 Vía Oral · Diario' : '💊 Oral · Daily'),
+    getAttributes: (isEs = false) => {
+      const itemsText = (Array.isArray(rx?.items) ? rx.items : [])
+        .map((i) => `${i?.instructions || ''} ${i?.directions || ''} ${i?.posology || ''}`)
+        .join(' ');
+      const freqCorpus = `${rx?.posology || ''} ${rx?.instructions || ''} ${rx?.directions || ''} ${itemsText}`;
+      const isDailyRegimen = /\b(daily|every\s*morning|every\s*evening|once\s*daily|twice\s*daily|cada\s*mañana|diario|diaria|al\s*día)\b/i.test(freqCorpus);
+
+      return {
+        routeDisplay: isNasalSpray
+          ? (isEs ? '💧 Intranasal · Diario' : '💧 Intranasal · Daily')
+          : isPen
+            ? (isDailyRegimen ? (isEs ? '💉 SubQ · Diario' : '💉 SubQ · Daily') : (isEs ? '💉 SubQ · Semanal' : '💉 SubQ · Weekly'))
+            : isInjectable
+              ? (isEs ? '💉 SubQ · Titulado' : '💉 SubQ · Titrated')
+              : isTopical
+                ? (isEs ? '💧 Tópica · Nocturna' : '💧 Topical · Nightly')
+                : isTransdermal
+                  ? (isEs ? '⚡ Transdérmica · Diaria' : '⚡ Transdermal · Daily')
+                  : (isEs ? '💊 Vía Oral · Diario' : '💊 Oral · Daily'),
 
       deviceDisplay: isNasalSpray
         ? (isEs ? '💧 Spray Nasal Dosificado' : '💧 Metered Nasal Spray')
@@ -201,7 +208,8 @@ export function detectPrescriptionType(rx = {}, formulations = []) {
               : isTransdermal
                 ? (isEs ? 'CREMA TRANSDÉRMICA (BHRT)' : 'TRANSDERMAL CREAM (BHRT)')
                 : (isEs ? 'SUPLEMENTO / NUTRACÉUTICO ORAL' : 'ORAL SUPPLEMENT / NUTRACEUTICAL')
-    })
+      };
+    }
   };
 }
 

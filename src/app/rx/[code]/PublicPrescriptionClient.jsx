@@ -615,9 +615,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             { label: isEs ? 'Prescripción Médica' : 'Medical Prescription' },
             { label: `#${rxId || currentRx?.prescriptionNumber || currentRx?.code || 'RX'}` }
           ]}
-          brandHref={doctorPublicUrl}
-          brandTitle={isAuthorizedViewer ? (isEs ? `Volver al portal del Dr/a. ${nominalDoctorName}` : `Return to Dr. ${nominalDoctorName}'s Portal`) : (isEs ? 'Portal de Práctica Médica Verificada' : 'Verified Medical Practice Portal')}
-          doctorHomeHref={doctorPublicUrl}
+          brandHref={isPatientView ? '#top' : doctorPublicUrl}
+          brandTitle={isPatientView ? (isEs ? 'Mi Expediente Clínico' : 'My Clinical Dossier') : (isAuthorizedViewer ? (isEs ? `Volver al portal del Dr/a. ${nominalDoctorName}` : `Return to Dr. ${nominalDoctorName}'s Portal`) : (isEs ? 'Portal de Práctica Médica Verificada' : 'Verified Medical Practice Portal'))}
+          doctorHomeHref={isPatientView ? null : doctorPublicUrl}
           doctorName={displayDoctorNameShort}
           hideAccountManager={true}
           hideImportRx={isPatientView || !isAuthorizedViewer}
@@ -633,15 +633,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             clinic: clinic || 'Arthregen Clinic',
             formula: resolvedFormulaSummary,
             dosage: resolvedDosageSummary,
-            category: 'NutriGen Prescription Dossier',
+            category: prescriptionTypeInfo.label,
             genomicsTest: genomicsData?.test?.shortName || rx.testName || (compoundedFormulations?.length > 1 ? 'NutriGen' : 'Prescription'),
             isNutriGen: true,
             isPatientView,
             isDispensed,
-            inquiryGoal: isPatientView ? (isDispensed ? 'renewal' : 'quotation') : 'inquiry',
-            priceFormatted: resolvedPrice?.formatted || 'AED 1,450.00'
+            inquiryGoal: isPatientView ? (isDispensed ? 'renewal' : 'support') : 'inquiry',
+            priceFormatted: isPatientView ? null : (resolvedPrice?.formatted || 'AED 1,450.00')
           }}
-          breadcrumb={[
+          breadcrumb={isPatientView ? [
+            { label: patientName || (isEs ? 'Mi Tratamiento' : 'My Treatment') },
+            { label: `#${rxId}` }
+          ] : [
             { label: displayDoctorNameShort, href: doctorPublicUrl },
             { label: isEs ? 'Pacientes' : 'Patients', href: isAuthorizedViewer ? `${doctorPublicUrl}#patients` : undefined },
             { label: patientName || (isEs ? 'Expediente Paciente' : 'Patient Dossier') },
@@ -727,52 +730,62 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
-              {/* ── Patient-Friendly 3-Card "Your Treatment Today" Strip ── */}
+              {/* ── Patient-Friendly 3-Card "Your Treatment Today" Strip + Personalized Atlas AI ── */}
               {isPatientView && (
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-                    gap: '10px',
-                  }}
-                >
-                  <div style={{ background: '#ffffff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? '1. Tu Dosis Diaria' : '1. Your Daily Dose'}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '8px' }}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                      gap: '10px',
+                    }}
+                  >
+                    <div style={{ background: '#ffffff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        {isEs ? '1. Tu Dosis Diaria' : '1. Your Daily Dose'}
+                      </div>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginTop: '4px', lineHeight: 1.35 }}>
+                        {currentRx?.posology || currentRx?.items?.[0]?.instructions || (isEs ? 'Sigue la pauta indicada en tu etiqueta.' : 'Follow the instructions printed on your label.')}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginTop: '4px', lineHeight: 1.35 }}>
-                      {currentRx?.posology || currentRx?.items?.[0]?.instructions || (isEs ? 'Sigue la pauta indicada en tu etiqueta.' : 'Follow the instructions printed on your label.')}
+                    <div style={{ background: '#ffffff', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 14px' }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        {isEs ? '2. Conservación' : '2. How to Store'}
+                      </div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginTop: '4px', lineHeight: 1.35 }}>
+                        {prescriptionTypeInfo?.storageDisplay || (isEs ? 'Conservar refrigerado (2°C–8°C).' : 'Refrigerate at 2°C–8°C. Do not freeze.')}
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ background: '#ffffff', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 14px' }}>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? '2. Cómo Guardarlo' : '2. How to Store'}
+                    <div style={{ background: '#ffffff', border: '1px solid #c7d2fe', borderRadius: '10px', padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        {isEs ? '3. ¿Dudas sobre tu pauta?' : '3. Questions About Your Rx?'}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof window !== 'undefined') {
+                            window.dispatchEvent(new CustomEvent('atlas:open-ai-drawer'));
+                          }
+                        }}
+                        style={{
+                          padding: '7px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #7c3aed',
+                          background: '#f5f3ff',
+                          color: '#6d28d9',
+                          fontSize: '0.76rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <Sparkles size={13} />
+                        <span>{isEs ? `Preguntar a Atlas AI sobre #${rxId}` : `Ask Atlas AI about #${rxId}`}</span>
+                      </button>
                     </div>
-                    <div style={{ fontSize: '0.84rem', fontWeight: 650, color: '#78350f', marginTop: '4px', lineHeight: 1.35 }}>
-                      {currentRx?.storage || (isEs ? 'Consultar etiqueta (2°C–8°C si es refrigerado).' : 'Check label instructions (2°C–8°C if refrigerated).')}
-                    </div>
-                  </div>
-                  <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? '3. Reposición Rápida' : '3. Need a Refill?'}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenInquiry()}
-                      style={{
-                        padding: '7px 12px',
-                        borderRadius: '7px',
-                        border: 'none',
-                        background: '#059669',
-                        color: '#ffffff',
-                        fontSize: '0.78rem',
-                        fontWeight: 750,
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                      }}
-                    >
-                      🔄 {isEs ? 'Solicitar Refill / Ayuda' : 'Request Refill / Help'}
-                    </button>
                   </div>
                 </div>
               )}
@@ -853,8 +866,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 />
               )}
 
-              {/* ── Compounded Formulations & Dedicated Posology Architecture (Patient vs Clinical) ──────────── */}
+              {/* ── Compounded Formulations & Dedicated Posology Architecture (Single-Panel in Patient View) ──────────── */}
               {isPatientView ? (
+                activeGcpTab === 'treatment' && (
                 <PatientPrescriptionGuide
                   rx={currentRx}
                   compoundedFormulations={compoundedFormulations}
@@ -870,6 +884,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   onOpenQuotation={() => setShowAtlasQuotationModal(true)}
                   onOpenDoctorContact={() => setShowDoctorContactModal(true)}
                 />
+                )
               ) : (
                 <CompoundedFormulationsSection
                   compoundedFormulations={compoundedFormulations}
@@ -885,7 +900,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 />
               )}
 
-              {/* ── Sequential Roadmap: MultiPartOverview & Biological Milestones (Expanded) ── */}
+              {/* ── Sequential Roadmap: MultiPartOverview & Biological Milestones (Single-Panel in Patient View) ── */}
+              {(!isPatientView || activeGcpTab === 'roadmap') && (
               <div id="roadmap-section" style={{ scrollMarginTop: '100px' }}>
                 <MultiPartOverview
                   formulations={compoundedFormulations}
@@ -900,13 +916,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   durationLabel={posology?.duration || currentRx?.duration || (prescriptionTypeInfo?.clinicalDomain === 'nasal_spray' ? (isEs ? '30 Días' : '30 Days') : null)}
                 />
               </div>
+              )}
 
-              {/* ── Section: Quality, Laboratory & EU GMP Traceability (Expanded) ──────────────── */}
+              {/* ── Section: Quality, Laboratory & EU GMP Traceability (Single-Panel in Patient View) ──────────────── */}
+              {(!isPatientView || activeGcpTab === 'traceability') && (
               <QualityTraceabilitySection
                 rxId={rxId}
                 rx={currentRx}
                 isEs={isEs}
               />
+              )}
 
               {/* ── Atlas Clinical Recommendations (Only visible in Doctor View; hidden from patient) ── */}
               {!isPatientView && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway || atlasRecs?.teletestHairMineral) && (
@@ -2193,12 +2212,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               doctorLicense={doctorLicense}
               doctorOffice={doctorAddress}
               doctorPhone={doctorPhone}
-              doctorPublicUrl={doctorPublicUrl}
+              doctorPublicUrl={isPatientView ? null : doctorPublicUrl}
               publicUrl={publicUrl}
               onOpenPdf={() => setShowBrochureModal(true)}
               onExportExcel={handleExportExcel}
-              activeGcpTab=""
-              onSelectTab={null}
+              activeGcpTab={activeGcpTab}
+              onSelectTab={setActiveGcpTab}
               lang={lang}
               isAuthorizedViewer={isAuthorizedViewer}
               isPatientView={isPatientView}
@@ -2729,8 +2748,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           isNutriGen: prescriptionTypeInfo.key === 'nutrigen',
           isPatientView,
           isDispensed,
-          inquiryGoal: isPatientView ? (isDispensed ? 'renewal' : 'quotation') : 'inquiry',
-          priceFormatted: resolvedPrice?.formatted || 'AED 1,450.00'
+          inquiryGoal: isPatientView ? (isDispensed ? 'renewal' : 'support') : 'inquiry',
+          priceFormatted: isPatientView ? null : (resolvedPrice?.formatted || 'AED 1,450.00')
         }}
         lang={lang}
       />

@@ -1314,7 +1314,7 @@ export default function PublicInstitutionalInquiryDrawer({
                           {lang === 'es' ? 'Dosis/Concentración:' : 'Strength/Dose:'} {attachedEntity.strength}
                         </div>
                       )}
-                      {attachedEntity.priceFormatted && (
+                      {attachedEntity.priceFormatted && !attachedEntity.isPatientView && (
                         <div style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: 750, marginTop: '2px' }}>
                           {lang === 'es' ? 'Precio Suministrado:' : 'Supplied Price:'} {attachedEntity.priceFormatted}
                         </div>
@@ -1617,7 +1617,8 @@ export default function PublicInstitutionalInquiryDrawer({
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: attachedEntity?.isPatientView ? '1fr' : '1fr 1fr', gap: '0.75rem' }}>
+                {!attachedEntity?.isPatientView && (
                 <div>
                   <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}>
                     {lang === 'es' ? 'Clínica / Institución' : 'Clinic / Institution'}
@@ -1638,6 +1639,7 @@ export default function PublicInstitutionalInquiryDrawer({
                     }}
                   />
                 </div>
+                )}
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}>
@@ -1825,7 +1827,11 @@ export default function PublicInstitutionalInquiryDrawer({
                   ) : (
                     <>
                       <Send size={16} />
-                      <span>{lang === 'es' ? 'Enviar Consulta Institucional' : 'Submit Institutional Inquiry'}</span>
+                      <span>
+                        {attachedEntity?.isPatientView
+                          ? (lang === 'es' ? 'Enviar a Mi Médico y Clínica' : 'Send to My Doctor & Clinic')
+                          : (lang === 'es' ? 'Enviar Consulta Institucional' : 'Submit Institutional Inquiry')}
+                      </span>
                     </>
                   )}
                 </button>

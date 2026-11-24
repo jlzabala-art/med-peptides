@@ -362,3 +362,23 @@ test('BioBlend Prefilled Pen QR: ExternalFulfillmentRefillCard binds lot/bud int
   const patientGuideSrc = read('src/components/prescription/PatientPrescriptionGuide.jsx');
   assert.ok(patientGuideSrc.includes('urlLot') && patientGuideSrc.includes('Pen Dial & Sterile Needles'), 'PatientPrescriptionGuide must show pen needle guidance and supplier lot/BUD');
 });
+
+test('Patient Rx Privacy, Clinical Accuracy & Single-Panel UX: blocks doctor profile, hides pricing, fixes Daily pen & antioxidant timeline', async () => {
+  const { detectPrescriptionType } = await import('../src/utils/prescriptionTypeDetection.js');
+  const penDaily = detectPrescriptionType({
+    dispensingForm: 'prefilled_pen',
+    items: [{ name: 'Glutathione Pen (BioBlend)', dose: '600 mg / 3 mL', instructions: 'Inject 15 clicks (0.15 mL = 30 mg) subcutaneously every morning.' }],
+  });
+  assert.equal(penDaily.getAttributes(false).routeDisplay, '💉 SubQ · Daily');
+
+  const hookSrc = read('src/hooks/usePrescriptionData.js');
+  assert.ok(hookSrc.includes('isAntioxidantTimeline') && hookSrc.includes('Cellular Redox & Glutathione Priming'), 'Glutathione/NAC pens must use antioxidant timeline instead of GLP-1 incretin');
+
+  const rxClientSrc = read('src/app/rx/[code]/PublicPrescriptionClient.jsx');
+  assert.ok(rxClientSrc.includes('doctorHomeHref={isPatientView ? null : doctorPublicUrl}'), 'Patient view must never link back to doctor portal');
+  assert.ok(rxClientSrc.includes('Ask Atlas AI about #'), 'Patient view must expose Rx-scoped Atlas AI trigger');
+  assert.ok(rxClientSrc.includes("activeGcpTab === 'treatment'"), 'Patient view must support single-panel sidebar switching');
+
+  const drawerSrc = read('src/components/shared/PublicInstitutionalInquiryDrawer.jsx');
+  assert.ok(drawerSrc.includes('!attachedEntity.isPatientView'), 'Inquiry drawer must hide Supplied Price in patient view');
+});

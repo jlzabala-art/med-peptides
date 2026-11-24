@@ -467,21 +467,31 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
 
       if (isPen) {
         // ── Pre-Filled Pen (SubQ) — no reconstitution, refrigerated, weekly ──
+        const penCorpus = `${treatmentTitle || ''} ${safeCustomPosology || ''} ${rx?.items?.map(i => `${i?.name || ''} ${i?.instructions || ''}`).join(' ') || ''}`.toLowerCase();
+        const isDailyPen = /\b(daily|every\s*morning|every\s*evening|once\s*daily|cada\s*mañana|al\s*día)\b/i.test(penCorpus);
+        const isAntioxidantPen = /\b(glutathione|nac|n-acetyl)\b/i.test(penCorpus);
+
         accentColor = '#7c3aed';
         accentBg = '#f5f3ff';
         badgeText += isEs ? ' · PLUMA PRECARGADA SUBCUTÁNEA (SUBQ PEN)' : ' · PRE-FILLED SUBCUTANEOUS PEN (SUBQ PEN)';
-        resolvedTitle = treatmentTitle || (isEs ? 'Terapia Incretínica con Pluma Precargada (SubQ Pen)' : 'Targeted Peptide Incretin Therapy (Pre-filled Pen)');
+        resolvedTitle = treatmentTitle || (isAntioxidantPen
+          ? (isEs ? 'Terapia Antioxidante Celular (Pluma Precargada)' : 'Cellular Antioxidant & Glutathione Pen Therapy')
+          : (isEs ? 'Terapia Incretínica con Pluma Precargada (SubQ Pen)' : 'Targeted Peptide Incretin Therapy (Pre-filled Pen)'));
         resolvedRoute = isEs ? 'Inyección Subcutánea (SubQ) · Pluma Precargada' : 'Subcutaneous Injection (SubQ) · Pre-filled Pen Device';
         resolvedVolume = volume || (isEs ? '2 Plumas Precargadas (60 mg total)' : '2 Pre-filled Pens (60 mg total)');
         vehicleObj.name = vehicleName || (isEs ? 'Solución Tampón Estéril (Lista para Inyección SubQ)' : 'Sterile Buffer Solution (Ready-to-Use Pre-filled Pen)');
         vehicleObj.specs = isEs
           ? 'Solución acuosa isotónica estéril con conservantes antimicrobianos aprobados. Lista para administración subcutánea directa sin reconstitución manual. Conservar refrigerado (2°C - 8°C). No congelar.'
           : 'Sterile isotonic aqueous solution with approved antimicrobial preservatives. Ready for immediate subcutaneous administration — no manual reconstitution required. Store refrigerated (2°C - 8°C). Do not freeze.';
-        posologyObj.title = isEs ? 'Pauta de Administración SubQ Semanal (Pluma Precargada)' : 'Weekly SubQ Dosing Schedule (Pre-filled Pen)';
-        posologyObj.regimen = safeCustomPosology || (isEs ? '1 inyección subcutánea semanal según protocolo médico de titulación' : '1 subcutaneous injection weekly per clinical titration protocol');
-        posologyObj.timing = isEs
-          ? 'Mismo día cada semana · Rotar sitios de inyección (abdomen o muslos)'
-          : 'Same day each week · Rotate subcutaneous injection sites (abdomen or front of thigh)';
+        posologyObj.title = isDailyPen
+          ? (isEs ? 'Pauta de Administración SubQ Diaria (Pluma Precargada)' : 'Daily SubQ Dosing Schedule (Pre-filled Pen)')
+          : (isEs ? 'Pauta de Administración SubQ Semanal (Pluma Precargada)' : 'Weekly SubQ Dosing Schedule (Pre-filled Pen)');
+        posologyObj.regimen = safeCustomPosology || (isDailyPen
+          ? (isEs ? '1 inyección subcutánea diaria según protocolo médico' : '1 subcutaneous injection daily per clinical protocol')
+          : (isEs ? '1 inyección subcutánea semanal según protocolo médico de titulación' : '1 subcutaneous injection weekly per clinical titration protocol'));
+        posologyObj.timing = isDailyPen
+          ? (isEs ? 'Cada mañana · Rotar sitios de inyección (abdomen o muslos)' : 'Every morning · Rotate subcutaneous injection sites (abdomen or front of thigh)')
+          : (isEs ? 'Mismo día cada semana · Rotar sitios de inyección (abdomen o muslos)' : 'Same day each week · Rotate subcutaneous injection sites (abdomen or front of thigh)');
       } else if (isInjectable) {
         accentColor = isDiluent ? '#0284c7' : '#2563eb';
         accentBg = isDiluent ? '#f0f9ff' : '#eff6ff';
@@ -1499,6 +1509,22 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         { phase: rx.duration || 'Weeks 7 - 12', title: 'Lab Monitoring & Dose Titration', badge: 'Follow-up', description: `Follow-up hormone panel and clinical adjustment with ${doctorName || 'the prescribing physician'}.` }
       ];
       return isEs ? (posology.timeline || bhrtEs) : (posology.timeline || bhrtEn);
+    }
+
+    // ── Antioxidant / Glutathione / NAC Pen Timeline ──────────────────────────
+    const isAntioxidantTimeline = /\b(glutathione|nac|n-acetyl)\b/i.test(`${rx?.title || ''} ${rx?.treatmentTitle || ''} ${rawLines.map(i => i?.name || i?.productName || '').join(' ')}`);
+    if ((isInjectableRx || isPenRx) && isAntioxidantTimeline) {
+      const antioxEs = [
+        { phase: 'Semanas 1 - 4', title: 'Saturación Antioxidante & Reserva de Glutatión', badge: 'Mes 1', description: 'Reposición progresiva de reservas intracelulares de glutatión (GSH) y reducción del estrés oxidativo basal.' },
+        { phase: 'Semanas 5 - 8', title: 'Detoxificación Hepática & Protección Mitocondrial', badge: 'Mes 2', description: 'Optimización de rutas redox celulares, soporte hepático de fase II y mejora de vitalidad sistémica manteniendo conservación 2°C – 8°C.' },
+        { phase: rx.duration || 'Semanas 9 - 12', title: 'Consolidación Celular & Revisión Clínica', badge: 'Mes 3', description: `Mantenimiento de niveles antioxidantes y valoración evolutiva con ${doctorName || 'el médico prescriptor'}.` }
+      ];
+      const antioxEn = [
+        { phase: 'Weeks 1 - 4', title: 'Cellular Redox & Glutathione Priming', badge: 'Month 1', description: 'Progressive replenishment of intracellular glutathione (GSH) reserves and reduction of baseline oxidative stress.' },
+        { phase: 'Weeks 5 - 8', title: 'Hepatic Detoxification & Mitochondrial Support', badge: 'Month 2', description: 'Optimization of cellular redox pathways, Phase II hepatic support, and systemic vitality while maintaining 2°C – 8°C cold storage.' },
+        { phase: rx.duration || 'Weeks 9 - 12', title: 'Cellular Consolidation & Clinical Review', badge: 'Month 3', description: `Maintenance of antioxidant defense and follow-up evaluation with ${doctorName || 'the prescribing physician'}.` }
+      ];
+      return isEs ? (posology.timeline || antioxEs) : (posology.timeline || antioxEn);
     }
 
     // ── Incretin / Peptide Pen Timeline ──────────────────────────────────────
