@@ -336,4 +336,7 @@ test('Rx Mobile & Nasal Spray UX: isolates nasal spray timeline, dynamic duratio
 
   const headerCss = read('src/styles/publicStickyHeader.css');
   assert.ok(headerCss.includes('.puh-desktop-only-pill'), 'publicStickyHeader.css must hide desktop-only pill on mobile');
+
+  const gsbSrc = read('src/components/ui/GlobalSearchBar.jsx');
+  assert.equal(gsbSrc.includes("style={{ position: 'absolute', top: height"), false, 'GlobalSearchBar chips zone must stay in-flow so it never overlaps pills on mobile');
 });

@@ -1016,11 +1016,11 @@ export default function GlobalSearchBar({
           )}
         </div>
 
-        {/* ── ACTIVE FILTER CHIPS ZONE (attached below input) ──────────── */}
+        {/* ── ACTIVE FILTER CHIPS ZONE (attached in-flow below input) ──────────── */}
         {hasActiveFilters && (
           <div
             className="atlas-search__chips-zone"
-            style={{ position: 'absolute', top: height, left: 0, right: 0, zIndex: 10 }}
+            style={{ position: 'relative', marginTop: '6px', zIndex: 10 }}
           >
             <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginRight: '0.25rem', flexShrink: 0 }}>
               ACTIVE FILTERS:

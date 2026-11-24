@@ -403,9 +403,10 @@ export function getPeptidesColumns({
                   padding: '0 8px',
                   fontSize: '0.69rem',
                   fontWeight: 700,
-                  background: '#1a73e8',
+                  background: '#ffffff',
                   border: 'none',
-                  color: '#ffffff',
+                  borderLeft: '1px solid #dadce0',
+                  color: '#3c4043',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -413,10 +414,10 @@ export function getPeptidesColumns({
                   gap: '3px',
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
-                  transition: 'background 0.15s ease'
+                  transition: 'all 0.15s ease'
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#1557b0'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#1a73e8'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#e8f0fe'; e.currentTarget.style.color = '#1a73e8'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#3c4043'; }}
                 title={isEs ? 'Añadir pack de 10 viales con descuento por volumen' : 'Add manufacturer pack of 10 vials (-volume discount)'}
               >
                 <Box size={10} />
