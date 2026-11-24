@@ -2423,11 +2423,15 @@ export default function PublicAtlasAIDrawer({
                   <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription' ? (
                       <>
-                        <div><strong>Prescription Identifier:</strong> {contextAnchor?.rxId || 'Official Verified Rx'}</div>
-                        <div><strong>Prescribing Physician:</strong> {contextAnchor?.doctorName || 'Dr. Hanieh Erdmann'} (Lic. DHA-00013060-006)</div>
-                        <div><strong>Compounding Vehicle:</strong> TrichoSol™ Lipid Carrier (Free of Propylene Glycol & Aggressive Alcohols)</div>
-                        <div><strong>Prescribed Formula:</strong> {contextAnchor?.formula || 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% (3x 100ml)'}</div>
-                        <div><strong>Posology:</strong> {contextAnchor?.dosage || '1.0 ml Once Daily at Night on Dry Scalp'}</div>
+                        <div><strong>{lang === 'es' ? 'Referencia:' : 'Reference:'}</strong> {contextAnchor?.rxId || 'Active Treatment'}</div>
+                        {contextAnchor?.patientName && <div><strong>{lang === 'es' ? 'Paciente:' : 'Patient:'}</strong> {contextAnchor.patientName}</div>}
+                        {!contextAnchor?.patientMode && contextAnchor?.doctorName && (
+                          <div><strong>{lang === 'es' ? 'Médico:' : 'Physician:'}</strong> {contextAnchor.doctorName}</div>
+                        )}
+                        {contextAnchor?.formula && <div><strong>{lang === 'es' ? 'Tratamiento:' : 'Formula:'}</strong> {contextAnchor.formula}</div>}
+                        {contextAnchor?.dosage && <div><strong>{lang === 'es' ? 'Posología:' : 'Posology:'}</strong> {contextAnchor.dosage}</div>}
+                        {contextAnchor?.lotNumber && <div><strong>{lang === 'es' ? 'Lote:' : 'Lot:'}</strong> {contextAnchor.lotNumber}</div>}
+                        {contextAnchor?.bud && <div><strong>BUD:</strong> {contextAnchor.bud}</div>}
                       </>
                     ) : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair') ? (
                       <>

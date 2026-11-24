@@ -41,7 +41,14 @@ export default function B2BUniversalMenu({
   hideMobileBar = false
 }) {
   const pathname = usePathname() || '/';
+  const [isPatientRoute, setIsPatientRoute] = useState(false);
   const [internalOpen, setInternalOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    setIsPatientRoute(params.get('view') === 'patient');
+  }, [pathname]);
   const [copiedCatalog, setCopiedCatalog] = useState(null);
   const [mobileSheetMode, setMobileSheetMode] = useState('all'); // 'all' | 'related'
   const [openDomainId, setOpenDomainId] = useState(() => getActiveDomainId(pathname));
@@ -90,6 +97,10 @@ export default function B2BUniversalMenu({
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }));
     }
   };
+
+  if (isPatientRoute) {
+    return null;
+  }
 
   return (
     <>

@@ -208,41 +208,43 @@ export async function POST(req) {
         ]).catch(() => ({ products: [], protocols: [] })),
       ]);
 
-      const isPatientRagScope = contextAnchor?.view === 'patient' || String(pathname || '').includes('view=patient');
+      const isPatientRagScope = contextAnchor?.view === 'patient' || Boolean(contextAnchor?.patientMode) || String(pathname || '').includes('view=patient');
       const matchedEntities = [];
       const ragLines = [];
 
-      (algoliaRagResult?.products || []).slice(0, 3).forEach((p) => {
-        const slug = p.slug || p.objectID || p.id;
-        if (!slug) return;
-        const title = p.canonicalName || p.name || p.title || slug;
-        const href = isPatientRagScope ? `/p/${encodeURIComponent(slug)}?view=patient` : `/p/${encodeURIComponent(slug)}`;
-        matchedEntities.push({
-          type: 'product',
-          objectID: String(p.objectID || slug),
-          title,
-          subtitle: p.subtitle || p.category || 'Clinical Formulation',
-          category: p.category || 'Product',
-          href,
+      if (!isPatientRagScope) {
+        (algoliaRagResult?.products || []).slice(0, 3).forEach((p) => {
+          const slug = p.slug || p.objectID || p.id;
+          if (!slug) return;
+          const title = p.canonicalName || p.name || p.title || slug;
+          const href = `/p/${encodeURIComponent(slug)}`;
+          matchedEntities.push({
+            type: 'product',
+            objectID: String(p.objectID || slug),
+            title,
+            subtitle: p.subtitle || p.category || 'Clinical Formulation',
+            category: p.category || 'Product',
+            href,
+          });
+          ragLines.push(`- [Product] ${title} (${p.category || 'Formulation'}) → ${href}${p.subtitle ? ` — ${p.subtitle}` : ''}`);
         });
-        ragLines.push(`- [Product] ${title} (${p.category || 'Formulation'}) → ${href}${p.subtitle ? ` — ${p.subtitle}` : ''}`);
-      });
 
-      (algoliaRagResult?.protocols || []).slice(0, 2).forEach((pr) => {
-        const slug = pr.slug || pr.objectID || pr.id;
-        if (!slug) return;
-        const title = pr.title || pr.name || slug;
-        const href = `/proto/${encodeURIComponent(slug)}`;
-        matchedEntities.push({
-          type: 'protocol',
-          objectID: String(pr.objectID || slug),
-          title,
-          subtitle: pr.goal || 'Clinical Protocol',
-          category: 'Protocol',
-          href,
+        (algoliaRagResult?.protocols || []).slice(0, 2).forEach((pr) => {
+          const slug = pr.slug || pr.objectID || pr.id;
+          if (!slug) return;
+          const title = pr.title || pr.name || slug;
+          const href = `/proto/${encodeURIComponent(slug)}`;
+          matchedEntities.push({
+            type: 'protocol',
+            objectID: String(pr.objectID || slug),
+            title,
+            subtitle: pr.goal || 'Clinical Protocol',
+            category: 'Protocol',
+            href,
+          });
+          ragLines.push(`- [Protocol] ${title} (${pr.goal || 'Clinical Protocol'}) → ${href}`);
         });
-        ragLines.push(`- [Protocol] ${title} (${pr.goal || 'Clinical Protocol'}) → ${href}`);
-      });
+      }
 
       const algoliaRagContext = ragLines.length > 0
         ? `\nLIVE ALGOLIA CATALOG & PROTOCOL MATCHES FOR THIS QUERY (cite these exact links when relevant):\n${ragLines.join('\n')}\n`
@@ -296,7 +298,33 @@ export async function POST(req) {
         String(pathname || '').startsWith('/pricing/pens') ||
         String(pathname || '').startsWith('/pricing/dnlab-pens');
 
-      if (isPreFilledPens) {
+      const isPrescriptionPatient = (contextAnchor?.category === 'prescription' || Boolean(contextAnchor?.rxId)) &&
+        (Boolean(contextAnchor?.patientMode) || isPatientRagScope);
+
+      if (isPrescriptionPatient) {
+        activeEntityContext = `CURRENT ACTIVE PATIENT TREATMENT CONTEXT (STRICTLY SCOPED TO THIS PRESCRIPTION):
+- Reference Code: ${contextAnchor?.rxId || 'Active Treatment'}
+- Patient Name: ${contextAnchor?.patientName || 'Patient'}
+- Prescribed Formula / Product: ${contextAnchor?.formula || 'As shown on your treatment guide'}
+- Posology / Dosing Instructions: ${contextAnchor?.dosage || 'Follow the dosing schedule shown on your treatment guide'}
+${contextAnchor?.route ? `- Administration Route / Device: ${contextAnchor.route}\n` : ''}${contextAnchor?.storage ? `- Storage Instructions: ${contextAnchor.storage}\n` : ''}${contextAnchor?.lotNumber ? `- Lot Number: ${contextAnchor.lotNumber}\n` : ''}${contextAnchor?.bud ? `- Beyond-Use Date (BUD): ${contextAnchor.bud}\n` : ''}${contextAnchor?.duration ? `- Treatment Duration: ${contextAnchor.duration}\n` : ''}`;
+
+        systemPrompt = `You are a helpful, clear treatment assistant dedicated exclusively to helping ${contextAnchor?.patientName || 'the patient'} understand THIS specific prescription (${contextAnchor?.rxId || 'active treatment'}).
+
+CRITICAL STRICT SCOPING RULES:
+1. THIS PRESCRIPTION & PATIENT ONLY:
+   - Answer ONLY using the details of this specific prescription and patient provided below.
+   - NEVER recommend, link, or promote other catalog products, protocols, B2B compounding services, or pricing/quotations.
+2. NO DOCTOR OR VERIFICATION CLAIMS:
+   - NEVER invent or mention any doctor name, clinic name, license number, or claim that the prescription was "certified" or "verified" by a specific physician or accreditation body.
+3. CLEAR, CALM, PATIENT-FRIENDLY GUIDANCE:
+   - Use simple, everyday language matching the patient's language (English or Spanish).
+   - Help with how to take/apply their dose, storage, missed-dose basics, and tracking their daily log.
+   - For dose adjustments, side effects, or medical symptoms, advise them to contact their care team directly using the "Ask a Question" button on the page.
+
+${activeEntityContext}
+`;
+      } else if (isPreFilledPens) {
         const selectedPens = Array.isArray(contextAnchor?.protocolSelection) ? contextAnchor.protocolSelection : [];
         const inventorySummary = Array.isArray(catalogInventory) && catalogInventory.length > 0
           ? catalogInventory.map((p) => {

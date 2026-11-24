@@ -20,6 +20,7 @@ export default function NominalWelcomeBanner({
   role = 'doctor', // 'doctor' | 'patient' | 'wholesaler' | 'client'
   clinicName = '',
   verifiedBy = 'Atlas Health Services',
+  hideVerifiedBadge = false,
   sessionDuration = '90 days',
   storageKey = 'atlas_welcome_banner_dismissed',
   lang = 'en'
@@ -134,23 +135,25 @@ export default function NominalWelcomeBanner({
       >
         {/* Left: Personalized Nominal Welcome & Verification Shield */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <div
-            style={{
-              background: 'rgba(255,255,255,0.18)',
-              padding: '3px 8px',
-              borderRadius: '6px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontWeight: 700,
-              fontSize: '0.74rem',
-              letterSpacing: '0.02em',
-              backdropFilter: 'blur(4px)',
-            }}
-          >
-            <ShieldCheck size={14} color="#86efac" />
-            <span>{isEs ? 'ACCESO VERIFICADO' : 'VERIFIED ACCESS'}</span>
-          </div>
+          {!hideVerifiedBadge && (
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.18)',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontWeight: 700,
+                fontSize: '0.74rem',
+                letterSpacing: '0.02em',
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              <ShieldCheck size={14} color="#86efac" />
+              <span>{isEs ? 'ACCESO VERIFICADO' : 'VERIFIED ACCESS'}</span>
+            </div>
+          )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>
@@ -161,7 +164,9 @@ export default function NominalWelcomeBanner({
               {isDoc
                 ? (isEs ? `Sesión clínica activa por ${sessionDuration} sin contraseña` : `Active clinical session for ${sessionDuration} passwordless`)
                 : isPatient
-                ? (isEs ? `Expediente digital certificado por ${cleanVerifiedBy}` : `Digital clinical dossier certified by ${cleanVerifiedBy}`)
+                ? (hideVerifiedBadge
+                    ? (isEs ? 'Tu guía personalizada de tratamiento' : 'Your personalized treatment guide')
+                    : (isEs ? `Expediente digital certificado por ${cleanVerifiedBy}` : `Digital clinical dossier certified by ${cleanVerifiedBy}`))
                 : (isEs ? `Catálogo mayorista oficial con márgenes B2B autorizados` : `Official wholesale catalog with authorized B2B margins`)}
             </span>
           </div>

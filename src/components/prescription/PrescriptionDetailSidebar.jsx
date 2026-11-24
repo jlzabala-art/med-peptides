@@ -724,8 +724,8 @@ export default function PrescriptionDetailSidebar({
             </div>
           )}
 
-          {/* Embedded Prescribing Physician Row (Single Unified Card, Divided by Hairline) */}
-          {doctorName && (
+          {/* Embedded Prescribing Physician Row (Doctor / Institutional view only; hidden in Patient View) */}
+          {doctorName && !isPatientView && (
             <div style={{
               borderTop: '1px solid #f1f5f9',
               paddingTop: '9px',

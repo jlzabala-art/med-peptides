@@ -631,7 +631,9 @@ export default function PatientPrescriptionGuide({
                           {isEs ? '📍 Zona de Inyección:' : '📍 Injection Site:'}
                         </div>
                         <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
-                          {item.posology?.timing || (isEs ? 'Rotación: abdomen o muslos (SubQ)' : 'Rotation: abdomen or front of thigh (SubQ)')}
+                          {(item.posology?.timing && item.posology.timing.trim() !== (item.posology?.regimen || '').trim())
+                            ? item.posology.timing
+                            : (isEs ? 'Rotación: abdomen o muslos (SubQ)' : 'Rotation: abdomen or front of thigh (SubQ)')}
                         </div>
                       </div>
 

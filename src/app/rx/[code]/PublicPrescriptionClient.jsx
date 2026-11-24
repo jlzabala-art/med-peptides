@@ -616,9 +616,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             { label: `#${rxId || currentRx?.prescriptionNumber || currentRx?.code || 'RX'}` }
           ]}
           brandHref={isPatientView ? '#top' : doctorPublicUrl}
-          brandTitle={isPatientView ? (isEs ? 'Mi Expediente Clínico' : 'My Clinical Dossier') : (isAuthorizedViewer ? (isEs ? `Volver al portal del Dr/a. ${nominalDoctorName}` : `Return to Dr. ${nominalDoctorName}'s Portal`) : (isEs ? 'Portal de Práctica Médica Verificada' : 'Verified Medical Practice Portal'))}
+          brandTitle={isPatientView ? (isEs ? 'Mi Tratamiento' : 'My Treatment') : (isAuthorizedViewer ? (isEs ? `Volver al portal del Dr/a. ${nominalDoctorName}` : `Return to Dr. ${nominalDoctorName}'s Portal`) : (isEs ? 'Portal de Práctica Médica' : 'Medical Practice Portal'))}
           doctorHomeHref={isPatientView ? null : doctorPublicUrl}
-          doctorName={displayDoctorNameShort}
+          doctorName={isPatientView ? null : displayDoctorNameShort}
           hideAccountManager={true}
           hideImportRx={isPatientView || !isAuthorizedViewer}
           hideSwitchRx={isPatientView || !isAuthorizedViewer}
@@ -656,8 +656,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             <NominalWelcomeBanner
               recipientName={patientName || (isEs ? 'Paciente' : 'Patient')}
               role="patient"
-              clinicName={clinic || doctorClinic || treatingDoc?.clinic}
-              verifiedBy={nominalDoctorName || 'Atlas Health Services'}
+              clinicName={isPatientView ? '' : (clinic || doctorClinic || treatingDoc?.clinic)}
+              verifiedBy={isPatientView ? '' : (nominalDoctorName || 'Atlas Health Services')}
+              hideVerifiedBadge={isPatientView}
               sessionDuration={isEs ? '90 días' : '90 days'}
               storageKey={`atlas_welcome_rx_${rxId}`}
               lang={lang}
@@ -825,7 +826,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 setExpandedSections={setExpandedSections}
               />
 
-              {(!isPatientView || activeGcpTab === 'traceability') && (
+              {!isPatientView && (
                 <TreatmentJourneyStepper
                   rx={rx}
                   rxId={rxId}
@@ -920,8 +921,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               </div>
               )}
 
-              {/* ── Section: Quality, Laboratory & EU GMP Traceability (Single-Panel in Patient View) ──────────────── */}
-              {(!isPatientView || activeGcpTab === 'traceability') && (
+              {/* ── Section: Quality, Laboratory & EU GMP Traceability (Doctor / Institutional only) ──────────────── */}
+              {!isPatientView && (
               <QualityTraceabilitySection
                 rxId={rxId}
                 rx={currentRx}
@@ -1472,8 +1473,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
-              {/* ── Section 5: Doctor & Clinical Care Hub (Dedicated Patient View Support) ── */}
-              {(activeGcpTab === 'patientSharing') && isPatientView && (
+              {/* ── Section 5: Doctor & Clinical Care Hub (Hidden in Patient View) ── */}
+              {false && (activeGcpTab === 'patientSharing') && isPatientView && (
                 <div id="patient-sharing-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
                   <div className="rx-card" style={{
                     background: '#ffffff',
@@ -2552,7 +2553,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   title={isEs ? `Consultar a ${nominalDoctorName || displayDoctorNameShort}` : `Ask ${nominalDoctorName || displayDoctorNameShort} a question`}
                 >
                   <MessageSquare size={14} color="#1d4ed8" />
-                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Consultar al Dr.' : 'Contact Doctor'}</span>
+                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Enviar Consulta' : 'Ask a Question'}</span>
                 </button>
 
                 <div style={{ position: 'relative' }} ref={patientDropdownRef}>
@@ -2763,11 +2764,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           name: `Prescription ${rxId}`,
           rxId,
           code: rxId,
-          doctorName: isAuthorizedViewer ? nominalDoctorName : displayDoctorNameShort,
-          clinic,
+          view: isPatientView ? 'patient' : 'doctor',
+          patientMode: isPatientView,
+          doctorName: isPatientView ? null : (isAuthorizedViewer ? nominalDoctorName : displayDoctorNameShort),
+          clinic: isPatientView ? null : clinic,
           patientName,
           formula: rx.formula || compoundedFormulations.map(f => f.formula || f.apis.map(a => `${a.name} ${a.dosage || ''}`.trim()).join(' + ')).filter(Boolean).join(' // ') || rx.treatmentType || 'Custom Compounded Formulation',
-          dosage: getPosologyText(rx.posology) || compoundedFormulations[0]?.posology?.regimen || 'As prescribed by physician',
+          dosage: getPosologyText(rx.posology) || compoundedFormulations[0]?.posology?.regimen || 'As prescribed',
+          storage: currentRx?.storage || null,
+          lotNumber: urlLot || currentRx?.lotNumber || currentRx?.lote || null,
+          bud: urlBud || currentRx?.expDate || currentRx?.bud || null,
           category: 'prescription',
           genomicsTest: genomicsData?.test?.shortName || null,
           slug: rxId.toLowerCase()
@@ -2914,6 +2920,97 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           }, 350);
         }}
       />
+      {/* ── Dedicated Patient Mobile Bottom Bar (3 simple actions, zero B2B / Labels) ── */}
+      {isPatientView && !embedded && (
+        <>
+          <style>{`
+            .rx-patient-mobile-bar {
+              display: none;
+            }
+            @media (max-width: 900px) {
+              .rx-patient-mobile-bar {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 9950;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+                padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+                background: rgba(255, 255, 255, 0.96);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-top: 1px solid #e2e8f0;
+                box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
+              }
+              .rx-patient-mobile-btn {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                min-height: 48px;
+                border: none;
+                border-radius: 10px;
+                background: transparent;
+                color: #475569;
+                font-size: 0.72rem;
+                font-weight: 700;
+                cursor: pointer;
+                padding: 4px 6px;
+                transition: background 0.15s ease, color 0.15s ease;
+              }
+              .rx-patient-mobile-btn.is-active {
+                background: #eff6ff;
+                color: #1d4ed8;
+              }
+              .rx-dossier-main-wrapper {
+                padding-bottom: 76px;
+              }
+            }
+          `}</style>
+          <nav
+            className="rx-patient-mobile-bar no-print"
+            aria-label={isEs ? 'Navegación del paciente' : 'Patient navigation'}
+          >
+            <button
+              type="button"
+              className={`rx-patient-mobile-btn ${activeGcpTab === 'treatment' ? 'is-active' : ''}`}
+              onClick={() => {
+                triggerHaptic('selection');
+                handleSidebarScrollTo('formula-card');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              <Clock size={18} />
+              <span>{isEs ? 'Mi Dosis' : 'My Dose'}</span>
+            </button>
+            <button
+              type="button"
+              className={`rx-patient-mobile-btn ${activeGcpTab === 'roadmap' ? 'is-active' : ''}`}
+              onClick={() => {
+                triggerHaptic('selection');
+                handleSidebarScrollTo('milestones-card');
+              }}
+            >
+              <Calendar size={18} />
+              <span>{isEs ? 'Mi Plan' : 'Plan'}</span>
+            </button>
+            <button
+              type="button"
+              className="rx-patient-mobile-btn"
+              onClick={() => {
+                triggerHaptic('selection');
+                window.dispatchEvent(new CustomEvent('atlas:open-ai-drawer', { detail: { contextType: 'prescription' } }));
+              }}
+            >
+              <Sparkles size={18} color="#7c3aed" />
+              <span>{isEs ? 'Ayuda AI' : 'Ask / Help'}</span>
+            </button>
+          </nav>
+        </>
+      )}
     </div>
   );
 }

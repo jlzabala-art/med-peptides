@@ -1142,14 +1142,14 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       icon: 'calendar'
     });
 
-    list.push({ 
-      id: 'quality-card', 
-      label: isPatientView
-        ? (isEs ? 'Seguridad y Lote' : 'Safety & Batch Info')
-        : (isEs ? 'Calidad & Trazabilidad GMP' : 'Quality & EU Traceability'),
-      category: 'traceability',
-      icon: 'shield'
-    });
+    if (!isPatientView) {
+      list.push({ 
+        id: 'quality-card', 
+        label: isEs ? 'Calidad & Trazabilidad GMP' : 'Quality & EU Traceability',
+        category: 'traceability',
+        icon: 'shield'
+      });
+    }
 
     if (!isPatientView && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway)) {
       list.push({ 
@@ -1166,16 +1166,6 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         label: isEs ? 'Datos de Médico & Paciente' : 'Doctor & Patient Info',
         category: 'credentials',
         icon: 'stethoscope'
-      });
-    }
-
-    // In Patient View, consolidate doctor info & support into a single clear item
-    if (isPatientView) {
-      list.push({ 
-        id: 'patient-sharing-card', 
-        label: isEs ? 'Preguntar al Médico' : 'Ask My Doctor',
-        category: 'patient-sharing',
-        icon: 'message'
       });
     }
 
