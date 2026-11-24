@@ -564,10 +564,10 @@ export default function PatientPrescriptionGuide({
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               {posologySchedule.mode === 'weekly'
-                ? (isEs ? 'Registro Semanal de Tomas (Últimas 4 Semanas)' : 'Weekly Dose Log (Last 4 Weeks)')
+                ? (isEs ? '1. Registro Semanal de Tomas (Últimas 4 Semanas)' : '1. Weekly Dose Log (Last 4 Weeks)')
                 : posologySchedule.mode === 'twice_daily'
-                ? (isEs ? 'Registro de Tomas: Mañana y Tarde' : 'Dose Log: Morning & Evening')
-                : (isEs ? 'Registro Rápido de Tomas (Últimos 7 Días)' : 'Quick Dose Log (Last 7 Days)')}
+                ? (isEs ? '1. Registro de Tomas: Mañana y Tarde' : '1. Dose Log: Morning & Evening')
+                : (isEs ? '1. Registro Rápido de Tomas (Últimos 7 Días)' : '1. Quick Dose Log (Last 7 Days)')}
             </div>
             <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '2px' }}>
               {posologySchedule.mode === 'weekly'
