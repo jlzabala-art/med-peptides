@@ -15,13 +15,16 @@ import {
   Eye,
   FlaskConical,
   Dna,
-  RotateCw
+  RotateCw,
+  FileText,
+  ExternalLink
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import PrescriptionStatusQuickAction from './PrescriptionStatusQuickAction';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { detectPrescriptionType } from '@/utils/prescriptionTypeDetection';
+import COMPOUND_INDEX, { resolveProductId } from '@/data/compoundIndex';
 
 /**
  * PrescriptionMasterHeader
@@ -272,32 +275,89 @@ export default function PrescriptionMasterHeader({
             </div>
           )}
 
-          {/* PATIENT VIEW ACTIONS: Copy Link only for authorized previewers, clean without clutter */}
-          {isPatientView && isAuthorizedViewer && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="rx-action-btn-icon"
-                title={isEs ? 'Copiar enlace de mi prescripción' : 'Copy prescription link'}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '5px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#334155',
-                  fontSize: '0.74rem',
-                  fontWeight: 650,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                {copied ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
-                <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
-              </button>
+          {/* PATIENT VIEW ACTIONS: Product Datasheet (when available) + Copy Link for authorized previewers */}
+          {isPatientView && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              {(() => {
+                const firstFormulation = Array.isArray(compoundedFormulations) && compoundedFormulations.length > 0 ? compoundedFormulations[0] : null;
+                let resolvedId = null;
+                const apis = firstFormulation?.apis || rx?.apis || [];
+                for (const api of apis) {
+                  const hit = resolveProductId(api?.slug || api?.name || api?.productName || '');
+                  if (hit) {
+                    resolvedId = hit;
+                    break;
+                  }
+                }
+                if (!resolvedId) {
+                  const hay = `${firstFormulation?.title || ''} ${rx?.treatmentTitle || ''} ${rx?.dispensingForm || ''}`.toLowerCase();
+                  for (const key of Object.keys(COMPOUND_INDEX)) {
+                    if (key.length >= 3 && hay.includes(key)) {
+                      resolvedId = COMPOUND_INDEX[key];
+                      break;
+                    }
+                  }
+                }
+                const datasheetHref =
+                  firstFormulation?.datasheetUrl ||
+                  firstFormulation?.monographUrl ||
+                  (firstFormulation?.productSlug ? `/p/${encodeURIComponent(firstFormulation.productSlug)}` : '') ||
+                  (rx?.productSlug ? `/p/${encodeURIComponent(rx.productSlug)}` : '') ||
+                  (rx?.productUrl && /\/p\//.test(rx.productUrl) ? rx.productUrl : '') ||
+                  (resolvedId ? `/p/${encodeURIComponent(resolvedId)}` : '');
+                if (!datasheetHref) return null;
+                return (
+                  <a
+                    href={datasheetHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '5px 10px',
+                      minHeight: '32px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#334155',
+                      fontSize: '0.74rem',
+                      fontWeight: 650,
+                      textDecoration: 'none',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <FileText size={13} color="#1a73e8" />
+                    <span>{isEs ? 'Ficha Técnica' : 'Product Datasheet'}</span>
+                    <ExternalLink size={12} color="#64748b" />
+                  </a>
+                );
+              })()}
+              {isAuthorizedViewer && (
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="rx-action-btn-icon"
+                  title={isEs ? 'Copiar enlace de mi prescripción' : 'Copy prescription link'}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '5px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#334155',
+                    fontSize: '0.74rem',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {copied ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                  <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
+                </button>
+              )}
             </div>
           )}
         </div>

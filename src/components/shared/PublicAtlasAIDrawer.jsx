@@ -330,6 +330,9 @@ export default function PublicAtlasAIDrawer({
     setInternalIsOpen(false);
     if (onCloseControlled) onCloseControlled();
     if (onCloseProp) onCloseProp();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('close-public-atlas-ai'));
+    }
   };
   const handleOpenDrawer = () => {
     setInternalIsOpen(true);
@@ -428,27 +431,37 @@ export default function PublicAtlasAIDrawer({
   // Global event listener to open drawer with pre-filled inquiry from publication cards
   useEffect(() => {
     const handleOpen = (e) => {
+      if (isGlobalFallback && typeof window !== 'undefined' && (window.__publicAtlasPageMounted > 0 || window.location.pathname.startsWith('/rx/'))) {
+        return;
+      }
       setInternalIsOpen(true);
       if (e.detail?.initialQuery) {
         setMessage(e.detail.initialQuery);
         setActiveTab('chat');
       }
     };
+    const handleGlobalClose = () => {
+      setInternalIsOpen(false);
+      if (onCloseControlled) onCloseControlled();
+      if (onCloseProp) onCloseProp();
+    };
     window.addEventListener('open-public-atlas-ai', handleOpen);
+    window.addEventListener('close-public-atlas-ai', handleGlobalClose);
     const handleKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'i') {
         e.preventDefault();
         setInternalIsOpen((v) => !v);
       } else if (e.key === 'Escape') {
-        setInternalIsOpen(false);
+        handleGlobalClose();
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => {
       window.removeEventListener('open-public-atlas-ai', handleOpen);
+      window.removeEventListener('close-public-atlas-ai', handleGlobalClose);
       window.removeEventListener('keydown', handleKey);
     };
-  }, []);
+  }, [isGlobalFallback]);
 
   const isPensFormulary =
     contextType === 'pens_formulary' || contextAnchor?.type === 'pens_pricing';
