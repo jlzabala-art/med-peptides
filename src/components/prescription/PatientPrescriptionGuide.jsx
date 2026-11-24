@@ -26,7 +26,7 @@ import {
   FileText,
   RefreshCw
 } from '@/lib/icons';
-import ReconstitutionGuideCard from './ReconstitutionGuideCard';
+import PatientExactDoseCard from './PatientExactDoseCard';
 import CalendarSyncModal from './CalendarSyncModal';
 import PatientWelcomePdfModal from './PatientWelcomePdfModal';
 import PatientPhysicianGreetingHero from './PatientPhysicianGreetingHero';
@@ -1339,19 +1339,8 @@ export default function PatientPrescriptionGuide({
                       </div>
                     </details>
 
-                    {/* 4. Reconstitution Guide (Only for lyophilized peptides) */}
-                    {item.category.requiresReconstitution && (
-                      <div style={{ marginTop: '4px' }}>
-                        <ReconstitutionGuideCard
-                          productName={item.title}
-                          vialDoseMg={item.estimatedVialMg || 5}
-                          diluentVolumeMl={2.0}
-                          prescribedDoseMcg={item.estimatedDoseMcg || 250}
-                          lang={isEs ? 'es' : 'en'}
-                          initiallyExpanded={true}
-                        />
-                      </div>
-                    )}
+                    {/* 4. Locked Exact Dose Guide (Shown for all formats that benefit from calculation: Vial, Pen, Nasal Spray, Pump) */}
+                    <PatientExactDoseCard item={item} rx={rx} isEs={isEs} />
                   </div>
                 );
               })()}
