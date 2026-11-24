@@ -757,7 +757,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       aria-label={isEs ? `Preguntar a Atlas AI sobre #${rxId}` : `Ask Atlas AI about #${rxId}`}
                       onClick={() => {
                         if (typeof window !== 'undefined') {
-                          window.dispatchEvent(new CustomEvent('atlas:open-ai-drawer'));
+                          window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
                         }
                       }}
                       style={{
@@ -3002,7 +3002,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               className={`rx-patient-mobile-btn ${activeGcpTab === 'treatment' ? 'is-active' : ''}`}
               onClick={() => {
                 triggerHaptic('selection');
-                handleSidebarScrollTo('formula-card');
+                setActiveGcpTab('treatment');
+                setExpandedSections(prev => ({ ...prev, formulations: true }));
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
@@ -3014,7 +3015,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               className={`rx-patient-mobile-btn ${activeGcpTab === 'roadmap' ? 'is-active' : ''}`}
               onClick={() => {
                 triggerHaptic('selection');
-                handleSidebarScrollTo('milestones-card');
+                setActiveGcpTab('roadmap');
+                setExpandedSections(prev => ({ ...prev, posology: true }));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
               <Calendar size={18} />
@@ -3025,7 +3028,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               className="rx-patient-mobile-btn"
               onClick={() => {
                 triggerHaptic('selection');
-                window.dispatchEvent(new CustomEvent('atlas:open-ai-drawer', { detail: { contextType: 'prescription' } }));
+                window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
               }}
             >
               <Sparkles size={18} color="#7c3aed" />

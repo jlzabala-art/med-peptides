@@ -160,9 +160,11 @@ export default function PrescriptionMasterHeader({
 
             <div style={{ fontSize: '0.74rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span>
-                {isEs
-                  ? 'Dossier clínico digital · Pauta posológica · Grado EU GMP'
-                  : 'Digital clinical dossier · Posology regimen · EU GMP Standards'}
+                {isPatientView
+                  ? (isEs ? 'Tu guía personal de tratamiento' : 'Your personal treatment guide')
+                  : (isEs
+                      ? 'Dossier clínico digital · Pauta posológica · Grado EU GMP'
+                      : 'Digital clinical dossier · Posology regimen · EU GMP Standards')}
               </span>
             </div>
           </div>
@@ -270,8 +272,8 @@ export default function PrescriptionMasterHeader({
             </div>
           )}
 
-          {/* PATIENT VIEW ACTIONS: Clean GCP copy button without clutter */}
-          {isPatientView && (
+          {/* PATIENT VIEW ACTIONS: Copy Link only for authorized previewers, clean without clutter */}
+          {isPatientView && isAuthorizedViewer && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <button
                 type="button"
@@ -289,7 +291,8 @@ export default function PrescriptionMasterHeader({
                   color: '#334155',
                   fontSize: '0.74rem',
                   fontWeight: 650,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {copied ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
