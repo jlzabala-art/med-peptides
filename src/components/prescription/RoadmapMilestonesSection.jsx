@@ -148,15 +148,22 @@ export default function RoadmapMilestonesSection({
           </div>
         </div>
 
-        {/* Visual Connected Stepper Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-            gap: '12px',
-            width: '100%',
-          }}
-        >
+        {/* Visual Connected Stepper Grid (3 cols desktop, 1 col mobile) */}
+        <style>{`
+          .atlas-roadmap-3col-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            width: 100%;
+          }
+          @media (max-width: 640px) {
+            .atlas-roadmap-3col-grid {
+              grid-template-columns: 1fr;
+              gap: 10px;
+            }
+          }
+        `}</style>
+        <div className="atlas-roadmap-3col-grid">
           {timeline.map((tm, idx) => {
             const isCurrent = idx === activeStepIndex;
             const isCompleted = idx < activeStepIndex;

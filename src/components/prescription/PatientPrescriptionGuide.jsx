@@ -1074,6 +1074,42 @@ export default function PatientPrescriptionGuide({
                     </div>
                   </div>
                 </div>
+
+                {(() => {
+                  const datasheetHref =
+                    item.datasheetUrl ||
+                    item.monographUrl ||
+                    (item.productSlug ? `/p/${encodeURIComponent(item.productSlug)}` : '') ||
+                    (rx?.productSlug ? `/p/${encodeURIComponent(rx.productSlug)}` : '') ||
+                    (rx?.productUrl && /\/p\//.test(rx.productUrl) ? rx.productUrl : '');
+                  if (!datasheetHref) return null;
+                  return (
+                    <a
+                      href={datasheetHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '6px 11px',
+                        minHeight: '34px',
+                        borderRadius: '6px',
+                        border: '1px solid #dadce0',
+                        background: '#ffffff',
+                        color: '#3c4043',
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <FileText size={13} color="#1a73e8" />
+                      <span>{isEs ? 'Ficha de Producto' : 'Product Datasheet'}</span>
+                      <ExternalLink size={12} color="#5f6368" />
+                    </a>
+                  );
+                })()}
               </div>
 
               {/* Card Body (Flat Google Cloud UX: How to take it 16px + Quick tip + 3-Phase Visual Stepper) */}
@@ -1193,8 +1229,25 @@ export default function PatientPrescriptionGuide({
                       )}
                     </div>
 
-                    {/* 3. Collapsible 3-Phase Visual Stepper */}
+                    {/* 3. Expanded-by-Default 3-Phase Visual Stepper (3 cols desktop, 1 col mobile) */}
+                    <style>{`
+                      .atlas-rx-3phase-grid {
+                        display: grid;
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        gap: 10px;
+                        margin-top: 12px;
+                        padding-top: 12px;
+                        border-top: 1px solid #e2e8f0;
+                      }
+                      @media (max-width: 640px) {
+                        .atlas-rx-3phase-grid {
+                          grid-template-columns: 1fr;
+                          gap: 8px;
+                        }
+                      }
+                    `}</style>
                     <details
+                      open
                       style={{
                         marginTop: '2px',
                         background: '#f8fafc',
@@ -1215,17 +1268,10 @@ export default function PatientPrescriptionGuide({
                       }}>
                         <span>{isEs ? 'Cómo usarlo (3 pasos sencillos)' : 'How to use it (3 simple steps)'}</span>
                         <span style={{ fontSize: '0.76rem', color: '#1a73e8', fontWeight: 600 }}>
-                          {isEs ? 'Ver pasos ▾' : 'Show steps ▾'}
+                          {isEs ? 'Pasos ▾' : 'Steps ▾'}
                         </span>
                       </summary>
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-                        gap: '10px',
-                        marginTop: '12px',
-                        paddingTop: '12px',
-                        borderTop: '1px solid #e2e8f0'
-                      }}>
+                      <div className="atlas-rx-3phase-grid">
                         {phases.map((phase, idx) => (
                           <div
                             key={idx}
