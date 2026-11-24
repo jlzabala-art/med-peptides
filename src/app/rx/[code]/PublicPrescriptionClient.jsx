@@ -586,12 +586,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     {
       contextAnchor: {
         type: 'prescription',
+        category: 'prescription',
         rxId,
+        code: rxId,
         patientName,
+        view: isPatientView ? 'patient' : 'doctor',
+        patientMode: isPatientView,
+        formula: resolvedFormulaSummary || currentRx?.treatmentTitle || null,
+        dosage: getPosologyText(rx?.posology) || compoundedFormulations?.[0]?.posology?.regimen || null,
+        storage: currentRx?.storage || null,
+        lotNumber: urlLot || currentRx?.lotNumber || currentRx?.lote || null,
+        bud: urlBud || currentRx?.expDate || currentRx?.bud || null,
       },
       bottomBar: { hidden: true },
     },
-    [rxId, patientName]
+    [rxId, patientName, isPatientView, resolvedFormulaSummary, urlLot, urlBud]
   );
 
   return (

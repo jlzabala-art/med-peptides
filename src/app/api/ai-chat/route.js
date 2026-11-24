@@ -138,6 +138,7 @@ export async function POST(req) {
     const userName = currentUser?.name || 'Valued User';
 
     let clinicalEvidenceArticles = [];
+    let matchedEntities = [];
     let systemPrompt = '';
     if (isPublicSandbox) {
       // 1. Fetch recognized clinical literature from PubMed / cache
@@ -209,7 +210,7 @@ export async function POST(req) {
       ]);
 
       const isPatientRagScope = contextAnchor?.view === 'patient' || Boolean(contextAnchor?.patientMode) || String(pathname || '').includes('view=patient');
-      const matchedEntities = [];
+      matchedEntities = [];
       const ragLines = [];
 
       if (!isPatientRagScope) {
