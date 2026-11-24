@@ -804,7 +804,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         {isEs ? 'Conservación' : 'Keep it safe'}
                       </div>
                       <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginTop: '3px', lineHeight: 1.35 }}>
-                        {prescriptionTypeInfo?.storageDisplay || (isEs ? 'Nevera 2°C–8°C · No congelar' : 'Fridge 2°C–8°C · Do not freeze')}
+                        {currentRx?.storage || prescriptionTypeInfo?.storageDisplay || (isEs ? 'Nevera 2°C–8°C · No congelar' : 'Fridge 2°C–8°C · Do not freeze')}
                         {(urlBud || currentRx?.expDate || currentRx?.bud) ? ` · ${isEs ? 'Usar antes del' : 'Use before'}: ${urlBud || currentRx?.expDate || currentRx?.bud}` : ''}
                       </div>
                     </div>

@@ -892,7 +892,7 @@ export default function PatientPrescriptionGuide({
                           {isEs ? '❄️ Conservación:' : '❄️ Storage:'}
                         </div>
                         <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
-                          {isEs ? 'Nevera 2°C–8°C · Lista para usar · No congelar' : 'Refrigerator 2°C–8°C · Ready-to-use · Do not freeze'}
+                          {rx?.storage || item.storage || (isEs ? 'Nevera 2°C–8°C · Lista para usar · No congelar' : 'Refrigerator 2°C–8°C · Ready-to-use · Do not freeze')}
                         </div>
                       </div>
 
@@ -905,11 +905,11 @@ export default function PatientPrescriptionGuide({
                             ? 'Usa una aguja estéril nueva en cada aplicación · Mantén pulsado 5–10 s tras inyectar'
                             : 'Attach a fresh sterile pen needle per dose · Hold 5–10s after dialing'}
                         </div>
-                        {(urlLot || rx?.batchCode || urlBud || rx?.expDate) && (
+                        {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode || urlBud || rx?.expDate || rx?.bud) && (
                           <div style={{ marginTop: '4px', fontSize: '0.72rem', fontFamily: 'monospace', color: '#5b21b6', fontWeight: 700 }}>
-                            {(urlLot || rx?.batchCode) ? `Lot: ${urlLot || rx?.batchCode}` : ''}
-                            {(urlLot || rx?.batchCode) && (urlBud || rx?.expDate) ? ' · ' : ''}
-                            {(urlBud || rx?.expDate) ? `BUD: ${urlBud || rx?.expDate}` : ''}
+                            {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode) ? `Lot: ${urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode}` : ''}
+                            {(urlLot || rx?.lotNumber || rx?.lote || rx?.batchCode) && (urlBud || rx?.expDate || rx?.bud) ? ' · ' : ''}
+                            {(urlBud || rx?.expDate || rx?.bud) ? `${isEs ? 'Usar antes del' : 'Use before'}: ${urlBud || rx?.expDate || rx?.bud}` : ''}
                           </div>
                         )}
                       </div>
