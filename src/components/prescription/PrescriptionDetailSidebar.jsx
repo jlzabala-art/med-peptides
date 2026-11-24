@@ -32,7 +32,8 @@ import {
   MessageCircle,
   Edit2,
   Loader2,
-  Send
+  Send,
+  RotateCcw
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
@@ -203,7 +204,9 @@ export default function PrescriptionDetailSidebar({
     'atlas-recommendations-card': 'recommendations',
     'doctor-patient-credentials': 'credentials',
     'patient-sharing-card': 'patientSharing',
-    'atlas-quotation-card': 'quotation'
+    'atlas-quotation-card': 'quotation',
+    'refill-card': 'refill',
+    'contact-atlas-card': 'contactAtlas'
   }), []);
 
   const TAB_TO_DEFAULT_SECTION = useMemo(() => ({
@@ -277,6 +280,14 @@ export default function PrescriptionDetailSidebar({
   const scrollTo = (id) => {
     triggerHaptic('selection');
 
+    if (id === 'atlas-ai-card') {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+      }
+      setIsMobileDrawerOpen(false);
+      return;
+    }
+
     // Switch tab if clicking a section belonging to a different tab
     const targetTab = SECTION_TO_TAB[id] || (availableSections.find(s => s.id === id)?.category === 'formula' ? 'treatment' : null);
     if (targetTab && onSelectTab && activeGcpTab !== targetTab) {
@@ -331,7 +342,8 @@ export default function PrescriptionDetailSidebar({
     if (iconType === 'dna' || id.includes('genomics')) return Dna;
     if (iconType === 'clock' || id.includes('posology')) return Clock;
     if (iconType === 'calendar' || id.includes('milestone')) return Calendar;
-    if (iconType === 'message' || id.includes('patient-sharing')) return MessageCircle;
+    if (iconType === 'rotate' || id.includes('refill')) return RotateCcw;
+    if (iconType === 'message' || id.includes('patient-sharing') || id.includes('contact')) return MessageCircle;
     if (iconType === 'stethoscope' || id.includes('doctor') || id.includes('clinical')) return Stethoscope;
     if (iconType === 'shield' || id.includes('qr')) return ShieldCheck;
     if (iconType === 'file' || id.includes('doc')) return FileText;

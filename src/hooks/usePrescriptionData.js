@@ -1142,6 +1142,27 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       icon: 'calendar'
     });
 
+    if (isPatientView) {
+      list.push({
+        id: 'refill-card',
+        label: isEs ? 'Solicitar Refill' : 'Request Refill',
+        category: 'refill',
+        icon: 'rotate'
+      });
+      list.push({
+        id: 'atlas-ai-card',
+        label: isEs ? 'Preguntar a Atlas AI' : 'Ask Atlas AI',
+        category: 'ai',
+        icon: 'sparkles'
+      });
+      list.push({
+        id: 'contact-atlas-card',
+        label: isEs ? 'Contactar con Atlas' : 'Contact Atlas',
+        category: 'contact',
+        icon: 'message'
+      });
+    }
+
     if (!isPatientView) {
       list.push({ 
         id: 'quality-card', 

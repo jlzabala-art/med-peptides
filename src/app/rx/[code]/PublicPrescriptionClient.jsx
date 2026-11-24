@@ -215,6 +215,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       } else if (targetId === 'doctor-patient-credentials' || targetId.includes('credential')) {
         setActiveGcpTab('credentials');
         setExpandedSections(prev => ({ ...prev, credentials: true }));
+      } else if (targetId === 'refill-card') {
+        setActiveGcpTab('refill');
+      } else if (targetId === 'contact-atlas-card') {
+        setActiveGcpTab('contactAtlas');
+      } else if (targetId === 'atlas-ai-card') {
+        window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
       } else if (targetId.includes('patient') || targetId.includes('sharing')) {
         if (isPatientView) {
           setActiveGcpTab('patientSharing');
@@ -873,8 +879,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 />
               )}
 
-              {/* ── Express QR Refill Card (Always shown when patient scans SCAN FOR REFILL QR) ── */}
-              {actionParam === 'refill' && (
+              {/* ── Express QR Refill Card (Shown on dedicated Request Refill tab or ?action=refill) ── */}
+              {(actionParam === 'refill' || (isPatientView && activeGcpTab === 'refill')) && (
                 <ExpressQrRefillCard
                   rxCode={rxId || currentRx?.code || ''}
                   formulations={compoundedFormulations}
@@ -885,8 +891,117 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 />
               )}
 
-              {/* ── Patient Action & Refill Banner Card (Shown at top ONLY if refill is due or already dispensed) ── */}
-              {(!isPatientView || isDispensed || currentRx?.isRefillDue) && (
+              {/* ── Contact Atlas Card (Dedicated, simple contact tab in Patient View) ── */}
+              {isPatientView && activeGcpTab === 'contactAtlas' && (
+                <div
+                  id="contact-atlas-card"
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? 'Soporte al Paciente' : 'Patient Support'}
+                    </div>
+                    <h3 style={{ margin: '4px 0 4px', fontSize: '1.08rem', fontWeight: 700, color: '#0f172a' }}>
+                      {isEs ? 'Contactar con Atlas' : 'Contact Atlas'}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.45 }}>
+                      {isEs
+                        ? '¿Tienes alguna duda sobre tu tratamiento, envíos o cómo usar tu envase? Escríbenos y nuestro equipo te responderá.'
+                        : 'Have a question about your treatment, delivery, or how to use your device? Send us a quick message and our team will reply.'}
+                    </p>
+                  </div>
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      const formEl = e.currentTarget;
+                      const contactVal = formEl.elements.patientContact?.value?.trim() || '';
+                      const msgVal = formEl.elements.patientMessage?.value?.trim() || '';
+                      if (!contactVal || !msgVal) {
+                        toast.error(isEs ? 'Por favor indica tu contacto y tu consulta.' : 'Please enter your contact and message.');
+                        return;
+                      }
+                      try {
+                        const res = await fetch('/api/portal/inquiry', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            type: 'patient_contact_atlas',
+                            rxId,
+                            patientName,
+                            contact: contactVal,
+                            message: msgVal,
+                          }),
+                        });
+                        if (res.ok) {
+                          toast.success(isEs ? 'Mensaje enviado a Atlas ✓' : 'Message sent to Atlas ✓');
+                          formEl.reset();
+                        } else {
+                          toast.error(isEs ? 'No se pudo enviar el mensaje.' : 'Could not send message.');
+                        }
+                      } catch {
+                        toast.error(isEs ? 'Error de conexión.' : 'Connection error.');
+                      }
+                    }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+                  >
+                    <input
+                      name="patientContact"
+                      type="text"
+                      defaultValue={currentRx?.patient?.phone || currentRx?.patient?.email || ''}
+                      placeholder={isEs ? 'Tu WhatsApp o email...' : 'Your WhatsApp or email...'}
+                      style={{
+                        minHeight: '42px',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.84rem'
+                      }}
+                    />
+                    <textarea
+                      name="patientMessage"
+                      rows={3}
+                      placeholder={isEs ? 'Escribe tu consulta aquí...' : 'Write your question here...'}
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.84rem',
+                        resize: 'vertical'
+                      }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        type="submit"
+                        style={{
+                          minHeight: '44px',
+                          padding: '8px 18px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: '#1a73e8',
+                          color: '#ffffff',
+                          fontSize: '0.84rem',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {isEs ? 'Enviar a Atlas' : 'Send to Atlas'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* ── Patient Action & Refill Banner Card (Doctor / Institutional view only; in Patient View, Refill has its own tab) ── */}
+              {!isPatientView && (
                 <PatientActionBannerCard
                   isPatientView={isPatientView}
                   isDispensed={isDispensed}
@@ -2967,8 +3082,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 bottom: 0;
                 z-index: 9950;
                 display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 6px;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 4px;
                 padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
                 background: rgba(255, 255, 255, 0.96);
                 backdrop-filter: blur(16px);
@@ -3034,6 +3149,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             </button>
             <button
               type="button"
+              className={`rx-patient-mobile-btn ${activeGcpTab === 'refill' ? 'is-active' : ''}`}
+              onClick={() => {
+                triggerHaptic('selection');
+                setActiveGcpTab('refill');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              <RotateCcw size={18} />
+              <span>{isEs ? 'Refill' : 'Refill'}</span>
+            </button>
+            <button
+              type="button"
               className="rx-patient-mobile-btn"
               onClick={() => {
                 triggerHaptic('selection');
@@ -3041,7 +3168,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               }}
             >
               <Sparkles size={18} color="#7c3aed" />
-              <span>{isEs ? 'Ayuda AI' : 'Ask / Help'}</span>
+              <span>{isEs ? 'Atlas AI' : 'Atlas AI'}</span>
             </button>
           </nav>
         </>
