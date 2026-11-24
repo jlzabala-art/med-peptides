@@ -942,11 +942,11 @@
     min-height: 44px !important;
     touch-action: manipulation;
   }
-  /* Search drops to its own full-width line */
+  /* Keep Worklist back chip + Print/More on 1 single row on mobile */
   .pls-search-container {
-    order: 3 !important;
-    flex: 1 1 100% !important;
-    width: 100% !important;
+    order: 1 !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
     max-width: 100% !important;
     min-width: 0 !important;
   }
@@ -991,7 +991,7 @@
     gap: 6px !important;
   }
   .pls-meta-row {
-    gap: 8px !important;
+    gap: 6px !important;
   }
   .pls-meta-divider {
     display: none;
@@ -999,9 +999,26 @@
   .pls-meta-item {
     width: 100%;
     justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap !important;
+  }
+  .pls-meta-item::-webkit-scrollbar {
+    display: none;
+  }
+  .pls-meta-item > *,
+  .pls-meta-primary-ops > *,
+  .pls-meta-btn-labeled {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
   .pls-meta-parts {
     margin-top: 4px;
+  }
+  .pls-studio-shell,
+  .pls-main-workspace {
+    padding-bottom: 84px !important;
   }
   /* Mobile Batch Queue - Horizontal Swipeable Chip Row (Golden Rule #23 & GCP Standard) */
   .pls-batch-bar {
@@ -1038,9 +1055,9 @@
     font-size: 0.74rem !important;
     border-radius: 6px !important;
   }
-  /* On mobile touch devices, active patient is already clearly shown in the selected batch pill */
+  /* Keep active patient visible in mobile context strip when no batch queue is shown */
   .pls-patient-meta-item {
-    display: none !important;
+    display: inline-flex !important;
   }
 }
 

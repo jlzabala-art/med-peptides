@@ -338,7 +338,9 @@ export default function LabelsMetaStrip({
               color: isApproved ? '#137333' : '#b45309',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '4px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}>
               {isApproved
                 ? (isEs ? 'Aprobada ✓' : 'Approved ✓')
@@ -389,7 +391,7 @@ export default function LabelsMetaStrip({
           )}
 
           {/* ── Google Cloud Console Master Resource Operations Toolbar (Rule #9 & #26) ── */}
-          <div className="pls-meta-primary-ops" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '6px' }}>
+          <div className="pls-meta-primary-ops" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '6px', whiteSpace: 'nowrap' }}>
             <span style={{ height: '16px', width: '1px', background: '#cbd5e1', display: 'inline-block', margin: '0 2px' }} />
 
             {/* 1. Open & Inspect Current Prescription In-App Drawer */}
