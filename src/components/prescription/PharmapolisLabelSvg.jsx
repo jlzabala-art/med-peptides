@@ -595,7 +595,7 @@ export default function PharmapolisLabelSvg({
     const budVal = labelData.bud || labelData.expiryDate || labelData.expDate || '';
     const lotParam = lotVal ? `&lot=${encodeURIComponent(lotVal)}` : '';
     const budParam = budVal ? `&bud=${encodeURIComponent(budVal)}` : '';
-    return `${base}${partParam}${productParam}${lotParam}${budParam}&action=refill`;
+    return `${base}${partParam}${productParam}${lotParam}${budParam}&src=label_qr&action=refill`;
   }, [labelData.targetRxUrl, labelData.url, fileNumber, labelData.partIndex, labelData.phaseIndex, productTitle]);
   const cleanDisplayUrl = targetRxUrl.replace(/^https?:\/\//, '');
 

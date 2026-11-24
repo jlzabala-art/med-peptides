@@ -22,13 +22,17 @@ import {
   Flame,
   Check,
   Tag,
-  Dna
+  Dna,
+  FileText,
+  RefreshCw
 } from '@/lib/icons';
 import ReconstitutionGuideCard from './ReconstitutionGuideCard';
 import CalendarSyncModal from './CalendarSyncModal';
+import PatientWelcomePdfModal from './PatientWelcomePdfModal';
 import PatientPhysicianGreetingHero from './PatientPhysicianGreetingHero';
 import { detectPrescriptionType } from '@/utils/prescriptionTypeDetection';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
+import { computeRefillSchedule, formatShortDate } from '@/utils/refillSchedule';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
@@ -83,7 +87,8 @@ export default function PatientPrescriptionGuide({
   urlBud = '',
   rx = {},
   onOpenDoctorContact = null,
-  onOpenQuotation = null
+  onOpenQuotation = null,
+  onOpenRefill = null
 }) {
   // Adherence tracking in local storage
   const todayKey = useMemo(() => {
@@ -102,6 +107,12 @@ export default function PatientPrescriptionGuide({
   });
   const [streakDays, setStreakDays] = useState(4);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showWelcomePdfModal, setShowWelcomePdfModal] = useState(false);
+
+  const refillSchedule = useMemo(
+    () => computeRefillSchedule(rx || {}, compoundedFormulations),
+    [rx, compoundedFormulations]
+  );
 
   // 7-day interactive adherence log (last 6 days + today) persisted per YYYY-MM-DD
   const last7Days = useMemo(() => {
@@ -592,6 +603,28 @@ export default function PatientPrescriptionGuide({
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             <button
               type="button"
+              onClick={() => setShowWelcomePdfModal(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 10px',
+                minHeight: '36px',
+                borderRadius: '6px',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#3c4043',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <FileText size={13} color="#1a73e8" />
+              <span>{isEs ? 'Tarjeta PDF' : 'Welcome PDF'}</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setShowCalendarModal(true)}
               style={{
                 display: 'inline-flex',
@@ -614,6 +647,60 @@ export default function PatientPrescriptionGuide({
             </button>
           </div>
         </div>
+
+        {/* 2-Week Pre-Refill Alert Banner */}
+        {refillSchedule.isTwoWeekWarning && (
+          <div
+            style={{
+              background: '#fffbeb',
+              border: '1px solid #fde68a',
+              borderLeft: '4px solid #d97706',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '10px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.80rem', color: '#92400e', fontWeight: 600 }}>
+              <AlertTriangle size={16} color="#d97706" style={{ flexShrink: 0 }} />
+              <span>
+                {refillSchedule.daysRemaining <= 0
+                  ? (isEs
+                      ? 'Tu ciclo actual ha finalizado — solicita tu refill ahora para no interrumpir tu tratamiento.'
+                      : 'Your current supply cycle is complete — request your refill now to avoid interruption.')
+                  : (isEs
+                      ? `Quedan ${refillSchedule.daysRemaining} días de tratamiento (refill estimado: ${formatShortDate(refillSchedule.tentativeRefillDate, true)}). Pídelo ahora para recibirlo a tiempo.`
+                      : `${refillSchedule.daysRemaining} days left in your supply (tentative refill: ${formatShortDate(refillSchedule.tentativeRefillDate, false)}). Order now so it arrives on time.`)}
+              </span>
+            </div>
+            {onOpenRefill && (
+              <button
+                type="button"
+                onClick={onOpenRefill}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #d97706',
+                  background: '#ffffff',
+                  color: '#b45309',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <RefreshCw size={13} />
+                <span>{isEs ? 'Solicitar Refill' : 'Request Refill'}</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {posologySchedule.mode === 'twice_daily' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' }}>
@@ -1214,6 +1301,21 @@ export default function PatientPrescriptionGuide({
         compoundedFormulations={compoundedFormulations}
         patientPublicUrl={patientPublicUrl}
         isEs={isEs}
+      />
+
+      {/* ── Bilingual Patient Welcome Card PDF Preview Modal ── */}
+      <PatientWelcomePdfModal
+        isOpen={showWelcomePdfModal}
+        onClose={() => setShowWelcomePdfModal(false)}
+        rx={rx}
+        rxId={rxId}
+        patientName={patientName}
+        doctorName={doctorName}
+        compoundedFormulations={compoundedFormulations}
+        patientPublicUrl={patientPublicUrl}
+        urlLot={urlLot}
+        urlBud={urlBud}
+        initialIsEs={isEs}
       />
     </div>
   );

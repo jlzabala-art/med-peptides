@@ -114,7 +114,7 @@ export default function ExternalFulfillmentRefillCard({
     labelData?.targetRxUrl ||
     labelData?.qrRefillUrl ||
     prescription?.qrRefillUrl ||
-    `https://www.atlashealth-services.com/rx/${encodeURIComponent(fileNumber)}?view=patient&action=refill`;
+    `https://www.atlashealth-services.com/rx/${encodeURIComponent(fileNumber)}?view=patient&action=refill&src=label_qr`;
 
   const refillUrl = (() => {
     const cleanLot = supplierLot.trim();

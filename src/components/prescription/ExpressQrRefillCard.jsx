@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { RefreshCw, CheckCircle2, MessageSquare } from '@/lib/icons';
+import { RefreshCw, CheckCircle2, MessageSquare, Calendar, AlertTriangle } from '@/lib/icons';
+import { computeRefillSchedule, formatShortDate } from '@/utils/refillSchedule';
 import toast from 'react-hot-toast';
 
 export default function ExpressQrRefillCard({
   rxCode,
+  rx = null,
   formulations = [],
   initialPartNumber = null,
   initialProductName = '',
   defaultContact = '',
+  scanSource = '',
   isEs = false,
 }) {
   const options = useMemo(() => {
@@ -42,6 +45,11 @@ export default function ExpressQrRefillCard({
   const [submitting, setSubmitting] = useState(false);
   const [submittedResult, setSubmittedResult] = useState(null);
 
+  const refillSchedule = useMemo(
+    () => computeRefillSchedule(rx || {}, formulations),
+    [rx, formulations]
+  );
+
   const selectedTitle =
     options.find((o) => Number(o.partNumber) === Number(selectedPart))?.title ||
     initialProductName ||
@@ -61,6 +69,7 @@ export default function ExpressQrRefillCard({
           quantity,
           contactInfo,
           notes,
+          source: scanSource || 'direct',
         }),
       });
       const json = await res.json();
@@ -154,10 +163,68 @@ export default function ExpressQrRefillCard({
             {isEs ? '3. Solicitar Refill' : '3. Request Refill'}
           </span>
         </div>
-        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1a73e8', background: '#e8f0fe', padding: '3px 8px', borderRadius: '4px' }}>
-          Rx #{rxCode}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          {scanSource === 'label_qr' && (
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px' }}>
+              {isEs ? 'Escaneo QR Etiqueta' : 'Label QR Scan'}
+            </span>
+          )}
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1a73e8', background: '#e8f0fe', padding: '3px 8px', borderRadius: '4px' }}>
+            Rx #{rxCode}
+          </span>
+        </div>
       </div>
+
+      {refillSchedule.purchaseDate && (
+        <div
+          style={{
+            background: refillSchedule.isTwoWeekWarning ? '#fffbeb' : '#f8fafc',
+            border: `1px solid ${refillSchedule.isTwoWeekWarning ? '#fde68a' : '#e2e8f0'}`,
+            borderRadius: '8px',
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '10px',
+            fontSize: '0.80rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', color: '#3c4043' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <Calendar size={14} color="#5f6368" />
+              <strong>{isEs ? 'Dispensado:' : 'Dispensed:'}</strong>{' '}
+              {formatShortDate(refillSchedule.purchaseDate, isEs)}
+            </span>
+            <span>
+              <strong>{isEs ? 'Refill estimado:' : 'Tentative refill:'}</strong>{' '}
+              {formatShortDate(refillSchedule.tentativeRefillDate, isEs)}
+            </span>
+          </div>
+          {refillSchedule.daysRemaining !== null && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                padding: '3px 9px',
+                borderRadius: '999px',
+                background: refillSchedule.isTwoWeekWarning ? '#fef3c7' : '#e8f0fe',
+                color: refillSchedule.isTwoWeekWarning ? '#b45309' : '#1a73e8',
+              }}
+            >
+              {refillSchedule.isTwoWeekWarning && <AlertTriangle size={13} />}
+              {refillSchedule.daysRemaining <= 0
+                ? (isEs ? 'Refill recomendado ahora' : 'Refill due now')
+                : refillSchedule.isTwoWeekWarning
+                ? (isEs ? `Quedan ${refillSchedule.daysRemaining} días — Pedir ya` : `${refillSchedule.daysRemaining} days left — Order now`)
+                : (isEs ? `Quedan ${refillSchedule.daysRemaining} días` : `${refillSchedule.daysRemaining} days remaining`)}
+            </span>
+          )}
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
         <div>

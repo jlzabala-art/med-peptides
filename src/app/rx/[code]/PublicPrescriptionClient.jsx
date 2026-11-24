@@ -136,6 +136,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const searchParams = useSearchParams();
   const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
   const actionParam = searchParams?.get('action') || '';
+  const srcParam = searchParams?.get('src') || '';
   const partParam = searchParams?.get('part') ? Number(searchParams.get('part')) : null;
   const productParam = searchParams?.get('product') || '';
   const urlLot = searchParams?.get('lot') || '';
@@ -150,7 +151,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showQrModal, setShowQrModal] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [inquiryCustomEntity, setInquiryCustomEntity] = useState(null);
-  const [activeGcpTab, setActiveGcpTab] = useState('treatment'); // 'treatment' | 'roadmap' | 'traceability' | 'credentials' | 'patientSharing'
+  const [activeGcpTab, setActiveGcpTab] = useState(() =>
+    actionParam === 'refill' || srcParam === 'label_qr' ? 'refill' : 'treatment'
+  ); // 'treatment' | 'roadmap' | 'refill' | 'atlasAi' | 'contactAtlas'
   const [showDoctorAuthModal, setShowDoctorAuthModal] = useState(false);
   const [showPatientAuthModal, setShowPatientAuthModal] = useState(false);
   const [showCalendarSyncModal, setShowCalendarSyncModal] = useState(false);
@@ -801,13 +804,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               )}
 
               {/* ── Express QR Refill Card (Shown on dedicated Request Refill tab or ?action=refill) ── */}
-              {(actionParam === 'refill' || (isPatientView && activeGcpTab === 'refill')) && (
+              {(isPatientView ? activeGcpTab === 'refill' : actionParam === 'refill') && (
                 <ExpressQrRefillCard
                   rxCode={rxId || currentRx?.code || ''}
+                  rx={currentRx}
                   formulations={compoundedFormulations}
                   initialPartNumber={partParam}
                   initialProductName={productParam}
                   defaultContact={currentRx?.patient?.phone || currentRx?.patient?.email || ''}
+                  scanSource={srcParam || (actionParam === 'refill' ? 'label_qr' : 'direct')}
                   isEs={isEs}
                 />
               )}
@@ -954,6 +959,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   urlBud={searchParams?.get('bud') || ''}
                   onOpenQuotation={() => setShowAtlasQuotationModal(true)}
                   onOpenDoctorContact={() => setShowDoctorContactModal(true)}
+                  onOpenRefill={() => setActiveGcpTab('refill')}
                 />
                 )
               ) : (
