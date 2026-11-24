@@ -381,4 +381,7 @@ test('Patient Rx Privacy, Clinical Accuracy & Single-Panel UX: blocks doctor pro
 
   const drawerSrc = read('src/components/shared/PublicInstitutionalInquiryDrawer.jsx');
   assert.ok(drawerSrc.includes('!attachedEntity.isPatientView'), 'Inquiry drawer must hide Supplied Price in patient view');
+
+  const guideSrc = read('src/components/prescription/PatientPrescriptionGuide.jsx');
+  assert.ok(guideSrc.includes('Quick Dose Log (Last 7 Days)') && guideSrc.includes('handleToggleDay'), 'PatientPrescriptionGuide must include 7-day dose tracker');
 });

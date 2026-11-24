@@ -71,6 +71,56 @@ export default function PatientPrescriptionGuide({
   const [streakDays, setStreakDays] = useState(4);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
 
+  // 7-day interactive adherence log (last 6 days + today) persisted per YYYY-MM-DD
+  const last7Days = useMemo(() => {
+    const out = [];
+    for (let offset = 6; offset >= 0; offset--) {
+      const d = new Date();
+      d.setDate(d.getDate() - offset);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const label = d.toLocaleDateString(isEs ? 'es-ES' : 'en-US', { weekday: 'short' });
+      const dayNum = d.getDate();
+      out.push({ key, label, dayNum, isToday: offset === 0 });
+    }
+    return out;
+  }, [isEs]);
+
+  const [loggedDaysMap, setLoggedDaysMap] = useState(() => {
+    const map = {};
+    if (typeof window === 'undefined') return map;
+    try {
+      for (let offset = 6; offset >= 0; offset--) {
+        const d = new Date();
+        d.setDate(d.getDate() - offset);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        map[k] = Boolean(localStorage.getItem(`atlas_rx_adherence_${rxId}_${k}`));
+      }
+    } catch {
+      /* ignore */
+    }
+    return map;
+  });
+
+  const handleToggleDay = (dayKey, isToday) => {
+    triggerHaptic('selection');
+    const nextVal = !loggedDaysMap[dayKey];
+    setLoggedDaysMap((prev) => ({ ...prev, [dayKey]: nextVal }));
+    if (isToday) setHasTakenDoseToday(nextVal);
+    try {
+      const fullKey = `atlas_rx_adherence_${rxId}_${dayKey}`;
+      if (nextVal) {
+        localStorage.setItem(fullKey, JSON.stringify({ taken: true, time: new Date().toLocaleTimeString() }));
+        toast.success(isEs ? 'Dosis registrada ✓' : 'Dose logged ✓', { icon: '💊' });
+      } else {
+        localStorage.removeItem(fullKey);
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const loggedCount7d = Object.values(loggedDaysMap).filter(Boolean).length;
+
   const handleToggleDose = () => {
     triggerHaptic('selection');
     const newState = !hasTakenDoseToday;
@@ -243,6 +293,95 @@ export default function PatientPrescriptionGuide({
         }}
         isEs={isEs}
       />
+
+      {/* ── Universal 7-Day Dose Tracker + Direct Message to Prescribing Doctor ── */}
+      <div
+        style={{
+          background: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '10px',
+          padding: '14px 16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          boxShadow: '0 1px 2px rgba(60, 64, 67, 0.06)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? 'Registro Rápido de Tomas (Últimos 7 Días)' : 'Quick Dose Log (Last 7 Days)'}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#5f6368', marginTop: '2px' }}>
+              {isEs
+                ? `Toca cada día que hayas tomado tu pauta · ${loggedCount7d}/7 días registrados`
+                : `Tap each day you took your dose · ${loggedCount7d}/7 days logged this week`}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenDoctorContact) {
+                onOpenDoctorContact('posology');
+              }
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 12px',
+              minHeight: '36px',
+              borderRadius: '6px',
+              border: '1px solid #dadce0',
+              background: '#ffffff',
+              color: '#3c4043',
+              fontSize: '0.76rem',
+              fontWeight: 650,
+              cursor: 'pointer',
+            }}
+          >
+            <MessageCircle size={14} color="#1a73e8" />
+            <span>{isEs ? `Preguntar a ${doctorName || 'mi médico'}` : `Message ${doctorName || 'My Doctor'}`}</span>
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '6px' }}>
+          {last7Days.map((day) => {
+            const checked = Boolean(loggedDaysMap[day.key]);
+            return (
+              <button
+                key={day.key}
+                type="button"
+                onClick={() => handleToggleDay(day.key, day.isToday)}
+                aria-pressed={checked}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '3px',
+                  minHeight: '52px',
+                  padding: '6px 4px',
+                  borderRadius: '8px',
+                  border: checked ? '1.5px solid #16a34a' : (day.isToday ? '1.5px solid #1a73e8' : '1px solid #e2e8f0'),
+                  background: checked ? '#f0fdf4' : (day.isToday ? '#eff6ff' : '#f8fafc'),
+                  color: checked ? '#15803d' : '#334155',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <span style={{ fontSize: '0.64rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85 }}>
+                  {day.isToday ? (isEs ? 'Hoy' : 'Today') : day.label}
+                </span>
+                <span style={{ fontSize: '0.84rem', fontWeight: 800 }}>
+                  {checked ? '✓' : day.dayNum}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* ── Item-by-Item Presentation with Differentiated Posology ──────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -475,7 +614,9 @@ export default function PatientPrescriptionGuide({
                     >
                       <div>
                         <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '🖊️ Dosis Semanal (Pluma):' : '🖊️ Weekly Dose (Pen):'}
+                          {/\b(daily|every\s*morning|every\s*evening|once\s*daily|cada\s*mañana|al\s*día)\b/i.test(item.posology?.regimen || '')
+                            ? (isEs ? '🖊️ Dosis Diaria (Pluma):' : '🖊️ Daily Dose (Pen):')
+                            : (isEs ? '🖊️ Dosis Semanal (Pluma):' : '🖊️ Weekly Dose (Pen):')}
                         </div>
                         <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#5b21b6' }}>
                           {item.posology?.regimen || (isEs ? '1 inyección subcutánea semanal' : '1 subcutaneous injection weekly')}
