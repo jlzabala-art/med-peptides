@@ -1129,6 +1129,13 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   const resolvedClinicName = doctorDoc.clinicName || resolvedClinic;
   const resolvedEmail = doctorDoc.email || (cleanDoctorName.toLowerCase().includes('marina') ? 'dr.marina@novaclinic.ae' : '');
 
+  const docLocStr = `${doctorDoc.country || ''} ${doctorDoc.location || ''} ${doctorDoc.city || ''} ${resolvedClinicName || ''}`.toLowerCase();
+  const defaultLicenseFallback = /\b(qatar|doha)\b/i.test(docLocStr)
+    ? 'DHP Qatar Registered'
+    : /\b(dubai|uae|abu\s*dhabi|sharjah)\b/i.test(docLocStr)
+      ? 'DHA Registered'
+      : 'Licensed Physician';
+
   const doctorProfile = {
     id: doctorId,
     name: formatDoctorName(cleanDoctorName),
@@ -1136,7 +1143,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     specialty: doctorDoc.specialty || doctorDoc.speciality || 'Regenerative Medicine & Nutrigenomics',
     clinic: resolvedClinic,
     clinicName: resolvedClinicName,
-    license: doctorDoc.licenseNumber || doctorDoc.license || doctorDoc.dhaLicense || doctorDoc.germanMedicalId || 'DHA Registered',
+    license: doctorDoc.licenseNumber || doctorDoc.license || doctorDoc.dhaLicense || doctorDoc.germanMedicalId || defaultLicenseFallback,
     email: resolvedEmail,
     assistantName: doctorDoc.assistantName || doctorDoc.assistant?.name || '',
     assistantEmail: doctorDoc.assistantEmail || doctorDoc.assistant?.email || '',

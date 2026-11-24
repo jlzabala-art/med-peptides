@@ -1439,8 +1439,14 @@ export function getAuthoritativeClinicalData(rx) {
     clinicName = 'Licensed Clinical Practice';
   }
 
-  if (!doctorLicense) {
-    doctorLicense = rx.treatingDoctor?.license || rx.doctorLicense || (isSezgin ? 'DHA 00208953-005' : (isHaytham ? 'DHA-P-0319842' : (isMarina ? 'DHA-91105367' : 'DHA Registered')));
+  if (!doctorLicense || doctorLicense === 'DHA Registered') {
+    const rxLocStr = `${rx.country || ''} ${rx.clinicName || ''} ${rx.clinic || ''} ${clinicName || ''} ${rx.treatingDoctor?.country || ''}`.toLowerCase();
+    const regionFallback = /\b(qatar|doha)\b/i.test(rxLocStr)
+      ? 'DHP Qatar Registered'
+      : /\b(dubai|uae|abu\s*dhabi|sharjah)\b/i.test(rxLocStr)
+        ? 'DHA Registered'
+        : 'Licensed Physician';
+    doctorLicense = rx.treatingDoctor?.license || rx.doctorLicense || (isSezgin ? 'DHA 00208953-005' : (isHaytham ? 'DHA-P-0319842' : (isMarina ? 'DHA-91105367' : regionFallback)));
   }
 
   // QR encoded URL on bottles points directly to patient portal
@@ -1882,7 +1888,7 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         expDate: rxExpDate,
         storage: form.storage || rx.storage || 'Store at room temperature',
         doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
-        doctorLicense: auth.doctorLicense || 'DHA Registered',
+        doctorLicense: auth.doctorLicense || 'Licensed Physician',
         clinicName: '',
         showClinicOnLabel: false,
         batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,
@@ -2086,7 +2092,7 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         labelMarkdown: rx.labelMarkdown || p.labelMarkdown || null,
         storage: p.storage || rx.storage || 'Store at room temperature (15°C - 25°C)',
         doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
-        doctorLicense: auth.doctorLicense || 'DHA Registered',
+        doctorLicense: auth.doctorLicense || 'Licensed Physician',
         clinicName: '',
         showClinicOnLabel: false,
         batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,

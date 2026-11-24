@@ -772,7 +772,7 @@ export default function ImportPrescriptionModal({
         finalDoctorName = 'Dr. Sobia Mirza';
         finalDoctorId = 'dr-sobia';
         finalDoctorSlug = 'dr-sobia';
-        finalDoctorLicense = 'DHA Registered';
+        finalDoctorLicense = 'Licensed Physician';
         finalClinicName = 'My London Skin Clinic';
         finalClinicId = 'IdDU1oK1VuAVVYrGz6E7';
       }
