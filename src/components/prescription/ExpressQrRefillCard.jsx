@@ -137,25 +137,24 @@ export default function ExpressQrRefillCard({
       onSubmit={handleSubmit}
       style={{
         background: '#ffffff',
-        border: '1px solid #bfdbfe',
-        borderLeft: '4px solid #003666',
-        borderRadius: '10px',
-        padding: '16px 18px',
+        border: '1px solid #dadce0',
+        borderRadius: '8px',
+        padding: '20px',
         marginBottom: '16px',
-        boxShadow: '0 2px 8px rgba(0, 54, 102, 0.06)',
+        boxShadow: '0 1px 2px 0 rgba(60, 64, 67, 0.08)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
+        gap: '14px',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <RefreshCw size={18} color="#003666" />
-          <span style={{ fontWeight: 800, fontSize: '0.96rem', color: '#0f172a' }}>
-            {isEs ? 'Refill Express por QR' : 'Express QR Refill Request'}
+          <RefreshCw size={17} color="#1a73e8" />
+          <span style={{ fontWeight: 700, fontSize: '1.02rem', color: '#202124' }}>
+            {isEs ? '3. Solicitar Refill' : '3. Request Refill'}
           </span>
         </div>
-        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0369a1', background: '#eff6ff', padding: '3px 8px', borderRadius: '6px' }}>
+        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1a73e8', background: '#e8f0fe', padding: '3px 8px', borderRadius: '4px' }}>
           Rx #{rxCode}
         </span>
       </div>

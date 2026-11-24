@@ -1115,7 +1115,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       list.push({ 
         id: 'formula-card', 
         label: isPatientView
-          ? (isEs ? 'Mi Dosis y Registro' : 'My Dose & Log')
+          ? (isEs ? '1. Mi Dosis y Registro' : '1. My Dose & Log')
           : (isEs ? 'Fórmula Magistral & Posología' : 'Compounded Formula & Posology'), 
         category: 'formula',
         badge: isPatientView ? null : (isEs ? 'Fórmula Única' : 'Single Compound'),
@@ -1136,7 +1136,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     list.push({ 
       id: 'milestones-card', 
       label: isPatientView
-        ? (isEs ? 'Plan de Tratamiento' : 'Treatment Plan')
+        ? (isEs ? '2. Plan de Tratamiento' : '2. Treatment Plan')
         : (isEs ? 'Roadmap & Hitos Clínicos' : 'Roadmap & Milestones'),
       category: 'milestones',
       icon: 'calendar'
@@ -1145,19 +1145,19 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     if (isPatientView) {
       list.push({
         id: 'refill-card',
-        label: isEs ? 'Solicitar Refill' : 'Request Refill',
+        label: isEs ? '3. Solicitar Refill' : '3. Request Refill',
         category: 'refill',
         icon: 'rotate'
       });
       list.push({
         id: 'atlas-ai-card',
-        label: isEs ? 'Preguntar a Atlas AI' : 'Ask Atlas AI',
+        label: isEs ? '4. Preguntar a Atlas AI' : '4. Ask Atlas AI',
         category: 'ai',
         icon: 'sparkles'
       });
       list.push({
         id: 'contact-atlas-card',
-        label: isEs ? 'Contactar con Atlas' : 'Contact Atlas',
+        label: isEs ? '5. Contactar con Atlas' : '5. Contact Atlas',
         category: 'contact',
         icon: 'message'
       });

@@ -296,6 +296,11 @@ export default function PrescriptionDetailSidebar({
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('OPEN_RX_SECTION', { detail: { id } }));
+      if (isPatientView) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsMobileDrawerOpen(false);
+        return;
+      }
     }
 
     const performScroll = (targetId) => {
@@ -916,8 +921,8 @@ export default function PrescriptionDetailSidebar({
           {isPatientView ? (
             <div style={{ display: 'flex', flexDirection: 'column', borderLeft: '2px solid #e2e8f0', marginLeft: '4px', gap: '2px' }}>
               {availableSections.map((sec) => {
-                const mappedTab = SECTION_TO_TAB[sec.id];
-                const isActive = (mappedTab && activeGcpTab === mappedTab) || activeId === sec.id;
+                const mappedTab = SECTION_TO_TAB[sec.id] || (sec.category === 'formula' ? 'treatment' : null);
+                const isActive = mappedTab ? activeGcpTab === mappedTab : activeId === sec.id;
                 const IconComp = getSectionIcon(sec.id, sec.icon);
                 return (
                   <button

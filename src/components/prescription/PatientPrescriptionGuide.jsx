@@ -448,7 +448,7 @@ export default function PatientPrescriptionGuide({
         color: '#1a73e8',
         bg: '#f8fafc',
         border: '#dadce0',
-        storageNote: isEs ? 'Conservar a temperatura ambiente protegida de la luz' : 'Store at room temperature protected from light'
+        storageNote: localizePatientText(rx?.storage || formulation.storage, isEs) || (isEs ? 'Conservar a temperatura ambiente protegida de la luz' : 'Store at room temperature protected from light')
       };
 
       if (isPrefilledPen) {
@@ -610,33 +610,6 @@ export default function PatientPrescriptionGuide({
             >
               <Calendar size={13} color="#5f6368" />
               <span>{isEs ? 'Recordatorios' : 'Reminders'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenDoctorContact) {
-                  onOpenDoctorContact('posology');
-                }
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 11px',
-                minHeight: '36px',
-                borderRadius: '6px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#3c4043',
-                fontSize: '0.74rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <MessageCircle size={13} color="#1a73e8" />
-              <span>{isEs ? 'Enviar Consulta' : 'Ask a Question'}</span>
             </button>
           </div>
         </div>
@@ -1327,7 +1300,10 @@ export default function PatientPrescriptionGuide({
                           {isEs ? '💆 Modo de Empleo:' : '💆 Application Method:'}
                         </div>
                         <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
-                          {isEs ? 'Masajear suavemente con la yema de los dedos hasta absorción' : 'Gently massage with fingertips until absorbed'}
+                          {(String(rx?.dispensingForm || item.title || '').toLowerCase().includes('nasal') ||
+                            String(rx?.treatmentTitle || '').toLowerCase().includes('nasal'))
+                            ? (isEs ? 'Pulverización intranasal · Limpiar boquilla tras usar' : 'Intranasal spray · Wipe nozzle after use')
+                            : (isEs ? 'Masajear suavemente con la yema de los dedos hasta absorción' : 'Gently massage with fingertips until absorbed')}
                         </div>
                       </div>
                     </div>

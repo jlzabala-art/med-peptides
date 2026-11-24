@@ -750,85 +750,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
-              {/* ── Patient-Friendly Single "Today's Treatment" Summary Card + Ask AI ── */}
-              {isPatientView && (
-                <div style={{
-                  background: '#ffffff',
-                  border: '1px solid #bfdbfe',
-                  borderRadius: '12px',
-                  padding: '14px 16px',
-                  marginBottom: '8px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px',
-                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {isEs ? 'Tu Tratamiento Hoy' : "Today's Treatment"}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label={isEs ? `Preguntar a Atlas AI sobre #${rxId}` : `Ask Atlas AI about #${rxId}`}
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
-                        }
-                      }}
-                      style={{
-                        padding: '6px 12px',
-                        minHeight: '36px',
-                        borderRadius: '8px',
-                        border: '1px solid #c4b5fd',
-                        background: '#f5f3ff',
-                        color: '#6d28d9',
-                        fontSize: '0.76rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                    >
-                      <Sparkles size={13} />
-                      <span>{isEs ? '¿Necesitas ayuda? Preguntar' : 'Need Help? Ask AI'}</span>
-                    </button>
-                  </div>
-
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                    gap: '10px',
-                  }}>
-                    <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '10px 12px' }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                        {isEs ? 'Qué tomar / aplicar' : 'What to take'}
-                      </div>
-                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', lineHeight: 1.35 }}>
-                        {resolvedFormulaSummary || currentRx?.treatmentTitle || (isEs ? 'Tu tratamiento' : 'Your treatment')}
-                      </div>
-                    </div>
-                    <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '10px 12px' }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                        {isEs ? 'Cómo y cuándo' : 'How & when'}
-                      </div>
-                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginTop: '3px', lineHeight: 1.35 }}>
-                        {currentRx?.posology || currentRx?.items?.[0]?.instructions || (isEs ? 'Sigue la pauta de tu etiqueta.' : 'Follow the instructions on your label.')}
-                      </div>
-                    </div>
-                    <div style={{ background: '#fffbeb', borderRadius: '8px', padding: '10px 12px' }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#b45309', textTransform: 'uppercase' }}>
-                        {isEs ? 'Conservación' : 'Keep it safe'}
-                      </div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginTop: '3px', lineHeight: 1.35 }}>
-                        {currentRx?.storage || prescriptionTypeInfo?.storageDisplay || (isEs ? 'Nevera 2°C–8°C · No congelar' : 'Fridge 2°C–8°C · Do not freeze')}
-                        {(urlBud || currentRx?.expDate || currentRx?.bud) ? ` · ${isEs ? 'Usar antes del' : 'Use before'}: ${urlBud || currentRx?.expDate || currentRx?.bud}` : ''}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* ── Master Header Card (Google Cloud Console High-Density Resource Header) ─────── */}
               <PrescriptionMasterHeader
                 rx={rx}
@@ -898,20 +819,20 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   style={{
                     background: '#ffffff',
                     border: '1px solid #dadce0',
-                    borderRadius: '12px',
+                    borderRadius: '8px',
                     padding: '20px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '12px',
-                    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
+                    boxShadow: '0 1px 2px 0 rgba(60, 64, 67, 0.08)'
                   }}
                 >
-                  <div>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       {isEs ? 'Soporte al Paciente' : 'Patient Support'}
                     </div>
-                    <h3 style={{ margin: '4px 0 4px', fontSize: '1.08rem', fontWeight: 700, color: '#0f172a' }}>
-                      {isEs ? 'Contactar con Atlas' : 'Contact Atlas'}
+                    <h3 style={{ margin: '4px 0 4px', fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
+                      {isEs ? '5. Contactar con Atlas' : '5. Contact Atlas'}
                     </h3>
                     <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.45 }}>
                       {isEs
@@ -2335,16 +2256,20 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   <span style={{ color: '#64748b', fontWeight: 600 }}>Ref:</span>
                   <span style={{ color: '#0f172a', fontWeight: 800, fontFamily: 'monospace' }}>{rxId}</span>
                 </div>
-                <div style={{ color: '#64748b', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <span>Atlas Clinical Intelligence Infrastructure</span>
-                  <span>•</span>
-                  <span>ISO 15189 / 17025 Accredited</span>
-                  <span>•</span>
-                  <span>EU GMP Compounding Alliance</span>
-                </div>
-                <div style={{ color: '#94a3b8', fontSize: '0.70rem' }}>
-                  Confidential Patient Prescription Dossier · Authorized Clinical Access Only
-                </div>
+                {!isPatientView && (
+                  <>
+                    <div style={{ color: '#64748b', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                      <span>Atlas Clinical Intelligence Infrastructure</span>
+                      <span>•</span>
+                      <span>ISO 15189 / 17025 Accredited</span>
+                      <span>•</span>
+                      <span>EU GMP Compounding Alliance</span>
+                    </div>
+                    <div style={{ color: '#94a3b8', fontSize: '0.70rem' }}>
+                      Confidential Patient Prescription Dossier · Authorized Clinical Access Only
+                    </div>
+                  </>
+                )}
               </footer>
             </div>
 
@@ -3161,6 +3086,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             </button>
             <button
               type="button"
+              aria-label={isEs ? `Preguntar a Atlas AI sobre #${rxId}` : `Ask Atlas AI about #${rxId}`}
               className="rx-patient-mobile-btn"
               onClick={() => {
                 triggerHaptic('selection');
