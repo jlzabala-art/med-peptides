@@ -219,35 +219,95 @@ export default function ExpressQrRefillCard({
   };
 
   if (submittedResult) {
+    const fullPhoneDisplay = phoneDigits ? `${dialCode}${phoneDigits}` : '';
     const waText = encodeURIComponent(
       `Hi Atlas Health, I just submitted Refill Request ${submittedResult.requestId} for Rx #${rxCode}: ${quantity}x ${selectedTitle}.`
     );
     return (
       <div
         style={{
-          background: '#f0fdf4',
-          border: '1px solid #86efac',
-          borderLeft: '4px solid #16a34a',
+          background: '#ffffff',
+          border: '1px solid #bbf7d0',
+          borderTop: '4px solid #16a34a',
           borderRadius: '10px',
-          padding: '16px 18px',
+          padding: '20px',
           marginBottom: '16px',
+          boxShadow: '0 2px 8px rgba(22, 163, 74, 0.08)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
+          gap: '14px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#166534', fontWeight: 800, fontSize: '0.98rem' }}>
-          <CheckCircle2 size={20} color="#16a34a" />
-          <span>
-            {isEs ? '¡Solicitud de Refill Confirmada!' : 'Refill Request Confirmed!'} ({submittedResult.requestId})
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <CheckCircle2 size={20} color="#16a34a" />
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '1.02rem', color: '#14532d' }}>
+                {isEs ? '¡Solicitud de Refill Recibida!' : 'Refill Request Received!'}
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#5f6368', fontFamily: 'monospace' }}>
+                Ref: {submittedResult.requestId} · Rx #{rxCode}
+              </div>
+            </div>
+          </div>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 10px', borderRadius: '999px' }}>
+            {isEs ? 'En revisión' : 'Requested'}
           </span>
         </div>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#14532d', lineHeight: 1.5 }}>
-          {isEs
-            ? `Hemos notificado al equipo de Atlas Health y a tu médico para preparar ${quantity}× ${selectedTitle} (Receta #${rxCode}).`
-            : `Atlas Health Operations and your prescribing physician have been notified to prepare ${quantity}× ${selectedTitle} (Rx #${rxCode}).`}
-        </p>
-        <div>
+
+        {/* 3-Step Mini Progress Tracker */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>
+              1. {isEs ? 'Recibido ✓' : 'Received ✓'}
+            </span>
+            <span style={{ fontSize: '0.72rem', color: '#334155', fontWeight: 600 }}>
+              {isEs ? 'Notificado ahora' : 'Logged now'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1a73e8', textTransform: 'uppercase' }}>
+              2. {isEs ? 'Preparación' : 'Preparation'}
+            </span>
+            <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>
+              {isEs ? 'Validación y lote' : 'Pharmacy & review'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+              3. {isEs ? 'Envío' : 'Delivery'}
+            </span>
+            <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>
+              {isEs ? 'Aviso por WhatsApp' : 'WhatsApp tracking'}
+            </span>
+          </div>
+        </div>
+
+        {/* Structured Summary */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', fontSize: '0.80rem', background: '#f0fdf4', border: '1px solid #dcfce7', borderRadius: '8px', padding: '10px 14px' }}>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>
+              {isEs ? 'Tratamiento' : 'Treatment'}
+            </div>
+            <div style={{ fontWeight: 700, color: '#14532d' }}>
+              {quantity}× {selectedTitle}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>
+              {isEs ? 'Contacto de confirmación' : 'Confirmation Contact'}
+            </div>
+            <div style={{ fontWeight: 600, color: '#14532d' }}>
+              {[fullPhoneDisplay, email].filter(Boolean).join(' · ') || '—'}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
           <a
             href={`https://wa.me/971553561058?text=${waText}`}
             target="_blank"
@@ -256,19 +316,34 @@ export default function ExpressQrRefillCard({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '7px 14px',
+              padding: '8px 14px',
               borderRadius: '6px',
-              background: '#ffffff',
-              border: '1px solid #bbf7d0',
-              color: '#15803d',
+              background: '#16a34a',
+              color: '#ffffff',
               fontWeight: 700,
-              fontSize: '0.8rem',
+              fontSize: '0.80rem',
               textDecoration: 'none',
             }}
           >
             <MessageSquare size={14} />
-            <span>{isEs ? 'Escribir por WhatsApp a Atlas' : 'Message Atlas on WhatsApp'}</span>
+            <span>{isEs ? 'Confirmar / Escribir por WhatsApp' : 'Message Atlas on WhatsApp'}</span>
           </a>
+          <button
+            type="button"
+            onClick={() => setSubmittedResult(null)}
+            style={{
+              padding: '7px 12px',
+              borderRadius: '6px',
+              border: '1px solid #dadce0',
+              background: '#ffffff',
+              color: '#3c4043',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            {isEs ? 'Hacer otra solicitud' : 'Submit another request'}
+          </button>
         </div>
       </div>
     );
