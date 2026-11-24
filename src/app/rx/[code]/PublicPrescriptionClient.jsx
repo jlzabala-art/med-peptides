@@ -261,6 +261,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     resolvedFormulaSummary,
     resolvedDosageSummary,
     resolvedPrice,
+    posology,
     timeline
   } = usePrescriptionData(currentRx, { lang, isEs, isPatientView, atlasRecs, isAuthorizedViewer });
 
