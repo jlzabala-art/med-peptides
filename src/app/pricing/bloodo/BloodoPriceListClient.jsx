@@ -23,6 +23,8 @@ import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
 import EmptyState from '@/components/ui/EmptyState';
 import PageHeroCard from '@/components/ui/PageHeroCard';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
+import { buildSchedulePdfBlob } from '@/lib/pdf/schedulePdfBuilder';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
@@ -53,6 +55,7 @@ export default function BloodoPriceListClient({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [cartItems, setCartItems] = useState({});
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
 
   const workspace = usePublicWorkspace?.() || {};
   const { addToWorkspaceCart } = workspace;
@@ -348,6 +351,10 @@ export default function BloodoPriceListClient({
           }
           actions={
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button type="button" className="gcp-btn-secondary" onClick={() => setIsPdfPreviewOpen(true)}>
+                <FileText size={14} />
+                <span>{isEs ? 'Tarifa PDF' : 'Download PDF'}</span>
+              </button>
               <button type="button" className="gcp-btn-secondary" onClick={handleShare}>
                 <Share2 size={14} />
                 <span>{isEs ? 'Compartir' : 'Share'}</span>
@@ -463,6 +470,40 @@ export default function BloodoPriceListClient({
         contextType="pricing"
         entityName="Bloodo™ Capillary Blood Diagnostics (B2B)"
         lang={lang}
+      />
+
+      <DocumentPreviewModal
+        isOpen={isPdfPreviewOpen}
+        onClose={() => setIsPdfPreviewOpen(false)}
+        printable={false}
+        getPdfBlob={() =>
+          buildSchedulePdfBlob({
+            title: isEs ? 'ATLAS HEALTH — DIAGNÓSTICO CAPILAR BLOODO™' : 'ATLAS HEALTH — BLOODO™ CAPILLARY DIAGNOSTICS',
+            subtitle: `CE-IVDR Dried Blood Spot (DBS) · ISO 15189 LC-MS/MS · ${currency}`,
+            metaLine: `Panels: ${filteredProducts.length}  |  Turnaround: 48–72h  |  Currency: ${currency}`,
+            documentRef: 'DOC-BLOODO-2026-V1',
+            currency,
+            tierLabel: 'Public B2B Schedule',
+            isGuest: true,
+            head: [
+              'SKU',
+              isEs ? 'Kit Diagnóstico' : 'Diagnostic Kit',
+              isEs ? 'Biomarcador' : 'Biomarker',
+              `B2B (${currency})`,
+              `Clinic Ref (${currency})`,
+            ],
+            body: filteredProducts.map((r) => [
+              r.sku || r.id,
+              isEs ? (r.nameEs || r.name) : r.name,
+              r.biomarker || 'Capillary DBS',
+              formatPrice(r.wholesalePriceEur),
+              formatPrice(r.clinicPriceEur),
+            ]),
+          })
+        }
+        downloadName={`Bloodo_Diagnostics_Schedule_${currency}.pdf`}
+        title={isEs ? 'Bloodo™ Diagnóstico Capilar — Tarifa Oficial PDF' : 'Bloodo™ Capillary Diagnostics — Official PDF'}
+        subtitle={`${filteredProducts.length} ${isEs ? 'kits' : 'kits'} · ${currency}`}
       />
     </div>
   );

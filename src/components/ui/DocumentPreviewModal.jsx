@@ -17,7 +17,7 @@ import { X, ExternalLink, Download, Printer, Loader2, AlertTriangle } from 'luci
  *  - downloadUrl   Optional URL for the download button (defaults to fileUrl)
  *  - downloadName  Optional filename for the download
  *  - title / subtitle
- *  - printable     Show the Print button (default true)
+ *  - printable     Show the Print button (default false — Preview -> Download first)
  */
 export default function DocumentPreviewModal({
   isOpen,
@@ -29,7 +29,7 @@ export default function DocumentPreviewModal({
   downloadName,
   title = 'Document Preview',
   subtitle,
-  printable = true,
+  printable = false,
 }) {
   const iframeRef = useRef(null);
   const [blobUrl, setBlobUrl] = useState(null);
@@ -123,13 +123,13 @@ export default function DocumentPreviewModal({
             {(fileUrl || blobUrl) && (
               <a
                 id="dpm-download-btn"
-                className="dpm-btn"
+                className={printable ? 'dpm-btn' : 'dpm-btn dpm-btn--primary'}
                 href={effectiveDownloadUrl}
                 download={downloadName || 'document.pdf'}
                 target="_blank"
                 rel="noreferrer"
               >
-                <Download size={16} /> <span className="dpm-btn-label">Download</span>
+                <Download size={16} /> <span className="dpm-btn-label">Download PDF</span>
               </a>
             )}
             {(fileUrl || blobUrl) && (

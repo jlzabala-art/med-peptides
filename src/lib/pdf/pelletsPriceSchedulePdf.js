@@ -4,12 +4,12 @@ import autoTable from 'jspdf-autotable';
 /**
  * buildPelletsPriceSchedulePdfBlob
  * ─────────────────────────────────────────────────────────────────────────────
- * Generates an institutional-grade A4 PDF document for Pharmapolis Subcutaneous
+ * Generates an institutional-grade A4 PDF document for EU GMP Subcutaneous
  * Hormone Pellets & Surgical Trocar Kits.
  *
  * Features:
- *  - Atlas Health Services & Pharmapolis Compounding Pharmacy EU GMP letterhead
- *  - Official Schedule Reference Card (Purity ≥99.5%, E-Beam SAL 10⁻⁶, Plovdiv BG)
+ *  - Atlas Health Services European Pharmacy EU GMP letterhead
+ *  - Official Schedule Reference Card (Purity ≥99.5%, E-Beam SAL 10⁻⁶)
  *  - 4-Card Executive KPI Grid (Currency, 41 Active SKUs, Pack ×10 -10% Savings, EU GMP)
  *  - Detailed Tables Grouped by Hormone Family
  *  - Formatted Unit and 10-Pack Wholesaler Prices
