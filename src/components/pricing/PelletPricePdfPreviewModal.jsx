@@ -247,42 +247,42 @@ export default function PelletPricePdfPreviewModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Document Header */}
+        {/* Document Header (Clean Google Cloud UX layout) */}
         <div style={{ background: '#003666', borderBottom: '3px solid #0d9488', padding: '16px 20px', color: '#ffffff' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ flex: '1 1 360px', minWidth: 0 }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 ATLAS HEALTH SERVICES · EUROPEAN PHARMACY (EU GMP)
               </div>
-              <h2 style={{ margin: '4px 0', fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
+              <h2 style={{ margin: '4px 0', fontSize: '1.18rem', fontWeight: 800, color: '#ffffff' }}>
                 {isEs ? 'Pellets Hormonales Subcutáneos & Kits Trócar · Tarifa Oficial B2B' : 'Subcutaneous Hormone Pellets & Trocar Kits · Official B2B Price Schedule'}
               </h2>
-              <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
+              <div style={{ fontSize: '0.73rem', color: '#cbd5e1' }}>
                 {isEs
-                  ? 'Cilindros Cristalinos Puros Sin Aglutinantes · Esterilización Terminal E-Beam SAL 10⁻⁶ · Farmacia Europea Licenciada (EU GMP)'
-                  : 'Pure Binder-Free Crystalline Cylinders · Terminal E-Beam Sterilization SAL 10⁻⁶ · European Union Licensed Compounding Pharmacy'}
+                  ? 'Cilindros Cristalinos Puros · Esterilización E-Beam SAL 10⁻⁶ · Liberación Orden Cero (3.5–6 Meses)'
+                  : 'Pure Binder-Free Crystalline Cylinders · E-Beam SAL 10⁻⁶ · Zero-Order Release (3.5–6 Months)'}
               </div>
             </div>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px', minWidth: '165px' }}>
-              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b' }}>{isEs ? 'TARIFA:' : 'SCHEDULE:'}</div>
-              <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#166534' }}>DISTRIBUTOR B2B</div>
-              <div style={{ fontSize: '0.65rem', color: '#475569', marginTop: '2px' }}>
-                REF: <strong>ATLAS-PELLETS-B2B-2026</strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px 12px', flexShrink: 0 }}>
+              <div>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#bae6fd', textTransform: 'uppercase' }}>{isEs ? 'Tarifa' : 'Schedule'}</div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#ffffff' }}>B2B WHOLESALE ({currency})</div>
+                <div style={{ fontSize: '0.63rem', color: '#cbd5e1' }}>REF: ATLAS-PELLETS-2026</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Quality Banner & KPIs */}
-        <div style={{ padding: '12px 20px', background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.4 }}>
+        {/* Quality Banner & KPIs (Zero internal margin leakage) */}
+        <div style={{ padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ fontSize: '0.73rem', color: '#334155', lineHeight: 1.4 }}>
             <strong>{isEs ? 'CALIDAD ANALÍTICA:' : 'ANALYTICAL RELEASE:'}</strong>{' '}
             {isEs
               ? 'HPLC ≥99.5% · Endotoxinas <0.25 EU/mg · Disolución Continua Orden Cero (3.5–6 Meses).'
               : 'HPLC ≥99.5% · Endotoxins <0.25 EU/mg · Zero-Order Continuous Release (3.5–6 Months).'}
-            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-              {isEs ? 'Tarifas Wholesaler (+15% + 15%) con Ahorro Institucional en Pack ×10 (-10%).' : 'Wholesaler Tariffs (+15% + 15%) with Institutional Volume Savings in Pack ×10 (-10%).'}
+            <div style={{ fontSize: '0.69rem', color: '#64748b' }}>
+              {isEs ? 'Tarifa Oficial B2B · Ahorro Institucional en Pack ×10 (-10%).' : 'Official B2B Wholesale Schedule · Pack ×10 (-10% Volume Tier).'}
             </div>
           </div>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -295,41 +295,48 @@ export default function PelletPricePdfPreviewModal({
           </div>
         </div>
 
-        {/* Category Quick-Navigation Summary Strip */}
-        <div style={{ padding: '12px 20px 4px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '8px' }}>
-          {groupedSections.map((group) => (
-            <a
-              key={`idx-${group.key}`}
-              href={`#pellet-cat-${group.key}`}
-              style={{
-                padding: '8px 10px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                background: '#f8fafc',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '6px',
-              }}
-            >
-              <span style={{ fontSize: '0.71rem', fontWeight: 700, color: '#003666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {group.title}
-              </span>
-              <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0d9488', background: '#ccfbf1', padding: '1px 6px', borderRadius: '9999px', flexShrink: 0 }}>
-                {group.items.length}
-              </span>
-            </a>
-          ))}
+        {/* Category Quick-Navigation Summary Strip (Single-row clean pills, no truncation) */}
+        <div style={{ padding: '10px 20px 2px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          {groupedSections.map((group) => {
+            const shortLabel = group.title
+              .replace(/\(Estrogen Pellets\)|\(Androgen Pellets\)|\(Estrogen-Blocker Combo\)|\(Sterile Single-Use\)/gi, '')
+              .replace(/17β-Estradiol & Biest 50:50/i, 'Estrogen & Bi-Est')
+              .replace(/Bioidentical Progesterone \(P4\)/i, 'Progesterone (P4)')
+              .replace(/Disposable Surgical Trocar Kits/i, 'Trocar Kits')
+              .trim();
+            return (
+              <a
+                key={`idx-${group.key}`}
+                href={`#pellet-cat-${group.key}`}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: '9999px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span style={{ fontSize: '0.71rem', fontWeight: 700, color: '#003666', whiteSpace: 'nowrap' }}>
+                  {shortLabel}
+                </span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#0f766e', background: '#f0fdfa', padding: '1px 6px', borderRadius: '9999px' }}>
+                  {group.items.length}
+                </span>
+              </a>
+            );
+          })}
         </div>
 
         {/* Tables */}
-        <div style={{ padding: '16px 20px' }}>
+        <div style={{ padding: '14px 20px' }}>
           {groupedSections.map((group) => (
-            <div key={group.key} id={`pellet-cat-${group.key}`} style={{ marginBottom: '20px' }}>
-              <div style={{ background: '#003666', color: '#ffffff', padding: '7px 12px', borderRadius: '6px 6px 0 0', fontSize: '0.78rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div key={group.key} id={`pellet-cat-${group.key}`} style={{ marginBottom: '18px' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: '4px solid #003666', color: '#0f172a', padding: '7px 12px', borderRadius: '6px 6px 0 0', fontSize: '0.78rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>{group.title}</span>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#bae6fd' }}>{group.items.length} SKUs</span>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569' }}>{group.items.length} SKUs</span>
               </div>
               <div style={{ border: '1px solid #e2e8f0', borderTop: 'none', borderRadius: '0 0 4px 4px', overflowX: 'auto' }}>
                 {/* eslint-disable-next-line no-restricted-syntax */}

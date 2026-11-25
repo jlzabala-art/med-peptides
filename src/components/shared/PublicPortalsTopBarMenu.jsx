@@ -51,15 +51,6 @@ const PUBLIC_PORTALS = [
     icon: FileText,
     color: '#16a34a',
     badge: 'Formulary'
-  },
-  {
-    id: 'labels',
-    name: 'Label Studio Standalone',
-    subtitle: 'Direct Warehouse Label Printer',
-    path: '/labels',
-    icon: Tags,
-    color: '#475569',
-    badge: 'Logistics'
   }
 ];
 

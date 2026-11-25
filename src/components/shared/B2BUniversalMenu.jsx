@@ -16,7 +16,9 @@ import {
   Copy,
   Check,
   FlaskConical,
-  Calculator
+  Calculator,
+  Sparkles,
+  SlidersHorizontal
 } from 'lucide-react';
 import {
   B2B_NAV_DOMAINS,
@@ -193,7 +195,7 @@ export default function B2BUniversalMenu({
         </button>
       )}
 
-      {/* ── Mobile Fixed Bottom Navigation Bar (< 1024px) ── */}
+      {/* ── Mobile Fixed Bottom Navigation Bar (< 1024px) — Page-Aware, Zero Labels Leak ── */}
       {!hideMobileBar && (
         <nav className="b2b-mobile-bottom-bar no-print" aria-label={isSpanish ? 'Navegación B2B móvil' : 'Mobile B2B navigation'}>
           <button
@@ -204,8 +206,8 @@ export default function B2BUniversalMenu({
               setOpen(true);
             }}
           >
-            <Compass size={17} />
-            <span>{isSpanish ? 'Relacionadas' : 'Related'}</span>
+            <SlidersHorizontal size={17} />
+            <span>{isSpanish ? 'Filtros' : 'Filters'}</span>
           </button>
 
           <button
@@ -217,13 +219,18 @@ export default function B2BUniversalMenu({
             <span>{isSpanish ? 'Buscar' : 'Search'}</span>
           </button>
 
-          <Link
-            href={activeRxCode ? `/labels?rx=${encodeURIComponent(activeRxCode)}` : '/labels'}
-            className={`b2b-mobile-tab-btn ${pathname.startsWith('/labels') ? 'is-active' : ''}`}
+          <button
+            type="button"
+            className="b2b-mobile-tab-btn"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+              }
+            }}
           >
-            <Tags size={17} />
-            <span>Labels</span>
-          </Link>
+            <Sparkles size={17} color="#7c3aed" />
+            <span>Atlas AI</span>
+          </button>
 
           <button
             type="button"
@@ -234,7 +241,7 @@ export default function B2BUniversalMenu({
             }}
           >
             <Menu size={17} />
-            <span>{isSpanish ? 'Menú B2B' : 'B2B Menu'}</span>
+            <span>{isSpanish ? 'Menú' : 'Menu'}</span>
           </button>
         </nav>
       )}
@@ -344,53 +351,118 @@ export default function B2BUniversalMenu({
                 </span>
               </button>
 
-              {/* 2. Active Clinical Context (suppress redundant Labels CTA when already on /labels) */}
-              {activeRxCode && (
-                <div
-                  style={{
-                    marginBottom: '10px',
-                    padding: '8px 10px',
-                    borderRadius: '8px',
-                    background: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '8px'
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase' }}>
-                      {isSpanish ? 'Receta Activa' : 'Active Rx'}
-                    </div>
-                    <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      #{activeRxCode}{patientName ? ` · ${patientName}` : ''}
-                    </div>
-                  </div>
-                  {!pathname.startsWith('/labels') && (
-                    <Link
-                      href={`/labels?rx=${encodeURIComponent(activeRxCode)}`}
-                      onClick={() => setOpen(false)}
+              {/* 2. Page-Aware Atlas AI + Filters/Sections for Current Page */}
+              {(() => {
+                const pageConfig = pathname.startsWith('/pricing/pellets')
+                  ? {
+                      title: isSpanish ? 'Pellets: Secciones y Filtros' : 'Pellets: Sections & Filters',
+                      aiSub: isSpanish ? 'Pregunta sobre trócares (3.2 vs 4.5 mm), rangos séricos o cinética' : 'Ask about trocars (3.2 vs 4.5 mm), serum targets, or zero-order kinetics',
+                      chips: [
+                        { label: isSpanish ? 'Todos' : 'All Formulations', href: '/pricing/pellets' },
+                        { label: '♀️ Female BHRT', href: '/pricing/pellets?profile=female' },
+                        { label: '♂️ Male TRT', href: '/pricing/pellets?profile=male' },
+                        { label: '17β-Estradiol & Bi-Est', href: '/pricing/pellets?category=estrogen' },
+                        { label: 'Progesterone (P4)', href: '/pricing/pellets?category=progesterone' },
+                        { label: 'Trocar Kits', href: '/pricing/pellets?profile=trocar' },
+                      ],
+                    }
+                  : (pathname.startsWith('/vials') || pathname.startsWith('/pricing/peptides'))
+                    ? {
+                        title: isSpanish ? 'Péptidos: Especialidades y Filtros' : 'Peptides: Specialties & Filters',
+                        aiSub: isSpanish ? 'Pregunta sobre reconstitución, pureza HPLC o protocolos' : 'Ask about reconstitution, HPLC purity, or specialty protocols',
+                        chips: [
+                          { label: isSpanish ? 'Todos' : 'All Vials', href: '/vials' },
+                          { label: 'Gynecology', href: '/vials?specialty=gynecology' },
+                          { label: 'Dermatology', href: '/vials?specialty=dermatology' },
+                          { label: 'Longevity', href: '/vials?specialty=longevity' },
+                          { label: 'Metabolic', href: '/vials?specialty=metabolic' },
+                          { label: 'Urology', href: '/vials?specialty=urology' },
+                        ],
+                      }
+                    : (pathname.startsWith('/pricing/pens') || pathname.startsWith('/pricing/dnlab-pens'))
+                      ? {
+                          title: isSpanish ? 'Plumas U-100: Secciones' : 'U-100 Pens: Sections',
+                          aiSub: isSpanish ? 'Pregunta sobre clics U-100 (0.01 mL/clic) y cartuchos' : 'Ask about U-100 click dosing (0.01 mL/click) & cartridges',
+                          chips: [
+                            { label: isSpanish ? 'Todas las Plumas' : 'All Pens', href: '/pricing/pens' },
+                            { label: isSpanish ? 'Calculadora de Clics' : 'Click Calculator', href: '/calculator?format=pen' },
+                          ],
+                        }
+                      : pathname.startsWith('/proto')
+                        ? {
+                            title: isSpanish ? 'Protocolos: Rutas Clínicas' : 'Protocols: Clinical Routes',
+                            aiSub: isSpanish ? 'Pregunta sobre protocolos clínicos y biomarcadores' : 'Ask about clinical protocols, dosing, and biomarkers',
+                            chips: [
+                              { label: 'All Protocols', href: '/proto' },
+                              { label: 'What are Peptides', href: '/what-are-peptides' },
+                            ],
+                          }
+                        : null;
+
+                return (
+                  <div style={{ marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpen(false);
+                        if (typeof window !== 'undefined') {
+                          window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+                        }
+                      }}
                       style={{
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        background: '#1a73e8',
-                        color: '#ffffff',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        textDecoration: 'none',
-                        flexShrink: 0,
-                        display: 'inline-flex',
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #ddd6fe',
+                        background: '#f5f3ff',
+                        color: '#5b21b6',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        gap: '10px',
                       }}
                     >
-                      <FileText size={11} />
-                      <span>Labels</span>
-                    </Link>
-                  )}
-                </div>
-              )}
+                      <Sparkles size={16} color="#7c3aed" style={{ flexShrink: 0 }} />
+                      <span style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                        <strong style={{ fontSize: '0.78rem' }}>Atlas AI</strong>
+                        <span style={{ fontSize: '0.68rem', color: '#6d28d9' }}>
+                          {pageConfig?.aiSub || (isSpanish ? 'Asistente clínico contextual de esta página' : 'Contextual clinical AI assistant for this page')}
+                        </span>
+                      </span>
+                    </button>
+
+                    {pageConfig && (
+                      <div style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                        <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                          {pageConfig.title}
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                          {pageConfig.chips.map((c) => (
+                            <Link
+                              key={c.href}
+                              href={c.href}
+                              onClick={() => setOpen(false)}
+                              style={{
+                                padding: '4px 9px',
+                                borderRadius: '9999px',
+                                border: '1px solid #cbd5e1',
+                                background: '#ffffff',
+                                color: '#0f172a',
+                                fontSize: '0.71rem',
+                                fontWeight: 600,
+                                textDecoration: 'none',
+                              }}
+                            >
+                              {c.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* 3. Cross-domain Related Screens (deduplicated against open accordion items) */}
               {dedupedRelatedRoutes.length > 0 && (

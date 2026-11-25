@@ -258,6 +258,7 @@ export default function PelletsPriceListClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProfile, setSelectedProfile] = useState('all'); // 'all' | 'female' | 'male' | 'trocar'
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const [copiedPelletUrl, setCopiedPelletUrl] = useState(false);
   const [copiedPelletWhatsApp, setCopiedPelletWhatsApp] = useState(false);
 
@@ -968,16 +969,110 @@ export default function PelletsPriceListClient({
                 <span>{isEs ? 'Tarifa PDF' : 'Preview PDF'}</span>
               </button>
 
-              <button
-                type="button"
-                className="gcp-btn-secondary"
-                onClick={handleShare}
-                title={isEs ? 'Copiar enlace al portapapeles' : 'Copy link to clipboard'}
-                style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-              >
-                <Share2 size={13} color="#5f6368" />
-                <span>{isEs ? 'Compartir' : 'Share'}</span>
-              </button>
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  className="gcp-btn-secondary"
+                  onClick={() => setShareMenuOpen((v) => !v)}
+                  title={isEs ? 'Compartir enlace o mensaje WhatsApp' : 'Share link or WhatsApp pitch'}
+                  style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Share2 size={13} color="#5f6368" />
+                  <span>{isEs ? 'Compartir ▾' : 'Share ▾'}</span>
+                </button>
+                {shareMenuOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 'calc(100% + 6px)',
+                      zIndex: 80,
+                      minWidth: '220px',
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      boxShadow: '0 8px 24px rgba(15, 23, 42, 0.14)',
+                      padding: '6px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px',
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') navigator.clipboard?.writeText(window.location.href);
+                        setCopiedPelletUrl(true);
+                        setShareMenuOpen(false);
+                        setTimeout(() => setCopiedPelletUrl(false), 2000);
+                      }}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#202124',
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {copiedPelletUrl ? (isEs ? 'Enlace copiado ✓' : 'Link Copied ✓') : (isEs ? 'Copiar enlace filtrado' : 'Copy Filtered Link')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          const profileLabel = selectedProfile === 'female'
+                            ? 'Female BHRT & Gynecology'
+                            : selectedProfile === 'male'
+                              ? 'Male TRT & Andrology'
+                              : 'Bioidentical Hormone Pellets';
+                          const pitch = `Good morning Dr. [Last Name],\n\nAs a brief clinical reference for your ${profileLabel} practice, I am sharing our pre-filtered EU GMP sterile bioidentical hormone pellet formulary:\n\n• ${profileLabel} Formulary:\n${window.location.href}\n\nZero-order sustained release kinetics, ≥99.5% USP/EP purity, and sterile trocar implantation kits are detailed on the page. Should you require Certificates of Analysis (CoAs) or prescription coordination, please let me know.\n\nKind regards,\n[Your Name]`;
+                          navigator.clipboard?.writeText(pitch);
+                        }
+                        setCopiedPelletWhatsApp(true);
+                        setShareMenuOpen(false);
+                        setTimeout(() => setCopiedPelletWhatsApp(false), 2000);
+                      }}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#202124',
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {copiedPelletWhatsApp ? (isEs ? 'Mensaje copiado ✓' : 'Pitch Copied ✓') : (isEs ? 'Copiar mensaje WhatsApp' : 'Copy WhatsApp Pitch')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShareMenuOpen(false);
+                        handleShare();
+                      }}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#202124',
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {isEs ? 'Compartir en dispositivo…' : 'Share via Device…'}
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <button
                 type="button"
@@ -1234,70 +1329,16 @@ export default function PelletsPriceListClient({
                 })}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <div style={{ fontSize: '0.73rem', color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
-                  {selectedProfile === 'female'
-                    ? (isEs ? 'Trócar 3.2 mm · Ventana T: 150–350 ng/dL · E2: 40–110 pg/mL' : '3.2 mm Trocar · Target T: 150–350 ng/dL · E2: 40–110 pg/mL')
-                    : selectedProfile === 'male'
-                      ? (isEs ? 'Trócar 4.5 mm (>50 mg) · Ventana T: 400–800 ng/dL' : '4.5 mm Trocar (>50 mg) · Target T: 400–800 ng/dL')
-                      : (isEs ? '≥99.5% USP · Liberación orden cero 3.5–6 meses · Sin primer paso hepático' : '≥99.5% USP · Zero-order release 3.5–6 mo · Zero hepatic first-pass')}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window === 'undefined') return;
-                    navigator.clipboard?.writeText(window.location.href);
-                    setCopiedPelletUrl(true);
-                    setTimeout(() => setCopiedPelletUrl(false), 2000);
-                  }}
-                  style={{
-                    padding: '5px 10px',
-                    minHeight: '30px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: copiedPelletUrl ? '#f0fdf4' : '#ffffff',
-                    color: copiedPelletUrl ? '#15803d' : '#334155',
-                    fontSize: '0.72rem',
-                    fontWeight: 650,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {copiedPelletUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar enlace filtrado' : 'Copy Filtered Link')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window === 'undefined') return;
-                    const profileLabel = selectedProfile === 'female'
-                      ? 'Female BHRT & Gynecology'
-                      : selectedProfile === 'male'
-                        ? 'Male TRT & Andrology'
-                        : 'Bioidentical Hormone Pellets';
-                    const pitch = `Good morning Dr. [Last Name],\n\nAs a brief clinical reference for your ${profileLabel} practice, I am sharing our pre-filtered EU GMP sterile bioidentical hormone pellet formulary:\n\n• ${profileLabel} Formulary:\n${window.location.href}\n\nZero-order sustained release kinetics, ≥99.5% USP/EP purity, and sterile trocar implantation kits are detailed on the page. Should you require Certificates of Analysis (CoAs) or prescription coordination, please let me know.\n\nKind regards,\n[Your Name]`;
-                    navigator.clipboard?.writeText(pitch);
-                    setCopiedPelletWhatsApp(true);
-                    setTimeout(() => setCopiedPelletWhatsApp(false), 2000);
-                  }}
-                  style={{
-                    padding: '5px 10px',
-                    minHeight: '30px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: copiedPelletWhatsApp ? '#f0fdf4' : '#ffffff',
-                    color: copiedPelletWhatsApp ? '#15803d' : '#334155',
-                    fontSize: '0.72rem',
-                    fontWeight: 650,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {copiedPelletWhatsApp ? (isEs ? 'Mensaje copiado ✓' : 'Pitch Copied ✓') : (isEs ? 'Copiar WhatsApp' : 'Copy WhatsApp Pitch')}
-                </button>
+              <div style={{ fontSize: '0.73rem', color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
+                {selectedProfile === 'female'
+                  ? (isEs ? 'Trócar 3.2 mm · Ventana T: 150–350 ng/dL · E2: 40–110 pg/mL' : '3.2 mm Trocar · Target T: 150–350 ng/dL · E2: 40–110 pg/mL')
+                  : selectedProfile === 'male'
+                    ? (isEs ? 'Trócar 4.5 mm (>50 mg) · Ventana T: 400–800 ng/dL' : '4.5 mm Trocar (>50 mg) · Target T: 400–800 ng/dL')
+                    : (isEs ? '≥99.5% USP · Liberación orden cero 3.5–6 meses · Sin primer paso hepático' : '≥99.5% USP · Zero-order release 3.5–6 mo · Zero hepatic first-pass')}
               </div>
             </div>
 
-            {/* Global Search Bar (Strict Rule #6 & #7) */}
+            {/* Global Search Bar (Strict Rule #6 & #7 — single profile bar above, no duplicate filter box) */}
             <div className="pellets-filter-toolbar">
               <GlobalSearchBar
                 namespace="pellets"
@@ -1306,12 +1347,6 @@ export default function PelletsPriceListClient({
                 value={searchQuery}
                 onChange={setSearchQuery}
                 resultCount={filteredProducts.length}
-                filters={[
-                  { id: 'all', label: isEs ? 'Todos' : 'All', active: selectedProfile === 'all', onClick: () => setSelectedProfile('all') },
-                  { id: 'female', label: isEs ? 'Mujer' : 'Female', active: selectedProfile === 'female', onClick: () => setSelectedProfile('female') },
-                  { id: 'male', label: isEs ? 'Hombre' : 'Male', active: selectedProfile === 'male', onClick: () => setSelectedProfile('male') },
-                  { id: 'trocar', label: isEs ? 'Kits Trócar' : 'Trocar Kits', active: selectedProfile === 'trocar', onClick: () => setSelectedProfile('trocar') },
-                ]}
                 size="lg"
               />
 

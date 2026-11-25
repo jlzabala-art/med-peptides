@@ -44,7 +44,6 @@ export default function AtlasAppSwitcher({
 
   const apps = [
     { label: isSpanish ? 'Catálogo Clínico' : 'Clinical Catalog', href: '/c/CAT-MU9L9GBN' },
-    { label: isSpanish ? 'Prescripciones y Etiquetas' : 'Prescriptions & Labels', href: '/labels' },
     { label: isSpanish ? 'Protocolos Clínicos' : 'Clinical Protocols', href: '/proto' },
     { label: isSpanish ? 'Hub de Precios B2B' : 'B2B Price Hub', href: '/pricing' },
     { label: isSpanish ? 'Lista de Péptidos' : 'Peptides Schedule', href: '/pricing/peptides' },

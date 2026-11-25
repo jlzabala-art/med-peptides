@@ -69,6 +69,49 @@ const INQUIRY_TOPICS_PEPTIDES = [
   }
 ];
 
+const INQUIRY_TOPICS_PELLETS_B2B_SCHEDULE = [
+  {
+    id: 'pellets_pack10_quote',
+    labelEn: 'Wholesale Pack ×10 & Clinic Volume Quote',
+    labelEs: 'Cotización Mayorista Pack ×10 y Volumen',
+    icon: Tag,
+    placeholderEn: 'Request official wholesale quotation for bioidentical hormone pellets, Pack ×10 (-10%) volume tiers, or clinic account pricing...',
+    placeholderEs: 'Solicite cotización mayorista de pellets hormonales bioidénticos, descuentos Pack ×10 (-10%) o tarifas para su clínica...'
+  },
+  {
+    id: 'pellets_female_bhrt',
+    labelEn: 'Female BHRT / Gynecology Pellet Dosing & Protocols',
+    labelEs: 'Protocolos Ginecología y THS Femenina (BHRT)',
+    icon: FileText,
+    placeholderEn: 'Inquire about 17β-Estradiol, Bi-Est 50:50, Progesterone (P4), or female low-dose Testosterone pellet selection and target serum ranges...',
+    placeholderEs: 'Consulte sobre selección de dosis en 17β-Estradiol, Bi-Est 50:50, Progesterona o Testosterona femenina y rangos séricos objetivo...'
+  },
+  {
+    id: 'pellets_male_trt',
+    labelEn: 'Male TRT & Testosterone + Anastrozole Protocols',
+    labelEs: 'Protocolos TRT Masculino y Testosterona + Anastrozol',
+    icon: FlaskConical,
+    placeholderEn: 'Specify target testosterone ranges, multi-pellet implantation totals, or T + Anastrozole synergy formulations...',
+    placeholderEs: 'Especifique rangos séricos objetivo, dosificación total multi-pellet o formulaciones sinérgicas de Testosterona + Anastrozol...'
+  },
+  {
+    id: 'pellets_trocars',
+    labelEn: 'Surgical Trocar Kits (3.2 mm / 4.5 mm) & Implantation',
+    labelEs: 'Kits Quirúrgicos de Trócar (3.2 mm / 4.5 mm)',
+    icon: RefreshCw,
+    placeholderEn: 'Ask about sterile single-use 3.2 mm vs 4.5 mm trocar kit compatibility, cannula sizing, or implantation training support...',
+    placeholderEs: 'Consulte compatibilidad de trócares desechables de 3.2 mm frente a 4.5 mm, calibre de cánula o soporte técnico de implantación...'
+  },
+  {
+    id: 'pellets_eu_gmp_coa',
+    labelEn: 'EU GMP Quality Dossiers (E-Beam SAL 10⁻⁶ & CoA)',
+    labelEs: 'Dossiers EU GMP (E-Beam SAL 10⁻⁶ y CoA)',
+    icon: ShieldCheck,
+    placeholderEn: 'Request batch Certificates of Analysis (≥99.5% HPLC), endotoxin (<0.25 EU/mg), sterility SAL 10⁻⁶ docs, or cold-chain logistics...',
+    placeholderEs: 'Solicite Certificados de Análisis (HPLC ≥99.5%), endotoxinas (<0.25 EU/mg), esterilidad SAL 10⁻⁶ o logística de envío...'
+  }
+];
+
 const INQUIRY_TOPICS_PEPTIDES_B2B_SCHEDULE = [
   {
     id: 'b2b_pack10_volume_quote',
@@ -656,6 +699,7 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [initialEntity, contextType, propBrandType]);
 
   const activeTopics = useMemo(() => {
+    if (brandType === 'pellets_schedule' || contextType === 'pellets_b2b_schedule') return INQUIRY_TOPICS_PELLETS_B2B_SCHEDULE;
     if (brandType === 'peptides_b2b') return INQUIRY_TOPICS_PEPTIDES_B2B_SCHEDULE;
     if (brandType === 'ultraperson' || brandType === 'ultraman') return INQUIRY_TOPICS_ULTRAPERSON;
     if (brandType === 'trichotest') return INQUIRY_TOPICS_TRICHOTEST;

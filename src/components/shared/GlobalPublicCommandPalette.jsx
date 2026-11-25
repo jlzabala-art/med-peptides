@@ -532,22 +532,24 @@ export default function GlobalPublicCommandPalette() {
                   >
                     {rx.patientName || rx.name} <span style={{ color: '#1a73e8', fontFamily: 'monospace' }}>#{rx.code}</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => navigateTo(`/labels?rx=${encodeURIComponent(rx.code || rx.id)}`)}
-                    style={{
-                      padding: '3px 8px',
-                      borderRadius: '5px',
-                      border: '1px solid #cbd5e1',
-                      background: '#f8fafc',
-                      color: '#1a73e8',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {isEs ? 'Etiquetas' : 'Labels'}
-                  </button>
+                  {pathname?.startsWith('/labels') && (
+                    <button
+                      type="button"
+                      onClick={() => navigateTo(`/labels?rx=${encodeURIComponent(rx.code || rx.id)}`)}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '5px',
+                        border: '1px solid #cbd5e1',
+                        background: '#f8fafc',
+                        color: '#1a73e8',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {isEs ? 'Etiquetas' : 'Labels'}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

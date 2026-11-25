@@ -903,7 +903,6 @@ export default function DatasheetQuickSearchModal({
             { label: 'Peptides & Kits', href: `/pricing/peptides?lang=${lang}`, match: /pept|vial|kit|bpc|tirz|reta|sema/i },
             { label: 'Clinical Protocols', href: `/proto?lang=${lang}`, match: /proto|guide|wada|longev/i },
             { label: 'Dosing Calculator', href: `/calculator?lang=${lang}`, match: /calc|click|clic|u-100|dose|reconst/i },
-            { label: 'Labels Studio', href: `/labels?lang=${lang}`, match: /label|etiquet|rx|print|zpl/i },
           ].filter((r) => !qClean || r.match.test(qClean) || r.label.toLowerCase().includes(qClean.toLowerCase()));
 
           if (!looksLikeRxCode && quickRoutes.length === 0) return null;
