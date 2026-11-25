@@ -65,12 +65,24 @@ function resolveInitialPhoneState(rawPhone = '', rawCountry = '') {
 }
 
 function cleanProductTitle(f, fallback) {
+  const short = String(f?.shortTitle || f?.title || '').trim();
+  const isGenericTitle = !short || /^compounded\s+(formula|formulation|nasal\s*spray)$/i.test(short);
+  if (!isGenericTitle) {
+    const clean = short
+      .replace(/\bCompounded\b/gi, '')
+      .replace(/\bCompounding\b/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    return f?.volume && !clean.toLowerCase().includes(String(f.volume).toLowerCase())
+      ? `${clean} (${f.volume})`
+      : clean;
+  }
   const firstApi = Array.isArray(f?.apis) && f.apis.length > 0 ? f.apis[0] : null;
   if (firstApi?.name || firstApi?.productName) {
     const name = firstApi.name || firstApi.productName;
     return firstApi.dosage ? `${name} (${firstApi.dosage})` : name;
   }
-  const raw = String(f?.title || f?.treatmentType || f?.dispensingForm || fallback || '');
+  const raw = String(f?.treatmentType || f?.dispensingForm || fallback || '');
   return raw
     .replace(/\bCompounded\b/gi, '')
     .replace(/\bCompounding\b/gi, '')
@@ -121,6 +133,17 @@ export default function ExpressQrRefillCard({
     [initialPhoneSource, defaultCountry, rx?.patient?.country, rx?.country]
   );
 
+  const isMultiPart = options.length > 1;
+  const hasExplicitInitialPart = Boolean(initialPartNumber || initialProductName);
+  const [refillScope, setRefillScope] = useState(
+    isMultiPart && !hasExplicitInitialPart ? 'full' : 'partial'
+  );
+  const [selectedParts, setSelectedParts] = useState(() => {
+    if (isMultiPart && !hasExplicitInitialPart) {
+      return options.map((o) => Number(o.partNumber));
+    }
+    return [Number(defaultSelected?.partNumber || 1)];
+  });
   const [selectedPart, setSelectedPart] = useState(defaultSelected?.partNumber || 1);
   const [quantity, setQuantity] = useState(1);
   const [dialCode, setDialCode] = useState(initialPhoneParsed.dialCode);
@@ -136,10 +159,38 @@ export default function ExpressQrRefillCard({
     [rx, formulations]
   );
 
-  const selectedTitle =
-    options.find((o) => Number(o.partNumber) === Number(selectedPart))?.title ||
-    initialProductName ||
-    'Personalized Treatment';
+  const activeSelectedOptions = useMemo(() => {
+    if (!isMultiPart || refillScope === 'full') return options;
+    const picked = options.filter((o) => selectedParts.includes(Number(o.partNumber)));
+    return picked.length > 0 ? picked : [options[0]];
+  }, [isMultiPart, refillScope, options, selectedParts]);
+
+  const selectedTitle = useMemo(() => {
+    if (isMultiPart && refillScope === 'full') {
+      return isEs
+        ? `Tratamiento completo (${options.length} partes): ${options.map((o) => o.title).join(' + ')}`
+        : `Full Regimen (${options.length} parts): ${options.map((o) => o.title).join(' + ')}`;
+    }
+    if (isMultiPart) {
+      return activeSelectedOptions.map((o) => o.title).join(' + ');
+    }
+    return (
+      options.find((o) => Number(o.partNumber) === Number(selectedPart))?.title ||
+      initialProductName ||
+      'Personalized Treatment'
+    );
+  }, [isMultiPart, refillScope, options, activeSelectedOptions, selectedPart, initialProductName, isEs]);
+
+  const togglePartSelection = (partNum) => {
+    const num = Number(partNum);
+    setSelectedParts((prev) => {
+      if (prev.includes(num)) {
+        if (prev.length === 1) return prev; // Keep at least 1 selected
+        return prev.filter((p) => p !== num);
+      }
+      return [...prev, num].sort((a, b) => a - b);
+    });
+  };
 
   const handlePhoneChange = (e) => {
     const digitsOnly = String(e.target.value || '').replace(/\D/g, '').slice(0, 15);
@@ -195,7 +246,9 @@ export default function ExpressQrRefillCard({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          partNumber: selectedPart,
+          partNumber: isMultiPart ? activeSelectedOptions[0]?.partNumber : selectedPart,
+          refillScope: isMultiPart ? refillScope : 'single',
+          selectedParts: activeSelectedOptions.map((o) => ({ partNumber: o.partNumber, title: o.title })),
           productName: selectedTitle,
           quantity,
           phone: fullPhone,
@@ -435,42 +488,160 @@ export default function ExpressQrRefillCard({
         </div>
       )}
 
-      {/* Row 1: Product & Quantity */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-        <div>
-          <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-            {isEs ? 'Producto a repetir' : 'Product to Refill'}
-          </label>
-          <select
-            value={selectedPart}
-            onChange={(e) => setSelectedPart(Number(e.target.value))}
-            style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.84rem', fontWeight: 600 }}
-          >
-            {options.map((opt) => (
-              <option key={opt.partNumber} value={opt.partNumber}>
-                {opt.title}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Row 1: Product / Multi-Part Scope & Quantity */}
+      {isMultiPart ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>
+              {isEs ? 'Qué deseas renovar' : 'What would you like to refill?'}
+            </label>
+            <div style={{ display: 'inline-flex', border: '1px solid #dadce0', borderRadius: '6px', overflow: 'hidden', background: '#f8fafc' }}>
+              <button
+                type="button"
+                onClick={() => setRefillScope('full')}
+                style={{
+                  padding: '5px 10px',
+                  border: 'none',
+                  borderRight: '1px solid #dadce0',
+                  background: refillScope === 'full' ? '#1a73e8' : 'transparent',
+                  color: refillScope === 'full' ? '#ffffff' : '#3c4043',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {isEs ? `Todo (${options.length} partes)` : `Full Regimen (${options.length} parts)`}
+              </button>
+              <button
+                type="button"
+                onClick={() => setRefillScope('partial')}
+                style={{
+                  padding: '5px 10px',
+                  border: 'none',
+                  background: refillScope === 'partial' ? '#1a73e8' : 'transparent',
+                  color: refillScope === 'partial' ? '#ffffff' : '#3c4043',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {isEs ? 'Elegir partes' : 'Select parts'}
+              </button>
+            </div>
+          </div>
 
-        <div>
-          <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-            {isEs ? 'Cantidad' : 'Quantity'}
-          </label>
-          <select
-            value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
-            style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.84rem', fontWeight: 600 }}
-          >
-            {[1, 2, 3, 4, 5].map((q) => (
-              <option key={q} value={q}>
-                {q} {q === 1 ? (isEs ? 'unidad' : 'unit') : (isEs ? 'unidades' : 'units')}
-              </option>
-            ))}
-          </select>
+          {refillScope === 'full' ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '10px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+              {options.map((opt) => (
+                <span
+                  key={opt.partNumber}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: '#0f766e',
+                    background: '#f0fdfa',
+                    border: '1px solid #99f6e4',
+                    padding: '4px 9px',
+                    borderRadius: '999px',
+                  }}
+                >
+                  <span>✓</span>
+                  <span>{opt.title}</span>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px' }}>
+              {options.map((opt) => {
+                const checked = selectedParts.includes(Number(opt.partNumber));
+                return (
+                  <label
+                    key={opt.partNumber}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      minHeight: '44px',
+                      padding: '8px 11px',
+                      borderRadius: '8px',
+                      border: checked ? '1.5px solid #1a73e8' : '1px solid #cbd5e1',
+                      background: checked ? '#eff6ff' : '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#202124',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => togglePartSelection(opt.partNumber)}
+                      style={{ width: '16px', height: '16px', accentColor: '#1a73e8', flexShrink: 0 }}
+                    />
+                    <span>{isEs ? `Parte ${opt.partNumber}: ` : `Part ${opt.partNumber}: `}{opt.title}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+
+          <div style={{ maxWidth: '220px' }}>
+            <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+              {isEs ? 'Ciclos / Cantidad' : 'Cycles / Quantity'}
+            </label>
+            <select
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.84rem', fontWeight: 600 }}
+            >
+              {[1, 2, 3, 4, 5].map((q) => (
+                <option key={q} value={q}>
+                  {q} {q === 1 ? (isEs ? 'ciclo / unidad' : 'cycle / unit') : (isEs ? 'ciclos / unidades' : 'cycles / units')}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+              {isEs ? 'Producto a repetir' : 'Product to Refill'}
+            </label>
+            <select
+              value={selectedPart}
+              onChange={(e) => setSelectedPart(Number(e.target.value))}
+              style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.84rem', fontWeight: 600 }}
+            >
+              {options.map((opt) => (
+                <option key={opt.partNumber} value={opt.partNumber}>
+                  {opt.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+              {isEs ? 'Cantidad' : 'Quantity'}
+            </label>
+            <select
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.84rem', fontWeight: 600 }}
+            >
+              {[1, 2, 3, 4, 5].map((q) => (
+                <option key={q} value={q}>
+                  {q} {q === 1 ? (isEs ? 'unidad' : 'unit') : (isEs ? 'unidades' : 'units')}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* Row 2: Dedicated Mobile (Country Flag + Digits) & Email */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>

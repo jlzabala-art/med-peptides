@@ -602,15 +602,33 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         patientName,
         view: isPatientView ? 'patient' : 'doctor',
         patientMode: isPatientView,
+        dispensingForm: currentRx?.dispensingForm || null,
         formula: resolvedFormulaSummary || currentRx?.treatmentTitle || null,
-        dosage: getPosologyText(rx?.posology) || compoundedFormulations?.[0]?.posology?.regimen || null,
+        dosage: getPosologyText(currentRx?.posology || rx?.posology) || compoundedFormulations.map((f) => `${f.shortTitle || f.title}: ${f.posology?.regimen || ''}`).filter(Boolean).join(' | ') || null,
+        durationDays: currentRx?.durationDays || null,
+        duration: posology?.duration || currentRx?.duration || null,
+        parts: compoundedFormulations.map((f, idx) => ({
+          partNumber: f.partNumber || idx + 1,
+          title: f.shortTitle || f.title,
+          volume: f.volume || null,
+          regimen: f.posology?.regimen || null,
+          apis: (f.apis || []).map((a) => `${a.name || a.productName}${a.dosage ? ` (${a.dosage})` : ''}`),
+        })),
+        items: Array.isArray(currentRx?.items)
+          ? currentRx.items.slice(0, 15).map((it) => ({
+              name: it?.name || it?.productName,
+              dosage: it?.dosage || null,
+              quantity: it?.quantity || 1,
+              instructions: it?.instructions || null,
+            }))
+          : [],
         storage: currentRx?.storage || null,
-        lotNumber: urlLot || currentRx?.lotNumber || currentRx?.lote || null,
+        lotNumber: urlLot || currentRx?.lotNumber || currentRx?.lote || currentRx?.batchCode || null,
         bud: urlBud || currentRx?.expDate || currentRx?.bud || null,
       },
       bottomBar: { hidden: true },
     },
-    [rxId, patientName, isPatientView, resolvedFormulaSummary, urlLot, urlBud]
+    [rxId, patientName, isPatientView, resolvedFormulaSummary, urlLot, urlBud, currentRx?.posology, currentRx?.durationDays, currentRx?.batchCode, compoundedFormulations, posology?.duration]
   );
 
   return (

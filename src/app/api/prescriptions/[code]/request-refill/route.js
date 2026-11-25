@@ -35,7 +35,14 @@ export async function POST(request, { params }) {
     const body = await request.json().catch(() => ({}));
     const quantity = Math.max(1, Math.min(10, Number(body?.quantity) || 1));
     const partNumber = body?.partNumber ? Number(body.partNumber) : null;
-    const productName = String(body?.productName || 'Personalized Treatment').trim().slice(0, 140);
+    const refillScope = String(body?.refillScope || 'single').trim().slice(0, 20);
+    const selectedParts = Array.isArray(body?.selectedParts)
+      ? body.selectedParts.slice(0, 12).map((p) => ({
+          partNumber: Number(p?.partNumber) || null,
+          title: String(p?.title || '').trim().slice(0, 120),
+        }))
+      : [];
+    const productName = String(body?.productName || 'Personalized Treatment').trim().slice(0, 180);
     const phone = String(body?.phone || '').trim().slice(0, 40);
     const email = String(body?.email || '').trim().slice(0, 100);
     const contactInfo = String(body?.contactInfo || [phone, email].filter(Boolean).join(' · ') || '').trim().slice(0, 160);
@@ -58,6 +65,8 @@ export async function POST(request, { params }) {
       requestId,
       source,
       partNumber,
+      refillScope,
+      selectedParts,
       productName,
       quantity,
       phone,
