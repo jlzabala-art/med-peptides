@@ -434,11 +434,19 @@ export default function PrescriptionMasterHeader({
           : attrs.routeDisplay;
         const multiDeviceSummary = isMultiPartHeader
           ? compoundedFormulations
-              .map((f, idx) => String(f.shortTitle || f.title || `Part ${idx + 1}`).split('(')[0].trim())
+              .map((f, idx) => {
+                const raw = String(f.shortTitle || f.title || `Part ${idx + 1}`).split('(')[0].trim();
+                if (!isPatientView) return raw;
+                const low = raw.toLowerCase();
+                if (low.includes('topical')) return isEs ? 'Loción capilar' : 'Scalp Lotion';
+                if (low.includes('oral')) return isEs ? 'Cápsulas diarias' : 'Daily Capsules';
+                if (low.includes('scalp care') || low.includes('hygiene')) return isEs ? 'Aceite y lavado' : 'Oil & Wash';
+                return raw.replace(/\bHPMC\s+/gi, '');
+              })
               .filter((v, i, arr) => v && arr.indexOf(v) === i)
               .slice(0, 3)
               .join(' · ')
-          : attrs.deviceDisplay;
+          : (isPatientView ? String(attrs.deviceDisplay || '').replace(/\bHPMC\s+/gi, '') : attrs.deviceDisplay);
         const durationDisplay = rx?.durationDays
           ? `${rx.durationDays} ${isEs ? 'Días' : 'Days Supply'}`
           : attrs.cycleDisplay;

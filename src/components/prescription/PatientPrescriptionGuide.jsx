@@ -573,91 +573,98 @@ export default function PatientPrescriptionGuide({
           boxShadow: '0 1px 2px rgba(60, 64, 67, 0.06)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {posologySchedule.mode === 'weekly'
-                ? (isEs ? '1. Registro Semanal de Tomas (Últimas 4 Semanas)' : '1. Weekly Dose Log (Last 4 Weeks)')
-                : posologySchedule.mode === 'twice_daily'
-                ? (isEs ? '1. Registro de Tomas: Mañana y Tarde' : '1. Dose Log: Morning & Evening')
-                : (isEs ? '1. Registro Rápido de Tomas (Últimos 7 Días)' : '1. Quick Dose Log (Last 7 Days)')}
+            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? '1. Qué hacer hoy' : '1. What to do today'}
             </div>
             <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '2px' }}>
-              {posologySchedule.mode === 'weekly'
-                ? (isEs
-                    ? `${posologySchedule.timeHint} · Toca la semana en la que aplicaste tu dosis`
-                    : `${posologySchedule.timeHint} · Tap the week you took your dose`)
-                : posologySchedule.mode === 'twice_daily'
-                ? (isEs
-                    ? `${posologySchedule.timeHint} · Marca mañana y tarde/noche hoy`
-                    : `${posologySchedule.timeHint} · Mark morning and evening today`)
-                : posologySchedule.mode === 'custom_weekly'
-                ? (isEs
-                    ? `${posologySchedule.timeHint} · ${loggedCount7d}/${posologySchedule.targetPerWeek} esta semana`
-                    : `${posologySchedule.timeHint} · ${loggedCount7d}/${posologySchedule.targetPerWeek} this week`)
-                : (isEs
-                    ? `${posologySchedule.timeHint} · ${loggedCount7d}/7 días · Pulsa en Hoy para marcar tu toma`
-                    : `${posologySchedule.timeHint} · ${loggedCount7d}/7 days logged · Tap Today to log your dose`)}
+              {posologySchedule.timeHint || (isEs ? 'Sigue tu pauta diaria' : 'Follow your daily schedule')}
+              {' · '}
+              {loggedCount7d}/7 {isEs ? 'días esta semana' : 'days this week'}
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={() => setShowWelcomePdfModal(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 10px',
-                minHeight: '36px',
-                borderRadius: '6px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#3c4043',
-                fontSize: '0.74rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <FileText size={13} color="#1a73e8" />
-              <span>{isEs ? 'Tarjeta PDF' : 'Welcome PDF'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowCalendarModal(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 10px',
-                minHeight: '36px',
-                borderRadius: '6px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#3c4043',
-                fontSize: '0.74rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <Calendar size={13} color="#5f6368" />
-              <span>{isEs ? 'Recordatorios' : 'Reminders'}</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => handleToggleDay(todayKey, true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              minHeight: '42px',
+              borderRadius: '8px',
+              border: hasTakenDoseToday ? '1.5px solid #16a34a' : 'none',
+              background: hasTakenDoseToday ? '#f0fdf4' : '#1a73e8',
+              color: hasTakenDoseToday ? '#15803d' : '#ffffff',
+              fontSize: '0.80rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <CheckCircle2 size={15} />
+            <span>
+              {hasTakenDoseToday
+                ? (isEs ? 'Completado hoy ✓' : 'Completed today ✓')
+                : (isEs ? 'Marcar hoy completado' : 'Mark today complete')}
+            </span>
+          </button>
         </div>
+
+        {/* Unified Daily Routine Summary inside Today Card for multi-part regimens */}
+        {categorizedItems.length > 1 && (() => {
+          const morning = [];
+          const evening = [];
+          const weekly = [];
+          categorizedItems.forEach((it) => {
+            const txt = `${it.posology?.dosageInstructions || ''} ${it.posology?.regimen || ''} ${it.posology?.timing || ''} ${it.title || ''}`.toLowerCase();
+            const rawLbl = String(it.shortTitle || it.title || '').toLowerCase();
+            const humanLbl = rawLbl.includes('topical')
+              ? (isEs ? 'Loción capilar' : 'Scalp lotion')
+              : rawLbl.includes('oral')
+              ? (isEs ? '1 cápsula con agua' : '1 capsule with water')
+              : (rawLbl.includes('scalp care') || rawLbl.includes('hygiene'))
+              ? (isEs ? 'Aceite y lavado' : 'Oil & scalp wash')
+              : (it.shortTitle || it.title);
+            if (/\b(weekly|1-2x|1–2x|2x\/week|wash|shampoo|oil)\b/i.test(txt)) weekly.push(humanLbl);
+            else if (/\b(night|bedtime|evening|noche|antes de dormir|pm)\b/i.test(txt)) evening.push(humanLbl);
+            else morning.push(humanLbl);
+          });
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '8px' }}>
+              {morning.length > 0 && (
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7' }}>☀️ {isEs ? 'Mañana' : 'Morning'}</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>{morning.join(' · ')}</div>
+                </div>
+              )}
+              {evening.length > 0 && (
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4f46e5' }}>🌙 {isEs ? 'Noche' : 'Evening'}</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>{evening.join(' · ')}</div>
+                </div>
+              )}
+              {weekly.length > 0 && (
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488' }}>🗓️ {isEs ? '1–2× / semana' : '1–2× / week'}</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124', marginTop: '2px' }}>{weekly.join(' · ')}</div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Refill Schedule Banner (Always visible when tentativeRefillDate exists; amber alert when <= 14 days) */}
         {refillSchedule.tentativeRefillDate && (
           <div
             style={{
               background: refillSchedule.isTwoWeekWarning ? '#fffbeb' : '#f8fafc',
-              border: refillSchedule.isTwoWeekWarning ? '1px solid #fde68a' : '1px solid #dadce0',
-              borderLeft: refillSchedule.isTwoWeekWarning ? '4px solid #d97706' : '4px solid #1a73e8',
+              border: refillSchedule.isTwoWeekWarning ? '1px solid #fde68a' : '1px solid #e2e8f0',
+              borderLeft: refillSchedule.isTwoWeekWarning ? '4px solid #d97706' : '3px solid #1a73e8',
               borderRadius: '8px',
-              padding: '10px 14px',
+              padding: '9px 12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -665,11 +672,11 @@ export default function PatientPrescriptionGuide({
               gap: '10px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.80rem', color: refillSchedule.isTwoWeekWarning ? '#92400e' : '#3c4043', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.79rem', color: refillSchedule.isTwoWeekWarning ? '#92400e' : '#3c4043', fontWeight: 600 }}>
               {refillSchedule.isTwoWeekWarning ? (
-                <AlertTriangle size={16} color="#d97706" style={{ flexShrink: 0 }} />
+                <AlertTriangle size={15} color="#d97706" style={{ flexShrink: 0 }} />
               ) : (
-                <RefreshCw size={15} color="#1a73e8" style={{ flexShrink: 0 }} />
+                <RefreshCw size={14} color="#1a73e8" style={{ flexShrink: 0 }} />
               )}
               <span>
                 {refillSchedule.daysRemaining <= 0
@@ -678,11 +685,11 @@ export default function PatientPrescriptionGuide({
                       : 'Your current supply cycle is complete — request your refill now to avoid interruption.')
                   : refillSchedule.isTwoWeekWarning
                   ? (isEs
-                      ? `Quedan ${refillSchedule.daysRemaining} días de tratamiento (refill estimado: ${formatShortDate(refillSchedule.tentativeRefillDate, true)}). Pídelo ahora para recibirlo a tiempo.`
-                      : `${refillSchedule.daysRemaining} days left in your supply (tentative refill: ${formatShortDate(refillSchedule.tentativeRefillDate, false)}). Order now so it arrives on time.`)
+                      ? `Quedan ${refillSchedule.daysRemaining} días de tratamiento (refill estimado: ${formatShortDate(refillSchedule.tentativeRefillDate, true)}).`
+                      : `${refillSchedule.daysRemaining} days left (tentative refill: ${formatShortDate(refillSchedule.tentativeRefillDate, false)}).`)
                   : (isEs
-                      ? `Próximo refill estimado: ${formatShortDate(refillSchedule.tentativeRefillDate, true)} (ciclo de ${refillSchedule.durationDays} días · quedan ${refillSchedule.daysRemaining} días).`
-                      : `Estimated next refill: ${formatShortDate(refillSchedule.tentativeRefillDate, false)} (${refillSchedule.durationDays}-day supply · ${refillSchedule.daysRemaining} days remaining).`)}
+                      ? `Próximo refill estimado: ${formatShortDate(refillSchedule.tentativeRefillDate, true)} (${refillSchedule.durationDays} días · quedan ${refillSchedule.daysRemaining} días).`
+                      : `Next refill estimated: ${formatShortDate(refillSchedule.tentativeRefillDate, false)} (${refillSchedule.durationDays}-day supply · ${refillSchedule.daysRemaining} days left).`)}
               </span>
             </div>
             {onOpenRefill && (
@@ -693,23 +700,77 @@ export default function PatientPrescriptionGuide({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  padding: '6px 12px',
+                  padding: '5px 11px',
                   borderRadius: '6px',
                   border: refillSchedule.isTwoWeekWarning ? '1px solid #d97706' : '1px solid #dadce0',
                   background: '#ffffff',
-                  color: refillSchedule.isTwoWeekWarning ? '#b45309' : '#1a73e8',
-                  fontSize: '0.76rem',
-                  fontWeight: 700,
+                  color: refillSchedule.isTwoWeekWarning ? '#b45309' : '#3c4043',
+                  fontSize: '0.75rem',
+                  fontWeight: 650,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                 }}
               >
-                <RefreshCw size={13} />
+                <RefreshCw size={12} />
                 <span>{isEs ? 'Solicitar Refill' : 'Request Refill'}</span>
               </button>
             )}
           </div>
         )}
+
+        {/* Progressive Disclosure: 7-Day Log + Welcome PDF + Reminders */}
+        <details style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+          <summary style={{ fontSize: '0.75rem', fontWeight: 650, color: '#5f6368', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', listStyle: 'none' }}>
+            <span>{isEs ? 'Ver historial de 7 días, tarjeta PDF y recordatorios' : 'Quick Dose Log (Last 7 Days), PDF card & reminders'}</span>
+            <span style={{ color: '#1a73e8', fontSize: '0.72rem' }}>{isEs ? 'Abrir ▾' : 'Open ▾'}</span>
+          </summary>
+          <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setShowWelcomePdfModal(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 10px',
+                  minHeight: '36px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <FileText size={13} color="#1a73e8" />
+                <span>{isEs ? 'Tarjeta PDF' : 'Welcome PDF'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCalendarModal(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 10px',
+                  minHeight: '36px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <Calendar size={13} color="#5f6368" />
+                <span>{isEs ? 'Recordatorios' : 'Reminders'}</span>
+              </button>
+            </div>
 
         {posologySchedule.mode === 'twice_daily' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' }}>
@@ -837,6 +898,8 @@ export default function PatientPrescriptionGuide({
           })}
         </div>
         )}
+          </div>
+        </details>
       </div>
       )}
 
@@ -991,76 +1054,6 @@ export default function PatientPrescriptionGuide({
         </div>
       )}
 
-      {/* ── Daily Routine At-a-Glance Strip (Multi-Part Prescriptions Only) ── */}
-      {categorizedItems.length > 1 && (() => {
-        const morningItems = [];
-        const eveningItems = [];
-        const weeklyOrAnytimeItems = [];
-        categorizedItems.forEach((it) => {
-          const txt = `${it.posology?.dosageInstructions || ''} ${it.posology?.regimen || ''} ${it.posology?.timing || ''} ${it.title || ''}`.toLowerCase();
-          const label = it.shortTitle || it.title;
-          if (/\b(weekly|1-2x|1–2x|2x\/week|wash|shampoo|oil)\b/i.test(txt)) {
-            weeklyOrAnytimeItems.push(label);
-          } else if (/\b(night|bedtime|evening|noche|antes de dormir|pm)\b/i.test(txt)) {
-            eveningItems.push(label);
-          } else if (/\b(morning|breakfast|am|ma[nñ]ana|desayuno)\b/i.test(txt)) {
-            morningItems.push(label);
-          } else {
-            morningItems.push(label);
-          }
-        });
-        return (
-          <div
-            style={{
-              background: '#f8fafc',
-              border: '1px solid #dadce0',
-              borderRadius: '10px',
-              padding: '12px 14px',
-              marginBottom: '1.1rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-            }}
-          >
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368' }}>
-              {isEs ? 'Tu rutina diaria en 1 vistazo' : 'Your daily routine at a glance'}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: '8px' }}>
-              {morningItems.length > 0 && (
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', marginBottom: '2px' }}>
-                    ☀️ {isEs ? 'Mañana / Día' : 'Morning / Day'}
-                  </div>
-                  <div style={{ fontSize: '0.77rem', fontWeight: 600, color: '#202124', lineHeight: 1.35 }}>
-                    {morningItems.join(' · ')}
-                  </div>
-                </div>
-              )}
-              {eveningItems.length > 0 && (
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4f46e5', marginBottom: '2px' }}>
-                    🌙 {isEs ? 'Noche' : 'Evening / Bedtime'}
-                  </div>
-                  <div style={{ fontSize: '0.77rem', fontWeight: 600, color: '#202124', lineHeight: 1.35 }}>
-                    {eveningItems.join(' · ')}
-                  </div>
-                </div>
-              )}
-              {weeklyOrAnytimeItems.length > 0 && (
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', marginBottom: '2px' }}>
-                    🗓️ {isEs ? 'Semanal / Lavado' : 'Weekly / Care'}
-                  </div>
-                  <div style={{ fontSize: '0.77rem', fontWeight: 600, color: '#202124', lineHeight: 1.35 }}>
-                    {weeklyOrAnytimeItems.join(' · ')}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
-
       {/* ── Item-by-Item Presentation with Differentiated Posology ──────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {categorizedItems.map((item) => {
@@ -1142,9 +1135,18 @@ export default function PatientPrescriptionGuide({
                   })()}
                   <div>
                     <h3 style={{ margin: 0, fontSize: '1.04rem', fontWeight: 700, color: '#202124' }}>
-                      {(/compounded\s+(nasal\s*spray|formula|solution)/i.test(item.title || '') && item.apis?.length > 0)
-                        ? `${item.apis.map(a => `${a.name || a.productName}${a.dosage ? ` (${a.dosage})` : ''}`).join(' + ')}`
-                        : item.title}
+                      {(() => {
+                        if (/compounded\s+(nasal\s*spray|formula|solution)/i.test(item.title || '') && item.apis?.length > 0) {
+                          return item.apis.map(a => `${a.name || a.productName}${a.dosage ? ` (${a.dosage})` : ''}`).join(' + ');
+                        }
+                        const rawT = String(item.title || '').trim();
+                        const lowT = rawT.toLowerCase();
+                        const prefix = categorizedItems.length > 1 ? `${item.itemIndex}. ` : '';
+                        if (lowT === 'topical treatment') return `${prefix}${isEs ? 'Loción Capilar (Noche)' : 'Scalp Lotion (Evening)'}`;
+                        if (lowT === 'oral treatment') return `${prefix}${isEs ? 'Cápsulas Diarias (Mañana)' : 'Daily Capsules (Morning)'}`;
+                        if (lowT === 'scalp care and hygiene') return `${prefix}${isEs ? 'Aceite y Lavado Semanal' : 'Weekly Oil & Wash'}`;
+                        return `${prefix}${rawT}`;
+                      })()}
                     </h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
                       {item.volume && (
@@ -1382,7 +1384,7 @@ export default function PatientPrescriptionGuide({
                       }
                     `}</style>
                     <details
-                      open
+                      open={categorizedItems.length <= 1}
                       style={{
                         marginTop: '2px',
                         background: '#f8fafc',

@@ -298,7 +298,7 @@ export default function GlobalBottomStickyBar() {
     }
   };
 
-  if (pathname?.startsWith('/labels')) {
+  if (pathname?.startsWith('/labels') || resolvedConfig?.hidden) {
     return null;
   }
 
