@@ -71,23 +71,67 @@ export async function generateMetadata({ params, searchParams }) {
     ? 'Monografía verificada de formulación clínica y protocolo de posología farmacéutica. Verificación médica autorizada • Atlas Health Services.'
     : 'Verified clinical formulation monograph and pharmaceutical posology protocol. Authorized medical verification • Atlas Health Services.';
 
+  let patientOgImage = null;
+
   if (isPatientView) {
-    const cleanTreatmentName = rx?.treatmentTitle || formulaSummary || '';
-    title = cleanTreatmentName
-      ? `${cleanTreatmentName} · ${isEs ? 'Guía de Tratamiento' : 'Treatment Guide'}`
-      : (isEs ? `Tu Guía de Tratamiento (#${cleanCode})` : `Your Treatment Guide (#${cleanCode})`);
+    const corpus = [
+      rx?.treatmentTitle,
+      rx?.title,
+      rx?.dispensingForm,
+      rx?.regimenCategory,
+      rx?.diagnosis,
+      formulaSummary,
+      ...(Array.isArray(rawItems) ? rawItems.map((i) => `${i?.name || ''} ${i?.productName || ''} ${i?.form || ''}`) : []),
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
 
-    const patientParts = [];
-    if (posologySummary) patientParts.push(posologySummary);
-    if (storageSummary) patientParts.push(storageSummary);
-    if (budSummary) patientParts.push(`${isEs ? 'Usar antes del' : 'Use before'}: ${budSummary}`);
-    else if (lotSummary) patientParts.push(`Lot: ${lotSummary}`);
+    const daysVal = Number(rx?.durationDays) > 0 ? Number(rx.durationDays) : null;
+    const isHair = /\b(trichotest|trichosol|trichooil|trichowash|trichofoam|minoxidil|dutasteride|finasteride|latanoprost|hair|scalp|follicular)\b/i.test(corpus);
+    const isHormone = /\b(bhrt|trt|estradiol|estriol|steriol|progesterone|testosterone|dhea|pregnenolone|pellet|hormone|menopause|enclomiphene)\b/i.test(corpus);
+    const isPen = rx?.dispensingForm === 'prefilled_pen' || /\b(pre-?filled\s*pen|pluma|bioblend|glutathione\s*pen)\b/i.test(corpus);
+    const isNasal = !isHair && (rx?.dispensingForm === 'nasal_spray' || /\b(nasal|intranasal|selank|semax)\b/i.test(corpus));
+    const isMetabolic = /\b(retatrutide|tirzepatide|semaglutide|glp-?1|glp-?3|nutrigen|weight|metabolic)\b/i.test(corpus);
+    const isSleep = /\b(sleep|insomnia|dsip|melatonin|magnesium|l-theanine|gaba|calm|stress)\b/i.test(corpus);
+    const isLongevity = /\b(telotest|epithalon|epitalon|mots-c|nad\+?|ubiquinol|pqq|cycloastragenol|longevity)\b/i.test(corpus);
+    const isOral = rx?.dispensingForm === 'oral_capsules' || /\b(capsule|caps|oral|tablet)\b/i.test(corpus);
 
-    description = patientParts.length > 0
-      ? patientParts.join(' · ')
-      : (isEs
-          ? 'Consulta cómo tomar tu tratamiento, conservación y registro diario de dosis.'
-          : 'View how to take your treatment, storage instructions, and your daily dose log.');
+    if (isHair) {
+      title = isEs ? 'Tu Guía de Tratamiento Capilar · Atlas Health' : 'Your Hair Care Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/topical_serum.jpg`;
+    } else if (isHormone) {
+      title = isEs ? 'Tu Guía de Equilibrio Hormonal · Atlas Health' : 'Your Hormone Balance Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/topical_serum.jpg`;
+    } else if (isPen) {
+      title = isEs ? 'Tu Guía de Tratamiento en Pluma · Atlas Health' : 'Your Pen Treatment Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/pen_single_cartridge.jpg`;
+    } else if (isNasal) {
+      title = isEs ? 'Tu Guía de Spray Nasal · Atlas Health' : 'Your Nasal Spray Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/nasal_spray.jpg`;
+    } else if (isMetabolic) {
+      title = isEs ? 'Tu Guía de Cuidado Metabólico · Atlas Health' : 'Your Metabolic Care Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/vial_single.jpg`;
+    } else if (isSleep) {
+      title = isEs ? 'Tu Guía de Sueño y Bienestar · Atlas Health' : 'Your Sleep & Calm Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/capsules_bottle.jpg`;
+    } else if (isLongevity) {
+      title = isEs ? 'Tu Guía de Longevidad Celular · Atlas Health' : 'Your Cellular Longevity Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/capsules_bottle.jpg`;
+    } else if (isOral) {
+      title = isEs ? 'Tu Guía de Tratamiento Oral · Atlas Health' : 'Your Daily Supplement Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/capsules_bottle.jpg`;
+    } else {
+      title = isEs ? 'Tu Guía Personal de Tratamiento · Atlas Health' : 'Your Personal Treatment Guide · Atlas Health';
+      patientOgImage = `${BASE_URL}/images/clinical/vial_single.jpg`;
+    }
+
+    const planText = daysVal
+      ? (isEs ? ` para tu plan de ${daysVal} días` : ` for your ${daysVal}-day plan`)
+      : '';
+    description = isEs
+      ? `Instrucciones paso a paso, conservación y refill en 1 clic${planText}. Toca para abrir tu guía privada.`
+      : `Simple step-by-step routine, storage tips & 1-click refill${planText}. Tap to open your private guide.`;
   } else if (formulaSummary) {
     description = `${isEs ? 'Fórmula' : 'Formula'}: ${formulaSummary}${packSummary ? ` (${packSummary})` : ''}. `;
     if (posologySummary) {
@@ -100,7 +144,10 @@ export async function generateMetadata({ params, searchParams }) {
     description = description.slice(0, 197).trim() + '...';
   }
 
-  const ogLogoUrl = `${BASE_URL}/atlas-health-logo-wa.png`;
+  const ogLogoUrl = (isPatientView && patientOgImage) ? patientOgImage : `${BASE_URL}/atlas-health-logo-wa.png`;
+  const ogImageType = ogLogoUrl.endsWith('.jpg') ? 'image/jpeg' : 'image/png';
+  const ogImageWidth = ogLogoUrl.endsWith('.jpg') ? 1200 : 400;
+  const ogImageHeight = ogLogoUrl.endsWith('.jpg') ? 630 : 400;
   const ogUrl = isPatientView
     ? `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}?view=patient`
     : `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}`;
@@ -113,22 +160,22 @@ export async function generateMetadata({ params, searchParams }) {
       description,
       url: ogUrl,
       siteName: isPatientView
-        ? (isEs ? 'Guía de Tratamiento' : 'Treatment Guide')
+        ? (isEs ? 'Guía de Tratamiento · Atlas Health' : 'Treatment Guide · Atlas Health')
         : (isEs ? 'Atlas Health Services · Formulario Clínico' : 'Atlas Health Services · Clinical Formulary'),
       locale: isEs ? 'es_ES' : 'en_US',
       type: 'article',
       images: [
         {
           url: ogLogoUrl,
-          width: 400,
-          height: 400,
-          type: 'image/png',
-          alt: 'Atlas Health Services'
+          width: ogImageWidth,
+          height: ogImageHeight,
+          type: ogImageType,
+          alt: title
         }
       ]
     },
     twitter: {
-      card: 'summary',
+      card: isPatientView ? 'summary_large_image' : 'summary',
       title,
       description,
       images: [ogLogoUrl]
@@ -136,10 +183,10 @@ export async function generateMetadata({ params, searchParams }) {
     other: {
       'og:image': ogLogoUrl,
       'og:image:secure_url': ogLogoUrl,
-      'og:image:type': 'image/png',
-      'og:image:width': '400',
-      'og:image:height': '400',
-      'og:image:alt': 'Atlas Health Services',
+      'og:image:type': ogImageType,
+      'og:image:width': String(ogImageWidth),
+      'og:image:height': String(ogImageHeight),
+      'og:image:alt': title,
       'whatsapp:title': title,
       'whatsapp:description': description,
       'whatsapp:image': ogLogoUrl
