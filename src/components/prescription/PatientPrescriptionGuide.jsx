@@ -649,13 +649,13 @@ export default function PatientPrescriptionGuide({
           </div>
         </div>
 
-        {/* 2-Week Pre-Refill Alert Banner */}
-        {refillSchedule.isTwoWeekWarning && (
+        {/* Refill Schedule Banner (Always visible when tentativeRefillDate exists; amber alert when <= 14 days) */}
+        {refillSchedule.tentativeRefillDate && (
           <div
             style={{
-              background: '#fffbeb',
-              border: '1px solid #fde68a',
-              borderLeft: '4px solid #d97706',
+              background: refillSchedule.isTwoWeekWarning ? '#fffbeb' : '#f8fafc',
+              border: refillSchedule.isTwoWeekWarning ? '1px solid #fde68a' : '1px solid #dadce0',
+              borderLeft: refillSchedule.isTwoWeekWarning ? '4px solid #d97706' : '4px solid #1a73e8',
               borderRadius: '8px',
               padding: '10px 14px',
               display: 'flex',
@@ -665,16 +665,24 @@ export default function PatientPrescriptionGuide({
               gap: '10px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.80rem', color: '#92400e', fontWeight: 600 }}>
-              <AlertTriangle size={16} color="#d97706" style={{ flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.80rem', color: refillSchedule.isTwoWeekWarning ? '#92400e' : '#3c4043', fontWeight: 600 }}>
+              {refillSchedule.isTwoWeekWarning ? (
+                <AlertTriangle size={16} color="#d97706" style={{ flexShrink: 0 }} />
+              ) : (
+                <RefreshCw size={15} color="#1a73e8" style={{ flexShrink: 0 }} />
+              )}
               <span>
                 {refillSchedule.daysRemaining <= 0
                   ? (isEs
                       ? 'Tu ciclo actual ha finalizado — solicita tu refill ahora para no interrumpir tu tratamiento.'
                       : 'Your current supply cycle is complete — request your refill now to avoid interruption.')
-                  : (isEs
+                  : refillSchedule.isTwoWeekWarning
+                  ? (isEs
                       ? `Quedan ${refillSchedule.daysRemaining} días de tratamiento (refill estimado: ${formatShortDate(refillSchedule.tentativeRefillDate, true)}). Pídelo ahora para recibirlo a tiempo.`
-                      : `${refillSchedule.daysRemaining} days left in your supply (tentative refill: ${formatShortDate(refillSchedule.tentativeRefillDate, false)}). Order now so it arrives on time.`)}
+                      : `${refillSchedule.daysRemaining} days left in your supply (tentative refill: ${formatShortDate(refillSchedule.tentativeRefillDate, false)}). Order now so it arrives on time.`)
+                  : (isEs
+                      ? `Próximo refill estimado: ${formatShortDate(refillSchedule.tentativeRefillDate, true)} (ciclo de ${refillSchedule.durationDays} días · quedan ${refillSchedule.daysRemaining} días).`
+                      : `Estimated next refill: ${formatShortDate(refillSchedule.tentativeRefillDate, false)} (${refillSchedule.durationDays}-day supply · ${refillSchedule.daysRemaining} days remaining).`)}
               </span>
             </div>
             {onOpenRefill && (
@@ -687,9 +695,9 @@ export default function PatientPrescriptionGuide({
                   gap: '5px',
                   padding: '6px 12px',
                   borderRadius: '6px',
-                  border: '1px solid #d97706',
+                  border: refillSchedule.isTwoWeekWarning ? '1px solid #d97706' : '1px solid #dadce0',
                   background: '#ffffff',
-                  color: '#b45309',
+                  color: refillSchedule.isTwoWeekWarning ? '#b45309' : '#1a73e8',
                   fontSize: '0.76rem',
                   fontWeight: 700,
                   cursor: 'pointer',

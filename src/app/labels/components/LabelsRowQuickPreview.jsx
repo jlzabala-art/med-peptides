@@ -226,36 +226,54 @@ export default function LabelsRowQuickPreview({
                 <div style={{ fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
                   {getConcisePartsSummary(rx)}
                 </div>
+
+                {/* Operational Delivery Metadata (GCP Key-Value Strip) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', fontSize: '0.69rem', color: '#64748b', marginTop: '2px' }}>
+                  <span>
+                    <strong style={{ color: '#3c4043' }}>{isEs ? 'Lote:' : 'Lot:'}</strong>{' '}
+                    {rx?.batchCode || rx?.lotNumber || rx?.lote || (isEs ? 'Pendiente' : 'Pending')}
+                  </span>
+                  {(rx?.bud || rx?.expDate) && (
+                    <span>
+                      <strong style={{ color: '#3c4043' }}>BUD:</strong> {rx.bud || rx.expDate}
+                    </span>
+                  )}
+                  {(rx?.duration || rx?.durationDays) && (
+                    <span>
+                      <strong style={{ color: '#3c4043' }}>{isEs ? 'Ciclo:' : 'Cycle:'}</strong>{' '}
+                      {rx.duration || `${rx.durationDays} ${isEs ? 'días' : 'days'}`}
+                    </span>
+                  )}
+                  {(rx?.patientPhone || rx?.phone) && (
+                    <span>
+                      <strong style={{ color: '#3c4043' }}>Tel:</strong> {rx.patientPhone || rx.phone}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Right: Always-available Preview PDF + Open Studio + Safe Delete */}
+              {/* Right: Monochromatic GCP Secondary Actions + Neutral Delete with Hover Danger */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={() => handlePreviewPdf(rx)}
                   className="gcp-btn-secondary"
-                  style={{ fontSize: '0.73rem', padding: '5px 10px', minHeight: '32px' }}
+                  style={{ fontSize: '0.72rem', padding: '5px 10px', minHeight: '30px' }}
                 >
-                  <Eye size={13} color="#003666" />
+                  <Eye size={13} color="#5f6368" />
                   <span>{isEs ? 'Ver PDF' : 'Preview PDF'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => onOpenStudio?.(rx?.code || rxCode)}
+                  className="gcp-btn-secondary"
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '5px 11px',
-                    minHeight: '32px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    backgroundColor: '#1a73e8',
-                    color: '#ffffff',
-                    fontSize: '0.73rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
+                    fontSize: '0.72rem',
+                    padding: '5px 10px',
+                    minHeight: '30px',
+                    color: '#1a73e8',
+                    fontWeight: 650,
                   }}
                 >
                   <span>{isEs ? 'Abrir Studio' : 'Open Studio'}</span>
@@ -263,30 +281,46 @@ export default function LabelsRowQuickPreview({
                 </button>
 
                 {rx?.id && (
-                  <button
-                    type="button"
-                    disabled={isDeleting}
-                    onClick={() => handleDeletePrescription(rx)}
-                    title={isEs ? 'Eliminar prescripción' : 'Delete prescription'}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '5px 9px',
-                      minHeight: '32px',
-                      borderRadius: '6px',
-                      border: '1px solid #fecaca',
-                      backgroundColor: '#fef2f2',
-                      color: '#dc2626',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      cursor: isDeleting ? 'not-allowed' : 'pointer',
-                      opacity: isDeleting ? 0.6 : 1,
-                    }}
-                  >
-                    {isDeleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-                    <span>{isEs ? 'Borrar' : 'Delete'}</span>
-                  </button>
+                  <>
+                    <div style={{ width: '1px', height: '18px', background: '#e2e8f0', margin: '0 2px' }} />
+                    <button
+                      type="button"
+                      disabled={isDeleting}
+                      onClick={() => handleDeletePrescription(rx)}
+                      title={isEs ? 'Eliminar prescripción' : 'Delete prescription'}
+                      onMouseEnter={(e) => {
+                        if (!isDeleting) {
+                          e.currentTarget.style.color = '#dc2626';
+                          e.currentTarget.style.borderColor = '#fecaca';
+                          e.currentTarget.style.backgroundColor = '#fef2f2';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#5f6368';
+                        e.currentTarget.style.borderColor = '#dadce0';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '5px 9px',
+                        minHeight: '30px',
+                        borderRadius: '6px',
+                        border: '1px solid #dadce0',
+                        backgroundColor: '#ffffff',
+                        color: '#5f6368',
+                        fontSize: '0.71rem',
+                        fontWeight: 600,
+                        cursor: isDeleting ? 'not-allowed' : 'pointer',
+                        opacity: isDeleting ? 0.6 : 1,
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      {isDeleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                      <span>{isEs ? 'Borrar' : 'Delete'}</span>
+                    </button>
+                  </>
                 )}
               </div>
             </div>

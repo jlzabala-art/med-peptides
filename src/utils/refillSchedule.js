@@ -24,12 +24,18 @@ export function parseRxDate(raw) {
 }
 
 export function extractDurationDays(rx = {}, formulations = []) {
+  const itemTexts = Array.isArray(rx?.items)
+    ? rx.items.map((i) => `${i?.instructions || ''} ${i?.posology || ''} ${i?.duration || ''} ${i?.name || ''}`)
+    : [];
   const candidates = [
     rx?.refillDays,
     rx?.durationDays,
     rx?.duration,
     rx?.treatmentDuration,
-    ...(Array.isArray(formulations) ? formulations.map((f) => f?.duration || f?.refillDays) : []),
+    ...(Array.isArray(formulations) ? formulations.map((f) => f?.duration || f?.refillDays || f?.posology?.regimen) : []),
+    rx?.posology,
+    rx?.instructions,
+    ...itemTexts,
   ];
 
   for (const val of candidates) {
@@ -37,10 +43,12 @@ export function extractDurationDays(rx = {}, formulations = []) {
     if (typeof val === 'string') {
       const mDays = val.match(/(\d+)\s*(?:days?|d[ií]as?)/i);
       if (mDays) return Number(mDays[1]);
-      const mWeeks = val.match(/(\d+)\s*(?:weeks?|semanas?)/i);
+      const mWeeks = val.match(/(\d+)\s*(?:weeks?|semanas?|wks?)/i);
       if (mWeeks) return Number(mWeeks[1]) * 7;
-      const mMonths = val.match(/(\d+)\s*(?:months?|mes(?:es)?)/i);
+      const mMonths = val.match(/(\d+)\s*[-–]?\s*(?:months?|mes(?:es)?)/i);
       if (mMonths) return Number(mMonths[1]) * 30;
+      const mCaps = val.match(/(\d+)\s*(?:capsules?|caps)\b/i);
+      if (mCaps && Number(mCaps[1]) >= 14) return Number(mCaps[1]);
     }
   }
   return 30;

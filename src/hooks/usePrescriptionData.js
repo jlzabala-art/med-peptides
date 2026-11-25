@@ -891,13 +891,22 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         return;
       }
 
-      // ── Injectable / Pen detection (MUST be checked BEFORE topical/oral) ──
-      const lineIsPen =
+      // ── Explicit oral guard (MUST run BEFORE injectable peptide keyword match) ──
+      const lineIsExplicitOral =
+        routeLower.includes('oral') ||
+        formLower.includes('capsule') ||
+        formLower.includes('cápsula') ||
+        formLower.includes('tablet') ||
+        /\b(caps?|capsules?|c[aá]psulas?|oral|tablet|troche|sublingual|hpmc|hygrocaps)\b/i.test(nameLower);
+
+      // ── Injectable / Pen detection (MUST be checked BEFORE topical, but NEVER override explicit oral) ──
+      const lineIsPen = !lineIsExplicitOral && (
         formLower.includes('pre-filled pen') || formLower.includes('prefilled pen') ||
         formLower.includes('pluma precargada') || formLower.includes('subq pen') ||
-        (formLower.includes('pen') && (nameLower.includes('glp') || nameLower.includes('retatrutide') || nameLower.includes('tirzepatide')));
+        (formLower.includes('pen') && (nameLower.includes('glp') || nameLower.includes('retatrutide') || nameLower.includes('tirzepatide')))
+      );
 
-      const lineIsInjectable = lineIsPen ||
+      const lineIsInjectable = !lineIsExplicitOral && (lineIsPen ||
         nameLower.includes('retatrutide') || nameLower.includes('glp-3') || nameLower.includes('glp3') ||
         nameLower.includes('glp-1') || nameLower.includes('glp1') || nameLower.includes('tirzepatide') ||
         nameLower.includes('semaglutide') || nameLower.includes('cagrilintide') || nameLower.includes('bpc-157') ||
@@ -905,7 +914,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         nameLower.includes('sermorelin') || nameLower.includes('ghk-cu') || nameLower.includes('epithalon') ||
         nameLower.includes('mots-c') || nameLower.includes('peptide') ||
         routeLower.includes('subq') || routeLower.includes('subcutaneous') || routeLower.includes('inject') ||
-        formLower.includes('lyophilized') || formLower.includes('liofilizado') || formLower.includes('vial');
+        formLower.includes('lyophilized') || formLower.includes('liofilizado') || formLower.includes('vial'));
 
       const isOil = !lineIsInjectable && (
         nameLower.includes('trichooil') || 

@@ -649,6 +649,7 @@ export default function LabelsHomeView({
                     key: 'patient',
                     label: isEs ? 'Paciente / Código / Fórmula' : 'Patient / Code / Formula',
                     align: 'left',
+                    width: '34%',
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
                       const isChecked = selectedCodes.includes(cleanCode);
@@ -698,6 +699,7 @@ export default function LabelsHomeView({
                   {
                     key: 'prescriptions',
                     label: isEs ? 'Prescripciones' : 'Prescriptions',
+                    width: '10%',
                     align: 'left',
                     render: (_val, p) => {
                       const pName = (p.name || p.patientName || '').trim().toLowerCase();
@@ -770,6 +772,7 @@ export default function LabelsHomeView({
                     key: 'status',
                     label: isEs ? 'Estado' : 'Status',
                     align: 'left',
+                    width: '16%',
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
                       const mergedRx = statusOverrides[p.code]
@@ -798,6 +801,7 @@ export default function LabelsHomeView({
                     key: 'printStatus',
                     label: isEs ? 'Impresión / Importado' : 'Print / Imported',
                     align: 'left',
+                    width: '14%',
                     render: (_val, p) => {
                       const rawDate = p.importedAt || p.createdAt || p.uploadedAt || p.updatedAt || p.date;
                       const ms = (() => {
@@ -854,6 +858,7 @@ export default function LabelsHomeView({
                     key: 'actions',
                     label: isEs ? 'Acciones' : 'Actions',
                     align: 'right',
+                    width: '26%',
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
                       const isMenuOpen = openRowMenuCode === p.code;
@@ -863,25 +868,7 @@ export default function LabelsHomeView({
                       const rawPhone = String(p.patientPhone || p.phone || p.patient?.phone || '').replace(/[^\d]/g, '');
 
                       return (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', position: 'relative' }}>
-                          {wasShared && (
-                            <span
-                              style={{
-                                fontSize: '0.64rem',
-                                fontWeight: 700,
-                                color: '#15803d',
-                                background: '#f0fdf4',
-                                border: '1px solid #bbf7d0',
-                                padding: '2px 6px',
-                                borderRadius: '999px',
-                                whiteSpace: 'nowrap',
-                              }}
-                              title={isEs ? 'Enlace compartido con paciente' : 'Patient link shared'}
-                            >
-                              {isEs ? 'Enviado ✓' : 'Sent ✓'}
-                            </span>
-                          )}
-
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', position: 'relative', paddingRight: '4px' }}>
                           {/* GCP 4-in-1 Segmented Action Capsule: [ Share ▾ | Rx ↗ | Delivery | Shipping ] */}
                           <div
                             style={{
@@ -892,6 +879,7 @@ export default function LabelsHomeView({
                               background: '#ffffff',
                               position: 'relative',
                               overflow: 'visible',
+                              flexShrink: 0,
                             }}
                           >
                             <div style={{ position: 'relative', display: 'flex' }}>
@@ -902,15 +890,19 @@ export default function LabelsHomeView({
                                   e.stopPropagation();
                                   setOpenRowMenuCode(isMenuOpen ? null : p.code);
                                 }}
-                                title={isEs ? 'Compartir enlace con paciente o clínica' : 'Share link with patient or clinic'}
+                                title={
+                                  wasShared
+                                    ? (isEs ? 'Enlace ya compartido · Abrir menú' : 'Link shared · Open menu')
+                                    : (isEs ? 'Compartir enlace con paciente o clínica' : 'Share link with patient or clinic')
+                                }
                                 style={{
-                                  padding: '5px 8px',
+                                  padding: '4px 7px',
                                   border: 'none',
                                   borderRight: '1px solid #e2e8f0',
                                   borderRadius: '5px 0 0 5px',
-                                  background: isMenuOpen ? '#e8f0fe' : 'transparent',
-                                  color: isMenuOpen ? '#1a73e8' : '#3c4043',
-                                  fontSize: '0.71rem',
+                                  background: isMenuOpen ? '#e8f0fe' : wasShared ? '#f0fdf4' : 'transparent',
+                                  color: isMenuOpen ? '#1a73e8' : wasShared ? '#15803d' : '#3c4043',
+                                  fontSize: '0.69rem',
                                   fontWeight: 650,
                                   cursor: 'pointer',
                                   display: 'inline-flex',
@@ -919,7 +911,7 @@ export default function LabelsHomeView({
                                   whiteSpace: 'nowrap',
                                 }}
                               >
-                                <span>{isEs ? 'Enviar ▾' : 'Share ▾'}</span>
+                                <span>{wasShared ? (isEs ? 'Enviado ✓ ▾' : 'Sent ✓ ▾') : (isEs ? 'Enviar ▾' : 'Share ▾')}</span>
                               </button>
 
                               {isMenuOpen && (
@@ -1026,21 +1018,21 @@ export default function LabelsHomeView({
                               onClick={(e) => e.stopPropagation()}
                               title={isEs ? `Ver prescripción #${p.code}` : `View prescription #${p.code}`}
                               style={{
-                                padding: '5px 8px',
+                                padding: '4px 6px',
                                 borderRight: '1px solid #e2e8f0',
                                 background: 'transparent',
                                 color: '#1a73e8',
-                                fontSize: '0.71rem',
+                                fontSize: '0.69rem',
                                 fontWeight: 700,
                                 textDecoration: 'none',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '3px',
+                                gap: '2px',
                                 whiteSpace: 'nowrap',
                               }}
                             >
                               <span>Rx</span>
-                              <ExternalLink size={11} />
+                              <ExternalLink size={10} />
                             </a>
 
                             <button
@@ -1051,12 +1043,12 @@ export default function LabelsHomeView({
                               }}
                               title={isEs ? 'Etiqueta Delivery (Clínica)' : 'Delivery Label (Clinical)'}
                               style={{
-                                padding: '5px 8px',
+                                padding: '4px 6px',
                                 border: 'none',
                                 borderRight: '1px solid #e2e8f0',
                                 background: 'transparent',
                                 color: '#3c4043',
-                                fontSize: '0.71rem',
+                                fontSize: '0.69rem',
                                 fontWeight: 650,
                                 cursor: 'pointer',
                                 display: 'inline-flex',
@@ -1075,12 +1067,12 @@ export default function LabelsHomeView({
                               }}
                               title={isEs ? 'Etiqueta Shipping (Aduanas)' : 'Shipping Label (Customs)'}
                               style={{
-                                padding: '5px 8px',
+                                padding: '4px 7px',
                                 border: 'none',
                                 borderRadius: '0 5px 5px 0',
                                 background: 'transparent',
                                 color: '#3c4043',
-                                fontSize: '0.71rem',
+                                fontSize: '0.69rem',
                                 fontWeight: 650,
                                 cursor: 'pointer',
                                 display: 'inline-flex',

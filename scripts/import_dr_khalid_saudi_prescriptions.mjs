@@ -84,7 +84,8 @@ export function parseProducts(productStr) {
   for (const part of rawParts) {
     const pLower = part.toLowerCase();
     let qty = 1;
-    const qtyMatch = part.match(/(?:x\s*(\d+)|\b(\d+)\s*pcs|\b(\d+)\s*caps)/i);
+    // Word boundary before `x` prevents matching the trailing `x` in "Semax 7500 mcg/ml"
+    const qtyMatch = part.match(/(?:\bx\s*(\d+)\b|\b(\d+)\s*pcs\b|\b(\d+)\s*caps\b)/i);
     if (qtyMatch) {
       qty = parseInt(qtyMatch[1] || qtyMatch[2] || qtyMatch[3], 10) || 1;
     }
