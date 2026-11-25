@@ -178,6 +178,56 @@ export function normalizePrescriptionWritePayload(payload = {}, existingData = {
   }
   next.dispensingForm = canonicalForm;
 
+  // Ensure code is never missing when id/rxCode/fileNumber is available
+  if (!merged.code && (merged.rxCode || merged.fileNumber || merged.id)) {
+    next.code = String(merged.rxCode || merged.fileNumber || merged.id).replace(/^#/, '').trim();
+  }
+
+  // Sanitize aberrant unit quantities (e.g. "7500 mcg/ml" accidentally parsed as qty=7500)
+  if (Array.isArray(next.items)) {
+    next.items = next.items.map((item) => {
+      if (!item || typeof item !== 'object') return item;
+      const itemText = `${item.name || item.productName || ''} ${item.presentation || ''} ${item.form || ''}`.toLowerCase();
+      const isOralCaps = /\b(caps?|capsules?|c[aá]psulas?|tablet)\b/i.test(itemText);
+      const q = Number(item.quantity);
+      if (!isOralCaps && Number.isFinite(q) && q > 200) {
+        return { ...item, quantity: 1 };
+      }
+      return item;
+    });
+  }
+
+  // Ensure durationDays and baseline clinical posology are never empty on import/save
+  const itemsForPos = Array.isArray(next.items) ? next.items : (Array.isArray(merged.items) ? merged.items : []);
+  const corpus = `${merged.code || ''} ${merged.treatmentTitle || merged.title || ''} ${canonicalForm} ${itemsForPos.map((i) => i?.name || i?.productName || '').join(' ')}`.toLowerCase();
+
+  if (!merged.durationDays && !merged.duration && !merged.refillDays && !merged.treatmentDuration) {
+    if (corpus.includes('telotest') || corpus.includes('aatel')) {
+      next.durationDays = 100;
+    } else if (corpus.includes('trichotest') || corpus.includes('aatri') || corpus.includes('nutrigen') || corpus.includes('acnetest') || merged.source === 'fagron') {
+      next.durationDays = 90;
+    } else {
+      next.durationDays = 30;
+    }
+  }
+
+  const hasAnyPosology = Boolean(merged.posology || merged.instructions || itemsForPos.some((i) => i?.instructions || i?.posology));
+  if (!hasAnyPosology) {
+    if (canonicalForm === 'nasal_spray') {
+      next.posology = 'Apply 1 spray in each nostril 1-2 times daily. Wipe nozzle after use and store refrigerated (2°C-8°C).';
+    } else if (canonicalForm === 'prefilled_pen') {
+      next.posology = 'Attach a fresh sterile needle, dial prescribed dose, inject subcutaneously into abdomen or thigh, and hold 5-10 seconds. Refrigerate (2°C-8°C).';
+    } else if (canonicalForm === 'oral_capsules') {
+      next.posology = 'Take 1 oral capsule daily with a full glass of water as directed by your physician. Store in a cool, dry place.';
+    } else if (canonicalForm === 'transdermal_cream') {
+      next.posology = 'Apply prescribed clicks/pumps to clean, dry inner forearm or thigh and wash hands afterward.';
+    } else if (canonicalForm === 'lyophilized_vial') {
+      next.posology = 'Reconstitute vial gently with bacteriostatic water (never shake), draw prescribed U-100 units, inject subcutaneously, and refrigerate (2°C-8°C).';
+    } else {
+      next.posology = 'Administer daily as directed by your prescribing physician. Store as labeled.';
+    }
+  }
+
   if (normalizedStatus === 'approved') {
     const existingBatch = merged.batchCode || merged.dispensingBatch;
     if (!existingBatch) {
