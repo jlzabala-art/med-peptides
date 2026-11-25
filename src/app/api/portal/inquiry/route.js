@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { sendSingleEmail } from '@/lib/orderNotificationMailer';
 
 /**
  * POST /api/portal/inquiry
@@ -52,11 +53,52 @@ export async function POST(request) {
       } : null,
       sourceUrl: String(sourceUrl || '').trim(),
       subscribeNewsletter: Boolean(body.subscribeNewsletter),
-      recipientDesk: 'info@atlashealth-services.com',
+      recipientDesk: 'jose@mediluxeme.com',
       status: 'new',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+
+    const refId = `INQ-${Date.now().toString().slice(-6)}`;
+    const waDigits = inquiryRecord.phone.replace(/[^\d]/g, '');
+    const emailHtml = `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:640px;margin:0 auto;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;color:#0f172a;">
+        <div style="background:#003666;color:#ffffff;padding:16px 20px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;color:#93c5fd;text-transform:uppercase;">Atlas Health · New Quote / Inquiry</div>
+          <h2 style="margin:4px 0 0;font-size:18px;">${refId} — ${inquiryRecord.topic}</h2>
+        </div>
+        <div style="padding:18px 20px;font-size:14px;line-height:1.5;">
+          <p style="margin:0 0 12px;"><strong>From:</strong> ${inquiryRecord.name} (${inquiryRecord.email})</p>
+          ${inquiryRecord.organization ? `<p style="margin:0 0 12px;"><strong>Clinic / Organization:</strong> ${inquiryRecord.organization}</p>` : ''}
+          ${inquiryRecord.phone ? `<p style="margin:0 0 12px;"><strong>Phone / WhatsApp:</strong> ${inquiryRecord.phone} ${waDigits ? `(<a href="https://wa.me/${waDigits}">Open WhatsApp</a>)` : ''}</p>` : ''}
+          ${inquiryRecord.attachedEntity?.name ? `<p style="margin:0 0 12px;"><strong>Attached Item:</strong> ${inquiryRecord.attachedEntity.name} ${inquiryRecord.attachedEntity.strength || ''}</p>` : ''}
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin:12px 0;white-space:pre-wrap;">${inquiryRecord.message}</div>
+          ${inquiryRecord.sourceUrl ? `<p style="margin:12px 0 0;font-size:12px;color:#64748b;"><strong>Source URL:</strong> <a href="${inquiryRecord.sourceUrl}">${inquiryRecord.sourceUrl}</a></p>` : ''}
+        </div>
+      </div>
+    `;
+
+    // Guaranteed email notification to jose@mediluxeme.com (even if Firestore or Zoho fails)
+    const adminMailResult = await sendSingleEmail({
+      to: 'jose@mediluxeme.com',
+      subject: `[Atlas Quote ${refId}] ${inquiryRecord.name}${inquiryRecord.organization ? ` (${inquiryRecord.organization})` : ''}`,
+      html: emailHtml,
+      logType: 'portal_quote_inquiry',
+      metadata: { inquiryRef: refId, topic: inquiryRecord.topic, contextType: inquiryRecord.contextType },
+    }).catch((err) => ({ ok: false, error: err?.message }));
+
+    // Best-effort confirmation email to the requester
+    sendSingleEmail({
+      to: inquiryRecord.email,
+      subject: `Atlas Health Services — Quote Request Received (${refId})`,
+      html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:580px;margin:0 auto;color:#0f172a;padding:20px;border:1px solid #e2e8f0;border-radius:10px;">
+        <h3 style="margin:0 0 10px;color:#003666;">Thank you, ${inquiryRecord.name}</h3>
+        <p style="font-size:14px;line-height:1.5;color:#334155;">We have received your quote / clinical inquiry (Reference: <strong>${refId}</strong>). Our medical &amp; institutional desk will respond shortly.</p>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569;white-space:pre-wrap;">${inquiryRecord.message}</div>
+      </div>`,
+      logType: 'portal_quote_confirmation',
+      metadata: { inquiryRef: refId },
+    }).catch(() => {});
 
     if (adminDb) {
       try {
@@ -138,19 +180,23 @@ export async function POST(request) {
         return NextResponse.json({
           success: true,
           inquiryId,
-          recipient: 'info@atlashealth-services.com'
+          referenceCode: refId,
+          emailDelivered: Boolean(adminMailResult?.sentVia),
+          recipient: 'jose@mediluxeme.com'
         });
       } catch (dbErr) {
         console.warn('Firestore write failed, falling back to success acknowledgement:', dbErr);
       }
     }
 
-    // Fallback if db unavailable
+    // Fallback if db unavailable (email to jose@mediluxeme.com was already attempted above)
     return NextResponse.json({
       success: true,
-      inquiryId: `INQ-${Date.now()}`,
-      recipient: 'info@atlashealth-services.com',
-      note: 'Acknowledged via relay'
+      inquiryId: refId,
+      referenceCode: refId,
+      emailDelivered: Boolean(adminMailResult?.sentVia),
+      recipient: 'jose@mediluxeme.com',
+      note: 'Acknowledged via email relay'
     });
   } catch (error) {
     console.error('Error in /api/portal/inquiry:', error);

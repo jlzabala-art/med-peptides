@@ -579,7 +579,7 @@ export function buildWholesalerReferralNotificationHtml(order = {}, partnerStats
  * Low-level single email dispatch helper.
  * Tries Gmail SMTP first, then Resend HTTP API, and logs result to Firestore `mail_logs`.
  */
-async function sendSingleEmail({ to, subject, html, logType = 'general', order = {}, metadata = {} }) {
+export async function sendSingleEmail({ to, subject, html, logType = 'general', order = {}, metadata = {} }) {
   let sentVia = null;
   let messageId = null;
   let lastError = null;
