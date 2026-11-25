@@ -85,6 +85,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   const [selectedGoal, setSelectedGoal] = useState('all');
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [copiedSpecialtyUrl, setCopiedSpecialtyUrl] = useState(false);
+  const [copiedWhatsAppMsg, setCopiedWhatsAppMsg] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -678,6 +679,32 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                   }}
                 >
                   {copiedSpecialtyUrl ? 'Copied ✓' : 'Copy Filtered Link'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window === 'undefined') return;
+                    const specTitle = selectedSpecialty && SPECIALTY_FILTERS[selectedSpecialty]
+                      ? SPECIALTY_FILTERS[selectedSpecialty].label
+                      : 'Clinical Peptide Vials';
+                    const pitch = `Good morning Dr. [Last Name],\n\nAs a brief clinical reference for your ${specTitle} practice, I am sharing a direct link to our physician-only sterile lyophilized peptide formulary:\n\n• ${specTitle} Formulary:\n${window.location.href}\n\nBatch-verified USP/EP specifications and full monograph details are included. Should you require Certificates of Analysis (CoAs) or prescription coordination, please let me know.\n\nKind regards,\n[Your Name]`;
+                    navigator.clipboard?.writeText(pitch);
+                    setCopiedWhatsAppMsg(true);
+                    setTimeout(() => setCopiedWhatsAppMsg(false), 2000);
+                  }}
+                  style={{
+                    padding: '6px 11px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: copiedWhatsAppMsg ? '#f0fdf4' : '#ffffff',
+                    color: copiedWhatsAppMsg ? '#15803d' : '#334155',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {copiedWhatsAppMsg ? 'Pitch Copied ✓' : 'Copy WhatsApp Pitch'}
                 </button>
               </div>
             )}

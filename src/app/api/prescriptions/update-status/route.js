@@ -42,8 +42,9 @@ export async function POST(request) {
     const resolvedPrescriptionNumber = prescriptionNumber || code;
 
     const isToleranceAction = Boolean(body.toleranceCheckCompleted || body.toleranceChecked || body.taskType === 'tolerance_check');
-    const targetStatusRaw = newStatus || status || (isToleranceAction ? 'current' : null);
-    if (!targetStatusRaw && !isToleranceAction) {
+    const isPatientGuideShareAction = Boolean(body.markPatientGuideShared);
+    const targetStatusRaw = newStatus || status || ((isToleranceAction || isPatientGuideShareAction) ? 'current' : null);
+    if (!targetStatusRaw && !isToleranceAction && !isPatientGuideShareAction) {
       return NextResponse.json(
         { error: 'Status is required' },
         { status: 400 }
@@ -193,6 +194,13 @@ export async function POST(request) {
       updatePayload.toleranceCheckCompleted = true;
       updatePayload.toleranceCheckedAt = new Date().toISOString();
       updatePayload.toleranceCheckedBy = updatedBy || 'Treating Physician';
+    }
+
+    if (isPatientGuideShareAction) {
+      updatePayload.patientGuideSharedAt = new Date().toISOString();
+      if (body.patientPhone) {
+        updatePayload.patientPhone = String(body.patientPhone).trim();
+      }
     }
 
     if (['approved', 'ordered', 'active', 'delivered', 'completed', 'dispensed'].includes(finalStatus)) {

@@ -71,6 +71,8 @@ export default function LabelsHomeView({
   const [selectedCodes, setSelectedCodes] = useState([]);
   const [openRowMenuCode, setOpenRowMenuCode] = useState(null);
   const [manualsMenuOpen, setManualsMenuOpen] = useState(false);
+  const [missingPhoneCode, setMissingPhoneCode] = useState(null);
+  const [phoneDraft, setPhoneDraft] = useState('');
   const [sharedRowCodes, setSharedRowCodes] = useState(() => {
     if (typeof window === 'undefined') return {};
     try {
@@ -80,7 +82,7 @@ export default function LabelsHomeView({
     }
   });
 
-  const markRowShared = (code) => {
+  const markRowShared = (code, phoneOverride = '') => {
     setSharedRowCodes((prev) => {
       const next = { ...prev, [code]: true };
       try {
@@ -88,6 +90,18 @@ export default function LabelsHomeView({
       } catch { /* ignore */ }
       return next;
     });
+    if (typeof fetch !== 'undefined' && code) {
+      fetch('/api/prescriptions/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code,
+          status: 'current',
+          markPatientGuideShared: true,
+          ...(phoneOverride ? { patientPhone: phoneOverride } : {}),
+        }),
+      }).catch(() => {});
+    }
   };
 
   const buildPatientShareUrl = (row) => {
@@ -1150,8 +1164,12 @@ export default function LabelsHomeView({
                                       const msg = isEs
                                         ? `Hola ${pName}, gracias por confiar en Atlas Health. Aquí tienes tu guía privada de tratamiento (#${cleanCode}) con instrucciones y refill en 1 clic: ${patientUrl}`
                                         : `Hi ${pName}, thank you for trusting Atlas Health. Here is your private treatment guide (#${cleanCode}) with instructions & 1-click refill: ${patientUrl}`;
-                                      const waBase = rawPhone ? `https://wa.me/${rawPhone}` : 'https://wa.me/';
-                                      window.open(`${waBase}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+                                      if (!rawPhone) {
+                                        setMissingPhoneCode(p.code);
+                                        setPhoneDraft('');
+                                        return;
+                                      }
+                                      window.open(`https://wa.me/${rawPhone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
                                       markRowShared(cleanCode);
                                       setOpenRowMenuCode(null);
                                     }}
@@ -1175,6 +1193,67 @@ export default function LabelsHomeView({
                                     <MessageCircle size={14} color="currentColor" />
                                     <span>{isEs ? 'WhatsApp al Paciente' : 'WhatsApp to Patient'}</span>
                                   </button>
+                                  {missingPhoneCode === p.code && (
+                                    <div
+                                      onClick={(e) => e.stopPropagation()}
+                                      style={{
+                                        padding: '6px 8px',
+                                        margin: '2px 0 4px',
+                                        background: '#fffbeb',
+                                        border: '1px solid #fde68a',
+                                        borderRadius: '6px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '5px',
+                                      }}
+                                    >
+                                      <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#92400e' }}>
+                                        {isEs ? 'Falta teléfono en ficha. Introduce WhatsApp:' : 'No phone on file. Enter WhatsApp:'}
+                                      </span>
+                                      <div style={{ display: 'flex', gap: '4px' }}>
+                                        <input
+                                          type="tel"
+                                          value={phoneDraft}
+                                          onChange={(e) => setPhoneDraft(e.target.value)}
+                                          placeholder="+97150..."
+                                          style={{
+                                            flex: 1,
+                                            minWidth: 0,
+                                            padding: '4px 6px',
+                                            fontSize: '0.72rem',
+                                            border: '1px solid #fcd34d',
+                                            borderRadius: '4px',
+                                          }}
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const cleaned = phoneDraft.replace(/[^\d]/g, '');
+                                            const msg = isEs
+                                              ? `Hola ${pName}, gracias por confiar en Atlas Health. Aquí tienes tu guía privada de tratamiento (#${cleanCode}) con instrucciones y refill en 1 clic: ${patientUrl}`
+                                              : `Hi ${pName}, thank you for trusting Atlas Health. Here is your private treatment guide (#${cleanCode}) with instructions & 1-click refill: ${patientUrl}`;
+                                            const waBase = cleaned ? `https://wa.me/${cleaned}` : 'https://wa.me/';
+                                            window.open(`${waBase}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+                                            markRowShared(cleanCode, cleaned);
+                                            setMissingPhoneCode(null);
+                                            setOpenRowMenuCode(null);
+                                          }}
+                                          style={{
+                                            padding: '4px 8px',
+                                            borderRadius: '4px',
+                                            border: 'none',
+                                            background: '#16a34a',
+                                            color: '#ffffff',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                          }}
+                                        >
+                                          {isEs ? 'Enviar' : 'Send'}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
                                   <button
                                     type="button"
                                     onClick={() => {

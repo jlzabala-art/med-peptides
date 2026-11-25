@@ -256,6 +256,7 @@ export default function PelletsPriceListClient({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProfile, setSelectedProfile] = useState('all'); // 'all' | 'female' | 'male' | 'trocar'
   const [copiedPelletUrl, setCopiedPelletUrl] = useState(false);
+  const [copiedPelletWhatsApp, setCopiedPelletWhatsApp] = useState(false);
 
   // Hydrate initial search/category/profile from URL query params (?q=..., ?category=..., ?profile=...)
   useEffect(() => {
@@ -1246,6 +1247,35 @@ export default function PelletsPriceListClient({
                   }}
                 >
                   {copiedPelletUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar enlace filtrado' : 'Copy Filtered Link')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window === 'undefined') return;
+                    const profileLabel = selectedProfile === 'female'
+                      ? 'Female BHRT & Gynecology'
+                      : selectedProfile === 'male'
+                        ? 'Male TRT & Andrology'
+                        : 'Bioidentical Hormone Pellets';
+                    const pitch = `Good morning Dr. [Last Name],\n\nAs a brief clinical reference for your ${profileLabel} practice, I am sharing our pre-filtered EU GMP sterile bioidentical hormone pellet formulary:\n\n• ${profileLabel} Formulary:\n${window.location.href}\n\nZero-order sustained release kinetics, ≥99.5% USP/EP purity, and sterile trocar implantation kits are detailed on the page. Should you require Certificates of Analysis (CoAs) or prescription coordination, please let me know.\n\nKind regards,\n[Your Name]`;
+                    navigator.clipboard?.writeText(pitch);
+                    setCopiedPelletWhatsApp(true);
+                    setTimeout(() => setCopiedPelletWhatsApp(false), 2000);
+                  }}
+                  style={{
+                    padding: '5px 10px',
+                    minHeight: '30px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: copiedPelletWhatsApp ? '#f0fdf4' : '#ffffff',
+                    color: copiedPelletWhatsApp ? '#15803d' : '#334155',
+                    fontSize: '0.72rem',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {copiedPelletWhatsApp ? (isEs ? 'Mensaje copiado ✓' : 'Pitch Copied ✓') : (isEs ? 'Copiar WhatsApp' : 'Copy WhatsApp Pitch')}
                 </button>
               </div>
             </div>
