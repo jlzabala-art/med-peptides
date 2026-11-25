@@ -281,7 +281,7 @@ renderPdf(
       <h2>1. Creating or Importing Prescriptions</h2>
       <ul>
         <li><strong><code>Import Rx</code>:</strong> Upload Fagron PDFs or clinical spreadsheets. The system automatically assigns canonical <code>dispensingForm</code>, <code>posology</code>, <code>durationDays</code>, and normalized <code>doctorCountry</code>.</li>
-        <li><strong><code>Manual Rx</code>:</strong> Create a new prescription directly in seconds when an order arrives via WhatsApp or email.</li>
+        <li><strong><code>Create Rx</code>:</strong> Create a new prescription directly in seconds when an order arrives via WhatsApp or email.</li>
       </ul>
       <h2>2. 1-Click Lifecycle Stepper (Status Column)</h2>
       <p>Click the status pill (e.g., <code>Draft</code> or <code>Approved</code>) in any row to open the 5-stage popover: <strong><code>1. Rx · 2. Pay · 3. Lab · 4. Label · 5. Ship</code></strong>.</p>
@@ -296,7 +296,7 @@ renderPdf(
       </table>
       <div class="screenshot-box">
         <img src="${imgLabelsMain}" alt="Labels Filters Overview" />
-        <div class="screenshot-caption">Screen 1 — /labels header toolbar with Import Rx, Manual Rx, Search (⌘K), Status tabs, and Country/Date filters.</div>
+        <div class="screenshot-caption">Screen 1 — /labels header toolbar with Import Rx, Create Rx, Search (⌘K), Status tabs, and Country/Date filters.</div>
       </div>
     `,
   })

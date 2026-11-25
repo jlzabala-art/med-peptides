@@ -261,7 +261,7 @@ export default function LabelsHomeView({
                   }}
                 >
                   <FilePlus2 size={14} color="#1a73e8" />
-                  <span>{isEs ? 'Rx Manual' : 'Manual Rx'}</span>
+                  <span>{isEs ? 'Crear Rx' : 'Create Rx'}</span>
                 </button>
               )}
               <div style={{ position: 'relative' }}>

@@ -60,13 +60,13 @@ const HELP_TOPICS = [
     descEs: 'Importar Rx, filtrar por país del médico y gestionar estados.',
     descEn: 'Import Rx, filter by doctor country, and update parcel lifecycle.',
     contentEs: `
-• **Paso 1 - Importar o Buscar:** Pulsa ⌘K o usa el buscador superior para localizar pacientes (#BOX..., nombre, fórmula) o usa **"Import Rx"** / **"Manual Rx"** para nuevas recetas.
+• **Paso 1 - Importar o Buscar:** Pulsa ⌘K o usa el buscador superior para localizar pacientes (#BOX..., nombre, fórmula) o usa **"Import Rx"** / **"Crear Rx"** para nuevas recetas.
 • **Paso 2 - Filtrar por País del Médico:** Usa el selector **"All countries ▾"** para aislar recetas por país (UAE, Spain, KSA, etc.) y preparar envíos agrupados.
 • **Paso 3 - Diseñar y Etiquetar:** Abre el estudio para imprimir etiquetas **Delivery** (con QR de refill) o **Shipping** (aduana/mensajería).
 • **Paso 4 - Ciclo de Vida y WhatsApp:** Marca el estado (**Printed → Dispatched → Delivered**) y, tras la entrega, usa **Share ▾ → Send via WhatsApp**.
     `,
     contentEn: `
-• **Step 1 - Intake or Search:** Press ⌘K or search by patient, #BOX code, or formula, or click **"Import Rx"** / **"Manual Rx"** to add prescriptions.
+• **Step 1 - Intake or Search:** Press ⌘K or search by patient, #BOX code, or formula, or click **"Import Rx"** / **"Create Rx"** to add prescriptions.
 • **Step 2 - Filter by Doctor Country:** Use **"All countries ▾"** to filter prescriptions by doctor country (UAE, Spain, KSA, etc.) for courier batching.
 • **Step 3 - Print Labels:** Open the studio to print **Delivery** labels (with SCAN FOR REFILL QR) or **Shipping** customs/courier labels.
 • **Step 4 - Lifecycle & Share:** Advance status (**Printed → Dispatched → Delivered**), then click **Share ▾ → Send via WhatsApp** once delivered.
@@ -207,8 +207,8 @@ export default function LabelsAtlasDock({
       } else if (q.includes('pais') || q.includes('país') || q.includes('country') || q.includes('filtro') || q.includes('filter') || q.includes('import') || q.includes('status') || q.includes('estado')) {
         manual = PDF_MANUALS[3];
         text = isEs
-          ? 'Usa el selector "All countries ▾" junto al buscador para filtrar prescripciones por país del médico (UAE, Spain, KSA, etc.). También puedes subir nuevas recetas con "Import Rx" / "Manual Rx" y avanzar estados (Printed → Dispatched → Delivered) en 1 clic.'
-          : 'Use the "All countries ▾" dropdown next to search to filter prescriptions by doctor country (UAE, Spain, KSA, etc.). You can also upload new prescriptions via "Import Rx" / "Manual Rx" and update status in 1 click.';
+          ? 'Usa el selector "All countries ▾" junto al buscador para filtrar prescripciones por país del médico (UAE, Spain, KSA, etc.). También puedes subir nuevas recetas con "Import Rx" / "Crear Rx" y avanzar estados (Printed → Dispatched → Delivered) en 1 clic.'
+          : 'Use the "All countries ▾" dropdown next to search to filter prescriptions by doctor country (UAE, Spain, KSA, etc.). You can also upload new prescriptions via "Import Rx" / "Create Rx" and update status in 1 click.';
       } else if (q.includes('zebra') || q.includes('termica') || q.includes('impresora') || q.includes('printer') || q.includes('qr') || q.includes('refill') || q.includes('a4')) {
         manual = PDF_MANUALS[1];
         text = isEs
