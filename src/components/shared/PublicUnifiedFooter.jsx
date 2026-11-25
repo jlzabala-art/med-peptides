@@ -19,7 +19,7 @@ const FOOTER_SECTIONS = [
     icon: FlaskConical,
     links: [
       { label: 'Clinical Peptide Monographs & Incretins', labelEs: 'Monografías Peptídicas Clínicas & Incretinas' },
-      { label: 'Pharmapolis® Hormone Pellets & Trocar Guide', labelEs: 'Pellets Hormonales Pharmapolis® & Guía Trócar' },
+      { label: 'EU GMP Hormone Pellets & Trocar Guide', labelEs: 'Pellets Hormonales EU GMP & Guía Trócar' },
       { label: 'Colway® Native Bio-Collagen', labelEs: 'Colway® Tropocolágeno Nativo' },
       { label: 'UltraPerson™ Clinical Nutraceuticals', labelEs: 'UltraPerson™ Nutracéutica Clínica' },
       { label: 'Pharmaceutical APIs & Compounding', labelEs: 'Materia Prima Farmacéutica & APIs' },

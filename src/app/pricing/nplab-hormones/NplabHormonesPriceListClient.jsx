@@ -123,8 +123,8 @@ export default function NplabHormonesPriceClient({
         : isNplabOnly
           ? t('Endocrinology & Hormones (TRT & BHRT)', 'Endocrinología y Hormonas (TRT y BHRT)')
           : t('EU GMP Bioidentical & Endocrine Hormones', 'Hormonas Bioidénticas y Endocrinología EU GMP'),
-      loginRedirect: supplierLock === 'pharmapolis' ? '/pricing/pharmapolis-hrt' : '/pricing/nplab-hormones',
-      switcherFormat: supplierLock === 'pharmapolis' ? 'pharmapolis-hrt' : 'nplab-hormones',
+      loginRedirect: supplierLock === 'pharmapolis' ? '/pricing/bhrt' : '/pricing/hormones',
+      switcherFormat: supplierLock === 'pharmapolis' ? 'bhrt' : 'hormones',
       brandLeft: 'ATLAS HEALTH',
       brandRight: isPharmapolis
         ? 'EU GMP · BIOIDENTICAL HRT'
@@ -154,12 +154,12 @@ export default function NplabHormonesPriceClient({
         'Search hormones by preparation, strength or active ingredient (Biest, Triest, Progesterone, Testosterone, Pellets, DHEA)...',
         'Buscar hormonas por preparación, concentración o principio activo (Biest, Triest, Progesterona, Testosterona, Pellets, DHEA)...'
       ),
-      storageNamespace: isPharmapolis ? 'pharmapolis_hormones_pricing' : 'nplab_hormones_pricing',
-      exportBrandTitle: isPharmapolis ? 'Pharmapolis Bulgaria Hormones' : 'NP LABS Hormones',
-      exportFilePrefix: isPharmapolis ? 'Pharmapolis_Hormones_Price_Schedule' : 'NPLAB_Hormones_Price_Schedule',
+      storageNamespace: isPharmapolis ? 'atlas_bhrt_hormones_pricing' : 'atlas_trt_hormones_pricing',
+      exportBrandTitle: isPharmapolis ? 'EU GMP Bioidentical HRT' : 'Compounded Hormones (TRT & BHRT)',
+      exportFilePrefix: isPharmapolis ? 'Atlas_EU_GMP_BHRT_Price_Schedule' : 'Atlas_Compounded_Hormones_Price_Schedule',
       whatsappHeader: isPharmapolis
-        ? '*PHARMAPOLIS BULGARIA EU GMP — HRT, CAPSULES & PELLETS SCHEDULE*'
-        : '*NP LABS INTERNATIONAL COMPOUNDING — TRT & BHRT SCHEDULE*',
+        ? '*ATLAS HEALTH EU GMP — BHRT, CAPSULES & PELLETS SCHEDULE*'
+        : '*ATLAS HEALTH COMPOUNDING — TRT & BHRT SCHEDULE*',
       persistInlineEdits: true,
     };
   }, [selectedLab, supplierLock, initialCurrency, t]);
@@ -171,21 +171,21 @@ export default function NplabHormonesPriceClient({
           id: 'pharmapolis_all',
           label: t(
             `All EU GMP HRT (${enrichedPharmapolisProducts.length + bulkProducts.length})`,
-            `Todo HRT Pharmapolis (${enrichedPharmapolisProducts.length + bulkProducts.length})`
+            `Todo HRT EU GMP (${enrichedPharmapolisProducts.length + bulkProducts.length})`
           ),
         },
         {
           id: 'pharmapolis',
           label: t(
-            `🇧🇬 Standard Master Preparations (${enrichedPharmapolisProducts.length})`,
-            `🇧🇬 Preparaciones Maestras (${enrichedPharmapolisProducts.length})`
+            `Standard Master Preparations (${enrichedPharmapolisProducts.length})`,
+            `Preparaciones Maestras (${enrichedPharmapolisProducts.length})`
           ),
         },
         {
           id: 'pharmapolis_bulk',
           label: t(
-            `📦 Bulk Batch Offers (MOQ 33–50 · ${bulkProducts.length})`,
-            `📦 Lotes Bulk (MOQ 33–50 · ${bulkProducts.length})`
+            `Bulk Batch Offers (MOQ 33–50 · ${bulkProducts.length})`,
+            `Lotes Bulk (MOQ 33–50 · ${bulkProducts.length})`
           ),
         },
       ];
@@ -194,22 +194,22 @@ export default function NplabHormonesPriceClient({
       return [
         {
           id: 'nplab',
-          label: `🇬🇷 NP LABS Compounded Hormones (${nplabProducts.length} SKUs)`,
+          label: `Compounded Hormones (${nplabProducts.length} SKUs)`,
         },
       ];
     }
     return [
       {
         id: 'pharmapolis',
-        label: `🇧🇬 Pharmapolis Bulgaria (${enrichedPharmapolisProducts.length} Master Preparations)`,
+        label: `EU GMP BHRT (${enrichedPharmapolisProducts.length} Master Preparations)`,
       },
       {
         id: 'pharmapolis_bulk',
-        label: `📦 Pharmapolis Bulk Batch (MOQ 33–50 · ${bulkProducts.length})`,
+        label: `Bulk Batch Offers (MOQ 33–50 · ${bulkProducts.length})`,
       },
       {
         id: 'nplab',
-        label: `🇬🇷 NP LABS Legacy (${nplabProducts.length} SKUs)`,
+        label: `Compounded Hormones (${nplabProducts.length} SKUs)`,
       },
       {
         id: 'all',
@@ -248,7 +248,7 @@ export default function NplabHormonesPriceClient({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
           {supplierLock === 'pharmapolis'
-            ? t('Pharmapolis EU GMP Catalog Views:', 'Vistas del Catálogo Pharmapolis EU GMP:')
+            ? t('EU GMP BHRT Catalog Views:', 'Vistas del Catálogo BHRT EU GMP:')
             : t('Compounding Laboratory Schedule:', 'Tarifa de Laboratorio:')}
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>

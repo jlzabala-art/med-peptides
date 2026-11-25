@@ -37,7 +37,7 @@ export const SUPPORTED_COLLECTIONS = {
     description: 'Targeted longevity precursors, CoQ10, PQQ, and adaptogens in acid-resistant vegetable capsules.',
     unitNoun: 'Bottle',
     pluralNoun: 'Bottles',
-    deliveryPledge: 'PharmaPolis compounding standards with batch-verified active constituent purity.'
+    deliveryPledge: 'EU GMP compounding standards with batch-verified active constituent purity.'
   },
   teletest: {
     slug: 'teletest',
