@@ -991,6 +991,76 @@ export default function PatientPrescriptionGuide({
         </div>
       )}
 
+      {/* ── Daily Routine At-a-Glance Strip (Multi-Part Prescriptions Only) ── */}
+      {categorizedItems.length > 1 && (() => {
+        const morningItems = [];
+        const eveningItems = [];
+        const weeklyOrAnytimeItems = [];
+        categorizedItems.forEach((it) => {
+          const txt = `${it.posology?.dosageInstructions || ''} ${it.posology?.regimen || ''} ${it.posology?.timing || ''} ${it.title || ''}`.toLowerCase();
+          const label = it.shortTitle || it.title;
+          if (/\b(weekly|1-2x|1–2x|2x\/week|wash|shampoo|oil)\b/i.test(txt)) {
+            weeklyOrAnytimeItems.push(label);
+          } else if (/\b(night|bedtime|evening|noche|antes de dormir|pm)\b/i.test(txt)) {
+            eveningItems.push(label);
+          } else if (/\b(morning|breakfast|am|ma[nñ]ana|desayuno)\b/i.test(txt)) {
+            morningItems.push(label);
+          } else {
+            morningItems.push(label);
+          }
+        });
+        return (
+          <div
+            style={{
+              background: '#f8fafc',
+              border: '1px solid #dadce0',
+              borderRadius: '10px',
+              padding: '12px 14px',
+              marginBottom: '1.1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+            }}
+          >
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5f6368' }}>
+              {isEs ? 'Tu rutina diaria en 1 vistazo' : 'Your daily routine at a glance'}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: '8px' }}>
+              {morningItems.length > 0 && (
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', marginBottom: '2px' }}>
+                    ☀️ {isEs ? 'Mañana / Día' : 'Morning / Day'}
+                  </div>
+                  <div style={{ fontSize: '0.77rem', fontWeight: 600, color: '#202124', lineHeight: 1.35 }}>
+                    {morningItems.join(' · ')}
+                  </div>
+                </div>
+              )}
+              {eveningItems.length > 0 && (
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4f46e5', marginBottom: '2px' }}>
+                    🌙 {isEs ? 'Noche' : 'Evening / Bedtime'}
+                  </div>
+                  <div style={{ fontSize: '0.77rem', fontWeight: 600, color: '#202124', lineHeight: 1.35 }}>
+                    {eveningItems.join(' · ')}
+                  </div>
+                </div>
+              )}
+              {weeklyOrAnytimeItems.length > 0 && (
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', marginBottom: '2px' }}>
+                    🗓️ {isEs ? 'Semanal / Lavado' : 'Weekly / Care'}
+                  </div>
+                  <div style={{ fontSize: '0.77rem', fontWeight: 600, color: '#202124', lineHeight: 1.35 }}>
+                    {weeklyOrAnytimeItems.join(' · ')}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── Item-by-Item Presentation with Differentiated Posology ──────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {categorizedItems.map((item) => {
@@ -1383,6 +1453,31 @@ export default function PatientPrescriptionGuide({
 
                     {/* 4. Locked Exact Dose Guide (Shown for all formats that benefit from calculation: Vial, Pen, Nasal Spray, Pump) */}
                     <PatientExactDoseCard item={item} rx={rx} isEs={isEs} />
+
+                    {categorizedItems.length > 1 && onOpenRefill && (
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                        <button
+                          type="button"
+                          onClick={() => onOpenRefill(item.partNumber || item.itemIndex)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '5px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #dadce0',
+                            background: '#ffffff',
+                            color: '#1a73e8',
+                            fontSize: '0.74rem',
+                            fontWeight: 650,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <RefreshCw size={12} />
+                          <span>{isEs ? 'Refill solo esta parte →' : 'Refill this part →'}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })()}

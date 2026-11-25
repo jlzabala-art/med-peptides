@@ -155,6 +155,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [activeGcpTab, setActiveGcpTab] = useState(() =>
     actionParam === 'refill' || srcParam === 'label_qr' ? 'refill' : 'treatment'
   ); // 'treatment' | 'roadmap' | 'refill' | 'atlasAi' | 'contactAtlas'
+  const [refillInitialPart, setRefillInitialPart] = useState(null);
   const [showDoctorAuthModal, setShowDoctorAuthModal] = useState(false);
   const [showPatientAuthModal, setShowPatientAuthModal] = useState(false);
   const [showCalendarSyncModal, setShowCalendarSyncModal] = useState(false);
@@ -825,7 +826,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   rxCode={rxId || currentRx?.code || ''}
                   rx={currentRx}
                   formulations={compoundedFormulations}
-                  initialPartNumber={partParam}
+                  initialPartNumber={refillInitialPart || partParam}
                   initialProductName={productParam}
                   defaultContact={currentRx?.patient?.phone || currentRx?.patient?.email || ''}
                   defaultPhone={currentRx?.patient?.phone || currentRx?.patientPhone || ''}
@@ -879,7 +880,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   urlBud={searchParams?.get('bud') || ''}
                   onOpenQuotation={() => setShowAtlasQuotationModal(true)}
                   onOpenDoctorContact={() => setShowDoctorContactModal(true)}
-                  onOpenRefill={() => setActiveGcpTab('refill')}
+                  onOpenRefill={(targetPart) => {
+                    setRefillInitialPart(typeof targetPart === 'number' ? targetPart : null);
+                    setActiveGcpTab('refill');
+                  }}
                 />
                 )
               ) : (

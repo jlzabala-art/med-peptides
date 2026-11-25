@@ -358,18 +358,30 @@ export default function PatientWelcomePdfModal({
   const sep = baseUrl.includes('?') ? '&' : '?';
   const qrUrl = `${baseUrl}${sep}lang=${pdfEs ? 'es' : 'en'}&src=welcome_card`;
 
-  const primaryFormulation = Array.isArray(compoundedFormulations) && compoundedFormulations.length > 0
-    ? compoundedFormulations[0]
-    : null;
-  const treatmentName = cleanTreatmentTitle(
-    primaryFormulation?.title || rx?.treatmentTitle || rx?.dispensingForm,
-    primaryFormulation?.apis || rx?.apis,
-    pdfEs
-  );
-  const posologyLine =
-    primaryFormulation?.posology?.dosageInstructions ||
-    primaryFormulation?.posology?.regimen ||
-    (pdfEs ? 'Seguir la pauta indicada por tu médico.' : 'Take as directed by your physician.');
+  const formulationsList = Array.isArray(compoundedFormulations) ? compoundedFormulations : [];
+  const primaryFormulation = formulationsList.length > 0 ? formulationsList[0] : null;
+  const isMultiPartPdf = formulationsList.length > 1;
+  const treatmentName = isMultiPartPdf
+    ? `${formulationsList.length}-${pdfEs ? 'Partes' : 'Part'}: ${formulationsList
+        .map((f, i) => String(f?.shortTitle || f?.title || `Part ${i + 1}`).replace(/\s*\(.*?\)\s*/g, '').trim())
+        .slice(0, 4)
+        .join(' · ')}`
+    : cleanTreatmentTitle(
+        primaryFormulation?.title || rx?.treatmentTitle || rx?.dispensingForm,
+        primaryFormulation?.apis || rx?.apis,
+        pdfEs
+      );
+  const posologyLine = isMultiPartPdf
+    ? formulationsList
+        .map((f, i) => {
+          const partTitle = String(f?.shortTitle || f?.title || `P${i + 1}`).split('(')[0].trim();
+          const partDir = f?.posology?.dosageInstructions || f?.posology?.regimen || (pdfEs ? 'Según pauta' : 'As directed');
+          return `${i + 1}) ${partTitle}: ${partDir}`;
+        })
+        .join(' · ')
+    : (primaryFormulation?.posology?.dosageInstructions ||
+        primaryFormulation?.posology?.regimen ||
+        (pdfEs ? 'Seguir la pauta indicada por tu médico.' : 'Take as directed by your physician.'));
   const storageLine =
     rx?.storage ||
     primaryFormulation?.storage ||
