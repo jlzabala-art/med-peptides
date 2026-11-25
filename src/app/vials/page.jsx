@@ -2,6 +2,8 @@ import React from 'react';
 import { fetchCollectionProductsAction, trackReferralVisitAction } from '@/actions/vialsCatalogActions';
 import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 import VialsCatalogClient from './VialsCatalogClient';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -133,8 +135,12 @@ export default async function VialsPublicPage({ searchParams }) {
     }).catch(() => {});
   }
 
-  // Pre-fetch collection products directly on server
-  const initialProducts = await fetchCollectionProductsAction(collection, code);
+  // Pre-fetch collection products directly on server and strip supplier leaks for non-admins
+  const isAdmin = await isAdminServerSession();
+  const rawProducts = await fetchCollectionProductsAction(collection, code);
+  const initialProducts = Array.isArray(rawProducts)
+    ? rawProducts.map((p) => sanitizePublicProductForViewer(p, { isAdmin }))
+    : [];
 
   // Pass ONLY opaque reference code to the client — zero mention of wholesaler or supplier names
   const referralInfo = {

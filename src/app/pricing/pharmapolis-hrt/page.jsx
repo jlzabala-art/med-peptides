@@ -1,60 +1,15 @@
-import React from 'react';
-import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
-import { getPharmapolisHormonesCatalog } from '@/data/pharmapolisHormonesRegistry';
-import NplabHormonesPriceListClient from '../nplab-hormones/NplabHormonesPriceListClient';
-import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
-import { isAdminServerSession } from '@/lib/serverAdminAuth';
-import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const metadata = {
+  robots: { index: false, follow: false },
+};
 
-export async function generateMetadata({ searchParams }) {
+export default async function LegacyPharmapolisHrtRedirect({ searchParams }) {
   const resolvedSearch = await searchParams;
-  const lang = normalizeMetaLang(resolvedSearch);
-
-  return buildBilingualMetadata({
-    lang,
-    path: '/pricing/pharmapolis-hrt',
-    siteName: 'Atlas Health Services',
-    en: {
-      title: 'EU GMP Bioidentical HRT (BHRT, Capsules, Creams & Pellets) • Official Schedule',
-      description:
-        'Official EU GMP Bioidentical Hormone Replacement Therapy (BHRT Topi-CLICK creams, oral capsules, vaginal preparations & subcutaneous pellets) catalog.',
-    },
-    es: {
-      title: 'HRT Bioidéntica EU GMP (BHRT, Cápsulas, Cremas y Pellets) • Tarifa Oficial',
-      description:
-        'Catálogo oficial EU GMP de Terapia Hormonal Bioidéntica (cremas Topi-CLICK, cápsulas orales, óvulos vaginales y pellets subcutáneos).',
-    },
-  });
-}
-
-export default async function PharmapolisHrtPricingPage({ searchParams }) {
-  const resolvedSearch = await searchParams;
-  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || '').toUpperCase();
-  const initialCurrency = ['EUR', 'AED', 'USD'].includes(rawCur) ? rawCur : 'EUR';
-  const rawView = String(resolvedSearch?.view || 'pharmapolis').toLowerCase();
-  const initialLab = ['pharmapolis', 'pharmapolis_bulk', 'pharmapolis_all'].includes(rawView)
-    ? rawView
-    : 'pharmapolis';
-
-  const isAdmin = await isAdminServerSession();
-  const pharmapolisProducts = (await fetchBrandPricingProductsAction({
-    brand: 'pharmapolis',
-    fallbackProducts: getPharmapolisHormonesCatalog(),
-    excludeCombos: false,
-    limitCount: 120,
-  })).map((p) => sanitizePublicProductForViewer(p, { isAdmin }));
-
-  return (
-    <NplabHormonesPriceListClient
-      pharmapolisProducts={pharmapolisProducts}
-      nplabProducts={[]}
-      supplierLock="pharmapolis"
-      initialLab={initialLab}
-      initialCategory={resolvedSearch?.category || 'all'}
-      initialCurrency={initialCurrency}
-    />
-  );
+  const qs = new URLSearchParams();
+  if (resolvedSearch?.cur) qs.set('cur', resolvedSearch.cur);
+  if (resolvedSearch?.currency) qs.set('currency', resolvedSearch.currency);
+  if (resolvedSearch?.category) qs.set('category', resolvedSearch.category);
+  const queryStr = qs.toString();
+  redirect(queryStr ? `/pricing/bhrt?${queryStr}` : '/pricing/bhrt');
 }

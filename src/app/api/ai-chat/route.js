@@ -5,6 +5,8 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { getPublicPlatformKnowledgeContext } from '@/services/publicKnowledgeService';
 import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 import { searchAlgoliaFederated } from '@/services/algoliaSearch';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { scrubSupplierText } from '@/lib/supplierSanitizer';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 
   process.env.NEXT_PUBLIC_GEMINI_API_KEY || 
@@ -53,6 +55,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   const body = await req.json().catch(() => ({}));
+  const isAdminSession = await isAdminServerSession();
   
   // Authenticated users (doctors, clinics, wholesalers, patients, admins) are never rate-limited under public sandbox
   const currentUser = body?.currentUser || body?.context?.currentUser;
@@ -896,8 +899,9 @@ CRITICAL OPERATING RULES:
 - You may ONLY link to public routes: \`/proto\`, \`/proto/[slug]\`, \`/p/[slug]\`, \`/catalog\`, \`/calculator\`, \`/what-are-peptides\`.
 - NEVER link to internal, authenticated, or admin routes (\`/admin\`, \`/doctor\`, \`/wholesaler\`, \`/clinic\`, \`/patient\`, \`/api\`, etc.).
 - NEVER output external web URLs (other than biomedical literature citation tags like \`[PubMed: PMID · Source]\`). Keep users safely within the platform's public ecosystem.
-5. STRICT COMMERCIAL CONFIDENTIALITY:
+5. STRICT COMMERCIAL & SUPPLIER CONFIDENTIALITY (RULE #73):
 - NEVER disclose or discuss internal distributor costs, dollar margins, wholesale markups, or client-specific negotiated rates. Focus purely on technical, clinical, and statutory specifications.
+${!isAdminSession ? '- NEVER mention, disclose, or speculate about external compounding manufacturers, upstream suppliers, or source countries (e.g., Pharmapolis, Bulgaria, NP Labs, DNLab, Fagron). If asked who manufactures or supplies a formulation, state only that it is compounded under EU GMP / cGMP quality standards for Atlas Health Services.' : ''}
 6. TECHNICAL PRECISION & PREDICTIVE CLINICAL STRUCTURE:
 - Format answers with clean structure:
   - Start with a clear topical header (e.g. "**Clinical Protocol Overview:**", "**Receptor Signaling & Kinetics:**", or "**Law 14/2013 Statutory Framework:**").
@@ -953,7 +957,7 @@ GUIDELINES:
    - Longevity: [Epithalon](/product/epithalon), [GHK-Cu](/product/ghk-cu), [CJC-1295](/product/cjc-1295)
    - Sleep: [DSIP](/product/dsip), [Epitalon](/product/epitalon)
 7. For reconstitution and dosage calculations, emphasize standard dilution with bacteriostatic water (e.g. 2mL of BAC water per 5mg/10mg vial).
-8. Always keep advice grounded in scientific research standards and remind users that compounds are for professional research protocols.`;
+8. Always keep advice grounded in scientific research standards and remind users that compounds are for professional research protocols.${!isAdminSession ? '\n9. STRICT SUPPLIER CONFIDENTIALITY: NEVER mention or reveal external compounding manufacturers, upstream suppliers, or source countries (e.g., Pharmapolis, Bulgaria, NP Labs, DNLab, Fagron). State only that formulations are prepared under EU GMP / cGMP standards for Atlas Health Services.' : ''}`;
     }
 
     if (GEMINI_API_KEY) {
@@ -992,15 +996,17 @@ GUIDELINES:
         });
 
         if (replyText) {
+          const safeReplyText = isAdminSession ? replyText : scrubSupplierText(replyText);
+
           // Cache verified inference result to ensure visitors never deplete quota on repeated searches
           setCachedQuery(queryCacheKey, {
-            reply: replyText,
+            reply: safeReplyText,
             sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
             matchedEntities: matchedEntities.length > 0 ? matchedEntities : undefined,
           });
 
           const res = NextResponse.json({
-            reply: replyText,
+            reply: safeReplyText,
             goal,
             model: modelUsed || 'gemini-resilient-router',
             timestamp: new Date().toISOString(),

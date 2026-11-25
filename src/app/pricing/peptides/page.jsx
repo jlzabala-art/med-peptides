@@ -2,6 +2,8 @@ import React from 'react';
 import { fetchCollectionProductsAction, trackReferralVisitAction } from '@/actions/vialsCatalogActions';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import PeptidesPriceListClient from './PeptidesPriceListClient';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -64,7 +66,11 @@ export default async function PeptidesPricingPage({ searchParams }) {
   }
 
   // Pre-fetch vials with distributor schedule (+15% margin) or standard wholesale (+15% + 15%)
-  const initialProducts = await fetchCollectionProductsAction('vials', referralCode);
+  const isAdmin = await isAdminServerSession();
+  const rawProducts = await fetchCollectionProductsAction('vials', referralCode);
+  const initialProducts = Array.isArray(rawProducts)
+    ? rawProducts.map((p) => sanitizePublicProductForViewer(p, { isAdmin }))
+    : [];
 
   return (
     <PeptidesPriceListClient

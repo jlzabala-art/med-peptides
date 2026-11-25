@@ -2,6 +2,8 @@ import React from 'react';
 import dnLabCatalog from '@/data/dnLabPensCatalog.json';
 import DnLabPensPriceListClient from '@/app/pricing/dnlab-pens/DnLabPensPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -33,9 +35,14 @@ export default async function AtlasPensPricingPage({ searchParams }) {
   const currency = String(resolvedSearch?.cur || resolvedSearch?.currency || 'USD').toUpperCase();
   const validCurrency = ['EUR', 'USD', 'AED'].includes(currency) ? currency : 'USD';
 
+  const isAdmin = await isAdminServerSession();
+  const sanitizedPens = Array.isArray(dnLabCatalog)
+    ? dnLabCatalog.map((p) => sanitizePublicProductForViewer(p, { isAdmin }))
+    : [];
+
   return (
     <DnLabPensPriceListClient
-      initialProducts={dnLabCatalog}
+      initialProducts={sanitizedPens}
       initialCurrency={validCurrency}
       initialLang={lang}
     />
