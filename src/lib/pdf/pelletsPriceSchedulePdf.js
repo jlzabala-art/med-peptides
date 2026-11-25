@@ -29,11 +29,11 @@ export function buildPelletsPriceSchedulePdfBlob({
 
   doc.setProperties({
     title: isEs
-      ? 'Tarifa Oficial B2B Pellets Hormonales Subcutáneos Pharmapolis EU GMP'
-      : 'Official B2B Pellets Price Schedule Pharmapolis EU GMP',
+      ? 'Tarifa Oficial B2B Pellets Hormonales Subcutáneos EU GMP'
+      : 'Official B2B Pellets Price Schedule EU GMP',
     subject: 'Certified Subcutaneous Hormone Pellets & Surgical Trocar Kits',
-    author: 'Atlas Health Services & Pharmapolis Compounding Pharmacy',
-    keywords: 'hormone pellets, testosterone, estradiol, progesterone, biest, trocar, b2b, pharmapolis, EU GMP',
+    author: 'Atlas Health Services',
+    keywords: 'hormone pellets, testosterone, estradiol, progesterone, biest, trocar, b2b, EU GMP',
     creator: 'Atlas Health Verified Document Engine'
   });
 
@@ -223,8 +223,8 @@ export function buildPelletsPriceSchedulePdfBlob({
         doc.setTextColor(148, 163, 184);
         doc.text(
           isEs
-            ? 'Atlas Health Services · Pharmapolis EU GMP (Bulgaria) · Liberación Continua Subcutánea SAL 10⁻⁶ · https://www.atlashealth-services.com/pricing/pellets'
-            : 'Atlas Health Services · Pharmapolis EU GMP (Bulgaria) · Zero-Order Subcutaneous Release SAL 10⁻⁶ · https://www.atlashealth-services.com/pricing/pellets',
+            ? 'Atlas Health Services · EU GMP Certified Compounding · Liberación Continua Subcutánea SAL 10⁻⁶ · https://www.atlashealth-services.com/pricing/pellets'
+            : 'Atlas Health Services · EU GMP Certified Compounding · Zero-Order Subcutaneous Release SAL 10⁻⁶ · https://www.atlashealth-services.com/pricing/pellets',
           12,
           pageHeight - 6
         );

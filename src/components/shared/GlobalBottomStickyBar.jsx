@@ -130,7 +130,7 @@ export default function GlobalBottomStickyBar() {
 
     if (pathname.startsWith('/pricing/pellets')) {
       return {
-        summaryTitle: isSpanish ? 'Pellets Hormonales Subcutáneos' : 'Pharmapolis Hormone Pellets',
+        summaryTitle: isSpanish ? 'Pellets Hormonales Subcutáneos' : 'Subcutaneous Hormone Pellets',
         summarySubtitle: isSpanish ? 'Terapia EU GMP · Trócares Quirúrgicos' : 'EU GMP Subcutaneous Therapy · Surgical Trocars',
         atlasAiLabel: isSpanish ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
         secondaryAction: quoteAction,

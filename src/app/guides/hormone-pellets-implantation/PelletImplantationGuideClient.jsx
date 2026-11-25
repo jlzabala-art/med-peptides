@@ -153,7 +153,7 @@ const PREOP_CHECKLIST = [
   { id: 'antiseptic', group: 'tray', en: '2% Chlorhexidine / 70% Alcohol prep + sterile fenestrated drape + surgical marker', es: 'Clorhexidina 2% en alcohol 70% + paño fenestrado estéril + marcador quirúrgico' },
   { id: 'anesthesia', group: 'tray', en: 'Buffered 9:1 Lidocaine 2% w/ Epi (1.8 mL) + 8.4% NaHCO₃ (0.2 mL) + 27G × 1.5" needle', es: 'Lidocaína 2% con Epi amortiguada 9:1 (1.8 mL + 0.2 mL Bicarbonato 8.4%) + aguja 27G × 1.5"' },
   { id: 'trocar', group: 'tray', en: 'Single-use sterile disposable trocar kit (3.2 mm or 4.5 mm), #11 scalpel & non-toothed Adson forceps', es: 'Kit de trócar desechable estéril (3.2 mm o 4.5 mm), bisturí #11 y pinzas Adson sin dientes' },
-  { id: 'pellets', group: 'tray', en: 'Pharmapolis EU GMP sterile pellet vials verified (lot #, BUD, strength & quantity)', es: 'Viales estériles de pellets Pharmapolis EU GMP verificados (lote, caducidad, dosis y unidades)' },
+  { id: 'pellets', group: 'tray', en: 'EU GMP sterile pellet vials verified (lot #, BUD, strength & quantity)', es: 'Viales estériles de pellets EU GMP verificados (lote, caducidad, dosis y unidades)' },
   { id: 'closure', group: 'tray', en: 'Steri-Strips, waterproof Tegaderm dressing (+ optional Dermabond adhesive) & sterile gauze', es: 'Steri-Strips, apósito impermeable Tegaderm (+ opcional Dermabond) y gasas estériles' },
 ];
 
@@ -401,7 +401,7 @@ export default function PelletImplantationGuideClient() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '0.75rem', color: '#5f6368' }}>
-              <span>Pharmapolis EU GMP</span>
+              <span>Atlas Health · EU GMP</span>
               <span style={{ color: '#cbd5e1' }}>•</span>
               <span>{isEs ? 'Protocolo Ambulatorio de 10 min' : '10-Min Outpatient Procedure'}</span>
               <span style={{ color: '#cbd5e1' }}>•</span>
@@ -1071,7 +1071,7 @@ export default function PelletImplantationGuideClient() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
             <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Layers size={16} color="#0284c7" />
-              <span>{isEs ? 'Monografías Clínicas de Pellets & Kits Desechables' : 'Pharmapolis Hormone Pellet Monographs & Trocar Kits'}</span>
+              <span>{isEs ? 'Monografías Clínicas de Pellets & Kits Desechables' : 'Hormone Pellet Monographs & Trocar Kits'}</span>
             </h3>
             <Link
               href="/pricing/pellets"

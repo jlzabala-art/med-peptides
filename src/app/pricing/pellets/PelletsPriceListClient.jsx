@@ -28,6 +28,7 @@ import toast from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
 import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
 import CopyableId from '@/components/ui/CopyableId';
 import EmptyState from '@/components/ui/EmptyState';
 import PageHeroCard from '@/components/ui/PageHeroCard';
@@ -249,6 +250,8 @@ export default function PelletsPriceListClient({
   initialLang = 'en'
 }) {
   const workspace = usePublicWorkspace();
+  const { is } = useRoleAccess();
+  const isAdmin = is('admin');
   const currency = workspace?.currency || initialCurrency || 'USD';
   const lang = workspace?.lang || initialLang || 'en';
 
@@ -427,8 +430,8 @@ export default function PelletsPriceListClient({
       storageKey: 'pricing-pellets',
       contextAnchor: {
         sectionTitle: isEs
-          ? 'Pellets Hormonales Subcutáneos Pharmapolis (EU GMP) y Kits Quirúrgicos de Trócar'
-          : 'Pharmapolis Subcutaneous Bioidentical Hormone Pellets & Surgical Trocar Kits',
+          ? 'Pellets Hormonales Subcutáneos (EU GMP) y Kits Quirúrgicos de Trócar'
+          : 'EU GMP Subcutaneous Bioidentical Hormone Pellets & Surgical Trocar Kits',
         keyActives: '17β-Estradiol, Biest, Micronized Testosterone (USP), Progesterone (P4), Testosterone + Anastrozole, Single-Use Surgical Trocars (3.2mm & 4.5mm)',
         mechanisms: isEs
           ? 'Implantes cristalinos comprimidos estériles EU GMP, irradiación E-Beam validada SAL 10⁻⁶, liberación continua de orden cero durante 3.5 a 6 meses sin fluctuaciones, 0% primer paso hepático, tarifas mayoristas unitarias y packs de 10.'
@@ -444,8 +447,8 @@ export default function PelletsPriceListClient({
   const handleShare = async () => {
     const url = 'https://www.atlashealth-services.com/pricing/pellets';
     const text = isEs
-      ? `Tarifa Oficial B2B · Pellets Hormonales Subcutáneos Pharmapolis (EU GMP)\nMonografías clínicas y precios mayoristas institucionales:\n${url}`
-      : `Official B2B Price Schedule · Pharmapolis Subcutaneous Hormone Pellets (EU GMP)\nClinical monographs & institutional wholesale pricing:\n${url}`;
+      ? `Tarifa Oficial B2B · Pellets Hormonales Subcutáneos (EU GMP)\nMonografías clínicas y precios mayoristas institucionales:\n${url}`
+      : `Official B2B Price Schedule · EU GMP Subcutaneous Hormone Pellets\nClinical monographs & institutional wholesale pricing:\n${url}`;
 
     if (navigator.share) {
       try {
@@ -742,7 +745,7 @@ export default function PelletsPriceListClient({
           {row.shortDescription}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '6px', fontSize: '0.72rem', color: '#64748b' }}>
-          <span><strong>{isEs ? 'Fabricante:' : 'Manufacturer:'}</strong> Pharmapolis (Bulgaria)</span>
+          <span><strong>{isEs ? 'Fabricación:' : 'Standard:'}</strong> {isAdmin ? 'Pharmapolis (Bulgaria)' : 'EU GMP Certified Facility'}</span>
           <span>•</span>
           <span><strong>{isEs ? 'Esterilidad:' : 'Sterility:'}</strong> E-Beam SAL 10⁻⁶</span>
           {row.trocarSize && (
@@ -875,14 +878,14 @@ export default function PelletsPriceListClient({
     {
       contextAnchor: {
         type: 'pricing-pellets',
-        name: 'Pharmapolis Hormone Pellets',
+        name: isAdmin ? 'Pharmapolis Hormone Pellets' : 'Subcutaneous Hormone Pellets',
         subtitle: 'EU GMP Subcutaneous Therapy · Surgical Trocars',
-        sectionTitle: isEs ? 'Pellets Hormonales Subcutáneos' : 'Pharmapolis Hormone Pellets',
+        sectionTitle: isEs ? 'Pellets Hormonales Subcutáneos' : (isAdmin ? 'Pharmapolis Hormone Pellets' : 'Subcutaneous Hormone Pellets'),
         currency,
         skuCount: initialProducts.length,
       },
       bottomBar: {
-        summaryTitle: isEs ? 'Pellets Hormonales Subcutáneos' : 'Pharmapolis Hormone Pellets',
+        summaryTitle: isEs ? 'Pellets Hormonales Subcutáneos' : (isAdmin ? 'Pharmapolis Hormone Pellets' : 'Subcutaneous Hormone Pellets'),
         summarySubtitle: `${currency} · ${initialProducts.length} SKUs · EU GMP`,
         atlasAiLabel: isEs ? 'Consultar a Atlas AI' : 'Ask Atlas AI',
         primaryAction: {
@@ -922,7 +925,7 @@ export default function PelletsPriceListClient({
       <main className="pellets-price-container">
         {/* ── UNIFIED COMPACT GCP RESOURCE HERO (Consistent across all platform screens) ── */}
         <PageHeroCard
-          brandRight="PHARMAPOLIS EU GMP"
+          brandRight={isAdmin ? 'PHARMAPOLIS EU GMP' : 'EU GMP CERTIFIED'}
           badges={[
             isEs ? 'E-Beam SAL 10⁻⁶ · POM' : 'E-Beam SAL 10⁻⁶ · POM',
             isEs ? 'Liberación 3.5–6 Meses' : '3.5–6 Mo Zero-Order',
@@ -1462,9 +1465,9 @@ export default function PelletsPriceListClient({
           isOpen={isInquiryDrawerOpen}
           onClose={() => setIsInquiryDrawerOpen(false)}
           contextType="pellets_b2b_schedule"
-          brandType="pharmapolis_pellets"
+          brandType="pellets_schedule"
           lang={lang}
-          customNotes={`Pharmapolis Subcutaneous Pellets RFQ Request. Currency: ${currency}. Selected items: ${JSON.stringify(cartItems)}`}
+          customNotes={`Subcutaneous Hormone Pellets RFQ Request. Currency: ${currency}. Selected items: ${JSON.stringify(cartItems)}`}
         />
       )}
 
@@ -1478,6 +1481,7 @@ export default function PelletsPriceListClient({
           currencySymbol={currencySymbol}
           formatPrice={formatPrice}
           lang={lang}
+          isAdmin={isAdmin}
         />
       )}
 

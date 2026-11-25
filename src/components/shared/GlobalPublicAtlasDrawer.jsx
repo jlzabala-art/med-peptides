@@ -53,7 +53,7 @@ export default function GlobalPublicAtlasDrawer() {
         contextType: 'catalog',
         storageKey: 'pricing-pellets',
         contextAnchor: {
-          sectionTitle: 'Pharmapolis Subcutaneous Bioidentical Hormone Pellets & Surgical Trocar Kits',
+          sectionTitle: 'EU GMP Subcutaneous Bioidentical Hormone Pellets & Surgical Trocar Kits',
           keyActives: '17β-Estradiol, Biest, Micronized Testosterone (USP), Progesterone (P4), Testosterone + Anastrozole, Single-Use Surgical Trocars (3.2mm & 4.5mm)',
           mechanisms: 'EU GMP sterile crystalline compressed implants, validated E-Beam SAL 10⁻⁶, zero-order release kinetics over 3.5 to 6 months, 0% hepatic first-pass bypass, wholesale unit and pack-of-10 institutional pricing tiers.',
         },
@@ -142,7 +142,7 @@ export default function GlobalPublicAtlasDrawer() {
         contextType: 'catalog',
         storageKey: 'pricing-nplab-hormones',
         contextAnchor: {
-          sectionTitle: 'NP Lab Bioidentical Hormones & Endocrinology Schedule',
+          sectionTitle: 'Bioidentical Hormones & Endocrinology Schedule',
           keyActives: 'Micronized testosterone, estradiol, progesterone, DHEA, and endocrine compounding formulations',
           mechanisms: 'BHRT clinical dosing, wholesale pricing tiers, and cross-catalog quote cart.',
         },

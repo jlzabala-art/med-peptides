@@ -14,7 +14,8 @@ export default function PelletPricePdfPreviewModal({
   currency = 'EUR',
   currencySymbol = '€',
   formatPrice,
-  lang = 'en'
+  lang = 'en',
+  isAdmin = false
 }) {
   const [pdfLang, setPdfLang] = useState(lang === 'es' ? 'es' : 'en');
   const [prevLang, setPrevLang] = useState(lang);
@@ -126,7 +127,9 @@ export default function PelletPricePdfPreviewModal({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <FileText size={16} color="#38bdf8" />
           <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '0.02em' }}>
-            {isEs ? 'Tarifa Oficial B2B · Pellets Pharmapolis' : 'Official B2B Price Schedule · Pharmapolis Pellets'}
+            {isEs
+              ? (isAdmin ? 'Tarifa Oficial B2B · Pellets Pharmapolis' : 'Tarifa Oficial B2B · Pellets Hormonales EU GMP')
+              : (isAdmin ? 'Official B2B Price Schedule · Pharmapolis Pellets' : 'Official B2B Price Schedule · EU GMP Pellets')}
           </span>
           <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontWeight: 700 }}>
             {currency}
@@ -372,7 +375,7 @@ export default function PelletPricePdfPreviewModal({
         <div style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
             <div>Atlas Health Services · Commercial & Magistral Division</div>
-            <div>Pharmapolis Compounding Pharmacy EU GMP (Bulgaria) · Zero-Order Dissolution · SAL 10⁻⁶</div>
+            <div>{isAdmin ? 'Pharmapolis Compounding Pharmacy EU GMP (Bulgaria)' : 'Atlas Health Services · EU GMP Certified Compounding'} · Zero-Order Dissolution · SAL 10⁻⁶</div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

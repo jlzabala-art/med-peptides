@@ -58,7 +58,7 @@ export default function NplabHormonesPriceClient({
         volume: `${offer.packLabel} (Batch ×${offer.packsPerBatch})`,
         presentation: `${offer.packagingType} · Batch ×${offer.packsPerBatch}`,
         keyActives: `${offer.productName} ${offer.strength} · ${offer.batchSize} ${offer.batchUnit} batch`,
-        clinicalFocus: `Institutional bulk compounding batch (${offer.packsPerBatch} packs/batch) by Pharmapolis Bulgaria (EU GMP). Excl. VAT.${savingsBadge}`,
+        clinicalFocus: `Institutional bulk compounding batch (${offer.packsPerBatch} packs/batch) · EU GMP Certified. Excl. VAT.${savingsBadge}`,
         costCurrency: 'EUR',
         costPriceEur: eur,
         landedCostAed: aed,
@@ -119,22 +119,22 @@ export default function NplabHormonesPriceClient({
     return {
       sectionLabel: t('B2B Compounding Pharmacy', 'Farmacia Magistral B2B'),
       navCurrentLabel: isPharmapolis
-        ? t('Pharmapolis Bulgaria HRT (BHRT & Pellets)', 'HRT Pharmapolis Bulgaria (BHRT y Pellets)')
+        ? t('EU GMP Bioidentical HRT (BHRT & Pellets)', 'HRT Bioidéntica EU GMP (BHRT y Pellets)')
         : isNplabOnly
-          ? t('NP LABS Hormones (TRT & BHRT)', 'Hormonas NP LABS (TRT y BHRT)')
-          : t('EU GMP Hormones (Pharmapolis & NP LABS)', 'Hormonas EU GMP (Pharmapolis y NP LABS)'),
+          ? t('Endocrinology & Hormones (TRT & BHRT)', 'Endocrinología y Hormonas (TRT y BHRT)')
+          : t('EU GMP Bioidentical & Endocrine Hormones', 'Hormonas Bioidénticas y Endocrinología EU GMP'),
       loginRedirect: supplierLock === 'pharmapolis' ? '/pricing/pharmapolis-hrt' : '/pricing/nplab-hormones',
       switcherFormat: supplierLock === 'pharmapolis' ? 'pharmapolis-hrt' : 'nplab-hormones',
       brandLeft: 'ATLAS HEALTH',
       brandRight: isPharmapolis
-        ? 'PHARMAPOLIS BULGARIA · EU GMP HRT'
+        ? 'EU GMP · BIOIDENTICAL HRT'
         : isNplabOnly
-          ? 'NP LABS · COMPOUNDED HORMONES'
-          : 'NP LABS & PHARMAPOLIS · COMPOUNDED HORMONES',
+          ? 'COMPOUNDED HORMONES · BHRT'
+          : 'EU GMP · COMPOUNDED HORMONES',
       documentTitle: isPharmapolis
-        ? t('PHARMAPOLIS BULGARIA EU GMP HRT & PELLETS SCHEDULE', 'TARIFA OFICIAL EU GMP HRT Y PELLETS · PHARMAPOLIS BULGARIA')
+        ? t('EU GMP BIOIDENTICAL HRT & PELLETS SCHEDULE', 'TARIFA OFICIAL EU GMP HRT Y PELLETS')
         : isNplabOnly
-          ? t('NP LABS TRT, BHRT & SUBCUTANEOUS PELLETS SCHEDULE', 'TARIFA OFICIAL TRT, BHRT Y PELLETS SUBCUTÁNEOS · NP LABS')
+          ? t('TRT, BHRT & SUBCUTANEOUS PELLETS SCHEDULE', 'TARIFA OFICIAL TRT, BHRT Y PELLETS SUBCUTÁNEOS')
           : t("MEN'S TRT, BHRT & SUBCUTANEOUS PELLETS SCHEDULE", 'TARIFA DE HORMONAS TRT, BHRT Y PELLETS SUBCUTÁNEOS'),
       documentSubtitle: isPharmapolis
         ? t(
@@ -170,7 +170,7 @@ export default function NplabHormonesPriceClient({
         {
           id: 'pharmapolis_all',
           label: t(
-            `All Pharmapolis HRT (${enrichedPharmapolisProducts.length + bulkProducts.length})`,
+            `All EU GMP HRT (${enrichedPharmapolisProducts.length + bulkProducts.length})`,
             `Todo HRT Pharmapolis (${enrichedPharmapolisProducts.length + bulkProducts.length})`
           ),
         },

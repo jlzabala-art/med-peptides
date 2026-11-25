@@ -15,14 +15,14 @@ export async function generateMetadata({ searchParams }) {
     path: '/pricing/nplab-hormones',
     siteName: 'Atlas Health Services',
     en: {
-      title: 'NP LABS Hormones (TRT, BHRT & Subcutaneous Pellets) • Official B2B Schedule',
+      title: 'Compounded Hormones (TRT, BHRT & Subcutaneous Pellets) • Official B2B Schedule',
       description:
-        'Official NP LABS Compounded Hormones schedule (TRT injectables, BHRT transdermal creams, oral capsules & subcutaneous pellets) in EUR.',
+        'Official Compounded Hormones schedule (TRT injectables, BHRT transdermal creams, oral capsules & subcutaneous pellets) in EUR.',
     },
     es: {
-      title: 'Hormonas NP LABS (TRT, BHRT y Pellets Subcutáneos) • Tarifa Oficial B2B',
+      title: 'Hormonas Compuestas (TRT, BHRT y Pellets Subcutáneos) • Tarifa Oficial B2B',
       description:
-        'Tarifa oficial de hormonas compuestas NP LABS (TRT inyectables, cremas transdérmicas BHRT, cápsulas orales y pellets subcutáneos) en EUR.',
+        'Tarifa oficial de hormonas compuestas (TRT inyectables, cremas transdérmicas BHRT, cápsulas orales y pellets subcutáneos) en EUR.',
     },
   });
 }

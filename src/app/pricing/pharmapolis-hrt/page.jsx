@@ -16,14 +16,14 @@ export async function generateMetadata({ searchParams }) {
     path: '/pricing/pharmapolis-hrt',
     siteName: 'Atlas Health Services',
     en: {
-      title: 'Pharmapolis Bulgaria HRT (BHRT, Capsules, Creams & Pellets) • Official Schedule',
+      title: 'EU GMP Bioidentical HRT (BHRT, Capsules, Creams & Pellets) • Official Schedule',
       description:
-        'Official EU GMP Bioidentical Hormone Replacement Therapy (BHRT Topi-CLICK creams, oral capsules, vaginal preparations & subcutaneous pellets) catalog from Pharmapolis Bulgaria.',
+        'Official EU GMP Bioidentical Hormone Replacement Therapy (BHRT Topi-CLICK creams, oral capsules, vaginal preparations & subcutaneous pellets) catalog.',
     },
     es: {
-      title: 'HRT Pharmapolis Bulgaria (BHRT, Cápsulas, Cremas y Pellets) • Tarifa Oficial',
+      title: 'HRT Bioidéntica EU GMP (BHRT, Cápsulas, Cremas y Pellets) • Tarifa Oficial',
       description:
-        'Catálogo oficial EU GMP de Terapia Hormonal Bioidéntica (cremas Topi-CLICK, cápsulas orales, óvulos vaginales y pellets subcutáneos) de Pharmapolis Bulgaria.',
+        'Catálogo oficial EU GMP de Terapia Hormonal Bioidéntica (cremas Topi-CLICK, cápsulas orales, óvulos vaginales y pellets subcutáneos).',
     },
   });
 }

@@ -18,10 +18,10 @@ export const PRICING_GROUPS = Object.freeze([
     items: [
       { id: 'peptides', href: '/pricing/peptides', labelEn: 'Peptide Vials & Kits', labelEs: 'Viales y Péptidos', badge: 'cGMP' },
       { id: 'pens', href: '/pricing/pens', labelEn: 'Peptide Pen Dosing Guide', labelEs: 'Guía Plumas U-100', badge: '27 Pens' },
-      { id: 'dnlab-pens', href: '/pricing/dnlab-pens', labelEn: 'DNLab Pens Schedule', labelEs: 'Tarifa DNLab Pens', badge: 'U-100' },
+      { id: 'dnlab-pens', href: '/pricing/dnlab-pens', labelEn: 'Peptide Pens Schedule', labelEs: 'Tarifa Plumas Péptidos', badge: 'U-100' },
       { id: 'pellets', href: '/pricing/pellets', labelEn: 'Subcutaneous Hormone Pellets', labelEs: 'Pellets Hormonales', badge: 'EU GMP' },
-      { id: 'pharmapolis-hrt', href: '/pricing/pharmapolis-hrt', labelEn: 'Pharmapolis HRT (BHRT)', labelEs: 'HRT Pharmapolis (BHRT)', badge: 'EU GMP' },
-      { id: 'nplab-hormones', href: '/pricing/nplab-hormones', labelEn: 'NP Lab Hormones', labelEs: 'Hormonas NP Lab', badge: 'BHRT' },
+      { id: 'pharmapolis-hrt', href: '/pricing/pharmapolis-hrt', labelEn: 'Bioidentical HRT (BHRT)', labelEs: 'HRT Bioidéntica (BHRT)', badge: 'EU GMP' },
+      { id: 'nplab-hormones', href: '/pricing/nplab-hormones', labelEn: 'Endocrinology & Hormones', labelEs: 'Endocrinología y Hormonas', badge: 'BHRT' },
     ],
   },
   {
