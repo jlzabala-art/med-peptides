@@ -203,7 +203,7 @@ export default function HormonePelletDetail({
         qrLabel: isEs ? 'Código QR' : 'QR Code',
         onOpenQr: () => setIsShareDrawerOpen(true),
         primaryAction: {
-          label: isEs ? 'Solicitar Asignación Clínica' : 'Request Allocation',
+          label: isEs ? 'Solicitar Presupuesto' : 'Request Quote',
           onClick: () => setIsInquiryDrawerOpen(true),
         },
       },
@@ -321,7 +321,7 @@ export default function HormonePelletDetail({
                 className="gcp-btn-primary gcp-header-btn"
               >
                 <Building2 size={14} />
-                <span>{isEs ? 'Solicitar Asignación' : 'Request Allocation'}</span>
+                <span>{isEs ? 'Solicitar Presupuesto' : 'Request Quote'}</span>
               </button>
             </div>
           </div>
@@ -1031,7 +1031,7 @@ export default function HormonePelletDetail({
               className="gcp-btn-primary pellet-sidebar-btn-primary"
             >
               <Building2 size={16} />
-              <span>{isEs ? 'Solicitar Asignación' : 'Request Allocation'}</span>
+              <span>{isEs ? 'Solicitar Presupuesto' : 'Request Quote'}</span>
             </button>
 
             <button

@@ -97,7 +97,7 @@ export default function NormaPharmaceuticalDetail({
         showSections: true,
         sectionsLabel: isEs ? 'Secciones' : 'Sections',
         primaryAction: {
-          label: isEs ? 'Solicitar Asignación Clínica' : 'Request Allocation',
+          label: isEs ? 'Solicitar Presupuesto' : 'Request Quote',
           onClick: () => setIsInquiryDrawerOpen(true),
         },
       },
@@ -205,7 +205,7 @@ export default function NormaPharmaceuticalDetail({
                 onClick={() => setIsInquiryDrawerOpen(true)}
               >
                 <FileText size={13} />
-                <span>{isEs ? 'Solicitar Asignación' : 'Request Allocation'}</span>
+                <span>{isEs ? 'Solicitar Presupuesto' : 'Request Quote'}</span>
               </button>
             </div>
           </div>

@@ -1081,7 +1081,7 @@ export default function PelletsPriceListClient({
                 style={{ height: '36px', padding: '0 13px', fontSize: '0.78rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 <FileText size={13} />
-                <span>{isEs ? 'Solicitar' : 'Request Allocation'}</span>
+                <span>{isEs ? 'Solicitar Presupuesto' : 'Request Quote'}</span>
               </button>
             </>
           }
@@ -1562,7 +1562,7 @@ export default function PelletsPriceListClient({
                 onClick={() => setIsInquiryDrawerOpen(true)}
               >
                 <CheckCircle2 size={14} />
-                <span>{isEs ? 'Solicitar Asignación / Cotización Formal' : 'Request Allocation / Official Quote'}</span>
+                <span>{isEs ? 'Solicitar Presupuesto Formal' : 'Request Official Quote'}</span>
               </button>
             </div>
           </div>

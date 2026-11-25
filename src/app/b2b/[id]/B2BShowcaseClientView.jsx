@@ -108,7 +108,7 @@ export default function B2BShowcaseClientView({ showcase }) {
               }}
             >
               <Building2 size={14} />
-              <span className="puh-btn-label">Request Allocation</span>
+              <span className="puh-btn-label">Request Quote</span>
             </button>
           </div>
         }
