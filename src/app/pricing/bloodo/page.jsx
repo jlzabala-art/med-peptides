@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { sanitizeForClient } from '@/utils/sanitizeForClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import BloodoPriceListClient from './BloodoPriceListClient';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -174,11 +175,30 @@ export default async function BloodoPricingPage({ searchParams }) {
     return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
   });
 
+  const safeProducts = sanitizeForClient(products);
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/pricing/bloodo',
+    name: 'Bloodo™ Capillary Blood Diagnostics • Official B2B Price Schedule',
+    description: 'Official B2B wholesale price schedule for Bloodo™ CE-IVDR Dried Blood Spot (DBS) LC-MS/MS kits: Intracellular NAD+, Testosterone+, Diurnal Cortisol, HbA1c, Omega-3/6, and Vitamin D3.',
+    currency: initialCurrency,
+    category: 'Capillary Blood Diagnostics (CE-IVDR)',
+    products: safeProducts,
+    faqs: [
+      {
+        q: 'What sample type and analytical method do Bloodo™ kits use?',
+        a: 'Bloodo™ kits use CE-IVDR capillary Dried Blood Spot (DBS) collection analyzed via LC-MS/MS in ISO 15189 laboratories with a 48–72 hour turnaround.',
+      },
+    ],
+  });
+
   return (
-    <BloodoPriceListClient
-      initialProducts={sanitizeForClient(products)}
-      initialLang={lang}
-      initialCurrency={initialCurrency}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <BloodoPriceListClient
+        initialProducts={safeProducts}
+        initialLang={lang}
+        initialCurrency={initialCurrency}
+      />
+    </>
   );
 }

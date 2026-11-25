@@ -29,10 +29,19 @@ export async function GET(request) {
 
     const staticRoutes = [
       '',
+      '/pricing/pellets',
+      '/pricing/peptides',
+      '/vials',
+      '/pricing/pens',
+      '/pricing/bhrt',
+      '/pricing/hormones',
+      '/pricing/bloodo',
+      '/pricing/24genetics',
+      '/pricing/fillers',
+      '/pricing/colway',
       '/proto',
       '/protocol-finder',
       '/guides/hormone-pellets-implantation',
-      '/pricing/pellets',
     ];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;

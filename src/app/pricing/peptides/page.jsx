@@ -4,6 +4,7 @@ import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelpe
 import PeptidesPriceListClient from './PeptidesPriceListClient';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -72,15 +73,37 @@ export default async function PeptidesPricingPage({ searchParams }) {
     ? rawProducts.map((p) => sanitizePublicProductForViewer(p, { isAdmin }))
     : [];
 
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/pricing/peptides',
+    name: 'Clinical Lyophilized Peptides • Official B2B Price Schedule',
+    description: 'Official institutional and wholesale price schedule for sterile lyophilized bioactive peptide vials (10R, ≥99.0% HPLC purity, cGMP) with Pack ×10 volume pricing.',
+    currency: initialCurrency,
+    category: 'Clinical Lyophilized Peptides',
+    products: initialProducts,
+    faqs: [
+      {
+        q: 'What analytical purity standard applies to Atlas Health Services peptide vials?',
+        a: 'All clinical 10R lyophilized peptide vials meet ≥99.0% HPLC purity with cGMP sterile manufacturing and batch CoA traceability.',
+      },
+      {
+        q: 'How are volume Pack ×10 discounts applied?',
+        a: 'Clinics ordering 10-vial packs receive automatic B2B volume tier pricing across EUR, USD, and AED schedules.',
+      },
+    ],
+  });
+
   return (
-    <PeptidesPriceListClient
-      initialProducts={initialProducts || []}
-      referralCode={referralCode}
-      isDistributor={isDistributor}
-      initialLang={initialLang}
-      initialCurrency={initialCurrency}
-      initialDest={initialDest}
-      trackingCode={trackingCode}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <PeptidesPriceListClient
+        initialProducts={initialProducts || []}
+        referralCode={referralCode}
+        isDistributor={isDistributor}
+        initialLang={initialLang}
+        initialCurrency={initialCurrency}
+        initialDest={initialDest}
+        trackingCode={trackingCode}
+      />
+    </>
   );
 }

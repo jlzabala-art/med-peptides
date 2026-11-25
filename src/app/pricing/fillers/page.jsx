@@ -2,6 +2,7 @@ import React from 'react';
 import { adminDb } from '@/lib/firebaseAdmin';
 import FillersPriceListClient from './FillersPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -67,11 +68,23 @@ export default async function FillersPricingPage({ searchParams }) {
     products = getAestheticInjectablesCatalog();
   }
 
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/pricing/fillers',
+    name: 'Dermal Fillers & Skin Boosters • Wholeseller B2B Catalog',
+    description: 'Direct B2B pricing for 40 CE-marked original aesthetic injectables across Juvéderm, Restylane, Belotero, Profhilo, Sculptra, Radiesse, PhilArt, and Aqualyx.',
+    currency: initialCurrency,
+    category: 'Dermal Fillers & Aesthetic Injectables',
+    products,
+  });
+
   return (
-    <FillersPriceListClient
-      initialProducts={products}
-      initialCurrency={initialCurrency}
-      initialLang={initialLang}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <FillersPriceListClient
+        initialProducts={products}
+        initialCurrency={initialCurrency}
+        initialLang={initialLang}
+      />
+    </>
   );
 }

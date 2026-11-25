@@ -4,6 +4,7 @@ import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 import VialsCatalogClient from './VialsCatalogClient';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -148,12 +149,24 @@ export default async function VialsPublicPage({ searchParams }) {
     collection
   };
 
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/vials',
+    name: 'Clinical Peptide Vials & Specialty Formularies',
+    description: 'Specialty-filtered clinical peptide vials for longevity, gynecology, dermatology, metabolic endocrinology, and urology clinics.',
+    currency: 'EUR',
+    category: 'Clinical Peptide Vials',
+    products: initialProducts,
+  });
+
   return (
-    <VialsCatalogClient
-      initialVials={initialProducts}
-      initialCollection={collection}
-      referralInfo={referralInfo}
-      isPatientView={isPatientView}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <VialsCatalogClient
+        initialVials={initialProducts}
+        initialCollection={collection}
+        referralInfo={referralInfo}
+        isPatientView={isPatientView}
+      />
+    </>
   );
 }

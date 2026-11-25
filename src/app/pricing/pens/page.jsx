@@ -4,6 +4,7 @@ import DnLabPensPriceListClient from '@/app/pricing/dnlab-pens/DnLabPensPriceLis
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -40,11 +41,29 @@ export default async function AtlasPensPricingPage({ searchParams }) {
     ? dnLabCatalog.map((p) => sanitizePublicProductForViewer(p, { isAdmin }))
     : [];
 
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/pricing/pens',
+    name: 'Pre-filled Multi-Dose Peptide Pens • Official B2B Portfolio',
+    description: 'Official B2B portfolio for pre-filled 3 mL multi-dose peptide pens with click-dial dosing protocols, HPLC ≥99.2% purity, and cold-chain standards.',
+    currency: validCurrency,
+    category: 'Pre-filled Peptide Pens',
+    products: sanitizedPens,
+    faqs: [
+      {
+        q: 'How do click-dial multi-dose peptide pens work?',
+        a: 'Each 3 mL pre-filled cartridge pen features precision click-dial micro-dosing for standardized clinic and patient administration without manual vial reconstitution.',
+      },
+    ],
+  });
+
   return (
-    <DnLabPensPriceListClient
-      initialProducts={sanitizedPens}
-      initialCurrency={validCurrency}
-      initialLang={lang}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <DnLabPensPriceListClient
+        initialProducts={sanitizedPens}
+        initialCurrency={validCurrency}
+        initialLang={lang}
+      />
+    </>
   );
 }

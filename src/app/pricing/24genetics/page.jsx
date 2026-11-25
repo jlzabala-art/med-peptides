@@ -4,6 +4,7 @@ import GenomicsPriceListClient from './GenomicsPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -292,12 +293,30 @@ export default async function GenomicsPricingPage({ searchParams }) {
     return clean;
   });
 
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/pricing/24genetics',
+    name: '24Genetics Precision Genomics Panels • Official B2B Price Schedule',
+    description: 'Clinical DNA and WGS/WES genomics panels for longevity, nutrigenetics, pharmacogenetics, dermatology, and sports medicine clinics.',
+    currency: initialCurrency,
+    category: 'Clinical Genomics Panels',
+    products: sanitizedProducts,
+    faqs: [
+      {
+        q: 'Which clinical areas do 24Genetics B2B DNA panels cover?',
+        a: 'Panels cover Pharmacogenetics, Nutrigenetics, Longevity & Telomere pathways, Dermatology/Skin, Sports Performance, and Whole Genome / Exome sequencing.',
+      },
+    ],
+  });
+
   return (
-    <GenomicsPriceListClient
-      initialProducts={sanitizedProducts}
-      initialCurrency={initialCurrency}
-      initialLang={initialLang}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <GenomicsPriceListClient
+        initialProducts={sanitizedProducts}
+        initialCurrency={initialCurrency}
+        initialLang={initialLang}
+      />
+    </>
   );
 }
 

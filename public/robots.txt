@@ -1,7 +1,54 @@
 User-agent: *
 Allow: /
+Allow: /pricing/
+Allow: /vials
+Allow: /proto
+Allow: /p/
+Allow: /raw/
+Allow: /guides/
+Allow: /llms.txt
 
-# Bloquear portales privados B2B y áreas de usuario
+# Explicit AI Search & Answer Engine Crawlers (ChatGPT Search, Perplexity, Claude, Google AI)
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /labels
+Disallow: /api/
+
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /labels
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /labels
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /labels
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /labels
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+
+# Block private portals, internal operations, and deprecated alias routes
+User-agent: *
 Disallow: /admin
 Disallow: /doctor
 Disallow: /wholesaler
@@ -14,6 +61,11 @@ Disallow: /login
 Disallow: /settings
 Disallow: /saved
 Disallow: /orders
+Disallow: /labels
+Disallow: /api/
+Disallow: /pricing/pharmapolis-hrt
+Disallow: /pricing/nplab-hormones
+Disallow: /pricing/dnlab-pens
 
-# Sitemap
+# Sitemaps
 Sitemap: https://www.atlashealth-services.com/sitemap.xml

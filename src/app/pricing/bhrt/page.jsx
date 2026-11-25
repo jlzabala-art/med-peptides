@@ -5,6 +5,7 @@ import NplabHormonesPriceListClient from '../nplab-hormones/NplabHormonesPriceLi
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -47,14 +48,26 @@ export default async function BhrtPricingPage({ searchParams }) {
     limitCount: 120,
   })).map((p) => sanitizePublicProductForViewer(p, { isAdmin }));
 
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/pricing/bhrt',
+    name: 'EU GMP Bioidentical HRT (BHRT, Capsules, Creams & Pellets)',
+    description: 'Official EU GMP Bioidentical Hormone Replacement Therapy catalog covering Topi-CLICK transdermal creams, oral micronized capsules, vaginal preparations, and subcutaneous pellets.',
+    currency: initialCurrency,
+    category: 'Bioidentical Hormone Replacement Therapy',
+    products: pharmapolisProducts,
+  });
+
   return (
-    <NplabHormonesPriceListClient
-      pharmapolisProducts={pharmapolisProducts}
-      nplabProducts={[]}
-      supplierLock="pharmapolis"
-      initialLab={initialLab}
-      initialCategory={resolvedSearch?.category || 'all'}
-      initialCurrency={initialCurrency}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <NplabHormonesPriceListClient
+        pharmapolisProducts={pharmapolisProducts}
+        nplabProducts={[]}
+        supplierLock="pharmapolis"
+        initialLab={initialLab}
+        initialCategory={resolvedSearch?.category || 'all'}
+        initialCurrency={initialCurrency}
+      />
+    </>
   );
 }

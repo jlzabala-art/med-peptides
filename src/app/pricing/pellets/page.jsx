@@ -6,6 +6,7 @@ import PelletsPriceListClient from './PelletsPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -182,11 +183,33 @@ export default async function PelletsPricingPage({ searchParams }) {
     toProductViewModel(item, { tier: 'wholesale', targetCurrency: initialCurrency })
   );
 
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/pricing/pellets',
+    name: 'Bioidentical Hormone Pellets • Official B2B Price Schedule',
+    description: 'Sterile subcutaneous testosterone and estradiol fused crystalline pellets (12.5 mg to 200 mg) and disposable stainless-steel trocar implantation kits for longevity clinics.',
+    currency: initialCurrency,
+    category: 'Bioidentical Hormone Pellets',
+    products: allProducts,
+    faqs: [
+      {
+        q: 'How long do subcutaneous hormone pellets release?',
+        a: 'Fused crystalline testosterone and estradiol pellets provide steady physiological release over 3.5 to 6 months depending on patient metabolism and dosage.',
+      },
+      {
+        q: 'What trocar sizes are used for hormone pellet implantation?',
+        a: '3.2 mm disposable stainless-steel trocars are standard for estradiol and low-dose female testosterone pellets, while 4.5 mm trocars are used for 100 mg and 200 mg testosterone pellets.',
+      },
+    ],
+  });
+
   return (
-    <PelletsPriceListClient
-      initialProducts={allProducts}
-      initialCurrency={initialCurrency}
-      initialLang={initialLang}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <PelletsPriceListClient
+        initialProducts={allProducts}
+        initialCurrency={initialCurrency}
+        initialLang={initialLang}
+      />
+    </>
   );
 }

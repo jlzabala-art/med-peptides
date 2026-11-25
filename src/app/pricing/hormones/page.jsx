@@ -4,6 +4,7 @@ import NplabHormonesPriceListClient from '../nplab-hormones/NplabHormonesPriceLi
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
 import { isAdminServerSession } from '@/lib/serverAdminAuth';
 import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
+import { buildPricingPageJsonLd } from '@/lib/seoPricingJsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -43,14 +44,26 @@ export default async function HormonesPricingPage({ searchParams }) {
     limitCount: 450,
   })).map((p) => sanitizePublicProductForViewer(p, { isAdmin }));
 
+  const jsonLd = buildPricingPageJsonLd({
+    path: '/pricing/hormones',
+    name: 'Compounded Hormones (TRT, BHRT & Subcutaneous Pellets)',
+    description: 'Official Compounded Hormones B2B schedule for TRT injectables, BHRT transdermal creams, oral capsules, and subcutaneous pellets.',
+    currency: initialCurrency,
+    category: 'Compounded Hormones',
+    products: nplabProducts,
+  });
+
   return (
-    <NplabHormonesPriceListClient
-      pharmapolisProducts={[]}
-      nplabProducts={nplabProducts}
-      supplierLock="nplab"
-      initialLab={initialLab}
-      initialCategory={resolvedSearch?.category || 'all'}
-      initialCurrency={initialCurrency}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <NplabHormonesPriceListClient
+        pharmapolisProducts={[]}
+        nplabProducts={nplabProducts}
+        supplierLock="nplab"
+        initialLab={initialLab}
+        initialCategory={resolvedSearch?.category || 'all'}
+        initialCurrency={initialCurrency}
+      />
+    </>
   );
 }
