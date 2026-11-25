@@ -608,11 +608,19 @@ export default function PelletsPriceListClient({
       render: (_, row) => {
         const eur = row.pricing?.wholesalePriceEur || row.pricing?.price_eur || row.pricing?.costPriceEur || 0;
         const currentQty = cartItems[row.id]?.single || 0;
+        const isKit = row.category === 'Trocar Kits' || row.hormoneType === 'instrument';
+        const durMatch = String(row.duration || '').match(/(\d+(?:\.\d+)?)\s*(?:to|-|a)\s*(\d+(?:\.\d+)?)/i);
+        const avgMonths = !isKit ? (durMatch ? (parseFloat(durMatch[1]) + parseFloat(durMatch[2])) / 2 : 4.5) : null;
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
             <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
               {formatPrice(eur)}
             </span>
+            {avgMonths && eur > 0 && (
+              <span style={{ fontSize: '0.65rem', fontWeight: 650, color: '#0f766e' }}>
+                ~{formatPrice(eur / avgMonths)}{isEs ? '/mes' : '/mo'}
+              </span>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               {currentQty > 0 ? (
                 <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '4px', background: '#ffffff' }}>
@@ -1370,7 +1378,15 @@ export default function PelletsPriceListClient({
                     type="button"
                     onClick={() => {
                       setSelectedCategory('all');
+                      setSelectedProfile('all');
                       setSearchQuery('');
+                      if (typeof window !== 'undefined') {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('profile');
+                        url.searchParams.delete('category');
+                        url.searchParams.delete('q');
+                        window.history.replaceState({}, '', url.toString());
+                      }
                     }}
                     style={{
                       background: 'transparent',
@@ -1386,6 +1402,26 @@ export default function PelletsPriceListClient({
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* 3-Point Clinical Decision Strip for Gynecologists & Endocrinologists */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              marginBottom: '10px',
+              fontSize: '0.72rem',
+              color: '#334155',
+            }}>
+              <span style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
+                ✓ {isEs ? '0% Primer Paso Hepático (Sin SHBG/trombosis oral)' : '0% Hepatic First-Pass (No oral SHBG spike)'}
+              </span>
+              <span style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
+                ✓ {isEs ? 'Liberación Meseta 3.5–6 Meses (Orden cero)' : '3.5–6 Month Zero-Order Plateau'}
+              </span>
+              <span style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
+                ✓ {isEs ? 'Esterilidad E-Beam SAL 10⁻⁶ (Blíster monodosis)' : 'E-Beam SAL 10⁻⁶ Sterility (Single-dose blister)'}
+              </span>
             </div>
 
             {/* DataTable (Strict Rule #3 & Rule #4 + Symmetric Mobile Card UX) */}
@@ -1443,7 +1479,40 @@ export default function PelletsPriceListClient({
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              {(() => {
+                const inCartIds = Object.keys(cartItems).filter((id) => (cartItems[id]?.single || 0) > 0 || (cartItems[id]?.pack10 || 0) > 0);
+                const inCartItems = initialProducts.filter((p) => inCartIds.includes(p.id));
+                const needs32 = inCartItems.some((p) => p.category !== 'Trocar Kits' && String(p.trocarSize || '').includes('3.2'));
+                const needs45 = inCartItems.some((p) => p.category !== 'Trocar Kits' && String(p.trocarSize || '').includes('4.5'));
+                const kit32 = initialProducts.find((p) => p.id === 'trocar-kit-3-2mm');
+                const kit45 = initialProducts.find((p) => p.id === 'trocar-kit-4-5mm');
+                const suggestedKit = (needs32 && kit32 && !inCartIds.includes(kit32.id))
+                  ? kit32
+                  : (needs45 && kit45 && !inCartIds.includes(kit45.id))
+                    ? kit45
+                    : null;
+                if (!suggestedKit) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => handleAddToCart(suggestedKit.id, 'single')}
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      border: '1px solid #0d9488',
+                      background: '#f0fdfa',
+                      color: '#0f766e',
+                      fontSize: '0.73rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    + {isEs ? `Añadir Kit Trócar ${suggestedKit.trocarSize}` : `Add ${suggestedKit.trocarSize} Trocar Kit`}
+                  </button>
+                );
+              })()}
               <button
                 type="button"
                 className="gcp-btn-secondary"
