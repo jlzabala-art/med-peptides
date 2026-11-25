@@ -635,6 +635,8 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
           setLocalLang(nextLang);
           workspace?.setLang?.(nextLang);
         }}
+        hideAiButton={true}
+        hideContactButton={true}
         hideAccountManager={true}
         breadcrumb={[
           { label: 'Price Schedules', href: '/pricing' },
@@ -671,7 +673,7 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         }
       />
 
-      <CatalogPricingBridgeBar activeMode="pricing" slug="24genomics" />
+      <CatalogPricingBridgeBar activeMode="pricing" slug="24genomics" lang={lang} />
 
       <main className="atlas-page-shell">
         <div style={{ marginBottom: '1rem' }}>

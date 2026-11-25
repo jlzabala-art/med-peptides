@@ -968,70 +968,7 @@ export function getSuggestedInquiriesForProduct(contextAnchor, contextType = 'mo
   }
 
   // 0a. Prescription-specific dynamic patient/clinical questions (never leak unrelated TrichoTest defaults)
-  // Dedicated Pellets & Vials Quick-Prompt Clusters (Atlas AI Optimization)
-  const anchorTitleLower = String(contextAnchor?.sectionTitle || contextAnchor?.name || contextAnchor?.type || '').toLowerCase();
-  const isPelletsContext = contextAnchor?.type === 'pricing-pellets' || /pellet|trocar/i.test(anchorTitleLower);
-  const isVialsContext = !isPelletsContext && (
-    contextAnchor?.type === 'vials_directory' ||
-    contextAnchor?.type === 'pricing-peptides' ||
-    /peptide\s*vials|lyophilized\s*peptide/i.test(anchorTitleLower)
-  );
-
-  if (isPelletsContext) {
-    contextualCandidates = [
-      {
-        label: isEs ? 'Trócar 3.2 mm vs 4.5 mm' : '3.2 mm vs 4.5 mm Trocar Sizing',
-        query: isEs
-          ? '¿Qué calibre de trócar (3.2 mm vs 4.5 mm) se requiere según la dosis de estradiol o testosterona del pellet?'
-          : 'Which surgical trocar cannula (3.2 mm vs 4.5 mm) is required for each Estradiol, Bi-Est, and Testosterone pellet strength?',
-      },
-      {
-        label: isEs ? 'Rangos séricos BHRT mujer' : 'Female BHRT Serum Targets',
-        query: isEs
-          ? '¿Cuáles son las ventanas séricas objetivo (E2 y Testosterona) y dosis habituales de pellets en ginecología y menopausia?'
-          : 'What are the target serum E2 & Testosterone ranges and typical pellet strengths for Female BHRT & Gynecology?',
-      },
-      {
-        label: isEs ? 'TRT hombre y T + Anastrozol' : 'Male TRT & T + Anastrozole',
-        query: isEs
-          ? '¿Cómo se dosifican los implantes múltiples en TRT masculino y cuándo se prefiere Testosterona + Anastrozol?'
-          : 'How are multi-pellet totals dosed in Male TRT and when is Testosterone + Anastrozole preferred?',
-      },
-      {
-        label: isEs ? 'Cinética orden cero (0% hígado)' : 'Zero-Order Release & E-Beam SAL 10⁻⁶',
-        query: isEs
-          ? '¿Por qué los pellets cristalinos con liberación de orden cero (3.5–6 meses) evitan picos séricos y el primer paso hepático?'
-          : 'Why do binder-free crystalline pellets with zero-order release (3.5–6 months) avoid hepatic first-pass and serum spikes?',
-      },
-    ];
-  } else if (isVialsContext) {
-    contextualCandidates = [
-      {
-        label: isEs ? 'Ginecología y salud femenina' : "Gynecology & Women's Health Peptides",
-        query: isEs
-          ? '¿Qué péptidos liofilizados (Kisspeptin-10, PT-141, Oxitocina, BPC-157) destacan en ginecología y salud femenina?'
-          : 'Which lyophilized peptides (Kisspeptin-10, PT-141, Oxytocin, BPC-157) are most relevant for Gynecology & Women\'s Health?',
-      },
-      {
-        label: isEs ? 'Reconstitución (mL y U-100)' : 'Reconstitution (BAC Water & U-100)',
-        query: isEs
-          ? '¿Cómo reconstituir viales liofilizados de 5 mg y 10 mg con agua bacteriostática y calcular unidades en jeringa U-100?'
-          : 'How do I reconstitute 5 mg and 10 mg lyophilized vials with BAC water and calculate U-100 syringe units?',
-      },
-      {
-        label: isEs ? 'Recuperación post-quirúrgica' : 'Post-Surgical Repair (BPC-157 + TB-500)',
-        query: isEs
-          ? '¿Cuál es el protocolo clínico habitual de BPC-157 + TB-500 para reparación tisular y recuperación postoperatoria?'
-          : 'What is the standard clinical protocol for BPC-157 + TB-500 in tissue repair and post-surgical recovery?',
-      },
-      {
-        label: isEs ? 'Estabilidad 28 días y HPLC ≥99%' : '28-Day Stability & HPLC ≥99.0%',
-        query: isEs
-          ? '¿Cuál es la estabilidad tras reconstitución (2–8 °C) y los criterios analíticos HPLC/endotoxinas de los viales?'
-          : 'What is the post-reconstitution stability window (2–8°C) and ≥99.0% HPLC / endotoxin release standard?',
-      },
-    ];
-  } else if (contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription') {
+  if (contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription') {
     const rawFormula = String(contextAnchor?.formula || '').split(' // ')[0].trim();
     const formulaLabel = rawFormula && rawFormula !== 'Custom Compounded Formulation'
       ? rawFormula.slice(0, 60)
@@ -1282,7 +1219,38 @@ export function getContextualAndPopularSuggestions({
     /peptide\s*vials|lyophilized\s*peptide/i.test(anchorTitleLower)
   );
 
-  if (isPelletsContext) {
+  const isBloodoContext = !isPelletsContext && !isVialsContext && (
+    contextAnchor?.category === 'bloodo' || /bloodo|capillary\s*blood|dbs/i.test(anchorTitleLower)
+  );
+
+  if (isBloodoContext) {
+    contextualCandidates = [
+      {
+        label: isEs ? 'NAD+ Intracelular vs Sangre Total' : 'NAD+ Intracellular vs Whole-Blood',
+        query: isEs
+          ? '¿Por qué es clave medir NAD+ intracelular con Bloodo™ DBS en protocolos de longevidad y fatiga mitocondrial?'
+          : 'Why is measuring intracellular NAD+ via Bloodo™ DBS clinically valuable in longevity and mitochondrial protocols?',
+      },
+      {
+        label: isEs ? 'Testosterona+ y Cortisol Diurno' : 'Testosterone+ & Diurnal Cortisol',
+        query: isEs
+          ? '¿Cómo interpretar el perfil de Testosterona+ y Cortisol Diurno (4 puntos) en muestra capilar DBS?'
+          : 'How are Bloodo™ Testosterone+ and 4-point Diurnal Cortisol DBS results interpreted clinically?',
+      },
+      {
+        label: isEs ? 'Toma de muestra capilar DBS' : 'DBS Sample Collection Guide',
+        query: isEs
+          ? '¿Cómo se realiza la toma de muestra capilar DBS en clínica o domicilio y cuál es el plazo de resultados (48–72h)?'
+          : 'How is the painless Dried Blood Spot (DBS) finger-prick collected in clinic or at home, and what is the 48–72h turnaround?',
+      },
+      {
+        label: isEs ? 'Precisión ISO 15189 LC-MS/MS' : 'ISO 15189 LC-MS/MS Accuracy',
+        query: isEs
+          ? '¿Qué fiabilidad ofrece el análisis LC-MS/MS en laboratorio europeo acreditado ISO 15189 frente a analítica venosa?'
+          : 'How does ISO 15189 accredited European LC-MS/MS DBS analysis compare to standard venous serum draws?',
+      },
+    ];
+  } else if (isPelletsContext) {
     contextualCandidates = [
       {
         label: isEs ? 'Trócar 3.2 mm vs 4.5 mm' : '3.2 mm vs 4.5 mm Trocar Sizing',

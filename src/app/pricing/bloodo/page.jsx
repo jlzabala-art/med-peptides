@@ -116,12 +116,12 @@ export async function generateMetadata({ searchParams }) {
     en: {
       title: `Bloodo™ Capillary Blood Diagnostics • Official B2B Price Schedule (${currency})`,
       description:
-        'Official B2B wholesale price schedule (15% + 15%) for Bloodo™ CE-IVDR Dried Blood Spot (DBS) test kits: NAD+ Intracellular, Testosterone+, Diurnal Cortisol, HbA1c, Omega-3/6 & Vitamin D3.',
+        'Official B2B wholesale price schedule for Bloodo™ CE-IVDR Dried Blood Spot (DBS) test kits: NAD+ Intracellular, Testosterone+, Diurnal Cortisol, HbA1c, Omega-3/6 & Vitamin D3.',
     },
     es: {
       title: `Bloodo™ Diagnóstico Capilar en Sangre • Tarifa Oficial B2B (${currency})`,
       description:
-        'Tarifa oficial mayorista B2B (15% + 15%) para los kits diagnósticos Bloodo™ CE-IVDR en sangre capilar (DBS): NAD+ Intracelular, Testosterona+, Cortisol Diurno, HbA1c, Omega-3/6 y Vitamina D3.',
+        'Tarifa oficial mayorista B2B para los kits diagnósticos Bloodo™ CE-IVDR en sangre capilar (DBS): NAD+ Intracelular, Testosterona+, Cortisol Diurno, HbA1c, Omega-3/6 y Vitamina D3.',
     },
   });
 }

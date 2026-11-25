@@ -383,6 +383,8 @@ export default function FillersPriceListClient({
           workspace?.setCurrency?.(nextCurr);
         }}
         loginRedirect="/pricing/fillers"
+        hideAiButton={true}
+        hideContactButton={true}
         breadcrumb={[
           { label: isEs ? 'Tarifas B2B' : 'B2B Pricing', href: '/pricing' },
           { label: isEs ? 'Boosters & Fillers' : 'Boosters & Fillers' }

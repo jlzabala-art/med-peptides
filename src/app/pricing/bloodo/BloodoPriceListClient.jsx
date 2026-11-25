@@ -70,8 +70,8 @@ export default function BloodoPriceListClient({
           : 'Bloodo™ Capillary Blood Diagnostics (CE-IVDR · ISO 15189) — B2B Price Schedule',
         keyActives: 'NAD+ Intracellular, Testosterone+, Diurnal Cortisol CAR, Omega-3/6 Ratio, HbA1c, 25-OH Vitamin D',
         mechanisms: isEs
-          ? 'Kits de gota de sangre seca (DBS) validados CE-IVDR con análisis LC-MS/MS/HPLC en laboratorio ISO 15189 y resultados en 48–72h. Precios mayoristas B2B (15% + 15%).'
-          : 'CE-IVDR validated Dried Blood Spot (DBS) kits analyzed via LC-MS/MS/HPLC in ISO 15189 accredited European lab with 48–72h turnaround. B2B wholesale pricing (15% + 15%).',
+          ? 'Kits de gota de sangre seca (DBS) validados CE-IVDR con análisis LC-MS/MS/HPLC en laboratorio ISO 15189 y resultados en 48–72h. Tarifas mayoristas B2B oficiales.'
+          : 'CE-IVDR validated Dried Blood Spot (DBS) kits analyzed via LC-MS/MS/HPLC in ISO 15189 accredited European lab with 48–72h turnaround. Official B2B wholesale schedule.',
       },
     };
     window.dispatchEvent(new CustomEvent('set-public-atlas-context', { detail }));
@@ -233,7 +233,7 @@ export default function BloodoPriceListClient({
       },
       {
         key: 'wholesalePriceEur',
-        label: isEs ? 'Wholeseller (15% + 15%)' : 'Wholeseller (15% + 15%)',
+        label: isEs ? 'Tarifa B2B' : 'B2B Wholesale',
         align: 'right',
         width: '16%',
         render: (_val, row) => (
@@ -327,40 +327,55 @@ export default function BloodoPriceListClient({
         }}
         brandHref="/"
         loginRedirect="/pricing/bloodo"
+        hideAiButton={true}
+        hideContactButton={true}
         breadcrumb={[
           { label: isEs ? 'Tarifas B2B' : 'B2B Schedules', href: '/pricing' },
           { label: 'Bloodo™ Diagnostics' },
         ]}
       />
 
-      <CatalogPricingBridgeBar activeMode="pricing" slug="bloodo" />
+      <CatalogPricingBridgeBar activeMode="pricing" slug="bloodo" lang={lang} />
 
-      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <main className="atlas-page-shell" style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '88px' }}>
         <PageHeroCard
           badge={isEs ? 'Diagnóstico Capilar CE-IVDR · ISO 15189' : 'CE-IVDR Capillary Diagnostics · ISO 15189'}
           title={isEs ? 'Tarifa Oficial B2B · Kits Diagnósticos Bloodo™' : 'Official B2B Price Schedule · Bloodo™ Diagnostics'}
           subtitle={
             isEs
-              ? 'Paneles de gota de sangre seca (DBS) con análisis LC-MS/MS europeo acreditado ISO 15189 y resultados en 48–72 horas. Precios mayoristas oficiales (15% + 15%).'
-              : 'Precision Dried Blood Spot (DBS) kits analyzed via ISO 15189 accredited European LC-MS/MS reference lab with 48–72h turnaround. Official wholeseller pricing (15% + 15%).'
+              ? 'Paneles de gota de sangre seca (DBS) con análisis LC-MS/MS europeo acreditado ISO 15189 y resultados en 48–72 horas. Tarifa mayorista oficial para clínicas.'
+              : 'Precision Dried Blood Spot (DBS) kits analyzed via ISO 15189 accredited European LC-MS/MS reference lab with 48–72h turnaround. Official clinic & wholesale schedule.'
           }
           actions={
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button type="button" className="gcp-btn-secondary" onClick={handleShare}>
                 <Share2 size={14} />
-                <span>{isEs ? 'Compartir Tarifa' : 'Share Schedule'}</span>
+                <span>{isEs ? 'Compartir' : 'Share'}</span>
               </button>
               <button type="button" className="gcp-btn-primary" onClick={() => setIsInquiryOpen(true)}>
                 <ShoppingCart size={14} />
                 <span>
                   {cartSummary.count > 0
-                    ? `${isEs ? 'Solicitar Cotización' : 'Request Quote'} (${cartSummary.count} · ${cartSummary.formatted})`
-                    : (isEs ? 'Solicitar Cotización B2B' : 'Request B2B Quote')}
+                    ? `${isEs ? 'Solicitar Presupuesto' : 'Request Quote'} (${cartSummary.count} · ${cartSummary.formatted})`
+                    : (isEs ? 'Solicitar Presupuesto' : 'Request Quote')}
                 </span>
               </button>
             </div>
           }
         />
+
+        {/* 3-Point Clinical Decision Strip (Matches Pellets UX) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '0.72rem', color: '#334155' }}>
+          <span style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
+            ✓ {isEs ? 'Laboratorio Europeo ISO 15189 (LC-MS/MS)' : 'ISO 15189 European Reference Lab (LC-MS/MS)'}
+          </span>
+          <span style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
+            ✓ {isEs ? 'Muestra Capilar DBS Indolora (Sin venopunción)' : 'Painless Capillary DBS (No phlebotomy)'}
+          </span>
+          <span style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontWeight: 600 }}>
+            ✓ {isEs ? 'Informe Cuantitativo en 48–72 Horas' : '48–72h Digital Quantitative Report'}
+          </span>
+        </div>
 
         {/* 4 KPIs (Rule #22) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px' }}>
