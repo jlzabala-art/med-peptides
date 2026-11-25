@@ -920,9 +920,12 @@ export default function PrescriptionDetailSidebar({
 
           {isPatientView ? (
             <div style={{ display: 'flex', flexDirection: 'column', borderLeft: '2px solid #e2e8f0', marginLeft: '4px', gap: '2px' }}>
-              {availableSections.map((sec) => {
+              {availableSections.map((sec, sIdx) => {
                 const mappedTab = SECTION_TO_TAB[sec.id] || (sec.category === 'formula' ? 'treatment' : null);
-                const isActive = mappedTab ? activeGcpTab === mappedTab : activeId === sec.id;
+                const multiFormulaInPatient = sec.category === 'formula' && formulaSections.length > 1;
+                const isActive = multiFormulaInPatient
+                  ? activeGcpTab === 'treatment' && (activeId ? activeId === sec.id : sIdx === 0)
+                  : (mappedTab ? activeGcpTab === mappedTab : activeId === sec.id);
                 const IconComp = getSectionIcon(sec.id, sec.icon);
                 return (
                   <button

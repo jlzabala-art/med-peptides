@@ -1124,7 +1124,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       list.push({ 
         id: 'formula-card', 
         label: isPatientView
-          ? (isEs ? '1. Mi Dosis y Registro' : '1. My Dose & Log')
+          ? (isEs ? 'Mi Dosis y Registro' : 'My Dose & Log')
           : (isEs ? 'Fórmula Magistral & Posología' : 'Compounded Formula & Posology'), 
         category: 'formula',
         badge: isPatientView ? null : (isEs ? 'Fórmula Única' : 'Single Compound'),
@@ -1136,7 +1136,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     if (genomicsData) {
       list.push({ 
         id: 'genomics-card', 
-        label: isEs ? 'Formulación Guiada por Fagron Genomics' : 'Formulation Guided by Fagron Genomics',
+        label: isEs ? 'Guía Fagron Genomics' : 'Fagron Genomics Guidance',
         category: 'genomics',
         icon: 'dna'
       });
@@ -1145,7 +1145,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     list.push({ 
       id: 'milestones-card', 
       label: isPatientView
-        ? (isEs ? '2. Plan de Tratamiento' : '2. Treatment Plan')
+        ? (isEs ? 'Plan de Tratamiento' : 'Treatment Plan')
         : (isEs ? 'Roadmap & Hitos Clínicos' : 'Roadmap & Milestones'),
       category: 'milestones',
       icon: 'calendar'
@@ -1154,22 +1154,26 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     if (isPatientView) {
       list.push({
         id: 'refill-card',
-        label: isEs ? '3. Solicitar Refill' : '3. Request Refill',
+        label: isEs ? 'Solicitar Refill' : 'Request Refill',
         category: 'refill',
         icon: 'rotate'
       });
       list.push({
         id: 'atlas-ai-card',
-        label: isEs ? '4. Preguntar a Atlas AI' : '4. Ask Atlas AI',
+        label: isEs ? 'Preguntar a Atlas AI' : 'Ask Atlas AI',
         category: 'ai',
         icon: 'sparkles'
       });
       list.push({
         id: 'contact-atlas-card',
-        label: isEs ? '5. Contactar con Atlas' : '5. Contact Atlas',
+        label: isEs ? 'Contactar con Atlas' : 'Contact Atlas',
         category: 'contact',
         icon: 'message'
       });
+      return list.map((item, idx) => ({
+        ...item,
+        label: `${idx + 1}. ${String(item.label || '').replace(/^\d+\.\s*/, '')}`,
+      }));
     }
 
     if (!isPatientView) {

@@ -15,6 +15,9 @@ import {
   ExternalLink,
   Repeat,
   FilePlus2,
+  Link2,
+  MessageCircle,
+  Building2,
 } from 'lucide-react';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -677,18 +680,16 @@ export default function LabelsHomeView({
                             style={{ width: '16px', height: '16px', marginTop: '3px', flexShrink: 0, cursor: 'pointer', accentColor: '#1a73e8' }}
                           />
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
-                                {p.name || p.patientName || 'Patient'}
-                              </span>
-                              <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                                <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
-                                {extraCodes.map((ec) => (
-                                  <CopyableId key={ec} value={ec} displayValue={`#${ec}`} />
-                                ))}
-                              </span>
-                            </div>
-                            <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                            <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124', lineHeight: 1.25 }}>
+                              {p.name || p.patientName || 'Patient'}
+                            </span>
+                            <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                              <CopyableId value={cleanCode} displayValue={`#${p.code}`} />
+                              {extraCodes.map((ec) => (
+                                <CopyableId key={ec} value={ec} displayValue={`#${ec}`} />
+                              ))}
+                            </span>
+                            <span style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.35 }}>
                               {p.title || p.treatmentTitle || 'Prescription protocol'}
                             </span>
                           </div>
@@ -867,10 +868,44 @@ export default function LabelsHomeView({
                       const pName = p.name || p.patientName || '';
                       const rawPhone = String(p.patientPhone || p.phone || p.patient?.phone || '').replace(/[^\d]/g, '');
 
+                      const rowIdx = paginatedWorklistItems.findIndex((item) => item.code === p.code);
+                      const openUpward = rowIdx >= Math.max(2, paginatedWorklistItems.length - 2);
+
                       return (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', position: 'relative', paddingRight: '4px' }}>
+                        <div className="gcp-actions-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', position: 'relative', paddingRight: '4px' }}>
+                          <style>{`
+                            @media (max-width: 768px) {
+                              .gcp-actions-wrap {
+                                width: 100%;
+                                justify-content: stretch !important;
+                                padding-right: 0 !important;
+                              }
+                              .gcp-actions-capsule {
+                                display: grid !important;
+                                grid-template-columns: repeat(2, minmax(0, 1fr));
+                                width: 100%;
+                                overflow: visible !important;
+                              }
+                              .gcp-actions-capsule > *,
+                              .gcp-actions-capsule > div > button {
+                                min-height: 44px !important;
+                                justify-content: center !important;
+                                width: 100%;
+                                font-size: 0.78rem !important;
+                              }
+                              .gcp-share-popover {
+                                position: static !important;
+                                grid-column: 1 / -1;
+                                width: 100% !important;
+                                min-width: 0 !important;
+                                margin-top: 6px;
+                                box-shadow: none !important;
+                              }
+                            }
+                          `}</style>
                           {/* GCP 4-in-1 Segmented Action Capsule: [ Share ▾ | Rx ↗ | Delivery | Shipping ] */}
                           <div
+                            className="gcp-actions-capsule"
                             style={{
                               display: 'inline-flex',
                               alignItems: 'stretch',
@@ -916,13 +951,14 @@ export default function LabelsHomeView({
 
                               {isMenuOpen && (
                                 <div
+                                  className="gcp-share-popover"
                                   onClick={(e) => e.stopPropagation()}
                                   style={{
                                     position: 'absolute',
-                                    right: 0,
-                                    top: 'calc(100% + 4px)',
+                                    left: 0,
+                                    ...(openUpward ? { bottom: 'calc(100% + 4px)' } : { top: 'calc(100% + 4px)' }),
                                     zIndex: 80,
-                                    minWidth: '215px',
+                                    minWidth: '210px',
                                     background: '#ffffff',
                                     border: '1px solid #dadce0',
                                     borderRadius: '8px',
@@ -945,21 +981,34 @@ export default function LabelsHomeView({
                                       toast.success(isEs ? 'Link de paciente copiado ✓' : 'Patient link copied ✓');
                                     }}
                                     style={{
-                                      padding: '7px 10px',
+                                      padding: '8px 10px',
+                                      minHeight: '36px',
                                       borderRadius: '6px',
                                       border: 'none',
                                       background: 'transparent',
                                       color: '#202124',
-                                      fontSize: '0.76rem',
+                                      fontSize: '0.75rem',
                                       fontWeight: 600,
                                       cursor: 'pointer',
                                       textAlign: 'left',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '8px',
                                     }}
                                   >
-                                    🔗 {isEs ? 'Copiar Link Paciente' : 'Copy Patient Link'}
+                                    <Link2 size={14} color="#5f6368" />
+                                    <span>{isEs ? 'Copiar Link Paciente' : 'Copy Patient Link'}</span>
                                   </button>
                                   <button
                                     type="button"
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.color = '#15803d';
+                                      e.currentTarget.style.background = '#f0fdf4';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.color = '#202124';
+                                      e.currentTarget.style.background = 'transparent';
+                                    }}
                                     onClick={() => {
                                       const msg = isEs
                                         ? `Hola ${pName}, gracias por confiar en Atlas Health. Aquí tienes tu guía privada de tratamiento (#${cleanCode}) con instrucciones y refill en 1 clic: ${patientUrl}`
@@ -970,18 +1019,24 @@ export default function LabelsHomeView({
                                       setOpenRowMenuCode(null);
                                     }}
                                     style={{
-                                      padding: '7px 10px',
+                                      padding: '8px 10px',
+                                      minHeight: '36px',
                                       borderRadius: '6px',
                                       border: 'none',
                                       background: 'transparent',
-                                      color: '#15803d',
-                                      fontSize: '0.76rem',
-                                      fontWeight: 700,
+                                      color: '#202124',
+                                      fontSize: '0.75rem',
+                                      fontWeight: 600,
                                       cursor: 'pointer',
                                       textAlign: 'left',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '8px',
+                                      transition: 'all 0.15s ease',
                                     }}
                                   >
-                                    💬 {isEs ? 'WhatsApp al Paciente' : 'WhatsApp to Patient'}
+                                    <MessageCircle size={14} color="currentColor" />
+                                    <span>{isEs ? 'WhatsApp al Paciente' : 'WhatsApp to Patient'}</span>
                                   </button>
                                   <button
                                     type="button"
@@ -994,18 +1049,23 @@ export default function LabelsHomeView({
                                       setOpenRowMenuCode(null);
                                     }}
                                     style={{
-                                      padding: '7px 10px',
+                                      padding: '8px 10px',
+                                      minHeight: '36px',
                                       borderRadius: '6px',
                                       border: 'none',
                                       background: 'transparent',
                                       color: '#202124',
-                                      fontSize: '0.76rem',
+                                      fontSize: '0.75rem',
                                       fontWeight: 600,
                                       cursor: 'pointer',
                                       textAlign: 'left',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '8px',
                                     }}
                                   >
-                                    🤝 {isEs ? 'Enviar a Partner / Clínica' : 'Send to Partner / Clinic'}
+                                    <Building2 size={14} color="#5f6368" />
+                                    <span>{isEs ? 'Enviar a Partner / Clínica' : 'Send to Partner / Clinic'}</span>
                                   </button>
                                 </div>
                               )}
