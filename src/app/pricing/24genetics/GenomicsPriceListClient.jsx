@@ -52,7 +52,11 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import GcpUserBadge from '@/components/shared/GcpUserBadge';
 import '../colway/ColwayPriceList.css';
 
-export default function GenomicsPriceListClient({ initialProducts = [] }) {
+export default function GenomicsPriceListClient({
+  initialProducts = [],
+  initialCurrency = 'EUR',
+  initialLang = 'en',
+}) {
   const router = useRouter();
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
@@ -66,8 +70,8 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
   const canViewCost = Boolean(isAdmin);
 
   const workspace = usePublicWorkspace?.() || null;
-  const [localCurrency, setLocalCurrency] = useState('EUR'); // EUR, USD, AED
-  const [localLang, setLocalLang] = useState('en');
+  const [localCurrency, setLocalCurrency] = useState(initialCurrency); // EUR, USD, AED
+  const [localLang, setLocalLang] = useState(initialLang);
   const currency = workspace?.currency || localCurrency;
   const lang = workspace?.lang || localLang;
   const [searchQuery, setSearchQuery] = useState('');
@@ -639,51 +643,14 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         hideContactButton={true}
         hideAccountManager={true}
         breadcrumb={[
-          { label: 'Price Schedules', href: '/pricing' },
+          { label: 'B2B Schedules', href: '/pricing' },
           { label: '24Genetics Clinical Panels' },
         ]}
-        extraActions={
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={handleShareSchedule}
-              className="puh-btn puh-btn-ghost hide-on-mobile-header"
-              title="Share schedule"
-            >
-              {copied ? <Check size={14} /> : <Share2 size={14} />}
-              <span className="puh-btn-label">{copied ? 'Copied' : 'Share'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsOrderDrawerOpen(true)}
-              className="puh-btn"
-              style={{
-                background: '#2563eb',
-                border: '1px solid #1d4ed8',
-                color: '#ffffff',
-                fontWeight: 600,
-              }}
-            >
-              <ShoppingCart size={14} />
-              <span className="puh-btn-label">
-                Request Proforma{totalCartCount > 0 ? ` (${totalCartCount})` : ''}
-              </span>
-            </button>
-          </div>
-        }
       />
 
       <CatalogPricingBridgeBar activeMode="pricing" slug="24genomics" lang={lang} />
 
       <main className="atlas-page-shell">
-        <div style={{ marginBottom: '1rem' }}>
-          <Breadcrumb items={[
-            { label: 'B2B Portal', href: '/' },
-            { label: 'Official Price Schedules', href: '/pricing/24genetics' },
-            { label: '24Genetics DNA Panels' }
-          ]} />
-        </div>
-
         <PageHeroCard
           brandLeft="ATLAS HEALTH"
           brandRight="24GENETICS GENOMICS"
@@ -720,22 +687,28 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
                 type="button"
                 onClick={() => setIsPdfPreviewOpen(true)}
                 className="gcp-btn-secondary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  color: '#334155',
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  fontSize: '0.80rem',
-                  fontWeight: 650,
-                  cursor: 'pointer'
-                }}
+                style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <Download size={14} />
-                <span>Export PDF / Print</span>
+                <Download size={13} />
+                <span>Preview PDF</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleShareSchedule}
+                className="gcp-btn-secondary"
+                style={{ height: '36px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                {copied ? <Check size={13} /> : <Share2 size={13} />}
+                <span>{copied ? 'Copied' : 'Share'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsOrderDrawerOpen(true)}
+                className="gcp-btn-primary"
+                style={{ height: '36px', padding: '0 13px', fontSize: '0.78rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <ShoppingCart size={13} />
+                <span>Request Quote{totalCartCount > 0 ? ` (${totalCartCount})` : ''}</span>
               </button>
             </div>
           }

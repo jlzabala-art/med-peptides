@@ -2,6 +2,8 @@ import React from 'react';
 import { adminDb } from '@/lib/firebaseAdmin';
 import GenomicsPriceListClient from './GenomicsPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -234,7 +236,13 @@ const FALLBACK_24GENETICS_PRODUCTS = [
   }
 ];
 
-export default async function GenomicsPricingPage() {
+export default async function GenomicsPricingPage({ searchParams }) {
+  const resolvedSearch = searchParams ? await searchParams : {};
+  const rawCur = String(resolvedSearch?.cur || resolvedSearch?.currency || '').toUpperCase();
+  const initialCurrency = ['EUR', 'USD', 'AED'].includes(rawCur) ? rawCur : 'EUR';
+  const initialLang = normalizeMetaLang(resolvedSearch);
+  const isAdmin = await isAdminServerSession();
+
   let products = [...FALLBACK_24GENETICS_PRODUCTS];
 
   if (adminDb) {
@@ -276,6 +284,20 @@ export default async function GenomicsPricingPage() {
     }
   }
 
-  return <GenomicsPriceListClient initialProducts={products} />;
+  const sanitizedProducts = products.map((p) => {
+    const clean = sanitizePublicProductForViewer(p, { isAdmin });
+    if (!isAdmin) {
+      delete clean.costPack10Eur;
+    }
+    return clean;
+  });
+
+  return (
+    <GenomicsPriceListClient
+      initialProducts={sanitizedProducts}
+      initialCurrency={initialCurrency}
+      initialLang={initialLang}
+    />
+  );
 }
 
