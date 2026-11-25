@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { getTokens } from 'next-firebase-auth-edge';
-import { serverConfig } from '@/lib/authConfig';
+import { serverConfig } from '@/authConfig';
 
 const ADMIN_EMAILS = ['jlzabala@gmail.com', 'admin@atlashealth-services.com'];
 
