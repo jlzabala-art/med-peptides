@@ -256,14 +256,21 @@ export default function PelletsPriceListClient({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProfile, setSelectedProfile] = useState('all'); // 'all' | 'female' | 'male' | 'trocar'
 
-  // Hydrate initial search/category from URL query params (?q=..., ?category=...) for cross-catalog synergy links
+  // Hydrate initial search/category/profile from URL query params (?q=..., ?category=..., ?profile=...)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     const q = params.get('q');
     const cat = params.get('category');
+    const profile = params.get('profile');
     if (q) setSearchQuery(q);
     if (cat) setSelectedCategory(cat);
+    if (profile && ['female', 'male', 'trocar'].includes(profile.toLowerCase())) {
+      setSelectedProfile(profile.toLowerCase());
+    }
+    if (q || cat || profile) {
+      setScopeMode('filtered');
+    }
   }, []);
   const [cartItems, setCartItems] = useState({}); // { [id]: { single: number, pack10: number } }
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);

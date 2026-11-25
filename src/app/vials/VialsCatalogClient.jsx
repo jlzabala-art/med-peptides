@@ -30,6 +30,17 @@ const GOAL_OPTIONS = [
   { id: 'general_health', label: 'General & Immunity' }
 ];
 
+const SPECIALTY_FILTERS = {
+  gynecology: {
+    label: "Gynecology & Women's Health",
+    keywords: [
+      'kisspeptin', 'pt-141', 'bremelanotide', 'oxytocin',
+      'bpc-157', 'tb-500', 'ghk-cu', 'epitalon', 'nad',
+      'tirzepatide', 'semaglutide', 'retatrutide', 'aod-9604', 'glutathione'
+    ]
+  }
+};
+
 const SHIPPING_OPTIONS = [
   { code: 'EU', label: 'European Union (Express Tracked)', cost: 30 },
   { code: 'UK', label: 'United Kingdom (Express Tracked)', cost: 35 },
@@ -44,6 +55,18 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   const [isLoadingCollection, setIsLoadingCollection] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGoal, setSelectedGoal] = useState('all');
+  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    const goal = params.get('goal');
+    const specialty = params.get('specialty')?.toLowerCase();
+    if (q) setSearchQuery(q);
+    if (goal && GOAL_OPTIONS.some((g) => g.id === goal)) setSelectedGoal(goal);
+    if (specialty && SPECIALTY_FILTERS[specialty]) setSelectedSpecialty(specialty);
+  }, []);
   const [cart, setCart] = useState({}); // { [vialId]: { vial, quantity } }
   const [quantities, setQuantities] = useState({}); // { [vialId]: count }
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
@@ -120,19 +143,24 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   // Filtered vials
   const filteredVials = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
+    const specCfg = selectedSpecialty ? SPECIALTY_FILTERS[selectedSpecialty] : null;
     return vials.filter(item => {
+      const nameLower = (item.productName || '').toLowerCase();
       const matchesSearch = !q ||
-        item.productName.toLowerCase().includes(q) ||
-        item.dosage.toLowerCase().includes(q) ||
+        nameLower.includes(q) ||
+        (item.dosage || '').toLowerCase().includes(q) ||
         (item.description && item.description.toLowerCase().includes(q));
 
       const matchesGoal = selectedGoal === 'all' ||
         item.primaryGoal === selectedGoal ||
         (Array.isArray(item.goals) && item.goals.includes(selectedGoal));
 
-      return matchesSearch && matchesGoal;
+      const matchesSpecialty = !specCfg ||
+        specCfg.keywords.some((kw) => nameLower.includes(kw));
+
+      return matchesSearch && matchesGoal && matchesSpecialty;
     });
-  }, [vials, searchQuery, selectedGoal]);
+  }, [vials, searchQuery, selectedGoal, selectedSpecialty]);
 
   // Quantity selector helpers
   const getSelectedQuantity = (vialId) => quantities[vialId] || 1;
@@ -514,6 +542,36 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
 
           {/* Goal Filter Chips */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            {selectedSpecialty && SPECIALTY_FILTERS[selectedSpecialty] && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSpecialty(null);
+                  if (typeof window !== 'undefined') {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('specialty');
+                    window.history.replaceState({}, '', url.toString());
+                  }
+                }}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '9999px',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  border: '1px solid #0d9488',
+                  backgroundColor: '#f0fdfa',
+                  color: '#0f766e',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                title="Clear specialty filter"
+              >
+                <span>Specialty: {SPECIALTY_FILTERS[selectedSpecialty].label}</span>
+                <X size={13} />
+              </button>
+            )}
             {GOAL_OPTIONS.map(opt => {
               const isActive = selectedGoal === opt.id;
               return (
