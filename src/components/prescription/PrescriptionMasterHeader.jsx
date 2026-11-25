@@ -129,10 +129,13 @@ export default function PrescriptionMasterHeader({
   return (
     <div className="rx-card rx-gcp-header-card" style={{ paddingBottom: setActiveGcpTab ? '0' : undefined }}>
       {/* ── Main GCP Resource Header Row ────────────────────────────────────── */}
-      <div className="rx-gcp-header-main-row" style={{ paddingBottom: setActiveGcpTab ? '12px' : undefined }}>
+      <div className="rx-gcp-header-main-row" style={{ paddingBottom: setActiveGcpTab ? '12px' : undefined, flexWrap: 'wrap', gap: '10px' }}>
         {/* Left: Identity & Metadata */}
-        <div className="rx-gcp-header-left">
-          <div className={`rx-gcp-header-icon ${isPatientView ? 'patient' : ''}`}>
+        <div className="rx-gcp-header-left" style={{ minWidth: 0, flex: '1 1 280px' }}>
+          <div
+            className="rx-gcp-header-icon"
+            style={{ background: '#e8f0fe', color: '#1a73e8', border: '1px solid #d2e3fc' }}
+          >
             {isPatientView ? <Pill size={20} /> : <Stethoscope size={20} />}
           </div>
 
@@ -174,7 +177,10 @@ export default function PrescriptionMasterHeader({
         </div>
 
         {/* Right: GCP Segmented Switcher & Role Actions */}
-        <div className="rx-gcp-header-right">
+        <div
+          className="rx-gcp-header-right"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', flexWrap: 'wrap', maxWidth: '100%' }}
+        >
           {/* Segmented Switcher (Doctor View ↔ Patient Preview for Authorized Clinicians) */}
           {isAuthorizedViewer && onSwitchView && (
             <div className="rx-gcp-segmented-switch" role="tablist" aria-label="View Switcher">
@@ -363,23 +369,25 @@ export default function PrescriptionMasterHeader({
         </div>
       </div>
 
-      {/* ── Patient Preview Context Banner (Subtle GCP Mode Ribbon) ──────────── */}
+      {/* ── Patient Preview Context Banner (Subtle GCP Info Strip) ──────────── */}
       {isPatientView && isAuthorizedViewer && (
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          flexWrap: 'wrap',
           gap: '8px',
           marginBottom: setActiveGcpTab ? '10px' : '0',
-          padding: '6px 12px',
+          padding: '7px 12px',
           borderRadius: '6px',
-          background: '#f0fdf4',
-          border: '1px solid #bbf7d0',
-          color: '#15803d',
+          background: '#f8fafc',
+          border: '1px solid #dadce0',
+          borderLeft: '3px solid #1a73e8',
+          color: '#3c4043',
           fontSize: '0.74rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-            <Eye size={13} />
+            <Eye size={13} color="#1a73e8" />
             <span>
               {isEs 
                 ? 'Modo Previsualización Paciente: Visualizando el dossier simplificado tal como lo recibe el paciente.' 
@@ -392,12 +400,13 @@ export default function PrescriptionMasterHeader({
             style={{
               background: 'none',
               border: 'none',
-              color: '#15803d',
+              color: '#1a73e8',
               fontWeight: 700,
               cursor: 'pointer',
               textDecoration: 'underline',
               padding: 0,
-              fontSize: '0.74rem'
+              fontSize: '0.74rem',
+              whiteSpace: 'nowrap',
             }}
           >
             {isEs ? 'Volver a Vista Médico →' : 'Return to Doctor View →'}
@@ -409,6 +418,30 @@ export default function PrescriptionMasterHeader({
       {(() => {
         const rxType = detectPrescriptionType(rx, compoundedFormulations);
         const attrs = rxType.getAttributes(isEs);
+        const isMultiPartHeader = Array.isArray(compoundedFormulations) && compoundedFormulations.length > 1;
+        const multiRouteSummary = isMultiPartHeader
+          ? `${compoundedFormulations.length} ${isEs ? 'Partes' : 'Parts'} (${compoundedFormulations
+              .map((f) => {
+                const hay = `${f.id || ''} ${f.shortTitle || ''} ${f.title || ''}`.toLowerCase();
+                if (f.isOral || hay.includes('oral') || hay.includes('caps')) return isEs ? 'Oral' : 'Oral';
+                if (hay.includes('oil') || hay.includes('wash') || hay.includes('hygiene')) return isEs ? 'Cuidado' : 'Care';
+                if (hay.includes('nasal')) return 'Nasal';
+                if (hay.includes('pen')) return 'Pen';
+                return isEs ? 'Tópico' : 'Topical';
+              })
+              .filter((v, i, arr) => arr.indexOf(v) === i)
+              .join(' · ')})`
+          : attrs.routeDisplay;
+        const multiDeviceSummary = isMultiPartHeader
+          ? compoundedFormulations
+              .map((f, idx) => String(f.shortTitle || f.title || `Part ${idx + 1}`).split('(')[0].trim())
+              .filter((v, i, arr) => v && arr.indexOf(v) === i)
+              .slice(0, 3)
+              .join(' · ')
+          : attrs.deviceDisplay;
+        const durationDisplay = rx?.durationDays
+          ? `${rx.durationDays} ${isEs ? 'Días' : 'Days Supply'}`
+          : attrs.cycleDisplay;
 
         return (
           <>
@@ -419,7 +452,7 @@ export default function PrescriptionMasterHeader({
                 gap: 10px;
                 background: #f8fafc;
                 border: 1px solid #e2e8f0;
-                border-radius: '6px';
+                border-radius: 6px;
                 padding: 8px 12px;
                 margin: 8px 0 10px 0;
               }
@@ -436,16 +469,16 @@ export default function PrescriptionMasterHeader({
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
                 {isPatientView
-                  ? String(attrs.routeDisplay || '').replace(/\bSubQ\b/gi, isEs ? 'Subcutánea' : 'Under the skin')
-                  : attrs.routeDisplay}
+                  ? String(multiRouteSummary || '').replace(/\bSubQ\b/gi, isEs ? 'Subcutánea' : 'Under the skin')
+                  : multiRouteSummary}
               </div>
             </div>
             <div>
               <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isPatientView ? (isEs ? 'Formato' : 'Device') : (isEs ? 'Dispositivo / Formato' : 'Device / Presentation')}
+                {isPatientView ? (isEs ? 'Formato' : 'Formats') : (isEs ? 'Dispositivo / Formato' : 'Device / Presentation')}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {attrs.deviceDisplay}
+                {multiDeviceSummary}
               </div>
             </div>
             <div>
@@ -461,7 +494,7 @@ export default function PrescriptionMasterHeader({
                 {isPatientView ? (isEs ? 'Duración' : 'Duration') : (isEs ? 'Ciclo Clínico' : 'Clinical Duration')}
               </div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                {attrs.cycleDisplay}
+                {durationDisplay}
               </div>
             </div>
           </div>
