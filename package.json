@@ -13,6 +13,7 @@
     "lint": "eslint src",
     "test": "node --test tests/*.test.mjs",
     "audit:rules": "node scripts/audit-golden-rules.mjs",
+    "manuals:refresh": "node scripts/generate-manuals.mjs",
     "test:routes": "node scripts/validate-navigation-routes.mjs",
     "analyze": "ANALYZE=true next build",
     "deploy": "node scripts/auto-deploy.mjs",

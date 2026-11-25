@@ -703,6 +703,9 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Nunca copiar recomendaciones ni marcas de cápsulas sugeridas (`Hygrocaps`, `(recommended ...)`)**: Eliminar automáticamente menciones de recomendación (`(recommended ...)`, `Hygrocaps`) tanto en títulos como en posología, pues la farmacia dispensadora no siempre usa ese excipiente.
 - **Ingredientes > 4 en 2 columnas de una sola línea**: Cuando haya más de 4 principios activos, dividir en 2 columnas con fuente reducida auto-ajustada para que **nombre + peso** queden siempre lado a lado en una sola línea sin partirse.
 
+## 72. Auto-Actualización de Manuales Operativos PDF al Cambiar el UX (Golden Rule)
+- **Mantener los manuales sincronizados con producción**: Siempre que se modifique la interfaz (UX), flujos o botones de `/labels` o `/rx/[code]` (vista paciente o médico), se DEBE ejecutar `npm run manuals:refresh` (`node scripts/generate-manuals.mjs`) antes de ejecutar `npm run deploy`, para regenerar los 4 PDFs en `public/manuals/` con capturas frescas de la versión online sin intervención del usuario.
+
 
 
 

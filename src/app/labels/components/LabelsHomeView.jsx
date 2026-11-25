@@ -18,6 +18,7 @@ import {
   Link2,
   MessageCircle,
   Building2,
+  BookOpen,
 } from 'lucide-react';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -69,6 +70,7 @@ export default function LabelsHomeView({
   const [statusOverrides, setStatusOverrides] = useState({});
   const [selectedCodes, setSelectedCodes] = useState([]);
   const [openRowMenuCode, setOpenRowMenuCode] = useState(null);
+  const [manualsMenuOpen, setManualsMenuOpen] = useState(false);
   const [sharedRowCodes, setSharedRowCodes] = useState(() => {
     if (typeof window === 'undefined') return {};
     try {
@@ -262,6 +264,101 @@ export default function LabelsHomeView({
                   <span>{isEs ? 'Rx Manual' : 'Manual Rx'}</span>
                 </button>
               )}
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => setManualsMenuOpen((v) => !v)}
+                  title={isEs ? 'Manuales operativos en PDF (EN)' : 'Operations User Manuals (PDF)'}
+                  style={{
+                    padding: '7px 11px',
+                    borderRadius: '6px',
+                    border: '1px solid #dadce0',
+                    background: manualsMenuOpen ? '#f1f5f9' : '#ffffff',
+                    color: '#5f6368',
+                    fontSize: '0.75rem',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                  }}
+                >
+                  <BookOpen size={14} color="#5f6368" />
+                  <span>{isEs ? 'Manuales ▾' : 'Manuals ▾'}</span>
+                </button>
+                {manualsMenuOpen && (
+                  <div
+                    onMouseLeave={() => setManualsMenuOpen(false)}
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 'calc(100% + 6px)',
+                      zIndex: 90,
+                      minWidth: '320px',
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      boxShadow: '0 8px 24px rgba(15, 23, 42, 0.14)',
+                      padding: '6px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '4px 8px' }}>
+                      {isEs ? 'Guías Operativas (PDF · EN)' : 'Operations Manuals (PDF · EN)'}
+                    </div>
+                    {[
+                      {
+                        title: '1. Share Treatment Guide via WhatsApp',
+                        sub: 'Send patient guide link after parcel delivery',
+                        href: '/manuals/Atlas-Labels-Share-User-Manual-EN.pdf',
+                      },
+                      {
+                        title: '2. Print Bottle & Box Labels (Delivery & QR)',
+                        sub: 'Lot/BUD, A4/thermal print & SCAN FOR REFILL QR',
+                        href: '/manuals/Atlas-Delivery-Labels-QR-Manual-EN.pdf',
+                      },
+                      {
+                        title: '3. Prepare Customs & Courier Labels (Shipping)',
+                        sub: 'Domestic UAE & GCC/EU international dispatch',
+                        href: '/manuals/Atlas-Shipping-Customs-Manual-EN.pdf',
+                      },
+                      {
+                        title: '4. Import Rx, Update Status & Country Filter',
+                        sub: 'Upload Rx, 1-click lifecycle & doctor country filter',
+                        href: '/manuals/Atlas-Rx-Intake-Lifecycle-Filters-Manual-EN.pdf',
+                      },
+                    ].map((m) => (
+                      <a
+                        key={m.href}
+                        href={m.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setManualsMenuOpen(false)}
+                        style={{
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          textDecoration: 'none',
+                          color: '#202124',
+                          fontSize: '0.76rem',
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '10px',
+                        }}
+                      >
+                        <span style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span>{m.title}</span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 400, color: '#5f6368' }}>{m.sub}</span>
+                        </span>
+                        <ExternalLink size={12} color="#1a73e8" style={{ flexShrink: 0 }} />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
               {unprintedCodes.length > 0 && (
                 <button
                   type="button"
