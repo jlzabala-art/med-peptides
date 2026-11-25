@@ -77,9 +77,12 @@ const BRAND_CONFIGS = {
   bloodo: {
     name: 'Bloodo™ Diagnostics',
     title: 'Bloodo™ Capillary Blood Diagnostics & CE-IVDR Test Kits',
+    titleEs: 'Bloodo™ Diagnóstico Capilar en Sangre y Kits CE-IVDR',
     badge: 'CE-IVDR Certified Laboratory Diagnostics',
+    badgeEs: 'Diagnóstico de Laboratorio Certificado CE-IVDR',
     badgeColor: '#dc2626',
     subtitle: 'Precision Dried Blood Spot (DBS) tests analyzing intracellular cellular bioenergetics, diurnal endocrine rhythms, and 90-day metabolic glycation with ISO 15189 European laboratory validation.',
+    subtitleEs: 'Tests capilares de gota de sangre seca (DBS) de alta precisión para bioenergética celular intracelular, ritmos endocrinos diurnos y glicación metabólica a 90 días con validación europea ISO 15189.',
     heroImage: '/images/products/bloodo/nad.jpg',
     accentColor: '#e11d48',
     kpis: [
@@ -87,6 +90,12 @@ const BRAND_CONFIGS = {
       { label: 'Laboratory Quality', value: 'ISO 15189', sub: 'European Reference Diagnostic Lab', icon: Award, color: '#0284c7' },
       { label: 'Sample Technology', value: 'Capillary DBS', sub: '100% Painless Finger-Prick Collection', icon: Droplets, color: '#d97706' },
       { label: 'Result Turnaround', value: '48 – 72 Hours', sub: 'Direct Quantitative Portal Delivery', icon: HeartPulse, color: '#16a34a' }
+    ],
+    kpisEs: [
+      { label: 'Biomarcadores Acreditados', value: '6 Paneles CE-IVDR', sub: 'NAD+, Testosterona, Cortisol, HbA1c', icon: Microscope, color: '#e11d48' },
+      { label: 'Calidad de Laboratorio', value: 'ISO 15189', sub: 'Laboratorio Europeo de Referencia', icon: Award, color: '#0284c7' },
+      { label: 'Tecnología de Muestra', value: 'Capilar DBS', sub: 'Toma 100% Indolora en Yema del Dedo', icon: Droplets, color: '#d97706' },
+      { label: 'Plazo de Resultados', value: '48 – 72 Horas', sub: 'Informe Cuantitativo Directo en Portal', icon: HeartPulse, color: '#16a34a' }
     ],
     categories: [
       { id: 'all', label: 'All Tests (6)' },
@@ -96,6 +105,15 @@ const BRAND_CONFIGS = {
       { id: 'hba1c', label: 'Glycation & HbA1c' },
       { id: 'omega', label: 'Lipidomics & Omega-3' },
       { id: 'vitamin-d', label: 'Micronutrients & Vit D3' }
+    ],
+    categoriesEs: [
+      { id: 'all', label: 'Todos los Tests (6)' },
+      { id: 'nad', label: 'Bioenergética (NAD+)' },
+      { id: 'cortisol', label: 'Endocrino y Cortisol CAR' },
+      { id: 'testosterone', label: 'Andrógenos y Testosterona+' },
+      { id: 'hba1c', label: 'Glicación y HbA1c' },
+      { id: 'omega', label: 'Lipidómica y Omega-3' },
+      { id: 'vitamin-d', label: 'Micronutrientes y Vit D3' }
     ]
   },
   ultraperson: {
@@ -601,7 +619,6 @@ export default function BrandCollectionPage({
   toggleCompare
 }) {
   const router = useRouter();
-  const config = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.bloodo;
   const { user, activeRole, isProfessional, loginWithGoogle } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lang, setLang] = useState(() => {
@@ -611,6 +628,15 @@ export default function BrandCollectionPage({
     return 'en';
   });
   const isEs = lang === 'es';
+  const rawConfig = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.bloodo;
+  const config = useMemo(() => ({
+    ...rawConfig,
+    title: isEs && rawConfig.titleEs ? rawConfig.titleEs : rawConfig.title,
+    badge: isEs && rawConfig.badgeEs ? rawConfig.badgeEs : rawConfig.badge,
+    subtitle: isEs && rawConfig.subtitleEs ? rawConfig.subtitleEs : rawConfig.subtitle,
+    kpis: isEs && rawConfig.kpisEs ? rawConfig.kpisEs : rawConfig.kpis,
+    categories: isEs && rawConfig.categoriesEs ? rawConfig.categoriesEs : rawConfig.categories,
+  }), [rawConfig, isEs]);
 
   const products = useMemo(() => {
     if (brandSlug === 'teletest' && (!initialProducts || initialProducts.length === 0)) {

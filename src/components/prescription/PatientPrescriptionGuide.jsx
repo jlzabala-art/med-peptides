@@ -1013,13 +1013,20 @@ export default function PatientPrescriptionGuide({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 280px' }}>
                   {(() => {
+                    const itemPresentation =
+                      item.dispensingForm ||
+                      item.dosageForm ||
+                      item.route ||
+                      item.category?.type ||
+                      rx?.dispensingForm ||
+                      item.title;
                     const deviceImg = resolveVariantClinicalImage(
                       {
-                        presentation: rx?.dispensingForm || item.category?.type || item.title,
+                        presentation: itemPresentation,
                         name: item.title,
                         title: item.title,
                       },
-                      { name: item.title, category: rx?.dispensingForm || item.category?.type }
+                      { name: item.title, category: item.dosageForm || item.category?.type || rx?.dispensingForm }
                     );
                     return deviceImg ? (
                       <img
@@ -1137,16 +1144,29 @@ export default function PatientPrescriptionGuide({
 
               {/* Card Body (Flat Google Cloud UX: How to take it 16px + Quick tip + 3-Phase Visual Stepper) */}
               {(() => {
-                const hay = `${rx?.dispensingForm || ''} ${item.title || ''} ${rx?.treatmentTitle || ''} ${item.vehicle?.name || ''}`.toLowerCase();
-                const isNasal = hay.includes('nasal');
-                const isPenDevice = item.category?.type === 'prefilled_pen' || item.category?.type === 'peptide_pen';
-                const isHormonalTransdermal = !isNasal && !isPenDevice && (item.category?.isTransdermal || /\b(topiclick|pentravan|hormon|estradiol|progesterone|testosterone|dhea)\b/i.test(hay));
-                const isHairTopical = !isNasal && !isPenDevice && !isHormonalTransdermal && (item.category?.type === 'topical' || /\b(trichosol|scalp|hair|capilar|minoxidil|finasteride|dutasteride|latanoprost)\b/i.test(hay));
+                const itemOwnHay = `${item.title || ''} ${item.dispensingForm || ''} ${item.route || ''} ${item.dosageForm || ''} ${item.vehicle?.name || ''}`.toLowerCase();
+                const hasOwnOral = /\b(capsule|caps|oral|tablet|troche|sublingual|hpmc|hygrocaps)\b/i.test(itemOwnHay);
+                const hasOwnNasal = /\b(nasal|intranasal)\b/i.test(itemOwnHay) || (itemOwnHay.includes('spray') && !itemOwnHay.includes('trichosol'));
+                const hasOwnPen = /\b(pen|pluma|bioblend)\b/i.test(itemOwnHay) && !itemOwnHay.includes('pentravan');
+                const hasOwnHormoneCream = /\b(topiclick|pentravan|transdermal|cream|gel)\b/i.test(itemOwnHay);
+                const hasOwnHairTopical = /\b(trichosol|trichowash|trichooil|scalp|hair|capilar|shampoo|foam|lotion)\b/i.test(itemOwnHay);
+                const hasOwnVial = /\b(vial|lyophilized|liofilizado|bac water|reconstitut)\b/i.test(itemOwnHay) || item.category?.type === 'peptide';
+                const hasExplicitOwnForm = hasOwnOral || hasOwnNasal || hasOwnPen || hasOwnHormoneCream || hasOwnHairTopical || hasOwnVial;
+
+                const fallbackHay = hasExplicitOwnForm ? '' : `${rx?.dispensingForm || ''} ${rx?.treatmentTitle || ''}`.toLowerCase();
+                const hay = `${itemOwnHay} ${fallbackHay}`.trim();
+
+                const isOral = hasOwnOral;
+                const isNasal = !isOral && (hasOwnNasal || (!hasExplicitOwnForm && hay.includes('nasal')));
+                const isPenDevice = !isOral && !isNasal && (hasOwnPen || item.category?.type === 'prefilled_pen' || item.category?.type === 'peptide_pen');
+                const isHormonalTransdermal = !isOral && !isNasal && !isPenDevice && (hasOwnHormoneCream || (!hasExplicitOwnForm && (item.category?.isTransdermal || /\b(topiclick|pentravan|hormon|estradiol|progesterone|testosterone|dhea)\b/i.test(hay))));
+                const isHairTopical = !isOral && !isNasal && !isPenDevice && !isHormonalTransdermal && (hasOwnHairTopical || (!hasExplicitOwnForm && (item.category?.type === 'topical' || /\b(trichosol|scalp|hair|capilar|minoxidil|finasteride|dutasteride|latanoprost)\b/i.test(hay))));
+                const isVial = !isOral && !isNasal && !isPenDevice && !isHormonalTransdermal && !isHairTopical && (hasOwnVial || item.category?.type === 'peptide' || /\b(vial|lyophilized|liofilizado)\b/i.test(hay));
 
                 const rawDirection =
                   item.posology?.dosageInstructions ||
                   localizePatientText(item.posology?.regimen, isEs) ||
-                  (item.category?.type === 'peptide' && item.estimatedDoseMcg
+                  (isVial && item.estimatedDoseMcg
                     ? `${item.estimatedDoseMcg} mcg (${isEs ? 'aprox. 10 unidades en U-100' : 'approx. 10 units on U-100'})`
                     : isNasal
                     ? (isEs ? 'Aplicar una (1) pulverización en cada fosa nasal según indicación médica.' : 'Apply one (1) spray in each nostril as directed by physician.')
@@ -1156,6 +1176,8 @@ export default function PatientPrescriptionGuide({
                   ? (isEs ? 'Limpia la boquilla tras usar' : 'Wipe nozzle after use')
                   : isPenDevice
                   ? (isEs ? 'Dial y Agujas Estériles: Usa una aguja estéril nueva cada vez · Mantén 5–10 s' : 'Pen Dial & Sterile Needles: Use a fresh sterile needle each time · Hold 5–10s')
+                  : isVial
+                  ? (isEs ? 'Mezcla girando suavemente (nunca agites) · Conservar en nevera 2°C–8°C' : 'Swirl gently (never shake) · Keep refrigerated at 2°C–8°C')
                   : isHormonalTransdermal
                   ? (isEs ? 'Lávate las manos tras aplicar' : 'Wash hands after applying')
                   : isHairTopical
@@ -1188,6 +1210,18 @@ export default function PatientPrescriptionGuide({
                           { title: 'Prepare', desc: 'Attach a fresh sterile needle to your pen.' },
                           { title: 'Dial dose', desc: 'Turn the dial to your prescribed dose.' },
                           { title: 'Inject', desc: 'Press on abdomen or thigh and hold for 5–10 seconds.' }
+                        ])
+                  : isVial
+                  ? (isEs
+                      ? [
+                          { title: 'Preparar vial', desc: 'Limpia el tapón con alcohol y añade el diluyente despacio.' },
+                          { title: 'Cargar dosis', desc: 'Gira suave sin agitar y carga las unidades U-100 indicadas.' },
+                          { title: 'Aplicar y guardar', desc: 'Aplica subcutáneo y guarda el vial en nevera (2°C–8°C).' }
+                        ]
+                      : [
+                          { title: 'Prepare vial', desc: 'Swab the stopper with alcohol and add diluent slowly.' },
+                          { title: 'Draw dose', desc: 'Swirl gently (never shake) and draw your U-100 units.' },
+                          { title: 'Inject & store', desc: 'Inject subcutaneously and store the vial at 2°C–8°C.' }
                         ])
                   : isHormonalTransdermal
                   ? (isEs

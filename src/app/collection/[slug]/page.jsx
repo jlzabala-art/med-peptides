@@ -40,9 +40,12 @@ const BRAND_METADATA = {
   },
   bloodo: {
     title: 'Bloodo™ Capillary Blood Diagnostics | CE-IVDR Test Kits | Atlas Collection',
+    titleEs: 'Bloodo™ Diagnóstico Capilar en Sangre | Kits CE-IVDR | Colección Atlas',
     description: 'Discover Bloodo™ precision Dried Blood Spot (DBS) tests: NAD+ Intracellular, Testosterone+, HbA1c 90-Day, Diurnal Cortisol CAR, Omega-3/6 Ratio & Vitamin D3. ISO 15189 accredited lab analysis.',
+    descriptionEs: 'Descubre los tests capilares DBS de precisión Bloodo™: NAD+ Intracelular, Testosterona+, HbA1c 90 Días, Cortisol Diurno CAR, Ratio Omega-3/6 y Vitamina D3. Análisis acreditado ISO 15189.',
     image: `${BASE_URL}/images/products/bloodo/nad.jpg`,
     section: 'Capillary Blood Diagnostics & CE-IVDR Kits',
+    sectionEs: 'Diagnóstico Capilar en Sangre y Kits CE-IVDR',
     keywords: ['Bloodo', 'NAD+ Test', 'DBS Test', 'Capillary Blood Test', 'Cortisol Test', 'Testosterone Test', 'HbA1c', 'Omega Ratio']
   },
   ultraperson: {
@@ -184,19 +187,27 @@ export async function generateMetadata({ params, searchParams }) {
     section: isEs ? 'Catálogo Clínico' : 'Clinical Catalog'
   };
 
+  const localizedTitle = isEs ? (meta.titleEs || meta.title) : meta.title;
+  const localizedDescription = isEs ? (meta.descriptionEs || meta.description) : meta.description;
+  const localizedSection = isEs ? (meta.sectionEs || meta.section) : meta.section;
+
   const canonicalUrl = `${BASE_URL}/collection/${slug}`;
   const isPng = meta.image.toLowerCase().endsWith('.png');
   const imageType = isPng ? 'image/png' : 'image/jpeg';
 
   return {
-    title: meta.title,
-    description: meta.description,
+    title: localizedTitle,
+    description: localizedDescription,
     alternates: {
       canonical: canonicalUrl,
+      languages: {
+        en: `${canonicalUrl}?lang=en`,
+        es: `${canonicalUrl}?lang=es`,
+      },
     },
     openGraph: {
-      title: meta.title,
-      description: meta.description,
+      title: localizedTitle,
+      description: localizedDescription,
       url: canonicalUrl,
       siteName: 'Atlas Clinical Healthcare Platform',
       images: [
@@ -205,7 +216,7 @@ export async function generateMetadata({ params, searchParams }) {
           width: 1200,
           height: 630,
           type: imageType,
-          alt: meta.title,
+          alt: localizedTitle,
         },
       ],
       type: 'website',
@@ -213,8 +224,8 @@ export async function generateMetadata({ params, searchParams }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: meta.title,
-      description: meta.description,
+      title: localizedTitle,
+      description: localizedDescription,
       images: [meta.image],
     },
     other: {
@@ -223,8 +234,8 @@ export async function generateMetadata({ params, searchParams }) {
       'og:image:type': imageType,
       'og:image:width': '1200',
       'og:image:height': '630',
-      'og:image:alt': meta.title,
-      'article:section': meta.section,
+      'og:image:alt': localizedTitle,
+      'article:section': localizedSection,
     },
     robots: { index: true, follow: true },
   };
