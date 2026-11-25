@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getPrescriptionData } from '@/lib/prescriptionFetcher';
 import { getPharmapolisLabelsForPrescription, PHARMAPOLIS_LABELS_REGISTRY } from '@/data/pharmapolisLabelsMap';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,9 @@ export const dynamic = 'force-dynamic';
  * public standalone Compounding Label Studio.
  */
 export async function GET(request) {
+  if (!(await isAdminServerSession())) {
+    return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+  }
   try {
     const { searchParams } = new URL(request.url);
     const code = (searchParams.get('code') || searchParams.get('rx') || '').trim();

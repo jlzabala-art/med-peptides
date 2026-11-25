@@ -6,6 +6,7 @@ import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { processPrescriptionZohoOnImport } from '@/actions/zohoAutoIngestMatcher';
 import { notifyPrescriptionImported } from '@/lib/prescriptionImportNotifier';
 import { normalizePrescriptionWritePayload } from '@/utils/firestoreModelGuard';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,9 @@ const MAX_PAYLOAD_BYTES = 400 * 1024; // 400 KB
  * Returns: { success, created: [{ id, code, patientName }] }
  */
 export async function POST(request) {
+  if (!(await isAdminServerSession())) {
+    return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+  }
   const rateInfo = checkRateLimit(request, { limit: 10, windowMs: 60 * 1000, tier: 'labels-import' });
   if (!rateInfo.allowed) {
     return rateLimitExceededResponse(rateInfo);

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb, admin } from '@/lib/firebaseAdmin';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,9 @@ export const dynamic = 'force-dynamic';
  * 6. printDetailsByCode: granular map of { [cleanCode]: { runCount, totalLabels, partPrintCounts } }
  */
 export async function GET() {
+  if (!(await isAdminServerSession())) {
+    return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+  }
   try {
     let totalPrescriptions = 339;
     let uploadedThisWeek = 0;

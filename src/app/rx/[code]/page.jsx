@@ -234,7 +234,7 @@ export default async function PublicPrescriptionPage({ params, searchParams }) {
       if (
         ['admin', 'medical_director', 'doctor', 'clinic', 'account_manager', 'fagron_clinic', 'patient_coordinator'].includes(role) ||
         tokens?.decodedToken?.admin === true ||
-        ['jlzabala@gmail.com', 'admin@atlashealth-services.com'].includes(email)
+        ['jlzabala@gmail.com', 'admin@atlashealth-services.com', 'kasia@mediluxeme.com', 'business@mediluxeme.com'].includes(email)
       ) {
         isAuthorized = true;
       }

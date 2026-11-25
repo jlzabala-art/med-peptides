@@ -6,6 +6,7 @@ import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { getCustomsFriendlySuggestions } from '@/utils/labels/customsNaming';
 import { deepSanitize, resolvePrescriptionDocAdmin } from '@/lib/labels/resolvePrescriptionAdmin';
 import { normalizePrescriptionWritePayload } from '@/utils/firestoreModelGuard';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,9 @@ const MAX_PAYLOAD_BYTES = 500 * 1024; // 500 KB limit
  *  5. Re-syncs the updated record to Algolia for instant search accuracy.
  */
 export async function POST(request) {
+  if (!(await isAdminServerSession())) {
+    return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+  }
   const rateInfo = checkRateLimit(request, { limit: 60, windowMs: 60 * 1000, tier: 'labels-save' });
   if (!rateInfo.allowed) {
     return rateLimitExceededResponse(rateInfo);

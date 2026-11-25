@@ -4,6 +4,7 @@ import { invalidateRxCache } from '@/lib/rxCache';
 import { syncPrescriptionToAlgolia } from '@/services/algoliaSyncService';
 import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { deepSanitize, resolvePrescriptionDocAdmin } from '@/lib/labels/resolvePrescriptionAdmin';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,6 +67,9 @@ async function syncPostMutation(targetDocRef, resolvedDocId, existingData, updat
  * only wants a subset of the prescription), preserving an undo snapshot in `removedParts`.
  */
 export async function POST(request) {
+  if (!(await isAdminServerSession())) {
+    return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+  }
   const rateInfo = checkRateLimit(request, { limit: 40, windowMs: 60 * 1000, tier: 'labels-remove-part' });
   if (!rateInfo.allowed) return rateLimitExceededResponse(rateInfo);
 

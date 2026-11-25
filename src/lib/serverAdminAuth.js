@@ -2,7 +2,12 @@ import { cookies } from 'next/headers';
 import { getTokens } from 'next-firebase-auth-edge';
 import { serverConfig } from '@/authConfig';
 
-const ADMIN_EMAILS = ['jlzabala@gmail.com', 'admin@atlashealth-services.com'];
+const ADMIN_EMAILS = [
+  'jlzabala@gmail.com',
+  'admin@atlashealth-services.com',
+  'kasia@mediluxeme.com',
+  'business@mediluxeme.com',
+];
 
 /**
  * Checks on the server whether the current request belongs to an authenticated Admin.

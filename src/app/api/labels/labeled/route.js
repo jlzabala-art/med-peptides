@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,9 @@ export const dynamic = 'force-dynamic';
  * pharmacy workstations stay synchronized in real time.
  */
 export async function POST(request) {
+  if (!(await isAdminServerSession())) {
+    return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+  }
   try {
     const body = await request.json();
     const { code, docId, partIdx = 0, labeled = true, updatedBy = 'Pharmacy Staff' } = body || {};

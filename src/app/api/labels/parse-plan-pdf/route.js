@@ -3,8 +3,12 @@ import { Type } from '@google/genai';
 import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
 import { sanitizeText } from '@/utils/apiValidator';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export async function POST(request) {
+  if (!(await isAdminServerSession())) {
+    return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+  }
   const rl = checkRateLimit(request, 'ai_extract');
   if (!rl.allowed) return rateLimitExceededResponse(rl);
 

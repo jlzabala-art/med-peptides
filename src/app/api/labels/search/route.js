@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { PHARMAPOLIS_LABELS_REGISTRY } from '@/data/pharmapolisLabelsMap';
 import { searchAlgoliaFederated } from '@/services/algoliaSearch';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,9 @@ export const dynamic = 'force-dynamic';
  * 3. Static Pharmapolis Labels Registry lookup for instant offline matches.
  */
 export async function GET(request) {
+  if (!(await isAdminServerSession())) {
+    return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+  }
   try {
     const { searchParams } = new URL(request.url);
     const query = (searchParams.get('q') || '').trim();

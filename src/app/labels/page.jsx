@@ -1,7 +1,9 @@
 import React from 'react';
+import Link from 'next/link';
 import { getPrescriptionData } from '@/lib/prescriptionFetcher';
 import { getPharmapolisLabelsForPrescription, PHARMAPOLIS_LABELS_REGISTRY } from '@/data/pharmapolisLabelsMap';
 import LabelsPageClient from './LabelsPageClient';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -66,6 +68,77 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default async function PublicLabelsPage({ searchParams }) {
+  const isAdmin = await isAdminServerSession();
+  if (!isAdmin) {
+    return (
+      <main
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#f8fafc',
+          padding: '24px',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '420px',
+            width: '100%',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '28px 24px',
+            boxShadow: '0 4px 16px rgba(15, 23, 42, 0.06)',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#dc2626', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
+            Restricted · Admin Only
+          </div>
+          <h1 style={{ margin: '0 0 8px', fontSize: '1.15rem', fontWeight: 700, color: '#0f172a' }}>
+            Administrator Access Required
+          </h1>
+          <p style={{ margin: '0 0 18px', fontSize: '0.84rem', color: '#475569', lineHeight: 1.5 }}>
+            This clinical operations workspace is restricted exclusively to authorized Atlas Health administrators.
+          </p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link
+              href="/login?redirect=/labels"
+              style={{
+                padding: '9px 16px',
+                borderRadius: '8px',
+                background: '#003666',
+                color: '#ffffff',
+                fontSize: '0.82rem',
+                fontWeight: 650,
+                textDecoration: 'none',
+              }}
+            >
+              Sign in as Admin
+            </Link>
+            <Link
+              href="/pricing/pellets"
+              style={{
+                padding: '9px 16px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#334155',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              Return to Catalog
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const hasExplicitParam = Boolean(resolvedSearchParams?.rx || resolvedSearchParams?.code);
   const rawCodesParam = (resolvedSearchParams?.rx || resolvedSearchParams?.code || '').trim();
