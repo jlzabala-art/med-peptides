@@ -132,7 +132,7 @@ export default function PrescriptionStatusPopover({
             top: `${popoverPos.top}px`,
             left: `${popoverPos.left}px`,
             zIndex: 1200,
-            width: 'min(344px, calc(100vw - 24px))',
+            width: 'min(380px, calc(100vw - 24px))',
             maxWidth: '94vw',
             background: '#ffffff',
             border: '1px solid #cbd5e1',
@@ -146,7 +146,7 @@ export default function PrescriptionStatusPopover({
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
             <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'Ciclo de Vida · 1 Clic' : 'Lifecycle Stepper · 1-Click'}
+              {isEs ? 'Actualizar Estado del Ciclo' : 'Update Lifecycle Status'}
             </span>
             <button
               type="button"
@@ -160,17 +160,18 @@ export default function PrescriptionStatusPopover({
           {/* 5-Step GCP Horizontal Stepper */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '4px' }}>
             {[
-              { key: 'clinicalStatus', short: '1. Clinical', done: draft.clinicalStatus === 'approved' },
-              { key: 'paymentStatus', short: '2. Pay', done: draft.paymentStatus === 'paid' || draft.paymentStatus === 'invoiced_b2b' },
-              { key: 'productionStatus', short: '3. Lab', done: draft.productionStatus === 'qc_passed' || draft.productionStatus === 'dispensed', locked: !productionUnlocked },
-              { key: 'labelStatus', short: '4. Label', done: draft.labelStatus === 'printed' || draft.labelStatus === 'labeled' },
-              { key: 'logisticsStatus', short: '5. Ship', done: draft.logisticsStatus === 'delivered' || draft.logisticsStatus === 'in_transit_hub' },
+              { key: 'clinicalStatus', short: 'Rx', title: '1. Clinical Review', done: draft.clinicalStatus === 'approved' },
+              { key: 'paymentStatus', short: 'Pay', title: '2. Payment', done: draft.paymentStatus === 'paid' || draft.paymentStatus === 'invoiced_b2b' },
+              { key: 'productionStatus', short: 'Lab', title: '3. Lab Production', done: draft.productionStatus === 'qc_passed' || draft.productionStatus === 'dispensed', locked: !productionUnlocked },
+              { key: 'labelStatus', short: 'Label', title: '4. Label & Print', done: draft.labelStatus === 'printed' || draft.labelStatus === 'labeled' },
+              { key: 'logisticsStatus', short: 'Ship', title: '5. Shipping', done: draft.logisticsStatus === 'delivered' || draft.logisticsStatus === 'in_transit_hub' },
             ].map((step) => {
               const isSelected = activeStep === step.key;
               return (
                 <button
                   key={step.key}
                   type="button"
+                  title={step.title}
                   onClick={() => setActiveStep(step.key)}
                   style={{
                     padding: '5px 3px',

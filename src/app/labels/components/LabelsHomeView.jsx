@@ -62,6 +62,36 @@ export default function LabelsHomeView({
   const { role } = useRoleAccess();
   const [statusOverrides, setStatusOverrides] = useState({});
   const [selectedCodes, setSelectedCodes] = useState([]);
+  const [openRowMenuCode, setOpenRowMenuCode] = useState(null);
+  const [sharedRowCodes, setSharedRowCodes] = useState(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      return JSON.parse(localStorage.getItem('atlas_labels_shared_codes') || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const markRowShared = (code) => {
+    setSharedRowCodes((prev) => {
+      const next = { ...prev, [code]: true };
+      try {
+        localStorage.setItem('atlas_labels_shared_codes', JSON.stringify(next));
+      } catch { /* ignore */ }
+      return next;
+    });
+  };
+
+  const buildPatientShareUrl = (row) => {
+    const cleanCode = sanitizeRecentCode(row.code);
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+    const langParam = isEs ? 'es' : 'en';
+    const lotVal = row.lotNumber || row.batchCode || '';
+    const budVal = row.bud || row.expDate || '';
+    const lotQs = lotVal ? `&lot=${encodeURIComponent(lotVal)}` : '';
+    const budQs = budVal ? `&bud=${encodeURIComponent(budVal)}` : '';
+    return `${origin}/rx/${encodeURIComponent(cleanCode)}?view=patient&src=shared_link&lang=${langParam}${lotQs}${budQs}`;
+  };
 
   // Group visible worklist rows by patient so each patient appears once in the main table
   const groupedWorklistRows = React.useMemo(() => {
@@ -826,18 +856,42 @@ export default function LabelsHomeView({
                     align: 'right',
                     render: (_val, p) => {
                       const cleanCode = sanitizeRecentCode(p.code);
+                      const isMenuOpen = openRowMenuCode === p.code;
+                      const wasShared = Boolean(sharedRowCodes[cleanCode] || sharedRowCodes[p.code]);
+                      const patientUrl = buildPatientShareUrl(p);
+                      const pName = p.name || p.patientName || '';
+                      const rawPhone = String(p.patientPhone || p.phone || p.patient?.phone || '').replace(/[^\d]/g, '');
+
                       return (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', position: 'relative' }}>
+                          {wasShared && (
+                            <span
+                              style={{
+                                fontSize: '0.64rem',
+                                fontWeight: 700,
+                                color: '#15803d',
+                                background: '#f0fdf4',
+                                border: '1px solid #bbf7d0',
+                                padding: '2px 6px',
+                                borderRadius: '999px',
+                                whiteSpace: 'nowrap',
+                              }}
+                              title={isEs ? 'Enlace compartido con paciente' : 'Patient link shared'}
+                            >
+                              {isEs ? 'Enviado ✓' : 'Sent ✓'}
+                            </span>
+                          )}
                           <a
                             href={`/rx/${encodeURIComponent(cleanCode)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
                             title={isEs ? `Ver prescripción #${p.code}` : `Open prescription #${p.code}`}
+                            className="gcp-btn-secondary"
                             style={{
-                              padding: '5px 7px',
+                              padding: '5px 8px',
                               borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
+                              border: '1px solid #dadce0',
                               background: '#ffffff',
                               color: '#1a73e8',
                               fontSize: '0.72rem',
@@ -846,61 +900,176 @@ export default function LabelsHomeView({
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '3px',
+                              whiteSpace: 'nowrap',
                             }}
                           >
                             <span>{isEs ? 'Ver Rx' : 'Rx'}</span>
                             <ExternalLink size={11} />
                           </a>
-                          <button
-                            type="button"
-                            className="gcp-btn-secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelectOrAddPatient(p.code, true, 'backQr');
-                            }}
-                            title={isEs ? 'Editar etiqueta clínica de Delivery' : 'Open Delivery Label (Clinical)'}
-                            style={{
-                              padding: '5px 8px',
-                              borderRadius: '6px',
-                              border: '1px solid #dadce0',
-                              background: '#ffffff',
-                              color: '#1a73e8',
-                              fontSize: '0.72rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '3px',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            <span>Delivery</span>
-                          </button>
-                          <button
-                            type="button"
-                            className="gcp-btn-secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelectOrAddPatient(p.code, true, 'shipping');
-                            }}
-                            title={isEs ? 'Editar etiqueta de Shipping (Aduanas)' : 'Open Shipping Label (Customs)'}
-                            style={{
-                              padding: '5px 8px',
-                              borderRadius: '6px',
-                              border: '1px solid #dadce0',
-                              background: '#ffffff',
-                              color: '#3c4043',
-                              fontSize: '0.72rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '3px',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            <span>Shipping</span>
-                          </button>
+
+                          <div style={{ position: 'relative' }}>
+                            <button
+                              type="button"
+                              className="gcp-btn-secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenRowMenuCode(isMenuOpen ? null : p.code);
+                              }}
+                              style={{
+                                padding: '5px 9px',
+                                borderRadius: '6px',
+                                border: '1px solid #dadce0',
+                                background: isMenuOpen ? '#e8f0fe' : '#ffffff',
+                                color: isMenuOpen ? '#1a73e8' : '#3c4043',
+                                fontSize: '0.72rem',
+                                fontWeight: 650,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              <span>{isEs ? 'Enviar ▾' : 'Share ▾'}</span>
+                            </button>
+
+                            {isMenuOpen && (
+                              <div
+                                onClick={(e) => e.stopPropagation()}
+                                style={{
+                                  position: 'absolute',
+                                  right: 0,
+                                  top: 'calc(100% + 4px)',
+                                  zIndex: 80,
+                                  minWidth: '215px',
+                                  background: '#ffffff',
+                                  border: '1px solid #dadce0',
+                                  borderRadius: '8px',
+                                  boxShadow: '0 8px 24px rgba(15, 23, 42, 0.14)',
+                                  padding: '6px',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '2px',
+                                  textAlign: 'left',
+                                }}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                                      navigator.clipboard.writeText(patientUrl);
+                                    }
+                                    markRowShared(cleanCode);
+                                    setOpenRowMenuCode(null);
+                                    toast.success(isEs ? 'Link de paciente copiado ✓' : 'Patient link copied ✓');
+                                  }}
+                                  style={{
+                                    padding: '7px 10px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#202124',
+                                    fontSize: '0.76rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                  }}
+                                >
+                                  🔗 {isEs ? 'Copiar Link Paciente' : 'Copy Patient Link'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const msg = isEs
+                                      ? `Hola ${pName}, gracias por confiar en Atlas Health. Aquí tienes tu guía privada de tratamiento (#${cleanCode}) con instrucciones y refill en 1 clic: ${patientUrl}`
+                                      : `Hi ${pName}, thank you for trusting Atlas Health. Here is your private treatment guide (#${cleanCode}) with instructions & 1-click refill: ${patientUrl}`;
+                                    const waBase = rawPhone ? `https://wa.me/${rawPhone}` : 'https://wa.me/';
+                                    window.open(`${waBase}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+                                    markRowShared(cleanCode);
+                                    setOpenRowMenuCode(null);
+                                  }}
+                                  style={{
+                                    padding: '7px 10px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#15803d',
+                                    fontSize: '0.76rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                  }}
+                                >
+                                  💬 {isEs ? 'WhatsApp al Paciente' : 'WhatsApp to Patient'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const msg = isEs
+                                      ? `Hola, compartimos el enlace de seguimiento y refill para ${pName} (#${cleanCode}) para su revisión/reenvío: ${patientUrl}`
+                                      : `Hi, here is the treatment guide & refill link for ${pName} (#${cleanCode}) for your review/forwarding: ${patientUrl}`;
+                                    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+                                    markRowShared(cleanCode);
+                                    setOpenRowMenuCode(null);
+                                  }}
+                                  style={{
+                                    padding: '7px 10px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#202124',
+                                    fontSize: '0.76rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                  }}
+                                >
+                                  🤝 {isEs ? 'Enviar a Partner / Clínica' : 'Send to Partner / Clinic'}
+                                </button>
+                                <div style={{ height: '1px', background: '#f1f5f9', margin: '3px 0' }} />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenRowMenuCode(null);
+                                    handleSelectOrAddPatient(p.code, true, 'backQr');
+                                  }}
+                                  style={{
+                                    padding: '7px 10px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#3c4043',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                  }}
+                                >
+                                  🏷️ {isEs ? 'Etiqueta Delivery (Clínica)' : 'Delivery Label (Clinical)'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenRowMenuCode(null);
+                                    handleSelectOrAddPatient(p.code, true, 'shipping');
+                                  }}
+                                  style={{
+                                    padding: '7px 10px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#3c4043',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                  }}
+                                >
+                                  📦 {isEs ? 'Etiqueta Shipping (Aduanas)' : 'Shipping Label (Customs)'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       );
                     },
