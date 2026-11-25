@@ -1,5 +1,5 @@
 import React from 'react';
-import { fetchBrandPricingProductsAction } from '@/actions/vialsCatalogActions';
+import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
 import { getPharmapolisHormonesCatalog } from '@/data/pharmapolisHormonesRegistry';
 import NplabHormonesPriceListClient from '../nplab-hormones/NplabHormonesPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
