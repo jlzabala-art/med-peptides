@@ -42,6 +42,9 @@ export default function LabelsHomeView({
   worklistTabCounts,
   worklistDateRange,
   setWorklistDateRange,
+  worklistCountryFilter = 'all',
+  setWorklistCountryFilter,
+  worklistCountryCounts = {},
   setWorklistPage,
   recentPrescriptions,
   filterWorklistItem,
@@ -442,28 +445,61 @@ export default function LabelsHomeView({
               })}
             </div>
 
-            <select
-              aria-label={isEs ? 'Rango temporal' : 'Date range'}
-              value={worklistDateRange}
-              onChange={(e) => {
-                setWorklistDateRange(e.target.value);
-                setWorklistPage(1);
-              }}
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                color: '#334155',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                padding: '4px 8px',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="7d">{isEs ? 'Últimos 7 días' : 'Last 7 days'}</option>
-              <option value="30d">{isEs ? 'Últimos 30 días' : 'Last 30 days'}</option>
-              <option value="all">{isEs ? 'Todo el historial' : 'All time'}</option>
-            </select>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <select
+                aria-label={isEs ? 'País del médico' : 'Doctor country'}
+                value={worklistCountryFilter}
+                onChange={(e) => {
+                  setWorklistCountryFilter?.(e.target.value);
+                  setWorklistPage(1);
+                }}
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  color: worklistCountryFilter !== 'all' ? '#1a73e8' : '#334155',
+                  background: worklistCountryFilter !== 'all' ? '#e8f0fe' : '#ffffff',
+                  border: worklistCountryFilter !== 'all' ? '1px solid #bfdbfe' : '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  padding: '4px 8px',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="all">{isEs ? 'Todos los países' : 'All countries'}</option>
+                {Object.entries(worklistCountryCounts)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([country, cnt]) => {
+                    const flag = country === 'UAE' ? '🇦🇪 ' : country === 'Saudi Arabia' ? '🇸🇦 ' : country === 'Qatar' ? '🇶🇦 ' : country === 'Kuwait' ? '🇰🇼 ' : country === 'Spain' ? '🇪🇸 ' : country === 'UK' ? '🇬🇧 ' : country === 'USA' ? '🇺🇸 ' : '🌐 ';
+                    return (
+                      <option key={country} value={country}>
+                        {flag}{country} ({cnt})
+                      </option>
+                    );
+                  })}
+              </select>
+
+              <select
+                aria-label={isEs ? 'Rango temporal' : 'Date range'}
+                value={worklistDateRange}
+                onChange={(e) => {
+                  setWorklistDateRange(e.target.value);
+                  setWorklistPage(1);
+                }}
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  color: '#334155',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  padding: '4px 8px',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="7d">{isEs ? 'Últimos 7 días' : 'Last 7 days'}</option>
+                <option value="30d">{isEs ? 'Últimos 30 días' : 'Last 30 days'}</option>
+                <option value="all">{isEs ? 'Todo el historial' : 'All time'}</option>
+              </select>
+            </div>
           </div>
 
           {/* Test kind filter sub-bar */}

@@ -111,6 +111,7 @@ export default function PublicLabelsAppClient({
   const [worklistPage, setWorklistPage] = useState(1);
   const [worklistPageSize, setWorklistPageSize] = useState(10);
   const [worklistDateRange, setWorklistDateRange] = useState('30d');
+  const [worklistCountryFilter, setWorklistCountryFilter] = useState('all');
   const [mountTimestamp] = useState(() => Date.now());
 
   const [showWelcomeCardsModal, setShowWelcomeCardsModal] = useState(false);
@@ -566,10 +567,20 @@ export default function PublicLabelsAppClient({
     return Number.isNaN(parsed) ? 0 : parsed;
   }, []);
 
+  const worklistCountryCounts = useMemo(() => {
+    const counts = {};
+    for (const item of baseWorklistItems) {
+      const c = item?.doctorCountry || item?.clinicCountry || item?.country || 'UAE';
+      counts[c] = (counts[c] || 0) + 1;
+    }
+    return counts;
+  }, [baseWorklistItems]);
+
   const filteredWorklistItems = useMemo(() => {
     const matched = baseWorklistItems
       .filter((item) => filterWorklistItem(item))
       .filter((item) => worklistTestFilter === 'all' || getWorklistTestKind(item) === worklistTestFilter)
+      .filter((item) => worklistCountryFilter === 'all' || (item?.doctorCountry || item?.clinicCountry || item?.country || 'UAE') === worklistCountryFilter)
       .sort((a, b) => getImportTimestampMs(b) - getImportTimestampMs(a));
     // Phase 4: Group by patient before pagination so each page shows N unique patients
     const seen = new Set();
@@ -581,7 +592,7 @@ export default function PublicLabelsAppClient({
       grouped.push(item);
     }
     return grouped;
-  }, [baseWorklistItems, worklistTab, printCountsMap, getImportTimestampMs, worklistTestFilter, searchQuery]);
+  }, [baseWorklistItems, worklistTab, printCountsMap, getImportTimestampMs, worklistTestFilter, worklistCountryFilter, searchQuery]);
 
   const totalWorklistPages = Math.max(1, Math.ceil(filteredWorklistItems.length / worklistPageSize));
   const safeWorklistPage = Math.min(worklistPage, totalWorklistPages);
@@ -892,6 +903,9 @@ export default function PublicLabelsAppClient({
             worklistTabCounts={worklistTabCounts}
             worklistDateRange={worklistDateRange}
             setWorklistDateRange={setWorklistDateRange}
+            worklistCountryFilter={worklistCountryFilter}
+            setWorklistCountryFilter={setWorklistCountryFilter}
+            worklistCountryCounts={worklistCountryCounts}
             setWorklistPage={setWorklistPage}
             recentPrescriptions={recentPrescriptions}
             filterWorklistItem={filterWorklistItem}

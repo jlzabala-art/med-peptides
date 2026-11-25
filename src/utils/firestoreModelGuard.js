@@ -162,6 +162,49 @@ function formatIsoDate(date) {
  * @param {Record<string, any>} [existingData]
  * @returns {Record<string, any>}
  */
+export function resolveCanonicalDoctorCountry(payload = {}, existingData = {}) {
+  const merged = { ...existingData, ...payload };
+  const normalize = (raw = '') => {
+    const s = String(raw || '').trim().toLowerCase();
+    if (!s) return '';
+    if (['uae', 'ae', 'united arab emirates', 'dubai', 'abu dhabi'].includes(s)) return 'UAE';
+    if (['ksa', 'sa', 'saudi', 'saudi arabia', 'riyadh', 'jeddah'].includes(s)) return 'Saudi Arabia';
+    if (['qatar', 'qa', 'doha'].includes(s)) return 'Qatar';
+    if (['kuwait', 'kw'].includes(s)) return 'Kuwait';
+    if (['bahrain', 'bh'].includes(s)) return 'Bahrain';
+    if (['oman', 'om'].includes(s)) return 'Oman';
+    if (['spain', 'españa', 'espana', 'es', 'madrid', 'barcelona'].includes(s)) return 'Spain';
+    if (['uk', 'gb', 'united kingdom', 'england', 'london'].includes(s)) return 'UK';
+    if (['usa', 'us', 'united states'].includes(s)) return 'USA';
+    return String(raw).trim();
+  };
+
+  const fromField = normalize(
+    merged.doctorCountry ||
+    merged.clinicCountry ||
+    merged.doctor?.country ||
+    merged.country
+  );
+  if (fromField) return fromField;
+
+  const phone = String(merged.doctorPhone || merged.clinicPhone || merged.patientPhone || merged.phone || '').replace(/[^\d+]/g, '');
+  if (phone.startsWith('+971') || phone.startsWith('00971')) return 'UAE';
+  if (phone.startsWith('+966') || phone.startsWith('00966')) return 'Saudi Arabia';
+  if (phone.startsWith('+974') || phone.startsWith('00974')) return 'Qatar';
+  if (phone.startsWith('+965') || phone.startsWith('00965')) return 'Kuwait';
+  if (phone.startsWith('+973') || phone.startsWith('00973')) return 'Bahrain';
+  if (phone.startsWith('+968') || phone.startsWith('00968')) return 'Oman';
+  if (phone.startsWith('+34') || phone.startsWith('0034')) return 'Spain';
+  if (phone.startsWith('+44') || phone.startsWith('0044')) return 'UK';
+  if (phone.startsWith('+1')) return 'USA';
+
+  const codeStr = String(merged.code || merged.rxCode || merged.id || '').toLowerCase();
+  if (codeStr.includes('ksa')) return 'Saudi Arabia';
+  if (codeStr.includes('qat') || codeStr.includes('qatar')) return 'Qatar';
+
+  return 'UAE';
+}
+
 export function normalizePrescriptionWritePayload(payload = {}, existingData = {}) {
   const merged = { ...existingData, ...payload };
   const next = { ...payload };
@@ -177,6 +220,9 @@ export function normalizePrescriptionWritePayload(payload = {}, existingData = {
     next.legacyDispensingForm = merged.dispensingForm;
   }
   next.dispensingForm = canonicalForm;
+
+  // Always guarantee normalized doctorCountry on every Rx write/import
+  next.doctorCountry = resolveCanonicalDoctorCountry(payload, existingData);
 
   // Ensure code is never missing when id/rxCode/fileNumber is available
   if (!merged.code && (merged.rxCode || merged.fileNumber || merged.id)) {

@@ -55,4 +55,19 @@ test('Firestore Write Guard: guarantees code, posology, durationDays, and saniti
     items: [{ name: 'Oral Astaxanthin', quantity: 100 }],
   });
   assert.equal(telotest.durationDays, 100);
+  assert.equal(telotest.doctorCountry, 'UAE');
+
+  const ksaRx = normalizePrescriptionWritePayload({
+    code: 'RX-KSA-NEW-01',
+    status: 'pending',
+    doctorPhone: '+966 55 123 4567',
+  });
+  assert.equal(ksaRx.doctorCountry, 'Saudi Arabia');
+
+  const uaeAlias = normalizePrescriptionWritePayload({
+    code: 'RX-UAE-01',
+    status: 'approved',
+    doctorCountry: 'United Arab Emirates',
+  });
+  assert.equal(uaeAlias.doctorCountry, 'UAE');
 });
