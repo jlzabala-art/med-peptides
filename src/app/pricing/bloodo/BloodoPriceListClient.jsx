@@ -47,15 +47,18 @@ export default function BloodoPriceListClient({
   initialLang = 'en',
   initialCurrency = 'EUR',
 }) {
-  const [lang, setLang] = useState(initialLang);
-  const [currency, setCurrency] = useState(initialCurrency);
+  const [localLang, setLocalLang] = useState(initialLang);
+  const [localCurrency, setLocalCurrency] = useState(initialCurrency);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [cartItems, setCartItems] = useState({});
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
 
+  const workspace = usePublicWorkspace?.() || {};
+  const { addToWorkspaceCart } = workspace;
+  const lang = workspace?.lang || localLang;
+  const currency = workspace?.currency || localCurrency;
   const isEs = lang === 'es';
-  const { addToWorkspaceCart } = usePublicWorkspace?.() || {};
 
   useEffect(() => {
     const detail = {
@@ -313,9 +316,15 @@ export default function BloodoPriceListClient({
       <PublicUnifiedHeader
         track="products"
         lang={lang}
-        onLangChange={(nextLang) => setLang(nextLang)}
+        onLangChange={(nextLang) => {
+          setLocalLang(nextLang);
+          workspace?.setLang?.(nextLang);
+        }}
         currency={currency}
-        onCurrencyChange={(nextCurr) => setCurrency(nextCurr)}
+        onCurrencyChange={(nextCurr) => {
+          setLocalCurrency(nextCurr);
+          workspace?.setCurrency?.(nextCurr);
+        }}
         brandHref="/"
         loginRedirect="/pricing/bloodo"
         breadcrumb={[

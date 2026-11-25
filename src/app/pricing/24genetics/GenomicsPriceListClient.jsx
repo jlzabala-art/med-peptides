@@ -33,6 +33,7 @@ import {
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -64,7 +65,11 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
   const isGuest = !user || effectiveRole === 'guest';
   const canViewCost = Boolean(isAdmin);
 
-  const [currency, setCurrency] = useState('EUR'); // EUR, USD, AED
+  const workspace = usePublicWorkspace?.() || null;
+  const [localCurrency, setLocalCurrency] = useState('EUR'); // EUR, USD, AED
+  const [localLang, setLocalLang] = useState('en');
+  const currency = workspace?.currency || localCurrency;
+  const lang = workspace?.lang || localLang;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [scopeMode] = useState('filtered');
@@ -621,7 +626,15 @@ export default function GenomicsPriceListClient({ initialProducts = [] }) {
         brandHref="/"
         loginRedirect="/pricing/24genetics"
         currency={currency}
-        onCurrencyChange={setCurrency}
+        onCurrencyChange={(nextCurr) => {
+          setLocalCurrency(nextCurr);
+          workspace?.setCurrency?.(nextCurr);
+        }}
+        lang={lang}
+        onLangChange={(nextLang) => {
+          setLocalLang(nextLang);
+          workspace?.setLang?.(nextLang);
+        }}
         hideAccountManager={true}
         breadcrumb={[
           { label: 'Price Schedules', href: '/pricing' },

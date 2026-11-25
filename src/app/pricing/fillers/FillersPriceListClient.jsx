@@ -17,6 +17,7 @@ import PriceScheduleRowActions from '@/components/pricing/shared/PriceScheduleRo
 import PriceScheduleExpandedActions from '@/components/pricing/shared/PriceScheduleExpandedActions';
 import { convertCurrencyAmount } from '@/utils/productViewModel';
 import { useRegisterAtlasContext } from '@/context/AtlasContextProvider';
+import { usePublicWorkspace } from '@/context/PublicWorkspaceContext';
 import { trackSearchClick, trackConversion } from '@/services/algoliaInsights';
 import { getTrendingItems } from '@/services/algoliaRecommendService';
 import { Sparkles, Syringe, Layers, ShieldCheck, Download } from 'lucide-react';
@@ -36,9 +37,12 @@ export default function FillersPriceListClient({
   initialCurrency = 'EUR',
   initialLang = 'en'
 }) {
-  const [lang, setLang] = useState(initialLang);
+  const workspace = usePublicWorkspace?.() || null;
+  const [localLang, setLocalLang] = useState(initialLang);
+  const [localCurrency, setLocalCurrency] = useState(initialCurrency);
+  const lang = workspace?.lang || localLang;
   const isEs = lang === 'es';
-  const [currency, setCurrency] = useState(initialCurrency);
+  const currency = workspace?.currency || localCurrency;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [selectedType, setSelectedType] = useState('all'); // 'all' | 'boosters' | 'fillers' | 'biostimulators'
@@ -369,9 +373,15 @@ export default function FillersPriceListClient({
       <PublicUnifiedHeader
         brandHref="/"
         lang={lang}
-        onLangChange={setLang}
+        onLangChange={(nextLang) => {
+          setLocalLang(nextLang);
+          workspace?.setLang?.(nextLang);
+        }}
         currency={currency}
-        onCurrencyChange={setCurrency}
+        onCurrencyChange={(nextCurr) => {
+          setLocalCurrency(nextCurr);
+          workspace?.setCurrency?.(nextCurr);
+        }}
         loginRedirect="/pricing/fillers"
         breadcrumb={[
           { label: isEs ? 'Tarifas B2B' : 'B2B Pricing', href: '/pricing' },
