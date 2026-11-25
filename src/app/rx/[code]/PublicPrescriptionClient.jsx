@@ -49,6 +49,7 @@ import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ExpressQrRefillCard from '@/components/prescription/ExpressQrRefillCard';
 import PatientContactAtlasCard from '@/components/prescription/PatientContactAtlasCard';
+import PatientContactReminderCard from '@/components/prescription/PatientContactReminderCard';
 import { RotateCcw, RefreshCw, Home, Loader2, AlertTriangle, MessageCircle, Lock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -898,6 +899,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   setSelectedLabelIndex={setSelectedLabelIndex}
                   setShowLabelsModal={setShowLabelsModal}
                   canManageLabels={isAdmin}
+                />
+              )}
+
+              {/* ── Subtle Patient Contact Capture (Only shown on ?view=patient when phone/email is missing in Atlas) ── */}
+              {isPatientView && activeGcpTab === 'treatment' && (
+                <PatientContactReminderCard
+                  rxId={rxId}
+                  rxCode={currentRx?.code || currentRx?.prescriptionNumber}
+                  existingPhone={patient?.phone || currentRx?.patientPhone || ''}
+                  existingEmail={patient?.email || currentRx?.patientEmail || ''}
+                  isEs={isEs}
+                  onContactSaved={({ phone, email }) => {
+                    setCurrentRx(prev => ({
+                      ...prev,
+                      patientPhone: phone || prev?.patientPhone,
+                      patientEmail: email || prev?.patientEmail,
+                      patient: {
+                        ...(prev?.patient || {}),
+                        phone: phone || prev?.patient?.phone,
+                        email: email || prev?.patient?.email
+                      }
+                    }));
+                  }}
                 />
               )}
 

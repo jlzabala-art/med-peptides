@@ -43,8 +43,9 @@ export async function POST(request) {
 
     const isToleranceAction = Boolean(body.toleranceCheckCompleted || body.toleranceChecked || body.taskType === 'tolerance_check');
     const isPatientGuideShareAction = Boolean(body.markPatientGuideShared);
-    const targetStatusRaw = newStatus || status || ((isToleranceAction || isPatientGuideShareAction) ? 'current' : null);
-    if (!targetStatusRaw && !isToleranceAction && !isPatientGuideShareAction) {
+    const isPatientContactCapture = Boolean(body.patientContactCapture);
+    const targetStatusRaw = newStatus || status || ((isToleranceAction || isPatientGuideShareAction || isPatientContactCapture) ? 'current' : null);
+    if (!targetStatusRaw && !isToleranceAction && !isPatientGuideShareAction && !isPatientContactCapture) {
       return NextResponse.json(
         { error: 'Status is required' },
         { status: 400 }
@@ -200,6 +201,24 @@ export async function POST(request) {
       updatePayload.patientGuideSharedAt = new Date().toISOString();
       if (body.patientPhone) {
         updatePayload.patientPhone = String(body.patientPhone).trim();
+      }
+    }
+
+    if (isPatientContactCapture) {
+      updatePayload.patientContactCapturedAt = new Date().toISOString();
+      if (body.patientPhone) {
+        const cleanPhone = String(body.patientPhone).trim();
+        updatePayload.patientPhone = cleanPhone;
+        if (existingData.patient && typeof existingData.patient === 'object') {
+          updatePayload['patient.phone'] = cleanPhone;
+        }
+      }
+      if (body.patientEmail) {
+        const cleanEmail = String(body.patientEmail).trim();
+        updatePayload.patientEmail = cleanEmail;
+        if (existingData.patient && typeof existingData.patient === 'object') {
+          updatePayload['patient.email'] = cleanEmail;
+        }
       }
     }
 
