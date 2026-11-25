@@ -11,7 +11,7 @@ const UNIFIED_CATALOG_TRACKS = [
   { id: '24genomics', labelEn: '24Genetics', labelEs: '24Genetics', collectionHref: '/collection/24genomics', pricingHref: '/pricing/24genetics' },
   { id: 'colway', labelEn: 'Colway', labelEs: 'Colway', collectionHref: '/collection/colway', pricingHref: '/pricing/colway' },
   { id: 'bloodo', labelEn: 'Bloodo™ DBS', labelEs: 'Bloodo™ DBS', collectionHref: '/collection/bloodo', pricingHref: '/pricing/bloodo' },
-  { id: 'hormones', labelEn: 'Hormones', labelEs: 'Hormonas', collectionHref: '/collection/hormones', pricingHref: '/pricing/pharmapolis-hrt' }
+  { id: 'hormones', labelEn: 'Hormones', labelEs: 'Hormonas', collectionHref: '/collection/hormones', pricingHref: '/pricing/bhrt' }
 ];
 
 function normalizeTrackId(slug = '') {
@@ -66,14 +66,21 @@ export default function CatalogPricingBridgeBar({
           padding: '4px 0'
         }}
       >
-        {/* Left: Category Tracks */}
+        {/* Left: Category Tracks (scrollbar hidden across Safari/Chrome/Firefox) */}
+        <style>{`
+          .atlas-bridge-tracks-scroll::-webkit-scrollbar { display: none; }
+        `}</style>
         <div
+          className="atlas-bridge-tracks-scroll"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
             overflowX: 'auto',
-            maxWidth: '100%'
+            maxWidth: '100%',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            paddingBottom: '2px',
           }}
         >
           {UNIFIED_CATALOG_TRACKS.map((track) => {
