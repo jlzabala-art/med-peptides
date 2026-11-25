@@ -706,6 +706,10 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 ## 72. Auto-Actualización de Manuales Operativos PDF al Cambiar el UX (Golden Rule)
 - **Mantener los manuales sincronizados con producción**: Siempre que se modifique la interfaz (UX), flujos o botones de `/labels` o `/rx/[code]` (vista paciente o médico), se DEBE ejecutar `npm run manuals:refresh` (`node scripts/generate-manuals.mjs`) antes de ejecutar `npm run deploy`, para regenerar los 4 PDFs en `public/manuals/` con capturas frescas de la versión online sin intervención del usuario.
 
+## 73. Confidencialidad Estricta de Proveedores (Solo Admin — Golden Rule)
+- **Prohibido exponer nombres de proveedores en páginas públicas o no-admin**: Ningún catálogo público, tarifa (`/pricing/*`, `/vials`, `/guides/*`, `/proto`), menú de navegación, metadata SEO/OpenGraph, enlace compartible o PDF descargable puede mostrar nombres de proveedores/fabricantes (`Pharmapolis`, `Bulgaria`, `NP Lab / NP LABS`, `DNLab`, etc.) salvo cuando el usuario haya iniciado sesión como **administrador** (`isAdmin`).
+- **Indicador exclusivo para Admin**: Cuando `isAdmin === true`, mostrar una etiqueta/campo explícito `Supplier:` (p. ej. `SUPPLIER: Pharmapolis (Bulgaria)`) para referencia operativa interna; cuando `!isAdmin`, sanitizar tanto la UI como el payload serializado del servidor (`sanitizePublicProductForViewer` + `isAdminServerSession` en `src/lib/supplierSanitizer.js`), incluyendo `sku` y descripciones, para que no pueda inferirse ni en el código fuente HTML ni en la URL.
+
 
 
 

@@ -898,7 +898,7 @@ export default function DatasheetQuickSearchModal({
           const qClean = String(searchTerm || '').trim();
           const looksLikeRxCode = /^[A-Za-z]{2,8}\d{3,8}$/i.test(qClean.replace(/^#/, ''));
           const quickRoutes = [
-            { label: 'Bioidentical HRT (BHRT)', href: `/pricing/pharmapolis-hrt?lang=${lang}`, match: /pharm|hrt|bhrt|progest|testost|biest|cream/i },
+            { label: 'Bioidentical HRT (BHRT)', href: `/pricing/bhrt?lang=${lang}`, match: /pharm|hrt|bhrt|progest|testost|biest|cream/i },
             { label: 'Hormone Pellets', href: `/pricing/pellets?lang=${lang}`, match: /pellet|trocar|estradiol|testost/i },
             { label: 'Peptides & Kits', href: `/pricing/peptides?lang=${lang}`, match: /pept|vial|kit|bpc|tirz|reta|sema/i },
             { label: 'Clinical Protocols', href: `/proto?lang=${lang}`, match: /proto|guide|wada|longev/i },

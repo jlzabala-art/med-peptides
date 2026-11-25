@@ -38,8 +38,9 @@ function deriveRouteLabel(pathname) {
   if (pathname === '/pricing/peptides') return { label: 'Peptides Schedule', category: 'Pricing' };
   if (pathname === '/pricing/pellets') return { label: 'Hormone Pellets Schedule', category: 'Pricing' };
   if (pathname === '/pricing/pens') return { label: 'Peptide Pen Guide', category: 'Pricing' };
-  if (pathname === '/pricing/dnlab-pens') return { label: 'Peptide Pens Schedule', category: 'Pricing' };
-  if (pathname === '/pricing/nplab-hormones') return { label: 'Endocrinology & Hormones', category: 'Pricing' };
+  if (pathname === '/pricing/dnlab-pens' || pathname === '/pricing/pens') return { label: 'Peptide Pens Schedule', category: 'Pricing' };
+  if (pathname === '/pricing/nplab-hormones' || pathname === '/pricing/hormones') return { label: 'Endocrinology & Hormones', category: 'Pricing' };
+  if (pathname === '/pricing/pharmapolis-hrt' || pathname === '/pricing/bhrt') return { label: 'Bioidentical HRT (BHRT)', category: 'Pricing' };
   if (pathname === '/pricing/24genetics') return { label: '24Genetics DNA Panels', category: 'Pricing' };
   if (pathname === '/pricing/24genomics-qatar') return { label: '24Genetics Qatar', category: 'Pricing' };
   if (pathname === '/vials') return { label: 'Peptide Vials Directory', category: 'Catalog' };

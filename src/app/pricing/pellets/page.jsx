@@ -4,6 +4,8 @@ import { getAllPharmapolisPellets } from '@/data/pharmapolisPelletsRegistry';
 import { toProductViewModel } from '@/utils/productViewModel';
 import PelletsPriceListClient from './PelletsPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -162,13 +164,19 @@ export default async function PelletsPricingPage({ searchParams }) {
     mergedPellets = staticPellets;
   }
 
-  const pellets = JSON.parse(JSON.stringify(mergedPellets)).map((p, idx) => ({
-    ...p,
-    itemNumber: p.itemNumber || `PL-${String(idx + 1).padStart(2, '0')}`,
-    trocarSize: p.trocarSize || (p.hormoneType === 'estrogen' ? '3.2 mm' : (p.strengthValue > 50 ? '4.5 mm' : '3.2 mm')),
-    targetSerum: p.targetSerum || p.monitoring?.targetSerumWindow || (p.hormoneType === 'estrogen' ? '40 - 110 pg/mL' : '400 - 800 ng/dL'),
-    duration: p.duration || p.galenicSpecs?.releaseDuration || '3.5 to 6 months'
-  }));
+  const isAdmin = await isAdminServerSession();
+  const pellets = JSON.parse(JSON.stringify(mergedPellets)).map((p, idx) =>
+    sanitizePublicProductForViewer(
+      {
+        ...p,
+        itemNumber: p.itemNumber || `PL-${String(idx + 1).padStart(2, '0')}`,
+        trocarSize: p.trocarSize || (p.hormoneType === 'estrogen' ? '3.2 mm' : (p.strengthValue > 50 ? '4.5 mm' : '3.2 mm')),
+        targetSerum: p.targetSerum || p.monitoring?.targetSerumWindow || (p.hormoneType === 'estrogen' ? '40 - 110 pg/mL' : '400 - 800 ng/dL'),
+        duration: p.duration || p.galenicSpecs?.releaseDuration || '3.5 to 6 months',
+      },
+      { isAdmin }
+    )
+  );
 
   const allProducts = [...pellets, ...TROCAR_KITS].map((item) =>
     toProductViewModel(item, { tier: 'wholesale', targetCurrency: initialCurrency })

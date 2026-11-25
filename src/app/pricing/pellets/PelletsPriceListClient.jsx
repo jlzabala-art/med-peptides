@@ -745,7 +745,10 @@ export default function PelletsPriceListClient({
           {row.shortDescription}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '6px', fontSize: '0.72rem', color: '#64748b' }}>
-          <span><strong>{isEs ? 'Fabricación:' : 'Standard:'}</strong> {isAdmin ? 'Pharmapolis (Bulgaria)' : 'EU GMP Certified Facility'}</span>
+          <span>
+            <strong>{isEs ? 'Estándar:' : 'Standard:'}</strong>{' '}
+            {isAdmin ? `Supplier: ${row.adminSupplierLabel || 'Pharmapolis (Bulgaria)'}` : 'EU GMP Certified Facility'}
+          </span>
           <span>•</span>
           <span><strong>{isEs ? 'Esterilidad:' : 'Sterility:'}</strong> E-Beam SAL 10⁻⁶</span>
           {row.trocarSize && (
@@ -930,7 +933,10 @@ export default function PelletsPriceListClient({
             isEs ? 'E-Beam SAL 10⁻⁶ · POM' : 'E-Beam SAL 10⁻⁶ · POM',
             isEs ? 'Liberación 3.5–6 Meses' : '3.5–6 Mo Zero-Order',
           ]}
-          metaItems={[{ label: 'REF:', value: 'DOC-BG-PHARM-PELLET-2026', mono: true }]}
+          metaItems={[
+            { label: 'REF:', value: isAdmin ? 'DOC-BG-PHARM-PELLET-2026' : 'DOC-EU-PELLET-2026', mono: true },
+            ...(isAdmin ? [{ label: 'SUPPLIER:', value: 'Pharmapolis (Bulgaria)' }] : []),
+          ]}
           title={
             isEs
               ? 'Pellets Hormonales Subcutáneos y Kits Quirúrgicos · Tarifa B2B'

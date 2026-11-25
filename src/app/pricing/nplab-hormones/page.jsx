@@ -2,6 +2,8 @@ import React from 'react';
 import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
 import NplabHormonesPriceListClient from './NplabHormonesPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -33,12 +35,13 @@ export default async function NplabHormonesPricingPage({ searchParams }) {
   const initialCurrency = ['EUR', 'AED', 'USD'].includes(rawCur) ? rawCur : 'EUR';
   const initialLab = String(resolvedSearch?.lab || 'nplab').toLowerCase();
 
-  const nplabProducts = await fetchBrandPricingProductsAction({
+  const isAdmin = await isAdminServerSession();
+  const nplabProducts = (await fetchBrandPricingProductsAction({
     brand: 'nplab',
     fallbackProducts: [],
     excludeCombos: false,
     limitCount: 450,
-  });
+  })).map((p) => sanitizePublicProductForViewer(p, { isAdmin }));
 
   return (
     <NplabHormonesPriceListClient

@@ -3,6 +3,8 @@ import { fetchBrandPricingProductsAction } from '@/actions/pricingActions';
 import { getPharmapolisHormonesCatalog } from '@/data/pharmapolisHormonesRegistry';
 import NplabHormonesPriceListClient from '../nplab-hormones/NplabHormonesPriceListClient';
 import { buildBilingualMetadata, normalizeMetaLang } from '@/utils/metadataHelper';
+import { isAdminServerSession } from '@/lib/serverAdminAuth';
+import { sanitizePublicProductForViewer } from '@/lib/supplierSanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -37,12 +39,13 @@ export default async function PharmapolisHrtPricingPage({ searchParams }) {
     ? rawView
     : 'pharmapolis';
 
-  const pharmapolisProducts = await fetchBrandPricingProductsAction({
+  const isAdmin = await isAdminServerSession();
+  const pharmapolisProducts = (await fetchBrandPricingProductsAction({
     brand: 'pharmapolis',
     fallbackProducts: getPharmapolisHormonesCatalog(),
     excludeCombos: false,
     limitCount: 120,
-  });
+  })).map((p) => sanitizePublicProductForViewer(p, { isAdmin }));
 
   return (
     <NplabHormonesPriceListClient
